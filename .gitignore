@@ -47,6 +47,5 @@ app.*.map.json
 # Widget Preview related
 .widget_preview/
 
-# Firebase
-.firebase/
-firebase-debug.log
+# Flutter SDK downloaded during Vercel builds
+/flutter/

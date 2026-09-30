@@ -51,35 +51,35 @@ brand background) until Flutter fires `flutter-first-frame`, so the page is neve
 while loading. If you change the headline or description, update `index.html` (title,
 meta description, Open Graph tags, `<noscript>`) too.
 
-## Deploy (Firebase Hosting)
+## Deploy (Vercel)
 
-Hosting is configured in `firebase.json` to serve `build/web`. Flutter isn't in the build
-images of Firebase, Cloudflare Pages or Netlify, so we build locally and upload the output.
+The Vercel project is connected to this GitHub repo, so every push to `main` deploys to
+production and every other branch gets a preview URL.
 
-One-time setup:
+Vercel's build image has no Flutter, so `vercel.json` handles it:
 
-```bash
-npm install -g firebase-tools
-firebase login
-firebase use --add            # pick or create the Firebase project, alias "default"
-```
+- **Install:** clones the Flutter SDK (pinned to the stable tag in `vercel.json`) into
+  `./flutter`, which is git-ignored, then runs `flutter pub get`.
+- **Build:** `flutter build web --release`.
+- **Output:** `build/web`.
 
-Each deploy:
+Vercel caches `./flutter` between builds, so only the first build pays for the SDK download.
+To upgrade Flutter, change the tag in `installCommand` and redeploy with
+"Redeploy → without build cache" so the new SDK is fetched.
 
-```bash
-flutter build web --release
-firebase deploy --only hosting
-```
+Leave the Framework Preset as "Other" and the build settings on their defaults in the Vercel
+dashboard; `vercel.json` overrides them.
 
 ### Domain
 
-In the Firebase console → Hosting → **Add custom domain**:
+In Vercel → Project → Settings → Domains:
 
-1. Add `moodbow.com` and create the DNS records Firebase shows at the registrar.
-2. Add `www.moodbow.com` and choose **Redirect to moodbow.com**.
+1. Add `moodbow.com` and set it as the primary domain.
+2. Add `www.moodbow.com` and choose to redirect it to `moodbow.com` (308).
+3. Create the DNS records Vercel shows at the registrar.
 
 The apex (`moodbow.com`) is canonical: `og:url` and `og:image` in `web/index.html` use it.
-Firebase issues and renews HTTPS certificates for both automatically.
+Vercel issues and renews HTTPS certificates automatically.
 
 ### Checking link previews
 
