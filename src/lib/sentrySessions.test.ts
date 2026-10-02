@@ -1,17 +1,22 @@
 import { afterEach, describe, expect, it } from "vitest";
 import * as SentryBrowser from "@sentry/browser";
 import { sentryOptions } from "@/sentry.shared";
-import { withoutBrowserSessions, withoutServerSessions } from "./sentrySessions";
+import { withoutServerSessions, withoutSessions } from "./sentrySessions";
 
-describe("withoutBrowserSessions / withoutServerSessions", () => {
-  it("drops only the BrowserSession integration", () => {
-    const names = withoutBrowserSessions([{ name: "BrowserSession" }, { name: "Breadcrumbs" }, { name: "Dedupe" }]).map((i) => i.name);
+describe("withoutSessions / withoutServerSessions", () => {
+  it("drops every integration whose name contains Session", () => {
+    const names = withoutSessions([
+      { name: "BrowserSession" },
+      { name: "ProcessSession" },
+      { name: "Breadcrumbs" },
+      { name: "Dedupe" },
+    ]).map((i) => i.name);
     expect(names).toEqual(["Breadcrumbs", "Dedupe"]);
   });
 
-  it("replaces the Http integration with the session-less one, keeping the rest", () => {
+  it("on the server, also replaces Http with the session-less one", () => {
     const replacement = { name: "Http", sessions: false };
-    const out = withoutServerSessions([{ name: "Console" }, { name: "Http", sessions: true }], () => replacement);
+    const out = withoutServerSessions([{ name: "Console" }, { name: "ProcessSession" }, { name: "Http", sessions: true }], () => replacement);
     expect(out).toEqual([{ name: "Console" }, replacement]);
     expect(out[1]).toBe(replacement);
   });
@@ -25,14 +30,14 @@ describe("browser SDK with our options", () => {
     await SentryBrowser.close();
   });
 
-  it("sends no session envelope and no user id", { timeout: 30_000 }, async () => {
+  it("installs no session integration and sends no session envelope or user id", { timeout: 30_000 }, async () => {
     const sent: string[] = [];
     const itemTypes: string[] = [];
     SentryBrowser.init({
       dsn: "https://public@o0.ingest.sentry.io/0",
       release: "test-release",
       ...sentryOptions,
-      integrations: withoutBrowserSessions,
+      integrations: withoutSessions,
       transport: () => ({
         send: async (envelope) => {
           const [, items] = envelope as unknown as [unknown, [{ type: string }, unknown][]];
@@ -43,7 +48,9 @@ describe("browser SDK with our options", () => {
         flush: async () => true,
       }),
     });
-    expect(SentryBrowser.getClient()?.getIntegrationByName("BrowserSession")).toBeUndefined();
+    const installed = (SentryBrowser.getClient()?.getOptions().integrations ?? []).map((i) => i.name);
+    expect(installed.length).toBeGreaterThan(0);
+    expect(installed.filter((n) => /Session/.test(n))).toEqual([]);
 
     // eslint-disable-next-line no-restricted-syntax -- simulating a forbidden call on purpose
     SentryBrowser.setUser({ id: "PROBEUSER-1", email: "jane@example.com" });
