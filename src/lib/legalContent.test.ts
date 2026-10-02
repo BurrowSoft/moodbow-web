@@ -65,6 +65,12 @@ describe("applyPending", () => {
     expect(applyPending(src, (id) => id === "y")).toEqual({ text: "a  b Y c", hidden: [{ id: "x", text: "X" }] });
   });
 
+  it("an unmet block filling a whole line removes the line (tables stay tables)", () => {
+    const table = "| A | B |\n|---|---|\n| 1 | 2 |\n{pending:x}| 3 | 4 |{/pending}\n| 5 | 6 |\n";
+    expect(applyPending(table, () => false).text).toBe("| A | B |\n|---|---|\n| 1 | 2 |\n| 5 | 6 |\n");
+    expect(applyPending("a {pending:x}X{/pending}\nb", () => false).text).toBe("a \nb");
+  });
+
   it("handles nesting: an unmet outer hides the inner; a met outer keeps only met inners", () => {
     const src = "{pending:outer}O1 {pending:inner}I{/pending} O2{/pending}";
     expect(applyPending(src, () => false).text).toBe("");
@@ -81,6 +87,15 @@ describe("renderLegal (the real privacy text, nothing met)", () => {
     expect(page.html).not.toContain("Moodbow Privacy Policy");
     expect(page.html).toContain("<h2>The short version</h2>");
     expect(page.html).not.toContain("<h3>");
+  });
+
+  it("tables survive hidden rows: §2 keeps 4 body rows, §3 keeps 5, no literal '|' lines", () => {
+    const tables = page.html.split("<table>").slice(1).map((t) => t.split("</table>")[0]);
+    expect(tables).toHaveLength(2);
+    const bodyRows = (t: string) => (t.split("<tbody>")[1] ?? "").match(/<tr>/g)?.length ?? 0;
+    expect(bodyRows(tables[0])).toBe(4);
+    expect(bodyRows(tables[1])).toBe(5);
+    expect(page.html.split("\n").some((line) => line.startsWith("|") || line.startsWith("<p>|"))).toBe(false);
   });
 
   it("renders the tables and strips the source comment", () => {

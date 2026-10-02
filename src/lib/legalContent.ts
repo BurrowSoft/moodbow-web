@@ -43,7 +43,13 @@ export function applyPending(source: string, met: (id: string) => boolean = isPe
     const [whole, id, content] = m;
     const keep = met(id);
     if (!keep) hidden.push({ id, text: content.trim() });
-    text = text.slice(0, m.index) + (keep ? content : "") + text.slice(m.index + whole.length);
+    let end = m.index + whole.length;
+    // An unmet block that fills its whole line (e.g. a table row) takes its
+    // line break with it: a blank line left mid-table would end the table,
+    // and the rows after it would render as literal "| … |" text.
+    const startsLine = m.index === 0 || text[m.index - 1] === "\n";
+    if (!keep && startsLine && text[end] === "\n") end += 1;
+    text = text.slice(0, m.index) + (keep ? content : "") + text.slice(end);
   }
   return { text, hidden };
 }
