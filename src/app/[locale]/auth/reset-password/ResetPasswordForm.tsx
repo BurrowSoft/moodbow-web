@@ -20,14 +20,6 @@ export function ResetPasswordForm() {
   const t = useTranslations("resetPassword");
   const [state, action, pending] = useActionState<ResetPasswordState, FormData>(resetPassword, { status: "idle" });
 
-  if (state.status === "done") {
-    return (
-      <p role="status" data-testid="reset-done" className="rounded-2xl border border-border bg-surface px-5 py-4 font-medium text-text">
-        {t("success")}
-      </p>
-    );
-  }
-
   const error = state.status === "error" ? state.error : null;
   return (
     <form action={action} noValidate className="space-y-5">

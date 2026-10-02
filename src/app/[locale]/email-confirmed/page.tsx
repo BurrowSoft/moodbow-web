@@ -4,6 +4,7 @@ import type { Locale } from "@/i18n/routing";
 import { Logo } from "@/components/Logo";
 import { liveFeatures } from "@/lib/liveFeatures";
 import { pageMetadata } from "@/lib/metadata";
+import { classifyAuthLink } from "@/lib/authLink";
 import { EmailConfirmedMessage } from "./EmailConfirmedMessage";
 
 // Where Supabase's confirm-email links land. Never indexed: the URL can
@@ -14,10 +15,13 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/email-co
   return pageMetadata({ locale: locale as Locale, path: "/email-confirmed", title: t("metaTitle"), noindex: true });
 }
 
-export default async function EmailConfirmedPage({ params }: PageProps<"/[locale]/email-confirmed">) {
+export default async function EmailConfirmedPage({ params, searchParams }: PageProps<"/[locale]/email-confirmed">) {
   const { locale } = await params;
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(await searchParams)) {
+    if (typeof value === "string") query.set(key, value);
+  }
   setRequestLocale(locale as Locale);
-  const t = await getTranslations("emailConfirmed");
   const tc = await getTranslations("common");
 
   return (
@@ -26,11 +30,7 @@ export default async function EmailConfirmedPage({ params }: PageProps<"/[locale
         <div className="mb-10 w-[120px]">
           <Logo variant="stacked" width={120} alt={tc("logoAlt")} />
         </div>
-        <EmailConfirmedMessage showContinue={liveFeatures.webJournal} />
-        <noscript>
-          <h1 className="text-center text-[28px] font-medium">{t("successTitle")}</h1>
-          <p className="mt-4 text-center text-muted">{t("successBody")}</p>
-        </noscript>
+        <EmailConfirmedMessage fromQuery={classifyAuthLink(query.toString(), "")} showContinue={liveFeatures.webJournal} />
       </div>
     </main>
   );

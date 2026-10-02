@@ -1,9 +1,8 @@
 // @vitest-environment node
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { NextRequest } from "next/server";
 
-// The Supabase server client, mocked: these tests pin what the confirm route
-// and the reset action do with each answer.
+// The Supabase server client, mocked: these tests pin what the confirm page,
+// its action and the reset action do with each answer.
 const auth = {
   verifyOtp: vi.fn(),
   signOut: vi.fn(),
@@ -11,77 +10,134 @@ const auth = {
   updateUser: vi.fn(),
 };
 let configured = true;
-vi.mock("@/lib/supabase/server", () => ({
-  createSupabaseServerClient: async () => (configured ? { auth } : null),
+const createClient = vi.fn(async () => (configured ? { auth } : null));
+vi.mock("@/lib/supabase/server", () => ({ createSupabaseServerClient: () => createClient() }));
+
+// next-intl: text keys come back as "namespace.key"; redirect throws like the
+// real one, carrying its arguments.
+vi.mock("next-intl/server", () => ({
+  getLocale: async () => "en",
+  setRequestLocale: () => {},
+  getTranslations: async (ns: string | { namespace: string }) => (key: string) => `${typeof ns === "string" ? ns : ns.namespace}.${key}`,
+}));
+class Redirect {
+  constructor(public args: { href: { pathname: string; query: Record<string, string> }; locale: string }) {}
+}
+vi.mock("@/i18n/navigation", () => ({
+  redirect: (args: Redirect["args"]) => {
+    throw new Redirect(args);
+  },
 }));
 
-const { GET } = await import("./confirm/route");
+const { default: ConfirmLinkPage } = await import("./confirm/page");
+const { confirmLink } = await import("./confirm/actions");
 const { resetPassword } = await import("./reset-password/actions");
 
 const HASH = "a1b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f6071829";
 const session = { access_token: "x" };
 
-async function confirm(query: string) {
-  const req = new NextRequest(`https://www.moodbow.com/en/auth/confirm${query}`);
-  const res = await GET(req, { params: Promise.resolve({ locale: "en" }) });
-  return { status: res.status, location: res.headers.get("location"), res };
-}
-
 beforeEach(() => {
   configured = true;
+  createClient.mockClear();
   for (const fn of Object.values(auth)) fn.mockReset();
   auth.signOut.mockResolvedValue({ error: null });
 });
 
-describe("GET /auth/confirm", () => {
-  it("signup: verifies, ends the web session, 303 to /email-confirmed with no token in the URL", async () => {
+// Depth-first search through a React element tree for props matching `test`.
+function findProps(node: unknown, test: (p: Record<string, unknown>) => boolean): Record<string, unknown> | undefined {
+  if (!node || typeof node !== "object") return undefined;
+  if (Array.isArray(node)) {
+    for (const n of node) {
+      const hit = findProps(n, test);
+      if (hit) return hit;
+    }
+    return undefined;
+  }
+  const props = (node as { props?: Record<string, unknown> }).props;
+  if (!props) return undefined;
+  if (test(props)) return props;
+  return findProps(props.children, test);
+}
+
+describe("GET /auth/confirm (the page)", () => {
+  const render = (query: Record<string, string>) =>
+    ConfirmLinkPage({ params: Promise.resolve({ locale: "en" }), searchParams: Promise.resolve(query) } as never);
+
+  it("never calls Supabase, so a link scanner can't spend the token", async () => {
+    for (const type of ["signup", "recovery", "email_change"]) {
+      await render({ token_hash: HASH, type });
+    }
+    await render({});
+    expect(createClient).not.toHaveBeenCalled();
+    expect(auth.verifyOtp).not.toHaveBeenCalled();
+  });
+
+  it("renders one button per type, carrying the token in the form", async () => {
+    const page = await render({ token_hash: HASH, type: "recovery" });
+    expect(findProps(page, (p) => p.title === "confirmLink.recoveryTitle")).toBeTruthy();
+    expect(findProps(page, (p) => p.name === "token_hash")?.value).toBe(HASH);
+    expect(findProps(page, (p) => p.name === "type")?.value).toBe("recovery");
+    expect(findProps(page, (p) => p.children === "confirmLink.recoveryButton")).toBeTruthy();
+    const signup = await render({ token_hash: HASH, type: "signup" });
+    expect(findProps(signup, (p) => p.children === "confirmLink.signupButton")).toBeTruthy();
+    const change = await render({ token_hash: HASH, type: "email_change" });
+    expect(findProps(change, (p) => p.children === "confirmLink.emailChangeButton")).toBeTruthy();
+  });
+
+  it("missing or bad params → the expired copy, no form", async () => {
+    for (const query of [{}, { token_hash: HASH, type: "sms" }, { token_hash: "x", type: "signup" }] as Record<string, string>[]) {
+      const page = await render(query);
+      expect(findProps(page, (p) => p.title === "emailConfirmed.errorTitle"), JSON.stringify(query)).toBeTruthy();
+      expect(findProps(page, (p) => p.name === "token_hash")).toBeUndefined();
+    }
+  });
+});
+
+describe("confirmLink (the button's POST)", () => {
+  const post = async (fields: Record<string, string>) => {
+    const form = new FormData();
+    for (const [k, v] of Object.entries(fields)) form.set(k, v);
+    try {
+      await confirmLink(form);
+    } catch (e) {
+      if (e instanceof Redirect) return e.args;
+      throw e;
+    }
+    throw new Error("expected a redirect");
+  };
+
+  it("signup: verifies, ends the web session, redirects to /email-confirmed", async () => {
     auth.verifyOtp.mockResolvedValue({ data: { session }, error: null });
-    const { status, location, res } = await confirm(`?token_hash=${HASH}&type=signup`);
+    expect(await post({ token_hash: HASH, type: "signup" })).toEqual({ href: { pathname: "/email-confirmed", query: {} }, locale: "en" });
     expect(auth.verifyOtp).toHaveBeenCalledWith({ type: "signup", token_hash: HASH });
     expect(auth.signOut).toHaveBeenCalledWith({ scope: "local" });
-    expect(status).toBe(303);
-    expect(location).toBe("https://www.moodbow.com/email-confirmed");
-    expect(res.headers.get("cache-control")).toBe("no-store");
-    expect(res.headers.get("referrer-policy")).toBe("no-referrer");
-    expect(res.headers.get("x-robots-tag")).toBe("noindex, nofollow");
   });
 
   it("recovery: keeps the session and goes to /auth/reset-password", async () => {
     auth.verifyOtp.mockResolvedValue({ data: { session }, error: null });
-    const { location } = await confirm(`?token_hash=${HASH}&type=recovery`);
+    expect((await post({ token_hash: HASH, type: "recovery" })).href.pathname).toBe("/auth/reset-password");
     expect(auth.signOut).not.toHaveBeenCalled();
-    expect(location).toBe("https://www.moodbow.com/auth/reset-password");
   });
 
-  it("email_change: updated when a session comes back, pending when it doesn't", async () => {
+  it("email_change: updated with a session, pending without one", async () => {
     auth.verifyOtp.mockResolvedValue({ data: { session }, error: null });
-    expect((await confirm(`?token_hash=${HASH}&type=email_change`)).location).toBe("https://www.moodbow.com/email-confirmed?result=email_changed");
+    expect((await post({ token_hash: HASH, type: "email_change" })).href.query).toEqual({ result: "email_changed" });
     auth.verifyOtp.mockResolvedValue({ data: { session: null, user: null }, error: null });
-    expect((await confirm(`?token_hash=${HASH}&type=email_change`)).location).toBe(
-      "https://www.moodbow.com/email-confirmed?result=email_change_pending",
-    );
+    expect((await post({ token_hash: HASH, type: "email_change" })).href.query).toEqual({ result: "email_change_pending" });
   });
 
-  it("an expired or used token → the expired page, no sign-out needed", async () => {
+  it("an expired or used token → expired", async () => {
     auth.verifyOtp.mockResolvedValue({ data: { session: null }, error: { code: "otp_expired" } });
-    const { location } = await confirm(`?token_hash=${HASH}&type=signup`);
-    expect(location).toBe("https://www.moodbow.com/email-confirmed?result=expired");
+    expect((await post({ token_hash: HASH, type: "signup" })).href).toEqual({ pathname: "/email-confirmed", query: { result: "expired" } });
     expect(auth.signOut).not.toHaveBeenCalled();
   });
 
-  it("bad params never reach Supabase; redirect_to is ignored", async () => {
-    for (const q of ["", "?type=signup", `?token_hash=${HASH}&type=sms`, `?token_hash=${HASH}&type=signup&redirect_to=https://evil.example`]) {
-      auth.verifyOtp.mockResolvedValue({ data: { session }, error: null });
-      const { location } = await confirm(q);
-      expect(location, q).not.toContain("evil");
-    }
-    expect(auth.verifyOtp).toHaveBeenCalledTimes(1);
-  });
-
-  it("fails closed without Supabase config", async () => {
+  it("bad fields never reach Supabase; missing config fails closed", async () => {
+    expect((await post({ token_hash: HASH, type: "sms" })).href.query).toEqual({ result: "expired" });
+    expect((await post({})).href.query).toEqual({ result: "expired" });
+    expect(auth.verifyOtp).not.toHaveBeenCalled();
     configured = false;
-    const { location } = await confirm(`?token_hash=${HASH}&type=signup`);
-    expect(location).toBe("https://www.moodbow.com/email-confirmed?result=expired");
+    expect((await post({ token_hash: HASH, type: "signup" })).href.query).toEqual({ result: "expired" });
   });
 });
 
@@ -106,12 +162,14 @@ describe("resetPassword (server action)", () => {
     expect(auth.updateUser).not.toHaveBeenCalled();
   });
 
-  it("success: sets the password, then ends the session", async () => {
+  it("success: sets the password, signs out every session (global), then redirects to the changed state", async () => {
     auth.getUser.mockResolvedValue({ data: { user: { id: "u" } } });
     auth.updateUser.mockResolvedValue({ error: null });
-    expect(await resetPassword(idle, form("new-password-1"))).toEqual({ status: "done" });
+    const redirected = await resetPassword(idle, form("new-password-1")).catch((e) => e);
+    expect(redirected).toBeInstanceOf(Redirect);
+    expect((redirected as Redirect).args).toEqual({ href: { pathname: "/auth/reset-password", query: { status: "changed" } }, locale: "en" });
     expect(auth.updateUser).toHaveBeenCalledWith({ password: "new-password-1" });
-    expect(auth.signOut).toHaveBeenCalledWith({ scope: "local" });
+    expect(auth.signOut).toHaveBeenCalledWith({ scope: "global" });
   });
 
   it("maps Supabase error codes, never messages", async () => {
