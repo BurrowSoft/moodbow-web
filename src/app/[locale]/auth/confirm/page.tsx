@@ -9,7 +9,7 @@ import { confirmLink } from "./actions";
 // Where auth email links land: /auth/confirm?token_hash=…&type=…
 // GET only shows one button. It never calls Supabase, so link scanners
 // can't spend the token; the click (a POST, ./actions.ts) verifies it.
-// noindex; next.config sends no-referrer for /auth/*.
+// noindex; next.config sends Referrer-Policy: same-origin for /auth/*.
 export const dynamic = "force-dynamic";
 
 // Copy per link type. invite / magiclink / email aren't sent by the R1 hook
