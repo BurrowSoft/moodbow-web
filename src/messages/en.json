@@ -1,0 +1,98 @@
+{
+  "meta": {
+    "siteName": "Moodbow",
+    "title": "Moodbow — A journal that learns your story",
+    "pageTitle": "{title} · Moodbow",
+    "description": "Moodbow is a private journal that helps you notice patterns in your mood, sleep and habits over time. Coming soon from BurrowSoft.",
+    "ogDescription": "A private journal that helps you notice patterns in your mood, sleep and habits over time. Coming soon.",
+    "ogImageAlt": "Moodbow logo with the text: Coming soon. A journal that learns your story.",
+    "manifestDescription": "A journal that learns your story."
+  },
+  "common": {
+    "logoAlt": "Moodbow",
+    "skipToContent": "Skip to content",
+    "homeAria": "Moodbow home",
+    "language": "Language",
+    "siteLinks": "Site links",
+    "languageNames": {
+      "en": "English"
+    },
+    "burrowsoftProduct": "A BurrowSoft product",
+    "burrowsoftAria": "A BurrowSoft product. Visit burrowsoft.com",
+    "copyright": "© 2026 BurrowSoft",
+    "support": "Support",
+    "accountDeletion": "Delete your account",
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "draftBanner": "Draft, not in effect. This page is only visible on test builds."
+  },
+  "home": {
+    "comingSoon": "Coming soon",
+    "tagline": "A journal that learns your story.",
+    "intro": "Moodbow is a private journal that helps you notice patterns in your mood, sleep and habits over time. We're putting the finishing touches on it.",
+    "notify": "Get notified",
+    "notifyAria": "Get notified by email when Moodbow launches",
+    "notifySubject": "Notify me about Moodbow",
+    "notifyNote": "Email us and we'll let you know when it's ready.",
+    "feature1Title": "Seconds a day",
+    "feature1Body": "Log your mood, sleep and exercise in seconds, and write about your day when you feel like it.",
+    "feature2Title": "See your patterns",
+    "feature2Body": "Your timeline and charts show what makes good days better, and what tends to come before hard ones.",
+    "feature3Title": "Private, and yours",
+    "feature3Body": "Only you can read your journal, and you can delete everything at any time."
+  },
+  "support": {
+    "title": "Support",
+    "description": "Get help with Moodbow: email us with questions, problems or ideas.",
+    "body": "Questions, problems or ideas? Email us and we'll get back to you.",
+    "deleteLink": "How to delete your account",
+    "emailLine": "Email: <link>{email}</link>"
+  },
+  "accountDeletion": {
+    "title": "Delete your Moodbow account",
+    "description": "How to delete your Moodbow account and everything in it.",
+    "intro": "You can delete your account and everything in it at any time. Deleting is immediate and can't be undone.",
+    "steps": "In the app or on the web: open Me → Delete account, type DELETE, and confirm.",
+    "what": "We delete your entries, check-ins, AI reflections and reports, what Moodbow remembers, your settings and your login.",
+    "backups": "Copies in our encrypted backups are removed automatically within {days} days.",
+    "noAccess": "Can't sign in? Email <support>{email}</support> from the address you signed up with and we'll delete it for you."
+  },
+  "emailConfirmed": {
+    "metaTitle": "Email confirmed",
+    "successTitle": "Email confirmed.",
+    "successBody": "Open Moodbow to continue.",
+    "errorTitle": "This link has expired or was already used.",
+    "errorBody": "Open Moodbow and ask for a new one.",
+    "continueWeb": "Continue on the web"
+  },
+  "privacy": {
+    "title": "Privacy policy",
+    "description": "How Moodbow handles your data.",
+    "pending": "This section is being written.",
+    "whoWeAre": "Who we are",
+    "whatWeCollect": "What we collect",
+    "howWeUse": "How we use it",
+    "ai": "AI features",
+    "whereStored": "Where your data is stored",
+    "retention": "How long we keep it, and deleting it",
+    "rights": "Your rights",
+    "contact": "Contact us"
+  },
+  "terms": {
+    "title": "Terms of use",
+    "description": "The terms for using Moodbow.",
+    "pending": "This section is being written.",
+    "using": "Using Moodbow",
+    "account": "Your account",
+    "content": "Your content",
+    "notMedical": "Not medical advice",
+    "ai": "AI features and credits",
+    "changes": "Changes to these terms",
+    "contact": "Contact us"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "body": "This page doesn't exist or has moved.",
+    "home": "Go to the home page"
+  }
+}

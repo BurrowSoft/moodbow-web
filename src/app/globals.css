@@ -1,0 +1,90 @@
+@import "tailwindcss";
+
+/* Moodbow brand palette (apps-brand-kits/moodbow-brand-kit). Light and dark
+   follow the system setting, like the app. Peach, rose and lavender never
+   carry body text on light backgrounds (contrast); accents there use deep
+   rose. */
+:root {
+  --cream: #fbf6f1;
+  --ink: #2b2438;
+  --peach: #f2a07b;
+  --rose: #e27d9a;
+  --deep-rose: #a8456a;
+  --lavender: #9b84d6;
+
+  --bg: var(--cream);
+  --surface: #ffffff;
+  --border: #ece3da;
+  --text: var(--ink);
+  --muted: #6b6278;
+  --accent: var(--deep-rose);
+  --on-accent: var(--cream);
+  --pill: #f9eaec;
+  --draft-bg: #fff4d6;
+  --draft-text: #5c4400;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: var(--ink);
+    --surface: #352d43;
+    --border: #463c56;
+    --text: var(--cream);
+    --muted: #c9c1d4;
+    --accent: var(--rose);
+    --on-accent: var(--ink);
+    --pill: #382c43;
+    --draft-bg: #4a3d14;
+    --draft-text: #ffe9a8;
+    color-scheme: dark;
+  }
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-on-accent: var(--on-accent);
+  --color-pill: var(--pill);
+  --color-peach: var(--peach);
+  --color-rose: var(--rose);
+  --color-lavender: var(--lavender);
+  --color-draft-bg: var(--draft-bg);
+  --color-draft-text: var(--draft-text);
+  /* Poppins for Latin; Thai glyphs (which Poppins lacks) fall through to
+     Prompt. */
+  --font-sans: var(--font-poppins), var(--font-prompt), ui-sans-serif, system-ui, sans-serif;
+}
+
+html {
+  background: var(--bg);
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* A visible ring for keyboard focus everywhere. */
+:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 3px;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.fade-in {
+  animation: fade-in 400ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fade-in { animation: none; }
+}

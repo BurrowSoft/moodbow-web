@@ -1,0 +1,18 @@
+{
+  "privacy-text-approved": {
+    "met": false,
+    "what": "The privacy policy's final text is written by UX & PM, approved by Vitor, and every claim in it matches what the system enforces today (W3)."
+  },
+  "terms-text-approved": {
+    "met": false,
+    "what": "The terms of use's final text is written by UX & PM and approved by Vitor (W3)."
+  },
+  "delete-account-live": {
+    "met": false,
+    "what": "Me → Delete account (type DELETE, confirm) works in a RELEASED app build and on the live web journal, and deletes every row plus the auth user immediately (M7 + the web Me screen)."
+  },
+  "backup-retention-confirmed": {
+    "met": false,
+    "what": "Mobile Dev confirmed in the Supabase dashboard how many days backups are kept (plan + PITR status), and BACKUP_RETENTION_DAYS in src/lib/site.ts holds that number."
+  }
+}
