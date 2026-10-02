@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/sign-in"
   return pageMetadata({ locale: locale as Locale, path: "/sign-in", title: t("signinSubmit"), noindex: true });
 }
 
-export default async function SignInPage({ params }: PageProps<"/[locale]/sign-in">) {
+export default async function SignInPage({ params, searchParams }: PageProps<"/[locale]/sign-in">) {
   const { locale } = await params;
   setRequestLocale(locale as Locale);
   if (pageGate("web-journal-live") === "hidden") notFound();
@@ -29,8 +29,16 @@ export default async function SignInPage({ params }: PageProps<"/[locale]/sign-i
   if (user) redirect({ href: "/app", locale });
 
   const t = await getTranslations("auth");
+  // Set by the proxy when the account no longer exists (deleted on another
+  // device): the stale session is already cleared.
+  const signedOut = (await searchParams).signed_out === "1";
   return (
     <PageShell title={t("signinTitle")}>
+      {signedOut && (
+        <p role="status" data-testid="account-gone" className="rounded-2xl border border-border bg-surface px-5 py-4 font-medium text-text">
+          {t("accountGoneNotice")}
+        </p>
+      )}
       <SignInForm />
     </PageShell>
   );
