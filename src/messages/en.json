@@ -63,7 +63,24 @@
     "successBody": "Open Moodbow to continue.",
     "errorTitle": "This link has expired or was already used.",
     "errorBody": "Open Moodbow and ask for a new one.",
-    "continueWeb": "Continue on the web"
+    "continueWeb": "Continue on the web",
+    "emailChangedTitle": "Your email address was updated.",
+    "emailChangedBody": "Use the new one next time you sign in.",
+    "emailChangePendingTitle": "Almost done.",
+    "emailChangePendingBody": "Open the link we sent to your other email address to finish changing it."
+  },
+  "resetPassword": {
+    "title": "Choose a new password",
+    "newPassword": "New password",
+    "confirmPassword": "Confirm new password",
+    "hint": "At least 8 characters",
+    "submit": "Save new password",
+    "errShort": "Use at least 8 characters",
+    "errMismatch": "The passwords don't match",
+    "errSame": "Choose a password that's different from your old one.",
+    "errExpired": "This link has expired or was already used. Open Moodbow and ask for a new one.",
+    "errGeneric": "Something went wrong. Please try again.",
+    "success": "Your password was changed. Sign in with your new password in the app or on the web."
   },
   "privacy": {
     "title": "Privacy policy",

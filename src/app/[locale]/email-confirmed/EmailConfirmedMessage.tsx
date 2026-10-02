@@ -13,6 +13,13 @@ function readResult(): AuthLinkResult {
   return firstResult;
 }
 const subscribe = () => () => {};
+
+const COPY = {
+  ok: { title: "successTitle", body: "successBody" },
+  error: { title: "errorTitle", body: "errorBody" },
+  email_changed: { title: "emailChangedTitle", body: "emailChangedBody" },
+  email_change_pending: { title: "emailChangePendingTitle", body: "emailChangePendingBody" },
+} as const satisfies Record<AuthLinkResult, { title: string; body: string }>;
 const serverResult = () => null;
 
 export function EmailConfirmedMessage({ showContinue }: { showContinue: boolean }) {
@@ -32,12 +39,11 @@ export function EmailConfirmedMessage({ showContinue }: { showContinue: boolean 
   if (result === null) return <div className="min-h-32" aria-hidden="true" />;
 
   const ok = result === "ok";
+  const copy = COPY[result];
   return (
     <div data-testid={`email-confirmed-${result}`} className="flex flex-col items-center text-center">
-      <h1 className="text-balance text-[28px] font-medium leading-tight tracking-tight sm:text-4xl">
-        {ok ? t("successTitle") : t("errorTitle")}
-      </h1>
-      <p className="mt-4 text-base leading-relaxed text-muted sm:text-[17px]">{ok ? t("successBody") : t("errorBody")}</p>
+      <h1 className="text-balance text-[28px] font-medium leading-tight tracking-tight sm:text-4xl">{t(copy.title)}</h1>
+      <p className="mt-4 text-base leading-relaxed text-muted sm:text-[17px]">{t(copy.body)}</p>
       {ok && showContinue && (
         <Link
           href="/app"

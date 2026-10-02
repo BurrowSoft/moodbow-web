@@ -15,6 +15,12 @@ const nextConfig: NextConfig = {
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
         ],
       },
+      // Auth links carry single-use tokens in the query: no referrer at all
+      // from these pages (overrides the rule above; the last match wins).
+      ...["/auth/:path*", "/:locale/auth/:path*", "/email-confirmed", "/:locale/email-confirmed"].map((source) => ({
+        source,
+        headers: [{ key: "Referrer-Policy", value: "no-referrer" }],
+      })),
       // Deep-link verification files (public/.well-known). Android and Apple
       // only accept them as JSON, and the AASA file has no extension, so the
       // type is set explicitly. The proxy skips paths with a dot, so neither

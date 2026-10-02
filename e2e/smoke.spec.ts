@@ -179,6 +179,43 @@ test.describe("404s are server-rendered (no JS)", () => {
       await expect(page.locator("html")).toHaveAttribute("lang", "en");
       await expect(page.getByRole("heading", { level: 1 })).toHaveText("Page not found");
       await expect(page.getByRole("link", { name: "Go to the home page" })).toHaveAttribute("href", "/");
+      await expect(page.getByRole("link", { name: "Support" })).toHaveAttribute("href", "/support");
+      await expect(page).toHaveTitle("Page not found · Moodbow");
+      await expect(page.getByText("This page doesn't exist or has moved.")).toBeVisible();
     });
   }
+});
+
+// Auth email links (W5). Real tokens are tested on the Preview (staging);
+// here the build has no Supabase env, so every link fails closed.
+test.describe("auth links", () => {
+  test("/auth/confirm without a working token lands on the expired page with a clean URL", async ({ page }) => {
+    await page.goto("/auth/confirm?token_hash=a1b2c3d4e5f60718293a4b5c6d7e8f90&type=signup");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("This link has expired or was already used.");
+    await expect(page).toHaveURL(/\/email-confirmed$/);
+  });
+
+  test("/auth/confirm sends no-store, no-referrer and noindex", async ({ request }) => {
+    const res = await request.get("/auth/confirm?token_hash=a1b2c3d4e5f60718293a4b5c6d7e8f90&type=recovery", { maxRedirects: 0 });
+    expect(res.status()).toBe(303);
+    expect(res.headers()["location"]).toMatch(/\/email-confirmed\?result=expired$/);
+    expect(res.headers()["cache-control"]).toContain("no-store");
+    expect(res.headers()["referrer-policy"]).toBe("no-referrer");
+    expect(res.headers()["x-robots-tag"]).toBe("noindex, nofollow");
+  });
+
+  test("/auth/reset-password without the recovery session shows the expired copy", async ({ page }) => {
+    await page.goto("/auth/reset-password");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("This link has expired or was already used.");
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex, nofollow");
+  });
+
+  test("email change results", async ({ page }) => {
+    await page.goto("/email-confirmed?result=email_changed");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Your email address was updated.");
+    await expect(page.getByText("Use the new one next time you sign in.")).toBeVisible();
+    await expect(page).toHaveURL(/\/email-confirmed$/);
+    await page.goto("/email-confirmed?result=email_change_pending");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Almost done.");
+  });
 });

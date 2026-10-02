@@ -59,6 +59,16 @@ Fonts: Poppins (Latin), with Prompt ready for Thai glyphs (not preloaded), self-
 | `/.well-known/apple-app-site-association` | iOS Universal Links (no claims until the iOS app, R2); served as JSON | — |
 | `/robots.txt`, `/sitemap.xml`, `/manifest.webmanifest` | Generated from `src/app/*.ts` | — |
 
+### Auth email links
+
+The Supabase send-email hook (moodbow-app) links to `/auth/confirm?token_hash=…&type=…`. The route runs
+`verifyOtp` server-side against the deployment's own project (Production → prod, Preview → staging; env
+`NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`), then 303s to a clean URL: signup and
+similar → `/email-confirmed`; recovery → `/auth/reset-password` (sets the password, then signs that session
+out); email change → `/email-confirmed?result=email_changed` (or `email_change_pending` after the first of
+the two confirmations); anything else → `?result=expired`. `redirect_to` is never followed, the pages send
+`no-referrer` and noindex, and nothing logs the token. Without the env vars every link fails closed.
+
 ### Text = enforcement: conditions and flags
 
 - `content/conditions.json`: "is it true yet?" facts, read through `conditionMet(id)`.
