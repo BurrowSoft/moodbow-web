@@ -12,7 +12,7 @@ Moodbow is a private journal made by Vitor Ribeiro Carvalho, trading as BurrowSo
 
 ### The short version
 - Only you can read your journal. BurrowSoft staff don't read journals; direct database access is limited to maintenance by Vitor Ribeiro Carvalho. We don't sell your data, show ads, or use your journal to train AI.
-- AI features are optional. If you turn them on, the parts of your journal needed for a reflection or report are sent to our AI provider, Anthropic, in the USA.
+{pending:ai_live}- AI features are optional. If you turn them on, the parts of your journal needed for a reflection or report are sent to our AI provider, Anthropic, in the USA.{/pending}
 - You can export everything, or delete your account and everything in it, at any time, from the app or the website.
 
 ### 1. What we collect
@@ -35,7 +35,7 @@ We don't collect your name, contacts, precise location, or advertising identifie
 |---|---|
 | Running your account and your journal | Our contract with you (the Terms) |
 | Processing your journal, which can reveal health and wellbeing information | Your explicit consent, given separately when you create your account (you can withdraw it by deleting your account) |
-| AI reflections and reports | Your separate, explicit AI consent. You can withdraw it at any time in Me → AI |
+{pending:ai_live}| AI reflections and reports | Your separate, explicit AI consent. You can withdraw it at any time in Me → AI |{/pending}
 | Keeping the service secure and fixing crashes | Our legitimate interest in a working, safe service |
 | Answering your emails | Our legitimate interest, or our contract with you |
 
@@ -67,12 +67,12 @@ Wherever you live, you can:
 - **see and download** everything: Me → Export my data;
 - **correct** it: edit any entry, check-in or setting;
 - **delete** it: delete any item, or your whole account in Me → Delete account;
-- **withdraw your AI consent** at any time in Me → AI. This stops new AI requests; past reflections stay until you delete them;
+{pending:ai_live}- **withdraw your AI consent** at any time in Me → AI. This stops new AI requests; past reflections stay until you delete them;{/pending}
 - **object or ask questions**: email support@moodbow.com. We answer within 30 days.
 You can also complain to a data-protection authority: in Thailand, the Personal Data Protection Committee (PDPC); in the EU or UK, your local authority.
 
 ### 6. Security
-Your data is encrypted in transit (HTTPS) and at rest. Database rules make sure each account can only ever read its own rows. You can add an app lock (PIN or fingerprint/face) on your phone. No system is perfectly secure; if a breach ever affects your data, we'll tell you and the authorities as the law requires.
+Your data is encrypted in transit (HTTPS) and at rest. Database rules make sure each account can only ever read its own rows. {pending:app_lock}You can add an app lock (PIN or fingerprint/face) on your phone.{/pending} No system is perfectly secure; if a breach ever affects your data, we'll tell you and the authorities as the law requires.
 
 ### 7. Age
 Moodbow is for people aged 18 and older. We don't knowingly collect data from anyone younger. If you believe a child has an account, email us and we'll delete it.

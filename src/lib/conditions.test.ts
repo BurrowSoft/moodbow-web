@@ -19,8 +19,9 @@ describe("conditions", () => {
     expect(conditionMet("privacy-text-approved")).toBe(false);
     expect(conditionMet("terms-text-approved")).toBe(false);
     expect(conditionMet("delete-account-live")).toBe(false);
-    expect(conditionMet("backup-retention")).toBe(false);
-    expect(BACKUP_RETENTION_DAYS).toBeNull();
+    // Decision 44: backups are kept 7 days; the number and the flag go together.
+    expect(conditionMet("backup-retention")).toBe(true);
+    expect(BACKUP_RETENTION_DAYS).toBe(7);
     expect(liveFeatures.webJournal).toBe(false);
   });
 });

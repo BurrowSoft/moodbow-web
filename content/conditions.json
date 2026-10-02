@@ -12,8 +12,8 @@
     "what": "Me → Delete account (type DELETE, confirm) works in a RELEASED app build and on the live web journal, and deletes every row plus the auth user immediately (M7 + the web Me screen)."
   },
   "backup-retention": {
-    "met": false,
-    "what": "Mobile Dev confirmed in the Supabase dashboard how many days backups are kept (plan + PITR status), and BACKUP_RETENTION_DAYS in src/lib/site.ts holds that number."
+    "met": true,
+    "what": "Supabase backups are kept 7 days (decision 44, confirmed by Mobile Dev/Vitor); BACKUP_RETENTION_DAYS in src/lib/site.ts = 7. Deleted data disappears from backups within that window."
   },
   "web-journal-live": {
     "met": false,
@@ -33,7 +33,7 @@
   },
   "app-lock": {
     "met": false,
-    "what": "The app lock (PIN or fingerprint/face, PIN kept only on the device) is in a RELEASED app build (M7)."
+    "what": "The app lock (PIN or fingerprint/face, PIN kept only on the device) is in a RELEASED app build (M7). App-only by design: the web has no app lock, so the web side is \"nothing to ship\"."
   },
   "share-cards": {
     "met": false,
@@ -46,5 +46,13 @@
   "starter-credits": {
     "met": false,
     "what": "New accounts get starter credits after confirming their email (app_config.starter_credits > 0, enforced server-side)."
+  },
+  "export-live": {
+    "met": false,
+    "what": "Me → Export my data (JSON + readable text, everything the user created) works in a RELEASED app build and on the live web journal (M7)."
+  },
+  "help-now-live": {
+    "met": false,
+    "what": "Me → Get help now (the safety card with local hotlines from the country registry) is in a RELEASED app build and on the live web journal (M7 + M8)."
   }
 }

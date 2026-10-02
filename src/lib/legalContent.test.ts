@@ -37,6 +37,18 @@ describe("legal content files", () => {
     }
   });
 
+  // The legal texts describe these as available today, unconditioned
+  // (decisions 40 + 69: real people only arrive after M7 + M8), so neither
+  // page may go live before them (Code Reviewer, #9).
+  it("a live legal page needs delete account, export, Get help now and the app lock live first", () => {
+    for (const { slug, gate } of PAGES) {
+      if (!conditionMet(gate)) continue;
+      for (const prerequisite of ["delete-account-live", "export-live", "help-now-live", "app-lock"] as const) {
+        expect(conditionMet(prerequisite), `${slug} needs ${prerequisite}`).toBe(true);
+      }
+    }
+  });
+
   it("todos() finds every kind of to-confirm mark, but not in editor comments", () => {
     expect(todos("a ⏳(check X) b ⏳[90] c [VITOR] d ⏳ e")).toEqual(["⏳(check X)", "⏳[90]", "[VITOR]", "⏳"]);
     expect(todos("<!-- ⏳ and [VITOR] mark facts -->\nclean text")).toEqual([]);
