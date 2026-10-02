@@ -14,6 +14,10 @@ const PAGES: PageEntry[] = [
   { path: "/app", gate: "web-journal-live", prefix: true, sitemap: false },
   { path: "/sign-in", gate: "web-journal-live", sitemap: false },
   { path: "/forgot-password", gate: "web-journal-live", sitemap: false },
+  { path: "/welcome", gate: "web-journal-live", sitemap: false },
+  { path: "/consent", gate: "web-journal-live", sitemap: false },
+  { path: "/sign-up", gate: "web-journal-live", sitemap: false },
+  { path: "/setup", gate: "web-journal-live", sitemap: false },
 ];
 
 export function sitemapPaths(met: (id: ConditionId) => boolean = conditionMet): string[] {
