@@ -15,7 +15,7 @@ test.describe("home", () => {
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("A journal that learns your story.");
     await expect(page.getByText("Coming soon", { exact: true })).toBeVisible();
     const notify = page.getByRole("link", { name: "Get notified by email when Moodbow launches" });
-    await expect(notify).toHaveAttribute("href", "mailto:support@burrowsoft.com?subject=Notify%20me%20about%20Moodbow");
+    await expect(notify).toHaveAttribute("href", "mailto:support@moodbow.com?subject=Notify%20me%20about%20Moodbow");
     await expect(page.getByText("Email us and we'll let you know when it's ready.")).toBeVisible();
     await expect(page.getByText("We'll email you once", { exact: false })).toHaveCount(0);
     for (const title of ["Seconds a day", "See your patterns", "Private, and yours"]) {
@@ -68,8 +68,8 @@ test.describe("support", () => {
   test("shows the support email", async ({ page }) => {
     await page.goto("/support");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Support");
-    await expect(page.getByRole("link", { name: "support@burrowsoft.com" })).toHaveAttribute("href", "mailto:support@burrowsoft.com");
-    await expect(page.getByText("Email: support@burrowsoft.com")).toBeVisible();
+    await expect(page.getByRole("link", { name: "support@moodbow.com" })).toHaveAttribute("href", "mailto:support@moodbow.com");
+    await expect(page.getByText("Email: support@moodbow.com")).toBeVisible();
   });
 });
 
@@ -100,7 +100,7 @@ test.describe("gated pages render as drafts outside Production", () => {
   test("account deletion: the PM's copy, support email, no backups line yet", async ({ page }) => {
     await page.goto("/account-deletion");
     await expect(page.getByText("In the app or on the web: open Me → Delete account, type DELETE, and confirm.")).toBeVisible();
-    await expect(page.getByRole("link", { name: "support@burrowsoft.com" })).toHaveAttribute("href", "mailto:support@burrowsoft.com");
+    await expect(page.getByRole("link", { name: "support@moodbow.com" })).toHaveAttribute("href", "mailto:support@moodbow.com");
     await expect(page.getByTestId("backups-line")).toHaveCount(0);
   });
 });
@@ -167,4 +167,18 @@ test("unknown pages are a 404 with the site's not-found page", async ({ page }) 
   const res = await page.goto("/no-such-page");
   expect(res?.status()).toBe(404);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Page not found");
+});
+
+test.describe("404s are server-rendered (no JS)", () => {
+  test.use({ javaScriptEnabled: false });
+
+  for (const path of ["/no-such-page", "/th"]) {
+    test(path, async ({ page }) => {
+      const res = await page.goto(path);
+      expect(res?.status()).toBe(404);
+      await expect(page.locator("html")).toHaveAttribute("lang", "en");
+      await expect(page.getByRole("heading", { level: 1 })).toHaveText("Page not found");
+      await expect(page.getByRole("link", { name: "Go to the home page" })).toHaveAttribute("href", "/");
+    });
+  }
 });
