@@ -1,7 +1,4 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "framework": null,
-  "installCommand": "if [ ! -x flutter/bin/flutter ]; then rm -rf flutter && git clone --depth 1 -b 3.47.5 https://github.com/flutter/flutter.git; fi && flutter/bin/flutter config --no-analytics && flutter/bin/flutter pub get",
-  "buildCommand": "flutter/bin/flutter build web --release",
-  "outputDirectory": "build/web"
+  "framework": "nextjs"
 }
