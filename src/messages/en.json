@@ -91,7 +91,8 @@
     "errSame": "Choose a password that's different from your old one.",
     "errExpired": "This link has expired or was already used. Open Moodbow and ask for a new one.",
     "errGeneric": "Something went wrong. Please try again.",
-    "success": "Your password was changed, and you've been signed out on all your devices. Sign in with your new password in the app or on the web."
+    "success": "Your password was changed, and you've been signed out on all your devices. Sign in with your new password in the app or on the web.",
+    "successTitle": "Password changed"
   },
   "privacy": {
     "title": "Privacy policy",
