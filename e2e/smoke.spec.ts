@@ -189,25 +189,44 @@ test.describe("404s are server-rendered (no JS)", () => {
 // Auth email links (W5). Real tokens are tested on the Preview (staging);
 // here the build has no Supabase env, so every link fails closed.
 test.describe("auth links", () => {
-  test("/auth/confirm without a working token lands on the expired page with a clean URL", async ({ page }) => {
+  test("/auth/confirm shows one button; only the click verifies (no env here → expired, clean URL)", async ({ page }) => {
     await page.goto("/auth/confirm?token_hash=a1b2c3d4e5f60718293a4b5c6d7e8f90&type=signup");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Confirm your email");
+    await expect(page.getByText("One tap and your Moodbow journal is ready.")).toBeVisible();
+    await page.getByRole("button", { name: "Confirm email" }).click();
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("This link has expired or was already used.");
     await expect(page).toHaveURL(/\/email-confirmed$/);
   });
 
-  test("/auth/confirm sends no-store, no-referrer and noindex", async ({ request }) => {
-    const res = await request.get("/auth/confirm?token_hash=a1b2c3d4e5f60718293a4b5c6d7e8f90&type=recovery", { maxRedirects: 0 });
-    expect(res.status()).toBe(303);
-    expect(res.headers()["location"]).toMatch(/\/email-confirmed\?result=expired$/);
-    expect(res.headers()["cache-control"]).toContain("no-store");
+  test("/auth/confirm copy per type, and bad links show the expired copy", async ({ page }) => {
+    await page.goto("/auth/confirm?token_hash=a1b2c3d4e5f60718293a4b5c6d7e8f90&type=recovery");
+    await expect(page.getByRole("button", { name: "Continue" })).toBeVisible();
+    await page.goto("/auth/confirm?token_hash=a1b2c3d4e5f60718293a4b5c6d7e8f90&type=email_change");
+    await expect(page.getByRole("button", { name: "Confirm email change" })).toBeVisible();
+    await page.goto("/auth/confirm?type=signup");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("This link has expired or was already used.");
+    await expect(page.getByRole("button")).toHaveCount(0);
+  });
+
+  test("/auth/confirm: GET is a plain page with no-referrer and noindex", async ({ request, page }) => {
+    const res = await request.get("/auth/confirm?token_hash=a1b2c3d4e5f60718293a4b5c6d7e8f90&type=signup", { maxRedirects: 0 });
+    expect(res.status()).toBe(200);
     expect(res.headers()["referrer-policy"]).toBe("no-referrer");
-    expect(res.headers()["x-robots-tag"]).toBe("noindex, nofollow");
+    await page.goto("/auth/confirm?token_hash=a1b2c3d4e5f60718293a4b5c6d7e8f90&type=signup");
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex, nofollow");
   });
 
   test("/auth/reset-password without the recovery session shows the expired copy", async ({ page }) => {
     await page.goto("/auth/reset-password");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("This link has expired or was already used.");
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex, nofollow");
+  });
+
+  test("/auth/reset-password?status=changed shows the success copy", async ({ page }) => {
+    await page.goto("/auth/reset-password?status=changed");
+    await expect(page.getByTestId("reset-done")).toHaveText(
+      "Your password was changed, and you've been signed out on all your devices. Sign in with your new password in the app or on the web.",
+    );
   });
 
   test("email change results", async ({ page }) => {

@@ -17,9 +17,23 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/auth/res
   return pageMetadata({ locale: locale as Locale, path: "/auth/reset-password", title: t("title"), noindex: true });
 }
 
-export default async function ResetPasswordPage({ params }: PageProps<"/[locale]/auth/reset-password">) {
+export default async function ResetPasswordPage({ params, searchParams }: PageProps<"/[locale]/auth/reset-password">) {
   const { locale } = await params;
   setRequestLocale(locale as Locale);
+
+  // After a successful reset (the action redirects here; the session is
+  // already gone, signed out everywhere).
+  if ((await searchParams).status === "changed") {
+    const t = await getTranslations("resetPassword");
+    return (
+      <PageShell title={t("title")}>
+        <p role="status" data-testid="reset-done" className="rounded-2xl border border-border bg-surface px-5 py-4 font-medium text-text">
+          {t("success")}
+        </p>
+      </PageShell>
+    );
+  }
+
   const supabase = await createSupabaseServerClient();
   const user = supabase ? (await supabase.auth.getUser()).data.user : null;
 
