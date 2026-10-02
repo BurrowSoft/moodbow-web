@@ -189,6 +189,16 @@ test.describe("404s are server-rendered (no JS)", () => {
 // Auth email links (W5). Real tokens are tested on the Preview (staging);
 // here the build has no Supabase env, so every link fails closed.
 test.describe("auth links", () => {
+  test.describe("without JavaScript", () => {
+    test.use({ javaScriptEnabled: false });
+    test("the confirm button still works (no Origin: null 500)", async ({ page }) => {
+      await page.goto("/auth/confirm?token_hash=a1b2c3d4e5f60718293a4b5c6d7e8f90&type=signup");
+      const [response] = await Promise.all([page.waitForResponse((r) => r.request().method() === "POST"), page.getByRole("button", { name: "Confirm email" }).click()]);
+      expect(response.status()).toBeLessThan(500);
+      await expect(page.getByRole("heading", { level: 1 })).toHaveText("This link has expired or was already used.");
+    });
+  });
+
   test("/auth/confirm shows one button; only the click verifies (no env here → expired, clean URL)", async ({ page }) => {
     await page.goto("/auth/confirm?token_hash=a1b2c3d4e5f60718293a4b5c6d7e8f90&type=signup");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Confirm your email");
@@ -208,10 +218,10 @@ test.describe("auth links", () => {
     await expect(page.getByRole("button")).toHaveCount(0);
   });
 
-  test("/auth/confirm: GET is a plain page with no-referrer and noindex", async ({ request, page }) => {
+  test("/auth/confirm: GET is a plain page, same-origin referrers only, noindex", async ({ request, page }) => {
     const res = await request.get("/auth/confirm?token_hash=a1b2c3d4e5f60718293a4b5c6d7e8f90&type=signup", { maxRedirects: 0 });
     expect(res.status()).toBe(200);
-    expect(res.headers()["referrer-policy"]).toBe("no-referrer");
+    expect(res.headers()["referrer-policy"]).toBe("same-origin");
     await page.goto("/auth/confirm?token_hash=a1b2c3d4e5f60718293a4b5c6d7e8f90&type=signup");
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex, nofollow");
   });

@@ -74,7 +74,7 @@ clean URL:
   confirmations;
 - anything else → `/email-confirmed?result=expired`.
 
-`redirect_to` is never followed, the pages send `no-referrer` and noindex, and nothing logs the token. Without
+`redirect_to` is never followed, the pages send `Referrer-Policy: same-origin` (never to other sites; `no-referrer` broke the no-JS form POST) and noindex, and nothing logs the token. Without
 the env vars every link fails closed.
 
 ### Text = enforcement: conditions and flags
