@@ -75,9 +75,10 @@ The unit tests pin the current values.
 
 `src/instrumentation*.ts` + `src/sentry.shared.ts`. Off without `NEXT_PUBLIC_SENTRY_DSN`. When on, the
 SDK collects no personal data (`dataCollection` all off, no replay, no tracing), and every event and
-breadcrumb passes through `src/lib/sentryScrub.ts`: URLs are cut to their path (no query or fragment),
-emails, phones and Thai IDs are redacted, and console and input breadcrumbs are dropped. Nothing a user
-types may reach Sentry.
+breadcrumb passes through `src/lib/sentryScrub.ts`. All free text is dropped: messages, exception values,
+source lines, breadcrumb messages, log entries, and free-form tags. The user is dropped, including the internal
+id, and URLs are cut to their path. What stays is structure (exception type, stack, route, browser/OS, release).
+The privacy policy promises this ("we remove any text you've written"), so keep it that way.
 
 ## Deploy (Vercel)
 

@@ -1,10 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { scrubBreadcrumb, scrubEvent, scrubText, scrubUrl } from "./sentryScrub";
+import { REDACTED, scrubBreadcrumb, scrubEvent, scrubUrl } from "./sentryScrub";
+
+// A diary sentence a user might type; it must never survive scrubbing.
+const DIARY = "felt anxious after the call with Mom";
 
 describe("scrubUrl", () => {
   it("keeps origin + path, drops query and fragment", () => {
-    expect(scrubUrl("https://www.moodbow.com/th/email-confirmed?code=abc#access_token=secret")).toBe(
-      "https://www.moodbow.com/th/email-confirmed",
+    expect(scrubUrl("https://www.moodbow.com/email-confirmed?code=abc#access_token=secret")).toBe(
+      "https://www.moodbow.com/email-confirmed",
     );
     expect(scrubUrl("/auth/confirm?token_hash=abc&type=signup")).toBe("/auth/confirm");
   });
@@ -14,73 +17,88 @@ describe("scrubUrl", () => {
   });
 });
 
-describe("scrubText", () => {
-  it("redacts emails, phone numbers, Thai IDs and URL queries in free text", () => {
-    const out = scrubText(
-      "failed for jane@example.com, call +66 81 234 5678, id 1-2345-67890-12-3 at https://x.supabase.co/rest/v1/entries?body=ilike.*sad*",
-    );
-    expect(out).not.toContain("jane@example.com");
-    expect(out).not.toContain("234 5678");
-    expect(out).not.toContain("67890");
-    expect(out).not.toContain("sad");
-    expect(out).toContain("[email]");
-    expect(out).toContain("https://x.supabase.co/rest/v1/entries");
-  });
-});
-
 describe("scrubEvent", () => {
-  it("strips request data, user details, extra, spans and unsafe contexts", () => {
-    const event = scrubEvent({
+  const event = () =>
+    scrubEvent({
+      message: `Save failed: ${DIARY}`,
       request: {
-        url: "https://www.moodbow.com/app?q=private",
+        url: `https://www.moodbow.com/app?q=${encodeURIComponent(DIARY)}`,
         method: "POST",
-        data: "my diary entry",
+        data: DIARY,
         headers: { cookie: "sb=1" },
         cookies: { sb: "1" },
       },
-      user: { id: 42, email: "jane@example.com", ip_address: "1.2.3.4" },
-      extra: { body: "my diary entry" },
+      user: { id: "0b9c5f7e-1d2a-4c3b-9e8f-7a6b5c4d3e2f", email: "jane@example.com", ip_address: "1.2.3.4" },
+      extra: { body: DIARY },
+      logentry: { message: "entry %s", params: [DIARY] },
       spans: [{ description: "GET /rest/v1/entries?body=x" }],
       contexts: {
         browser: { name: "Chrome" },
         nextjs: { request_path: "/app?q=private" },
         trace: { trace_id: "t", span_id: "s", data: { url: "https://x?y" } },
       },
-      tags: { url: "https://www.moodbow.com/a?b=c", note: "mail jane@example.com" },
+      tags: { url: "https://www.moodbow.com/a?b=c", runtime: "browser", note: DIARY, handled: "no" },
       exception: {
         values: [
           {
-            value: "Bad input from jane@example.com",
-            stacktrace: { frames: [{ context_line: "save('jane@example.com')", vars: { body: "secret" } }] },
+            type: "TypeError",
+            value: `Cannot read "${DIARY}"`,
+            stacktrace: {
+              frames: [{ filename: "app.js", function: "save", lineno: 3, context_line: `save("${DIARY}")`, pre_context: [DIARY], vars: { body: DIARY } }],
+            },
           },
         ],
       },
+      breadcrumbs: [{ category: "navigation", message: DIARY, data: { from: "/a?x=1", to: "/b#t", note: DIARY } }],
     });
-    expect(event.request).toEqual({ url: "https://www.moodbow.com/app", method: "POST" });
-    expect(event.user).toEqual({ id: "42" });
-    expect("extra" in event).toBe(false);
-    expect("spans" in event).toBe(false);
-    expect(event.contexts).toEqual({ browser: { name: "Chrome" }, trace: { trace_id: "t", span_id: "s" } });
-    expect(event.tags).toEqual({ url: "https://www.moodbow.com/a", note: "mail [email]" });
-    const ex = event.exception.values[0];
-    expect(ex.value).toBe("Bad input from [email]");
-    expect(ex.stacktrace.frames[0]).toEqual({ context_line: "save('[email]')" });
-    expect(JSON.stringify(event)).not.toContain("diary");
+
+  it("no free text survives anywhere", () => {
+    const json = JSON.stringify(event());
+    expect(json).not.toContain("anxious");
+    expect(json).not.toContain("jane@example.com");
+    expect(json).not.toContain("private");
+  });
+
+  it("drops the user entirely, including the internal id", () => {
+    expect("user" in event()).toBe(false);
+  });
+
+  it("keeps structure: exception type, stack frames, route path, method, safe contexts and tags", () => {
+    const e = event();
+    expect(e.message).toBe(REDACTED);
+    expect(e.request).toEqual({ url: "https://www.moodbow.com/app", method: "POST" });
+    expect(e.exception.values[0]).toEqual({
+      type: "TypeError",
+      value: REDACTED,
+      stacktrace: { frames: [{ filename: "app.js", function: "save", lineno: 3 }] },
+    });
+    expect(e.contexts).toEqual({ browser: { name: "Chrome" }, trace: { trace_id: "t", span_id: "s" } });
+    expect(e.tags).toEqual({ url: "https://www.moodbow.com/a", runtime: "browser", handled: "no" });
+    expect(e.breadcrumbs).toEqual([{ category: "navigation", data: { from: "/a", to: "/b" } }]);
+    for (const key of ["extra", "logentry", "spans"]) expect(key in e, key).toBe(false);
   });
 });
 
 describe("scrubBreadcrumb", () => {
   it("drops console output and input breadcrumbs", () => {
-    expect(scrubBreadcrumb({ category: "console", message: "entry text" })).toBeNull();
+    expect(scrubBreadcrumb({ category: "console", message: DIARY })).toBeNull();
     expect(scrubBreadcrumb({ category: "ui.input", message: "textarea" })).toBeNull();
+  });
+
+  it("drops messages (ui.click selectors can contain visible text)", () => {
+    expect(scrubBreadcrumb({ category: "ui.click", message: `button[aria-label="${DIARY}"]`, level: "info" })).toEqual({
+      category: "ui.click",
+      level: "info",
+    });
   });
 
   it("keeps only safe data keys, with URLs cut to their path", () => {
     expect(
       scrubBreadcrumb({
         category: "fetch",
+        type: "http",
         data: { url: "https://x.supabase.co/rest/v1/entries?select=*&body=eq.hi", method: "GET", status_code: 200, request_body: "hi" },
       }),
-    ).toEqual({ category: "fetch", data: { url: "https://x.supabase.co/rest/v1/entries", method: "GET", status_code: 200 } });
+    ).toEqual({ category: "fetch", type: "http", data: { url: "https://x.supabase.co/rest/v1/entries", method: "GET", status_code: 200 } });
   });
 });
