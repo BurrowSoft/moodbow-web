@@ -11,12 +11,48 @@
     "met": false,
     "what": "Me → Delete account (type DELETE, confirm) works in a RELEASED app build and on the live web journal, and deletes every row plus the auth user immediately (M7 + the web Me screen)."
   },
-  "backup-retention-confirmed": {
-    "met": false,
-    "what": "Mobile Dev confirmed in the Supabase dashboard how many days backups are kept (plan + PITR status), and BACKUP_RETENTION_DAYS in src/lib/site.ts holds that number."
+  "backup-retention": {
+    "met": true,
+    "what": "Supabase backups are kept 7 days (decision 44, confirmed by Mobile Dev/Vitor); BACKUP_RETENTION_DAYS in src/lib/site.ts = 7. Deleted data disappears from backups within that window."
   },
   "web-journal-live": {
     "met": false,
     "what": "The signed-in web journal (W0 shell + onboarding + Today, at parity with the released app) is live for users, with Vitor's go. Gates /app, /sign-in, /forgot-password and the \"Continue on the web\" button."
+  },
+  "ai-memory": {
+    "met": false,
+    "what": "The AI memory screen (Me → What Moodbow remembers: see, edit, delete facts) is live on the app and the web (R2)."
+  },
+  "purchases": {
+    "met": false,
+    "what": "AI credit purchases (Google Play / App Store) are live, with the refund rule enforced (R2)."
+  },
+  "appearance-setting": {
+    "met": false,
+    "what": "Me → Appearance (system / light / dark) is live, and the choice is stored in the account settings."
+  },
+  "app-lock": {
+    "met": false,
+    "what": "The app lock (PIN or fingerprint/face, PIN kept only on the device) is in a RELEASED app build (M7). App-only by design: the web has no app lock, so the web side is \"nothing to ship\"."
+  },
+  "share-cards": {
+    "met": false,
+    "what": "Share cards (made on the device, leaving it only when the user shares) are in a RELEASED app build and on the web (M10)."
+  },
+  "ai-live": {
+    "met": false,
+    "what": "AI reflections and reports are switched on for users (the AI flag on, decision D2), with the free Lite allowance enforced server-side."
+  },
+  "starter-credits": {
+    "met": false,
+    "what": "New accounts get starter credits after confirming their email (app_config.starter_credits > 0, enforced server-side)."
+  },
+  "export-live": {
+    "met": false,
+    "what": "Me → Export my data (JSON + readable text, everything the user created) works in a RELEASED app build and on the live web journal (M7)."
+  },
+  "help-now-live": {
+    "met": false,
+    "what": "Me → Get help now (the safety card with local hotlines from the country registry) is in a RELEASED app build and on the live web journal (M7 + M8)."
   }
 }

@@ -30,7 +30,7 @@ export default async function AccountDeletionPage({ params }: PageProps<"/[local
   if (gate === "hidden") notFound();
   const t = await getTranslations("accountDeletion");
   // Text = enforcement: the backups line needs the confirmed number.
-  const backupDays = conditionMet("backup-retention-confirmed") ? BACKUP_RETENTION_DAYS : null;
+  const backupDays = conditionMet("backup-retention") ? BACKUP_RETENTION_DAYS : null;
 
   return (
     <PageShell title={t("title")} draft={gate === "draft"} article>

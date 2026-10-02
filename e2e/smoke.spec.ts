@@ -75,8 +75,8 @@ test.describe("support", () => {
 
 test.describe("gated pages render as drafts outside Production", () => {
   for (const [path, heading] of [
-    ["/privacy", "Privacy policy"],
-    ["/terms", "Terms of use"],
+    ["/privacy", "Moodbow Privacy Policy"],
+    ["/terms", "Moodbow Terms of Use"],
     ["/account-deletion", "Delete your Moodbow account"],
   ] as const) {
     test(path, async ({ page }) => {
@@ -88,6 +88,25 @@ test.describe("gated pages render as drafts outside Production", () => {
     });
   }
 
+  test("legal drafts: the real text, unmet pending blocks only in the draft panel, no to-confirm marks left", async ({ page }) => {
+    await page.goto("/privacy");
+    const article = page.locator('[data-content="article"]');
+    await expect(article.getByRole("heading", { level: 2, name: "The short version" })).toBeVisible();
+    await expect(article.getByText("Last updated: 2 October 2026")).toBeVisible();
+    await expect(article).not.toContainText("Google Play, Apple App Store");
+    await expect(article).toContainText("disappear automatically within 7 days");
+    // AI is off: no line may point at a Me → AI screen (decision 69).
+    await expect(article).not.toContainText("Me → AI");
+    await expect(article).not.toContainText("app lock");
+    // UX resolved every to-confirm mark (decision 67).
+    await expect(article.locator("mark.legal-todo")).toHaveCount(0);
+    const panel = page.getByTestId("legal-hidden");
+    await expect(panel).toContainText("purchases");
+    await expect(article.getByTestId("legal-hidden")).toHaveCount(0);
+    await page.goto("/terms");
+    await expect(page.locator('[data-content="article"]')).not.toContainText("AI credits");
+  });
+
   test("gated pages are not linked from the footer", async ({ page }) => {
     await page.goto("/");
     const footer = page.getByRole("contentinfo");
@@ -97,11 +116,11 @@ test.describe("gated pages render as drafts outside Production", () => {
     }
   });
 
-  test("account deletion: the PM's copy, support email, no backups line yet", async ({ page }) => {
+  test("account deletion: the PM's copy, support email, the 7-day backups line (decision 44)", async ({ page }) => {
     await page.goto("/account-deletion");
     await expect(page.getByText("In the app or on the web: open Me → Delete account, type DELETE, and confirm.")).toBeVisible();
     await expect(page.getByRole("link", { name: "support@moodbow.com" })).toHaveAttribute("href", "mailto:support@moodbow.com");
-    await expect(page.getByTestId("backups-line")).toHaveCount(0);
+    await expect(page.getByTestId("backups-line")).toHaveText("Copies in our encrypted backups are removed automatically within 7 days.");
   });
 });
 
