@@ -1,9 +1,11 @@
 import { defineRouting } from "next-intl/routing";
 
-// English at /, Thai at /th. More languages are added here and in
-// src/messages (every key in every file; src/messages.test.ts checks it).
+// English only for the beta (decision #32). Adding a language later
+// (th, es, pt-BR, fr, de) = add it here + src/messages/<locale>.json with every
+// key (src/messages/messages.test.ts checks parity); English stays at /, the
+// others get a /<locale> prefix.
 export const routing = defineRouting({
-  locales: ["en", "th"],
+  locales: ["en"],
   defaultLocale: "en",
   localePrefix: "as-needed",
 });

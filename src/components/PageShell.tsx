@@ -6,12 +6,16 @@ type Props = {
   title: string;
   // A draft page (condition not met, outside Production) shows a banner.
   draft?: boolean;
+  // Long-form bodies (legal, account deletion, Help articles) are marked
+  // data-content="article" so the tester's strings check can tell them
+  // from UI chrome.
+  article?: boolean;
   children: React.ReactNode;
 };
 
 // Layout for the inner pages: the horizontal logo linking home, an optional
 // draft banner, and a readable text column.
-export async function PageShell({ title, draft = false, children }: Props) {
+export async function PageShell({ title, draft = false, article = false, children }: Props) {
   const t = await getTranslations("common");
   return (
     <>
@@ -30,7 +34,7 @@ export async function PageShell({ title, draft = false, children }: Props) {
       <main id="main" className="flex-1 px-6 py-10">
         <article className="mx-auto max-w-2xl">
           <h1 className="text-balance text-3xl font-medium tracking-tight sm:text-4xl">{title}</h1>
-          <div className="mt-6 space-y-5 text-base leading-relaxed text-muted sm:text-[17px]">{children}</div>
+          <div data-content={article ? "article" : undefined} className="mt-6 space-y-5 text-base leading-relaxed text-muted sm:text-[17px]">{children}</div>
         </article>
       </main>
     </>

@@ -18,7 +18,7 @@ export async function LegalSkeleton({ namespace, gate, sections }: Props) {
   const t = await getTranslations(namespace);
 
   return (
-    <PageShell title={t("title")} draft={state === "draft"}>
+    <PageShell title={t("title")} draft={state === "draft"} article>
       {sections.map((key) => (
         <section key={key} className="pt-2">
           <h2 className="text-xl font-medium text-text">{t(key)}</h2>

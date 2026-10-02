@@ -10,6 +10,8 @@ export function LanguageSwitcher() {
   const t = useTranslations("common");
   const locale = useLocale();
   const pathname = usePathname();
+  // Nothing to switch between while only one language ships.
+  if (routing.locales.length < 2) return null;
 
   return (
     <nav aria-label={t("language")} className="flex items-center gap-1">

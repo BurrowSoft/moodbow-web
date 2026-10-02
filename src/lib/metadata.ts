@@ -22,6 +22,9 @@ export function languageAlternates(path: string): Record<string, string> {
   return languages;
 }
 
+// Open Graph locale codes for the languages we may ship.
+const OG_LOCALES: Record<string, string> = { en: "en_US", th: "th_TH", es: "es_ES", "pt-BR": "pt_BR", fr: "fr_FR", de: "de_DE" };
+
 type PageMetaInput = {
   locale: Locale;
   path: string;
@@ -33,7 +36,7 @@ type PageMetaInput = {
 
 export async function pageMetadata({ locale, path, title, description, noindex }: PageMetaInput): Promise<Metadata> {
   const t = await getTranslations({ locale, namespace: "meta" });
-  const fullTitle = title ? `${title} · Moodbow` : t("title");
+  const fullTitle = title ? t("pageTitle", { title }) : t("title");
   const desc = description ?? t("description");
   const url = absoluteUrl(locale, path);
   return {
@@ -42,11 +45,11 @@ export async function pageMetadata({ locale, path, title, description, noindex }
     alternates: { canonical: url, languages: languageAlternates(path) },
     openGraph: {
       type: "website",
-      siteName: "Moodbow",
+      siteName: t("siteName"),
       url,
       title: fullTitle,
       description: title ? desc : t("ogDescription"),
-      locale: locale === "th" ? "th_TH" : "en_US",
+      locale: OG_LOCALES[locale] ?? "en_US",
       images: [{ url: `${SITE_URL}/og-image.png`, width: 1200, height: 630, alt: t("ogImageAlt") }],
     },
     twitter: {

@@ -9,12 +9,13 @@ type Props = {
   variant: keyof typeof VARIANTS;
   // Rendered width in px; the height follows the SVG's aspect ratio.
   width: number;
-  // Empty when the logo sits inside a link that already has a label.
-  alt?: string;
+  // From messages (common.logoAlt); empty when the logo sits inside a link
+  // that already has a label.
+  alt: string;
   priority?: boolean;
 };
 
-export function Logo({ variant, width, alt = "Moodbow", priority = false }: Props) {
+export function Logo({ variant, width, alt, priority = false }: Props) {
   const size = VARIANTS[variant];
   const height = Math.round((width * size.height) / size.width);
   return (

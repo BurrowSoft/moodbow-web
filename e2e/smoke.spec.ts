@@ -24,24 +24,17 @@ test.describe("home", () => {
     await expect(page.getByText(/\bAI\b/)).toHaveCount(0);
   });
 
-  test("Thai at /th", async ({ page }) => {
-    await page.goto("/th");
-    await expect(page.locator("html")).toHaveAttribute("lang", "th");
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("ไดอารี่ที่เรียนรู้เรื่องราวของคุณ");
-    await expect(page.getByText("เร็วๆ นี้", { exact: true })).toBeVisible();
-    await expect(page.getByRole("heading", { level: 2, name: "เห็นรูปแบบของตัวเอง" })).toBeVisible();
-  });
-
   test("SEO tags use the www canonical host", async ({ page }) => {
     await page.goto("/");
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", CANONICAL);
     await expect(page.locator('meta[property="og:url"]')).toHaveAttribute("content", CANONICAL);
     await expect(page.locator('meta[property="og:image"]')).toHaveAttribute("content", `${CANONICAL}/og-image.png`);
     await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute("content", "summary_large_image");
-    await expect(page.locator('link[rel="alternate"][hreflang="th"]')).toHaveAttribute("href", `${CANONICAL}/th`);
+    await expect(page.locator('link[rel="alternate"][hreflang="en"]')).toHaveAttribute("href", CANONICAL);
     await expect(page.locator('link[rel="alternate"][hreflang="x-default"]')).toHaveAttribute("href", CANONICAL);
-    await page.goto("/th");
-    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", `${CANONICAL}/th`);
+    await expect(page.locator('link[rel="alternate"][hreflang="th"]')).toHaveCount(0);
+    await page.goto("/support");
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", `${CANONICAL}/support`);
   });
 
   test("the og image and icons are served", async ({ request }) => {
@@ -51,26 +44,21 @@ test.describe("home", () => {
   });
 });
 
-test.describe("language", () => {
-  test("a Thai browser is sent to /th on its first visit", async ({ browser }) => {
+test.describe("language (English-only beta)", () => {
+  test("a Thai browser stays on English at /", async ({ browser }) => {
     const context = await browser.newContext({ locale: "th-TH" });
     const page = await context.newPage();
     await page.goto("/");
-    await expect(page).toHaveURL(/\/th$/);
+    await expect(page).toHaveURL(/\/$/);
+    await expect(page.locator("html")).toHaveAttribute("lang", "en");
     await context.close();
   });
 
-  test("the switcher changes language and the choice sticks", async ({ page }) => {
-    await page.goto("/support");
-    await page.getByRole("navigation", { name: "Language" }).getByRole("link", { name: "ไทย" }).click();
-    await expect(page).toHaveURL(/\/th\/support$/);
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("ช่วยเหลือ");
+  test("/th is not a route yet, and there is no language switcher", async ({ page }) => {
+    const res = await page.goto("/th");
+    expect(res?.status()).toBe(404);
     await page.goto("/");
-    await expect(page).toHaveURL(/\/th$/);
-    await page.getByRole("navigation", { name: "ภาษา" }).getByRole("link", { name: "English" }).click();
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("A journal that learns your story.");
-    await page.goto("/");
-    await expect(page.locator("html")).toHaveAttribute("lang", "en");
+    await expect(page.getByRole("navigation", { name: "Language" })).toHaveCount(0);
   });
 });
 
@@ -79,6 +67,7 @@ test.describe("support", () => {
     await page.goto("/support");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Support");
     await expect(page.getByRole("link", { name: "support@burrowsoft.com" })).toHaveAttribute("href", "mailto:support@burrowsoft.com");
+    await expect(page.getByText("Email: support@burrowsoft.com")).toBeVisible();
   });
 });
 
@@ -87,12 +76,12 @@ test.describe("gated pages render as drafts outside Production", () => {
     ["/privacy", "Privacy policy"],
     ["/terms", "Terms of use"],
     ["/account-deletion", "Delete your Moodbow account"],
-    ["/th/account-deletion", "ลบบัญชี Moodbow ของคุณ"],
   ] as const) {
     test(path, async ({ page }) => {
       await page.goto(path);
       await expect(page.getByRole("heading", { level: 1 })).toHaveText(heading);
       await expect(page.getByTestId("draft-banner")).toBeVisible();
+      await expect(page.locator('[data-content="article"]')).toHaveCount(1);
       await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex, nofollow");
     });
   }
@@ -124,9 +113,10 @@ test.describe("email confirmed", () => {
   });
 
   test("an expired link shows the error and the token is removed from the URL", async ({ page }) => {
-    await page.goto("/th/email-confirmed?code=abc#error=access_denied&error_code=otp_expired&error_description=expired");
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("ลิงก์นี้หมดอายุหรือถูกใช้ไปแล้ว");
-    await expect(page).toHaveURL(/\/th\/email-confirmed$/);
+    await page.goto("/email-confirmed?code=abc#error=access_denied&error_code=otp_expired&error_description=expired");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("This link has expired or was already used.");
+    await expect(page.getByText("Open Moodbow and ask for a new one.")).toBeVisible();
+    await expect(page).toHaveURL(/\/email-confirmed$/);
   });
 
   test("a successful link with tokens is cleaned too", async ({ page }) => {
@@ -144,6 +134,13 @@ test.describe("static files", () => {
     expect(await res.json()).toEqual([]);
   });
 
+  test("apple-app-site-association is JSON with no app claims yet, and not redirected", async ({ request }) => {
+    const res = await request.get("/.well-known/apple-app-site-association", { maxRedirects: 0 });
+    expect(res.status()).toBe(200);
+    expect(res.headers()["content-type"]).toContain("application/json");
+    expect(await res.json()).toEqual({ applinks: { details: [] } });
+  });
+
   test("robots.txt points to the sitemap", async ({ request }) => {
     const res = await request.get("/robots.txt");
     expect(res.status()).toBe(200);
@@ -157,15 +154,15 @@ test.describe("static files", () => {
     expect(res.status()).toBe(200);
     const body = await res.text();
     expect(body).toContain(`<loc>${CANONICAL}/</loc>`);
-    expect(body).toContain(`<loc>${CANONICAL}/th/support</loc>`);
-    for (const hidden of ["privacy", "terms", "account-deletion", "email-confirmed"]) {
+    expect(body).toContain(`<loc>${CANONICAL}/support</loc>`);
+    for (const hidden of ["privacy", "terms", "account-deletion", "email-confirmed", "/th"]) {
       expect(body, hidden).not.toContain(hidden);
     }
   });
 });
 
-test("unknown pages are a localized 404", async ({ page }) => {
-  const res = await page.goto("/th/no-such-page");
+test("unknown pages are a 404 with the site's not-found page", async ({ page }) => {
+  const res = await page.goto("/no-such-page");
   expect(res?.status()).toBe(404);
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText("ไม่พบหน้านี้");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Page not found");
 });

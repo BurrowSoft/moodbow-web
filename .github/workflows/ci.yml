@@ -3,14 +3,14 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [master]
 
 permissions:
   contents: read
 
 concurrency:
   # PR runs share a group per branch, so a new push cancels the superseded
-  # run. main runs are grouped per commit so queued merges aren't dropped.
+  # run. master runs are grouped per commit so queued merges aren't dropped.
   group: ci-${{ github.event_name == 'pull_request' && github.ref || github.sha }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 

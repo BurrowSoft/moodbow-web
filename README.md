@@ -31,15 +31,20 @@ Run the smoke tests against a Vercel Preview with
 `E2E_BASE_URL=https://<preview-url> npm run test:e2e`. When Deployment Protection is on, also set
 `VERCEL_AUTOMATION_BYPASS_SECRET` in your shell; never commit it.
 
-## Languages
+## Languages and text
 
-English at `/`, Thai at `/th` (`src/i18n/routing.ts`). Every string lives in `src/messages/<locale>.json`,
-and every key must exist in every file. `src/messages/messages.test.ts` checks keys, ICU syntax and
-placeholders. To add a language, add it to `routing.locales` and add its message file.
-A Thai browser is sent to `/th` on its first visit. The footer's language switcher remembers the choice
-in the `NEXT_LOCALE` cookie.
+The beta ships in **English only**, at `/`. **No hard-coded user-facing text:** every visible string,
+alt text, aria label, title and placeholder, plus metadata, Open Graph tags and the manifest, comes from
+`src/messages/en.json` through next-intl. `npm run lint` fails on literal JSX text and on literal
+user-facing attributes (`eslint.config.mjs`). Long-form bodies (legal, help) sit inside an element
+with `data-content="article"`.
 
-Fonts: Poppins (Latin) with Prompt for Thai glyphs, self-hosted by `next/font`.
+Adding languages (th, es, pt-BR, fr, de) is planned as one localization PR: add each to
+`routing.locales` (`src/i18n/routing.ts`) and add `src/messages/<locale>.json` with every key
+(`src/messages/messages.test.ts` checks key, ICU and placeholder parity). Non-English locales get a
+`/<locale>` prefix, and the footer's language switcher appears once there are two or more.
+
+Fonts: Poppins (Latin), with Prompt ready for Thai glyphs (not preloaded), self-hosted by `next/font`.
 
 ## Pages
 
@@ -51,6 +56,7 @@ Fonts: Poppins (Latin) with Prompt for Thai glyphs, self-hosted by `next/font`.
 | `/account-deletion` | Google Play's account-deletion URL | `delete-account-live` (+ `backup-retention-confirmed` for the backups line) |
 | `/email-confirmed` | Where Supabase confirm links land; strips tokens from the URL; noindex | — |
 | `/.well-known/assetlinks.json` | Android App Links (empty until the app's signing fingerprints exist) | — |
+| `/.well-known/apple-app-site-association` | iOS Universal Links (no claims until the iOS app, R2); served as JSON | — |
 | `/robots.txt`, `/sitemap.xml`, `/manifest.webmanifest` | Generated from `src/app/*.ts` | — |
 
 ### Text = enforcement: conditions and flags
@@ -74,9 +80,9 @@ types may reach Sentry.
 
 ## Deploy (Vercel)
 
-The Vercel project is connected to this repo: `main` deploys to Production, and every other branch gets
-a Preview. `vercel.json` sets the framework to Next.js; the dashboard's build settings stay on their
-defaults.
+The Vercel project is connected to this repo: `master` deploys to Production, and every other branch gets
+a Preview. `vercel.json` sets the framework and the install/build/output commands, which take precedence
+over the dashboard's build settings.
 
 Canonical host: **www.moodbow.com**. `moodbow.com` redirects to it (308, Vercel → Domains), and canonical
 URLs, Open Graph tags and the sitemap use www (`SITE_URL` in `src/lib/site.ts`).

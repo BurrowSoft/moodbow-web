@@ -22,10 +22,14 @@ export default async function SupportPage({ params }: PageProps<"/[locale]/suppo
     <PageShell title={t("title")}>
       <p>{t("body")}</p>
       <p>
-        {t("emailLabel")}:{" "}
-        <a href={`mailto:${SUPPORT_EMAIL}`} className="font-medium text-accent underline underline-offset-4">
-          {SUPPORT_EMAIL}
-        </a>
+        {t.rich("emailLine", {
+          email: SUPPORT_EMAIL,
+          link: (chunks) => (
+            <a href={`mailto:${SUPPORT_EMAIL}`} className="font-medium text-accent underline underline-offset-4">
+              {chunks}
+            </a>
+          ),
+        })}
       </p>
       {conditionMet("delete-account-live") && (
         <p>

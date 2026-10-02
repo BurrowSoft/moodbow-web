@@ -1,11 +1,15 @@
 import type { MetadataRoute } from "next";
+import { getTranslations } from "next-intl/server";
+import { routing } from "@/i18n/routing";
 
-// Carried over from the Flutter site's web/manifest.json.
-export default function manifest(): MetadataRoute.Manifest {
+// Carried over from the Flutter site's web/manifest.json. The manifest has
+// one language: the default locale's.
+export default async function manifest(): Promise<MetadataRoute.Manifest> {
+  const t = await getTranslations({ locale: routing.defaultLocale, namespace: "meta" });
   return {
-    name: "Moodbow",
-    short_name: "Moodbow",
-    description: "A journal that learns your story.",
+    name: t("siteName"),
+    short_name: t("siteName"),
+    description: t("manifestDescription"),
     start_url: "/",
     display: "standalone",
     background_color: "#FBF6F1",

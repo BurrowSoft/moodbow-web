@@ -22,12 +22,13 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
   const { locale } = await params;
   setRequestLocale(locale as Locale);
   const t = await getTranslations("home");
+  const tc = await getTranslations("common");
 
   return (
     <main id="main" className="flex flex-1 flex-col items-center px-6 sm:px-8">
       <section className="flex w-full max-w-[560px] flex-col items-center py-12 text-center sm:py-16">
         <div className="w-[120px] sm:w-[160px]">
-          <Logo variant="stacked" width={160} priority />
+          <Logo variant="stacked" width={160} alt={tc("logoAlt")} priority />
         </div>
         <p className="mt-8 rounded-full bg-pill px-3.5 py-1.5 text-[13px] font-medium tracking-wide text-accent">
           {t("comingSoon")}

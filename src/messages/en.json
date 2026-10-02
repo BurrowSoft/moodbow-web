@@ -1,18 +1,21 @@
 {
   "meta": {
+    "siteName": "Moodbow",
     "title": "Moodbow — A journal that learns your story",
+    "pageTitle": "{title} · Moodbow",
     "description": "Moodbow is a private journal that helps you notice patterns in your mood, sleep and habits over time. Coming soon from BurrowSoft.",
     "ogDescription": "A private journal that helps you notice patterns in your mood, sleep and habits over time. Coming soon.",
-    "ogImageAlt": "Moodbow logo with the text: Coming soon. A journal that learns your story."
+    "ogImageAlt": "Moodbow logo with the text: Coming soon. A journal that learns your story.",
+    "manifestDescription": "A journal that learns your story."
   },
   "common": {
+    "logoAlt": "Moodbow",
     "skipToContent": "Skip to content",
     "homeAria": "Moodbow home",
     "language": "Language",
     "siteLinks": "Site links",
     "languageNames": {
-      "en": "English",
-      "th": "ไทย"
+      "en": "English"
     },
     "burrowsoftProduct": "A BurrowSoft product",
     "burrowsoftAria": "A BurrowSoft product. Visit burrowsoft.com",
@@ -41,8 +44,8 @@
     "title": "Support",
     "description": "Get help with Moodbow: email us with questions, problems or ideas.",
     "body": "Questions, problems or ideas? Email us and we'll get back to you.",
-    "emailLabel": "Email",
-    "deleteLink": "How to delete your account"
+    "deleteLink": "How to delete your account",
+    "emailLine": "Email: <link>{email}</link>"
   },
   "accountDeletion": {
     "title": "Delete your Moodbow account",

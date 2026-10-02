@@ -33,7 +33,7 @@ export default async function AccountDeletionPage({ params }: PageProps<"/[local
   const backupDays = conditionMet("backup-retention-confirmed") ? BACKUP_RETENTION_DAYS : null;
 
   return (
-    <PageShell title={t("title")} draft={gate === "draft"}>
+    <PageShell title={t("title")} draft={gate === "draft"} article>
       <p>{t("intro")}</p>
       <p className="rounded-2xl border border-border bg-surface px-5 py-4 font-medium text-text">{t("steps")}</p>
       <p>{t("what")}</p>

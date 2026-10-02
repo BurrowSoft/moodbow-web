@@ -2,9 +2,10 @@ import { describe, expect, it } from "vitest";
 import { IntlMessageFormat } from "intl-messageformat";
 import { routing } from "@/i18n/routing";
 import en from "./en.json";
-import th from "./th.json";
 
-const FILES: Record<string, unknown> = { en, th };
+// One entry per shipped locale (English only for the beta; the localization
+// PR adds th, es, pt-BR, fr, de here and in routing.locales).
+const FILES: Record<string, unknown> = { en };
 
 // "a.b.c" → string, for every leaf.
 function flatten(obj: unknown, prefix = ""): Record<string, unknown> {
@@ -52,11 +53,4 @@ describe("message files", () => {
       }
     });
   }
-
-  it("th really is Thai where it should be", () => {
-    // Guards against an English string pasted into th.json.
-    expect(th.home.tagline).toMatch(/[฀-๿]/);
-    expect(th.accountDeletion.intro).toMatch(/[฀-๿]/);
-    expect(th.emailConfirmed.successTitle).toMatch(/[฀-๿]/);
-  });
 });

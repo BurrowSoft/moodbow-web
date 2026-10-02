@@ -11,18 +11,24 @@ export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
 
-export const metadata: Metadata = {
-  metadataBase: new URL(SITE_URL),
-  applicationName: "Moodbow",
-  appleWebApp: { title: "Moodbow" },
-  icons: {
-    icon: [
-      { url: "/favicon.ico", sizes: "any" },
-      { url: "/favicon.svg", type: "image/svg+xml" },
-      { url: "/favicon-32.png", type: "image/png", sizes: "32x32" },
-    ],
-    apple: "/apple-touch-icon.png",
-  },
+export async function generateMetadata({ params }: LayoutProps<"/[locale]">): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "meta" });
+  return {
+    metadataBase: new URL(SITE_URL),
+    applicationName: t("siteName"),
+    appleWebApp: { title: t("siteName") },
+    icons: ICONS,
+  };
+}
+
+const ICONS: Metadata["icons"] = {
+  icon: [
+    { url: "/favicon.ico", sizes: "any" },
+    { url: "/favicon.svg", type: "image/svg+xml" },
+    { url: "/favicon-32.png", type: "image/png", sizes: "32x32" },
+  ],
+  apple: "/apple-touch-icon.png",
 };
 
 export const viewport: Viewport = {

@@ -15,6 +15,9 @@ export const prompt = Prompt({
   weight: ["400", "500"],
   variable: "--font-prompt",
   display: "swap",
+  // No Thai pages ship yet (English-only beta), so don't preload it; its
+  // unicode-range keeps it from downloading until Thai text appears.
+  preload: false,
 });
 
 export const fontVariables = `${poppins.variable} ${prompt.variable}`;
