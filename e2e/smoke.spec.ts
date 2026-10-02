@@ -1,9 +1,9 @@
 import { expect, test } from "@playwright/test";
 
-// Smoke tests for the public site. They run against a build without
-// NEXT_PUBLIC_VERCEL_ENV=production (local, CI, a Preview), where gated
-// pages render as drafts. Production's 404s for gated pages are pinned by
-// the pageGate unit tests.
+// Smoke tests for the public site. They expect a test build, where gated
+// pages render as drafts: a Vercel Preview, or a local/CI build made with
+// NEXT_PUBLIC_SHOW_DRAFTS=1 npm run build. Everywhere else gated pages are
+// 404s (fail closed), pinned by the pageGate unit tests.
 
 const CANONICAL = "https://www.moodbow.com";
 
@@ -16,7 +16,9 @@ test.describe("home", () => {
     await expect(page.getByText("Coming soon", { exact: true })).toBeVisible();
     const notify = page.getByRole("link", { name: "Get notified by email when Moodbow launches" });
     await expect(notify).toHaveAttribute("href", "mailto:support@burrowsoft.com?subject=Notify%20me%20about%20Moodbow");
-    for (const title of ["A journal that learns your story", "See your patterns", "Private, and yours"]) {
+    await expect(page.getByText("Email us and we'll let you know when it's ready.")).toBeVisible();
+    await expect(page.getByText("We'll email you once", { exact: false })).toHaveCount(0);
+    for (const title of ["Seconds a day", "See your patterns", "Private, and yours"]) {
       await expect(page.getByRole("heading", { level: 2, name: title })).toBeVisible();
     }
     // welcome3BodyNoAi: no AI claim while AI isn't live.

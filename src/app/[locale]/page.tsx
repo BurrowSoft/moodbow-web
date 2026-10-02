@@ -3,14 +3,15 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 import { Logo } from "@/components/Logo";
 import { pageMetadata } from "@/lib/metadata";
-import { NOTIFY_MAILTO } from "@/lib/site";
+import { notifyMailto } from "@/lib/site";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]">): Promise<Metadata> {
   const { locale } = await params;
   return pageMetadata({ locale: locale as Locale, path: "/" });
 }
 
-// Feature blocks: the app's welcome slides 1–3 (r1-screens-and-copy.md),
+// Feature blocks: the app's welcome slides 1–3 (r1-screens-and-copy.md; card 1
+// is titled "Seconds a day" so it doesn't repeat the h1),
 // with welcome3BodyNoAi until AI claims are live. Each gets one brand colour.
 const FEATURES = [
   { n: 1, color: "text-peach", icon: <PenIcon /> },
@@ -36,7 +37,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
         <h1 className="mt-5 text-balance text-[28px] font-medium leading-tight tracking-tight sm:text-4xl">{t("tagline")}</h1>
         <p className="mt-4 text-base leading-relaxed text-muted sm:text-[17px]">{t("intro")}</p>
         <a
-          href={NOTIFY_MAILTO}
+          href={notifyMailto(t("notifySubject"))}
           aria-label={t("notifyAria")}
           className="mt-9 inline-flex min-h-[52px] min-w-[200px] items-center justify-center rounded-full bg-accent px-8 py-3.5 text-base font-medium text-on-accent transition-opacity hover:opacity-90"
         >

@@ -5,7 +5,10 @@ export const SITE_URL = "https://www.moodbow.com";
 // Until a moodbow.com mailbox exists (Vitor), support goes to BurrowSoft's.
 export const SUPPORT_EMAIL = "support@burrowsoft.com";
 
-export const NOTIFY_MAILTO = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent("Notify me about Moodbow")}`;
+// The subject is copy, so it comes from messages (home.notifySubject).
+export function notifyMailto(subject: string): string {
+  return `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(subject)}`;
+}
 
 export const BURROWSOFT_URL = "https://www.burrowsoft.com";
 

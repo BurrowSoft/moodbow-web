@@ -22,9 +22,9 @@ export async function generateMetadata({ params }: LayoutProps<"/[locale]">): Pr
   };
 }
 
+// /favicon.ico comes from src/app/favicon.ico, which Next links itself.
 const ICONS: Metadata["icons"] = {
   icon: [
-    { url: "/favicon.ico", sizes: "any" },
     { url: "/favicon.svg", type: "image/svg+xml" },
     { url: "/favicon-32.png", type: "image/png", sizes: "32x32" },
   ],

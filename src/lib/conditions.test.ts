@@ -24,15 +24,26 @@ describe("conditions", () => {
   });
 });
 
-describe("pageGate", () => {
-  it("unmet pages are 404 on Production", () => {
-    expect(pageGate("privacy-text-approved", "production")).toBe("hidden");
+describe("pageGate (fails closed)", () => {
+  const gate = (build: Parameters<typeof pageGate>[1]) => pageGate("privacy-text-approved", build);
+
+  it("unmet pages are 404 on Production, even with the drafts flag or in dev mode", () => {
+    expect(gate({ vercelEnv: "production" })).toBe("hidden");
+    expect(gate({ vercelEnv: "production", showDrafts: "1", nodeEnv: "development" })).toBe("hidden");
   });
 
-  it("unmet pages are drafts on Preview, locally and in CI", () => {
-    expect(pageGate("privacy-text-approved", "preview")).toBe("draft");
-    expect(pageGate("privacy-text-approved", "development")).toBe("draft");
-    expect(pageGate("privacy-text-approved", undefined)).toBe("draft");
+  it("unmet pages are 404 when the environment is unset or unknown", () => {
+    expect(gate({})).toBe("hidden");
+    expect(gate({ nodeEnv: "production" })).toBe("hidden");
+    expect(gate({ vercelEnv: "staging" })).toBe("hidden");
+    expect(gate({ showDrafts: "true" })).toBe("hidden");
+  });
+
+  it("unmet pages are drafts only on known test builds", () => {
+    expect(gate({ vercelEnv: "preview" })).toBe("draft");
+    expect(gate({ vercelEnv: "development" })).toBe("draft");
+    expect(gate({ nodeEnv: "development" })).toBe("draft");
+    expect(gate({ nodeEnv: "production", showDrafts: "1" })).toBe("draft");
   });
 });
 

@@ -48,9 +48,12 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      # No NEXT_PUBLIC_VERCEL_ENV here, so gated pages build as drafts (the
-      # smoke tests expect that); no Sentry DSN, so Sentry stays off.
+      # Gated pages fail closed (404) unless the build is explicitly a test
+      # build; the smoke tests check the drafts, so opt in. No Sentry DSN, so
+      # Sentry stays off.
       - run: npm run build
+        env:
+          NEXT_PUBLIC_SHOW_DRAFTS: "1"
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
       - if: failure()

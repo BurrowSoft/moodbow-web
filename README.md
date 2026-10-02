@@ -23,7 +23,7 @@ No env vars are needed locally. See `.env.example` for the names Vercel uses.
 npm run typecheck      # next typegen && tsc --noEmit
 npm run lint
 npm test               # vitest: message parity, conditions, Sentry scrubber, helpers
-npm run build
+NEXT_PUBLIC_SHOW_DRAFTS=1 npm run build   # a test build: gated pages render as drafts
 npm run test:e2e       # Playwright smoke against `npm run start` (build first)
 ```
 
@@ -62,8 +62,9 @@ Fonts: Poppins (Latin), with Prompt ready for Thai glyphs (not preloaded), self-
 ### Text = enforcement: conditions and flags
 
 - `content/conditions.json`: "is it true yet?" facts, read through `conditionMet(id)`.
-  A page gated on an unmet condition is a **404 on Production**, and a **draft** (banner + noindex) on
-  Previews, locally and in CI, so it can be reviewed (`pageGate` in `src/lib/conditions.ts`). Gated pages
+  A page gated on an unmet condition is a **404** unless the build is explicitly a test build (Vercel
+  Preview, `next dev`, or `NEXT_PUBLIC_SHOW_DRAFTS=1` as in CI), where it is a **draft** (banner + noindex)
+  so it can be reviewed. It fails closed: an unset environment hides it (`pageGate` in `src/lib/conditions.ts`). Gated pages
   are linked from the footer and listed in the sitemap only once their condition is met.
 - `src/lib/liveFeatures.ts`: what public pages may claim or link to (e.g. `webJournal`).
 
