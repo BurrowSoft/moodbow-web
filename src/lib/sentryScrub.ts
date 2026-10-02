@@ -19,7 +19,9 @@ type ScrubbableEvent = {
   user?: unknown;
   extra?: unknown;
   message?: string;
-  exception?: { values?: { type?: string; value?: string; stacktrace?: { frames?: StackFrame[] } }[] };
+  exception?: {
+    values?: { type?: string; value?: string; mechanism?: { data?: unknown; [key: string]: unknown }; stacktrace?: { frames?: StackFrame[] } }[];
+  };
   transaction?: string;
   breadcrumbs?: Breadcrumb[];
   contexts?: Record<string, Record<string, unknown> | undefined>;
@@ -80,6 +82,8 @@ export function scrubEvent<T extends object>(input: T): T {
   if (event.message) event.message = REDACTED;
   for (const ex of event.exception?.values ?? []) {
     if (ex.value) ex.value = REDACTED;
+    // Mechanism data can hold handler arguments (e.g. an event target's text).
+    if (ex.mechanism) delete ex.mechanism.data;
     for (const frame of ex.stacktrace?.frames ?? []) {
       delete frame.context_line;
       delete frame.pre_context;

@@ -23,6 +23,9 @@ export const sentryOptions = {
   environment: process.env.NEXT_PUBLIC_VERCEL_ENV ?? process.env.VERCEL_ENV ?? "development",
   // No performance tracing: spans carry full URLs. Errors only.
   tracesSampleRate: 0,
+  // v11 streams spans by default, which skips beforeSendTransaction. Keep
+  // the static lifecycle so anything span-shaped still passes the scrubber.
+  traceLifecycle: "static",
   beforeSend: (event) => scrubEvent(event),
   beforeSendTransaction: (event) => scrubEvent(event),
   beforeBreadcrumb: (crumb) => scrubBreadcrumb(crumb),

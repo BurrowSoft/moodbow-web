@@ -43,6 +43,7 @@ describe("scrubEvent", () => {
           {
             type: "TypeError",
             value: `Cannot read "${DIARY}"`,
+            mechanism: { type: "onerror", handled: false, data: { target: DIARY } },
             stacktrace: {
               frames: [{ filename: "app.js", function: "save", lineno: 3, context_line: `save("${DIARY}")`, pre_context: [DIARY], vars: { body: DIARY } }],
             },
@@ -70,6 +71,7 @@ describe("scrubEvent", () => {
     expect(e.exception.values[0]).toEqual({
       type: "TypeError",
       value: REDACTED,
+      mechanism: { type: "onerror", handled: false },
       stacktrace: { frames: [{ filename: "app.js", function: "save", lineno: 3 }] },
     });
     expect(e.contexts).toEqual({ browser: { name: "Chrome" }, trace: { trace_id: "t", span_id: "s" } });

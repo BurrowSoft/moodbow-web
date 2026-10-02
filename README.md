@@ -79,6 +79,9 @@ breadcrumb passes through `src/lib/sentryScrub.ts`. All free text is dropped: me
 source lines, breadcrumb messages, log entries, and free-form tags. The user is dropped, including the internal
 id, and URLs are cut to their path. What stays is structure (exception type, stack, route, browser/OS, release).
 The privacy policy promises this ("we remove any text you've written"), so keep it that way.
+No release-health sessions (their envelopes carry the user id and bypass `beforeSend`): the browser drops
+the BrowserSession integration and Node rebuilds Http with `sessions: false` (`src/lib/sentrySessions.ts`).
+Lint bans `Sentry.setUser/setTag/setContext/setExtra` everywhere in `src`; `src/lint.test.ts` pins the rules.
 
 ## Deploy (Vercel)
 

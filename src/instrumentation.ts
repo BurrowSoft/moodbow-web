@@ -1,12 +1,22 @@
 import * as Sentry from "@sentry/nextjs";
 import { sentryOptions } from "./sentry.shared";
+import { withoutServerSessions } from "./lib/sentrySessions";
 
 // Server-side Sentry (Node and Edge runtimes). Vercel provides
 // NEXT_PUBLIC_SENTRY_DSN; SENTRY_DSN is the name used in local .env files.
 export async function register() {
   const dsn = process.env.NEXT_PUBLIC_SENTRY_DSN ?? process.env.SENTRY_DSN;
   if (!dsn) return;
-  if (process.env.NEXT_RUNTIME === "nodejs" || process.env.NEXT_RUNTIME === "edge") {
+  if (process.env.NEXT_RUNTIME === "nodejs") {
+    // Node only (the Edge bundle can't load @sentry/node): rebuild the Http
+    // integration without request sessions (see lib/sentrySessions.ts).
+    const { httpIntegration } = await import("@sentry/node");
+    Sentry.init({
+      dsn,
+      ...sentryOptions,
+      integrations: (defaults) => withoutServerSessions(defaults, () => httpIntegration({ sessions: false })),
+    });
+  } else if (process.env.NEXT_RUNTIME === "edge") {
     Sentry.init({ dsn, ...sentryOptions });
   }
 }
