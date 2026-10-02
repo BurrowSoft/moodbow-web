@@ -218,10 +218,10 @@ test.describe("auth links", () => {
     await expect(page.getByRole("button")).toHaveCount(0);
   });
 
-  test("/auth/confirm: GET is a plain page, same-origin referrers only, noindex", async ({ request, page }) => {
+  test("/auth/confirm: GET is a plain page, origin-only referrers, noindex", async ({ request, page }) => {
     const res = await request.get("/auth/confirm?token_hash=a1b2c3d4e5f60718293a4b5c6d7e8f90&type=signup", { maxRedirects: 0 });
     expect(res.status()).toBe(200);
-    expect(res.headers()["referrer-policy"]).toBe("same-origin");
+    expect(res.headers()["referrer-policy"]).toBe("strict-origin");
     await page.goto("/auth/confirm?token_hash=a1b2c3d4e5f60718293a4b5c6d7e8f90&type=signup");
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex, nofollow");
   });
@@ -272,7 +272,7 @@ test.describe("web journal (signed out)", () => {
     await expect(page.getByTestId("signin-error")).toHaveText("Something went wrong. Please try again.");
   });
 
-  test("forgot password: link from sign-in, validation, fail closed", async ({ page }) => {
+  test("forgot password: link from sign-in, validation, always the neutral answer", async ({ page }) => {
     await page.goto("/sign-in");
     await page.getByRole("link", { name: "Forgot password?" }).click();
     await expect(page).toHaveURL(/\/forgot-password$/);
@@ -282,6 +282,8 @@ test.describe("web journal (signed out)", () => {
     await expect(page.getByTestId("forgot-error")).toHaveText("Enter a valid email");
     await page.getByLabel("Email").fill("w0@example.invalid");
     await page.getByRole("button", { name: "Send link" }).click();
-    await expect(page.getByTestId("forgot-error")).toHaveText("Something went wrong. Please try again.");
+    // Always the neutral answer (no account enumeration), even without Supabase.
+    await expect(page.getByTestId("reset-sent")).toHaveText("If an account exists for w0@example.invalid, a link is on its way.");
+    await expect(page.getByTestId("reset-sent-hint")).toHaveText("Didn't get it? Check your spam folder, or try again in a few minutes.");
   });
 });

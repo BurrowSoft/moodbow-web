@@ -7,7 +7,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export type SignInState =
   | { status: "idle" }
-  | { status: "error"; error: "emailInvalid" | "badCredentials" | "generic" }
+  | { status: "error"; error: "emailInvalid" | "badCredentials" | "rateLimited" | "generic" }
   // The email is kept so "Send it again" can resend the confirmation link.
   | { status: "notConfirmed"; email: string }
   | { status: "resent"; email: string };
@@ -41,6 +41,12 @@ async function resendConfirmation(prev: SignInState): Promise<SignInState> {
   const supabase = await createSupabaseServerClient();
   if (!supabase) return { status: "error", error: "generic" };
   const { error } = await supabase.auth.resend({ type: "signup", email: prev.email });
-  if (error) return { status: "error", error: "generic" };
+  // The user's own unconfirmed account (they just proved the password), so
+  // the rate limit can be named here without revealing anything new.
+  if (error) return { status: "error", error: isRateLimit(error) ? "rateLimited" : "generic" };
   return { status: "resent", email: prev.email };
+}
+
+function isRateLimit(error: { code?: string; status?: number }): boolean {
+  return error.status === 429 || (error.code ?? "").startsWith("over_");
 }

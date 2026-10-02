@@ -5,8 +5,9 @@ import { ESLint } from "eslint";
 // Self-test for the project's guard rules (eslint.config.mjs), so a config
 // change can't silently switch them off.
 const eslint = new ESLint({ cwd: process.cwd() });
-// Loading the full config takes a few seconds on the first run.
-const SLOW = { timeout: 60_000 };
+// Loading the full config takes a few seconds on the first run, and much
+// longer when the whole suite runs in parallel on a busy machine.
+const SLOW = { timeout: 120_000 };
 
 async function ruleHits(code: string, filePath: string): Promise<string[]> {
   const [result] = await eslint.lintText(code, { filePath });

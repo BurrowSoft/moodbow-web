@@ -15,14 +15,15 @@ const nextConfig: NextConfig = {
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
         ],
       },
-      // Auth links carry single-use tokens in the query: never send them to
-      // another site (overrides the rule above; the last match wins).
-      // same-origin, not no-referrer: with no-referrer, Chrome sends
+      // Auth links carry single-use tokens in the query (overrides the rule
+      // above; the last match wins). strict-origin: every request from these
+      // pages (incl. their own fonts and scripts) sends only the bare origin,
+      // never the URL with the token. Not no-referrer: then Chrome sends
       // "Origin: null" on a no-JS form POST and Next rejects the server
-      // action (500). Same-origin referrers stay on our own host.
+      // action (500).
       ...["/auth/:path*", "/:locale/auth/:path*", "/email-confirmed", "/:locale/email-confirmed"].map((source) => ({
         source,
-        headers: [{ key: "Referrer-Policy", value: "same-origin" }],
+        headers: [{ key: "Referrer-Policy", value: "strict-origin" }],
       })),
       // Deep-link verification files (public/.well-known). Android and Apple
       // only accept them as JSON, and the AASA file has no extension, so the

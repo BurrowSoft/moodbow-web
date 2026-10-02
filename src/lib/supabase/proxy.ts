@@ -1,6 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import type { NextRequest, NextResponse } from "next/server";
-import { supabaseConfig } from "./server";
+import { SESSION_COOKIE_OPTIONS, supabaseConfig } from "./server";
 
 // Paths that read the Supabase session (paths without the locale prefix).
 // Only these pay for a session check; the marketing pages never do.
@@ -18,6 +18,7 @@ export async function refreshSession(req: NextRequest, res: NextResponse): Promi
   const config = supabaseConfig();
   if (!config) return;
   const supabase = createServerClient(config.url, config.key, {
+    cookieOptions: SESSION_COOKIE_OPTIONS,
     cookies: {
       getAll: () => req.cookies.getAll(),
       setAll: (list) => {

@@ -9,6 +9,7 @@ import { signIn, type SignInState } from "./actions";
 const ERROR_KEYS = {
   emailInvalid: "errEmailInvalid",
   badCredentials: "errBadCredentials",
+  rateLimited: "errRateLimited",
   generic: "errGeneric",
 } as const;
 

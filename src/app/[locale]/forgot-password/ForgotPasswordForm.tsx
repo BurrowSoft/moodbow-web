@@ -16,6 +16,7 @@ export function ForgotPasswordForm() {
         <p role="status" data-testid="reset-sent" className="rounded-2xl border border-border bg-surface px-5 py-4 font-medium text-text">
           {t("resetSent", { email: state.email })}
         </p>
+        <p data-testid="reset-sent-hint">{t("resetSentHint")}</p>
         <p>
           <Link href="/sign-in" className={textLinkClass}>
             {t("signinSubmit")}
@@ -25,7 +26,7 @@ export function ForgotPasswordForm() {
     );
   }
 
-  const message = state.status === "error" ? t(state.error === "emailInvalid" ? "errEmailInvalid" : "errGeneric") : null;
+  const message = state.status === "error" ? t("errEmailInvalid") : null;
   return (
     <form action={action} noValidate className="space-y-5">
       <p>{t("resetBody")}</p>

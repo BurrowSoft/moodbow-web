@@ -27,5 +27,5 @@ export async function confirmLink(form: FormData): Promise<void> {
   }
 
   const locale = await getLocale();
-  redirect({ href: { pathname: target.path, query: target.result ? { result: target.result } : {} }, locale });
+  redirect({ href: target.result ? { pathname: target.path, query: { result: target.result } } : target.path, locale });
 }
