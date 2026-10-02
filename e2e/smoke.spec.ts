@@ -243,6 +243,8 @@ test.describe("auth links", () => {
 
   test("/auth/reset-password?status=changed shows the success copy", async ({ page }) => {
     await page.goto("/auth/reset-password?status=changed");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Password changed");
+    await expect(page.getByRole("button")).toHaveCount(0);
     await expect(page.getByTestId("reset-done")).toHaveText(
       "Your password was changed, and you've been signed out on all your devices. Sign in with your new password in the app or on the web.",
     );

@@ -26,7 +26,7 @@ export default async function ResetPasswordPage({ params, searchParams }: PagePr
   if ((await searchParams).status === "changed") {
     const t = await getTranslations("resetPassword");
     return (
-      <PageShell title={t("title")}>
+      <PageShell title={t("successTitle")}>
         <p role="status" data-testid="reset-done" className="rounded-2xl border border-border bg-surface px-5 py-4 font-medium text-text">
           {t("success")}
         </p>
