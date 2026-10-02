@@ -2,6 +2,7 @@ import createMiddleware from "next-intl/middleware";
 import { NextResponse, type NextRequest } from "next/server";
 import { routing } from "./i18n/routing";
 import { isHiddenPage, pagePath } from "./lib/sitemapPages";
+import { needsSession, refreshSession } from "./lib/supabase/proxy";
 
 // Locale routing (src/i18n/routing.ts): the default locale is unprefixed,
 // others get /<locale>. With more than one locale, a first visit is matched
@@ -15,15 +16,19 @@ const intl = createMiddleware(routing);
 // instead: no <h1>, no lang until JS runs.)
 const NOT_FOUND_PATH = `/${routing.defaultLocale}/_not-found-page`;
 
-export default function proxy(req: NextRequest) {
+export default async function proxy(req: NextRequest) {
+  const path = pagePath(req.nextUrl.pathname, routing.locales);
   // Gated pages that aren't live yet (content/conditions.json) are 404s on
   // Production; drafts elsewhere render normally (pageGate).
-  if (isHiddenPage(pagePath(req.nextUrl.pathname, routing.locales))) {
+  if (isHiddenPage(path)) {
     const url = req.nextUrl.clone();
     url.pathname = NOT_FOUND_PATH;
     return NextResponse.rewrite(url, { status: 404 });
   }
-  return intl(req);
+  const res = intl(req);
+  // The signed-in area and the auth pages keep the Supabase session fresh.
+  if (needsSession(path)) await refreshSession(req, res);
+  return res;
 }
 
 export const config = {

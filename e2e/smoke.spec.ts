@@ -238,3 +238,40 @@ test.describe("auth links", () => {
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Almost done.");
   });
 });
+
+// The web journal shell (W0), behind web-journal-live (drafts on test
+// builds). No Supabase env here: signed-out paths and fail-closed errors.
+// Signed-in rows run on the Preview against staging.
+test.describe("web journal (signed out)", () => {
+  test("/app sends a signed-out visitor to sign-in", async ({ page }) => {
+    await page.goto("/app/me");
+    await expect(page).toHaveURL(/\/sign-in$/);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Welcome back");
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex, nofollow");
+  });
+
+  test("sign-in validates the email, then fails closed", async ({ page }) => {
+    await page.goto("/sign-in");
+    await page.getByLabel("Email").fill("not-an-email");
+    await page.getByLabel("Password").fill("whatever-123");
+    await page.getByRole("button", { name: "Sign in" }).click();
+    await expect(page.getByTestId("signin-error")).toHaveText("Enter a valid email");
+    await page.getByLabel("Email").fill("w0@example.invalid");
+    await page.getByLabel("Password").fill("whatever-123");
+    await page.getByRole("button", { name: "Sign in" }).click();
+    await expect(page.getByTestId("signin-error")).toHaveText("Something went wrong. Please try again.");
+  });
+
+  test("forgot password: link from sign-in, validation, fail closed", async ({ page }) => {
+    await page.goto("/sign-in");
+    await page.getByRole("link", { name: "Forgot password?" }).click();
+    await expect(page).toHaveURL(/\/forgot-password$/);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Reset your password");
+    await page.getByLabel("Email").fill("nope");
+    await page.getByRole("button", { name: "Send link" }).click();
+    await expect(page.getByTestId("forgot-error")).toHaveText("Enter a valid email");
+    await page.getByLabel("Email").fill("w0@example.invalid");
+    await page.getByRole("button", { name: "Send link" }).click();
+    await expect(page.getByTestId("forgot-error")).toHaveText("Something went wrong. Please try again.");
+  });
+});

@@ -4,6 +4,7 @@ import { conditionMet, pageGate } from "./conditions";
 import { liveFeatures } from "./liveFeatures";
 import { BACKUP_RETENTION_DAYS } from "./site";
 import { isHiddenPage, pagePath, sitemapPaths } from "./sitemapPages";
+import { needsSession } from "./supabase/proxy";
 
 describe("conditions", () => {
   it("every entry has a boolean met and a description", () => {
@@ -101,5 +102,33 @@ describe("pagePath (what the proxy checks)", () => {
 
   it("an encoded gated path is still hidden on Production", () => {
     expect(isHiddenPage(pagePath("/%70rivacy", locales), { vercelEnv: "production" })).toBe(true);
+  });
+});
+
+describe("the web journal gate (W0)", () => {
+  const prod = { vercelEnv: "production" };
+
+  it("is off, and liveFeatures.webJournal follows the condition", () => {
+    expect(conditionMet("web-journal-live")).toBe(false);
+    expect(liveFeatures.webJournal).toBe(conditionMet("web-journal-live"));
+  });
+
+  it("hides /app and everything below it, sign-in and forgot-password on Production", () => {
+    for (const path of ["/app", "/app/me", "/app/timeline", "/sign-in", "/forgot-password"]) {
+      expect(isHiddenPage(path, prod), path).toBe(true);
+    }
+    expect(isHiddenPage("/apples", prod)).toBe(false);
+    expect(isHiddenPage("/app", { vercelEnv: "preview" })).toBe(false);
+  });
+
+  it("never lists the signed-in area in the sitemap, even when live", () => {
+    expect(sitemapPaths(() => true)).toEqual(["/", "/support", "/privacy", "/terms", "/account-deletion"]);
+  });
+});
+
+describe("needsSession (proxy session refresh)", () => {
+  it("only for the signed-in area and the auth pages", () => {
+    for (const path of ["/app", "/app/me", "/sign-in", "/forgot-password", "/auth/reset-password"]) expect(needsSession(path), path).toBe(true);
+    for (const path of ["/", "/support", "/privacy", "/auth/confirm", "/email-confirmed", "/apples"]) expect(needsSession(path), path).toBe(false);
   });
 });
