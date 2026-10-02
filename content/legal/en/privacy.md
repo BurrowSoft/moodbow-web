@@ -19,7 +19,7 @@ Moodbow is a private journal made by Vitor Ribeiro Carvalho, trading as BurrowSo
 **Your account:** your email address, your password (stored only as a secure hash), and when you agreed to our Terms and this policy, and confirmed you're 18 or older.
 **Your journal:** the entries you write, your daily check-ins (mood, sleep, exercise, stress), the dates they belong to, and which entries you mark as moments.
 **Your settings:** language, country, time zone, reminder time, {pending:appearance_setting}appearance, {/pending}and your AI choices (on or off, tone, focus areas).
-**AI content (only if AI is on):** the reflections and reports the AI writes for you, {pending:ai_memory}and the short facts Moodbow remembers about you, which you can see, edit and delete in Me → What Moodbow remembers{/pending}.
+**AI content (only if AI is on):** the reflections and reports the AI writes for you{pending:ai_memory}, and the short facts Moodbow remembers about you, which you can see, edit and delete in Me → What Moodbow remembers{/pending}.
 **AI usage:** for each AI request, the feature, the model, the number of tokens, the cost and the credits used. Not the text of your entries or of the AI's answer.
 {pending:purchases}**Purchases:** if you buy AI credits, Google Play or the App Store handles the payment. We receive a purchase reference and the number of credits, never your card details.{/pending}
 **Crash reports:** if the app or website crashes, a technical report (device type, app or browser version, the error) is sent to our error-tracking provider. We remove personal details and any text you've written before it's sent, and the provider doesn't store your IP address.
