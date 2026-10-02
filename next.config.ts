@@ -25,6 +25,13 @@ const nextConfig: NextConfig = {
         source,
         headers: [{ key: "Referrer-Policy", value: "strict-origin" }],
       })),
+      // Images linked from emails (public/email): the path never changes, since
+      // sent emails keep pointing at it. 30 days of caching; a new logo would
+      // replace the file in place.
+      {
+        source: "/email/:path*",
+        headers: [{ key: "Cache-Control", value: "public, max-age=2592000" }],
+      },
       // Deep-link verification files (public/.well-known). Android and Apple
       // only accept them as JSON, and the AASA file has no extension, so the
       // type is set explicitly. The proxy skips paths with a dot, so neither

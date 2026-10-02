@@ -143,6 +143,15 @@ test.describe("static files", () => {
     expect(await res.json()).toEqual({ applinks: { details: [] } });
   });
 
+  test("the email logo is a 320×65 PNG, cached, not redirected", async ({ request }) => {
+    const res = await request.get("/email/moodbow-logo.png", { maxRedirects: 0 });
+    expect(res.status()).toBe(200);
+    expect(res.headers()["content-type"]).toBe("image/png");
+    expect(res.headers()["cache-control"]).toContain("max-age=2592000");
+    const png = await res.body();
+    expect([png.readUInt32BE(16), png.readUInt32BE(20)]).toEqual([320, 65]);
+  });
+
   test("robots.txt points to the sitemap", async ({ request }) => {
     const res = await request.get("/robots.txt");
     expect(res.status()).toBe(200);
@@ -234,6 +243,8 @@ test.describe("auth links", () => {
 
   test("/auth/reset-password?status=changed shows the success copy", async ({ page }) => {
     await page.goto("/auth/reset-password?status=changed");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Password changed");
+    await expect(page.getByRole("button")).toHaveCount(0);
     await expect(page.getByTestId("reset-done")).toHaveText(
       "Your password was changed, and you've been signed out on all your devices. Sign in with your new password in the app or on the web.",
     );
