@@ -3,7 +3,7 @@ import conditions from "../../content/conditions.json";
 import { conditionMet, pageGate } from "./conditions";
 import { liveFeatures } from "./liveFeatures";
 import { BACKUP_RETENTION_DAYS } from "./site";
-import { isHiddenPage, sitemapPaths } from "./sitemapPages";
+import { isHiddenPage, pagePath, sitemapPaths } from "./sitemapPages";
 
 describe("conditions", () => {
   it("every entry has a boolean met and a description", () => {
@@ -76,5 +76,30 @@ describe("isHiddenPage (the proxy's routing-level 404)", () => {
 
   it("fails closed when the environment is unset", () => {
     expect(isHiddenPage("/privacy", {})).toBe(true);
+  });
+});
+
+describe("pagePath (what the proxy checks)", () => {
+  const locales = ["en", "th"];
+  it("strips the locale prefix and percent-decodes", () => {
+    expect(pagePath("/privacy", locales)).toBe("/privacy");
+    expect(pagePath("/en/privacy", locales)).toBe("/privacy");
+    expect(pagePath("/th", locales)).toBe("/");
+    expect(pagePath("/%70rivacy", locales)).toBe("/privacy");
+    expect(pagePath("/en/%74erms", locales)).toBe("/terms");
+  });
+
+  it("lowercases, because Vercel matches routes case-insensitively", () => {
+    expect(pagePath("/PRIVACY", locales)).toBe("/privacy");
+    expect(pagePath("/En/Account-Deletion", locales)).toBe("/account-deletion");
+    expect(isHiddenPage(pagePath("/Terms", locales), { vercelEnv: "production" })).toBe(true);
+  });
+
+  it("leaves malformed escapes alone", () => {
+    expect(pagePath("/%E0%A4%A", locales)).toBe("/%e0%a4%a");
+  });
+
+  it("an encoded gated path is still hidden on Production", () => {
+    expect(isHiddenPage(pagePath("/%70rivacy", locales), { vercelEnv: "production" })).toBe(true);
   });
 });

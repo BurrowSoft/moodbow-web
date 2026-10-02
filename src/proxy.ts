@@ -1,7 +1,7 @@
 import createMiddleware from "next-intl/middleware";
 import { NextResponse, type NextRequest } from "next/server";
 import { routing } from "./i18n/routing";
-import { isHiddenPage } from "./lib/sitemapPages";
+import { isHiddenPage, pagePath } from "./lib/sitemapPages";
 
 // Locale routing (src/i18n/routing.ts): the default locale is unprefixed,
 // others get /<locale>. With more than one locale, a first visit is matched
@@ -16,12 +16,9 @@ const intl = createMiddleware(routing);
 const NOT_FOUND_PATH = `/${routing.defaultLocale}/_not-found-page`;
 
 export default function proxy(req: NextRequest) {
-  const { pathname } = req.nextUrl;
-  const [, first = ""] = pathname.split("/");
-  const bare = (routing.locales as readonly string[]).includes(first) ? pathname.slice(first.length + 1) || "/" : pathname;
   // Gated pages that aren't live yet (content/conditions.json) are 404s on
   // Production; drafts elsewhere render normally (pageGate).
-  if (isHiddenPage(bare)) {
+  if (isHiddenPage(pagePath(req.nextUrl.pathname, routing.locales))) {
     const url = req.nextUrl.clone();
     url.pathname = NOT_FOUND_PATH;
     return NextResponse.rewrite(url, { status: 404 });

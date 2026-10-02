@@ -5,19 +5,31 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { classifyAuthLink, type AuthLinkResult } from "@/lib/authLink";
 
-// Read once, before the effect below cleans the URL, so the result stays
-// stable for the life of the page.
-let firstResult: AuthLinkResult | null = null;
-function readResult(): AuthLinkResult {
-  firstResult ??= classifyAuthLink(window.location.search, window.location.hash);
-  return firstResult;
+// The query (?result=… from /auth/confirm, Supabase's ?error=…) is read on
+// the server and passed in as `fromQuery`: window.location can still show
+// the previous URL during a client navigation (e.g. right after the
+// confirm button's redirect). Only the fragment needs the browser: Supabase's
+// own links put #error=… there, and they always arrive as a full page load.
+// It's read once, before the effect below cleans the URL.
+let hashResult: AuthLinkResult | undefined;
+function readHash(): AuthLinkResult {
+  hashResult ??= classifyAuthLink("", window.location.hash);
+  return hashResult;
 }
 const subscribe = () => () => {};
-const serverResult = () => null;
+const noHashOnServer = (): AuthLinkResult => "ok";
 
-export function EmailConfirmedMessage({ showContinue }: { showContinue: boolean }) {
+const COPY = {
+  ok: { title: "successTitle", body: "successBody" },
+  error: { title: "errorTitle", body: "errorBody" },
+  email_changed: { title: "emailChangedTitle", body: "emailChangedBody" },
+  email_change_pending: { title: "emailChangePendingTitle", body: "emailChangePendingBody" },
+} as const satisfies Record<AuthLinkResult, { title: string; body: string }>;
+
+export function EmailConfirmedMessage({ fromQuery, showContinue }: { fromQuery: AuthLinkResult; showContinue: boolean }) {
   const t = useTranslations("emailConfirmed");
-  const result = useSyncExternalStore(subscribe, readResult, serverResult);
+  const fromHash = useSyncExternalStore(subscribe, readHash, noHashOnServer);
+  const result: AuthLinkResult = fromHash === "error" ? "error" : fromQuery;
 
   // Confirmation links can carry tokens in the query or fragment: drop them
   // from the address bar and history so they aren't shared, bookmarked or
@@ -28,16 +40,12 @@ export function EmailConfirmedMessage({ showContinue }: { showContinue: boolean 
     }
   }, []);
 
-  // Before hydration the result isn't known; keep the space so nothing jumps.
-  if (result === null) return <div className="min-h-32" aria-hidden="true" />;
-
   const ok = result === "ok";
+  const copy = COPY[result];
   return (
     <div data-testid={`email-confirmed-${result}`} className="flex flex-col items-center text-center">
-      <h1 className="text-balance text-[28px] font-medium leading-tight tracking-tight sm:text-4xl">
-        {ok ? t("successTitle") : t("errorTitle")}
-      </h1>
-      <p className="mt-4 text-base leading-relaxed text-muted sm:text-[17px]">{ok ? t("successBody") : t("errorBody")}</p>
+      <h1 className="text-balance text-[28px] font-medium leading-tight tracking-tight sm:text-4xl">{t(copy.title)}</h1>
+      <p className="mt-4 text-base leading-relaxed text-muted sm:text-[17px]">{t(copy.body)}</p>
       {ok && showContinue && (
         <Link
           href="/app"
