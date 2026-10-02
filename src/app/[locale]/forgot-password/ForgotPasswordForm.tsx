@@ -30,7 +30,14 @@ export function ForgotPasswordForm() {
   return (
     <form action={action} noValidate className="space-y-5">
       <p>{t("resetBody")}</p>
-      <AuthField id="email" label={t("emailLabel")} type="email" autoComplete="email" errorId={message ? "forgot-error" : undefined} />
+      <AuthField
+        id="email"
+        label={t("emailLabel")}
+        type="email"
+        autoComplete="email"
+        defaultValue={state.status === "error" ? state.email : undefined}
+        errorId={message ? "forgot-error" : undefined}
+      />
       {message && (
         <p id="forgot-error" role="alert" data-testid="forgot-error" className="font-medium text-accent">
           {message}

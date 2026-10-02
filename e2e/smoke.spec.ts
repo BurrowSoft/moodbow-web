@@ -298,3 +298,81 @@ test.describe("web journal (signed out)", () => {
     await expect(page.getByTestId("reset-sent-hint")).toHaveText("Didn't get it? Check your spam folder, or try again in a few minutes.");
   });
 });
+
+// Onboarding (W0 part 2), signed out, no Supabase env. The account-creating
+// and signed-in rows run on the Preview against staging.
+test.describe("onboarding (signed out)", () => {
+  test("welcome: Next, Skip to slide 3, Get started → Consent; Back from Consent → slide 3", async ({ page }) => {
+    await page.goto("/welcome");
+    await expect(page.getByTestId("welcome-slide-1")).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("A journal that learns your story");
+    await page.getByTestId("welcome-next").click();
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("See your patterns");
+    await page.getByTestId("welcome-skip").click();
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Private, and yours");
+    await expect(page.getByText("Only you can read your journal, and you can delete everything at any time.")).toBeVisible();
+    await expect(page.getByTestId("welcome-skip")).toHaveCount(0);
+    await expect(page).toHaveURL(/\/welcome\?slide=3$/);
+    await page.getByTestId("welcome-start").click();
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Before you start");
+    await page.getByTestId("consent-back").click();
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Private, and yours");
+  });
+
+  test("browser Back from Consent lands on slide 3 too", async ({ page }) => {
+    await page.goto("/welcome");
+    await page.getByTestId("welcome-skip").click();
+    await page.getByTestId("welcome-start").click();
+    await expect(page).toHaveURL(/\/consent$/);
+    await page.goBack();
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Private, and yours");
+  });
+
+  test("consent: Continue only with both boxes; no AI row; then Create account", async ({ page }) => {
+    await page.goto("/consent");
+    const cont = page.getByTestId("consent-continue");
+    await expect(cont).toBeDisabled();
+    await page.getByTestId("consent-privacy").check();
+    await expect(cont).toBeDisabled();
+    await page.getByTestId("consent-health").check();
+    await expect(page.getByText("AI reflections and reports (optional)")).toHaveCount(0);
+    await cont.click();
+    await expect(page).toHaveURL(/\/sign-up$/);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Create your account");
+  });
+
+  test("sign-up without consent → Consent", async ({ page }) => {
+    await page.goto("/sign-up");
+    await expect(page).toHaveURL(/\/consent$/);
+  });
+
+  test("sign-up validation, then fail closed without Supabase", async ({ page }) => {
+    await page.goto("/consent");
+    await page.getByTestId("consent-privacy").check();
+    await page.getByTestId("consent-health").check();
+    await page.getByTestId("consent-continue").click();
+    await expect(page).toHaveURL(/\/sign-up$/);
+    await page.getByLabel("Email").fill("nope");
+    await page.getByLabel("Password").fill("secret-123");
+    await page.getByTestId("signup-submit").click();
+    await expect(page.getByTestId("signup-error")).toHaveText("Enter a valid email");
+    await page.getByLabel("Email").fill("w0@example.invalid");
+    await page.getByLabel("Password").fill("short");
+    await page.getByTestId("signup-submit").click();
+    await expect(page.getByTestId("signup-error")).toHaveText("Use at least 8 characters");
+    await page.getByLabel("Password").fill("secret-123");
+    await page.getByTestId("signup-submit").click();
+    await expect(page.getByTestId("signup-error")).toHaveText("Moodbow is for people 18 and older");
+    await page.getByTestId("signup-age").check();
+    await page.getByTestId("signup-submit").click();
+    await expect(page.getByTestId("signup-error")).toHaveText("Something went wrong. Please try again.");
+  });
+
+  test("sign-in links to Create account (Welcome); setup needs a session", async ({ page }) => {
+    await page.goto("/sign-in");
+    await page.getByTestId("signin-to-signup").click();
+    await expect(page).toHaveURL(/\/welcome$/);
+    await page.goto("/setup");
+    await expect(page).toHaveURL(/\/sign-in$/);
+  });
+});

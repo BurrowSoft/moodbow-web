@@ -25,9 +25,12 @@ export default async function proxy(req: NextRequest) {
     url.pathname = NOT_FOUND_PATH;
     return NextResponse.rewrite(url, { status: 404 });
   }
+  // The signed-in area and the auth pages keep the Supabase session fresh:
+  // refreshed first, so this request's server components already see the
+  // new cookies (lib/supabase/proxy.ts), then saved on the response.
+  const refreshed = needsSession(path) ? await refreshSession(req) : [];
   const res = intl(req);
-  // The signed-in area and the auth pages keep the Supabase session fresh.
-  if (needsSession(path)) await refreshSession(req, res);
+  for (const { name, value, options } of refreshed) res.cookies.set(name, value, options);
   return res;
 }
 
