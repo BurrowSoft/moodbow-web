@@ -69,6 +69,10 @@ describe("applyPending", () => {
     const table = "| A | B |\n|---|---|\n| 1 | 2 |\n{pending:x}| 3 | 4 |{/pending}\n| 5 | 6 |\n";
     expect(applyPending(table, () => false).text).toBe("| A | B |\n|---|---|\n| 1 | 2 |\n| 5 | 6 |\n");
     expect(applyPending("a {pending:x}X{/pending}\nb", () => false).text).toBe("a \nb");
+    // A hidden list item leaves one continuous list.
+    const list = "- one\n{pending:x}- two{/pending}\n- three\n";
+    expect(applyPending(list, () => false).text).toBe("- one\n- three\n");
+    expect(renderLegal(`## T\n${list}`, () => false).html.match(/<ul>/g)).toHaveLength(1);
   });
 
   it("handles nesting: an unmet outer hides the inner; a met outer keeps only met inners", () => {
