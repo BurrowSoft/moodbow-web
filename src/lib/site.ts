@@ -2,8 +2,8 @@
 // URLs, Open Graph URLs and the sitemap all use www.
 export const SITE_URL = "https://www.moodbow.com";
 
-// Until a moodbow.com mailbox exists (Vitor), support goes to BurrowSoft's.
-export const SUPPORT_EMAIL = "support@burrowsoft.com";
+// Support mailbox (live since 2026-10-02, Vitor).
+export const SUPPORT_EMAIL = "support@moodbow.com";
 
 // The subject is copy, so it comes from messages (home.notifySubject).
 export function notifyMailto(subject: string): string {

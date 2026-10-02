@@ -3,7 +3,7 @@ import conditions from "../../content/conditions.json";
 import { conditionMet, pageGate } from "./conditions";
 import { liveFeatures } from "./liveFeatures";
 import { BACKUP_RETENTION_DAYS } from "./site";
-import { sitemapPaths } from "./sitemapPages";
+import { isHiddenPage, sitemapPaths } from "./sitemapPages";
 
 describe("conditions", () => {
   it("every entry has a boolean met and a description", () => {
@@ -54,5 +54,27 @@ describe("sitemapPaths", () => {
 
   it("adds a gated page once its condition is met", () => {
     expect(sitemapPaths((id) => id === "delete-account-live")).toEqual(["/", "/support", "/account-deletion"]);
+  });
+});
+
+describe("isHiddenPage (the proxy's routing-level 404)", () => {
+  const prod = { vercelEnv: "production" };
+  const preview = { vercelEnv: "preview" };
+
+  it("hides unmet gated pages on Production, with or without a trailing slash", () => {
+    for (const path of ["/privacy", "/terms", "/account-deletion", "/privacy/"]) {
+      expect(isHiddenPage(path, prod), path).toBe(true);
+    }
+  });
+
+  it("never hides ungated or unknown paths, and shows drafts on test builds", () => {
+    for (const path of ["/", "/support", "/email-confirmed", "/no-such-page"]) {
+      expect(isHiddenPage(path, prod), path).toBe(false);
+    }
+    expect(isHiddenPage("/privacy", preview)).toBe(false);
+  });
+
+  it("fails closed when the environment is unset", () => {
+    expect(isHiddenPage("/privacy", {})).toBe(true);
   });
 });
