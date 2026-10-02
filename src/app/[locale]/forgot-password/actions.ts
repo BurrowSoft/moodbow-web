@@ -3,7 +3,7 @@
 import { isValidEmail, normalizeEmail } from "@/lib/email";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
-export type ForgotPasswordState = { status: "idle" } | { status: "error"; error: "emailInvalid" } | { status: "sent"; email: string };
+export type ForgotPasswordState = { status: "idle" } | { status: "error"; error: "emailInvalid"; email: string } | { status: "sent"; email: string };
 
 // Sends the recovery email. The answer is ALWAYS the same neutral "If an
 // account exists for …" once the email is well-formed, whatever Supabase
@@ -14,7 +14,7 @@ export type ForgotPasswordState = { status: "idle" } | { status: "error"; error:
 // (/auth/confirm?type=recovery) itself.
 export async function requestPasswordReset(_prev: ForgotPasswordState, form: FormData): Promise<ForgotPasswordState> {
   const email = normalizeEmail(form.get("email"));
-  if (!isValidEmail(email)) return { status: "error", error: "emailInvalid" };
+  if (!isValidEmail(email)) return { status: "error", error: "emailInvalid", email: String(form.get("email") ?? "") };
   const supabase = await createSupabaseServerClient();
   if (supabase) await supabase.auth.resetPasswordForEmail(email);
   return { status: "sent", email };

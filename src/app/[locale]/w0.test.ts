@@ -39,7 +39,7 @@ beforeEach(() => {
 
 describe("signIn", () => {
   it("checks the email shape before calling Supabase", async () => {
-    expect(await signIn(idle, form({ email: "not-an-email", password: "x" }))).toEqual({ status: "error", error: "emailInvalid" });
+    expect(await signIn(idle, form({ email: "not-an-email", password: "x" }))).toMatchObject({ status: "error", error: "emailInvalid" });
     expect(auth.signInWithPassword).not.toHaveBeenCalled();
   });
 
@@ -53,11 +53,11 @@ describe("signIn", () => {
 
   it("maps error codes (never messages)", async () => {
     auth.signInWithPassword.mockResolvedValue({ error: { code: "invalid_credentials", message: "raw" } });
-    expect(await signIn(idle, form({ email: "a@b.co", password: "x" }))).toEqual({ status: "error", error: "badCredentials" });
+    expect(await signIn(idle, form({ email: "a@b.co", password: "x" }))).toMatchObject({ status: "error", error: "badCredentials" });
     auth.signInWithPassword.mockResolvedValue({ error: { code: "email_not_confirmed", message: "raw" } });
     expect(await signIn(idle, form({ email: "a@b.co", password: "x" }))).toEqual({ status: "notConfirmed", email: "a@b.co" });
     auth.signInWithPassword.mockResolvedValue({ error: { code: "over_request_rate_limit", message: "raw" } });
-    expect(await signIn(idle, form({ email: "a@b.co", password: "x" }))).toEqual({ status: "error", error: "generic" });
+    expect(await signIn(idle, form({ email: "a@b.co", password: "x" }))).toMatchObject({ status: "error", error: "generic" });
   });
 
   it("'Send it again' resends the signup confirmation for the unconfirmed email only", async () => {
@@ -66,7 +66,7 @@ describe("signIn", () => {
     expect(auth.resend).toHaveBeenCalledWith({ type: "signup", email: "a@b.co" });
     // Rate-limited: the user's own account, so it can be named.
     auth.resend.mockResolvedValue({ error: { code: "over_email_send_rate_limit", status: 429 } });
-    expect(await signIn({ status: "notConfirmed", email: "a@b.co" }, form({ intent: "resend" }))).toEqual({ status: "error", error: "rateLimited" });
+    expect(await signIn({ status: "notConfirmed", email: "a@b.co" }, form({ intent: "resend" }))).toMatchObject({ status: "error", error: "rateLimited" });
     // Not after a different outcome.
     auth.resend.mockClear();
     expect(await signIn(idle, form({ intent: "resend" }))).toEqual(idle);
@@ -75,7 +75,7 @@ describe("signIn", () => {
 
   it("fails closed without Supabase config", async () => {
     configured = false;
-    expect(await signIn(idle, form({ email: "a@b.co", password: "x" }))).toEqual({ status: "error", error: "generic" });
+    expect(await signIn(idle, form({ email: "a@b.co", password: "x" }))).toMatchObject({ status: "error", error: "generic" });
   });
 });
 
@@ -87,7 +87,7 @@ describe("requestPasswordReset", () => {
   });
 
   it("validates the email shape only", async () => {
-    expect(await requestPasswordReset(idle, form({ email: "nope" }))).toEqual({ status: "error", error: "emailInvalid" });
+    expect(await requestPasswordReset(idle, form({ email: "nope" }))).toMatchObject({ status: "error", error: "emailInvalid" });
   });
 
   it("answers the same for every Supabase outcome (rate limits only hit real accounts)", async () => {

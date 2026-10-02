@@ -19,7 +19,7 @@ export function SignInForm() {
 
   const message =
     state.status === "error" ? t(ERROR_KEYS[state.error]) : state.status === "notConfirmed" ? t("errEmailNotConfirmed") : null;
-  const lastEmail = state.status === "notConfirmed" || state.status === "resent" ? state.email : undefined;
+  const lastEmail = state.status === "idle" ? undefined : state.email;
 
   return (
     <div className="space-y-6">
@@ -56,9 +56,12 @@ export function SignInForm() {
           </button>
         </form>
       )}
-      <p>
+      <p className="flex flex-col gap-3">
         <Link href="/forgot-password" className={textLinkClass}>
           {t("signinForgot")}
+        </Link>
+        <Link href="/welcome" data-testid="signin-to-signup" className={textLinkClass}>
+          {t("signinNoAccount")}
         </Link>
       </p>
     </div>
