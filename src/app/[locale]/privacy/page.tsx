@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
-import { LegalSkeleton } from "@/components/LegalSkeleton";
+import { LegalArticle } from "@/components/LegalArticle";
 import { pageGate } from "@/lib/conditions";
 import { pageMetadata } from "@/lib/metadata";
 
 const GATE = "privacy-text-approved" as const;
-const SECTIONS = ["whoWeAre", "whatWeCollect", "howWeUse", "ai", "whereStored", "retention", "rights", "contact"] as const;
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/privacy">): Promise<Metadata> {
   const { locale } = await params;
@@ -23,5 +22,5 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/privacy"
 export default async function PrivacyPage({ params }: PageProps<"/[locale]/privacy">) {
   const { locale } = await params;
   setRequestLocale(locale as Locale);
-  return <LegalSkeleton namespace="privacy" gate={GATE} sections={SECTIONS} />;
+  return <LegalArticle slug="privacy" locale={locale} gate={GATE} />;
 }

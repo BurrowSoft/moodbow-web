@@ -5,6 +5,9 @@ import { withSentryConfig } from "@sentry/nextjs/config";
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig: NextConfig = {
+  // The legal pages read content/legal/** with fs at build time; keep the
+  // files in the server bundle too in case a page renders on demand.
+  outputFileTracingIncludes: { "/[locale]/privacy": ["./content/legal/**"], "/[locale]/terms": ["./content/legal/**"] },
   async headers() {
     return [
       {

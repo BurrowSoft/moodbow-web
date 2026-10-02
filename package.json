@@ -20,6 +20,7 @@
     "@sentry/node": "11.2.0",
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.117.2",
+    "marked": "^18.0.14",
     "next": "^16.3.8",
     "next-intl": "^4.14.8",
     "react": "^19.2.8",

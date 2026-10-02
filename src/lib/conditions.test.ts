@@ -19,7 +19,7 @@ describe("conditions", () => {
     expect(conditionMet("privacy-text-approved")).toBe(false);
     expect(conditionMet("terms-text-approved")).toBe(false);
     expect(conditionMet("delete-account-live")).toBe(false);
-    expect(conditionMet("backup-retention-confirmed")).toBe(false);
+    expect(conditionMet("backup-retention")).toBe(false);
     expect(BACKUP_RETENTION_DAYS).toBeNull();
     expect(liveFeatures.webJournal).toBe(false);
   });

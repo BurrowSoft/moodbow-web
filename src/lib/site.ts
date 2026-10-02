@@ -14,6 +14,6 @@ export const BURROWSOFT_URL = "https://www.burrowsoft.com";
 
 // Days deleted data can survive in Supabase backups. null until Mobile Dev
 // confirms the plan's real retention; the account-deletion page shows the
-// backups line only when the "backup-retention-confirmed" condition is met
+// backups line only when the "backup-retention" condition is met
 // AND this is a number (text = enforcement).
 export const BACKUP_RETENTION_DAYS: number | null = null;

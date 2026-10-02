@@ -53,7 +53,7 @@ Fonts: Poppins (Latin), with Prompt ready for Thai glyphs (not preloaded), self-
 | `/` | Coming soon + 3 feature blocks + "Get notified" (mailto) | — |
 | `/support` | Support email | — |
 | `/privacy`, `/terms` | Skeletons until the final text (W3) | `privacy-text-approved`, `terms-text-approved` |
-| `/account-deletion` | Google Play's account-deletion URL | `delete-account-live` (+ `backup-retention-confirmed` for the backups line) |
+| `/account-deletion` | Google Play's account-deletion URL | `delete-account-live` (+ `backup-retention` for the backups line) |
 | `/email-confirmed` | Where Supabase confirm links land; strips tokens from the URL; noindex | — |
 | `/.well-known/assetlinks.json` | Android App Links (empty until the app's signing fingerprints exist) | — |
 | `/.well-known/apple-app-site-association` | iOS Universal Links (no claims until the iOS app, R2); served as JSON | — |

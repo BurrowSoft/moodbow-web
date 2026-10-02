@@ -10,12 +10,14 @@ type Props = {
   // data-content="article" so the tester's strings check can tell them
   // from UI chrome.
   article?: boolean;
+  // Rendered after the article, outside it (e.g. a draft-only panel).
+  after?: React.ReactNode;
   children: React.ReactNode;
 };
 
 // Layout for the inner pages: the horizontal logo linking home, an optional
 // draft banner, and a readable text column.
-export async function PageShell({ title, draft = false, article = false, children }: Props) {
+export async function PageShell({ title, draft = false, article = false, after, children }: Props) {
   const t = await getTranslations("common");
   return (
     <>
@@ -36,6 +38,7 @@ export async function PageShell({ title, draft = false, article = false, childre
           <h1 className="text-balance text-3xl font-medium tracking-tight sm:text-4xl">{title}</h1>
           <div data-content={article ? "article" : undefined} className="mt-6 space-y-5 text-base leading-relaxed text-muted sm:text-[17px]">{children}</div>
         </article>
+        {after}
       </main>
     </>
   );

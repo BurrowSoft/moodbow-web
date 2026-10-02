@@ -96,28 +96,14 @@
   },
   "privacy": {
     "title": "Privacy policy",
-    "description": "How Moodbow handles your data.",
-    "pending": "This section is being written.",
-    "whoWeAre": "Who we are",
-    "whatWeCollect": "What we collect",
-    "howWeUse": "How we use it",
-    "ai": "AI features",
-    "whereStored": "Where your data is stored",
-    "retention": "How long we keep it, and deleting it",
-    "rights": "Your rights",
-    "contact": "Contact us"
+    "description": "How Moodbow handles your data."
   },
   "terms": {
     "title": "Terms of use",
-    "description": "The terms for using Moodbow.",
-    "pending": "This section is being written.",
-    "using": "Using Moodbow",
-    "account": "Your account",
-    "content": "Your content",
-    "notMedical": "Not medical advice",
-    "ai": "AI features and credits",
-    "changes": "Changes to these terms",
-    "contact": "Contact us"
+    "description": "The terms for using Moodbow."
+  },
+  "legal": {
+    "hiddenTitle": "Not shown yet: each block appears once its feature is live (test builds only)"
   },
   "auth": {
     "signinTitle": "Welcome back",
