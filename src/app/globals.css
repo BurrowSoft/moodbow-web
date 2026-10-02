@@ -88,3 +88,20 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .fade-in { animation: none; }
 }
+
+/* Long-form legal text (content/legal/*.md rendered by marked). */
+.legal-prose h2 { margin-top: 2rem; font-size: 1.25rem; font-weight: 500; color: var(--text); }
+.legal-prose h3 { margin-top: 1.5rem; font-size: 1.05rem; font-weight: 500; color: var(--text); }
+.legal-prose p,
+.legal-prose ul,
+.legal-prose table { margin-top: 0.75rem; }
+.legal-prose ul { list-style: disc; padding-left: 1.25rem; }
+.legal-prose li + li { margin-top: 0.35rem; }
+.legal-prose strong { color: var(--text); font-weight: 500; }
+.legal-prose a { color: var(--accent); text-decoration: underline; text-underline-offset: 4px; }
+.legal-prose table { display: block; overflow-x: auto; border-collapse: collapse; font-size: 0.95em; }
+.legal-prose th,
+.legal-prose td { border: 1px solid var(--border); padding: 0.5rem 0.75rem; text-align: left; vertical-align: top; }
+.legal-prose th { color: var(--text); font-weight: 500; background: var(--surface); }
+/* Facts still to confirm (⏳, [VITOR]): visible on drafts only (a page can't go live with any). */
+.legal-prose mark.legal-todo { background: var(--draft-bg); color: var(--draft-text); padding: 0 0.2em; border-radius: 0.25rem; }
