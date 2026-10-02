@@ -3,7 +3,7 @@
 import { cookies } from "next/headers";
 import { getLocale } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
-import { getMe } from "@/lib/journal/me";
+import { getMe, hasCurrentConsent } from "@/lib/journal/me";
 import { consentItem, type ConsentItem } from "@/lib/legalVersions";
 import { CONSENT_COOKIE, CONSENT_COOKIE_MAX_AGE, grantedAtConsent, serializeConsent } from "@/lib/onboardingConsent";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -36,7 +36,7 @@ export async function giveConsent(_prev: ConsentState, form: FormData): Promise<
   }
 
   const me = await getMe(supabase);
-  const needsAge = !me?.consents.age_18?.granted;
+  const needsAge = !me || !hasCurrentConsent(me, "age_18");
   if (needsAge && form.get("age") !== "on") return { status: "error", error: "age" };
   const items: ConsentItem[] = [...grantedAtConsent(), ...(needsAge ? [consentItem("age_18")] : [])];
   const { error } = await supabase.rpc("record_consents", { p_items: items });

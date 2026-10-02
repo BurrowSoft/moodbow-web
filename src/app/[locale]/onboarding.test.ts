@@ -2,6 +2,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CONSENT_COOKIE, grantedAtConsent, parseConsentCookie, serializeConsent } from "@/lib/onboardingConsent";
 import { onboardingStep } from "@/lib/journal/me";
+import { POLICY_VERSIONS } from "@/lib/legalVersions";
 
 // W0 part 2: the onboarding actions with mocked Supabase, cookies and
 // next-intl redirects.
@@ -73,10 +74,23 @@ describe("consent cookie", () => {
 });
 
 describe("onboardingStep", () => {
+  const current = Object.fromEntries(
+    (Object.keys(POLICY_VERSIONS) as (keyof typeof POLICY_VERSIONS)[]).map((k) => [k, { version: POLICY_VERSIONS[k], granted: true }]),
+  );
   it("consent first, then setup, then the journal", () => {
-    expect(onboardingStep({ has_required_consents: false, profile: { onboarded_at: "x" } as never })).toBe("consent");
-    expect(onboardingStep({ has_required_consents: true, profile: { onboarded_at: null } as never })).toBe("setup");
-    expect(onboardingStep({ has_required_consents: true, profile: { onboarded_at: "2026-10-02" } as never })).toBe("journal");
+    expect(onboardingStep({ consents: {}, profile: { onboarded_at: "x" } as never })).toBe("consent");
+    expect(onboardingStep({ consents: current, profile: { onboarded_at: null } as never })).toBe("setup");
+    expect(onboardingStep({ consents: current, profile: { onboarded_at: "2026-10-02" } as never })).toBe("journal");
+  });
+
+  it("an older accepted version (fine for the DB) still sends the web user to Consent", () => {
+    const old = { ...current, privacy: { version: "2025-01-01", granted: true } };
+    expect(onboardingStep({ consents: old, profile: { onboarded_at: "x" } as never })).toBe("consent");
+    const withdrawn = { ...current, health_data: { version: POLICY_VERSIONS.health_data, granted: false } };
+    expect(onboardingStep({ consents: withdrawn, profile: { onboarded_at: "x" } as never })).toBe("consent");
+    // AI is optional: missing AI consent doesn't block.
+    const { ai: _ai, ...noAi } = current;
+    expect(onboardingStep({ consents: noAi, profile: { onboarded_at: "x" } as never })).toBe("journal");
   });
 });
 

@@ -5,7 +5,7 @@ import type { Locale } from "@/i18n/routing";
 import { redirect } from "@/i18n/navigation";
 import { PageShell } from "@/components/PageShell";
 import { pageGate } from "@/lib/conditions";
-import { getMe } from "@/lib/journal/me";
+import { getMe, hasCurrentConsent, hasCurrentConsents } from "@/lib/journal/me";
 import { pageMetadata } from "@/lib/metadata";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { ConsentForm } from "./ConsentForm";
@@ -31,9 +31,9 @@ export default async function ConsentPage({ params }: PageProps<"/[locale]/conse
   let askAge = false;
   if (supabase && user) {
     const me = await getMe(supabase);
-    // Consents already current → nothing to ask.
-    if (me?.has_required_consents) redirect({ href: "/app", locale });
-    askAge = !me?.consents.age_18?.granted;
+    // Consents already current (the versions this build ships) → nothing to ask.
+    if (me && hasCurrentConsents(me)) redirect({ href: "/app", locale });
+    askAge = !me || !hasCurrentConsent(me, "age_18");
   }
 
   const t = await getTranslations("onboarding");

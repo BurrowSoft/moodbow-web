@@ -6,6 +6,7 @@ import { redirect } from "@/i18n/navigation";
 import { pageGate } from "@/lib/conditions";
 import { getMe, onboardingStep } from "@/lib/journal/me";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { JournalUnavailable } from "@/components/JournalUnavailable";
 import { AppNav } from "./AppNav";
 
 // The signed-in web journal. Behind web-journal-live: the proxy 404s /app on
@@ -26,7 +27,8 @@ export default async function AppLayout({ children, params }: LayoutProps<"/[loc
   if (!supabase || !user) return redirect({ href: "/sign-in", locale });
 
   const me = await getMe(supabase);
-  if (!me) return redirect({ href: "/sign-in", locale });
+  // Signed in but the data didn't load: an error state, not a redirect loop.
+  if (!me) return <JournalUnavailable />;
   const step = onboardingStep(me);
   if (step === "consent") redirect({ href: "/consent", locale });
   if (step === "setup") redirect({ href: "/setup", locale });

@@ -8,6 +8,7 @@ import { pageGate } from "@/lib/conditions";
 import { getMe, onboardingStep } from "@/lib/journal/me";
 import { pageMetadata } from "@/lib/metadata";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { JournalUnavailable } from "@/components/JournalUnavailable";
 import { SetupForm } from "./SetupForm";
 
 // Set up (M3): signed in, consents current, not onboarded yet. Behind
@@ -29,7 +30,8 @@ export default async function SetupPage({ params }: PageProps<"/[locale]/setup">
   const user = supabase ? (await supabase.auth.getUser()).data.user : null;
   if (!supabase || !user) return redirect({ href: "/sign-in", locale });
   const me = await getMe(supabase);
-  if (!me) return redirect({ href: "/sign-in", locale });
+  // Signed in but the data didn't load: an error state, not a redirect loop.
+  if (!me) return <JournalUnavailable />;
   const step = onboardingStep(me);
   if (step === "consent") redirect({ href: "/consent", locale });
   if (step === "journal") redirect({ href: "/app", locale });

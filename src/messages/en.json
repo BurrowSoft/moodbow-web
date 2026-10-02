@@ -183,7 +183,8 @@
     "tabInsights": "Insights",
     "tabMe": "Me",
     "emptyComingSoon": "Coming soon",
-    "meSignOut": "Sign out"
+    "meSignOut": "Sign out",
+    "retry": "Try again"
   },
   "notFound": {
     "title": "Page not found",

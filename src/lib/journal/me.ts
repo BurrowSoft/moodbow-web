@@ -1,5 +1,5 @@
 import type { createSupabaseServerClient } from "@/lib/supabase/server";
-import type { ConsentKind } from "@/lib/legalVersions";
+import { POLICY_VERSIONS, REQUIRED_KINDS, type ConsentKind } from "@/lib/legalVersions";
 
 type Client = NonNullable<Awaited<ReturnType<typeof createSupabaseServerClient>>>;
 
@@ -22,8 +22,20 @@ export async function getMe(supabase: Client): Promise<Me | null> {
 // current consents goes to Consent first; then Set up until onboarded).
 export type OnboardingStep = "consent" | "setup" | "journal";
 
-export function onboardingStep(me: Pick<Me, "has_required_consents" | "profile">): OnboardingStep {
-  if (!me.has_required_consents) return "consent";
+// The web checks the versions ITSELF: get_me().has_required_consents accepts
+// any published version (so older app builds keep working), but this build
+// asks for the versions it ships (POLICY_VERSIONS), like the app does.
+export function hasCurrentConsent(me: Pick<Me, "consents">, kind: ConsentKind): boolean {
+  const c = me.consents?.[kind];
+  return !!c?.granted && c.version === POLICY_VERSIONS[kind];
+}
+
+export function hasCurrentConsents(me: Pick<Me, "consents">): boolean {
+  return REQUIRED_KINDS.every((kind) => hasCurrentConsent(me, kind));
+}
+
+export function onboardingStep(me: Pick<Me, "consents" | "profile">): OnboardingStep {
+  if (!hasCurrentConsents(me)) return "consent";
   if (!me.profile?.onboarded_at) return "setup";
   return "journal";
 }
