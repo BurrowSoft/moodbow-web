@@ -14,5 +14,9 @@
   "backup-retention-confirmed": {
     "met": false,
     "what": "Mobile Dev confirmed in the Supabase dashboard how many days backups are kept (plan + PITR status), and BACKUP_RETENTION_DAYS in src/lib/site.ts holds that number."
+  },
+  "web-journal-live": {
+    "met": false,
+    "what": "The signed-in web journal (W0 shell + onboarding + Today, at parity with the released app) is live for users, with Vitor's go. Gates /app, /sign-in, /forgot-password and the \"Continue on the web\" button."
   }
 }

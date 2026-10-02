@@ -218,10 +218,10 @@ test.describe("auth links", () => {
     await expect(page.getByRole("button")).toHaveCount(0);
   });
 
-  test("/auth/confirm: GET is a plain page, same-origin referrers only, noindex", async ({ request, page }) => {
+  test("/auth/confirm: GET is a plain page, origin-only referrers, noindex", async ({ request, page }) => {
     const res = await request.get("/auth/confirm?token_hash=a1b2c3d4e5f60718293a4b5c6d7e8f90&type=signup", { maxRedirects: 0 });
     expect(res.status()).toBe(200);
-    expect(res.headers()["referrer-policy"]).toBe("same-origin");
+    expect(res.headers()["referrer-policy"]).toBe("strict-origin");
     await page.goto("/auth/confirm?token_hash=a1b2c3d4e5f60718293a4b5c6d7e8f90&type=signup");
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex, nofollow");
   });
@@ -246,5 +246,44 @@ test.describe("auth links", () => {
     await expect(page).toHaveURL(/\/email-confirmed$/);
     await page.goto("/email-confirmed?result=email_change_pending");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Almost done.");
+  });
+});
+
+// The web journal shell (W0), behind web-journal-live (drafts on test
+// builds). No Supabase env here: signed-out paths and fail-closed errors.
+// Signed-in rows run on the Preview against staging.
+test.describe("web journal (signed out)", () => {
+  test("/app sends a signed-out visitor to sign-in", async ({ page }) => {
+    await page.goto("/app/me");
+    await expect(page).toHaveURL(/\/sign-in$/);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Welcome back");
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex, nofollow");
+  });
+
+  test("sign-in validates the email, then fails closed", async ({ page }) => {
+    await page.goto("/sign-in");
+    await page.getByLabel("Email").fill("not-an-email");
+    await page.getByLabel("Password").fill("whatever-123");
+    await page.getByRole("button", { name: "Sign in" }).click();
+    await expect(page.getByTestId("signin-error")).toHaveText("Enter a valid email");
+    await page.getByLabel("Email").fill("w0@example.invalid");
+    await page.getByLabel("Password").fill("whatever-123");
+    await page.getByRole("button", { name: "Sign in" }).click();
+    await expect(page.getByTestId("signin-error")).toHaveText("Something went wrong. Please try again.");
+  });
+
+  test("forgot password: link from sign-in, validation, always the neutral answer", async ({ page }) => {
+    await page.goto("/sign-in");
+    await page.getByRole("link", { name: "Forgot password?" }).click();
+    await expect(page).toHaveURL(/\/forgot-password$/);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Reset your password");
+    await page.getByLabel("Email").fill("nope");
+    await page.getByRole("button", { name: "Send link" }).click();
+    await expect(page.getByTestId("forgot-error")).toHaveText("Enter a valid email");
+    await page.getByLabel("Email").fill("w0@example.invalid");
+    await page.getByRole("button", { name: "Send link" }).click();
+    // Always the neutral answer (no account enumeration), even without Supabase.
+    await expect(page.getByTestId("reset-sent")).toHaveText("If an account exists for w0@example.invalid, a link is on its way.");
+    await expect(page.getByTestId("reset-sent-hint")).toHaveText("Didn't get it? Check your spam folder, or try again in a few minutes.");
   });
 });

@@ -12,6 +12,16 @@ export function supabaseConfig(): { url: string; key: string } | null {
   return url && key ? { url, key } : null;
 }
 
+// The auth cookies. httpOnly: nothing in the browser reads them (there's no
+// browser-side Supabase client; every call runs on the server). secure on
+// Vercel (https), not on localhost.
+export const SESSION_COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "lax",
+  path: "/",
+} as const;
+
 // null when the env vars are missing (local builds, CI): callers fail
 // closed (an auth link shows "expired", a form shows the generic error).
 export async function createSupabaseServerClient() {
@@ -19,6 +29,7 @@ export async function createSupabaseServerClient() {
   if (!config) return null;
   const store = await cookies();
   return createServerClient(config.url, config.key, {
+    cookieOptions: SESSION_COOKIE_OPTIONS,
     cookies: {
       getAll: () => store.getAll(),
       setAll: (list) => {

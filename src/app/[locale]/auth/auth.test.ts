@@ -21,7 +21,7 @@ vi.mock("next-intl/server", () => ({
   getTranslations: async (ns: string | { namespace: string }) => (key: string) => `${typeof ns === "string" ? ns : ns.namespace}.${key}`,
 }));
 class Redirect {
-  constructor(public args: { href: { pathname: string; query: Record<string, string> }; locale: string }) {}
+  constructor(public args: { href: string | { pathname: string; query: Record<string, string> }; locale: string }) {}
 }
 vi.mock("@/i18n/navigation", () => ({
   redirect: (args: Redirect["args"]) => {
@@ -94,6 +94,7 @@ describe("GET /auth/confirm (the page)", () => {
 });
 
 describe("confirmLink (the button's POST)", () => {
+  const query = (args: Redirect["args"]) => (typeof args.href === "string" ? {} : args.href.query);
   const post = async (fields: Record<string, string>) => {
     const form = new FormData();
     for (const [k, v] of Object.entries(fields)) form.set(k, v);
@@ -108,22 +109,23 @@ describe("confirmLink (the button's POST)", () => {
 
   it("signup: verifies, ends the web session, redirects to /email-confirmed", async () => {
     auth.verifyOtp.mockResolvedValue({ data: { session }, error: null });
-    expect(await post({ token_hash: HASH, type: "signup" })).toEqual({ href: { pathname: "/email-confirmed", query: {} }, locale: "en" });
+    // A plain path when there's no result (no trailing "?").
+    expect(await post({ token_hash: HASH, type: "signup" })).toEqual({ href: "/email-confirmed", locale: "en" });
     expect(auth.verifyOtp).toHaveBeenCalledWith({ type: "signup", token_hash: HASH });
     expect(auth.signOut).toHaveBeenCalledWith({ scope: "local" });
   });
 
   it("recovery: keeps the session and goes to /auth/reset-password", async () => {
     auth.verifyOtp.mockResolvedValue({ data: { session }, error: null });
-    expect((await post({ token_hash: HASH, type: "recovery" })).href.pathname).toBe("/auth/reset-password");
+    expect((await post({ token_hash: HASH, type: "recovery" })).href).toBe("/auth/reset-password");
     expect(auth.signOut).not.toHaveBeenCalled();
   });
 
   it("email_change: updated with a session, pending without one", async () => {
     auth.verifyOtp.mockResolvedValue({ data: { session }, error: null });
-    expect((await post({ token_hash: HASH, type: "email_change" })).href.query).toEqual({ result: "email_changed" });
+    expect(query(await post({ token_hash: HASH, type: "email_change" }))).toEqual({ result: "email_changed" });
     auth.verifyOtp.mockResolvedValue({ data: { session: null, user: null }, error: null });
-    expect((await post({ token_hash: HASH, type: "email_change" })).href.query).toEqual({ result: "email_change_pending" });
+    expect(query(await post({ token_hash: HASH, type: "email_change" }))).toEqual({ result: "email_change_pending" });
   });
 
   it("an expired or used token → expired", async () => {
@@ -133,11 +135,11 @@ describe("confirmLink (the button's POST)", () => {
   });
 
   it("bad fields never reach Supabase; missing config fails closed", async () => {
-    expect((await post({ token_hash: HASH, type: "sms" })).href.query).toEqual({ result: "expired" });
-    expect((await post({})).href.query).toEqual({ result: "expired" });
+    expect(query(await post({ token_hash: HASH, type: "sms" }))).toEqual({ result: "expired" });
+    expect(query(await post({}))).toEqual({ result: "expired" });
     expect(auth.verifyOtp).not.toHaveBeenCalled();
     configured = false;
-    expect((await post({ token_hash: HASH, type: "signup" })).href.query).toEqual({ result: "expired" });
+    expect(query(await post({ token_hash: HASH, type: "signup" }))).toEqual({ result: "expired" });
   });
 });
 
