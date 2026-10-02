@@ -61,14 +61,21 @@ Fonts: Poppins (Latin), with Prompt ready for Thai glyphs (not preloaded), self-
 
 ### Auth email links
 
-The Supabase send-email hook (moodbow-app) links to . **GET only shows a page
+The Supabase send-email hook (moodbow-app) links to `/auth/confirm?token_hash=…&type=…`. **GET only shows a page
 with one button** and never calls Supabase, so mail scanners that prefetch links can't spend the single-use
-token. The click (a server action) runs  against the deployment's own project (Production → prod,
-Preview → staging; env  + ) and redirects to a
-clean URL: signup and similar → ; recovery →  (sets the password, signs
-the account out on every device, then shows ); email change →  (or  after the first of the two confirmations); anything else →
-.  is never followed, the pages send  and noindex, and nothing logs
-the token. Without the env vars every link fails closed.
+token. The click (a server action) runs `verifyOtp` against the deployment's own project (Production → prod,
+Preview → staging; env `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`) and redirects to a
+clean URL:
+
+- signup and similar → `/email-confirmed`;
+- recovery → `/auth/reset-password` (sets the password, signs the account out on every device, then shows
+  `?status=changed`);
+- email change → `/email-confirmed?result=email_changed`, or `email_change_pending` after the first of the two
+  confirmations;
+- anything else → `/email-confirmed?result=expired`.
+
+`redirect_to` is never followed, the pages send `no-referrer` and noindex, and nothing logs the token. Without
+the env vars every link fails closed.
 
 ### Text = enforcement: conditions and flags
 
