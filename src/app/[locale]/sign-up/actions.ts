@@ -69,9 +69,15 @@ async function signUp(form: FormData): Promise<SignUpState> {
   // With email confirmation on, Supabase answers an existing address with a
   // user that has no identities (and sends nothing).
   if (data.user && data.user.identities?.length === 0) return fail("emailTaken");
-  store.delete(CONSENT_COOKIE);
   // No confirmation required on this project → already signed in.
-  if (data.session) return redirect({ href: "/setup", locale });
+  if (data.session) {
+    store.delete(CONSENT_COOKIE);
+    return redirect({ href: "/setup", locale });
+  }
+  // The consent cookie stays until the user leaves this page signed in: the
+  // action's response re-renders /sign-up, which sends anyone without it
+  // back to /consent and would lose the Check email step (Web Tester, #6).
+  // It expires on its own after an hour if the flow is abandoned.
   return { status: "checkEmail", email };
 }
 
@@ -82,6 +88,8 @@ async function confirmedSignIn(prev: SignUpState, form: FormData): Promise<SignU
   const password = String(form.get("password") ?? "");
   const { error } = await supabase.auth.signInWithPassword({ email: prev.email, password });
   if (error) return { ...prev, notice: error.code === "email_not_confirmed" ? "notConfirmed" : "generic" };
+  // Signed in and leaving /sign-up: the consents are in the account now.
+  (await cookies()).delete(CONSENT_COOKIE);
   return redirect({ href: "/setup", locale: await getLocale() });
 }
 

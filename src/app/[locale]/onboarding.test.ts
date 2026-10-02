@@ -159,7 +159,9 @@ describe("signUpFlow", () => {
     expect(arg.options.data.time_zone).toBe("Asia/Bangkok");
     expect(arg.options.data.consents.map((c: { kind: string }) => c.kind)).toEqual(["privacy", "terms", "health_data", "age_18"]);
     expect(arg.options.data).not.toHaveProperty("country");
-    expect(jar.has(CONSENT_COOKIE)).toBe(false);
+    // Kept: the action's re-render of /sign-up needs it, or the page would
+    // send the user back to /consent and lose Check email (#6 ❌).
+    expect(parseConsentCookie(jar.get(CONSENT_COOKIE)?.value)).toEqual(grantedAtConsent());
   });
 
   it("a bad time zone is sent as null (the DB falls back to UTC)", async () => {
@@ -179,13 +181,16 @@ describe("signUpFlow", () => {
     expect(await signUpFlow(idle, form(valid))).toMatchObject({ status: "error", error: "passwordShort" });
   });
 
-  it("I've confirmed my email: signs in with the in-memory password → /setup, or says not confirmed yet", async () => {
+  it("I've confirmed my email: signs in with the in-memory password → /setup (cookie cleared), or says not confirmed yet", async () => {
+    jar.set(CONSENT_COOKIE, { value: serializeConsent(grantedAtConsent()) });
     const check = { status: "checkEmail", email: "new@example.invalid" } as const;
     auth.signInWithPassword.mockResolvedValue({ error: { code: "email_not_confirmed" } });
     expect(await signUpFlow(check, form({ intent: "confirmed", password: "secret-123" }))).toEqual({ ...check, notice: "notConfirmed" });
+    expect(jar.has(CONSENT_COOKIE)).toBe(true);
     auth.signInWithPassword.mockResolvedValue({ error: null });
     expect(await redirected(signUpFlow(check, form({ intent: "confirmed", password: "secret-123" })))).toEqual({ redirect: "/setup" });
     expect(auth.signInWithPassword).toHaveBeenLastCalledWith({ email: "new@example.invalid", password: "secret-123" });
+    expect(jar.has(CONSENT_COOKIE)).toBe(false);
   });
 
   it("Send it again: resent, or the rate-limit copy", async () => {
