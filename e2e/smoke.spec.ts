@@ -143,6 +143,15 @@ test.describe("static files", () => {
     expect(await res.json()).toEqual({ applinks: { details: [] } });
   });
 
+  test("the email logo is a 320×65 PNG, cached, not redirected", async ({ request }) => {
+    const res = await request.get("/email/moodbow-logo.png", { maxRedirects: 0 });
+    expect(res.status()).toBe(200);
+    expect(res.headers()["content-type"]).toBe("image/png");
+    expect(res.headers()["cache-control"]).toContain("max-age=2592000");
+    const png = await res.body();
+    expect([png.readUInt32BE(16), png.readUInt32BE(20)]).toEqual([320, 65]);
+  });
+
   test("robots.txt points to the sitemap", async ({ request }) => {
     const res = await request.get("/robots.txt");
     expect(res.status()).toBe(200);
