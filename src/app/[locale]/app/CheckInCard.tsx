@@ -206,7 +206,7 @@ function Card({ initial, uid, today, setSuperseded }: Props & { setSuperseded: (
 
   const set = (patch: Partial<Fields>) => setFields((f) => ({ ...f, ...patch }));
   const chip = (active: boolean) =>
-    `min-h-11 rounded-full border px-4 text-sm font-medium ${active ? "border-accent bg-pill text-accent" : "border-border text-text hover:bg-pill"}`;
+    `min-h-12 rounded-full border px-4 text-sm font-medium ${active ? "border-accent bg-pill text-accent" : "border-border text-text hover:bg-pill"}`;
   const errorKey = storageFailed
     ? "errGeneric"
     : state.status === "error"
@@ -342,7 +342,7 @@ function Card({ initial, uid, today, setSuperseded }: Props & { setSuperseded: (
             <legend className="text-sm font-medium text-text">
               {t("stressTitle")} <span className="font-normal text-muted">· {t("optional")}</span>
             </legend>
-            <div className="mt-2 flex items-start gap-2">
+            <div className="mt-2 flex flex-wrap items-start gap-2">
               {STRESS_LEVELS.map((s) => (
                 <div key={s} className="flex flex-col items-center gap-1">
                   <button
@@ -350,7 +350,7 @@ function Card({ initial, uid, today, setSuperseded }: Props & { setSuperseded: (
                     aria-pressed={fields.stress === String(s)}
                     data-testid={`checkin-stress-${s}`}
                     onClick={() => set({ stress: fields.stress === String(s) ? "" : String(s) })}
-                    className={`${chip(fields.stress === String(s))} w-11 px-0`}
+                    className={`${chip(fields.stress === String(s))} min-w-12 px-0`}
                   >
                     {s}
                   </button>

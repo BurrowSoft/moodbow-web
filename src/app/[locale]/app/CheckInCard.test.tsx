@@ -292,3 +292,12 @@ describe("CheckInCard: narrow screens and large text (decision 105)", () => {
     expect(selected).toHaveAttribute("aria-hidden", "true");
   });
 });
+
+describe("CheckInCard: stress chips at large text (reviewer #26)", () => {
+  it("48 px chips in a row that wraps", () => {
+    renderCard(null);
+    fireEvent.click(screen.getByTestId("checkin-mood-3"));
+    for (const s of [1, 2, 3, 4, 5]) expect(screen.getByTestId(`checkin-stress-${s}`).className).toMatch(/\bmin-w-12\b/);
+    expect(screen.getByTestId("checkin-stress-1").closest("div")!.parentElement!.className).toMatch(/\bflex-wrap\b/);
+  });
+});
