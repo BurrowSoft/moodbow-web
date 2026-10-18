@@ -248,3 +248,23 @@ describe("CheckInCard: a request lost at the network level (Web Tester, #11)", (
     await waitFor(() => expect(window.localStorage.getItem(KEY)).toBeNull());
   });
 });
+
+describe("CheckInCard: a live save sent to sign-in or Consent (reviewer #11/#22)", () => {
+  it("keeps the values as a pending copy before leaving (decision 81)", async () => {
+    saveCheckIn.mockRejectedValue(Object.assign(new Error("NEXT_REDIRECT"), { digest: "NEXT_REDIRECT;replace;/sign-in?signed_out=session;307;" }));
+    const onError = vi.spyOn(console, "error").mockImplementation(() => {});
+    const swallow = (e: Event) => e.preventDefault();
+    window.addEventListener("error", swallow);
+    try {
+      renderCard(null);
+      fireEvent.click(screen.getByTestId("checkin-mood-4"));
+      fireEvent.click(screen.getByTestId("checkin-stress-2"));
+      fireEvent.click(screen.getByTestId("checkin-save"));
+      await waitFor(() => expect(window.localStorage.getItem(KEY)).not.toBeNull());
+      expect(JSON.parse(window.localStorage.getItem(KEY)!)).toMatchObject({ fields: { mood: 4, stress: "2" }, date: "2026-10-02" });
+    } finally {
+      window.removeEventListener("error", swallow);
+      onError.mockRestore();
+    }
+  });
+});
