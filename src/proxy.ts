@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { routing } from "./i18n/routing";
 import { isHiddenPage, pagePath } from "./lib/sitemapPages";
 import { AUTH_OUTAGE_HEADER } from "./lib/supabase/deadline";
-import { authCookieNames, needsSession, refreshSession, signedInOnly } from "./lib/supabase/proxy";
+import { authCookieNames, authCookieUid, needsSession, refreshSession, signedInOnly, WIPE_COOKIE, WIPE_COOKIE_OPTIONS } from "./lib/supabase/proxy";
 
 // Locale routing (src/i18n/routing.ts): the default locale is unprefixed,
 // others get /<locale>. With more than one locale, a first visit is matched
@@ -43,6 +43,8 @@ export default async function proxy(req: NextRequest) {
   // doesn't count (lib/supabase/proxy.ts).
   if (signedOut) {
     const stale = authCookieNames(req);
+    // Read before the session cookies are dropped below.
+    const goneUid = signedOut === "account_gone" ? authCookieUid(req) : null;
     for (const name of stale) req.cookies.delete(name);
     let res: NextResponse;
     if (signedInOnly(path)) {
@@ -56,6 +58,11 @@ export default async function proxy(req: NextRequest) {
       res = intl(req);
     }
     for (const name of stale) res.cookies.delete(name);
+    // A deleted account's health data must not stay in this browser either
+    // (decisions 68 + 85): the next page wipes that uid's local copies. A
+    // revoked session keeps them for when the same person signs back in
+    // (decision 81).
+    if (goneUid) res.cookies.set(WIPE_COOKIE, goneUid, WIPE_COOKIE_OPTIONS);
     return res;
   }
 
