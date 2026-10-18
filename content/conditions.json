@@ -54,5 +54,9 @@
   "help-now-live": {
     "met": false,
     "what": "Me → Get help now (the safety card with local hotlines from the country registry) is in a RELEASED app build and on the live web journal (M7 + M8)."
+  },
+  "web-analytics": {
+    "met": false,
+    "what": "Vercel Web Analytics (cookie-free visit counts, decision 79) is enabled for the moodbow-web project by Vitor in Vercel. Flipping this shows the privacy policy's visit-count lines and loads the counter (with the URL scrubber, src/lib/analytics.ts) in the same deploy."
   }
 }
