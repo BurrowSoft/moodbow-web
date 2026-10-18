@@ -45,6 +45,22 @@ function removePending(uid: string) {
   }
 }
 
+// The pending copy for a save whose request failed (the inverse of toFormData).
+function pendingFromForm(form: FormData): Pending {
+  const text = (name: string) => String(form.get(name) ?? "");
+  return {
+    fields: {
+      mood: Number(text("mood")),
+      sleepHours: text("sleep_hours"),
+      sleepQuality: text("sleep_quality") as SleepQuality | "",
+      exercise: text("exercise_minutes"),
+      stress: text("stress"),
+    },
+    expected: text("expected_updated_at"),
+    date: text("local_date"),
+  };
+}
+
 function toFormData(fields: Fields, expectedUpdatedAt: string, date: string, fromPending = false): FormData {
   const form = new FormData();
   form.set("local_date", date);
@@ -91,13 +107,23 @@ function Card({ initial, uid, today, setSuperseded }: Props & { setSuperseded: (
     try {
       next = await saveCheckIn(prev, form);
     } catch (e) {
-      // The request itself failed (offline, the connection dropped): not a
-      // crash, the generic error, and a pending copy stays for the next try.
       // A redirect (consent, sign-in) is the navigation itself.
-      if (form.get("from_pending") === "1") flushing.current = false;
+      const fromPending = form.get("from_pending") === "1";
+      if (fromPending) flushing.current = false;
       const digest = (e as { digest?: unknown })?.digest;
       if (typeof digest === "string" && digest.startsWith("NEXT_REDIRECT")) throw e;
-      return { status: "error", error: "generic" };
+      // The request itself failed (the connection dropped while the browser
+      // still says online): not a crash. A synced copy simply stays for the
+      // next reconnect; a live save becomes one, exactly like saving offline.
+      if (fromPending) return prev;
+      try {
+        window.localStorage.setItem(pendingKey(uid), JSON.stringify(pendingFromForm(form)));
+      } catch {
+        return { status: "error", error: "generic" };
+      }
+      setOffline(true);
+      setEditing(false);
+      return prev;
     }
     if (form.get("from_pending") === "1") {
       flushing.current = false;

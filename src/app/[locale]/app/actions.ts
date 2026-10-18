@@ -57,7 +57,11 @@ export async function saveCheckIn(_prev: CheckInState, form: FormData): Promise<
     if (action.kind === "redirect") return redirect({ href: action.to, locale: await getLocale() });
     if (action.error === "stale") {
       const { data: latest } = await supabase.from("check_ins").select(COLUMNS).eq("local_date", date).maybeSingle();
-      return { status: "error", error: "stale", checkIn: (latest as CheckIn | null) ?? undefined };
+      const row = (latest as CheckIn | null) ?? undefined;
+      // The day already holds exactly these values: this same save went
+      // through before and only its answer was lost. Saved, not a conflict.
+      if (row && sameCheckIn(row, input)) return { status: "saved", checkIn: row };
+      return { status: "error", error: "stale", checkIn: row };
     }
     return { status: "error", error: action.error };
   }
