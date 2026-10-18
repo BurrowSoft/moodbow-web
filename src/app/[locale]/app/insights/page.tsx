@@ -1,4 +1,7 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
+import { pageGate } from "@/lib/conditions";
+import { dateLocale } from "@/lib/journal/today";
 import { setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 import { JournalUnavailable } from "@/components/JournalUnavailable";
@@ -7,6 +10,7 @@ import { getMe } from "@/lib/journal/me";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { tabMetadata } from "../TabPlaceholder";
 import { InsightsView } from "./InsightsView";
+import { ShareMonth } from "./ShareMonth";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/app/insights">): Promise<Metadata> {
   return tabMetadata("tabInsights", (await params).locale);
@@ -33,5 +37,10 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
     .gte("local_date", previousRangeStart(me.today, range))
     .lte("local_date", me.today);
   if (error) return <JournalUnavailable />;
-  return <InsightsView rows={(data ?? []) as InsightRow[]} today={me.today} range={range} />;
+  // Share: the current month's moodbow (M10), where share cards are on.
+  const share =
+    pageGate("share-cards") !== "hidden" ? (
+      <ShareMonth month={me.today.slice(0, 7)} dateLocaleTag={dateLocale(locale, (await headers()).get("accept-language"), me.profile?.country ?? null)} />
+    ) : null;
+  return <InsightsView rows={(data ?? []) as InsightRow[]} today={me.today} range={range} share={share} />;
 }
