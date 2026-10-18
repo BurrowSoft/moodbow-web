@@ -4,7 +4,8 @@
 
 export const RANGES = { week: 7, month: 30, "3months": 90 } as const;
 export type Range = keyof typeof RANGES;
-export const isRange = (s: unknown): s is Range => typeof s === "string" && s in RANGES;
+// Own keys only: `in` would also accept "toString", "__proto__"…
+export const isRange = (s: unknown): s is Range => typeof s === "string" && Object.hasOwn(RANGES, s);
 
 export type Metric = "mood" | "sleep" | "stress" | "exercise";
 export const METRICS: Metric[] = ["mood", "sleep", "stress", "exercise"];

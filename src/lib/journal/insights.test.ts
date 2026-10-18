@@ -20,6 +20,8 @@ describe("ranges (rolling, ending today)", () => {
   it("isRange accepts only the three tabs", () => {
     expect(["week", "month", "3months"].every(isRange)).toBe(true);
     expect(isRange("year")).toBe(false);
+    // Inherited names must not pass (reviewer #16: ?range=toString was a 500).
+    for (const inherited of ["toString", "__proto__", "constructor", "hasOwnProperty", "valueOf"]) expect(isRange(inherited), inherited).toBe(false);
     expect(isRange(undefined)).toBe(false);
   });
 });
