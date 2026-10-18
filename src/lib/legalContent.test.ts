@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { routing } from "@/i18n/routing";
 import { conditionMet, type ConditionId } from "./conditions";
 import { applyPending, isPendingMet, legalSource, pendingIds, renderLegal, todos, type LegalSlug } from "./legalContent";
+import { BACKUP_RETENTION_DAYS } from "./site";
 
 const PAGES: { slug: LegalSlug; gate: ConditionId }[] = [
   { slug: "privacy", gate: "privacy-text-approved" },
@@ -39,13 +40,24 @@ describe("legal content files", () => {
 
   // The legal texts describe these as available today, unconditioned
   // (decisions 40 + 69: real people only arrive after M7 + M8), so neither
-  // page may go live before them (Code Reviewer, #9).
-  it("a live legal page needs delete account, export, Get help now and the app lock live first", () => {
+  // page may go live before them (Code Reviewer, #9). The app lock is not a
+  // prerequisite (decision 83: it comes after 1.0, and its lines stay
+  // wrapped in {pending:app_lock}).
+  it("a live legal page needs delete account, export and Get help now live first", () => {
     for (const { slug, gate } of PAGES) {
       if (!conditionMet(gate)) continue;
-      for (const prerequisite of ["delete-account-live", "export-live", "help-now-live", "app-lock"] as const) {
+      for (const prerequisite of ["delete-account-live", "export-live", "help-now-live"] as const) {
         expect(conditionMet(prerequisite), `${slug} needs ${prerequisite}`).toBe(true);
       }
+    }
+  });
+
+  // Text = enforcement (decision 84): the policy's backup window is the
+  // number the account-deletion page uses.
+  it("the privacy policy's backup days match BACKUP_RETENTION_DAYS", () => {
+    for (const locale of routing.locales) {
+      const days = legalSource("privacy", locale).match(/\{pending:backup_retention\}(\d+)\{\/pending\}/)?.[1];
+      expect(Number(days), locale).toBe(BACKUP_RETENTION_DAYS);
     }
   });
 
