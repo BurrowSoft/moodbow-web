@@ -28,13 +28,14 @@ export default async function proxy(req: NextRequest) {
   // The signed-in area and the auth pages keep the Supabase session fresh:
   // refreshed first, so this request's server components already see the
   // new cookies (lib/supabase/proxy.ts), then saved on the response.
-  const { cookies: refreshed, accountGone } = needsSession(path) ? await refreshSession(req) : { cookies: [], accountGone: false };
+  const { cookies: refreshed, signedOut } = needsSession(path) ? await refreshSession(req) : { cookies: [], signedOut: null };
 
-  // The account (or session) no longer exists, e.g. deleted on another
-  // device: drop the stale session cookies everywhere, and send signed-in
-  // pages to sign-in with the notice (never to Consent). A server error or
-  // being offline doesn't count (lib/supabase/proxy.ts).
-  if (accountGone) {
+  // Supabase ended this session: the account was deleted on another device
+  // (decision 68) or the session was revoked (decision 70). Drop the stale
+  // session cookies everywhere, and send signed-in pages to sign-in with the
+  // matching notice (never to Consent). A server error or being offline
+  // doesn't count (lib/supabase/proxy.ts).
+  if (signedOut) {
     const stale = authCookieNames(req);
     for (const name of stale) req.cookies.delete(name);
     let res: NextResponse;
@@ -43,7 +44,7 @@ export default async function proxy(req: NextRequest) {
       const [, first = ""] = url.pathname.split("/");
       const prefix = (routing.locales as readonly string[]).includes(first) && first !== routing.defaultLocale ? `/${first}` : "";
       url.pathname = `${prefix}/sign-in`;
-      url.search = "?signed_out=1";
+      url.search = `?signed_out=${signedOut === "account_gone" ? "account" : "session"}`;
       res = NextResponse.redirect(url, 303);
     } else {
       res = intl(req);

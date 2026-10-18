@@ -396,9 +396,11 @@ test.describe("onboarding (signed out)", () => {
   });
 });
 
-test("sign-in shows the account-gone notice after the proxy signs a deleted account out", async ({ page }) => {
-  await page.goto("/sign-in?signed_out=1");
-  await expect(page.getByTestId("account-gone")).toHaveText("You've been signed out. If you deleted your account, everything in it is gone.");
+test("sign-in shows the notice for why the session ended (decisions 68 + 70)", async ({ page }) => {
+  await page.goto("/sign-in?signed_out=account");
+  await expect(page.getByTestId("signed-out-notice")).toHaveText("You've been signed out. If you deleted your account, everything in it is gone.");
+  await page.goto("/sign-in?signed_out=session");
+  await expect(page.getByTestId("signed-out-notice")).toHaveText("You've been signed out. Please sign in again.");
   await page.goto("/sign-in");
-  await expect(page.getByTestId("account-gone")).toHaveCount(0);
+  await expect(page.getByTestId("signed-out-notice")).toHaveCount(0);
 });

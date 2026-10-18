@@ -19,14 +19,24 @@ export function signedInOnly(path: string): boolean {
   return matches(SIGNED_IN_ONLY, path);
 }
 
-// Supabase Auth's answers that mean "this account or session no longer
-// exists" (deleted on another device, the session revoked). Same trigger as
-// the app. Anything else (a 5xx, a timeout, offline) must NOT sign anyone
-// out.
-const GONE_CODES = new Set(["user_not_found", "session_not_found"]);
+// Supabase Auth's answers that end this browser's session (same triggers as
+// the app, decisions 68 + 70):
+// - "account_gone": the user no longer exists (deleted on another device);
+// - "session_ended": the account exists but this session was revoked
+//   (e.g. signed out everywhere after a password reset).
+// Anything else (a 5xx, a timeout, offline) must NOT sign anyone out.
+export type SignedOutReason = "account_gone" | "session_ended";
 
-export function isAccountGone(error: { code?: string } | null): boolean {
-  return !!error?.code && GONE_CODES.has(error.code);
+export function signedOutReason(error: { code?: string } | null): SignedOutReason | null {
+  switch (error?.code) {
+    case "user_not_found":
+      return "account_gone";
+    case "session_not_found":
+    case "refresh_token_not_found":
+      return "session_ended";
+    default:
+      return null;
+  }
 }
 
 // The session cookie: sb-<project ref>-auth-token, possibly split into
@@ -51,10 +61,10 @@ export type CookieToSet = { name: string; value: string; options?: CookieOptions
 //   them in the browser.
 // Without this, server components would read the old access token and
 // refresh again with an already-rotated refresh token.
-// accountGone: Supabase says the user or session no longer exists.
-export async function refreshSession(req: NextRequest): Promise<{ cookies: CookieToSet[]; accountGone: boolean }> {
+// signedOut: why Supabase ended this session, if it did (see above).
+export async function refreshSession(req: NextRequest): Promise<{ cookies: CookieToSet[]; signedOut: SignedOutReason | null }> {
   const config = supabaseConfig();
-  if (!config) return { cookies: [], accountGone: false };
+  if (!config) return { cookies: [], signedOut: null };
   let toSet: CookieToSet[] = [];
   const supabase = createServerClient(config.url, config.key, {
     cookieOptions: SESSION_COOKIE_OPTIONS,
@@ -68,5 +78,5 @@ export async function refreshSession(req: NextRequest): Promise<{ cookies: Cooki
   });
   // Validates the JWT with Supabase and refreshes it when expired.
   const { error } = await supabase.auth.getUser();
-  return { cookies: toSet, accountGone: isAccountGone(error) };
+  return { cookies: toSet, signedOut: signedOutReason(error) };
 }

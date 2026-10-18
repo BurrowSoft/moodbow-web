@@ -23,6 +23,7 @@ vi.mock("@supabase/ssr", () => ({
         // The account was deleted elsewhere / the session revoked.
         if (value === "GONE") return { data: { user: null }, error: { code: "user_not_found", status: 403 } };
         if (value === "NO_SESSION") return { data: { user: null }, error: { code: "session_not_found", status: 403 } };
+        if (value === "REVOKED_REFRESH") return { data: { user: null }, error: { code: "refresh_token_not_found", status: 400 } };
         // A server hiccup: must never sign anyone out.
         if (value === "OUTAGE") return { data: { user: null }, error: { code: "unexpected_failure", status: 500 } };
         if (value === "EXPIRED") {
@@ -74,13 +75,17 @@ describe("proxy session refresh", () => {
   });
 });
 
-describe("an account that no longer exists (parity with the app)", () => {
-  it("signed-in pages: the session cookies are cleared and sign-in shows the notice", async () => {
-    for (const value of ["GONE", "NO_SESSION"]) {
+describe("Supabase ended the session (decisions 68 + 70, parity with the app)", () => {
+  it("signed-in pages: the session cookies are cleared and sign-in shows the matching notice", async () => {
+    for (const [value, reason] of [
+      ["GONE", "account"],
+      ["NO_SESSION", "session"],
+      ["REVOKED_REFRESH", "session"],
+    ]) {
       const req = new NextRequest("https://www.moodbow.com/app/me", { headers: { cookie: `${COOKIE}=${value}; ${COOKIE}.1=chunk; other=keep` } });
       const res = await proxy(req);
       expect(res.status, value).toBe(303);
-      expect(res.headers.get("location")).toBe("https://www.moodbow.com/sign-in?signed_out=1");
+      expect(res.headers.get("location")).toBe(`https://www.moodbow.com/sign-in?signed_out=${reason}`);
       const setCookie = res.headers.get("set-cookie") ?? "";
       expect(setCookie).toContain(`${COOKIE}=;`);
       expect(setCookie).toContain(`${COOKIE}.1=;`);

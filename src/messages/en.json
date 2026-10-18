@@ -108,6 +108,7 @@
   "auth": {
     "signinTitle": "Welcome back",
     "accountGoneNotice": "You've been signed out. If you deleted your account, everything in it is gone.",
+    "sessionEndedNotice": "You've been signed out. Please sign in again.",
     "emailLabel": "Email",
     "passwordLabel": "Password",
     "signinSubmit": "Sign in",
