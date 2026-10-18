@@ -10,7 +10,7 @@ import { CheckInCard } from "../../CheckInCard";
 export function DayCheckIn({ initial, uid, date, dateLocaleTag }: { initial: CheckIn | null; uid: string; date: string; dateLocaleTag: string }) {
   const t = useTranslations("timeline");
   const [adding, setAdding] = useState(false);
-  if (initial || adding) return <CheckInCard initial={initial} uid={uid} today={date} dateLocaleTag={dateLocaleTag} />;
+  if (initial || adding) return <CheckInCard initial={initial} uid={uid} date={date} dateLocaleTag={dateLocaleTag} />;
   return (
     <div className="rounded-3xl border border-dashed border-border p-6" data-testid="day-no-checkin">
       <p className="text-muted">{t("dayNoCheckin")}</p>

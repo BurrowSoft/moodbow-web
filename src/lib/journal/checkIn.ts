@@ -62,7 +62,10 @@ export function sameCheckIn(row: CheckIn, input: CheckInInput): boolean {
 }
 
 // The RPC's error codes (supabase/contracts/errors.md) → what the card does.
-export type CheckInError = "dateInFuture" | "stale" | "generic";
+// invalid: the values themselves were refused (invalid_value, or a form this
+// file rejects); a retry can never succeed. generic: anything else (the
+// network, an outage), which may.
+export type CheckInError = "dateInFuture" | "stale" | "invalid" | "generic";
 export type CheckInErrorAction = { kind: "error"; error: CheckInError } | { kind: "redirect"; to: "/consent" | "/sign-in" };
 
 export function checkInErrorAction(message: string): CheckInErrorAction {
@@ -70,5 +73,6 @@ export function checkInErrorAction(message: string): CheckInErrorAction {
   if (message.includes("not_authenticated")) return { kind: "redirect", to: "/sign-in" };
   if (message.includes("date_in_future")) return { kind: "error", error: "dateInFuture" };
   if (message.includes("stale_write")) return { kind: "error", error: "stale" };
+  if (message.includes("invalid_value")) return { kind: "error", error: "invalid" };
   return { kind: "error", error: "generic" };
 }

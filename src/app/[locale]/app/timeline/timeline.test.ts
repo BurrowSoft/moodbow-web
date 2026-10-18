@@ -5,11 +5,16 @@ import { dayLabel, groupByMonth, isIsoDate, monthLabel } from "@/lib/journal/tim
 // The Timeline's helpers, and loadTimeline against a mocked Supabase client.
 const rpc = vi.fn();
 vi.mock("@/lib/supabase/server", () => ({ createSupabaseServerClient: async () => ({ rpc }) }));
+let momentsLive = true;
+vi.mock("@/lib/conditions", () => ({ conditionMet: (id: string) => id === "timeline-moments-rpc" && momentsLive }));
 const { loadTimeline } = await import("./actions");
 
 const day = (local_date: string) => ({ local_date, check_in: null, entries: [], entry_count: 0 });
 
-beforeEach(() => rpc.mockReset());
+beforeEach(() => {
+  rpc.mockReset();
+  momentsLive = true;
+});
 
 describe("timeline helpers", () => {
   it("groups days under their month, keeping their order", () => {
@@ -46,6 +51,12 @@ describe("loadTimeline", () => {
     const page = await loadTimeline(null, true);
     expect(page).toMatchObject({ status: "ok", done: false });
     expect(rpc).toHaveBeenCalledWith("get_timeline", { p_before: null, p_limit: 30, p_moments_only: true });
+  });
+
+  it("Moments before migration 005 is live: refused here, never sent (reviewer #15)", async () => {
+    momentsLive = false;
+    expect(await loadTimeline(null, true)).toEqual({ status: "error" });
+    expect(rpc).not.toHaveBeenCalled();
   });
 
   it("an error (or the function not existing yet) is an error; a bad cursor never reaches the RPC", async () => {

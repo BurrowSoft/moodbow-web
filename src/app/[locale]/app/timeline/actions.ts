@@ -1,5 +1,6 @@
 "use server";
 
+import { conditionMet } from "@/lib/conditions";
 import { isIsoDate, TIMELINE_PAGE_DAYS, type TimelineDay } from "@/lib/journal/timeline";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -11,6 +12,9 @@ export type TimelinePage = { status: "ok"; days: TimelineDay[]; done: boolean } 
 // with Mobile Dev). Previews only, never full bodies.
 export async function loadTimeline(before: string | null, momentsOnly: boolean): Promise<TimelinePage> {
   if (before !== null && !isIsoDate(before)) return { status: "error" };
+  // The flag needs migration 005: never sent before it is live (a client
+  // calling this action directly included).
+  if (momentsOnly && !conditionMet("timeline-moments-rpc")) return { status: "error" };
   const supabase = await createSupabaseServerClient();
   if (!supabase) return { status: "error" };
   const { data, error } = await supabase.rpc("get_timeline", {

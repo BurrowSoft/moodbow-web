@@ -117,7 +117,7 @@ describe("saveCheckIn", () => {
   });
 
   it("an invalid card never reaches the RPC", async () => {
-    expect(await saveCheckIn(idle, form({ mood: "9" }))).toEqual({ status: "error", error: "generic" });
+    expect(await saveCheckIn(idle, form({ mood: "9" }))).toEqual({ status: "error", error: "invalid" });
     expect(rpc).not.toHaveBeenCalled();
   });
 

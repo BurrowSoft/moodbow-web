@@ -18,7 +18,7 @@ const COLUMNS = "local_date, mood, sleep_hours, sleep_quality, exercise_minutes,
 // version and asks to retry.
 export async function saveCheckIn(_prev: CheckInState, form: FormData): Promise<CheckInState> {
   const input = parseCheckIn(form);
-  if (!input) return { status: "error", error: "generic" };
+  if (!input) return { status: "error", error: "invalid" };
   const supabase = await createSupabaseServerClient();
   if (!supabase) return { status: "error", error: "generic" };
   const me = await getMe(supabase);

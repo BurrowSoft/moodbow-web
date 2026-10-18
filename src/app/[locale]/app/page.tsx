@@ -59,7 +59,7 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
           {dateLine(me.today, dateLocaleTag)}
         </p>
       </header>
-      <CheckInCard initial={(data as CheckIn | null) ?? null} uid={user.id} today={me.today} dateLocaleTag={dateLocaleTag} />
+      <CheckInCard initial={(data as CheckIn | null) ?? null} uid={user.id} date={me.today} dateLocaleTag={dateLocaleTag} />
       <Link
         href="/app/write"
         data-testid="today-write"
