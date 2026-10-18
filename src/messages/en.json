@@ -263,5 +263,9 @@
     "meTerms": "Terms",
     "meContact": "Contact us",
     "meVersion": "Version {version}"
+  },
+  "help": {
+    "helpTitle": "Help & FAQ",
+    "helpIntro": "Answers to common questions about using Moodbow. Can't find what you need? Email {email}."
   }
 }

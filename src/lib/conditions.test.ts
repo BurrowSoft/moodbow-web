@@ -51,11 +51,11 @@ describe("pageGate (fails closed)", () => {
 
 describe("sitemapPaths", () => {
   it("lists only ungated pages while nothing is met", () => {
-    expect(sitemapPaths()).toEqual(["/", "/support"]);
+    expect(sitemapPaths()).toEqual(["/", "/support", "/help"]);
   });
 
   it("adds a gated page once its condition is met", () => {
-    expect(sitemapPaths((id) => id === "delete-account-live")).toEqual(["/", "/support", "/account-deletion"]);
+    expect(sitemapPaths((id) => id === "delete-account-live")).toEqual(["/", "/support", "/help", "/account-deletion"]);
   });
 });
 
@@ -123,7 +123,7 @@ describe("the web journal gate (W0)", () => {
   });
 
   it("never lists the signed-in area in the sitemap, even when live", () => {
-    expect(sitemapPaths(() => true)).toEqual(["/", "/support", "/privacy", "/terms", "/account-deletion"]);
+    expect(sitemapPaths(() => true)).toEqual(["/", "/support", "/help", "/privacy", "/terms", "/account-deletion"]);
   });
 });
 

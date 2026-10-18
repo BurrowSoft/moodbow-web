@@ -8,6 +8,7 @@ type PageEntry = { path: string; gate?: ConditionId; prefix?: boolean; sitemap?:
 const PAGES: PageEntry[] = [
   { path: "/" },
   { path: "/support" },
+  { path: "/help", prefix: true },
   { path: "/privacy", gate: "privacy-text-approved" },
   { path: "/terms", gate: "terms-text-approved" },
   { path: "/account-deletion", gate: "delete-account-live" },

@@ -1,11 +1,14 @@
 import type { MetadataRoute } from "next";
 import { routing } from "@/i18n/routing";
+import { helpIndex } from "@/lib/helpContent";
 import { absoluteUrl, languageAlternates } from "@/lib/metadata";
 import { sitemapPaths } from "@/lib/sitemapPages";
 
-// One entry per page and locale, each with its hreflang alternates.
+// One entry per page and locale, each with its hreflang alternates, plus
+// the published Help articles (the default locale's list).
 export default function sitemap(): MetadataRoute.Sitemap {
-  return sitemapPaths().flatMap((path) =>
+  const articles = helpIndex(routing.defaultLocale).flatMap((g) => g.articles.map((a) => `/help/${a.slug}`));
+  return [...sitemapPaths(), ...articles].flatMap((path) =>
     routing.locales.map((locale) => ({
       url: absoluteUrl(locale, path),
       alternates: { languages: languageAlternates(path) },
