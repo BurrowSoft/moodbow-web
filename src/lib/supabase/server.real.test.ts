@@ -19,8 +19,9 @@ function expiredSessionCookie(): string {
 }
 
 const requestHeaders = new Headers();
+const cookieSet = vi.fn();
 vi.mock("next/headers", () => ({
-  cookies: async () => ({ getAll: () => [{ name: COOKIE, value: expiredSessionCookie() }], set: () => {} }),
+  cookies: async () => ({ getAll: () => [{ name: COOKIE, value: expiredSessionCookie() }, { name: "NEXT_LOCALE", value: "en" }], set: cookieSet }),
   headers: async () => requestHeaders,
 }));
 
@@ -111,5 +112,28 @@ describe("server client + real SDK: the auth forms while Auth hangs", () => {
     ]);
     for (const { error } of answers) expect(error?.name).toBe("AuthRetryableFetchError");
     expect(calls).toEqual([]);
+  });
+});
+
+describe("server client + real SDK: signing out while Auth is unreachable (reviewer #18)", () => {
+  beforeEach(() => cookieSet.mockClear());
+  const cleared = () => cookieSet.mock.calls.filter(([name, value, options]) => name === COOKIE && value === "" && options?.maxAge === 0);
+
+  it("flagged by the proxy: the session cookies are cleared anyway (a shared computer)", async () => {
+    requestHeaders.set("x-mb-auth-outage", "1");
+    const client = (await createSupabaseServerClient())!;
+    const { error } = await client.auth.signOut({ scope: "local" });
+    expect(error?.name).toBe("AuthRetryableFetchError");
+    expect(cleared()).toHaveLength(1);
+    // Only the session cookies: the locale cookie stays.
+    expect(cookieSet.mock.calls.some(([name]) => name === "NEXT_LOCALE")).toBe(false);
+  });
+
+  it("Auth hanging (auth-js would keep the session): cleared after the deadline", async () => {
+    const client = (await createSupabaseServerClient())!;
+    const pending = client.auth.signOut({ scope: "local" });
+    await vi.advanceTimersByTimeAsync(10_000);
+    await pending;
+    expect(cleared()).toHaveLength(1);
   });
 });

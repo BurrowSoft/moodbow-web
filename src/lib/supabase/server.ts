@@ -23,6 +23,25 @@ export const SESSION_COOKIE_OPTIONS = {
   path: "/",
 } as const;
 
+// The session cookie: sb-<project ref>-auth-token, possibly split into
+// chunks (.0, .1, …) by @supabase/ssr.
+const AUTH_COOKIE = /^sb-.+-auth-token(\.\d+)?$/;
+
+type CookieStore = Awaited<ReturnType<typeof cookies>>;
+
+// Deletes this browser's session cookies directly. Only server actions and
+// route handlers may set cookies; elsewhere this does nothing.
+export function clearSessionCookies(store: CookieStore): void {
+  for (const { name } of store.getAll()) {
+    if (!AUTH_COOKIE.test(name)) continue;
+    try {
+      store.set(name, "", { ...SESSION_COOKIE_OPTIONS, maxAge: 0 });
+    } catch {
+      // a server component: the proxy or the next action clears it
+    }
+  }
+}
+
 // null when the env vars are missing (local builds, CI): callers fail
 // closed (an auth link shows "expired", a form shows the generic error).
 //
@@ -105,7 +124,16 @@ export async function createSupabaseServerClient() {
   auth.updateUser = async (attributes, options) => (await bounded(() => updateUser(attributes, options))) ?? { data: { user: null }, error: deadlineError() };
   const resetPasswordForEmail = auth.resetPasswordForEmail.bind(auth);
   auth.resetPasswordForEmail = async (email, options) => (await bounded(() => resetPasswordForEmail(email, options))) ?? { data: null, error: deadlineError() };
+  // A sign-out always ends the session in THIS browser, whatever Auth says:
+  // auth-js keeps the session when it can't reach Auth (it returns early on
+  // a network error or a 5xx), and a timed-out or flagged call never gets
+  // that far, but the person asked to be signed out here (a shared
+  // computer). Revoking it server-side is best effort.
   const signOut = auth.signOut.bind(auth);
-  auth.signOut = async (options) => (await bounded(() => signOut(options))) ?? { error: deadlineError() };
+  auth.signOut = async (options) => {
+    const result = (await bounded(() => signOut(options))) ?? { error: deadlineError() };
+    clearSessionCookies(store);
+    return result;
+  };
   return client;
 }
