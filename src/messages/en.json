@@ -254,7 +254,9 @@
     "deleteTypeConfirm": "Type DELETE to confirm",
     "deleteConfirm": "Delete everything",
     "deleteDone": "Your account and everything in it were deleted.",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "exportReadable": "Readable copy (.txt)",
+    "exportData": "Data file (.json)"
   },
   "export": {
     "exportTitle": "Moodbow: your journal",

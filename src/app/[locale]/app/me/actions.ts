@@ -30,7 +30,9 @@ export async function exportMyData(): Promise<ExportResult> {
   const exportedAt = String((data as { exported_at?: unknown }).exported_at ?? "");
   // No indent: the whole journal travels in this one response (Vercel caps
   // it at 4.5 MB), so every byte counts. A streamed export is a follow-up.
-  return { status: "ok", json: JSON.stringify(data), date: /^\d{4}-\d{2}-\d{2}/.test(exportedAt) ? exportedAt.slice(0, 10) : "" };
+  // The export day in UTC (the file names), whatever offset exported_at has.
+  const day = Number.isNaN(Date.parse(exportedAt)) ? "" : new Date(exportedAt).toISOString().slice(0, 10);
+  return { status: "ok", json: JSON.stringify(data), date: day };
 }
 
 export type DeleteAccountState = { status: "idle" } | { status: "error"; error: "confirm" | "generic" };

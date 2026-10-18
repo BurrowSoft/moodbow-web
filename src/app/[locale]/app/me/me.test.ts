@@ -48,6 +48,11 @@ describe("exportMyData", () => {
     expect(exportFileName("")).toBe("moodbow-export.json");
   });
 
+  it("the file names use the export day in UTC, whatever the offset", async () => {
+    rpc.mockResolvedValue({ data: { format: "moodbow-export", format_version: 1, exported_at: "2026-10-03T01:00:00+07:00" }, error: null });
+    expect(await exportMyData()).toMatchObject({ status: "ok", date: "2026-10-02" });
+  });
+
   it("an error is an error", async () => {
     rpc.mockResolvedValue({ data: null, error: { message: "boom" } });
     expect(await exportMyData()).toEqual({ status: "error" });
