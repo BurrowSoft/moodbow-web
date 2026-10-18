@@ -37,6 +37,17 @@ export function WelcomeSlides() {
     // No server round trip: Next keeps its router in sync with replaceState.
     window.history.replaceState(window.history.state, "", `?slide=${next + 1}`);
   };
+  // Next / Skip / Back are real links to ?slide=N, so they work before JS
+  // loads too (decision 73: the server renders that slide). Once running,
+  // the click stays on the page instead.
+  const slideLink = (next: number) => ({
+    href: `?slide=${next + 1}`,
+    onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+      e.preventDefault();
+      go(next);
+    },
+  });
 
   return (
     <div className="flex flex-col items-center text-center">
@@ -56,24 +67,23 @@ export function WelcomeSlides() {
           </Link>
         ) : (
           <>
-            <button type="button" data-testid="welcome-next" onClick={() => go(slide + 1)} className={primaryButtonClass}>
+            <a data-testid="welcome-next" {...slideLink(slide + 1)} className={primaryButtonClass}>
               {t("welcomeNext")}
-            </button>
-            <button type="button" data-testid="welcome-skip" onClick={() => go(SLIDES.length - 1)} className={textLinkClass}>
+            </a>
+            <a data-testid="welcome-skip" {...slideLink(SLIDES.length - 1)} className={textLinkClass}>
               {t("welcomeSkip")}
-            </button>
+            </a>
           </>
         )}
         {slide > 0 && (
-          <button
-            type="button"
+          <a
             data-testid="welcome-back"
-            onClick={() => go(slide - 1)}
+            {...slideLink(slide - 1)}
             className="inline-flex min-h-12 items-center gap-2 text-sm font-medium text-muted hover:text-text"
           >
             <ArrowLeft />
             {t("back")}
-          </button>
+          </a>
         )}
         <Link href="/sign-in" data-testid="welcome-have-account" className={`${textLinkClass} mt-4 text-sm`}>
           {t("welcomeHaveAccount")}
