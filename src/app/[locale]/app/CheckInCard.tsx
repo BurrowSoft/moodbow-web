@@ -164,7 +164,8 @@ function Card({ initial, uid, date: cardDate, notify }: Props & { notify: Notify
         // pending copy first, so it syncs once they're back (decision 81).
         if (!fromPending) {
           try {
-            window.localStorage.setItem(pendingKey(uid), JSON.stringify(pendingFromForm(form)));
+            const copy = pendingFromForm(form);
+            window.localStorage.setItem(pendingKey(uid, copy.date), JSON.stringify(copy));
           } catch {
             // storage unavailable: nothing more can be done before leaving
           }

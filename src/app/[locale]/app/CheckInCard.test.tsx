@@ -338,8 +338,8 @@ describe("CheckInCard: a live save sent to sign-in or Consent (reviewer #11/#22)
       fireEvent.click(screen.getByTestId("checkin-mood-4"));
       fireEvent.click(screen.getByTestId("checkin-stress-2"));
       fireEvent.click(screen.getByTestId("checkin-save"));
-      await waitFor(() => expect(window.localStorage.getItem(KEY)).not.toBeNull());
-      expect(JSON.parse(window.localStorage.getItem(KEY)!)).toMatchObject({ fields: { mood: 4, stress: "2" }, date: "2026-10-02" });
+      await waitFor(() => expect(window.localStorage.getItem(dayKey("2026-10-02"))).not.toBeNull());
+      expect(JSON.parse(window.localStorage.getItem(dayKey("2026-10-02"))!)).toMatchObject({ fields: { mood: 4, stress: "2" }, date: "2026-10-02" });
     } finally {
       window.removeEventListener("error", swallow);
       onError.mockRestore();
