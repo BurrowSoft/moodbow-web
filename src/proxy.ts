@@ -1,6 +1,7 @@
 import createMiddleware from "next-intl/middleware";
 import { NextResponse, type NextRequest } from "next/server";
 import { routing } from "./i18n/routing";
+import { canonicalEmailConfirmedSearch } from "./lib/authLink";
 import { isHiddenPage, pagePath } from "./lib/sitemapPages";
 import { authCookieNames, needsSession, refreshSession, signedInOnly } from "./lib/supabase/proxy";
 
@@ -24,6 +25,16 @@ export default async function proxy(req: NextRequest) {
     const url = req.nextUrl.clone();
     url.pathname = NOT_FOUND_PATH;
     return NextResponse.rewrite(url, { status: 404 });
+  }
+  // /email-confirmed keeps only ?result= (lib/authLink.ts): a code or error
+  // details in the address are dropped before the page renders.
+  if (path === "/email-confirmed" && req.method === "GET" && req.nextUrl.search) {
+    const search = canonicalEmailConfirmedSearch(req.nextUrl.search);
+    if (search !== req.nextUrl.search) {
+      const url = req.nextUrl.clone();
+      url.search = search;
+      return NextResponse.redirect(url, 307);
+    }
   }
   // The signed-in area and the auth pages keep the Supabase session fresh:
   // refreshed first, so this request's server components already see the

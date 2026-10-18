@@ -111,3 +111,20 @@ describe("proxy + real auth-js: why a session ended", () => {
     expect(clearsAuthCookie(res)).toBe(false);
   });
 });
+
+describe("proxy: /email-confirmed keeps only ?result=", () => {
+  it("drops a code or error details before the page renders", async () => {
+    const res = await visit("/email-confirmed?code=abc123");
+    expect(res.status).toBe(307);
+    expect(res.headers.get("location")).toBe("https://www.moodbow.com/email-confirmed");
+    const err = await visit("/email-confirmed?error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid");
+    expect(err.headers.get("location")).toBe("https://www.moodbow.com/email-confirmed?result=expired");
+  });
+
+  it("the canonical forms pass straight through", async () => {
+    for (const path of ["/email-confirmed", "/email-confirmed?result=expired", "/email-confirmed?result=email_changed"]) {
+      const res = await visit(path);
+      expect(res.status, path).toBe(200);
+    }
+  });
+});
