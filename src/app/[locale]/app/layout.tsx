@@ -26,13 +26,13 @@ export default async function AppLayout({ children, params }: LayoutProps<"/[loc
   const supabase = await createSupabaseServerClient();
   const { data, error } = supabase ? await supabase.auth.getUser() : { data: { user: null }, error: null };
   // Supabase Auth unreachable: the session may be fine, so no sign-out look.
-  if (!data.user && isAuthOutage(error)) return <JournalUnavailable />;
+  if (!data.user && isAuthOutage(error)) return <JournalUnavailable standalone />;
   const user = data.user;
   if (!supabase || !user) return redirect({ href: "/sign-in", locale });
 
   const me = await getMe(supabase);
   // Signed in but the data didn't load: an error state, not a redirect loop.
-  if (!me) return <JournalUnavailable />;
+  if (!me) return <JournalUnavailable standalone />;
   const step = onboardingStep(me);
   if (step === "consent") redirect({ href: "/consent", locale });
   if (step === "setup") redirect({ href: "/setup", locale });
