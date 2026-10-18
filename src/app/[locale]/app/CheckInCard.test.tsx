@@ -301,3 +301,14 @@ describe("CheckInCard: stress chips at large text (reviewer #26)", () => {
     expect(screen.getByTestId("checkin-stress-1").closest("div")!.parentElement!.className).toMatch(/\bflex-wrap\b/);
   });
 });
+
+describe("CheckInCard: legends without a hard-coded separator (decision 34)", () => {
+  it("each optional row's legend is its title and 'Optional', two texts", () => {
+    renderCard(null);
+    fireEvent.click(screen.getByTestId("checkin-mood-3"));
+    for (const title of [messages.today.sleepTitle, messages.today.exerciseTitle, messages.today.stressTitle]) {
+      const legend = screen.getByText(title, { selector: "legend", exact: false });
+      expect(legend.textContent).toBe(`${title} ${messages.today.optional}`);
+    }
+  });
+});

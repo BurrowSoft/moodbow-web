@@ -286,7 +286,7 @@ function Card({ initial, uid, today, setSuperseded }: Props & { setSuperseded: (
         <div className="mt-6 space-y-6">
           <fieldset>
             <legend className="text-sm font-medium text-text">
-              {t("sleepTitle")} <span className="font-normal text-muted">· {t("optional")}</span>
+              {t("sleepTitle")} <span className="ml-2 font-normal text-muted">{t("optional")}</span>
             </legend>
             <div className="mt-2 flex flex-wrap items-center gap-2">
               <select
@@ -320,7 +320,7 @@ function Card({ initial, uid, today, setSuperseded }: Props & { setSuperseded: (
 
           <fieldset>
             <legend className="text-sm font-medium text-text">
-              {t("exerciseTitle")} <span className="font-normal text-muted">· {t("optional")}</span>
+              {t("exerciseTitle")} <span className="ml-2 font-normal text-muted">{t("optional")}</span>
             </legend>
             <div className="mt-2 flex flex-wrap gap-2">
               {EXERCISE_MINUTES.map((m) => (
@@ -340,7 +340,7 @@ function Card({ initial, uid, today, setSuperseded }: Props & { setSuperseded: (
 
           <fieldset>
             <legend className="text-sm font-medium text-text">
-              {t("stressTitle")} <span className="font-normal text-muted">· {t("optional")}</span>
+              {t("stressTitle")} <span className="ml-2 font-normal text-muted">{t("optional")}</span>
             </legend>
             <div className="mt-2 flex flex-wrap items-start gap-2">
               {STRESS_LEVELS.map((s) => (
