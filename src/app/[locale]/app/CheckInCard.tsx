@@ -2,7 +2,7 @@
 
 import { startTransition, useActionState, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { EXERCISE_MINUTES, MOODS, SLEEP_HOURS, SLEEP_QUALITIES, STRESS_LEVELS, type CheckIn, type SleepQuality } from "@/lib/journal/checkIn";
+import { EXERCISE_MINUTES, MOOD_COLOURS, MOODS, SLEEP_HOURS, SLEEP_QUALITIES, STRESS_LEVELS, type CheckIn, type SleepQuality } from "@/lib/journal/checkIn";
 import { dateLine } from "@/lib/journal/today";
 import { localKey } from "@/lib/localData";
 import { saveCheckIn, type CheckInState } from "./actions";
@@ -21,7 +21,6 @@ const fromRow = (row: CheckIn | null): Fields => ({
   stress: row?.stress != null ? String(row.stress) : "",
 });
 
-const MOOD_COLOURS = ["bg-[#9b84d6]", "bg-[#b9a3e3]", "bg-[#e3c0d0]", "bg-[#f2a07b]", "bg-[#e27d9a]"];
 const pendingKey = (uid: string) => localKey("pending-checkin", uid);
 
 // The pending copy names its own day: synced after midnight, it must still

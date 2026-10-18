@@ -30,11 +30,12 @@ export async function saveCheckIn(_prev: CheckInState, form: FormData): Promise<
   const date = ISO_DATE.test(sent) ? sent : me.today;
   const expected = String(form.get("expected_updated_at") ?? "") || null;
 
-  // An offline copy made when the day had no check-in has no version to lock
-  // against. If the day has one now, it's either this copy saved before
-  // (the answer was lost) or another device's: never overwrite that silently
-  // (decision 72; same as the app).
-  if (expected === null && form.get("from_pending") === "1") {
+  // A check-in made when the day had none (the card, or an offline copy)
+  // has no version to lock against. If the day has one now, it's either this
+  // one saved before (the answer was lost) or another device's: never
+  // overwrite that silently (decision 72; agreed with Mobile Dev for every
+  // card, Today and the day view).
+  if (expected === null) {
     const { data: existing, error: readError } = await supabase.from("check_ins").select(COLUMNS).eq("local_date", date).maybeSingle();
     if (readError) return { status: "error", error: "generic" };
     if (existing) {
