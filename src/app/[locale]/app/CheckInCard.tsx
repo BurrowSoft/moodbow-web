@@ -87,7 +87,18 @@ function Card({ initial, uid, today, setSuperseded }: Props & { setSuperseded: (
   const [storageFailed, setStorageFailed] = useState(false);
   const flushing = useRef(false);
   const [state, action, pending] = useActionState<CheckInState, FormData>(async (prev, form) => {
-    const next = await saveCheckIn(prev, form);
+    let next: CheckInState;
+    try {
+      next = await saveCheckIn(prev, form);
+    } catch (e) {
+      // The request itself failed (offline, the connection dropped): not a
+      // crash, the generic error, and a pending copy stays for the next try.
+      // A redirect (consent, sign-in) is the navigation itself.
+      if (form.get("from_pending") === "1") flushing.current = false;
+      const digest = (e as { digest?: unknown })?.digest;
+      if (typeof digest === "string" && digest.startsWith("NEXT_REDIRECT")) throw e;
+      return { status: "error", error: "generic" };
+    }
     if (form.get("from_pending") === "1") {
       flushing.current = false;
       // The copy is removed only once it's answered, and kept while a retry
