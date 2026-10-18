@@ -13,6 +13,8 @@ process.env.NEXT_PUBLIC_SHOW_DRAFTS = "1";
 
 // supabase-js's default storage key: sb-<first host label>-auth-token.
 const COOKIE = "sb-teststub-auth-token";
+const UID = "0b5f2c1e-7d3a-4e8b-9c41-2a6f8e1d3b70";
+const wipeCookie = (res: Response) => res.headers.getSetCookie().find((c) => c.startsWith("mb_wipe=")) ?? null;
 
 vi.mock("next-intl/middleware", () => ({
   default: () => (req: NextRequest) => NextResponse.next({ request: { headers: new Headers(req.headers) } }),
@@ -26,7 +28,7 @@ function sessionCookie({ expired }: { expired: boolean }): string {
   const exp = expired ? now - 600 : now + 3600;
   const jwt = [
     b64url(JSON.stringify({ alg: "HS256", typ: "JWT" })),
-    b64url(JSON.stringify({ sub: "u1", exp, session_id: "s1", role: "authenticated", aud: "authenticated" })),
+    b64url(JSON.stringify({ sub: UID, exp, session_id: "s1", role: "authenticated", aud: "authenticated" })),
     "c2ln",
   ].join(".");
   const session = {
@@ -35,7 +37,7 @@ function sessionCookie({ expired }: { expired: boolean }): string {
     token_type: "bearer",
     expires_in: 3600,
     expires_at: exp,
-    user: { id: "u1", aud: "authenticated", role: "authenticated", email: "x@example.invalid", app_metadata: {}, user_metadata: {}, created_at: "2026-10-01T00:00:00Z" },
+    user: { id: UID, aud: "authenticated", role: "authenticated", email: "x@example.invalid", app_metadata: {}, user_metadata: {}, created_at: "2026-10-01T00:00:00Z" },
   };
   return `base64-${b64url(JSON.stringify(session))}`;
 }
@@ -52,7 +54,7 @@ const json = ({ status, body }: Answer) =>
   });
 
 beforeEach(() => {
-  userAnswer = { status: 200, body: { id: "u1", aud: "authenticated", role: "authenticated", email: "x@example.invalid", app_metadata: {}, user_metadata: {}, created_at: "2026-10-01T00:00:00Z" } };
+  userAnswer = { status: 200, body: { id: UID, aud: "authenticated", role: "authenticated", email: "x@example.invalid", app_metadata: {}, user_metadata: {}, created_at: "2026-10-01T00:00:00Z" } };
   refreshAnswer = { status: 500, body: { code: "unexpected_failure", message: "not expected in this test" } };
   vi.stubGlobal("fetch", async (input: RequestInfo | URL) => {
     const url = String(input instanceof Request ? input.url : input);
@@ -90,6 +92,39 @@ describe("proxy + real auth-js: why a session ended", () => {
     expect(res.status).toBe(303);
     expect(res.headers.get("location")).toBe("https://www.moodbow.com/sign-in?signed_out=account");
     expect(clearsAuthCookie(res)).toBe(true);
+    // Decision 85: the next page wipes this uid's local copies. Only the
+    // uid, 60 s, readable by the page (not httpOnly), never in the URL.
+    const wipe = wipeCookie(res);
+    expect(wipe).toMatch(new RegExp(`^mb_wipe=${UID};`));
+    expect(wipe).toMatch(/Max-Age=60/i);
+    expect(wipe).toMatch(/SameSite=lax/i);
+    expect(wipe).not.toMatch(/HttpOnly/i);
+    expect(res.headers.get("location")).not.toContain(UID);
+  });
+
+  it("a deleted account on a page anyone can open (sign-up): no redirect, but the wipe still runs", async () => {
+    userAnswer = { status: 403, body: { code: "user_not_found", message: "User from sub claim in JWT does not exist" } };
+    const res = await visit("/sign-up", sessionCookie({ expired: false }));
+    expect(res.status).toBe(200);
+    expect(wipeCookie(res)).toMatch(new RegExp(`^mb_wipe=${UID};`));
+  });
+
+  it("a session split into chunks (.0, .1): the uid is still found", async () => {
+    userAnswer = { status: 403, body: { code: "user_not_found", message: "User from sub claim in JWT does not exist" } };
+    const value = sessionCookie({ expired: false });
+    const half = Math.floor(value.length / 2);
+    const res = await proxy(
+      new NextRequest("https://www.moodbow.com/app", { headers: { cookie: `${COOKIE}.1=${value.slice(half)}; ${COOKIE}.0=${value.slice(0, half)}` } }),
+    );
+    expect(res.headers.get("location")).toBe("https://www.moodbow.com/sign-in?signed_out=account");
+    expect(wipeCookie(res)).toMatch(new RegExp(`^mb_wipe=${UID};`));
+  });
+
+  it("a revoked session keeps the local copies (decision 81): no wipe cookie", async () => {
+    userAnswer = { status: 403, body: { code: "session_not_found", message: "Session from session_id claim in JWT does not exist" } };
+    const res = await visit("/app", sessionCookie({ expired: false }));
+    expect(res.headers.get("location")).toBe("https://www.moodbow.com/sign-in?signed_out=session");
+    expect(wipeCookie(res)).toBeNull();
   });
 
   it("an auth outage (503) changes nothing: no redirect, no cookie deletion", async () => {
