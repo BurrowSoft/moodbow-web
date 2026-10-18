@@ -176,3 +176,14 @@ describe("proxy + real auth-js: a server action after the session ended", () => 
     expect(res.headers.get("x-action-redirect")).toBeNull();
   });
 });
+
+describe("proxy: a server action after the account was deleted elsewhere", () => {
+  it("the action redirect also carries the decision 85 wipe cookie", async () => {
+    userAnswer = { status: 403, body: { code: "user_not_found", message: "User from sub claim in JWT does not exist" } };
+    const res = await proxy(
+      new NextRequest("https://www.moodbow.com/app", { method: "POST", headers: { cookie: `${COOKIE}=${sessionCookie({ expired: false })}`, "next-action": "abc123" } }),
+    );
+    expect(res.headers.get("x-action-redirect")).toBe("/sign-in?signed_out=account;replace");
+    expect(wipeCookie(res)).toMatch(new RegExp(`^mb_wipe=${UID};`));
+  });
+});
