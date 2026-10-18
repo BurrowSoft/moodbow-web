@@ -16,7 +16,7 @@ const KEY = "mb:pending-checkin:u1";
 const renderCard = (initial: CheckIn | null) =>
   render(
     <NextIntlClientProvider locale="en" messages={messages}>
-      <CheckInCard initial={initial} uid="u1" />
+      <CheckInCard initial={initial} uid="u1" today="2026-10-02" />
     </NextIntlClientProvider>,
   );
 const sent = (call = 0) => Object.fromEntries((saveCheckIn.mock.calls[call][1] as FormData).entries());
@@ -51,7 +51,7 @@ describe("CheckInCard", () => {
     fireEvent.click(screen.getByTestId("checkin-save"));
 
     await screen.findByTestId("checkin-summary");
-    expect(sent()).toEqual({ mood: "4", sleep_hours: "7.5", sleep_quality: "good", exercise_minutes: "30", stress: "2", expected_updated_at: "" });
+    expect(sent()).toEqual({ local_date: "2026-10-02", mood: "4", sleep_hours: "7.5", sleep_quality: "good", exercise_minutes: "30", stress: "2", expected_updated_at: "" });
     expect(screen.getByTestId("checkin-status")).toHaveTextContent(messages.today.checkinSaved);
     expect(screen.getByTestId("checkin-summary")).toHaveTextContent(messages.today.mood4);
 
@@ -86,7 +86,7 @@ describe("CheckInCard", () => {
     fireEvent.click(screen.getByTestId("checkin-mood-3"));
     fireEvent.click(screen.getByTestId("checkin-save"));
     expect(screen.getByTestId("checkin-status")).toHaveTextContent(messages.today.checkinSavedOfflineWeb);
-    expect(JSON.parse(window.localStorage.getItem(KEY)!)).toMatchObject({ fields: { mood: 3 }, expected: "" });
+    expect(JSON.parse(window.localStorage.getItem(KEY)!)).toMatchObject({ fields: { mood: 3 }, expected: "", date: "2026-10-02" });
     expect(saveCheckIn).not.toHaveBeenCalled();
 
     saveCheckIn.mockResolvedValue({ status: "saved", checkIn: { ...ROW, mood: 3 } });
@@ -101,10 +101,93 @@ describe("CheckInCard", () => {
   });
 
   it("a pending copy from an earlier visit is sent on load", async () => {
-    window.localStorage.setItem(KEY, JSON.stringify({ fields: { mood: 2, sleepHours: "", sleepQuality: "", exercise: "", stress: "" }, expected: "" }));
+    window.localStorage.setItem(KEY, JSON.stringify({ fields: { mood: 2, sleepHours: "", sleepQuality: "", exercise: "", stress: "" }, expected: "", date: "2026-10-02" }));
     saveCheckIn.mockResolvedValue({ status: "saved", checkIn: { ...ROW, mood: 2 } });
     renderCard(null);
     await waitFor(() => expect(saveCheckIn).toHaveBeenCalledTimes(1));
-    expect(sent()).toMatchObject({ mood: "2" });
+    expect(sent()).toMatchObject({ mood: "2", local_date: "2026-10-02" });
+  });
+
+  const pendingFrom = (date: string, mood = 2) =>
+    window.localStorage.setItem(KEY, JSON.stringify({ fields: { mood, sleepHours: "", sleepQuality: "", exercise: "", stress: "" }, expected: "", date }));
+
+  it("yesterday's offline copy is sent for yesterday, and today's card stays as it is", async () => {
+    pendingFrom("2026-10-01");
+    saveCheckIn.mockResolvedValue({ status: "saved", checkIn: { ...ROW, local_date: "2026-10-01", mood: 2 } });
+    renderCard(null);
+    await waitFor(() => expect(saveCheckIn).toHaveBeenCalledTimes(1));
+    expect(sent()).toMatchObject({ local_date: "2026-10-01", mood: "2" });
+    await waitFor(() => expect(window.localStorage.getItem(KEY)).toBeNull());
+    expect(screen.getByTestId("checkin-card")).toBeInTheDocument();
+    expect(screen.getByTestId("checkin-mood-2")).toHaveAttribute("aria-checked", "false");
+  });
+
+  it("a flush that fails is kept for the next try", async () => {
+    pendingFrom("2026-10-02");
+    saveCheckIn.mockResolvedValue({ status: "error", error: "generic" });
+    renderCard(null);
+    await waitFor(() => expect(saveCheckIn).toHaveBeenCalledTimes(1));
+    await screen.findByTestId("checkin-error");
+    expect(window.localStorage.getItem(KEY)).not.toBeNull();
+
+    saveCheckIn.mockResolvedValue({ status: "saved", checkIn: { ...ROW, mood: 2 } });
+    await act(async () => {
+      window.dispatchEvent(new Event("online"));
+    });
+    await waitFor(() => expect(saveCheckIn).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(window.localStorage.getItem(KEY)).toBeNull());
+  });
+
+  it("a flush that redirects (consent) keeps the copy", async () => {
+    pendingFrom("2026-10-02");
+    saveCheckIn.mockRejectedValue(new Error("NEXT_REDIRECT"));
+    const onError = vi.spyOn(console, "error").mockImplementation(() => {});
+    const swallow = (e: Event) => e.preventDefault();
+    window.addEventListener("error", swallow);
+    try {
+      renderCard(null);
+      await waitFor(() => expect(saveCheckIn).toHaveBeenCalledTimes(1));
+      await new Promise((r) => setTimeout(r, 20));
+      expect(window.localStorage.getItem(KEY)).not.toBeNull();
+    } finally {
+      window.removeEventListener("error", swallow);
+      onError.mockRestore();
+    }
+  });
+
+  it("a stale flush is dropped (the newer row is shown instead)", async () => {
+    pendingFrom("2026-10-02");
+    saveCheckIn.mockResolvedValue({ status: "error", error: "stale", checkIn: { ...ROW, mood: 5 } });
+    renderCard(null);
+    await screen.findByTestId("checkin-error");
+    expect(window.localStorage.getItem(KEY)).toBeNull();
+    expect(screen.getByTestId("checkin-mood-5")).toHaveAttribute("aria-checked", "true");
+  });
+
+  it("a corrupt pending copy is ignored", () => {
+    window.localStorage.setItem(KEY, "{not json");
+    renderCard(null);
+    expect(saveCheckIn).not.toHaveBeenCalled();
+  });
+
+  it("offline with storage unavailable: says it wasn't saved", () => {
+    setOnline(false);
+    const setItem = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+      throw new Error("QuotaExceededError");
+    });
+    try {
+      renderCard(null);
+      fireEvent.click(screen.getByTestId("checkin-mood-3"));
+      fireEvent.click(screen.getByTestId("checkin-save"));
+      expect(screen.getByTestId("checkin-error")).toHaveTextContent(messages.today.errGeneric);
+      expect(screen.queryByTestId("checkin-summary")).toBeNull();
+    } finally {
+      setItem.mockRestore();
+    }
+  });
+
+  it("the stress chip is a message, not a concatenation", async () => {
+    renderCard(ROW);
+    expect(screen.getByTestId("checkin-summary")).toHaveTextContent(messages.today.stressChip.replace("{level}", "2"));
   });
 });

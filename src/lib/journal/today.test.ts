@@ -41,6 +41,9 @@ describe("dateLine", () => {
     expect(dateLine("2026-10-02", "en")).toBe("Friday, 2 October 2026");
     expect(dateLine("2026-01-01", "en")).toBe("Thursday, 1 January 2026");
   });
+  it("Thai: the locale's own format with the Buddhist year (spec M4)", () => {
+    expect(dateLine("2026-10-02", "th")).toBe("วันศุกร์ที่ 2 ตุลาคม 2569");
+  });
 });
 
 describe("parseCheckIn (the same rules as upsert_check_in)", () => {

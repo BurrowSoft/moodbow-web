@@ -1,8 +1,9 @@
 "use client";
 
-import { startTransition, useActionState, useEffect, useState } from "react";
+import { startTransition, useActionState, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { EXERCISE_MINUTES, MOODS, SLEEP_HOURS, SLEEP_QUALITIES, STRESS_LEVELS, type CheckIn, type SleepQuality } from "@/lib/journal/checkIn";
+import { localKey } from "@/lib/localData";
 import { saveCheckIn, type CheckInState } from "./actions";
 
 // The daily check-in (M4): mood required (5 labelled circles), then the
@@ -20,27 +21,61 @@ const fromRow = (row: CheckIn | null): Fields => ({
 });
 
 const MOOD_COLOURS = ["bg-[#9b84d6]", "bg-[#b9a3e3]", "bg-[#e3c0d0]", "bg-[#f2a07b]", "bg-[#e27d9a]"];
-const pendingKey = (uid: string) => `mb:pending-checkin:${uid}`;
+const pendingKey = (uid: string) => localKey("pending-checkin", uid);
 
-function toFormData(fields: Fields, expectedUpdatedAt: string): FormData {
+// The pending copy names its own day: synced after midnight, it must still
+// land on the day it was made, not on the new today.
+type Pending = { fields: Fields; expected: string; date: string };
+
+function readPending(uid: string): Pending | null {
+  try {
+    const p = JSON.parse(window.localStorage.getItem(pendingKey(uid)) ?? "null") as Pending | null;
+    return p && typeof p.date === "string" && typeof p.expected === "string" && typeof p.fields?.mood === "number" ? p : null;
+  } catch {
+    return null;
+  }
+}
+
+function removePending(uid: string) {
+  try {
+    window.localStorage.removeItem(pendingKey(uid));
+  } catch {
+    // storage unavailable
+  }
+}
+
+function toFormData(fields: Fields, expectedUpdatedAt: string, date: string, fromPending = false): FormData {
   const form = new FormData();
+  form.set("local_date", date);
   form.set("mood", String(fields.mood ?? ""));
   form.set("sleep_hours", fields.sleepHours);
   form.set("sleep_quality", fields.sleepQuality);
   form.set("exercise_minutes", fields.exercise);
   form.set("stress", fields.stress);
   form.set("expected_updated_at", expectedUpdatedAt);
+  if (fromPending) form.set("from_pending", "1");
   return form;
 }
 
-export function CheckInCard({ initial, uid }: { initial: CheckIn | null; uid: string }) {
+export function CheckInCard({ initial, uid, today }: { initial: CheckIn | null; uid: string; today: string }) {
   const t = useTranslations("today");
   const [row, setRow] = useState<CheckIn | null>(initial);
   const [fields, setFields] = useState<Fields>(fromRow(initial));
   const [editing, setEditing] = useState(initial === null);
   const [offline, setOffline] = useState(false);
+  const [storageFailed, setStorageFailed] = useState(false);
+  const flushing = useRef(false);
   const [state, action, pending] = useActionState<CheckInState, FormData>(async (prev, form) => {
     const next = await saveCheckIn(prev, form);
+    if (form.get("from_pending") === "1") {
+      flushing.current = false;
+      // The copy is removed only once it's answered, and kept while a retry
+      // can still succeed ("generic", e.g. the network dropped again). A
+      // redirect (consent, sign-in) throws before this line: the copy stays.
+      if (next.status === "saved" || (next.status === "error" && next.error !== "generic")) removePending(uid);
+      // A copy from an earlier day doesn't change today's card.
+      if (form.get("local_date") !== today) return prev;
+    }
     if (next.status === "saved") {
       setRow(next.checkIn);
       setFields(fromRow(next.checkIn));
@@ -56,20 +91,11 @@ export function CheckInCard({ initial, uid }: { initial: CheckIn | null; uid: st
   // Send a check-in saved while offline once the browser is online again.
   useEffect(() => {
     const flush = () => {
-      let stored: string | null = null;
-      try {
-        stored = window.localStorage.getItem(pendingKey(uid));
-      } catch {
-        return;
-      }
-      if (!stored || !navigator.onLine) return;
-      try {
-        window.localStorage.removeItem(pendingKey(uid));
-      } catch {
-        // storage unavailable: the copy stays and is retried next time
-      }
-      const { fields: saved, expected } = JSON.parse(stored) as { fields: Fields; expected: string };
-      startTransition(() => action(toFormData(saved, expected)));
+      if (flushing.current || !navigator.onLine) return;
+      const saved = readPending(uid);
+      if (!saved) return;
+      flushing.current = true;
+      startTransition(() => action(toFormData(saved.fields, saved.expected, saved.date, true)));
     };
     flush();
     window.addEventListener("online", flush);
@@ -80,24 +106,34 @@ export function CheckInCard({ initial, uid }: { initial: CheckIn | null; uid: st
     event.preventDefault();
     if (fields.mood === null) return;
     const expected = row?.updated_at ?? "";
+    setStorageFailed(false);
     if (!navigator.onLine) {
       try {
-        window.localStorage.setItem(pendingKey(uid), JSON.stringify({ fields, expected }));
+        window.localStorage.setItem(pendingKey(uid), JSON.stringify({ fields, expected, date: today } satisfies Pending));
       } catch {
-        // storage unavailable: nothing to keep, the generic error shows instead
+        // storage unavailable: nothing was kept, so don't say it was saved
+        setStorageFailed(true);
+        return;
       }
       setOffline(true);
       setEditing(false);
       return;
     }
-    startTransition(() => action(toFormData(fields, expected)));
+    startTransition(() => action(toFormData(fields, expected, today)));
   };
 
   const set = (patch: Partial<Fields>) => setFields((f) => ({ ...f, ...patch }));
   const chip = (active: boolean) =>
     `min-h-11 rounded-full border px-4 text-sm font-medium ${active ? "border-accent bg-pill text-accent" : "border-border text-text hover:bg-pill"}`;
-  const errorKey =
-    state.status === "error" ? (state.error === "dateInFuture" ? "errDateInFuture" : state.error === "stale" ? "errStaleWrite" : "errGeneric") : null;
+  const errorKey = storageFailed
+    ? "errGeneric"
+    : state.status === "error"
+      ? state.error === "dateInFuture"
+        ? "errDateInFuture"
+        : state.error === "stale"
+          ? "errStaleWrite"
+          : "errGeneric"
+      : null;
 
   if (!editing && fields.mood !== null) {
     const summary = [
@@ -105,7 +141,7 @@ export function CheckInCard({ initial, uid }: { initial: CheckIn | null; uid: st
       fields.sleepHours !== "" ? t("sleepHours", { hours: Number(fields.sleepHours) }) : null,
       fields.sleepQuality ? t(`sleep${fields.sleepQuality[0].toUpperCase()}${fields.sleepQuality.slice(1)}` as "sleepPoor") : null,
       fields.exercise !== "" ? (fields.exercise === "0" ? t("exerciseNone") : fields.exercise === "90" ? t("exercise90") : t("exerciseMinutes", { minutes: Number(fields.exercise) })) : null,
-      fields.stress !== "" ? `${t("stressTitle")} ${fields.stress}/5` : null,
+      fields.stress !== "" ? t("stressChip", { level: Number(fields.stress) }) : null,
     ].filter(Boolean);
     return (
       <section className="rounded-3xl border border-border bg-surface p-6" data-testid="checkin-summary">

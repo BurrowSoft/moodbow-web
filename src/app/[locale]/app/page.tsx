@@ -43,7 +43,7 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
           {dateLine(me.today, locale)}
         </p>
       </header>
-      <CheckInCard initial={(data as CheckIn | null) ?? null} uid={user.id} />
+      <CheckInCard initial={(data as CheckIn | null) ?? null} uid={user.id} today={me.today} />
     </section>
   );
 }

@@ -197,6 +197,7 @@
     "stressTitle": "Stress",
     "stressLow": "Low",
     "stressHigh": "High",
+    "stressChip": "Stress {level}/5",
     "checkinSave": "Save",
     "checkinSaved": "Saved",
     "checkinSavedOfflineWeb": "Saved in this browser. It will sync when you're online.",

@@ -22,11 +22,15 @@ export function localHour(timeZone: string, now: Date = new Date()): number {
   }
 }
 
-// "Friday, 2 October 2026" for a YYYY-MM-DD local date (the date itself,
-// formatted at noon UTC so no zone can shift it to another day).
+// The locale's own long date, never assembled by hand (decision 34). The
+// spec's English is the day-first order ("Friday, 2 October 2026"), which
+// is CLDR's en-GB; plain "en" would give "Friday, October 2, 2026". Thai
+// uses its default Buddhist calendar ("วันศุกร์ที่ 2 ตุลาคม 2569").
+const DATE_LOCALES: Record<string, string> = { en: "en-GB" };
+
+// The date line for a YYYY-MM-DD local date (the date itself, formatted at
+// noon UTC so no zone can shift it to another day).
 export function dateLine(localDate: string, locale: string): string {
   const date = new Date(`${localDate}T12:00:00Z`);
-  const parts = new Intl.DateTimeFormat(locale, { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).formatToParts(date);
-  const get = (type: Intl.DateTimeFormatPartTypes) => parts.find((p) => p.type === type)?.value ?? "";
-  return `${get("weekday")}, ${get("day")} ${get("month")} ${get("year")}`;
+  return new Intl.DateTimeFormat(DATE_LOCALES[locale] ?? locale, { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(date);
 }

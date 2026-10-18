@@ -6,7 +6,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 // or a redirect.
 const rpc = vi.fn();
 const maybeSingle = vi.fn();
-const from = vi.fn(() => ({ select: () => ({ eq: () => ({ maybeSingle }) }) }));
+const eq = vi.fn(() => ({ maybeSingle }));
+const from = vi.fn(() => ({ select: () => ({ eq }) }));
 vi.mock("@/lib/supabase/server", () => ({ createSupabaseServerClient: async () => ({ rpc, from }) }));
 vi.mock("next-intl/server", () => ({ getLocale: async () => "en" }));
 class Redirect {
@@ -55,6 +56,18 @@ describe("saveCheckIn", () => {
     });
   });
 
+  it("an offline copy synced later is saved for the day it was made", async () => {
+    rpcAnswers({ data: ROW, error: null });
+    await saveCheckIn(idle, form({ mood: "4", local_date: "2026-10-01" }));
+    expect(rpc.mock.calls.find((c) => c[0] === "upsert_check_in")![1].p_date).toBe("2026-10-01");
+  });
+
+  it("a malformed date falls back to today", async () => {
+    rpcAnswers({ data: ROW, error: null });
+    await saveCheckIn(idle, form({ mood: "4", local_date: "yesterday" }));
+    expect(rpc.mock.calls.find((c) => c[0] === "upsert_check_in")![1].p_date).toBe("2026-10-02");
+  });
+
   it("a first check-in sends no lock (null)", async () => {
     rpcAnswers({ data: ROW, error: null });
     await saveCheckIn(idle, form({ mood: "4", expected_updated_at: "" }));
@@ -70,6 +83,14 @@ describe("saveCheckIn", () => {
     rpcAnswers({ data: null, error: { message: "stale_write" } });
     maybeSingle.mockResolvedValue({ data: ROW });
     expect(await saveCheckIn(idle, form({ mood: "2", expected_updated_at: "2026-10-02T08:00:00Z" }))).toEqual({ status: "error", error: "stale", checkIn: ROW });
+    expect(eq).toHaveBeenLastCalledWith("local_date", "2026-10-02");
+  });
+
+  it("stale_write on an older day reloads that day", async () => {
+    rpcAnswers({ data: null, error: { message: "stale_write" } });
+    maybeSingle.mockResolvedValue({ data: null });
+    await saveCheckIn(idle, form({ mood: "2", local_date: "2026-09-30", expected_updated_at: "2026-09-30T08:00:00Z" }));
+    expect(eq).toHaveBeenLastCalledWith("local_date", "2026-09-30");
   });
 
   it("maps the other codes", async () => {
