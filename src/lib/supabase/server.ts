@@ -86,5 +86,26 @@ export async function createSupabaseServerClient() {
     if (!result) throw deadlineAbort();
     return result;
   };
+
+  // The auth forms' calls (sign in, sign up, resend, password reset, the
+  // email links): past the deadline they answer like Auth being down, so
+  // each form shows its generic error with Try again (spec, line 88)
+  // instead of waiting on auth-js's retries.
+  const auth = client.auth;
+  const timedOut = () => ({ data: { user: null, session: null }, error: deadlineError() }) as const;
+  const signInWithPassword = auth.signInWithPassword.bind(auth);
+  auth.signInWithPassword = async (credentials) => (await bounded(() => signInWithPassword(credentials))) ?? timedOut();
+  const signUp = auth.signUp.bind(auth);
+  auth.signUp = async (credentials) => (await bounded(() => signUp(credentials))) ?? timedOut();
+  const resend = auth.resend.bind(auth);
+  auth.resend = async (credentials) => (await bounded(() => resend(credentials))) ?? timedOut();
+  const verifyOtp = auth.verifyOtp.bind(auth);
+  auth.verifyOtp = async (params) => (await bounded(() => verifyOtp(params))) ?? timedOut();
+  const updateUser = auth.updateUser.bind(auth);
+  auth.updateUser = async (attributes, options) => (await bounded(() => updateUser(attributes, options))) ?? { data: { user: null }, error: deadlineError() };
+  const resetPasswordForEmail = auth.resetPasswordForEmail.bind(auth);
+  auth.resetPasswordForEmail = async (email, options) => (await bounded(() => resetPasswordForEmail(email, options))) ?? { data: null, error: deadlineError() };
+  const signOut = auth.signOut.bind(auth);
+  auth.signOut = async (options) => (await bounded(() => signOut(options))) ?? { error: deadlineError() };
   return client;
 }

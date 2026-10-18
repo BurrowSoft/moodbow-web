@@ -134,6 +134,13 @@ describe("confirmLink (the button's POST)", () => {
     expect(auth.signOut).not.toHaveBeenCalled();
   });
 
+  it("Auth didn't answer: back to the same button with 'something went wrong', never 'expired'", async () => {
+    auth.verifyOtp.mockResolvedValue({ data: { session: null, user: null }, error: { name: "AuthRetryableFetchError", status: 0 } });
+    expect((await post({ token_hash: HASH, type: "recovery" })).href).toEqual({ pathname: "/auth/confirm", query: { token_hash: HASH, type: "recovery", retry: "1" } });
+    const page = await ConfirmLinkPage({ params: Promise.resolve({ locale: "en" }), searchParams: Promise.resolve({ token_hash: HASH, type: "recovery", retry: "1" }) } as never);
+    expect(findProps(page, (p) => p["data-testid"] === "confirm-retry")).toBeTruthy();
+  });
+
   it("bad fields never reach Supabase; missing config fails closed", async () => {
     expect(query(await post({ token_hash: HASH, type: "sms" }))).toEqual({ result: "expired" });
     expect(query(await post({}))).toEqual({ result: "expired" });

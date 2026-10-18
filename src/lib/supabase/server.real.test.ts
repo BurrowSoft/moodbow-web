@@ -82,3 +82,34 @@ describe("server client + real SDK: data calls while Auth hangs", () => {
     expect(calls).toEqual([]);
   });
 });
+
+describe("server client + real SDK: the auth forms while Auth hangs", () => {
+  it("sign-in settles by 10 s as an outage (the form's generic error), not after auth-js's retries", async () => {
+    const client = (await createSupabaseServerClient())!;
+    let settled = false;
+    const pending = client.auth.signInWithPassword({ email: "a@b.co", password: "secret-123" }).then((r) => ((settled = true), r));
+    await vi.advanceTimersByTimeAsync(9_999);
+    expect(settled).toBe(false);
+    await vi.advanceTimersByTimeAsync(1);
+    const { data, error } = await pending;
+    expect(data.session).toBeNull();
+    expect(error?.name).toBe("AuthRetryableFetchError");
+    expect(calls.some((c) => c.url.includes("/auth/v1/token"))).toBe(true);
+  });
+
+  it("flagged by the proxy: every form call answers at once, nothing is sent", async () => {
+    requestHeaders.set("x-mb-auth-outage", "1");
+    const client = (await createSupabaseServerClient())!;
+    const answers = await Promise.all([
+      client.auth.signInWithPassword({ email: "a@b.co", password: "x" }),
+      client.auth.signUp({ email: "a@b.co", password: "x" }),
+      client.auth.resend({ type: "signup", email: "a@b.co" }),
+      client.auth.resetPasswordForEmail("a@b.co"),
+      client.auth.verifyOtp({ type: "signup", token_hash: "h" }),
+      client.auth.updateUser({ password: "y" }),
+      client.auth.signOut({ scope: "local" }),
+    ]);
+    for (const { error } of answers) expect(error?.name).toBe("AuthRetryableFetchError");
+    expect(calls).toEqual([]);
+  });
+});

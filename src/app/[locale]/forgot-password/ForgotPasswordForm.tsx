@@ -26,7 +26,7 @@ export function ForgotPasswordForm() {
     );
   }
 
-  const message = state.status === "error" ? t("errEmailInvalid") : null;
+  const message = state.status === "error" ? (state.error === "generic" ? t("errGeneric") : t("errEmailInvalid")) : null;
   return (
     <form action={action} noValidate className="space-y-5">
       <p>{t("resetBody")}</p>

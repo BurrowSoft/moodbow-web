@@ -47,9 +47,16 @@ export default async function ConfirmLinkPage({ params, searchParams }: PageProp
   }
 
   const t = await getTranslations("confirmLink");
+  const ta = await getTranslations("auth");
   const copy = COPY[link.type];
   return (
     <PageShell title={t(copy.title)}>
+      {/* Set when Auth didn't answer the last click (./actions.ts). */}
+      {query.retry === "1" && (
+        <p role="alert" data-testid="confirm-retry" className="font-medium text-accent">
+          {ta("errGeneric")}
+        </p>
+      )}
       <p>{t(copy.body)}</p>
       <form action={confirmLink}>
         <input type="hidden" name="token_hash" value={link.tokenHash} />

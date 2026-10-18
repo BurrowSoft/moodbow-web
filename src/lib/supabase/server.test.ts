@@ -14,7 +14,8 @@ vi.mock("next/headers", () => ({
 }));
 const getUser = vi.fn();
 const getSession = vi.fn();
-vi.mock("@supabase/ssr", () => ({ createServerClient: () => ({ auth: { getUser, getSession } }) }));
+const others = Object.fromEntries(["signInWithPassword", "signUp", "resend", "verifyOtp", "updateUser", "resetPasswordForEmail", "signOut"].map((m) => [m, vi.fn()]));
+vi.mock("@supabase/ssr", () => ({ createServerClient: () => ({ auth: { getUser, getSession, ...others } }) }));
 
 const { createSupabaseServerClient } = await import("./server");
 
