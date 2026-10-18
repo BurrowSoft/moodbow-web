@@ -140,7 +140,7 @@ describe("CheckInCard", () => {
 
   it("a flush that redirects (consent) keeps the copy", async () => {
     pendingFrom("2026-10-02");
-    saveCheckIn.mockRejectedValue(new Error("NEXT_REDIRECT"));
+    saveCheckIn.mockRejectedValue(Object.assign(new Error("NEXT_REDIRECT"), { digest: "NEXT_REDIRECT;replace;/consent;307;" }));
     const onError = vi.spyOn(console, "error").mockImplementation(() => {});
     const swallow = (e: Event) => e.preventDefault();
     window.addEventListener("error", swallow);
@@ -204,5 +204,47 @@ describe("CheckInCard", () => {
   it("the stress chip is a message, not a concatenation", async () => {
     renderCard(ROW);
     expect(screen.getByTestId("checkin-summary")).toHaveTextContent(messages.today.stressChip.replace("{level}", "2"));
+  });
+});
+
+describe("CheckInCard: a request lost at the network level (Web Tester, #11)", () => {
+  it("an online save that can't reach the server: kept in this browser like an offline save, no crash", async () => {
+    saveCheckIn.mockRejectedValue(new TypeError("Failed to fetch"));
+    renderCard(null);
+    fireEvent.click(screen.getByTestId("checkin-mood-3"));
+    fireEvent.click(screen.getByTestId("checkin-save"));
+    expect(await screen.findByTestId("checkin-status")).toHaveTextContent(messages.today.checkinSavedOfflineWeb);
+    expect(JSON.parse(window.localStorage.getItem(KEY)!)).toMatchObject({ fields: { mood: 3 }, expected: "", date: "2026-10-02" });
+  });
+
+  it("…and with storage unavailable too: the generic error", async () => {
+    saveCheckIn.mockRejectedValue(new TypeError("Failed to fetch"));
+    const setItem = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+      throw new Error("QuotaExceededError");
+    });
+    try {
+      renderCard(null);
+      fireEvent.click(screen.getByTestId("checkin-mood-3"));
+      fireEvent.click(screen.getByTestId("checkin-save"));
+      expect(await screen.findByTestId("checkin-error")).toHaveTextContent(messages.today.errGeneric);
+    } finally {
+      setItem.mockRestore();
+    }
+  });
+
+  it("a flush that can't reach the server keeps the copy and tries again on the next reconnect", async () => {
+    window.localStorage.setItem(KEY, JSON.stringify({ fields: { mood: 2, sleepHours: "", sleepQuality: "", exercise: "", stress: "" }, expected: "", date: "2026-10-02" }));
+    saveCheckIn.mockRejectedValueOnce(new TypeError("Failed to fetch"));
+    saveCheckIn.mockResolvedValueOnce({ status: "saved", checkIn: { ...ROW, mood: 2 } });
+    renderCard(null);
+    await waitFor(() => expect(saveCheckIn).toHaveBeenCalledTimes(1));
+    await new Promise((r) => setTimeout(r, 20));
+    expect(window.localStorage.getItem(KEY)).not.toBeNull();
+    expect(screen.queryByTestId("checkin-error")).toBeNull();
+    await act(async () => {
+      window.dispatchEvent(new Event("online"));
+    });
+    await waitFor(() => expect(saveCheckIn).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(window.localStorage.getItem(KEY)).toBeNull());
   });
 });
