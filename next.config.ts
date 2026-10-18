@@ -14,6 +14,7 @@ const nextConfig: NextConfig = {
         source: "/(.*)",
         headers: [
           { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "X-Frame-Options", value: "DENY" },
           // strict-origin everywhere: every request (to us or anyone,
           // fonts, scripts, the visit counter's beacon) carries only the
           // bare origin as its referrer, never a page address. Ours can hold

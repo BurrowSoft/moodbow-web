@@ -246,10 +246,12 @@ test.describe("auth links", () => {
     await expect(page.getByRole("button")).toHaveCount(0);
   });
 
-  test("every page sends origin-only referrers (decision 79: no page address ever leaves as a referrer)", async ({ request }) => {
+  test("every page: origin-only referrers (decision 79), never framed, no sniffing", async ({ request }) => {
     for (const path of ["/", "/support", "/sign-in", "/welcome", "/email-confirmed?code=abc"]) {
       const res = await request.get(path, { maxRedirects: 0 });
       expect(res.headers()["referrer-policy"], path).toBe("strict-origin");
+      expect(res.headers()["x-frame-options"], path).toBe("DENY");
+      expect(res.headers()["x-content-type-options"], path).toBe("nosniff");
     }
   });
 
