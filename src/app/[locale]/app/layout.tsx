@@ -40,7 +40,7 @@ export default async function AppLayout({ children, params }: LayoutProps<"/[loc
   return (
     <div className="flex flex-1 flex-col md:flex-row">
       <AppNav />
-      <main id="main" className="flex-1 px-6 pb-28 pt-10 md:pb-10">
+      <main id="main" className="flex-1 px-4 pb-28 pt-10 sm:px-6 md:pb-10">
         <div className="mx-auto max-w-3xl">{children}</div>
       </main>
     </div>

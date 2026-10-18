@@ -226,7 +226,7 @@ function Card({ initial, uid, today, setSuperseded }: Props & { setSuperseded: (
       fields.stress !== "" ? t("stressChip", { level: Number(fields.stress) }) : null,
     ].filter(Boolean);
     return (
-      <section className="rounded-3xl border border-border bg-surface p-6" data-testid="checkin-summary">
+      <section className="rounded-3xl border border-border bg-surface p-4 sm:p-6" data-testid="checkin-summary">
         <h2 className="text-lg font-medium text-text">{t("checkinTitle")}</h2>
         <ul className="mt-3 flex flex-wrap gap-2">
           {summary.map((label) => (
@@ -246,24 +246,39 @@ function Card({ initial, uid, today, setSuperseded }: Props & { setSuperseded: (
   }
 
   return (
-    <form onSubmit={submit} className="rounded-3xl border border-border bg-surface p-6" data-testid="checkin-card">
+    <form onSubmit={submit} className="rounded-3xl border border-border bg-surface p-4 sm:p-6" data-testid="checkin-card">
       <fieldset>
         <legend className="text-lg font-medium text-text">{t("checkinTitle")}</legend>
-        <div className="mt-4 grid grid-cols-5 gap-2" role="radiogroup" aria-label={t("checkinTitle")}>
-          {MOODS.map((mood) => (
-            <button
-              key={mood}
-              type="button"
-              role="radio"
-              aria-checked={fields.mood === mood}
-              data-testid={`checkin-mood-${mood}`}
-              onClick={() => set({ mood })}
-              className={`flex flex-col items-center gap-2 rounded-2xl p-2 text-xs font-medium ${fields.mood === mood ? "bg-pill text-accent" : "text-muted hover:bg-pill"}`}
-            >
-              <span className={`h-9 w-9 rounded-full ${MOOD_COLOURS[mood - 1]} ${fields.mood === mood ? "ring-2 ring-accent ring-offset-2" : ""}`} aria-hidden="true" />
-              {t(`mood${mood}` as "mood1")}
-            </button>
-          ))}
+        {/* Narrow or large text (decision 105, app parity): every face stays a
+            48 px target and the row wraps rather than shrink; when the labels
+            don't fit (under 22rem, which grows with the text size) they become
+            screen-reader text, so each face keeps its name, and the chosen
+            mood's label shows under the row instead. */}
+        <div className="@container mt-4">
+          <div className="flex flex-wrap justify-between gap-1 @min-[22rem]:gap-2" role="radiogroup" aria-label={t("checkinTitle")}>
+            {MOODS.map((mood) => (
+              <button
+                key={mood}
+                type="button"
+                role="radio"
+                aria-checked={fields.mood === mood}
+                data-testid={`checkin-mood-${mood}`}
+                onClick={() => set({ mood })}
+                className={`flex min-h-12 min-w-12 flex-1 basis-12 flex-col items-center justify-center gap-2 rounded-2xl p-1 text-xs font-medium @min-[22rem]:p-2 ${fields.mood === mood ? "bg-pill text-accent" : "text-muted hover:bg-pill"}`}
+              >
+                <span className={`h-9 w-9 shrink-0 rounded-full ${MOOD_COLOURS[mood - 1]} ${fields.mood === mood ? "ring-2 ring-accent ring-offset-2" : ""}`} aria-hidden="true" />
+                <span className="sr-only @min-[22rem]:not-sr-only" data-testid={`checkin-mood-label-${mood}`}>
+                  {t(`mood${mood}` as "mood1")}
+                </span>
+              </button>
+            ))}
+          </div>
+          {fields.mood !== null && (
+            // Visual only: the selected radio already says it to screen readers.
+            <p aria-hidden="true" data-testid="checkin-mood-selected" className="mt-2 text-center text-sm font-medium text-accent @min-[22rem]:hidden">
+              {t(`mood${fields.mood}` as "mood1")}
+            </p>
+          )}
         </div>
       </fieldset>
 
