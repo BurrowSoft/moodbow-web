@@ -11,11 +11,13 @@ vi.mock("./actions", () => ({
 }));
 const { YourData } = await import("./YourData");
 const m = messages.me;
+const UID = "0b5f2c1e-7d3a-4e8b-9c41-2a6f8e1d3b70";
+const KEYS = [`mb:pending-checkin:${UID}:2026-10-02`, `mb:draft-entry:${UID}:new`];
 
 const renderIt = (credits = 0) =>
   render(
     <NextIntlClientProvider locale="en" messages={messages}>
-      <YourData credits={credits} />
+      <YourData credits={credits} uid={UID} />
     </NextIntlClientProvider>,
   );
 
@@ -112,5 +114,43 @@ describe("YourData: delete account", () => {
     fireEvent.keyDown(document, { key: "Tab", shiftKey: true });
     expect(screen.getByTestId("delete-cancel")).toHaveFocus();
     expect(confirmButton).toBeDisabled();
+  });
+});
+
+describe("YourData: this browser forgets a deleted account (decision 85; reviewer #17)", () => {
+  const redirectTo = (url: string) => Object.assign(new Error("NEXT_REDIRECT"), { digest: `NEXT_REDIRECT;replace;${url};307;` });
+  const confirmDelete = () => {
+    fireEvent.click(screen.getByTestId("me-delete"));
+    fireEvent.change(screen.getByTestId("delete-confirm-input"), { target: { value: "DELETE" } });
+    fireEvent.click(screen.getByTestId("delete-confirm"));
+  };
+  beforeEach(() => {
+    window.localStorage.clear();
+    for (const k of KEYS) window.localStorage.setItem(k, "x");
+    window.localStorage.setItem("mb:pending-checkin:someone-else:2026-10-02", "y");
+  });
+
+  it("deleted: this user's copies are gone at once, others' stay", async () => {
+    deleteMyAccount.mockRejectedValue(redirectTo("/sign-in?signed_out=deleted"));
+    const onError = vi.spyOn(console, "error").mockImplementation(() => {});
+    const swallow = (e: Event) => e.preventDefault();
+    window.addEventListener("error", swallow);
+    try {
+      renderIt();
+      confirmDelete();
+      await waitFor(() => expect(KEYS.every((k) => window.localStorage.getItem(k) === null)).toBe(true));
+      expect(window.localStorage.getItem("mb:pending-checkin:someone-else:2026-10-02")).toBe("y");
+    } finally {
+      window.removeEventListener("error", swallow);
+      onError.mockRestore();
+    }
+  });
+
+  it("a failed delete (or another redirect, e.g. to sign-in) keeps them", async () => {
+    deleteMyAccount.mockResolvedValue({ status: "error", error: "generic" });
+    renderIt();
+    confirmDelete();
+    await screen.findByTestId("delete-error");
+    expect(KEYS.every((k) => window.localStorage.getItem(k) === "x")).toBe(true);
   });
 });

@@ -252,7 +252,7 @@
     "deleteExportFirst": "Export my data first",
     "deleteTypeConfirm": "Type DELETE to confirm",
     "deleteConfirm": "Delete everything",
-    "deleteDone": "Your account was deleted.",
+    "deleteDone": "Your account and everything in it were deleted.",
     "cancel": "Cancel"
   }
 }

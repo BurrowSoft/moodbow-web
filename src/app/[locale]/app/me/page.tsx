@@ -28,7 +28,7 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
   return (
     <section className="space-y-8">
       <h1 className="text-3xl font-medium tracking-tight">{t("tabMe")}</h1>
-      <YourData credits={me.credits?.balance ?? 0} />
+      <YourData credits={me.credits?.balance ?? 0} uid={user.id} />
       <form action={signOut}>
         <button
           type="submit"

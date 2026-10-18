@@ -43,7 +43,7 @@ describe("exportMyData", () => {
     rpc.mockResolvedValue({ data: doc, error: null });
     const result = await exportMyData();
     expect(rpc).toHaveBeenCalledWith("export_my_data");
-    expect(result).toEqual({ status: "ok", json: JSON.stringify(doc, null, 2), date: "2026-10-02" });
+    expect(result).toEqual({ status: "ok", json: JSON.stringify(doc), date: "2026-10-02" });
     expect(exportFileName("2026-10-02")).toBe("moodbow-export-2026-10-02.json");
     expect(exportFileName("")).toBe("moodbow-export.json");
   });

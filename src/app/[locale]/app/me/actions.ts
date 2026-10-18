@@ -28,7 +28,9 @@ export async function exportMyData(): Promise<ExportResult> {
     return { status: "error" };
   }
   const exportedAt = String((data as { exported_at?: unknown }).exported_at ?? "");
-  return { status: "ok", json: JSON.stringify(data, null, 2), date: /^\d{4}-\d{2}-\d{2}/.test(exportedAt) ? exportedAt.slice(0, 10) : "" };
+  // No indent: the whole journal travels in this one response (Vercel caps
+  // it at 4.5 MB), so every byte counts. A streamed export is a follow-up.
+  return { status: "ok", json: JSON.stringify(data), date: /^\d{4}-\d{2}-\d{2}/.test(exportedAt) ? exportedAt.slice(0, 10) : "" };
 }
 
 export type DeleteAccountState = { status: "idle" } | { status: "error"; error: "confirm" | "generic" };

@@ -4,12 +4,13 @@ import { startTransition, useActionState, useCallback, useState, useTransition }
 import { useTranslations } from "next-intl";
 import { Dialog, dialogButton } from "@/components/Dialog";
 import { DELETE_WORD, exportFileName } from "@/lib/journal/account";
+import { wipeLocalData } from "@/lib/localData";
 import { deleteMyAccount, exportMyData, type DeleteAccountState } from "./actions";
 
 // Me → Your data (M7): Export my data, and Delete account behind a dialog
 // that warns about lost AI credits (only when there are any), offers the
 // export first, and needs DELETE typed.
-export function YourData({ credits }: { credits: number }) {
+export function YourData({ credits, uid }: { credits: number; uid: string }) {
   const t = useTranslations("me");
   const tt = useTranslations("today");
   const [exporting, startExport] = useTransition();
@@ -21,7 +22,20 @@ export function YourData({ credits }: { credits: number }) {
       return await deleteMyAccount(prev, form);
     } catch (e) {
       // A redirect (done, or signed out) is the navigation itself.
-      if (typeof (e as { digest?: unknown })?.digest === "string" && (e as { digest: string }).digest.startsWith("NEXT_REDIRECT")) throw e;
+      const digest = (e as { digest?: unknown })?.digest;
+      if (typeof digest === "string" && digest.startsWith("NEXT_REDIRECT")) {
+        // Deleted: this user's local copies (pending check-ins, drafts) go
+        // now, before the next page (decision 85). Only on success: a
+        // failed delete must not lose them.
+        if (digest.includes("signed_out=deleted")) {
+          try {
+            wipeLocalData(window.localStorage, uid);
+          } catch {
+            // storage unavailable: nothing was kept here either
+          }
+        }
+        throw e;
+      }
       return { status: "error", error: "generic" };
     }
   }, { status: "idle" });
@@ -57,7 +71,8 @@ export function YourData({ credits }: { credits: number }) {
         {t("meYourData")}
       </h2>
       <div className="mt-4 space-y-1">
-        <button type="button" data-testid="me-export" onClick={runExport} disabled={exporting} className={dialogButton()}>
+        <button type="button" data-testid="me-export" onClick={runExport} disabled={exporting} aria-busy={exporting} className={`${dialogButton()} gap-2`}>
+          {exporting && <span className="h-4 w-4 animate-spin rounded-full border-2 border-border border-t-accent motion-reduce:animate-none" aria-hidden="true" />}
           {t("meExport")}
         </button>
         <p className="text-sm text-muted">{t("meExportBody")}</p>
