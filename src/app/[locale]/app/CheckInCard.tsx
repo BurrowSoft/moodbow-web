@@ -111,7 +111,18 @@ function Card({ initial, uid, today, setSuperseded }: Props & { setSuperseded: (
       const fromPending = form.get("from_pending") === "1";
       if (fromPending) flushing.current = false;
       const digest = (e as { digest?: unknown })?.digest;
-      if (typeof digest === "string" && digest.startsWith("NEXT_REDIRECT")) throw e;
+      if (typeof digest === "string" && digest.startsWith("NEXT_REDIRECT")) {
+        // Leaving for sign-in or Consent before this was saved: keep it as a
+        // pending copy first, so it syncs once they're back (decision 81).
+        if (!fromPending) {
+          try {
+            window.localStorage.setItem(pendingKey(uid), JSON.stringify(pendingFromForm(form)));
+          } catch {
+            // storage unavailable: nothing more can be done before leaving
+          }
+        }
+        throw e;
+      }
       // The request itself failed (the connection dropped while the browser
       // still says online): not a crash. A synced copy simply stays for the
       // next reconnect; a live save becomes one, exactly like saving offline.
