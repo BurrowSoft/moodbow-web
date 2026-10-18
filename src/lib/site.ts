@@ -12,7 +12,8 @@ export function notifyMailto(subject: string): string {
 
 export const BURROWSOFT_URL = "https://www.burrowsoft.com";
 
-// Days deleted data can survive in Supabase backups: 7 (decision 44); the account-deletion page shows the
+// Days deleted data can survive in Supabase backups: 8 (decisions 44 + 84: the prod list holds
+// today + 7 back); the account-deletion page shows the
 // backups line only when the "backup-retention" condition is met
 // AND this is a number (text = enforcement).
-export const BACKUP_RETENTION_DAYS: number | null = 7;
+export const BACKUP_RETENTION_DAYS: number | null = 8;
