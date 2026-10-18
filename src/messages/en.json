@@ -173,7 +173,8 @@
     "tabMe": "Me",
     "emptyComingSoon": "Coming soon",
     "meSignOut": "Sign out",
-    "retry": "Try again"
+    "tryAgain": "Try again",
+    "slowLoading": "Taking longer than usual…"
   },
   "notFound": {
     "title": "Page not found",

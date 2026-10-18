@@ -2,6 +2,7 @@ import createMiddleware from "next-intl/middleware";
 import { NextResponse, type NextRequest } from "next/server";
 import { routing } from "./i18n/routing";
 import { isHiddenPage, pagePath } from "./lib/sitemapPages";
+import { AUTH_OUTAGE_HEADER } from "./lib/supabase/deadline";
 import { authCookieNames, needsSession, refreshSession, signedInOnly } from "./lib/supabase/proxy";
 
 // Locale routing (src/i18n/routing.ts): the default locale is unprefixed,
@@ -28,7 +29,12 @@ export default async function proxy(req: NextRequest) {
   // The signed-in area and the auth pages keep the Supabase session fresh:
   // refreshed first, so this request's server components already see the
   // new cookies (lib/supabase/proxy.ts), then saved on the response.
-  const { cookies: refreshed, signedOut } = needsSession(path) ? await refreshSession(req) : { cookies: [], signedOut: null };
+  // Only the proxy may say Auth timed out on this request (lib/supabase/deadline.ts).
+  req.headers.delete(AUTH_OUTAGE_HEADER);
+  const { cookies: refreshed, signedOut, outage } = needsSession(path) ? await refreshSession(req) : { cookies: [], signedOut: null, outage: false };
+  // Auth didn't answer in time: the session stays as it is, and the server
+  // components show the outage state without waiting again.
+  if (outage) req.headers.set(AUTH_OUTAGE_HEADER, "1");
 
   // Supabase ended this session: the account was deleted on another device
   // (decision 68) or the session was revoked (decision 70). Drop the stale

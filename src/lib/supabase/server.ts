@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
+import { AUTH_OUTAGE_HEADER, deadlineError, startDeadline } from "./deadline";
 
 // Supabase from server components, route handlers and server actions
 // (@supabase/ssr, session in cookies). Each deployment talks to its own
@@ -24,11 +25,18 @@ export const SESSION_COOKIE_OPTIONS = {
 
 // null when the env vars are missing (local builds, CI): callers fail
 // closed (an auth link shows "expired", a form shows the generic error).
+//
+// auth.getUser() never waits longer than AUTH_DEADLINE_MS, and answers at
+// once when the proxy already ran out of time on this request: past that it
+// returns an AuthRetryableFetchError (an outage: pages show "Something went
+// wrong" + Try again, and nobody is signed out). Every page and action gets
+// this by using this client.
 export async function createSupabaseServerClient() {
   const config = supabaseConfig();
   if (!config) return null;
   const store = await cookies();
-  return createServerClient(config.url, config.key, {
+  const outage = (await headers()).get(AUTH_OUTAGE_HEADER) === "1";
+  const client = createServerClient(config.url, config.key, {
     cookieOptions: SESSION_COOKIE_OPTIONS,
     cookies: {
       getAll: () => store.getAll(),
@@ -42,4 +50,17 @@ export async function createSupabaseServerClient() {
       },
     },
   });
+  const getUser = client.auth.getUser.bind(client.auth);
+  client.auth.getUser = async (jwt?: string) => {
+    const timedOut = { data: { user: null }, error: deadlineError() } as const;
+    if (outage) return timedOut;
+    const deadline = startDeadline();
+    try {
+      const result = await Promise.race([getUser(jwt), deadline.expired]);
+      return result === "expired" ? timedOut : result;
+    } finally {
+      deadline.clear();
+    }
+  };
+  return client;
 }
