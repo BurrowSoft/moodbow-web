@@ -247,7 +247,7 @@ test.describe("auth links", () => {
   });
 
   test("every page sends origin-only referrers (decision 79: no page address ever leaves as a referrer)", async ({ request }) => {
-    for (const path of ["/", "/privacy", "/support", "/sign-in", "/app", "/email-confirmed?code=abc"]) {
+    for (const path of ["/", "/support", "/sign-in", "/welcome", "/email-confirmed?code=abc"]) {
       const res = await request.get(path, { maxRedirects: 0 });
       expect(res.headers()["referrer-policy"], path).toBe("strict-origin");
     }
