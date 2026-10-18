@@ -140,7 +140,7 @@ describe("CheckInCard", () => {
 
   it("a flush that redirects (consent) keeps the copy", async () => {
     pendingFrom("2026-10-02");
-    saveCheckIn.mockRejectedValue(new Error("NEXT_REDIRECT"));
+    saveCheckIn.mockRejectedValue(Object.assign(new Error("NEXT_REDIRECT"), { digest: "NEXT_REDIRECT;replace;/consent;307;" }));
     const onError = vi.spyOn(console, "error").mockImplementation(() => {});
     const swallow = (e: Event) => e.preventDefault();
     window.addEventListener("error", swallow);
@@ -204,5 +204,31 @@ describe("CheckInCard", () => {
   it("the stress chip is a message, not a concatenation", async () => {
     renderCard(ROW);
     expect(screen.getByTestId("checkin-summary")).toHaveTextContent(messages.today.stressChip.replace("{level}", "2"));
+  });
+});
+
+describe("CheckInCard: a request lost at the network level (Web Tester, #11)", () => {
+  it("an online save that can't reach the server: the generic error, no crash, the card stays", async () => {
+    saveCheckIn.mockRejectedValue(new TypeError("Failed to fetch"));
+    renderCard(null);
+    fireEvent.click(screen.getByTestId("checkin-mood-3"));
+    fireEvent.click(screen.getByTestId("checkin-save"));
+    expect(await screen.findByTestId("checkin-error")).toHaveTextContent(messages.today.errGeneric);
+    expect(screen.getByTestId("checkin-mood-3")).toHaveAttribute("aria-checked", "true");
+  });
+
+  it("a flush that can't reach the server keeps the copy and tries again on the next reconnect", async () => {
+    window.localStorage.setItem(KEY, JSON.stringify({ fields: { mood: 2, sleepHours: "", sleepQuality: "", exercise: "", stress: "" }, expected: "", date: "2026-10-02" }));
+    saveCheckIn.mockRejectedValueOnce(new TypeError("Failed to fetch"));
+    saveCheckIn.mockResolvedValueOnce({ status: "saved", checkIn: { ...ROW, mood: 2 } });
+    renderCard(null);
+    await waitFor(() => expect(saveCheckIn).toHaveBeenCalledTimes(1));
+    await screen.findByTestId("checkin-error");
+    expect(window.localStorage.getItem(KEY)).not.toBeNull();
+    await act(async () => {
+      window.dispatchEvent(new Event("online"));
+    });
+    await waitFor(() => expect(saveCheckIn).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(window.localStorage.getItem(KEY)).toBeNull());
   });
 });
