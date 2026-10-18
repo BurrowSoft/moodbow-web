@@ -16,7 +16,7 @@ const KEY = "mb:pending-checkin:u1";
 const renderCard = (initial: CheckIn | null) =>
   render(
     <NextIntlClientProvider locale="en" messages={messages}>
-      <CheckInCard initial={initial} uid="u1" today="2026-10-02" />
+      <CheckInCard initial={initial} uid="u1" today="2026-10-02" dateLocaleTag="en-US" />
     </NextIntlClientProvider>,
   );
 const sent = (call = 0) => Object.fromEntries((saveCheckIn.mock.calls[call][1] as FormData).entries());
@@ -155,13 +155,28 @@ describe("CheckInCard", () => {
     }
   });
 
-  it("a stale flush is dropped (the newer row is shown instead)", async () => {
+  const superseded = (date: string) => messages.today.offlineCheckinSuperseded.replace("{date}", date);
+
+  it("a stale flush for today: dropped, never silently; the newer row is shown (decision 72)", async () => {
     pendingFrom("2026-10-02");
     saveCheckIn.mockResolvedValue({ status: "error", error: "stale", checkIn: { ...ROW, mood: 5 } });
     renderCard(null);
-    await screen.findByTestId("checkin-error");
+    expect(await screen.findByTestId("checkin-superseded")).toHaveTextContent(superseded("Friday, October 2, 2026"));
     expect(window.localStorage.getItem(KEY)).toBeNull();
-    expect(screen.getByTestId("checkin-mood-5")).toHaveAttribute("aria-checked", "true");
+    expect(screen.getByTestId("checkin-summary")).toHaveTextContent(messages.today.mood5);
+    expect(screen.getByTestId("checkin-status")).toHaveTextContent(messages.today.checkinSaved);
+    expect(screen.queryByTestId("checkin-error")).toBeNull();
+  });
+
+  it("a stale flush for an earlier day: a dismissible notice naming that day; today's card unchanged", async () => {
+    pendingFrom("2026-10-01");
+    saveCheckIn.mockResolvedValue({ status: "error", error: "stale", checkIn: { ...ROW, local_date: "2026-10-01", mood: 5 } });
+    renderCard(null);
+    expect(await screen.findByTestId("checkin-superseded")).toHaveTextContent(superseded("Thursday, October 1, 2026"));
+    expect(window.localStorage.getItem(KEY)).toBeNull();
+    expect(screen.getByTestId("checkin-mood-5")).toHaveAttribute("aria-checked", "false");
+    fireEvent.click(screen.getByTestId("checkin-superseded-dismiss"));
+    expect(screen.queryByTestId("checkin-superseded")).toBeNull();
   });
 
   it("a corrupt pending copy is ignored", () => {

@@ -198,6 +198,8 @@
     "stressLow": "Low",
     "stressHigh": "High",
     "stressChip": "Stress {level}/5",
+    "offlineCheckinSuperseded": "Your offline check-in for {date} wasn't saved, because that day was updated on another device. You're seeing the latest version.",
+    "dismiss": "Dismiss",
     "checkinSave": "Save",
     "checkinSaved": "Saved",
     "checkinSavedOfflineWeb": "Saved in this browser. It will sync when you're online.",

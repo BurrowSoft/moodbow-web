@@ -50,7 +50,9 @@ export function dateLocale(uiLocale: string, acceptLanguage: string | null, coun
     const [l, region] = tag.split("-");
     return l.toLowerCase() === lang && /^[a-z]{2}$|^\d{3}$/i.test(region ?? "") && supported(tag);
   });
-  if (browser) return browser.tag;
+  // Only language-region: an extension (-u-ca-…, -u-nu-…) in the header
+  // must not switch the calendar or the digits.
+  if (browser) return browser.tag.split("-").slice(0, 2).join("-");
   if (country && /^[a-z]{2}$/i.test(country) && supported(`${lang}-${country.toUpperCase()}`)) return `${lang}-${country.toUpperCase()}`;
   return lang === "en" ? "en-US" : lang;
 }

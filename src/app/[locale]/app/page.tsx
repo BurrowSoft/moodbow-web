@@ -33,6 +33,7 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
     .maybeSingle();
   const t = await getTranslations("today");
   const timeZone = me.profile?.time_zone ?? "UTC";
+  const dateLocaleTag = dateLocale(locale, (await headers()).get("accept-language"), me.profile?.country ?? null);
 
   return (
     <section className="space-y-8">
@@ -41,10 +42,10 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
           {t(greetingKey(localHour(timeZone)))}
         </h1>
         <p className="mt-1 text-muted" data-testid="today-date">
-          {dateLine(me.today, dateLocale(locale, (await headers()).get("accept-language"), me.profile?.country ?? null))}
+          {dateLine(me.today, dateLocaleTag)}
         </p>
       </header>
-      <CheckInCard initial={(data as CheckIn | null) ?? null} uid={user.id} today={me.today} />
+      <CheckInCard initial={(data as CheckIn | null) ?? null} uid={user.id} today={me.today} dateLocaleTag={dateLocaleTag} />
     </section>
   );
 }

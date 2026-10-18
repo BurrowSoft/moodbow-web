@@ -63,6 +63,7 @@ describe("dateLocale (decision 89: browser region → profile country → en-US)
   it("ignores refused or malformed tags", () => {
     expect(dateLocale("en", "en-GB;q=0,en-US;q=0.5", null)).toBe("en-US");
     expect(dateLocale("en", "en-<script>", "GB")).toBe("en-GB");
+    expect(dateLocale("en", "en-US-u-ca-buddhist", null)).toBe("en-US");
   });
   it("Thai stays Thai", () => {
     expect(dateLocale("th", "th-TH,en;q=0.8", "TH")).toBe("th-TH");

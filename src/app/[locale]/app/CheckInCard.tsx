@@ -3,6 +3,7 @@
 import { startTransition, useActionState, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { EXERCISE_MINUTES, MOODS, SLEEP_HOURS, SLEEP_QUALITIES, STRESS_LEVELS, type CheckIn, type SleepQuality } from "@/lib/journal/checkIn";
+import { dateLine } from "@/lib/journal/today";
 import { localKey } from "@/lib/localData";
 import { saveCheckIn, type CheckInState } from "./actions";
 
@@ -57,7 +58,27 @@ function toFormData(fields: Fields, expectedUpdatedAt: string, date: string, fro
   return form;
 }
 
-export function CheckInCard({ initial, uid, today }: { initial: CheckIn | null; uid: string; today: string }) {
+type Props = { initial: CheckIn | null; uid: string; today: string; dateLocaleTag: string };
+
+export function CheckInCard(props: Props) {
+  const t = useTranslations("today");
+  const [superseded, setSuperseded] = useState<string | null>(null);
+  return (
+    <div className="space-y-4">
+      {superseded && (
+        <div role="status" data-testid="checkin-superseded" className="flex items-start gap-4 rounded-2xl bg-pill p-4 text-sm text-text">
+          <p className="flex-1">{t("offlineCheckinSuperseded", { date: dateLine(superseded, props.dateLocaleTag) })}</p>
+          <button type="button" data-testid="checkin-superseded-dismiss" onClick={() => setSuperseded(null)} className="font-medium text-accent underline underline-offset-4">
+            {t("dismiss")}
+          </button>
+        </div>
+      )}
+      <Card {...props} setSuperseded={setSuperseded} />
+    </div>
+  );
+}
+
+function Card({ initial, uid, today, setSuperseded }: Props & { setSuperseded: (date: string) => void }) {
   const t = useTranslations("today");
   const [row, setRow] = useState<CheckIn | null>(initial);
   const [fields, setFields] = useState<Fields>(fromRow(initial));
@@ -73,8 +94,21 @@ export function CheckInCard({ initial, uid, today }: { initial: CheckIn | null; 
       // can still succeed ("generic", e.g. the network dropped again). A
       // redirect (consent, sign-in) throws before this line: the copy stays.
       if (next.status === "saved" || (next.status === "error" && next.error !== "generic")) removePending(uid);
+      const date = String(form.get("local_date"));
+      // The day changed on another device meanwhile: the copy is dropped, but
+      // never silently (decision 72). Today's card shows the latest version.
+      if (next.status === "error" && next.error === "stale") {
+        setSuperseded(date);
+        if (date === today && next.checkIn) {
+          setRow(next.checkIn);
+          setFields(fromRow(next.checkIn));
+          setEditing(false);
+          setOffline(false);
+        }
+        return prev;
+      }
       // A copy from an earlier day doesn't change today's card.
-      if (form.get("local_date") !== today) return prev;
+      if (date !== today) return prev;
     }
     if (next.status === "saved") {
       setRow(next.checkIn);
