@@ -1,0 +1,88 @@
+{
+  "format": "moodbow-export",
+  "format_version": 1,
+  "exported_at": "2026-10-20T03:15:59.987654+07:00",
+  "account": { "email": "sam@example.invalid" },
+  "profile": {
+    "locale": "en",
+    "time_zone": "Asia/Bangkok",
+    "country": "TH",
+    "onboarded_at": "2026-09-01T03:00:00+00:00",
+    "created_at": "2026-09-01T02:58:00+00:00",
+    "updated_at": "2026-09-01T03:00:00+00:00"
+  },
+  "settings": {
+    "tone": "warm",
+    "focus_areas": ["sleep", "work"],
+    "reminder_on": true,
+    "reminder_time": "21:00:00",
+    "ai_enabled": false
+  },
+  "consents": [
+    { "kind": "privacy", "version": "2026-10-02", "granted": true, "created_at": "2026-09-01T02:58:00+00:00" }
+  ],
+  "check_ins": [
+    {
+      "id": "c1", "local_date": "2026-09-28", "mood": 2, "sleep_hours": null, "sleep_quality": null,
+      "exercise_minutes": null, "stress": null,
+      "created_at": "2026-09-28T13:00:00+00:00", "updated_at": "2026-09-28T13:00:00+00:00"
+    },
+    {
+      "id": "c2", "local_date": "2026-09-29", "mood": 3, "sleep_hours": 7, "sleep_quality": null,
+      "exercise_minutes": 0, "stress": 4,
+      "created_at": "2026-09-29T13:00:00+00:00", "updated_at": "2026-09-29T13:00:00+00:00"
+    },
+    {
+      "id": "c3", "local_date": "2026-09-30", "mood": 5, "sleep_hours": null, "sleep_quality": "poor",
+      "exercise_minutes": 90, "stress": null,
+      "created_at": "2026-09-30T13:00:00+00:00", "updated_at": "2026-09-30T13:00:00+00:00"
+    },
+    {
+      "id": "c4", "local_date": "2026-10-02", "mood": 4, "sleep_hours": 7.5, "sleep_quality": "good",
+      "exercise_minutes": 30, "stress": 2,
+      "created_at": "2026-10-02T01:30:00+00:00", "updated_at": "2026-10-02T01:30:00+00:00"
+    }
+  ],
+  "entries": [
+    {
+      "id": "e1", "entry_date": "2026-09-30", "body": "Long day.\r\nBut a good talk with Mai at the end — ขอบคุณ.\r\n\r\n",
+      "is_moment": false,
+      "created_at": "2026-09-30T14:00:00+00:00", "updated_at": "2026-09-30T14:00:00+00:00"
+    },
+    {
+      "id": "e2", "entry_date": "2026-10-02", "body": "A walk by the river.",
+      "is_moment": true,
+      "created_at": "2026-10-02T02:00:00+00:00", "updated_at": "2026-10-02T02:10:00+00:00"
+    },
+    {
+      "id": "e3", "entry_date": "2026-10-02", "body": "\nGroceries  \n\n- rice\n- tea\n \t\n\t\n",
+      "is_moment": false,
+      "created_at": "2026-10-02T09:00:00+00:00", "updated_at": "2026-10-02T09:00:00+00:00"
+    }
+  ],
+  "ai_reflections": [
+    {
+      "id": "r1", "entry_id": "e2", "body": "Time outside seems to lift your mood.",
+      "tier": "lite", "model": "claude-haiku-5-5", "created_at": "2026-10-02T02:11:00+00:00"
+    },
+    {
+      "id": "r2", "entry_id": "e-deleted", "body": "You named what you needed.",
+      "tier": "lite", "model": "claude-haiku-5-5", "created_at": "2026-10-01T23:30:00+00:00"
+    }
+  ],
+  "ai_reports": [
+    {
+      "id": "w1", "kind": "weekly", "period_start": "2026-09-28", "period_end": "2026-10-04",
+      "body": { "summary": "Not in the text in format 1." },
+      "tier": "lite", "model": "claude-haiku-5-5", "created_at": "2026-10-05T01:00:00+00:00"
+    }
+  ],
+  "ai_memories": [
+    {
+      "id": "m1", "fact": "Walks by the river help.", "source_entry_id": "e2",
+      "created_at": "2026-10-02T02:11:00+00:00", "updated_at": "2026-10-02T02:11:00+00:00"
+    }
+  ],
+  "ai_usage": [],
+  "credits": { "balance": 5, "ledger": [] }
+}

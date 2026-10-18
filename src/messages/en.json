@@ -233,7 +233,8 @@
     "entryDeletedTitle": "This entry was deleted on another device",
     "entryDeletedBody": "Your version is still here. Do you want to keep it?",
     "entryDeletedKeep": "Keep it",
-    "entryDeletedDiscard": "Delete it"
+    "entryDeletedDiscard": "Delete it",
+    "momentBadge": "Moment"
   },
   "notFound": {
     "title": "Page not found",
@@ -254,5 +255,24 @@
     "deleteConfirm": "Delete everything",
     "deleteDone": "Your account and everything in it were deleted.",
     "cancel": "Cancel"
+  },
+  "export": {
+    "exportTitle": "Moodbow: your journal",
+    "exportExported": "Exported: {when}",
+    "exportAccount": "Account: {email}",
+    "exportPrivateNote": "This file holds your private journal. Keep it somewhere safe.",
+    "exportCheckins": "Check-ins",
+    "exportEntries": "Entries",
+    "exportReflections": "AI reflections",
+    "exportMemories": "What the AI remembers",
+    "exportField": "{label}: {value}",
+    "exportMood": "Mood",
+    "exportMoodValue": "{label} ({value}/5)",
+    "exportSleep": "Sleep",
+    "exportSleepValue": "{hours}, {quality}",
+    "exportExercise": "Exercise",
+    "exportStress": "Stress",
+    "exportOfFive": "{value}/5",
+    "exportReflectionOn": "On your entry of {date}"
   }
 }
