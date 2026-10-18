@@ -128,6 +128,13 @@ describe("saveCheckIn", () => {
     expect(eq).toHaveBeenLastCalledWith("local_date", "2026-10-02");
   });
 
+  it("stale_write, but the day already holds these exact values (an earlier answer was lost): saved", async () => {
+    rpcAnswers({ data: null, error: { message: "stale_write" } });
+    maybeSingle.mockResolvedValue({ data: ROW });
+    const same = { mood: "4", sleep_hours: "7.5", sleep_quality: "good", exercise_minutes: "30", stress: "2", expected_updated_at: "2026-10-02T08:00:00Z" };
+    expect(await saveCheckIn(idle, form(same))).toEqual({ status: "saved", checkIn: ROW });
+  });
+
   it("stale_write on an older day reloads that day", async () => {
     rpcAnswers({ data: null, error: { message: "stale_write" } });
     maybeSingle.mockResolvedValue({ data: null });

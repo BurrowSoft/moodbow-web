@@ -63,6 +63,22 @@ function removePending(key: string) {
   }
 }
 
+// The pending copy for a save whose request failed (the inverse of toFormData).
+function pendingFromForm(form: FormData): Pending {
+  const text = (name: string) => String(form.get(name) ?? "");
+  return {
+    fields: {
+      mood: Number(text("mood")),
+      sleepHours: text("sleep_hours"),
+      sleepQuality: text("sleep_quality") as SleepQuality | "",
+      exercise: text("exercise_minutes"),
+      stress: text("stress"),
+    },
+    expected: text("expected_updated_at"),
+    date: text("local_date"),
+  };
+}
+
 function toFormData(fields: Fields, expectedUpdatedAt: string, date: string, fromPending?: string): FormData {
   const form = new FormData();
   form.set("local_date", date);
@@ -135,7 +151,29 @@ function Card({ initial, uid, date: cardDate, notify }: Props & { notify: Notify
   // The pending copies being sent right now (by key), so none goes twice.
   const flushing = useRef(new Set<string>());
   const [state, action, pending] = useActionState<CheckInState, FormData>(async (prev, form) => {
-    const next = await saveCheckIn(prev, form);
+    let next: CheckInState;
+    try {
+      next = await saveCheckIn(prev, form);
+    } catch (e) {
+      // A redirect (consent, sign-in) is the navigation itself.
+      const fromPending = form.get("from_pending") === "1";
+      if (fromPending) flushing.current.delete(String(form.get("pending_key")));
+      const digest = (e as { digest?: unknown })?.digest;
+      if (typeof digest === "string" && digest.startsWith("NEXT_REDIRECT")) throw e;
+      // The request itself failed (the connection dropped while the browser
+      // still says online): not a crash. A synced copy simply stays for the
+      // next reconnect; a live save becomes one, exactly like saving offline.
+      if (fromPending) return prev;
+      try {
+        const copy = pendingFromForm(form);
+        window.localStorage.setItem(pendingKey(uid, copy.date), JSON.stringify(copy));
+      } catch {
+        return { status: "error", error: "generic" };
+      }
+      setOffline(true);
+      setEditing(false);
+      return prev;
+    }
     if (form.get("from_pending") === "1") {
       const key = String(form.get("pending_key"));
       flushing.current.delete(key);
