@@ -233,11 +233,23 @@
     "entryDeletedTitle": "This entry was deleted on another device",
     "entryDeletedBody": "Your version is still here. Do you want to keep it?",
     "entryDeletedKeep": "Keep it",
-    "entryDeletedDiscard": "Delete it"
+    "entryDeletedDiscard": "Delete it",
+    "momentBadge": "Moment"
   },
   "notFound": {
     "title": "Page not found",
     "body": "This page doesn't exist or has moved.",
     "home": "Go to the home page"
+  },
+  "timeline": {
+    "timelineTitle": "Timeline",
+    "timelineAll": "All days",
+    "timelineMoments": "Moments",
+    "timelineEmptyTitle": "Your story starts here",
+    "timelineEmptyBody": "Check in or write about your day, and it will appear here.",
+    "timelineMomentsEmpty": "No moments yet. Tap ★ on an entry to keep it here.",
+    "dayNoCheckin": "No check-in this day",
+    "dayAddCheckin": "Add a check-in",
+    "dayAddEntry": "Add an entry"
   }
 }

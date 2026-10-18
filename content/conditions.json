@@ -54,5 +54,9 @@
   "help-now-live": {
     "met": false,
     "what": "Me → Get help now (the safety card with local hotlines from the country registry) is in a RELEASED app build and on the live web journal (M7 + M8)."
+  },
+  "timeline-moments-rpc": {
+    "met": false,
+    "what": "get_timeline(p_before, p_limit, p_moments_only) from moodbow-app migration 005 is applied on staging AND production (Mobile Dev confirms). Until then the Timeline's Moments filter is hidden."
   }
 }

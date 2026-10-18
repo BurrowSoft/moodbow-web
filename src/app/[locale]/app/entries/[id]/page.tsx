@@ -21,8 +21,9 @@ export default async function EntryPage({ params }: PageProps<"/[locale]/app/ent
   if (!isEntryId(id)) notFound();
   const supabase = await createSupabaseServerClient();
   const user = supabase ? (await supabase.auth.getUser()).data.user : null;
-  const me = supabase ? await getMe(supabase) : null;
-  if (!supabase || !user || !me) return <JournalUnavailable />;
+  if (!supabase || !user) return <JournalUnavailable />;
+  const me = await getMe(supabase);
+  if (!me) return <JournalUnavailable />;
   const { data, error } = await supabase.from("entries").select(ENTRY_COLUMNS).eq("id", id).maybeSingle();
   if (error) return <JournalUnavailable />;
   if (!data) notFound();
