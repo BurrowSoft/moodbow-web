@@ -6,7 +6,7 @@ import { dayLabel, groupByMonth, isIsoDate, monthLabel } from "@/lib/journal/tim
 const rpc = vi.fn();
 vi.mock("@/lib/supabase/server", () => ({ createSupabaseServerClient: async () => ({ rpc }) }));
 let momentsLive = true;
-vi.mock("@/lib/conditions", () => ({ conditionMet: (id: string) => id === "timeline-moments-rpc" && momentsLive }));
+vi.mock("@/lib/conditions", () => ({ pageGate: (id: string) => (id === "timeline-moments-rpc" && momentsLive ? "live" : "hidden") }));
 const { loadTimeline } = await import("./actions");
 
 const day = (local_date: string) => ({ local_date, check_in: null, entries: [], entry_count: 0 });

@@ -4,7 +4,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 import { Link } from "@/i18n/navigation";
 import { JournalUnavailable } from "@/components/JournalUnavailable";
-import { conditionMet } from "@/lib/conditions";
+import { pageGate } from "@/lib/conditions";
 import { getMe } from "@/lib/journal/me";
 import { dateLocale } from "@/lib/journal/today";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -17,8 +17,9 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/app/time
 }
 
 // Timeline (M5): All days, or Moments (?view=moments). The Moments filter
-// needs get_timeline's p_moments_only (moodbow-app migration 005), so it
-// only shows once that is live ("timeline-moments-rpc").
+// needs get_timeline's p_moments_only (moodbow-app migration 005): it shows
+// on Previews (staging has 005) and on Production once "timeline-moments-rpc"
+// is met (005 applied there too).
 export default async function TimelinePage({ params, searchParams }: PageProps<"/[locale]/app/timeline">) {
   const { locale } = await params;
   setRequestLocale(locale as Locale);
@@ -28,7 +29,7 @@ export default async function TimelinePage({ params, searchParams }: PageProps<"
   const me = await getMe(supabase);
   if (!me) return <JournalUnavailable />;
 
-  const momentsReady = conditionMet("timeline-moments-rpc");
+  const momentsReady = pageGate("timeline-moments-rpc") !== "hidden";
   const momentsOnly = momentsReady && (await searchParams).view === "moments";
   const page = await loadTimeline(null, momentsOnly);
   if (page.status === "error") return <JournalUnavailable />;

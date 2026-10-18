@@ -57,6 +57,6 @@
   },
   "timeline-moments-rpc": {
     "met": false,
-    "what": "get_timeline(p_before, p_limit, p_moments_only) from moodbow-app migration 005 is applied on staging AND production (Mobile Dev confirms). Until then the Timeline's Moments filter is hidden."
+    "what": "get_timeline(p_before, p_limit, p_moments_only) from moodbow-app migration 005 is applied on PRODUCTION (Mobile Dev confirms; staging has it since 2026-10-19). Until then the Timeline's Moments filter shows on Previews only."
   }
 }
