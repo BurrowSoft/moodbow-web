@@ -56,3 +56,16 @@ describe("Reminder", () => {
     expect(await screen.findByText(messages.today.errGeneric)).toBeInTheDocument();
   });
 });
+
+describe("Reminder: a new time, then switching off before leaving the field (reviewer #19)", () => {
+  it("sends the new time with the switch", async () => {
+    renderIt(true, "21:00");
+    fireEvent.change(screen.getByTestId("me-reminder-time"), { target: { value: "06:45" } });
+    fireEvent.click(screen.getByTestId("me-reminder-on"));
+    await waitFor(() => expect(saveReminder).toHaveBeenCalledTimes(1));
+    expect(sent()).toEqual({ reminder_on: "false", reminder_time: "06:45" });
+    // The field, now disabled, doesn't send it again when left.
+    fireEvent.blur(screen.getByTestId("me-reminder-time"));
+    expect(saveReminder).toHaveBeenCalledTimes(1);
+  });
+});
