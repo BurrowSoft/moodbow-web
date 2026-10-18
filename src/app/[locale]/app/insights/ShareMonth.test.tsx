@@ -16,9 +16,20 @@ const renderIt = () =>
     </NextIntlClientProvider>,
   );
 
+// A 2D context that accepts every call; the image always decodes; the PNG
+// is a tiny blob.
+const noopCtx = new Proxy({}, { get: (_t, k) => (k === "measureText" ? () => ({ width: 10 }) : () => {}), set: () => true });
+const names: string[] = [];
 beforeEach(() => {
   loadMonthCheckIns.mockReset();
-  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(null);
+  names.length = 0;
+  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(noopCtx as unknown as CanvasRenderingContext2D);
+  vi.spyOn(HTMLCanvasElement.prototype, "toBlob").mockImplementation((cb) => cb(new Blob(["png"], { type: "image/png" })));
+  Object.assign(HTMLImageElement.prototype, { decode: () => Promise.resolve() });
+  Object.assign(URL, { createObjectURL: vi.fn(() => "blob:x"), revokeObjectURL: vi.fn() });
+  vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(function (this: HTMLAnchorElement) {
+    names.push(this.download);
+  });
 });
 afterEach(() => {
   cleanup();
@@ -49,37 +60,66 @@ describe("ShareMonth", () => {
     expect(screen.getByTestId("share-theme-dark")).toHaveAttribute("aria-pressed", "true");
   });
 
-  it("without file sharing: 'Download image' saves moodbow-2026-10.png", async () => {
+  const ready = async () => {
+    const send = await screen.findByTestId("share-send");
+    await waitFor(() => expect(send).toBeEnabled());
+    return send;
+  };
+
+  it("without file sharing: 'Download image' saves moodbow-2026-10.png once the card is drawn", async () => {
     loadMonthCheckIns.mockResolvedValue({ status: "ok", checkIns: days(6) });
-    vi.spyOn(HTMLCanvasElement.prototype, "toBlob").mockImplementation((cb) => cb(new Blob(["png"], { type: "image/png" })));
-    Object.assign(URL, { createObjectURL: vi.fn(() => "blob:x"), revokeObjectURL: vi.fn() });
-    const names: string[] = [];
-    vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(function (this: HTMLAnchorElement) {
-      names.push(this.download);
-    });
     renderIt();
     fireEvent.click(screen.getByTestId("share-open"));
-    const send = await screen.findByTestId("share-send");
+    const send = await ready();
     expect(send).toHaveTextContent(m.shareDownload);
     fireEvent.click(send);
-    await waitFor(() => expect(names).toEqual(["moodbow-2026-10.png"]));
+    expect(names).toEqual(["moodbow-2026-10.png"]);
   });
 
-  it("with file sharing: 'Share' hands the PNG to the system share sheet", async () => {
+  it("with file sharing: share() is called right in the click (Safari's user activation), with the PNG", async () => {
     loadMonthCheckIns.mockResolvedValue({ status: "ok", checkIns: days(6) });
-    vi.spyOn(HTMLCanvasElement.prototype, "toBlob").mockImplementation((cb) => cb(new Blob(["png"], { type: "image/png" })));
-    const share = vi.fn(async () => {});
+    const share = vi.fn(() => Promise.resolve());
     Object.assign(navigator, { canShare: () => true, share });
+    try {
+      renderIt();
+      fireEvent.click(screen.getByTestId("share-open"));
+      const send = await ready();
+      expect(send).toHaveTextContent(m.shareSend);
+      fireEvent.click(send);
+      // Synchronously, before any await.
+      expect(share).toHaveBeenCalledTimes(1);
+      const files = (share.mock.calls[0] as unknown as [{ files: File[] }])[0].files;
+      expect(files[0].name).toBe("moodbow-2026-10.png");
+      expect(files[0].type).toBe("image/png");
+    } finally {
+      Object.assign(navigator, { canShare: undefined, share: undefined });
+    }
+  });
+
+  it("share refused (not allowed) → a download; cancelled (AbortError) → nothing", async () => {
+    loadMonthCheckIns.mockResolvedValue({ status: "ok", checkIns: days(6) });
+    const share = vi.fn().mockRejectedValueOnce(new DOMException("no", "NotAllowedError")).mockRejectedValueOnce(new DOMException("cancel", "AbortError"));
+    Object.assign(navigator, { canShare: () => true, share });
+    try {
+      renderIt();
+      fireEvent.click(screen.getByTestId("share-open"));
+      const send = await ready();
+      fireEvent.click(send);
+      await waitFor(() => expect(names).toEqual(["moodbow-2026-10.png"]));
+      fireEvent.click(send);
+      await new Promise((r) => setTimeout(r, 10));
+      expect(names).toHaveLength(1);
+    } finally {
+      Object.assign(navigator, { canShare: undefined, share: undefined });
+    }
+  });
+
+  it("the preview describes itself: the count and the line", async () => {
+    loadMonthCheckIns.mockResolvedValue({ status: "ok", checkIns: days(7) });
     renderIt();
     fireEvent.click(screen.getByTestId("share-open"));
-    const send = await screen.findByTestId("share-send");
-    expect(send).toHaveTextContent(m.shareSend);
-    fireEvent.click(send);
-    await waitFor(() => expect(share).toHaveBeenCalledTimes(1));
-    const files = (share.mock.calls[0] as unknown as [{ files: File[] }])[0].files;
-    expect(files[0].name).toBe("moodbow-2026-10.png");
-    expect(files[0].type).toBe("image/png");
-    Object.assign(navigator, { canShare: undefined, share: undefined });
+    fireEvent.change(await screen.findByTestId("share-line"), { target: { value: "Calmer" } });
+    expect(screen.getByTestId("share-preview")).toHaveAccessibleDescription("7 days journaled Calmer");
   });
 
   it("a failed load says so", async () => {

@@ -21,6 +21,8 @@ export function ShareMonth({ month, dateLocaleTag, label }: { month: string; dat
   const [theme, setTheme] = useState<CardTheme>("light");
   const [line, setLine] = useState("");
   const [canShareFiles, setCanShareFiles] = useState(false);
+  // The finished PNG, made when the preview has drawn (see send).
+  const [file, setFile] = useState<File | null>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
 
   const start = () => {
@@ -45,6 +47,7 @@ export function ShareMonth({ month, dateLocaleTag, label }: { month: string; dat
     const el = canvas.current;
     if (!open || !enough || !el) return;
     let cancelled = false;
+    setFile(null);
     (async () => {
       const family = getComputedStyle(document.documentElement).getPropertyValue("--font-poppins").trim() || "sans-serif";
       await Promise.all([document.fonts?.load(`500 72px ${family}`), document.fonts?.load(`400 44px ${family}`)]).catch(() => undefined);
@@ -66,30 +69,37 @@ export function ShareMonth({ month, dateLocaleTag, label }: { month: string; dat
         fontFamily: `${family}, sans-serif`,
         logo: logo.complete && logo.naturalWidth > 0 ? logo : null,
       });
+      // A canvas PNG carries no EXIF or text chunks; the name is the month.
+      el.toBlob((blob) => {
+        if (!cancelled && blob) setFile(new File([blob], cardFileName(month), { type: "image/png" }));
+      }, "image/png");
     })();
     return () => {
       cancelled = true;
     };
   }, [open, enough, colours, format, theme, line, month, dateLocaleTag, t]);
 
+  const download = (f: File) => {
+    const url = URL.createObjectURL(f);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = f.name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  // share() is called right in the click (Safari only allows it during the
+  // click's user activation), so the file is ready before: made when the
+  // preview finishes drawing. Cancelling the sheet is nothing; any other
+  // refusal falls back to a download.
   const send = () => {
-    canvas.current?.toBlob(async (blob) => {
-      if (!blob) return;
-      // A canvas PNG carries no EXIF or text chunks; the name is the month.
-      const file = new File([blob], cardFileName(month), { type: "image/png" });
-      if (canShareFiles) {
-        await navigator.share({ files: [file] }).catch(() => undefined);
-        return;
-      }
-      const url = URL.createObjectURL(file);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = file.name;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-    }, "image/png");
+    if (!file) return;
+    if (!canShareFiles) return download(file);
+    navigator.share({ files: [file] }).catch((e: unknown) => {
+      if ((e as { name?: string })?.name !== "AbortError") download(file);
+    });
   };
 
   const choice = (active: boolean) =>
@@ -102,7 +112,7 @@ export function ShareMonth({ month, dateLocaleTag, label }: { month: string; dat
       </button>
       {open && (
         <Dialog title={t("shareTitle")} onCancel={close} testId="share-dialog">
-          <div className="w-full space-y-4 text-left">
+          <div className="w-full space-y-4 text-left" aria-busy={colours === null && !failed}>
             <h3 className="font-medium text-text" data-testid="share-type-moodbow">
               {t("shareMoodbow")}
             </h3>
@@ -122,9 +132,14 @@ export function ShareMonth({ month, dateLocaleTag, label }: { month: string; dat
                   ref={canvas}
                   role="img"
                   aria-label={t("shareMoodbow")}
+                  aria-describedby="share-preview-desc"
                   data-testid="share-preview"
                   className={`mx-auto block rounded-xl border border-border ${format === "story" ? "h-80 w-[180px]" : "h-60 w-60"}`}
                 />
+                {/* What the image says, for screen readers (the count and the line). */}
+                <p id="share-preview-desc" className="sr-only">
+                  <span>{t("shareDaysJournaled", { n: colours!.length })}</span> <span>{line}</span>
+                </p>
                 <div className="flex flex-wrap gap-2" role="group" aria-label={t("shareTitle")}>
                   <button type="button" data-testid="share-format-story" aria-pressed={format === "story"} onClick={() => setFormat("story")} className={choice(format === "story")}>
                     {t("shareStory")}
@@ -152,7 +167,7 @@ export function ShareMonth({ month, dateLocaleTag, label }: { month: string; dat
                 />
                 <p className="text-sm text-muted">{t("sharePrivacyNote")}</p>
                 <div className="flex flex-wrap justify-end gap-3">
-                  <button type="button" data-testid="share-send" onClick={send} className={dialogButton(true)}>
+                  <button type="button" data-testid="share-send" onClick={send} disabled={!file} aria-busy={!file} className={`${dialogButton(true)} disabled:opacity-50`}>
                     {canShareFiles ? t("shareSend") : t("shareDownload")}
                   </button>
                 </div>
