@@ -1,6 +1,8 @@
 import { cleanup, render } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { LocalDataWipe } from "@/components/LocalDataWipe";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+let pathname = "/app/me";
+vi.mock("next/navigation", () => ({ usePathname: () => pathname }));
+const { LocalDataWipe } = await import("@/components/LocalDataWipe");
 import { localKey, wipeCookieUid, wipeLocalData } from "./localData";
 
 const GONE = "0b5f2c1e-7d3a-4e8b-9c41-2a6f8e1d3b70";
@@ -36,6 +38,18 @@ describe("wipeCookieUid", () => {
 });
 
 describe("LocalDataWipe", () => {
+  it("also runs after a client-side navigation (the layout stays mounted; reviewer #17)", () => {
+    pathname = "/app/me";
+    const view = render(<LocalDataWipe />);
+    expect(keys()).toHaveLength(4);
+    // A server action deleted the account, set the cookie and redirected.
+    document.cookie = `mb_wipe=${GONE}; Path=/`;
+    pathname = "/sign-in";
+    view.rerender(<LocalDataWipe />);
+    expect(keys()).toEqual(["NEXT_LOCALE", `mb:pending-checkin:${OTHER}`]);
+    expect(document.cookie).not.toContain("mb_wipe=");
+  });
+
   it("wipes the named user's copies and deletes the cookie at once", () => {
     document.cookie = `mb_wipe=${GONE}; Path=/`;
     render(<LocalDataWipe />);
