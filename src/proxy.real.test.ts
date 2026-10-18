@@ -111,3 +111,33 @@ describe("proxy + real auth-js: why a session ended", () => {
     expect(clearsAuthCookie(res)).toBe(false);
   });
 });
+
+// A form on a signed-in page posts a server action; when Supabase ended the
+// session, the answer must be one Next's action client understands (Web
+// Tester, #12: a page redirect left the editor on its generic error).
+describe("proxy + real auth-js: a server action after the session ended", () => {
+  const act = (path: string, cookie: string) =>
+    proxy(new NextRequest(`https://www.moodbow.com${path}`, { method: "POST", headers: { cookie: `${COOKIE}=${cookie}`, "next-action": "abc123" } }));
+
+  it("revoked: an action redirect to sign-in with the notice, not a page redirect; cookies cleared", async () => {
+    userAnswer = { status: 403, body: { code: "session_not_found", message: "Session from session_id claim in JWT does not exist" } };
+    const res = await act("/app/write", sessionCookie({ expired: false }));
+    expect(res.status).toBe(200);
+    expect(res.headers.get("location")).toBeNull();
+    expect(res.headers.get("x-action-redirect")).toBe("/sign-in?signed_out=session;replace");
+    expect(clearsAuthCookie(res)).toBe(true);
+  });
+
+  it("deleted elsewhere: the account notice", async () => {
+    userAnswer = { status: 403, body: { code: "user_not_found", message: "User from sub claim in JWT does not exist" } };
+    const res = await act("/app", sessionCookie({ expired: false }));
+    expect(res.headers.get("x-action-redirect")).toBe("/sign-in?signed_out=account;replace");
+  });
+
+  it("a page request still gets the 303", async () => {
+    userAnswer = { status: 403, body: { code: "session_not_found", message: "x" } };
+    const res = await visit("/app/write", sessionCookie({ expired: false }));
+    expect(res.status).toBe(303);
+    expect(res.headers.get("x-action-redirect")).toBeNull();
+  });
+});
