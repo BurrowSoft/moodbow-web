@@ -132,7 +132,8 @@ export async function createSupabaseServerClient() {
   const signOut = auth.signOut.bind(auth);
   auth.signOut = async (options) => {
     const result = (await bounded(() => signOut(options))) ?? { error: deadlineError() };
-    clearSessionCookies(store);
+    // "others" keeps this browser signed in: only the other sessions end.
+    if (options?.scope !== "others") clearSessionCookies(store);
     return result;
   };
   return client;

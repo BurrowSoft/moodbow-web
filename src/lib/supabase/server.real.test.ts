@@ -137,3 +137,13 @@ describe("server client + real SDK: signing out while Auth is unreachable (revie
     expect(cleared()).toHaveLength(1);
   });
 });
+
+describe("server client: signing out the OTHER sessions keeps this one", () => {
+  it("scope 'others' never clears this browser's cookies", async () => {
+    cookieSet.mockClear();
+    requestHeaders.set("x-mb-auth-outage", "1");
+    const client = (await createSupabaseServerClient())!;
+    await client.auth.signOut({ scope: "others" });
+    expect(cookieSet).not.toHaveBeenCalled();
+  });
+});
