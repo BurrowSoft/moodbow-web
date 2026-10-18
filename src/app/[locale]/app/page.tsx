@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 import { JournalUnavailable } from "@/components/JournalUnavailable";
 import type { CheckIn } from "@/lib/journal/checkIn";
 import { getMe } from "@/lib/journal/me";
-import { dateLine, greetingKey, localHour } from "@/lib/journal/today";
+import { dateLine, dateLocale, greetingKey, localHour } from "@/lib/journal/today";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { CheckInCard } from "./CheckInCard";
 import { tabMetadata } from "./TabPlaceholder";
@@ -40,7 +41,7 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
           {t(greetingKey(localHour(timeZone)))}
         </h1>
         <p className="mt-1 text-muted" data-testid="today-date">
-          {dateLine(me.today, locale)}
+          {dateLine(me.today, dateLocale(locale, (await headers()).get("accept-language"), me.profile?.country ?? null))}
         </p>
       </header>
       <CheckInCard initial={(data as CheckIn | null) ?? null} uid={user.id} today={me.today} />

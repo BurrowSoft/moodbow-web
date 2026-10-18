@@ -22,15 +22,43 @@ export function localHour(timeZone: string, now: Date = new Date()): number {
   }
 }
 
-// The locale's own long date, never assembled by hand (decision 34). The
-// spec's English is the day-first order ("Friday, 2 October 2026"), which
-// is CLDR's en-GB; plain "en" would give "Friday, October 2, 2026". Thai
-// uses its default Buddhist calendar ("วันศุกร์ที่ 2 ตุลาคม 2569").
-const DATE_LOCALES: Record<string, string> = { en: "en-GB" };
+const supported = (tag: string) => {
+  try {
+    return Intl.DateTimeFormat.supportedLocalesOf(tag).length > 0;
+  } catch {
+    return false;
+  }
+};
 
-// The date line for a YYYY-MM-DD local date (the date itself, formatted at
-// noon UTC so no zone can shift it to another day).
-export function dateLine(localDate: string, locale: string): string {
+// Whose date order to use (decision 89): the browser's own locale for the
+// UI language (Accept-Language: en-US → "Friday, October 2, 2026", en-GB /
+// en-AU → "Friday, 2 October 2026"), else the profile's country, else
+// en-US for English. Thai uses its default Buddhist calendar
+// ("วันศุกร์ที่ 2 ตุลาคม 2569").
+export function dateLocale(uiLocale: string, acceptLanguage: string | null, country: string | null): string {
+  const lang = uiLocale.split("-")[0].toLowerCase();
+  const tags = (acceptLanguage ?? "")
+    .split(",")
+    .map((part, i) => {
+      const [tag, ...params] = part.trim().split(";");
+      const q = Number(params.find((p) => p.trim().startsWith("q="))?.trim().slice(2) ?? 1);
+      return { tag: tag.trim(), q: Number.isFinite(q) ? q : 0, i };
+    })
+    .filter((t) => t.tag && t.q > 0)
+    .sort((a, b) => b.q - a.q || a.i - b.i);
+  const browser = tags.find(({ tag }) => {
+    const [l, region] = tag.split("-");
+    return l.toLowerCase() === lang && /^[a-z]{2}$|^\d{3}$/i.test(region ?? "") && supported(tag);
+  });
+  if (browser) return browser.tag;
+  if (country && /^[a-z]{2}$/i.test(country) && supported(`${lang}-${country.toUpperCase()}`)) return `${lang}-${country.toUpperCase()}`;
+  return lang === "en" ? "en-US" : lang;
+}
+
+// The date line for a YYYY-MM-DD local date in the locale's own long form,
+// never assembled by hand (decision 34). Formatted at noon UTC so no zone
+// can shift the date itself to another day.
+export function dateLine(localDate: string, dateLocaleTag: string): string {
   const date = new Date(`${localDate}T12:00:00Z`);
-  return new Intl.DateTimeFormat(DATE_LOCALES[locale] ?? locale, { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(date);
+  return new Intl.DateTimeFormat(dateLocaleTag, { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(date);
 }

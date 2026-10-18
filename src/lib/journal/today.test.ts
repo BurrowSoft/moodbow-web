@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { checkInErrorAction, parseCheckIn } from "./checkIn";
-import { dateLine, greetingKey, localHour } from "./today";
+import { dateLine, dateLocale, greetingKey, localHour } from "./today";
 
 const form = (fields: Record<string, string>) => {
   const f = new FormData();
@@ -37,12 +37,36 @@ describe("localHour", () => {
 });
 
 describe("dateLine", () => {
-  it("formats the local date itself (no zone can shift it)", () => {
-    expect(dateLine("2026-10-02", "en")).toBe("Friday, 2 October 2026");
-    expect(dateLine("2026-01-01", "en")).toBe("Thursday, 1 January 2026");
+  it("formats the local date itself in the region's order (no zone can shift it)", () => {
+    expect(dateLine("2026-10-02", "en-US")).toBe("Friday, October 2, 2026");
+    expect(dateLine("2026-10-02", "en-GB")).toBe("Friday, 2 October 2026");
+    expect(dateLine("2026-01-01", "en-AU")).toBe("Thursday 1 January 2026"); // CLDR en-AU: no comma
   });
   it("Thai: the locale's own format with the Buddhist year (spec M4)", () => {
     expect(dateLine("2026-10-02", "th")).toBe("วันศุกร์ที่ 2 ตุลาคม 2569");
+  });
+});
+
+describe("dateLocale (decision 89: browser region → profile country → en-US)", () => {
+  it("uses the browser's locale for the UI language", () => {
+    expect(dateLocale("en", "en-GB,en;q=0.9", "US")).toBe("en-GB");
+    expect(dateLocale("en", "en-US,en;q=0.9", "GB")).toBe("en-US");
+    expect(dateLocale("en", "fr-FR,en-AU;q=0.8,en;q=0.5", null)).toBe("en-AU");
+    expect(dateLocale("en", "en;q=0.5,en-NZ;q=0.9", null)).toBe("en-NZ");
+  });
+  it("falls back to the profile's country, then en-US", () => {
+    expect(dateLocale("en", "en", "GB")).toBe("en-GB");
+    expect(dateLocale("en", "fr-FR", "au")).toBe("en-AU");
+    expect(dateLocale("en", null, null)).toBe("en-US");
+    expect(dateLocale("en", "*", "x1")).toBe("en-US");
+  });
+  it("ignores refused or malformed tags", () => {
+    expect(dateLocale("en", "en-GB;q=0,en-US;q=0.5", null)).toBe("en-US");
+    expect(dateLocale("en", "en-<script>", "GB")).toBe("en-GB");
+  });
+  it("Thai stays Thai", () => {
+    expect(dateLocale("th", "th-TH,en;q=0.8", "TH")).toBe("th-TH");
+    expect(dateLocale("th", null, null)).toBe("th");
   });
 });
 
