@@ -6,6 +6,7 @@ import { routing } from "@/i18n/routing";
 import { fontVariables } from "@/lib/fonts";
 import { SITE_URL } from "@/lib/site";
 import { Footer } from "@/components/Footer";
+import { LocalDataWipe } from "@/components/LocalDataWipe";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -55,6 +56,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
           {t("skipToContent")}
         </a>
         <NextIntlClientProvider>
+          <LocalDataWipe />
           <div className="fade-in flex flex-1 flex-col">
             {children}
             <Footer />
