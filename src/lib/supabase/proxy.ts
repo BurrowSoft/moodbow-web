@@ -27,16 +27,25 @@ export function signedInOnly(path: string): boolean {
 // Anything else (a 5xx, a timeout, offline) must NOT sign anyone out.
 export type SignedOutReason = "account_gone" | "session_ended";
 
-export function signedOutReason(error: { code?: string } | null): SignedOutReason | null {
-  switch (error?.code) {
-    case "user_not_found":
-      return "account_gone";
-    case "session_not_found":
-    case "refresh_token_not_found":
-      return "session_ended";
-    default:
-      return null;
-  }
+// Careful: auth-js never hands back GoTrue's 403 "session_not_found" as a
+// code. It converts it into an AuthSessionMissingError (no code) and clears
+// the stored session itself (lib/fetch.js → _getUser). The same error also
+// means "no session cookie at all", so it only counts as a revoked session
+// when this request actually carried an auth cookie (Web Tester + reviewer,
+// #10: a global sign-out elsewhere showed no notice).
+export function signedOutReason(error: { code?: string; name?: string } | null, hadSession: boolean): SignedOutReason | null {
+  if (!error) return null;
+  if (error.code === "user_not_found") return "account_gone";
+  if (error.code === "session_not_found" || error.code === "refresh_token_not_found") return "session_ended";
+  if (error.name === "AuthSessionMissingError" && hadSession) return "session_ended";
+  return null;
+}
+
+// An auth outage (network failure, timeout, a 5xx from Supabase Auth): the
+// session may be fine, so pages show an error state, never a sign-out.
+export function isAuthOutage(error: { name?: string; status?: number } | null): boolean {
+  if (!error) return false;
+  return error.name === "AuthRetryableFetchError" || (typeof error.status === "number" && (error.status === 0 || error.status >= 500));
 }
 
 // The session cookie: sb-<project ref>-auth-token, possibly split into
@@ -65,6 +74,8 @@ export type CookieToSet = { name: string; value: string; options?: CookieOptions
 export async function refreshSession(req: NextRequest): Promise<{ cookies: CookieToSet[]; signedOut: SignedOutReason | null }> {
   const config = supabaseConfig();
   if (!config) return { cookies: [], signedOut: null };
+  // Read before getUser(), which may clear the session cookies itself.
+  const hadSession = authCookieNames(req).length > 0;
   let toSet: CookieToSet[] = [];
   const supabase = createServerClient(config.url, config.key, {
     cookieOptions: SESSION_COOKIE_OPTIONS,
@@ -78,5 +89,5 @@ export async function refreshSession(req: NextRequest): Promise<{ cookies: Cooki
   });
   // Validates the JWT with Supabase and refreshes it when expired.
   const { error } = await supabase.auth.getUser();
-  return { cookies: toSet, signedOut: signedOutReason(error) };
+  return { cookies: toSet, signedOut: signedOutReason(error, hadSession) };
 }

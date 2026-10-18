@@ -9,6 +9,7 @@ import { getMe, onboardingStep } from "@/lib/journal/me";
 import { pageMetadata } from "@/lib/metadata";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { JournalUnavailable } from "@/components/JournalUnavailable";
+import { isAuthOutage } from "@/lib/supabase/proxy";
 import { SetupForm } from "./SetupForm";
 
 // Set up (M3): signed in, consents current, not onboarded yet. Behind
@@ -27,7 +28,10 @@ export default async function SetupPage({ params }: PageProps<"/[locale]/setup">
   if (pageGate("web-journal-live") === "hidden") notFound();
 
   const supabase = await createSupabaseServerClient();
-  const user = supabase ? (await supabase.auth.getUser()).data.user : null;
+  const { data, error } = supabase ? await supabase.auth.getUser() : { data: { user: null }, error: null };
+  // Supabase Auth unreachable: the session may be fine, so no sign-out look.
+  if (!data.user && isAuthOutage(error)) return <JournalUnavailable />;
+  const user = data.user;
   if (!supabase || !user) return redirect({ href: "/sign-in", locale });
   const me = await getMe(supabase);
   // Signed in but the data didn't load: an error state, not a redirect loop.
