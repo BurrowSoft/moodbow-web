@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { entryErrorAction, parseEntry } from "@/lib/journal/entry";
+import { entryErrorAction, parseEntry, preview } from "@/lib/journal/entry";
 
 // saveEntry / deleteEntry with a mocked Supabase client, plus the editor's
 // form rules (lib/journal/entry.ts).
@@ -19,7 +19,7 @@ vi.mock("@/i18n/navigation", () => ({
   },
 }));
 
-const { saveEntry, deleteEntry } = await import("./actions");
+const { saveEntry, deleteEntry, getEntry } = await import("./actions");
 
 const ID = "3d6f1a2b-4c5d-4e6f-8a9b-0c1d2e3f4a5b";
 const ENTRY = { id: ID, entry_date: "2026-10-02", body: "A good day.", is_moment: true, updated_at: "2026-10-02T10:00:00Z" };
@@ -29,6 +29,7 @@ const form = (fields: Record<string, string>) => {
   return f;
 };
 const valid = { id: ID, entry_date: "2026-10-02", body: "A good day.", is_moment: "true", expected_updated_at: "" };
+const locked = { ...valid, expected_updated_at: "2026-10-01T09:00:00Z" };
 const idle = { status: "idle" } as const;
 
 beforeEach(() => {
@@ -82,24 +83,80 @@ describe("saveEntry", () => {
   it("stale_write: returns the server's version now", async () => {
     rpc.mockResolvedValue({ data: null, error: { message: "stale_write" } });
     maybeSingle.mockResolvedValue({ data: ENTRY });
-    expect(await saveEntry(idle, form(valid))).toEqual({ status: "error", error: "stale", latest: ENTRY });
+    expect(await saveEntry(idle, form(locked))).toEqual({ status: "error", error: "stale", latest: ENTRY });
     expect(eq).toHaveBeenCalledWith("id", ID);
   });
 
   it("stale_write on an entry deleted elsewhere: latest is null", async () => {
     rpc.mockResolvedValue({ data: null, error: { message: "stale_write" } });
     maybeSingle.mockResolvedValue({ data: null });
-    expect(await saveEntry(idle, form(valid))).toEqual({ status: "error", error: "stale", latest: null });
+    expect(await saveEntry(idle, form(locked))).toEqual({ status: "error", error: "stale", latest: null });
   });
 
   it("maps the other codes, and consent_required → Consent", async () => {
     rpc.mockResolvedValue({ data: null, error: { message: "entry_too_long" } });
-    expect(await saveEntry(idle, form(valid))).toEqual({ status: "error", error: "tooLong" });
+    expect(await saveEntry(idle, form(locked))).toEqual({ status: "error", error: "tooLong" });
     rpc.mockResolvedValue({ data: null, error: { message: "date_in_future" } });
-    expect(await saveEntry(idle, form(valid))).toEqual({ status: "error", error: "dateInFuture" });
+    expect(await saveEntry(idle, form(locked))).toEqual({ status: "error", error: "dateInFuture" });
     rpc.mockResolvedValue({ data: null, error: { message: "consent_required" } });
-    const thrown = await saveEntry(idle, form(valid)).catch((e) => e);
+    const thrown = await saveEntry(idle, form(locked)).catch((e) => e);
     expect((thrown as Redirect).args).toEqual({ href: "/consent", locale: "en" });
+  });
+});
+
+describe("saveEntry with no lock reads the row first (reviewer #12; same as the app)", () => {
+  it("no row: saves", async () => {
+    maybeSingle.mockResolvedValue({ data: null, error: null });
+    rpc.mockResolvedValue({ data: ENTRY, error: null });
+    expect(await saveEntry(idle, form(valid))).toEqual({ status: "saved", entry: ENTRY });
+    expect(eq).toHaveBeenCalledWith("id", ID);
+    expect(rpc).toHaveBeenCalledWith("save_entry", expect.objectContaining({ p_expected_updated_at: null }));
+  });
+
+  it("the same text is already saved (a lost answer): saved, nothing written", async () => {
+    maybeSingle.mockResolvedValue({ data: ENTRY, error: null });
+    expect(await saveEntry(idle, form(valid))).toEqual({ status: "saved", entry: ENTRY });
+    expect(rpc).not.toHaveBeenCalled();
+  });
+
+  it("a different version is saved (edited since): the conflict, never an overwrite", async () => {
+    const edited = { ...ENTRY, body: "Edited later.", updated_at: "2026-10-02T12:00:00Z" };
+    maybeSingle.mockResolvedValue({ data: edited, error: null });
+    expect(await saveEntry(idle, form(valid))).toEqual({ status: "error", error: "stale", latest: edited });
+    for (const other of [{ ...ENTRY, entry_date: "2026-10-01" }, { ...ENTRY, is_moment: false }]) {
+      maybeSingle.mockResolvedValue({ data: other, error: null });
+      expect(await saveEntry(idle, form(valid))).toMatchObject({ status: "error", error: "stale" });
+    }
+    expect(rpc).not.toHaveBeenCalled();
+  });
+
+  it("the read fails: generic", async () => {
+    maybeSingle.mockResolvedValue({ data: null, error: { message: "boom" } });
+    expect(await saveEntry(idle, form(valid))).toEqual({ status: "error", error: "generic" });
+    expect(rpc).not.toHaveBeenCalled();
+  });
+});
+
+describe("getEntry", () => {
+  it("returns the row, null, or an error; a bad id never reaches the database", async () => {
+    maybeSingle.mockResolvedValue({ data: ENTRY, error: null });
+    expect(await getEntry(ID)).toEqual({ status: "ok", entry: ENTRY });
+    maybeSingle.mockResolvedValue({ data: null, error: null });
+    expect(await getEntry(ID)).toEqual({ status: "ok", entry: null });
+    maybeSingle.mockResolvedValue({ data: null, error: { message: "boom" } });
+    expect(await getEntry(ID)).toEqual({ status: "error" });
+    maybeSingle.mockClear();
+    expect(await getEntry("nope")).toEqual({ status: "error" });
+    expect(maybeSingle).not.toHaveBeenCalled();
+  });
+});
+
+describe("preview", () => {
+  it("cuts by what people see, never inside an emoji", () => {
+    expect(preview("short")).toBe("short");
+    const family = "👨‍👩‍👧";
+    expect(preview(`ab${family}cd`, 3)).toBe(`ab${family}`);
+    expect(preview("x".repeat(300))).toHaveLength(240);
   });
 });
 

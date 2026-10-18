@@ -3,20 +3,23 @@
 import { useEffect, useId, useRef } from "react";
 
 // A small modal dialog: a title, a body and a row of actions. Focus moves
-// into it when it opens and returns to where it was when it closes; Escape
-// is the same as the cancel action.
+// into it when it opens (to the first action, or the last one: the safe
+// choice, never a destructive one), stays inside it (Tab wraps) and returns
+// to where it was when it closes; Escape is the same as the cancel action.
 export function Dialog({
   title,
   body,
   onCancel,
   children,
   testId,
+  initialFocus = "first",
 }: {
   title: string;
   body?: string;
   onCancel: () => void;
   children: React.ReactNode;
   testId?: string;
+  initialFocus?: "first" | "last";
 }) {
   const titleId = useId();
   const bodyId = useId();
@@ -24,16 +27,31 @@ export function Dialog({
 
   useEffect(() => {
     const previous = document.activeElement as HTMLElement | null;
-    ref.current?.querySelector<HTMLElement>("button")?.focus();
+    const buttons = () => Array.from(ref.current?.querySelectorAll<HTMLElement>("button:not([disabled])") ?? []);
+    const start = buttons();
+    (initialFocus === "last" ? start[start.length - 1] : start[0])?.focus();
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onCancel();
+      if (e.key === "Escape") return onCancel();
+      if (e.key !== "Tab") return;
+      const list = buttons();
+      if (list.length === 0) return;
+      const first = list[0];
+      const last = list[list.length - 1];
+      const inside = ref.current?.contains(document.activeElement);
+      if (e.shiftKey && (document.activeElement === first || !inside)) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && (document.activeElement === last || !inside)) {
+        e.preventDefault();
+        first.focus();
+      }
     };
     document.addEventListener("keydown", onKey);
     return () => {
       document.removeEventListener("keydown", onKey);
       previous?.focus?.();
     };
-  }, [onCancel]);
+  }, [onCancel, initialFocus]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center">

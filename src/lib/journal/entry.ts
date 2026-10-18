@@ -33,6 +33,17 @@ export function parseEntry(form: FormData): EntryInput | null {
   return { id, date, body, isMoment: form.get("is_moment") === "true", expected };
 }
 
+// True when a saved entry holds exactly this text, date and moment flag.
+export const sameEntry = (row: Entry, input: Pick<EntryInput, "body" | "date" | "isMoment">) =>
+  row.body === input.body && row.entry_date === input.date && row.is_moment === input.isMoment;
+
+// The first `max` characters of a text as people see them (never half an
+// emoji or a split accent).
+export function preview(text: string, max = 240): string {
+  const graphemes = Array.from(new Intl.Segmenter(undefined, { granularity: "grapheme" }).segment(text), (s) => s.segment);
+  return graphemes.length <= max ? text : graphemes.slice(0, max).join("");
+}
+
 // The RPC's error codes (supabase/contracts/errors.md) → what the editor does.
 export type EntryError = "dateInFuture" | "stale" | "tooLong" | "generic";
 export type EntryErrorAction = { kind: "error"; error: EntryError } | { kind: "redirect"; to: "/consent" | "/sign-in" };

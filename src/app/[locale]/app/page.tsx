@@ -4,6 +4,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 import { JournalUnavailable } from "@/components/JournalUnavailable";
 import type { CheckIn } from "@/lib/journal/checkIn";
+import { preview } from "@/lib/journal/entry";
 import { getMe } from "@/lib/journal/me";
 import { dateLine, dateLocale, greetingKey, localHour } from "@/lib/journal/today";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -16,9 +17,10 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/app">): 
 }
 
 // Today (M4): greeting + date line in the profile's time zone, today's
-// check-in, "Write about your day" and today's entries. "Today" is get_me().today (the user's local date from
-// the database), never the browser's or the server's clock. The layout has
-// already checked the session, consents and onboarding.
+// check-in, "Write about your day" and today's entries. "Today" is
+// get_me().today (the user's local date from the database), never the
+// browser's or the server's clock. The layout has already checked the
+// session, consents and onboarding.
 export default async function TodayPage({ params }: PageProps<"/[locale]/app">) {
   const { locale } = await params;
   setRequestLocale(locale as Locale);
@@ -27,13 +29,16 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
   const me = supabase ? await getMe(supabase) : null;
   if (!supabase || !user || !me) return <JournalUnavailable />;
 
-  const { data } = await supabase
+  const { data, error: checkInError } = await supabase
     .from("check_ins")
     .select("local_date, mood, sleep_hours, sleep_quality, exercise_minutes, stress, updated_at")
     .eq("local_date", me.today)
     .maybeSingle();
+  // A failed read must not look like "no check-in yet": the empty card would
+  // then save over the real one without a lock.
+  if (checkInError) return <JournalUnavailable />;
   // Today's entries, newest first (previews only; the editor loads the rest).
-  const { data: entries } = await supabase
+  const { data: entries, error: entriesError } = await supabase
     .from("entries")
     .select("id, body")
     .eq("entry_date", me.today)
@@ -61,6 +66,11 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
       >
         {te("writeButton")}
       </Link>
+      {entriesError && (
+        <p role="alert" data-testid="today-entries-error" className="font-medium text-accent">
+          {t("errGeneric")}
+        </p>
+      )}
       {entries && entries.length > 0 && (
         <section aria-labelledby="today-entries-title">
           <h2 id="today-entries-title" className="text-lg font-medium text-text">
@@ -74,7 +84,7 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
                   data-testid={`today-entry-${entry.id}`}
                   className="block rounded-2xl border border-border bg-surface p-4 text-text hover:bg-pill"
                 >
-                  <span className="line-clamp-3 whitespace-pre-line">{entry.body.slice(0, 240)}</span>
+                  <span className="line-clamp-3 whitespace-pre-line">{preview(entry.body)}</span>
                 </Link>
               </li>
             ))}

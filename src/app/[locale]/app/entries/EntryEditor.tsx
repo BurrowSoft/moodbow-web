@@ -4,9 +4,9 @@ import { startTransition, useActionState, useCallback, useEffect, useRef, useSta
 import { useTranslations } from "next-intl";
 import { Dialog, dialogButton } from "@/components/Dialog";
 import { useRouter } from "@/i18n/navigation";
-import { MAX_ENTRY_CHARS, type Entry } from "@/lib/journal/entry";
+import { MAX_ENTRY_CHARS, sameEntry, type Entry } from "@/lib/journal/entry";
 import { localKey } from "@/lib/localData";
-import { deleteEntry, saveEntry, type DeleteState, type EntryState } from "./actions";
+import { deleteEntry, getEntry, saveEntry, type DeleteState, type EntryState } from "./actions";
 
 // The entry editor (M4): a full-page text area, a date (today or earlier)
 // and "Mark as a moment". A draft is autosaved in this browser, per user and
@@ -72,7 +72,7 @@ function Editor({ initial, newId, uid, today, restore }: Props & { restore: bool
     const d = restore ? readDraft(draftKey) : null;
     return d && (!initial || d.id === initial.id) ? d : null;
   });
-  const [id] = useState(draft?.id ?? initial?.id ?? newId);
+  const [id, setId] = useState(draft?.id ?? initial?.id ?? newId);
   const [base, setBase] = useState<string | null>(draft ? draft.base : (initial?.updated_at ?? null));
   const [fields, setFields] = useState<Fields>(draft ? { body: draft.body, date: draft.date, isMoment: draft.isMoment } : saved);
   const [dialog, setDialog] = useState<null | "leave" | "delete" | { conflict: Entry | null }>(null);
@@ -85,6 +85,46 @@ function Editor({ initial, newId, uid, today, restore }: Props & { restore: bool
     current.current = { ...fields, id, base };
     dirtyRef.current = dirty;
   });
+  // Set once the text is saved, discarded or deleted: nothing left to keep.
+  const finished = useRef(false);
+
+  // Leaving by any route (a redirect after Save, the tab bar, Back) keeps
+  // unsaved text: the 2 s autosave timer dies with the editor.
+  useEffect(() => {
+    if (!restore) return;
+    return () => {
+      if (!finished.current && dirtyRef.current) writeDraft(draftKey, current.current);
+    };
+  }, [draftKey, restore]);
+
+  // A restored "new" draft may already be saved (the answer to its save was
+  // lost) and even edited since. Ask the server before treating it as new,
+  // the same as the app: none → keep writing; the same text → it's saved,
+  // start a fresh entry; different → the decision 87 dialog.
+  useEffect(() => {
+    if (!restore || initial || !draft) return;
+    let cancelled = false;
+    getEntry(draft.id)
+      .then((result) => {
+        if (cancelled || result.status !== "ok" || !result.entry) return;
+        if (sameEntry(result.entry, draft)) {
+          // Only if nothing was typed while we asked.
+          if (!same(current.current, draft)) return;
+          removeDraft(draftKey);
+          setId(newId);
+          setBase(null);
+          setFields({ body: "", date: today, isMoment: false });
+        } else {
+          setDialog({ conflict: result.entry });
+        }
+      })
+      .catch(() => {
+        // offline: the save path asks again
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [restore, initial, draft, draftKey, newId, today]);
 
   // Autosave the draft a moment after each change; an editor put back to
   // the saved version has nothing to keep. Not before the draft was read
@@ -123,6 +163,7 @@ function Editor({ initial, newId, uid, today, restore }: Props & { restore: bool
       return { status: "error", error: "generic" };
     }
     if (next.status === "saved") {
+      finished.current = true;
       removeDraft(draftKey);
       setSaved(fromEntry(next.entry));
       setFields(fromEntry(next.entry));
@@ -133,9 +174,23 @@ function Editor({ initial, newId, uid, today, restore }: Props & { restore: bool
     return next;
   }, { status: "idle" });
 
-  const [deleteState, deleteAction, deleting] = useActionState<DeleteState, FormData>(deleteEntry, { status: "idle" });
+  const [deleteState, deleteAction, deleting] = useActionState<DeleteState, FormData>(async (prev, form) => {
+    try {
+      const next = await deleteEntry(prev, form);
+      if (next.status === "error") finished.current = false;
+      return next;
+    } catch (e) {
+      if (isRedirect(e)) throw e;
+      // offline or the request failed: nothing was deleted
+      finished.current = false;
+      return { status: "error" };
+    }
+  }, { status: "idle" });
 
   const send = (withBase: string | null) => {
+    // Kept before the request: a redirect (session ended, consent) unmounts
+    // the editor before any answer comes back.
+    if (restore) writeDraft(draftKey, { ...fields, id, base: withBase });
     const form = new FormData();
     form.set("id", id);
     form.set("entry_date", fields.date);
@@ -249,12 +304,13 @@ function Editor({ initial, newId, uid, today, restore }: Props & { restore: bool
       </div>
 
       {dialog === "leave" && (
-        <Dialog title={t("entryLeaveTitle")} onCancel={closeDialog} testId="entry-leave-dialog">
+        <Dialog title={t("entryLeaveTitle")} onCancel={closeDialog} testId="entry-leave-dialog" initialFocus="last">
           <button
             type="button"
             data-testid="entry-discard"
             className={dialogButton()}
             onClick={() => {
+              finished.current = true;
               removeDraft(draftKey);
               setFields(saved);
               leave();
@@ -286,6 +342,7 @@ function Editor({ initial, newId, uid, today, restore }: Props & { restore: bool
             data-testid="entry-delete-confirm"
             className={dialogButton(true)}
             onClick={() => {
+              finished.current = true;
               removeDraft(draftKey);
               setDialog(null);
               const form = new FormData();
@@ -336,12 +393,13 @@ function Editor({ initial, newId, uid, today, restore }: Props & { restore: bool
 
       {conflict === null && (
         // Deleted on another device: there's no other version to pick.
-        <Dialog title={t("entryDeletedTitle")} body={t("entryDeletedBody")} onCancel={closeDialog} testId="entry-deleted-dialog">
+        <Dialog title={t("entryDeletedTitle")} body={t("entryDeletedBody")} onCancel={closeDialog} testId="entry-deleted-dialog" initialFocus="last">
           <button
             type="button"
             data-testid="entry-deleted-discard"
             className={dialogButton()}
             onClick={() => {
+              finished.current = true;
               setDialog(null);
               removeDraft(draftKey);
               leave();

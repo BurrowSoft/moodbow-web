@@ -7,10 +7,12 @@ import type { Entry } from "@/lib/journal/entry";
 // The entry editor against mocked actions (CI has no Supabase to sign in to).
 const saveEntry = vi.fn();
 const deleteEntry = vi.fn();
+const getEntry = vi.fn();
 const push = vi.fn();
 vi.mock("./actions", () => ({
   saveEntry: (...args: unknown[]) => saveEntry(...args),
   deleteEntry: (...args: unknown[]) => deleteEntry(...args),
+  getEntry: (...args: unknown[]) => getEntry(...args),
 }));
 vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push }) }));
 const { EntryEditor } = await import("./EntryEditor");
@@ -35,6 +37,8 @@ const stored = (key: string) => JSON.parse(window.localStorage.getItem(key) ?? "
 beforeEach(() => {
   saveEntry.mockReset();
   deleteEntry.mockReset();
+  getEntry.mockReset();
+  getEntry.mockResolvedValue({ status: "ok", entry: null });
   push.mockReset();
   window.localStorage.clear();
 });
@@ -251,5 +255,116 @@ describe("EntryEditor: changed on another device (decision 87)", () => {
     fireEvent.click(await screen.findByTestId("entry-deleted-discard"));
     expect(window.localStorage.getItem(EDIT_KEY)).toBeNull();
     expect(push).toHaveBeenCalledWith("/app");
+  });
+});
+
+describe("EntryEditor: nothing typed is lost (reviewer #12)", () => {
+  it("Save keeps the text as a draft before the request (a redirect unmounts the editor)", async () => {
+    let answer: (value: unknown) => void = () => {};
+    saveEntry.mockReturnValue(new Promise((resolve) => (answer = resolve)));
+    renderEditor();
+    type("Pasted and saved at once");
+    fireEvent.click(screen.getByTestId("entry-save"));
+    expect(stored(NEW_KEY)).toMatchObject({ id: NEW_ID, body: "Pasted and saved at once" });
+    // Settle it: React entangles pending actions, and an open one would hold
+    // back the next tests' transitions.
+    await act(async () => answer({ status: "error", error: "generic" }));
+  });
+
+  it("leaving with unsaved text by any route (unmount) keeps the draft", () => {
+    const { unmount } = renderEditor();
+    type("Typed, then the tab bar");
+    unmount();
+    expect(stored(NEW_KEY)).toMatchObject({ body: "Typed, then the tab bar" });
+  });
+
+  it("after a save, Discard or Delete nothing is written back", async () => {
+    saveEntry.mockResolvedValue({ status: "saved", entry: { ...ENTRY, id: NEW_ID, body: "Done" } });
+    const first = renderEditor();
+    type("Done");
+    fireEvent.click(screen.getByTestId("entry-save"));
+    await waitFor(() => expect(push).toHaveBeenCalled());
+    first.unmount();
+    expect(window.localStorage.getItem(NEW_KEY)).toBeNull();
+
+    const second = renderEditor();
+    type("Throw away");
+    fireEvent.click(screen.getByTestId("entry-cancel"));
+    fireEvent.click(screen.getByTestId("entry-discard"));
+    second.unmount();
+    expect(window.localStorage.getItem(NEW_KEY)).toBeNull();
+  });
+
+  it("Delete fails offline: an error, not a crash, and the edit is kept again", async () => {
+    deleteEntry.mockRejectedValue(new TypeError("Failed to fetch"));
+    const { unmount } = renderEditor(ENTRY);
+    type("changed");
+    fireEvent.click(screen.getByTestId("entry-delete"));
+    fireEvent.click(screen.getByTestId("entry-delete-confirm"));
+    expect(await screen.findByTestId("entry-error")).toHaveTextContent(messages.today.errGeneric);
+    unmount();
+    expect(stored(EDIT_KEY)).toMatchObject({ body: "changed" });
+  });
+});
+
+describe("EntryEditor: a restored new draft that was already saved (reviewer #12)", () => {
+  const draft = { id: DRAFT_ID, body: "Saved before", date: "2026-10-02", isMoment: false, base: null };
+  const row = { id: DRAFT_ID, entry_date: "2026-10-02", body: "Saved before", is_moment: false, updated_at: "2026-10-02T07:00:00Z" };
+
+  it("not on the server: keeps writing it", async () => {
+    window.localStorage.setItem(NEW_KEY, JSON.stringify(draft));
+    renderEditor();
+    await waitFor(() => expect(getEntry).toHaveBeenCalledWith(DRAFT_ID));
+    expect(screen.getByTestId("entry-text")).toHaveValue("Saved before");
+    expect(screen.queryByRole("dialog")).toBeNull();
+  });
+
+  it("saved with the same text: the draft is dropped and Write starts a fresh entry", async () => {
+    window.localStorage.setItem(NEW_KEY, JSON.stringify(draft));
+    getEntry.mockResolvedValue({ status: "ok", entry: row });
+    saveEntry.mockResolvedValue({ status: "saved", entry: { ...row, id: NEW_ID, body: "Fresh" } });
+    renderEditor();
+    await waitFor(() => expect(screen.getByTestId("entry-text")).toHaveValue(""));
+    expect(window.localStorage.getItem(NEW_KEY)).toBeNull();
+    type("Fresh");
+    fireEvent.click(screen.getByTestId("entry-save"));
+    await waitFor(() => expect(saveEntry).toHaveBeenCalled());
+    expect(sent()).toMatchObject({ id: NEW_ID, expected_updated_at: "" });
+  });
+
+  it("saved and edited since: the decision 87 dialog, never a silent overwrite", async () => {
+    window.localStorage.setItem(NEW_KEY, JSON.stringify(draft));
+    getEntry.mockResolvedValue({ status: "ok", entry: { ...row, body: "Edited from Today" } });
+    saveEntry.mockResolvedValue({ status: "saved", entry: row });
+    renderEditor();
+    expect(await screen.findByRole("dialog", { name: m.entryConflictTitle })).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId("entry-conflict-keep-mine"));
+    await waitFor(() => expect(saveEntry).toHaveBeenCalled());
+    expect(sent()).toMatchObject({ id: DRAFT_ID, body: "Saved before", expected_updated_at: row.updated_at });
+  });
+});
+
+describe("Dialog focus", () => {
+  it("the leave dialog starts on Keep draft (never on Discard), and Tab stays inside", () => {
+    renderEditor();
+    type("x");
+    fireEvent.click(screen.getByTestId("entry-cancel"));
+    const keep = screen.getByTestId("entry-keep-draft");
+    const discard = screen.getByTestId("entry-discard");
+    expect(keep).toHaveFocus();
+    fireEvent.keyDown(document, { key: "Tab" });
+    expect(discard).toHaveFocus();
+    fireEvent.keyDown(document, { key: "Tab", shiftKey: true });
+    expect(keep).toHaveFocus();
+  });
+
+  it("the delete dialog starts on Cancel; focus goes back to Delete when it closes", () => {
+    renderEditor(ENTRY);
+    const opener = screen.getByTestId("entry-delete");
+    opener.focus();
+    fireEvent.click(opener);
+    expect(screen.getByTestId("entry-delete-cancel")).toHaveFocus();
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(opener).toHaveFocus();
   });
 });

@@ -2,7 +2,7 @@
 
 import { getLocale } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
-import { ENTRY_COLUMNS, entryErrorAction, isEntryId, parseEntry, type Entry, type EntryError } from "@/lib/journal/entry";
+import { ENTRY_COLUMNS, entryErrorAction, isEntryId, parseEntry, sameEntry, type Entry, type EntryError } from "@/lib/journal/entry";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 // stale: the entry changed (or was deleted) on another device since the
@@ -23,6 +23,21 @@ export async function saveEntry(_prev: EntryState, form: FormData): Promise<Entr
   const supabase = await createSupabaseServerClient();
   if (!supabase) return { status: "error", error: "generic" };
 
+  // No version to lock against (a new entry, or "Keep it" after a delete
+  // elsewhere): save_entry would UPDATE an existing row with this id without
+  // asking. The row exists when an earlier save's answer was lost, and may
+  // have been edited since (here or on another device). Read it first, the
+  // same as the app: none → save; the same text → already saved; different
+  // → the decision 87 dialog.
+  if (input.expected === null) {
+    const { data: existing, error: readError } = await supabase.from("entries").select(ENTRY_COLUMNS).eq("id", input.id).maybeSingle();
+    if (readError) return { status: "error", error: "generic" };
+    if (existing) {
+      const row = existing as Entry;
+      return sameEntry(row, input) ? { status: "saved", entry: row } : { status: "error", error: "stale", latest: row };
+    }
+  }
+
   const { data, error } = await supabase.rpc("save_entry", {
     p_id: input.id,
     p_date: input.date,
@@ -40,6 +55,17 @@ export async function saveEntry(_prev: EntryState, form: FormData): Promise<Entr
     return { status: "error", error: action.error };
   }
   return { status: "saved", entry: data as Entry };
+}
+
+// The saved version of an entry (null: there is none), for a "new" draft
+// restored in the editor: its save may already have gone through.
+export async function getEntry(id: string): Promise<{ status: "ok"; entry: Entry | null } | { status: "error" }> {
+  if (!isEntryId(id)) return { status: "error" };
+  const supabase = await createSupabaseServerClient();
+  if (!supabase) return { status: "error" };
+  const { data, error } = await supabase.from("entries").select(ENTRY_COLUMNS).eq("id", id).maybeSingle();
+  if (error) return { status: "error" };
+  return { status: "ok", entry: (data as Entry | null) ?? null };
 }
 
 export type DeleteState = { status: "idle" } | { status: "error" };
