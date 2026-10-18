@@ -253,6 +253,15 @@
     "deleteTypeConfirm": "Type DELETE to confirm",
     "deleteConfirm": "Delete everything",
     "deleteDone": "Your account and everything in it were deleted.",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "meReminder": "Daily reminder",
+    "meReminderTime": "Time",
+    "webReminderNote": "Reminders arrive on your phone. Install the Moodbow app to get them.",
+    "meHelp": "Help",
+    "meFaq": "Help & FAQ",
+    "mePrivacy": "Privacy Policy",
+    "meTerms": "Terms",
+    "meContact": "Contact us",
+    "meVersion": "Version {version}"
   }
 }
