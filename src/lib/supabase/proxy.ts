@@ -59,6 +59,40 @@ export function authCookieNames(req: NextRequest): string[] {
     .filter((name) => AUTH_COOKIE.test(name));
 }
 
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const fromB64url = (s: string) => Buffer.from(s, "base64url").toString("utf8");
+
+// The user id (JWT sub) in this request's session cookie, or null. Not
+// verified: it's only used to wipe that id's data from this same browser
+// once Supabase said the account is gone (decision 85).
+export function authCookieUid(req: NextRequest): string | null {
+  const cookies = req.cookies.getAll().filter((c) => AUTH_COOKIE.test(c.name));
+  const chunk = (name: string) => Number(name.match(/\.(\d+)$/)?.[1] ?? -1);
+  const raw = cookies
+    .sort((a, b) => chunk(a.name) - chunk(b.name))
+    .map((c) => c.value)
+    .join("");
+  try {
+    const session = JSON.parse(raw.startsWith("base64-") ? fromB64url(raw.slice(7)) : raw) as { access_token?: string };
+    const sub = (JSON.parse(fromB64url(session.access_token?.split(".")[1] ?? "")) as { sub?: unknown }).sub;
+    return typeof sub === "string" && UUID.test(sub) ? sub : null;
+  } catch {
+    return null;
+  }
+}
+
+// Set when the account is gone: names the uid whose local copies (the
+// mb:*:<uid> keys, lib/localData.ts) the next page wipes from this browser.
+// Holds only the uid, lives 60 s, and is deleted as soon as it's used.
+export const WIPE_COOKIE = "mb_wipe";
+export const WIPE_COOKIE_OPTIONS = {
+  maxAge: 60,
+  httpOnly: false,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "lax",
+  path: "/",
+} as const;
+
 export type CookieToSet = { name: string; value: string; options?: CookieOptions };
 
 // Refreshes the session BEFORE the response is built (@supabase/ssr's
