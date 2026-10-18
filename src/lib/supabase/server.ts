@@ -1,6 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies, headers } from "next/headers";
-import { AUTH_OUTAGE_HEADER, deadlineError, startDeadline } from "./deadline";
+import { AUTH_OUTAGE_HEADER, deadlineAbort, deadlineError, fetchUntil, startDeadline } from "./deadline";
 
 // Supabase from server components, route handlers and server actions
 // (@supabase/ssr, session in cookies). Each deployment talks to its own
@@ -26,21 +26,32 @@ export const SESSION_COOKIE_OPTIONS = {
 // null when the env vars are missing (local builds, CI): callers fail
 // closed (an auth link shows "expired", a form shows the generic error).
 //
-// auth.getUser() never waits longer than AUTH_DEADLINE_MS, and answers at
-// once when the proxy already ran out of time on this request: past that it
-// returns an AuthRetryableFetchError (an outage: pages show "Something went
-// wrong" + Try again, and nobody is signed out). Every page and action gets
-// this by using this client.
+// Supabase Auth is never waited on longer than AUTH_DEADLINE_MS, and not at
+// all when the proxy already ran out of time on this request (an outage:
+// pages show "Something went wrong" + Try again, and nobody is signed out).
+// Every page and action gets this by using this client:
+// - auth.getUser() returns an AuthRetryableFetchError past the deadline;
+// - auth.getSession(), which every .rpc() / .from() calls for its token
+//   (and which refreshes an expired one), THROWS an AbortError: a null
+//   session would send the request with the anon key, answer
+//   not_authenticated, and look like a sign-out. postgrest-js turns the
+//   abort into an { error } (the generic message) without retrying, so a
+//   data call fails fast instead.
 export async function createSupabaseServerClient() {
   const config = supabaseConfig();
   if (!config) return null;
   const store = await cookies();
-  const outage = (await headers()).get(AUTH_OUTAGE_HEADER) === "1";
+  let outage = (await headers()).get(AUTH_OUTAGE_HEADER) === "1";
+  // Aborts what's still running once a deadline passes.
+  const abort = new AbortController();
   const client = createServerClient(config.url, config.key, {
     cookieOptions: SESSION_COOKIE_OPTIONS,
+    global: { fetch: fetchUntil(abort.signal) },
     cookies: {
       getAll: () => store.getAll(),
       setAll: (list) => {
+        // A late refresh after a deadline must not change the session.
+        if (outage) return;
         try {
           for (const { name, value, options } of list) store.set(name, value, options);
         } catch {
@@ -50,17 +61,30 @@ export async function createSupabaseServerClient() {
       },
     },
   });
-  const getUser = client.auth.getUser.bind(client.auth);
-  client.auth.getUser = async (jwt?: string) => {
-    const timedOut = { data: { user: null }, error: deadlineError() } as const;
-    if (outage) return timedOut;
+
+  // Runs an Auth call within the deadline; undefined when it ran out (and
+  // from then on, every Auth call on this client answers at once).
+  async function bounded<T>(call: () => Promise<T>): Promise<T | undefined> {
+    if (outage) return undefined;
     const deadline = startDeadline();
     try {
-      const result = await Promise.race([getUser(jwt), deadline.expired]);
-      return result === "expired" ? timedOut : result;
+      const result = await Promise.race([call(), deadline.expired]);
+      if (result !== "expired") return result as T;
+      outage = true;
+      abort.abort();
+      return undefined;
     } finally {
       deadline.clear();
     }
+  }
+
+  const getUser = client.auth.getUser.bind(client.auth);
+  client.auth.getUser = async (jwt?: string) => (await bounded(() => getUser(jwt))) ?? { data: { user: null }, error: deadlineError() };
+  const getSession = client.auth.getSession.bind(client.auth);
+  client.auth.getSession = async () => {
+    const result = await bounded(getSession);
+    if (!result) throw deadlineAbort();
+    return result;
   };
   return client;
 }

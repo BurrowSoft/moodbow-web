@@ -13,7 +13,8 @@ vi.mock("next/headers", () => ({
   headers: async () => requestHeaders,
 }));
 const getUser = vi.fn();
-vi.mock("@supabase/ssr", () => ({ createServerClient: () => ({ auth: { getUser } }) }));
+const getSession = vi.fn();
+vi.mock("@supabase/ssr", () => ({ createServerClient: () => ({ auth: { getUser, getSession } }) }));
 
 const { createSupabaseServerClient } = await import("./server");
 

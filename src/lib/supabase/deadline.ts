@@ -17,6 +17,12 @@ export const AUTH_OUTAGE_HEADER = "x-mb-auth-outage";
 // unreachable (lib/supabase/proxy.ts isAuthOutage).
 export const deadlineError = () => new AuthRetryableFetchError("Supabase Auth didn't answer in time", 0);
 
+// What a data call (.rpc / .from) gets when its token can't be had in time:
+// an AbortError, which postgrest-js treats as a timeout. It answers
+// { error } at once; any other error makes it retry a GET 3 times with
+// backoff (1 + 2 + 4 s), the very wait this cuts short.
+export const deadlineAbort = () => new DOMException("Supabase Auth didn't answer in time", "AbortError");
+
 export type Deadline = { signal: AbortSignal; expired: Promise<"expired">; clear: () => void };
 
 // A deadline: `expired` resolves when it passes, and `signal` aborts the
