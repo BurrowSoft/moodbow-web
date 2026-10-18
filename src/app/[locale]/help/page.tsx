@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 import { Link } from "@/i18n/navigation";
+import { notFound } from "next/navigation";
 import { PageShell } from "@/components/PageShell";
+import { HELP_GATE } from "@/lib/helpGate";
+import { pageGate } from "@/lib/conditions";
 import { helpIndex } from "@/lib/helpContent";
 import { pageMetadata } from "@/lib/metadata";
 import { SUPPORT_EMAIL } from "@/lib/site";
@@ -10,7 +13,7 @@ import { SUPPORT_EMAIL } from "@/lib/site";
 export async function generateMetadata({ params }: PageProps<"/[locale]/help">): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "help" });
-  return pageMetadata({ locale: locale as Locale, path: "/help", title: t("helpTitle"), description: t("helpIntro", { email: SUPPORT_EMAIL }) });
+  return pageMetadata({ locale: locale as Locale, path: "/help", title: t("helpTitle"), description: t("helpIntro", { email: SUPPORT_EMAIL }), noindex: pageGate(HELP_GATE) !== "live" });
 }
 
 // An id from a topic name ("Privacy & account" → "topic-privacy-account").
@@ -20,9 +23,12 @@ const topicId = (topic: string) => `topic-${topic.toLowerCase().replace(/[^a-z0-
 export default async function HelpPage({ params }: PageProps<"/[locale]/help">) {
   const { locale } = await params;
   setRequestLocale(locale as Locale);
+  // The proxy 404s it on Production until then; this is the backstop.
+  const state = pageGate(HELP_GATE);
+  if (state === "hidden") notFound();
   const t = await getTranslations("help");
   return (
-    <PageShell title={t("helpTitle")}>
+    <PageShell title={t("helpTitle")} draft={state === "draft"}>
       <p>{t("helpIntro", { email: SUPPORT_EMAIL })}</p>
       {helpIndex(locale).map(({ topic, articles }) => (
         <section key={topic} aria-labelledby={topicId(topic)} className="pt-4">

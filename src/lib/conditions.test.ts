@@ -51,11 +51,11 @@ describe("pageGate (fails closed)", () => {
 
 describe("sitemapPaths", () => {
   it("lists only ungated pages while nothing is met", () => {
-    expect(sitemapPaths()).toEqual(["/", "/support", "/help"]);
+    expect(sitemapPaths()).toEqual(["/", "/support"]);
   });
 
   it("adds a gated page once its condition is met", () => {
-    expect(sitemapPaths((id) => id === "delete-account-live")).toEqual(["/", "/support", "/help", "/account-deletion"]);
+    expect(sitemapPaths((id) => id === "delete-account-live")).toEqual(["/", "/support", "/account-deletion"]);
   });
 });
 

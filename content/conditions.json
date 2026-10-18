@@ -62,5 +62,9 @@
   "offline-start": {
     "met": false,
     "what": "The app opens without a connection for a user who signed in before, showing the journal saved on the phone (the app's offline start, Mobile Dev). Gates the Help article line about it."
+  },
+  "reminder-live": {
+    "met": false,
+    "what": "The daily reminder is in a RELEASED app build (local notification at the chosen time, skipped if that phone saw a check-in that day). Gates the Help article about reminders."
   }
 }

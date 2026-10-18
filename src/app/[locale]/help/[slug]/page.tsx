@@ -5,7 +5,9 @@ import type { Locale } from "@/i18n/routing";
 import { routing } from "@/i18n/routing";
 import { Link } from "@/i18n/navigation";
 import { PageShell } from "@/components/PageShell";
+import { pageGate } from "@/lib/conditions";
 import { findArticle, helpArticles, renderArticle } from "@/lib/helpContent";
+import { HELP_GATE } from "@/lib/helpGate";
 import { pageMetadata } from "@/lib/metadata";
 
 export function generateStaticParams() {
@@ -16,7 +18,7 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/help/[sl
   const { locale, slug } = await params;
   const article = findArticle(locale, slug);
   if (!article) return {};
-  return pageMetadata({ locale: locale as Locale, path: `/help/${slug}`, title: article.title, description: article.summary });
+  return pageMetadata({ locale: locale as Locale, path: `/help/${slug}`, title: article.title, description: article.summary, noindex: pageGate(HELP_GATE) !== "live" });
 }
 
 // One Help article, exactly as published (unmet pending blocks removed; an
@@ -24,12 +26,14 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/help/[sl
 export default async function HelpArticlePage({ params }: PageProps<"/[locale]/help/[slug]">) {
   const { locale, slug } = await params;
   setRequestLocale(locale as Locale);
+  const state = pageGate(HELP_GATE);
+  if (state === "hidden") notFound();
   const article = findArticle(locale, slug);
   const html = article ? renderArticle(article) : "";
   if (!article || !html) notFound();
   const t = await getTranslations("help");
   return (
-    <PageShell title={article.title} article>
+    <PageShell title={article.title} article draft={state === "draft"}>
       <div className="legal-prose" dangerouslySetInnerHTML={{ __html: html }} />
       <p>
         <Link href="/help" className="font-medium text-accent underline underline-offset-4">

@@ -62,3 +62,12 @@ describe("help articles (content/help, copied verbatim from specs/help)", () => 
     expect(findArticle("en", "nope")).toBeNull();
   });
 });
+
+describe("Help is gated like the journal it describes (reviewer #23)", () => {
+  it("hidden on Production while its condition is unmet, a draft on Previews", () => {
+    for (const path of ["/help", "/help/check-ins", "/help/delete-account"]) {
+      expect(isHiddenPage(path, { vercelEnv: "production" }), path).toBe(true);
+      expect(isHiddenPage(path, { vercelEnv: "preview" }), path).toBe(false);
+    }
+  });
+});
