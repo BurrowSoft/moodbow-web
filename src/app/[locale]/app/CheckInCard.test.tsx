@@ -208,13 +208,28 @@ describe("CheckInCard", () => {
 });
 
 describe("CheckInCard: a request lost at the network level (Web Tester, #11)", () => {
-  it("an online save that can't reach the server: the generic error, no crash, the card stays", async () => {
+  it("an online save that can't reach the server: kept in this browser like an offline save, no crash", async () => {
     saveCheckIn.mockRejectedValue(new TypeError("Failed to fetch"));
     renderCard(null);
     fireEvent.click(screen.getByTestId("checkin-mood-3"));
     fireEvent.click(screen.getByTestId("checkin-save"));
-    expect(await screen.findByTestId("checkin-error")).toHaveTextContent(messages.today.errGeneric);
-    expect(screen.getByTestId("checkin-mood-3")).toHaveAttribute("aria-checked", "true");
+    expect(await screen.findByTestId("checkin-status")).toHaveTextContent(messages.today.checkinSavedOfflineWeb);
+    expect(JSON.parse(window.localStorage.getItem(KEY)!)).toMatchObject({ fields: { mood: 3 }, expected: "", date: "2026-10-02" });
+  });
+
+  it("…and with storage unavailable too: the generic error", async () => {
+    saveCheckIn.mockRejectedValue(new TypeError("Failed to fetch"));
+    const setItem = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+      throw new Error("QuotaExceededError");
+    });
+    try {
+      renderCard(null);
+      fireEvent.click(screen.getByTestId("checkin-mood-3"));
+      fireEvent.click(screen.getByTestId("checkin-save"));
+      expect(await screen.findByTestId("checkin-error")).toHaveTextContent(messages.today.errGeneric);
+    } finally {
+      setItem.mockRestore();
+    }
   });
 
   it("a flush that can't reach the server keeps the copy and tries again on the next reconnect", async () => {
@@ -223,8 +238,9 @@ describe("CheckInCard: a request lost at the network level (Web Tester, #11)", (
     saveCheckIn.mockResolvedValueOnce({ status: "saved", checkIn: { ...ROW, mood: 2 } });
     renderCard(null);
     await waitFor(() => expect(saveCheckIn).toHaveBeenCalledTimes(1));
-    await screen.findByTestId("checkin-error");
+    await new Promise((r) => setTimeout(r, 20));
     expect(window.localStorage.getItem(KEY)).not.toBeNull();
+    expect(screen.queryByTestId("checkin-error")).toBeNull();
     await act(async () => {
       window.dispatchEvent(new Event("online"));
     });
