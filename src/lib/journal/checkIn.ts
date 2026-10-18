@@ -46,6 +46,19 @@ export function parseCheckIn(form: FormData): CheckInInput | null {
   return { mood, sleep_hours: sleepHours, sleep_quality: sleepQuality as SleepQuality | null, exercise_minutes: exercise, stress };
 }
 
+// True when a stored row holds exactly these values (numeric columns may
+// come back as strings).
+export function sameCheckIn(row: CheckIn, input: CheckInInput): boolean {
+  const num = (v: number | string | null) => (v === null ? null : Number(v));
+  return (
+    num(row.mood) === input.mood &&
+    num(row.sleep_hours) === input.sleep_hours &&
+    (row.sleep_quality ?? null) === input.sleep_quality &&
+    num(row.exercise_minutes) === input.exercise_minutes &&
+    num(row.stress) === input.stress
+  );
+}
+
 // The RPC's error codes (supabase/contracts/errors.md) → what the card does.
 export type CheckInError = "dateInFuture" | "stale" | "generic";
 export type CheckInErrorAction = { kind: "error"; error: CheckInError } | { kind: "redirect"; to: "/consent" | "/sign-in" };

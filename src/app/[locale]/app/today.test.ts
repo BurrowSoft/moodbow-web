@@ -68,6 +68,44 @@ describe("saveCheckIn", () => {
     expect(rpc.mock.calls.find((c) => c[0] === "upsert_check_in")![1].p_date).toBe("2026-10-02");
   });
 
+  describe("an offline copy with no base version (decision 72)", () => {
+    const pending = { mood: "4", sleep_hours: "7.5", sleep_quality: "good", exercise_minutes: "30", stress: "2", local_date: "2026-10-02", expected_updated_at: "", from_pending: "1" };
+
+    it("the day is still empty: saved", async () => {
+      rpcAnswers({ data: ROW, error: null });
+      maybeSingle.mockResolvedValue({ data: null, error: null });
+      expect(await saveCheckIn(idle, form(pending))).toEqual({ status: "saved", checkIn: ROW });
+      expect(rpc).toHaveBeenCalledWith("upsert_check_in", expect.anything());
+    });
+
+    it("the day has this same check-in (an earlier answer was lost): saved, nothing written", async () => {
+      rpcAnswers({ data: ROW, error: null });
+      maybeSingle.mockResolvedValue({ data: { ...ROW, sleep_hours: "7.5" }, error: null });
+      expect(await saveCheckIn(idle, form(pending))).toMatchObject({ status: "saved" });
+      expect(rpc).not.toHaveBeenCalledWith("upsert_check_in", expect.anything());
+    });
+
+    it("another device checked in meanwhile: stale with its row, never overwritten", async () => {
+      rpcAnswers({ data: ROW, error: null });
+      const theirs = { ...ROW, mood: 1 };
+      maybeSingle.mockResolvedValue({ data: theirs, error: null });
+      expect(await saveCheckIn(idle, form(pending))).toEqual({ status: "error", error: "stale", checkIn: theirs });
+      expect(rpc).not.toHaveBeenCalledWith("upsert_check_in", expect.anything());
+    });
+
+    it("the read fails: generic (the copy is kept for a retry)", async () => {
+      rpcAnswers({ data: ROW, error: null });
+      maybeSingle.mockResolvedValue({ data: null, error: { message: "boom" } });
+      expect(await saveCheckIn(idle, form(pending))).toEqual({ status: "error", error: "generic" });
+    });
+
+    it("the live card's first check-in doesn't read first (last write wins, as on the app)", async () => {
+      rpcAnswers({ data: ROW, error: null });
+      await saveCheckIn(idle, form({ ...pending, from_pending: "" }));
+      expect(maybeSingle).not.toHaveBeenCalled();
+    });
+  });
+
   it("a first check-in sends no lock (null)", async () => {
     rpcAnswers({ data: ROW, error: null });
     await saveCheckIn(idle, form({ mood: "4", expected_updated_at: "" }));
