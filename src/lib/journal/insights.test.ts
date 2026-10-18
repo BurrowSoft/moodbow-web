@@ -68,4 +68,12 @@ describe("summarize", () => {
     expect(roundFor("exercise", 22.5)).toBe(23);
     expect(roundFor("sleep", 7.25)).toBe(7.3);
   });
+
+  it("halves go away from zero, like the app (Mobile Dev's shared values)", () => {
+    expect(roundFor("mood", 4.25)).toBe(4.3);
+    expect(roundFor("mood", -0.05)).toBe(-0.1);
+    expect(roundFor("mood", -0.04)).toBe(0);
+    expect(Object.is(roundFor("mood", -0.04), -0)).toBe(false);
+    expect(roundFor("exercise", -2.5)).toBe(-3);
+  });
 });

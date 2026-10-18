@@ -49,7 +49,7 @@ describe("InsightsView", () => {
     renderView(thisWeek);
     expect(screen.getByTestId("insights-average-mood")).toHaveTextContent("Average 4.3 / 5");
     expect(screen.getByTestId("insights-average-sleep")).toHaveTextContent("Average 7.5 h");
-    expect(screen.getByTestId("insights-average-stress")).toHaveTextContent("Average 2 / 5");
+    expect(screen.getByTestId("insights-average-stress")).toHaveTextContent("Average 2.0 / 5");
     // Exercise has only 2 values (30, 0): not enough.
     expect(screen.getByTestId("insights-not-enough-exercise")).toBeInTheDocument();
   });
@@ -72,12 +72,26 @@ describe("InsightsView", () => {
   it("3 months reads '3 months' in the sentence", () => {
     const rows = [row("2026-08-01", 4), row("2026-09-01", 4), row("2026-10-01", 4), row("2026-05-10", 3), row("2026-06-01", 3), row("2026-06-20", 3)];
     renderView(rows, "3months");
-    expect(screen.getByTestId("insights-change-mood")).toHaveTextContent("↑ 1 vs the previous 3 months");
+    expect(screen.getByTestId("insights-change-mood")).toHaveTextContent("↑ 1.0 vs the previous 3 months");
   });
 
   it("a drawn chart is an image named by its title and summary", () => {
     renderView(thisWeek);
     const img = within(screen.getByTestId("insights-chart-mood")).getByRole("img");
     expect(img).toHaveAccessibleName(`${messages.insights.chartMood} Average 4.3 / 5`);
+  });
+});
+
+describe("InsightsView: number format (app parity)", () => {
+  it("one decimal always for mood, stress and sleep; whole minutes for exercise", () => {
+    const rows = [
+      row("2026-09-28", 4, { sleep_hours: 7, stress: 3, exercise_minutes: 30 }),
+      row("2026-09-29", 4, { sleep_hours: 7, stress: 3, exercise_minutes: 30 }),
+      row("2026-09-30", 4, { sleep_hours: 7, stress: 3, exercise_minutes: 30 }),
+    ];
+    renderView(rows);
+    expect(screen.getByTestId("insights-average-mood")).toHaveTextContent("Average 4.0 / 5");
+    expect(screen.getByTestId("insights-average-sleep")).toHaveTextContent("Average 7.0 h");
+    expect(screen.getByTestId("insights-average-exercise")).toHaveTextContent("Average 30 min");
   });
 });

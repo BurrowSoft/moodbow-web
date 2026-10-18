@@ -22,10 +22,17 @@ const CHARTS: Record<Metric, { title: "chartMood" | "chartSleep" | "chartStress"
 export function InsightsView({ rows, today, range }: { rows: InsightRow[]; today: string; range: Range }) {
   const t = useTranslations("insights");
   const tt = useTranslations("today");
-  const number = new Intl.NumberFormat(useLocale(), { maximumFractionDigits: 1 });
-  // A value with its unit: "7.5 h", "35 min", or the bare number (1–5).
+  // Always one decimal for mood, stress and sleep ("4.0", "↑ 1.0": the
+  // precision stays visible), whole minutes for exercise; same as the app.
+  const oneDecimal = new Intl.NumberFormat(useLocale(), { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  // A value with its unit: "7.0 h", "35 min", or the bare number (1–5).
   const withUnit = (metric: Metric, v: number) =>
-    metric === "sleep" ? tt("sleepHours", { hours: v }) : metric === "exercise" ? tt("exerciseMinutes", { minutes: v }) : number.format(v);
+    metric === "sleep"
+      ? tt("sleepHours", { hours: oneDecimal.format(v) })
+      : metric === "exercise"
+        ? tt("exerciseMinutes", { minutes: v })
+        : oneDecimal.format(v);
+  const number = oneDecimal;
   const tab = (active: boolean) =>
     `inline-flex min-h-11 items-center rounded-full px-4 text-sm font-medium ${active ? "bg-pill text-accent" : "text-muted hover:bg-pill"}`;
 

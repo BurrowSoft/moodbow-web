@@ -50,7 +50,11 @@ const mean = (values: (number | null)[]) => {
 };
 
 // Mood, stress and sleep hours to one decimal; exercise in whole minutes.
-export const roundFor = (metric: Metric, v: number) => (metric === "exercise" ? Math.round(v) : Math.round(v * 10) / 10);
+// Halves go AWAY FROM ZERO, like Dart's round() on the app (Math.round
+// would turn −0.05 into −0, "Same as", where the app says "↓ 0.1"); −0
+// becomes 0. Agreed with Mobile Dev, with shared test values.
+const roundTo = (v: number, f: number) => Math.sign(v) * Math.round(Math.abs(v) * f) / f + 0;
+export const roundFor = (metric: Metric, v: number) => roundTo(v, metric === "exercise" ? 1 : 10);
 
 export type MetricSummary = {
   points: (number | null)[];
