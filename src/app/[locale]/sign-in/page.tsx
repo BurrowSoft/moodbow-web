@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/sign-in"
   return pageMetadata({ locale: locale as Locale, path: "/sign-in", title: t("signinSubmit"), noindex: true });
 }
 
-export default async function SignInPage({ params }: PageProps<"/[locale]/sign-in">) {
+export default async function SignInPage({ params, searchParams }: PageProps<"/[locale]/sign-in">) {
   const { locale } = await params;
   setRequestLocale(locale as Locale);
   if (pageGate("web-journal-live") === "hidden") notFound();
@@ -29,8 +29,18 @@ export default async function SignInPage({ params }: PageProps<"/[locale]/sign-i
   if (user) redirect({ href: "/app", locale });
 
   const t = await getTranslations("auth");
+  // Set by the proxy when Supabase ended the session (the stale cookies are
+  // already cleared): the account is gone (decision 68), or the session was
+  // revoked while the account still exists (decision 70).
+  const reason = (await searchParams).signed_out;
+  const notice = reason === "account" ? "accountGoneNotice" : reason === "session" ? "sessionEndedNotice" : null;
   return (
     <PageShell title={t("signinTitle")}>
+      {notice && (
+        <p role="status" data-testid="signed-out-notice" className="rounded-2xl border border-border bg-surface px-5 py-4 font-medium text-text">
+          {t(notice)}
+        </p>
+      )}
       <SignInForm />
     </PageShell>
   );

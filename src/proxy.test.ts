@@ -19,7 +19,14 @@ vi.mock("@supabase/ssr", () => ({
       getUser: async () => {
         getUserCalls++;
         // Supabase rotates an expired session: new cookie values.
-        if (opts.cookies.getAll().some((c) => c.name === COOKIE && c.value === "EXPIRED")) {
+        const value = opts.cookies.getAll().find((c) => c.name === COOKIE)?.value;
+        // The account was deleted elsewhere / the session revoked.
+        if (value === "GONE") return { data: { user: null }, error: { code: "user_not_found", status: 403 } };
+        if (value === "NO_SESSION") return { data: { user: null }, error: { code: "session_not_found", status: 403 } };
+        if (value === "REVOKED_REFRESH") return { data: { user: null }, error: { code: "refresh_token_not_found", status: 400 } };
+        // A server hiccup: must never sign anyone out.
+        if (value === "OUTAGE") return { data: { user: null }, error: { code: "unexpected_failure", status: 500 } };
+        if (value === "EXPIRED") {
           opts.cookies.setAll([{ name: COOKIE, value: "REFRESHED", options: { path: "/", httpOnly: true } }]);
         }
         return { data: { user: { id: "u" } }, error: null };
@@ -65,5 +72,39 @@ describe("proxy session refresh", () => {
   it("marketing pages never touch Supabase", async () => {
     await proxy(request("/support", "EXPIRED"));
     expect(getUserCalls).toBe(0);
+  });
+});
+
+describe("Supabase ended the session (decisions 68 + 70, parity with the app)", () => {
+  it("signed-in pages: the session cookies are cleared and sign-in shows the matching notice", async () => {
+    for (const [value, reason] of [
+      ["GONE", "account"],
+      ["NO_SESSION", "session"],
+      ["REVOKED_REFRESH", "session"],
+    ]) {
+      const req = new NextRequest("https://www.moodbow.com/app/me", { headers: { cookie: `${COOKIE}=${value}; ${COOKIE}.1=chunk; other=keep` } });
+      const res = await proxy(req);
+      expect(res.status, value).toBe(303);
+      expect(res.headers.get("location")).toBe(`https://www.moodbow.com/sign-in?signed_out=${reason}`);
+      const setCookie = res.headers.get("set-cookie") ?? "";
+      expect(setCookie).toContain(`${COOKIE}=;`);
+      expect(setCookie).toContain(`${COOKIE}.1=;`);
+      expect(setCookie).not.toContain("other=");
+      expect(seenByIntl).toBeUndefined();
+    }
+  });
+
+  it("auth and onboarding pages: cookies cleared, no redirect (they work signed out)", async () => {
+    const res = await proxy(request("/consent", "GONE"));
+    expect(res.status).toBe(200);
+    expect(seenByIntl).toBeUndefined();
+    expect(res.headers.get("set-cookie") ?? "").toContain(`${COOKIE}=;`);
+  });
+
+  it("a server error never signs anyone out", async () => {
+    const res = await proxy(request("/app", "OUTAGE"));
+    expect(res.status).toBe(200);
+    expect(seenByIntl).toBe("OUTAGE");
+    expect(res.headers.get("set-cookie")).toBeNull();
   });
 });
