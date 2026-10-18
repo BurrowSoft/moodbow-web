@@ -2,7 +2,7 @@
 
 import { getLocale } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
-import { checkInErrorAction, parseCheckIn, type CheckIn, type CheckInError } from "@/lib/journal/checkIn";
+import { checkInErrorAction, parseCheckIn, sameCheckIn, type CheckIn, type CheckInError } from "@/lib/journal/checkIn";
 import { getMe } from "@/lib/journal/me";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -29,6 +29,20 @@ export async function saveCheckIn(_prev: CheckInState, form: FormData): Promise<
   const sent = String(form.get("local_date") ?? "");
   const date = ISO_DATE.test(sent) ? sent : me.today;
   const expected = String(form.get("expected_updated_at") ?? "") || null;
+
+  // An offline copy made when the day had no check-in has no version to lock
+  // against. If the day has one now, it's either this copy saved before
+  // (the answer was lost) or another device's: never overwrite that silently
+  // (decision 72; same as the app).
+  if (expected === null && form.get("from_pending") === "1") {
+    const { data: existing, error: readError } = await supabase.from("check_ins").select(COLUMNS).eq("local_date", date).maybeSingle();
+    if (readError) return { status: "error", error: "generic" };
+    if (existing) {
+      const row = existing as CheckIn;
+      return sameCheckIn(row, input) ? { status: "saved", checkIn: row } : { status: "error", error: "stale", checkIn: row };
+    }
+  }
+
   const { data, error } = await supabase.rpc("upsert_check_in", {
     p_date: date,
     p_mood: input.mood,
