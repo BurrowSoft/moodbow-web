@@ -269,5 +269,21 @@
     "deleteConfirm": "Delete everything",
     "deleteDone": "Your account and everything in it were deleted.",
     "cancel": "Cancel"
+  },
+  "insights": {
+    "insightsTitle": "Insights",
+    "rangeWeek": "Week",
+    "rangeMonth": "Month",
+    "range3Months": "3 months",
+    "chartMood": "Mood",
+    "chartSleep": "Sleep",
+    "chartStress": "Stress",
+    "chartExercise": "Exercise",
+    "chartAverage": "Average {value}",
+    "chartAverageOfFive": "Average {value} / 5",
+    "chartChangeUp": "↑ {value} vs the previous {range, select, week {week} month {month} other {3 months}}",
+    "chartChangeDown": "↓ {value} vs the previous {range, select, week {week} month {month} other {3 months}}",
+    "chartNoChange": "Same as the previous {range, select, week {week} month {month} other {3 months}}",
+    "chartNotEnough": "A few more check-ins and your chart will appear."
   }
 }
