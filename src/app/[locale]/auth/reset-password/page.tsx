@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
-import { PageShell } from "@/components/PageShell";
+import { StatusShell } from "@/components/StatusShell";
 import { pageMetadata } from "@/lib/metadata";
 import { isAuthOutage } from "@/lib/supabase/proxy";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -27,11 +27,14 @@ export default async function ResetPasswordPage({ params, searchParams }: PagePr
   if ((await searchParams).status === "changed") {
     const t = await getTranslations("resetPassword");
     return (
-      <PageShell title={t("successTitle")}>
-        <p role="status" data-testid="reset-done" className="rounded-2xl border border-border bg-surface px-5 py-4 font-medium text-text">
-          {t("success")}
-        </p>
-      </PageShell>
+      <StatusShell
+        title={t("successTitle")}
+        body={
+          <p role="status" data-testid="reset-done">
+            {t("success")}
+          </p>
+        }
+      />
     );
   }
 
@@ -46,28 +49,34 @@ export default async function ResetPasswordPage({ params, searchParams }: PagePr
     const t = await getTranslations("resetPassword");
     const ta = await getTranslations("auth");
     return (
-      <PageShell title={t("title")}>
-        <p role="alert" data-testid="reset-outage" className="font-medium text-accent">
-          {ta("errGeneric")}
-        </p>
-        <ResetPasswordForm />
-      </PageShell>
+      <StatusShell
+        title={t("title")}
+        body={
+          <p role="alert" data-testid="reset-outage" className="font-medium text-accent">
+            {ta("errGeneric")}
+          </p>
+        }
+      >
+        <div className="w-full text-left">
+          <ResetPasswordForm />
+        </div>
+      </StatusShell>
     );
   }
 
   if (!user) {
     const t = await getTranslations("emailConfirmed");
     return (
-      <PageShell title={t("errorTitle")}>
-        <p data-testid="reset-expired">{t("errorBody")}</p>
-      </PageShell>
+      <StatusShell title={t("errorTitle")} body={<p data-testid="reset-expired">{t("errorBody")}</p>} />
     );
   }
 
   const t = await getTranslations("resetPassword");
   return (
-    <PageShell title={t("title")}>
-      <ResetPasswordForm />
-    </PageShell>
+    <StatusShell title={t("title")}>
+      <div className="w-full text-left">
+        <ResetPasswordForm />
+      </div>
+    </StatusShell>
   );
 }

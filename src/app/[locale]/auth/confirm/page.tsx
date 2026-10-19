@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
-import { PageShell } from "@/components/PageShell";
+import { STATUS_BUTTON, StatusShell } from "@/components/StatusShell";
 import { parseConfirmLink, type ConfirmType } from "@/lib/authConfirm";
 import { pageMetadata } from "@/lib/metadata";
 import { confirmLink } from "./actions";
@@ -40,9 +40,7 @@ export default async function ConfirmLinkPage({ params, searchParams }: PageProp
   if (!link) {
     const t = await getTranslations("emailConfirmed");
     return (
-      <PageShell title={t("errorTitle")}>
-        <p data-testid="confirm-invalid">{t("errorBody")}</p>
-      </PageShell>
+      <StatusShell title={t("errorTitle")} body={<p data-testid="confirm-invalid">{t("errorBody")}</p>} />
     );
   }
 
@@ -50,24 +48,20 @@ export default async function ConfirmLinkPage({ params, searchParams }: PageProp
   const ta = await getTranslations("auth");
   const copy = COPY[link.type];
   return (
-    <PageShell title={t(copy.title)}>
+    <StatusShell title={t(copy.title)} body={<p>{t(copy.body)}</p>}>
       {/* Set when Auth didn't answer the last click (./actions.ts). */}
       {query.retry === "1" && (
         <p role="alert" data-testid="confirm-retry" className="font-medium text-accent">
           {ta("errGeneric")}
         </p>
       )}
-      <p>{t(copy.body)}</p>
       <form action={confirmLink}>
         <input type="hidden" name="token_hash" value={link.tokenHash} />
         <input type="hidden" name="type" value={link.type} />
-        <button
-          type="submit"
-          className="inline-flex min-h-[52px] min-w-[200px] items-center justify-center rounded-full bg-accent px-8 py-3.5 text-base font-medium text-on-accent hover:opacity-90"
-        >
+        <button type="submit" className={STATUS_BUTTON}>
           {t(copy.button)}
         </button>
       </form>
-    </PageShell>
+    </StatusShell>
   );
 }

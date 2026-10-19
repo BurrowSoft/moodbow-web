@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { useTranslations } from "next-intl";
+import { STATUS_BUTTON } from "@/components/statusButton";
 import { PASSWORD_MIN_LENGTH } from "@/lib/password";
 import { resetPassword, type ResetPasswordState } from "./actions";
 
@@ -52,13 +53,12 @@ export function ResetPasswordForm() {
           {t(ERROR_KEYS[error])}
         </p>
       )}
-      <button
-        type="submit"
-        disabled={pending}
-        className="inline-flex min-h-[52px] min-w-[200px] items-center justify-center rounded-full bg-accent px-8 py-3.5 text-base font-medium text-on-accent hover:opacity-90 disabled:opacity-60"
-      >
-        {t("submit")}
-      </button>
+      {/* Centred, like the action on every status page (StatusShell). */}
+      <div className="flex justify-center">
+        <button type="submit" disabled={pending} className={STATUS_BUTTON}>
+          {t("submit")}
+        </button>
+      </div>
     </form>
   );
 }
