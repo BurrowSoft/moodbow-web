@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 let pathname = "/app";
 let search = "";
 vi.mock("next/navigation", () => ({ usePathname: () => pathname, useSearchParams: () => new URLSearchParams(search) }));
+vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => `app.${key}` }));
 const { NavProgress } = await import("./NavProgress");
 
 function setup() {
@@ -117,5 +118,52 @@ describe("NavProgress: every click waits its own 300 ms (reviewer #28)", () => {
     expect(screen.queryByTestId("nav-progress")).toBeNull();
     act(() => vi.advanceTimersByTime(1));
     expect(screen.getByTestId("nav-progress")).toBeInTheDocument();
+  });
+});
+
+describe("NavProgress: the 3 s line when no loading boundary shows it (UX, #28)", () => {
+  it("empty live region under the bar; the line at 3 s; gone on arrival", () => {
+    const { link, view } = setup();
+    fireEvent.click(link("/app/timeline"));
+    act(() => vi.advanceTimersByTime(300));
+    const line = screen.getByTestId("nav-slow");
+    expect(line).toHaveAttribute("role", "status");
+    expect(line).toBeEmptyDOMElement();
+    // The bar is decorative; the line isn't inside its aria-hidden part.
+    expect(line.closest("[aria-hidden]")).toBeNull();
+    act(() => vi.advanceTimersByTime(2699));
+    expect(line).toBeEmptyDOMElement();
+    act(() => vi.advanceTimersByTime(1));
+    expect(line).toHaveTextContent("app.slowLoading");
+
+    pathname = "/app/timeline";
+    window.history.replaceState(null, "", "/app/timeline");
+    view.rerender(<NavProgress />);
+    expect(screen.queryByTestId("nav-slow")).toBeNull();
+  });
+
+  it("not when a loading boundary is showing its own line", () => {
+    const { main, link } = setup();
+    const boundary = document.createElement("div");
+    boundary.setAttribute("data-loading-boundary", "");
+    main.appendChild(boundary);
+    fireEvent.click(link("/app/timeline"));
+    act(() => vi.advanceTimersByTime(5000));
+    expect(screen.getByTestId("nav-slow")).toBeEmptyDOMElement();
+  });
+
+  it("each click starts its own 3 s", () => {
+    const { link, view } = setup();
+    fireEvent.click(link("/app/timeline"));
+    act(() => vi.advanceTimersByTime(3000));
+    expect(screen.getByTestId("nav-slow")).toHaveTextContent("app.slowLoading");
+    pathname = "/app/timeline";
+    window.history.replaceState(null, "", "/app/timeline");
+    view.rerender(<NavProgress />);
+    fireEvent.click(link("/app/me"));
+    act(() => vi.advanceTimersByTime(2999));
+    expect(screen.getByTestId("nav-slow")).toBeEmptyDOMElement();
+    act(() => vi.advanceTimersByTime(1));
+    expect(screen.getByTestId("nav-slow")).toHaveTextContent("app.slowLoading");
   });
 });
