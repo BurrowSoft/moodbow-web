@@ -31,6 +31,8 @@ export function TimelineList({ initial, initialDone, momentsOnly, dateLocaleTag 
   const loadMore = useCallback(() => {
     if (done || loading || days.length === 0) return;
     const before = days[days.length - 1].local_date;
+    // Empty first, so the same count twice is announced again (reviewer #40).
+    setLoaded(null);
     startLoading(async () => {
       try {
         const page = await loadTimeline(before, momentsOnly);
