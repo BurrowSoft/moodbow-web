@@ -28,7 +28,7 @@ export function JournalUnavailable({ standalone = false }: { standalone?: boolea
     >
       {/* The page's heading too: when the journal can't load, this is all
           the page has (a11y pass). */}
-      <div role="alert">
+      <div role="alert" data-alert="heading">
         <h1 className="text-lg font-medium text-text">{t("errGeneric")}</h1>
       </div>
       <button
