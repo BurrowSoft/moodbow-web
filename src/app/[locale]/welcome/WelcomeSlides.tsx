@@ -32,8 +32,11 @@ export function WelcomeSlides() {
   const [slide, setSlide] = useState(() => slideFromQuery(params.get("slide")));
   const last = slide === SLIDES.length - 1;
 
+  // The slide's heading takes focus after Next / Skip / Back: the link
+  // that had it may be gone, and the new slide is read from its title.
   const go = (next: number) => {
     setSlide(next);
+    window.setTimeout(() => document.getElementById("welcome-title")?.focus(), 0);
     // No server round trip: Next keeps its router in sync with replaceState.
     window.history.replaceState(window.history.state, "", `?slide=${next + 1}`);
   };
@@ -52,7 +55,7 @@ export function WelcomeSlides() {
   return (
     <div className="flex flex-col items-center text-center">
       <div className="min-h-48" data-testid={`welcome-slide-${slide + 1}`}>
-        <h1 className="text-balance text-[28px] font-medium leading-tight tracking-tight sm:text-4xl">{t(SLIDES[slide].title)}</h1>
+        <h1 id="welcome-title" tabIndex={-1} className="outline-none text-balance text-[28px] font-medium leading-tight tracking-tight sm:text-4xl">{t(SLIDES[slide].title)}</h1>
         <p className="mt-4 text-base leading-relaxed text-muted sm:text-[17px]">{t(SLIDES[slide].body)}</p>
       </div>
       <div className="mt-6 flex gap-2" aria-hidden="true">

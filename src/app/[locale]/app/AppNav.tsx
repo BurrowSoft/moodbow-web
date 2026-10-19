@@ -17,6 +17,7 @@ const TABS = [
 
 export function AppNav() {
   const t = useTranslations("app");
+  const tc = useTranslations("common");
   const pathname = usePathname();
   const isActive = (href: string) => (href === "/app" ? pathname === "/app" : pathname === href || pathname.startsWith(`${href}/`));
 
@@ -26,7 +27,8 @@ export function AppNav() {
       className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-bg md:static md:w-60 md:shrink-0 md:border-t-0 md:border-r md:px-4 md:py-6"
     >
       <div className="hidden px-3 pb-8 md:block">
-        <Link href="/app" aria-label={t("tabToday")} className="inline-block rounded-md">
+        {/* Not "Today": that's the first tab right after it (a11y pass). */}
+        <Link href="/app" aria-label={tc("homeAria")} className="inline-block rounded-md">
           <Logo variant="horizontal" width={130} alt="" />
         </Link>
       </div>

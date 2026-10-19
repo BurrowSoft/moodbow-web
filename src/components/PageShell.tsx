@@ -22,7 +22,7 @@ export async function PageShell({ title, draft = false, article = false, after, 
   return (
     <>
       {draft && (
-        <p role="status" data-testid="draft-banner" className="bg-draft-bg px-6 py-3 text-center text-sm font-medium text-draft-text">
+        <p data-testid="draft-banner" className="bg-draft-bg px-6 py-3 text-center text-sm font-medium text-draft-text">
           {t("draftBanner")}
         </p>
       )}
