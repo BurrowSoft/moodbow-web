@@ -143,6 +143,15 @@ describe("ReflectPanel", () => {
     expect(screen.queryByTestId("reflect-credits-out")).toBeNull();
   });
 
+  it("a reflection that names Get help now shows that button, which opens the safety card (decision 124)", () => {
+    const view = renderIt(reflection({ body: `Please reach out to someone today.\nThe "${messages.me.meGetHelpNow}" button in Moodbow has numbers you can call.` }));
+    fireEvent.click(screen.getByTestId("reflect-get-help"));
+    expect(screen.getByTestId("safety-card")).toBeInTheDocument();
+    view.unmount();
+    renderIt(reflection({ body: "A calm day. What made it calm?" }));
+    expect(screen.queryByTestId("reflect-get-help")).toBeNull();
+  });
+
   it("delete asks first (decision 122); cancel keeps it; confirm removes it; a failure says so", async () => {
     renderIt(reflection());
     fireEvent.click(screen.getByTestId("reflect-delete"));

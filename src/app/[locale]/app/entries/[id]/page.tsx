@@ -43,8 +43,8 @@ export default async function EntryPage({ params }: PageProps<"/[locale]/app/ent
   }
   return (
     <>
-      <EntryEditor initial={data as Entry} newId={id} uid={user.id} today={me.today} />
-      {reflect && <ReflectPanel entryId={id} initial={reflection} balance={me.credits?.balance ?? 0} />}
+      <EntryEditor initial={data as Entry} newId={id} uid={user.id} today={me.today} country={me.profile?.country} />
+      {reflect && <ReflectPanel entryId={id} initial={reflection} balance={me.credits?.balance ?? 0} country={me.profile?.country} />}
     </>
   );
 }

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Dialog, dialogButton } from "@/components/Dialog";
+import { GetHelpNow } from "@/components/SafetyCard";
 import { IN_PROGRESS_LIMIT_MS, IN_PROGRESS_RETRY_MS, type Reflection, type ReflectErrorKey } from "@/lib/journal/reflect";
 import { deleteReflection, reflectOnEntry } from "./reflectActions";
 
@@ -23,8 +24,9 @@ const isRedirect = (e: unknown) => typeof (e as { digest?: unknown })?.digest ==
 // unchanged on every retry of that tap; the button is disabled while a tap
 // is in flight. The body is shown as plain text with its line breaks
 // (decision 120), never as HTML.
-export function ReflectPanel({ entryId, initial, balance }: { entryId: string; initial: Reflection | null; balance: number }) {
+export function ReflectPanel({ entryId, initial, balance, country }: { entryId: string; initial: Reflection | null; balance: number; country?: string | null }) {
   const t = useTranslations("ai");
+  const tm = useTranslations("me");
   const ta = useTranslations("app");
   const tt = useTranslations("today");
   const [reflection, setReflection] = useState(initial);
@@ -142,6 +144,14 @@ export function ReflectPanel({ entryId, initial, balance }: { entryId: string; i
           <p data-testid="reflect-body" className="whitespace-pre-line text-text">
             {reflection.body}
           </p>
+          {/* The crisis rule names the Get help button by its label
+              (get-help-label.json = meGetHelpNow): then the button itself,
+              opening the safety card (decision 124). */}
+          {reflection.body.includes(tm("meGetHelpNow")) && (
+            <div className="mt-4">
+              <GetHelpNow country={country} testId="reflect-get-help" />
+            </div>
+          )}
           {creditsOut && (
             <p data-testid="reflect-credits-out" className="mt-3 text-sm text-muted">
               {t("creditsOut")}
