@@ -94,7 +94,7 @@ test.describe("gated pages render as drafts outside Production", () => {
     await expect(article.getByRole("heading", { level: 2, name: "The short version" })).toBeVisible();
     await expect(article.getByText("Last updated: 2 October 2026")).toBeVisible();
     await expect(article).not.toContainText("Google Play, Apple App Store");
-    await expect(article).toContainText("disappear automatically within 7 days");
+    await expect(article).toContainText("disappear automatically within 8 days");
     // AI is off: no line may point at a Me → AI screen (decision 69).
     await expect(article).not.toContainText("Me → AI");
     await expect(article).not.toContainText("app lock");
@@ -120,7 +120,7 @@ test.describe("gated pages render as drafts outside Production", () => {
     await page.goto("/account-deletion");
     await expect(page.getByText("In the app or on the web: open Me → Delete account, type DELETE, and confirm.")).toBeVisible();
     await expect(page.getByRole("link", { name: "support@moodbow.com" })).toHaveAttribute("href", "mailto:support@moodbow.com");
-    await expect(page.getByTestId("backups-line")).toHaveText("Copies in our encrypted backups are removed automatically within 7 days.");
+    await expect(page.getByTestId("backups-line")).toHaveText("Copies in our encrypted backups are removed automatically within 8 days.");
   });
 });
 

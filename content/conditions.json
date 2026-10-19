@@ -13,7 +13,7 @@
   },
   "backup-retention": {
     "met": true,
-    "what": "Supabase backups are kept 7 days (decision 44, confirmed by Mobile Dev/Vitor); BACKUP_RETENTION_DAYS in src/lib/site.ts = 7. Deleted data disappears from backups within that window."
+    "what": "Supabase backups are kept 8 days: the prod list holds today + 7 back (decisions 44 + 84, checked by Mobile Dev); BACKUP_RETENTION_DAYS in src/lib/site.ts = 8. Deleted data disappears from backups within that window."
   },
   "web-journal-live": {
     "met": false,
