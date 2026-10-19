@@ -54,7 +54,9 @@ const isRedirect = (e: unknown) => typeof (e as { digest?: unknown })?.digest ==
 
 // startDate: the day a new entry starts on (a Timeline day's "Add an entry").
 // country: the profile's, for the safety card's numbers (M8).
-type Props = { initial: Entry | null; newId: string; uid: string; today: string; startDate?: string; country?: string | null };
+// backTo: where leaving the editor goes: the page it was opened from
+// (decision 152), else Today.
+type Props = { initial: Entry | null; newId: string; uid: string; today: string; startDate?: string; country?: string | null; backTo?: string };
 
 const noSubscribe = () => () => {};
 
@@ -66,7 +68,7 @@ export function EntryEditor(props: Props) {
   return <Editor key={inBrowser ? "browser" : "server"} {...props} restore={inBrowser} />;
 }
 
-function Editor({ initial, newId, uid, today, startDate, country, restore }: Props & { restore: boolean }) {
+function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app", restore }: Props & { restore: boolean }) {
   const t = useTranslations("entry");
   const tt = useTranslations("today");
   const router = useRouter();
@@ -162,7 +164,7 @@ function Editor({ initial, newId, uid, today, startDate, country, restore }: Pro
     return () => window.removeEventListener("beforeunload", onUnload);
   }, [draftKey, restore]);
 
-  const leave = useCallback(() => router.push("/app"), [router]);
+  const leave = useCallback(() => router.push(backTo), [router, backTo]);
   const closeSafety = useCallback(() => {
     setSafety("closed");
     // After the card's own focus restore (on its unmount): back into the entry.
@@ -250,6 +252,8 @@ function Editor({ initial, newId, uid, today, startDate, country, restore }: Pro
         if (!blank && !tooLong && !future) send(base);
       }}
     >
+      {/* The page's heading (also its title), for heading navigation. */}
+      <h1 className="sr-only">{initial ? t("entryEditTitle") : t("entryNewTitle")}</h1>
       <label className="sr-only" htmlFor="entry-text">
         {t("entryTextLabel")}
       </label>
@@ -259,6 +263,9 @@ function Editor({ initial, newId, uid, today, startDate, country, restore }: Pro
         value={fields.body}
         onChange={(e) => setFields((f) => ({ ...f, body: e.target.value }))}
         placeholder={t("entryPlaceholder")}
+        // Too long: the message is tied to the text (a11y pass).
+        aria-invalid={tooLong || undefined}
+        aria-describedby={tooLong ? "entry-error" : undefined}
         className="min-h-[50dvh] w-full flex-1 resize-none rounded-3xl border border-border bg-surface p-6 text-lg leading-relaxed text-text placeholder:text-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
       />
 
@@ -272,6 +279,8 @@ function Editor({ initial, newId, uid, today, startDate, country, restore }: Pro
             data-testid="entry-date"
             type="date"
             max={today}
+            aria-invalid={future || undefined}
+            aria-describedby={future ? "entry-error" : undefined}
             value={fields.date}
             onChange={(e) => e.target.value && setFields((f) => ({ ...f, date: e.target.value }))}
             className="min-h-11 rounded-full border border-border bg-bg px-4 text-text"
@@ -296,7 +305,7 @@ function Editor({ initial, newId, uid, today, startDate, country, restore }: Pro
       </div>
 
       {errorText && (
-        <p role="alert" data-testid="entry-error" className="font-medium text-accent">
+        <p id="entry-error" role="alert" data-testid="entry-error" className="font-medium text-accent">
           {errorText}
         </p>
       )}
@@ -350,6 +359,11 @@ function Editor({ initial, newId, uid, today, startDate, country, restore }: Pro
             }}
           >
             {t("entryLeaveKeep")}
+          </button>
+          {/* The safe choice, and where focus starts (initialFocus last;
+              decision 143): back to the text. */}
+          <button type="button" data-testid="entry-keep-editing" className={dialogButton()} onClick={closeDialog}>
+            {t("entryKeepEditing")}
           </button>
         </Dialog>
       )}
