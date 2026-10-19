@@ -192,6 +192,7 @@ describe("EntryScreen: the view", () => {
     fireEvent.click(screen.getByTestId("entry-delete-confirm"));
     await waitFor(() => expect(deleteEntry).toHaveBeenCalled());
     expect((deleteEntry.mock.calls[0][1] as FormData).get("id")).toBe(ENTRY.id);
+    expect((deleteEntry.mock.calls[0][1] as FormData).get("from")).toBe("/app/timeline");
   });
 
   it("an unsaved draft of this entry in the browser: the editor opens with it straight away", () => {

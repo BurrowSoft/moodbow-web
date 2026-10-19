@@ -3,6 +3,7 @@
 import { getLocale } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
 import { ENTRY_COLUMNS, entryErrorAction, isEntryId, parseEntry, sameEntry, type Entry, type EntryError } from "@/lib/journal/entry";
+import { originOf } from "@/lib/journal/origin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 // stale: the entry changed (or was deleted) on another device since the
@@ -70,7 +71,8 @@ export async function getEntry(id: string): Promise<{ status: "ok"; entry: Entry
 
 export type DeleteState = { status: "idle" } | { status: "error" };
 
-// Deletes an entry (delete_entry) and goes back to Today. Already gone
+// Deletes an entry (delete_entry) and goes back where it was opened from
+// (from: allow-listed by originOf, else Today; decision 152). Already gone
 // (not_found, e.g. deleted on another device) ends the same way.
 export async function deleteEntry(_prev: DeleteState, form: FormData): Promise<DeleteState> {
   const id = String(form.get("id") ?? "");
@@ -83,5 +85,5 @@ export async function deleteEntry(_prev: DeleteState, form: FormData): Promise<D
     if (error.message.includes("not_authenticated")) return redirect({ href: "/sign-in", locale });
     if (!error.message.includes("not_found")) return { status: "error" };
   }
-  return redirect({ href: "/app", locale });
+  return redirect({ href: originOf(form.get("from")), locale });
 }

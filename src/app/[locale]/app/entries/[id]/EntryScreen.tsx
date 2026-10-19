@@ -313,6 +313,7 @@ function Screen({ entry: initial, checkIn, from, backLabel, dateLocaleTag, uid, 
               setConfirmDelete(false);
               const form = new FormData();
               form.set("id", entry.id);
+              form.set("from", from);
               startTransition(() => deleteAction(form));
             }}
           >

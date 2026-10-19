@@ -410,6 +410,7 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
               setDialog(null);
               const form = new FormData();
               form.set("id", id);
+              form.set("from", backTo);
               startTransition(() => deleteAction(form));
             }}
           >
