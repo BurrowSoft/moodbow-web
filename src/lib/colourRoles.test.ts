@@ -43,5 +43,11 @@ describe("errors aren't told by colour alone (decision 150)", () => {
     expect(rule).toContain('content: "";');
     expect(rule).toContain("background-color: currentColor;");
     expect(rule).toMatch(/mask: url\("data:image\/svg\+xml,/);
+    // Older Safari needs the prefixed mask (else a solid square).
+    expect(rule).toMatch(/-webkit-mask: url\("data:image\/svg\+xml,/);
+    // A heading alert carries the icon inside the heading, in its own rule
+    // (a browser without :has() keeps the base rule).
+    expect(css).toContain('[role="alert"] > h1::before');
+    expect(css).toMatch(/\[role="alert"\]:has\(> h1\)::before \{\s*display: none;/);
   });
 });
