@@ -25,7 +25,14 @@ export function scrubUrl(raw: string): string | null {
   return `${url.origin}/${path}`;
 }
 
+// A "not found" page sends nothing (it's no page of ours, and its address can
+// be anything someone typed). A notFound() inside a locale page renders
+// [locale]/not-found.tsx within the layout that carries the analytics, so
+// that page marks itself (Web Tester, #21).
+export const NOT_FOUND_MARK = "data-not-found";
+
 export function scrubEvent<T extends { url: string }>(event: T): T | null {
+  if (typeof document !== "undefined" && document.querySelector(`[${NOT_FOUND_MARK}]`)) return null;
   const url = scrubUrl(event.url);
   return url === null ? null : { ...event, url };
 }
