@@ -7,20 +7,34 @@ import { saveReminder, type ReminderState } from "./actions";
 // Me → Daily reminder (M7): on/off and the time, saved as soon as either
 // changes (update_settings). The notification itself only exists on the
 // phone, which the web says plainly (webReminderNote).
+// A failed save puts both controls back to what the account has, with the
+// error and Try again (which resends what was tried): a control never shows
+// a state the server doesn't have (decision 111, after the Web Tester's #19).
 export function Reminder({ on: initialOn, time: initialTime }: { on: boolean; time: string }) {
   const t = useTranslations("me");
   const tt = useTranslations("today");
+  const ta = useTranslations("app");
   const [on, setOn] = useState(initialOn);
   const [time, setTime] = useState(initialTime);
+  // What the account has (the last successful save).
+  const saved = useRef({ on: initialOn, time: initialTime });
   // The last time sent, so leaving the field unchanged sends nothing.
   const sentTime = useRef(initialTime);
   const [state, action, pending] = useActionState<ReminderState, FormData>(async (prev, form) => {
+    let result: ReminderState;
     try {
-      return await saveReminder(prev, form);
+      result = await saveReminder(prev, form);
     } catch (e) {
       if (typeof (e as { digest?: unknown })?.digest === "string" && (e as { digest: string }).digest.startsWith("NEXT_REDIRECT")) throw e;
-      return { status: "error", on: form.get("reminder_on") === "true", time: String(form.get("reminder_time")) };
+      result = { status: "error", on: form.get("reminder_on") === "true", time: String(form.get("reminder_time")) };
     }
+    if (result.status === "saved") saved.current = { on: result.on, time: result.time };
+    if (result.status === "error") {
+      setOn(saved.current.on);
+      setTime(saved.current.time);
+      sentTime.current = saved.current.time;
+    }
+    return result;
   }, { status: "idle" });
 
   const save = (nextOn: boolean, nextTime: string) => {
@@ -69,6 +83,20 @@ export function Reminder({ on: initialOn, time: initialTime }: { on: boolean; ti
       <p role="status" data-testid="me-reminder-status" className="mt-2 text-sm font-medium text-text">
         {!pending && state.status === "saved" ? tt("checkinSaved") : !pending && state.status === "error" ? tt("errGeneric") : null}
       </p>
+      {!pending && state.status === "error" ? (
+        <button
+          type="button"
+          data-testid="me-reminder-retry"
+          onClick={() => {
+            setOn(state.on);
+            setTime(state.time);
+            save(state.on, state.time);
+          }}
+          className="mt-2 min-h-11 rounded-full border border-border px-4 text-sm font-medium text-text"
+        >
+          {ta("tryAgain")}
+        </button>
+      ) : null}
     </section>
   );
 }
