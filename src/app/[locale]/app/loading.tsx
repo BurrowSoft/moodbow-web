@@ -6,7 +6,7 @@ import { SlowLoading } from "@/components/SlowLoading";
 // the session before any HTML is sent).
 export default function AppLoading() {
   return (
-    <div className="flex flex-col items-center gap-4 py-16 text-center" data-testid="app-loading">
+    <div className="flex flex-col items-center gap-4 py-16 text-center" data-testid="app-loading" data-loading-boundary="">
       <span className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-accent motion-reduce:animate-none" aria-hidden="true" />
       <SlowLoading />
     </div>
