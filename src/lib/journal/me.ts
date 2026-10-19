@@ -10,6 +10,8 @@ export type Me = {
   consents: Partial<Record<ConsentKind, { version: string; granted: boolean }>>;
   has_required_consents: boolean;
   today: string;
+  // get_my_credits() (migration 003): the AI credit balance.
+  credits?: { balance: number } | null;
 };
 
 export async function getMe(supabase: Client): Promise<Me | null> {

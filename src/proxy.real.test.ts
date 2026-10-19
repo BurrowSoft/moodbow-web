@@ -146,3 +146,52 @@ describe("proxy + real auth-js: why a session ended", () => {
     expect(clearsAuthCookie(res)).toBe(false);
   });
 });
+
+// UX after the Web Tester's #10 outage run: an expired session with Auth
+// down made every page wait ~51 s (auth-js retries the refresh). The proxy
+// now stops at 10 s, changes nothing, and tells the server components.
+describe("proxy + real auth-js: Auth doesn't answer", () => {
+  const outageHeader = (res: Response) => res.headers.get("x-middleware-request-x-mb-auth-outage");
+  // A fetch that never answers, but stops when its request is aborted.
+  const hanging = (input: RequestInfo | URL, init?: RequestInit) =>
+    new Promise<Response>((_, reject) => {
+      init?.signal?.addEventListener("abort", () => reject(new DOMException("aborted", "AbortError")));
+    });
+
+  afterEach(() => vi.useRealTimers());
+
+  it("an expired session and a hanging refresh: after 10 s, the outage flag, and the session untouched", async () => {
+    vi.useFakeTimers();
+    vi.stubGlobal("fetch", vi.fn(hanging));
+    const pending = visit("/app", sessionCookie({ expired: true }));
+    await vi.advanceTimersByTimeAsync(9_999);
+    let done = false;
+    void pending.then(() => (done = true));
+    await vi.advanceTimersByTimeAsync(0);
+    expect(done).toBe(false);
+    await vi.advanceTimersByTimeAsync(1);
+    const res = await pending;
+    expect(res.status).toBe(200);
+    expect(outageHeader(res)).toBe("1");
+    expect(clearsAuthCookie(res)).toBe(false);
+    expect(res.headers.get("set-cookie")).toBeNull();
+    // The requests still running at the deadline were aborted.
+    const calls = (fetch as unknown as { mock: { calls: [unknown, RequestInit?][] } }).mock.calls;
+    expect(calls.length).toBeGreaterThan(0);
+    expect(calls.every(([, init]) => init?.signal?.aborted)).toBe(true);
+  });
+
+  it("an answer in time: no flag", async () => {
+    const res = await visit("/app", sessionCookie({ expired: false }));
+    expect(outageHeader(res)).toBeNull();
+  });
+
+  it("a visitor can't set the flag themselves", async () => {
+    for (const path of ["/app", "/privacy"]) {
+      const res = await proxy(
+        new NextRequest(`https://www.moodbow.com${path}`, { headers: { cookie: `${COOKIE}=${sessionCookie({ expired: false })}`, "x-mb-auth-outage": "1" } }),
+      );
+      expect(outageHeader(res), path).toBeNull();
+    }
+  });
+});
