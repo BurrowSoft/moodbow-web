@@ -401,10 +401,11 @@ describe("CheckInCard: a save is announced and focus follows (a11y pass)", () =>
     fireEvent.click(screen.getByTestId("checkin-edit"));
     expect(screen.getByTestId("checkin-announce")).toBeEmptyDOMElement();
     // Focus goes to the chosen mood, not lost with the Edit button.
-    expect(screen.getByTestId(`checkin-mood-${ROW.mood}`)).toHaveFocus();
+    // The focus moves in an effect: wait for it (flaky under load otherwise).
+    await waitFor(() => expect(screen.getByTestId(`checkin-mood-${ROW.mood}`)).toHaveFocus());
     fireEvent.click(screen.getByTestId("checkin-save"));
     await screen.findByTestId("checkin-summary");
-    expect(screen.getByTestId("checkin-announce")).toHaveTextContent(messages.today.checkinSaved);
-    expect(screen.getByRole("heading", { name: messages.today.checkinTitle })).toHaveFocus();
+    await waitFor(() => expect(screen.getByTestId("checkin-announce")).toHaveTextContent(messages.today.checkinSaved));
+    await waitFor(() => expect(screen.getByRole("heading", { name: messages.today.checkinTitle })).toHaveFocus());
   });
 });
