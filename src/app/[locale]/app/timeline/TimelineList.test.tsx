@@ -15,6 +15,9 @@ vi.mock("@/i18n/navigation", () => ({
     </a>
   ),
 }));
+// The month header's share (decision 161) asks the month's check-ins.
+const loadMonthCheckIns = vi.fn();
+vi.mock("../insights/shareActions", () => ({ loadMonthCheckIns: (...args: unknown[]) => loadMonthCheckIns(...args) }));
 const { TimelineList } = await import("./TimelineList");
 
 let seeEnd: () => void = () => {};
@@ -43,6 +46,7 @@ const renderList = (props: Partial<React.ComponentProps<typeof TimelineList>> = 
 
 beforeEach(() => {
   loadTimeline.mockReset();
+  loadMonthCheckIns.mockReset().mockResolvedValue({ status: "ok", checkIns: [] });
   vi.stubGlobal("IntersectionObserver", FakeObserver);
 });
 afterEach(() => {
@@ -51,16 +55,18 @@ afterEach(() => {
 });
 
 describe("TimelineList", () => {
-  it("days under month headers, each with its date, mood, chips and previews", () => {
+  it("days under month headers: the mood's dot, the date and its mood word, then the previews; no chips (decision 161)", () => {
     renderList();
     expect(screen.getByRole("heading", { name: "October 2026" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "September 2026" })).toBeInTheDocument();
     const day = screen.getByTestId("timeline-day-2026-10-02");
     expect(day).toHaveAttribute("href", "/app/timeline/2026-10-02");
     expect(day).toHaveTextContent("Fri, Oct 2");
-    expect(day).toHaveTextContent(messages.today.mood4);
+    expect(day).toHaveTextContent(`· ${messages.today.mood4}`);
+    expect(within(day).getByTestId("timeline-mood-dot")).toBeInTheDocument();
     const row = day.closest("li")!;
-    for (const chip of ["7.5 h", "30 min", "Stress 2/5"]) expect(within(row).getByText(chip)).toBeInTheDocument();
+    // The chips live in the day view and the entry view now.
+    for (const chip of ["7.5 h", "30 min", "Stress 2/5"]) expect(within(row).queryByText(chip)).toBeNull();
     // Opened from the Timeline (decision 152): its nav and Back lead back here.
     expect(screen.getByTestId("timeline-entry-e1")).toHaveAttribute("href", "/app/entries/e1?from=%2Fapp%2Ftimeline");
   });
@@ -71,11 +77,13 @@ describe("TimelineList", () => {
     expect(within(screen.getByTestId("timeline-entry-e2")).queryByRole("img")).toBeNull();
   });
 
-  it("a day without a check-in shows no mood or chips", () => {
+  it("a day without a check-in: an empty dashed dot, said only to screen readers", () => {
     renderList();
     const day = screen.getByTestId("timeline-day-2026-09-28");
     expect(day).toHaveTextContent("Mon, Sep 28");
-    expect(day.closest("li")!.querySelectorAll("ul li")).toHaveLength(1);
+    expect(within(day).getByTestId("timeline-no-checkin-dot")).toHaveAttribute("aria-hidden", "true");
+    expect(within(day).getByText(messages.timeline.dayNoCheckin)).toHaveClass("sr-only");
+    expect(within(day).queryByTestId("timeline-mood-dot")).toBeNull();
   });
 
   it("the end in view loads the next page before the last day, skipping days already shown", async () => {
@@ -127,5 +135,27 @@ describe("TimelineList: more days without scrolling, and said (a11y pass)", () =
     expect(loadTimeline).toHaveBeenCalledWith("2026-09-28", false);
     expect(status).toHaveTextContent("1 more day loaded");
     expect(screen.queryByTestId("timeline-more")).not.toHaveAttribute("aria-busy");
+  });
+});
+
+describe("TimelineList: Share this month (decision 161)", () => {
+  const moods = (n: number) => ({ status: "ok", checkIns: Array.from({ length: n }, (_, i) => ({ local_date: `2026-10-${String(i + 1).padStart(2, "0")}`, mood: 3 })) });
+
+  it("in each month header that has enough check-ins for a card; hidden (not disabled) otherwise", async () => {
+    loadMonthCheckIns.mockImplementation(async (month: string) => (month === "2026-10" ? moods(5) : moods(4)));
+    renderList({ shareable: true });
+    const share = await screen.findByTestId("timeline-share-2026-10");
+    expect(share).toHaveTextContent(messages.share.shareThisMonth);
+    expect(loadMonthCheckIns).toHaveBeenCalledWith("2026-09");
+    await act(async () => {});
+    expect(screen.queryByTestId("timeline-share-2026-09")).toBeNull();
+  });
+
+  it("not where share cards are off", async () => {
+    loadMonthCheckIns.mockResolvedValue(moods(10));
+    renderList();
+    await act(async () => {});
+    expect(screen.queryByTestId("timeline-share-2026-10")).toBeNull();
+    expect(loadMonthCheckIns).not.toHaveBeenCalled();
   });
 });

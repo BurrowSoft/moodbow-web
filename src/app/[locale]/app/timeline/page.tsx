@@ -58,7 +58,14 @@ export default async function TimelinePage({ params, searchParams }: PageProps<"
         </nav>
       )}
       {/* Keyed by the view, so switching filters starts a fresh list. */}
-      <TimelineList key={momentsOnly ? "moments" : "all"} initial={page.days} initialDone={page.done} momentsOnly={momentsOnly} dateLocaleTag={dateLocaleTag} />
+      <TimelineList
+        key={momentsOnly ? "moments" : "all"}
+        initial={page.days}
+        initialDone={page.done}
+        momentsOnly={momentsOnly}
+        dateLocaleTag={dateLocaleTag}
+        shareable={pageGate("share-cards") !== "hidden"}
+      />
     </section>
   );
 }
