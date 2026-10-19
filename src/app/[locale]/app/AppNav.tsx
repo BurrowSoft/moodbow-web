@@ -1,7 +1,9 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
 import { Link, usePathname } from "@/i18n/navigation";
+import { originOf, originTab } from "@/lib/journal/origin";
 import { Logo } from "@/components/Logo";
 import { TAB_ITEM, TAB_LINK_NARROW } from "@/lib/ui/journalLayout";
 
@@ -19,7 +21,11 @@ export function AppNav() {
   const t = useTranslations("app");
   const tc = useTranslations("common");
   const pathname = usePathname();
-  const isActive = (href: string) => (href === "/app" ? pathname === "/app" : pathname === href || pathname.startsWith(`${href}/`));
+  const from = useSearchParams().get("from");
+  // An entry page or New entry belongs to the tab it was opened from (Today
+  // or the Timeline; Today on a direct load), decision 152.
+  const section = pathname.startsWith("/app/entries/") || pathname === "/app/write" ? originTab(originOf(from)) : pathname;
+  const isActive = (href: string) => (href === "/app" ? section === "/app" : section === href || section.startsWith(`${href}/`));
 
   return (
     <nav
