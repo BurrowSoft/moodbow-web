@@ -1,7 +1,10 @@
 "use server";
 
+import { cookies } from "next/headers";
 import { getLocale } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
+import { DELETE_WORD } from "@/lib/journal/account";
+import { WIPE_COOKIE, WIPE_COOKIE_OPTIONS } from "@/lib/supabase/proxy";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 // Me → Sign out: this browser only (the app stays signed in).
@@ -9,4 +12,49 @@ export async function signOut(): Promise<void> {
   const supabase = await createSupabaseServerClient();
   if (supabase) await supabase.auth.signOut({ scope: "local" });
   redirect({ href: "/sign-in", locale: await getLocale() });
+}
+
+export type ExportResult = { status: "ok"; json: string; date: string } | { status: "error" };
+
+// Me → Export my data: export_my_data() (migration 004), everything the
+// user created as one JSON document, handed to the browser to save as a
+// file. Nothing is stored on the way: the file is made in the browser.
+export async function exportMyData(): Promise<ExportResult> {
+  const supabase = await createSupabaseServerClient();
+  if (!supabase) return { status: "error" };
+  const { data, error } = await supabase.rpc("export_my_data");
+  if (error || !data) {
+    if (error?.message.includes("not_authenticated")) return redirect({ href: "/sign-in", locale: await getLocale() });
+    return { status: "error" };
+  }
+  const exportedAt = String((data as { exported_at?: unknown }).exported_at ?? "");
+  // No indent: the whole journal travels in this one response (Vercel caps
+  // it at 4.5 MB), so every byte counts. A streamed export is a follow-up.
+  return { status: "ok", json: JSON.stringify(data), date: /^\d{4}-\d{2}-\d{2}/.test(exportedAt) ? exportedAt.slice(0, 10) : "" };
+}
+
+export type DeleteAccountState = { status: "idle" } | { status: "error"; error: "confirm" | "generic" };
+
+// Me → Delete account: delete_my_account() removes the auth user and,
+// with it, every row, right away (M7). Then this browser forgets the
+// session and the user's local copies (pending check-ins, drafts:
+// decision 85), and sign-in says it's done.
+export async function deleteMyAccount(_prev: DeleteAccountState, form: FormData): Promise<DeleteAccountState> {
+  if (String(form.get("confirm") ?? "").trim() !== DELETE_WORD) return { status: "error", error: "confirm" };
+  const supabase = await createSupabaseServerClient();
+  if (!supabase) return { status: "error", error: "generic" };
+  const locale = await getLocale();
+  const { data, error: userError } = await supabase.auth.getUser();
+  const uid = data.user?.id;
+  if (!uid) return userError?.name === "AuthRetryableFetchError" ? { status: "error", error: "generic" } : redirect({ href: "/sign-in", locale });
+
+  const { error } = await supabase.rpc("delete_my_account");
+  if (error) return { status: "error", error: "generic" };
+
+  // The account is gone: the session's cookies go too (Auth may refuse the
+  // sign-out itself now that the user doesn't exist; local scope clears the
+  // cookies either way).
+  await supabase.auth.signOut({ scope: "local" }).catch(() => undefined);
+  (await cookies()).set(WIPE_COOKIE, uid, WIPE_COOKIE_OPTIONS);
+  return redirect({ href: "/sign-in?signed_out=deleted", locale });
 }

@@ -1,8 +1,8 @@
 "use client";
 
-import { startTransition, useActionState, useEffect, useRef, useState } from "react";
+import { startTransition, useActionState, useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { EXERCISE_MINUTES, MOODS, SLEEP_HOURS, SLEEP_QUALITIES, STRESS_LEVELS, type CheckIn, type SleepQuality } from "@/lib/journal/checkIn";
+import { EXERCISE_MINUTES, MOOD_COLOURS, MOODS, SLEEP_HOURS, SLEEP_QUALITIES, STRESS_LEVELS, type CheckIn, type SleepQuality } from "@/lib/journal/checkIn";
 import { dateLine } from "@/lib/journal/today";
 import { localKey } from "@/lib/localData";
 import { saveCheckIn, type CheckInState } from "./actions";
@@ -21,25 +21,43 @@ const fromRow = (row: CheckIn | null): Fields => ({
   stress: row?.stress != null ? String(row.stress) : "",
 });
 
-const MOOD_COLOURS = ["bg-[#9b84d6]", "bg-[#b9a3e3]", "bg-[#e3c0d0]", "bg-[#f2a07b]", "bg-[#e27d9a]"];
-const pendingKey = (uid: string) => localKey("pending-checkin", uid);
+// One pending copy per user per day (UX): saving offline on two days keeps
+// both, a later save for the same day replaces only that day's, and every
+// pending day syncs on reconnect (decision 72: never a silent drop).
+const pendingKey = (uid: string, date: string) => localKey("pending-checkin", uid, date);
 
 // The pending copy names its own day: synced after midnight, it must still
 // land on the day it was made, not on the new today.
 type Pending = { fields: Fields; expected: string; date: string };
 
-function readPending(uid: string): Pending | null {
+const isPending = (p: Pending | null): p is Pending =>
+  !!p && typeof p.date === "string" && typeof p.expected === "string" && typeof p.fields?.mood === "number";
+
+// Every pending copy of this user, oldest day first. Also reads the
+// one-per-user key from before per-day copies (mb:pending-checkin:<uid>).
+function readAllPending(uid: string): { key: string; pending: Pending }[] {
+  const legacy = localKey("pending-checkin", uid);
+  const found: { key: string; pending: Pending }[] = [];
   try {
-    const p = JSON.parse(window.localStorage.getItem(pendingKey(uid)) ?? "null") as Pending | null;
-    return p && typeof p.date === "string" && typeof p.expected === "string" && typeof p.fields?.mood === "number" ? p : null;
+    for (let i = 0; i < window.localStorage.length; i++) {
+      const key = window.localStorage.key(i);
+      if (!key || (key !== legacy && !key.startsWith(`${legacy}:`))) continue;
+      try {
+        const p = JSON.parse(window.localStorage.getItem(key) ?? "null") as Pending | null;
+        if (isPending(p)) found.push({ key, pending: p });
+      } catch {
+        // a corrupt copy is ignored
+      }
+    }
   } catch {
-    return null;
+    // storage unavailable
   }
+  return found.sort((a, b) => a.pending.date.localeCompare(b.pending.date));
 }
 
-function removePending(uid: string) {
+function removePending(key: string) {
   try {
-    window.localStorage.removeItem(pendingKey(uid));
+    window.localStorage.removeItem(key);
   } catch {
     // storage unavailable
   }
@@ -61,7 +79,7 @@ function pendingFromForm(form: FormData): Pending {
   };
 }
 
-function toFormData(fields: Fields, expectedUpdatedAt: string, date: string, fromPending = false): FormData {
+function toFormData(fields: Fields, expectedUpdatedAt: string, date: string, fromPending?: string): FormData {
   const form = new FormData();
   form.set("local_date", date);
   form.set("mood", String(fields.mood ?? ""));
@@ -70,38 +88,68 @@ function toFormData(fields: Fields, expectedUpdatedAt: string, date: string, fro
   form.set("exercise_minutes", fields.exercise);
   form.set("stress", fields.stress);
   form.set("expected_updated_at", expectedUpdatedAt);
-  if (fromPending) form.set("from_pending", "1");
+  // from_pending tells the action it's a synced copy; pending_key which one
+  // to remove once it's answered.
+  if (fromPending) {
+    form.set("from_pending", "1");
+    form.set("pending_key", fromPending);
+  }
   return form;
 }
 
-type Props = { initial: CheckIn | null; uid: string; today: string; dateLocaleTag: string };
+// date: the day this card is for (today on Today, the day in the day view).
+type Props = { initial: CheckIn | null; uid: string; date: string; dateLocaleTag: string };
+
+// What became of an offline copy that couldn't be saved as it was: another
+// device changed that day ("superseded"), or the server refused it
+// ("rejected": e.g. a day that is in the future for the account's zone).
+// Never silent (decision 72): one notice per day, until dismissed.
+type Notice = { date: string; kind: "superseded" | "rejected" };
+type Notify = (notice: Notice) => void;
 
 export function CheckInCard(props: Props) {
   const t = useTranslations("today");
-  const [superseded, setSuperseded] = useState<string | null>(null);
+  const [notices, setNotices] = useState<Notice[]>([]);
+  const notify = useCallback<Notify>(
+    (notice) => setNotices((shown) => (shown.some((n) => n.date === notice.date && n.kind === notice.kind) ? shown : [...shown, notice])),
+    [],
+  );
   return (
     <div className="space-y-4">
-      {superseded && (
-        <div role="status" data-testid="checkin-superseded" className="flex items-start gap-4 rounded-2xl bg-pill p-4 text-sm text-text">
-          <p className="flex-1">{t("offlineCheckinSuperseded", { date: dateLine(superseded, props.dateLocaleTag) })}</p>
-          <button type="button" data-testid="checkin-superseded-dismiss" onClick={() => setSuperseded(null)} className="font-medium text-accent underline underline-offset-4">
+      {notices.map((notice) => (
+        <div
+          key={`${notice.kind}-${notice.date}`}
+          role="status"
+          data-testid={`checkin-${notice.kind}`}
+          className="flex items-start gap-4 rounded-2xl bg-pill p-4 text-sm text-text"
+        >
+          <p className="flex-1">
+            {t(notice.kind === "superseded" ? "offlineCheckinSuperseded" : "offlineCheckinRejected", { date: dateLine(notice.date, props.dateLocaleTag) })}
+          </p>
+          <button
+            type="button"
+            data-testid={`checkin-${notice.kind}-dismiss`}
+            onClick={() => setNotices((shown) => shown.filter((n) => n !== notice))}
+            className="font-medium text-accent underline underline-offset-4"
+          >
             {t("dismiss")}
           </button>
         </div>
-      )}
-      <Card {...props} setSuperseded={setSuperseded} />
+      ))}
+      <Card {...props} notify={notify} />
     </div>
   );
 }
 
-function Card({ initial, uid, today, setSuperseded }: Props & { setSuperseded: (date: string) => void }) {
+function Card({ initial, uid, date: cardDate, notify }: Props & { notify: Notify }) {
   const t = useTranslations("today");
   const [row, setRow] = useState<CheckIn | null>(initial);
   const [fields, setFields] = useState<Fields>(fromRow(initial));
   const [editing, setEditing] = useState(initial === null);
   const [offline, setOffline] = useState(false);
   const [storageFailed, setStorageFailed] = useState(false);
-  const flushing = useRef(false);
+  // The pending copies being sent right now (by key), so none goes twice.
+  const flushing = useRef(new Set<string>());
   const [state, action, pending] = useActionState<CheckInState, FormData>(async (prev, form) => {
     let next: CheckInState;
     try {
@@ -109,14 +157,15 @@ function Card({ initial, uid, today, setSuperseded }: Props & { setSuperseded: (
     } catch (e) {
       // A redirect (consent, sign-in) is the navigation itself.
       const fromPending = form.get("from_pending") === "1";
-      if (fromPending) flushing.current = false;
+      if (fromPending) flushing.current.delete(String(form.get("pending_key")));
       const digest = (e as { digest?: unknown })?.digest;
       if (typeof digest === "string" && digest.startsWith("NEXT_REDIRECT")) {
         // Leaving for sign-in or Consent before this was saved: keep it as a
         // pending copy first, so it syncs once they're back (decision 81).
         if (!fromPending) {
           try {
-            window.localStorage.setItem(pendingKey(uid), JSON.stringify(pendingFromForm(form)));
+            const copy = pendingFromForm(form);
+            window.localStorage.setItem(pendingKey(uid, copy.date), JSON.stringify(copy));
           } catch {
             // storage unavailable: nothing more can be done before leaving
           }
@@ -128,7 +177,8 @@ function Card({ initial, uid, today, setSuperseded }: Props & { setSuperseded: (
       // next reconnect; a live save becomes one, exactly like saving offline.
       if (fromPending) return prev;
       try {
-        window.localStorage.setItem(pendingKey(uid), JSON.stringify(pendingFromForm(form)));
+        const copy = pendingFromForm(form);
+        window.localStorage.setItem(pendingKey(uid, copy.date), JSON.stringify(copy));
       } catch {
         return { status: "error", error: "generic" };
       }
@@ -137,17 +187,23 @@ function Card({ initial, uid, today, setSuperseded }: Props & { setSuperseded: (
       return prev;
     }
     if (form.get("from_pending") === "1") {
-      flushing.current = false;
+      const key = String(form.get("pending_key"));
+      flushing.current.delete(key);
       // The copy is removed only once it's answered, and kept while a retry
       // can still succeed ("generic", e.g. the network dropped again). A
       // redirect (consent, sign-in) throws before this line: the copy stays.
-      if (next.status === "saved" || (next.status === "error" && next.error !== "generic")) removePending(uid);
+      if (next.status === "saved" || (next.status === "error" && next.error !== "generic")) removePending(key);
       const date = String(form.get("local_date"));
-      // The day changed on another device meanwhile: the copy is dropped, but
-      // never silently (decision 72). Today's card shows the latest version.
+      // Dropped, but never silently (decision 72).
+      if (next.status === "error" && (next.error === "dateInFuture" || next.error === "invalid")) {
+        notify({ date, kind: "rejected" });
+        return prev;
+      }
+      // The day changed on another device meanwhile; this card shows the
+      // latest version if it's that day's.
       if (next.status === "error" && next.error === "stale") {
-        setSuperseded(date);
-        if (date === today && next.checkIn) {
+        notify({ date, kind: "superseded" });
+        if (date === cardDate && next.checkIn) {
           setRow(next.checkIn);
           setFields(fromRow(next.checkIn));
           setEditing(false);
@@ -155,8 +211,8 @@ function Card({ initial, uid, today, setSuperseded }: Props & { setSuperseded: (
         }
         return prev;
       }
-      // A copy from an earlier day doesn't change today's card.
-      if (date !== today) return prev;
+      // A copy for another day doesn't change this card.
+      if (date !== cardDate) return prev;
     }
     if (next.status === "saved") {
       setRow(next.checkIn);
@@ -170,14 +226,16 @@ function Card({ initial, uid, today, setSuperseded }: Props & { setSuperseded: (
     return next;
   }, { status: "idle" });
 
-  // Send a check-in saved while offline once the browser is online again.
+  // Send every check-in saved while offline once the browser is online
+  // again, oldest day first (React runs the queued saves in order).
   useEffect(() => {
     const flush = () => {
-      if (flushing.current || !navigator.onLine) return;
-      const saved = readPending(uid);
-      if (!saved) return;
-      flushing.current = true;
-      startTransition(() => action(toFormData(saved.fields, saved.expected, saved.date, true)));
+      if (!navigator.onLine) return;
+      for (const { key, pending: saved } of readAllPending(uid)) {
+        if (flushing.current.has(key)) continue;
+        flushing.current.add(key);
+        startTransition(() => action(toFormData(saved.fields, saved.expected, saved.date, key)));
+      }
     };
     flush();
     window.addEventListener("online", flush);
@@ -191,7 +249,7 @@ function Card({ initial, uid, today, setSuperseded }: Props & { setSuperseded: (
     setStorageFailed(false);
     if (!navigator.onLine) {
       try {
-        window.localStorage.setItem(pendingKey(uid), JSON.stringify({ fields, expected, date: today } satisfies Pending));
+        window.localStorage.setItem(pendingKey(uid, cardDate), JSON.stringify({ fields, expected, date: cardDate } satisfies Pending));
       } catch {
         // storage unavailable: nothing was kept, so don't say it was saved
         setStorageFailed(true);
@@ -201,7 +259,7 @@ function Card({ initial, uid, today, setSuperseded }: Props & { setSuperseded: (
       setEditing(false);
       return;
     }
-    startTransition(() => action(toFormData(fields, expected, today)));
+    startTransition(() => action(toFormData(fields, expected, cardDate)));
   };
 
   const set = (patch: Partial<Fields>) => setFields((f) => ({ ...f, ...patch }));

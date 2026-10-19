@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 import { PageShell } from "@/components/PageShell";
 import { pageMetadata } from "@/lib/metadata";
+import { isAuthOutage } from "@/lib/supabase/proxy";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { ResetPasswordForm } from "./ResetPasswordForm";
 
@@ -35,7 +36,24 @@ export default async function ResetPasswordPage({ params, searchParams }: PagePr
   }
 
   const supabase = await createSupabaseServerClient();
-  const user = supabase ? (await supabase.auth.getUser()).data.user : null;
+  const { data, error } = supabase ? await supabase.auth.getUser() : { data: { user: null }, error: null };
+  const user = data.user;
+
+  // Auth didn't answer: the link may still be good, so not "expired". The
+  // form, with the generic error above it; saving works once Auth is back
+  // (Web Tester + reviewer, #18).
+  if (!user && isAuthOutage(error)) {
+    const t = await getTranslations("resetPassword");
+    const ta = await getTranslations("auth");
+    return (
+      <PageShell title={t("title")}>
+        <p role="alert" data-testid="reset-outage" className="font-medium text-accent">
+          {ta("errGeneric")}
+        </p>
+        <ResetPasswordForm />
+      </PageShell>
+    );
+  }
 
   if (!user) {
     const t = await getTranslations("emailConfirmed");

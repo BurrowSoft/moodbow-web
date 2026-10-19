@@ -109,7 +109,7 @@ describe("checkInErrorAction (supabase/contracts/errors.md)", () => {
     expect(checkInErrorAction("not_authenticated")).toEqual({ kind: "redirect", to: "/sign-in" });
     expect(checkInErrorAction("date_in_future")).toEqual({ kind: "error", error: "dateInFuture" });
     expect(checkInErrorAction("stale_write")).toEqual({ kind: "error", error: "stale" });
-    expect(checkInErrorAction("invalid_value")).toEqual({ kind: "error", error: "generic" });
+    expect(checkInErrorAction("invalid_value")).toEqual({ kind: "error", error: "invalid" });
     expect(checkInErrorAction("not_found")).toEqual({ kind: "error", error: "generic" });
   });
 });
