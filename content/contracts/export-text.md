@@ -44,7 +44,7 @@ The heading `{exportCheckins}`, then one line per check-in:
 - always: `{exportField(label: exportMood, value: exportMoodValue(label: mood<n>, value: n))}` → `Mood: Good (4/5)`
 - if `sleep_hours`: `{exportField(exportSleep, …)}`, where the value is `sleepHours(h)` (`7`, `7.5`: no trailing `.0`). If there's also `sleep_quality`: `{exportSleepValue(hours: sleepHours(h), quality: sleepPoor|sleepOkay|sleepGood)}` → `Sleep: 7.5 h, Good`
 - if only `sleep_quality` (no hours): `Sleep: Good`
-- if `exercise_minutes` is not null (0 counts): `Exercise: ` + `exerciseNone` (0) | `exercise90` (90) | `exerciseMinutes(n)`
+- if `exercise_minutes` is not null (0 counts): `Movement: ` (exportExercise) + `exerciseNone` (0) | `exercise90` (90) | `exerciseMinutes(n)`
 - if `stress`: `Stress: ` + `exportOfFive(n)` → `Stress: 2/5`
 
 ## Entries
@@ -81,7 +81,7 @@ The heading `{exportMemories}`, then one line per memory: `- {fact}`.
 | exportMoodValue | {label} ({value}/5) |
 | exportSleep | Sleep |
 | exportSleepValue | {hours}, {quality} |
-| exportExercise | Exercise |
+| exportExercise | Movement (decision 158) |
 | exportStress | Stress |
 | exportOfFive | {value}/5 |
 | exportReflectionOn | On your entry of {date} |

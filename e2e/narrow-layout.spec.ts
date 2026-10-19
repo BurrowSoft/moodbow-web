@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import messages from "../src/messages/en.json";
-import { APP_MAIN_GUTTER, JOURNAL_CARD, MOOD_FACE, MOOD_ROW, PRIMARY_SAVE, TAB_ITEM, TAB_LABEL, TAB_LINK_NARROW } from "../src/lib/ui/journalLayout";
+import { APP_MAIN_GUTTER, JOURNAL_CARD, MOOD_FACE, MOOD_LABEL, MOOD_ROW, PRIMARY_SAVE, TAB_ITEM, TAB_LABEL, TAB_LINK_NARROW } from "../src/lib/ui/journalLayout";
 
 // The web journal's narrow layout in a real browser (jsdom can't lay out).
 // The journal pages need a session, so this builds the same markup from the
@@ -21,7 +21,7 @@ async function mount(page: Page, width: number, html: string, viewport = 320) {
   );
 }
 
-const faces = Array.from({ length: 5 }, (_, i) => `<button type="button" role="radio" class="${MOOD_FACE}"><span class="h-9 w-9 shrink-0 rounded-full bg-accent"></span><span class="sr-only @min-[22rem]:not-sr-only">${messages.today[`mood${i + 1}` as "mood1"]}</span></button>`).join("");
+const faces = Array.from({ length: 5 }, (_, i) => `<button type="button" role="radio" class="${MOOD_FACE}"><span class="h-9 w-9 shrink-0 rounded-full bg-accent"></span><span class="${MOOD_LABEL}">${messages.today[`mood${i + 1}` as "mood1"]}</span></button>`).join("");
 const moodRow = `<div class="@container" id="row-box"><div class="${MOOD_ROW}" role="radiogroup">${faces}</div></div>`;
 
 async function oneRow(page: Page) {
@@ -31,6 +31,16 @@ async function oneRow(page: Page) {
   for (const b of boxes) {
     expect(b.w).toBeGreaterThanOrEqual(48);
     expect(b.h).toBeGreaterThanOrEqual(48);
+  }
+  // All five labels shown (UX, superseding decision 105), each on one line
+  // under its face at the default text size, as in the mockup.
+  const labels = await page.locator(`#row-box button > span:last-child`).evaluateAll((els) =>
+    els.map((e) => ({ h: e.getBoundingClientRect().height, line: parseFloat(getComputedStyle(e).lineHeight), scroll: e.scrollWidth, client: e.clientWidth })),
+  );
+  expect(labels).toHaveLength(5);
+  for (const l of labels) {
+    expect(l.h, JSON.stringify(l)).toBeLessThanOrEqual(l.line + 1);
+    expect(l.scroll).toBeLessThanOrEqual(l.client);
   }
 }
 

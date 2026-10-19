@@ -2,6 +2,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { METRICS, summarize, type InsightRow, type Metric, type Range } from "@/lib/journal/insights";
 import type { ValueKey } from "@/lib/journal/valueColours";
+import { segment } from "@/lib/ui/journalLayout";
 import { Chart } from "./Chart";
 
 const RANGE_TABS: { range: Range; key: "rangeWeek" | "rangeMonth" | "range3Months" }[] = [
@@ -35,8 +36,7 @@ export function InsightsView({ rows, today, range, share }: { rows: InsightRow[]
         ? tt("exerciseMinutes", { minutes: v })
         : oneDecimal.format(v);
   const number = oneDecimal;
-  const tab = (active: boolean) =>
-    `inline-flex min-h-11 items-center rounded-full px-4 text-sm font-medium ${active ? "bg-pill text-accent" : "text-muted hover:bg-pill"}`;
+  const tab = segment;
 
   return (
     <section>

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Dialog, dialogButton } from "@/components/Dialog";
+import { segment } from "@/lib/ui/journalLayout";
 import { drawCard } from "@/lib/share/drawCard";
 import { stripPngMetadata } from "@/lib/share/pngChunks";
 import { cardFileName, formatMonth, LAYOUT, MIN_CHECK_INS, monthBands, THEMES, type CardFormat, type CardTheme } from "@/lib/share/moodbow";
@@ -120,8 +121,7 @@ export function ShareMonth({ month, dateLocaleTag, label }: { month: string; dat
     });
   };
 
-  const choice = (active: boolean) =>
-    `inline-flex min-h-11 items-center rounded-full px-4 text-sm font-medium ${active ? "bg-pill text-accent" : "text-muted hover:bg-pill"}`;
+  const choice = segment;
 
   return (
     <>
