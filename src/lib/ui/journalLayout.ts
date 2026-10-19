@@ -19,8 +19,9 @@ export const MOOD_ROW = "flex flex-wrap justify-between gap-0.5 @min-[22rem]:gap
 // min-w-min + the label's min-w-10: at least 48 px (40 + p-1), or the
 // label's longest word, never less, so the label never breaks mid-word.
 export const MOOD_FACE = "flex min-h-12 min-w-min flex-1 basis-12 flex-col items-center justify-center gap-1 rounded-2xl p-1 font-medium @min-[22rem]:p-2";
-// The label under each face: always shown (UX, superseding decision 105).
-export const MOOD_LABEL = "min-w-10 text-center text-[11px] leading-tight";
+// The label under each face: always shown (UX, superseding decision 105);
+// 11 px at the default text size, in rem so it follows the reader's setting.
+export const MOOD_LABEL = "min-w-10 text-center text-[0.6875rem] leading-tight";
 
 // The primary Save button (check-in, entry): full width on phones, so at
 // 200% zoom (a 160 px-wide page) it never overflows; the label wraps.
