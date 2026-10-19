@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 import { Logo } from "@/components/Logo";
+import { TAB_ITEM, TAB_LINK_NARROW } from "@/lib/ui/journalLayout";
 
 // The web journal's tabs, the same four as the app (Today · Timeline ·
 // Insights · Me) with the same test ids. A sidebar from md up, a bottom bar
@@ -33,12 +34,12 @@ export function AppNav() {
         {TABS.map((tab) => {
           const active = isActive(tab.href);
           return (
-            <li key={tab.href}>
+            <li key={tab.href} className={TAB_ITEM}>
               <Link
                 href={tab.href}
                 data-testid={tab.id}
                 aria-current={active ? "page" : undefined}
-                className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-2xl px-3 text-xs font-medium md:min-h-12 md:flex-row md:justify-start md:gap-3 md:text-base ${
+                className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-2xl ${TAB_LINK_NARROW} text-xs font-medium md:min-h-12 md:px-3 md:text-left md:flex-row md:justify-start md:gap-3 md:text-base ${
                   active ? "text-accent md:bg-pill" : "text-muted hover:text-text"
                 }`}
               >

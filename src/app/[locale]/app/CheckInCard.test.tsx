@@ -346,3 +346,47 @@ describe("CheckInCard: a live save sent to sign-in or Consent (reviewer #11/#22)
     }
   });
 });
+
+describe("CheckInCard: narrow screens and large text (decision 105)", () => {
+  it("every face keeps a 48 px target and its accessible name, even with its label hidden", () => {
+    renderCard(null);
+    for (const mood of [1, 2, 3, 4, 5] as const) {
+      const face = screen.getByTestId(`checkin-mood-${mood}`);
+      expect(face.className).toMatch(/\bmin-h-12\b/);
+      expect(face.className).toMatch(/\bmin-w-12\b/);
+      // Screen-reader text below the container width, never display:none.
+      expect(screen.getByTestId(`checkin-mood-label-${mood}`).className).toMatch(/\bsr-only\b/);
+      expect(face).toHaveAccessibleName(messages.today[`mood${mood}`]);
+    }
+    expect(screen.getByRole("radiogroup").className).toMatch(/\bflex-wrap\b/);
+  });
+
+  it("the chosen mood's label shows under the row (visual only)", () => {
+    renderCard(null);
+    expect(screen.queryByTestId("checkin-mood-selected")).toBeNull();
+    fireEvent.click(screen.getByTestId("checkin-mood-4"));
+    const selected = screen.getByTestId("checkin-mood-selected");
+    expect(selected).toHaveTextContent(messages.today.mood4);
+    expect(selected).toHaveAttribute("aria-hidden", "true");
+  });
+});
+
+describe("CheckInCard: stress chips at large text (reviewer #26)", () => {
+  it("48 px chips in a row that wraps", () => {
+    renderCard(null);
+    fireEvent.click(screen.getByTestId("checkin-mood-3"));
+    for (const s of [1, 2, 3, 4, 5]) expect(screen.getByTestId(`checkin-stress-${s}`).className).toMatch(/\bmin-w-12\b/);
+    expect(screen.getByTestId("checkin-stress-1").closest("div")!.parentElement!.className).toMatch(/\bflex-wrap\b/);
+  });
+});
+
+describe("CheckInCard: legends without a hard-coded separator (decision 34)", () => {
+  it("each optional row's legend is its title and 'Optional', two texts", () => {
+    renderCard(null);
+    fireEvent.click(screen.getByTestId("checkin-mood-3"));
+    for (const title of [messages.today.sleepTitle, messages.today.exerciseTitle, messages.today.stressTitle]) {
+      const legend = screen.getByText(title, { selector: "legend", exact: false });
+      expect(legend.textContent).toBe(`${title} ${messages.today.optional}`);
+    }
+  });
+});

@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { EXERCISE_MINUTES, MOOD_COLOURS, MOODS, SLEEP_HOURS, SLEEP_QUALITIES, STRESS_LEVELS, type CheckIn, type SleepQuality } from "@/lib/journal/checkIn";
 import { dateLine } from "@/lib/journal/today";
 import { localKey } from "@/lib/localData";
+import { JOURNAL_CARD, MOOD_FACE, MOOD_ROW, PRIMARY_SAVE } from "@/lib/ui/journalLayout";
 import { saveCheckIn, type CheckInState } from "./actions";
 
 // The daily check-in (M4): mood required (5 labelled circles), then the
@@ -264,7 +265,7 @@ function Card({ initial, uid, date: cardDate, notify }: Props & { notify: Notify
 
   const set = (patch: Partial<Fields>) => setFields((f) => ({ ...f, ...patch }));
   const chip = (active: boolean) =>
-    `min-h-11 rounded-full border px-4 text-sm font-medium ${active ? "border-accent bg-pill text-accent" : "border-border text-text hover:bg-pill"}`;
+    `min-h-12 rounded-full border px-4 text-sm font-medium ${active ? "border-accent bg-pill text-accent" : "border-border text-text hover:bg-pill"}`;
   const errorKey = storageFailed
     ? "errGeneric"
     : state.status === "error"
@@ -284,7 +285,7 @@ function Card({ initial, uid, date: cardDate, notify }: Props & { notify: Notify
       fields.stress !== "" ? t("stressChip", { level: Number(fields.stress) }) : null,
     ].filter(Boolean);
     return (
-      <section className="rounded-3xl border border-border bg-surface p-6" data-testid="checkin-summary">
+      <section className={JOURNAL_CARD} data-testid="checkin-summary">
         <h2 className="text-lg font-medium text-text">{t("checkinTitle")}</h2>
         <ul className="mt-3 flex flex-wrap gap-2">
           {summary.map((label) => (
@@ -304,24 +305,39 @@ function Card({ initial, uid, date: cardDate, notify }: Props & { notify: Notify
   }
 
   return (
-    <form onSubmit={submit} className="rounded-3xl border border-border bg-surface p-6" data-testid="checkin-card">
+    <form onSubmit={submit} className={JOURNAL_CARD} data-testid="checkin-card">
       <fieldset>
         <legend className="text-lg font-medium text-text">{t("checkinTitle")}</legend>
-        <div className="mt-4 grid grid-cols-5 gap-2" role="radiogroup" aria-label={t("checkinTitle")}>
-          {MOODS.map((mood) => (
-            <button
-              key={mood}
-              type="button"
-              role="radio"
-              aria-checked={fields.mood === mood}
-              data-testid={`checkin-mood-${mood}`}
-              onClick={() => set({ mood })}
-              className={`flex flex-col items-center gap-2 rounded-2xl p-2 text-xs font-medium ${fields.mood === mood ? "bg-pill text-accent" : "text-muted hover:bg-pill"}`}
-            >
-              <span className={`h-9 w-9 rounded-full ${MOOD_COLOURS[mood - 1]} ${fields.mood === mood ? "ring-2 ring-accent ring-offset-2" : ""}`} aria-hidden="true" />
-              {t(`mood${mood}` as "mood1")}
-            </button>
-          ))}
+        {/* Narrow or large text (decision 105, app parity): every face stays a
+            48 px target and the row wraps rather than shrink; when the labels
+            don't fit (under 22rem, which grows with the text size) they become
+            screen-reader text, so each face keeps its name, and the chosen
+            mood's label shows under the row instead. */}
+        <div className="@container mt-4">
+          <div className={MOOD_ROW} role="radiogroup" aria-label={t("checkinTitle")}>
+            {MOODS.map((mood) => (
+              <button
+                key={mood}
+                type="button"
+                role="radio"
+                aria-checked={fields.mood === mood}
+                data-testid={`checkin-mood-${mood}`}
+                onClick={() => set({ mood })}
+                className={`${MOOD_FACE} ${fields.mood === mood ? "bg-pill text-accent" : "text-muted hover:bg-pill"}`}
+              >
+                <span className={`h-9 w-9 shrink-0 rounded-full ${MOOD_COLOURS[mood - 1]} ${fields.mood === mood ? "ring-2 ring-accent ring-offset-2" : ""}`} aria-hidden="true" />
+                <span className="sr-only @min-[22rem]:not-sr-only" data-testid={`checkin-mood-label-${mood}`}>
+                  {t(`mood${mood}` as "mood1")}
+                </span>
+              </button>
+            ))}
+          </div>
+          {fields.mood !== null && (
+            // Visual only: the selected radio already says it to screen readers.
+            <p aria-hidden="true" data-testid="checkin-mood-selected" className="mt-2 text-center text-sm font-medium text-accent @min-[22rem]:hidden">
+              {t(`mood${fields.mood}` as "mood1")}
+            </p>
+          )}
         </div>
       </fieldset>
 
@@ -329,7 +345,7 @@ function Card({ initial, uid, date: cardDate, notify }: Props & { notify: Notify
         <div className="mt-6 space-y-6">
           <fieldset>
             <legend className="text-sm font-medium text-text">
-              {t("sleepTitle")} <span className="font-normal text-muted">· {t("optional")}</span>
+              {t("sleepTitle")} <span className="ml-2 font-normal text-muted">{t("optional")}</span>
             </legend>
             <div className="mt-2 flex flex-wrap items-center gap-2">
               <select
@@ -363,7 +379,7 @@ function Card({ initial, uid, date: cardDate, notify }: Props & { notify: Notify
 
           <fieldset>
             <legend className="text-sm font-medium text-text">
-              {t("exerciseTitle")} <span className="font-normal text-muted">· {t("optional")}</span>
+              {t("exerciseTitle")} <span className="ml-2 font-normal text-muted">{t("optional")}</span>
             </legend>
             <div className="mt-2 flex flex-wrap gap-2">
               {EXERCISE_MINUTES.map((m) => (
@@ -383,9 +399,9 @@ function Card({ initial, uid, date: cardDate, notify }: Props & { notify: Notify
 
           <fieldset>
             <legend className="text-sm font-medium text-text">
-              {t("stressTitle")} <span className="font-normal text-muted">· {t("optional")}</span>
+              {t("stressTitle")} <span className="ml-2 font-normal text-muted">{t("optional")}</span>
             </legend>
-            <div className="mt-2 flex items-start gap-2">
+            <div className="mt-2 flex flex-wrap items-start gap-2">
               {STRESS_LEVELS.map((s) => (
                 <div key={s} className="flex flex-col items-center gap-1">
                   <button
@@ -393,7 +409,7 @@ function Card({ initial, uid, date: cardDate, notify }: Props & { notify: Notify
                     aria-pressed={fields.stress === String(s)}
                     data-testid={`checkin-stress-${s}`}
                     onClick={() => set({ stress: fields.stress === String(s) ? "" : String(s) })}
-                    className={`${chip(fields.stress === String(s))} w-11 px-0`}
+                    className={`${chip(fields.stress === String(s))} min-w-12 px-0`}
                   >
                     {s}
                   </button>
@@ -414,7 +430,7 @@ function Card({ initial, uid, date: cardDate, notify }: Props & { notify: Notify
         type="submit"
         data-testid="checkin-save"
         disabled={fields.mood === null || pending}
-        className="mt-6 inline-flex min-h-12 min-w-[160px] items-center justify-center rounded-full bg-accent px-8 font-medium text-on-accent hover:opacity-90 disabled:opacity-50"
+        className={`mt-6 ${PRIMARY_SAVE}`}
       >
         {t("checkinSave")}
       </button>
