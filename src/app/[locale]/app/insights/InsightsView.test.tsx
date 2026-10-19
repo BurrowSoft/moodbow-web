@@ -33,6 +33,10 @@ describe("InsightsView", () => {
   it("range tabs (Week current), with the spec's test ids", () => {
     renderView([]);
     expect(screen.getByTestId("insights-range-week")).toHaveAttribute("aria-current", "page");
+    // The selected segment in the rose accent with on-accent text (colour-roles §3, UX).
+    expect(screen.getByTestId("insights-range-week").classList.contains("bg-accent")).toBe(true);
+    expect(screen.getByTestId("insights-range-week").classList.contains("text-on-accent")).toBe(true);
+    expect(screen.getByTestId("insights-range-month").classList.contains("bg-accent")).toBe(false);
     expect(screen.getByTestId("insights-range-month")).toHaveAttribute("href", "/app/insights?range=month");
     expect(screen.getByTestId("insights-range-3months")).toHaveTextContent(messages.insights.range3Months);
   });

@@ -10,6 +10,7 @@ import { dateLocale } from "@/lib/journal/today";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { tabMetadata } from "../TabPlaceholder";
 import { loadTimeline } from "./actions";
+import { segment } from "@/lib/ui/journalLayout";
 import { TimelineList } from "./TimelineList";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/app/timeline">): Promise<Metadata> {
@@ -36,8 +37,7 @@ export default async function TimelinePage({ params, searchParams }: PageProps<"
 
   const t = await getTranslations("timeline");
   const dateLocaleTag = dateLocale(locale, (await headers()).get("accept-language"), me.profile?.country ?? null);
-  const filter = (active: boolean) =>
-    `inline-flex min-h-11 items-center rounded-full px-4 text-sm font-medium ${active ? "bg-pill text-accent" : "text-muted hover:bg-pill"}`;
+  const filter = segment;
 
   return (
     <section>
