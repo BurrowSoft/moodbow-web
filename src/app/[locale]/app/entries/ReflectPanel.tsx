@@ -157,9 +157,11 @@ export function ReflectPanel({ entryId, initial, balance, country }: { entryId: 
         {t("reflectButton")}
       </h2>
       {reflection && (
-        <div data-testid="reflect-result">
+        // Moodbow's voice (decision 150): its own colour and surface, never a
+        // mood colour and never the entry's mood.
+        <div data-testid="reflect-result" className="rounded-2xl border-l-4 border-voice bg-voice-surface p-4">
           {reflection.tier === "lite" && (
-            <span data-testid="reflect-lite" className="mb-2 inline-block rounded-full bg-pill px-3 py-0.5 text-xs font-medium text-accent">
+            <span data-testid="reflect-lite" className="mb-2 inline-block rounded-full border border-voice px-3 py-0.5 text-xs font-medium text-voice">
               {t("reflectLiteBadge")}
             </span>
           )}

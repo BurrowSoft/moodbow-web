@@ -22,6 +22,11 @@
   --pill: #f9eaec;
   --draft-bg: #fff4d6;
   --draft-text: #5c4400;
+  /* Moodbow's voice (reflections, the Lite badge; decision 150): the brand
+     accent on a light tint of it, never a mood colour and never following
+     an entry's mood. */
+  --voice: var(--accent);
+  --voice-surface: #fbeff3;
   color-scheme: light;
 }
 
@@ -35,11 +40,15 @@
     --border: #463c56;
     --text: var(--cream);
     --muted: #c9c1d4;
-    --accent: var(--rose);
+    --accent: #d88aa6;
     --on-accent: var(--ink);
     --pill: #382c43;
     --draft-bg: #4a3d14;
     --draft-text: #ffe9a8;
+    --voice: var(--accent);
+    /* 6% of the accent over the card: the label stays ≥ 4.5:1 (12% gave
+       4.13:1). */
+    --voice-surface: color-mix(in srgb, var(--accent) 6%, var(--surface));
     color-scheme: dark;
   }
   :root:not([data-theme="light"]) .logo-light {
@@ -52,11 +61,13 @@
   --border: #463c56;
   --text: var(--cream);
   --muted: #c9c1d4;
-  --accent: var(--rose);
+  --accent: #d88aa6;
   --on-accent: var(--ink);
   --pill: #382c43;
   --draft-bg: #4a3d14;
   --draft-text: #ffe9a8;
+  --voice: var(--accent);
+  --voice-surface: color-mix(in srgb, var(--accent) 6%, var(--surface));
   color-scheme: dark;
 }
 :root[data-theme="dark"] .logo-light {
@@ -88,6 +99,8 @@
   --color-lavender: var(--lavender);
   --color-draft-bg: var(--draft-bg);
   --color-draft-text: var(--draft-text);
+  --color-voice: var(--voice);
+  --color-voice-surface: var(--voice-surface);
   /* Poppins for Latin; Thai glyphs (which Poppins lacks) fall through to
      Prompt. */
   --font-sans: var(--font-poppins), var(--font-prompt), ui-sans-serif, system-ui, sans-serif;

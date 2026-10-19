@@ -71,7 +71,7 @@ export function InsightsView({ rows, today, range, share }: { rows: InsightRow[]
               {s.enough && s.average !== null ? (
                 <>
                   <div className="mt-3">
-                    <Chart kind={chart.kind} points={s.points} min={chart.min} max={chart.max} labelledBy={`${titleId} ${summaryId}`} />
+                    <Chart kind={chart.kind} points={s.points} min={chart.min} max={chart.max} labelledBy={`${titleId} ${summaryId}`} neutral={metric === "mood"} />
                   </div>
                   <div id={summaryId} className="mt-3 space-y-1 text-sm">
                     <p className="font-medium text-text" data-testid={`insights-average-${metric}`}>
