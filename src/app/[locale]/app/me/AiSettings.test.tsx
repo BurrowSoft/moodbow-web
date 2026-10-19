@@ -93,13 +93,19 @@ describe("Me → AI", () => {
 
   it("tone saves on change; focus chips save the whole set in a fixed order", async () => {
     renderIt(true);
-    fireEvent.click(screen.getByTestId("me-ai-tone-direct"));
+    // Controls are disabled while a save is in flight: wait until it's done.
+    const click = async (id: string) => {
+      const el = screen.getByTestId(id);
+      await waitFor(() => expect(el).toBeEnabled());
+      fireEvent.click(el);
+    };
+    await click("me-ai-tone-direct");
     await waitFor(() => expect(saveTone).toHaveBeenCalledWith("direct"));
-    fireEvent.click(screen.getByTestId("me-ai-focus-self_esteem"));
+    await click("me-ai-focus-self_esteem");
     await waitFor(() => expect(saveFocusAreas).toHaveBeenLastCalledWith(["sleep", "self_esteem"]));
-    fireEvent.click(screen.getByTestId("me-ai-focus-stress"));
+    await click("me-ai-focus-stress");
     await waitFor(() => expect(saveFocusAreas).toHaveBeenLastCalledWith(["sleep", "stress", "self_esteem"]));
-    fireEvent.click(screen.getByTestId("me-ai-focus-sleep"));
+    await click("me-ai-focus-sleep");
     await waitFor(() => expect(saveFocusAreas).toHaveBeenLastCalledWith(["stress", "self_esteem"]));
   });
 
