@@ -53,7 +53,14 @@ export default async function proxy(req: NextRequest) {
       const prefix = (routing.locales as readonly string[]).includes(first) && first !== routing.defaultLocale ? `/${first}` : "";
       url.pathname = `${prefix}/sign-in`;
       url.search = `?signed_out=${signedOut === "account_gone" ? "account" : "session"}`;
-      res = NextResponse.redirect(url, 303);
+      // A server action's request (a form on a signed-in page) can't follow
+      // a page redirect: fetch would follow it to the sign-in HTML and Next
+      // reports "an unexpected response" (the form shows its generic error,
+      // or a check-in is kept as offline: Web Tester, #12). Answer it the way
+      // Next answers an action that redirects, so the client navigates.
+      res = req.headers.has("next-action")
+        ? new NextResponse(null, { status: 200, headers: { "x-action-redirect": `${url.pathname}${url.search};replace`, "content-type": "text/plain" } })
+        : NextResponse.redirect(url, 303);
     } else {
       res = intl(req);
     }
