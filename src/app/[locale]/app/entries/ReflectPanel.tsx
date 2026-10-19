@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Dialog, dialogButton } from "@/components/Dialog";
-import { IN_PROGRESS_LIMIT_MS, IN_PROGRESS_RETRY_MS, type Reflection, type ReflectErrorKey } from "@/lib/journal/reflect";
+import { IN_PROGRESS_LIMIT_MS, IN_PROGRESS_RETRY_MS, REFLECT_CLIENT_DEADLINE_MS, type Reflection, type ReflectErrorKey, type ReflectResult } from "@/lib/journal/reflect";
 import { deleteReflection, reflectOnEntry } from "./reflectActions";
 
 type Phase =
@@ -13,6 +13,23 @@ type Phase =
   | { kind: "error"; message: ReflectErrorKey }
   // No answer reached the browser: Try again resends the same tap.
   | { kind: "offline" };
+
+// One call, or no answer after ms (a hung request): the late answer, if
+// any, is ignored; the same key is resent on Try again.
+const withDeadline = (call: Promise<ReflectResult>, ms: number): Promise<ReflectResult> =>
+  new Promise((done, fail) => {
+    const timer = window.setTimeout(() => done({ status: "no_answer" }), ms);
+    call.then(
+      (r) => {
+        window.clearTimeout(timer);
+        done(r);
+      },
+      (e) => {
+        window.clearTimeout(timer);
+        fail(e);
+      },
+    );
+  });
 
 const wait = (ms: number) => new Promise((done) => window.setTimeout(done, ms));
 const isRedirect = (e: unknown) => typeof (e as { digest?: unknown })?.digest === "string" && (e as { digest: string }).digest.startsWith("NEXT_REDIRECT");
@@ -53,7 +70,7 @@ export function ReflectPanel({ entryId, initial, balance }: { entryId: string; i
     for (;;) {
       let result;
       try {
-        result = await reflectOnEntry(entryId, key);
+        result = await withDeadline(reflectOnEntry(entryId, key), REFLECT_CLIENT_DEADLINE_MS);
       } catch (e) {
         if (isRedirect(e)) throw e;
         if (alive.current) setPhase({ kind: "offline" });

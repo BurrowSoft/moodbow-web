@@ -3,7 +3,7 @@
 import { FunctionsHttpError } from "@supabase/supabase-js";
 import { getLocale } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
-import { isUuid, reflectOutcome, type Reflection, type ReflectResult } from "@/lib/journal/reflect";
+import { isUuid, REFLECT_SERVER_DEADLINE_MS, reflectOutcome, type Reflection, type ReflectResult } from "@/lib/journal/reflect";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 const toSignIn = async () => redirect({ href: "/sign-in", locale: await getLocale() });
@@ -20,10 +20,19 @@ export async function reflectOnEntry(entryId: string, clientKey: string): Promis
   const { data: auth } = await supabase.auth.getSession();
   const token = auth.session?.access_token;
   if (!token) return toSignIn();
-  const { data, error } = await supabase.functions.invoke("reflect", {
-    body: { entry_id: entryId, client_key: clientKey },
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  let answer: Awaited<ReturnType<typeof supabase.functions.invoke>>;
+  try {
+    answer = await supabase.functions.invoke("reflect", {
+      body: { entry_id: entryId, client_key: clientKey },
+      headers: { Authorization: `Bearer ${token}` },
+      // A held call ends here as no answer (it may still finish: the same
+      // key then replays it).
+      timeout: REFLECT_SERVER_DEADLINE_MS,
+    });
+  } catch {
+    return { status: "no_answer" };
+  }
+  const { data, error } = answer;
   if (error) {
     if (error instanceof FunctionsHttpError) {
       const response = error.context as Response;

@@ -84,6 +84,23 @@ describe("ReflectPanel", () => {
     expect(screen.getByTestId("reflect-body")).toBeInTheDocument();
   });
 
+  it("a call that never answers: after 55 s, errOffline; Try again resends the same key (Web Tester, #35)", async () => {
+    vi.useFakeTimers();
+    reflectOnEntry.mockReturnValueOnce(new Promise(() => {})).mockResolvedValueOnce(ok());
+    renderIt();
+    fireEvent.click(screen.getByTestId("reflect-button"));
+    await act(async () => vi.advanceTimersByTimeAsync(54_999));
+    expect(screen.getByTestId("reflect-status")).toHaveTextContent(m.reflectLoading);
+    await act(async () => vi.advanceTimersByTimeAsync(1));
+    expect(screen.getByTestId("reflect-error")).toHaveTextContent(m.errOffline);
+    expect(screen.getByTestId("reflect-button")).toBeEnabled();
+    fireEvent.click(screen.getByTestId("reflect-retry"));
+    await settle();
+    expect(keys()).toHaveLength(2);
+    expect(keys()[1]).toBe(keys()[0]);
+    expect(screen.getByTestId("reflect-body")).toBeInTheDocument();
+  });
+
   it("no answer from the function (no_answer): errOffline and the same key on Try again; a final error after it means a new key next tap", async () => {
     reflectOnEntry.mockResolvedValueOnce({ status: "no_answer" }).mockResolvedValueOnce({ status: "error", message: "reflectError" }).mockResolvedValueOnce(ok());
     renderIt();

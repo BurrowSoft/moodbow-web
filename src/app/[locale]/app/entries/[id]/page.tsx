@@ -12,6 +12,10 @@ import { EntryEditor } from "../EntryEditor";
 import { ReflectPanel } from "../ReflectPanel";
 import { tabMetadata } from "../../TabPlaceholder";
 
+// The Reflect server action runs in this page's function: room for the
+// reflect call's 45 s deadline (REFLECT_SERVER_DEADLINE_MS).
+export const maxDuration = 60;
+
 export async function generateMetadata({ params }: PageProps<"/[locale]/app/entries/[id]">): Promise<Metadata> {
   return tabMetadata("tabToday", (await params).locale);
 }
