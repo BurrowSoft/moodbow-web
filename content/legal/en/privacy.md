@@ -17,8 +17,8 @@ Moodbow is a private journal made by Vitor Ribeiro Carvalho, trading as BurrowSo
 
 ### 1. What we collect
 **Your account:** your email address, your password (stored only as a secure hash), and when you agreed to our Terms and this policy, and confirmed you're 18 or older.
-**Your journal:** the entries you write, your daily check-ins (mood, sleep, exercise, stress), the dates they belong to, and which entries you mark as moments.
-**Your settings:** language, country, time zone, reminder time, {pending:appearance_setting}appearance, {/pending}and your AI choices (on or off, tone, focus areas).
+**Your journal:** the entries you write, your daily check-ins (mood, sleep, movement (minutes of exercise), stress), the dates they belong to, and which entries you mark as moments.
+**Your settings:** language, country, time zone, reminder time, and your AI choices (on or off, tone, focus areas).
 **AI content (only if AI is on):** the reflections and reports the AI writes for you{pending:ai_memory}, and the short facts Moodbow remembers about you, which you can see, edit and delete in Me → What Moodbow remembers{/pending}.
 **AI usage:** for each AI request, the feature, the model, the number of tokens, the cost and the credits used. Not the text of your entries or of the AI's answer.
 {pending:purchases}**Purchases:** if you buy AI credits, Google Play or the App Store handles the payment. We receive a purchase reference and the number of credits, never your card details.{/pending}
@@ -26,7 +26,7 @@ Moodbow is a private journal made by Vitor Ribeiro Carvalho, trading as BurrowSo
 
 **What stays only on your device:** unsent drafts{pending:app_lock}, your app-lock PIN{/pending}{pending:share_cards}, and the share cards you create. Share cards are made on your device and only leave it if you share them yourself{/pending}.
 
-**Technical logs:** like almost every online service, our hosting providers record IP addresses and device or browser information when you connect, for security and to fix problems. They keep these logs for a limited time (see §4).
+**Technical logs:** like almost every online service, our hosting providers record IP addresses and device or browser information when you connect, for security and to fix problems. They keep these logs for a limited time (see §4). We also keep daily totals of AI use (how many reflections were made that day and what they cost us), with no link to any person, so we can keep costs under control.
 
 We don't collect your name, contacts, precise location, or advertising identifiers, and we don't use advertising trackers.
 
@@ -84,3 +84,5 @@ If we change this policy in a way that matters, we'll update the date at the top
 
 ### 9. Contact
 Vitor Ribeiro Carvalho, trading as BurrowSoft, 297 Moo 1, Baan Sanian, Mueang Nan, Nan 55000, Thailand · support@moodbow.com
+
+---
