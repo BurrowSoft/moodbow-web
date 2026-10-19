@@ -246,6 +246,15 @@ test.describe("auth links", () => {
     await expect(page.getByRole("button")).toHaveCount(0);
   });
 
+  test("every page: origin-only referrers (decision 79), never framed, no sniffing", async ({ request }) => {
+    for (const path of ["/", "/support", "/sign-in", "/welcome", "/email-confirmed?code=abc"]) {
+      const res = await request.get(path, { maxRedirects: 0 });
+      expect(res.headers()["referrer-policy"], path).toBe("strict-origin");
+      expect(res.headers()["x-frame-options"], path).toBe("DENY");
+      expect(res.headers()["x-content-type-options"], path).toBe("nosniff");
+    }
+  });
+
   test("/auth/confirm: GET is a plain page, origin-only referrers, noindex", async ({ request, page }) => {
     const res = await request.get("/auth/confirm?token_hash=a1b2c3d4e5f60718293a4b5c6d7e8f90&type=signup", { maxRedirects: 0 });
     expect(res.status()).toBe(200);

@@ -21,19 +21,18 @@ const nextConfig: NextConfig = {
         headers: [
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "X-Frame-Options", value: "DENY" },
-          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          // strict-origin everywhere: every request (to us or anyone,
+          // fonts, scripts, the visit counter's beacon) carries only the
+          // bare origin as its referrer, never a page address. Ours can hold
+          // single-use tokens (/auth/confirm?token_hash=, /email-confirmed
+          // ?code=), entry ids, days and ?date= (decision 79 + reviewer,
+          // #21: the counter reports document.referrer, which its
+          // beforeSend never sees). Not no-referrer: then Chrome sends
+          // "Origin: null" on a no-JS form POST and Next rejects the server
+          // action (500).
+          { key: "Referrer-Policy", value: "strict-origin" },
         ],
       },
-      // Auth links carry single-use tokens in the query (overrides the rule
-      // above; the last match wins). strict-origin: every request from these
-      // pages (incl. their own fonts and scripts) sends only the bare origin,
-      // never the URL with the token. Not no-referrer: then Chrome sends
-      // "Origin: null" on a no-JS form POST and Next rejects the server
-      // action (500).
-      ...["/auth/:path*", "/:locale/auth/:path*", "/email-confirmed", "/:locale/email-confirmed"].map((source) => ({
-        source,
-        headers: [{ key: "Referrer-Policy", value: "strict-origin" }],
-      })),
       // Images linked from emails (public/email): the path never changes, since
       // sent emails keep pointing at it. 30 days of caching; a new logo would
       // replace the file in place.
