@@ -40,7 +40,7 @@ describe("reflectOnEntry", () => {
       reflection: { id: REFLECTION.id, body: REFLECTION.body, tier: "full", created_at: REFLECTION.created_at },
       balance: 691,
     });
-    expect(invoke).toHaveBeenCalledWith("reflect", { body: { entry_id: ENTRY, client_key: KEY }, headers: { Authorization: "Bearer jwt-123" } });
+    expect(invoke).toHaveBeenCalledWith("reflect", { body: { entry_id: ENTRY, client_key: KEY }, headers: { Authorization: "Bearer jwt-123" }, timeout: 45_000 });
   });
 
   it("maps every contract error to what the page shows", async () => {
@@ -76,6 +76,11 @@ describe("reflectOnEntry", () => {
     invoke.mockResolvedValueOnce({ data: null, error: new FunctionsHttpError(new Response("<html>504 Gateway Time-out</html>", { status: 504, headers: { "content-type": "text/html" } })) });
     expect(await reflectOnEntry(ENTRY, KEY)).toEqual({ status: "no_answer" });
     invoke.mockResolvedValueOnce({ data: null, error: new FunctionsHttpError(new Response(JSON.stringify({ message: "x" }), { status: 546 })) });
+    expect(await reflectOnEntry(ENTRY, KEY)).toEqual({ status: "no_answer" });
+  });
+
+  it("a held call ends at the 45 s deadline, or invoke throws: no_answer (Web Tester, #35)", async () => {
+    invoke.mockRejectedValueOnce(new DOMException("The operation was aborted.", "AbortError"));
     expect(await reflectOnEntry(ENTRY, KEY)).toEqual({ status: "no_answer" });
   });
 

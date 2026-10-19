@@ -48,3 +48,11 @@ export function reflectOutcome(code: unknown): Exclude<ReflectResult, { status: 
 // (reflect.md: retry the same client_key after ~2 s, up to ~30 s).
 export const IN_PROGRESS_RETRY_MS = 2_000;
 export const IN_PROGRESS_LIMIT_MS = 30_000;
+
+// How long one call may take before it counts as no answer (the same key
+// is then safe to resend; reflect.md). The server gives the function 45 s;
+// the browser gives the whole server action 55 s, in case the request
+// between them hangs (Web Tester, #35: a held call showed "Reading your
+// entry…" forever).
+export const REFLECT_SERVER_DEADLINE_MS = 45_000;
+export const REFLECT_CLIENT_DEADLINE_MS = 55_000;
