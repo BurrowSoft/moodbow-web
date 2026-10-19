@@ -35,6 +35,8 @@ const rpcAnswers = (upsert: { data: unknown; error: unknown }) =>
 beforeEach(() => {
   rpc.mockReset();
   maybeSingle.mockReset();
+  // The day is empty unless a test says otherwise (a no-lock save reads it first).
+  maybeSingle.mockResolvedValue({ data: null, error: null });
 });
 
 describe("saveCheckIn", () => {
@@ -99,10 +101,12 @@ describe("saveCheckIn", () => {
       expect(await saveCheckIn(idle, form(pending))).toEqual({ status: "error", error: "generic" });
     });
 
-    it("the live card's first check-in doesn't read first (last write wins, as on the app)", async () => {
+    it("the live card's first check-in reads first too (agreed with Mobile Dev): another device's day is never overwritten", async () => {
       rpcAnswers({ data: ROW, error: null });
-      await saveCheckIn(idle, form({ ...pending, from_pending: "" }));
-      expect(maybeSingle).not.toHaveBeenCalled();
+      const theirs = { ...ROW, mood: 1 };
+      maybeSingle.mockResolvedValue({ data: theirs, error: null });
+      expect(await saveCheckIn(idle, form({ ...pending, from_pending: "" }))).toEqual({ status: "error", error: "stale", checkIn: theirs });
+      expect(rpc).not.toHaveBeenCalledWith("upsert_check_in", expect.anything());
     });
   });
 
@@ -113,7 +117,7 @@ describe("saveCheckIn", () => {
   });
 
   it("an invalid card never reaches the RPC", async () => {
-    expect(await saveCheckIn(idle, form({ mood: "9" }))).toEqual({ status: "error", error: "generic" });
+    expect(await saveCheckIn(idle, form({ mood: "9" }))).toEqual({ status: "error", error: "invalid" });
     expect(rpc).not.toHaveBeenCalled();
   });
 

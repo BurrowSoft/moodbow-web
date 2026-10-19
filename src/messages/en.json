@@ -201,6 +201,7 @@
     "stressHigh": "High",
     "stressChip": "Stress {level}/5",
     "offlineCheckinSuperseded": "Your offline check-in for {date} wasn't saved, because that day was updated on another device. You're seeing the latest version.",
+    "offlineCheckinRejected": "A check-in you saved offline for {date} couldn't be saved. Please add it again.",
     "dismiss": "Got it",
     "checkinSave": "Save",
     "checkinSaved": "Saved",
@@ -235,12 +236,39 @@
     "entryDeletedTitle": "This entry was deleted on another device",
     "entryDeletedBody": "Your version is still here. Do you want to keep it?",
     "entryDeletedKeep": "Keep it",
-    "entryDeletedDiscard": "Delete it"
+    "entryDeletedDiscard": "Delete it",
+    "momentBadge": "Moment"
   },
   "notFound": {
     "title": "Page not found",
     "body": "This page doesn't exist or has moved.",
     "home": "Go to the home page"
+  },
+  "timeline": {
+    "timelineTitle": "Timeline",
+    "timelineAll": "All days",
+    "timelineMoments": "Moments",
+    "timelineEmptyTitle": "Your story starts here",
+    "timelineEmptyBody": "Check in or write about your day, and it will appear here.",
+    "timelineMomentsEmpty": "No moments yet. Tap ★ on an entry to keep it here.",
+    "dayNoCheckin": "No check-in this day",
+    "dayAddCheckin": "Add a check-in",
+    "dayAddEntry": "Add an entry"
+  },
+  "me": {
+    "meYourData": "Your data",
+    "meExport": "Export my data",
+    "meExportBody": "A file with everything you've written and logged.",
+    "meExportReady": "Your export is ready",
+    "meDelete": "Delete account",
+    "deleteTitle": "Delete your account?",
+    "deleteBody": "This deletes your entries, check-ins, AI reflections and reports, what Moodbow remembers, and your settings, right away. It can't be undone.",
+    "deleteCredits": "You'll also lose your {credits, plural, one {# AI credit} other {# AI credits}}.",
+    "deleteExportFirst": "Export my data first",
+    "deleteTypeConfirm": "Type DELETE to confirm",
+    "deleteConfirm": "Delete everything",
+    "deleteDone": "Your account and everything in it were deleted.",
+    "cancel": "Cancel"
   },
   "insights": {
     "insightsTitle": "Insights",
@@ -257,20 +285,5 @@
     "chartChangeDown": "↓ {value} vs the previous {range, select, week {week} month {month} other {3 months}}",
     "chartNoChange": "Same as the previous {range, select, week {week} month {month} other {3 months}}",
     "chartNotEnough": "A few more check-ins and your chart will appear."
-  },
-  "me": {
-    "meYourData": "Your data",
-    "meExport": "Export my data",
-    "meExportBody": "A file with everything you've written and logged.",
-    "meExportReady": "Your export is ready",
-    "meDelete": "Delete account",
-    "deleteTitle": "Delete your account?",
-    "deleteBody": "This deletes your entries, check-ins, AI reflections and reports, what Moodbow remembers, and your settings, right away. It can't be undone.",
-    "deleteCredits": "You'll also lose your {credits, plural, one {# AI credit} other {# AI credits}}.",
-    "deleteExportFirst": "Export my data first",
-    "deleteTypeConfirm": "Type DELETE to confirm",
-    "deleteConfirm": "Delete everything",
-    "deleteDone": "Your account and everything in it were deleted.",
-    "cancel": "Cancel"
   }
 }
