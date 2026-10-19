@@ -353,17 +353,27 @@ describe("EntryEditor: a restored new draft that was already saved (reviewer #12
 });
 
 describe("Dialog focus", () => {
-  it("the leave dialog starts on Keep draft (never on Discard), and Tab stays inside", () => {
+  it("the leave dialog starts on Keep editing (the safe choice, decision 143), and Tab stays inside", () => {
     renderEditor();
     type("x");
     fireEvent.click(screen.getByTestId("entry-cancel"));
-    const keep = screen.getByTestId("entry-keep-draft");
+    const editing = screen.getByTestId("entry-keep-editing");
     const discard = screen.getByTestId("entry-discard");
-    expect(keep).toHaveFocus();
+    expect(editing).toHaveFocus();
     fireEvent.keyDown(document, { key: "Tab" });
     expect(discard).toHaveFocus();
     fireEvent.keyDown(document, { key: "Tab", shiftKey: true });
-    expect(keep).toHaveFocus();
+    expect(editing).toHaveFocus();
+  });
+
+  it("Keep editing closes the dialog and stays on the text, nothing saved or discarded", () => {
+    renderEditor();
+    type("still writing");
+    fireEvent.click(screen.getByTestId("entry-cancel"));
+    fireEvent.click(screen.getByTestId("entry-keep-editing"));
+    expect(screen.queryByTestId("entry-leave-dialog")).toBeNull();
+    expect(push).not.toHaveBeenCalled();
+    expect(screen.getByTestId("entry-text")).toHaveValue("still writing");
   });
 
   it("the delete dialog starts on Cancel; focus goes back to Delete when it closes", () => {
@@ -446,6 +456,29 @@ describe("EntryEditor: the safety card after a flagged save (M8, decisions 124/1
     fireEvent.click(screen.getByTestId("entry-save"));
     await waitFor(() => expect(push).toHaveBeenCalledWith("/app"));
     expect(screen.queryByTestId("safety-card")).toBeNull();
+  });
+});
+
+describe("EntryEditor for screen readers (a11y pass)", () => {
+  it("a heading: New entry / Edit entry", () => {
+    const view = renderEditor();
+    expect(screen.getByRole("heading", { level: 1, name: m.entryNewTitle })).toBeInTheDocument();
+    view.unmount();
+    renderEditor(ENTRY);
+    expect(screen.getByRole("heading", { level: 1, name: m.entryEditTitle })).toBeInTheDocument();
+  });
+
+  it("too long → the text is invalid and described by the message; a future date → the date is", () => {
+    renderEditor();
+    type("x".repeat(20_001));
+    expect(screen.getByTestId("entry-text")).toHaveAttribute("aria-invalid", "true");
+    expect(screen.getByTestId("entry-text")).toHaveAttribute("aria-describedby", "entry-error");
+    expect(screen.getByTestId("entry-date")).not.toHaveAttribute("aria-invalid");
+    type("fine");
+    expect(screen.getByTestId("entry-text")).not.toHaveAttribute("aria-invalid");
+    fireEvent.change(screen.getByTestId("entry-date"), { target: { value: "2026-10-09" } });
+    expect(screen.getByTestId("entry-date")).toHaveAttribute("aria-invalid", "true");
+    expect(screen.getByTestId("entry-date")).toHaveAttribute("aria-describedby", "entry-error");
   });
 });
 

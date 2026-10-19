@@ -59,6 +59,10 @@ export function ReflectPanel({ entryId, initial, balance, country }: { entryId: 
   const [confirming, setConfirming] = useState(false);
   const [deleteFailed, setDeleteFailed] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  // What the status line says after "Reading your entry…": the reply is
+  // there, or it was deleted (they arrived silently before; a11y pass).
+  const [said, setSaid] = useState<"reflectReady" | "reflectDeleted" | null>(null);
+  const reflectButton = useRef<HTMLButtonElement>(null);
   const lastBalance = useRef(balance);
   // The current tap's key, kept for a retry after no answer.
   const tapKey = useRef<string | null>(null);
@@ -72,6 +76,7 @@ export function ReflectPanel({ entryId, initial, balance, country }: { entryId: 
 
   const run = async (key: string) => {
     tapKey.current = key;
+    setSaid(null);
     setPhase({ kind: "loading" });
     const started = Date.now();
     for (;;) {
@@ -110,6 +115,7 @@ export function ReflectPanel({ entryId, initial, balance, country }: { entryId: 
         return;
       }
       setReflection(result.reflection);
+      setSaid("reflectReady");
       if (result.balance !== null) {
         setCreditsOut(lastBalance.current > 0 && result.balance <= 0);
         lastBalance.current = result.balance;
@@ -120,7 +126,7 @@ export function ReflectPanel({ entryId, initial, balance, country }: { entryId: 
   };
 
   const tap = () => {
-    if (phase.kind === "loading") return;
+    if (phase.kind === "loading" || deleting) return;
     void run(crypto.randomUUID());
   };
   const retrySameTap = () => {
@@ -132,6 +138,7 @@ export function ReflectPanel({ entryId, initial, balance, country }: { entryId: 
   const remove = async () => {
     if (!reflection || deleting) return;
     setConfirming(false);
+    setSaid(null);
     setDeleting(true);
     setDeleteFailed(false);
     let ok = false;
@@ -145,6 +152,9 @@ export function ReflectPanel({ entryId, initial, balance, country }: { entryId: 
     if (ok) {
       setReflection(null);
       setCreditsOut(false);
+      setSaid("reflectDeleted");
+      // Delete reflection is gone with it: focus Reflect instead.
+      window.setTimeout(() => reflectButton.current?.focus(), 0);
     } else setDeleteFailed(true);
   };
 
@@ -157,9 +167,11 @@ export function ReflectPanel({ entryId, initial, balance, country }: { entryId: 
         {t("reflectButton")}
       </h2>
       {reflection && (
-        <div data-testid="reflect-result">
+        // Moodbow's voice (decision 150): its own colour and surface, never a
+        // mood colour and never the entry's mood.
+        <div data-testid="reflect-result" className="rounded-2xl border-l-4 border-voice bg-voice-surface p-4">
           {reflection.tier === "lite" && (
-            <span data-testid="reflect-lite" className="mb-2 inline-block rounded-full bg-pill px-3 py-0.5 text-xs font-medium text-accent">
+            <span data-testid="reflect-lite" className="mb-2 inline-block rounded-full border border-voice px-3 py-0.5 text-xs font-medium text-voice">
               {t("reflectLiteBadge")}
             </span>
           )}
@@ -182,9 +194,9 @@ export function ReflectPanel({ entryId, initial, balance, country }: { entryId: 
           <button
             type="button"
             data-testid="reflect-delete"
-            disabled={loading || deleting}
-            onClick={() => setConfirming(true)}
-            className="mt-4 font-medium text-accent underline underline-offset-4 disabled:opacity-50"
+            aria-disabled={loading || deleting}
+            onClick={() => !loading && !deleting && setConfirming(true)}
+            className="mt-4 font-medium text-accent underline underline-offset-4 aria-disabled:opacity-50"
           >
             {t("reflectDelete")}
           </button>
@@ -199,16 +211,17 @@ export function ReflectPanel({ entryId, initial, balance, country }: { entryId: 
       <div className={reflection ? "mt-6" : ""}>
         <button
           type="button"
+          ref={reflectButton}
           data-testid="reflect-button"
           onClick={tap}
-          disabled={loading || deleting}
-          aria-busy={loading}
-          className={`${dialogButton(!reflection)} disabled:opacity-50`}
+          // Focusable while a tap runs (disabling it dropped focus).
+          aria-disabled={loading || deleting}
+          className={`${dialogButton(!reflection)} aria-disabled:opacity-50`}
         >
           {t("reflectButton")}
         </button>
         <p role="status" data-testid="reflect-status" className="mt-3 text-sm text-muted">
-          {loading ? t("reflectLoading") : null}
+          {loading ? t("reflectLoading") : said ? t(said) : null}
         </p>
         {phase.kind === "error" && (
           <p role="alert" data-testid="reflect-error" className="text-sm font-medium text-accent">

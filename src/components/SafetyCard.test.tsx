@@ -77,3 +77,13 @@ describe("Get help now's style (decision 128)", () => {
     expect(button.className).not.toContain("bg-accent");
   });
 });
+
+describe("SafetyCard: numbers as plain text too (decision 142) and the new-tab cue", () => {
+  it("each number is also selectable text beside its link (not read twice); Find a helpline says it opens a new tab", () => {
+    wrap(<SafetyCard country="TH" onClose={() => {}} />);
+    expect(screen.getByTestId("safety-number-helpline")).toHaveTextContent("1323");
+    expect(screen.getByTestId("safety-number-helpline")).toHaveAttribute("aria-hidden", "true");
+    expect(screen.getByTestId("safety-number-emergency")).toHaveTextContent("1669");
+    expect(screen.getByTestId("safety-find-helpline")).toHaveAccessibleName(`${s.safetyFindHelpline} ${messages.common.opensInNewTab}`);
+  });
+});
