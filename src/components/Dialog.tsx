@@ -27,13 +27,17 @@ export function Dialog({
 
   useEffect(() => {
     const previous = document.activeElement as HTMLElement | null;
+    // Initial focus goes to an action (a button); Tab cycles through
+    // everything focusable inside (fields too).
     const buttons = () => Array.from(ref.current?.querySelectorAll<HTMLElement>("button:not([disabled])") ?? []);
+    const focusable = () =>
+      Array.from(ref.current?.querySelectorAll<HTMLElement>("button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), a[href]") ?? []);
     const start = buttons();
     (initialFocus === "last" ? start[start.length - 1] : start[0])?.focus();
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") return onCancel();
       if (e.key !== "Tab") return;
-      const list = buttons();
+      const list = focusable();
       if (list.length === 0) return;
       const first = list[0];
       const last = list[list.length - 1];

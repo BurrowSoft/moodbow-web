@@ -239,5 +239,20 @@
     "title": "Page not found",
     "body": "This page doesn't exist or has moved.",
     "home": "Go to the home page"
+  },
+  "me": {
+    "meYourData": "Your data",
+    "meExport": "Export my data",
+    "meExportBody": "A file with everything you've written and logged.",
+    "meExportReady": "Your export is ready",
+    "meDelete": "Delete account",
+    "deleteTitle": "Delete your account?",
+    "deleteBody": "This deletes your entries, check-ins, AI reflections and reports, what Moodbow remembers, and your settings, right away. It can't be undone.",
+    "deleteCredits": "You'll also lose your {credits, plural, one {# AI credit} other {# AI credits}}.",
+    "deleteExportFirst": "Export my data first",
+    "deleteTypeConfirm": "Type DELETE to confirm",
+    "deleteConfirm": "Delete everything",
+    "deleteDone": "Your account and everything in it were deleted.",
+    "cancel": "Cancel"
   }
 }
