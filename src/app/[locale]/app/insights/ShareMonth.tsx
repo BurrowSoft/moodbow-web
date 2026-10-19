@@ -34,8 +34,10 @@ export function ShareMonth({ month, dateLocaleTag, label }: { month: string; dat
     setOpen(true);
     setColours(null);
     setFailed(false);
-    // The app's current theme is the default.
-    setTheme(window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    // The page's current theme is the default: one chosen in Me →
+    // Appearance (<html data-theme>, decision 133), else the system's.
+    const chosen = document.documentElement.dataset.theme;
+    setTheme(chosen === "dark" || chosen === "light" ? chosen : window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light");
     const probe = typeof File !== "undefined" ? new File([""], cardFileName(month), { type: "image/png" }) : null;
     setCanShareFiles(!!probe && typeof navigator.canShare === "function" && navigator.canShare({ files: [probe] }));
     loadMonthCheckIns(month)
