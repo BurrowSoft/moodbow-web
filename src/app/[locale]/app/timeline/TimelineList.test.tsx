@@ -19,7 +19,6 @@ vi.mock("@/i18n/navigation", () => ({
 const loadMonthCheckIns = vi.fn();
 vi.mock("../insights/shareActions", () => ({ loadMonthCheckIns: (...args: unknown[]) => loadMonthCheckIns(...args) }));
 const { TimelineList } = await import("./TimelineList");
-const { forgetMonthCounts } = await import("./MonthShare");
 
 let seeEnd: () => void = () => {};
 class FakeObserver {
@@ -48,7 +47,6 @@ const renderList = (props: Partial<React.ComponentProps<typeof TimelineList>> = 
 beforeEach(() => {
   loadTimeline.mockReset();
   loadMonthCheckIns.mockReset().mockResolvedValue({ status: "ok", checkIns: [] });
-  forgetMonthCounts();
   vi.stubGlobal("IntersectionObserver", FakeObserver);
 });
 afterEach(() => {
@@ -161,13 +159,28 @@ describe("TimelineList: Share this month (decision 161)", () => {
     expect(loadMonthCheckIns).not.toHaveBeenCalled();
   });
 
-  it("each month's count is asked once, however often the list renders", async () => {
+  it("each month's count is asked once per list, however often it re-renders", async () => {
     loadMonthCheckIns.mockResolvedValue(moods(6));
     const view = renderList({ shareable: true });
     await screen.findByTestId("timeline-share-2026-10");
-    view.unmount();
-    renderList({ shareable: true });
-    await screen.findByTestId("timeline-share-2026-10");
+    // More days arrive (a re-render of the same list): no new ask.
+    view.rerender(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <TimelineList initial={days} initialDone={false} momentsOnly={false} dateLocaleTag="en-US" shareable />
+      </NextIntlClientProvider>,
+    );
+    await act(async () => {});
     expect(loadMonthCheckIns.mock.calls.filter(([m]) => m === "2026-10")).toHaveLength(1);
+  });
+
+  it("back on the Timeline (a new list), the count is asked again: a 5th check-in shows the link", async () => {
+    loadMonthCheckIns.mockResolvedValue(moods(4));
+    const view = renderList({ shareable: true });
+    await act(async () => {});
+    expect(screen.queryByTestId("timeline-share-2026-10")).toBeNull();
+    view.unmount();
+    loadMonthCheckIns.mockResolvedValue(moods(5));
+    renderList({ shareable: true });
+    expect(await screen.findByTestId("timeline-share-2026-10")).toBeInTheDocument();
   });
 });

@@ -8,10 +8,11 @@ import { loadMonthCheckIns } from "../insights/shareActions";
 // The message key for the trigger (the share flow translates it).
 const SHARE_LABEL = "shareThisMonth" as const;
 
-// Each month's check-in count, asked once per page load (a failed ask is
-// dropped, so a later header asks again).
-const counts = new Map<string, Promise<number>>();
-function monthCount(month: string): Promise<number> {
+// Each month's check-in count, asked once per Timeline list (the list owns
+// the map, so coming back to the Timeline asks again and a new check-in
+// counts; reviewer #63). A failed ask is dropped, so a later header retries.
+export type MonthCounts = Map<string, Promise<number>>;
+function monthCount(counts: MonthCounts, month: string): Promise<number> {
   let count = counts.get(month);
   if (!count) {
     count = loadMonthCheckIns(month).then((result) => {
@@ -23,19 +24,17 @@ function monthCount(month: string): Promise<number> {
   }
   return count;
 }
-// Tests start each case afresh.
-export const forgetMonthCounts = () => counts.clear();
 
 // "Share this month" in a Timeline month header (decision 161): the same
 // share flow as Insights, for that month. Shown only when the month has
 // enough check-ins for a card (MIN_CHECK_INS); otherwise nothing (hidden,
 // not disabled). The count comes from the month itself, not from the days
 // loaded so far (a month can span pages; Moments shows only some days).
-export function MonthShare({ month, dateLocaleTag }: { month: string; dateLocaleTag: string }) {
+export function MonthShare({ month, dateLocaleTag, counts }: { month: string; dateLocaleTag: string; counts: MonthCounts }) {
   const [enough, setEnough] = useState(false);
   useEffect(() => {
     let cancelled = false;
-    monthCount(month)
+    monthCount(counts, month)
       .then((n) => {
         if (!cancelled) setEnough(n >= MIN_CHECK_INS);
       })
@@ -45,7 +44,7 @@ export function MonthShare({ month, dateLocaleTag }: { month: string; dateLocale
     return () => {
       cancelled = true;
     };
-  }, [month]);
+  }, [counts, month]);
   if (!enough) return null;
   return <ShareMonth month={month} dateLocaleTag={dateLocaleTag} label={SHARE_LABEL} asLink testId={`timeline-share-${month}`} />;
 }

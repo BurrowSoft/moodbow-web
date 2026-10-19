@@ -7,7 +7,7 @@ import { Link } from "@/i18n/navigation";
 import { MOOD_COLOURS, MOOD_DOT_OUTLINE } from "@/lib/journal/checkIn";
 import { withOrigin } from "@/lib/journal/origin";
 import { dayLabel, groupByMonth, monthLabel, type TimelineDay } from "@/lib/journal/timeline";
-import { MonthShare } from "./MonthShare";
+import { MonthShare, type MonthCounts } from "./MonthShare";
 import { loadTimeline } from "./actions";
 
 // The Timeline (M5, decision 161): days newest first under month headers
@@ -24,6 +24,8 @@ export function TimelineList({ initial, initialDone, momentsOnly, dateLocaleTag,
   const te = useTranslations("entry");
   const ta = useTranslations("app");
   const [days, setDays] = useState(initial);
+  // The month headers' check-in counts, for this list only (MonthShare).
+  const [monthCounts] = useState<MonthCounts>(() => new Map());
   const [done, setDone] = useState(initialDone);
   const [failed, setFailed] = useState(false);
   const [loading, startLoading] = useTransition();
@@ -82,7 +84,7 @@ export function TimelineList({ initial, initialDone, momentsOnly, dateLocaleTag,
             <h2 id={`month-${month}`} className="text-sm font-medium uppercase tracking-wide text-muted">
               {monthLabel(month, dateLocaleTag)}
             </h2>
-            {shareable && <MonthShare month={month} dateLocaleTag={dateLocaleTag} />}
+            {shareable && <MonthShare month={month} dateLocaleTag={dateLocaleTag} counts={monthCounts} />}
           </div>
           <ul className="mt-3 space-y-3">
             {monthDays.map((day) => {
