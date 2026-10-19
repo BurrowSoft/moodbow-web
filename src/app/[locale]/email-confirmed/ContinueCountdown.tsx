@@ -9,14 +9,28 @@ export const COUNTDOWN_SECONDS = 5;
 
 // After a confirmed email (decision 134, while the web journal is live):
 // on to `href` after 5 s, unless the person moves on sooner (Continue) or
-// stops it (Stay on this page; WCAG 2.2.1 Timing Adjustable). The sentence
+// stops it (Stay on this page, or any key press, pointer press or focus
+// change: WCAG 2.2.1 Timing Adjustable). The sentence
 // is announced once, when it appears; the ticking number is visual only
 // (aria-hidden), so a screen reader isn't told every second. No animation.
 export function ContinueCountdown({ href }: { href: string }) {
+  // The journal line only with a session; otherwise sign in (decision 134).
+  const line = href === "/sign-in" ? "emailConfirmedRedirectSignIn" : "emailConfirmedRedirect";
   const t = useTranslations("emailConfirmed");
   const router = useRouter();
   const [left, setLeft] = useState(COUNTDOWN_SECONDS);
   const [stopped, setStopped] = useState(false);
+
+  // Any sign of someone using the page stops it, like Stay.
+  useEffect(() => {
+    if (stopped) return;
+    const stop = () => setStopped(true);
+    const events = ["keydown", "pointerdown", "focusin"] as const;
+    for (const e of events) document.addEventListener(e, stop, true);
+    return () => {
+      for (const e of events) document.removeEventListener(e, stop, true);
+    };
+  }, [stopped]);
 
   useEffect(() => {
     if (stopped) return;
@@ -34,10 +48,10 @@ export function ContinueCountdown({ href }: { href: string }) {
         <>
           {/* Read once (its text never changes); the number shown changes. */}
           <p role="status" className="sr-only">
-            {t("emailConfirmedRedirect", { seconds: COUNTDOWN_SECONDS })}
+            {t(line, { seconds: COUNTDOWN_SECONDS })}
           </p>
           <p aria-hidden="true" data-testid="email-confirmed-seconds" className="text-sm text-muted">
-            {t("emailConfirmedRedirect", { seconds: left })}
+            {t(line, { seconds: left })}
           </p>
         </>
       )}

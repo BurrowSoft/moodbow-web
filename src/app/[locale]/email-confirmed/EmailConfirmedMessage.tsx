@@ -47,7 +47,9 @@ export function EmailConfirmedMessage({ fromQuery, continueTo }: { fromQuery: Au
   return (
     <div data-testid={`email-confirmed-${result}`} className="flex flex-col items-center text-center">
       <h1 className="text-balance text-[28px] font-medium leading-tight tracking-tight sm:text-4xl">{t(copy.title)}</h1>
-      <p className="mt-4 text-base leading-relaxed text-muted sm:text-[17px]">{t(copy.body)}</p>
+      {/* With the countdown, "Open Moodbow to continue." would contradict it:
+          the web line instead (decision 134). */}
+      <p className="mt-4 text-base leading-relaxed text-muted sm:text-[17px]">{result === "ok" && continueTo ? t("emailConfirmedWebBody") : t(copy.body)}</p>
       {moveOn && continueTo && <ContinueCountdown href={continueTo} />}
     </div>
   );

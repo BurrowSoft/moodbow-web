@@ -74,3 +74,34 @@ describe("EmailConfirmedMessage: when the countdown shows", () => {
     expect(push).not.toHaveBeenCalled();
   });
 });
+
+describe("decision 134 refinements (review of #42)", () => {
+  it("to sign in: its own line", () => {
+    wrap(<ContinueCountdown href="/sign-in" />);
+    expect(screen.getByRole("status")).toHaveTextContent("Taking you to the sign-in page in 5 seconds…");
+  });
+
+  for (const [what, act_] of [
+    ["a key press", () => fireEvent.keyDown(document.body, { key: "Tab" })],
+    ["a pointer press", () => fireEvent.pointerDown(document.body)],
+    ["a focus change", () => fireEvent.focusIn(document.body)],
+  ] as const) {
+    it(`${what} stops it, like Stay; Continue stays`, () => {
+      wrap(<ContinueCountdown href="/app" />);
+      act(() => act_());
+      seconds(10);
+      expect(push).not.toHaveBeenCalled();
+      expect(screen.queryByTestId("email-confirmed-seconds")).toBeNull();
+      expect(screen.getByTestId("email-confirmed-continue")).toBeInTheDocument();
+    });
+  }
+
+  it("with the countdown the body is 'You're all set.'; without it, the usual body", () => {
+    const live = wrap(<EmailConfirmedMessage fromQuery="ok" continueTo="/app" />);
+    expect(screen.getByText(m.emailConfirmedWebBody)).toBeInTheDocument();
+    expect(screen.queryByText(m.successBody)).toBeNull();
+    live.unmount();
+    wrap(<EmailConfirmedMessage fromQuery="ok" continueTo={null} />);
+    expect(screen.getByText(m.successBody)).toBeInTheDocument();
+  });
+});
