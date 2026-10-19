@@ -18,7 +18,7 @@ vi.mock("@/i18n/navigation", () => ({
     throw new Redirect(args);
   },
 }));
-const { exportMyData, deleteMyAccount, saveReminder } = await import("./actions");
+const { exportMyData, deleteMyAccount, saveReminder, setAiEnabled, saveTone, saveFocusAreas } = await import("./actions");
 
 const UID = "0b5f2c1e-7d3a-4e8b-9c41-2a6f8e1d3b70";
 const confirm = (word: string) => {
@@ -111,5 +111,48 @@ describe("saveReminder", () => {
     expect(rpc).not.toHaveBeenCalled();
     rpc.mockResolvedValue({ data: null, error: { message: "boom" } });
     expect(await saveReminder(idle, reminder("true", "07:30"))).toEqual({ status: "error", on: true, time: "07:30" });
+  });
+});
+
+describe("Me → AI actions (M9; reflect.md, Me → AI)", () => {
+  const AI = { kind: "ai", version: "2026-10-02" };
+
+  it("on: the consent first, then the setting", async () => {
+    rpc.mockResolvedValue({ data: null, error: null });
+    expect(await setAiEnabled(true)).toEqual({ ok: true });
+    expect(rpc.mock.calls).toEqual([
+      ["record_consents", { p_items: [{ ...AI, granted: true }] }],
+      ["update_settings", { p_ai_enabled: true }],
+    ]);
+  });
+
+  it("off: the setting first, then the recorded withdrawal", async () => {
+    rpc.mockResolvedValue({ data: null, error: null });
+    expect(await setAiEnabled(false)).toEqual({ ok: true });
+    expect(rpc.mock.calls).toEqual([
+      ["update_settings", { p_ai_enabled: false }],
+      ["record_consents", { p_items: [{ ...AI, granted: false }] }],
+    ]);
+  });
+
+  it("a failed step stops there and says so; a lost session goes to sign-in", async () => {
+    rpc.mockResolvedValueOnce({ data: null, error: { message: "boom" } });
+    expect(await setAiEnabled(true)).toEqual({ ok: false });
+    expect(rpc).toHaveBeenCalledTimes(1);
+    rpc.mockResolvedValueOnce({ data: null, error: { message: "not_authenticated" } });
+    await expect(saveTone("brief")).rejects.toBeInstanceOf(Redirect);
+  });
+
+  it("tone and focus: only known values reach the database", async () => {
+    rpc.mockResolvedValue({ data: null, error: null });
+    expect(await saveTone("brief")).toEqual({ ok: true });
+    expect(rpc).toHaveBeenLastCalledWith("update_settings", { p_tone: "brief" });
+    expect(await saveFocusAreas(["sleep", "self_esteem"])).toEqual({ ok: true });
+    expect(rpc).toHaveBeenLastCalledWith("update_settings", { p_focus_areas: ["sleep", "self_esteem"] });
+    rpc.mockClear();
+    expect(await saveTone("shouty")).toEqual({ ok: false });
+    expect(await saveFocusAreas(["sleep", "money"])).toEqual({ ok: false });
+    expect(await setAiEnabled("yes" as unknown as boolean)).toEqual({ ok: false });
+    expect(rpc).not.toHaveBeenCalled();
   });
 });

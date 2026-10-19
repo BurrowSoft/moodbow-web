@@ -314,5 +314,31 @@
     "shareDaysJournaled": "{n} days journaled",
     "shareNotEnough": "Check in on at least 5 days this month to make your moodbow.",
     "shareThisMonth": "Share this month"
+  },
+  "ai": {
+    "meAi": "AI",
+    "meAiOn": "AI reflections and reports",
+    "consentAiBody": "To write reflections and reports, Moodbow sends your entries and logs to our AI provider, Anthropic (USA), only when needed. They aren't used to train AI models. You can turn this off any time in Me → AI.",
+    "meAiOffHint": "AI is off. Your journal works the same; you just won't get reflections or reports.",
+    "meTone": "Tone",
+    "toneWarm": "Warm",
+    "toneWarmHint": "Kind and encouraging",
+    "toneDirect": "Direct",
+    "toneDirectHint": "Honest, straight to the point",
+    "toneBrief": "Brief",
+    "toneBriefHint": "Just the essentials",
+    "meFocus": "Focus areas",
+    "focusSleep": "Sleep",
+    "focusStress": "Stress",
+    "focusWork": "Work",
+    "focusStudy": "Study",
+    "focusRelationships": "Relationships",
+    "focusFamily": "Family",
+    "focusHealth": "Health & body",
+    "focusSelfEsteem": "Self-esteem",
+    "creditsTitle": "AI credits",
+    "creditsBalance": "{credits, plural, one {# credit} other {# credits}}",
+    "creditsLiteNow": "You're on Moodbow AI Lite: shorter, simpler answers, up to {cap} a day.",
+    "creditsOut": "You've used your Moodbow AI credits. We'll keep going with Moodbow AI Lite, so answers will be shorter and simpler."
   }
 }

@@ -11,9 +11,21 @@ export type Me = {
   has_required_consents: boolean;
   today: string;
   // user_settings (migration 001); reminder_time is "HH:MM:SS".
-  settings?: { reminder_on: boolean; reminder_time: string | null } | null;
-  // get_my_credits() (migration 003): the AI credit balance.
-  credits?: { balance: number } | null;
+  settings?: {
+    reminder_on: boolean;
+    reminder_time: string | null;
+    tone?: string;
+    focus_areas?: string[];
+    ai_enabled?: boolean;
+  } | null;
+  // get_my_credits() (migrations 003/006): the AI credit balance and Lite.
+  credits?: {
+    balance: number;
+    tier_now?: "full" | "lite";
+    lite_replies_left_estimate?: number | null;
+  } | null;
+  // The global AI switch (app_config.ai_enabled_global, migration 006).
+  ai_available?: boolean;
 };
 
 export async function getMe(supabase: Client): Promise<Me | null> {

@@ -4,6 +4,8 @@ import { cookies } from "next/headers";
 import { getLocale } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
 import { DELETE_WORD } from "@/lib/journal/account";
+import { isFocusArea, isTone } from "@/lib/journal/ai";
+import { consentItem } from "@/lib/legalVersions";
 import { WIPE_COOKIE, WIPE_COOKIE_OPTIONS } from "@/lib/supabase/proxy";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -78,4 +80,45 @@ export async function saveReminder(_prev: ReminderState, form: FormData): Promis
     return { status: "error", on, time };
   }
   return { status: "saved", on, time };
+}
+
+// Me → AI (M9; reflect.md, "Me → AI"). Each returns whether the account now
+// has the value; the control reverts to the saved one when it doesn't
+// (decision 111). Errors are codes, never messages.
+export type AiSaveResult = { ok: true } | { ok: false };
+
+const settingsFailed = async (message: string | undefined): Promise<AiSaveResult> => {
+  if (message?.includes("not_authenticated")) return redirect({ href: "/sign-in", locale: await getLocale() });
+  return { ok: false };
+};
+
+// On: record the AI consent, then switch AI on. Off: switch AI off, then
+// record the withdrawal (a consent row with granted false).
+export async function setAiEnabled(on: boolean): Promise<AiSaveResult> {
+  if (typeof on !== "boolean") return { ok: false };
+  const supabase = await createSupabaseServerClient();
+  if (!supabase) return { ok: false };
+  const consent = () => supabase.rpc("record_consents", { p_items: [consentItem("ai", on)] });
+  const setting = () => supabase.rpc("update_settings", { p_ai_enabled: on });
+  for (const step of on ? [consent, setting] : [setting, consent]) {
+    const { error } = await step();
+    if (error) return settingsFailed(error.message);
+  }
+  return { ok: true };
+}
+
+export async function saveTone(tone: string): Promise<AiSaveResult> {
+  if (!isTone(tone)) return { ok: false };
+  const supabase = await createSupabaseServerClient();
+  if (!supabase) return { ok: false };
+  const { error } = await supabase.rpc("update_settings", { p_tone: tone });
+  return error ? settingsFailed(error.message) : { ok: true };
+}
+
+export async function saveFocusAreas(areas: string[]): Promise<AiSaveResult> {
+  if (!Array.isArray(areas) || !areas.every(isFocusArea)) return { ok: false };
+  const supabase = await createSupabaseServerClient();
+  if (!supabase) return { ok: false };
+  const { error } = await supabase.rpc("update_settings", { p_focus_areas: areas });
+  return error ? settingsFailed(error.message) : { ok: true };
 }
