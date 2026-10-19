@@ -48,7 +48,7 @@ export default async function DayPage({ params }: PageProps<"/[locale]/app/timel
   if (checkInError) return <JournalUnavailable />;
   const { data: entries, error: entriesError } = await supabase
     .from("entries")
-    .select("id, body, is_moment, created_at")
+    .select("id, body, is_moment, entry_date, created_at")
     .eq("entry_date", date)
     .order("created_at", { ascending: false });
 

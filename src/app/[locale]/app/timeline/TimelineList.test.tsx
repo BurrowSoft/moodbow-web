@@ -19,6 +19,7 @@ vi.mock("@/i18n/navigation", () => ({
 const loadMonthCheckIns = vi.fn();
 vi.mock("../insights/shareActions", () => ({ loadMonthCheckIns: (...args: unknown[]) => loadMonthCheckIns(...args) }));
 const { TimelineList } = await import("./TimelineList");
+const { forgetMonthCounts } = await import("./MonthShare");
 
 let seeEnd: () => void = () => {};
 class FakeObserver {
@@ -47,6 +48,7 @@ const renderList = (props: Partial<React.ComponentProps<typeof TimelineList>> = 
 beforeEach(() => {
   loadTimeline.mockReset();
   loadMonthCheckIns.mockReset().mockResolvedValue({ status: "ok", checkIns: [] });
+  forgetMonthCounts();
   vi.stubGlobal("IntersectionObserver", FakeObserver);
 });
 afterEach(() => {
@@ -157,5 +159,15 @@ describe("TimelineList: Share this month (decision 161)", () => {
     await act(async () => {});
     expect(screen.queryByTestId("timeline-share-2026-10")).toBeNull();
     expect(loadMonthCheckIns).not.toHaveBeenCalled();
+  });
+
+  it("each month's count is asked once, however often the list renders", async () => {
+    loadMonthCheckIns.mockResolvedValue(moods(6));
+    const view = renderList({ shareable: true });
+    await screen.findByTestId("timeline-share-2026-10");
+    view.unmount();
+    renderList({ shareable: true });
+    await screen.findByTestId("timeline-share-2026-10");
+    expect(loadMonthCheckIns.mock.calls.filter(([m]) => m === "2026-10")).toHaveLength(1);
   });
 });

@@ -8,6 +8,24 @@ import { loadMonthCheckIns } from "../insights/shareActions";
 // The message key for the trigger (the share flow translates it).
 const SHARE_LABEL = "shareThisMonth" as const;
 
+// Each month's check-in count, asked once per page load (a failed ask is
+// dropped, so a later header asks again).
+const counts = new Map<string, Promise<number>>();
+function monthCount(month: string): Promise<number> {
+  let count = counts.get(month);
+  if (!count) {
+    count = loadMonthCheckIns(month).then((result) => {
+      if (result.status !== "ok") throw new Error("count");
+      return result.checkIns.filter((c) => c.mood >= 1 && c.mood <= 5).length;
+    });
+    count.catch(() => counts.delete(month));
+    counts.set(month, count);
+  }
+  return count;
+}
+// Tests start each case afresh.
+export const forgetMonthCounts = () => counts.clear();
+
 // "Share this month" in a Timeline month header (decision 161): the same
 // share flow as Insights, for that month. Shown only when the month has
 // enough check-ins for a card (MIN_CHECK_INS); otherwise nothing (hidden,
@@ -17,9 +35,9 @@ export function MonthShare({ month, dateLocaleTag }: { month: string; dateLocale
   const [enough, setEnough] = useState(false);
   useEffect(() => {
     let cancelled = false;
-    loadMonthCheckIns(month)
-      .then((result) => {
-        if (!cancelled && result.status === "ok") setEnough(result.checkIns.filter((c) => c.mood >= 1 && c.mood <= 5).length >= MIN_CHECK_INS);
+    monthCount(month)
+      .then((n) => {
+        if (!cancelled) setEnough(n >= MIN_CHECK_INS);
       })
       .catch(() => {
         // offline: no link; Insights still has the share

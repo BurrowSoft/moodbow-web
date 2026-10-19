@@ -15,8 +15,8 @@ const { EntryPreviews } = await import("./EntryPreviews");
 afterEach(cleanup);
 
 const ENTRIES = [
-  { id: "e1", body: "Line one\nline two\nline three", is_moment: true, created_at: "2026-10-19T12:12:00Z" },
-  { id: "e2", body: "Short.", is_moment: false, created_at: "2026-10-19T01:05:00Z" },
+  { id: "e1", body: "Line one\nline two\nline three", is_moment: true, entry_date: "2026-10-19", created_at: "2026-10-19T12:12:00Z" },
+  { id: "e2", body: "Short.", is_moment: false, entry_date: "2026-10-19", created_at: "2026-10-19T01:05:00Z" },
 ];
 
 describe("EntryPreviews (decision 161)", () => {
@@ -35,5 +35,22 @@ describe("EntryPreviews (decision 161)", () => {
     render(await EntryPreviews({ entries: [ENTRIES[1]], testIdPrefix: "day-entry", from: "/app", timeZone: "Asia/Bangkok", dateLocaleTag: "en-GB" }));
     const time = screen.getByTestId("day-entry-e2").querySelector("time")!;
     expect(time.textContent).toMatch(/^0?8:05$/);
+  });
+});
+
+describe("EntryPreviews: the time only on the entry's own day (UX, #63)", () => {
+  it("a back-dated entry (written later for an earlier day) shows no time; the ★ stays", async () => {
+    const backDated = { id: "e3", body: "Yesterday, remembered.", is_moment: true, entry_date: "2026-10-18", created_at: "2026-10-19T12:00:00Z" };
+    render(await EntryPreviews({ entries: [backDated], testIdPrefix: "day-entry", from: "/app", timeZone: "Asia/Bangkok", dateLocaleTag: "en-US" }));
+    const card = screen.getByTestId("day-entry-e3");
+    expect(card.querySelector("time")).toBeNull();
+    expect(within(card).getByRole("img", { name: messages.entry.momentBadge })).toBeInTheDocument();
+  });
+
+  it("the day is the profile's: 23:30 local is still that day though UTC is the next", async () => {
+    // 23:30 in Los Angeles on Oct 18 is 06:30 UTC on Oct 19.
+    const late = { id: "e4", body: "Late.", is_moment: false, entry_date: "2026-10-18", created_at: "2026-10-19T06:30:00Z" };
+    render(await EntryPreviews({ entries: [late], testIdPrefix: "day-entry", from: "/app", timeZone: "America/Los_Angeles", dateLocaleTag: "en-US" }));
+    expect(screen.getByTestId("day-entry-e4").querySelector("time")).toHaveTextContent("11:30 PM");
   });
 });

@@ -10,11 +10,12 @@ import { dayLabel, groupByMonth, monthLabel, type TimelineDay } from "@/lib/jour
 import { MonthShare } from "./MonthShare";
 import { loadTimeline } from "./actions";
 
-// The Timeline (M5): days newest first under month headers. Each day: its
-// date and mood (colour dot + label), check-in chips, then its entry
-// previews (2 lines, ★ for moments). More days load as the end of the list
-// comes into view (by days, not months: a month can span two pages).
-// shareable: share cards are on ("Share this month" in each month header).
+// The Timeline (M5, decision 161): days newest first under month headers
+// (each with "Share this month" where it can make a card). Each day: its
+// mood dot and date with the mood word (a dashed dot without a check-in),
+// then its entry previews (2 lines, ★ for moments); the chips live in the
+// day and entry views. More days load as the end of the list comes into
+// view (by days, not months: a month can span two pages).
 type Props = { initial: TimelineDay[]; initialDone: boolean; momentsOnly: boolean; dateLocaleTag: string; shareable?: boolean };
 
 export function TimelineList({ initial, initialDone, momentsOnly, dateLocaleTag, shareable = false }: Props) {
