@@ -4,7 +4,9 @@ import { startTransition, useActionState, useCallback, useEffect, useId, useRef,
 import { useTranslations } from "next-intl";
 import { EXERCISE_MINUTES, MOODS, SLEEP_HOURS, SLEEP_QUALITIES, STRESS_LEVELS, type CheckIn, type SleepQuality } from "@/lib/journal/checkIn";
 import { dateLine } from "@/lib/journal/today";
+import { valueHex } from "@/lib/journal/valueColours";
 import { localKey } from "@/lib/localData";
+import { ValueDot } from "@/components/ValueDot";
 import { JOURNAL_CARD, MOOD_FACE, MOOD_LABEL, MOOD_ROW, PRIMARY_SAVE } from "@/lib/ui/journalLayout";
 import { MoodFace } from "@/components/MoodFace";
 import { saveCheckIn, type CheckInState } from "./actions";
@@ -280,7 +282,7 @@ function Card({ initial, uid, date: cardDate, notify, announce, autoFocus }: Pro
 
   const set = (patch: Partial<Fields>) => setFields((f) => ({ ...f, ...patch }));
   const chip = (active: boolean) =>
-    `min-h-12 rounded-full border px-4 text-sm font-medium ${active ? "border-accent bg-pill text-accent" : "border-border text-text hover:bg-pill"}`;
+    `inline-flex min-h-12 items-center justify-center gap-2 rounded-full border px-4 text-sm font-medium ${active ? "border-accent bg-pill text-accent" : "border-border text-text hover:bg-pill"}`;
   const errorKey = storageFailed
     ? "errGeneric"
     : state.status === "error"
@@ -417,6 +419,8 @@ function Card({ initial, uid, date: cardDate, notify, announce, autoFocus }: Pro
                   </option>
                 ))}
               </select>
+              {/* The chosen value's colour (decision 150): only once one is picked. */}
+              {fields.sleepHours !== "" && <ValueDot hex={valueHex("sleep_hours", fields.sleepHours)} testId="checkin-sleep-dot" />}
               {SLEEP_QUALITIES.map((q) => (
                 <button
                   key={q}
@@ -446,6 +450,7 @@ function Card({ initial, uid, date: cardDate, notify, announce, autoFocus }: Pro
                   onClick={() => set({ exercise: fields.exercise === String(m) ? "" : String(m) })}
                   className={chip(fields.exercise === String(m))}
                 >
+                  {fields.exercise === String(m) && <ValueDot hex={valueHex("exercise_minutes", m)} testId="checkin-exercise-dot" />}
                   {m === 0 ? t("exerciseNone") : m === 90 ? t("exercise90") : t("exerciseMinutes", { minutes: m })}
                 </button>
               ))}
@@ -469,6 +474,7 @@ function Card({ initial, uid, date: cardDate, notify, announce, autoFocus }: Pro
                     onClick={() => set({ stress: fields.stress === String(s) ? "" : String(s) })}
                     className={`${chip(fields.stress === String(s))} min-w-12 px-0`}
                   >
+                    {fields.stress === String(s) && <ValueDot hex={valueHex("stress", s)} testId="checkin-stress-dot" />}
                     {s}
                   </button>
                   <span className="h-4 text-xs text-muted">{s === 1 ? t("stressLow") : s === 5 ? t("stressHigh") : ""}</span>

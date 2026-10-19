@@ -41,7 +41,9 @@ describe("ReflectPanel", () => {
     renderIt();
     const button = screen.getByTestId("reflect-button");
     fireEvent.click(button);
-    expect(button).toBeDisabled();
+    // Paused, but still focusable (a11y pass).
+    expect(button).toHaveAttribute("aria-disabled", "true");
+    expect(button).toBeEnabled();
     expect(screen.getByTestId("reflect-status")).toHaveTextContent(m.reflectLoading);
     fireEvent.click(button);
     expect(reflectOnEntry).toHaveBeenCalledTimes(1);
@@ -50,7 +52,7 @@ describe("ReflectPanel", () => {
     expect(body.textContent).toBe("A long day.\n\nWhat helped? <b>x</b>");
     expect(body.querySelector("b")).toBeNull();
     expect(body).toHaveClass("whitespace-pre-line");
-    expect(button).toBeEnabled();
+    expect(button).toHaveAttribute("aria-disabled", "false");
     expect(reflectOnEntry).toHaveBeenCalledWith(ENTRY, expect.stringMatching(/^[0-9a-f-]{36}$/));
   });
 
@@ -93,7 +95,7 @@ describe("ReflectPanel", () => {
     expect(screen.getByTestId("reflect-status")).toHaveTextContent(m.reflectLoading);
     await act(async () => vi.advanceTimersByTimeAsync(1));
     expect(screen.getByTestId("reflect-error")).toHaveTextContent(m.errOffline);
-    expect(screen.getByTestId("reflect-button")).toBeEnabled();
+    expect(screen.getByTestId("reflect-button")).toHaveAttribute("aria-disabled", "false");
     fireEvent.click(screen.getByTestId("reflect-retry"));
     await settle();
     expect(keys()).toHaveLength(2);
@@ -196,6 +198,37 @@ describe("ReflectPanel", () => {
     await settle();
     expect(deleteReflection).toHaveBeenLastCalledWith(reflection().id);
     expect(screen.queryByTestId("reflect-result")).toBeNull();
-    expect(screen.getByTestId("reflect-button")).toBeEnabled();
+    expect(screen.getByTestId("reflect-button")).toHaveAttribute("aria-disabled", "false");
+  });
+});
+
+describe("ReflectPanel: what screen readers hear (a11y pass)", () => {
+  it("after Reading your entry…: Your reflection is ready", async () => {
+    reflectOnEntry.mockResolvedValueOnce(ok());
+    renderIt();
+    fireEvent.click(screen.getByTestId("reflect-button"));
+    await settle();
+    expect(screen.getByTestId("reflect-status")).toHaveTextContent(m.reflectReady);
+  });
+
+  it("after a delete: Reflection deleted, and focus on Reflect", async () => {
+    vi.useFakeTimers();
+    renderIt(reflection());
+    fireEvent.click(screen.getByTestId("reflect-delete"));
+    fireEvent.click(screen.getByTestId("reflect-delete-confirm"));
+    await act(async () => vi.runAllTimersAsync());
+    expect(screen.getByTestId("reflect-status")).toHaveTextContent(m.reflectDeleted);
+    expect(screen.getByTestId("reflect-button")).toHaveFocus();
+  });
+});
+
+describe("ReflectPanel: Moodbow's voice colours (decision 150)", () => {
+  it("the reflection sits on the voice surface with the voice rule; the Lite badge is the voice colour; nothing follows the mood", () => {
+    renderIt(reflection({ tier: "lite" }));
+    const card = screen.getByTestId("reflect-result");
+    expect(card.className).toMatch(/\bbg-voice-surface\b/);
+    expect(card.className).toMatch(/\bborder-voice\b/);
+    expect(screen.getByTestId("reflect-lite").className).toMatch(/\btext-voice\b/);
+    expect(card.className).not.toMatch(/accent|#[0-9a-f]{6}/i);
   });
 });

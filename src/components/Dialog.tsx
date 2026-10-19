@@ -1,8 +1,11 @@
 "use client";
 
 import { useEffect, useId, useRef } from "react";
+import { createPortal } from "react-dom";
 
-// A small modal dialog: a title, a body and a row of actions. Focus moves
+// A small modal dialog: a title, a body and a row of actions. Client-only:
+// it renders into document.body (a portal), so it must never be open on
+// the server's first render (every caller opens it on a user action). Focus moves
 // into it when it opens (to the first action, or the last one: the safe
 // choice, never a destructive one), stays inside it (Tab wraps) and returns
 // to where it was when it closes; Escape is the same as the cancel action.
@@ -41,25 +44,33 @@ export function Dialog({
       if (e.key !== "Tab") return;
       const list = focusable();
       if (list.length === 0) return;
-      const first = list[0];
-      const last = list[list.length - 1];
-      const inside = ref.current?.contains(document.activeElement);
-      if (e.shiftKey && (document.activeElement === first || !inside)) {
+      // Focus that isn't on one of them (the title, focused on open, or
+      // outside) wraps too: Shift+Tab from the safety card's title used to
+      // leave the dialog (a11y pass).
+      const at = list.indexOf(document.activeElement as HTMLElement);
+      if (e.shiftKey && at <= 0) {
         e.preventDefault();
-        last.focus();
-      } else if (!e.shiftKey && (document.activeElement === last || !inside)) {
+        list[list.length - 1].focus();
+      } else if (!e.shiftKey && (at === -1 || at === list.length - 1)) {
         e.preventDefault();
-        first.focus();
+        list[0].focus();
       }
     };
     document.addEventListener("keydown", onKey);
+    // Everything else is inert while it's open, so a touch screen reader
+    // can't swipe into the page behind it (aria-modal alone isn't enough
+    // everywhere; a11y pass). The dialog itself is portalled to <body>.
+    const overlay = ref.current?.parentElement;
+    const madeInert = Array.from(document.body.children).filter((el) => el !== overlay && !el.hasAttribute("inert"));
+    for (const el of madeInert) el.setAttribute("inert", "");
     return () => {
+      for (const el of madeInert) el.removeAttribute("inert");
       document.removeEventListener("keydown", onKey);
       previous?.focus?.();
     };
   }, [onCancel, initialFocus]);
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center">
       <div
         ref={ref}
@@ -80,7 +91,8 @@ export function Dialog({
         )}
         <div className="mt-6 flex flex-wrap justify-end gap-3">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 

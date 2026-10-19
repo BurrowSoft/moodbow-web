@@ -48,11 +48,13 @@ export function ConsentForm({ askAge, showBack }: { askAge: boolean; showBack: b
       <p className="flex flex-wrap gap-x-6 gap-y-1 px-1 text-sm">
         <Link href="/terms" target="_blank" rel="noopener" data-testid="consent-read-terms" className={textLinkClass}>
           {t("consentReadTerms")}
-          <span className="sr-only"> {tc("opensInNewTab")}</span>
+          {" "}
+          <span className="sr-only">{tc("opensInNewTab")}</span>
         </Link>
         <Link href="/privacy" target="_blank" rel="noopener" data-testid="consent-read-privacy" className={textLinkClass}>
           {t("consentReadPrivacy")}
-          <span className="sr-only"> {tc("opensInNewTab")}</span>
+          {" "}
+          <span className="sr-only">{tc("opensInNewTab")}</span>
         </Link>
       </p>
       <Checkbox name="health" testId="consent-health" label={t("consentHealth")} checked={health} onChange={setHealth} />
