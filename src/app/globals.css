@@ -22,6 +22,11 @@
   --pill: #f9eaec;
   --draft-bg: #fff4d6;
   --draft-text: #5c4400;
+  /* Moodbow's voice (reflections, the Lite badge; decision 150): the brand
+     accent on a light tint of it, never a mood colour and never following
+     an entry's mood. */
+  --voice: var(--accent);
+  --voice-surface: #fbeff3;
   color-scheme: light;
 }
 
@@ -35,11 +40,15 @@
     --border: #463c56;
     --text: var(--cream);
     --muted: #c9c1d4;
-    --accent: var(--rose);
+    --accent: #d88aa6;
     --on-accent: var(--ink);
     --pill: #382c43;
     --draft-bg: #4a3d14;
     --draft-text: #ffe9a8;
+    --voice: var(--accent);
+    /* 6% of the accent over the card: the label stays ≥ 4.5:1 (12% gave
+       4.13:1). */
+    --voice-surface: color-mix(in srgb, var(--accent) 6%, var(--surface));
     color-scheme: dark;
   }
   :root:not([data-theme="light"]) .logo-light {
@@ -52,11 +61,13 @@
   --border: #463c56;
   --text: var(--cream);
   --muted: #c9c1d4;
-  --accent: var(--rose);
+  --accent: #d88aa6;
   --on-accent: var(--ink);
   --pill: #382c43;
   --draft-bg: #4a3d14;
   --draft-text: #ffe9a8;
+  --voice: var(--accent);
+  --voice-surface: color-mix(in srgb, var(--accent) 6%, var(--surface));
   color-scheme: dark;
 }
 :root[data-theme="dark"] .logo-light {
@@ -88,6 +99,8 @@
   --color-lavender: var(--lavender);
   --color-draft-bg: var(--draft-bg);
   --color-draft-text: var(--draft-text);
+  --color-voice: var(--voice);
+  --color-voice-surface: var(--voice-surface);
   /* Poppins for Latin; Thai glyphs (which Poppins lacks) fall through to
      Prompt. */
   --font-sans: var(--font-poppins), var(--font-prompt), ui-sans-serif, system-ui, sans-serif;
@@ -103,9 +116,34 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* A visible ring for keyboard focus everywhere. */
+/* Every error message (role=alert) gets an error icon before its words:
+   colour is never the only cue (decision 150). Decorative: a pseudo-element
+   with no text, so screen readers read only the words. When the alert is
+   a heading (journal unavailable, data-alert="heading"), the icon goes
+   inside it, on its line. */
+[role="alert"]::before,
+[role="alert"][data-alert="heading"] > h1::before {
+  content: "";
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  margin-inline-end: 0.4em;
+  vertical-align: -0.15em;
+  background-color: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22%3E%3Cpath d=%22M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm-1 5h2v7h-2V7Zm0 9h2v2h-2v-2Z%22/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22%3E%3Cpath d=%22M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm-1 5h2v7h-2V7Zm0 9h2v2h-2v-2Z%22/%3E%3C/svg%3E") center / contain no-repeat;
+}
+/* A heading alert opts in with data-alert="heading": its icon is inside
+   the h1 instead of above it (an attribute rather than a parent selector,
+   so no browser shows both). */
+[role="alert"][data-alert="heading"]::before {
+  display: none;
+}
+
+/* A visible ring for keyboard focus everywhere, in the accent (decision 150:
+   never a mood colour; ≥ 5:1 on every surface in both themes). */
 :focus-visible {
-  outline: 2px solid var(--text);
+  outline: 2px solid var(--accent);
   outline-offset: 3px;
 }
 
