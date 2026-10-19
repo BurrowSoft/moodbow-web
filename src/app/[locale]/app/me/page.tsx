@@ -12,6 +12,7 @@ import packageJson from "../../../../../package.json";
 import { tabMetadata } from "../TabPlaceholder";
 import { signOut } from "./actions";
 import { AiSettings } from "./AiSettings";
+import { LanguageRegion } from "./LanguageRegion";
 import { Reminder } from "./Reminder";
 import { YourData } from "./YourData";
 
@@ -23,9 +24,9 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/app/me">
 const hhmm = (time: string | null | undefined) => (time && /^\d{2}:\d{2}/.test(time) ? time.slice(0, 5) : "21:00");
 
 // Me (M7), in the spec's order. Here: AI (M9, only when AI is shown) ·
-// Reminder · Your data · Help · Sign out · version. Language & region with the shared
-// country list, Get help now with the safety card; App lock is app-only and
-// Appearance waits for its condition.
+// Reminder · Language & region · Your data · Help · Sign out · version.
+// Get help now (top) comes with the safety card (M8); App lock is app-only;
+// Appearance waits for its condition (the setting needs a stored column).
 export default async function MePage({ params }: PageProps<"/[locale]/app/me">) {
   const { locale } = await params;
   setRequestLocale(locale as Locale);
@@ -52,6 +53,7 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
         />
       )}
       <Reminder on={me.settings?.reminder_on ?? true} time={hhmm(me.settings?.reminder_time)} />
+      <LanguageRegion initial={{ locale: me.profile?.locale ?? locale, country: me.profile?.country ?? "", time_zone: me.profile?.time_zone ?? "UTC" }} />
       <YourData credits={me.credits?.balance ?? 0} uid={user.id} />
 
       <section aria-labelledby="me-help" className="rounded-3xl border border-border bg-surface p-6">
