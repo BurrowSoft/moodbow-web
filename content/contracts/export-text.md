@@ -1,6 +1,12 @@
-# Readable export (`moodbow-journal.txt`)
+# Readable export (`moodbow-journal-YYYY-MM-DD.txt`)
 
 `export_my_data()` returns JSON (`format: moodbow-export`, `format_version: 1`). Me → Export gives the user that JSON **and** this readable text, rendered on the device/browser from the same JSON. App and web must produce **byte-identical** text: both test that rendering `export_fixture.json` gives `export_fixture.txt` exactly.
+
+## Files (decision 107)
+- `moodbow-journal-YYYY-MM-DD.txt` (this text) and `moodbow-export-YYYY-MM-DD.json` (the JSON as returned).
+- `YYYY-MM-DD` = `exported_at` as a date in the **profile's time zone** (`profile.time_zone` in the JSON; UTC if it's missing or unknown). It's the user's local day, so an export at 06:30 in Bangkok is named for that day, not the UTC day before.
+- Only the filenames use the local date. The `Exported:` header line inside the file stays **UTC** (below).
+- The app shares both files in one share sheet and deletes the temp files when the sheet closes; the web offers two download links.
 
 ## Encoding
 - UTF-8, no BOM, `\n` line endings, and exactly one `\n` at the end of the file.
