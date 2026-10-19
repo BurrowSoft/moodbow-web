@@ -52,3 +52,13 @@ describe("errors aren't told by colour alone (decision 150)", () => {
     expect(css).not.toContain(":has(");
   });
 });
+
+describe("the focus ring (decision 150)", () => {
+  it("keyboard focus everywhere in the accent, but not on code-only focus targets (tabindex -1)", () => {
+    const css = readFileSync(join("src", "app", "globals.css"), "utf8");
+    const rule = css.split(':focus-visible:not([tabindex="-1"]) {')[1]?.split("}")[0] ?? "";
+    expect(rule).toContain("outline: 2px solid var(--accent)");
+    // No other, unconditional :focus-visible rule that would ring them anyway.
+    expect(css.split(":focus-visible {").length - 1).toBe(0);
+  });
+});

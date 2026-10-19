@@ -141,8 +141,12 @@ body {
 }
 
 /* A visible ring for keyboard focus everywhere, in the accent (decision 150:
-   never a mood colour; ≥ 5:1 on every surface in both themes). */
-:focus-visible {
+   never a mood colour; ≥ 5:1 on every surface in both themes). Not on
+   tabindex="-1" targets: those only take focus from code (a heading after
+   Save, the reflection after Reflect) to tell screen readers where they are,
+   and a ring there looks like a selection (Web Tester, #51). This rule is
+   unlayered, so it beats utilities like focus:outline-none: exclude them here. */
+:focus-visible:not([tabindex="-1"]) {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
 }

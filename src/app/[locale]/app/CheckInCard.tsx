@@ -330,32 +330,56 @@ function Card({ initial, uid, date: cardDate, notify, announce, autoFocus }: Pro
   }, [showsSummary]);
 
   if (showsSummary) {
-    const summary = [
-      t(`mood${fields.mood}` as "mood1"),
-      fields.sleepHours !== "" ? t("sleepHours", { hours: Number(fields.sleepHours) }) : null,
-      fields.sleepQuality ? t(`sleep${fields.sleepQuality[0].toUpperCase()}${fields.sleepQuality.slice(1)}` as "sleepPoor") : null,
-      fields.exercise !== "" ? (fields.exercise === "0" ? t("exerciseNone") : fields.exercise === "90" ? t("exercise90") : t("exerciseMinutes", { minutes: Number(fields.exercise) })) : null,
-      fields.stress !== "" ? t("stressChip", { level: Number(fields.stress) }) : null,
-    ].filter(Boolean);
+    // The rest as chips, each stored value with its Sunrise dot (decision
+    // 150); sleep quality is words only, and a rest day has no colour.
+    const mood = fields.mood as number;
+    const chips = [
+      fields.sleepHours !== "" ? { label: t("sleepHours", { hours: Number(fields.sleepHours) }), hex: valueHex("sleep_hours", fields.sleepHours) } : null,
+      fields.sleepQuality ? { label: t(`sleep${fields.sleepQuality[0].toUpperCase()}${fields.sleepQuality.slice(1)}` as "sleepPoor"), hex: null } : null,
+      fields.exercise !== ""
+        ? {
+            label: fields.exercise === "0" ? t("exerciseNone") : fields.exercise === "90" ? t("exercise90") : t("exerciseMinutes", { minutes: Number(fields.exercise) }),
+            hex: valueHex("exercise_minutes", fields.exercise),
+          }
+        : null,
+      fields.stress !== "" ? { label: t("stressChip", { level: Number(fields.stress) }), hex: valueHex("stress", fields.stress) } : null,
+    ].filter((c): c is { label: string; hex: string | null } => c !== null);
     return (
       <section ref={root} className={JOURNAL_CARD} data-testid="checkin-summary">
-        <h2 tabIndex={-1} className="text-lg font-medium text-text outline-none">
-          {t("checkinTitle")}
-        </h2>
-        <ul className="mt-3 flex flex-wrap gap-2">
-          {summary.map((label) => (
-            <li key={label} className="rounded-full bg-pill px-3 py-1 text-sm text-text">
-              {label}
-            </li>
-          ))}
-        </ul>
+        {/* The mockups (decision 161): the mood's face and its name, Edit on
+            the right. The heading still says what it answers, for screen
+            readers ("How are you today? Good"). */}
+        <div className="flex items-center justify-between gap-3">
+          <h2
+            tabIndex={-1}
+            aria-labelledby={`${moodTitle}-q ${moodTitle}-a`}
+            className="flex items-center gap-3 text-lg font-medium text-text outline-none"
+            data-testid="checkin-summary-mood"
+          >
+            <MoodFace mood={mood} className="h-9 w-9" />
+            <span id={`${moodTitle}-q`} className="sr-only">
+              {t("checkinTitle")}
+            </span>
+            <span id={`${moodTitle}-a`}>{t(`mood${mood}` as "mood1")}</span>
+          </h2>
+          <button type="button" data-testid="checkin-edit" onClick={() => setEditing(true)} className="min-h-11 font-medium text-accent underline underline-offset-4">
+            {t("checkinEdit")}
+          </button>
+        </div>
+        {chips.length > 0 && (
+          <ul className="mt-3 flex flex-wrap gap-2" data-testid="checkin-summary-chips">
+            {chips.map(({ label, hex }) => (
+              <li key={label} className="inline-flex items-center gap-2 rounded-full bg-pill px-3 py-1 text-sm text-text">
+                <ValueDot hex={hex} />
+                {label}
+              </li>
+            ))}
+          </ul>
+        )}
         {/* Visual; the announcement is checkin-announce. */}
         <p className="mt-3 text-sm text-muted" data-testid="checkin-status">
           {offline ? t("checkinSavedOfflineWeb") : t("checkinSaved")}
         </p>
-        <button type="button" data-testid="checkin-edit" onClick={() => setEditing(true)} className="mt-4 font-medium text-accent underline underline-offset-4">
-          {t("checkinEdit")}
-        </button>
       </section>
     );
   }

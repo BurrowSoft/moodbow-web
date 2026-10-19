@@ -417,7 +417,8 @@ describe("CheckInCard: a save is announced and focus follows (a11y pass)", () =>
     fireEvent.click(screen.getByTestId("checkin-save"));
     await screen.findByTestId("checkin-summary");
     await waitFor(() => expect(screen.getByTestId("checkin-announce")).toHaveTextContent(messages.today.checkinSaved));
-    await waitFor(() => expect(screen.getByRole("heading", { name: messages.today.checkinTitle })).toHaveFocus());
+    // The summary's heading: the question and its answer ("How are you today? Good").
+    await waitFor(() => expect(screen.getByRole("heading", { name: `${messages.today.checkinTitle} ${messages.today[`mood${ROW.mood}` as "mood1"]}` })).toHaveFocus());
   });
 });
 
@@ -473,5 +474,19 @@ describe("CheckInCard: value colours (decision 150)", () => {
     expect(screen.getByTestId("checkin-exercise-dot")).toHaveAttribute("data-value-colour", "#F3C24F");
     fireEvent.change(screen.getByTestId("checkin-sleep-hours"), { target: { value: "5.5" } });
     expect(screen.getByTestId("checkin-sleep-dot")).toHaveAttribute("data-value-colour", "#A99BD1");
+  });
+});
+
+describe("CheckInCard: the summary (decision 161)", () => {
+  it("the mood's face and name with Edit beside it; the other values as chips with their colour dots", () => {
+    renderCard({ ...ROW, mood: 4, sleep_hours: 7.5, sleep_quality: "good", exercise_minutes: 0, stress: 2 });
+    const mood = screen.getByTestId("checkin-summary-mood");
+    expect(mood.querySelector("[data-testid=mood-face]")).not.toBeNull();
+    expect(mood).toHaveTextContent(messages.today.mood4);
+    expect(screen.getByTestId("checkin-edit")).toBeInTheDocument();
+    const chips = [...screen.getByTestId("checkin-summary-chips").querySelectorAll("li")];
+    expect(chips.map((c) => c.textContent)).toEqual(["7.5 h", messages.today.sleepGood, messages.today.exerciseNone, "Stress 2/5"]);
+    // Sleep and stress coloured; quality is words only; a rest day has no colour.
+    expect(chips.map((c) => c.querySelector("[data-value-colour]")?.getAttribute("data-value-colour") ?? null)).toEqual(["#F3C24F", null, null, "#F4A77A"]);
   });
 });
