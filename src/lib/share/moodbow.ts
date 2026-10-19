@@ -25,10 +25,12 @@ export const LAYOUT = {
     centre: { x: 540, y: 1100 },
     rIn: 120,
     rOut: 420,
-    month: { size: 72, top: 200 },
+    // Text and logo stay inside y 250–1670: Instagram / TikTok cover ~250 px
+    // at the top and bottom of a story (decision 141).
+    month: { size: 72, top: 300 },
     days: { size: 44, top: 1180 },
     line: { size: 40, top: 1300, maxWidth: 880, maxLines: 2, maxChars: 80 },
-    footer: { logoHeight: 64, logoBottom: 1760, urlSize: 32, urlGap: 24, urlBeside: false },
+    footer: { logoHeight: 64, logoBottom: 1580, urlSize: 32, urlGap: 24, urlBeside: false },
   },
   square: {
     width: 1080,
