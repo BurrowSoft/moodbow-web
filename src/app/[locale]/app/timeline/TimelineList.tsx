@@ -4,7 +4,8 @@ import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { MomentStar } from "@/components/MomentStar";
 import { Link } from "@/i18n/navigation";
-import { MOOD_COLOURS } from "@/lib/journal/checkIn";
+import { MOOD_COLOURS, MOOD_DOT_OUTLINE } from "@/lib/journal/checkIn";
+import { withOrigin } from "@/lib/journal/origin";
 import { dayLabel, groupByMonth, monthLabel, type TimelineDay } from "@/lib/journal/timeline";
 import { loadTimeline } from "./actions";
 
@@ -103,7 +104,7 @@ export function TimelineList({ initial, initialDone, momentsOnly, dateLocaleTag 
                     <span>{dayLabel(day.local_date, dateLocaleTag)}</span>
                     {c && (
                       <span className="flex items-center gap-2 text-sm text-muted">
-                        <span className={`h-3 w-3 rounded-full ${MOOD_COLOURS[c.mood - 1]}`} aria-hidden="true" />
+                        <span className={`h-3 w-3 rounded-full ${MOOD_COLOURS[c.mood - 1]} ${MOOD_DOT_OUTLINE}`} aria-hidden="true" />
                         {tt(`mood${c.mood}` as "mood1")}
                       </span>
                     )}
@@ -121,7 +122,7 @@ export function TimelineList({ initial, initialDone, momentsOnly, dateLocaleTag 
                     <ul className="mt-3 space-y-2">
                       {day.entries.map((entry) => (
                         <li key={entry.id}>
-                          <Link href={`/app/entries/${entry.id}`} data-testid={`timeline-entry-${entry.id}`} className="flex items-start gap-2 rounded-lg text-sm text-text hover:text-accent">
+                          <Link href={withOrigin(`/app/entries/${entry.id}`, "/app/timeline")} data-testid={`timeline-entry-${entry.id}`} className="flex items-start gap-2 rounded-lg text-sm text-text hover:text-accent">
                             {entry.is_moment && <MomentStar label={te("momentBadge")} />}
                             <span className="line-clamp-2 whitespace-pre-line">{entry.preview}</span>
                           </Link>

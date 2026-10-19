@@ -458,3 +458,42 @@ describe("EntryEditor: the safety card after a flagged save (M8, decisions 124/1
     expect(screen.queryByTestId("safety-card")).toBeNull();
   });
 });
+
+describe("EntryEditor for screen readers (a11y pass)", () => {
+  it("a heading: New entry / Edit entry", () => {
+    const view = renderEditor();
+    expect(screen.getByRole("heading", { level: 1, name: m.entryNewTitle })).toBeInTheDocument();
+    view.unmount();
+    renderEditor(ENTRY);
+    expect(screen.getByRole("heading", { level: 1, name: m.entryEditTitle })).toBeInTheDocument();
+  });
+
+  it("too long → the text is invalid and described by the message; a future date → the date is", () => {
+    renderEditor();
+    type("x".repeat(20_001));
+    expect(screen.getByTestId("entry-text")).toHaveAttribute("aria-invalid", "true");
+    expect(screen.getByTestId("entry-text")).toHaveAttribute("aria-describedby", "entry-error");
+    expect(screen.getByTestId("entry-date")).not.toHaveAttribute("aria-invalid");
+    type("fine");
+    expect(screen.getByTestId("entry-text")).not.toHaveAttribute("aria-invalid");
+    fireEvent.change(screen.getByTestId("entry-date"), { target: { value: "2026-10-09" } });
+    expect(screen.getByTestId("entry-date")).toHaveAttribute("aria-invalid", "true");
+    expect(screen.getByTestId("entry-date")).toHaveAttribute("aria-describedby", "entry-error");
+  });
+});
+
+describe("EntryEditor: leaving returns where it was opened from (decision 152)", () => {
+  it("Cancel and a save go to backTo (e.g. the Timeline), not always Today", async () => {
+    saveEntry.mockResolvedValue({ status: "saved", entry: { ...ENTRY, id: NEW_ID, entry_date: "2026-10-02", body: "Hi" } });
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <EntryEditor initial={null} newId={NEW_ID} uid="u1" today="2026-10-02" backTo="/app/timeline" />
+      </NextIntlClientProvider>,
+    );
+    fireEvent.click(screen.getByTestId("entry-cancel"));
+    expect(push).toHaveBeenLastCalledWith("/app/timeline");
+    type("Hi");
+    fireEvent.click(screen.getByTestId("entry-save"));
+    await waitFor(() => expect(push).toHaveBeenLastCalledWith("/app/timeline"));
+  });
+});
