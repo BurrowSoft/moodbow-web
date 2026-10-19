@@ -99,7 +99,8 @@ function toFormData(fields: Fields, expectedUpdatedAt: string, date: string, fro
 }
 
 // date: the day this card is for (today on Today, the day in the day view).
-type Props = { initial: CheckIn | null; uid: string; date: string; dateLocaleTag: string };
+// autoFocus: focus the first mood when the card opens ("Add a check-in").
+type Props = { initial: CheckIn | null; uid: string; date: string; dateLocaleTag: string; autoFocus?: boolean };
 
 // What became of an offline copy that couldn't be saved as it was: another
 // device changed that day ("superseded"), or the server refused it
@@ -111,6 +112,9 @@ type Notify = (notice: Notice) => void;
 export function CheckInCard(props: Props) {
   const t = useTranslations("today");
   const [notices, setNotices] = useState<Notice[]>([]);
+  // One live region, always mounted, so a save is announced (a region
+  // that appears together with its text often isn't; a11y pass).
+  const [announcement, setAnnouncement] = useState("");
   const notify = useCallback<Notify>(
     (notice) => setNotices((shown) => (shown.some((n) => n.date === notice.date && n.kind === notice.kind) ? shown : [...shown, notice])),
     [],
@@ -137,12 +141,15 @@ export function CheckInCard(props: Props) {
           </button>
         </div>
       ))}
-      <Card {...props} notify={notify} />
+      <p role="status" className="sr-only" data-testid="checkin-announce">
+        {announcement}
+      </p>
+      <Card {...props} notify={notify} announce={setAnnouncement} />
     </div>
   );
 }
 
-function Card({ initial, uid, date: cardDate, notify }: Props & { notify: Notify }) {
+function Card({ initial, uid, date: cardDate, notify, announce, autoFocus }: Props & { notify: Notify; announce: (text: string) => void }) {
   const t = useTranslations("today");
   const [row, setRow] = useState<CheckIn | null>(initial);
   const [fields, setFields] = useState<Fields>(fromRow(initial));
@@ -276,7 +283,30 @@ function Card({ initial, uid, date: cardDate, notify }: Props & { notify: Notify
           : "errGeneric"
       : null;
 
-  if (!editing && fields.mood !== null) {
+  // Switching between the form and the summary replaces what had focus
+  // (Save, Edit): move it to the new view, and say "Saved" (a11y pass).
+  const root = useRef<HTMLElement | null>(null);
+  const seen = useRef(false);
+  const showsSummary = !editing && fields.mood !== null;
+  useEffect(() => {
+    if (!seen.current) {
+      seen.current = true;
+      if (autoFocus && !showsSummary) root.current?.querySelector<HTMLElement>("[role=radio]")?.focus();
+      return;
+    }
+    if (showsSummary) {
+      announce(offline ? t("checkinSavedOfflineWeb") : t("checkinSaved"));
+      root.current?.querySelector<HTMLElement>("h2")?.focus();
+    } else {
+      announce("");
+      const radios = root.current;
+      (radios?.querySelector<HTMLElement>("[role=radio][aria-checked=true]") ?? radios?.querySelector<HTMLElement>("[role=radio]"))?.focus();
+    }
+    // Only on a switch between the two views.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showsSummary]);
+
+  if (showsSummary) {
     const summary = [
       t(`mood${fields.mood}` as "mood1"),
       fields.sleepHours !== "" ? t("sleepHours", { hours: Number(fields.sleepHours) }) : null,
@@ -285,8 +315,10 @@ function Card({ initial, uid, date: cardDate, notify }: Props & { notify: Notify
       fields.stress !== "" ? t("stressChip", { level: Number(fields.stress) }) : null,
     ].filter(Boolean);
     return (
-      <section className={JOURNAL_CARD} data-testid="checkin-summary">
-        <h2 className="text-lg font-medium text-text">{t("checkinTitle")}</h2>
+      <section ref={root} className={JOURNAL_CARD} data-testid="checkin-summary">
+        <h2 tabIndex={-1} className="text-lg font-medium text-text outline-none">
+          {t("checkinTitle")}
+        </h2>
         <ul className="mt-3 flex flex-wrap gap-2">
           {summary.map((label) => (
             <li key={label} className="rounded-full bg-pill px-3 py-1 text-sm text-text">
@@ -294,7 +326,8 @@ function Card({ initial, uid, date: cardDate, notify }: Props & { notify: Notify
             </li>
           ))}
         </ul>
-        <p role="status" className="mt-3 text-sm text-muted" data-testid="checkin-status">
+        {/* Visual; the announcement is checkin-announce. */}
+        <p className="mt-3 text-sm text-muted" data-testid="checkin-status">
           {offline ? t("checkinSavedOfflineWeb") : t("checkinSaved")}
         </p>
         <button type="button" data-testid="checkin-edit" onClick={() => setEditing(true)} className="mt-4 font-medium text-accent underline underline-offset-4">
@@ -305,7 +338,7 @@ function Card({ initial, uid, date: cardDate, notify }: Props & { notify: Notify
   }
 
   return (
-    <form onSubmit={submit} className={JOURNAL_CARD} data-testid="checkin-card">
+    <form ref={(el) => void (root.current = el)} onSubmit={submit} className={JOURNAL_CARD} data-testid="checkin-card">
       <fieldset>
         <legend className="text-lg font-medium text-text">{t("checkinTitle")}</legend>
         {/* Narrow or large text (decision 105, app parity): every face stays a

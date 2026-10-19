@@ -390,3 +390,21 @@ describe("CheckInCard: legends without a hard-coded separator (decision 34)", ()
     }
   });
 });
+
+describe("CheckInCard: a save is announced and focus follows (a11y pass)", () => {
+  it("nothing is announced for a check-in already there; after Edit → Save, 'Saved' is, and focus moves to the summary", async () => {
+    saveCheckIn.mockResolvedValue({ status: "saved", checkIn: ROW });
+    renderCard(ROW);
+    expect(screen.getByTestId("checkin-announce")).toHaveAttribute("role", "status");
+    // The visible line isn't a second live region.
+    expect(screen.getByTestId("checkin-status")).not.toHaveAttribute("role");
+    fireEvent.click(screen.getByTestId("checkin-edit"));
+    expect(screen.getByTestId("checkin-announce")).toBeEmptyDOMElement();
+    // Focus goes to the chosen mood, not lost with the Edit button.
+    expect(screen.getByTestId(`checkin-mood-${ROW.mood}`)).toHaveFocus();
+    fireEvent.click(screen.getByTestId("checkin-save"));
+    await screen.findByTestId("checkin-summary");
+    expect(screen.getByTestId("checkin-announce")).toHaveTextContent(messages.today.checkinSaved);
+    expect(screen.getByRole("heading", { name: messages.today.checkinTitle })).toHaveFocus();
+  });
+});
