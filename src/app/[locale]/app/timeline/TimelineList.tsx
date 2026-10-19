@@ -7,21 +7,25 @@ import { Link } from "@/i18n/navigation";
 import { MOOD_COLOURS, MOOD_DOT_OUTLINE } from "@/lib/journal/checkIn";
 import { withOrigin } from "@/lib/journal/origin";
 import { dayLabel, groupByMonth, monthLabel, type TimelineDay } from "@/lib/journal/timeline";
-import { checkInChips } from "../checkInChips";
+import { MonthShare, type MonthCounts } from "./MonthShare";
 import { loadTimeline } from "./actions";
 
-// The Timeline (M5): days newest first under month headers. Each day: its
-// date and mood (colour dot + label), check-in chips, then its entry
-// previews (2 lines, ★ for moments). More days load as the end of the list
-// comes into view (by days, not months: a month can span two pages).
-type Props = { initial: TimelineDay[]; initialDone: boolean; momentsOnly: boolean; dateLocaleTag: string };
+// The Timeline (M5, decision 161): days newest first under month headers
+// (each with "Share this month" where it can make a card). Each day: its
+// mood dot and date with the mood word (a dashed dot without a check-in),
+// then its entry previews (2 lines, ★ for moments); the chips live in the
+// day and entry views. More days load as the end of the list comes into
+// view (by days, not months: a month can span two pages).
+type Props = { initial: TimelineDay[]; initialDone: boolean; momentsOnly: boolean; dateLocaleTag: string; shareable?: boolean };
 
-export function TimelineList({ initial, initialDone, momentsOnly, dateLocaleTag }: Props) {
+export function TimelineList({ initial, initialDone, momentsOnly, dateLocaleTag, shareable = false }: Props) {
   const t = useTranslations("timeline");
   const tt = useTranslations("today");
   const te = useTranslations("entry");
   const ta = useTranslations("app");
   const [days, setDays] = useState(initial);
+  // The month headers' check-in counts, for this list only (MonthShare).
+  const [monthCounts] = useState<MonthCounts>(() => new Map());
   const [done, setDone] = useState(initialDone);
   const [failed, setFailed] = useState(false);
   const [loading, startLoading] = useTransition();
@@ -76,37 +80,39 @@ export function TimelineList({ initial, initialDone, momentsOnly, dateLocaleTag 
     <div className="mt-6 space-y-10">
       {groupByMonth(days).map(({ month, days: monthDays }) => (
         <section key={month} aria-labelledby={`month-${month}`}>
-          <h2 id={`month-${month}`} className="text-sm font-medium uppercase tracking-wide text-muted">
-            {monthLabel(month, dateLocaleTag)}
-          </h2>
+          <div className="flex flex-wrap items-center justify-between gap-x-4">
+            <h2 id={`month-${month}`} className="text-sm font-medium uppercase tracking-wide text-muted">
+              {monthLabel(month, dateLocaleTag)}
+            </h2>
+            {shareable && <MonthShare month={month} dateLocaleTag={dateLocaleTag} counts={monthCounts} />}
+          </div>
           <ul className="mt-3 space-y-3">
             {monthDays.map((day) => {
               const c = day.check_in;
-              const chips = c ? checkInChips(c, tt).map((chip) => chip.label) : [];
               return (
                 <li key={day.local_date} className="rounded-2xl border border-border bg-surface p-4">
                   <Link
                     href={`/app/timeline/${day.local_date}`}
                     data-testid={`timeline-day-${day.local_date}`}
-                    className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg font-medium text-text hover:text-accent"
+                    className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg font-medium text-text hover:text-accent"
                   >
+                    {/* The mood's dot, named in words beside it (never colour
+                        alone); a day without a check-in gets an empty dashed
+                        one, said only to screen readers (no guilt). */}
+                    {c ? (
+                      <span className={`h-3.5 w-3.5 shrink-0 rounded-full ${MOOD_COLOURS[c.mood - 1]} ${MOOD_DOT_OUTLINE}`} aria-hidden="true" data-testid="timeline-mood-dot" />
+                    ) : (
+                      <span className="h-3.5 w-3.5 shrink-0 rounded-full border border-dashed border-muted" aria-hidden="true" data-testid="timeline-no-checkin-dot" />
+                    )}
                     <span>{dayLabel(day.local_date, dateLocaleTag)}</span>
-                    {c && (
-                      <span className="flex items-center gap-2 text-sm text-muted">
-                        <span className={`h-3 w-3 rounded-full ${MOOD_COLOURS[c.mood - 1]} ${MOOD_DOT_OUTLINE}`} aria-hidden="true" />
-                        {tt(`mood${c.mood}` as "mood1")}
+                    {c ? (
+                      <span className="text-sm font-normal text-muted">
+                        <span aria-hidden="true">·</span> {tt(`mood${c.mood}` as "mood1")}
                       </span>
+                    ) : (
+                      <span className="sr-only">{t("dayNoCheckin")}</span>
                     )}
                   </Link>
-                  {chips.length > 0 && (
-                    <ul className="mt-2 flex flex-wrap gap-2">
-                      {chips.map((chip) => (
-                        <li key={chip} className="rounded-full bg-pill px-3 py-0.5 text-xs text-text">
-                          {chip}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
                   {day.entries.length > 0 && (
                     <ul className="mt-3 space-y-2">
                       {day.entries.map((entry) => (

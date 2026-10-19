@@ -13,7 +13,20 @@ import { loadMonthCheckIns } from "./shareActions";
 // always. The card is drawn here in the browser from the month's moods and
 // only leaves it if the person shares or downloads it (decision 20). Only
 // colours, the month, the count and their own optional line are on it.
-export function ShareMonth({ month, dateLocaleTag, label }: { month: string; dateLocaleTag: string; label?: "shareButton" | "shareThisMonth" }) {
+// asLink: the quiet text-link trigger (a Timeline month header, decision 161).
+export function ShareMonth({
+  month,
+  dateLocaleTag,
+  label,
+  asLink = false,
+  testId = "share-open",
+}: {
+  month: string;
+  dateLocaleTag: string;
+  label?: "shareButton" | "shareThisMonth";
+  asLink?: boolean;
+  testId?: string;
+}) {
   const t = useTranslations("share");
   const tt = useTranslations("today");
   const tm = useTranslations("me");
@@ -125,7 +138,12 @@ export function ShareMonth({ month, dateLocaleTag, label }: { month: string; dat
 
   return (
     <>
-      <button type="button" data-testid="share-open" onClick={start} className={dialogButton()}>
+      <button
+        type="button"
+        data-testid={testId}
+        onClick={start}
+        className={asLink ? "inline-flex min-h-11 items-center text-sm font-medium text-accent underline underline-offset-4" : dialogButton()}
+      >
         {t(label ?? "shareButton")}
       </button>
       {open && (

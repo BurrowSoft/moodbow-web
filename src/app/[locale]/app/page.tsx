@@ -41,7 +41,7 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
   // Today's entries, newest first (previews only; the editor loads the rest).
   const { data: entries, error: entriesError } = await supabase
     .from("entries")
-    .select("id, body, is_moment")
+    .select("id, body, is_moment, entry_date, created_at")
     .eq("entry_date", me.today)
     .order("created_at", { ascending: false });
   const t = await getTranslations("today");
@@ -77,7 +77,7 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
           <h2 id="today-entries-title" className="text-lg font-medium text-text">
             {te("todayEntriesTitle")}
           </h2>
-          <EntryPreviews entries={entries as EntrySummary[]} testIdPrefix="today-entry" from="/app" />
+          <EntryPreviews entries={entries as EntrySummary[]} testIdPrefix="today-entry" from="/app" timeZone={me.profile?.time_zone ?? "UTC"} dateLocaleTag={dateLocaleTag} />
         </section>
       )}
     </section>
