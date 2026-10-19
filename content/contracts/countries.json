@@ -1,0 +1,97 @@
+{
+  "format": "moodbow-countries",
+  "version": "2026-10-19",
+  "default": {
+    "directory_url": "https://findahelpline.com"
+  },
+  "countries": [
+    {
+      "code": "AU",
+      "helpline": { "name": "Lifeline", "display": "13 11 14", "dial": "131114", "sms": false },
+      "emergency": { "display": "000", "dial": "000" },
+      "status": "verified",
+      "checked_on": "2026-10-19",
+      "source": "https://www.lifeline.org.au"
+    },
+    {
+      "code": "BR",
+      "helpline": { "name": "CVV", "display": "188", "dial": "188", "sms": false },
+      "emergency": { "display": "192", "dial": "192" },
+      "status": "verified",
+      "checked_on": "2026-10-19",
+      "source": "https://cvv.org.br"
+    },
+    {
+      "code": "CA",
+      "helpline": { "name": "9-8-8 Suicide Crisis Helpline", "display": "988", "dial": "988", "sms": true },
+      "emergency": { "display": "911", "dial": "911" },
+      "status": "verified",
+      "checked_on": "2026-10-19",
+      "source": "https://988.ca"
+    },
+    {
+      "code": "DE",
+      "helpline": { "name": "TelefonSeelsorge", "display": "0800 111 0 111", "dial": "08001110111", "sms": false },
+      "emergency": { "display": "112", "dial": "112" },
+      "status": "verified",
+      "checked_on": "2026-10-19",
+      "source": "https://www.telefonseelsorge.de"
+    },
+    {
+      "code": "ES",
+      "helpline": { "name": "Línea 024", "display": "024", "dial": "024", "sms": false },
+      "emergency": { "display": "112", "dial": "112" },
+      "status": "verified",
+      "checked_on": "2026-10-19",
+      "source": "https://www.sanidad.gob.es"
+    },
+    {
+      "code": "FR",
+      "helpline": { "name": "3114", "display": "3114", "dial": "3114", "sms": false },
+      "emergency": { "display": "112", "dial": "112" },
+      "status": "verified",
+      "checked_on": "2026-10-19",
+      "source": "https://3114.fr"
+    },
+    {
+      "code": "GB",
+      "helpline": { "name": "Samaritans", "display": "116 123", "dial": "116123", "sms": false },
+      "emergency": { "display": "999", "dial": "999" },
+      "status": "verified",
+      "checked_on": "2026-10-19",
+      "source": "https://www.samaritans.org"
+    },
+    {
+      "code": "IE",
+      "helpline": { "name": "Samaritans", "display": "116 123", "dial": "116123", "sms": false },
+      "emergency": { "display": "112", "dial": "112" },
+      "status": "verified",
+      "checked_on": "2026-10-19",
+      "source": "https://www.samaritans.org"
+    },
+    {
+      "code": "NZ",
+      "helpline": { "name": "Need to talk? 1737", "display": "1737", "dial": "1737", "sms": true },
+      "emergency": { "display": "111", "dial": "111" },
+      "status": "verified",
+      "checked_on": "2026-10-19",
+      "source": "https://1737.org.nz"
+    },
+    {
+      "code": "TH",
+      "helpline": { "name": "Department of Mental Health hotline", "display": "1323", "dial": "1323", "sms": false },
+      "emergency": { "display": "1669", "dial": "1669" },
+      "status": "unverified",
+      "checked_on": "2026-10-19",
+      "source": "https://www.dmh.go.th"
+    },
+    {
+      "code": "US",
+      "helpline": { "name": "988 Suicide & Crisis Lifeline", "display": "988", "dial": "988", "sms": true },
+      "emergency": { "display": "911", "dial": "911" },
+      "status": "verified",
+      "checked_on": "2026-10-19",
+      "source": "https://988lifeline.org"
+    }
+  ]
+}

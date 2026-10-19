@@ -1,0 +1,13 @@
+{
+  "repo": "BurrowSoft/moodbow-app",
+  "path": "supabase/contracts",
+  "commit": "1faa4ca739faec802aa7b4c7fa7061a043a2bb54",
+  "sha256": {
+    "countries.json": "d2ab7e11f366a4c43c4a40c9409e4c703b85a092ed7a773ff1b92761746bd815",
+    "export-text.md": "30e81ae72426a7a980f87c34325f886bd5311525e5b6ee310708daebd91198cd",
+    "export_fixture.json": "1221e41176ac46a67faf93ec9d90ac1546f16bd44d7c61874289d51ae5b7312e",
+    "export_fixture.txt": "3a3925736b035703187fdd79abb52fa10831366859ce71f2d30fdd6f363f775a",
+    "get-help-label.json": "0c249d77add657a909adffcbcf483c86b80823927240b62973fb33361b7db838",
+    "reflect.md": "5513fb73e2e9178b503cdf8e5bce9de0104415d45eac2187b197cc135102932c"
+  }
+}
