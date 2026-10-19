@@ -24,17 +24,24 @@ export function TimelineList({ initial, initialDone, momentsOnly, dateLocaleTag 
   const [failed, setFailed] = useState(false);
   const [loading, startLoading] = useTransition();
   const sentinel = useRef<HTMLDivElement>(null);
+  // How many days the last load added, said in a status region that's
+  // always there (new days arrive silently otherwise; a11y pass).
+  const [loaded, setLoaded] = useState<number | null>(null);
 
   const loadMore = useCallback(() => {
     if (done || loading || days.length === 0) return;
     const before = days[days.length - 1].local_date;
+    // Empty first, so the same count twice is announced again (reviewer #40).
+    setLoaded(null);
     startLoading(async () => {
       try {
         const page = await loadTimeline(before, momentsOnly);
         if (page.status === "error") return setFailed(true);
         setFailed(false);
         // Keyed by date, so a page that overlaps what's shown can't repeat a day.
+        const fresh = page.days.filter((d) => !days.some((s) => s.local_date === d.local_date));
         setDays((shown) => [...shown, ...page.days.filter((d) => !shown.some((s) => s.local_date === d.local_date))]);
+        setLoaded(fresh.length);
         setDone(page.done);
       } catch {
         setFailed(true);
@@ -129,8 +136,11 @@ export function TimelineList({ initial, initialDone, momentsOnly, dateLocaleTag 
         </section>
       ))}
 
+      <p role="status" className="sr-only" data-testid="timeline-loaded">
+        {loaded ? t("timelineLoadedMore", { count: loaded }) : null}
+      </p>
       {!done && (
-        <div ref={sentinel} className="flex flex-col items-center gap-3 pb-4" data-testid="timeline-more" aria-busy={loading}>
+        <div ref={sentinel} className="flex flex-col items-center gap-3 pb-4" data-testid="timeline-more">
           {failed ? (
             <>
               <p role="alert" className="font-medium text-accent">
@@ -141,7 +151,14 @@ export function TimelineList({ initial, initialDone, momentsOnly, dateLocaleTag 
               </button>
             </>
           ) : (
-            <span className="h-6 w-6 animate-spin rounded-full border-2 border-border border-t-accent motion-reduce:animate-none" aria-hidden="true" hidden={!loading} />
+            <>
+              <span className="h-6 w-6 animate-spin rounded-full border-2 border-border border-t-accent motion-reduce:animate-none" aria-hidden="true" hidden={!loading} />
+              {/* Scrolling loads more by itself; this is for keyboards and
+                  screen readers, whose cursor may not scroll the page. */}
+              <button type="button" data-testid="timeline-load-more" onClick={loadMore} aria-disabled={loading} className="font-medium text-accent underline underline-offset-4 aria-disabled:opacity-60">
+                {t("timelineLoadMore")}
+              </button>
+            </>
           )}
         </div>
       )}

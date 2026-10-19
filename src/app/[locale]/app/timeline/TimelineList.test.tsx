@@ -113,3 +113,18 @@ describe("TimelineList", () => {
     expect(screen.getByTestId("timeline-empty")).toHaveTextContent(t.timelineMomentsEmpty);
   });
 });
+
+describe("TimelineList: more days without scrolling, and said (a11y pass)", () => {
+  it("'Show more days' loads the next page; the status says how many new days came (repeats not counted)", async () => {
+    loadTimeline.mockResolvedValue({ status: "ok", days: [days[1], { local_date: "2026-08-15", check_in: null, entries: [], entry_count: 0 }], done: false });
+    renderList();
+    const status = screen.getByTestId("timeline-loaded");
+    expect(status).toHaveAttribute("role", "status");
+    expect(status).toBeEmptyDOMElement();
+    fireEvent.click(screen.getByTestId("timeline-load-more"));
+    await waitFor(() => expect(screen.getByTestId("timeline-day-2026-08-15")).toBeInTheDocument());
+    expect(loadTimeline).toHaveBeenCalledWith("2026-09-28", false);
+    expect(status).toHaveTextContent("1 more day loaded");
+    expect(screen.queryByTestId("timeline-more")).not.toHaveAttribute("aria-busy");
+  });
+});
