@@ -41,3 +41,14 @@ export function timeZoneOptions(current: string | null | undefined): string[] {
 }
 
 export const isTimeZoneName = (v: unknown): v is string => typeof v === "string" && /^[A-Za-z][A-Za-z0-9_+\-]*(\/[A-Za-z0-9_+\-]+)*$/.test(v) && v.length <= 64;
+
+// The web's languages as [code, name], each named in its own language.
+export function languageOptions(locales: readonly string[]): [string, string][] {
+  return locales.map((code): [string, string] => {
+    try {
+      return [code, new Intl.DisplayNames([code], { type: "language" }).of(code) ?? code];
+    } catch {
+      return [code, code];
+    }
+  });
+}

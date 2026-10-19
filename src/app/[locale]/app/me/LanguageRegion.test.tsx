@@ -9,11 +9,12 @@ const refresh = vi.fn();
 const replace = vi.fn();
 vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ refresh, replace }), usePathname: () => "/app/me" }));
 const { LanguageRegion } = await import("./LanguageRegion");
+const { countryOptions, languageOptions, timeZoneOptions } = await import("@/lib/region/countries");
 
 const renderIt = (initial = { locale: "en", country: "TH", time_zone: "Asia/Bangkok" }) =>
   render(
     <NextIntlClientProvider locale="en" messages={messages}>
-      <LanguageRegion initial={initial} />
+      <LanguageRegion initial={initial} countries={countryOptions("en")} zones={timeZoneOptions(initial.time_zone)} languages={languageOptions(["en"])} />
     </NextIntlClientProvider>,
   );
 
@@ -70,5 +71,17 @@ describe("Me → Language & region", () => {
     expect(await screen.findByTestId("me-region-retry")).toBeInTheDocument();
     expect(screen.getByTestId("me-time-zone")).toHaveValue("Asia/Bangkok");
     expect(refresh).not.toHaveBeenCalled();
+  });
+});
+
+describe("Me → Language & region: the lists come from the server (reviewer #36)", () => {
+  it("renders exactly the options it's given (no browser-side Intl lists)", () => {
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <LanguageRegion initial={{ locale: "en", country: "TH", time_zone: "Asia/Bangkok" }} countries={[["TH", "Thailand"], ["US", "United States"]]} zones={["Asia/Bangkok", "UTC"]} languages={[["en", "English"]]} />
+      </NextIntlClientProvider>,
+    );
+    expect(screen.getByTestId("me-country").querySelectorAll("option")).toHaveLength(3);
+    expect(screen.getByTestId("me-time-zone").querySelectorAll("option")).toHaveLength(2);
   });
 });

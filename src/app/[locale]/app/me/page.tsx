@@ -13,6 +13,8 @@ import { tabMetadata } from "../TabPlaceholder";
 import { signOut } from "./actions";
 import { AiSettings } from "./AiSettings";
 import { LanguageRegion } from "./LanguageRegion";
+import { countryOptions, languageOptions, timeZoneOptions } from "@/lib/region/countries";
+import { routing } from "@/i18n/routing";
 import { Reminder } from "./Reminder";
 import { YourData } from "./YourData";
 
@@ -53,7 +55,12 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
         />
       )}
       <Reminder on={me.settings?.reminder_on ?? true} time={hhmm(me.settings?.reminder_time)} />
-      <LanguageRegion initial={{ locale: me.profile?.locale ?? locale, country: me.profile?.country ?? "", time_zone: me.profile?.time_zone ?? "UTC" }} />
+      <LanguageRegion
+        initial={{ locale: me.profile?.locale ?? locale, country: me.profile?.country ?? "", time_zone: me.profile?.time_zone ?? "UTC" }}
+        countries={countryOptions(locale)}
+        zones={timeZoneOptions(me.profile?.time_zone)}
+        languages={languageOptions(routing.locales)}
+      />
       <YourData credits={me.credits?.balance ?? 0} uid={user.id} />
 
       <section aria-labelledby="me-help" className="rounded-3xl border border-border bg-surface p-6">
