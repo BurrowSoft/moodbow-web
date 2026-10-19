@@ -1,11 +1,11 @@
 ---
 title: Daily check-ins
-summary: Log your mood, sleep, exercise and stress in seconds.
+summary: Log your mood, sleep, movement and stress in seconds.
 topic: Your journal
 ---
 On **Today**, tap how you feel. That's the only required part. If you like, add:
 - **Sleep:** hours and how well you slept
-- **Exercise:** how many minutes you moved
+- **Movement:** how many minutes you moved (a walk counts; a rest day is fine)
 - **Stress:** from low to high
 
 Tap **Save**. You can come back and **Edit** the check-in any time, from Today or from the timeline.
