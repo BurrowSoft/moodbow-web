@@ -252,6 +252,8 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
         if (!blank && !tooLong && !future) send(base);
       }}
     >
+      {/* The page's heading (also its title), for heading navigation. */}
+      <h1 className="sr-only">{initial ? t("entryEditTitle") : t("entryNewTitle")}</h1>
       <label className="sr-only" htmlFor="entry-text">
         {t("entryTextLabel")}
       </label>
@@ -261,6 +263,9 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
         value={fields.body}
         onChange={(e) => setFields((f) => ({ ...f, body: e.target.value }))}
         placeholder={t("entryPlaceholder")}
+        // Too long: the message is tied to the text (a11y pass).
+        aria-invalid={tooLong || undefined}
+        aria-describedby={tooLong ? "entry-error" : undefined}
         className="min-h-[50dvh] w-full flex-1 resize-none rounded-3xl border border-border bg-surface p-6 text-lg leading-relaxed text-text placeholder:text-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
       />
 
@@ -274,6 +279,8 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
             data-testid="entry-date"
             type="date"
             max={today}
+            aria-invalid={future || undefined}
+            aria-describedby={future ? "entry-error" : undefined}
             value={fields.date}
             onChange={(e) => e.target.value && setFields((f) => ({ ...f, date: e.target.value }))}
             className="min-h-11 rounded-full border border-border bg-bg px-4 text-text"
@@ -298,7 +305,7 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
       </div>
 
       {errorText && (
-        <p role="alert" data-testid="entry-error" className="font-medium text-accent">
+        <p id="entry-error" role="alert" data-testid="entry-error" className="font-medium text-accent">
           {errorText}
         </p>
       )}

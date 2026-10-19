@@ -18,3 +18,10 @@ export async function tabMetadata(titleKey: "tabToday" | "tabTimeline" | "tabIns
   const meta = await getTranslations({ locale, namespace: "meta" });
   return { title: meta("pageTitle", { title: t(titleKey) }), robots: { index: false, follow: false } };
 }
+
+// A journal page with its own title ("New entry · Moodbow", a day's date):
+// the route announcer reads the title, so each page needs its own (a11y pass).
+export async function titledMetadata(title: string, locale: string) {
+  const meta = await getTranslations({ locale, namespace: "meta" });
+  return { title: meta("pageTitle", { title }), robots: { index: false, follow: false } };
+}
