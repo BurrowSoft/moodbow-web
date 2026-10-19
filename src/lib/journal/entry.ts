@@ -27,7 +27,11 @@ export type EntryInput = { id: string; date: string; body: string; isMoment: boo
 export function parseEntry(form: FormData): EntryInput | null {
   const id = String(form.get("id") ?? "");
   const date = String(form.get("entry_date") ?? "");
-  const body = String(form.get("body") ?? "");
+  // Line breaks as \n, like the app and the editor's text area: a browser
+  // sends form text with \r\n (multipart encoding), which would be stored
+  // as-is, count twice against the 20,000 limit, and differ from the
+  // editor's copy (a false "unsaved" or "changed elsewhere"; Web Tester, #51).
+  const body = String(form.get("body") ?? "").replace(/\r\n?/g, "\n");
   const expected = String(form.get("expected_updated_at") ?? "") || null;
   if (!isEntryId(id) || !ISO_DATE.test(date) || body.trim() === "" || body.length > MAX_ENTRY_CHARS) return null;
   return { id, date, body, isMoment: form.get("is_moment") === "true", expected };
