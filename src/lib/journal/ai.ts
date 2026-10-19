@@ -9,6 +9,19 @@ export type Tone = (typeof TONES)[number];
 export const FOCUS_AREAS = ["sleep", "stress", "work", "study", "relationships", "family", "health", "self_esteem"] as const;
 export type FocusArea = (typeof FOCUS_AREAS)[number];
 
+// Their labels (messages "ai"): the tone with its hint, and each focus area.
+export const TONE_KEYS = { warm: ["toneWarm", "toneWarmHint"], direct: ["toneDirect", "toneDirectHint"], brief: ["toneBrief", "toneBriefHint"] } as const;
+export const FOCUS_KEYS = {
+  sleep: "focusSleep",
+  stress: "focusStress",
+  work: "focusWork",
+  study: "focusStudy",
+  relationships: "focusRelationships",
+  family: "focusFamily",
+  health: "focusHealth",
+  self_esteem: "focusSelfEsteem",
+} as const satisfies Record<FocusArea, string>;
+
 export const isTone = (v: unknown): v is Tone => typeof v === "string" && (TONES as readonly string[]).includes(v);
 export const isFocusArea = (v: unknown): v is FocusArea => typeof v === "string" && (FOCUS_AREAS as readonly string[]).includes(v);
 
