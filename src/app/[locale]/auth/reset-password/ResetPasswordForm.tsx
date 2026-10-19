@@ -22,6 +22,8 @@ export function ResetPasswordForm() {
   const [state, action, pending] = useActionState<ResetPasswordState, FormData>(resetPassword, { status: "idle" });
 
   const error = state.status === "error" ? state.error : null;
+  // The error is tied to the field it's about (aria-invalid + described by).
+  const on = error === "short" || error === "same" ? "password" : error === "mismatch" ? "confirm" : null;
   return (
     <form action={action} noValidate className="space-y-5">
       <div>
@@ -35,7 +37,8 @@ export function ResetPasswordForm() {
           autoComplete="new-password"
           required
           minLength={PASSWORD_MIN_LENGTH}
-          aria-describedby="password-hint"
+          aria-describedby={on === "password" ? "password-hint reset-error" : "password-hint"}
+          aria-invalid={on === "password" ? true : undefined}
           className={inputClass}
         />
         <p id="password-hint" className="mt-1 text-sm">
@@ -46,10 +49,19 @@ export function ResetPasswordForm() {
         <label htmlFor="confirm" className="block text-sm font-medium text-text">
           {t("confirmPassword")}
         </label>
-        <input id="confirm" name="confirm" type="password" autoComplete="new-password" required className={inputClass} />
+        <input
+          id="confirm"
+          name="confirm"
+          type="password"
+          autoComplete="new-password"
+          required
+          aria-describedby={on === "confirm" ? "reset-error" : undefined}
+          aria-invalid={on === "confirm" ? true : undefined}
+          className={inputClass}
+        />
       </div>
       {error && (
-        <p role="alert" data-testid="reset-error" className="font-medium text-accent">
+        <p id="reset-error" role="alert" data-testid="reset-error" className="font-medium text-accent">
           {t(ERROR_KEYS[error])}
         </p>
       )}

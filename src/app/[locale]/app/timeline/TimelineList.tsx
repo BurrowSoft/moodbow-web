@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { MomentStar } from "@/components/MomentStar";
 import { Link } from "@/i18n/navigation";
 import { MOOD_COLOURS, MOOD_DOT_OUTLINE } from "@/lib/journal/checkIn";
+import { withOrigin } from "@/lib/journal/origin";
 import { dayLabel, groupByMonth, monthLabel, type TimelineDay } from "@/lib/journal/timeline";
 import { loadTimeline } from "./actions";
 
@@ -121,7 +122,7 @@ export function TimelineList({ initial, initialDone, momentsOnly, dateLocaleTag 
                     <ul className="mt-3 space-y-2">
                       {day.entries.map((entry) => (
                         <li key={entry.id}>
-                          <Link href={`/app/entries/${entry.id}`} data-testid={`timeline-entry-${entry.id}`} className="flex items-start gap-2 rounded-lg text-sm text-text hover:text-accent">
+                          <Link href={withOrigin(`/app/entries/${entry.id}`, "/app/timeline")} data-testid={`timeline-entry-${entry.id}`} className="flex items-start gap-2 rounded-lg text-sm text-text hover:text-accent">
                             {entry.is_moment && <MomentStar label={te("momentBadge")} />}
                             <span className="line-clamp-2 whitespace-pre-line">{entry.preview}</span>
                           </Link>

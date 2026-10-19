@@ -48,6 +48,11 @@ describe("parseEntry", () => {
     }
     expect(parseEntry(form({ ...valid, body: "x".repeat(20000) }))).not.toBeNull();
   });
+  it("stores line breaks as \\n, as the browser's \\r\\n arrives; the limit counts each break once", () => {
+    expect(parseEntry(form({ ...valid, body: "One.\r\n\r\nTwo.\rThree.\n" }))!.body).toBe("One.\n\nTwo.\nThree.\n");
+    const long = `${"x".repeat(9999)}\r\n${"y".repeat(10000)}`;
+    expect(parseEntry(form({ ...valid, body: long }))!.body).toHaveLength(20000);
+  });
 });
 
 describe("entryErrorAction", () => {

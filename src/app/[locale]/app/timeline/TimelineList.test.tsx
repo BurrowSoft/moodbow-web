@@ -61,7 +61,8 @@ describe("TimelineList", () => {
     expect(day).toHaveTextContent(messages.today.mood4);
     const row = day.closest("li")!;
     for (const chip of ["7.5 h", "30 min", "Stress 2/5"]) expect(within(row).getByText(chip)).toBeInTheDocument();
-    expect(screen.getByTestId("timeline-entry-e1")).toHaveAttribute("href", "/app/entries/e1");
+    // Opened from the Timeline (decision 152): its nav and Back lead back here.
+    expect(screen.getByTestId("timeline-entry-e1")).toHaveAttribute("href", "/app/entries/e1?from=%2Fapp%2Ftimeline");
   });
 
   it("a moment has the ★, named 'Moment' (UX); others don't", () => {
