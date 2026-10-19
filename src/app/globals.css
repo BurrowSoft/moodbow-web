@@ -119,9 +119,10 @@ body {
 /* Every error message (role=alert) gets an error icon before its words:
    colour is never the only cue (decision 150). Decorative: a pseudo-element
    with no text, so screen readers read only the words. When the alert is
-   a heading (journal unavailable), the icon goes inside it, on its line. */
+   a heading (journal unavailable, data-alert="heading"), the icon goes
+   inside it, on its line. */
 [role="alert"]::before,
-[role="alert"] > h1::before {
+[role="alert"][data-alert="heading"] > h1::before {
   content: "";
   display: inline-block;
   width: 1em;
@@ -132,9 +133,10 @@ body {
   -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22%3E%3Cpath d=%22M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm-1 5h2v7h-2V7Zm0 9h2v2h-2v-2Z%22/%3E%3C/svg%3E") center / contain no-repeat;
   mask: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22%3E%3Cpath d=%22M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm-1 5h2v7h-2V7Zm0 9h2v2h-2v-2Z%22/%3E%3C/svg%3E") center / contain no-repeat;
 }
-/* Own rules so a browser without :has() still shows the icon (above the
-   heading then). */
-[role="alert"]:has(> h1)::before {
+/* A heading alert opts in with data-alert="heading": its icon is inside
+   the h1 instead of above it (an attribute rather than a parent selector,
+   so no browser shows both). */
+[role="alert"][data-alert="heading"]::before {
   display: none;
 }
 
