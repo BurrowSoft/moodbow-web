@@ -32,14 +32,22 @@ export default async function HelpArticlePage({ params }: PageProps<"/[locale]/h
   const html = article ? renderArticle(article) : "";
   if (!article || !html) notFound();
   const t = await getTranslations("help");
+  // The link back to Help is chrome, so it sits after the article, outside
+  // [data-content=article] (Web Tester, #23).
   return (
-    <PageShell title={article.title} article draft={state === "draft"}>
+    <PageShell
+      title={article.title}
+      article
+      draft={state === "draft"}
+      after={
+        <p className="mx-auto mt-6 max-w-2xl">
+          <Link href="/help" data-testid="help-back" className="font-medium text-accent underline underline-offset-4">
+            {t("helpTitle")}
+          </Link>
+        </p>
+      }
+    >
       <div className="legal-prose" dangerouslySetInnerHTML={{ __html: html }} />
-      <p>
-        <Link href="/help" className="font-medium text-accent underline underline-offset-4">
-          {t("helpTitle")}
-        </Link>
-      </p>
     </PageShell>
   );
 }
