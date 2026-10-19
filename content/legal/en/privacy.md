@@ -57,7 +57,7 @@ We never sell your data, and we never share it with advertisers.
 ### 4. How long we keep it
 - Everything is kept until you delete it or delete your account.
 - **Deleting your account** removes your journal, check-ins, AI content, settings, credits history and login from our live database immediately.
-- Copies in our encrypted backups disappear automatically within {pending:backup_retention}7{/pending} days.
+- Copies in our encrypted backups disappear automatically within {pending:backup_retention}8{/pending} days.
 - Crash reports are kept by our error-tracking provider for up to 90 days.
 - Technical logs at our providers (hosting, database, email delivery) are kept only for a limited period set by each provider, and then deleted.
 - When you delete your account, copies in those providers' logs also expire under these retention periods.
