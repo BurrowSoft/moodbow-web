@@ -5,6 +5,7 @@ import type { Locale } from "@/i18n/routing";
 import { redirect } from "@/i18n/navigation";
 import { PageShell } from "@/components/PageShell";
 import { pageGate } from "@/lib/conditions";
+import { canReflect } from "@/lib/journal/ai";
 import { getMe, onboardingStep } from "@/lib/journal/me";
 import { pageMetadata } from "@/lib/metadata";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -43,7 +44,9 @@ export default async function SetupPage({ params }: PageProps<"/[locale]/setup">
   const t = await getTranslations("onboarding");
   return (
     <PageShell title={t("setupTitle")}>
-      <SetupForm />
+      {/* Focus and tone only when AI was turned on at Consent (and AI is
+          shown here), as on the app (r1 §M3). */}
+      <SetupForm askAi={canReflect(me)} />
     </PageShell>
   );
 }

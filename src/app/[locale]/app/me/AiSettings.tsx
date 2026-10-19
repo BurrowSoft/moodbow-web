@@ -2,20 +2,8 @@
 
 import { useRef, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
-import { FOCUS_AREAS, TONES, type FocusArea, type Tone } from "@/lib/journal/ai";
+import { FOCUS_AREAS, FOCUS_KEYS, TONE_KEYS, TONES, type FocusArea, type Tone } from "@/lib/journal/ai";
 import { recordAiWithdrawal, saveFocusAreas, saveTone, setAiEnabled, type AiSaveResult, type AiSwitchResult } from "./actions";
-
-const TONE_KEYS = { warm: ["toneWarm", "toneWarmHint"], direct: ["toneDirect", "toneDirectHint"], brief: ["toneBrief", "toneBriefHint"] } as const;
-const FOCUS_KEYS: Record<FocusArea, string> = {
-  sleep: "focusSleep",
-  stress: "focusStress",
-  work: "focusWork",
-  study: "focusStudy",
-  relationships: "focusRelationships",
-  family: "focusFamily",
-  health: "focusHealth",
-  self_esteem: "focusSelfEsteem",
-};
 
 type Values = { on: boolean; tone: Tone; focus: FocusArea[] };
 type Field = keyof Values;
@@ -108,6 +96,7 @@ export function AiSettings({ initial, credits }: { initial: Values; credits: { b
                     type="radio"
                     name="me-ai-tone"
                     data-testid={`me-ai-tone-${tone}`}
+                    aria-describedby={`me-ai-tone-${tone}-hint`}
                     checked={values.tone === tone}
                     aria-disabled={pending}
                     onChange={() => save("tone", tone)}
@@ -115,7 +104,7 @@ export function AiSettings({ initial, credits }: { initial: Values; credits: { b
                   />
                   <span className="flex flex-col">
                     <span>{t(TONE_KEYS[tone][0])}</span>
-                    <span className="text-sm text-muted">{t(TONE_KEYS[tone][1])}</span>
+                    <span id={`me-ai-tone-${tone}-hint`} aria-hidden="true" className="text-sm text-muted">{t(TONE_KEYS[tone][1])}</span>
                   </span>
                 </label>
               ))}

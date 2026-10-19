@@ -163,6 +163,8 @@
     "errAgeRequired": "Moodbow is for people 18 and older",
     "errEmailTaken": "This email already has an account. Sign in instead?",
     "setupTitle": "Make it yours",
+    "setupFocusTitle": "What would you like Moodbow to pay attention to?",
+    "setupToneTitle": "How should Moodbow talk to you?",
     "setupReminderTitle": "Daily reminder",
     "setupReminderBody": "A gentle nudge to check in.",
     "setupReminderTime": "Time",
