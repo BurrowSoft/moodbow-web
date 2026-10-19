@@ -18,7 +18,7 @@ vi.mock("@/i18n/navigation", () => ({
     throw new Redirect(args);
   },
 }));
-const { exportMyData, deleteMyAccount } = await import("./actions");
+const { exportMyData, deleteMyAccount, saveReminder } = await import("./actions");
 
 const UID = "0b5f2c1e-7d3a-4e8b-9c41-2a6f8e1d3b70";
 const confirm = (word: string) => {
@@ -87,5 +87,29 @@ describe("deleteMyAccount", () => {
     getUser.mockResolvedValue({ data: { user: null }, error: { name: "AuthRetryableFetchError" } });
     expect(await deleteMyAccount(idle, confirm("DELETE"))).toEqual({ status: "error", error: "generic" });
     expect(rpc).not.toHaveBeenCalled();
+  });
+});
+
+describe("saveReminder", () => {
+  const reminder = (on: string, time: string) => {
+    const f = new FormData();
+    f.set("reminder_on", on);
+    f.set("reminder_time", time);
+    return f;
+  };
+
+  it("saves on/off and the time with update_settings", async () => {
+    rpc.mockResolvedValue({ data: {}, error: null });
+    expect(await saveReminder(idle, reminder("true", "07:30"))).toEqual({ status: "saved", on: true, time: "07:30" });
+    expect(rpc).toHaveBeenCalledWith("update_settings", { p_reminder_on: true, p_reminder_time: "07:30" });
+    expect(await saveReminder(idle, reminder("false", "21:00"))).toEqual({ status: "saved", on: false, time: "21:00" });
+  });
+
+  it("a malformed time never reaches the RPC; a failure is an error", async () => {
+    expect(await saveReminder(idle, reminder("true", "25:00"))).toMatchObject({ status: "error" });
+    expect(await saveReminder(idle, reminder("true", "7:30"))).toMatchObject({ status: "error" });
+    expect(rpc).not.toHaveBeenCalled();
+    rpc.mockResolvedValue({ data: null, error: { message: "boom" } });
+    expect(await saveReminder(idle, reminder("true", "07:30"))).toEqual({ status: "error", on: true, time: "07:30" });
   });
 });
