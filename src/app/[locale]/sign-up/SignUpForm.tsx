@@ -29,6 +29,15 @@ export function SignUpForm() {
   const [state, action, pending] = useActionState<SignUpState, FormData>(signUpFlow, { status: "idle" });
   const [password, setPassword] = useState("");
   const timeZone = useSyncExternalStore(subscribe, browserTimeZone, noTimeZoneOnServer);
+  // "Sent again" twice in a row is the same text: empty the region on each
+  // resend, so the next answer is announced again (reviewer #39). A new
+  // answer (a new state object) shows it again.
+  const [resending, setResending] = useState(false);
+  const [answered, setAnswered] = useState(state);
+  if (answered !== state) {
+    setAnswered(state);
+    setResending(false);
+  }
 
   if (state.status === "checkEmail") {
     const NOTICES = {
@@ -45,7 +54,7 @@ export function SignUpForm() {
         {/* "Sent again" goes in a region that's always there (so it's
             announced); a problem is an alert. */}
         <p role="status" className="font-medium text-text empty:hidden" data-testid={state.notice === "resent" ? "check-email-notice" : undefined}>
-          {state.notice === "resent" ? notice : null}
+          {state.notice === "resent" && !resending ? notice : null}
         </p>
         {notice && state.notice !== "resent" && (
           <p role="alert" data-testid="check-email-notice" className="font-medium text-text">
@@ -59,7 +68,7 @@ export function SignUpForm() {
             {t("checkEmailConfirmed")}
           </button>
         </form>
-        <form action={action}>
+        <form action={action} onSubmit={() => setResending(true)}>
           <input type="hidden" name="intent" value="resend" />
           <button type="submit" disabled={pending} data-testid="check-email-resend" className={textLinkClass}>
             {t("checkEmailResend")}
