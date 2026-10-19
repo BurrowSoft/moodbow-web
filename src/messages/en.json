@@ -245,7 +245,10 @@
     "entryDeletedBody": "Your version is still here. Do you want to keep it?",
     "entryDeletedKeep": "Keep it",
     "entryDeletedDiscard": "Delete it",
-    "momentBadge": "Moment"
+    "momentBadge": "Moment",
+    "entryEditTitle": "Edit entry",
+    "entryAddMore": "Add to this entry…",
+    "entryMoreActions": "More options"
   },
   "notFound": {
     "title": "Page not found",
@@ -358,6 +361,7 @@
   },
   "ai": {
     "meAi": "AI",
+    "reflectAnswer": "Write your answer",
     "meAiOn": "AI reflections and reports",
     "consentAiBody": "To write reflections and reports, Moodbow sends your entries and logs to our AI provider, Anthropic (USA), only when needed. They aren't used to train AI models. You can turn this off any time in Me → AI.",
     "meAiOffHint": "AI is off. Your journal works the same; you just won't get reflections or reports.",

@@ -3,19 +3,18 @@ import { notFound } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 import { JournalUnavailable } from "@/components/JournalUnavailable";
+import type { CheckIn } from "@/lib/journal/checkIn";
 import { ENTRY_COLUMNS, isEntryId, type Entry } from "@/lib/journal/entry";
 import { canReflect } from "@/lib/journal/ai";
 import { getMe } from "@/lib/journal/me";
 import type { Reflection } from "@/lib/journal/reflect";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { headers } from "next/headers";
-import { BackLink } from "@/components/BackLink";
 import { backLabel } from "@/lib/journal/backLabel";
 import { originOf } from "@/lib/journal/origin";
 import { dateLocale } from "@/lib/journal/today";
-import { EntryEditor } from "../EntryEditor";
-import { ReflectPanel } from "../ReflectPanel";
 import { tabMetadata } from "../../TabPlaceholder";
+import { EntryScreen } from "./EntryScreen";
 
 // The Reflect server action runs in this page's function: room for the
 // reflect call's 45 s deadline (REFLECT_SERVER_DEADLINE_MS).
@@ -25,7 +24,7 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/app/entr
   return tabMetadata("tabToday", (await params).locale);
 }
 
-// Edit an entry (M4). RLS returns only the signed-in user's own rows, so
+// An entry (M4): the entry view, editing in place (decision 151). RLS returns only the signed-in user's own rows, so
 // someone else's id is the same 404 as a missing one.
 export default async function EntryPage({ params, searchParams }: PageProps<"/[locale]/app/entries/[id]">) {
   const { locale, id } = await params;
@@ -50,15 +49,29 @@ export default async function EntryPage({ params, searchParams }: PageProps<"/[l
     if (readError) reflect = false;
     else reflection = (row as Reflection | null) ?? null;
   }
-  // Opened from Today, the Timeline or a day (decision 152): Back and
-  // leaving the editor return there.
+  // Opened from Today, the Timeline or a day (decision 152): Back
+  // returns there.
   const from = originOf((await searchParams).from);
   const tag = dateLocale(locale, (await headers()).get("accept-language"), me.profile?.country ?? null);
+  // That day's check-in, for the strip under the date. Not read (an error):
+  // no strip, the same as a day without one; the entry is still all here.
+  const entry = data as Entry;
+  const { data: checkIn } = await supabase
+    .from("check_ins")
+    .select("local_date, mood, sleep_hours, sleep_quality, exercise_minutes, stress, updated_at")
+    .eq("local_date", entry.entry_date)
+    .maybeSingle();
   return (
-    <>
-      <BackLink href={from} label={await backLabel(from, tag)} testId="nav-back" />
-      <EntryEditor initial={data as Entry} newId={id} uid={user.id} today={me.today} country={me.profile?.country} backTo={from} />
-      {reflect && <ReflectPanel entryId={id} initial={reflection} balance={me.credits?.balance ?? 0} country={me.profile?.country} />}
-    </>
+    <EntryScreen
+      entry={entry}
+      checkIn={(checkIn as CheckIn | null) ?? null}
+      from={from}
+      backLabel={await backLabel(from, tag)}
+      dateLocaleTag={tag}
+      uid={user.id}
+      today={me.today}
+      country={me.profile?.country}
+      reflect={reflect ? { initial: reflection, balance: me.credits?.balance ?? 0 } : null}
+    />
   );
 }

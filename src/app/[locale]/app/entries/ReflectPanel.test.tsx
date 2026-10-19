@@ -199,3 +199,19 @@ describe("ReflectPanel", () => {
     expect(screen.getByTestId("reflect-button")).toBeEnabled();
   });
 });
+
+describe("ReflectPanel: Write your answer (decision 151)", () => {
+  it("only where the page offers it, with the reflection's closing question", () => {
+    renderIt(reflection());
+    expect(screen.queryByTestId("reflect-answer")).toBeNull();
+    cleanup();
+    const onAnswer = vi.fn();
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <ReflectPanel entryId={ENTRY} initial={reflection()} balance={600} onAnswer={onAnswer} />
+      </NextIntlClientProvider>,
+    );
+    fireEvent.click(screen.getByRole("button", { name: m.reflectAnswer }));
+    expect(onAnswer).toHaveBeenCalledWith("What helped?");
+  });
+});

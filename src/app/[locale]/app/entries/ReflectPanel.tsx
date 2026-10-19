@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Dialog, dialogButton } from "@/components/Dialog";
 import { GetHelpNow } from "@/components/SafetyCard";
+import { lastQuestion } from "@/lib/journal/answer";
 import getHelpLabel from "../../../../../content/contracts/get-help-label.json";
 import { IN_PROGRESS_LIMIT_MS, IN_PROGRESS_RETRY_MS, REFLECT_CLIENT_DEADLINE_MS, type Reflection, type ReflectErrorKey, type ReflectResult } from "@/lib/journal/reflect";
 import { deleteReflection, reflectOnEntry } from "./reflectActions";
@@ -46,8 +47,10 @@ const isRedirect = (e: unknown) => typeof (e as { digest?: unknown })?.digest ==
 // reflecting again replaces it. Each tap has its own client_key, resent
 // unchanged on every retry of that tap; the button is disabled while a tap
 // is in flight. The body is shown as plain text with its line breaks
-// (decision 120), never as HTML.
-export function ReflectPanel({ entryId, initial, balance, country }: { entryId: string; initial: Reflection | null; balance: number; country?: string | null }) {
+// (decision 120), never as HTML. onAnswer: "Write your answer" under the
+// reflection, with its closing question (the entry view, decision 151).
+type Props = { entryId: string; initial: Reflection | null; balance: number; country?: string | null; onAnswer?: (question: string) => void };
+export function ReflectPanel({ entryId, initial, balance, country, onAnswer }: Props) {
   const t = useTranslations("ai");
   const ta = useTranslations("app");
   const tt = useTranslations("today");
@@ -166,6 +169,16 @@ export function ReflectPanel({ entryId, initial, balance, country }: { entryId: 
           <p data-testid="reflect-body" className="whitespace-pre-line text-text">
             {reflection.body}
           </p>
+          {onAnswer && (
+            <button
+              type="button"
+              data-testid="reflect-answer"
+              onClick={() => onAnswer(lastQuestion(reflection.body))}
+              className={`mt-4 ${dialogButton()}`}
+            >
+              {t("reflectAnswer")}
+            </button>
+          )}
           {/* The crisis rule names the Get help button by its label
               (get-help-label.json = meGetHelpNow): then the button itself,
               opening the safety card (decision 124). */}
