@@ -173,7 +173,9 @@
     "tabMe": "Me",
     "emptyComingSoon": "Coming soon",
     "meSignOut": "Sign out",
-    "retry": "Try again"
+    "retry": "Try again",
+    "tryAgain": "Try again",
+    "slowLoading": "Taking longer than usual…"
   },
   "today": {
     "greetMorning": "Good morning",
@@ -207,7 +209,8 @@
     "optional": "Optional",
     "errDateInFuture": "You can't log a day that hasn't happened yet.",
     "errStaleWrite": "This was changed on another device. We've loaded the latest version. Please try again.",
-    "errGeneric": "Something went wrong. Please try again."
+    "errGeneric": "Something went wrong. Please try again.",
+    "offlineCheckinRejected": "A check-in you saved offline for {date} couldn't be saved. Please add it again."
   },
   "entry": {
     "writeButton": "Write about your day",
@@ -233,7 +236,8 @@
     "entryDeletedTitle": "This entry was deleted on another device",
     "entryDeletedBody": "Your version is still here. Do you want to keep it?",
     "entryDeletedKeep": "Keep it",
-    "entryDeletedDiscard": "Delete it"
+    "entryDeletedDiscard": "Delete it",
+    "momentBadge": "Moment"
   },
   "notFound": {
     "title": "Page not found",
@@ -263,5 +267,32 @@
     "meTerms": "Terms",
     "meContact": "Contact us",
     "meVersion": "Version {version}"
+  },
+  "timeline": {
+    "timelineTitle": "Timeline",
+    "timelineAll": "All days",
+    "timelineMoments": "Moments",
+    "timelineEmptyTitle": "Your story starts here",
+    "timelineEmptyBody": "Check in or write about your day, and it will appear here.",
+    "timelineMomentsEmpty": "No moments yet. Tap ★ on an entry to keep it here.",
+    "dayNoCheckin": "No check-in this day",
+    "dayAddCheckin": "Add a check-in",
+    "dayAddEntry": "Add an entry"
+  },
+  "insights": {
+    "insightsTitle": "Insights",
+    "rangeWeek": "Week",
+    "rangeMonth": "Month",
+    "range3Months": "3 months",
+    "chartMood": "Mood",
+    "chartSleep": "Sleep",
+    "chartStress": "Stress",
+    "chartExercise": "Exercise",
+    "chartAverage": "Average {value}",
+    "chartAverageOfFive": "Average {value} / 5",
+    "chartChangeUp": "↑ {value} vs the previous {range, select, week {week} month {month} other {3 months}}",
+    "chartChangeDown": "↓ {value} vs the previous {range, select, week {week} month {month} other {3 months}}",
+    "chartNoChange": "Same as the previous {range, select, week {week} month {month} other {3 months}}",
+    "chartNotEnough": "A few more check-ins and your chart will appear."
   }
 }

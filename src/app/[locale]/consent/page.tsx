@@ -7,6 +7,7 @@ import { PageShell } from "@/components/PageShell";
 import { pageGate } from "@/lib/conditions";
 import { getMe, hasCurrentConsent, hasCurrentConsents } from "@/lib/journal/me";
 import { pageMetadata } from "@/lib/metadata";
+import { isAuthOutage } from "@/lib/supabase/proxy";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { ConsentForm } from "./ConsentForm";
 
@@ -27,7 +28,12 @@ export default async function ConsentPage({ params }: PageProps<"/[locale]/conse
   if (pageGate("web-journal-live") === "hidden") notFound();
 
   const supabase = await createSupabaseServerClient();
-  const user = supabase ? (await supabase.auth.getUser()).data.user : null;
+  const { data, error } = supabase ? await supabase.auth.getUser() : { data: { user: null }, error: null };
+  const user = data.user;
+  // Auth didn't answer: a signed-in person we can't see right now. The form
+  // with the generic error (its Continue answers the same until Auth is
+  // back), never the new-account flow's Back to Welcome.
+  const outage = !user && isAuthOutage(error);
   let askAge = false;
   if (supabase && user) {
     const me = await getMe(supabase);
@@ -37,9 +43,15 @@ export default async function ConsentPage({ params }: PageProps<"/[locale]/conse
   }
 
   const t = await getTranslations("onboarding");
+  const ta = await getTranslations("auth");
   return (
     <PageShell title={t("consentTitle")}>
-      <ConsentForm askAge={askAge} showBack={!user} />
+      {outage && (
+        <p role="alert" data-testid="consent-outage" className="font-medium text-accent">
+          {ta("errGeneric")}
+        </p>
+      )}
+      <ConsentForm askAge={askAge} showBack={!user && !outage} />
     </PageShell>
   );
 }

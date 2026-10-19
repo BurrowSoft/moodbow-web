@@ -105,3 +105,5 @@ body {
 .legal-prose th { color: var(--text); font-weight: 500; background: var(--surface); }
 /* Facts still to confirm (⏳, [VITOR]): visible on drafts only (a page can't go live with any). */
 .legal-prose mark.legal-todo { background: var(--draft-bg); color: var(--draft-text); padding: 0 0.2em; border-radius: 0.25rem; }
+/* The in-app navigation bar (components/NavProgress.tsx): a segment sliding across. */
+@keyframes nav-progress { from { transform: translateX(-100%); } to { transform: translateX(300%); } }
