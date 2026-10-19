@@ -168,7 +168,26 @@ describe("resetPassword (server action)", () => {
   it("without the recovery session → expired", async () => {
     auth.getUser.mockResolvedValue({ data: { user: null } });
     expect(await resetPassword(idle, form("new-password-1"))).toEqual({ status: "error", error: "expired" });
+    auth.getUser.mockResolvedValue({ data: { user: null }, error: { name: "AuthSessionMissingError" } });
+    expect(await resetPassword(idle, form("new-password-1"))).toEqual({ status: "error", error: "expired" });
     expect(auth.updateUser).not.toHaveBeenCalled();
+  });
+
+  it("Auth didn't answer (down, or past 10 s): the generic error, never 'expired' (Web Tester, #18)", async () => {
+    auth.getUser.mockResolvedValue({ data: { user: null }, error: { name: "AuthRetryableFetchError", status: 0 } });
+    expect(await resetPassword(idle, form("new-password-1"))).toEqual({ status: "error", error: "generic" });
+    expect(auth.updateUser).not.toHaveBeenCalled();
+  });
+
+  it("the page during an outage: the form with the generic error, not the expired copy", async () => {
+    const { default: ResetPasswordPage } = await import("./reset-password/page");
+    auth.getUser.mockResolvedValue({ data: { user: null }, error: { name: "AuthRetryableFetchError", status: 0 } });
+    const page = await ResetPasswordPage({ params: Promise.resolve({ locale: "en" }), searchParams: Promise.resolve({}) } as never);
+    expect(findProps(page, (p) => p["data-testid"] === "reset-outage")).toBeTruthy();
+    expect(findProps(page, (p) => p["data-testid"] === "reset-expired")).toBeFalsy();
+    auth.getUser.mockResolvedValue({ data: { user: null }, error: null });
+    const expired = await ResetPasswordPage({ params: Promise.resolve({ locale: "en" }), searchParams: Promise.resolve({}) } as never);
+    expect(findProps(expired, (p) => p["data-testid"] === "reset-expired")).toBeTruthy();
   });
 
   it("success: sets the password, signs out every session (global), then redirects to the changed state", async () => {
