@@ -39,11 +39,10 @@ export function SignInForm() {
             {message}
           </p>
         )}
-        {state.status === "resent" && (
-          <p role="status" data-testid="signin-resent" className="font-medium text-text">
-            {t("checkEmailResent")}
-          </p>
-        )}
+        {/* Always there, so "sent again" is announced when it appears. */}
+        <p role="status" data-testid={state.status === "resent" ? "signin-resent" : undefined} className="font-medium text-text empty:hidden">
+          {state.status === "resent" ? t("checkEmailResent") : null}
+        </p>
         <button type="submit" disabled={pending} className={primaryButtonClass}>
           {t("signinSubmit")}
         </button>
