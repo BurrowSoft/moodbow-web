@@ -22,5 +22,7 @@ describe("BackLink", () => {
     expect(link.className).toMatch(/\bh-11\b/);
     expect(link.className).toMatch(/\bw-11\b/);
     expect(link.className).toMatch(/\brounded-full\b/);
+    // The tinted circle the chevron sits in (decision 161).
+    expect(link.querySelector("span")!.classList.contains("bg-pill")).toBe(true);
   });
 });
