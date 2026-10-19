@@ -48,7 +48,7 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
         </h2>
         <ul className="mt-4 space-y-3">
           <li>
-            <Link href="/support" data-testid="me-faq" className={link}>
+            <Link href="/help" data-testid="me-faq" className={link}>
               {tm("meFaq")}
             </Link>
           </li>
