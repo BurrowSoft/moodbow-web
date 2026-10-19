@@ -378,5 +378,15 @@
     "errOffline": "You're offline. Check your connection and try again.",
     "errRateLimited": "Please wait a minute and try again.",
     "cancel": "Cancel"
+  },
+  "safety": {
+    "safetyTitle": "You don't have to go through this alone",
+    "safetyBody": "It sounds like things are really hard right now. Talking to someone can help, today.",
+    "safetyEmergency": "If you're in danger right now, call your local emergency number.",
+    "safetyFindHelpline": "Find a helpline in your country",
+    "safetyCall": "Call {name} ({number})",
+    "safetyCallEmergency": "Call emergency number {number}",
+    "safetyClose": "Close",
+    "safetyNotTherapy": "Moodbow isn't a substitute for professional help."
   }
 }

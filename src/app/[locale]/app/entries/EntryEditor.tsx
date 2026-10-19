@@ -3,9 +3,12 @@
 import { startTransition, useActionState, useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
 import { Dialog, dialogButton } from "@/components/Dialog";
+import { SafetyCard } from "@/components/SafetyCard";
 import { useRouter } from "@/i18n/navigation";
 import { MAX_ENTRY_CHARS, sameEntry, type Entry } from "@/lib/journal/entry";
 import { localKey } from "@/lib/localData";
+import { flagsCrisis } from "@/lib/safety/crisis";
+import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
 import { PRIMARY_SAVE } from "@/lib/ui/journalLayout";
 import { deleteEntry, getEntry, saveEntry, type DeleteState, type EntryState } from "./actions";
 
@@ -50,7 +53,8 @@ function removeDraft(key: string) {
 const isRedirect = (e: unknown) => typeof (e as { digest?: unknown })?.digest === "string" && (e as { digest: string }).digest.startsWith("NEXT_REDIRECT");
 
 // startDate: the day a new entry starts on (a Timeline day's "Add an entry").
-type Props = { initial: Entry | null; newId: string; uid: string; today: string; startDate?: string };
+// country: the profile's, for the safety card's numbers (M8).
+type Props = { initial: Entry | null; newId: string; uid: string; today: string; startDate?: string; country?: string | null };
 
 const noSubscribe = () => () => {};
 
@@ -62,7 +66,7 @@ export function EntryEditor(props: Props) {
   return <Editor key={inBrowser ? "browser" : "server"} {...props} restore={inBrowser} />;
 }
 
-function Editor({ initial, newId, uid, today, startDate, restore }: Props & { restore: boolean }) {
+function Editor({ initial, newId, uid, today, startDate, country, restore }: Props & { restore: boolean }) {
   const t = useTranslations("entry");
   const tt = useTranslations("today");
   const router = useRouter();
@@ -78,6 +82,11 @@ function Editor({ initial, newId, uid, today, startDate, restore }: Props & { re
   const [base, setBase] = useState<string | null>(draft ? draft.base : (initial?.updated_at ?? null));
   const [fields, setFields] = useState<Fields>(draft ? { body: draft.body, date: draft.date, isMoment: draft.isMoment } : saved);
   const [dialog, setDialog] = useState<null | "leave" | "delete" | { conflict: Entry | null }>(null);
+  // The safety card after a save the keyword check flagged (M8, decision
+  // 124): the entry is already saved; we stay on it, and closing the card
+  // puts focus back in the entry. The check runs here only; nothing about
+  // it is sent or kept (decision 125).
+  const [safety, setSafety] = useState<"closed" | "open">("closed");
   const dirty = !same(fields, saved);
 
   // The latest values for the unload handler and the autosave timer.
@@ -154,6 +163,11 @@ function Editor({ initial, newId, uid, today, startDate, restore }: Props & { re
   }, [draftKey, restore]);
 
   const leave = useCallback(() => router.push("/app"), [router]);
+  const closeSafety = useCallback(() => {
+    setSafety("closed");
+    // After the card's own focus restore (on its unmount): back into the entry.
+    window.setTimeout(() => document.getElementById("entry-text")?.focus(), 0);
+  }, []);
 
   const [state, action, pending] = useActionState<EntryState, FormData>(async (prev, form) => {
     let next: EntryState;
@@ -169,7 +183,13 @@ function Editor({ initial, newId, uid, today, startDate, restore }: Props & { re
       removeDraft(draftKey);
       setSaved(fromEntry(next.entry));
       setFields(fromEntry(next.entry));
-      leave();
+      if (flagsCrisis(next.entry.body, CRISIS_KEYWORDS)) {
+        // Staying on the saved entry: it's now the version edits start from,
+        // and further edits are a draft again (reviewer #35).
+        finished.current = false;
+        setBase(next.entry.updated_at);
+        setSafety("open");
+      } else leave();
     } else if (next.status === "error" && next.error === "stale") {
       setDialog({ conflict: next.latest });
     }
@@ -424,6 +444,7 @@ function Editor({ initial, newId, uid, today, startDate, restore }: Props & { re
           </button>
         </Dialog>
       )}
+      {safety === "open" && <SafetyCard country={country} onClose={closeSafety} />}
     </form>
   );
 }

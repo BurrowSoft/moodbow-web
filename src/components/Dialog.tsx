@@ -19,7 +19,8 @@ export function Dialog({
   onCancel: () => void;
   children: React.ReactNode;
   testId?: string;
-  initialFocus?: "first" | "last";
+  // "title": focus the heading itself (the safety card, decision 124).
+  initialFocus?: "first" | "last" | "title";
 }) {
   const titleId = useId();
   const bodyId = useId();
@@ -33,7 +34,8 @@ export function Dialog({
     const focusable = () =>
       Array.from(ref.current?.querySelectorAll<HTMLElement>("button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), a[href]") ?? []);
     const start = buttons();
-    (initialFocus === "last" ? start[start.length - 1] : start[0])?.focus();
+    if (initialFocus === "title") ref.current?.querySelector<HTMLElement>("h2")?.focus();
+    else (initialFocus === "last" ? start[start.length - 1] : start[0])?.focus();
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") return onCancel();
       if (e.key !== "Tab") return;
@@ -68,7 +70,7 @@ export function Dialog({
         data-testid={testId}
         className="w-full max-w-md rounded-3xl bg-surface p-6 shadow-xl"
       >
-        <h2 id={titleId} className="text-lg font-medium text-text">
+        <h2 id={titleId} tabIndex={initialFocus === "title" ? -1 : undefined} className="text-lg font-medium text-text outline-none">
           {title}
         </h2>
         {body && (

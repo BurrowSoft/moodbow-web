@@ -11,6 +11,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import packageJson from "../../../../../package.json";
 import { tabMetadata } from "../TabPlaceholder";
 import { signOut } from "./actions";
+import { GetHelpNow } from "@/components/SafetyCard";
 import { AiSettings } from "./AiSettings";
 import { LanguageRegion } from "./LanguageRegion";
 import { countryOptions, languageOptions, timeZoneOptions } from "@/lib/region/countries";
@@ -44,6 +45,10 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
   return (
     <section className="space-y-8">
       <h1 className="text-3xl font-medium tracking-tight">{t("tabMe")}</h1>
+      {/* Get help now (M8): at the top, on its own, AI or not; not repeated
+          under Help (decision 128). */}
+      <GetHelpNow country={me.profile?.country} testId="me-get-help" />
+
       {aiShown(me) && (
         <AiSettings
           initial={{
