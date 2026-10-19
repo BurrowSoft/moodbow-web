@@ -4,6 +4,8 @@ import { cookies } from "next/headers";
 import { getLocale } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
 import { DELETE_WORD, localDay } from "@/lib/journal/account";
+import { isFocusArea, isTone } from "@/lib/journal/ai";
+import { consentItem } from "@/lib/legalVersions";
 import { WIPE_COOKIE, WIPE_COOKIE_OPTIONS } from "@/lib/supabase/proxy";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -82,4 +84,68 @@ export async function saveReminder(_prev: ReminderState, form: FormData): Promis
     return { status: "error", on, time };
   }
   return { status: "saved", on, time };
+}
+
+// Me → AI (M9; reflect.md, "Me → AI"). Each returns whether the account now
+// has the value; the control reverts to the saved one when it doesn't
+// (decision 111). Errors are codes, never messages.
+export type AiSaveResult = { ok: true } | { ok: false };
+
+const settingsFailed = async (message: string | undefined): Promise<AiSaveResult> => {
+  if (message?.includes("not_authenticated")) return redirect({ href: "/sign-in", locale: await getLocale() });
+  return { ok: false };
+};
+
+// The AI switch reports what the account has after a failure (it takes two
+// steps), and whether the withdrawal is still to be recorded.
+export type AiSwitchResult = { ok: true } | { ok: false; aiEnabled: boolean; pending?: "withdrawal" };
+
+// On: record the AI consent, then switch AI on; a failure in either leaves
+// AI off. Off: switch AI off, then record the withdrawal (a consent row
+// with granted false). If only the withdrawal failed, AI IS off: say so,
+// and the retry records just the withdrawal (reviewer #33).
+export async function setAiEnabled(on: boolean): Promise<AiSwitchResult> {
+  if (typeof on !== "boolean") return { ok: false, aiEnabled: !on };
+  const supabase = await createSupabaseServerClient();
+  if (!supabase) return { ok: false, aiEnabled: !on };
+  const failed = async (message: string, result: AiSwitchResult) => ((await settingsFailed(message)), result);
+  if (on) {
+    const consent = await supabase.rpc("record_consents", { p_items: [consentItem("ai", true)] });
+    if (consent.error) return failed(consent.error.message, { ok: false, aiEnabled: false });
+    const setting = await supabase.rpc("update_settings", { p_ai_enabled: true });
+    if (setting.error) return failed(setting.error.message, { ok: false, aiEnabled: false });
+    return { ok: true };
+  }
+  const setting = await supabase.rpc("update_settings", { p_ai_enabled: false });
+  if (setting.error) return failed(setting.error.message, { ok: false, aiEnabled: true });
+  return recordAiWithdrawal();
+}
+
+// The AI consent withdrawal alone (Try again after it failed; AI is
+// already off).
+export async function recordAiWithdrawal(): Promise<AiSwitchResult> {
+  const supabase = await createSupabaseServerClient();
+  if (!supabase) return { ok: false, aiEnabled: false, pending: "withdrawal" };
+  const { error } = await supabase.rpc("record_consents", { p_items: [consentItem("ai", false)] });
+  if (error) {
+    await settingsFailed(error.message);
+    return { ok: false, aiEnabled: false, pending: "withdrawal" };
+  }
+  return { ok: true };
+}
+
+export async function saveTone(tone: string): Promise<AiSaveResult> {
+  if (!isTone(tone)) return { ok: false };
+  const supabase = await createSupabaseServerClient();
+  if (!supabase) return { ok: false };
+  const { error } = await supabase.rpc("update_settings", { p_tone: tone });
+  return error ? settingsFailed(error.message) : { ok: true };
+}
+
+export async function saveFocusAreas(areas: string[]): Promise<AiSaveResult> {
+  if (!Array.isArray(areas) || !areas.every(isFocusArea)) return { ok: false };
+  const supabase = await createSupabaseServerClient();
+  if (!supabase) return { ok: false };
+  const { error } = await supabase.rpc("update_settings", { p_focus_areas: areas });
+  return error ? settingsFailed(error.message) : { ok: true };
 }
