@@ -15,6 +15,13 @@ vi.mock("./actions", () => ({
   getEntry: (...args: unknown[]) => getEntry(...args),
 }));
 vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push }) }));
+// The crisis list: none by default (as until the contract is synced).
+let keywords: { version: number; languages: Record<string, { match: "word" | "substring"; phrases: string[] }> } | null = null;
+vi.mock("@/lib/safety/keywords", () => ({
+  get CRISIS_KEYWORDS() {
+    return keywords;
+  },
+}));
 const { EntryEditor } = await import("./EntryEditor");
 
 const NEW_ID = "11111111-1111-4111-8111-111111111111";
@@ -40,6 +47,7 @@ beforeEach(() => {
   getEntry.mockReset();
   getEntry.mockResolvedValue({ status: "ok", entry: null });
   push.mockReset();
+  keywords = null;
   window.localStorage.clear();
 });
 afterEach(cleanup);
@@ -382,5 +390,60 @@ describe("EntryEditor: a new entry for an earlier day (Timeline → Add an entry
     fireEvent.click(screen.getByTestId("entry-save"));
     await waitFor(() => expect(saveEntry).toHaveBeenCalled());
     expect(sent()).toMatchObject({ entry_date: "2026-09-28" });
+  });
+});
+
+describe("EntryEditor: the safety card after a flagged save (M8, decisions 124/125)", () => {
+  it("a flagged save stays on the saved entry and opens the card; closing it puts focus back in the entry", async () => {
+    keywords = { version: 1, languages: { en: { match: "word", phrases: ["want to die"] } } };
+    saveEntry.mockResolvedValue({ status: "saved", entry: { ...ENTRY, id: NEW_ID, entry_date: "2026-10-02", body: "Some days I want to die." } });
+    renderEditor();
+    type("Some days I want to die.");
+    fireEvent.click(screen.getByTestId("entry-save"));
+    expect(await screen.findByTestId("safety-card")).toBeInTheDocument();
+    expect(saveEntry).toHaveBeenCalledTimes(1);
+    expect(push).not.toHaveBeenCalled();
+    expect(screen.getByRole("heading", { name: messages.safety.safetyTitle })).toHaveFocus();
+    fireEvent.click(screen.getByTestId("safety-close"));
+    expect(screen.queryByTestId("safety-card")).toBeNull();
+    await waitFor(() => expect(screen.getByTestId("entry-text")).toHaveFocus());
+  });
+
+  it("after the card, saving again is an ordinary update of that version (no conflict), and a flagged text shows the card again (reviewer #35)", async () => {
+    keywords = { version: 1, languages: { en: { match: "word", phrases: ["want to die"] } } };
+    const first = { ...ENTRY, id: NEW_ID, entry_date: "2026-10-02", body: "I want to die.", updated_at: "2026-10-02T10:00:00Z" };
+    saveEntry.mockResolvedValueOnce({ status: "saved", entry: first });
+    renderEditor();
+    type("I want to die.");
+    fireEvent.click(screen.getByTestId("entry-save"));
+    fireEvent.click(await screen.findByTestId("safety-close"));
+    saveEntry.mockResolvedValueOnce({ status: "saved", entry: { ...first, body: "I want to die. Still.", updated_at: "2026-10-02T10:05:00Z" } });
+    type("I want to die. Still.");
+    fireEvent.click(screen.getByTestId("entry-save"));
+    expect(await screen.findByTestId("safety-card")).toBeInTheDocument();
+    expect(sent(1)).toMatchObject({ id: NEW_ID, body: "I want to die. Still.", expected_updated_at: "2026-10-02T10:00:00Z" });
+    expect(screen.queryByTestId("entry-conflict-dialog")).toBeNull();
+    expect(push).not.toHaveBeenCalled();
+  });
+
+  it("edits typed after the card are kept as a draft on leaving, based on the saved version", async () => {
+    keywords = { version: 1, languages: { en: { match: "word", phrases: ["want to die"] } } };
+    saveEntry.mockResolvedValueOnce({ status: "saved", entry: { ...ENTRY, id: NEW_ID, entry_date: "2026-10-02", body: "I want to die.", updated_at: "2026-10-02T10:00:00Z" } });
+    const view = renderEditor();
+    type("I want to die.");
+    fireEvent.click(screen.getByTestId("entry-save"));
+    fireEvent.click(await screen.findByTestId("safety-close"));
+    type("I want to die. And more.");
+    view.unmount();
+    expect(stored(NEW_KEY)).toMatchObject({ id: NEW_ID, body: "I want to die. And more.", base: "2026-10-02T10:00:00Z" });
+  });
+
+  it("an ordinary save, or no list yet: no card, back to Today as before", async () => {
+    saveEntry.mockResolvedValue({ status: "saved", entry: { ...ENTRY, id: NEW_ID, entry_date: "2026-10-02", body: "Some days I want to die." } });
+    renderEditor();
+    type("Some days I want to die.");
+    fireEvent.click(screen.getByTestId("entry-save"));
+    await waitFor(() => expect(push).toHaveBeenCalledWith("/app"));
+    expect(screen.queryByTestId("safety-card")).toBeNull();
   });
 });

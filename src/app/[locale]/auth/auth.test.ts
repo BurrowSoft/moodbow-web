@@ -56,7 +56,8 @@ function findProps(node: unknown, test: (p: Record<string, unknown>) => boolean)
   const props = (node as { props?: Record<string, unknown> }).props;
   if (!props) return undefined;
   if (test(props)) return props;
-  return findProps(props.children, test);
+  // StatusShell takes its message as `body` and its actions as children.
+  return findProps(props.body, test) ?? findProps(props.children, test);
 }
 
 describe("GET /auth/confirm (the page)", () => {

@@ -4,6 +4,7 @@ import { useActionState, useState, useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { AuthField, primaryButtonClass, textLinkClass } from "@/components/AuthField";
+import { FocusOnMount } from "@/components/FocusOnMount";
 import { signUpFlow, type SignUpState } from "./actions";
 
 const ERROR_KEYS = {
@@ -28,6 +29,15 @@ export function SignUpForm() {
   const [state, action, pending] = useActionState<SignUpState, FormData>(signUpFlow, { status: "idle" });
   const [password, setPassword] = useState("");
   const timeZone = useSyncExternalStore(subscribe, browserTimeZone, noTimeZoneOnServer);
+  // "Sent again" twice in a row is the same text: empty the region on each
+  // resend, so the next answer is announced again (reviewer #39). A new
+  // answer (a new state object) shows it again.
+  const [resending, setResending] = useState(false);
+  const [answered, setAnswered] = useState(state);
+  if (answered !== state) {
+    setAnswered(state);
+    setResending(false);
+  }
 
   if (state.status === "checkEmail") {
     const NOTICES = {
@@ -39,10 +49,15 @@ export function SignUpForm() {
     const notice = state.notice ? ta(NOTICES[state.notice]) : null;
     return (
       <div className="space-y-6" data-testid="check-email">
-        <h2 className="text-2xl font-medium text-text">{t("checkEmailTitle")}</h2>
+        <FocusOnMount className="text-2xl font-medium text-text">{t("checkEmailTitle")}</FocusOnMount>
         <p>{t("checkEmailBody", { email: state.email })}</p>
-        {notice && (
-          <p role={state.notice === "resent" ? "status" : "alert"} data-testid="check-email-notice" className="font-medium text-text">
+        {/* "Sent again" goes in a region that's always there (so it's
+            announced); a problem is an alert. */}
+        <p role="status" className="font-medium text-text empty:hidden" data-testid={state.notice === "resent" ? "check-email-notice" : undefined}>
+          {state.notice === "resent" && !resending ? notice : null}
+        </p>
+        {notice && state.notice !== "resent" && (
+          <p role="alert" data-testid="check-email-notice" className="font-medium text-text">
             {notice}
           </p>
         )}
@@ -53,7 +68,7 @@ export function SignUpForm() {
             {t("checkEmailConfirmed")}
           </button>
         </form>
-        <form action={action}>
+        <form action={action} onSubmit={() => setResending(true)}>
           <input type="hidden" name="intent" value="resend" />
           <button type="submit" disabled={pending} data-testid="check-email-resend" className={textLinkClass}>
             {t("checkEmailResend")}
@@ -65,6 +80,8 @@ export function SignUpForm() {
 
   const error = state.status === "error" ? state.error : null;
   const message = error ? (ERROR_KEYS[error][0] === "auth" ? ta(ERROR_KEYS[error][1]) : t(ERROR_KEYS[error][1])) : null;
+  // The error is tied to the field it's about (aria-invalid + described by).
+  const errorOn = error === "passwordShort" ? "password" : error === "ageRequired" ? "age" : error === "emailInvalid" || error === "emailTaken" ? "email" : null;
   return (
     <div className="space-y-6">
       <form action={action} noValidate className="space-y-5">
@@ -76,7 +93,7 @@ export function SignUpForm() {
           type="email"
           autoComplete="email"
           defaultValue={state.status === "error" ? state.email : undefined}
-          errorId={message ? "signup-error" : undefined}
+          errorId={errorOn === "email" ? "signup-error" : undefined}
         />
         <div>
           <label htmlFor="password" className="block text-sm font-medium text-text">
@@ -90,7 +107,8 @@ export function SignUpForm() {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            aria-describedby="password-hint"
+            aria-describedby={errorOn === "password" ? "password-hint signup-error" : "password-hint"}
+            aria-invalid={errorOn === "password" ? true : undefined}
             className="mt-2 block w-full rounded-2xl border border-border bg-surface px-4 py-3 text-base text-text outline-none focus-visible:border-accent"
           />
           <p id="password-hint" className="mt-1 text-sm">
@@ -103,6 +121,8 @@ export function SignUpForm() {
             name="age"
             data-testid="signup-age"
             defaultChecked={state.status === "error" ? state.age : false}
+            aria-describedby={errorOn === "age" ? "signup-error" : undefined}
+            aria-invalid={errorOn === "age" ? true : undefined}
             className="mt-1 h-5 w-5 shrink-0 accent-[var(--accent)]"
           />
           <span>{t("ageConfirm")}</span>

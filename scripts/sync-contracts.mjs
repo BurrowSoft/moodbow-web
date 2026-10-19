@@ -16,7 +16,7 @@ import { join } from "node:path";
 
 const REPO = "BurrowSoft/moodbow-app";
 const DIR = "supabase/contracts";
-export const FILES = ["countries.json", "export-text.md", "export_fixture.json", "export_fixture.txt", "get-help-label.json", "reflect.md"];
+export const FILES = ["countries.json", "crisis-keywords.json", "export-text.md", "export_fixture.json", "export_fixture.txt", "get-help-label.json", "reflect.md"];
 
 const gh = (path, accept) => execFileSync("gh", ["api", ...(accept ? ["-H", `Accept: ${accept}`] : []), path], { stdio: ["ignore", "pipe", "inherit"] });
 

@@ -166,3 +166,24 @@ describe("YourData: this browser forgets a deleted account (decision 85; reviewe
     expect(KEYS.every((k) => window.localStorage.getItem(k) === "x")).toBe(true);
   });
 });
+
+describe("YourData: the export result is announced and keeps focus (a11y pass)", () => {
+  it("one status region is there before the export and gets the result; Export stays focusable while it runs", async () => {
+    let answer!: (v: unknown) => void;
+    exportMyData.mockReturnValueOnce(new Promise((r) => (answer = r)));
+    renderIt();
+    const region = screen.getByRole("status");
+    expect(region).toBeEmptyDOMElement();
+    const button = screen.getByTestId("me-export");
+    button.focus();
+    fireEvent.click(button);
+    expect(button).toBeEnabled();
+    expect(button).toHaveFocus();
+    await waitFor(() => expect(button).toHaveAttribute("aria-disabled", "true"));
+    fireEvent.click(button);
+    expect(exportMyData).toHaveBeenCalledTimes(1);
+    answer({ status: "error" });
+    await waitFor(() => expect(region).toHaveTextContent(messages.today.errGeneric));
+    expect(screen.getByRole("status")).toBe(region);
+  });
+});

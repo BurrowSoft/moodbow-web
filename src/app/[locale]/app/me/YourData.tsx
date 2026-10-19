@@ -48,7 +48,9 @@ export function YourData({ credits, uid }: { credits: number; uid: string }) {
 
   // The files are made here, in the browser: nothing is stored on the way.
   // One Export, then two links (UX): the readable copy and the data file.
-  const runExport = () =>
+  // Ignored while one runs (the button stays focusable: aria-disabled).
+  const runExport = () => {
+    if (exporting) return;
     startExport(async () => {
       try {
         const result = await exportMyData();
@@ -66,16 +68,19 @@ export function YourData({ credits, uid }: { credits: number; uid: string }) {
         setExportState("error");
       }
     });
+  };
 
   // The links' object URLs live until a new export or leaving the page.
   useEffect(() => () => files.forEach((f) => URL.revokeObjectURL(f.url)), [files]);
 
-  const exportResult =
-    exportState === "ready" ? (
-      <div className="space-y-1">
-        <p role="status" data-testid="me-export-status" className="text-sm font-medium text-text">
-          {t("meExportReady")}
-        </p>
+  // The result: a status line that's always there (so it's announced
+  // when it's filled), and the two links once the export is ready.
+  const exportResult = (
+    <div className="space-y-1">
+      <p role="status" data-testid={exportState === "idle" ? undefined : "me-export-status"} className="text-sm font-medium text-text empty:hidden">
+        {exportState === "ready" ? t("meExportReady") : exportState === "error" ? tt("errGeneric") : null}
+      </p>
+      {exportState === "ready" && (
         <ul className="space-y-1">
           {files.map((f) => (
             <li key={f.kind}>
@@ -85,12 +90,9 @@ export function YourData({ credits, uid }: { credits: number; uid: string }) {
             </li>
           ))}
         </ul>
-      </div>
-    ) : exportState === "error" ? (
-      <p role="status" data-testid="me-export-status" className="text-sm font-medium text-text">
-        {tt("errGeneric")}
-      </p>
-    ) : null;
+      )}
+    </div>
+  );
 
   const closeDelete = useCallback(() => {
     setDeleting(false);
@@ -103,7 +105,7 @@ export function YourData({ credits, uid }: { credits: number; uid: string }) {
         {t("meYourData")}
       </h2>
       <div className="mt-4 space-y-1">
-        <button type="button" data-testid="me-export" onClick={runExport} disabled={exporting} aria-busy={exporting} className={`${dialogButton()} gap-2`}>
+        <button type="button" data-testid="me-export" onClick={runExport} aria-disabled={exporting} className={`${dialogButton()} gap-2 aria-disabled:opacity-60`}>
           {exporting && <span className="h-4 w-4 animate-spin rounded-full border-2 border-border border-t-accent motion-reduce:animate-none" aria-hidden="true" />}
           {t("meExport")}
         </button>
@@ -129,7 +131,7 @@ export function YourData({ credits, uid }: { credits: number; uid: string }) {
                 {t("deleteCredits", { credits })}
               </p>
             )}
-            <button type="button" data-testid="delete-export-first" onClick={runExport} disabled={exporting} className="font-medium text-accent underline underline-offset-4">
+            <button type="button" data-testid="delete-export-first" onClick={runExport} aria-disabled={exporting} className="font-medium text-accent underline underline-offset-4 aria-disabled:opacity-60">
               {t("deleteExportFirst")}
             </button>
             {exportResult}

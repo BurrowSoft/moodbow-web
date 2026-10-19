@@ -27,5 +27,5 @@ export default async function WritePage({ params, searchParams }: PageProps<"/[l
   if (!me) return <JournalUnavailable />;
   const asked = (await searchParams).date;
   const startDate = typeof asked === "string" && isIsoDate(asked) && asked <= me.today ? asked : me.today;
-  return <EntryEditor initial={null} newId={crypto.randomUUID()} uid={user.id} today={me.today} startDate={startDate} />;
+  return <EntryEditor initial={null} newId={crypto.randomUUID()} uid={user.id} today={me.today} startDate={startDate} country={me.profile?.country} />;
 }

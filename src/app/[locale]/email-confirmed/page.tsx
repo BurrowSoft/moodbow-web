@@ -5,6 +5,7 @@ import { Logo } from "@/components/Logo";
 import { liveFeatures } from "@/lib/liveFeatures";
 import { pageMetadata } from "@/lib/metadata";
 import { classifyAuthLink } from "@/lib/authLink";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { EmailConfirmedMessage } from "./EmailConfirmedMessage";
 
 // Where Supabase's confirm-email links land. Never indexed: the URL can
@@ -23,6 +24,15 @@ export default async function EmailConfirmedPage({ params, searchParams }: PageP
   }
   setRequestLocale(locale as Locale);
   const tc = await getTranslations("common");
+  // Decision 134: once the web journal is live, a confirmed email moves on:
+  // to the journal if the confirm left a web session here, else to sign
+  // in. Before that, no Continue at all (the page stays as it is).
+  let continueTo: string | null = null;
+  if (liveFeatures.webJournal) {
+    const supabase = await createSupabaseServerClient();
+    const user = supabase ? (await supabase.auth.getUser()).data.user : null;
+    continueTo = user ? "/app" : "/sign-in";
+  }
 
   return (
     <main id="main" className="flex flex-1 flex-col items-center justify-center px-6 py-16">
@@ -30,7 +40,7 @@ export default async function EmailConfirmedPage({ params, searchParams }: PageP
         <div className="mb-10 w-[120px]">
           <Logo variant="stacked" width={120} alt={tc("logoAlt")} />
         </div>
-        <EmailConfirmedMessage fromQuery={classifyAuthLink(query.toString(), "")} showContinue={liveFeatures.webJournal} />
+        <EmailConfirmedMessage fromQuery={classifyAuthLink(query.toString(), "")} continueTo={continueTo} />
       </div>
     </main>
   );

@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { AuthField, primaryButtonClass, textLinkClass } from "@/components/AuthField";
+import { FocusOnMount } from "@/components/FocusOnMount";
 import { requestPasswordReset, type ForgotPasswordState } from "./actions";
 
 export function ForgotPasswordForm() {
@@ -13,9 +14,10 @@ export function ForgotPasswordForm() {
   if (state.status === "sent") {
     return (
       <div className="space-y-6">
-        <p role="status" data-testid="reset-sent" className="rounded-2xl border border-border bg-surface px-5 py-4 font-medium text-text">
+        {/* Replaces the form (and its focused button): focus moves here. */}
+        <FocusOnMount as="p" testId="reset-sent" className="rounded-2xl border border-border bg-surface px-5 py-4 font-medium text-text">
           {t("resetSent", { email: state.email })}
-        </p>
+        </FocusOnMount>
         <p data-testid="reset-sent-hint">{t("resetSentHint")}</p>
         <p>
           <Link href="/sign-in" className={textLinkClass}>

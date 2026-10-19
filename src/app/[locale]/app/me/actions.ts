@@ -6,6 +6,8 @@ import { redirect } from "@/i18n/navigation";
 import { DELETE_WORD, localDay } from "@/lib/journal/account";
 import { isFocusArea, isTone } from "@/lib/journal/ai";
 import { consentItem } from "@/lib/legalVersions";
+import { isCountry, isTimeZoneName } from "@/lib/region/countries";
+import { routing } from "@/i18n/routing";
 import { WIPE_COOKIE, WIPE_COOKIE_OPTIONS } from "@/lib/supabase/proxy";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -147,5 +149,21 @@ export async function saveFocusAreas(areas: string[]): Promise<AiSaveResult> {
   const supabase = await createSupabaseServerClient();
   if (!supabase) return { ok: false };
   const { error } = await supabase.rpc("update_settings", { p_focus_areas: areas });
+  return error ? settingsFailed(error.message) : { ok: true };
+}
+
+// Me → Language & region (M7): one field at a time through
+// update_profile(p_locale | p_country | p_time_zone) (migration 004, which
+// checks each again). Country "" clears it (the safety card's default).
+export type RegionField = "locale" | "country" | "time_zone";
+
+export async function saveRegion(field: RegionField, value: string): Promise<AiSaveResult> {
+  const valid =
+    field === "locale" ? (routing.locales as readonly string[]).includes(value) : field === "country" ? value === "" || isCountry(value) : field === "time_zone" ? isTimeZoneName(value) : false;
+  if (!valid) return { ok: false };
+  const supabase = await createSupabaseServerClient();
+  if (!supabase) return { ok: false };
+  const param = field === "locale" ? "p_locale" : field === "country" ? "p_country" : "p_time_zone";
+  const { error } = await supabase.rpc("update_profile", { [param]: value });
   return error ? settingsFailed(error.message) : { ok: true };
 }
