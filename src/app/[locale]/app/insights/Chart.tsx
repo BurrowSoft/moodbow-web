@@ -5,13 +5,15 @@
 // gets a flat bar.
 // neutral: the mood chart's line is ink / cream, never the accent or a mood
 // colour (decision 150: colour means mood; only mood points may carry it).
-type Props = { kind: "line" | "bars"; points: (number | null)[]; min: number; max: number; labelledBy: string; neutral?: boolean };
+// pointColour: the mood chart's points in their mood colours (the only place
+// a chart may use them), each with the 1 px muted outline (decision 149).
+type Props = { kind: "line" | "bars"; points: (number | null)[]; min: number; max: number; labelledBy: string; neutral?: boolean; pointColour?: (v: number) => string };
 
 const W = 300;
 const H = 120;
 const PAD = 8;
 
-export function Chart({ kind, points, min, max, labelledBy, neutral = false }: Props) {
+export function Chart({ kind, points, min, max, labelledBy, neutral = false, pointColour }: Props) {
   const slot = (W - PAD * 2) / points.length;
   const x = (i: number) => PAD + slot * i + slot / 2;
   const y = (v: number) => H - PAD - ((Math.min(Math.max(v, min), max) - min) / (max - min || 1)) * (H - PAD * 2);
@@ -37,6 +39,16 @@ export function Chart({ kind, points, min, max, labelledBy, neutral = false }: P
               vectorEffect="non-scaling-stroke"
             />
           )}
+      {/* Round dots that stay round in a stretched SVG: zero-length lines
+          with a round cap and a non-scaling stroke. */}
+      {kind === "line" &&
+        pointColour &&
+        present.map(({ v, i }) => (
+          <g key={`p${i}`} data-testid="chart-point">
+            <line x1={x(i)} x2={x(i)} y1={y(v)} y2={y(v)} className="stroke-muted" strokeWidth={9} strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+            <line x1={x(i)} x2={x(i)} y1={y(v)} y2={y(v)} stroke={pointColour(v)} strokeWidth={7} strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+          </g>
+        ))}
     </svg>
   );
 }

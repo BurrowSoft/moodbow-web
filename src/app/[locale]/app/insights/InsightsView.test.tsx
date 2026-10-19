@@ -105,3 +105,12 @@ describe("InsightsView colour roles (decision 150)", () => {
     for (const metric of ["sleep", "stress"]) expect(svg(metric).getAttribute("class")).toMatch(/\btext-accent\b/);
   });
 });
+
+describe("InsightsView: mood points (decision 150)", () => {
+  it("the mood chart's points carry their mood colour; other charts have none", () => {
+    renderView(thisWeek);
+    const points = screen.getByTestId("insights-chart-mood").querySelectorAll("[data-testid=chart-point] line:last-child");
+    expect([...points].map((p) => p.getAttribute("stroke"))).toEqual(["#F4A77A", "#F4A77A", "#F3C24F"]);
+    expect(screen.getByTestId("insights-chart-stress").querySelectorAll("[data-testid=chart-point]")).toHaveLength(0);
+  });
+});

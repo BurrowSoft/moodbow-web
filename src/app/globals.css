@@ -116,9 +116,10 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* A visible ring for keyboard focus everywhere. */
+/* A visible ring for keyboard focus everywhere, in the accent (decision 150:
+   never a mood colour; ≥ 5:1 on every surface in both themes). */
 :focus-visible {
-  outline: 2px solid var(--text);
+  outline: 2px solid var(--accent);
   outline-offset: 3px;
 }
 
