@@ -134,7 +134,12 @@ export function ShareMonth({ month, dateLocaleTag, label }: { month: string; dat
                 {tt("errGeneric")}
               </p>
             ) : colours === null ? (
-              <span className="block h-6 w-6 animate-spin rounded-full border-2 border-border border-t-accent motion-reduce:animate-none" aria-hidden="true" />
+              <>
+                <span className="block h-6 w-6 animate-spin rounded-full border-2 border-border border-t-accent motion-reduce:animate-none" aria-hidden="true" />
+                <p role="status" className="sr-only" data-testid="share-loading">
+                  {t("shareLoading")}
+                </p>
+              </>
             ) : !enough ? (
               <p data-testid="share-not-enough" className="text-muted">
                 {t("shareNotEnough")}
@@ -149,23 +154,28 @@ export function ShareMonth({ month, dateLocaleTag, label }: { month: string; dat
                   data-testid="share-preview"
                   className={`mx-auto block rounded-xl border border-border ${format === "story" ? "h-80 w-[180px]" : "h-60 w-60"}`}
                 />
-                {/* What the image says, for screen readers (the count and the line). */}
+                {/* What the image says, for screen readers (the month, the count and the line). */}
                 <p id="share-preview-desc" className="sr-only">
-                  <span>{t("shareDaysJournaled", { n: colours!.length })}</span> <span>{line}</span>
+                  <span>{formatMonth(month, dateLocaleTag)}</span> <span>{t("shareDaysJournaled", { n: colours!.length })}</span> <span>{line}</span>
                 </p>
-                <div className="flex flex-wrap gap-2" role="group" aria-label={t("shareTitle")}>
+                {/* Two choices, two named groups (decision 143). */}
+                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2" role="group" aria-label={t("shareFormat")}>
                   <button type="button" data-testid="share-format-story" aria-pressed={format === "story"} onClick={() => setFormat("story")} className={choice(format === "story")}>
                     {t("shareStory")}
                   </button>
                   <button type="button" data-testid="share-format-square" aria-pressed={format === "square"} onClick={() => setFormat("square")} className={choice(format === "square")}>
                     {t("shareSquare")}
                   </button>
+                </div>
+                <div className="flex flex-wrap gap-2" role="group" aria-label={t("shareTheme")}>
                   <button type="button" data-testid="share-theme-light" aria-pressed={theme === "light"} onClick={() => setTheme("light")} className={choice(theme === "light")}>
                     {t("shareThemeLight")}
                   </button>
                   <button type="button" data-testid="share-theme-dark" aria-pressed={theme === "dark"} onClick={() => setTheme("dark")} className={choice(theme === "dark")}>
                     {t("shareThemeDark")}
                   </button>
+                </div>
                 </div>
                 <label htmlFor="share-line" className="block text-sm font-medium text-text">
                   {t("shareAddLine")}
@@ -176,8 +186,17 @@ export function ShareMonth({ month, dateLocaleTag, label }: { month: string; dat
                   value={line}
                   maxLength={maxChars}
                   onChange={(e) => setLine(e.target.value.slice(0, maxChars))}
+                  aria-describedby="share-line-count"
                   className="block w-full rounded-2xl border border-border bg-bg px-4 py-3 text-text"
                 />
+                {/* Shown always; announced only at 10 left and at 0, not on
+                    every key (decision 143). */}
+                <p id="share-line-count" data-testid="share-line-count" className="text-sm text-muted">
+                  {t("shareLineCount", { count: maxChars - line.length })}
+                </p>
+                <p role="status" className="sr-only" data-testid="share-line-count-announce">
+                  {maxChars - line.length === 10 || maxChars - line.length === 0 ? t("shareLineCount", { count: maxChars - line.length }) : null}
+                </p>
                 <p className="text-sm text-muted">{t("sharePrivacyNote")}</p>
                 {encodeFailed && (
                   <p role="alert" data-testid="share-encode-failed" className="font-medium text-accent">

@@ -148,12 +148,12 @@ describe("ShareMonth", () => {
     }
   });
 
-  it("the preview describes itself: the count and the line", async () => {
+  it("the preview describes itself: the month, the count and the line", async () => {
     loadMonthCheckIns.mockResolvedValue({ status: "ok", checkIns: days(7) });
     renderIt();
     fireEvent.click(screen.getByTestId("share-open"));
     fireEvent.change(await screen.findByTestId("share-line"), { target: { value: "Calmer" } });
-    expect(screen.getByTestId("share-preview")).toHaveAccessibleDescription("7 days journaled Calmer");
+    expect(screen.getByTestId("share-preview")).toHaveAccessibleDescription("October 2026 7 days journaled Calmer");
   });
 
   it("a failed load says so", async () => {
@@ -188,5 +188,41 @@ describe("ShareMonth: the default theme follows Me → Appearance (decision 133)
     renderIt();
     fireEvent.click(screen.getByTestId("share-open"));
     expect(await screen.findByTestId("share-theme-dark")).toHaveAttribute("aria-pressed", "true");
+  });
+});
+
+describe("ShareMonth for screen readers (decision 143)", () => {
+  it("while loading: Getting your month…", () => {
+    loadMonthCheckIns.mockReturnValueOnce(new Promise(() => {}));
+    renderIt();
+    fireEvent.click(screen.getByTestId("share-open"));
+    expect(screen.getByTestId("share-loading")).toHaveTextContent(m.shareLoading);
+  });
+
+  it("two named groups: Format and Theme", async () => {
+    loadMonthCheckIns.mockResolvedValue({ status: "ok", checkIns: days(6) });
+    renderIt();
+    fireEvent.click(screen.getByTestId("share-open"));
+    await screen.findByTestId("share-preview");
+    expect(screen.getByRole("group", { name: m.shareFormat })).toContainElement(screen.getByTestId("share-format-story"));
+    expect(screen.getByRole("group", { name: m.shareTheme })).toContainElement(screen.getByTestId("share-theme-dark"));
+  });
+
+  it("the line's characters left: always shown, announced only at 10 and at 0", async () => {
+    loadMonthCheckIns.mockResolvedValue({ status: "ok", checkIns: days(6) });
+    renderIt();
+    fireEvent.click(screen.getByTestId("share-open"));
+    const input = await screen.findByTestId("share-line");
+    expect(screen.getByTestId("share-line-count")).toHaveTextContent("80 characters left");
+    expect(input).toHaveAccessibleDescription("80 characters left");
+    const announce = screen.getByTestId("share-line-count-announce");
+    fireEvent.change(input, { target: { value: "x".repeat(5) } });
+    expect(announce).toBeEmptyDOMElement();
+    fireEvent.change(input, { target: { value: "x".repeat(70) } });
+    expect(announce).toHaveTextContent("10 characters left");
+    fireEvent.change(input, { target: { value: "x".repeat(71) } });
+    expect(announce).toBeEmptyDOMElement();
+    fireEvent.change(input, { target: { value: "x".repeat(80) } });
+    expect(announce).toHaveTextContent("0 characters left");
   });
 });

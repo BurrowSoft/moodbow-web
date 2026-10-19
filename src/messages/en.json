@@ -244,7 +244,8 @@
     "entryDeletedBody": "Your version is still here. Do you want to keep it?",
     "entryDeletedKeep": "Keep it",
     "entryDeletedDiscard": "Delete it",
-    "momentBadge": "Moment"
+    "momentBadge": "Moment",
+    "entryKeepEditing": "Keep editing"
   },
   "notFound": {
     "title": "Page not found",
@@ -353,7 +354,11 @@
     "shareDownload": "Download image",
     "shareDaysJournaled": "{n} days journaled",
     "shareNotEnough": "Check in on at least 5 days this month to make your moodbow.",
-    "shareThisMonth": "Share this month"
+    "shareThisMonth": "Share this month",
+    "shareLoading": "Getting your month…",
+    "shareFormat": "Format",
+    "shareTheme": "Theme",
+    "shareLineCount": "{count, plural, one {# character left} other {# characters left}}"
   },
   "ai": {
     "meAi": "AI",
