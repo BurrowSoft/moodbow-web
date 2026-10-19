@@ -269,7 +269,12 @@
     "mePrivacy": "Privacy Policy",
     "meTerms": "Terms",
     "meContact": "Contact us",
-    "meVersion": "Version {version}"
+    "meVersion": "Version {version}",
+    "meLanguageRegion": "Language & region",
+    "meLanguage": "Language",
+    "meCountry": "Country",
+    "meTimeZone": "Time zone",
+    "meCountryNone": "Not set"
   },
   "export": {
     "exportTitle": "Moodbow: your journal",

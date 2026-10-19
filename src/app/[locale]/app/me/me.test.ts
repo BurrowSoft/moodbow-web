@@ -18,7 +18,7 @@ vi.mock("@/i18n/navigation", () => ({
     throw new Redirect(args);
   },
 }));
-const { exportMyData, deleteMyAccount, saveReminder, setAiEnabled, recordAiWithdrawal, saveTone, saveFocusAreas } = await import("./actions");
+const { exportMyData, deleteMyAccount, saveReminder, setAiEnabled, recordAiWithdrawal, saveTone, saveFocusAreas, saveRegion } = await import("./actions");
 
 const UID = "0b5f2c1e-7d3a-4e8b-9c41-2a6f8e1d3b70";
 const confirm = (word: string) => {
@@ -178,5 +178,31 @@ describe("Me → AI actions (M9; reflect.md, Me → AI)", () => {
     expect(await saveFocusAreas(["sleep", "money"])).toEqual({ ok: false });
     expect(await setAiEnabled("yes" as unknown as boolean)).toMatchObject({ ok: false });
     expect(rpc).not.toHaveBeenCalled();
+  });
+});
+
+describe("saveRegion (Me → Language & region)", () => {
+  it("one field per call through update_profile; only valid values reach the database", async () => {
+    rpc.mockResolvedValue({ data: null, error: null });
+    expect(await saveRegion("country", "TH")).toEqual({ ok: true });
+    expect(rpc).toHaveBeenLastCalledWith("update_profile", { p_country: "TH" });
+    expect(await saveRegion("country", "")).toEqual({ ok: true });
+    expect(rpc).toHaveBeenLastCalledWith("update_profile", { p_country: "" });
+    expect(await saveRegion("time_zone", "Asia/Bangkok")).toEqual({ ok: true });
+    expect(rpc).toHaveBeenLastCalledWith("update_profile", { p_time_zone: "Asia/Bangkok" });
+    expect(await saveRegion("locale", "en")).toEqual({ ok: true });
+    expect(rpc).toHaveBeenLastCalledWith("update_profile", { p_locale: "en" });
+    rpc.mockClear();
+    for (const [field, value] of [["country", "XX"], ["country", "th"], ["time_zone", "../x"], ["locale", "fr"], ["nope", "x"]] as const) {
+      expect(await saveRegion(field as "country", value), `${field}=${value}`).toEqual({ ok: false });
+    }
+    expect(rpc).not.toHaveBeenCalled();
+  });
+
+  it("the database says no (invalid_time_zone): the error; a lost session: sign in", async () => {
+    rpc.mockResolvedValueOnce({ data: null, error: { message: "invalid_time_zone" } });
+    expect(await saveRegion("time_zone", "Mars/Olympus")).toEqual({ ok: false });
+    rpc.mockResolvedValueOnce({ data: null, error: { message: "not_authenticated" } });
+    await expect(saveRegion("country", "TH")).rejects.toBeInstanceOf(Redirect);
   });
 });
