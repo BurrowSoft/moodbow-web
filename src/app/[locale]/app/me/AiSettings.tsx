@@ -70,7 +70,7 @@ export function AiSettings({ initial, credits }: { initial: Values; credits: { b
   };
 
   const chip = (active: boolean) =>
-    `inline-flex min-h-12 items-center rounded-full border px-4 text-sm font-medium ${active ? "border-accent bg-pill text-accent" : "border-border text-muted hover:bg-pill"}`;
+    `inline-flex min-h-12 items-center rounded-full border px-4 text-sm font-medium aria-disabled:opacity-60 ${active ? "border-accent bg-pill text-accent" : "border-border text-muted hover:bg-pill"}`;
 
   return (
     <section aria-labelledby="me-ai" className="rounded-3xl border border-border bg-surface p-6">
@@ -86,7 +86,7 @@ export function AiSettings({ initial, credits }: { initial: Values; credits: { b
           checked={values.on}
           aria-disabled={pending}
           onChange={(e) => save("on", e.target.checked)}
-          className="h-6 w-6 accent-[var(--color-accent)]"
+          className="h-6 w-6 accent-[var(--color-accent)] aria-disabled:opacity-60"
         />
       </label>
       <p className="mt-2 text-sm text-muted" data-testid="me-ai-consent">
@@ -111,7 +111,7 @@ export function AiSettings({ initial, credits }: { initial: Values; credits: { b
                     checked={values.tone === tone}
                     aria-disabled={pending}
                     onChange={() => save("tone", tone)}
-                    className="h-5 w-5 accent-[var(--color-accent)]"
+                    className="h-5 w-5 accent-[var(--color-accent)] aria-disabled:opacity-60"
                   />
                   <span className="flex flex-col">
                     <span>{t(TONE_KEYS[tone][0])}</span>
