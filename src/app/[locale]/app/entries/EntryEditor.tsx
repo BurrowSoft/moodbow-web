@@ -293,6 +293,23 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
     >
       {/* The page's heading (also its title), for heading navigation. */}
       <h1 className="sr-only">{initial ? t("entryEditTitle") : t("entryNewTitle")}</h1>
+      {/* The date first, then the text (the mockups, decision 161). */}
+      <div className="flex flex-col gap-1">
+        <label htmlFor="entry-date" className="text-sm font-medium text-text">
+          {t("entryDateLabel")}
+        </label>
+        <input
+          id="entry-date"
+          data-testid="entry-date"
+          type="date"
+          max={today}
+          aria-invalid={future || undefined}
+          aria-describedby={future ? "entry-error" : undefined}
+          value={fields.date}
+          onChange={(e) => e.target.value && setFields((f) => ({ ...f, date: e.target.value }))}
+          className="min-h-11 w-fit rounded-full border border-border bg-bg px-4 text-text"
+        />
+      </div>
       <label className="sr-only" htmlFor="entry-text">
         {t("entryTextLabel")}
       </label>
@@ -309,22 +326,6 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
       />
 
       <div className="flex flex-wrap items-end gap-6">
-        <div className="flex flex-col gap-1">
-          <label htmlFor="entry-date" className="text-sm font-medium text-text">
-            {t("entryDateLabel")}
-          </label>
-          <input
-            id="entry-date"
-            data-testid="entry-date"
-            type="date"
-            max={today}
-            aria-invalid={future || undefined}
-            aria-describedby={future ? "entry-error" : undefined}
-            value={fields.date}
-            onChange={(e) => e.target.value && setFields((f) => ({ ...f, date: e.target.value }))}
-            className="min-h-11 rounded-full border border-border bg-bg px-4 text-text"
-          />
-        </div>
         <div className="flex flex-col gap-1">
           <label className="flex min-h-11 items-center gap-3 font-medium text-text">
             <input

@@ -497,3 +497,12 @@ describe("EntryEditor: leaving returns where it was opened from (decision 152)",
     await waitFor(() => expect(push).toHaveBeenLastCalledWith("/app/timeline"));
   });
 });
+
+describe("EntryEditor: the date first (decision 161)", () => {
+  it("the date field comes before the text, for the eye and for Tab", () => {
+    renderEditor();
+    const date = screen.getByTestId("entry-date");
+    const text = screen.getByTestId("entry-text");
+    expect(date.compareDocumentPosition(text) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+});

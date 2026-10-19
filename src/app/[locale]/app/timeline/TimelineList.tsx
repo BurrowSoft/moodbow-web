@@ -82,7 +82,7 @@ export function TimelineList({ initial, initialDone, momentsOnly, dateLocaleTag 
           <ul className="mt-3 space-y-3">
             {monthDays.map((day) => {
               const c = day.check_in;
-              const chips = c ? checkInChips(c, tt) : [];
+              const chips = c ? checkInChips(c, tt).map((chip) => chip.label) : [];
               return (
                 <li key={day.local_date} className="rounded-2xl border border-border bg-surface p-4">
                   <Link

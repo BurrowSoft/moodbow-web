@@ -224,3 +224,14 @@ describe("EntryScreen: headings", () => {
     expect(headings[0]).toHaveTextContent(m.entryEditTitle);
   });
 });
+
+describe("EntryScreen: the strip as in the mockups (decision 161)", () => {
+  it("the mood's face and word, then the chips with their value dots", () => {
+    renderIt();
+    const strip = screen.getByTestId("entry-checkin");
+    expect(strip.querySelector("[data-testid=mood-face]")).not.toBeNull();
+    expect(strip).toHaveTextContent(today.mood4);
+    // 7.5 h sleep → gold, 30 min → gold, stress 2 → orange.
+    expect([...strip.querySelectorAll("li [data-value-colour]")].map((d) => d.getAttribute("data-value-colour"))).toEqual(["#F3C24F", "#F3C24F", "#F4A77A"]);
+  });
+});
