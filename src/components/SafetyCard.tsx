@@ -9,7 +9,8 @@ import { helplinesFor, telHref } from "@/lib/safety/helplines";
 // save, behind Me → Get help now and under a reflection that names it. A
 // dismissible dialog; focus moves to its title; Esc or Close closes it.
 // Numbers from the country registry as tel: links; without a known
-// country, the helpline directory and "your local emergency number".
+// country, the generic emergency line; the helpline directory always
+// (decision 135).
 export function SafetyCard({ country, onClose }: { country: string | null | undefined; onClose: () => void }) {
   const t = useTranslations("safety");
   const lines = helplinesFor(country);
@@ -24,24 +25,21 @@ export function SafetyCard({ country, onClose }: { country: string | null | unde
             </a>
           </p>
         )}
-        <p className="text-text">
-          {t("safetyEmergency")}
-          {lines.emergency && (
-            <>
-              {" "}
-              <a href={telHref(lines.emergency.dial)} data-testid="safety-call-emergency" className={link}>
-                {lines.emergency.display}
-              </a>
-            </>
-          )}
-        </p>
-        {!lines.helpline && (
+        <p className="text-text">{t("safetyEmergency")}</p>
+        {/* Its own line; the visible text is the spoken name (WCAG 2.5.3). */}
+        {lines.emergency && (
           <p>
-            <a href={lines.directoryUrl} target="_blank" rel="noopener noreferrer" data-testid="safety-find-helpline" className={link}>
-              {t("safetyFindHelpline")}
+            <a href={telHref(lines.emergency.dial)} data-testid="safety-call-emergency" className={link}>
+              {t("safetyCallEmergency", { number: lines.emergency.display })}
             </a>
           </p>
         )}
+        {/* Always, as a quiet link under the numbers (decision 135). */}
+        <p>
+          <a href={lines.directoryUrl} target="_blank" rel="noopener noreferrer" data-testid="safety-find-helpline" className="text-sm text-muted underline underline-offset-4">
+            {t("safetyFindHelpline")}
+          </a>
+        </p>
         <p className="text-sm text-muted">{t("safetyNotTherapy")}</p>
       </div>
       <button type="button" data-testid="safety-close" className={dialogButton(true)} onClick={onClose}>

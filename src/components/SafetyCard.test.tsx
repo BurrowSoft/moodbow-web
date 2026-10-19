@@ -34,8 +34,11 @@ describe("SafetyCard", () => {
     expect(screen.getByTestId("safety-call-helpline")).toHaveAttribute("href", "tel:1323");
     expect(screen.getByTestId("safety-call-helpline")).toHaveTextContent("Call Department of Mental Health hotline (1323)");
     expect(screen.getByTestId("safety-call-emergency")).toHaveAttribute("href", "tel:1669");
+    // The visible text is the spoken name (safetyCallEmergency).
+    expect(screen.getByRole("link", { name: "Call emergency number 1669" })).toBe(screen.getByTestId("safety-call-emergency"));
     expect(card).toHaveTextContent(s.safetyNotTherapy);
-    expect(screen.queryByTestId("safety-find-helpline")).toBeNull();
+    // The directory is always there too, under the numbers (decision 135).
+    expect(screen.getByTestId("safety-find-helpline")).toHaveAttribute("href", "https://findahelpline.com");
   });
 
   it("no known country: the directory link and 'your local emergency number'", () => {
