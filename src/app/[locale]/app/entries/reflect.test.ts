@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { FunctionsFetchError, FunctionsHttpError } from "@supabase/supabase-js";
+import { FunctionsFetchError, FunctionsHttpError, FunctionsRelayError } from "@supabase/supabase-js";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { reflectOutcome } from "@/lib/journal/reflect";
 
@@ -68,9 +68,18 @@ describe("reflectOnEntry", () => {
     await expect(reflectOnEntry(ENTRY, KEY)).rejects.toBeInstanceOf(Redirect);
   });
 
-  it("the function unreachable, or a reply without a reflection: the friendly error", async () => {
+  it("no answer from the function (unreachable, relay, a gateway page without a code): no_answer, so the same key is resent (reviewer #34)", async () => {
     invoke.mockResolvedValueOnce({ data: null, error: new FunctionsFetchError(new TypeError("fetch failed")) });
-    expect(await reflectOnEntry(ENTRY, KEY)).toEqual({ status: "error", message: "reflectError" });
+    expect(await reflectOnEntry(ENTRY, KEY)).toEqual({ status: "no_answer" });
+    invoke.mockResolvedValueOnce({ data: null, error: new FunctionsRelayError(new Response("relay", { status: 502 })) });
+    expect(await reflectOnEntry(ENTRY, KEY)).toEqual({ status: "no_answer" });
+    invoke.mockResolvedValueOnce({ data: null, error: new FunctionsHttpError(new Response("<html>504 Gateway Time-out</html>", { status: 504, headers: { "content-type": "text/html" } })) });
+    expect(await reflectOnEntry(ENTRY, KEY)).toEqual({ status: "no_answer" });
+    invoke.mockResolvedValueOnce({ data: null, error: new FunctionsHttpError(new Response(JSON.stringify({ message: "x" }), { status: 546 })) });
+    expect(await reflectOnEntry(ENTRY, KEY)).toEqual({ status: "no_answer" });
+  });
+
+  it("a 200 without a reflection: the friendly error", async () => {
     invoke.mockResolvedValueOnce({ data: { credits: {} }, error: null });
     expect(await reflectOnEntry(ENTRY, KEY)).toEqual({ status: "error", message: "reflectError" });
   });

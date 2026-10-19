@@ -32,11 +32,14 @@ export default async function EntryPage({ params }: PageProps<"/[locale]/app/ent
   if (!data) notFound();
   // Reflect (M9): only when AI is shown, consented to and on. The entry's
   // reflection, if any (RLS: own rows; at most one per entry).
+  // If it can't be read, no Reflect for now: reflecting would replace a
+  // reflection the person couldn't see (reviewer #34).
   let reflection: Reflection | null = null;
-  const reflect = canReflect(me);
+  let reflect = canReflect(me);
   if (reflect) {
-    const { data: row } = await supabase.from("ai_reflections").select("id, body, tier, created_at").eq("entry_id", id).maybeSingle();
-    reflection = (row as Reflection | null) ?? null;
+    const { data: row, error: readError } = await supabase.from("ai_reflections").select("id, body, tier, created_at").eq("entry_id", id).maybeSingle();
+    if (readError) reflect = false;
+    else reflection = (row as Reflection | null) ?? null;
   }
   return (
     <>

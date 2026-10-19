@@ -11,6 +11,10 @@ export type ReflectResult =
   | { status: "in_progress" }
   // AI is off for everyone right now (ai_disabled): hide Reflect.
   | { status: "hidden" }
+  // No answer from the function (unreachable, or a gateway error without
+  // the contract's {error} code): it may have run, so only a retry with the
+  // SAME client_key is safe (reflect.md; reviewer #34). Shown as errOffline.
+  | { status: "no_answer" }
   | { status: "error"; message: ReflectErrorKey };
 
 // Copy keys in the "ai" namespace.
