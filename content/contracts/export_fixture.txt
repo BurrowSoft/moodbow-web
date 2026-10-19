@@ -1,0 +1,35 @@
+Moodbow: your journal
+Exported: 2026-10-19 20:15 UTC
+Account: sam@example.invalid
+This file holds your private journal. Keep it somewhere safe.
+
+Check-ins
+2026-09-28 · Mood: Bad (2/5)
+2026-09-29 · Mood: Okay (3/5) · Sleep: 7 h · Exercise: None · Stress: 4/5
+2026-09-30 · Mood: Great (5/5) · Sleep: Poor · Exercise: 90+ min
+2026-10-02 · Mood: Good (4/5) · Sleep: 7.5 h, Good · Exercise: 30 min · Stress: 2/5
+
+Entries
+2026-09-30
+Long day.
+But a good talk with Mai at the end — ขอบคุณ.
+
+2026-10-02 · ★ Moment
+A walk by the river.
+
+2026-10-02
+
+Groceries  
+
+- rice
+- tea
+
+AI reflections
+On your entry of 2026-10-02
+Time outside seems to lift your mood.
+
+On your entry of 2026-10-01
+You named what you needed.
+
+What the AI remembers
+- Walks by the river help.

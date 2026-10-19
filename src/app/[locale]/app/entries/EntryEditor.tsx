@@ -6,6 +6,7 @@ import { Dialog, dialogButton } from "@/components/Dialog";
 import { useRouter } from "@/i18n/navigation";
 import { MAX_ENTRY_CHARS, sameEntry, type Entry } from "@/lib/journal/entry";
 import { localKey } from "@/lib/localData";
+import { PRIMARY_SAVE } from "@/lib/ui/journalLayout";
 import { deleteEntry, getEntry, saveEntry, type DeleteState, type EntryState } from "./actions";
 
 // The entry editor (M4): a full-page text area, a date (today or earlier)
@@ -285,7 +286,7 @@ function Editor({ initial, newId, uid, today, startDate, restore }: Props & { re
           type="submit"
           data-testid="entry-save"
           disabled={blank || tooLong || future || pending || deleting}
-          className="inline-flex min-h-12 min-w-[160px] items-center justify-center rounded-full bg-accent px-8 font-medium text-on-accent hover:opacity-90 disabled:opacity-50"
+          className={PRIMARY_SAVE}
         >
           {t("entrySave")}
         </button>

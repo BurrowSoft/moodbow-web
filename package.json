@@ -10,7 +10,8 @@
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "sync:contracts": "node scripts/sync-contracts.mjs"
   },
   "engines": {
     "node": ">=20.9"

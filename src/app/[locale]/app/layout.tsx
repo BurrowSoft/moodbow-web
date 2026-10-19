@@ -11,6 +11,7 @@ import { JournalUnavailable } from "@/components/JournalUnavailable";
 import { isAuthOutage } from "@/lib/supabase/proxy";
 import { AppNav } from "./AppNav";
 import { NavProgress } from "@/components/NavProgress";
+import { APP_MAIN_GUTTER } from "@/lib/ui/journalLayout";
 
 // The signed-in web journal. Behind web-journal-live: the proxy 404s /app on
 // Production until it's met; this check is the backstop. Signed-out visitors
@@ -46,7 +47,7 @@ export default async function AppLayout({ children, params }: LayoutProps<"/[loc
         <NavProgress />
       </Suspense>
       <AppNav />
-      <main id="main" className="flex-1 px-6 pb-28 pt-10 md:pb-10">
+      <main id="main" className={`flex-1 ${APP_MAIN_GUTTER} pb-28 pt-10 md:pb-10`}>
         <div className="mx-auto max-w-3xl">{children}</div>
       </main>
     </div>
