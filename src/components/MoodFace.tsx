@@ -14,7 +14,7 @@ export function MoodFace({ mood, className, selected = false }: { mood: number; 
     <span
       aria-hidden="true"
       data-testid="mood-face"
-      className={`relative inline-block shrink-0 rounded-full ${MOOD_COLOURS[mood - 1]} ${MOOD_DOT_OUTLINE} ${className} ${selected ? "ring-2 ring-accent ring-offset-2" : ""}`}
+      className={`relative inline-block shrink-0 rounded-full ${MOOD_COLOURS[mood - 1]} ${MOOD_DOT_OUTLINE} ${className} ${selected ? "ring-2 ring-accent ring-offset-2 ring-offset-pill" : ""}`}
     >
       <svg
         viewBox={`0 0 ${faces.view_box} ${faces.view_box}`}

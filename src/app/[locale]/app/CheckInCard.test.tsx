@@ -376,6 +376,8 @@ describe("CheckInCard: the mood faces (mood-faces.json; UX, superseding decision
     expect(screen.getByTestId("checkin-mood-4").classList.contains("text-accent")).toBe(true);
     expect(screen.getByTestId("checkin-mood-2").classList.contains("text-muted")).toBe(true);
     expect(screen.getByTestId("checkin-mood-4").querySelector("[data-testid=mood-face]")!.classList.contains("ring-accent")).toBe(true);
+    // The ring's gap is the selected face's own background, not white (a halo in dark).
+    expect(screen.getByTestId("checkin-mood-4").querySelector("[data-testid=mood-face]")!.classList.contains("ring-offset-pill")).toBe(true);
     expect(screen.queryByTestId("checkin-mood-selected")).toBeNull();
   });
 });
