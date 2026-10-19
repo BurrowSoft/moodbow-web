@@ -10,13 +10,22 @@ import { SlowLoading } from "./SlowLoading";
 // redirect: sending them to sign-in would loop straight back here, since
 // the session itself is fine. Try again reloads the page's data in place
 // and says "Taking longer than usual…" if that takes over 3 s.
-export function JournalUnavailable() {
+// standalone: it's the whole page (the /app layout itself, Set up), so it
+// is the page's <main id="main">. Inside a page of the journal it's a
+// section of the layout's <main>: one main landmark, one #main (the skip
+// link's target; Web Tester's a11y note).
+export function JournalUnavailable({ standalone = false }: { standalone?: boolean }) {
   const t = useTranslations("auth");
   const ta = useTranslations("app");
   const router = useRouter();
   const [retrying, startRetry] = useTransition();
+  const Root = standalone ? "main" : "section";
   return (
-    <main id="main" className="flex flex-1 flex-col items-center justify-center px-6 py-16 text-center" data-testid="journal-unavailable">
+    <Root
+      id={standalone ? "main" : undefined}
+      className="flex flex-1 flex-col items-center justify-center px-6 py-16 text-center"
+      data-testid="journal-unavailable"
+    >
       <p role="alert" className="text-lg font-medium text-text">
         {t("errGeneric")}
       </p>
@@ -32,6 +41,6 @@ export function JournalUnavailable() {
       <div className="mt-4 min-h-6">
         <SlowLoading active={retrying} />
       </div>
-    </main>
+    </Root>
   );
 }
