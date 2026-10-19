@@ -18,7 +18,7 @@ vi.mock("@/i18n/navigation", () => ({
     throw new Redirect(args);
   },
 }));
-const { exportMyData, deleteMyAccount, saveReminder, setAiEnabled, saveTone, saveFocusAreas } = await import("./actions");
+const { exportMyData, deleteMyAccount, saveReminder, setAiEnabled, recordAiWithdrawal, saveTone, saveFocusAreas } = await import("./actions");
 
 const UID = "0b5f2c1e-7d3a-4e8b-9c41-2a6f8e1d3b70";
 const confirm = (word: string) => {
@@ -135,12 +135,24 @@ describe("Me → AI actions (M9; reflect.md, Me → AI)", () => {
     ]);
   });
 
-  it("a failed step stops there and says so; a lost session goes to sign-in", async () => {
+  it("on: a failed step stops there; AI stays off; a lost session goes to sign-in", async () => {
     rpc.mockResolvedValueOnce({ data: null, error: { message: "boom" } });
-    expect(await setAiEnabled(true)).toEqual({ ok: false });
+    expect(await setAiEnabled(true)).toEqual({ ok: false, aiEnabled: false });
     expect(rpc).toHaveBeenCalledTimes(1);
     rpc.mockResolvedValueOnce({ data: null, error: { message: "not_authenticated" } });
     await expect(saveTone("brief")).rejects.toBeInstanceOf(Redirect);
+  });
+
+  it("off: switching off failed → still on; only the withdrawal failed → off, withdrawal pending; the retry records only it (reviewer #33)", async () => {
+    rpc.mockResolvedValueOnce({ data: null, error: { message: "boom" } });
+    expect(await setAiEnabled(false)).toEqual({ ok: false, aiEnabled: true });
+    rpc.mockReset();
+    rpc.mockResolvedValueOnce({ data: null, error: null }).mockResolvedValueOnce({ data: null, error: { message: "boom" } });
+    expect(await setAiEnabled(false)).toEqual({ ok: false, aiEnabled: false, pending: "withdrawal" });
+    rpc.mockReset();
+    rpc.mockResolvedValue({ data: null, error: null });
+    expect(await recordAiWithdrawal()).toEqual({ ok: true });
+    expect(rpc.mock.calls).toEqual([["record_consents", { p_items: [{ ...AI, granted: false }] }]]);
   });
 
   it("tone and focus: only known values reach the database", async () => {
@@ -152,7 +164,7 @@ describe("Me → AI actions (M9; reflect.md, Me → AI)", () => {
     rpc.mockClear();
     expect(await saveTone("shouty")).toEqual({ ok: false });
     expect(await saveFocusAreas(["sleep", "money"])).toEqual({ ok: false });
-    expect(await setAiEnabled("yes" as unknown as boolean)).toEqual({ ok: false });
+    expect(await setAiEnabled("yes" as unknown as boolean)).toMatchObject({ ok: false });
     expect(rpc).not.toHaveBeenCalled();
   });
 });

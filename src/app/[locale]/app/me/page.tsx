@@ -48,7 +48,7 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
             tone: isTone(me.settings?.tone) ? me.settings.tone : "warm",
             focus: FOCUS_AREAS.filter((a) => me.settings?.focus_areas?.includes(a)),
           }}
-          credits={{ balance: me.credits?.balance ?? 0, lite: me.credits?.tier_now === "lite" }}
+          credits={{ balance: me.credits?.balance ?? 0 }}
         />
       )}
       <Reminder on={me.settings?.reminder_on ?? true} time={hhmm(me.settings?.reminder_time)} />

@@ -92,17 +92,40 @@ const settingsFailed = async (message: string | undefined): Promise<AiSaveResult
   return { ok: false };
 };
 
-// On: record the AI consent, then switch AI on. Off: switch AI off, then
-// record the withdrawal (a consent row with granted false).
-export async function setAiEnabled(on: boolean): Promise<AiSaveResult> {
-  if (typeof on !== "boolean") return { ok: false };
+// The AI switch reports what the account has after a failure (it takes two
+// steps), and whether the withdrawal is still to be recorded.
+export type AiSwitchResult = { ok: true } | { ok: false; aiEnabled: boolean; pending?: "withdrawal" };
+
+// On: record the AI consent, then switch AI on; a failure in either leaves
+// AI off. Off: switch AI off, then record the withdrawal (a consent row
+// with granted false). If only the withdrawal failed, AI IS off: say so,
+// and the retry records just the withdrawal (reviewer #33).
+export async function setAiEnabled(on: boolean): Promise<AiSwitchResult> {
+  if (typeof on !== "boolean") return { ok: false, aiEnabled: !on };
   const supabase = await createSupabaseServerClient();
-  if (!supabase) return { ok: false };
-  const consent = () => supabase.rpc("record_consents", { p_items: [consentItem("ai", on)] });
-  const setting = () => supabase.rpc("update_settings", { p_ai_enabled: on });
-  for (const step of on ? [consent, setting] : [setting, consent]) {
-    const { error } = await step();
-    if (error) return settingsFailed(error.message);
+  if (!supabase) return { ok: false, aiEnabled: !on };
+  const failed = async (message: string, result: AiSwitchResult) => ((await settingsFailed(message)), result);
+  if (on) {
+    const consent = await supabase.rpc("record_consents", { p_items: [consentItem("ai", true)] });
+    if (consent.error) return failed(consent.error.message, { ok: false, aiEnabled: false });
+    const setting = await supabase.rpc("update_settings", { p_ai_enabled: true });
+    if (setting.error) return failed(setting.error.message, { ok: false, aiEnabled: false });
+    return { ok: true };
+  }
+  const setting = await supabase.rpc("update_settings", { p_ai_enabled: false });
+  if (setting.error) return failed(setting.error.message, { ok: false, aiEnabled: true });
+  return recordAiWithdrawal();
+}
+
+// The AI consent withdrawal alone (Try again after it failed; AI is
+// already off).
+export async function recordAiWithdrawal(): Promise<AiSwitchResult> {
+  const supabase = await createSupabaseServerClient();
+  if (!supabase) return { ok: false, aiEnabled: false, pending: "withdrawal" };
+  const { error } = await supabase.rpc("record_consents", { p_items: [consentItem("ai", false)] });
+  if (error) {
+    await settingsFailed(error.message);
+    return { ok: false, aiEnabled: false, pending: "withdrawal" };
   }
   return { ok: true };
 }

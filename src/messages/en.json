@@ -338,7 +338,7 @@
     "focusSelfEsteem": "Self-esteem",
     "creditsTitle": "AI credits",
     "creditsBalance": "{credits, plural, one {# credit} other {# credits}}",
-    "creditsLiteNow": "You're on Moodbow AI Lite: shorter, simpler answers, up to {cap} a day.",
+    "creditsLiteNow": "You're on Moodbow AI Lite: shorter, simpler answers, free every day.",
     "creditsOut": "You've used your Moodbow AI credits. We'll keep going with Moodbow AI Lite, so answers will be shorter and simpler."
   }
 }

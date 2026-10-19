@@ -3,7 +3,7 @@
 import { useRef, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { FOCUS_AREAS, TONES, type FocusArea, type Tone } from "@/lib/journal/ai";
-import { saveFocusAreas, saveTone, setAiEnabled, type AiSaveResult } from "./actions";
+import { recordAiWithdrawal, saveFocusAreas, saveTone, setAiEnabled, type AiSaveResult, type AiSwitchResult } from "./actions";
 
 const TONE_KEYS = { warm: ["toneWarm", "toneWarmHint"], direct: ["toneDirect", "toneDirectHint"], brief: ["toneBrief", "toneBriefHint"] } as const;
 const FOCUS_KEYS: Record<FocusArea, string> = {
@@ -25,38 +25,49 @@ type Field = keyof Values;
 // as soon as it changes; a failed save puts it back to what the account has,
 // with the error and Try again (decision 111). Tone and focus only while AI
 // is on, as in Set up.
-export function AiSettings({ initial, credits }: { initial: Values; credits: { balance: number; lite: boolean } }) {
+export function AiSettings({ initial, credits }: { initial: Values; credits: { balance: number } }) {
   const t = useTranslations("ai");
   const ta = useTranslations("app");
   const tt = useTranslations("today");
   const [values, setValues] = useState(initial);
   // What the account has (the last successful save of each field).
   const saved = useRef(initial);
-  const [failed, setFailed] = useState<{ field: Field; tried: Values[Field] } | null>(null);
+  // The failed save, for Try again: the field and value tried, or (AI
+  // switched off but its withdrawal not yet recorded) just the withdrawal.
+  const [failed, setFailed] = useState<{ field: Field; tried: Values[Field]; withdrawal?: boolean } | null>(null);
   const [pending, startTransition] = useTransition();
 
-  const save = <F extends Field>(field: F, next: Values[F]) => {
+  const send = (field: Field, next: Values[Field], withdrawalOnly = false): Promise<AiSaveResult | AiSwitchResult> => {
+    if (withdrawalOnly) return recordAiWithdrawal();
+    if (field === "on") return setAiEnabled(next as boolean);
+    return field === "tone" ? saveTone(next as Tone) : saveFocusAreas(next as FocusArea[]);
+  };
+
+  const save = <F extends Field>(field: F, next: Values[F], withdrawalOnly = false) => {
     setFailed(null);
     setValues((v) => ({ ...v, [field]: next }));
     startTransition(async () => {
-      let result: AiSaveResult;
+      let result: AiSaveResult | AiSwitchResult;
       try {
-        result = field === "on" ? await setAiEnabled(next as boolean) : field === "tone" ? await saveTone(next as Tone) : await saveFocusAreas(next as FocusArea[]);
+        result = await send(field, next, withdrawalOnly);
       } catch (e) {
         if (typeof (e as { digest?: unknown })?.digest === "string" && (e as { digest: string }).digest.startsWith("NEXT_REDIRECT")) throw e;
         result = { ok: false };
       }
       if (result.ok) {
         saved.current = { ...saved.current, [field]: next };
-      } else {
-        setValues((v) => ({ ...v, [field]: saved.current[field] }));
-        setFailed({ field, tried: next });
+        return;
       }
+      // The switch takes what the server says it has (two steps: one may
+      // have gone through); everything else goes back to the last save.
+      if (field === "on" && "aiEnabled" in result) saved.current = { ...saved.current, on: result.aiEnabled };
+      setValues((v) => ({ ...v, [field]: saved.current[field] }));
+      setFailed({ field, tried: next, withdrawal: withdrawalOnly || ("pending" in result && result.pending === "withdrawal") });
     });
   };
 
   const chip = (active: boolean) =>
-    `inline-flex min-h-11 items-center rounded-full border px-4 text-sm font-medium ${active ? "border-accent bg-pill text-accent" : "border-border text-muted hover:bg-pill"}`;
+    `inline-flex min-h-12 items-center rounded-full border px-4 text-sm font-medium ${active ? "border-accent bg-pill text-accent" : "border-border text-muted hover:bg-pill"}`;
 
   return (
     <section aria-labelledby="me-ai" className="rounded-3xl border border-border bg-surface p-6" aria-busy={pending}>
@@ -99,8 +110,9 @@ export function AiSettings({ initial, credits }: { initial: Values; credits: { b
                     onChange={() => save("tone", tone)}
                     className="h-5 w-5 accent-[var(--color-accent)]"
                   />
-                  <span>
-                    {t(TONE_KEYS[tone][0])} <span className="text-sm text-muted">· {t(TONE_KEYS[tone][1])}</span>
+                  <span className="flex flex-col">
+                    <span>{t(TONE_KEYS[tone][0])}</span>
+                    <span className="text-sm text-muted">{t(TONE_KEYS[tone][1])}</span>
                   </span>
                 </label>
               ))}
@@ -133,7 +145,9 @@ export function AiSettings({ initial, credits }: { initial: Values; credits: { b
       <div className="mt-6 border-t border-border pt-4" data-testid="me-ai-credits">
         <h3 className="text-sm font-medium text-text">{t("creditsTitle")}</h3>
         <p className="mt-1 text-text">{t("creditsBalance", { credits: credits.balance })}</p>
-        {credits.lite && <p className="mt-1 text-sm text-muted">{t("creditsOut")}</p>}
+        {/* At a balance of 0, the steady Lite state (creditsOut is only the
+            one-time notice when they run out; m9 spec, decision 122). */}
+        {credits.balance <= 0 && <p className="mt-1 text-sm text-muted">{t("creditsLiteNow")}</p>}
       </div>
 
       {failed && !pending && (
@@ -141,7 +155,7 @@ export function AiSettings({ initial, credits }: { initial: Values; credits: { b
           <p role="alert" data-testid="me-ai-error" className="text-sm font-medium text-accent">
             {tt("errGeneric")}
           </p>
-          <button type="button" data-testid="me-ai-retry" onClick={() => save(failed.field, failed.tried)} className="mt-2 min-h-11 rounded-full border border-border px-4 text-sm font-medium text-text">
+          <button type="button" data-testid="me-ai-retry" onClick={() => save(failed.field, failed.tried, failed.withdrawal)} className="mt-2 min-h-11 rounded-full border border-border px-4 text-sm font-medium text-text">
             {ta("tryAgain")}
           </button>
         </div>
