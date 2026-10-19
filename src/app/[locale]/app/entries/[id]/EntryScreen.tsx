@@ -232,12 +232,8 @@ function Screen({ entry: initial, checkIn, from, backLabel, dateLocaleTag, uid, 
           </>
         )}
       </div>
-      {mode.kind === "edit" && (
-        <>
-          <h1 className="sr-only">{t("entryEditTitle")}</h1>
-          <EntryEditor key={opened} initial={entry} newId={entry.id} uid={uid} today={today} country={country} backTo={from} start={mode.start} onLeave={onLeave} />
-        </>
-      )}
+      {/* The editor has its own heading, Edit entry (a11y pass 5). */}
+      {mode.kind === "edit" && <EntryEditor key={opened} initial={entry} newId={entry.id} uid={uid} today={today} country={country} backTo={from} start={mode.start} onLeave={onLeave} />}
       {/* Hidden, not unmounted, while editing: a reflection made on this
           visit is still here after (ReflectPanel keeps it). */}
       <article hidden={mode.kind === "edit"} className="mt-6 space-y-6" data-testid="entry-view">

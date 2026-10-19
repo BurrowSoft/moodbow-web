@@ -213,3 +213,14 @@ describe("EntryScreen: an entry deleted on another device", () => {
     expect(push).toHaveBeenCalledWith("/app/timeline");
   });
 });
+
+describe("EntryScreen: headings", () => {
+  it("one h1 at a time: the date in the view, the editor's Edit entry while editing", () => {
+    renderIt();
+    expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
+    fireEvent.click(screen.getByTestId("entry-add-more"));
+    const headings = screen.getAllByRole("heading", { level: 1 });
+    expect(headings).toHaveLength(1);
+    expect(headings[0]).toHaveTextContent(m.entryEditTitle);
+  });
+});

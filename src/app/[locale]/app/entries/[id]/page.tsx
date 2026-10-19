@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 import { JournalUnavailable } from "@/components/JournalUnavailable";
 import type { CheckIn } from "@/lib/journal/checkIn";
@@ -13,7 +13,7 @@ import { headers } from "next/headers";
 import { backLabel } from "@/lib/journal/backLabel";
 import { originOf } from "@/lib/journal/origin";
 import { dateLocale } from "@/lib/journal/today";
-import { tabMetadata } from "../../TabPlaceholder";
+import { titledMetadata } from "../../TabPlaceholder";
 import { EntryScreen } from "./EntryScreen";
 
 // The Reflect server action runs in this page's function: room for the
@@ -21,11 +21,14 @@ import { EntryScreen } from "./EntryScreen";
 export const maxDuration = 60;
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/app/entries/[id]">): Promise<Metadata> {
-  return tabMetadata("tabToday", (await params).locale);
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "entry" });
+  return titledMetadata(t("entryEditTitle"), locale);
 }
 
-// An entry (M4): the entry view, editing in place (decision 151). RLS returns only the signed-in user's own rows, so
-// someone else's id is the same 404 as a missing one.
+// An entry (M4): the entry view, editing in place (decision 151). RLS
+// returns only the signed-in user's own rows, so someone else's id is the
+// same 404 as a missing one.
 export default async function EntryPage({ params, searchParams }: PageProps<"/[locale]/app/entries/[id]">) {
   const { locale, id } = await params;
   setRequestLocale(locale as Locale);

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 import { JournalUnavailable } from "@/components/JournalUnavailable";
 import { getMe } from "@/lib/journal/me";
@@ -11,10 +11,12 @@ import { backLabel } from "@/lib/journal/backLabel";
 import { originOf } from "@/lib/journal/origin";
 import { dateLocale } from "@/lib/journal/today";
 import { EntryEditor } from "../entries/EntryEditor";
-import { tabMetadata } from "../TabPlaceholder";
+import { titledMetadata } from "../TabPlaceholder";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/app/write">): Promise<Metadata> {
-  return tabMetadata("tabToday", (await params).locale);
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "entry" });
+  return titledMetadata(t("entryNewTitle"), locale);
 }
 
 // A new entry (M4). Its id is made here, when the draft starts, so a save
