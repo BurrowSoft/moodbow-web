@@ -181,7 +181,8 @@
     "meSignOut": "Sign out",
     "retry": "Try again",
     "tryAgain": "Try again",
-    "slowLoading": "Taking longer than usual…"
+    "slowLoading": "Taking longer than usual…",
+    "navBackTo": "Back to {screen}"
   },
   "today": {
     "greetMorning": "Good morning",
