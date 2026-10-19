@@ -7,12 +7,9 @@ export const MOODS = [1, 2, 3, 4, 5] as const;
 export const SLEEP_QUALITIES = ["poor", "okay", "good"] as const;
 export const EXERCISE_MINUTES = [0, 15, 30, 45, 60, 90] as const;
 export const STRESS_LEVELS = [1, 2, 3, 4, 5] as const;
-// The mood colours, Awful → Great: "Sunrise" (decision 149; the same as the
-// app and lib/share/moodbow.ts MOOD_HEX). Not the brand mark's colours.
-// Several are light on a light background, so the circles carry a
-// MOOD_DOT_OUTLINE (the muted token: ≥ 4.9:1 on every surface, both themes).
-export const MOOD_COLOURS = ["bg-[#7f8cb8]", "bg-[#a99bd1]", "bg-[#e6c7d3]", "bg-[#f4a77a]", "bg-[#f3c24f]"] as const;
-export const MOOD_DOT_OUTLINE = "border border-muted";
+// The mood colours, Awful → Great ("Sunrise", decision 149): from the
+// colour-map contract, in valueColours.ts.
+export { MOOD_COLOURS, MOOD_DOT_OUTLINE } from "./valueColours";
 export const SLEEP_HOURS = Array.from({ length: 29 }, (_, i) => i / 2); // 0, 0.5 … 14
 
 export type SleepQuality = (typeof SLEEP_QUALITIES)[number];

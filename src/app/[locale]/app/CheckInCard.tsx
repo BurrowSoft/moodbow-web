@@ -2,10 +2,13 @@
 
 import { startTransition, useActionState, useCallback, useEffect, useId, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { EXERCISE_MINUTES, MOOD_COLOURS, MOOD_DOT_OUTLINE, MOODS, SLEEP_HOURS, SLEEP_QUALITIES, STRESS_LEVELS, type CheckIn, type SleepQuality } from "@/lib/journal/checkIn";
+import { EXERCISE_MINUTES, MOODS, SLEEP_HOURS, SLEEP_QUALITIES, STRESS_LEVELS, type CheckIn, type SleepQuality } from "@/lib/journal/checkIn";
 import { dateLine } from "@/lib/journal/today";
+import { valueHex } from "@/lib/journal/valueColours";
 import { localKey } from "@/lib/localData";
-import { JOURNAL_CARD, MOOD_FACE, MOOD_ROW, PRIMARY_SAVE } from "@/lib/ui/journalLayout";
+import { ValueDot } from "@/components/ValueDot";
+import { JOURNAL_CARD, MOOD_FACE, MOOD_LABEL, MOOD_ROW, PRIMARY_SAVE } from "@/lib/ui/journalLayout";
+import { MoodFace } from "@/components/MoodFace";
 import { saveCheckIn, type CheckInState } from "./actions";
 
 // The daily check-in (M4): mood required (5 labelled circles), then the
@@ -279,7 +282,7 @@ function Card({ initial, uid, date: cardDate, notify, announce, autoFocus }: Pro
 
   const set = (patch: Partial<Fields>) => setFields((f) => ({ ...f, ...patch }));
   const chip = (active: boolean) =>
-    `min-h-12 rounded-full border px-4 text-sm font-medium ${active ? "border-accent bg-pill text-accent" : "border-border text-text hover:bg-pill"}`;
+    `inline-flex min-h-12 items-center justify-center gap-2 rounded-full border px-4 text-sm font-medium ${active ? "border-accent bg-pill text-accent" : "border-border text-text hover:bg-pill"}`;
   const errorKey = storageFailed
     ? "errGeneric"
     : state.status === "error"
@@ -365,11 +368,11 @@ function Card({ initial, uid, date: cardDate, notify, announce, autoFocus }: Pro
         <h2 id={moodTitle} className="text-lg font-medium text-text">
           {t("checkinTitle")}
         </h2>
-        {/* Narrow or large text (decision 105, app parity): every face stays a
-            48 px target and the row wraps rather than shrink; when the labels
-            don't fit (under 22rem, which grows with the text size) they become
-            screen-reader text, so each face keeps its name, and the chosen
-            mood's label shows under the row instead. */}
+        {/* The faces (mood-faces.json) with all five labels under them, the
+            chosen one in the accent (UX, superseding decision 105's hidden
+            labels). Every face stays a ≥ 48 px target; at large text or zoom
+            a face grows to its label's longest word and the row wraps, so a
+            label never breaks mid-word. */}
         <div className="@container mt-4">
           <div className={MOOD_ROW} role="radiogroup" aria-labelledby={moodTitle} aria-required="true" onKeyDown={moveMood}>
             {MOODS.map((mood) => (
@@ -385,19 +388,13 @@ function Card({ initial, uid, date: cardDate, notify, announce, autoFocus }: Pro
                 onClick={() => set({ mood })}
                 className={`${MOOD_FACE} ${fields.mood === mood ? "bg-pill text-accent" : "text-muted hover:bg-pill"}`}
               >
-                <span className={`h-9 w-9 shrink-0 rounded-full ${MOOD_COLOURS[mood - 1]} ${MOOD_DOT_OUTLINE} ${fields.mood === mood ? "ring-2 ring-accent ring-offset-2" : ""}`} aria-hidden="true" />
-                <span className="sr-only @min-[22rem]:not-sr-only" data-testid={`checkin-mood-label-${mood}`}>
+                <MoodFace mood={mood} className="h-9 w-9" selected={fields.mood === mood} />
+                <span className={MOOD_LABEL} data-testid={`checkin-mood-label-${mood}`}>
                   {t(`mood${mood}` as "mood1")}
                 </span>
               </button>
             ))}
           </div>
-          {fields.mood !== null && (
-            // Visual only: the selected radio already says it to screen readers.
-            <p aria-hidden="true" data-testid="checkin-mood-selected" className="mt-2 text-center text-sm font-medium text-accent @min-[22rem]:hidden">
-              {t(`mood${fields.mood}` as "mood1")}
-            </p>
-          )}
         </div>
       </div>
 
@@ -422,6 +419,8 @@ function Card({ initial, uid, date: cardDate, notify, announce, autoFocus }: Pro
                   </option>
                 ))}
               </select>
+              {/* The chosen value's colour (decision 150): only once one is picked. */}
+              {fields.sleepHours !== "" && <ValueDot hex={valueHex("sleep_hours", fields.sleepHours)} testId="checkin-sleep-dot" />}
               {SLEEP_QUALITIES.map((q) => (
                 <button
                   key={q}
@@ -451,6 +450,7 @@ function Card({ initial, uid, date: cardDate, notify, announce, autoFocus }: Pro
                   onClick={() => set({ exercise: fields.exercise === String(m) ? "" : String(m) })}
                   className={chip(fields.exercise === String(m))}
                 >
+                  {fields.exercise === String(m) && <ValueDot hex={valueHex("exercise_minutes", m)} testId="checkin-exercise-dot" />}
                   {m === 0 ? t("exerciseNone") : m === 90 ? t("exercise90") : t("exerciseMinutes", { minutes: m })}
                 </button>
               ))}
@@ -474,6 +474,7 @@ function Card({ initial, uid, date: cardDate, notify, announce, autoFocus }: Pro
                     onClick={() => set({ stress: fields.stress === String(s) ? "" : String(s) })}
                     className={`${chip(fields.stress === String(s))} min-w-12 px-0`}
                   >
+                    {fields.stress === String(s) && <ValueDot hex={valueHex("stress", s)} testId="checkin-stress-dot" />}
                     {s}
                   </button>
                   <span className="h-4 text-xs text-muted">{s === 1 ? t("stressLow") : s === 5 ? t("stressHigh") : ""}</span>

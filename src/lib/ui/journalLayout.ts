@@ -16,7 +16,13 @@ export const JOURNAL_CARD = "rounded-3xl border border-border bg-surface p-3 min
 
 // The mood picker: a radio row inside an @container, and each face.
 export const MOOD_ROW = "flex flex-wrap justify-between gap-0.5 @min-[22rem]:gap-2";
-export const MOOD_FACE = "flex min-h-12 min-w-12 flex-1 basis-12 flex-col items-center justify-center gap-2 rounded-2xl p-1 text-xs font-medium @min-[22rem]:p-2";
+// min-w-min + the label's min-w-10: at least 48 px (40 + p-1), or the
+// label's longest word, never less, so the label never breaks mid-word.
+export const MOOD_FACE = "flex min-h-12 min-w-min flex-1 basis-12 flex-col items-center justify-center gap-1 rounded-2xl p-1 font-medium @min-[22rem]:p-2";
+// The label under each face: always shown (UX, superseding decision 105);
+// 12 px (0.75rem, UX) at the default text size: in rem, so it follows the
+// reader's setting. "Awful" and "Great" stay on one line under 48 px faces.
+export const MOOD_LABEL = "min-w-10 text-center text-xs leading-tight";
 
 // The primary Save button (check-in, entry): full width on phones, so at
 // 200% zoom (a 160 px-wide page) it never overflows; the label wraps.
@@ -27,6 +33,10 @@ export const PRIMARY_SAVE =
 // (min-w-0), so at 200% zoom the four labels wrap instead of overlapping.
 export const TAB_ITEM = "min-w-0";
 export const TAB_LINK_NARROW = "px-1 min-[360px]:px-3 text-center leading-tight [overflow-wrap:anywhere]";
+// Under 240 CSS px (200%+ zoom on a phone) the labels can't fit without
+// breaking mid-word: icons only, each label kept as screen-reader text (the
+// link's name) and a title tooltip. Never a smaller font: that defeats zoom (UX).
+export const TAB_LABEL = "max-[240px]:sr-only";
 
 // A segmented choice (Timeline All days/Moments, Insights ranges, the share
 // card's format and theme): the selected one in the rose accent with
