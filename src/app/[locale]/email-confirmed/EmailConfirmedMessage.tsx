@@ -2,8 +2,8 @@
 
 import { useEffect, useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
 import { classifyAuthLink, type AuthLinkResult } from "@/lib/authLink";
+import { ContinueCountdown } from "./ContinueCountdown";
 
 // The query (?result=… from /auth/confirm, Supabase's ?error=…) is read on
 // the server and passed in as `fromQuery`: window.location can still show
@@ -26,7 +26,9 @@ const COPY = {
   email_change_pending: { title: "emailChangePendingTitle", body: "emailChangePendingBody" },
 } as const satisfies Record<AuthLinkResult, { title: string; body: string }>;
 
-export function EmailConfirmedMessage({ fromQuery, showContinue }: { fromQuery: AuthLinkResult; showContinue: boolean }) {
+// continueTo: where Continue (and the countdown, decision 134) goes, or
+// null while the web journal isn't live (the page stays as it is).
+export function EmailConfirmedMessage({ fromQuery, continueTo }: { fromQuery: AuthLinkResult; continueTo: string | null }) {
   const t = useTranslations("emailConfirmed");
   const fromHash = useSyncExternalStore(subscribe, readHash, noHashOnServer);
   const result: AuthLinkResult = fromHash === "error" ? "error" : fromQuery;
@@ -40,20 +42,13 @@ export function EmailConfirmedMessage({ fromQuery, showContinue }: { fromQuery: 
     }
   }, []);
 
-  const ok = result === "ok";
+  const moveOn = result === "ok" || result === "email_changed";
   const copy = COPY[result];
   return (
     <div data-testid={`email-confirmed-${result}`} className="flex flex-col items-center text-center">
       <h1 className="text-balance text-[28px] font-medium leading-tight tracking-tight sm:text-4xl">{t(copy.title)}</h1>
       <p className="mt-4 text-base leading-relaxed text-muted sm:text-[17px]">{t(copy.body)}</p>
-      {ok && showContinue && (
-        <Link
-          href="/app"
-          className="mt-9 inline-flex min-h-[52px] min-w-[200px] items-center justify-center rounded-full bg-accent px-8 py-3.5 text-base font-medium text-on-accent hover:opacity-90"
-        >
-          {t("continueWeb")}
-        </Link>
-      )}
+      {moveOn && continueTo && <ContinueCountdown href={continueTo} />}
     </div>
   );
 }
