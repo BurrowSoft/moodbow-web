@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { EXERCISE_MINUTES, MOOD_COLOURS, MOODS, SLEEP_HOURS, SLEEP_QUALITIES, STRESS_LEVELS, type CheckIn, type SleepQuality } from "@/lib/journal/checkIn";
 import { dateLine } from "@/lib/journal/today";
 import { localKey } from "@/lib/localData";
+import { JOURNAL_CARD, MOOD_FACE, MOOD_ROW, PRIMARY_SAVE } from "@/lib/ui/journalLayout";
 import { saveCheckIn, type CheckInState } from "./actions";
 
 // The daily check-in (M4): mood required (5 labelled circles), then the
@@ -284,7 +285,7 @@ function Card({ initial, uid, date: cardDate, notify }: Props & { notify: Notify
       fields.stress !== "" ? t("stressChip", { level: Number(fields.stress) }) : null,
     ].filter(Boolean);
     return (
-      <section className="rounded-3xl border border-border bg-surface p-4 sm:p-6" data-testid="checkin-summary">
+      <section className={JOURNAL_CARD} data-testid="checkin-summary">
         <h2 className="text-lg font-medium text-text">{t("checkinTitle")}</h2>
         <ul className="mt-3 flex flex-wrap gap-2">
           {summary.map((label) => (
@@ -304,7 +305,7 @@ function Card({ initial, uid, date: cardDate, notify }: Props & { notify: Notify
   }
 
   return (
-    <form onSubmit={submit} className="rounded-3xl border border-border bg-surface p-4 sm:p-6" data-testid="checkin-card">
+    <form onSubmit={submit} className={JOURNAL_CARD} data-testid="checkin-card">
       <fieldset>
         <legend className="text-lg font-medium text-text">{t("checkinTitle")}</legend>
         {/* Narrow or large text (decision 105, app parity): every face stays a
@@ -313,7 +314,7 @@ function Card({ initial, uid, date: cardDate, notify }: Props & { notify: Notify
             screen-reader text, so each face keeps its name, and the chosen
             mood's label shows under the row instead. */}
         <div className="@container mt-4">
-          <div className="flex flex-wrap justify-between gap-1 @min-[22rem]:gap-2" role="radiogroup" aria-label={t("checkinTitle")}>
+          <div className={MOOD_ROW} role="radiogroup" aria-label={t("checkinTitle")}>
             {MOODS.map((mood) => (
               <button
                 key={mood}
@@ -322,7 +323,7 @@ function Card({ initial, uid, date: cardDate, notify }: Props & { notify: Notify
                 aria-checked={fields.mood === mood}
                 data-testid={`checkin-mood-${mood}`}
                 onClick={() => set({ mood })}
-                className={`flex min-h-12 min-w-12 flex-1 basis-12 flex-col items-center justify-center gap-2 rounded-2xl p-1 text-xs font-medium @min-[22rem]:p-2 ${fields.mood === mood ? "bg-pill text-accent" : "text-muted hover:bg-pill"}`}
+                className={`${MOOD_FACE} ${fields.mood === mood ? "bg-pill text-accent" : "text-muted hover:bg-pill"}`}
               >
                 <span className={`h-9 w-9 shrink-0 rounded-full ${MOOD_COLOURS[mood - 1]} ${fields.mood === mood ? "ring-2 ring-accent ring-offset-2" : ""}`} aria-hidden="true" />
                 <span className="sr-only @min-[22rem]:not-sr-only" data-testid={`checkin-mood-label-${mood}`}>
@@ -429,7 +430,7 @@ function Card({ initial, uid, date: cardDate, notify }: Props & { notify: Notify
         type="submit"
         data-testid="checkin-save"
         disabled={fields.mood === null || pending}
-        className="mt-6 inline-flex min-h-12 min-w-[160px] items-center justify-center rounded-full bg-accent px-8 font-medium text-on-accent hover:opacity-90 disabled:opacity-50"
+        className={`mt-6 ${PRIMARY_SAVE}`}
       >
         {t("checkinSave")}
       </button>
