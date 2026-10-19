@@ -173,7 +173,9 @@
     "tabMe": "Me",
     "emptyComingSoon": "Coming soon",
     "meSignOut": "Sign out",
-    "retry": "Try again"
+    "retry": "Try again",
+    "tryAgain": "Try again",
+    "slowLoading": "Taking longer than usual…"
   },
   "today": {
     "greetMorning": "Good morning",
@@ -252,5 +254,20 @@
     "dayNoCheckin": "No check-in this day",
     "dayAddCheckin": "Add a check-in",
     "dayAddEntry": "Add an entry"
+  },
+  "me": {
+    "meYourData": "Your data",
+    "meExport": "Export my data",
+    "meExportBody": "A file with everything you've written and logged.",
+    "meExportReady": "Your export is ready",
+    "meDelete": "Delete account",
+    "deleteTitle": "Delete your account?",
+    "deleteBody": "This deletes your entries, check-ins, AI reflections and reports, what Moodbow remembers, and your settings, right away. It can't be undone.",
+    "deleteCredits": "You'll also lose your {credits, plural, one {# AI credit} other {# AI credits}}.",
+    "deleteExportFirst": "Export my data first",
+    "deleteTypeConfirm": "Type DELETE to confirm",
+    "deleteConfirm": "Delete everything",
+    "deleteDone": "Your account and everything in it were deleted.",
+    "cancel": "Cancel"
   }
 }

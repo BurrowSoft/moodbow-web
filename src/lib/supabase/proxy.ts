@@ -1,5 +1,6 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import type { NextRequest } from "next/server";
+import { AUTH_DEADLINE_MS, fetchUntil, startDeadline } from "./deadline";
 import { SESSION_COOKIE_OPTIONS, supabaseConfig } from "./server";
 
 // Paths that read the Supabase session (paths without the locale prefix).
@@ -105,23 +106,40 @@ export type CookieToSet = { name: string; value: string; options?: CookieOptions
 // Without this, server components would read the old access token and
 // refresh again with an already-rotated refresh token.
 // signedOut: why Supabase ended this session, if it did (see above).
-export async function refreshSession(req: NextRequest): Promise<{ cookies: CookieToSet[]; signedOut: SignedOutReason | null }> {
+// outage: Supabase Auth didn't answer within AUTH_DEADLINE_MS. Nothing
+// changes (no cookies set or cleared); the proxy tells the server
+// components so they show the outage state at once.
+export async function refreshSession(
+  req: NextRequest,
+  deadlineMs = AUTH_DEADLINE_MS,
+): Promise<{ cookies: CookieToSet[]; signedOut: SignedOutReason | null; outage: boolean }> {
   const config = supabaseConfig();
-  if (!config) return { cookies: [], signedOut: null };
+  if (!config) return { cookies: [], signedOut: null, outage: false };
   // Read before getUser(), which may clear the session cookies itself.
   const hadSession = authCookieNames(req).length > 0;
   let toSet: CookieToSet[] = [];
+  let settled = false;
+  const deadline = startDeadline(deadlineMs);
   const supabase = createServerClient(config.url, config.key, {
     cookieOptions: SESSION_COOKIE_OPTIONS,
+    global: { fetch: fetchUntil(deadline.signal) },
     cookies: {
       getAll: () => req.cookies.getAll(),
       setAll: (list) => {
+        // A late answer after the deadline must not change this request.
+        if (settled) return;
         for (const { name, value } of list) req.cookies.set(name, value);
         toSet = list;
       },
     },
   });
-  // Validates the JWT with Supabase and refreshes it when expired.
-  const { error } = await supabase.auth.getUser();
-  return { cookies: toSet, signedOut: signedOutReason(error, hadSession) };
+  try {
+    // Validates the JWT with Supabase and refreshes it when expired.
+    const result = await Promise.race([supabase.auth.getUser(), deadline.expired]);
+    if (result === "expired") return { cookies: [], signedOut: null, outage: true };
+    return { cookies: toSet, signedOut: signedOutReason(result.error, hadSession), outage: false };
+  } finally {
+    settled = true;
+    deadline.clear();
+  }
 }
