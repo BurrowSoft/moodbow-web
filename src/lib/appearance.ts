@@ -22,10 +22,17 @@ export function writeTheme(theme: Theme): void {
   } catch {
     // Storage blocked: it still applies for this page.
   }
+  applyTheme(theme);
+}
+
+// Applies it to this page only (<html data-theme>; CSS does the rest).
+export function applyTheme(theme: Theme): void {
   if (theme === "system") delete document.documentElement.dataset.theme;
   else document.documentElement.dataset.theme = theme;
 }
 
 // Inline in <head>, before first paint, so a chosen theme never flashes
 // the system one. Kept tiny and self-contained (it runs before any JS).
+// If a Content-Security-Policy is ever added, it needs this script's hash
+// (reviewer #41).
 export const THEME_PRE_PAINT = `try{var t=localStorage.getItem("${THEME_KEY}");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}`;

@@ -2,18 +2,24 @@
 
 import { useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
-import { readTheme, THEMES, writeTheme, type Theme } from "@/lib/appearance";
+import { applyTheme, readTheme, THEME_KEY, THEMES, writeTheme, type Theme } from "@/lib/appearance";
 
 const LABELS = { system: "themeSystem", light: "themeLight", dark: "themeDark" } as const;
 
 // Changes made here (and in other tabs: the storage event) re-render.
 const listeners = new Set<() => void>();
 const subscribe = (cb: () => void) => {
+  // Another tab changed it (or cleared storage): this page follows too, not
+  // just the radios (reviewer #41).
+  const onStorage = (e: StorageEvent) => {
+    if (e.key === THEME_KEY || e.key === null) applyTheme(readTheme());
+    cb();
+  };
   listeners.add(cb);
-  window.addEventListener("storage", cb);
+  window.addEventListener("storage", onStorage);
   return () => {
     listeners.delete(cb);
-    window.removeEventListener("storage", cb);
+    window.removeEventListener("storage", onStorage);
   };
 };
 
