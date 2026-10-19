@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /* Moodbow brand palette (apps-brand-kits/moodbow-brand-kit). Light and dark
-   follow the system setting, like the app. Peach, rose and lavender never
+   follow the system setting unless Me → Appearance chose one (below). Peach, rose and lavender never
    carry body text on light backgrounds (contrast); accents there use deep
    rose. */
 :root {
@@ -25,8 +25,11 @@
   color-scheme: light;
 }
 
+/* Dark: the system's, unless this device chose light; or chosen dark (Me →
+   Appearance, decision 133: per device, set before first paint by the
+   script in [locale]/layout.tsx as <html data-theme>). */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --bg: var(--ink);
     --surface: #352d43;
     --border: #463c56;
@@ -39,6 +42,36 @@
     --draft-text: #ffe9a8;
     color-scheme: dark;
   }
+  :root:not([data-theme="light"]) .logo-light {
+    display: none;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: var(--ink);
+  --surface: #352d43;
+  --border: #463c56;
+  --text: var(--cream);
+  --muted: #c9c1d4;
+  --accent: var(--rose);
+  --on-accent: var(--ink);
+  --pill: #382c43;
+  --draft-bg: #4a3d14;
+  --draft-text: #ffe9a8;
+  color-scheme: dark;
+}
+:root[data-theme="dark"] .logo-light {
+  display: none;
+}
+.logo-dark {
+  display: none;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .logo-dark {
+    display: inline;
+  }
+}
+:root[data-theme="dark"] .logo-dark {
+  display: inline;
 }
 
 @theme inline {

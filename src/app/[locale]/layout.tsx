@@ -8,6 +8,7 @@ import { SITE_URL } from "@/lib/site";
 import { Footer } from "@/components/Footer";
 import { LocalDataWipe } from "@/components/LocalDataWipe";
 import { VisitCounts } from "@/components/VisitCounts";
+import { THEME_PRE_PAINT } from "@/lib/appearance";
 import { conditionMet } from "@/lib/conditions";
 
 export function generateStaticParams() {
@@ -49,7 +50,13 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
   const t = await getTranslations({ locale, namespace: "common" });
 
   return (
-    <html lang={locale} className={fontVariables}>
+    // data-theme is set by the pre-paint script before React runs, so the
+    // server HTML can't know it (suppressHydrationWarning, <html> only).
+    <html lang={locale} className={fontVariables} suppressHydrationWarning>
+      <head>
+        {/* Me → Appearance on this device (decision 133), before first paint. */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_PRE_PAINT }} />
+      </head>
       <body className="flex min-h-dvh flex-col font-sans">
         <a
           href="#main"
