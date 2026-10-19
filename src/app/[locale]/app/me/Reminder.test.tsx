@@ -57,6 +57,50 @@ describe("Reminder", () => {
   });
 });
 
+describe("Reminder: a failed save shows what the account has (decision 111)", () => {
+  const fail = async (_p: unknown, f: FormData) => ({ status: "error", on: f.get("reminder_on") === "true", time: f.get("reminder_time") });
+
+  it("the switch goes back on; Try again resends the change", async () => {
+    saveReminder.mockImplementationOnce(fail);
+    renderIt(true, "21:00");
+    const sw = screen.getByTestId("me-reminder-on");
+    fireEvent.click(sw);
+    expect(await screen.findByText(messages.today.errGeneric)).toBeInTheDocument();
+    expect(sw).toBeChecked();
+    expect(screen.getByTestId("me-reminder-time")).toBeEnabled();
+
+    fireEvent.click(screen.getByTestId("me-reminder-retry"));
+    expect(await screen.findByText(messages.today.checkinSaved)).toBeInTheDocument();
+    expect(sent(1)).toEqual({ reminder_on: "false", reminder_time: "21:00" });
+    expect(sw).not.toBeChecked();
+    expect(screen.queryByTestId("me-reminder-retry")).toBeNull();
+  });
+
+  it("a thrown save (network off) also reverts", async () => {
+    saveReminder.mockRejectedValueOnce(new TypeError("Failed to fetch"));
+    renderIt(false, "21:00");
+    fireEvent.click(screen.getByTestId("me-reminder-on"));
+    expect(await screen.findByTestId("me-reminder-retry")).toBeInTheDocument();
+    expect(screen.getByTestId("me-reminder-on")).not.toBeChecked();
+  });
+
+  it("a failed time goes back to the saved time, and only a later success moves it", async () => {
+    renderIt(true, "21:00");
+    const field = screen.getByTestId("me-reminder-time");
+    fireEvent.change(field, { target: { value: "07:30" } });
+    fireEvent.blur(field);
+    expect(await screen.findByText(messages.today.checkinSaved)).toBeInTheDocument();
+    saveReminder.mockImplementationOnce(fail);
+    fireEvent.change(field, { target: { value: "06:00" } });
+    fireEvent.blur(field);
+    expect(await screen.findByText(messages.today.errGeneric)).toBeInTheDocument();
+    expect(field).toHaveValue("07:30");
+    // Leaving it at the saved time again sends nothing.
+    fireEvent.blur(field);
+    expect(saveReminder).toHaveBeenCalledTimes(2);
+  });
+});
+
 describe("Reminder: a new time, then switching off before leaving the field (reviewer #19)", () => {
   it("sends the new time with the switch", async () => {
     renderIt(true, "21:00");
