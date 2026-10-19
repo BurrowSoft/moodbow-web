@@ -182,8 +182,13 @@ function Editor({ initial, newId, uid, today, startDate, country, restore }: Pro
       removeDraft(draftKey);
       setSaved(fromEntry(next.entry));
       setFields(fromEntry(next.entry));
-      if (flagsCrisis(next.entry.body, CRISIS_KEYWORDS)) setSafety("open");
-      else leave();
+      if (flagsCrisis(next.entry.body, CRISIS_KEYWORDS)) {
+        // Staying on the saved entry: it's now the version edits start from,
+        // and further edits are a draft again (reviewer #35).
+        finished.current = false;
+        setBase(next.entry.updated_at);
+        setSafety("open");
+      } else leave();
     } else if (next.status === "error" && next.error === "stale") {
       setDialog({ conflict: next.latest });
     }

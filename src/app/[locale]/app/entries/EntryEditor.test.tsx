@@ -409,6 +409,35 @@ describe("EntryEditor: the safety card after a flagged save (M8, decisions 124/1
     await waitFor(() => expect(screen.getByTestId("entry-text")).toHaveFocus());
   });
 
+  it("after the card, saving again is an ordinary update of that version (no conflict), and a flagged text shows the card again (reviewer #35)", async () => {
+    keywords = { version: 1, languages: { en: { match: "word", phrases: ["want to die"] } } };
+    const first = { ...ENTRY, id: NEW_ID, entry_date: "2026-10-02", body: "I want to die.", updated_at: "2026-10-02T10:00:00Z" };
+    saveEntry.mockResolvedValueOnce({ status: "saved", entry: first });
+    renderEditor();
+    type("I want to die.");
+    fireEvent.click(screen.getByTestId("entry-save"));
+    fireEvent.click(await screen.findByTestId("safety-close"));
+    saveEntry.mockResolvedValueOnce({ status: "saved", entry: { ...first, body: "I want to die. Still.", updated_at: "2026-10-02T10:05:00Z" } });
+    type("I want to die. Still.");
+    fireEvent.click(screen.getByTestId("entry-save"));
+    expect(await screen.findByTestId("safety-card")).toBeInTheDocument();
+    expect(sent(1)).toMatchObject({ id: NEW_ID, body: "I want to die. Still.", expected_updated_at: "2026-10-02T10:00:00Z" });
+    expect(screen.queryByTestId("entry-conflict-dialog")).toBeNull();
+    expect(push).not.toHaveBeenCalled();
+  });
+
+  it("edits typed after the card are kept as a draft on leaving, based on the saved version", async () => {
+    keywords = { version: 1, languages: { en: { match: "word", phrases: ["want to die"] } } };
+    saveEntry.mockResolvedValueOnce({ status: "saved", entry: { ...ENTRY, id: NEW_ID, entry_date: "2026-10-02", body: "I want to die.", updated_at: "2026-10-02T10:00:00Z" } });
+    const view = renderEditor();
+    type("I want to die.");
+    fireEvent.click(screen.getByTestId("entry-save"));
+    fireEvent.click(await screen.findByTestId("safety-close"));
+    type("I want to die. And more.");
+    view.unmount();
+    expect(stored(NEW_KEY)).toMatchObject({ id: NEW_ID, body: "I want to die. And more.", base: "2026-10-02T10:00:00Z" });
+  });
+
   it("an ordinary save, or no list yet: no card, back to Today as before", async () => {
     saveEntry.mockResolvedValue({ status: "saved", entry: { ...ENTRY, id: NEW_ID, entry_date: "2026-10-02", body: "Some days I want to die." } });
     renderEditor();
