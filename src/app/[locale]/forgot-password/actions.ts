@@ -3,7 +3,7 @@
 import { isValidEmail, normalizeEmail } from "@/lib/email";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
-export type ForgotPasswordState = { status: "idle" } | { status: "error"; error: "emailInvalid"; email: string } | { status: "sent"; email: string };
+export type ForgotPasswordState = { status: "idle" } | { status: "error"; error: "emailInvalid" | "generic"; email: string } | { status: "sent"; email: string };
 
 // Sends the recovery email. The answer is ALWAYS the same neutral "If an
 // account exists for …" once the email is well-formed, whatever Supabase
@@ -16,6 +16,13 @@ export async function requestPasswordReset(_prev: ForgotPasswordState, form: For
   const email = normalizeEmail(form.get("email"));
   if (!isValidEmail(email)) return { status: "error", error: "emailInvalid", email: String(form.get("email") ?? "") };
   const supabase = await createSupabaseServerClient();
-  if (supabase) await supabase.auth.resetPasswordForEmail(email);
+  if (!supabase) return { status: "sent", email };
+  const { error } = await supabase.auth.resetPasswordForEmail(email);
+  // The one exception: Auth didn't answer at all (unreachable, a gateway
+  // error, or past the 10 s deadline: an AuthRetryableFetchError). That
+  // says nothing about the address, and "sent" would be untrue for
+  // everyone, so it's the generic error with Try again. Not every 5xx: a
+  // failed email send (500) only happens for real accounts.
+  if (error?.name === "AuthRetryableFetchError") return { status: "error", error: "generic", email };
   return { status: "sent", email };
 }

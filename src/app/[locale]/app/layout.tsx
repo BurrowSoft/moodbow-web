@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
@@ -9,6 +10,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { JournalUnavailable } from "@/components/JournalUnavailable";
 import { isAuthOutage } from "@/lib/supabase/proxy";
 import { AppNav } from "./AppNav";
+import { NavProgress } from "@/components/NavProgress";
 
 // The signed-in web journal. Behind web-journal-live: the proxy 404s /app on
 // Production until it's met; this check is the backstop. Signed-out visitors
@@ -39,6 +41,10 @@ export default async function AppLayout({ children, params }: LayoutProps<"/[loc
 
   return (
     <div className="flex flex-1 flex-col md:flex-row">
+      {/* It reads the search params: its own Suspense boundary. */}
+      <Suspense fallback={null}>
+        <NavProgress />
+      </Suspense>
       <AppNav />
       <main id="main" className="flex-1 px-4 pb-28 pt-10 sm:px-6 md:pb-10">
         <div className="mx-auto max-w-3xl">{children}</div>

@@ -3,6 +3,7 @@
 import { getLocale } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
 import { validateNewPassword } from "@/lib/password";
+import { isAuthOutage } from "@/lib/supabase/proxy";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export type ResetPasswordState =
@@ -23,7 +24,11 @@ export async function resetPassword(_prev: ResetPasswordState, form: FormData): 
   if (!supabase) return { status: "error", error: "generic" };
   const {
     data: { user },
+    error: userError,
   } = await supabase.auth.getUser();
+  // Auth didn't answer (down, or past the 10 s deadline): the link may be
+  // fine, so never say it expired (Web Tester, #18).
+  if (!user && isAuthOutage(userError)) return { status: "error", error: "generic" };
   if (!user) return { status: "error", error: "expired" };
 
   const { error } = await supabase.auth.updateUser({ password });
