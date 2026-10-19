@@ -130,7 +130,7 @@ export function ShareMonth({ month, dateLocaleTag, label }: { month: string; dat
       </button>
       {open && (
         <Dialog title={t("shareTitle")} onCancel={close} testId="share-dialog">
-          <div className="w-full space-y-4 text-left" aria-busy={colours === null && !failed}>
+          <div className="w-full space-y-4 text-left">
             {/* Always there while the dialog is open, filled while loading, so
                 it's announced (review of #46). */}
             <p role="status" className="sr-only" data-testid="share-loading">
