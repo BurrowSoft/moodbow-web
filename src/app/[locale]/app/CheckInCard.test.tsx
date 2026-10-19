@@ -444,3 +444,23 @@ describe("CheckInCard: the mood radios and stress buttons for screen readers (a1
     expect(region).toHaveAttribute("role", "status");
   });
 });
+
+describe("CheckInCard: value colours (decision 150)", () => {
+  it("only the chosen value shows its colour dot; the chips stay accent buttons; movement 0 has none", () => {
+    renderCard(null);
+    fireEvent.click(screen.getByTestId("checkin-mood-3"));
+    expect(screen.queryByTestId("checkin-stress-dot")).toBeNull();
+    fireEvent.click(screen.getByTestId("checkin-stress-2"));
+    const stress = screen.getAllByTestId("checkin-stress-dot");
+    expect(stress).toHaveLength(1);
+    expect(screen.getByTestId("checkin-stress-2")).toContainElement(stress[0]);
+    expect(stress[0]).toHaveAttribute("data-value-colour", "#F4A77A");
+    expect(screen.getByTestId("checkin-stress-2").className).toContain("text-accent");
+    fireEvent.click(screen.getByTestId("checkin-exercise-0"));
+    expect(screen.queryByTestId("checkin-exercise-dot")).toBeNull();
+    fireEvent.click(screen.getByTestId("checkin-exercise-30"));
+    expect(screen.getByTestId("checkin-exercise-dot")).toHaveAttribute("data-value-colour", "#F3C24F");
+    fireEvent.change(screen.getByTestId("checkin-sleep-hours"), { target: { value: "5.5" } });
+    expect(screen.getByTestId("checkin-sleep-dot")).toHaveAttribute("data-value-colour", "#A99BD1");
+  });
+});
