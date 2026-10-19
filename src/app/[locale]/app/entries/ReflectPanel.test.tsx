@@ -251,3 +251,27 @@ describe("ReflectPanel: a crisis reply (r1)", () => {
     expect(screen.queryByTestId("reflect-answer")).toBeNull();
   });
 });
+
+describe("ReflectPanel: focus with one-shot Reflect (reviewer #51)", () => {
+  it("Reflect goes away with the reflection: focus moves to the reflection, not the page", async () => {
+    reflectOnEntry.mockResolvedValueOnce(ok());
+    renderIt();
+    const button = screen.getByTestId("reflect-button");
+    button.focus();
+    fireEvent.click(button);
+    await settle();
+    expect(screen.getByTestId("reflect-result")).toHaveFocus();
+  });
+
+  it("focus elsewhere while it ran: it stays there", async () => {
+    let answer!: (v: unknown) => void;
+    reflectOnEntry.mockReturnValueOnce(new Promise((r) => (answer = r)));
+    const view = renderIt();
+    fireEvent.click(screen.getByTestId("reflect-button"));
+    const other = document.createElement("button");
+    view.container.appendChild(other);
+    other.focus();
+    await act(async () => answer(ok()));
+    expect(other).toHaveFocus();
+  });
+});

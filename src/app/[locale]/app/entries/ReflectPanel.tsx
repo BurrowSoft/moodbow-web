@@ -118,6 +118,9 @@ export function ReflectPanel({ entryId, initial, balance, country, onAnswer }: P
         setPhase({ kind: "error", message: result.message });
         return;
       }
+      // Reflect goes away with a reflection (one-shot): if it had focus, the
+      // reflection takes it (reviewer #51); elsewhere, focus stays put.
+      focusResult.current = document.activeElement === reflectButton.current;
       setReflection(result.reflection);
       setSaid("reflectReady");
       if (result.balance !== null) {
@@ -163,10 +166,16 @@ export function ReflectPanel({ entryId, initial, balance, country, onAnswer }: P
     } else setDeleteFailed(true);
   };
   const focusReflect = useRef(false);
+  const focusResult = useRef(false);
+  const resultBox = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    if (reflection || !focusReflect.current) return;
-    focusReflect.current = false;
-    reflectButton.current?.focus();
+    if (reflection && focusResult.current) {
+      focusResult.current = false;
+      resultBox.current?.focus();
+    } else if (!reflection && focusReflect.current) {
+      focusReflect.current = false;
+      reflectButton.current?.focus();
+    }
   }, [reflection]);
 
   if (hidden) return null;
@@ -178,7 +187,7 @@ export function ReflectPanel({ entryId, initial, balance, country, onAnswer }: P
         {t("reflectButton")}
       </h2>
       {reflection && (
-        <div data-testid="reflect-result">
+        <div ref={resultBox} tabIndex={-1} data-testid="reflect-result" className="rounded-2xl focus:outline-none">
           {reflection.tier === "lite" && (
             <span data-testid="reflect-lite" className="mb-2 inline-block rounded-full bg-pill px-3 py-0.5 text-xs font-medium text-accent">
               {t("reflectLiteBadge")}
