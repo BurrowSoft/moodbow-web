@@ -1,11 +1,7 @@
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { METRICS, summarize, type InsightRow, type Metric, type Range } from "@/lib/journal/insights";
-import { MOOD_HEX } from "@/lib/share/moodbow";
 import { Chart } from "./Chart";
-
-// A day's mood point in its mood colour (the day's value, rounded).
-const moodPointColour = (v: number) => MOOD_HEX[Math.min(5, Math.max(1, Math.round(v))) - 1];
 
 const RANGE_TABS: { range: Range; key: "rangeWeek" | "rangeMonth" | "range3Months" }[] = [
   { range: "week", key: "rangeWeek" },
@@ -75,7 +71,7 @@ export function InsightsView({ rows, today, range, share }: { rows: InsightRow[]
               {s.enough && s.average !== null ? (
                 <>
                   <div className="mt-3">
-                    <Chart kind={chart.kind} points={s.points} min={chart.min} max={chart.max} labelledBy={`${titleId} ${summaryId}`} neutral={metric === "mood"} pointColour={metric === "mood" ? moodPointColour : undefined} />
+                    <Chart kind={chart.kind} points={s.points} min={chart.min} max={chart.max} labelledBy={`${titleId} ${summaryId}`} />
                   </div>
                   <div id={summaryId} className="mt-3 space-y-1 text-sm">
                     <p className="font-medium text-text" data-testid={`insights-average-${metric}`}>

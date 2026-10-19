@@ -95,22 +95,3 @@ describe("InsightsView: number format (app parity)", () => {
     expect(screen.getByTestId("insights-average-exercise")).toHaveTextContent("Average 30 min");
   });
 });
-
-describe("InsightsView colour roles (decision 150)", () => {
-  it("the mood line is neutral (ink / cream); the other charts keep the UI accent, never a mood colour", () => {
-    renderView(thisWeek);
-    const svg = (metric: string) => screen.getByTestId(`insights-chart-${metric}`).querySelector("svg")!;
-    expect(svg("mood").getAttribute("class")).toMatch(/\btext-text\b/);
-    expect(svg("mood").getAttribute("class")).not.toMatch(/\btext-accent\b/);
-    for (const metric of ["sleep", "stress"]) expect(svg(metric).getAttribute("class")).toMatch(/\btext-accent\b/);
-  });
-});
-
-describe("InsightsView: mood points (decision 150)", () => {
-  it("the mood chart's points carry their mood colour; other charts have none", () => {
-    renderView(thisWeek);
-    const points = screen.getByTestId("insights-chart-mood").querySelectorAll("[data-testid=chart-point] line:last-child");
-    expect([...points].map((p) => p.getAttribute("stroke"))).toEqual(["#F4A77A", "#F4A77A", "#F3C24F"]);
-    expect(screen.getByTestId("insights-chart-stress").querySelectorAll("[data-testid=chart-point]")).toHaveLength(0);
-  });
-});

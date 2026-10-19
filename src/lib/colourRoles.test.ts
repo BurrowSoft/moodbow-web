@@ -1,20 +1,11 @@
 // @vitest-environment node
-import { readdirSync, readFileSync, statSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-// Colour roles (decision 150, specs/colour-roles.md): mood colours only for
-// the user's own ratings; Moodbow's voice has its own colours, ≥ 4.5:1.
-const MOOD = ["#7F8CB8", "#A99BD1", "#E6C7D3", "#F4A77A", "#F3C24F"];
-// The only files that may hold mood colours: the two mood-colour lists.
-const ALLOWED = [join("src", "lib", "journal", "checkIn.ts"), join("src", "lib", "share", "moodbow.ts")];
-
-const files = (dir: string): string[] =>
-  readdirSync(dir).flatMap((name) => {
-    const p = join(dir, name);
-    return statSync(p).isDirectory() ? files(p) : /\.(tsx?|css)$/.test(name) && !/\.test\.tsx?$/.test(name) ? [p] : [];
-  });
-
+// Colour roles (decision 150, specs/colour-roles.md §2–3): Moodbow's voice and
+// the UI accent are one rose family, ≥ 4.5:1; errors carry an icon. (The
+// value colours, §1, follow with the shared colour-map.json contract.)
 const lum = (hex: string) => {
   const c = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
   return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
@@ -25,13 +16,6 @@ const contrast = (a: string, b: string) => {
 };
 
 describe("colour roles", () => {
-  it("no mood colour anywhere but the two mood-colour lists", () => {
-    const offenders = files("src")
-      .filter((f) => !ALLOWED.includes(f))
-      .filter((f) => MOOD.some((hex) => readFileSync(f, "utf8").toLowerCase().includes(hex.toLowerCase())));
-    expect(offenders).toEqual([]);
-  });
-
   it("Moodbow's voice is the brand accent (one rose family) on a tint of it, ≥ 4.5:1 in both themes", () => {
     const css = readFileSync(join("src", "app", "globals.css"), "utf8");
     const count = (needle: string) => css.split(needle).length - 1;
@@ -49,5 +33,15 @@ describe("colour roles", () => {
     expect(contrast("#2B2438", "#D88AA6")).toBeGreaterThanOrEqual(4.5);
     // The dark accent as link text on every dark surface.
     for (const bg of ["#352D43", "#2B2438", "#382C43"]) expect(contrast("#D88AA6", bg), bg).toBeGreaterThanOrEqual(4.5);
+  });
+});
+
+describe("errors aren't told by colour alone (decision 150)", () => {
+  it("every role=alert gets a decorative error icon before its words (a text-free pseudo-element)", () => {
+    const css = readFileSync(join("src", "app", "globals.css"), "utf8");
+    const rule = css.slice(css.indexOf('[role="alert"]::before'), css.indexOf("}", css.indexOf('[role="alert"]::before')));
+    expect(rule).toContain('content: "";');
+    expect(rule).toContain("background-color: currentColor;");
+    expect(rule).toMatch(/mask: url\("data:image\/svg\+xml,/);
   });
 });

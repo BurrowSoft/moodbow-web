@@ -116,6 +116,20 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Every error message (role=alert) gets an error icon before its words:
+   colour is never the only cue (decision 150). Decorative: a pseudo-element
+   with no text, so screen readers read only the words. */
+[role="alert"]::before {
+  content: "";
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  margin-inline-end: 0.4em;
+  vertical-align: -0.15em;
+  background-color: currentColor;
+  mask: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22%3E%3Cpath d=%22M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm-1 5h2v7h-2V7Zm0 9h2v2h-2v-2Z%22/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
 /* A visible ring for keyboard focus everywhere, in the accent (decision 150:
    never a mood colour; ≥ 5:1 on every surface in both themes). */
 :focus-visible {
