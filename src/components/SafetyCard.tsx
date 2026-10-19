@@ -6,7 +6,8 @@ import { Dialog, dialogButton } from "@/components/Dialog";
 import { helplinesFor, telHref } from "@/lib/safety/helplines";
 
 // The safety card (M8, r1 §M8, decision 124): the same card after a flagged
-// save, behind Me → Get help now and under a reflection that names it. A
+// save, behind Me → the help button (meGetHelpNow, "Want to talk to someone?")
+// and under a reflection that names it. A
 // dismissible dialog; focus moves to its title; Esc or Close closes it.
 // Numbers from the country registry as tel: links; without a known
 // country, the generic emergency line; the helpline directory always
@@ -49,7 +50,8 @@ export function SafetyCard({ country, onClose }: { country: string | null | unde
   );
 }
 
-// "Get help now" (meGetHelpNow): the button that opens the card, at the top
+// The help button (meGetHelpNow, "Want to talk to someone?", decision 153):
+// opens the card, at the top
 // of Me on its own and under a reflection that names it. A calm secondary
 // button, never red or alarming (decision 128).
 export function GetHelpNow({ country, testId, className }: { country: string | null | undefined; testId: string; className?: string }) {
