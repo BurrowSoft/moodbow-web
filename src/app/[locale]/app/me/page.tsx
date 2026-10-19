@@ -13,6 +13,7 @@ import { tabMetadata } from "../TabPlaceholder";
 import { signOut } from "./actions";
 import { GetHelpNow } from "@/components/SafetyCard";
 import { AiSettings } from "./AiSettings";
+import { Appearance } from "./Appearance";
 import { LanguageRegion } from "./LanguageRegion";
 import { countryOptions, languageOptions, timeZoneOptions } from "@/lib/region/countries";
 import { routing } from "@/i18n/routing";
@@ -27,9 +28,9 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/app/me">
 const hhmm = (time: string | null | undefined) => (time && /^\d{2}:\d{2}/.test(time) ? time.slice(0, 5) : "21:00");
 
 // Me (M7), in the spec's order. Here: AI (M9, only when AI is shown) ·
-// Reminder · Language & region · Your data · Help · Sign out · version.
-// Get help now (top) comes with the safety card (M8); App lock is app-only;
-// Appearance waits for its condition (the setting needs a stored column).
+// Reminder · Language & region · Appearance · Your data · Help · Sign out ·
+// version. Get help now (top) comes with the safety card (M8); App lock is
+// app-only; Appearance is per device (decision 133).
 export default async function MePage({ params }: PageProps<"/[locale]/app/me">) {
   const { locale } = await params;
   setRequestLocale(locale as Locale);
@@ -66,6 +67,7 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
         zones={timeZoneOptions(me.profile?.time_zone)}
         languages={languageOptions(routing.locales)}
       />
+      <Appearance />
       <YourData credits={me.credits?.balance ?? 0} uid={user.id} />
 
       <section aria-labelledby="me-help" className="rounded-3xl border border-border bg-surface p-6">

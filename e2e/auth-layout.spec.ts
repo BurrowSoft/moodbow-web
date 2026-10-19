@@ -24,7 +24,7 @@ for (const width of [1900, 1280, 768, 320]) {
         await page.setViewportSize({ width, height: 900 });
         await page.goto(path);
         const footer = await centreX(page, "footer nav");
-        for (const part of ["main img", "main h1"]) {
+        for (const part of ["main img >> visible=true", "main h1"]) {
           expect(Math.abs((await centreX(page, part)) - footer), `${part} vs footer`).toBeLessThanOrEqual(2);
         }
         const action = page.locator("main button, main a[href]").first();
