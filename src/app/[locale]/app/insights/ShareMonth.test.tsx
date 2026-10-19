@@ -111,6 +111,25 @@ describe("ShareMonth", () => {
     }
   });
 
+  it("a PNG the filter can't read: the generic error, nothing shared or downloaded (reviewer #31)", async () => {
+    loadMonthCheckIns.mockResolvedValue({ status: "ok", checkIns: days(6) });
+    vi.spyOn(HTMLCanvasElement.prototype, "toBlob").mockImplementation((cb) => cb(new Blob(["not a png"], { type: "image/png" })));
+    const share = vi.fn(() => Promise.resolve());
+    Object.assign(navigator, { canShare: () => true, share });
+    try {
+      renderIt();
+      fireEvent.click(screen.getByTestId("share-open"));
+      expect(await screen.findByTestId("share-encode-failed")).toHaveTextContent(messages.today.errGeneric);
+      const send = screen.getByTestId("share-send");
+      expect(send).toBeDisabled();
+      fireEvent.click(send);
+      expect(share).not.toHaveBeenCalled();
+      expect(names).toEqual([]);
+    } finally {
+      Object.assign(navigator, { canShare: undefined, share: undefined });
+    }
+  });
+
   it("share refused (not allowed) → a download; cancelled (AbortError) → nothing", async () => {
     loadMonthCheckIns.mockResolvedValue({ status: "ok", checkIns: days(6) });
     const share = vi.fn().mockRejectedValueOnce(new DOMException("no", "NotAllowedError")).mockRejectedValueOnce(new DOMException("cancel", "AbortError"));

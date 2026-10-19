@@ -81,4 +81,10 @@ describe("stripPngMetadata (UX, after the Web Tester's #25 run)", () => {
     expect(stripPngMetadata(FIREFOX_LIKE.subarray(0, FIREFOX_LIKE.length - 20))).toBeNull();
     expect(stripPngMetadata(concat([SIG, IHDR, IDAT]))).toBeNull();
   });
+
+  it("IHDR must come first and there must be an IDAT (reviewer #31)", () => {
+    expect(stripPngMetadata(concat([SIG, SRGB, IHDR, IDAT, IEND]))).toBeNull();
+    expect(stripPngMetadata(concat([SIG, IHDR, SRGB, IEND]))).toBeNull();
+    expect(stripPngMetadata(concat([SIG, IHDR, chunk("tEXt", "a\0b"), IDAT, IEND]))).not.toBeNull();
+  });
 });

@@ -26,7 +26,9 @@ export function stripPngMetadata(png: Uint8Array): Uint8Array | null {
     ended = type === "IEND";
     at = end;
   }
-  if (kept.length < 3) return null;
+  // IHDR first, at least one IDAT (reviewer #31); IEND was reached above.
+  const types = kept.slice(1).map((c) => String.fromCharCode(...c.subarray(4, 8)));
+  if (types[0] !== "IHDR" || !types.includes("IDAT")) return null;
   const out = new Uint8Array(kept.reduce((n, c) => n + c.length, 0));
   let offset = 0;
   for (const c of kept) {
