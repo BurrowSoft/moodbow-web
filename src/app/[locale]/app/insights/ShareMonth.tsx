@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Dialog, dialogButton } from "@/components/Dialog";
 import { drawCard } from "@/lib/share/drawCard";
+import { stripPngMetadata } from "@/lib/share/pngChunks";
 import { cardFileName, formatMonth, LAYOUT, MIN_CHECK_INS, monthBands, THEMES, type CardFormat, type CardTheme } from "@/lib/share/moodbow";
 import { loadMonthCheckIns } from "./shareActions";
 
@@ -23,6 +24,9 @@ export function ShareMonth({ month, dateLocaleTag, label }: { month: string; dat
   const [canShareFiles, setCanShareFiles] = useState(false);
   // The finished PNG, made when the preview has drawn (see send).
   const [file, setFile] = useState<File | null>(null);
+  // The browser gave no PNG (or one the filter can't read): nothing to
+  // share, and never the unfiltered bytes (reviewer #31).
+  const [encodeFailed, setEncodeFailed] = useState(false);
   const canvas = useRef<HTMLCanvasElement>(null);
 
   const start = () => {
@@ -48,6 +52,7 @@ export function ShareMonth({ month, dateLocaleTag, label }: { month: string; dat
     if (!open || !enough || !el) return;
     let cancelled = false;
     setFile(null);
+    setEncodeFailed(false);
     (async () => {
       const family = getComputedStyle(document.documentElement).getPropertyValue("--font-poppins").trim() || "sans-serif";
       await Promise.all([document.fonts?.load(`500 72px ${family}`), document.fonts?.load(`400 44px ${family}`)]).catch(() => undefined);
@@ -69,9 +74,14 @@ export function ShareMonth({ month, dateLocaleTag, label }: { month: string; dat
         fontFamily: `${family}, sans-serif`,
         logo: logo.complete && logo.naturalWidth > 0 ? logo : null,
       });
-      // A canvas PNG carries no EXIF or text chunks; the name is the month.
-      el.toBlob((blob) => {
-        if (!cancelled && blob) setFile(new File([blob], cardFileName(month), { type: "image/png" }));
+      // Pixels only: every chunk the browser's encoder adds is dropped
+      // (lib/share/pngChunks.ts); the name is the month.
+      el.toBlob(async (blob) => {
+        if (cancelled) return;
+        const png = blob ? stripPngMetadata(new Uint8Array(await blob.arrayBuffer())) : null;
+        if (cancelled) return;
+        if (png) setFile(new File([png as BlobPart], cardFileName(month), { type: "image/png" }));
+        else setEncodeFailed(true);
       }, "image/png");
     })();
     return () => {
@@ -166,8 +176,13 @@ export function ShareMonth({ month, dateLocaleTag, label }: { month: string; dat
                   className="block w-full rounded-2xl border border-border bg-bg px-4 py-3 text-text"
                 />
                 <p className="text-sm text-muted">{t("sharePrivacyNote")}</p>
+                {encodeFailed && (
+                  <p role="alert" data-testid="share-encode-failed" className="font-medium text-accent">
+                    {tt("errGeneric")}
+                  </p>
+                )}
                 <div className="flex flex-wrap justify-end gap-3">
-                  <button type="button" data-testid="share-send" onClick={send} disabled={!file} aria-busy={!file} className={`${dialogButton(true)} disabled:opacity-50`}>
+                  <button type="button" data-testid="share-send" onClick={send} disabled={!file} aria-busy={!file && !encodeFailed} className={`${dialogButton(true)} disabled:opacity-50`}>
                     {canShareFiles ? t("shareSend") : t("shareDownload")}
                   </button>
                 </div>
