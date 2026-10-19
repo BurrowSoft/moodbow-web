@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import messages from "@/messages/en.json";
@@ -161,5 +161,32 @@ describe("ShareMonth", () => {
     renderIt();
     fireEvent.click(screen.getByTestId("share-open"));
     expect(await screen.findByRole("alert")).toHaveTextContent(messages.today.errGeneric);
+  });
+});
+
+describe("ShareMonth: the dialog takes focus and can always be closed (a11y pass)", () => {
+  it("focus moves into the dialog at once (to Cancel, while loading); Cancel closes it in every state", async () => {
+    let answer!: (v: unknown) => void;
+    loadMonthCheckIns.mockReturnValueOnce(new Promise((r) => (answer = r)));
+    renderIt();
+    fireEvent.click(screen.getByTestId("share-open"));
+    expect(screen.getByTestId("share-close")).toHaveFocus();
+    await act(async () => answer({ status: "ok", checkIns: days(2) }));
+    expect(await screen.findByTestId("share-not-enough")).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId("share-close"));
+    expect(screen.queryByTestId("share-dialog")).toBeNull();
+  });
+});
+
+describe("ShareMonth: the default theme follows Me → Appearance (decision 133)", () => {
+  afterEach(() => {
+    delete document.documentElement.dataset.theme;
+  });
+  it("a chosen dark theme is the card's default, whatever the system says", async () => {
+    document.documentElement.dataset.theme = "dark";
+    loadMonthCheckIns.mockResolvedValue({ status: "ok", checkIns: days(6) });
+    renderIt();
+    fireEvent.click(screen.getByTestId("share-open"));
+    expect(await screen.findByTestId("share-theme-dark")).toHaveAttribute("aria-pressed", "true");
   });
 });

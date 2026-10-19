@@ -1,6 +1,6 @@
 "use client";
 
-import { startTransition, useActionState, useCallback, useEffect, useRef, useState } from "react";
+import { startTransition, useActionState, useCallback, useEffect, useId, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { EXERCISE_MINUTES, MOOD_COLOURS, MOODS, SLEEP_HOURS, SLEEP_QUALITIES, STRESS_LEVELS, type CheckIn, type SleepQuality } from "@/lib/journal/checkIn";
 import { dateLine } from "@/lib/journal/today";
@@ -99,7 +99,8 @@ function toFormData(fields: Fields, expectedUpdatedAt: string, date: string, fro
 }
 
 // date: the day this card is for (today on Today, the day in the day view).
-type Props = { initial: CheckIn | null; uid: string; date: string; dateLocaleTag: string };
+// autoFocus: focus the first mood when the card opens ("Add a check-in").
+type Props = { initial: CheckIn | null; uid: string; date: string; dateLocaleTag: string; autoFocus?: boolean };
 
 // What became of an offline copy that couldn't be saved as it was: another
 // device changed that day ("superseded"), or the server refused it
@@ -111,16 +112,22 @@ type Notify = (notice: Notice) => void;
 export function CheckInCard(props: Props) {
   const t = useTranslations("today");
   const [notices, setNotices] = useState<Notice[]>([]);
+  // One live region, always mounted, so a save is announced (a region
+  // that appears together with its text often isn't; a11y pass).
+  const [announcement, setAnnouncement] = useState("");
   const notify = useCallback<Notify>(
     (notice) => setNotices((shown) => (shown.some((n) => n.date === notice.date && n.kind === notice.kind) ? shown : [...shown, notice])),
     [],
   );
+  // Dismissing a notice removes the focused button: focus the card instead.
+  const wrapper = useRef<HTMLDivElement>(null);
   return (
-    <div className="space-y-4">
+    <div ref={wrapper} tabIndex={-1} className="space-y-4 outline-none">
+      {/* One region, always there, so each notice is announced as it comes. */}
+      <div role="status" className="space-y-4 empty:hidden" data-testid="checkin-notices">
       {notices.map((notice) => (
         <div
           key={`${notice.kind}-${notice.date}`}
-          role="status"
           data-testid={`checkin-${notice.kind}`}
           className="flex items-start gap-4 rounded-2xl bg-pill p-4 text-sm text-text"
         >
@@ -130,19 +137,26 @@ export function CheckInCard(props: Props) {
           <button
             type="button"
             data-testid={`checkin-${notice.kind}-dismiss`}
-            onClick={() => setNotices((shown) => shown.filter((n) => n !== notice))}
+            onClick={() => {
+              setNotices((shown) => shown.filter((n) => n !== notice));
+              wrapper.current?.focus();
+            }}
             className="font-medium text-accent underline underline-offset-4"
           >
             {t("dismiss")}
           </button>
         </div>
       ))}
-      <Card {...props} notify={notify} />
+      </div>
+      <p role="status" className="sr-only" data-testid="checkin-announce">
+        {announcement}
+      </p>
+      <Card {...props} notify={notify} announce={setAnnouncement} />
     </div>
   );
 }
 
-function Card({ initial, uid, date: cardDate, notify }: Props & { notify: Notify }) {
+function Card({ initial, uid, date: cardDate, notify, announce, autoFocus }: Props & { notify: Notify; announce: (text: string) => void }) {
   const t = useTranslations("today");
   const [row, setRow] = useState<CheckIn | null>(initial);
   const [fields, setFields] = useState<Fields>(fromRow(initial));
@@ -276,7 +290,43 @@ function Card({ initial, uid, date: cardDate, notify }: Props & { notify: Notify
           : "errGeneric"
       : null;
 
-  if (!editing && fields.mood !== null) {
+  // Arrow keys in the mood group: move to the previous / next face and
+  // choose it (the radio pattern), wrapping around.
+  const moveMood = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const step = e.key === "ArrowRight" || e.key === "ArrowDown" ? 1 : e.key === "ArrowLeft" || e.key === "ArrowUp" ? -1 : 0;
+    if (!step) return;
+    e.preventDefault();
+    const at = (MOODS as readonly number[]).indexOf(fields.mood ?? MOODS[0]);
+    const next = MOODS[(at + step + MOODS.length) % MOODS.length];
+    set({ mood: next });
+    e.currentTarget.querySelector<HTMLElement>(`[data-testid=checkin-mood-${next}]`)?.focus();
+  };
+
+  // Switching between the form and the summary replaces what had focus
+  // (Save, Edit): move it to the new view, and say "Saved" (a11y pass).
+  const root = useRef<HTMLElement | null>(null);
+  const seen = useRef(false);
+  const showsSummary = !editing && fields.mood !== null;
+  const moodTitle = useId();
+  useEffect(() => {
+    if (!seen.current) {
+      seen.current = true;
+      if (autoFocus && !showsSummary) root.current?.querySelector<HTMLElement>("[role=radio]")?.focus();
+      return;
+    }
+    if (showsSummary) {
+      announce(offline ? t("checkinSavedOfflineWeb") : t("checkinSaved"));
+      root.current?.querySelector<HTMLElement>("h2")?.focus();
+    } else {
+      announce("");
+      const radios = root.current;
+      (radios?.querySelector<HTMLElement>("[role=radio][aria-checked=true]") ?? radios?.querySelector<HTMLElement>("[role=radio]"))?.focus();
+    }
+    // Only on a switch between the two views.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showsSummary]);
+
+  if (showsSummary) {
     const summary = [
       t(`mood${fields.mood}` as "mood1"),
       fields.sleepHours !== "" ? t("sleepHours", { hours: Number(fields.sleepHours) }) : null,
@@ -285,8 +335,10 @@ function Card({ initial, uid, date: cardDate, notify }: Props & { notify: Notify
       fields.stress !== "" ? t("stressChip", { level: Number(fields.stress) }) : null,
     ].filter(Boolean);
     return (
-      <section className={JOURNAL_CARD} data-testid="checkin-summary">
-        <h2 className="text-lg font-medium text-text">{t("checkinTitle")}</h2>
+      <section ref={root} className={JOURNAL_CARD} data-testid="checkin-summary">
+        <h2 tabIndex={-1} className="text-lg font-medium text-text outline-none">
+          {t("checkinTitle")}
+        </h2>
         <ul className="mt-3 flex flex-wrap gap-2">
           {summary.map((label) => (
             <li key={label} className="rounded-full bg-pill px-3 py-1 text-sm text-text">
@@ -294,7 +346,8 @@ function Card({ initial, uid, date: cardDate, notify }: Props & { notify: Notify
             </li>
           ))}
         </ul>
-        <p role="status" className="mt-3 text-sm text-muted" data-testid="checkin-status">
+        {/* Visual; the announcement is checkin-announce. */}
+        <p className="mt-3 text-sm text-muted" data-testid="checkin-status">
           {offline ? t("checkinSavedOfflineWeb") : t("checkinSaved")}
         </p>
         <button type="button" data-testid="checkin-edit" onClick={() => setEditing(true)} className="mt-4 font-medium text-accent underline underline-offset-4">
@@ -305,22 +358,29 @@ function Card({ initial, uid, date: cardDate, notify }: Props & { notify: Notify
   }
 
   return (
-    <form onSubmit={submit} className={JOURNAL_CARD} data-testid="checkin-card">
-      <fieldset>
-        <legend className="text-lg font-medium text-text">{t("checkinTitle")}</legend>
+    <form ref={(el) => void (root.current = el)} onSubmit={submit} className={JOURNAL_CARD} data-testid="checkin-card">
+      {/* One group, named once (a fieldset + a radiogroup were read twice;
+          a11y pass): the title labels the radiogroup. */}
+      <div>
+        <h2 id={moodTitle} className="text-lg font-medium text-text">
+          {t("checkinTitle")}
+        </h2>
         {/* Narrow or large text (decision 105, app parity): every face stays a
             48 px target and the row wraps rather than shrink; when the labels
             don't fit (under 22rem, which grows with the text size) they become
             screen-reader text, so each face keeps its name, and the chosen
             mood's label shows under the row instead. */}
         <div className="@container mt-4">
-          <div className={MOOD_ROW} role="radiogroup" aria-label={t("checkinTitle")}>
+          <div className={MOOD_ROW} role="radiogroup" aria-labelledby={moodTitle} aria-required="true" onKeyDown={moveMood}>
             {MOODS.map((mood) => (
               <button
                 key={mood}
                 type="button"
                 role="radio"
                 aria-checked={fields.mood === mood}
+                // One tab stop for the group (the chosen face, else the first);
+                // arrows move between faces, as for native radios.
+                tabIndex={fields.mood === mood || (fields.mood === null && mood === MOODS[0]) ? 0 : -1}
                 data-testid={`checkin-mood-${mood}`}
                 onClick={() => set({ mood })}
                 className={`${MOOD_FACE} ${fields.mood === mood ? "bg-pill text-accent" : "text-muted hover:bg-pill"}`}
@@ -339,7 +399,7 @@ function Card({ initial, uid, date: cardDate, notify }: Props & { notify: Notify
             </p>
           )}
         </div>
-      </fieldset>
+      </div>
 
       {fields.mood !== null && (
         <div className="mt-6 space-y-6">
@@ -407,6 +467,9 @@ function Card({ initial, uid, date: cardDate, notify }: Props & { notify: Notify
                   <button
                     type="button"
                     aria-pressed={fields.stress === String(s)}
+                    // "Stress 1 of 5", not just "1" (the Low/High captions aren't
+                    // part of the button; a11y pass).
+                    aria-label={t("stressLevelLabel", { n: s })}
                     data-testid={`checkin-stress-${s}`}
                     onClick={() => set({ stress: fields.stress === String(s) ? "" : String(s) })}
                     className={`${chip(fields.stress === String(s))} min-w-12 px-0`}

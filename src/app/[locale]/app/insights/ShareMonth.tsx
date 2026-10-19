@@ -15,6 +15,7 @@ import { loadMonthCheckIns } from "./shareActions";
 export function ShareMonth({ month, dateLocaleTag, label }: { month: string; dateLocaleTag: string; label?: "shareButton" | "shareThisMonth" }) {
   const t = useTranslations("share");
   const tt = useTranslations("today");
+  const tm = useTranslations("me");
   const [open, setOpen] = useState(false);
   const [colours, setColours] = useState<string[] | null>(null);
   const [failed, setFailed] = useState(false);
@@ -33,8 +34,10 @@ export function ShareMonth({ month, dateLocaleTag, label }: { month: string; dat
     setOpen(true);
     setColours(null);
     setFailed(false);
-    // The app's current theme is the default.
-    setTheme(window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    // The page's current theme is the default: one chosen in Me →
+    // Appearance (<html data-theme>, decision 133), else the system's.
+    const chosen = document.documentElement.dataset.theme;
+    setTheme(chosen === "dark" || chosen === "light" ? chosen : window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light");
     const probe = typeof File !== "undefined" ? new File([""], cardFileName(month), { type: "image/png" }) : null;
     setCanShareFiles(!!probe && typeof navigator.canShare === "function" && navigator.canShare({ files: [probe] }));
     loadMonthCheckIns(month)
@@ -182,13 +185,19 @@ export function ShareMonth({ month, dateLocaleTag, label }: { month: string; dat
                   </p>
                 )}
                 <div className="flex flex-wrap justify-end gap-3">
-                  <button type="button" data-testid="share-send" onClick={send} disabled={!file} aria-busy={!file && !encodeFailed} className={`${dialogButton(true)} disabled:opacity-50`}>
+                  <button type="button" data-testid="share-send" onClick={send} disabled={!file} className={`${dialogButton(true)} disabled:opacity-50`}>
                     {canShareFiles ? t("shareSend") : t("shareDownload")}
                   </button>
                 </div>
               </>
             )}
           </div>
+          {/* Always there (also while loading, or with nothing to share):
+              where focus goes when the dialog opens, and a way out without
+              Esc, e.g. for a touch screen reader (a11y pass). */}
+          <button type="button" data-testid="share-close" className={dialogButton()} onClick={close}>
+            {tm("cancel")}
+          </button>
         </Dialog>
       )}
     </>

@@ -81,9 +81,9 @@
       "code": "TH",
       "helpline": { "name": "Department of Mental Health hotline", "display": "1323", "dial": "1323", "sms": false },
       "emergency": { "display": "1669", "dial": "1669" },
-      "status": "unverified",
+      "status": "verified",
       "checked_on": "2026-10-19",
-      "source": "https://www.dmh.go.th"
+      "source": "https://www.thailand.go.th"
     },
     {
       "code": "US",
