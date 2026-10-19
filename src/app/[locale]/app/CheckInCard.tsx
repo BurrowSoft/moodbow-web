@@ -467,9 +467,9 @@ function Card({ initial, uid, date: cardDate, notify, announce, autoFocus }: Pro
                   <button
                     type="button"
                     aria-pressed={fields.stress === String(s)}
-                    // "Stress 1/5", not just "1" (the Low/High captions aren't
+                    // "Stress 1 of 5", not just "1" (the Low/High captions aren't
                     // part of the button; a11y pass).
-                    aria-label={t("stressChip", { level: s })}
+                    aria-label={t("stressLevelLabel", { n: s })}
                     data-testid={`checkin-stress-${s}`}
                     onClick={() => set({ stress: fields.stress === String(s) ? "" : String(s) })}
                     className={`${chip(fields.stress === String(s))} min-w-12 px-0`}

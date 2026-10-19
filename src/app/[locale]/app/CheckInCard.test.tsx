@@ -432,10 +432,10 @@ describe("CheckInCard: the mood radios and stress buttons for screen readers (a1
     expect(screen.getByTestId("checkin-mood-5")).toHaveFocus();
   });
 
-  it("stress buttons say what they are ('Stress 2/5'), with the digit still in the name", () => {
+  it("stress buttons say what they are ('Stress 2 of 5'), with the digit still in the name", () => {
     renderCard(null);
     fireEvent.click(screen.getByTestId("checkin-mood-3"));
-    expect(screen.getByRole("button", { name: "Stress 2/5" })).toBe(screen.getByTestId("checkin-stress-2"));
+    expect(screen.getByRole("button", { name: "Stress 2 of 5" })).toBe(screen.getByTestId("checkin-stress-2"));
   });
 
   it("offline-sync notices live in one region that's always there", () => {
