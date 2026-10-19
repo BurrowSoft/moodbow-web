@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Dialog, dialogButton } from "@/components/Dialog";
 import { drawCard } from "@/lib/share/drawCard";
+import { stripPngMetadata } from "@/lib/share/pngChunks";
 import { cardFileName, formatMonth, LAYOUT, MIN_CHECK_INS, monthBands, THEMES, type CardFormat, type CardTheme } from "@/lib/share/moodbow";
 import { loadMonthCheckIns } from "./shareActions";
 
@@ -69,9 +70,12 @@ export function ShareMonth({ month, dateLocaleTag, label }: { month: string; dat
         fontFamily: `${family}, sans-serif`,
         logo: logo.complete && logo.naturalWidth > 0 ? logo : null,
       });
-      // A canvas PNG carries no EXIF or text chunks; the name is the month.
-      el.toBlob((blob) => {
-        if (!cancelled && blob) setFile(new File([blob], cardFileName(month), { type: "image/png" }));
+      // Pixels only: every chunk the browser's encoder adds is dropped
+      // (lib/share/pngChunks.ts); the name is the month.
+      el.toBlob(async (blob) => {
+        if (cancelled || !blob) return;
+        const png = stripPngMetadata(new Uint8Array(await blob.arrayBuffer()));
+        if (!cancelled && png) setFile(new File([png as BlobPart], cardFileName(month), { type: "image/png" }));
       }, "image/png");
     })();
     return () => {

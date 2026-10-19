@@ -17,14 +17,25 @@ const renderIt = () =>
   );
 
 // A 2D context that accepts every call; the image always decodes; the PNG
-// is a tiny blob.
+// is a tiny well-formed one carrying Firefox's deBG chunk (the filter's own
+// tests are in lib/share/pngChunks.test.ts).
+const pngChunk = (type: string, data: number[]) => {
+  const out = new Uint8Array(12 + data.length);
+  new DataView(out.buffer).setUint32(0, data.length);
+  out.set(new TextEncoder().encode(type), 4);
+  out.set(data, 8);
+  return out;
+};
+const PNG = new Uint8Array(
+  [[0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a], pngChunk("IHDR", Array(13).fill(0)), pngChunk("IDAT", [0]), pngChunk("deBG", [1, 2, 3]), pngChunk("IEND", [])].flatMap((c) => Array.from(c)),
+);
 const noopCtx = new Proxy({}, { get: (_t, k) => (k === "measureText" ? () => ({ width: 10 }) : () => {}), set: () => true });
 const names: string[] = [];
 beforeEach(() => {
   loadMonthCheckIns.mockReset();
   names.length = 0;
   vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(noopCtx as unknown as CanvasRenderingContext2D);
-  vi.spyOn(HTMLCanvasElement.prototype, "toBlob").mockImplementation((cb) => cb(new Blob(["png"], { type: "image/png" })));
+  vi.spyOn(HTMLCanvasElement.prototype, "toBlob").mockImplementation((cb) => cb(new Blob([PNG], { type: "image/png" })));
   Object.assign(HTMLImageElement.prototype, { decode: () => Promise.resolve() });
   Object.assign(URL, { createObjectURL: vi.fn(() => "blob:x"), revokeObjectURL: vi.fn() });
   vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(function (this: HTMLAnchorElement) {
@@ -91,6 +102,10 @@ describe("ShareMonth", () => {
       const files = (share.mock.calls[0] as unknown as [{ files: File[] }])[0].files;
       expect(files[0].name).toBe("moodbow-2026-10.png");
       expect(files[0].type).toBe("image/png");
+      // The encoder's deBG chunk didn't make it into the shared file.
+      const shared = new TextDecoder("latin1").decode(await files[0].arrayBuffer());
+      expect(shared).toContain("IDAT");
+      expect(shared).not.toContain("deBG");
     } finally {
       Object.assign(navigator, { canShare: undefined, share: undefined });
     }
