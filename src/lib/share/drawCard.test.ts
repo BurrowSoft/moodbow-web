@@ -78,3 +78,46 @@ describe("drawCard", () => {
     vi.restoreAllMocks();
   });
 });
+
+describe("story safe zone (decision 141)", () => {
+  // Everything but the background stays inside y 250–1670 (stories cover
+  // ~250 px at the top and bottom), with the longest line and a logo.
+  it("text, logo and arcs all sit within y 250–1670", () => {
+    const { ctx, calls } = recorder();
+    const logo = {} as CanvasImageSource;
+    drawCard(ctx, {
+      format: "story",
+      theme: "light",
+      colours: Array.from({ length: 31 }, (_, i) => MOOD_HEX[i % 5]),
+      monthLabel: "September 2026",
+      daysLabel: "31 days journaled",
+      line: "A long line that will need the second line to fit everything I wanted to say",
+      fontFamily: "Poppins, sans-serif",
+      logo,
+    });
+    const spans: [string, number, number][] = [];
+    for (const c of calls) {
+      if (c.op === "fillText") {
+        const size = Number(String(c.state.font).match(/(\d+)px/)![1]);
+        const y = c.args[2] as number;
+        const base = c.state.textBaseline;
+        spans.push([String(c.args[0]), base === "top" ? y : base === "middle" ? y - size / 2 : y - size, base === "top" ? y + size : base === "middle" ? y + size / 2 : y]);
+      } else if (c.op === "drawImage") {
+        const [, , top, , h] = c.args as number[];
+        spans.push(["logo", top, top + h]);
+      } else if (c.op === "arc") {
+        const [, cy, r] = c.args as number[];
+        spans.push(["arc", cy - r, cy]);
+      }
+    }
+    expect(spans.length).toBeGreaterThan(5);
+    for (const [what, top, bottom] of spans) {
+      expect(top, `${what} top`).toBeGreaterThanOrEqual(250);
+      expect(bottom, `${what} bottom`).toBeLessThanOrEqual(1670);
+    }
+    // The spec's positions.
+    expect(spans.find(([w]) => w === "September 2026")![1]).toBe(300);
+    expect(spans.find(([w]) => w === "logo")![2]).toBe(1580);
+    expect(spans.find(([w]) => w === "moodbow.com")![1]).toBe(1604);
+  });
+});
