@@ -358,14 +358,21 @@ test.describe("onboarding (signed out)", () => {
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Private, and yours");
   });
 
-  test("consent: Continue only with both boxes; no AI row; then Create account", async ({ page }) => {
+  test("consent: Continue only with both boxes; the AI box optional; then Create account", async ({ page }) => {
     await page.goto("/consent");
     const cont = page.getByTestId("consent-continue");
     await expect(cont).toBeDisabled();
     await page.getByTestId("consent-privacy").check();
     await expect(cont).toBeDisabled();
     await page.getByTestId("consent-health").check();
-    await expect(page.getByText("AI reflections and reports (optional)")).toHaveCount(0);
+    // This build shows drafts, so ai-live is a draft and the optional AI box
+    // is there (#60; hidden on Production until ai-live is met): unticked,
+    // never required, and Continue doesn't wait for it.
+    const ai = page.getByTestId("consent-ai");
+    await expect(ai).toBeVisible();
+    await expect(ai).not.toBeChecked();
+    await expect(page.getByText("AI reflections and reports (optional)")).toBeVisible();
+    await expect(cont).toBeEnabled();
     await cont.click();
     await expect(page).toHaveURL(/\/sign-up$/);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Create your account");
