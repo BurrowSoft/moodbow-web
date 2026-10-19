@@ -215,3 +215,15 @@ describe("ReflectPanel: Write your answer (decision 151)", () => {
     expect(onAnswer).toHaveBeenCalledWith("What helped?");
   });
 });
+
+describe("ReflectPanel: a crisis reply (r1)", () => {
+  it("names Get help: that button is its only action, no Write your answer", () => {
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <ReflectPanel entryId={ENTRY} initial={reflection({ body: `That sounds really heavy. ${messages.me.meGetHelpNow}` })} balance={600} onAnswer={vi.fn()} />
+      </NextIntlClientProvider>,
+    );
+    expect(screen.getByTestId("reflect-get-help")).toBeInTheDocument();
+    expect(screen.queryByTestId("reflect-answer")).toBeNull();
+  });
+});

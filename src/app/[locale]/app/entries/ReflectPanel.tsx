@@ -169,7 +169,9 @@ export function ReflectPanel({ entryId, initial, balance, country, onAnswer }: P
           <p data-testid="reflect-body" className="whitespace-pre-line text-text">
             {reflection.body}
           </p>
-          {onAnswer && (
+          {/* A crisis reply (it names Get help): its only action is that button
+              (r1, UX), never "Write your answer". */}
+          {onAnswer && !namesGetHelp(reflection.body) && (
             <button
               type="button"
               data-testid="reflect-answer"
