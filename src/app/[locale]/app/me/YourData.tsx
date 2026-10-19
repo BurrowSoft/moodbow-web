@@ -1,11 +1,14 @@
 "use client";
 
-import { startTransition, useActionState, useCallback, useState, useTransition } from "react";
+import { startTransition, useActionState, useCallback, useEffect, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { Dialog, dialogButton } from "@/components/Dialog";
-import { DELETE_WORD, exportFileName } from "@/lib/journal/account";
+import { canRenderText, renderExportText, type Translate } from "@/lib/exportText";
+import { DELETE_WORD, exportFileName, journalFileName } from "@/lib/journal/account";
 import { wipeLocalData } from "@/lib/localData";
 import { deleteMyAccount, exportMyData, type DeleteAccountState } from "./actions";
+
+type ExportFile = { kind: "txt" | "json"; name: string; url: string };
 
 // Me → Your data (M7): Export my data, and Delete account behind a dialog
 // that warns about lost AI credits (only when there are any), offers the
@@ -15,6 +18,9 @@ export function YourData({ credits, uid }: { credits: number; uid: string }) {
   const tt = useTranslations("today");
   const [exporting, startExport] = useTransition();
   const [exportState, setExportState] = useState<"idle" | "ready" | "error">("idle");
+  const [files, setFiles] = useState<ExportFile[]>([]);
+  // The whole message tree, for the readable export's keys (lib/exportText).
+  const tr = useTranslations();
   const [deleting, setDeleting] = useState(false);
   const [typed, setTyped] = useState("");
   const [state, action, pending] = useActionState<DeleteAccountState, FormData>(async (prev, form) => {
@@ -40,25 +46,51 @@ export function YourData({ credits, uid }: { credits: number; uid: string }) {
     }
   }, { status: "idle" });
 
-  // The file is made here, in the browser: nothing is stored on the way.
+  // The files are made here, in the browser: nothing is stored on the way.
+  // One Export, then two links (UX): the readable copy and the data file.
   const runExport = () =>
     startExport(async () => {
       try {
         const result = await exportMyData();
         if (result.status !== "ok") return setExportState("error");
-        const url = URL.createObjectURL(new Blob([result.json], { type: "application/json" }));
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = exportFileName(result.date);
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        URL.revokeObjectURL(url);
+        const doc: unknown = JSON.parse(result.json);
+        const next: ExportFile[] = [];
+        // Only a format the renderer knows becomes text; the JSON always.
+        if (canRenderText(doc)) {
+          next.push({ kind: "txt", name: journalFileName(result.date), url: URL.createObjectURL(new Blob([renderExportText(doc, tr as Translate)], { type: "text/plain;charset=utf-8" })) });
+        }
+        next.push({ kind: "json", name: exportFileName(result.date), url: URL.createObjectURL(new Blob([result.json], { type: "application/json" })) });
+        setFiles(next);
         setExportState("ready");
       } catch {
         setExportState("error");
       }
     });
+
+  // The links' object URLs live until a new export or leaving the page.
+  useEffect(() => () => files.forEach((f) => URL.revokeObjectURL(f.url)), [files]);
+
+  const exportResult =
+    exportState === "ready" ? (
+      <div className="space-y-1">
+        <p role="status" data-testid="me-export-status" className="text-sm font-medium text-text">
+          {t("meExportReady")}
+        </p>
+        <ul className="space-y-1">
+          {files.map((f) => (
+            <li key={f.kind}>
+              <a href={f.url} download={f.name} data-testid={`me-export-${f.kind}`} className="font-medium text-accent underline underline-offset-4">
+                {f.kind === "txt" ? t("exportReadable") : t("exportData")}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ) : exportState === "error" ? (
+      <p role="status" data-testid="me-export-status" className="text-sm font-medium text-text">
+        {tt("errGeneric")}
+      </p>
+    ) : null;
 
   const closeDelete = useCallback(() => {
     setDeleting(false);
@@ -76,9 +108,7 @@ export function YourData({ credits, uid }: { credits: number; uid: string }) {
           {t("meExport")}
         </button>
         <p className="text-sm text-muted">{t("meExportBody")}</p>
-        <p role="status" data-testid="me-export-status" className="text-sm font-medium text-text">
-          {exportState === "ready" ? t("meExportReady") : exportState === "error" ? tt("errGeneric") : null}
-        </p>
+        {!deleting && exportResult}
       </div>
       <button type="button" data-testid="me-delete" onClick={() => setDeleting(true)} className="mt-6 font-medium text-accent underline underline-offset-4">
         {t("meDelete")}
@@ -102,11 +132,7 @@ export function YourData({ credits, uid }: { credits: number; uid: string }) {
             <button type="button" data-testid="delete-export-first" onClick={runExport} disabled={exporting} className="font-medium text-accent underline underline-offset-4">
               {t("deleteExportFirst")}
             </button>
-            {exportState !== "idle" && (
-              <p role="status" className="text-sm text-text">
-                {exportState === "ready" ? t("meExportReady") : tt("errGeneric")}
-              </p>
-            )}
+            {exportResult}
             <div>
               <label htmlFor="delete-confirm" className="block text-sm font-medium text-text">
                 {t("deleteTypeConfirm")}

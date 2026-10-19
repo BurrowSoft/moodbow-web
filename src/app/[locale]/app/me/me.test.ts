@@ -48,6 +48,18 @@ describe("exportMyData", () => {
     expect(exportFileName("")).toBe("moodbow-export.json");
   });
 
+  it("the file names use the export day in the profile's time zone (decision 107)", async () => {
+    // 2026-10-02 23:30 UTC = the morning of 2026-10-03 in Bangkok.
+    const at = "2026-10-02T23:30:00Z";
+    rpc.mockResolvedValue({ data: { format: "moodbow-export", format_version: 1, exported_at: at, profile: { time_zone: "Asia/Bangkok" } }, error: null });
+    expect(await exportMyData()).toMatchObject({ status: "ok", date: "2026-10-03" });
+    rpc.mockResolvedValue({ data: { format: "moodbow-export", format_version: 1, exported_at: at, profile: { time_zone: "America/Sao_Paulo" } }, error: null });
+    expect(await exportMyData()).toMatchObject({ date: "2026-10-02" });
+    // No or an unknown zone: UTC.
+    rpc.mockResolvedValue({ data: { format: "moodbow-export", format_version: 1, exported_at: at, profile: { time_zone: "Not/AZone" } }, error: null });
+    expect(await exportMyData()).toMatchObject({ date: "2026-10-02" });
+  });
+
   it("an error is an error", async () => {
     rpc.mockResolvedValue({ data: null, error: { message: "boom" } });
     expect(await exportMyData()).toEqual({ status: "error" });

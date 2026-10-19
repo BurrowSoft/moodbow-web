@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { scrubEvent, scrubUrl } from "./analytics";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { NOT_FOUND_MARK, scrubEvent, scrubUrl } from "./analytics";
 
 const W = "https://www.moodbow.com";
 
@@ -35,5 +35,17 @@ describe("scrubUrl (decision 79: page addresses only, nothing that identifies an
   it("scrubEvent keeps the rest of the event, or drops it", () => {
     expect(scrubEvent({ type: "pageview", url: `${W}/app/entries/3d6f1a2b-4c5d-4e6f-8a9b-0c1d2e3f4a5b?x=1` })).toEqual({ type: "pageview", url: `${W}/app/entries/[id]` });
     expect(scrubEvent({ type: "pageview", url: `${W}/auth/confirm` })).toBeNull();
+  });
+});
+
+describe("scrubEvent on a not-found page (Web Tester, #21)", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("sends nothing while the page is marked not found; normal again after", () => {
+    const marked = { value: true };
+    vi.stubGlobal("document", { querySelector: (sel: string) => (sel === `[${NOT_FOUND_MARK}]` && marked.value ? {} : null) });
+    expect(scrubEvent({ type: "pageview", url: `${W}/help/some-typed-slug` })).toBeNull();
+    marked.value = false;
+    expect(scrubEvent({ type: "pageview", url: `${W}/help` })).toEqual({ type: "pageview", url: `${W}/help` });
   });
 });

@@ -29,16 +29,28 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe("YourData: export", () => {
-  it("downloads the file in the browser and says it's ready", async () => {
-    exportMyData.mockResolvedValue({ status: "ok", json: "{}", date: "2026-10-02" });
-    const click = vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(function (this: HTMLAnchorElement) {
-      expect(this.download).toBe("moodbow-export-2026-10-02.json");
-    });
+  it("one Export, then two links: the readable copy (.txt) and the data file (.json), named by the day", async () => {
+    const doc = { format: "moodbow-export", format_version: 1, exported_at: "2026-10-02T09:30:00Z", account: { email: "a@b.co" }, check_ins: [], entries: [] };
+    exportMyData.mockResolvedValue({ status: "ok", json: JSON.stringify(doc), date: "2026-10-02" });
+    const blobs: Blob[] = [];
+    (URL.createObjectURL as unknown as ReturnType<typeof vi.fn>).mockImplementation((b: Blob) => (blobs.push(b), `blob:${blobs.length}`));
     renderIt();
     fireEvent.click(screen.getByTestId("me-export"));
     await waitFor(() => expect(screen.getByTestId("me-export-status")).toHaveTextContent(m.meExportReady));
-    expect(click).toHaveBeenCalledTimes(1);
-    click.mockRestore();
+    const txt = screen.getByRole("link", { name: m.exportReadable });
+    const json = screen.getByRole("link", { name: m.exportData });
+    expect(txt).toHaveAttribute("download", "moodbow-journal-2026-10-02.txt");
+    expect(json).toHaveAttribute("download", "moodbow-export-2026-10-02.json");
+    expect(await blobs[0].text()).toBe("Moodbow: your journal\nExported: 2026-10-02 09:30 UTC\nAccount: a@b.co\nThis file holds your private journal. Keep it somewhere safe.\n");
+    expect(blobs[1].type).toBe("application/json");
+  });
+
+  it("a format the renderer doesn't know: the data file alone (no partial text)", async () => {
+    exportMyData.mockResolvedValue({ status: "ok", json: JSON.stringify({ format: "moodbow-export", format_version: 2 }), date: "2026-10-02" });
+    renderIt();
+    fireEvent.click(screen.getByTestId("me-export"));
+    expect(await screen.findByRole("link", { name: m.exportData })).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: m.exportReadable })).toBeNull();
   });
 
   it("a failure says so", async () => {
