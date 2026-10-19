@@ -5,9 +5,9 @@ This file holds your private journal. Keep it somewhere safe.
 
 Check-ins
 2026-09-28 · Mood: Bad (2/5)
-2026-09-29 · Mood: Okay (3/5) · Sleep: 7 h · Exercise: None · Stress: 4/5
-2026-09-30 · Mood: Great (5/5) · Sleep: Poor · Exercise: 90+ min
-2026-10-02 · Mood: Good (4/5) · Sleep: 7.5 h, Good · Exercise: 30 min · Stress: 2/5
+2026-09-29 · Mood: Okay (3/5) · Sleep: 7 h · Movement: Rest day · Stress: 4/5
+2026-09-30 · Mood: Great (5/5) · Sleep: Poor · Movement: 90+ min
+2026-10-02 · Mood: Good (4/5) · Sleep: 7.5 h, Good · Movement: 30 min · Stress: 2/5
 
 Entries
 2026-09-30

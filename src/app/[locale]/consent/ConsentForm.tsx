@@ -29,9 +29,11 @@ function Checkbox({ name, label, checked, onChange, testId }: { name: string; la
 // Every box here is required (the action checks again). Once the page is
 // running, Continue stays disabled until they're all ticked; before that
 // (no JS yet, decision 73) it's a plain form: the browser's own required
-// check, then the server's. The AI row is hidden while AI is off.
+// check, then the server's. askAi: the optional AI box (r1 §M3), never
+// required and never pre-ticked; hidden while this build doesn't show AI.
 // showBack: new accounts only (Back → Welcome slide 3, the privacy promise).
-export function ConsentForm({ askAge, showBack }: { askAge: boolean; showBack: boolean }) {
+export function ConsentForm({ askAge, askAi = false, showBack }: { askAge: boolean; askAi?: boolean; showBack: boolean }) {
+  const tai = useTranslations("ai");
   const t = useTranslations("onboarding");
   const ta = useTranslations("auth");
   const tc = useTranslations("common");
@@ -48,15 +50,28 @@ export function ConsentForm({ askAge, showBack }: { askAge: boolean; showBack: b
       <p className="flex flex-wrap gap-x-6 gap-y-1 px-1 text-sm">
         <Link href="/terms" target="_blank" rel="noopener" data-testid="consent-read-terms" className={textLinkClass}>
           {t("consentReadTerms")}
-          <span className="sr-only"> {tc("opensInNewTab")}</span>
+          {" "}
+          <span className="sr-only">{tc("opensInNewTab")}</span>
         </Link>
         <Link href="/privacy" target="_blank" rel="noopener" data-testid="consent-read-privacy" className={textLinkClass}>
           {t("consentReadPrivacy")}
-          <span className="sr-only"> {tc("opensInNewTab")}</span>
+          {" "}
+          <span className="sr-only">{tc("opensInNewTab")}</span>
         </Link>
       </p>
       <Checkbox name="health" testId="consent-health" label={t("consentHealth")} checked={health} onChange={setHealth} />
       {askAge && <Checkbox name="age" testId="consent-age" label={t("ageConfirm")} checked={age} onChange={setAge} />}
+      {askAi && (
+        <label className="flex items-start gap-3 rounded-2xl border border-border bg-surface px-4 py-4 text-text">
+          <input type="checkbox" name="ai" data-testid="consent-ai" aria-describedby="consent-ai-body" className="mt-1 h-5 w-5 shrink-0 accent-[var(--accent)]" />
+          <span className="flex flex-col gap-1">
+            <span className="font-medium">{tai("consentAiTitle")}</span>
+            <span id="consent-ai-body" aria-hidden="true" className="text-sm text-muted">
+              {tai("consentAiBody")}
+            </span>
+          </span>
+        </label>
+      )}
       {state.status === "error" && (
         <p role="alert" data-testid="consent-error" className="font-medium text-accent">
           {state.error === "age" ? t("errAgeRequired") : ta("errGeneric")}

@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "note": "The mood faces (decisions 149/150; the approved screen review): each mood 1-5 is a circle in its Sunrise colour (colour-map.json steps) with this glyph centred on it. The glyph is drawn in a 24 x 24 box scaled to glyph_scale of the circle's diameter. Eyes are filled dots; mouths are stroked SVG paths (round caps and joins). The ink is the same in both themes, since every Sunrise colour is light. The circle keeps its 1 px muted outline (colour-map.json outline); a selected face adds the accent ring (colour-roles §3). The app and the web draw from this file and test against it.",
+  "view_box": 24,
+  "glyph_scale": 0.64,
+  "ink": "#2B2438",
+  "eyes": [
+    { "cx": 8.5, "cy": 10, "r": 1.7 },
+    { "cx": 15.5, "cy": 10, "r": 1.7 }
+  ],
+  "mouth_stroke_width": 2,
+  "mouths": {
+    "1": "M8 17 q4 -3 8 0",
+    "2": "M8 16.5 q4 -1.5 8 0",
+    "3": "M8 16 h8",
+    "4": "M8 15.5 q4 1.5 8 0",
+    "5": "M7.5 15 q4.5 3.5 9 0"
+  }
+}

@@ -12,11 +12,13 @@ export async function generateMetadata({ params }: PageProps<"/[locale]">): Prom
 
 // Feature blocks: the app's welcome slides 1–3 (r1-screens-and-copy.md; card 1
 // is titled "Seconds a day" so it doesn't repeat the h1),
-// with welcome3BodyNoAi until AI claims are live. Each gets one brand colour.
+// with welcome3BodyNoAi until AI claims are live. Icons in the accent: peach
+// / lavender / rose sat right next to the mood colours (decision 150: colour
+// means mood; only the brand mark keeps its own colours).
 const FEATURES = [
-  { n: 1, color: "text-peach", icon: <PenIcon /> },
-  { n: 2, color: "text-lavender", icon: <ChartIcon /> },
-  { n: 3, color: "text-rose", icon: <LockIcon /> },
+  { n: 1, color: "text-accent", icon: <PenIcon /> },
+  { n: 2, color: "text-accent", icon: <ChartIcon /> },
+  { n: 3, color: "text-accent", icon: <LockIcon /> },
 ] as const;
 
 export default async function HomePage({ params }: PageProps<"/[locale]">) {

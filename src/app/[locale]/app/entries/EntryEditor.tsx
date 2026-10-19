@@ -399,6 +399,11 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
           >
             {t("entryLeaveKeep")}
           </button>
+          {/* The safe choice, and where focus starts (initialFocus last;
+              decision 143): back to the text. */}
+          <button type="button" data-testid="entry-keep-editing" className={dialogButton()} onClick={closeDialog}>
+            {t("entryKeepEditing")}
+          </button>
         </Dialog>
       )}
 

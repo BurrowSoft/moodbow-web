@@ -34,7 +34,7 @@ The same `client_key` after success → the **same** 200 (a replay; nothing runs
 | 429 | `rate_limited` | Over the per-user limit (5/min, 60/h; app_config) | errRateLimited |
 | 429 | `daily_limit` | Lite allowance used up today | dailyLimit |
 | 503 | `ai_budget_exhausted` | The org monthly cap (users never see "budget") | reflectError |
-| 502 | `reflect_failed` | Model refusal, `max_tokens`, empty reply, upstream error/timeout | reflectError ("…Your entry is saved.") |
+| 502 | `reflect_failed` | Model refusal, `max_tokens`, empty reply, upstream error/timeout, a reply not in the entry's script after one full-model retry (`language_mismatch`, decision 153) | reflectError ("…Your entry is saved.") |
 
 Network failure / no response → errOffline. Retry with the **same** client_key (safe).
 
@@ -55,7 +55,7 @@ Network failure / no response → errOffline. Retry with the **same** client_key
 3. Read the entry (`id`, `uid`) plus the last 7 days of check-ins (numbers only), tone, focus and locale.
 4. Call the model (`ai_models[tier]`; spec settings). **Whatever happens after a billed call, the request is closed**:
    - success → `ai_complete_reflection(...)`, which prices by `response.model` (incl. thinking in output_tokens, and cache read/write), debits and replaces the entry's reflection in one transaction;
-   - refusal / max_tokens / error → `ai_finish_request(..., 'failed', <code>)` with the real usage if any (logged, never debited).
+   - refusal / max_tokens / language_mismatch / error → `ai_finish_request(..., 'failed', <code>)` with the real usage if any (logged, never debited). A reply discarded for the language retry goes as `p_discarded` {model, input, output, cache_read, cache_write}: a cost (caps, spend), never debited (decision 155, migration 008).
 5. Close the request in a `finally`: any path that doesn't reach complete/finish (a thrown error, a timeout) calls `ai_finish_request(..., 'failed', 'internal_error')`. If the function itself dies, the next begin of that user reaps its started rows older than 5 min as failed `abandoned`.
 6. Never log, store in ai_requests or send to Sentry any prompt, entry or reply text.
 

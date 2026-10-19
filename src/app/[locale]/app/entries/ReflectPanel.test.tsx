@@ -275,3 +275,14 @@ describe("ReflectPanel: focus with one-shot Reflect (reviewer #51)", () => {
     expect(other).toHaveFocus();
   });
 });
+
+describe("ReflectPanel: Moodbow's voice colours (decision 150)", () => {
+  it("the reflection sits on the voice surface with the voice rule; the Lite badge is the voice colour; nothing follows the mood", () => {
+    renderIt(reflection({ tier: "lite" }));
+    const card = screen.getByTestId("reflect-result");
+    expect(card.className).toMatch(/\bbg-voice-surface\b/);
+    expect(card.className).toMatch(/\bborder-voice\b/);
+    expect(screen.getByTestId("reflect-lite").className).toMatch(/\btext-voice\b/);
+    expect(card.className).not.toMatch(/accent|#[0-9a-f]{6}/i);
+  });
+});

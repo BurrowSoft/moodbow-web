@@ -2,6 +2,7 @@ import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-libra
 import { NextIntlClientProvider } from "next-intl";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import messages from "@/messages/en.json";
+import moodFaces from "../../../../content/contracts/mood-faces.json";
 import type { CheckIn } from "@/lib/journal/checkIn";
 
 // The check-in card against a mocked save action. CI has no Supabase to sign
@@ -347,27 +348,37 @@ describe("CheckInCard: a live save sent to sign-in or Consent (reviewer #11/#22)
   });
 });
 
-describe("CheckInCard: narrow screens and large text (decision 105)", () => {
-  it("every face keeps a 48 px target and its accessible name, even with its label hidden", () => {
+describe("CheckInCard: the mood faces (mood-faces.json; UX, superseding decision 105)", () => {
+  it("each face: its Sunrise circle with the contract's eyes and mouth; all five labels shown, the chosen one in the accent", () => {
     renderCard(null);
     for (const mood of [1, 2, 3, 4, 5] as const) {
       const face = screen.getByTestId(`checkin-mood-${mood}`);
-      expect(face.className).toMatch(/\bmin-h-12\b/);
-      expect(face.className).toMatch(/\bmin-w-12\b/);
-      // Screen-reader text below the container width, never display:none.
-      expect(screen.getByTestId(`checkin-mood-label-${mood}`).className).toMatch(/\bsr-only\b/);
+      expect(face.classList.contains("min-h-12")).toBe(true);
       expect(face).toHaveAccessibleName(messages.today[`mood${mood}`]);
+      const label = screen.getByTestId(`checkin-mood-label-${mood}`);
+      expect(label.classList.contains("sr-only")).toBe(false);
+      expect(label.classList.contains("min-w-10")).toBe(true);
+      const glyph = face.querySelector("[data-testid=mood-face] svg")!;
+      expect(glyph.getAttribute("viewBox")).toBe(`0 0 ${moodFaces.view_box} ${moodFaces.view_box}`);
+      expect([...glyph.querySelectorAll("circle")].map((c) => [c.getAttribute("cx"), c.getAttribute("cy"), c.getAttribute("r"), c.getAttribute("fill")])).toEqual(
+        moodFaces.eyes.map((e) => [String(e.cx), String(e.cy), String(e.r), moodFaces.ink]),
+      );
+      const mouth = glyph.querySelector("path")!;
+      expect(mouth.getAttribute("d")).toBe(moodFaces.mouths[String(mood) as "1"]);
+      expect(mouth.getAttribute("stroke-width")).toBe(String(moodFaces.mouth_stroke_width));
+      // glyph_scale of the circle's diameter (the outline included).
+      const width = (glyph as SVGElement).style.width;
+      expect(width).toContain(String(moodFaces.glyph_scale));
+      expect(width).toContain("(100% + 2px)");
     }
-    expect(screen.getByRole("radiogroup").className).toMatch(/\bflex-wrap\b/);
-  });
-
-  it("the chosen mood's label shows under the row (visual only)", () => {
-    renderCard(null);
-    expect(screen.queryByTestId("checkin-mood-selected")).toBeNull();
+    expect(screen.getByRole("radiogroup").classList.contains("flex-wrap")).toBe(true);
     fireEvent.click(screen.getByTestId("checkin-mood-4"));
-    const selected = screen.getByTestId("checkin-mood-selected");
-    expect(selected).toHaveTextContent(messages.today.mood4);
-    expect(selected).toHaveAttribute("aria-hidden", "true");
+    expect(screen.getByTestId("checkin-mood-4").classList.contains("text-accent")).toBe(true);
+    expect(screen.getByTestId("checkin-mood-2").classList.contains("text-muted")).toBe(true);
+    expect(screen.getByTestId("checkin-mood-4").querySelector("[data-testid=mood-face]")!.classList.contains("ring-accent")).toBe(true);
+    // The ring's gap is the selected face's own background, not white (a halo in dark).
+    expect(screen.getByTestId("checkin-mood-4").querySelector("[data-testid=mood-face]")!.classList.contains("ring-offset-pill")).toBe(true);
+    expect(screen.queryByTestId("checkin-mood-selected")).toBeNull();
   });
 });
 
@@ -442,5 +453,25 @@ describe("CheckInCard: the mood radios and stress buttons for screen readers (a1
     renderCard(ROW);
     const region = screen.getByTestId("checkin-notices");
     expect(region).toHaveAttribute("role", "status");
+  });
+});
+
+describe("CheckInCard: value colours (decision 150)", () => {
+  it("only the chosen value shows its colour dot; the chips stay accent buttons; movement 0 has none", () => {
+    renderCard(null);
+    fireEvent.click(screen.getByTestId("checkin-mood-3"));
+    expect(screen.queryByTestId("checkin-stress-dot")).toBeNull();
+    fireEvent.click(screen.getByTestId("checkin-stress-2"));
+    const stress = screen.getAllByTestId("checkin-stress-dot");
+    expect(stress).toHaveLength(1);
+    expect(screen.getByTestId("checkin-stress-2")).toContainElement(stress[0]);
+    expect(stress[0]).toHaveAttribute("data-value-colour", "#F4A77A");
+    expect(screen.getByTestId("checkin-stress-2").className).toContain("text-accent");
+    fireEvent.click(screen.getByTestId("checkin-exercise-0"));
+    expect(screen.queryByTestId("checkin-exercise-dot")).toBeNull();
+    fireEvent.click(screen.getByTestId("checkin-exercise-30"));
+    expect(screen.getByTestId("checkin-exercise-dot")).toHaveAttribute("data-value-colour", "#F3C24F");
+    fireEvent.change(screen.getByTestId("checkin-sleep-hours"), { target: { value: "5.5" } });
+    expect(screen.getByTestId("checkin-sleep-dot")).toHaveAttribute("data-value-colour", "#A99BD1");
   });
 });

@@ -26,15 +26,18 @@ export function JournalUnavailable({ standalone = false }: { standalone?: boolea
       className="flex flex-1 flex-col items-center justify-center px-6 py-16 text-center"
       data-testid="journal-unavailable"
     >
-      <p role="alert" className="text-lg font-medium text-text">
-        {t("errGeneric")}
-      </p>
+      {/* The page's heading too: when the journal can't load, this is all
+          the page has (a11y pass). */}
+      <div role="alert" data-alert="heading">
+        <h1 className="text-lg font-medium text-text">{t("errGeneric")}</h1>
+      </div>
       <button
         type="button"
         data-testid="try-again"
-        disabled={retrying}
-        onClick={() => startRetry(() => router.refresh())}
-        className="mt-6 inline-flex min-h-12 items-center rounded-full border border-border px-6 font-medium text-accent hover:bg-pill disabled:opacity-60"
+        // Focusable while it retries (disabling it dropped focus).
+        aria-disabled={retrying}
+        onClick={() => !retrying && startRetry(() => router.refresh())}
+        className="mt-6 inline-flex min-h-12 items-center rounded-full border border-border px-6 font-medium text-accent hover:bg-pill aria-disabled:opacity-60"
       >
         {ta("tryAgain")}
       </button>

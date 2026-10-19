@@ -43,6 +43,9 @@ describe("Me → AI", () => {
     fireEvent.click(screen.getByTestId("me-ai-on"));
     expect(setAiEnabled).toHaveBeenCalledWith(true);
     expect(await screen.findByTestId("me-ai-tone-warm")).toBeChecked();
+    // Named by the tone, described by its hint (not one run-together name).
+    expect(screen.getByTestId("me-ai-tone-warm")).toHaveAccessibleName(messages.ai.toneWarm);
+    expect(screen.getByTestId("me-ai-tone-warm")).toHaveAccessibleDescription(messages.ai.toneWarmHint);
     expect(screen.getByTestId("me-ai-focus-sleep")).toHaveAttribute("aria-pressed", "true");
   });
 

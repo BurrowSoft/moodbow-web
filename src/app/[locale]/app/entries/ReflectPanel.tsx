@@ -187,9 +187,12 @@ export function ReflectPanel({ entryId, initial, balance, country, onAnswer }: P
         {t("reflectButton")}
       </h2>
       {reflection && (
-        <div ref={resultBox} tabIndex={-1} data-testid="reflect-result" className="rounded-2xl focus:outline-none">
+        // Moodbow's voice (decision 150): its own colour and surface, never a
+        // mood colour and never the entry's mood. Focusable (-1): it takes
+        // focus from Reflect, which goes with it (one-shot, reviewer #51).
+        <div ref={resultBox} tabIndex={-1} data-testid="reflect-result" className="rounded-2xl border-l-4 border-voice bg-voice-surface p-4 focus:outline-none">
           {reflection.tier === "lite" && (
-            <span data-testid="reflect-lite" className="mb-2 inline-block rounded-full bg-pill px-3 py-0.5 text-xs font-medium text-accent">
+            <span data-testid="reflect-lite" className="mb-2 inline-block rounded-full border border-voice px-3 py-0.5 text-xs font-medium text-voice">
               {t("reflectLiteBadge")}
             </span>
           )}

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Dialog, dialogButton } from "@/components/Dialog";
+import { segment } from "@/lib/ui/journalLayout";
 import { drawCard } from "@/lib/share/drawCard";
 import { stripPngMetadata } from "@/lib/share/pngChunks";
 import { cardFileName, formatMonth, LAYOUT, MIN_CHECK_INS, monthBands, THEMES, type CardFormat, type CardTheme } from "@/lib/share/moodbow";
@@ -30,8 +31,13 @@ export function ShareMonth({ month, dateLocaleTag, label }: { month: string; dat
   const [encodeFailed, setEncodeFailed] = useState(false);
   const canvas = useRef<HTMLCanvasElement>(null);
 
+  // The loading line is filled a moment after the dialog opens: a live
+  // region that appears with its text often isn't announced.
+  const [sayLoading, setSayLoading] = useState(false);
   const start = () => {
     setOpen(true);
+    setSayLoading(false);
+    window.setTimeout(() => setSayLoading(true), 100);
     setColours(null);
     setFailed(false);
     // The page's current theme is the default: one chosen in Me →
@@ -115,8 +121,7 @@ export function ShareMonth({ month, dateLocaleTag, label }: { month: string; dat
     });
   };
 
-  const choice = (active: boolean) =>
-    `inline-flex min-h-11 items-center rounded-full px-4 text-sm font-medium ${active ? "bg-pill text-accent" : "text-muted hover:bg-pill"}`;
+  const choice = segment;
 
   return (
     <>
@@ -125,7 +130,12 @@ export function ShareMonth({ month, dateLocaleTag, label }: { month: string; dat
       </button>
       {open && (
         <Dialog title={t("shareTitle")} onCancel={close} testId="share-dialog">
-          <div className="w-full space-y-4 text-left" aria-busy={colours === null && !failed}>
+          <div className="w-full space-y-4 text-left">
+            {/* Always there while the dialog is open, filled while loading, so
+                it's announced (review of #46). */}
+            <p role="status" className="sr-only" data-testid="share-loading">
+              {sayLoading && colours === null && !failed ? t("shareLoading") : null}
+            </p>
             <h3 className="font-medium text-text" data-testid="share-type-moodbow">
               {t("shareMoodbow")}
             </h3>
@@ -149,23 +159,28 @@ export function ShareMonth({ month, dateLocaleTag, label }: { month: string; dat
                   data-testid="share-preview"
                   className={`mx-auto block rounded-xl border border-border ${format === "story" ? "h-80 w-[180px]" : "h-60 w-60"}`}
                 />
-                {/* What the image says, for screen readers (the count and the line). */}
+                {/* What the image says, for screen readers (the month, the count and the line). */}
                 <p id="share-preview-desc" className="sr-only">
-                  <span>{t("shareDaysJournaled", { n: colours!.length })}</span> <span>{line}</span>
+                  <span>{formatMonth(month, dateLocaleTag)}</span> <span>{t("shareDaysJournaled", { n: colours!.length })}</span> <span>{line}</span>
                 </p>
-                <div className="flex flex-wrap gap-2" role="group" aria-label={t("shareTitle")}>
+                {/* Two choices, two named groups (decision 143). */}
+                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2" role="group" aria-label={t("shareFormat")}>
                   <button type="button" data-testid="share-format-story" aria-pressed={format === "story"} onClick={() => setFormat("story")} className={choice(format === "story")}>
                     {t("shareStory")}
                   </button>
                   <button type="button" data-testid="share-format-square" aria-pressed={format === "square"} onClick={() => setFormat("square")} className={choice(format === "square")}>
                     {t("shareSquare")}
                   </button>
+                </div>
+                <div className="flex flex-wrap gap-2" role="group" aria-label={t("shareTheme")}>
                   <button type="button" data-testid="share-theme-light" aria-pressed={theme === "light"} onClick={() => setTheme("light")} className={choice(theme === "light")}>
                     {t("shareThemeLight")}
                   </button>
                   <button type="button" data-testid="share-theme-dark" aria-pressed={theme === "dark"} onClick={() => setTheme("dark")} className={choice(theme === "dark")}>
                     {t("shareThemeDark")}
                   </button>
+                </div>
                 </div>
                 <label htmlFor="share-line" className="block text-sm font-medium text-text">
                   {t("shareAddLine")}
@@ -176,8 +191,17 @@ export function ShareMonth({ month, dateLocaleTag, label }: { month: string; dat
                   value={line}
                   maxLength={maxChars}
                   onChange={(e) => setLine(e.target.value.slice(0, maxChars))}
+                  aria-describedby="share-line-count"
                   className="block w-full rounded-2xl border border-border bg-bg px-4 py-3 text-text"
                 />
+                {/* Shown always; announced only at 10 left and at 0, not on
+                    every key (decision 143). */}
+                <p id="share-line-count" data-testid="share-line-count" className="text-sm text-muted">
+                  {t("shareLineCount", { count: maxChars - line.length })}
+                </p>
+                <p role="status" className="sr-only" data-testid="share-line-count-announce">
+                  {maxChars - line.length === 10 || maxChars - line.length === 0 ? t("shareLineCount", { count: maxChars - line.length }) : null}
+                </p>
                 <p className="text-sm text-muted">{t("sharePrivacyNote")}</p>
                 {encodeFailed && (
                   <p role="alert" data-testid="share-encode-failed" className="font-medium text-accent">

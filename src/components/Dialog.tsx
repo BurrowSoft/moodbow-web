@@ -3,7 +3,9 @@
 import { useEffect, useId, useRef } from "react";
 import { createPortal } from "react-dom";
 
-// A small modal dialog: a title, a body and a row of actions. Focus moves
+// A small modal dialog: a title, a body and a row of actions. Client-only:
+// it renders into document.body (a portal), so it must never be open on
+// the server's first render (every caller opens it on a user action). Focus moves
 // into it when it opens (to the first action, or the last one: the safe
 // choice, never a destructive one), stays inside it (Tab wraps) and returns
 // to where it was when it closes; Escape is the same as the cancel action.

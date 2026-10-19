@@ -9,6 +9,19 @@ export type Tone = (typeof TONES)[number];
 export const FOCUS_AREAS = ["sleep", "stress", "work", "study", "relationships", "family", "health", "self_esteem"] as const;
 export type FocusArea = (typeof FOCUS_AREAS)[number];
 
+// Their labels (messages "ai"): the tone with its hint, and each focus area.
+export const TONE_KEYS = { warm: ["toneWarm", "toneWarmHint"], direct: ["toneDirect", "toneDirectHint"], brief: ["toneBrief", "toneBriefHint"] } as const;
+export const FOCUS_KEYS = {
+  sleep: "focusSleep",
+  stress: "focusStress",
+  work: "focusWork",
+  study: "focusStudy",
+  relationships: "focusRelationships",
+  family: "focusFamily",
+  health: "focusHealth",
+  self_esteem: "focusSelfEsteem",
+} as const satisfies Record<FocusArea, string>;
+
 export const isTone = (v: unknown): v is Tone => typeof v === "string" && (TONES as readonly string[]).includes(v);
 export const isFocusArea = (v: unknown): v is FocusArea => typeof v === "string" && (FOCUS_AREAS as readonly string[]).includes(v);
 
@@ -18,6 +31,13 @@ export const isFocusArea = (v: unknown): v is FocusArea => typeof v === "string"
 // no Reflect, like the app's AI_ENABLED build flag.
 export function aiShown(me: Pick<Me, "ai_available">): boolean {
   return me.ai_available === true && pageGate("ai-live") !== "hidden";
+}
+
+// The optional AI box on Consent: whenever this build shows AI, like the
+// app's AI flag. A signed-out visitor can't read the global switch, and a
+// consent given while it's off just waits for it.
+export function askAiConsent(): boolean {
+  return pageGate("ai-live") !== "hidden";
 }
 
 // The Reflect button: AI shown, a current AI consent, and AI on in settings
