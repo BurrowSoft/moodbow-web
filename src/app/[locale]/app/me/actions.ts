@@ -3,7 +3,7 @@
 import { cookies } from "next/headers";
 import { getLocale } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
-import { DELETE_WORD } from "@/lib/journal/account";
+import { DELETE_WORD, localDay } from "@/lib/journal/account";
 import { WIPE_COOKIE, WIPE_COOKIE_OPTIONS } from "@/lib/supabase/proxy";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -30,7 +30,11 @@ export async function exportMyData(): Promise<ExportResult> {
   const exportedAt = String((data as { exported_at?: unknown }).exported_at ?? "");
   // No indent: the whole journal travels in this one response (Vercel caps
   // it at 4.5 MB), so every byte counts. A streamed export is a follow-up.
-  return { status: "ok", json: JSON.stringify(data), date: /^\d{4}-\d{2}-\d{2}/.test(exportedAt) ? exportedAt.slice(0, 10) : "" };
+  // The file names carry the export day in the person's own time zone (the
+  // profile's; decision 107: "yesterday's date" in the morning looks like a
+  // bug). The text's "Exported: … UTC" line stays UTC.
+  const zone = (data as { profile?: { time_zone?: unknown } }).profile?.time_zone;
+  return { status: "ok", json: JSON.stringify(data), date: localDay(exportedAt, typeof zone === "string" ? zone : "UTC") };
 }
 
 export type DeleteAccountState = { status: "idle" } | { status: "error"; error: "confirm" | "generic" };
