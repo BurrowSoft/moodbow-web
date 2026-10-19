@@ -98,6 +98,11 @@ describe("requestPasswordReset", () => {
     configured = false;
     expect(await requestPasswordReset(idle, form({ email: "a@b.co" }))).toEqual({ status: "sent", email: "a@b.co" });
   });
+
+  it("Auth unreachable (down, or past the 10 s deadline): the generic error, never 'sent'", async () => {
+    auth.resetPasswordForEmail.mockResolvedValue({ error: { name: "AuthRetryableFetchError", status: 0 } });
+    expect(await requestPasswordReset(idle, form({ email: "a@b.co" }))).toEqual({ status: "error", error: "generic", email: "a@b.co" });
+  });
 });
 
 describe("signOut (Me)", () => {
