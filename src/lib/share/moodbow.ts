@@ -8,7 +8,7 @@ export type CardTheme = "light" | "dark";
 export const MIN_CHECK_INS = 5;
 
 // Mood 1 → 5, the same colours as the check-in picker, in both themes.
-export const MOOD_HEX = ["#9B84D6", "#B9A3E3", "#E3C0D0", "#F2A07B", "#E27D9A"] as const;
+export const MOOD_HEX = ["#7F8CB8", "#A99BD1", "#E6C7D3", "#F4A77A", "#F3C24F"] as const;
 
 export const THEMES: Record<CardTheme, { background: string; text: string; muted: string; logo: string }> = {
   light: { background: "#FBF6F1", text: "#2B2438", muted: "#6B6278", logo: "/brand/moodbow-logo-horizontal-light.svg" },

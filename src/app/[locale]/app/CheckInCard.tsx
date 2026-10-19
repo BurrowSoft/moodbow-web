@@ -2,7 +2,7 @@
 
 import { startTransition, useActionState, useCallback, useEffect, useId, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { EXERCISE_MINUTES, MOOD_COLOURS, MOODS, SLEEP_HOURS, SLEEP_QUALITIES, STRESS_LEVELS, type CheckIn, type SleepQuality } from "@/lib/journal/checkIn";
+import { EXERCISE_MINUTES, MOOD_COLOURS, MOOD_DOT_OUTLINE, MOODS, SLEEP_HOURS, SLEEP_QUALITIES, STRESS_LEVELS, type CheckIn, type SleepQuality } from "@/lib/journal/checkIn";
 import { dateLine } from "@/lib/journal/today";
 import { localKey } from "@/lib/localData";
 import { JOURNAL_CARD, MOOD_FACE, MOOD_ROW, PRIMARY_SAVE } from "@/lib/ui/journalLayout";
@@ -385,7 +385,7 @@ function Card({ initial, uid, date: cardDate, notify, announce, autoFocus }: Pro
                 onClick={() => set({ mood })}
                 className={`${MOOD_FACE} ${fields.mood === mood ? "bg-pill text-accent" : "text-muted hover:bg-pill"}`}
               >
-                <span className={`h-9 w-9 shrink-0 rounded-full ${MOOD_COLOURS[mood - 1]} ${fields.mood === mood ? "ring-2 ring-accent ring-offset-2" : ""}`} aria-hidden="true" />
+                <span className={`h-9 w-9 shrink-0 rounded-full ${MOOD_COLOURS[mood - 1]} ${MOOD_DOT_OUTLINE} ${fields.mood === mood ? "ring-2 ring-accent ring-offset-2" : ""}`} aria-hidden="true" />
                 <span className="sr-only @min-[22rem]:not-sr-only" data-testid={`checkin-mood-label-${mood}`}>
                   {t(`mood${mood}` as "mood1")}
                 </span>
