@@ -174,6 +174,13 @@ describe("deleteEntry", () => {
     expect(rpc).toHaveBeenCalledWith("delete_entry", { p_id: ID });
   });
 
+  it("goes back where the entry was opened from; anything not allow-listed is Today (decision 152)", async () => {
+    rpc.mockResolvedValue({ data: null, error: null });
+    expect(((await go({ id: ID, from: "/app/timeline/2026-10-01" })) as Redirect).args.href).toBe("/app/timeline/2026-10-01");
+    expect(((await go({ id: ID, from: "/app/timeline" })) as Redirect).args.href).toBe("/app/timeline");
+    expect(((await go({ id: ID, from: "https://evil.example" })) as Redirect).args.href).toBe("/app");
+  });
+
   it("already deleted elsewhere (not_found): the same", async () => {
     rpc.mockResolvedValue({ data: null, error: { message: "not_found" } });
     expect(((await go({ id: ID })) as Redirect).args.href).toBe("/app");

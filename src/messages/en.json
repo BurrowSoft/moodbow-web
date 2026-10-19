@@ -250,7 +250,9 @@
     "momentBadge": "Moment",
     "entryKeepEditing": "Keep editing",
     "entryNewTitle": "New entry",
-    "entryEditTitle": "Edit entry"
+    "entryEditTitle": "Edit entry",
+    "entryAddMore": "Add to this entry…",
+    "entryMoreActions": "More options"
   },
   "notFound": {
     "title": "Page not found",
@@ -367,6 +369,7 @@
   },
   "ai": {
     "meAi": "AI",
+    "reflectAnswer": "Write your answer",
     "meAiOn": "AI reflections and reports",
     "consentAiTitle": "AI reflections and reports (optional)",
     "consentAiBody": "To write reflections and reports, Moodbow sends your entries and logs to our AI provider, Anthropic (USA), only when needed. They aren't used to train AI models. You can turn this off any time in Me → AI.",

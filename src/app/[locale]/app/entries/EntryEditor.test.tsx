@@ -191,7 +191,7 @@ describe("EntryEditor: editing", () => {
     expect(dialog).toHaveAccessibleDescription(m.entryDeleteBody);
     fireEvent.click(screen.getByTestId("entry-delete-confirm"));
     await waitFor(() => expect(deleteEntry).toHaveBeenCalled());
-    expect(Object.fromEntries((deleteEntry.mock.calls[0][1] as FormData).entries())).toEqual({ id: ENTRY.id });
+    expect(Object.fromEntries((deleteEntry.mock.calls[0][1] as FormData).entries())).toEqual({ id: ENTRY.id, from: "/app" });
     expect(window.localStorage.getItem(EDIT_KEY)).toBeNull();
   });
 

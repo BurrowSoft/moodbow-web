@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Dialog, dialogButton } from "@/components/Dialog";
 import { SafetyCard } from "@/components/SafetyCard";
 import { useRouter } from "@/i18n/navigation";
+import { withQuestion } from "@/lib/journal/answer";
 import { MAX_ENTRY_CHARS, sameEntry, type Entry } from "@/lib/journal/entry";
 import { localKey } from "@/lib/localData";
 import { flagsCrisis } from "@/lib/safety/crisis";
@@ -52,11 +53,30 @@ function removeDraft(key: string) {
 
 const isRedirect = (e: unknown) => typeof (e as { digest?: unknown })?.digest === "string" && (e as { digest: string }).digest.startsWith("NEXT_REDIRECT");
 
+// Whether this browser holds an unsaved draft of the entry: the entry view
+// opens the editor straight away, so the draft isn't hidden (decision 151).
+export const hasDraft = (uid: string, entryId: string) => readDraft(localKey("draft-entry", uid, entryId))?.id === entryId;
+
 // startDate: the day a new entry starts on (a Timeline day's "Add an entry").
 // country: the profile's, for the safety card's numbers (M8).
 // backTo: where leaving the editor goes: the page it was opened from
 // (decision 152), else Today.
-type Props = { initial: Entry | null; newId: string; uid: string; today: string; startDate?: string; country?: string | null; backTo?: string };
+// From the entry view (decision 151): start puts the caret where the text was
+// clicked, or at the end; with a question ("Write your answer") it's quoted
+// after the entry first. onLeave replaces going to backTo: Save and Cancel
+// return to the view, with the saved entry when there's a new version.
+export type EditorStart = { at: number | "end"; question?: string };
+type Props = {
+  initial: Entry | null;
+  newId: string;
+  uid: string;
+  today: string;
+  startDate?: string;
+  country?: string | null;
+  backTo?: string;
+  start?: EditorStart;
+  onLeave?: (saved: Entry | null) => void;
+};
 
 const noSubscribe = () => () => {};
 
@@ -68,7 +88,7 @@ export function EntryEditor(props: Props) {
   return <Editor key={inBrowser ? "browser" : "server"} {...props} restore={inBrowser} />;
 }
 
-function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app", restore }: Props & { restore: boolean }) {
+function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app", start, onLeave, restore }: Props & { restore: boolean }) {
   const t = useTranslations("entry");
   const tt = useTranslations("today");
   const router = useRouter();
@@ -82,7 +102,10 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
   });
   const [id, setId] = useState(draft?.id ?? initial?.id ?? newId);
   const [base, setBase] = useState<string | null>(draft ? draft.base : (initial?.updated_at ?? null));
-  const [fields, setFields] = useState<Fields>(draft ? { body: draft.body, date: draft.date, isMoment: draft.isMoment } : saved);
+  const [fields, setFields] = useState<Fields>(() => {
+    const f = draft ? { body: draft.body, date: draft.date, isMoment: draft.isMoment } : saved;
+    return start?.question ? { ...f, body: withQuestion(f.body, start.question) } : f;
+  });
   const [dialog, setDialog] = useState<null | "leave" | "delete" | { conflict: Entry | null }>(null);
   // The safety card after a save the keyword check flagged (M8, decision
   // 124): the entry is already saved; we stay on it, and closing the card
@@ -164,7 +187,22 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
     return () => window.removeEventListener("beforeunload", onUnload);
   }, [draftKey, restore]);
 
-  const leave = useCallback(() => router.push(backTo), [router, backTo]);
+  // Opened from the entry view: the caret goes where the text was clicked
+  // (a draft may be shorter: then its end), or at the end, ready to write.
+  const startAt = start && (start.question || start.at === "end" ? "end" : start.at);
+  useEffect(() => {
+    if (!restore || startAt === undefined) return;
+    const el = document.getElementById("entry-text") as HTMLTextAreaElement | null;
+    if (!el) return;
+    const at = startAt === "end" ? el.value.length : Math.min(startAt, el.value.length);
+    el.focus();
+    el.setSelectionRange(at, at);
+  }, [restore, startAt]);
+
+  // The last version saved from here: the view shows it even when leaving
+  // later by Cancel (after a save the safety card kept us on the entry).
+  const lastSaved = useRef<Entry | null>(null);
+  const leave = useCallback(() => (onLeave ? onLeave(lastSaved.current) : router.push(backTo)), [router, backTo, onLeave]);
   const closeSafety = useCallback(() => {
     setSafety("closed");
     // After the card's own focus restore (on its unmount): back into the entry.
@@ -183,6 +221,7 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
     if (next.status === "saved") {
       finished.current = true;
       removeDraft(draftKey);
+      lastSaved.current = next.entry;
       setSaved(fromEntry(next.entry));
       setFields(fromEntry(next.entry));
       if (flagsCrisis(next.entry.body, CRISIS_KEYWORDS)) {
@@ -383,6 +422,7 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
               setDialog(null);
               const form = new FormData();
               form.set("id", id);
+              form.set("from", backTo);
               startTransition(() => deleteAction(form));
             }}
           >
@@ -404,6 +444,7 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
               setDialog(null);
               removeDraft(draftKey);
               setBase(conflict.updated_at);
+              lastSaved.current = conflict;
               setSaved(fromEntry(conflict));
               setFields(fromEntry(conflict));
             }}
@@ -438,7 +479,8 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
               finished.current = true;
               setDialog(null);
               removeDraft(draftKey);
-              leave();
+              // There's no entry left to view: back where it was opened from.
+              router.push(backTo);
             }}
           >
             {t("entryDeletedDiscard")}

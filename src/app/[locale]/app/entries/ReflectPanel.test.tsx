@@ -52,7 +52,8 @@ describe("ReflectPanel", () => {
     expect(body.textContent).toBe("A long day.\n\nWhat helped? <b>x</b>");
     expect(body.querySelector("b")).toBeNull();
     expect(body).toHaveClass("whitespace-pre-line");
-    expect(button).toHaveAttribute("aria-disabled", "false");
+    // One-shot (UX): no Reflect once there's a reflection.
+    expect(screen.queryByTestId("reflect-button")).toBeNull();
     expect(reflectOnEntry).toHaveBeenCalledWith(ENTRY, expect.stringMatching(/^[0-9a-f-]{36}$/));
   });
 
@@ -146,20 +147,21 @@ describe("ReflectPanel", () => {
     expect(screen.queryByTestId("reflect-panel")).toBeNull();
   });
 
-  it("an existing reflection; reflecting again replaces it; Lite gets its badge; creditsOut once, when they run out", async () => {
-    renderIt(reflection({ body: "Old one." }), 1);
+  it("one-shot: no Reflect while a reflection exists (UX); Lite gets its badge; creditsOut once, when they run out", async () => {
+    renderIt(reflection({ body: "Old one." }));
     expect(screen.getByTestId("reflect-body")).toHaveTextContent("Old one.");
     expect(screen.queryByTestId("reflect-lite")).toBeNull();
+    expect(screen.queryByTestId("reflect-button")).toBeNull();
+    expect(screen.getByTestId("reflect-delete")).toBeInTheDocument();
+    cleanup();
+    renderIt(null, 1);
     reflectOnEntry.mockResolvedValueOnce(ok({ body: "New one.", tier: "lite" }, 0));
     fireEvent.click(screen.getByTestId("reflect-button"));
     await settle();
     expect(screen.getByTestId("reflect-body")).toHaveTextContent("New one.");
     expect(screen.getByTestId("reflect-lite")).toHaveTextContent(m.reflectLiteBadge);
     expect(screen.getByTestId("reflect-credits-out")).toHaveTextContent(m.creditsOut);
-    reflectOnEntry.mockResolvedValueOnce(ok({ body: "Third.", tier: "lite" }, 0));
-    fireEvent.click(screen.getByTestId("reflect-button"));
-    await settle();
-    expect(screen.queryByTestId("reflect-credits-out")).toBeNull();
+    expect(screen.queryByTestId("reflect-button")).toBeNull();
   });
 
   it("a reflection that names the help button ('Want to talk to someone?', decision 153) shows it, opening the safety card (decision 124)", () => {
@@ -219,6 +221,58 @@ describe("ReflectPanel: what screen readers hear (a11y pass)", () => {
     await act(async () => vi.runAllTimersAsync());
     expect(screen.getByTestId("reflect-status")).toHaveTextContent(m.reflectDeleted);
     expect(screen.getByTestId("reflect-button")).toHaveFocus();
+  });
+});
+
+describe("ReflectPanel: Write your answer (decision 151)", () => {
+  it("only where the page offers it, with the reflection's closing question", () => {
+    renderIt(reflection());
+    expect(screen.queryByTestId("reflect-answer")).toBeNull();
+    cleanup();
+    const onAnswer = vi.fn();
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <ReflectPanel entryId={ENTRY} initial={reflection()} balance={600} onAnswer={onAnswer} />
+      </NextIntlClientProvider>,
+    );
+    fireEvent.click(screen.getByRole("button", { name: m.reflectAnswer }));
+    expect(onAnswer).toHaveBeenCalledWith("What helped?");
+  });
+});
+
+describe("ReflectPanel: a crisis reply (r1)", () => {
+  it("names Get help: that button is its only action, no Write your answer", () => {
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <ReflectPanel entryId={ENTRY} initial={reflection({ body: `That sounds really heavy. ${messages.me.meGetHelpNow}` })} balance={600} onAnswer={vi.fn()} />
+      </NextIntlClientProvider>,
+    );
+    expect(screen.getByTestId("reflect-get-help")).toBeInTheDocument();
+    expect(screen.queryByTestId("reflect-answer")).toBeNull();
+  });
+});
+
+describe("ReflectPanel: focus with one-shot Reflect (reviewer #51)", () => {
+  it("Reflect goes away with the reflection: focus moves to the reflection, not the page", async () => {
+    reflectOnEntry.mockResolvedValueOnce(ok());
+    renderIt();
+    const button = screen.getByTestId("reflect-button");
+    button.focus();
+    fireEvent.click(button);
+    await settle();
+    expect(screen.getByTestId("reflect-result")).toHaveFocus();
+  });
+
+  it("focus elsewhere while it ran: it stays there", async () => {
+    let answer!: (v: unknown) => void;
+    reflectOnEntry.mockReturnValueOnce(new Promise((r) => (answer = r)));
+    const view = renderIt();
+    fireEvent.click(screen.getByTestId("reflect-button"));
+    const other = document.createElement("button");
+    view.container.appendChild(other);
+    other.focus();
+    await act(async () => answer(ok()));
+    expect(other).toHaveFocus();
   });
 });
 

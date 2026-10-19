@@ -7,6 +7,7 @@ import { Link } from "@/i18n/navigation";
 import { MOOD_COLOURS, MOOD_DOT_OUTLINE } from "@/lib/journal/checkIn";
 import { withOrigin } from "@/lib/journal/origin";
 import { dayLabel, groupByMonth, monthLabel, type TimelineDay } from "@/lib/journal/timeline";
+import { checkInChips } from "../checkInChips";
 import { loadTimeline } from "./actions";
 
 // The Timeline (M5): days newest first under month headers. Each day: its
@@ -81,19 +82,7 @@ export function TimelineList({ initial, initialDone, momentsOnly, dateLocaleTag 
           <ul className="mt-3 space-y-3">
             {monthDays.map((day) => {
               const c = day.check_in;
-              const chips = c
-                ? [
-                    c.sleep_hours != null ? tt("sleepHours", { hours: Number(c.sleep_hours) }) : null,
-                    c.exercise_minutes != null
-                      ? c.exercise_minutes === 0
-                        ? tt("exerciseNone")
-                        : c.exercise_minutes === 90
-                          ? tt("exercise90")
-                          : tt("exerciseMinutes", { minutes: c.exercise_minutes })
-                      : null,
-                    c.stress != null ? tt("stressChip", { level: c.stress }) : null,
-                  ].filter((x): x is string => x !== null)
-                : [];
+              const chips = c ? checkInChips(c, tt) : [];
               return (
                 <li key={day.local_date} className="rounded-2xl border border-border bg-surface p-4">
                   <Link

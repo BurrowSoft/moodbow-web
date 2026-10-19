@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Dialog, dialogButton } from "@/components/Dialog";
 import { GetHelpNow } from "@/components/SafetyCard";
+import { lastQuestion } from "@/lib/journal/answer";
 import getHelpLabel from "../../../../../content/contracts/get-help-label.json";
 import { IN_PROGRESS_LIMIT_MS, IN_PROGRESS_RETRY_MS, REFLECT_CLIENT_DEADLINE_MS, type Reflection, type ReflectErrorKey, type ReflectResult } from "@/lib/journal/reflect";
 import { deleteReflection, reflectOnEntry } from "./reflectActions";
@@ -46,8 +47,11 @@ const isRedirect = (e: unknown) => typeof (e as { digest?: unknown })?.digest ==
 // reflecting again replaces it. Each tap has its own client_key, resent
 // unchanged on every retry of that tap; the button is disabled while a tap
 // is in flight. The body is shown as plain text with its line breaks
-// (decision 120), never as HTML.
-export function ReflectPanel({ entryId, initial, balance, country }: { entryId: string; initial: Reflection | null; balance: number; country?: string | null }) {
+// (decision 120), never as HTML. One-shot: no Reflect while a reflection
+// exists (UX); Delete reflection stays, and brings Reflect back. onAnswer: "Write your answer" under the
+// reflection, with its closing question (the entry view, decision 151).
+type Props = { entryId: string; initial: Reflection | null; balance: number; country?: string | null; onAnswer?: (question: string) => void };
+export function ReflectPanel({ entryId, initial, balance, country, onAnswer }: Props) {
   const t = useTranslations("ai");
   const ta = useTranslations("app");
   const tt = useTranslations("today");
@@ -114,6 +118,9 @@ export function ReflectPanel({ entryId, initial, balance, country }: { entryId: 
         setPhase({ kind: "error", message: result.message });
         return;
       }
+      // Reflect goes away with a reflection (one-shot): if it had focus, the
+      // reflection takes it (reviewer #51); elsewhere, focus stays put.
+      focusResult.current = document.activeElement === reflectButton.current;
       setReflection(result.reflection);
       setSaid("reflectReady");
       if (result.balance !== null) {
@@ -153,10 +160,23 @@ export function ReflectPanel({ entryId, initial, balance, country }: { entryId: 
       setReflection(null);
       setCreditsOut(false);
       setSaid("reflectDeleted");
-      // Delete reflection is gone with it: focus Reflect instead.
-      window.setTimeout(() => reflectButton.current?.focus(), 0);
+      // Delete reflection is gone with it: focus Reflect instead, once it's
+      // back (it only shows without a reflection; the effect below).
+      focusReflect.current = true;
     } else setDeleteFailed(true);
   };
+  const focusReflect = useRef(false);
+  const focusResult = useRef(false);
+  const resultBox = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (reflection && focusResult.current) {
+      focusResult.current = false;
+      resultBox.current?.focus();
+    } else if (!reflection && focusReflect.current) {
+      focusReflect.current = false;
+      reflectButton.current?.focus();
+    }
+  }, [reflection]);
 
   if (hidden) return null;
   const loading = phase.kind === "loading";
@@ -168,8 +188,9 @@ export function ReflectPanel({ entryId, initial, balance, country }: { entryId: 
       </h2>
       {reflection && (
         // Moodbow's voice (decision 150): its own colour and surface, never a
-        // mood colour and never the entry's mood.
-        <div data-testid="reflect-result" className="rounded-2xl border-l-4 border-voice bg-voice-surface p-4">
+        // mood colour and never the entry's mood. Focusable (-1): it takes
+        // focus from Reflect, which goes with it (one-shot, reviewer #51).
+        <div ref={resultBox} tabIndex={-1} data-testid="reflect-result" className="rounded-2xl border-l-4 border-voice bg-voice-surface p-4 focus:outline-none">
           {reflection.tier === "lite" && (
             <span data-testid="reflect-lite" className="mb-2 inline-block rounded-full border border-voice px-3 py-0.5 text-xs font-medium text-voice">
               {t("reflectLiteBadge")}
@@ -178,6 +199,18 @@ export function ReflectPanel({ entryId, initial, balance, country }: { entryId: 
           <p data-testid="reflect-body" className="whitespace-pre-line text-text">
             {reflection.body}
           </p>
+          {/* A crisis reply (it names Get help): its only action is that button
+              (r1, UX), never "Write your answer". */}
+          {onAnswer && !namesGetHelp(reflection.body) && (
+            <button
+              type="button"
+              data-testid="reflect-answer"
+              onClick={() => onAnswer(lastQuestion(reflection.body))}
+              className={`mt-4 ${dialogButton()}`}
+            >
+              {t("reflectAnswer")}
+            </button>
+          )}
           {/* The crisis rule names the Get help button by its label
               (get-help-label.json = meGetHelpNow): then the button itself,
               opening the safety card (decision 124). */}
@@ -208,18 +241,23 @@ export function ReflectPanel({ entryId, initial, balance, country }: { entryId: 
         </div>
       )}
 
-      <div className={reflection ? "mt-6" : ""}>
-        <button
-          type="button"
-          ref={reflectButton}
-          data-testid="reflect-button"
-          onClick={tap}
-          // Focusable while a tap runs (disabling it dropped focus).
-          aria-disabled={loading || deleting}
-          className={`${dialogButton(!reflection)} aria-disabled:opacity-50`}
-        >
-          {t("reflectButton")}
-        </button>
+      <div>
+        {/* One reflection per entry in 1.0 (m9, UX): no Reflect while one
+            exists, on any entry; deleting it brings Reflect back (and focus,
+            above). */}
+        {!reflection && (
+          <button
+            type="button"
+            ref={reflectButton}
+            data-testid="reflect-button"
+            onClick={tap}
+            // Focusable while a tap runs (disabling it dropped focus).
+            aria-disabled={loading || deleting}
+            className={`${dialogButton(true)} aria-disabled:opacity-50`}
+          >
+            {t("reflectButton")}
+          </button>
+        )}
         <p role="status" data-testid="reflect-status" className="mt-3 text-sm text-muted">
           {loading ? t("reflectLoading") : said ? t(said) : null}
         </p>
