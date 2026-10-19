@@ -56,6 +56,8 @@ export function WelcomeSlides() {
     <div className="flex flex-col items-center text-center">
       <div className="min-h-48" data-testid={`welcome-slide-${slide + 1}`}>
         <h1 id="welcome-title" tabIndex={-1} className="outline-none text-balance text-[28px] font-medium leading-tight tracking-tight sm:text-4xl">{t(SLIDES[slide].title)}</h1>
+        {/* The dots below are decoration; this says where you are. */}
+        <p className="sr-only">{t("welcomeStep", { n: slide + 1, total: SLIDES.length })}</p>
         <p className="mt-4 text-base leading-relaxed text-muted sm:text-[17px]">{t(SLIDES[slide].body)}</p>
       </div>
       <div className="mt-6 flex gap-2" aria-hidden="true">

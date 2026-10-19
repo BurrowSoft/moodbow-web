@@ -24,7 +24,8 @@
     "accountDeletion": "Delete your account",
     "privacy": "Privacy",
     "terms": "Terms",
-    "draftBanner": "Draft, not in effect. This page is only visible on test builds."
+    "draftBanner": "Draft, not in effect. This page is only visible on test builds.",
+    "opensInNewTab": "(opens in a new tab)"
   },
   "home": {
     "comingSoon": "Coming soon",
@@ -163,7 +164,8 @@
     "setupReminderTime": "Time",
     "setupReminderOff": "No reminder",
     "setupDone": "Start my journal",
-    "back": "Back"
+    "back": "Back",
+    "welcomeStep": "Step {n} of {total}"
   },
   "app": {
     "appName": "Moodbow",
@@ -303,7 +305,9 @@
     "timelineMomentsEmpty": "No moments yet. Tap ★ on an entry to keep it here.",
     "dayNoCheckin": "No check-in this day",
     "dayAddCheckin": "Add a check-in",
-    "dayAddEntry": "Add an entry"
+    "dayAddEntry": "Add an entry",
+    "timelineLoadMore": "Show more days",
+    "timelineLoadedMore": "{count, plural, one {# more day loaded} other {# more days loaded}}"
   },
   "insights": {
     "insightsTitle": "Insights",
@@ -316,8 +320,8 @@
     "chartExercise": "Exercise",
     "chartAverage": "Average {value}",
     "chartAverageOfFive": "Average {value} / 5",
-    "chartChangeUp": "↑ {value} vs the previous {range, select, week {week} month {month} other {3 months}}",
-    "chartChangeDown": "↓ {value} vs the previous {range, select, week {week} month {month} other {3 months}}",
+    "chartChangeUp": "Up {value} vs the previous {range, select, week {week} month {month} other {3 months}}",
+    "chartChangeDown": "Down {value} vs the previous {range, select, week {week} month {month} other {3 months}}",
     "chartNoChange": "Same as the previous {range, select, week {week} month {month} other {3 months}}",
     "chartNotEnough": "A few more check-ins and your chart will appear."
   },
