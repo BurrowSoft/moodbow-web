@@ -403,7 +403,8 @@ describe("EntryEditor: the safety card after a flagged save (M8, decisions 124/1
     expect(await screen.findByTestId("safety-card")).toBeInTheDocument();
     expect(saveEntry).toHaveBeenCalledTimes(1);
     expect(push).not.toHaveBeenCalled();
-    expect(screen.getByRole("heading", { name: messages.safety.safetyTitle })).toHaveFocus();
+    // Focus moves in the dialog's effect: wait for it (flaky under load).
+    await waitFor(() => expect(screen.getByRole("heading", { name: messages.safety.safetyTitle })).toHaveFocus());
     fireEvent.click(screen.getByTestId("safety-close"));
     expect(screen.queryByTestId("safety-card")).toBeNull();
     await waitFor(() => expect(screen.getByTestId("entry-text")).toHaveFocus());
