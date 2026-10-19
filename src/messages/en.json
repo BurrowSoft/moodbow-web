@@ -298,5 +298,21 @@
     "chartChangeDown": "↓ {value} vs the previous {range, select, week {week} month {month} other {3 months}}",
     "chartNoChange": "Same as the previous {range, select, week {week} month {month} other {3 months}}",
     "chartNotEnough": "A few more check-ins and your chart will appear."
+  },
+  "share": {
+    "shareButton": "Share",
+    "shareTitle": "Share a card",
+    "shareMoodbow": "My month's moodbow",
+    "shareStory": "Story",
+    "shareSquare": "Square",
+    "shareThemeLight": "Light",
+    "shareThemeDark": "Dark",
+    "shareAddLine": "Add a line (optional)",
+    "sharePrivacyNote": "Only what you see here is shared.",
+    "shareSend": "Share",
+    "shareDownload": "Download image",
+    "shareDaysJournaled": "{n} days journaled",
+    "shareNotEnough": "Check in on at least 5 days this month to make your moodbow.",
+    "shareThisMonth": "Share this month"
   }
 }

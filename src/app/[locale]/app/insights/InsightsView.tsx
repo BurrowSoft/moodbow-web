@@ -19,7 +19,8 @@ const CHARTS: Record<Metric, { title: "chartMood" | "chartSleep" | "chartStress"
 // chart with its average and the change vs the range before. The change is
 // neutral on purpose (decision 98): "stress ↑" isn't good, "mood ↓" isn't a
 // failure, so it gets the same muted ink either way.
-export function InsightsView({ rows, today, range }: { rows: InsightRow[]; today: string; range: Range }) {
+// share: the "My month's moodbow" button, where share cards are on (M10).
+export function InsightsView({ rows, today, range, share }: { rows: InsightRow[]; today: string; range: Range; share?: React.ReactNode }) {
   const t = useTranslations("insights");
   const tt = useTranslations("today");
   // Always one decimal for mood, stress and sleep ("4.0", "↑ 1.0": the
@@ -38,7 +39,10 @@ export function InsightsView({ rows, today, range }: { rows: InsightRow[]; today
 
   return (
     <section>
-      <h1 className="text-3xl font-medium tracking-tight">{t("insightsTitle")}</h1>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <h1 className="text-3xl font-medium tracking-tight">{t("insightsTitle")}</h1>
+        {share}
+      </div>
       <nav aria-label={t("insightsTitle")} className="mt-4 flex flex-wrap gap-2">
         {RANGE_TABS.map(({ range: r, key }) => (
           <Link
