@@ -63,11 +63,15 @@
     "successBody": "Open Moodbow to continue.",
     "errorTitle": "This link has expired or was already used.",
     "errorBody": "Open Moodbow and ask for a new one.",
-    "continueWeb": "Continue on the web",
     "emailChangedTitle": "Your email address was updated.",
     "emailChangedBody": "Use the new one next time you sign in.",
     "emailChangePendingTitle": "Almost done.",
-    "emailChangePendingBody": "Open the link we sent to your other email address to finish changing it."
+    "emailChangePendingBody": "Open the link we sent to your other email address to finish changing it.",
+    "emailConfirmedRedirect": "Taking you to your journal in {seconds, plural, one {# second} other {# seconds}}…",
+    "emailConfirmedRedirectSignIn": "{seconds, plural, one {Taking you to the sign-in page in 1 second…} other {Taking you to the sign-in page in {seconds} seconds…}}",
+    "emailConfirmedContinue": "Continue",
+    "emailConfirmedStay": "Stay on this page",
+    "emailConfirmedWebBody": "You're all set."
   },
   "confirmLink": {
     "signupTitle": "Confirm your email",

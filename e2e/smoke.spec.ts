@@ -129,7 +129,9 @@ test.describe("email confirmed", () => {
     await page.goto("/email-confirmed");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Email confirmed.");
     await expect(page.getByText("Open Moodbow to continue.")).toBeVisible();
-    await expect(page.getByRole("link", { name: "Continue on the web" })).toHaveCount(0);
+    // Until the web journal is live: no Continue and no countdown (decision 134).
+    await expect(page.getByTestId("email-confirmed-countdown")).toHaveCount(0);
+    await expect(page.getByRole("link", { name: "Continue" })).toHaveCount(0);
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex, nofollow");
   });
 
