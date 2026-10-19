@@ -16,3 +16,12 @@ export function classifyAuthLink(search: string, hash: string): AuthLinkResult {
   if (result === "email_changed" || result === "email_change_pending") return result;
   return "ok";
 }
+
+// The only query /email-confirmed keeps: ?result=<what to show>, or none
+// for a plain confirmation. Anything else (Supabase's ?code=, error
+// details) is dropped by the proxy before the page renders, so it never
+// reaches the page's props or its RSC payload (Web Tester's note, #9).
+export function canonicalEmailConfirmedSearch(search: string): string {
+  const result = classifyAuthLink(search, "");
+  return result === "ok" ? "" : `?result=${result === "error" ? "expired" : result}`;
+}

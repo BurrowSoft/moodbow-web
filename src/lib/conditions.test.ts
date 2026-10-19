@@ -123,7 +123,7 @@ describe("the web journal gate (W0)", () => {
   });
 
   it("never lists the signed-in area in the sitemap, even when live", () => {
-    expect(sitemapPaths(() => true)).toEqual(["/", "/support", "/privacy", "/terms", "/account-deletion"]);
+    expect(sitemapPaths(() => true)).toEqual(["/", "/support", "/help", "/privacy", "/terms", "/account-deletion"]);
   });
 });
 

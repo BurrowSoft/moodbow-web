@@ -7,6 +7,8 @@ export const MOODS = [1, 2, 3, 4, 5] as const;
 export const SLEEP_QUALITIES = ["poor", "okay", "good"] as const;
 export const EXERCISE_MINUTES = [0, 15, 30, 45, 60, 90] as const;
 export const STRESS_LEVELS = [1, 2, 3, 4, 5] as const;
+// The five brand colours, Awful → Great (the same circles as the app).
+export const MOOD_COLOURS = ["bg-[#9b84d6]", "bg-[#b9a3e3]", "bg-[#e3c0d0]", "bg-[#f2a07b]", "bg-[#e27d9a]"] as const;
 export const SLEEP_HOURS = Array.from({ length: 29 }, (_, i) => i / 2); // 0, 0.5 … 14
 
 export type SleepQuality = (typeof SLEEP_QUALITIES)[number];
@@ -60,7 +62,10 @@ export function sameCheckIn(row: CheckIn, input: CheckInInput): boolean {
 }
 
 // The RPC's error codes (supabase/contracts/errors.md) → what the card does.
-export type CheckInError = "dateInFuture" | "stale" | "generic";
+// invalid: the values themselves were refused (invalid_value, or a form this
+// file rejects); a retry can never succeed. generic: anything else (the
+// network, an outage), which may.
+export type CheckInError = "dateInFuture" | "stale" | "invalid" | "generic";
 export type CheckInErrorAction = { kind: "error"; error: CheckInError } | { kind: "redirect"; to: "/consent" | "/sign-in" };
 
 export function checkInErrorAction(message: string): CheckInErrorAction {
@@ -68,5 +73,6 @@ export function checkInErrorAction(message: string): CheckInErrorAction {
   if (message.includes("not_authenticated")) return { kind: "redirect", to: "/sign-in" };
   if (message.includes("date_in_future")) return { kind: "error", error: "dateInFuture" };
   if (message.includes("stale_write")) return { kind: "error", error: "stale" };
+  if (message.includes("invalid_value")) return { kind: "error", error: "invalid" };
   return { kind: "error", error: "generic" };
 }

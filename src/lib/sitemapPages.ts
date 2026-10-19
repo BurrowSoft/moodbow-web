@@ -1,3 +1,4 @@
+import { HELP_GATE } from "./helpGate";
 import { conditionMet, pageGate, type BuildEnv, type ConditionId } from "./conditions";
 
 // Pages and the condition each one waits on. Used by the sitemap (gated
@@ -8,6 +9,7 @@ type PageEntry = { path: string; gate?: ConditionId; prefix?: boolean; sitemap?:
 const PAGES: PageEntry[] = [
   { path: "/" },
   { path: "/support" },
+  { path: "/help", gate: HELP_GATE, prefix: true },
   { path: "/privacy", gate: "privacy-text-approved" },
   { path: "/terms", gate: "terms-text-approved" },
   { path: "/account-deletion", gate: "delete-account-live" },

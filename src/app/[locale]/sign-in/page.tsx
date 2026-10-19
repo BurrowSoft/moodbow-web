@@ -29,16 +29,19 @@ export default async function SignInPage({ params, searchParams }: PageProps<"/[
   if (user) redirect({ href: "/app", locale });
 
   const t = await getTranslations("auth");
+  const tm = await getTranslations("me");
   // Set by the proxy when Supabase ended the session (the stale cookies are
   // already cleared): the account is gone (decision 68), or the session was
-  // revoked while the account still exists (decision 70).
+  // revoked while the account still exists (decision 70). "deleted": the
+  // user just deleted their account here (Me → Delete account).
   const reason = (await searchParams).signed_out;
-  const notice = reason === "account" ? "accountGoneNotice" : reason === "session" ? "sessionEndedNotice" : null;
+  const notice =
+    reason === "deleted" ? tm("deleteDone") : reason === "account" ? t("accountGoneNotice") : reason === "session" ? t("sessionEndedNotice") : null;
   return (
     <PageShell title={t("signinTitle")}>
       {notice && (
         <p role="status" data-testid="signed-out-notice" className="rounded-2xl border border-border bg-surface px-5 py-4 font-medium text-text">
-          {t(notice)}
+          {notice}
         </p>
       )}
       <SignInForm />
