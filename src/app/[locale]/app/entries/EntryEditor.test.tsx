@@ -448,3 +448,19 @@ describe("EntryEditor: the safety card after a flagged save (M8, decisions 124/1
     expect(screen.queryByTestId("safety-card")).toBeNull();
   });
 });
+
+describe("EntryEditor: leaving returns where it was opened from (decision 152)", () => {
+  it("Cancel and a save go to backTo (e.g. the Timeline), not always Today", async () => {
+    saveEntry.mockResolvedValue({ status: "saved", entry: { ...ENTRY, id: NEW_ID, entry_date: "2026-10-02", body: "Hi" } });
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <EntryEditor initial={null} newId={NEW_ID} uid="u1" today="2026-10-02" backTo="/app/timeline" />
+      </NextIntlClientProvider>,
+    );
+    fireEvent.click(screen.getByTestId("entry-cancel"));
+    expect(push).toHaveBeenLastCalledWith("/app/timeline");
+    type("Hi");
+    fireEvent.click(screen.getByTestId("entry-save"));
+    await waitFor(() => expect(push).toHaveBeenLastCalledWith("/app/timeline"));
+  });
+});

@@ -8,6 +8,9 @@ import { JournalUnavailable } from "@/components/JournalUnavailable";
 import type { CheckIn } from "@/lib/journal/checkIn";
 import { getMe } from "@/lib/journal/me";
 import { isIsoDate } from "@/lib/journal/timeline";
+import { withOrigin } from "@/lib/journal/origin";
+import { BackLink } from "@/components/BackLink";
+import { backLabel } from "@/lib/journal/backLabel";
 import { dateLine, dateLocale } from "@/lib/journal/today";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { EntryPreviews, type EntrySummary } from "../../EntryPreviews";
@@ -51,6 +54,8 @@ export default async function DayPage({ params }: PageProps<"/[locale]/app/timel
 
   return (
     <section className="space-y-8">
+      {/* Opened from the Timeline (decision 152). */}
+      <BackLink href="/app/timeline" label={await backLabel("/app/timeline", dateLocaleTag)} testId="nav-back" />
       <h1 className="text-3xl font-medium tracking-tight" data-testid="day-date">
         {dateLine(date, dateLocaleTag)}
       </h1>
@@ -60,10 +65,10 @@ export default async function DayPage({ params }: PageProps<"/[locale]/app/timel
           {tt("errGeneric")}
         </p>
       ) : (
-        entries && entries.length > 0 && <EntryPreviews entries={entries as EntrySummary[]} testIdPrefix="day-entry" />
+        entries && entries.length > 0 && <EntryPreviews entries={entries as EntrySummary[]} testIdPrefix="day-entry" from={`/app/timeline/${date}`} />
       )}
       <Link
-        href={`/app/write?date=${date}`}
+        href={withOrigin(`/app/write?date=${date}`, `/app/timeline/${date}`)}
         data-testid="day-add-entry"
         className="inline-flex min-h-12 items-center justify-center rounded-full bg-accent px-8 font-medium text-on-accent hover:opacity-90"
       >
