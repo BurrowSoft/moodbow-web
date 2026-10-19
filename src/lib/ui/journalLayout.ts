@@ -27,3 +27,9 @@ export const PRIMARY_SAVE =
 // (min-w-0), so at 200% zoom the four labels wrap instead of overlapping.
 export const TAB_ITEM = "min-w-0";
 export const TAB_LINK_NARROW = "px-1 min-[360px]:px-3 text-center leading-tight [overflow-wrap:anywhere]";
+
+// A segmented choice (Timeline All days/Moments, Insights ranges, the share
+// card's format and theme): the selected one in the rose accent with
+// on-accent text (colour-roles §3, UX), the others muted.
+export const segment = (active: boolean) =>
+  `inline-flex min-h-11 items-center rounded-full px-4 text-sm font-medium ${active ? "bg-accent text-on-accent" : "text-muted hover:bg-pill"}`;
