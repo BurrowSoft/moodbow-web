@@ -14,8 +14,13 @@ import { usePathname, useSearchParams } from "next/navigation";
 // notes where we were; the navigation is "pending" for as long as we're
 // still there. Any arrival (the page, its error state, a redirect
 // elsewhere) ends it, and 30 s is the outer limit.
+// Only link clicks show it: programmatic navigations (router.push, a
+// server action's redirect, the browser's Back/Forward) don't, by design
+// (they have their own feedback: the form's pending state, or the
+// browser's own loading indicator).
 export const SHOW_AFTER_MS = 300;
 const GIVE_UP_MS = 30_000;
+let clicks = 0;
 
 function internalTarget(e: MouseEvent): string | null {
   if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return null;
@@ -29,15 +34,17 @@ function internalTarget(e: MouseEvent): string | null {
 
 export function NavProgress() {
   const here = `${usePathname()}?${useSearchParams().toString()}`;
-  // Where a navigation started from; it's pending while we're still there.
-  const [from, setFrom] = useState<string | null>(null);
-  const [shown, setShown] = useState<string | null>(null);
-  const pending = from !== null && from === here;
-  const visible = pending && shown === from;
+  // Where a navigation started from (and which click it was); it's pending
+  // while we're still there. `shown` names the click whose bar is up, so a
+  // later click (even from the same page) starts its own 300 ms wait.
+  const [from, setFrom] = useState<{ at: string; click: number } | null>(null);
+  const [shown, setShown] = useState<number | null>(null);
+  const pending = from !== null && from.at === here;
+  const visible = pending && shown === from.click;
 
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
-      if (internalTarget(e)) setFrom(`${location.pathname}?${new URLSearchParams(location.search).toString()}`);
+      if (internalTarget(e)) setFrom({ at: `${location.pathname}?${new URLSearchParams(location.search).toString()}`, click: ++clicks });
     };
     // Capture: Next's Link prevents the default itself, after this.
     document.addEventListener("click", onClick, true);
@@ -46,7 +53,8 @@ export function NavProgress() {
 
   useEffect(() => {
     if (!pending) return;
-    const show = window.setTimeout(() => setShown(from), SHOW_AFTER_MS);
+    const click = from!.click;
+    const show = window.setTimeout(() => setShown(click), SHOW_AFTER_MS);
     const giveUp = window.setTimeout(() => setFrom(null), GIVE_UP_MS);
     return () => {
       window.clearTimeout(show);

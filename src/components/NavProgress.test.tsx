@@ -98,3 +98,24 @@ describe("NavProgress", () => {
     expect(main).not.toHaveAttribute("aria-busy");
   });
 });
+
+describe("NavProgress: every click waits its own 300 ms (reviewer #28)", () => {
+  it("A → B → A, then a click from A doesn't show the bar at once", () => {
+    const { link, view } = setup();
+    fireEvent.click(link("/app/timeline"));
+    act(() => vi.advanceTimersByTime(300));
+    expect(screen.getByTestId("nav-progress")).toBeInTheDocument();
+    pathname = "/app/timeline";
+    window.history.replaceState(null, "", "/app/timeline");
+    view.rerender(<NavProgress />);
+    pathname = "/app";
+    window.history.replaceState(null, "", "/app");
+    view.rerender(<NavProgress />);
+    fireEvent.click(link("/app/me"));
+    expect(screen.queryByTestId("nav-progress")).toBeNull();
+    act(() => vi.advanceTimersByTime(299));
+    expect(screen.queryByTestId("nav-progress")).toBeNull();
+    act(() => vi.advanceTimersByTime(1));
+    expect(screen.getByTestId("nav-progress")).toBeInTheDocument();
+  });
+});
