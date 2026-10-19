@@ -50,7 +50,8 @@ describe("ReflectPanel", () => {
     expect(body.textContent).toBe("A long day.\n\nWhat helped? <b>x</b>");
     expect(body.querySelector("b")).toBeNull();
     expect(body).toHaveClass("whitespace-pre-line");
-    expect(button).toBeEnabled();
+    // One-shot (UX): no Reflect once there's a reflection.
+    expect(screen.queryByTestId("reflect-button")).toBeNull();
     expect(reflectOnEntry).toHaveBeenCalledWith(ENTRY, expect.stringMatching(/^[0-9a-f-]{36}$/));
   });
 
@@ -144,20 +145,21 @@ describe("ReflectPanel", () => {
     expect(screen.queryByTestId("reflect-panel")).toBeNull();
   });
 
-  it("an existing reflection; reflecting again replaces it; Lite gets its badge; creditsOut once, when they run out", async () => {
-    renderIt(reflection({ body: "Old one." }), 1);
+  it("one-shot: no Reflect while a reflection exists (UX); Lite gets its badge; creditsOut once, when they run out", async () => {
+    renderIt(reflection({ body: "Old one." }));
     expect(screen.getByTestId("reflect-body")).toHaveTextContent("Old one.");
     expect(screen.queryByTestId("reflect-lite")).toBeNull();
+    expect(screen.queryByTestId("reflect-button")).toBeNull();
+    expect(screen.getByTestId("reflect-delete")).toBeInTheDocument();
+    cleanup();
+    renderIt(null, 1);
     reflectOnEntry.mockResolvedValueOnce(ok({ body: "New one.", tier: "lite" }, 0));
     fireEvent.click(screen.getByTestId("reflect-button"));
     await settle();
     expect(screen.getByTestId("reflect-body")).toHaveTextContent("New one.");
     expect(screen.getByTestId("reflect-lite")).toHaveTextContent(m.reflectLiteBadge);
     expect(screen.getByTestId("reflect-credits-out")).toHaveTextContent(m.creditsOut);
-    reflectOnEntry.mockResolvedValueOnce(ok({ body: "Third.", tier: "lite" }, 0));
-    fireEvent.click(screen.getByTestId("reflect-button"));
-    await settle();
-    expect(screen.queryByTestId("reflect-credits-out")).toBeNull();
+    expect(screen.queryByTestId("reflect-button")).toBeNull();
   });
 
   it("a reflection that names Get help now shows that button, which opens the safety card (decision 124)", () => {

@@ -47,7 +47,8 @@ const isRedirect = (e: unknown) => typeof (e as { digest?: unknown })?.digest ==
 // reflecting again replaces it. Each tap has its own client_key, resent
 // unchanged on every retry of that tap; the button is disabled while a tap
 // is in flight. The body is shown as plain text with its line breaks
-// (decision 120), never as HTML. onAnswer: "Write your answer" under the
+// (decision 120), never as HTML. One-shot: no Reflect while a reflection
+// exists (UX); Delete reflection stays, and brings Reflect back. onAnswer: "Write your answer" under the
 // reflection, with its closing question (the entry view, decision 151).
 type Props = { entryId: string; initial: Reflection | null; balance: number; country?: string | null; onAnswer?: (question: string) => void };
 export function ReflectPanel({ entryId, initial, balance, country, onAnswer }: Props) {
@@ -211,17 +212,21 @@ export function ReflectPanel({ entryId, initial, balance, country, onAnswer }: P
         </div>
       )}
 
-      <div className={reflection ? "mt-6" : ""}>
-        <button
-          type="button"
-          data-testid="reflect-button"
-          onClick={tap}
-          disabled={loading || deleting}
-          aria-busy={loading}
-          className={`${dialogButton(!reflection)} disabled:opacity-50`}
-        >
-          {t("reflectButton")}
-        </button>
+      <div>
+        {/* One reflection per entry in 1.0 (m9, UX): no Reflect while one
+            exists, on any entry; deleting it brings Reflect back. */}
+        {!reflection && (
+          <button
+            type="button"
+            data-testid="reflect-button"
+            onClick={tap}
+            disabled={loading || deleting}
+            aria-busy={loading}
+            className={`${dialogButton(true)} disabled:opacity-50`}
+          >
+            {t("reflectButton")}
+          </button>
+        )}
         <p role="status" data-testid="reflect-status" className="mt-3 text-sm text-muted">
           {loading ? t("reflectLoading") : null}
         </p>
