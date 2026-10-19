@@ -12,18 +12,25 @@ test.describe("home", () => {
     await page.goto("/");
     await expect(page).toHaveTitle("Moodbow — A journal that learns your story");
     await expect(page.locator("html")).toHaveAttribute("lang", "en");
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("A journal that learns your story.");
+    // The store frames' look (launch readiness): the arc, the headline, the
+    // three blocks and Private by design.
+    await expect(page.getByTestId("moodbow-arc")).toBeVisible();
+    await expect(page.getByTestId("moodbow-arc")).toHaveAttribute("aria-hidden", "true");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Your month, as a rainbow");
+    // Before the web journal is live: Coming soon and Get notified (a mailto).
     await expect(page.getByText("Coming soon", { exact: true })).toBeVisible();
     const notify = page.getByRole("link", { name: "Get notified by email when Moodbow launches" });
     await expect(notify).toHaveAttribute("href", "mailto:support@moodbow.com?subject=Notify%20me%20about%20Moodbow");
     await expect(page.getByText("Email us and we'll let you know when it's ready.")).toBeVisible();
-    await expect(page.getByText("We'll email you once", { exact: false })).toHaveCount(0);
-    for (const title of ["Seconds a day", "See your patterns", "Private, and yours"]) {
+    await expect(page.getByTestId("home-start")).toHaveCount(0);
+    for (const title of ["Check in in 10 seconds", "Write about your day", "See what shapes your days", "Private by design"]) {
       await expect(page.getByRole("heading", { level: 2, name: title })).toBeVisible();
     }
-    // welcome3BodyNoAi: no AI claim while AI isn't live.
-    await expect(page.getByText("Only you can read your journal, and you can delete everything at any time.")).toBeVisible();
+    // No AI claim while AI isn't live; store badges are text only.
+    await expect(page.getByText("Moodbow writes back")).toHaveCount(0);
     await expect(page.getByText(/\bAI\b/)).toHaveCount(0);
+    await expect(page.getByTestId("home-stores")).toHaveText("Coming soon to Google Play and the App Store");
+    await expect(page.getByTestId("home-stores").getByRole("link")).toHaveCount(0);
   });
 
   test("SEO tags use the www canonical host", async ({ page }) => {
