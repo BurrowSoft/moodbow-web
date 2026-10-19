@@ -45,3 +45,15 @@ describe("readable export (content/contracts/export-text.md)", () => {
     expect(fs.readFileSync(path.join(dir, "export_fixture.txt"), "utf8")).toContain("Groceries  \n");
   });
 });
+
+describe("export file names (decision 107)", () => {
+  it("the fixture's +07:00 exported_at in Asia/Bangkok is 2026-10-20, while the text says the UTC time", async () => {
+    const { localDay, exportFileName, journalFileName } = await import("./journal/account");
+    const doc = JSON.parse(fs.readFileSync(path.join(dir, "export_fixture.json"), "utf8"));
+    const day = localDay(doc.exported_at, doc.profile.time_zone);
+    expect(day).toBe("2026-10-20");
+    expect(exportFileName(day)).toBe("moodbow-export-2026-10-20.json");
+    expect(journalFileName(day)).toBe("moodbow-journal-2026-10-20.txt");
+    expect(renderExportText(doc, t)).toContain("Exported: 2026-10-19 20:15 UTC");
+  });
+});
