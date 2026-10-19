@@ -1,0 +1,99 @@
+{
+  "version": 1,
+  "rules": "specs/crisis-keywords-1.0.md",
+  "languages": {
+    "en": {
+      "match": "word",
+      "phrases": [
+        "kill myself", "killing myself", "kill my self",
+        "end my life", "ending my life", "end it all", "ending it all",
+        "take my own life", "taking my own life", "take my life",
+        "suicide", "suicidal",
+        "want to die", "wanna die", "wish i was dead", "wish i were dead",
+        "better off dead", "better off without me",
+        "dont want to be here anymore", "dont want to be alive", "dont want to live",
+        "do not want to live", "no reason to live", "dont want to wake up",
+        "cant go on living", "thinking about ending it",
+        "hurt myself", "hurting myself", "harm myself", "harming myself",
+        "self harm", "self harming", "cut myself", "cutting myself",
+        "take all my pills"
+      ]
+    },
+    "es": {
+      "match": "word",
+      "phrases": [
+        "suicidio", "suicidarme", "me quiero suicidar",
+        "quiero matarme", "voy a matarme", "pienso en matarme",
+        "quitarme la vida", "acabar con mi vida",
+        "quiero morir", "quiero morirme", "no quiero vivir", "no quiero seguir viviendo",
+        "hacerme daño", "me hago daño", "cortarme las venas"
+      ]
+    },
+    "pt": {
+      "match": "word",
+      "phrases": [
+        "suicídio", "me suicidar", "suicidar",
+        "quero me matar", "vou me matar", "pensando em me matar",
+        "tirar minha vida", "tirar a minha vida", "acabar com a minha vida", "acabar com minha vida",
+        "quero morrer", "não quero viver", "não quero mais viver",
+        "me machucar", "me machuco", "automutilação"
+      ]
+    },
+    "de": {
+      "match": "word",
+      "phrases": [
+        "selbstmord", "suizid", "suizidal",
+        "ich will mich umbringen", "mich selbst umbringen", "mir das leben nehmen",
+        "ich will sterben", "will nicht mehr leben", "möchte nicht mehr leben",
+        "mich selbst verletzen", "mich ritzen", "ritze mich"
+      ]
+    },
+    "fr": {
+      "match": "word",
+      "phrases": [
+        "suicide", "me suicider", "suicidaire",
+        "je veux me tuer", "envie de me tuer",
+        "mettre fin à mes jours", "mettre fin à ma vie", "en finir avec la vie", "je veux en finir",
+        "je veux mourir", "envie de mourir",
+        "me faire du mal", "me scarifier", "me mutiler"
+      ]
+    },
+    "th": {
+      "match": "substring",
+      "phrases": [
+        "ฆ่าตัวตาย", "อยากตาย", "ไม่อยากอยู่แล้ว", "ไม่อยากมีชีวิตอยู่",
+        "จบชีวิต", "ทำร้ายตัวเอง", "กรีดแขน", "กรีดข้อมือ", "ไม่อยากตื่นขึ้นมา"
+      ]
+    }
+  },
+  "fixture": {
+    "should_flag": [
+      "I don't want to be here anymore. I've been thinking about ending it.",
+      "Sometimes I hurt myself when it gets too much. Did it again tonight.",
+      "honestly i just want to die",
+      "I’ve been feeling suicidal all week",
+      "dont want to wake up tomorrow",
+      "Ya no quiero vivir así",
+      "nao quero mais viver",
+      "Ich will nicht mehr leben.",
+      "J'ai envie de mourir ce soir",
+      "ไม่อยากอยู่แล้ว เหนื่อยมาก คิดว่าจะจบชีวิตตัวเอง",
+      "วันนี้อยากตายมาก"
+    ],
+    "should_not_flag": [
+      "This deadline is killing me.",
+      "I'm killing it at work this week!",
+      "I'm dying to see the new movie.",
+      "My mum will kill me when she sees the car.",
+      "Mi jefe va a matarme si llego tarde.",
+      "Minha mãe vai me matar.",
+      "Meine Mutter bringt mich um, wenn sie das sieht.",
+      "Ma mère va me tuer.",
+      "Mañana voy a cortarme el pelo.",
+      "My phone died on the train.",
+      "We're ending the night with a party.",
+      "I nearly died laughing at the show.",
+      "วันนี้ไปเดินเล่นที่สวนกับเพื่อน อากาศดีมาก"
+    ]
+  }
+}

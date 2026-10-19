@@ -32,7 +32,6 @@ const isRedirect = (e: unknown) => typeof (e as { digest?: unknown })?.digest ==
 // (decision 120), never as HTML.
 export function ReflectPanel({ entryId, initial, balance, country }: { entryId: string; initial: Reflection | null; balance: number; country?: string | null }) {
   const t = useTranslations("ai");
-  const tm = useTranslations("me");
   const ta = useTranslations("app");
   const tt = useTranslations("today");
   const [reflection, setReflection] = useState(initial);
