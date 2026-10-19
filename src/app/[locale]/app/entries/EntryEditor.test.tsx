@@ -403,7 +403,8 @@ describe("EntryEditor: the safety card after a flagged save (M8, decisions 124/1
     expect(await screen.findByTestId("safety-card")).toBeInTheDocument();
     expect(saveEntry).toHaveBeenCalledTimes(1);
     expect(push).not.toHaveBeenCalled();
-    expect(screen.getByRole("heading", { name: messages.safety.safetyTitle })).toHaveFocus();
+    // Focus moves in the dialog's effect: wait for it (flaky under load).
+    await waitFor(() => expect(screen.getByRole("heading", { name: messages.safety.safetyTitle })).toHaveFocus());
     fireEvent.click(screen.getByTestId("safety-close"));
     expect(screen.queryByTestId("safety-card")).toBeNull();
     await waitFor(() => expect(screen.getByTestId("entry-text")).toHaveFocus());
@@ -468,5 +469,21 @@ describe("EntryEditor for screen readers (a11y pass)", () => {
     fireEvent.change(screen.getByTestId("entry-date"), { target: { value: "2026-10-09" } });
     expect(screen.getByTestId("entry-date")).toHaveAttribute("aria-invalid", "true");
     expect(screen.getByTestId("entry-date")).toHaveAttribute("aria-describedby", "entry-error");
+  });
+});
+
+describe("EntryEditor: leaving returns where it was opened from (decision 152)", () => {
+  it("Cancel and a save go to backTo (e.g. the Timeline), not always Today", async () => {
+    saveEntry.mockResolvedValue({ status: "saved", entry: { ...ENTRY, id: NEW_ID, entry_date: "2026-10-02", body: "Hi" } });
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <EntryEditor initial={null} newId={NEW_ID} uid="u1" today="2026-10-02" backTo="/app/timeline" />
+      </NextIntlClientProvider>,
+    );
+    fireEvent.click(screen.getByTestId("entry-cancel"));
+    expect(push).toHaveBeenLastCalledWith("/app/timeline");
+    type("Hi");
+    fireEvent.click(screen.getByTestId("entry-save"));
+    await waitFor(() => expect(push).toHaveBeenLastCalledWith("/app/timeline"));
   });
 });

@@ -2,7 +2,8 @@ import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 // The in-app navigation bar: shown 300 ms after an internal link click while
-// the location hasn't changed yet, gone on arrival; aria-busy on main.
+// the location hasn't changed yet, gone on arrival; never aria-busy on main
+// (decision 137).
 let pathname = "/app";
 let search = "";
 vi.mock("next/navigation", () => ({ usePathname: () => pathname, useSearchParams: () => new URLSearchParams(search) }));
@@ -39,14 +40,14 @@ afterEach(() => {
 });
 
 describe("NavProgress", () => {
-  it("nothing before 300 ms; then the bar and aria-busy on main; gone (and not busy) on arrival", () => {
+  it("nothing before 300 ms; then the bar (main never aria-busy); gone on arrival", () => {
     const { main, link, view } = setup();
     fireEvent.click(link("/app/timeline"));
     act(() => vi.advanceTimersByTime(299));
     expect(screen.queryByTestId("nav-progress")).toBeNull();
     act(() => vi.advanceTimersByTime(1));
     expect(screen.getByTestId("nav-progress")).toBeInTheDocument();
-    expect(main).toHaveAttribute("aria-busy", "true");
+    expect(main).not.toHaveAttribute("aria-busy");
 
     pathname = "/app/timeline";
     window.history.replaceState(null, "", "/app/timeline");

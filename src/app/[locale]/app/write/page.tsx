@@ -5,6 +5,11 @@ import { JournalUnavailable } from "@/components/JournalUnavailable";
 import { getMe } from "@/lib/journal/me";
 import { isIsoDate } from "@/lib/journal/timeline";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { headers } from "next/headers";
+import { BackLink } from "@/components/BackLink";
+import { backLabel } from "@/lib/journal/backLabel";
+import { originOf } from "@/lib/journal/origin";
+import { dateLocale } from "@/lib/journal/today";
 import { EntryEditor } from "../entries/EntryEditor";
 import { titledMetadata } from "../TabPlaceholder";
 
@@ -29,5 +34,12 @@ export default async function WritePage({ params, searchParams }: PageProps<"/[l
   if (!me) return <JournalUnavailable />;
   const asked = (await searchParams).date;
   const startDate = typeof asked === "string" && isIsoDate(asked) && asked <= me.today ? asked : me.today;
-  return <EntryEditor initial={null} newId={crypto.randomUUID()} uid={user.id} today={me.today} startDate={startDate} country={me.profile?.country} />;
+  const from = originOf((await searchParams).from);
+  const tag = dateLocale(locale, (await headers()).get("accept-language"), me.profile?.country ?? null);
+  return (
+    <>
+      <BackLink href={from} label={await backLabel(from, tag)} testId="nav-back" />
+      <EntryEditor initial={null} newId={crypto.randomUUID()} uid={user.id} today={me.today} startDate={startDate} country={me.profile?.country} backTo={from} />
+    </>
+  );
 }

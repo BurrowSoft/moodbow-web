@@ -8,8 +8,8 @@ import { SLOW_AFTER_MS } from "./SlowLoading";
 // A thin bar at the top while an in-app navigation is on its way (UX, after
 // the Web Tester's #14 case: if Auth is slow before a link was prefetched,
 // a tab click showed nothing for up to 10 s). It appears ~300 ms after the
-// click, so fast navigations never flash it, and the page's main region is
-// aria-busy meanwhile. At 3 s, if no loading boundary is showing its own
+// click, so fast navigations never flash it. (No aria-busy on the page:
+// it can hold content back from screen readers; decision 137.) At 3 s, if no loading boundary is showing its own
 // "Taking longer than usual…" (SlowLoading), the bar shows that line in a
 // polite live region under it (UX, after the Web Tester's #28 run: without
 // a prefetch there's no boundary, so the bar was the only feedback).
@@ -73,13 +73,6 @@ export function NavProgress() {
       window.clearTimeout(giveUp);
     };
   }, [pending, from]);
-
-  useEffect(() => {
-    const main = document.getElementById("main");
-    if (!main) return;
-    if (visible) main.setAttribute("aria-busy", "true");
-    else main.removeAttribute("aria-busy");
-  }, [visible]);
 
   if (!visible) return null;
   // The live region is there from the bar's start (empty), so screen

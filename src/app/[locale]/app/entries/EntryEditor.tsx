@@ -54,7 +54,9 @@ const isRedirect = (e: unknown) => typeof (e as { digest?: unknown })?.digest ==
 
 // startDate: the day a new entry starts on (a Timeline day's "Add an entry").
 // country: the profile's, for the safety card's numbers (M8).
-type Props = { initial: Entry | null; newId: string; uid: string; today: string; startDate?: string; country?: string | null };
+// backTo: where leaving the editor goes: the page it was opened from
+// (decision 152), else Today.
+type Props = { initial: Entry | null; newId: string; uid: string; today: string; startDate?: string; country?: string | null; backTo?: string };
 
 const noSubscribe = () => () => {};
 
@@ -66,7 +68,7 @@ export function EntryEditor(props: Props) {
   return <Editor key={inBrowser ? "browser" : "server"} {...props} restore={inBrowser} />;
 }
 
-function Editor({ initial, newId, uid, today, startDate, country, restore }: Props & { restore: boolean }) {
+function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app", restore }: Props & { restore: boolean }) {
   const t = useTranslations("entry");
   const tt = useTranslations("today");
   const router = useRouter();
@@ -162,7 +164,7 @@ function Editor({ initial, newId, uid, today, startDate, country, restore }: Pro
     return () => window.removeEventListener("beforeunload", onUnload);
   }, [draftKey, restore]);
 
-  const leave = useCallback(() => router.push("/app"), [router]);
+  const leave = useCallback(() => router.push(backTo), [router, backTo]);
   const closeSafety = useCallback(() => {
     setSafety("closed");
     // After the card's own focus restore (on its unmount): back into the entry.

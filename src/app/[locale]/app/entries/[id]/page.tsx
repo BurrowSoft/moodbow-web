@@ -8,6 +8,11 @@ import { canReflect } from "@/lib/journal/ai";
 import { getMe } from "@/lib/journal/me";
 import type { Reflection } from "@/lib/journal/reflect";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { headers } from "next/headers";
+import { BackLink } from "@/components/BackLink";
+import { backLabel } from "@/lib/journal/backLabel";
+import { originOf } from "@/lib/journal/origin";
+import { dateLocale } from "@/lib/journal/today";
 import { EntryEditor } from "../EntryEditor";
 import { ReflectPanel } from "../ReflectPanel";
 import { titledMetadata } from "../../TabPlaceholder";
@@ -24,7 +29,7 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/app/entr
 
 // Edit an entry (M4). RLS returns only the signed-in user's own rows, so
 // someone else's id is the same 404 as a missing one.
-export default async function EntryPage({ params }: PageProps<"/[locale]/app/entries/[id]">) {
+export default async function EntryPage({ params, searchParams }: PageProps<"/[locale]/app/entries/[id]">) {
   const { locale, id } = await params;
   setRequestLocale(locale as Locale);
   if (!isEntryId(id)) notFound();
@@ -47,9 +52,14 @@ export default async function EntryPage({ params }: PageProps<"/[locale]/app/ent
     if (readError) reflect = false;
     else reflection = (row as Reflection | null) ?? null;
   }
+  // Opened from Today, the Timeline or a day (decision 152): Back and
+  // leaving the editor return there.
+  const from = originOf((await searchParams).from);
+  const tag = dateLocale(locale, (await headers()).get("accept-language"), me.profile?.country ?? null);
   return (
     <>
-      <EntryEditor initial={data as Entry} newId={id} uid={user.id} today={me.today} country={me.profile?.country} />
+      <BackLink href={from} label={await backLabel(from, tag)} testId="nav-back" />
+      <EntryEditor initial={data as Entry} newId={id} uid={user.id} today={me.today} country={me.profile?.country} backTo={from} />
       {reflect && <ReflectPanel entryId={id} initial={reflection} balance={me.credits?.balance ?? 0} country={me.profile?.country} />}
     </>
   );

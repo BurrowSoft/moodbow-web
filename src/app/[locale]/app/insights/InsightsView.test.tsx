@@ -54,25 +54,25 @@ describe("InsightsView", () => {
     expect(screen.getByTestId("insights-not-enough-exercise")).toBeInTheDocument();
   });
 
-  it("the change vs the previous range: ↑/↓ with the range in words; none without previous data", () => {
+  it("the change vs the previous range: 'Up'/'Down' in words (decision 137); none without previous data", () => {
     renderView([...thisWeek, ...lastWeek]);
-    expect(screen.getByTestId("insights-change-mood")).toHaveTextContent("↑ 0.6 vs the previous week");
+    expect(screen.getByTestId("insights-change-mood")).toHaveTextContent("Up 0.6 vs the previous week");
     expect(screen.getByTestId("insights-change-stress")).toHaveTextContent("Same as the previous week");
     expect(screen.queryByTestId("insights-change-sleep")).toBeNull();
   });
 
-  it("a fall reads ↓, in the same neutral ink as a rise (decision 98)", () => {
+  it("a fall reads 'Down', in the same neutral ink as a rise (decision 98)", () => {
     const better = [row("2026-09-20", 5), row("2026-09-22", 5), row("2026-09-24", 5)];
     renderView([...thisWeek, ...better]);
     const change = screen.getByTestId("insights-change-mood");
-    expect(change).toHaveTextContent("↓ 0.7 vs the previous week");
+    expect(change).toHaveTextContent("Down 0.7 vs the previous week");
     expect(change.className).toBe("text-muted");
   });
 
   it("3 months reads '3 months' in the sentence", () => {
     const rows = [row("2026-08-01", 4), row("2026-09-01", 4), row("2026-10-01", 4), row("2026-05-10", 3), row("2026-06-01", 3), row("2026-06-20", 3)];
     renderView(rows, "3months");
-    expect(screen.getByTestId("insights-change-mood")).toHaveTextContent("↑ 1.0 vs the previous 3 months");
+    expect(screen.getByTestId("insights-change-mood")).toHaveTextContent("Up 1.0 vs the previous 3 months");
   });
 
   it("a drawn chart is an image named by its title and summary", () => {

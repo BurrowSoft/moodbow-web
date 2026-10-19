@@ -77,7 +77,7 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
           <h2 id="today-entries-title" className="text-lg font-medium text-text">
             {te("todayEntriesTitle")}
           </h2>
-          <EntryPreviews entries={entries as EntrySummary[]} testIdPrefix="today-entry" />
+          <EntryPreviews entries={entries as EntrySummary[]} testIdPrefix="today-entry" from="/app" />
         </section>
       )}
     </section>
