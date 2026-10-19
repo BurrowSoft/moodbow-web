@@ -322,7 +322,7 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
         // Too long: the message is tied to the text (a11y pass).
         aria-invalid={tooLong || undefined}
         aria-describedby={tooLong ? "entry-error" : undefined}
-        className="min-h-[50dvh] w-full flex-1 resize-none rounded-3xl border border-border bg-surface p-6 text-lg leading-relaxed text-text placeholder:text-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+        className="min-h-[50dvh] w-full flex-1 resize-none rounded-3xl border border-border bg-surface p-6 text-lg leading-relaxed text-text placeholder:text-muted"
       />
 
       <div className="flex flex-wrap items-end gap-6">
