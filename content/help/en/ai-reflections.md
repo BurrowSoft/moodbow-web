@@ -9,4 +9,4 @@ topic: AI
 
 **Credits:** new accounts get free credits for the full Moodbow AI after confirming their email. When they run out, Moodbow keeps going with **Moodbow AI Lite**, a simpler model with shorter answers and a daily allowance. Your balance is in **Me → AI**.
 
-Moodbow's AI isn't a therapist and doesn't give medical advice. If you're struggling, use **Get help now**.{/pending}
+Moodbow's AI isn't a therapist and doesn't give medical advice. If you're struggling, use **Want to talk to someone?**.{/pending}
