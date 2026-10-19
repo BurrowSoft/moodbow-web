@@ -2,13 +2,16 @@
 // (decision 104). App and web draw the same card: this geometry, tested
 // against the spec's numbers, is the cross-platform contract.
 
+import { STEP_HEX } from "@/lib/journal/valueColours";
+
 export type CardFormat = "story" | "square";
 export type CardTheme = "light" | "dark";
 
 export const MIN_CHECK_INS = 5;
 
-// Mood 1 → 5, the same colours as the check-in picker, in both themes.
-export const MOOD_HEX = ["#7F8CB8", "#A99BD1", "#E6C7D3", "#F4A77A", "#F3C24F"] as const;
+// Mood 1 → 5, the same colours as the check-in picker, in both themes (mood
+// maps to its own step; the card shows mood bands only, decision 150).
+export const MOOD_HEX = STEP_HEX;
 
 export const THEMES: Record<CardTheme, { background: string; text: string; muted: string; logo: string }> = {
   light: { background: "#FBF6F1", text: "#2B2438", muted: "#6B6278", logo: "/brand/moodbow-logo-horizontal-light.svg" },
