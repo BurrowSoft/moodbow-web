@@ -17,6 +17,8 @@ vi.mock("@/i18n/navigation", () => ({
 }));
 vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(search) }));
 vi.mock("@/components/Logo", () => ({ Logo: () => null }));
+let keyboard = false;
+vi.mock("@/lib/ui/keyboardOpen", () => ({ useKeyboardOpen: () => keyboard }));
 const { AppNav } = await import("./AppNav");
 afterEach(cleanup);
 
@@ -82,5 +84,20 @@ describe("AppNav: the current tab again (r1)", () => {
     current("/app");
     expect(screen.getByTestId("tab-insights")).toHaveAttribute("title", messages.app.tabInsights);
     expect(screen.getByTestId("tab-insights")).toHaveTextContent(messages.app.tabInsights);
+  });
+});
+
+describe("AppNav: the on-screen keyboard (UX)", () => {
+  it("while it's up the phone bar is hidden (data-keyboard + max-md:hidden); the sidebar stays", () => {
+    current("/app");
+    const nav = screen.getByRole("navigation");
+    expect(nav).not.toHaveAttribute("data-keyboard");
+    cleanup();
+    keyboard = true;
+    current("/app");
+    const hidden = screen.getByRole("navigation");
+    expect(hidden).toHaveAttribute("data-keyboard", "true");
+    expect(hidden.className).toContain("data-[keyboard]:max-md:hidden");
+    keyboard = false;
   });
 });

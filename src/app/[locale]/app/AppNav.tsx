@@ -6,6 +6,7 @@ import { Link, usePathname } from "@/i18n/navigation";
 import { originOf, originTab } from "@/lib/journal/origin";
 import { Logo } from "@/components/Logo";
 import { TAB_ITEM, TAB_LABEL, TAB_LINK_NARROW } from "@/lib/ui/journalLayout";
+import { useKeyboardOpen } from "@/lib/ui/keyboardOpen";
 
 // The web journal's tabs, the same four as the app (Today · Timeline ·
 // Insights · Me) with the same test ids. A sidebar from md up, a bottom bar
@@ -21,6 +22,9 @@ export function AppNav() {
   const t = useTranslations("app");
   const tc = useTranslations("common");
   const pathname = usePathname();
+  // The phone bar steps aside while the on-screen keyboard is up (UX); the
+  // sidebar from md up never does.
+  const keyboard = useKeyboardOpen();
   const from = useSearchParams().get("from");
   // An entry page or New entry belongs to the tab it was opened from (Today
   // or the Timeline; Today on a direct load), decision 152.
@@ -39,7 +43,8 @@ export function AppNav() {
   return (
     <nav
       aria-label={t("appName")}
-      className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-bg md:static md:w-60 md:shrink-0 md:border-t-0 md:border-r md:px-4 md:py-6"
+      data-keyboard={keyboard || undefined}
+      className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-bg data-[keyboard]:max-md:hidden md:static md:w-60 md:shrink-0 md:border-t-0 md:border-r md:px-4 md:py-6"
     >
       <div className="hidden px-3 pb-8 md:block">
         {/* Not "Today": that's the first tab right after it (a11y pass). */}
