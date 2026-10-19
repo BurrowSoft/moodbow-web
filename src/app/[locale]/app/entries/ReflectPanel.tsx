@@ -60,10 +60,16 @@ export function ReflectPanel({ entryId, initial, balance }: { entryId: string; i
         return;
       }
       if (!alive.current) return;
+      // No answer: keep the key; Try again resends this same tap.
+      if (result.status === "no_answer") {
+        setPhase({ kind: "offline" });
+        return;
+      }
       if (result.status === "in_progress") {
+        // Still running after ~30 s: stop asking for now, but it's the same
+        // tap (it may finish): Try again resends this key (reviewer #34).
         if (Date.now() - started + IN_PROGRESS_RETRY_MS > IN_PROGRESS_LIMIT_MS) {
-          tapKey.current = null;
-          setPhase({ kind: "error", message: "reflectError" });
+          setPhase({ kind: "offline" });
           return;
         }
         await wait(IN_PROGRESS_RETRY_MS);

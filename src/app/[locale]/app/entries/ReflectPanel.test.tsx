@@ -67,18 +67,36 @@ describe("ReflectPanel", () => {
     expect(new Set(keys()).size).toBe(1);
   });
 
-  it("still in_progress after ~30 s: the friendly error; the next tap is a new key", async () => {
+  it("still in_progress after ~30 s: stop asking, errOffline; Try again resends the same key (reviewer #34)", async () => {
     vi.useFakeTimers();
     reflectOnEntry.mockResolvedValue({ status: "in_progress" });
     renderIt();
     fireEvent.click(screen.getByTestId("reflect-button"));
     await act(async () => vi.advanceTimersByTimeAsync(31_000));
-    expect(screen.getByTestId("reflect-error")).toHaveTextContent(m.reflectError);
+    expect(screen.getByTestId("reflect-error")).toHaveTextContent(m.errOffline);
     const first = keys()[0];
+    const asked = keys().length;
     reflectOnEntry.mockResolvedValueOnce(ok());
+    fireEvent.click(screen.getByTestId("reflect-retry"));
+    await settle();
+    expect(keys()).toHaveLength(asked + 1);
+    expect(new Set(keys())).toEqual(new Set([first]));
+    expect(screen.getByTestId("reflect-body")).toBeInTheDocument();
+  });
+
+  it("no answer from the function (no_answer): errOffline and the same key on Try again; a final error after it means a new key next tap", async () => {
+    reflectOnEntry.mockResolvedValueOnce({ status: "no_answer" }).mockResolvedValueOnce({ status: "error", message: "reflectError" }).mockResolvedValueOnce(ok());
+    renderIt();
     fireEvent.click(screen.getByTestId("reflect-button"));
     await settle();
-    expect(keys()[keys().length - 1]).not.toBe(first);
+    expect(screen.getByTestId("reflect-error")).toHaveTextContent(m.errOffline);
+    fireEvent.click(screen.getByTestId("reflect-retry"));
+    await settle();
+    expect(keys()[1]).toBe(keys()[0]);
+    expect(screen.getByTestId("reflect-error")).toHaveTextContent(m.reflectError);
+    fireEvent.click(screen.getByTestId("reflect-button"));
+    await settle();
+    expect(keys()[2]).not.toBe(keys()[0]);
   });
 
   it("no answer reached the browser: errOffline; Try again resends the same key", async () => {

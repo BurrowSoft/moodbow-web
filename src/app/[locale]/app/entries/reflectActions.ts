@@ -32,11 +32,13 @@ export async function reflectOnEntry(entryId: string, clientKey: string): Promis
         .json()
         .then((b: { error?: unknown }) => b?.error)
         .catch(() => undefined);
+      // A gateway's own error page (502/504/546…): not the function's answer.
+      if (typeof code !== "string") return { status: "no_answer" };
       return reflectOutcome(code);
     }
     // The function couldn't be reached from the server (relay or fetch
-    // error): the friendly error; the same tap's key is safe to resend.
-    return { status: "error", message: "reflectError" };
+    // error): it may still have run; the same tap's key must be resent.
+    return { status: "no_answer" };
   }
   const reflection = (data as { reflection?: Reflection } | null)?.reflection;
   if (!reflection || typeof reflection.body !== "string") return { status: "error", message: "reflectError" };
