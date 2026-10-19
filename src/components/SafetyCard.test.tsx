@@ -65,3 +65,12 @@ describe("SafetyCard", () => {
     expect(button).toHaveFocus();
   });
 });
+
+describe("Get help now's style (decision 128)", () => {
+  it("a calm secondary button, not the accent fill", () => {
+    wrap(<GetHelpNow country="GB" testId="me-get-help" />);
+    const button = screen.getByTestId("me-get-help");
+    expect(button.className).toContain("border-border");
+    expect(button.className).not.toContain("bg-accent");
+  });
+});

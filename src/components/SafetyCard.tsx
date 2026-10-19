@@ -51,15 +51,16 @@ export function SafetyCard({ country, onClose }: { country: string | null | unde
   );
 }
 
-// "Get help now" (meGetHelpNow): the button that opens the card, on Me and
-// under a reflection that names it.
+// "Get help now" (meGetHelpNow): the button that opens the card, at the top
+// of Me on its own and under a reflection that names it. A calm secondary
+// button, never red or alarming (decision 128).
 export function GetHelpNow({ country, testId, className }: { country: string | null | undefined; testId: string; className?: string }) {
   const t = useTranslations("me");
   const [open, setOpen] = useState(false);
   const close = useCallback(() => setOpen(false), []);
   return (
     <>
-      <button type="button" data-testid={testId} onClick={() => setOpen(true)} className={className ?? dialogButton(true)}>
+      <button type="button" data-testid={testId} onClick={() => setOpen(true)} className={className ?? dialogButton()}>
         {t("meGetHelpNow")}
       </button>
       {open && <SafetyCard country={country} onClose={close} />}
