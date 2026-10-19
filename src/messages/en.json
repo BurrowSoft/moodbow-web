@@ -339,6 +339,17 @@
     "creditsTitle": "AI credits",
     "creditsBalance": "{credits, plural, one {# credit} other {# credits}}",
     "creditsLiteNow": "You're on Moodbow AI Lite: shorter, simpler answers, free every day.",
-    "creditsOut": "You've used your Moodbow AI credits. We'll keep going with Moodbow AI Lite, so answers will be shorter and simpler."
+    "creditsOut": "You've used your Moodbow AI credits. We'll keep going with Moodbow AI Lite, so answers will be shorter and simpler.",
+    "reflectButton": "Reflect with Moodbow",
+    "reflectLoading": "Reading your entry…",
+    "reflectDelete": "Delete reflection",
+    "reflectDeleteConfirmTitle": "Delete this reflection?",
+    "reflectDeleteConfirmBody": "Your entry stays. This can't be undone.",
+    "reflectError": "Moodbow couldn't reflect right now. Your entry is saved.",
+    "reflectLiteBadge": "Lite",
+    "dailyLimit": "You've reached today's AI limit. It resets tomorrow. Your journal still works as usual.",
+    "errOffline": "You're offline. Check your connection and try again.",
+    "errRateLimited": "Please wait a minute and try again.",
+    "cancel": "Cancel"
   }
 }

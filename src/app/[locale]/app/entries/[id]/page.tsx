@@ -4,9 +4,12 @@ import { setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 import { JournalUnavailable } from "@/components/JournalUnavailable";
 import { ENTRY_COLUMNS, isEntryId, type Entry } from "@/lib/journal/entry";
+import { canReflect } from "@/lib/journal/ai";
 import { getMe } from "@/lib/journal/me";
+import type { Reflection } from "@/lib/journal/reflect";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { EntryEditor } from "../EntryEditor";
+import { ReflectPanel } from "../ReflectPanel";
 import { tabMetadata } from "../../TabPlaceholder";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/app/entries/[id]">): Promise<Metadata> {
@@ -27,5 +30,18 @@ export default async function EntryPage({ params }: PageProps<"/[locale]/app/ent
   const { data, error } = await supabase.from("entries").select(ENTRY_COLUMNS).eq("id", id).maybeSingle();
   if (error) return <JournalUnavailable />;
   if (!data) notFound();
-  return <EntryEditor initial={data as Entry} newId={id} uid={user.id} today={me.today} />;
+  // Reflect (M9): only when AI is shown, consented to and on. The entry's
+  // reflection, if any (RLS: own rows; at most one per entry).
+  let reflection: Reflection | null = null;
+  const reflect = canReflect(me);
+  if (reflect) {
+    const { data: row } = await supabase.from("ai_reflections").select("id, body, tier, created_at").eq("entry_id", id).maybeSingle();
+    reflection = (row as Reflection | null) ?? null;
+  }
+  return (
+    <>
+      <EntryEditor initial={data as Entry} newId={id} uid={user.id} today={me.today} />
+      {reflect && <ReflectPanel entryId={id} initial={reflection} balance={me.credits?.balance ?? 0} />}
+    </>
+  );
 }
