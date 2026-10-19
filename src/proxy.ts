@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { routing } from "./i18n/routing";
 import { canonicalEmailConfirmedSearch } from "./lib/authLink";
 import { isHiddenPage, pagePath } from "./lib/sitemapPages";
+import { AUTH_OUTAGE_HEADER } from "./lib/supabase/deadline";
 import { authCookieNames, authCookieUid, needsSession, refreshSession, signedInOnly, WIPE_COOKIE, WIPE_COOKIE_OPTIONS } from "./lib/supabase/proxy";
 
 // Locale routing (src/i18n/routing.ts): the default locale is unprefixed,
@@ -39,7 +40,12 @@ export default async function proxy(req: NextRequest) {
   // The signed-in area and the auth pages keep the Supabase session fresh:
   // refreshed first, so this request's server components already see the
   // new cookies (lib/supabase/proxy.ts), then saved on the response.
-  const { cookies: refreshed, signedOut } = needsSession(path) ? await refreshSession(req) : { cookies: [], signedOut: null };
+  // Only the proxy may say Auth timed out on this request (lib/supabase/deadline.ts).
+  req.headers.delete(AUTH_OUTAGE_HEADER);
+  const { cookies: refreshed, signedOut, outage } = needsSession(path) ? await refreshSession(req) : { cookies: [], signedOut: null, outage: false };
+  // Auth didn't answer in time: the session stays as it is, and the server
+  // components show the outage state without waiting again.
+  if (outage) req.headers.set(AUTH_OUTAGE_HEADER, "1");
 
   // Supabase ended this session: the account was deleted on another device
   // (decision 68) or the session was revoked (decision 70). Drop the stale
@@ -58,7 +64,14 @@ export default async function proxy(req: NextRequest) {
       const prefix = (routing.locales as readonly string[]).includes(first) && first !== routing.defaultLocale ? `/${first}` : "";
       url.pathname = `${prefix}/sign-in`;
       url.search = `?signed_out=${signedOut === "account_gone" ? "account" : "session"}`;
-      res = NextResponse.redirect(url, 303);
+      // A server action's request (a form on a signed-in page) can't follow
+      // a page redirect: fetch would follow it to the sign-in HTML and Next
+      // reports "an unexpected response" (the form shows its generic error,
+      // or a check-in is kept as offline: Web Tester, #12). Answer it the way
+      // Next answers an action that redirects, so the client navigates.
+      res = req.headers.has("next-action")
+        ? new NextResponse(null, { status: 200, headers: { "x-action-redirect": `${url.pathname}${url.search};replace`, "content-type": "text/plain" } })
+        : NextResponse.redirect(url, 303);
     } else {
       res = intl(req);
     }

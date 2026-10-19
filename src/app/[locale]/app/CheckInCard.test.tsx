@@ -12,11 +12,14 @@ const { CheckInCard } = await import("./CheckInCard");
 
 const ROW: CheckIn = { local_date: "2026-10-02", mood: 4, sleep_hours: 7.5, sleep_quality: "good", exercise_minutes: 30, stress: 2, updated_at: "2026-10-02T10:00:00Z" };
 const KEY = "mb:pending-checkin:u1";
+// Per-day copies (UX): mb:pending-checkin:<uid>:<date>.
+const dayKey = (date: string) => `${KEY}:${date}`;
+const anyPending = () => Object.keys(window.localStorage).some((k) => k.startsWith(KEY));
 
 const renderCard = (initial: CheckIn | null) =>
   render(
     <NextIntlClientProvider locale="en" messages={messages}>
-      <CheckInCard initial={initial} uid="u1" today="2026-10-02" dateLocaleTag="en-US" />
+      <CheckInCard initial={initial} uid="u1" date="2026-10-02" dateLocaleTag="en-US" />
     </NextIntlClientProvider>,
   );
 const sent = (call = 0) => Object.fromEntries((saveCheckIn.mock.calls[call][1] as FormData).entries());
@@ -86,7 +89,7 @@ describe("CheckInCard", () => {
     fireEvent.click(screen.getByTestId("checkin-mood-3"));
     fireEvent.click(screen.getByTestId("checkin-save"));
     expect(screen.getByTestId("checkin-status")).toHaveTextContent(messages.today.checkinSavedOfflineWeb);
-    expect(JSON.parse(window.localStorage.getItem(KEY)!)).toMatchObject({ fields: { mood: 3 }, expected: "", date: "2026-10-02" });
+    expect(JSON.parse(window.localStorage.getItem(dayKey("2026-10-02"))!)).toMatchObject({ fields: { mood: 3 }, expected: "", date: "2026-10-02" });
     expect(saveCheckIn).not.toHaveBeenCalled();
 
     saveCheckIn.mockResolvedValue({ status: "saved", checkIn: { ...ROW, mood: 3 } });
@@ -96,7 +99,7 @@ describe("CheckInCard", () => {
     });
     await waitFor(() => expect(saveCheckIn).toHaveBeenCalledTimes(1));
     expect(sent()).toMatchObject({ mood: "3" });
-    expect(window.localStorage.getItem(KEY)).toBeNull();
+    expect(anyPending()).toBe(false);
     await waitFor(() => expect(screen.getByTestId("checkin-status")).toHaveTextContent(messages.today.checkinSaved));
   });
 
@@ -109,7 +112,7 @@ describe("CheckInCard", () => {
   });
 
   const pendingFrom = (date: string, mood = 2) =>
-    window.localStorage.setItem(KEY, JSON.stringify({ fields: { mood, sleepHours: "", sleepQuality: "", exercise: "", stress: "" }, expected: "", date }));
+    window.localStorage.setItem(dayKey(date), JSON.stringify({ fields: { mood, sleepHours: "", sleepQuality: "", exercise: "", stress: "" }, expected: "", date }));
 
   it("yesterday's offline copy is sent for yesterday, and today's card stays as it is", async () => {
     pendingFrom("2026-10-01");
@@ -117,7 +120,7 @@ describe("CheckInCard", () => {
     renderCard(null);
     await waitFor(() => expect(saveCheckIn).toHaveBeenCalledTimes(1));
     expect(sent()).toMatchObject({ local_date: "2026-10-01", mood: "2" });
-    await waitFor(() => expect(window.localStorage.getItem(KEY)).toBeNull());
+    await waitFor(() => expect(anyPending()).toBe(false));
     expect(screen.getByTestId("checkin-card")).toBeInTheDocument();
     expect(screen.getByTestId("checkin-mood-2")).toHaveAttribute("aria-checked", "false");
   });
@@ -128,14 +131,14 @@ describe("CheckInCard", () => {
     renderCard(null);
     await waitFor(() => expect(saveCheckIn).toHaveBeenCalledTimes(1));
     await screen.findByTestId("checkin-error");
-    expect(window.localStorage.getItem(KEY)).not.toBeNull();
+    expect(anyPending()).toBe(true);
 
     saveCheckIn.mockResolvedValue({ status: "saved", checkIn: { ...ROW, mood: 2 } });
     await act(async () => {
       window.dispatchEvent(new Event("online"));
     });
     await waitFor(() => expect(saveCheckIn).toHaveBeenCalledTimes(2));
-    await waitFor(() => expect(window.localStorage.getItem(KEY)).toBeNull());
+    await waitFor(() => expect(anyPending()).toBe(false));
   });
 
   it("a flush that redirects (consent) keeps the copy", async () => {
@@ -148,7 +151,7 @@ describe("CheckInCard", () => {
       renderCard(null);
       await waitFor(() => expect(saveCheckIn).toHaveBeenCalledTimes(1));
       await new Promise((r) => setTimeout(r, 20));
-      expect(window.localStorage.getItem(KEY)).not.toBeNull();
+      expect(anyPending()).toBe(true);
     } finally {
       window.removeEventListener("error", swallow);
       onError.mockRestore();
@@ -162,7 +165,7 @@ describe("CheckInCard", () => {
     saveCheckIn.mockResolvedValue({ status: "error", error: "stale", checkIn: { ...ROW, mood: 5 } });
     renderCard(null);
     expect(await screen.findByTestId("checkin-superseded")).toHaveTextContent(superseded("Friday, October 2, 2026"));
-    expect(window.localStorage.getItem(KEY)).toBeNull();
+    expect(anyPending()).toBe(false);
     expect(screen.getByTestId("checkin-summary")).toHaveTextContent(messages.today.mood5);
     expect(screen.getByTestId("checkin-status")).toHaveTextContent(messages.today.checkinSaved);
     expect(screen.queryByTestId("checkin-error")).toBeNull();
@@ -173,7 +176,7 @@ describe("CheckInCard", () => {
     saveCheckIn.mockResolvedValue({ status: "error", error: "stale", checkIn: { ...ROW, local_date: "2026-10-01", mood: 5 } });
     renderCard(null);
     expect(await screen.findByTestId("checkin-superseded")).toHaveTextContent(superseded("Thursday, October 1, 2026"));
-    expect(window.localStorage.getItem(KEY)).toBeNull();
+    expect(anyPending()).toBe(false);
     expect(screen.getByTestId("checkin-mood-5")).toHaveAttribute("aria-checked", "false");
     fireEvent.click(screen.getByTestId("checkin-superseded-dismiss"));
     expect(screen.queryByTestId("checkin-superseded")).toBeNull();
@@ -207,6 +210,81 @@ describe("CheckInCard", () => {
   });
 });
 
+describe("CheckInCard: one offline copy per day (UX; reviewer #15)", () => {
+  const renderFor = (date: string) =>
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <CheckInCard initial={null} uid="u1" date={date} dateLocaleTag="en-US" />
+      </NextIntlClientProvider>,
+    );
+  const saveOffline = (mood: number) => {
+    fireEvent.click(screen.getByTestId(`checkin-mood-${mood}`));
+    fireEvent.click(screen.getByTestId("checkin-save"));
+  };
+
+  it("offline on two days keeps both; back online, both are sent (oldest first) and removed", async () => {
+    setOnline(false);
+    renderFor("2026-09-28");
+    saveOffline(2);
+    cleanup();
+    renderFor("2026-10-02");
+    saveOffline(4);
+    expect(JSON.parse(window.localStorage.getItem(dayKey("2026-09-28"))!)).toMatchObject({ fields: { mood: 2 }, date: "2026-09-28" });
+    expect(JSON.parse(window.localStorage.getItem(dayKey("2026-10-02"))!)).toMatchObject({ fields: { mood: 4 }, date: "2026-10-02" });
+
+    saveCheckIn.mockImplementation(async (_prev: unknown, form: FormData) => ({ status: "saved", checkIn: { ...ROW, local_date: String(form.get("local_date")), mood: Number(form.get("mood")) } }));
+    setOnline(true);
+    await act(async () => {
+      window.dispatchEvent(new Event("online"));
+    });
+    await waitFor(() => expect(saveCheckIn).toHaveBeenCalledTimes(2));
+    expect([sent(0).local_date, sent(1).local_date]).toEqual(["2026-09-28", "2026-10-02"]);
+    await waitFor(() => expect(anyPending()).toBe(false));
+  });
+
+  it("a second offline save for the same day replaces only that day's copy", () => {
+    setOnline(false);
+    window.localStorage.setItem(dayKey("2026-09-28"), JSON.stringify({ fields: { mood: 1, sleepHours: "", sleepQuality: "", exercise: "", stress: "" }, expected: "", date: "2026-09-28" }));
+    renderFor("2026-10-02");
+    saveOffline(3);
+    fireEvent.click(screen.getByTestId("checkin-edit"));
+    saveOffline(5);
+    expect(JSON.parse(window.localStorage.getItem(dayKey("2026-10-02"))!)).toMatchObject({ fields: { mood: 5 } });
+    expect(JSON.parse(window.localStorage.getItem(dayKey("2026-09-28"))!)).toMatchObject({ fields: { mood: 1 } });
+  });
+
+  it("only the answered copy is removed; a failed one stays", async () => {
+    window.localStorage.setItem(dayKey("2026-09-28"), JSON.stringify({ fields: { mood: 1, sleepHours: "", sleepQuality: "", exercise: "", stress: "" }, expected: "", date: "2026-09-28" }));
+    window.localStorage.setItem(dayKey("2026-10-01"), JSON.stringify({ fields: { mood: 2, sleepHours: "", sleepQuality: "", exercise: "", stress: "" }, expected: "", date: "2026-10-01" }));
+    saveCheckIn.mockImplementation(async (_prev: unknown, form: FormData) =>
+      form.get("local_date") === "2026-09-28" ? { status: "saved", checkIn: { ...ROW, local_date: "2026-09-28" } } : { status: "error", error: "generic" },
+    );
+    renderFor("2026-10-02");
+    await waitFor(() => expect(saveCheckIn).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(window.localStorage.getItem(dayKey("2026-09-28"))).toBeNull());
+    expect(window.localStorage.getItem(dayKey("2026-10-01"))).not.toBeNull();
+  });
+
+  it("a copy the server refuses: a one-time notice naming its day, and the copy is dropped (UX parity)", async () => {
+    window.localStorage.setItem(dayKey("2026-10-01"), JSON.stringify({ fields: { mood: 2, sleepHours: "", sleepQuality: "", exercise: "", stress: "" }, expected: "", date: "2026-10-01" }));
+    saveCheckIn.mockResolvedValue({ status: "error", error: "invalid" });
+    renderFor("2026-10-02");
+    expect(await screen.findByTestId("checkin-rejected")).toHaveTextContent(messages.today.offlineCheckinRejected.replace("{date}", "Thursday, October 1, 2026"));
+    expect(anyPending()).toBe(false);
+    expect(screen.queryByTestId("checkin-error")).toBeNull();
+    fireEvent.click(screen.getByTestId("checkin-rejected-dismiss"));
+    expect(screen.queryByTestId("checkin-rejected")).toBeNull();
+  });
+
+  it("date_in_future on sync is a rejection too", async () => {
+    window.localStorage.setItem(dayKey("2026-10-03"), JSON.stringify({ fields: { mood: 2, sleepHours: "", sleepQuality: "", exercise: "", stress: "" }, expected: "", date: "2026-10-03" }));
+    saveCheckIn.mockResolvedValue({ status: "error", error: "dateInFuture" });
+    renderFor("2026-10-02");
+    expect(await screen.findByTestId("checkin-rejected")).toBeInTheDocument();
+    expect(anyPending()).toBe(false);
+  });
+});
+
 describe("CheckInCard: a request lost at the network level (Web Tester, #11)", () => {
   it("an online save that can't reach the server: kept in this browser like an offline save, no crash", async () => {
     saveCheckIn.mockRejectedValue(new TypeError("Failed to fetch"));
@@ -214,7 +292,7 @@ describe("CheckInCard: a request lost at the network level (Web Tester, #11)", (
     fireEvent.click(screen.getByTestId("checkin-mood-3"));
     fireEvent.click(screen.getByTestId("checkin-save"));
     expect(await screen.findByTestId("checkin-status")).toHaveTextContent(messages.today.checkinSavedOfflineWeb);
-    expect(JSON.parse(window.localStorage.getItem(KEY)!)).toMatchObject({ fields: { mood: 3 }, expected: "", date: "2026-10-02" });
+    expect(JSON.parse(window.localStorage.getItem(dayKey("2026-10-02"))!)).toMatchObject({ fields: { mood: 3 }, expected: "", date: "2026-10-02" });
   });
 
   it("…and with storage unavailable too: the generic error", async () => {
@@ -233,19 +311,19 @@ describe("CheckInCard: a request lost at the network level (Web Tester, #11)", (
   });
 
   it("a flush that can't reach the server keeps the copy and tries again on the next reconnect", async () => {
-    window.localStorage.setItem(KEY, JSON.stringify({ fields: { mood: 2, sleepHours: "", sleepQuality: "", exercise: "", stress: "" }, expected: "", date: "2026-10-02" }));
+    window.localStorage.setItem(dayKey("2026-10-02"), JSON.stringify({ fields: { mood: 2, sleepHours: "", sleepQuality: "", exercise: "", stress: "" }, expected: "", date: "2026-10-02" }));
     saveCheckIn.mockRejectedValueOnce(new TypeError("Failed to fetch"));
     saveCheckIn.mockResolvedValueOnce({ status: "saved", checkIn: { ...ROW, mood: 2 } });
     renderCard(null);
     await waitFor(() => expect(saveCheckIn).toHaveBeenCalledTimes(1));
     await new Promise((r) => setTimeout(r, 20));
-    expect(window.localStorage.getItem(KEY)).not.toBeNull();
+    expect(anyPending()).toBe(true);
     expect(screen.queryByTestId("checkin-error")).toBeNull();
     await act(async () => {
       window.dispatchEvent(new Event("online"));
     });
     await waitFor(() => expect(saveCheckIn).toHaveBeenCalledTimes(2));
-    await waitFor(() => expect(window.localStorage.getItem(KEY)).toBeNull());
+    await waitFor(() => expect(anyPending()).toBe(false));
   });
 });
 
@@ -260,8 +338,8 @@ describe("CheckInCard: a live save sent to sign-in or Consent (reviewer #11/#22)
       fireEvent.click(screen.getByTestId("checkin-mood-4"));
       fireEvent.click(screen.getByTestId("checkin-stress-2"));
       fireEvent.click(screen.getByTestId("checkin-save"));
-      await waitFor(() => expect(window.localStorage.getItem(KEY)).not.toBeNull());
-      expect(JSON.parse(window.localStorage.getItem(KEY)!)).toMatchObject({ fields: { mood: 4, stress: "2" }, date: "2026-10-02" });
+      await waitFor(() => expect(window.localStorage.getItem(dayKey("2026-10-02"))).not.toBeNull());
+      expect(JSON.parse(window.localStorage.getItem(dayKey("2026-10-02"))!)).toMatchObject({ fields: { mood: 4, stress: "2" }, date: "2026-10-02" });
     } finally {
       window.removeEventListener("error", swallow);
       onError.mockRestore();
