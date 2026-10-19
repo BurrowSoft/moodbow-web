@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 import { JournalUnavailable } from "@/components/JournalUnavailable";
 import { ENTRY_COLUMNS, isEntryId, type Entry } from "@/lib/journal/entry";
@@ -10,14 +10,16 @@ import type { Reflection } from "@/lib/journal/reflect";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { EntryEditor } from "../EntryEditor";
 import { ReflectPanel } from "../ReflectPanel";
-import { tabMetadata } from "../../TabPlaceholder";
+import { titledMetadata } from "../../TabPlaceholder";
 
 // The Reflect server action runs in this page's function: room for the
 // reflect call's 45 s deadline (REFLECT_SERVER_DEADLINE_MS).
 export const maxDuration = 60;
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/app/entries/[id]">): Promise<Metadata> {
-  return tabMetadata("tabToday", (await params).locale);
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "entry" });
+  return titledMetadata(t("entryEditTitle"), locale);
 }
 
 // Edit an entry (M4). RLS returns only the signed-in user's own rows, so

@@ -447,3 +447,26 @@ describe("EntryEditor: the safety card after a flagged save (M8, decisions 124/1
     expect(screen.queryByTestId("safety-card")).toBeNull();
   });
 });
+
+describe("EntryEditor for screen readers (a11y pass)", () => {
+  it("a heading: New entry / Edit entry", () => {
+    const view = renderEditor();
+    expect(screen.getByRole("heading", { level: 1, name: m.entryNewTitle })).toBeInTheDocument();
+    view.unmount();
+    renderEditor(ENTRY);
+    expect(screen.getByRole("heading", { level: 1, name: m.entryEditTitle })).toBeInTheDocument();
+  });
+
+  it("too long → the text is invalid and described by the message; a future date → the date is", () => {
+    renderEditor();
+    type("x".repeat(20_001));
+    expect(screen.getByTestId("entry-text")).toHaveAttribute("aria-invalid", "true");
+    expect(screen.getByTestId("entry-text")).toHaveAttribute("aria-describedby", "entry-error");
+    expect(screen.getByTestId("entry-date")).not.toHaveAttribute("aria-invalid");
+    type("fine");
+    expect(screen.getByTestId("entry-text")).not.toHaveAttribute("aria-invalid");
+    fireEvent.change(screen.getByTestId("entry-date"), { target: { value: "2026-10-09" } });
+    expect(screen.getByTestId("entry-date")).toHaveAttribute("aria-invalid", "true");
+    expect(screen.getByTestId("entry-date")).toHaveAttribute("aria-describedby", "entry-error");
+  });
+});

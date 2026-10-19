@@ -11,11 +11,15 @@ import { isIsoDate } from "@/lib/journal/timeline";
 import { dateLine, dateLocale } from "@/lib/journal/today";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { EntryPreviews, type EntrySummary } from "../../EntryPreviews";
-import { tabMetadata } from "../../TabPlaceholder";
+import { tabMetadata, titledMetadata } from "../../TabPlaceholder";
 import { DayCheckIn } from "./DayCheckIn";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/app/timeline/[date]">): Promise<Metadata> {
-  return tabMetadata("tabTimeline", (await params).locale);
+  // The day's date (in the browser language's format; the profile's
+  // region would need another get_me() here), else Timeline.
+  const { locale, date } = await params;
+  if (!isIsoDate(date)) return tabMetadata("tabTimeline", locale);
+  return titledMetadata(dateLine(date, dateLocale(locale, (await headers()).get("accept-language"), null)), locale);
 }
 
 // One day (M5): its check-in (editable, or "Add a check-in") and all its
