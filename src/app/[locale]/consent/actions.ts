@@ -6,6 +6,7 @@ import { redirect } from "@/i18n/navigation";
 import { getMe, hasCurrentConsent } from "@/lib/journal/me";
 import { consentItem, type ConsentItem } from "@/lib/legalVersions";
 import { CONSENT_COOKIE, CONSENT_COOKIE_MAX_AGE, grantedAtConsent, serializeConsent } from "@/lib/onboardingConsent";
+import { isAuthOutage } from "@/lib/supabase/proxy";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export type ConsentState = { status: "idle" } | { status: "error"; error: "required" | "age" | "generic" };
@@ -21,7 +22,11 @@ export async function giveConsent(_prev: ConsentState, form: FormData): Promise<
   if (form.get("privacy") !== "on" || form.get("health") !== "on") return { status: "error", error: "required" };
   const locale = await getLocale();
   const supabase = await createSupabaseServerClient();
-  const user = supabase ? (await supabase.auth.getUser()).data.user : null;
+  const { data, error: userError } = supabase ? await supabase.auth.getUser() : { data: { user: null }, error: null };
+  const user = data.user;
+  // Auth didn't answer: this is a signed-in person we can't see right now,
+  // not a new account; never start the sign-up path for them.
+  if (!user && isAuthOutage(userError)) return { status: "error", error: "generic" };
 
   if (!supabase || !user) {
     const store = await cookies();

@@ -7,6 +7,8 @@ import { fontVariables } from "@/lib/fonts";
 import { SITE_URL } from "@/lib/site";
 import { Footer } from "@/components/Footer";
 import { LocalDataWipe } from "@/components/LocalDataWipe";
+import { VisitCounts } from "@/components/VisitCounts";
+import { conditionMet } from "@/lib/conditions";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -62,6 +64,9 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
             <Footer />
           </div>
         </NextIntlClientProvider>
+        {/* Cookie-free visit counts (decision 79): only once the privacy
+            policy says so, in the same deploy ("web-analytics"). */}
+        {conditionMet("web-analytics") && <VisitCounts />}
       </body>
     </html>
   );

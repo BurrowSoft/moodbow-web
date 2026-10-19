@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { CONFIRM_FAILED, confirmTarget, keepsSession, parseConfirmLink } from "./authConfirm";
-import { classifyAuthLink } from "./authLink";
+import { canonicalEmailConfirmedSearch, classifyAuthLink } from "./authLink";
 import { validateNewPassword } from "./password";
 
 const HASH = "a1b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f6071829";
@@ -62,5 +62,17 @@ describe("validateNewPassword", () => {
     expect(validateNewPassword("😀😀😀😀😀😀😀", "😀😀😀😀😀😀😀")).toBe("short");
     expect(validateNewPassword("12345678", "12345679")).toBe("mismatch");
     expect(validateNewPassword("12345678", "12345678")).toBeNull();
+  });
+});
+
+describe("canonicalEmailConfirmedSearch", () => {
+  it("keeps only the result, never a code or error details", () => {
+    expect(canonicalEmailConfirmedSearch("")).toBe("");
+    expect(canonicalEmailConfirmedSearch("?code=abc123")).toBe("");
+    expect(canonicalEmailConfirmedSearch("?error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid")).toBe("?result=expired");
+    expect(canonicalEmailConfirmedSearch("?result=expired")).toBe("?result=expired");
+    expect(canonicalEmailConfirmedSearch("?result=email_changed&code=x")).toBe("?result=email_changed");
+    expect(canonicalEmailConfirmedSearch("?result=email_change_pending")).toBe("?result=email_change_pending");
+    expect(canonicalEmailConfirmedSearch("?result=whatever")).toBe("");
   });
 });

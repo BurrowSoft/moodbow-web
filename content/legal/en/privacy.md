@@ -28,7 +28,9 @@ Moodbow is a private journal made by Vitor Ribeiro Carvalho, trading as BurrowSo
 
 **Technical logs:** like almost every online service, our hosting providers record IP addresses and device or browser information when you connect, for security and to fix problems. They keep these logs for a limited time (see §4).
 
-We don't collect your name, contacts, precise location, or advertising identifiers, and we don't use analytics or advertising trackers.
+We don't collect your name, contacts, precise location, or advertising identifiers, and we don't use advertising trackers.
+
+{pending:web_analytics}**Visit counts (website and web journal only):** we count visits with a cookie-free tool from our host, Vercel: which pages were opened, from what kind of device and country. It never sees what you write, page addresses are stripped of anything that could identify you, and it can't tell who you are. The mobile app sends no analytics.{/pending}
 
 ### 2. Why we use it, and on what legal basis
 | Purpose | Legal basis |
@@ -44,7 +46,7 @@ We don't collect your name, contacts, precise location, or advertising identifie
 |---|---|---|
 | Supabase (on Amazon Web Services) | Database, accounts, file storage | Ireland (EU) |
 | Anthropic | AI reflections and reports, only if AI is on | USA |
-| Vercel | Hosting the website and web journal | USA and global edge network |
+| Vercel | Hosting the website and web journal{pending:web_analytics}; counting visits (no cookies){/pending} | USA and global edge network |
 | Resend | Sending account emails (confirmation, password reset) | USA (company); emails are sent from Japan |
 | Sentry | Crash reports, with personal details removed | USA |
 {pending:purchases}| Google Play, Apple App Store | Payments for AI credits | Global |{/pending}

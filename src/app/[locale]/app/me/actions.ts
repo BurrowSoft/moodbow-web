@@ -62,3 +62,24 @@ export async function deleteMyAccount(_prev: DeleteAccountState, form: FormData)
   (await cookies()).set(WIPE_COOKIE, uid, WIPE_COOKIE_OPTIONS);
   return redirect({ href: "/sign-in?signed_out=deleted", locale });
 }
+
+export type ReminderState = { status: "idle" } | { status: "saved"; on: boolean; time: string } | { status: "error"; on: boolean; time: string };
+
+const TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+// Me → Daily reminder: update_settings(p_reminder_on, p_reminder_time). The
+// reminder itself is a phone notification; the web only stores the setting
+// (webReminderNote says so).
+export async function saveReminder(_prev: ReminderState, form: FormData): Promise<ReminderState> {
+  const on = form.get("reminder_on") === "true";
+  const time = String(form.get("reminder_time") ?? "");
+  if (!TIME.test(time)) return { status: "error", on, time };
+  const supabase = await createSupabaseServerClient();
+  if (!supabase) return { status: "error", on, time };
+  const { error } = await supabase.rpc("update_settings", { p_reminder_on: on, p_reminder_time: time });
+  if (error) {
+    if (error.message.includes("not_authenticated")) return redirect({ href: "/sign-in", locale: await getLocale() });
+    return { status: "error", on, time };
+  }
+  return { status: "saved", on, time };
+}

@@ -173,7 +173,9 @@
     "tabMe": "Me",
     "emptyComingSoon": "Coming soon",
     "meSignOut": "Sign out",
-    "retry": "Try again"
+    "retry": "Try again",
+    "tryAgain": "Try again",
+    "slowLoading": "Taking longer than usual…"
   },
   "today": {
     "greetMorning": "Good morning",
@@ -207,7 +209,8 @@
     "optional": "Optional",
     "errDateInFuture": "You can't log a day that hasn't happened yet.",
     "errStaleWrite": "This was changed on another device. We've loaded the latest version. Please try again.",
-    "errGeneric": "Something went wrong. Please try again."
+    "errGeneric": "Something went wrong. Please try again.",
+    "offlineCheckinRejected": "A check-in you saved offline for {date} couldn't be saved. Please add it again."
   },
   "entry": {
     "writeButton": "Write about your day",
@@ -256,7 +259,16 @@
     "deleteDone": "Your account and everything in it were deleted.",
     "cancel": "Cancel",
     "exportReadable": "Readable copy (.txt)",
-    "exportData": "Data file (.json)"
+    "exportData": "Data file (.json)",
+    "meReminder": "Daily reminder",
+    "meReminderTime": "Time",
+    "webReminderNote": "Reminders arrive on your phone. Install the Moodbow app to get them.",
+    "meHelp": "Help",
+    "meFaq": "Help & FAQ",
+    "mePrivacy": "Privacy Policy",
+    "meTerms": "Terms",
+    "meContact": "Contact us",
+    "meVersion": "Version {version}"
   },
   "export": {
     "exportTitle": "Moodbow: your journal",
@@ -276,5 +288,52 @@
     "exportStress": "Stress",
     "exportOfFive": "{value}/5",
     "exportReflectionOn": "On your entry of {date}"
+  },
+  "help": {
+    "helpTitle": "Help & FAQ",
+    "helpIntro": "Answers to common questions about using Moodbow. Can't find what you need? Email {email}."
+  },
+  "timeline": {
+    "timelineTitle": "Timeline",
+    "timelineAll": "All days",
+    "timelineMoments": "Moments",
+    "timelineEmptyTitle": "Your story starts here",
+    "timelineEmptyBody": "Check in or write about your day, and it will appear here.",
+    "timelineMomentsEmpty": "No moments yet. Tap ★ on an entry to keep it here.",
+    "dayNoCheckin": "No check-in this day",
+    "dayAddCheckin": "Add a check-in",
+    "dayAddEntry": "Add an entry"
+  },
+  "insights": {
+    "insightsTitle": "Insights",
+    "rangeWeek": "Week",
+    "rangeMonth": "Month",
+    "range3Months": "3 months",
+    "chartMood": "Mood",
+    "chartSleep": "Sleep",
+    "chartStress": "Stress",
+    "chartExercise": "Exercise",
+    "chartAverage": "Average {value}",
+    "chartAverageOfFive": "Average {value} / 5",
+    "chartChangeUp": "↑ {value} vs the previous {range, select, week {week} month {month} other {3 months}}",
+    "chartChangeDown": "↓ {value} vs the previous {range, select, week {week} month {month} other {3 months}}",
+    "chartNoChange": "Same as the previous {range, select, week {week} month {month} other {3 months}}",
+    "chartNotEnough": "A few more check-ins and your chart will appear."
+  },
+  "share": {
+    "shareButton": "Share",
+    "shareTitle": "Share a card",
+    "shareMoodbow": "My month's moodbow",
+    "shareStory": "Story",
+    "shareSquare": "Square",
+    "shareThemeLight": "Light",
+    "shareThemeDark": "Dark",
+    "shareAddLine": "Add a line (optional)",
+    "sharePrivacyNote": "Only what you see here is shared.",
+    "shareSend": "Share",
+    "shareDownload": "Download image",
+    "shareDaysJournaled": "{n} days journaled",
+    "shareNotEnough": "Check in on at least 5 days this month to make your moodbow.",
+    "shareThisMonth": "Share this month"
   }
 }

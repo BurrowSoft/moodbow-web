@@ -4,11 +4,11 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 import { JournalUnavailable } from "@/components/JournalUnavailable";
 import type { CheckIn } from "@/lib/journal/checkIn";
-import { preview } from "@/lib/journal/entry";
 import { getMe } from "@/lib/journal/me";
 import { dateLine, dateLocale, greetingKey, localHour } from "@/lib/journal/today";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { CheckInCard } from "./CheckInCard";
+import { EntryPreviews, type EntrySummary } from "./EntryPreviews";
 import { tabMetadata } from "./TabPlaceholder";
 import { Link } from "@/i18n/navigation";
 
@@ -26,8 +26,9 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
   setRequestLocale(locale as Locale);
   const supabase = await createSupabaseServerClient();
   const user = supabase ? (await supabase.auth.getUser()).data.user : null;
-  const me = supabase ? await getMe(supabase) : null;
-  if (!supabase || !user || !me) return <JournalUnavailable />;
+  if (!supabase || !user) return <JournalUnavailable />;
+  const me = await getMe(supabase);
+  if (!me) return <JournalUnavailable />;
 
   const { data, error: checkInError } = await supabase
     .from("check_ins")
@@ -40,7 +41,7 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
   // Today's entries, newest first (previews only; the editor loads the rest).
   const { data: entries, error: entriesError } = await supabase
     .from("entries")
-    .select("id, body")
+    .select("id, body, is_moment")
     .eq("entry_date", me.today)
     .order("created_at", { ascending: false });
   const t = await getTranslations("today");
@@ -58,7 +59,7 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
           {dateLine(me.today, dateLocaleTag)}
         </p>
       </header>
-      <CheckInCard initial={(data as CheckIn | null) ?? null} uid={user.id} today={me.today} dateLocaleTag={dateLocaleTag} />
+      <CheckInCard initial={(data as CheckIn | null) ?? null} uid={user.id} date={me.today} dateLocaleTag={dateLocaleTag} />
       <Link
         href="/app/write"
         data-testid="today-write"
@@ -76,19 +77,7 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
           <h2 id="today-entries-title" className="text-lg font-medium text-text">
             {te("todayEntriesTitle")}
           </h2>
-          <ul className="mt-3 space-y-3">
-            {(entries as { id: string; body: string }[]).map((entry) => (
-              <li key={entry.id}>
-                <Link
-                  href={`/app/entries/${entry.id}`}
-                  data-testid={`today-entry-${entry.id}`}
-                  className="block rounded-2xl border border-border bg-surface p-4 text-text hover:bg-pill"
-                >
-                  <span className="line-clamp-3 whitespace-pre-line">{preview(entry.body)}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
+          <EntryPreviews entries={entries as EntrySummary[]} testIdPrefix="today-entry" />
         </section>
       )}
     </section>

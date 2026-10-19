@@ -1,0 +1,131 @@
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { NextIntlClientProvider } from "next-intl";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import messages from "@/messages/en.json";
+
+const loadMonthCheckIns = vi.fn();
+vi.mock("./shareActions", () => ({ loadMonthCheckIns: (...a: unknown[]) => loadMonthCheckIns(...a) }));
+const { ShareMonth } = await import("./ShareMonth");
+const m = messages.share;
+
+const days = (n: number) => Array.from({ length: n }, (_, i) => ({ local_date: `2026-10-${String(i + 1).padStart(2, "0")}`, mood: (i % 5) + 1 }));
+const renderIt = () =>
+  render(
+    <NextIntlClientProvider locale="en" messages={messages}>
+      <ShareMonth month="2026-10" dateLocaleTag="en-US" />
+    </NextIntlClientProvider>,
+  );
+
+// A 2D context that accepts every call; the image always decodes; the PNG
+// is a tiny blob.
+const noopCtx = new Proxy({}, { get: (_t, k) => (k === "measureText" ? () => ({ width: 10 }) : () => {}), set: () => true });
+const names: string[] = [];
+beforeEach(() => {
+  loadMonthCheckIns.mockReset();
+  names.length = 0;
+  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(noopCtx as unknown as CanvasRenderingContext2D);
+  vi.spyOn(HTMLCanvasElement.prototype, "toBlob").mockImplementation((cb) => cb(new Blob(["png"], { type: "image/png" })));
+  Object.assign(HTMLImageElement.prototype, { decode: () => Promise.resolve() });
+  Object.assign(URL, { createObjectURL: vi.fn(() => "blob:x"), revokeObjectURL: vi.fn() });
+  vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(function (this: HTMLAnchorElement) {
+    names.push(this.download);
+  });
+});
+afterEach(() => {
+  cleanup();
+  vi.restoreAllMocks();
+});
+
+describe("ShareMonth", () => {
+  it("fewer than 5 check-ins that month: shareNotEnough, no card", async () => {
+    loadMonthCheckIns.mockResolvedValue({ status: "ok", checkIns: days(4) });
+    renderIt();
+    fireEvent.click(screen.getByTestId("share-open"));
+    expect(await screen.findByTestId("share-not-enough")).toHaveTextContent(m.shareNotEnough);
+    expect(screen.queryByTestId("share-preview")).toBeNull();
+    expect(loadMonthCheckIns).toHaveBeenCalledWith("2026-10");
+  });
+
+  it("enough: the preview, the format/theme choices, the line (capped per format) and the privacy note", async () => {
+    loadMonthCheckIns.mockResolvedValue({ status: "ok", checkIns: days(12) });
+    renderIt();
+    fireEvent.click(screen.getByTestId("share-open"));
+    expect(await screen.findByTestId("share-preview")).toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: m.shareTitle })).toHaveTextContent(m.sharePrivacyNote);
+    expect(screen.getByTestId("share-format-story")).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByLabelText(m.shareAddLine)).toHaveAttribute("maxLength", "80");
+    fireEvent.click(screen.getByTestId("share-format-square"));
+    expect(screen.getByLabelText(m.shareAddLine)).toHaveAttribute("maxLength", "60");
+    fireEvent.click(screen.getByTestId("share-theme-dark"));
+    expect(screen.getByTestId("share-theme-dark")).toHaveAttribute("aria-pressed", "true");
+  });
+
+  const ready = async () => {
+    const send = await screen.findByTestId("share-send");
+    await waitFor(() => expect(send).toBeEnabled());
+    return send;
+  };
+
+  it("without file sharing: 'Download image' saves moodbow-2026-10.png once the card is drawn", async () => {
+    loadMonthCheckIns.mockResolvedValue({ status: "ok", checkIns: days(6) });
+    renderIt();
+    fireEvent.click(screen.getByTestId("share-open"));
+    const send = await ready();
+    expect(send).toHaveTextContent(m.shareDownload);
+    fireEvent.click(send);
+    expect(names).toEqual(["moodbow-2026-10.png"]);
+  });
+
+  it("with file sharing: share() is called right in the click (Safari's user activation), with the PNG", async () => {
+    loadMonthCheckIns.mockResolvedValue({ status: "ok", checkIns: days(6) });
+    const share = vi.fn(() => Promise.resolve());
+    Object.assign(navigator, { canShare: () => true, share });
+    try {
+      renderIt();
+      fireEvent.click(screen.getByTestId("share-open"));
+      const send = await ready();
+      expect(send).toHaveTextContent(m.shareSend);
+      fireEvent.click(send);
+      // Synchronously, before any await.
+      expect(share).toHaveBeenCalledTimes(1);
+      const files = (share.mock.calls[0] as unknown as [{ files: File[] }])[0].files;
+      expect(files[0].name).toBe("moodbow-2026-10.png");
+      expect(files[0].type).toBe("image/png");
+    } finally {
+      Object.assign(navigator, { canShare: undefined, share: undefined });
+    }
+  });
+
+  it("share refused (not allowed) → a download; cancelled (AbortError) → nothing", async () => {
+    loadMonthCheckIns.mockResolvedValue({ status: "ok", checkIns: days(6) });
+    const share = vi.fn().mockRejectedValueOnce(new DOMException("no", "NotAllowedError")).mockRejectedValueOnce(new DOMException("cancel", "AbortError"));
+    Object.assign(navigator, { canShare: () => true, share });
+    try {
+      renderIt();
+      fireEvent.click(screen.getByTestId("share-open"));
+      const send = await ready();
+      fireEvent.click(send);
+      await waitFor(() => expect(names).toEqual(["moodbow-2026-10.png"]));
+      fireEvent.click(send);
+      await new Promise((r) => setTimeout(r, 10));
+      expect(names).toHaveLength(1);
+    } finally {
+      Object.assign(navigator, { canShare: undefined, share: undefined });
+    }
+  });
+
+  it("the preview describes itself: the count and the line", async () => {
+    loadMonthCheckIns.mockResolvedValue({ status: "ok", checkIns: days(7) });
+    renderIt();
+    fireEvent.click(screen.getByTestId("share-open"));
+    fireEvent.change(await screen.findByTestId("share-line"), { target: { value: "Calmer" } });
+    expect(screen.getByTestId("share-preview")).toHaveAccessibleDescription("7 days journaled Calmer");
+  });
+
+  it("a failed load says so", async () => {
+    loadMonthCheckIns.mockResolvedValue({ status: "error" });
+    renderIt();
+    fireEvent.click(screen.getByTestId("share-open"));
+    expect(await screen.findByRole("alert")).toHaveTextContent(messages.today.errGeneric);
+  });
+});

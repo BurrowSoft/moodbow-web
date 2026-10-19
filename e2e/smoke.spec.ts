@@ -246,6 +246,15 @@ test.describe("auth links", () => {
     await expect(page.getByRole("button")).toHaveCount(0);
   });
 
+  test("every page: origin-only referrers (decision 79), never framed, no sniffing", async ({ request }) => {
+    for (const path of ["/", "/support", "/sign-in", "/welcome", "/email-confirmed?code=abc"]) {
+      const res = await request.get(path, { maxRedirects: 0 });
+      expect(res.headers()["referrer-policy"], path).toBe("strict-origin");
+      expect(res.headers()["x-frame-options"], path).toBe("DENY");
+      expect(res.headers()["x-content-type-options"], path).toBe("nosniff");
+    }
+  });
+
   test("/auth/confirm: GET is a plain page, origin-only referrers, noindex", async ({ request, page }) => {
     const res = await request.get("/auth/confirm?token_hash=a1b2c3d4e5f60718293a4b5c6d7e8f90&type=signup", { maxRedirects: 0 });
     expect(res.status()).toBe(200);
@@ -358,6 +367,44 @@ test.describe("onboarding (signed out)", () => {
     await cont.click();
     await expect(page).toHaveURL(/\/sign-up$/);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Create your account");
+  });
+
+  // Decision 73: the whole way to an account works before JavaScript loads
+  // (or without it): real links and native forms, server-rendered steps.
+  test.describe("without JavaScript", () => {
+    test.use({ javaScriptEnabled: false });
+
+    test("welcome → consent → sign-up, and the form answers", async ({ page }) => {
+      await page.goto("/welcome");
+      await page.getByTestId("welcome-next").click();
+      await expect(page.getByRole("heading", { level: 1 })).toHaveText("See your patterns");
+      await page.getByTestId("welcome-back").click();
+      await expect(page.getByRole("heading", { level: 1 })).toHaveText("A journal that learns your story");
+      await page.getByTestId("welcome-skip").click();
+      await expect(page.getByRole("heading", { level: 1 })).toHaveText("Private, and yours");
+      await page.getByTestId("welcome-start").click();
+      await expect(page.getByRole("heading", { level: 1 })).toHaveText("Before you start");
+
+      // Continue is enabled without JS; the browser's required check stops
+      // an incomplete form (no request is sent).
+      const cont = page.getByTestId("consent-continue");
+      await expect(cont).toBeEnabled();
+      await cont.click();
+      await expect(page).toHaveURL(/\/consent$/);
+      await page.getByTestId("consent-privacy").check();
+      await page.getByTestId("consent-health").check();
+      await cont.click();
+      await expect(page).toHaveURL(/\/sign-up$/);
+      await expect(page.getByRole("heading", { level: 1 })).toHaveText("Create your account");
+
+      // A native POST: the server answers with the page (here: no Supabase,
+      // so it fails closed with the validation message first).
+      await page.getByLabel("Email").fill("nope");
+      await page.getByLabel("Password").fill("secret-123");
+      const [response] = await Promise.all([page.waitForResponse((r) => r.request().method() === "POST"), page.getByTestId("signup-submit").click()]);
+      expect(response.status()).toBeLessThan(500);
+      await expect(page.getByTestId("signup-error")).toHaveText("Enter a valid email");
+    });
   });
 
   test("sign-up without consent → Consent", async ({ page }) => {
