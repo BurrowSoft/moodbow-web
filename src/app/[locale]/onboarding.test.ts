@@ -29,6 +29,13 @@ vi.mock("@/i18n/navigation", () => ({
   },
 }));
 
+// The optional AI box shows where this build shows AI ("ai-live").
+let aiGate: "live" | "draft" | "hidden" = "hidden";
+vi.mock("@/lib/conditions", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/conditions")>()),
+  pageGate: (id: string) => (id === "ai-live" ? aiGate : "live"),
+}));
+
 const { giveConsent } = await import("./consent/actions");
 const { signUpFlow } = await import("./sign-up/actions");
 const { completeSetup } = await import("./setup/actions");
@@ -58,6 +65,7 @@ beforeEach(() => {
   configured = true;
   jar.clear();
   rpc.mockReset();
+  aiGate = "hidden";
   for (const fn of Object.values(auth)) fn.mockReset();
 });
 
@@ -70,6 +78,15 @@ describe("consent cookie", () => {
     expect(parseConsentCookie(serializeConsent(stale))).toBeNull();
     const refused = grantedAtConsent().map((i) => (i.kind === "health_data" ? { ...i, granted: false } : i));
     expect(parseConsentCookie(serializeConsent(refused))).toBeNull();
+  });
+
+  it("carries the optional AI grant (current version), and nothing else extra", () => {
+    expect(parseConsentCookie(serializeConsent(grantedAtConsent(true)))).toEqual(grantedAtConsent(true));
+    expect(grantedAtConsent(true)).toContainEqual({ kind: "ai", version: POLICY_VERSIONS.ai, granted: true });
+    const staleAi = grantedAtConsent(true).map((i) => (i.kind === "ai" ? { ...i, version: "2020-01-01" } : i));
+    expect(parseConsentCookie(serializeConsent(staleAi))).toBeNull();
+    const extra = [...grantedAtConsent(true), { kind: "age_18" as const, version: POLICY_VERSIONS.age_18, granted: true }];
+    expect(parseConsentCookie(serializeConsent(extra))).toBeNull();
   });
 });
 
@@ -91,6 +108,33 @@ describe("onboardingStep", () => {
     // AI is optional: missing AI consent doesn't block.
     const { ai: _ai, ...noAi } = current;
     expect(onboardingStep({ consents: noAi, profile: { onboarded_at: "x" } as never })).toBe("journal");
+  });
+});
+
+describe("giveConsent: the optional AI box (r1 §M3)", () => {
+  it("signed out, AI shown and ticked: the AI grant rides in the cookie to sign-up", async () => {
+    signedOut();
+    aiGate = "draft";
+    await redirected(giveConsent(idle, form({ privacy: "on", health: "on", ai: "on" })));
+    expect(parseConsentCookie(jar.get(CONSENT_COOKIE)!.value)).toEqual(grantedAtConsent(true));
+  });
+
+  it("not ticked, or ticked where it wasn't shown: no AI grant", async () => {
+    signedOut();
+    aiGate = "draft";
+    await redirected(giveConsent(idle, form({ privacy: "on", health: "on" })));
+    expect(parseConsentCookie(jar.get(CONSENT_COOKIE)!.value)).toEqual(grantedAtConsent());
+    aiGate = "hidden";
+    await redirected(giveConsent(idle, form({ privacy: "on", health: "on", ai: "on" })));
+    expect(parseConsentCookie(jar.get(CONSENT_COOKIE)!.value)).toEqual(grantedAtConsent());
+  });
+
+  it("signed in: record_consents with the AI grant (the database then turns AI on)", async () => {
+    signedIn();
+    aiGate = "live";
+    me({ age_18: { version: "1", granted: true } });
+    await redirected(giveConsent(idle, form({ privacy: "on", health: "on", ai: "on" })));
+    expect(rpc).toHaveBeenCalledWith("record_consents", { p_items: grantedAtConsent(true) });
   });
 });
 

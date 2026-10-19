@@ -366,6 +366,7 @@
   "ai": {
     "meAi": "AI",
     "meAiOn": "AI reflections and reports",
+    "consentAiTitle": "AI reflections and reports (optional)",
     "consentAiBody": "To write reflections and reports, Moodbow sends your entries and logs to our AI provider, Anthropic (USA), only when needed. They aren't used to train AI models. You can turn this off any time in Me → AI.",
     "meAiOffHint": "AI is off. Your journal works the same; you just won't get reflections or reports.",
     "meTone": "Tone",
