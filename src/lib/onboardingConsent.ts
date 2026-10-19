@@ -8,9 +8,10 @@ import { POLICY_VERSIONS, type ConsentItem } from "./legalVersions";
 export const CONSENT_COOKIE = "mb_consent";
 export const CONSENT_COOKIE_MAX_AGE = 60 * 60; // 1 hour
 
-// What the Consent screen grants (the 18+ box is on Create account).
-export function grantedAtConsent(): ConsentItem[] {
-  return (["privacy", "terms", "health_data"] as const).map((kind) => ({ kind, version: POLICY_VERSIONS[kind], granted: true }));
+// What the Consent screen grants (the 18+ box is on Create account): the
+// required three, and AI when its optional box was ticked (r1 §M3).
+export function grantedAtConsent(ai = false): ConsentItem[] {
+  return [...(["privacy", "terms", "health_data"] as const), ...(ai ? (["ai"] as const) : [])].map((kind) => ({ kind, version: POLICY_VERSIONS[kind], granted: true }));
 }
 
 export function serializeConsent(items: ConsentItem[]): string {
@@ -18,14 +19,16 @@ export function serializeConsent(items: ConsentItem[]): string {
 }
 
 // The cookie must hold exactly the current required grants (privacy, terms,
-// health data, current versions); anything else counts as no consent.
+// health data, current versions), plus at most the current AI grant;
+// anything else counts as no consent.
 export function parseConsentCookie(raw: string | undefined): ConsentItem[] | null {
   if (!raw) return null;
   try {
     const items = JSON.parse(raw) as ConsentItem[];
-    const expected = grantedAtConsent();
+    if (!Array.isArray(items)) return null;
+    const ai = items.some((i) => i?.kind === "ai");
+    const expected = grantedAtConsent(ai);
     const ok =
-      Array.isArray(items) &&
       items.length === expected.length &&
       expected.every((e) => items.some((i) => i.kind === e.kind && i.version === e.version && i.granted === true));
     return ok ? expected : null;

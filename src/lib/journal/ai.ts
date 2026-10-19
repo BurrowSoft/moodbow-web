@@ -33,6 +33,13 @@ export function aiShown(me: Pick<Me, "ai_available">): boolean {
   return me.ai_available === true && pageGate("ai-live") !== "hidden";
 }
 
+// The optional AI box on Consent: whenever this build shows AI, like the
+// app's AI flag. A signed-out visitor can't read the global switch, and a
+// consent given while it's off just waits for it.
+export function askAiConsent(): boolean {
+  return pageGate("ai-live") !== "hidden";
+}
+
 // The Reflect button: AI shown, a current AI consent, and AI on in settings
 // (reflect.md, Gate).
 export function canReflect(me: Pick<Me, "ai_available" | "consents" | "settings">): boolean {

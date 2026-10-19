@@ -9,6 +9,7 @@ import { getMe, hasCurrentConsent, hasCurrentConsents } from "@/lib/journal/me";
 import { pageMetadata } from "@/lib/metadata";
 import { isAuthOutage } from "@/lib/supabase/proxy";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { askAiConsent } from "@/lib/journal/ai";
 import { ConsentForm } from "./ConsentForm";
 
 // Consent (M3): before Create account for new people; for signed-in people
@@ -51,7 +52,7 @@ export default async function ConsentPage({ params }: PageProps<"/[locale]/conse
           {ta("errGeneric")}
         </p>
       )}
-      <ConsentForm askAge={askAge} showBack={!user && !outage} />
+      <ConsentForm askAge={askAge} askAi={askAiConsent()} showBack={!user && !outage} />
     </PageShell>
   );
 }
