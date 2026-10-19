@@ -30,8 +30,13 @@ export function ShareMonth({ month, dateLocaleTag, label }: { month: string; dat
   const [encodeFailed, setEncodeFailed] = useState(false);
   const canvas = useRef<HTMLCanvasElement>(null);
 
+  // The loading line is filled a moment after the dialog opens: a live
+  // region that appears with its text often isn't announced.
+  const [sayLoading, setSayLoading] = useState(false);
   const start = () => {
     setOpen(true);
+    setSayLoading(false);
+    window.setTimeout(() => setSayLoading(true), 100);
     setColours(null);
     setFailed(false);
     // The page's current theme is the default: one chosen in Me →
@@ -126,6 +131,11 @@ export function ShareMonth({ month, dateLocaleTag, label }: { month: string; dat
       {open && (
         <Dialog title={t("shareTitle")} onCancel={close} testId="share-dialog">
           <div className="w-full space-y-4 text-left" aria-busy={colours === null && !failed}>
+            {/* Always there while the dialog is open, filled while loading, so
+                it's announced (review of #46). */}
+            <p role="status" className="sr-only" data-testid="share-loading">
+              {sayLoading && colours === null && !failed ? t("shareLoading") : null}
+            </p>
             <h3 className="font-medium text-text" data-testid="share-type-moodbow">
               {t("shareMoodbow")}
             </h3>
@@ -134,12 +144,7 @@ export function ShareMonth({ month, dateLocaleTag, label }: { month: string; dat
                 {tt("errGeneric")}
               </p>
             ) : colours === null ? (
-              <>
-                <span className="block h-6 w-6 animate-spin rounded-full border-2 border-border border-t-accent motion-reduce:animate-none" aria-hidden="true" />
-                <p role="status" className="sr-only" data-testid="share-loading">
-                  {t("shareLoading")}
-                </p>
-              </>
+              <span className="block h-6 w-6 animate-spin rounded-full border-2 border-border border-t-accent motion-reduce:animate-none" aria-hidden="true" />
             ) : !enough ? (
               <p data-testid="share-not-enough" className="text-muted">
                 {t("shareNotEnough")}

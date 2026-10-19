@@ -192,11 +192,13 @@ describe("ShareMonth: the default theme follows Me → Appearance (decision 133)
 });
 
 describe("ShareMonth for screen readers (decision 143)", () => {
-  it("while loading: Getting your month…", () => {
+  it("while loading: Getting your month…", async () => {
     loadMonthCheckIns.mockReturnValueOnce(new Promise(() => {}));
     renderIt();
     fireEvent.click(screen.getByTestId("share-open"));
-    expect(screen.getByTestId("share-loading")).toHaveTextContent(m.shareLoading);
+    // Empty at first (so the text that arrives is announced), then filled.
+    expect(screen.getByTestId("share-loading")).toBeEmptyDOMElement();
+    await waitFor(() => expect(screen.getByTestId("share-loading")).toHaveTextContent(m.shareLoading));
   });
 
   it("two named groups: Format and Theme", async () => {
