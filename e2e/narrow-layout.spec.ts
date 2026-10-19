@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import messages from "../src/messages/en.json";
-import { APP_MAIN_GUTTER, JOURNAL_CARD, MOOD_FACE, MOOD_LABEL, MOOD_ROW, PRIMARY_SAVE, TAB_ITEM, TAB_LINK_NARROW } from "../src/lib/ui/journalLayout";
+import { APP_MAIN_GUTTER, JOURNAL_CARD, MOOD_FACE, MOOD_LABEL, MOOD_ROW, PRIMARY_SAVE, TAB_ITEM, TAB_LABEL, TAB_LINK_NARROW } from "../src/lib/ui/journalLayout";
 
 // The web journal's narrow layout in a real browser (jsdom can't lay out).
 // The journal pages need a session, so this builds the same markup from the
@@ -10,8 +10,8 @@ import { APP_MAIN_GUTTER, JOURNAL_CARD, MOOD_FACE, MOOD_LABEL, MOOD_ROW, PRIMARY
 
 // A 320 px window (the min-[360px] gutters apply); the content box is set
 // explicitly, so the result doesn't depend on the runner's scrollbars.
-async function mount(page: Page, width: number, html: string) {
-  await page.setViewportSize({ width: 320, height: 640 });
+async function mount(page: Page, width: number, html: string, viewport = 320) {
+  await page.setViewportSize({ width: viewport, height: 640 });
   await page.goto("/");
   await page.evaluate(
     ([w, inner]) => {
@@ -44,6 +44,12 @@ async function oneRow(page: Page) {
   }
 }
 
+const TAB_KEYS = ["tabToday", "tabTimeline", "tabInsights", "tabMe"] as const;
+const tabs = TAB_KEYS.map(
+  (k) =>
+    `<li class="${TAB_ITEM}"><a href="#" title="${messages.app[k]}" class="flex min-h-14 flex-col items-center justify-center gap-1 rounded-2xl ${TAB_LINK_NARROW} text-xs font-medium"><span class="h-6 w-6"></span><span class="${TAB_LABEL}">${messages.app[k]}</span></a></li>`,
+).join("");
+
 test.describe("narrow journal layout", () => {
   test("a 255 px mood row holds all five 48 px faces on one row", async ({ page }) => {
     await mount(page, 255, moodRow);
@@ -57,9 +63,6 @@ test.describe("narrow journal layout", () => {
   });
 
   test("200% zoom (a 160 px page): Save and the four tabs stay inside the page, no overlap", async ({ page }) => {
-    const tabs = ["tabToday", "tabTimeline", "tabInsights", "tabMe"]
-      .map((k) => `<li class="${TAB_ITEM}"><a href="#" class="flex min-h-14 flex-col items-center justify-center gap-1 rounded-2xl ${TAB_LINK_NARROW} text-xs font-medium"><span class="h-6 w-6"></span>${messages.app[k as "tabToday"]}</a></li>`)
-      .join("");
     await mount(
       page,
       160,
@@ -77,5 +80,19 @@ test.describe("narrow journal layout", () => {
       expect(l.scroll, `tab ${i} label fits its cell`).toBeLessThanOrEqual(l.client);
       if (i > 0) expect(l.left, `tab ${i} starts after tab ${i - 1}`).toBeGreaterThanOrEqual(links[i - 1].right - 0.5);
     }
+  });
+
+  test("a 160 px viewport (200%+ zoom on a phone): the tabs are icons only, each still named by its label, nothing breaks mid-word", async ({ page }) => {
+    await mount(page, 160, `<nav><ul class="grid grid-cols-4">${tabs}</ul></nav>`, 160);
+    for (const k of TAB_KEYS) {
+      const link = page.getByRole("link", { name: messages.app[k], exact: true });
+      await expect(link).toHaveCount(1);
+      await expect(link.getByText(messages.app[k], { exact: true })).toHaveCSS("position", "absolute");
+    }
+  });
+
+  test("from 240 px the labels show again", async ({ page }) => {
+    await mount(page, 240, `<nav><ul class="grid grid-cols-4">${tabs}</ul></nav>`, 241);
+    for (const k of TAB_KEYS) await expect(page.getByText(messages.app[k], { exact: true })).not.toHaveCSS("position", "absolute");
   });
 });

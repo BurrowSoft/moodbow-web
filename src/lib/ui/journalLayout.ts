@@ -33,3 +33,7 @@ export const PRIMARY_SAVE =
 // (min-w-0), so at 200% zoom the four labels wrap instead of overlapping.
 export const TAB_ITEM = "min-w-0";
 export const TAB_LINK_NARROW = "px-1 min-[360px]:px-3 text-center leading-tight [overflow-wrap:anywhere]";
+// Under 240 CSS px (200%+ zoom on a phone) the labels can't fit without
+// breaking mid-word: icons only, each label kept as screen-reader text (the
+// link's name) and a title tooltip. Never a smaller font: that defeats zoom (UX).
+export const TAB_LABEL = "max-[240px]:sr-only";
