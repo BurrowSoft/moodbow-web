@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import messages from "@/messages/en.json";
@@ -93,10 +93,10 @@ describe("Me → AI", () => {
 
   it("tone saves on change; focus chips save the whole set in a fixed order", async () => {
     renderIt(true);
-    // Controls are disabled while a save is in flight: wait until it's done.
+    // Input is ignored while a save is in flight: wait until it's done.
     const click = async (id: string) => {
       const el = screen.getByTestId(id);
-      await waitFor(() => expect(el).toBeEnabled());
+      await waitFor(() => expect(el).not.toHaveAttribute("aria-disabled", "true"));
       fireEvent.click(el);
     };
     await click("me-ai-tone-direct");
@@ -114,5 +114,24 @@ describe("Me → AI", () => {
     expect(screen.getByTestId("me-ai-credits")).toHaveTextContent("0 credits");
     expect(screen.getByTestId("me-ai-credits")).toHaveTextContent(m.creditsLiteNow);
     expect(screen.getByTestId("me-ai-credits")).not.toHaveTextContent(m.creditsOut);
+  });
+});
+
+describe("Me → AI: keyboard focus survives a save (a11y pass)", () => {
+  it("the control in use stays enabled and focused while saving; input meanwhile is ignored", async () => {
+    let finish!: (v: unknown) => void;
+    saveTone.mockReturnValueOnce(new Promise((r) => (finish = r)));
+    renderIt(true);
+    const direct = screen.getByTestId("me-ai-tone-direct");
+    direct.focus();
+    fireEvent.click(direct);
+    await waitFor(() => expect(direct).toHaveAttribute("aria-disabled", "true"));
+    expect(direct).toBeEnabled();
+    expect(direct).toHaveFocus();
+    fireEvent.click(screen.getByTestId("me-ai-tone-brief"));
+    expect(saveTone).toHaveBeenCalledTimes(1);
+    await act(async () => finish({ ok: true }));
+    expect(direct).not.toHaveAttribute("aria-disabled", "true");
+    expect(direct).toBeChecked();
   });
 });
