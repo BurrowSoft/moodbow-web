@@ -1,6 +1,6 @@
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import messages from "@/messages/en.json";
 import { THEME_KEY } from "@/lib/appearance";
 import { Appearance } from "./Appearance";
@@ -53,5 +53,21 @@ describe("Me → Appearance: another tab's change (review of #41)", () => {
     });
     expect(document.documentElement.dataset.theme).toBeUndefined();
     expect(screen.getByTestId("me-theme-system")).toBeChecked();
+  });
+});
+
+describe("Me → Appearance with storage blocked (Web Tester #41)", () => {
+  it("choosing Dark darkens the page and the radio shows Dark", () => {
+    const blocked = () => {
+      throw new DOMException("denied", "SecurityError");
+    };
+    const get = vi.spyOn(Storage.prototype, "getItem").mockImplementation(blocked);
+    const set = vi.spyOn(Storage.prototype, "setItem").mockImplementation(blocked);
+    renderIt();
+    fireEvent.click(screen.getByTestId("me-theme-dark"));
+    expect(document.documentElement.dataset.theme).toBe("dark");
+    expect(screen.getByTestId("me-theme-dark")).toBeChecked();
+    get.mockRestore();
+    set.mockRestore();
   });
 });

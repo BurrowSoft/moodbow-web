@@ -26,16 +26,17 @@ describe("appearance", () => {
     expect(readTheme()).toBe("system");
   });
 
-  it("blocked storage: reads as system; a choice still applies for the page", () => {
+  it("blocked storage: a choice still applies and is remembered for the page", () => {
     vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
       throw new DOMException("denied", "SecurityError");
     });
     vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
       throw new DOMException("denied", "SecurityError");
     });
-    expect(readTheme()).toBe("system");
     expect(() => writeTheme("light")).not.toThrow();
     expect(document.documentElement.dataset.theme).toBe("light");
+    // The choice is remembered for this page, so the radio shows it (Web Tester #41).
+    expect(readTheme()).toBe("light");
   });
 
   it("the pre-paint script sets data-theme from storage, ignores junk, and never throws", () => {

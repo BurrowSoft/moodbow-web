@@ -5,17 +5,23 @@ export const THEME_KEY = "mb:theme";
 export const THEMES = ["system", "light", "dark"] as const;
 export type Theme = (typeof THEMES)[number];
 
+// This page's choice when storage is blocked (private mode): the radio
+// still shows what was picked, for as long as the page is open (Web Tester
+// #41).
+let fallback: Theme | null = null;
+
 export function readTheme(): Theme {
   try {
     const v = window.localStorage.getItem(THEME_KEY);
     return v === "light" || v === "dark" ? v : "system";
   } catch {
-    return "system";
+    return fallback ?? "system";
   }
 }
 
 // Saves and applies it at once (<html data-theme>; CSS does the rest).
 export function writeTheme(theme: Theme): void {
+  fallback = theme;
   try {
     if (theme === "system") window.localStorage.removeItem(THEME_KEY);
     else window.localStorage.setItem(THEME_KEY, theme);
