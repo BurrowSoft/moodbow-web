@@ -401,10 +401,46 @@ describe("CheckInCard: a save is announced and focus follows (a11y pass)", () =>
     fireEvent.click(screen.getByTestId("checkin-edit"));
     expect(screen.getByTestId("checkin-announce")).toBeEmptyDOMElement();
     // Focus goes to the chosen mood, not lost with the Edit button.
-    expect(screen.getByTestId(`checkin-mood-${ROW.mood}`)).toHaveFocus();
+    // The focus moves in an effect: wait for it (flaky under load otherwise).
+    await waitFor(() => expect(screen.getByTestId(`checkin-mood-${ROW.mood}`)).toHaveFocus());
     fireEvent.click(screen.getByTestId("checkin-save"));
     await screen.findByTestId("checkin-summary");
-    expect(screen.getByTestId("checkin-announce")).toHaveTextContent(messages.today.checkinSaved);
-    expect(screen.getByRole("heading", { name: messages.today.checkinTitle })).toHaveFocus();
+    await waitFor(() => expect(screen.getByTestId("checkin-announce")).toHaveTextContent(messages.today.checkinSaved));
+    await waitFor(() => expect(screen.getByRole("heading", { name: messages.today.checkinTitle })).toHaveFocus());
+  });
+});
+
+describe("CheckInCard: the mood radios and stress buttons for screen readers (a11y pass)", () => {
+  it("one group, named once, required; one tab stop; arrows move and choose (wrapping)", () => {
+    renderCard(null);
+    const group = screen.getByRole("radiogroup", { name: messages.today.checkinTitle });
+    expect(group).toHaveAttribute("aria-required", "true");
+    // The title is there once, as the group's label (no second legend name).
+    expect(screen.getAllByText(messages.today.checkinTitle)).toHaveLength(1);
+    expect(group).not.toHaveAttribute("aria-label");
+    const radios = screen.getAllByRole("radio");
+    expect(radios.filter((r) => r.tabIndex === 0)).toHaveLength(1);
+    expect(radios[0].tabIndex).toBe(0);
+    radios[0].focus();
+    fireEvent.keyDown(group, { key: "ArrowRight" });
+    expect(screen.getByTestId("checkin-mood-2")).toHaveAttribute("aria-checked", "true");
+    expect(screen.getByTestId("checkin-mood-2")).toHaveFocus();
+    expect(screen.getAllByRole("radio").filter((r) => r.tabIndex === 0)).toEqual([screen.getByTestId("checkin-mood-2")]);
+    fireEvent.keyDown(group, { key: "ArrowLeft" });
+    fireEvent.keyDown(group, { key: "ArrowLeft" });
+    expect(screen.getByTestId("checkin-mood-5")).toHaveAttribute("aria-checked", "true");
+    expect(screen.getByTestId("checkin-mood-5")).toHaveFocus();
+  });
+
+  it("stress buttons say what they are ('Stress 2/5'), with the digit still in the name", () => {
+    renderCard(null);
+    fireEvent.click(screen.getByTestId("checkin-mood-3"));
+    expect(screen.getByRole("button", { name: "Stress 2/5" })).toBe(screen.getByTestId("checkin-stress-2"));
+  });
+
+  it("offline-sync notices live in one region that's always there", () => {
+    renderCard(ROW);
+    const region = screen.getByTestId("checkin-notices");
+    expect(region).toHaveAttribute("role", "status");
   });
 });

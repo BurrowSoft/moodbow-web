@@ -177,3 +177,16 @@ describe("ShareMonth: the dialog takes focus and can always be closed (a11y pass
     expect(screen.queryByTestId("share-dialog")).toBeNull();
   });
 });
+
+describe("ShareMonth: the default theme follows Me → Appearance (decision 133)", () => {
+  afterEach(() => {
+    delete document.documentElement.dataset.theme;
+  });
+  it("a chosen dark theme is the card's default, whatever the system says", async () => {
+    document.documentElement.dataset.theme = "dark";
+    loadMonthCheckIns.mockResolvedValue({ status: "ok", checkIns: days(6) });
+    renderIt();
+    fireEvent.click(screen.getByTestId("share-open"));
+    expect(await screen.findByTestId("share-theme-dark")).toHaveAttribute("aria-pressed", "true");
+  });
+});
