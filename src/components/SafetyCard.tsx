@@ -14,6 +14,7 @@ import { helplinesFor, telHref } from "@/lib/safety/helplines";
 // (decision 135).
 export function SafetyCard({ country, onClose }: { country: string | null | undefined; onClose: () => void }) {
   const t = useTranslations("safety");
+  const tc = useTranslations("common");
   const lines = helplinesFor(country);
   const link = "font-medium text-accent underline underline-offset-4";
   return (
@@ -24,6 +25,12 @@ export function SafetyCard({ country, onClose }: { country: string | null | unde
             <a href={telHref(lines.helpline.dial)} data-testid="safety-call-helpline" className={link}>
               {t("safetyCall", { name: lines.helpline.name, number: lines.helpline.display })}
             </a>
+            {/* The number as plain text too, to copy or read out on a computer
+                that can't dial (decision 142); the link already says it, so
+                it isn't read twice. */}
+            <span aria-hidden="true" data-testid="safety-number-helpline" className="ml-2 select-all text-text">
+              {lines.helpline.display}
+            </span>
           </p>
         )}
         <p className="text-text">{t("safetyEmergency")}</p>
@@ -33,12 +40,17 @@ export function SafetyCard({ country, onClose }: { country: string | null | unde
             <a href={telHref(lines.emergency.dial)} data-testid="safety-call-emergency" className={link}>
               {t("safetyCallEmergency", { number: lines.emergency.display })}
             </a>
+            <span aria-hidden="true" data-testid="safety-number-emergency" className="ml-2 select-all text-text">
+              {lines.emergency.display}
+            </span>
           </p>
         )}
         {/* Always, as a quiet link under the numbers (decision 135). */}
         <p>
           <a href={lines.directoryUrl} target="_blank" rel="noopener noreferrer" data-testid="safety-find-helpline" className="text-sm text-muted underline underline-offset-4">
             {t("safetyFindHelpline")}
+            {" "}
+            <span className="sr-only">{tc("opensInNewTab")}</span>
           </a>
         </p>
         <p className="text-sm text-muted">{t("safetyNotTherapy")}</p>
