@@ -1,6 +1,6 @@
 "use client";
 
-import { startTransition, useActionState, useCallback, useEffect, useRef, useState } from "react";
+import { startTransition, useActionState, useCallback, useEffect, useId, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { EXERCISE_MINUTES, MOOD_COLOURS, MOODS, SLEEP_HOURS, SLEEP_QUALITIES, STRESS_LEVELS, type CheckIn, type SleepQuality } from "@/lib/journal/checkIn";
 import { dateLine } from "@/lib/journal/today";
@@ -307,6 +307,7 @@ function Card({ initial, uid, date: cardDate, notify, announce, autoFocus }: Pro
   const root = useRef<HTMLElement | null>(null);
   const seen = useRef(false);
   const showsSummary = !editing && fields.mood !== null;
+  const moodTitle = useId();
   useEffect(() => {
     if (!seen.current) {
       seen.current = true;
@@ -361,16 +362,16 @@ function Card({ initial, uid, date: cardDate, notify, announce, autoFocus }: Pro
       {/* One group, named once (a fieldset + a radiogroup were read twice;
           a11y pass): the title labels the radiogroup. */}
       <div>
-        <p id="checkin-mood-title" className="text-lg font-medium text-text">
+        <h2 id={moodTitle} className="text-lg font-medium text-text">
           {t("checkinTitle")}
-        </p>
+        </h2>
         {/* Narrow or large text (decision 105, app parity): every face stays a
             48 px target and the row wraps rather than shrink; when the labels
             don't fit (under 22rem, which grows with the text size) they become
             screen-reader text, so each face keeps its name, and the chosen
             mood's label shows under the row instead. */}
         <div className="@container mt-4">
-          <div className={MOOD_ROW} role="radiogroup" aria-labelledby="checkin-mood-title" aria-required="true" onKeyDown={moveMood}>
+          <div className={MOOD_ROW} role="radiogroup" aria-labelledby={moodTitle} aria-required="true" onKeyDown={moveMood}>
             {MOODS.map((mood) => (
               <button
                 key={mood}
