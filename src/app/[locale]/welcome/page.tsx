@@ -10,6 +10,11 @@ import { WelcomeSlides } from "./WelcomeSlides";
 
 // The first onboarding screen on the web (no Language step while one locale
 // ships). Behind web-journal-live.
+// Rendered per request, so the server sends the slide in ?slide= (with a
+// prerendered page, useSearchParams would leave only the Suspense fallback
+// in the HTML, and nothing would show before JS loads: decision 73).
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata({ params }: PageProps<"/[locale]/welcome">): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "onboarding" });

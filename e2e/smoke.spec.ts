@@ -369,6 +369,44 @@ test.describe("onboarding (signed out)", () => {
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Create your account");
   });
 
+  // Decision 73: the whole way to an account works before JavaScript loads
+  // (or without it): real links and native forms, server-rendered steps.
+  test.describe("without JavaScript", () => {
+    test.use({ javaScriptEnabled: false });
+
+    test("welcome → consent → sign-up, and the form answers", async ({ page }) => {
+      await page.goto("/welcome");
+      await page.getByTestId("welcome-next").click();
+      await expect(page.getByRole("heading", { level: 1 })).toHaveText("See your patterns");
+      await page.getByTestId("welcome-back").click();
+      await expect(page.getByRole("heading", { level: 1 })).toHaveText("A journal that learns your story");
+      await page.getByTestId("welcome-skip").click();
+      await expect(page.getByRole("heading", { level: 1 })).toHaveText("Private, and yours");
+      await page.getByTestId("welcome-start").click();
+      await expect(page.getByRole("heading", { level: 1 })).toHaveText("Before you start");
+
+      // Continue is enabled without JS; the browser's required check stops
+      // an incomplete form (no request is sent).
+      const cont = page.getByTestId("consent-continue");
+      await expect(cont).toBeEnabled();
+      await cont.click();
+      await expect(page).toHaveURL(/\/consent$/);
+      await page.getByTestId("consent-privacy").check();
+      await page.getByTestId("consent-health").check();
+      await cont.click();
+      await expect(page).toHaveURL(/\/sign-up$/);
+      await expect(page.getByRole("heading", { level: 1 })).toHaveText("Create your account");
+
+      // A native POST: the server answers with the page (here: no Supabase,
+      // so it fails closed with the validation message first).
+      await page.getByLabel("Email").fill("nope");
+      await page.getByLabel("Password").fill("secret-123");
+      const [response] = await Promise.all([page.waitForResponse((r) => r.request().method() === "POST"), page.getByTestId("signup-submit").click()]);
+      expect(response.status()).toBeLessThan(500);
+      await expect(page.getByTestId("signup-error")).toHaveText("Enter a valid email");
+    });
+  });
+
   test("sign-up without consent → Consent", async ({ page }) => {
     await page.goto("/sign-up");
     await expect(page).toHaveURL(/\/consent$/);

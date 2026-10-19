@@ -111,6 +111,13 @@ describe("giveConsent", () => {
     expect(rpc).not.toHaveBeenCalled();
   });
 
+  it("Auth didn't answer: the generic error, never the new-account cookie + sign-up (reviewer #18 sweep)", async () => {
+    auth.getUser.mockResolvedValue({ data: { user: null }, error: { name: "AuthRetryableFetchError", status: 0 } });
+    expect(await giveConsent(idle, form({ privacy: "on", health: "on" }))).toEqual({ status: "error", error: "generic" });
+    expect(jar.size).toBe(0);
+    expect(rpc).not.toHaveBeenCalled();
+  });
+
   it("works without Supabase config for the signed-out path", async () => {
     configured = false;
     expect(await redirected(giveConsent(idle, form({ privacy: "on", health: "on" })))).toEqual({ redirect: "/sign-up" });

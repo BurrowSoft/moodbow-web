@@ -58,5 +58,17 @@
   "web-analytics": {
     "met": false,
     "what": "Vercel Web Analytics (cookie-free visit counts, decision 79) is enabled for the moodbow-web project by Vitor in Vercel. Flipping this shows the privacy policy's visit-count lines and loads the counter (with the URL scrubber, src/lib/analytics.ts) in the same deploy."
+  },
+  "timeline-moments-rpc": {
+    "met": false,
+    "what": "get_timeline(p_before, p_limit, p_moments_only) from moodbow-app migration 005 is applied on PRODUCTION (Mobile Dev confirms; staging has it since 2026-10-19). Until then the Timeline's Moments filter shows on Previews only."
+  },
+  "offline-start": {
+    "met": false,
+    "what": "The app opens without a connection for a user who signed in before, showing the journal saved on the phone (the app's offline start, Mobile Dev). Gates the Help article line about it."
+  },
+  "reminder-live": {
+    "met": false,
+    "what": "The daily reminder is in a RELEASED app build (local notification at the chosen time, skipped if that phone saw a check-in that day). Gates the Help article about reminders."
   }
 }

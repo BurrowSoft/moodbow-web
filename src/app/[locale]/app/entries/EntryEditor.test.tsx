@@ -368,3 +368,19 @@ describe("Dialog focus", () => {
     expect(opener).toHaveFocus();
   });
 });
+
+describe("EntryEditor: a new entry for an earlier day (Timeline → Add an entry)", () => {
+  it("starts on that day and saves for it", async () => {
+    saveEntry.mockResolvedValue({ status: "saved", entry: { ...ENTRY, id: NEW_ID } });
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <EntryEditor initial={null} newId={NEW_ID} uid="u1" today="2026-10-02" startDate="2026-09-28" />
+      </NextIntlClientProvider>,
+    );
+    expect(screen.getByTestId("entry-date")).toHaveValue("2026-09-28");
+    type("Remembered later");
+    fireEvent.click(screen.getByTestId("entry-save"));
+    await waitFor(() => expect(saveEntry).toHaveBeenCalled());
+    expect(sent()).toMatchObject({ entry_date: "2026-09-28" });
+  });
+});

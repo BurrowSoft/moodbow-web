@@ -10,6 +10,10 @@ export type Me = {
   consents: Partial<Record<ConsentKind, { version: string; granted: boolean }>>;
   has_required_consents: boolean;
   today: string;
+  // user_settings (migration 001); reminder_time is "HH:MM:SS".
+  settings?: { reminder_on: boolean; reminder_time: string | null } | null;
+  // get_my_credits() (migration 003): the AI credit balance.
+  credits?: { balance: number } | null;
 };
 
 export async function getMe(supabase: Client): Promise<Me | null> {

@@ -48,7 +48,8 @@ function removeDraft(key: string) {
 
 const isRedirect = (e: unknown) => typeof (e as { digest?: unknown })?.digest === "string" && (e as { digest: string }).digest.startsWith("NEXT_REDIRECT");
 
-type Props = { initial: Entry | null; newId: string; uid: string; today: string };
+// startDate: the day a new entry starts on (a Timeline day's "Add an entry").
+type Props = { initial: Entry | null; newId: string; uid: string; today: string; startDate?: string };
 
 const noSubscribe = () => () => {};
 
@@ -60,14 +61,14 @@ export function EntryEditor(props: Props) {
   return <Editor key={inBrowser ? "browser" : "server"} {...props} restore={inBrowser} />;
 }
 
-function Editor({ initial, newId, uid, today, restore }: Props & { restore: boolean }) {
+function Editor({ initial, newId, uid, today, startDate, restore }: Props & { restore: boolean }) {
   const t = useTranslations("entry");
   const tt = useTranslations("today");
   const router = useRouter();
   const draftKey = localKey("draft-entry", uid, initial ? initial.id : "new");
 
   // What "unchanged" means: the server version, or a blank new entry.
-  const [saved, setSaved] = useState<Fields>(initial ? fromEntry(initial) : { body: "", date: today, isMoment: false });
+  const [saved, setSaved] = useState<Fields>(initial ? fromEntry(initial) : { body: "", date: startDate ?? today, isMoment: false });
   const [draft] = useState(() => {
     const d = restore ? readDraft(draftKey) : null;
     return d && (!initial || d.id === initial.id) ? d : null;
@@ -113,7 +114,7 @@ function Editor({ initial, newId, uid, today, restore }: Props & { restore: bool
           removeDraft(draftKey);
           setId(newId);
           setBase(null);
-          setFields({ body: "", date: today, isMoment: false });
+          setFields({ body: "", date: startDate ?? today, isMoment: false });
         } else {
           setDialog({ conflict: result.entry });
         }
@@ -124,7 +125,7 @@ function Editor({ initial, newId, uid, today, restore }: Props & { restore: bool
     return () => {
       cancelled = true;
     };
-  }, [restore, initial, draft, draftKey, newId, today]);
+  }, [restore, initial, draft, draftKey, newId, today, startDate]);
 
   // Autosave the draft a moment after each change; an editor put back to
   // the saved version has nothing to keep. Not before the draft was read

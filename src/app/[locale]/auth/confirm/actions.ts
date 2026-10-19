@@ -4,6 +4,7 @@ import { getLocale } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
 import { CONFIRM_FAILED, confirmTarget, keepsSession, parseConfirmLink, type ConfirmTarget } from "@/lib/authConfirm";
 import { liveFeatures } from "@/lib/liveFeatures";
+import { isAuthOutage } from "@/lib/supabase/proxy";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 // The button on /auth/confirm. Only this POST spends the token: mail
@@ -20,6 +21,12 @@ export async function confirmLink(form: FormData): Promise<void> {
   const supabase = link ? await createSupabaseServerClient() : null;
   if (link && supabase) {
     const { data, error } = await supabase.auth.verifyOtp({ type: link.type, token_hash: link.tokenHash });
+    // Auth didn't answer (down, or past the 10 s deadline): the link may
+    // well still be good, so don't call it expired. Back to the same
+    // one-button page, which says something went wrong (Try again).
+    if (isAuthOutage(error)) {
+      redirect({ href: { pathname: "/auth/confirm", query: { token_hash: link.tokenHash, type: link.type, retry: "1" } }, locale: await getLocale() });
+    }
     if (!error) {
       target = confirmTarget(link.type, !!data.session);
       if (!keepsSession(link.type, liveFeatures.webJournal)) await supabase.auth.signOut({ scope: "local" });
