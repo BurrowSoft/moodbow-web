@@ -37,3 +37,9 @@ export const TAB_LINK_NARROW = "px-1 min-[360px]:px-3 text-center leading-tight 
 // breaking mid-word: icons only, each label kept as screen-reader text (the
 // link's name) and a title tooltip. Never a smaller font: that defeats zoom (UX).
 export const TAB_LABEL = "max-[240px]:sr-only";
+
+// A segmented choice (Timeline All days/Moments, Insights ranges, the share
+// card's format and theme): the selected one in the rose accent with
+// on-accent text (colour-roles §3, UX), the others muted.
+export const segment = (active: boolean) =>
+  `inline-flex min-h-11 items-center rounded-full px-4 text-sm font-medium ${active ? "bg-accent text-on-accent" : "text-muted hover:bg-pill"}`;

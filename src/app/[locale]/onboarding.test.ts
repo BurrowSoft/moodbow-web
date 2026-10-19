@@ -262,6 +262,20 @@ describe("completeSetup", () => {
     expect(rpc).toHaveBeenLastCalledWith("complete_onboarding", { p_reminder_on: false, p_reminder_time: "21:00" });
   });
 
+  it("with AI on: the tone and the chosen focus areas, known values only, each once", async () => {
+    rpc.mockResolvedValue({ data: {}, error: null });
+    const f = form({ tone: "direct", focus_shown: "1", reminder_time: "21:00" });
+    for (const area of ["sleep", "work", "sleep", "bogus"]) f.append("focus", area);
+    await redirected(completeSetup({ status: "idle" }, f));
+    expect(rpc).toHaveBeenLastCalledWith("complete_onboarding", { p_tone: "direct", p_focus_areas: ["sleep", "work"], p_reminder_on: true, p_reminder_time: "21:00" });
+    // The focus row shown with nothing chosen: saved as none.
+    await redirected(completeSetup({ status: "idle" }, form({ tone: "brief", focus_shown: "1" })));
+    expect(rpc).toHaveBeenLastCalledWith("complete_onboarding", { p_tone: "brief", p_focus_areas: [], p_reminder_on: true, p_reminder_time: "21:00" });
+    // An unknown tone isn't sent (the RPC's default, Warm).
+    await redirected(completeSetup({ status: "idle" }, form({ tone: "shouty" })));
+    expect(rpc).toHaveBeenLastCalledWith("complete_onboarding", { p_reminder_on: true, p_reminder_time: "21:00" });
+  });
+
   it("stale consents → Consent; other errors → the generic error", async () => {
     rpc.mockResolvedValue({ data: null, error: { message: "consent_required" } });
     expect(await redirected(completeSetup({ status: "idle" }, form({})))).toEqual({ redirect: "/consent" });
