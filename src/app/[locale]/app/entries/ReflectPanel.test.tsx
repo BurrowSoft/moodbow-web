@@ -286,3 +286,35 @@ describe("ReflectPanel: Moodbow's voice colours (decision 150)", () => {
     expect(card.className).not.toMatch(/accent|#[0-9a-f]{6}/i);
   });
 });
+
+describe("ReflectPanel: the mockups' voice card (decision 161)", () => {
+  it("the reflection says who's speaking, Moodbow, in the voice colour, with Lite beside it", () => {
+    renderIt(reflection({ tier: "lite" }));
+    const voice = screen.getByTestId("reflect-voice");
+    expect(voice).toHaveTextContent(messages.app.appName);
+    expect(voice.classList.contains("text-voice")).toBe(true);
+    expect(voice).toContainElement(screen.getByTestId("reflect-lite"));
+  });
+
+  it("while it reads: the voice card with Reading your entry… (visual); the status says it for screen readers", async () => {
+    let answer!: (v: unknown) => void;
+    reflectOnEntry.mockReturnValueOnce(new Promise((r) => (answer = r)));
+    renderIt();
+    fireEvent.click(screen.getByTestId("reflect-button"));
+    const card = screen.getByTestId("reflect-loading-card");
+    expect(card).toHaveAttribute("aria-hidden", "true");
+    expect(card).toHaveTextContent(m.reflectLoading);
+    expect(screen.getByTestId("reflect-status").querySelector(".sr-only")).toHaveTextContent(m.reflectLoading);
+    await act(async () => answer(ok()));
+    expect(screen.queryByTestId("reflect-loading-card")).toBeNull();
+  });
+
+  it("Write your answer is the filled button", () => {
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <ReflectPanel entryId={ENTRY} initial={reflection()} balance={600} onAnswer={vi.fn()} />
+      </NextIntlClientProvider>,
+    );
+    expect(screen.getByTestId("reflect-answer").classList.contains("bg-accent")).toBe(true);
+  });
+});

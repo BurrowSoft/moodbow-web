@@ -5,7 +5,9 @@ import { useTranslations } from "next-intl";
 import { BackLink } from "@/components/BackLink";
 import { Dialog, dialogButton } from "@/components/Dialog";
 import { useRouter } from "@/i18n/navigation";
-import { MOOD_COLOURS, MOOD_DOT_OUTLINE, type CheckIn } from "@/lib/journal/checkIn";
+import type { CheckIn } from "@/lib/journal/checkIn";
+import { MoodFace } from "@/components/MoodFace";
+import { ValueDot } from "@/components/ValueDot";
 import type { Entry } from "@/lib/journal/entry";
 import type { Origin } from "@/lib/journal/origin";
 import type { Reflection } from "@/lib/journal/reflect";
@@ -260,14 +262,15 @@ function Screen({ entry: initial, checkIn, from, backLabel, dateLocaleTag, uid, 
       {checkIn && checkIn.local_date === entry.entry_date && (
         <div data-testid="entry-checkin" className="flex flex-wrap items-center gap-x-3 gap-y-2">
           <span className="flex items-center gap-2 text-sm font-medium text-text">
-            <span className={`h-5 w-5 rounded-full ${MOOD_COLOURS[checkIn.mood - 1]} ${MOOD_DOT_OUTLINE}`} aria-hidden="true" />
+            <MoodFace mood={checkIn.mood} className="h-7 w-7" />
             {tt(`mood${checkIn.mood}` as "mood1")}
           </span>
           {chips.length > 0 && (
             <ul className="flex flex-wrap gap-2">
-              {chips.map((chip) => (
-                <li key={chip} className="rounded-full bg-pill px-3 py-0.5 text-xs text-text">
-                  {chip}
+              {chips.map(({ label, hex }) => (
+                <li key={label} className="inline-flex items-center gap-1.5 rounded-full bg-pill px-3 py-0.5 text-xs text-text">
+                  <ValueDot hex={hex} />
+                  {label}
                 </li>
               ))}
             </ul>

@@ -191,11 +191,15 @@ export function ReflectPanel({ entryId, initial, balance, country, onAnswer }: P
         // mood colour and never the entry's mood. Focusable (-1): it takes
         // focus from Reflect, which goes with it (one-shot, reviewer #51).
         <div ref={resultBox} tabIndex={-1} data-testid="reflect-result" className="rounded-2xl border-l-4 border-voice bg-voice-surface p-4 focus:outline-none">
-          {reflection.tier === "lite" && (
-            <span data-testid="reflect-lite" className="mb-2 inline-block rounded-full border border-voice px-3 py-0.5 text-xs font-medium text-voice">
-              {t("reflectLiteBadge")}
-            </span>
-          )}
+          {/* Who's speaking (the mockups, decision 161), in the voice colour. */}
+          <p className="mb-2 flex flex-wrap items-center gap-2 text-sm font-medium text-voice" data-testid="reflect-voice">
+            <span>{ta("appName")}</span>
+            {reflection.tier === "lite" && (
+              <span data-testid="reflect-lite" className="inline-block rounded-full border border-voice px-3 py-0.5 text-xs font-medium text-voice">
+                {t("reflectLiteBadge")}
+              </span>
+            )}
+          </p>
           <p data-testid="reflect-body" className="whitespace-pre-line text-text">
             {reflection.body}
           </p>
@@ -206,7 +210,7 @@ export function ReflectPanel({ entryId, initial, balance, country, onAnswer }: P
               type="button"
               data-testid="reflect-answer"
               onClick={() => onAnswer(lastQuestion(reflection.body))}
-              className={`mt-4 ${dialogButton()}`}
+              className={`mt-4 ${dialogButton(true)}`}
             >
               {t("reflectAnswer")}
             </button>
@@ -241,6 +245,19 @@ export function ReflectPanel({ entryId, initial, balance, country, onAnswer }: P
         </div>
       )}
 
+      {/* While Moodbow reads: the voice card with "Reading your entry…" and a
+          moving bar (the mockups, decision 161). Visual only; the status
+          below says it to screen readers. */}
+      {!reflection && loading && (
+        <div aria-hidden="true" data-testid="reflect-loading-card" className="mb-4 rounded-2xl border-l-4 border-voice bg-voice-surface p-4">
+          <p className="text-sm font-medium text-voice">{ta("appName")}</p>
+          <p className="mt-1 text-muted">{t("reflectLoading")}</p>
+          <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-pill">
+            <div className="h-full w-1/3 animate-[nav-progress_1.4s_ease-in-out_infinite] rounded-full bg-voice motion-reduce:w-full motion-reduce:animate-none motion-reduce:opacity-40" />
+          </div>
+        </div>
+      )}
+
       <div>
         {/* One reflection per entry in 1.0 (m9, UX): no Reflect while one
             exists, on any entry; deleting it brings Reflect back (and focus,
@@ -259,7 +276,8 @@ export function ReflectPanel({ entryId, initial, balance, country, onAnswer }: P
           </button>
         )}
         <p role="status" data-testid="reflect-status" className="mt-3 text-sm text-muted">
-          {loading ? t("reflectLoading") : said ? t(said) : null}
+          {/* The card shows the wait; here it's for screen readers only. */}
+          {loading ? <span className="sr-only">{t("reflectLoading")}</span> : said ? t(said) : null}
         </p>
         {phase.kind === "error" && (
           <p role="alert" data-testid="reflect-error" className="text-sm font-medium text-accent">
