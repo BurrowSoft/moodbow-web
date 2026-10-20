@@ -22,7 +22,9 @@ const CHARTS: Record<Metric, { title: "chartMood" | "chartSleep" | "chartStress"
 // neutral on purpose (decision 98): "stress ↑" isn't good, "mood ↓" isn't a
 // failure, so it gets the same muted ink either way.
 // share: the "My month's moodbow" button, where share cards are on (M10).
-export function InsightsView({ rows, today, range, share }: { rows: InsightRow[]; today: string; range: Range; share?: React.ReactNode }) {
+// week: "Your week" (1.1 D), between the range tabs and the charts, where AI
+// and the weekly report are on.
+export function InsightsView({ rows, today, range, share, week }: { rows: InsightRow[]; today: string; range: Range; share?: React.ReactNode; week?: React.ReactNode }) {
   const t = useTranslations("insights");
   const tt = useTranslations("today");
   // Always one decimal for mood, stress and sleep ("4.0", "↑ 1.0": the
@@ -57,6 +59,8 @@ export function InsightsView({ rows, today, range, share }: { rows: InsightRow[]
           </Link>
         ))}
       </nav>
+
+      {week}
 
       <div className="mt-8 grid gap-6 sm:grid-cols-2">
         {METRICS.map((metric) => {

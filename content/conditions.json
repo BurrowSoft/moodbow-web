@@ -78,5 +78,9 @@
   "csp-enforced": {
     "met": true,
     "what": "The Content-Security-Policy (lib/csp.ts) is enforced instead of Report-Only. Flip only after a clean Preview run of every page (journal, share-card canvas, the OG route) with no violations reported to Sentry (reviewer's audit A1)."
+  },
+  "weekly-report-live": {
+    "met": false,
+    "what": "1.1 D \"Your week\" (specs/m9-weekly-report.md, decision 180) is tested on the app and the web against staging; then the Insights card shows on Production, which also needs AI live there (the combined AI go-live)."
   }
 }

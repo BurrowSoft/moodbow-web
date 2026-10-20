@@ -428,7 +428,21 @@
     "errRateLimited": "กรุณารอสักครู่แล้วลองอีกครั้ง",
     "cancel": "ยกเลิก",
     "reflectReady": "การสะท้อนความคิดของคุณพร้อมแล้ว",
-    "reflectDeleted": "ลบการสะท้อนความคิดแล้ว"
+    "reflectDeleted": "ลบการสะท้อนความคิดแล้ว",
+    "reportWeekly": "สัปดาห์ของคุณ",
+    "reportNotEnough": "บันทึกอย่างน้อย 3 วันในสัปดาห์นี้เพื่อรับรายงานประจำสัปดาห์",
+    "reportChanged": "อะไรเปลี่ยนไป",
+    "reportWentWell": "อะไรที่เป็นไปได้ดี",
+    "reportNotice": "สิ่งที่ควรสังเกต",
+    "reportIdea": "ไอเดียเล็กๆ หนึ่งอย่าง",
+    "reportButton": "ดูสัปดาห์ของฉัน",
+    "reportLoading": "กำลังทบทวนสัปดาห์ของคุณ…",
+    "reportError": "ตอนนี้ Moodbow ยังทบทวนสัปดาห์ของคุณไม่ได้ ลองอีกครั้งในอีกสักครู่",
+    "reportDelete": "ลบรายงาน",
+    "reportDeleteConfirmTitle": "ลบรายงานนี้ไหม",
+    "reportDeleteConfirmBody": "คุณขอรายงานใหม่ของสัปดาห์นี้ได้ และย้อนกลับไม่ได้",
+    "reportReady": "สัปดาห์ของคุณพร้อมแล้ว",
+    "reportDeleted": "ลบรายงานแล้ว"
   },
   "safety": {
     "safetyTitle": "คุณไม่จำเป็นต้องผ่านเรื่องนี้ไปคนเดียว",
