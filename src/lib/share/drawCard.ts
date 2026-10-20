@@ -1,3 +1,4 @@
+import { CHART_STROKE, chartGeometry } from "./cards";
 import { bands, LAYOUT, LOGO_RATIO, THEMES, type CardFormat, type CardTheme } from "./moodbow";
 
 // Draws the card on a 2D canvas context, in the browser; nothing is
@@ -12,6 +13,11 @@ export type CardContent = {
   line: string;
   fontFamily: string;
   logo: CanvasImageSource | null;
+  // The 1.1 cards (decision 169): the chart card draws the mood line from
+  // these values (null = a day without a check-in) instead of the arc; the
+  // milestone card's title is larger; an empty daysLabel draws no subtitle.
+  lineChart?: (number | null)[];
+  titleSize?: number;
 };
 
 type Measure = (text: string) => number;
@@ -53,20 +59,23 @@ export function drawCard(ctx: CanvasRenderingContext2D, c: CardContent): void {
     ctx.fillText(text, L.width / 2, top);
   };
 
-  centreText(c.monthLabel, L.month.top, 500, L.month.size, T.text);
+  centreText(c.monthLabel, L.month.top, 500, c.titleSize ?? L.month.size, T.text);
 
-  // The moodbow: half-circles over the top, butt ends on the baseline.
-  const { thickness, radii } = bands(c.colours.length, c.format);
-  ctx.lineCap = "butt";
-  ctx.lineWidth = thickness;
-  radii.forEach((r, i) => {
-    ctx.strokeStyle = c.colours[i];
-    ctx.beginPath();
-    ctx.arc(L.centre.x, L.centre.y, r, Math.PI, 2 * Math.PI);
-    ctx.stroke();
-  });
+  if (c.lineChart) drawLine(ctx, c.lineChart, c.format, T.muted);
+  else {
+    // The moodbow: half-circles over the top, butt ends on the baseline.
+    const { thickness, radii } = bands(c.colours.length, c.format);
+    ctx.lineCap = "butt";
+    ctx.lineWidth = thickness;
+    radii.forEach((r, i) => {
+      ctx.strokeStyle = c.colours[i];
+      ctx.beginPath();
+      ctx.arc(L.centre.x, L.centre.y, r, Math.PI, 2 * Math.PI);
+      ctx.stroke();
+    });
+  }
 
-  centreText(c.daysLabel, L.days.top, 400, L.days.size, T.muted);
+  if (c.daysLabel) centreText(c.daysLabel, L.days.top, 400, L.days.size, T.muted);
 
   if (c.line.trim()) {
     ctx.font = font(400, L.line.size);
@@ -94,4 +103,43 @@ export function drawCard(ctx: CanvasRenderingContext2D, c: CardContent): void {
     ctx.fillText("moodbow.com", L.width / 2, F.logoBottom + F.urlGap);
   }
   ctx.restore();
+}
+
+// The chart card's mood line (lib/share/cards.ts geometry): a neutral
+// baseline, the runs of consecutive days stroked with the vertical Sunrise
+// gradient, and a dot per stored value in its colour inside a muted ring.
+function drawLine(ctx: CanvasRenderingContext2D, moods: (number | null)[], format: CardFormat, muted: string): void {
+  const g = chartGeometry(moods, format);
+  const { line, dot } = CHART_STROKE[format];
+  ctx.save();
+  ctx.globalAlpha = 0.35;
+  ctx.strokeStyle = muted;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(g.baseline.x1, g.baseline.y);
+  ctx.lineTo(g.baseline.x2, g.baseline.y);
+  ctx.stroke();
+  ctx.restore();
+  const gradient = ctx.createLinearGradient(0, g.gradient.y1, 0, g.gradient.y2);
+  for (const s of g.gradient.stops) gradient.addColorStop(s.offset, s.hex);
+  ctx.strokeStyle = gradient;
+  ctx.lineWidth = line;
+  ctx.lineJoin = "round";
+  ctx.lineCap = "round";
+  for (const run of g.segments) {
+    if (run.length < 2) continue;
+    ctx.beginPath();
+    run.forEach((p, i) => (i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y)));
+    ctx.stroke();
+  }
+  for (const p of g.dots) {
+    ctx.fillStyle = muted;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, dot + 2, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.fillStyle = p.hex;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, dot, 0, 2 * Math.PI);
+    ctx.fill();
+  }
 }

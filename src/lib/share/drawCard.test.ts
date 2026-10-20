@@ -28,7 +28,14 @@ function recorder() {
   const state: Record<string, unknown> = {};
   const record = (op: string) => (...args: unknown[]) => calls.push({ op, args, state: { ...state } });
   const ctx = new Proxy(state, {
-    get: (target, key: string) => (key in target ? target[key] : key === "measureText" ? (s: string) => ({ width: s.length * 20 }) : record(key)),
+    get: (target, key: string) =>
+      key in target
+        ? target[key]
+        : key === "measureText"
+          ? (s: string) => ({ width: s.length * 20 })
+          : key === "createLinearGradient"
+            ? (...args: unknown[]) => (record(key)(...args), { addColorStop: record("addColorStop") })
+            : record(key),
     set: (target, key: string, value) => ((target[key] = value), true),
   });
   return { ctx: ctx as unknown as CanvasRenderingContext2D, calls };
@@ -119,5 +126,40 @@ describe("story safe zone (decision 141)", () => {
     expect(spans.find(([w]) => w === "September 2026")![1]).toBe(300);
     expect(spans.find(([w]) => w === "logo")![2]).toBe(1580);
     expect(spans.find(([w]) => w === "moodbow.com")![1]).toBe(1604);
+  });
+});
+
+describe("the 1.1 cards (decision 169)", () => {
+  const base = {
+    format: "story" as const,
+    theme: "light" as const,
+    colours: [],
+    monthLabel: "My last 7 days",
+    daysLabel: "4 days journaled",
+    line: "",
+    fontFamily: "Poppins, sans-serif",
+    logo: null,
+  };
+
+  it("the chart card: the mood line instead of the arc, the gradient by value, a dot per stored value; only the title, count and moodbow.com in words", () => {
+    const { ctx, calls } = recorder();
+    drawCard(ctx, { ...base, lineChart: [3, null, 5, 1, 4, null, 2] });
+    // No moodbow arcs (half-circles); only the dots' full circles.
+    expect(calls.filter((c) => c.op === "arc").every((c) => c.args[3] === 0 && c.args[4] === 2 * Math.PI)).toBe(true);
+    const gradient = calls.find((c) => c.op === "createLinearGradient")!;
+    expect(gradient.args).toEqual([0, 1100, 0, 700]);
+    expect(calls.filter((c) => c.op === "addColorStop").map((c) => c.args)).toEqual([0, 0.25, 0.5, 0.75, 1].map((o, i) => [o, MOOD_HEX[i]]));
+    // 5 stored values → 5 dots, each a muted ring then its colour.
+    expect(calls.filter((c) => c.op === "fill")).toHaveLength(10);
+    expect(calls.filter((c) => c.op === "fillText").map((c) => c.args[0])).toEqual(["My last 7 days", "4 days journaled", "moodbow.com"]);
+  });
+
+  it("the milestone card: the larger title, the arc, no subtitle", () => {
+    const { ctx, calls } = recorder();
+    drawCard(ctx, { ...base, monthLabel: "100 days of my story", daysLabel: "", titleSize: 96, colours: Array.from({ length: 31 }, (_, i) => MOOD_HEX[i % 5]) });
+    const title = calls.find((c) => c.op === "fillText")!;
+    expect(String(title.state.font)).toContain("96px");
+    expect(calls.filter((c) => c.op === "arc")).toHaveLength(31);
+    expect(calls.filter((c) => c.op === "fillText").map((c) => c.args[0])).toEqual(["100 days of my story", "moodbow.com"]);
   });
 });
