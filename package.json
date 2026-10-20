@@ -12,6 +12,7 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "test:journeys": "playwright test -c playwright.journey.config.ts",
+    "perf": "playwright test -c playwright.perf.config.ts",
     "sync:contracts": "node scripts/sync-contracts.mjs"
   },
   "engines": {
