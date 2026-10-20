@@ -8,7 +8,7 @@ import { JournalUnavailable } from "@/components/JournalUnavailable";
 import { isRange, previousRangeStart, type InsightRow, type Range } from "@/lib/journal/insights";
 import { getMe } from "@/lib/journal/me";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { tabMetadata } from "../TabPlaceholder";
+import { tabMetadata } from "../pageMeta";
 import { InsightsView } from "./InsightsView";
 import { ShareMonth } from "./ShareMonth";
 

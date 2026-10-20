@@ -9,7 +9,7 @@ import { getMe, hasCurrentConsent } from "@/lib/journal/me";
 import { SUPPORT_EMAIL } from "@/lib/site";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import packageJson from "../../../../../package.json";
-import { tabMetadata } from "../TabPlaceholder";
+import { tabMetadata } from "../pageMeta";
 import { signOut } from "./actions";
 import { GetHelpNow } from "@/components/SafetyCard";
 import { AiSettings } from "./AiSettings";

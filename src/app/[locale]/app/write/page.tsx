@@ -11,7 +11,7 @@ import { backLabel } from "@/lib/journal/backLabel";
 import { originOf } from "@/lib/journal/origin";
 import { dateLocale } from "@/lib/journal/today";
 import { EntryEditor } from "../entries/EntryEditor";
-import { titledMetadata } from "../TabPlaceholder";
+import { titledMetadata } from "../pageMeta";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/app/write">): Promise<Metadata> {
   const { locale } = await params;

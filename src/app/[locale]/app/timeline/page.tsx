@@ -8,7 +8,7 @@ import { pageGate } from "@/lib/conditions";
 import { getMe } from "@/lib/journal/me";
 import { dateLocale } from "@/lib/journal/today";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { tabMetadata } from "../TabPlaceholder";
+import { tabMetadata } from "../pageMeta";
 import { loadTimeline } from "./actions";
 import { segment } from "@/lib/ui/journalLayout";
 import { TimelineList } from "./TimelineList";
