@@ -15,7 +15,7 @@ export type SignUpState =
   // email/age echo what was typed: React resets the form after an action,
   // and the fields come back from these values (the password is held by the
   // page and never echoed).
-  | { status: "error"; error: "emailInvalid" | "passwordShort" | "ageRequired" | "emailTaken" | "generic"; email?: string; age?: boolean }
+  | { status: "error"; error: "emailInvalid" | "passwordShort" | "ageRequired" | "emailTaken" | "rateLimited" | "generic"; email?: string; age?: boolean }
   // notice: the outcome of the last action on the Check email step.
   | { status: "checkEmail"; email: string; notice?: "resent" | "notConfirmed" | "rateLimited" | "generic" };
 
@@ -64,6 +64,8 @@ async function signUp(form: FormData): Promise<SignUpState> {
     if (error.code === "user_already_exists" || error.code === "email_exists") return fail("emailTaken");
     if (error.code === "weak_password") return fail("passwordShort");
     if (error.code === "email_address_invalid") return fail("emailInvalid");
+    // Too many tries (429 / over_*): said plainly, as Send it again does (UX).
+    if (isRateLimit(error)) return fail("rateLimited");
     return fail("generic");
   }
   // With email confirmation on, Supabase answers an existing address with a
