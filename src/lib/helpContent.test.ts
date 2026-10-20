@@ -78,9 +78,10 @@ describe("help articles (content/help, copied verbatim from specs/help)", () => 
 });
 
 describe("Help is public, scoped to what's live (decision 212)", () => {
-  it("live on Production: the app's Me → Help & FAQ opens it", () => {
+  it("live on Production (the app's Me → Help & FAQ opens it) and on Previews", () => {
     for (const path of ["/help", "/help/check-ins", "/help/delete-account"]) {
       expect(isHiddenPage(path, { vercelEnv: "production" }), path).toBe(false);
+      expect(isHiddenPage(path, { vercelEnv: "preview" }), path).toBe(false);
     }
   });
 

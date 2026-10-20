@@ -74,12 +74,8 @@ describe("pageGate (fails closed)", () => {
 });
 
 describe("sitemapPaths", () => {
-  it("today: the ungated pages plus the met ones (Help: decision 212, the legal pages, account deletion)", () => {
-    expect(sitemapPaths()).toEqual(["/", "/support", "/help", "/privacy", "/terms", "/account-deletion"]);
-  });
-
-  it("lists only ungated pages while nothing is met", () => {
-    expect(sitemapPaths(() => false)).toEqual(["/", "/support"]);
+  it("after the web launch: the ungated pages, Help and account deletion (not the legal pages yet)", () => {
+    expect(sitemapPaths()).toEqual(["/", "/support", "/help", "/account-deletion"]);
   });
 
   it("adds a gated page once its condition is met", () => {
@@ -92,9 +88,11 @@ describe("isHiddenPage (the proxy's routing-level 404)", () => {
   const preview = { vercelEnv: "preview" };
 
   it("hides unmet gated pages on Production, with or without a trailing slash", () => {
-    for (const path of ["/sign-in", "/welcome", "/sign-in/"]) {
+    for (const path of ["/privacy", "/terms", "/privacy/"]) {
       expect(isHiddenPage(path, prod), path).toBe(true);
     }
+    // Live with the web launch.
+    expect(isHiddenPage("/account-deletion", prod)).toBe(false);
   });
 
   it("met gated pages are live on Production (the legal pages, account deletion, Help: decision 212)", () => {
@@ -143,17 +141,16 @@ describe("pagePath (what the proxy checks)", () => {
 describe("the web journal gate (W0)", () => {
   const prod = { vercelEnv: "production" };
 
-  it("is off, and liveFeatures.webJournal follows the condition", () => {
-    expect(conditionMet("web-journal-live")).toBe(false);
+  it("is on, and liveFeatures.webJournal follows the condition", () => {
+    expect(conditionMet("web-journal-live")).toBe(true);
     expect(liveFeatures.webJournal).toBe(conditionMet("web-journal-live"));
   });
 
-  it("hides /app and everything below it, sign-in and forgot-password on Production", () => {
+  it("shows /app and everything below it, sign-in and forgot-password on Production", () => {
     for (const path of ["/app", "/app/me", "/app/timeline", "/sign-in", "/forgot-password"]) {
-      expect(isHiddenPage(path, prod), path).toBe(true);
+      expect(isHiddenPage(path, prod), path).toBe(false);
     }
     expect(isHiddenPage("/apples", prod)).toBe(false);
-    expect(isHiddenPage("/app", { vercelEnv: "preview" })).toBe(false);
   });
 
   it("never lists the signed-in area in the sitemap, even when live", () => {
