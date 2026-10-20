@@ -7,7 +7,8 @@ import { MoodbowArc } from "@/components/MoodbowArc";
 import { conditionMet } from "@/lib/conditions";
 import { pageMetadata } from "@/lib/metadata";
 import { notifyMailto } from "@/lib/site";
-import { APP_STORE_URL, liveStores, PLAY_URL } from "@/lib/stores";
+import { APP_STORE_URL, liveStores } from "@/lib/stores";
+import { PlayStoreLink } from "@/components/PlayStoreLink";
 import { jsonLdText, softwareApplication } from "@/lib/jsonLd";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]">): Promise<Metadata> {
@@ -96,9 +97,9 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
               <p>
                 {t("storeGetApp")}{" "}
                 {stores.play && (
-                  <a href={PLAY_URL} data-testid="home-store-play" className={storeLink}>
+                  <PlayStoreLink testId="home-store-play" className={storeLink}>
                     {t("storeGooglePlay")}
-                  </a>
+                  </PlayStoreLink>
                 )}
                 {stores.play && stores.appStore && <span aria-hidden="true"> · </span>}
                 {stores.appStore && (
