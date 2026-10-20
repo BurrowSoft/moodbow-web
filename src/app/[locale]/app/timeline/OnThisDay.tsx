@@ -34,6 +34,7 @@ const read = (key: string) => {
 
 export function OnThisDay({ kind, entryId, dateLabel, preview, mood, uid, today }: Props) {
   const t = useTranslations("timeline");
+  const tt = useTranslations("today");
   // One key per user and day: a new day shows its card again.
   const key = localKey("on-this-day-hidden", uid, today);
   const hidden = useSyncExternalStore(subscribe, () => read(key), () => false);
@@ -70,6 +71,12 @@ export function OnThisDay({ kind, entryId, dateLabel, preview, mood, uid, today 
         <span className="flex items-center gap-2 text-sm text-muted">
           {mood !== null && <span className={`h-3 w-3 shrink-0 rounded-full ${MOOD_COLOURS[mood - 1]} ${MOOD_DOT_OUTLINE}`} aria-hidden="true" />}
           {dateLabel}
+          {/* The mood in words beside its dot, as on the Timeline rows (decision 161). */}
+          {mood !== null && (
+            <span data-testid="on-this-day-mood">
+              <span aria-hidden="true">·</span> {tt(`mood${mood}` as "mood1")}
+            </span>
+          )}
         </span>
         <span className="mt-1 line-clamp-2 whitespace-pre-line">{preview}</span>
       </Link>

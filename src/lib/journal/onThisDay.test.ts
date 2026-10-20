@@ -2,6 +2,9 @@
 import { describe, expect, it } from "vitest";
 import type { CrisisKeywords } from "@/lib/safety/crisis";
 import { monthsBefore, onThisDayDates, pickOnThisDay, type MomentRow } from "./onThisDay";
+import messages from "@/messages/en.json";
+import contract from "../../../content/contracts/on-this-day.json";
+import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
 
 describe("monthsBefore: the same day, earlier; no rounding", () => {
   it("across months and years", () => {
@@ -56,5 +59,27 @@ describe("pickOnThisDay", () => {
 
   it("nothing on those days: no card", () => {
     expect(pickOnThisDay([row({ entry_date: "2026-09-20" })], "2026-10-21", KEYWORDS)).toBeNull();
+  });
+});
+
+// The shared contract (moodbow-app supabase/contracts/on-this-day.json): the
+// app runs the same cases, so both pick the same memory. With the real crisis
+// list, every language (crisis-keywords rule 5).
+describe("the on-this-day.json contract (v1)", () => {
+  it("is version 1", () => {
+    expect(contract.version).toBe(1);
+  });
+  it.each(contract.monthsBefore)("monthsBefore($today, $months) = $expected", ({ today, months, expected }) => {
+    expect(monthsBefore(today, months)).toBe(expected);
+  });
+  it.each(contract.dates)("onThisDayDates($today)", ({ today, expected }) => {
+    expect(onThisDayDates(today)).toEqual(expected);
+  });
+  it.each(contract.pick)("pick: $name", ({ today, entries, expected }) => {
+    const got = pickOnThisDay(entries as MomentRow[], today, CRISIS_KEYWORDS);
+    expect(got && { kind: got.kind, id: got.entry.id }).toEqual(expected);
+  });
+  it("the labels are ours", () => {
+    expect(contract.labels).toMatchObject({ year: messages.timeline.onThisDayYear, sixMonths: messages.timeline.onThisDay6Months, month: messages.timeline.onThisDayMonth, dismiss: messages.timeline.onThisDayDismiss });
   });
 });
