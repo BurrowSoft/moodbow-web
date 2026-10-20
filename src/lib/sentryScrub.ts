@@ -28,6 +28,7 @@ type ScrubbableEvent = {
   tags?: Record<string, unknown>;
   logentry?: unknown;
   spans?: unknown[];
+  threads?: unknown;
 };
 
 type StackFrame = {
@@ -53,9 +54,11 @@ const URL_TAGS = new Set(["url", "transaction"]);
 const SAFE_CRUMB_KEYS = ["method", "status_code"];
 const URL_CRUMB_KEYS = ["url", "from", "to"];
 const UUID_SEGMENT = /\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?=\/|$)/gi;
+// A day in the path (/app/timeline/2026-10-18) says when someone journaled.
+const DATE_SEGMENT = /\/\d{4}-\d{2}-\d{2}(?=\/|$)/g;
 
 // Origin + path only: no query string and no fragment at all (tokens,
-// emails, search terms), and record ids in the path become [id].
+// emails, search terms); record ids in the path become [id] and days [date].
 export function scrubUrl(url: string | undefined): string | undefined {
   if (!url) return url;
   const absolute = /^https?:\/\//i.test(url);
@@ -65,7 +68,7 @@ export function scrubUrl(url: string | undefined): string | undefined {
   } catch {
     return undefined;
   }
-  const path = parsed.pathname.replace(UUID_SEGMENT, "/[id]");
+  const path = parsed.pathname.replace(UUID_SEGMENT, "/[id]").replace(DATE_SEGMENT, "/[date]");
   return absolute ? `${parsed.origin}${path}` : path;
 }
 
@@ -117,6 +120,9 @@ export function scrubEvent<T extends object>(input: T): T {
   // Spans carry full URLs (Supabase REST filters, auth links). Tracing is
   // off; any span that still arrives is dropped.
   delete event.spans;
+  // Thread stacks carry the same frames (with source lines) as exceptions,
+  // and nothing here needs them.
+  delete event.threads;
   event.breadcrumbs = (event.breadcrumbs ?? [])
     .map((b) => scrubBreadcrumb(b))
     .filter((b): b is Breadcrumb => b !== null);

@@ -15,6 +15,14 @@ describe("scrubUrl", () => {
   it("replaces record ids in the path", () => {
     expect(scrubUrl("/app/entries/0b9c5f7e-1d2a-4c3b-9e8f-7a6b5c4d3e2f/edit")).toBe("/app/entries/[id]/edit");
   });
+
+  it("replaces days in the path (L1): request urls, transactions and breadcrumbs all go through here", () => {
+    expect(scrubUrl("https://www.moodbow.com/app/timeline/2026-10-18")).toBe("https://www.moodbow.com/app/timeline/[date]");
+    expect(scrubUrl("/app/timeline/2026-10-18/edit")).toBe("/app/timeline/[date]/edit");
+    // Only whole segments: a date inside a longer segment stays as it is.
+    expect(scrubUrl("/help/2026-10-18-notes")).toBe("/help/2026-10-18-notes");
+    expect(scrubEvent({ transaction: "/app/timeline/2026-10-18" }).transaction).toBe("/app/timeline/[date]");
+  });
 });
 
 describe("scrubEvent", () => {
@@ -62,6 +70,11 @@ describe("scrubEvent", () => {
 
   it("drops the user entirely, including the internal id", () => {
     expect("user" in event()).toBe(false);
+  });
+
+  it("drops thread stacks (L2): their frames carry source lines too", () => {
+    const scrubbed = scrubEvent({ threads: { values: [{ stacktrace: { frames: [{ context_line: `save("${DIARY}")` }] } }] } });
+    expect("threads" in scrubbed).toBe(false);
   });
 
   it("keeps structure: exception type, stack frames, route path, method, safe contexts and tags", () => {
