@@ -11,6 +11,7 @@ import { withQuestion } from "@/lib/journal/answer";
 import { MAX_ENTRY_CHARS, sameEntry, type Entry } from "@/lib/journal/entry";
 import { localKey } from "@/lib/localData";
 import { flagsCrisis } from "@/lib/safety/crisis";
+import { holdLeaving } from "@/lib/ui/leaveGuard";
 import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
 import { PRIMARY_SAVE } from "@/lib/ui/journalLayout";
 import { deleteEntry, getEntry, saveEntry, type DeleteState, type EntryState } from "./actions";
@@ -232,6 +233,19 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
     return () => window.removeEventListener("click", onClick, true);
   }, [restore]);
 
+  // Ways out that aren't links (the keyboard shortcuts) ask the same way:
+  // the dialog opens, and the way out runs after Discard or Keep draft.
+  const leaveGo = useRef<(() => void) | null>(null);
+  useEffect(() => {
+    if (!restore) return;
+    return holdLeaving((go) => {
+      if (!keepRef.current || finished.current) return go();
+      leaveVia.current = null;
+      leaveGo.current = go;
+      setDialog("leave");
+    });
+  }, [restore]);
+
   // Opened from the entry view: the caret goes where the text was clicked
   // (a draft may be shorter: then its end), or at the end, ready to write.
   const startAt = start && (start.question || start.at === "end" ? "end" : start.at);
@@ -252,9 +266,12 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
   // still there), else the editor's own way out.
   const leaveOn = useCallback(() => {
     const a = leaveVia.current;
+    const go = leaveGo.current;
     leaveVia.current = null;
+    leaveGo.current = null;
     setDialog(null);
-    if (a?.isConnected) {
+    if (go) go();
+    else if (a?.isConnected) {
       letThrough.current = true;
       a.click();
     } else leave();
@@ -338,6 +355,7 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
 
   const closeDialog = useCallback(() => {
     leaveVia.current = null;
+    leaveGo.current = null;
     setDialog(null);
   }, []);
   const conflict = dialog && typeof dialog === "object" ? dialog.conflict : undefined;

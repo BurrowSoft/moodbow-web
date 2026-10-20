@@ -295,6 +295,37 @@ describe("EntryEditor: every way out asks (decision 206)", () => {
   });
 });
 
+describe("EntryEditor: ways out that aren't links ask too (the keyboard shortcuts; reviewer M1)", () => {
+  it("with unsaved text, leaveThen opens the dialog; Keep editing stays, Keep draft then goes", async () => {
+    const { leaveThen } = await import("@/lib/ui/leaveGuard");
+    renderEditor();
+    type("Half a thought");
+    const go = vi.fn();
+    act(() => leaveThen(go));
+    expect(screen.getByRole("dialog", { name: m.entryLeaveTitle })).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId("entry-keep-editing"));
+    expect(go).not.toHaveBeenCalled();
+    act(() => leaveThen(go));
+    fireEvent.click(screen.getByTestId("entry-keep-draft"));
+    expect(go).toHaveBeenCalledTimes(1);
+    expect(stored(NEW_KEY)).toMatchObject({ body: "Half a thought" });
+    expect(push).not.toHaveBeenCalled();
+  });
+
+  it("nothing to keep: it goes at once; with the editor gone, there's no guard left", async () => {
+    const { leaveThen } = await import("@/lib/ui/leaveGuard");
+    const { unmount } = renderEditor();
+    const go = vi.fn();
+    leaveThen(go);
+    expect(go).toHaveBeenCalledTimes(1);
+    expect(screen.queryByTestId("entry-leave-dialog")).toBeNull();
+    type("Typed");
+    unmount();
+    leaveThen(go);
+    expect(go).toHaveBeenCalledTimes(2);
+  });
+});
+
 describe("EntryEditor: Mark as a moment is a switch (decision 206)", () => {
   it("named by its label, described by its hint, and its state is exposed", () => {
     renderEditor();
