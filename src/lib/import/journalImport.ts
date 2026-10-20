@@ -39,6 +39,8 @@ export type ImportOptions = { dateOrder?: DateOrder; customMoods?: Record<string
 export const MAX_IMPORT_DAYS = 2000;
 export const MAX_IMPORT_ENTRIES = 5000;
 export const MAX_IMPORT_BYTES = 10 * 1024 * 1024;
+// Rows per server action call (check-ins or entries).
+export const IMPORT_BATCH = 100;
 
 // The file's bytes as text (M2, H4): at most 10 MB, and valid UTF-8 (a BOM is
 // fine); anything else (another encoding, a renamed image) is an error.
