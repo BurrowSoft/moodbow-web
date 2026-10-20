@@ -18,7 +18,8 @@
     "language": "ภาษา",
     "siteLinks": "ลิงก์ของเว็บไซต์",
     "languageNames": {
-      "en": "English"
+      "en": "English",
+      "th": "ไทย"
     },
     "burrowsoftProduct": "ผลิตภัณฑ์ของ BurrowSoft",
     "burrowsoftAria": "ผลิตภัณฑ์ของ BurrowSoft ไปที่ burrowsoft.com",
@@ -82,9 +83,9 @@
     "emailChangedBody": "ใช้อีเมลใหม่ในครั้งถัดไปที่เข้าสู่ระบบ",
     "emailChangePendingTitle": "ใกล้เสร็จแล้ว",
     "emailChangePendingBody": "เปิดลิงก์ที่เราส่งไปยังอีเมลอีกฉบับของคุณเพื่อเปลี่ยนอีเมลให้เสร็จ",
-    "emailConfirmedRedirect": "กำลังพาคุณไปที่ไดอารี่ใน {seconds, plural, other {# วินาที}}…",
+    "emailConfirmedRedirect": "กำลังพาคุณไปที่ไดอารี่ใน {seconds} วินาที…",
     "emailConfirmedRedirectSignIn": "กำลังพาคุณไปหน้าลงชื่อเข้าใช้ใน {seconds} วินาที…",
-    "emailConfirmedContinue": "ไปต่อ",
+    "emailConfirmedContinue": "ต่อไป",
     "emailConfirmedStay": "อยู่ที่หน้านี้",
     "emailConfirmedWebBody": "เรียบร้อยแล้ว"
   },
@@ -93,8 +94,8 @@
     "signupBody": "แตะครั้งเดียว ไดอารี่ Moodbow ของคุณก็พร้อมใช้",
     "signupButton": "ยืนยันอีเมล",
     "recoveryTitle": "ตั้งรหัสผ่านใหม่",
-    "recoveryBody": "แตะ ไปต่อ เพื่อเลือกรหัสผ่านใหม่",
-    "recoveryButton": "ไปต่อ",
+    "recoveryBody": "แตะ ต่อไป เพื่อเลือกรหัสผ่านใหม่",
+    "recoveryButton": "ต่อไป",
     "emailChangeTitle": "ยืนยันอีเมลใหม่ของคุณ",
     "emailChangeBody": "แตะปุ่มเพื่อยืนยันอีเมลใหม่ของบัญชี Moodbow",
     "emailChangeButton": "ยืนยันการเปลี่ยนอีเมล"
@@ -281,7 +282,7 @@
     "meDelete": "ลบบัญชี",
     "deleteTitle": "ลบบัญชีของคุณ?",
     "deleteBody": "การดำเนินการนี้จะลบบันทึก ข้อมูลรายวัน การสะท้อนความคิดและรายงานจาก AI สิ่งที่ Moodbow จดจำ และการตั้งค่าของคุณทันที และไม่สามารถย้อนกลับได้",
-    "deleteCredits": "เครดิต AI ของคุณจะหายไปด้วย {credits, plural, other {# เครดิต}}",
+    "deleteCredits": "เครดิต AI จำนวน {credits} เครดิตของคุณจะหายไปด้วย",
     "deleteExportFirst": "ส่งออกข้อมูลก่อน",
     "deleteTypeConfirm": "พิมพ์ DELETE เพื่อยืนยัน",
     "deleteConfirm": "ลบทั้งหมด",
@@ -421,7 +422,7 @@
     "focusHealth": "สุขภาพและร่างกาย",
     "focusSelfEsteem": "ความมั่นใจในตัวเอง",
     "creditsTitle": "เครดิต AI",
-    "creditsBalance": "{credits, plural, other {# เครดิต}}",
+    "creditsBalance": "{credits} เครดิต",
     "creditsLiteNow": "ตอนนี้คุณใช้ Moodbow AI Lite: คำตอบสั้นและเรียบง่ายขึ้น ใช้ได้ฟรีทุกวัน",
     "creditsOut": "คุณใช้เครดิต Moodbow AI หมดแล้ว เราจะใช้ Moodbow AI Lite ต่อ คำตอบจะสั้นและเรียบง่ายขึ้น",
     "reflectButton": "สะท้อนความคิดกับ Moodbow",
