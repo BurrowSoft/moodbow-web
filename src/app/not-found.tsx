@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { connection } from "next/server";
 import { getTranslations } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 import { Logo } from "@/components/Logo";
@@ -8,6 +9,9 @@ import { fontVariables } from "@/lib/fonts";
 // those here). Rendered outside [locale], so it resolves the default
 // locale's text itself. The <title> is hoisted into <head> by React.
 export default async function RootNotFound() {
+  // Rendered per request, not prerendered: its scripts need this request's
+  // CSP nonce (Next stamps it from the request header; reviewer + tester #69).
+  await connection();
   const locale = routing.defaultLocale;
   const t = await getTranslations({ locale, namespace: "notFound" });
   const tc = await getTranslations({ locale, namespace: "common" });

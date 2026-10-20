@@ -82,7 +82,7 @@ describe("EntryScreen: the view", () => {
     expect(strip).toHaveTextContent(today.mood4);
     expect(strip).toHaveTextContent("7.5 h");
     expect(strip).toHaveTextContent("30 min");
-    expect(strip).toHaveTextContent("Stress 2/5");
+    expect(strip).toHaveTextContent("Stress 2 of 5");
     expect(screen.getByTestId("entry-body").textContent).toBe(ENTRY.body);
     const order = [back, star, more, screen.getByTestId("entry-date"), strip, screen.getByTestId("entry-body"), screen.getByTestId("reflect-panel"), screen.getByTestId("entry-add-more")];
     order.slice(1).forEach((el, i) => expect(before(order[i], el)).toBe(true));
