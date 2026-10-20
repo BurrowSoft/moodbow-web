@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
-import { escapeLike, searchTerm, snippet } from "./search";
+import { searchTerm, snippet } from "./search";
 
 describe("searchTerm", () => {
   it("trimmed, at least 2 characters, at most 100", () => {
@@ -9,15 +9,6 @@ describe("searchTerm", () => {
     expect(searchTerm("   ")).toBeNull();
     expect(searchTerm("x".repeat(101))).toBeNull();
     expect(searchTerm(42)).toBeNull();
-  });
-});
-
-describe("escapeLike (UX: a user's % or _ is never a wildcard)", () => {
-  it("escapes %, _ and the escape character itself", () => {
-    expect(escapeLike("50%")).toBe("50\\%");
-    expect(escapeLike("a_b")).toBe("a\\_b");
-    expect(escapeLike("back\\slash")).toBe("back\\\\slash");
-    expect(escapeLike("plain words")).toBe("plain words");
   });
 });
 

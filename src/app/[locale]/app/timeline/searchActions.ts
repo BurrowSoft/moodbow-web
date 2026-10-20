@@ -1,7 +1,7 @@
 "use server";
 
 import { pageGate } from "@/lib/conditions";
-import { escapeLike, searchTerm, snippet, SEARCH_MAX_RESULTS, type Snippet } from "@/lib/journal/search";
+import { searchTerm, snippet, SEARCH_MAX_RESULTS, type Snippet } from "@/lib/journal/search";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 // Search your journal (1.1 L): entry text, the user's own rows (RLS), newest
@@ -17,14 +17,11 @@ export async function searchEntries(raw: string): Promise<SearchResult> {
   if (!q) return { status: "error" };
   const supabase = await createSupabaseServerClient();
   if (!supabase) return { status: "error" };
-  // One more than shown, to know whether there are more ("the newest 50").
-  const { data, error } = await supabase
-    .from("entries")
-    .select("id, entry_date, body, is_moment")
-    .ilike("body", `%${escapeLike(q)}%`)
-    .order("entry_date", { ascending: false })
-    .order("created_at", { ascending: false })
-    .limit(SEARCH_MAX_RESULTS + 1);
+  // search_entries (moodbow-app migration 010, security invoker so RLS
+  // applies): the raw text in the POST body, never a URL (decision 196); the
+  // function escapes % _ and \ itself and orders newest first. One more than
+  // shown, to know whether there are more ("the newest 50").
+  const { data, error } = await supabase.rpc("search_entries", { p_q: q, p_limit: SEARCH_MAX_RESULTS + 1 });
   if (error) return { status: "error" };
   const rows = (data ?? []) as { id: string; entry_date: string; body: string; is_moment: boolean }[];
   const shown = rows.slice(0, SEARCH_MAX_RESULTS);

@@ -16,10 +16,6 @@ export function searchTerm(raw: unknown): string | null {
   return q.length >= SEARCH_MIN && q.length <= SEARCH_MAX_CHARS ? q : null;
 }
 
-// For ilike: the user's % and _ are letters, not wildcards (and \ is escaped
-// first, as Postgres's LIKE escape character). "50%" finds "50%", not "50…".
-export const escapeLike = (q: string) => q.replace(/[\\%_]/g, (c) => `\\${c}`);
-
 // One line around the first match: the text before (cut to a word boundary,
 // with … when cut), the matched text as written, and the text after. Case-
 // insensitive like the query; line breaks become spaces. Null if there's no

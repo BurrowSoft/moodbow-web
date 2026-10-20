@@ -1,54 +1,45 @@
 // @vitest-environment node
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// Search (1.1 L): the user's own entries (RLS) by ilike, newest first, at most
-// 50, with the % and _ they typed escaped; only a snippet comes back.
-type Row = { id: string; entry_date: string; body: string; is_moment: boolean };
+// Search (1.1 L): the search_entries rpc (a POST body, never a URL: decision
+// 196) with the raw text — the function escapes % and _ itself (UX), which
+// the e2e checks ("50%" finds only a literal 50%). At most 50, and only a
+// snippet comes back.
+type Row = { id: string; entry_date: string; body: string; is_moment: boolean; created_at: string };
 let rows: Row[] = [];
 let readError: unknown = null;
 let live = true;
-const ilike = vi.fn();
-const orders: unknown[][] = [];
-let limit = 0;
+const rpc = vi.fn();
 const client = {
-  from: (table: string) =>
-    table === "entries"
-      ? {
-          select: () => {
-            const q = {
-              ilike: (...a: unknown[]) => (ilike(...a), q),
-              order: (...a: unknown[]) => (orders.push(a), q),
-              limit: async (n: number) => ((limit = n), readError ? { data: null, error: readError } : { data: rows.slice(0, n), error: null }),
-            };
-            return q;
-          },
-        }
-      : { select: () => ({ in: async () => ({ data: [{ local_date: "2026-10-20", mood: 4 }], error: null }) }) },
+  rpc: async (...a: unknown[]) => {
+    rpc(...a);
+    return readError ? { data: null, error: readError } : { data: rows, error: null };
+  },
+  from: () => ({ select: () => ({ in: async () => ({ data: [{ local_date: "2026-10-20", mood: 4 }], error: null }) }) }),
 };
 vi.mock("@/lib/supabase/server", () => ({ createSupabaseServerClient: async () => client }));
 vi.mock("@/lib/conditions", () => ({ pageGate: () => (live ? "live" : "hidden") }));
 const { searchEntries } = await import("./searchActions");
 
-const row = (n: number, body = "A long walk by the river."): Row => ({ id: `id-${n}`, entry_date: n === 0 ? "2026-10-20" : "2026-09-01", body, is_moment: n === 0 });
+const row = (n: number, body = "A long walk by the river."): Row => ({
+  id: `id-${n}`,
+  entry_date: n === 0 ? "2026-10-20" : "2026-09-01",
+  body,
+  is_moment: n === 0,
+  created_at: "2026-10-20T09:00:00Z",
+});
 
 beforeEach(() => {
   rows = [];
   readError = null;
   live = true;
-  ilike.mockReset();
-  orders.length = 0;
-  limit = 0;
+  rpc.mockReset();
 });
 
 describe("searchEntries", () => {
-  it("ilike on the body with % and _ escaped; newest first; asks for 51", async () => {
+  it("search_entries with the trimmed raw text (no client escaping) and 51", async () => {
     await searchEntries("  50%_off ");
-    expect(ilike).toHaveBeenCalledWith("body", "%50\\%\\_off%");
-    expect(orders).toEqual([
-      ["entry_date", { ascending: false }],
-      ["created_at", { ascending: false }],
-    ]);
-    expect(limit).toBe(51);
+    expect(rpc).toHaveBeenCalledWith("search_entries", { p_q: "50%_off", p_limit: 51 });
   });
 
   it("hits: id, date, moment, the day's mood and a snippet (never the whole body)", async () => {
@@ -66,18 +57,18 @@ describe("searchEntries", () => {
   });
 
   it("51 rows: 50 shown and more", async () => {
-    rows = Array.from({ length: 60 }, (_, i) => row(i + 1));
+    rows = Array.from({ length: 51 }, (_, i) => row(i + 1));
     const r = await searchEntries("walk");
     expect(r.status === "ok" && r.hits.length).toBe(50);
     expect(r.status === "ok" && r.more).toBe(true);
   });
 
-  it("too short, not live, or a failed read: error, and nothing is asked", async () => {
+  it("too short, not live, or a failed call: error, and nothing is asked", async () => {
     expect(await searchEntries("a")).toEqual({ status: "error" });
-    expect(ilike).not.toHaveBeenCalled();
+    expect(rpc).not.toHaveBeenCalled();
     live = false;
     expect(await searchEntries("walk")).toEqual({ status: "error" });
-    expect(ilike).not.toHaveBeenCalled();
+    expect(rpc).not.toHaveBeenCalled();
     live = true;
     readError = { message: "boom" };
     expect(await searchEntries("walk")).toEqual({ status: "error" });
