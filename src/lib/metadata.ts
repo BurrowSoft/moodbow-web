@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { routing, type Locale } from "@/i18n/routing";
+import { conditionMet } from "./conditions";
 import { SITE_URL } from "./site";
 
 // The public URL of a page in a locale: en is unprefixed, others get /<locale>.
@@ -36,8 +37,14 @@ type PageMetaInput = {
 
 export async function pageMetadata({ locale, path, title, description, noindex }: PageMetaInput): Promise<Metadata> {
   const t = await getTranslations({ locale, namespace: "meta" });
+  // Launch copy and image once the web journal is live (UX): until then the
+  // "Coming soon" description and the image that says so (/og-image.png).
+  const live = conditionMet("web-journal-live");
+  const image = live ? { url: `${SITE_URL}/og-launch.png`, alt: t("ogImageAltLaunch") } : { url: `${SITE_URL}/og-image.png`, alt: t("ogImageAlt") };
+  const siteDescription = live ? t("descriptionLaunch") : t("description");
+  const ogDescription = live ? t("ogDescriptionLaunch") : t("ogDescription");
   const fullTitle = title ? t("pageTitle", { title }) : t("title");
-  const desc = description ?? t("description");
+  const desc = description ?? siteDescription;
   const url = absoluteUrl(locale, path);
   return {
     title: fullTitle,
@@ -48,15 +55,15 @@ export async function pageMetadata({ locale, path, title, description, noindex }
       siteName: t("siteName"),
       url,
       title: fullTitle,
-      description: title ? desc : t("ogDescription"),
+      description: title ? desc : ogDescription,
       locale: OG_LOCALES[locale] ?? "en_US",
-      images: [{ url: `${SITE_URL}/og-image.png`, width: 1200, height: 630, alt: t("ogImageAlt") }],
+      images: [{ url: image.url, width: 1200, height: 630, alt: image.alt }],
     },
     twitter: {
       card: "summary_large_image",
       title: fullTitle,
-      description: title ? desc : t("ogDescription"),
-      images: [`${SITE_URL}/og-image.png`],
+      description: title ? desc : ogDescription,
+      images: [image.url],
     },
     robots: noindex ? { index: false, follow: false } : undefined,
   };

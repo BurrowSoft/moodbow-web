@@ -9,7 +9,7 @@ import { isRange, previousRangeStart, rangeDays, series, type InsightRow, type R
 import { loadMilestone } from "@/lib/share/milestoneData";
 import { getMe } from "@/lib/journal/me";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { tabMetadata } from "../TabPlaceholder";
+import { tabMetadata } from "../pageMeta";
 import { InsightsView } from "./InsightsView";
 import { ShareMonth } from "./ShareMonth";
 

@@ -6,6 +6,9 @@
     "description": "Moodbow is a private journal that helps you notice patterns in your mood, sleep and habits over time. Coming soon from BurrowSoft.",
     "ogDescription": "A private journal that helps you notice patterns in your mood, sleep and habits over time. Coming soon.",
     "ogImageAlt": "Moodbow logo with the text: Coming soon. A journal that learns your story.",
+    "descriptionLaunch": "A private journal that learns your story and shows what shapes your days.",
+    "ogDescriptionLaunch": "A private journal that learns your story and shows what shapes your days.",
+    "ogImageAltLaunch": "Moodbow: your month, as a rainbow",
     "manifestDescription": "A journal that learns your story."
   },
   "common": {
@@ -29,18 +32,24 @@
   },
   "home": {
     "comingSoon": "Coming soon",
-    "tagline": "A journal that learns your story.",
-    "intro": "Moodbow is a private journal that helps you notice patterns in your mood, sleep and habits over time. We're putting the finishing touches on it.",
+    "heroTitle": "Your month, as a rainbow",
+    "heroSub": "A private journal that learns your story and shows what shapes your days.",
     "notify": "Get notified",
     "notifyAria": "Get notified by email when Moodbow launches",
     "notifySubject": "Notify me about Moodbow",
     "notifyNote": "Email us and we'll let you know when it's ready.",
-    "feature1Title": "Seconds a day",
-    "feature1Body": "Log your mood, sleep and movement in seconds, and write about your day when you feel like it.",
-    "feature2Title": "See your patterns",
-    "feature2Body": "Your timeline and charts show what makes good days better, and what tends to come before hard ones.",
-    "feature3Title": "Private, and yours",
-    "feature3Body": "Only you can read your journal, and you can delete everything at any time."
+    "start": "Start your journal",
+    "storeSoon": "Coming soon to Google Play and the App Store",
+    "featureCheckInTitle": "Check in in 10 seconds",
+    "featureCheckInBody": "Mood, sleep, movement, stress.",
+    "featureWriteTitle": "Write it. Moodbow writes back.",
+    "featureWriteBody": "A kind reflection when you want one.",
+    "featureWriteNoAiTitle": "Write about your day",
+    "featureWriteNoAiBody": "In your own words, whenever you feel like it.",
+    "featureInsightsTitle": "See what shapes your days",
+    "featureInsightsBody": "Week, month and 3-month charts.",
+    "privateTitle": "Private by design",
+    "privateBody": "Only you can read your journal. Export or delete everything, anytime."
   },
   "support": {
     "title": "Support",
@@ -179,7 +188,6 @@
     "tabTimeline": "Timeline",
     "tabInsights": "Insights",
     "tabMe": "Me",
-    "emptyComingSoon": "Coming soon",
     "meSignOut": "Sign out",
     "retry": "Try again",
     "tryAgain": "Try again",
@@ -319,6 +327,10 @@
     "helpIntro": "Answers to common questions about using Moodbow. Can't find what you need? Email {email}."
   },
   "timeline": {
+    "onThisDayMonth": "A month ago",
+    "onThisDay6Months": "6 months ago",
+    "onThisDayYear": "A year ago",
+    "onThisDayDismiss": "Hide for today",
     "timelineTitle": "Timeline",
     "timelineAll": "All days",
     "timelineMoments": "Moments",

@@ -13,7 +13,7 @@ import { headers } from "next/headers";
 import { backLabel } from "@/lib/journal/backLabel";
 import { originOf } from "@/lib/journal/origin";
 import { dateLocale } from "@/lib/journal/today";
-import { titledMetadata } from "../../TabPlaceholder";
+import { titledMetadata } from "../../pageMeta";
 import { EntryScreen } from "./EntryScreen";
 
 // The Reflect server action runs in this page's function: room for the

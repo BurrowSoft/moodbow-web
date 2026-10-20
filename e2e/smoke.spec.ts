@@ -12,18 +12,34 @@ test.describe("home", () => {
     await page.goto("/");
     await expect(page).toHaveTitle("Moodbow — A journal that learns your story");
     await expect(page.locator("html")).toHaveAttribute("lang", "en");
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("A journal that learns your story.");
+    // The store frames' look (launch readiness): the arc, the headline, the
+    // three blocks and Private by design.
+    await expect(page.getByTestId("moodbow-arc")).toBeVisible();
+    await expect(page.getByTestId("moodbow-arc")).toHaveAttribute("aria-hidden", "true");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Your month, as a rainbow");
+    // Before the web journal is live: Coming soon and Get notified (a mailto).
     await expect(page.getByText("Coming soon", { exact: true })).toBeVisible();
     const notify = page.getByRole("link", { name: "Get notified by email when Moodbow launches" });
     await expect(notify).toHaveAttribute("href", "mailto:support@moodbow.com?subject=Notify%20me%20about%20Moodbow");
     await expect(page.getByText("Email us and we'll let you know when it's ready.")).toBeVisible();
-    await expect(page.getByText("We'll email you once", { exact: false })).toHaveCount(0);
-    for (const title of ["Seconds a day", "See your patterns", "Private, and yours"]) {
+    await expect(page.getByTestId("home-start")).toHaveCount(0);
+    for (const title of ["Check in in 10 seconds", "Write about your day", "See what shapes your days", "Private by design"]) {
       await expect(page.getByRole("heading", { level: 2, name: title })).toBeVisible();
     }
-    // welcome3BodyNoAi: no AI claim while AI isn't live.
-    await expect(page.getByText("Only you can read your journal, and you can delete everything at any time.")).toBeVisible();
+    // No AI claim while AI isn't live; store badges are text only.
+    await expect(page.getByText("Moodbow writes back")).toHaveCount(0);
     await expect(page.getByText(/\bAI\b/)).toHaveCount(0);
+    await expect(page.getByTestId("home-stores")).toHaveText("Coming soon to Google Play and the App Store");
+    await expect(page.getByTestId("home-stores").getByRole("link")).toHaveCount(0);
+  });
+
+  test("200% zoom on a phone (a 160 px page): nothing scrolls sideways (Web Tester, #65)", async ({ page }) => {
+    await page.setViewportSize({ width: 160, height: 640 });
+    await page.goto("/");
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    expect(overflow).toBeLessThanOrEqual(0);
+    const notify = await page.getByTestId("home-notify").boundingBox();
+    expect(notify!.x + notify!.width).toBeLessThanOrEqual(160);
   });
 
   test("security headers: an enforced per-request CSP nonce on every script, no violations, and Permissions-Policy (audit A1 + A2)", async ({ page, request }) => {
@@ -79,7 +95,7 @@ test.describe("home", () => {
   });
 
   test("the og image and icons are served", async ({ request }) => {
-    for (const path of ["/og-image.png", "/favicon.ico", "/favicon.svg", "/apple-touch-icon.png", "/manifest.webmanifest"]) {
+    for (const path of ["/og-image.png", "/og-launch.png", "/favicon.ico", "/favicon.svg", "/apple-touch-icon.png", "/manifest.webmanifest"]) {
       expect((await request.get(path)).status(), path).toBe(200);
     }
   });
@@ -155,7 +171,7 @@ test.describe("gated pages render as drafts outside Production", () => {
     }
   });
 
-  test("account deletion: the PM's copy, support email, the 7-day backups line (decision 44)", async ({ page }) => {
+  test("account deletion: the PM's copy, support email, the 8-day backups line (decisions 44 + 84)", async ({ page }) => {
     await page.goto("/account-deletion");
     await expect(page.getByText("In the app or on the web: open Me → Delete account, type DELETE, and confirm.")).toBeVisible();
     await expect(page.getByRole("link", { name: "support@moodbow.com" })).toHaveAttribute("href", "mailto:support@moodbow.com");

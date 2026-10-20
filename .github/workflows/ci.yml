@@ -64,3 +64,70 @@ jobs:
             playwright-report/
             test-results/
           retention-days: 7
+
+  # The launch journeys (e2e/journey): sign-up to delete account against
+  # STAGING, with throwaway @example.invalid accounts. Its own build, pointed
+  # at staging (the smoke job's build has no Supabase on purpose). PR runs
+  # only: the job is skipped on pushes to master, and the trigger is
+  # pull_request, never pull_request_target, so fork PRs get no secrets. The
+  # secrets reach only the steps below that need them, the secret key only the
+  # test step (never the build), and nothing prints them.
+  # Without the secrets every step after the check is skipped.
+  journeys:
+    name: Staging journeys
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - id: cfg
+        env:
+          URL: ${{ secrets.SUPABASE_STAGING_URL }}
+          SECRET: ${{ secrets.SUPABASE_STAGING_SECRET_KEY }}
+          PUBLISHABLE: ${{ secrets.SUPABASE_STAGING_PUBLISHABLE_KEY }}
+        run: |
+          if [ -z "$URL" ] || [ -z "$SECRET" ] || [ -z "$PUBLISHABLE" ]; then
+            echo "Staging secrets not set: journeys skipped."
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          elif [ "$(node -e 'console.log(new URL(process.env.URL).hostname)')" != "mnmkkrqponzlenvxiutd.supabase.co" ]; then
+            echo "::error::SUPABASE_STAGING_URL isn't the staging project: refusing."
+            exit 1
+          else
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.cfg.outputs.ok == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - if: steps.cfg.outputs.ok == 'true'
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: npm
+      - if: steps.cfg.outputs.ok == 'true'
+        run: npm ci
+      - if: steps.cfg.outputs.ok == 'true'
+        run: npm run build
+        env:
+          NEXT_PUBLIC_SHOW_DRAFTS: "1"
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_STAGING_URL }}
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_STAGING_PUBLISHABLE_KEY }}
+      - if: steps.cfg.outputs.ok == 'true'
+        run: npx playwright install --with-deps chromium
+      - if: steps.cfg.outputs.ok == 'true'
+        run: npm run test:journeys
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_STAGING_URL }}
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_STAGING_PUBLISHABLE_KEY }}
+          SUPABASE_STAGING_URL: ${{ secrets.SUPABASE_STAGING_URL }}
+          SUPABASE_STAGING_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_STAGING_PUBLISHABLE_KEY }}
+          SUPABASE_STAGING_SECRET_KEY: ${{ secrets.SUPABASE_STAGING_SECRET_KEY }}
+      # Traces and screenshots only: the journey writes no secrets into them,
+      # but the report holds the throwaway emails, so it's kept for 3 days.
+      - if: failure() && steps.cfg.outputs.ok == 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: journeys-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 3

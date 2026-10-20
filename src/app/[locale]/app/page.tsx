@@ -9,7 +9,7 @@ import { dateLine, dateLocale, greetingKey, localHour } from "@/lib/journal/toda
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { CheckInCard } from "./CheckInCard";
 import { EntryPreviews, type EntrySummary } from "./EntryPreviews";
-import { tabMetadata } from "./TabPlaceholder";
+import { tabMetadata } from "./pageMeta";
 import { Link } from "@/i18n/navigation";
 import { pageGate } from "@/lib/conditions";
 import { loadMilestone } from "@/lib/share/milestoneData";
