@@ -171,7 +171,7 @@
   },
   {
     "key": "home.featureCheckInTitle",
-    "en": "Check in in 10 seconds",
+    "en": "A 10-second check-in",
     "reason": "UX draft (native read pending)"
   },
   {
@@ -636,7 +636,7 @@
   },
   {
     "key": "export.exportMemories",
-    "en": "What the AI remembers",
+    "en": "What Moodbow remembers",
     "reason": "UX draft (native read pending)"
   },
   {

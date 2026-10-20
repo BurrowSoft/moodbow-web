@@ -46,7 +46,7 @@
     "storeAppStore": "App Store",
     "storeSoonPlay": "Coming soon to Google Play",
     "storeSoonAppStore": "Coming soon to the App Store",
-    "featureCheckInTitle": "Check in in 10 seconds",
+    "featureCheckInTitle": "A 10-second check-in",
     "featureCheckInBody": "Mood, sleep, movement, stress.",
     "featureWriteTitle": "Write it. Moodbow writes back.",
     "featureWriteBody": "A kind reflection when you want one.",
@@ -55,7 +55,7 @@
     "featureInsightsTitle": "See what shapes your days",
     "featureInsightsBody": "Week, month and 3-month charts.",
     "privateTitle": "Private by design",
-    "privateBody": "Only you can read your journal. Export or delete everything, anytime."
+    "privateBody": "Only you can read your journal. Export or delete everything, any time."
   },
   "support": {
     "title": "Support",
@@ -69,7 +69,7 @@
     "description": "How to delete your Moodbow account and everything in it.",
     "intro": "You can delete your account and everything in it at any time. Deleting is immediate and can't be undone.",
     "steps": "In the app or on the web: open Me → Delete account, type DELETE, and confirm.",
-    "what": "We delete your entries, check-ins, AI reflections and reports, what Moodbow remembers, your settings and your login.",
+    "what": "We delete your entries, check-ins, AI reflections and reports, what Moodbow remembers, your settings and your sign-in details.",
     "backups": "Copies in our encrypted backups are removed automatically within {days} days.",
     "noAccess": "Can't sign in? Email <support>{email}</support> from the address you signed up with and we'll delete it for you."
   },
@@ -115,11 +115,11 @@
     "successTitle": "Password changed"
   },
   "privacy": {
-    "title": "Privacy policy",
+    "title": "Privacy Policy",
     "description": "How Moodbow handles your data."
   },
   "terms": {
-    "title": "Terms of use",
+    "title": "Terms of Use",
     "description": "The terms for using Moodbow."
   },
   "legal": {
@@ -352,7 +352,7 @@
     "exportCheckins": "Check-ins",
     "exportEntries": "Entries",
     "exportReflections": "AI reflections",
-    "exportMemories": "What the AI remembers",
+    "exportMemories": "What Moodbow remembers",
     "exportField": "{label}: {value}",
     "exportMood": "Mood",
     "exportMoodValue": "{label} ({value}/5)",
@@ -377,7 +377,7 @@
     "timelineMoments": "Moments",
     "timelineEmptyTitle": "Your story starts here",
     "timelineEmptyBody": "Check in or write about your day, and it will appear here.",
-    "timelineMomentsEmpty": "No moments yet. Tap ★ on an entry to keep it here.",
+    "timelineMomentsEmpty": "No moments yet. Mark an entry as a moment to keep it here.",
     "dayNoCheckin": "No check-in this day",
     "dayAddCheckin": "Add a check-in",
     "dayAddEntry": "Add an entry",

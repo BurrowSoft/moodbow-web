@@ -7,4 +7,4 @@ topic: Privacy & account
 
 Moodbow never overwrites what you already have: a day that already has a check-in keeps it, and importing the same file twice adds nothing new. Daylio's activities and tags aren't imported. If you used your own mood names in Daylio, you match each one to a Moodbow mood first. You can import up to 2,000 days at a time; the newest come first.
 
-Imported notes are part of your journal like anything you write here, so they appear in Timeline, Insights and **Your week**, and are kept as private as the rest.{/pending}
+Imported notes are part of your journal like anything you write here, so they appear in **Timeline** and **Insights**{pending:weekly_report_live} and **Your week**{/pending}, and are kept as private as the rest.{/pending}
