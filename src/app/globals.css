@@ -187,9 +187,12 @@ body {
    and a transform, so it moves nothing else. Reduced motion: just appears. */
 /* Room at the page's very end while the milestone card floats: its height
    above the tab bar on phones (to ~15rem), above the corner on wide screens. */
-.has-floating-card { padding-bottom: 15rem; }
+/* The body is a min-h-dvh flex column with border-box sizing: on a short page
+   the padding would come out of that minimum and pull the footer up, so the
+   minimum grows by the same amount (reviewer #82). Unlayered: beats min-h-dvh. */
+.has-floating-card { padding-bottom: 15rem; min-height: calc(100dvh + 15rem); }
 @media (min-width: 48rem) {
-  .has-floating-card { padding-bottom: 12rem; }
+  .has-floating-card { padding-bottom: 12rem; min-height: calc(100dvh + 12rem); }
 }
 
 @keyframes milestone-in {
