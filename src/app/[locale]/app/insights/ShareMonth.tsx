@@ -7,6 +7,8 @@ import { segment } from "@/lib/ui/journalLayout";
 import { drawCard } from "@/lib/share/drawCard";
 import { stripPngMetadata } from "@/lib/share/pngChunks";
 import { cardFileName, formatMonth, LAYOUT, MIN_CHECK_INS, monthBands, THEMES, type CardFormat, type CardTheme } from "@/lib/share/moodbow";
+import { MILESTONE_TITLE_SIZE, type Milestone } from "@/lib/share/cards";
+import { MIN_POINTS, type Range } from "@/lib/journal/insights";
 import { loadMonthCheckIns } from "./shareActions";
 
 // "My month's moodbow" (M10, specs/m10-share-card.md): preview first,
@@ -14,23 +16,43 @@ import { loadMonthCheckIns } from "./shareActions";
 // only leaves it if the person shares or downloads it (decision 20). Only
 // colours, the month, the count and their own optional line are on it.
 // asLink: the quiet text-link trigger (a Timeline month header, decision 161).
+// The 1.1 cards (decision 169, behind share-cards-more): with chart and/or
+// milestone given, a type switch Moodbow / Chart / Milestone; initialType
+// picks the card it opens on (Today's milestone card opens on Milestone).
+export type CardType = "moodbow" | "chart" | "milestone";
+const RANGE_KEYS: Record<Range, "shareRangeWeek" | "shareRangeMonth" | "shareRange3Months"> = {
+  week: "shareRangeWeek",
+  month: "shareRangeMonth",
+  "3months": "shareRange3Months",
+};
 export function ShareMonth({
   month,
   dateLocaleTag,
   label,
   asLink = false,
   testId = "share-open",
+  chart,
+  milestone,
+  initialType = "moodbow",
+  onOpen,
 }: {
   month: string;
   dateLocaleTag: string;
-  label?: "shareButton" | "shareThisMonth";
+  label?: "shareButton" | "shareThisMonth" | "milestoneShare";
   asLink?: boolean;
   testId?: string;
+  chart?: { range: Range; moods: (number | null)[] };
+  milestone?: { n: Milestone; colours: string[] } | null;
+  initialType?: CardType;
+  onOpen?: () => void;
 }) {
   const t = useTranslations("share");
   const tt = useTranslations("today");
   const tm = useTranslations("me");
+  const ti = useTranslations("insights");
   const [open, setOpen] = useState(false);
+  const types: CardType[] = ["moodbow", ...(chart ? (["chart"] as const) : []), ...(milestone ? (["milestone"] as const) : [])];
+  const [type, setType] = useState<CardType>(initialType);
   const [colours, setColours] = useState<string[] | null>(null);
   const [failed, setFailed] = useState(false);
   const [format, setFormat] = useState<CardFormat>("story");
@@ -49,6 +71,8 @@ export function ShareMonth({
   const [sayLoading, setSayLoading] = useState(false);
   const start = () => {
     setOpen(true);
+    setType(types.includes(initialType) ? initialType : "moodbow");
+    onOpen?.();
     setSayLoading(false);
     window.setTimeout(() => setSayLoading(true), 100);
     setColours(null);
@@ -67,11 +91,23 @@ export function ShareMonth({
 
   const enough = colours !== null && colours.length >= MIN_CHECK_INS;
   const maxChars = LAYOUT[format].line.maxChars;
+  // What the chosen card shows: its title, its count line, its colours (the
+  // chart card draws the line instead), and the file's name.
+  const chartPoints = chart ? chart.moods.filter((m) => m !== null).length : 0;
+  const card =
+    type === "chart" && chart
+      ? { ready: chartPoints >= MIN_POINTS, title: t(RANGE_KEYS[chart.range]), days: t("shareDaysJournaled", { n: chartPoints }), colours: [] as string[], file: `moodbow-chart-${chart.range}.png`, label: t("shareChart") }
+      : type === "milestone" && milestone
+        ? { ready: true, title: t("shareMilestoneText", { n: milestone.n }), days: "", colours: milestone.colours, file: `moodbow-${milestone.n}-days.png`, label: t("shareMilestone") }
+        : { ready: enough, title: formatMonth(month, dateLocaleTag), days: colours ? t("shareDaysJournaled", { n: colours.length }) : "", colours: colours ?? [], file: cardFileName(month), label: t("shareMoodbow") };
+  // What the card draws, as one value: a redraw whenever any of it changes
+  // (card itself is a new object each render, reviewer #72).
+  const drawKey = [type, card.title, card.days, card.colours.join(), type === "chart" ? (chart?.moods.join() ?? "") : ""].join("|");
 
   // Draw (again) whenever something on the card changes.
   useEffect(() => {
     const el = canvas.current;
-    if (!open || !enough || !el) return;
+    if (!open || !card.ready || !el) return;
     let cancelled = false;
     setFile(null);
     setEncodeFailed(false);
@@ -89,12 +125,14 @@ export function ShareMonth({
       drawCard(ctx, {
         format,
         theme,
-        colours: colours!,
-        monthLabel: formatMonth(month, dateLocaleTag),
-        daysLabel: t("shareDaysJournaled", { n: colours!.length }),
+        colours: card.colours,
+        monthLabel: card.title,
+        daysLabel: card.days,
         line,
         fontFamily: `${family}, sans-serif`,
         logo: logo.complete && logo.naturalWidth > 0 ? logo : null,
+        lineChart: type === "chart" ? chart?.moods : undefined,
+        titleSize: type === "milestone" ? MILESTONE_TITLE_SIZE[format] : undefined,
       });
       // Pixels only: every chunk the browser's encoder adds is dropped
       // (lib/share/pngChunks.ts); the name is the month.
@@ -102,14 +140,16 @@ export function ShareMonth({
         if (cancelled) return;
         const png = blob ? stripPngMetadata(new Uint8Array(await blob.arrayBuffer())) : null;
         if (cancelled) return;
-        if (png) setFile(new File([png as BlobPart], cardFileName(month), { type: "image/png" }));
+        if (png) setFile(new File([png as BlobPart], card.file, { type: "image/png" }));
         else setEncodeFailed(true);
       }, "image/png");
     })();
     return () => {
       cancelled = true;
     };
-  }, [open, enough, colours, format, theme, line, month, dateLocaleTag, t]);
+    // card is a new object each render; drawKey stands for its content.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, card.ready, drawKey, colours, format, theme, line, month, dateLocaleTag, t]);
 
   const download = (f: File) => {
     const url = URL.createObjectURL(f);
@@ -152,34 +192,44 @@ export function ShareMonth({
             {/* Always there while the dialog is open, filled while loading, so
                 it's announced (review of #46). */}
             <p role="status" className="sr-only" data-testid="share-loading">
-              {sayLoading && colours === null && !failed ? t("shareLoading") : null}
+              {sayLoading && type === "moodbow" && colours === null && !failed ? t("shareLoading") : null}
             </p>
-            <h3 className="font-medium text-text" data-testid="share-type-moodbow">
-              {t("shareMoodbow")}
-            </h3>
-            {failed ? (
+            {types.length > 1 ? (
+              <div className="flex flex-wrap gap-2" role="group" aria-label={t("shareCardType")}>
+                {types.map((k) => (
+                  <button key={k} type="button" data-testid={`share-type-${k}`} aria-pressed={type === k} onClick={() => setType(k)} className={choice(type === k)}>
+                    {t(k === "moodbow" ? "shareMoodbow" : k === "chart" ? "shareChart" : "shareMilestone")}
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <h3 className="font-medium text-text" data-testid="share-type-moodbow">
+                {t("shareMoodbow")}
+              </h3>
+            )}
+            {type === "moodbow" && failed ? (
               <p role="alert" className="font-medium text-accent">
                 {tt("errGeneric")}
               </p>
-            ) : colours === null ? (
+            ) : type === "moodbow" && colours === null ? (
               <span className="block h-6 w-6 animate-spin rounded-full border-2 border-border border-t-accent motion-reduce:animate-none" aria-hidden="true" />
-            ) : !enough ? (
+            ) : !card.ready ? (
               <p data-testid="share-not-enough" className="text-muted">
-                {t("shareNotEnough")}
+                {type === "chart" ? ti("chartNotEnough") : t("shareNotEnough")}
               </p>
             ) : (
               <>
                 <canvas
                   ref={canvas}
                   role="img"
-                  aria-label={t("shareMoodbow")}
+                  aria-label={card.label}
                   aria-describedby="share-preview-desc"
                   data-testid="share-preview"
                   className={`mx-auto block rounded-xl border border-border ${format === "story" ? "h-80 w-[180px]" : "h-60 w-60"}`}
                 />
-                {/* What the image says, for screen readers (the month, the count and the line). */}
+                {/* What the image says, for screen readers (the title, the count and the line). */}
                 <p id="share-preview-desc" className="sr-only">
-                  <span>{formatMonth(month, dateLocaleTag)}</span> <span>{t("shareDaysJournaled", { n: colours!.length })}</span> <span>{line}</span>
+                  <span>{card.title}</span> <span>{card.days}</span> <span>{line}</span>
                 </p>
                 {/* Two choices, two named groups (decision 143). */}
                 <div className="flex flex-wrap gap-2">

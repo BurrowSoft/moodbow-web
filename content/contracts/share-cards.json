@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "note": "The 1.1 share cards (decision 169): the chart card's line geometry and the milestone selection. App and web test against these cases. Chart: one slot per day of the range, the point at the slot centre (x = box.x + w/N·(i+0.5)), mood 1 at the box bottom and 5 at the top (y = box.y + h − (v−1)/4·h), a day without a check-in breaks the line; dots take the value's Sunrise colour; the gradient runs from y1 (mood 1, bottom) to y2 (mood 5, top). Coordinates rounded to 2 decimals.",
+  "chart": [
+    {
+      "format": "story",
+      "moods": [3, null, 5, 1],
+      "segments": [[{ "x": 240, "y": 900 }], [{ "x": 640, "y": 700 }, { "x": 840, "y": 1100 }]],
+      "dots": [
+        { "x": 240, "y": 900, "hex": "#E6C7D3" },
+        { "x": 640, "y": 700, "hex": "#F3C24F" },
+        { "x": 840, "y": 1100, "hex": "#7F8CB8" }
+      ],
+      "gradient": {
+        "y1": 1100,
+        "y2": 700,
+        "stops": [
+          { "offset": 0, "hex": "#7F8CB8" },
+          { "offset": 0.25, "hex": "#A99BD1" },
+          { "offset": 0.5, "hex": "#E6C7D3" },
+          { "offset": 0.75, "hex": "#F4A77A" },
+          { "offset": 1, "hex": "#F3C24F" }
+        ]
+      },
+      "baseline": { "x1": 140, "x2": 940, "y": 1100 }
+    },
+    {
+      "format": "square",
+      "moods": [4, 4],
+      "segments": [[{ "x": 340, "y": 375 }, { "x": 740, "y": 375 }]],
+      "dots": [
+        { "x": 340, "y": 375, "hex": "#F4A77A" },
+        { "x": 740, "y": 375, "hex": "#F4A77A" }
+      ],
+      "gradient": {
+        "y1": 720,
+        "y2": 260,
+        "stops": [
+          { "offset": 0, "hex": "#7F8CB8" },
+          { "offset": 0.25, "hex": "#A99BD1" },
+          { "offset": 0.5, "hex": "#E6C7D3" },
+          { "offset": 0.75, "hex": "#F4A77A" },
+          { "offset": 1, "hex": "#F3C24F" }
+        ]
+      },
+      "baseline": { "x1": 140, "x2": 940, "y": 720 }
+    },
+    {
+      "format": "story",
+      "moods": [null, null, null],
+      "segments": [],
+      "dots": [],
+      "gradient": {
+        "y1": 1100,
+        "y2": 700,
+        "stops": [
+          { "offset": 0, "hex": "#7F8CB8" },
+          { "offset": 0.25, "hex": "#A99BD1" },
+          { "offset": 0.5, "hex": "#E6C7D3" },
+          { "offset": 0.75, "hex": "#F4A77A" },
+          { "offset": 1, "hex": "#F3C24F" }
+        ]
+      },
+      "baseline": { "x1": 140, "x2": 940, "y": 1100 }
+    }
+  ],
+  "milestones": [
+    [0, null],
+    [29, null],
+    [30, 30],
+    [99, 30],
+    [100, 100],
+    [364, 100],
+    [365, 365],
+    [1000, 365]
+  ]
+}

@@ -5,7 +5,8 @@ import { dateLocale } from "@/lib/journal/today";
 import { setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 import { JournalUnavailable } from "@/components/JournalUnavailable";
-import { isRange, previousRangeStart, type InsightRow, type Range } from "@/lib/journal/insights";
+import { isRange, previousRangeStart, rangeDays, series, type InsightRow, type Range } from "@/lib/journal/insights";
+import { loadMilestone } from "@/lib/share/milestoneData";
 import { getMe } from "@/lib/journal/me";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { tabMetadata } from "../pageMeta";
@@ -37,10 +38,19 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
     .gte("local_date", previousRangeStart(me.today, range))
     .lte("local_date", me.today);
   if (error) return <JournalUnavailable />;
-  // Share: the current month's moodbow (M10), where share cards are on.
+  // Share: the current month's moodbow (M10), where share cards are on; and,
+  // where the 1.1 cards are on too (decision 169), this range's mood line
+  // (the chart card) and the milestone reached, if any.
+  const rows = (data ?? []) as InsightRow[];
+  const more = pageGate("share-cards-more") !== "hidden";
   const share =
     pageGate("share-cards") !== "hidden" ? (
-      <ShareMonth month={me.today.slice(0, 7)} dateLocaleTag={dateLocale(locale, (await headers()).get("accept-language"), me.profile?.country ?? null)} />
+      <ShareMonth
+        month={me.today.slice(0, 7)}
+        dateLocaleTag={dateLocale(locale, (await headers()).get("accept-language"), me.profile?.country ?? null)}
+        chart={more ? { range, moods: series(rows, rangeDays(me.today, range), "mood") } : undefined}
+        milestone={more ? await loadMilestone(supabase) : undefined}
+      />
     ) : null;
-  return <InsightsView rows={(data ?? []) as InsightRow[]} today={me.today} range={range} share={share} />;
+  return <InsightsView rows={rows} today={me.today} range={range} share={share} />;
 }
