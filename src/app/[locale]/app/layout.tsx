@@ -51,7 +51,7 @@ export default async function AppLayout({ children, params }: LayoutProps<"/[loc
           <NavProgress />
         </Suspense>
         <AppNav />
-        <main id="main" className={`flex-1 ${APP_MAIN_GUTTER} pb-28 pt-10 md:pb-10`}>
+        <main id="main" className={`flex-1 ${APP_MAIN_GUTTER} pb-28 pt-10 md:pb-10 print:p-0`}>
           <div className="mx-auto max-w-3xl">{children}</div>
         </main>
       </div>

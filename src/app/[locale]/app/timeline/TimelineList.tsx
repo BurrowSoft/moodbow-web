@@ -10,6 +10,9 @@ import { dayLabel, groupByMonth, monthLabel, type TimelineDay } from "@/lib/jour
 import { MonthShare, type MonthCounts } from "./MonthShare";
 import { loadTimeline } from "./actions";
 
+// "Print this month" beside "Share this month": the same link look.
+export const PRINT_LINK = "inline-flex min-h-11 items-center text-sm font-medium text-accent underline underline-offset-4";
+
 // The Timeline (M5, decision 161): days newest first under month headers
 // (each with "Share this month" where it can make a card). Each day: its
 // mood dot and date with the mood word (a dashed dot without a check-in),
@@ -17,10 +20,10 @@ import { loadTimeline } from "./actions";
 // day and entry views. More days load as the end of the list comes into
 // view (by days, not months: a month can span two pages).
 // year: the Year card on offer in the month shares (1.1 J, Dec/Jan; UX: the
-// same entry points as the app).
-type Props = { initial: TimelineDay[]; initialDone: boolean; momentsOnly: boolean; dateLocaleTag: string; shareable?: boolean; year?: number | null };
+// same entry points as the app). printable: "Print this month" (1.1 N).
+type Props = { initial: TimelineDay[]; initialDone: boolean; momentsOnly: boolean; dateLocaleTag: string; shareable?: boolean; year?: number | null; printable?: boolean };
 
-export function TimelineList({ initial, initialDone, momentsOnly, dateLocaleTag, shareable = false, year = null }: Props) {
+export function TimelineList({ initial, initialDone, momentsOnly, dateLocaleTag, shareable = false, year = null, printable = false }: Props) {
   const t = useTranslations("timeline");
   const tt = useTranslations("today");
   const te = useTranslations("entry");
@@ -86,7 +89,14 @@ export function TimelineList({ initial, initialDone, momentsOnly, dateLocaleTag,
             <h2 id={`month-${month}`} className="text-sm font-medium uppercase tracking-wide text-muted">
               {monthLabel(month, dateLocaleTag)}
             </h2>
-            {shareable && <MonthShare month={month} dateLocaleTag={dateLocaleTag} counts={monthCounts} year={year} />}
+            <div className="flex flex-wrap items-center gap-x-4">
+              {shareable && <MonthShare month={month} dateLocaleTag={dateLocaleTag} counts={monthCounts} year={year} />}
+              {printable && (
+                <Link href={`/app/print/${month}`} data-testid={`timeline-print-${month}`} className={PRINT_LINK}>
+                  {t("printMonth")}
+                </Link>
+              )}
+            </div>
           </div>
           <ul className="mt-3 space-y-3">
             {monthDays.map((day) => {
