@@ -428,7 +428,21 @@
     "errRateLimited": "Please wait a minute and try again.",
     "cancel": "Cancel",
     "reflectReady": "Your reflection is ready",
-    "reflectDeleted": "Reflection deleted"
+    "reflectDeleted": "Reflection deleted",
+    "reportWeekly": "Your week",
+    "reportNotEnough": "Check in on at least 3 days this week to get a weekly report.",
+    "reportChanged": "What changed",
+    "reportWentWell": "What went well",
+    "reportNotice": "Worth noticing",
+    "reportIdea": "One small idea",
+    "reportButton": "See my week",
+    "reportLoading": "Looking back at your week…",
+    "reportError": "Moodbow couldn't look back at your week right now. Try again in a moment.",
+    "reportDelete": "Delete report",
+    "reportDeleteConfirmTitle": "Delete this report?",
+    "reportDeleteConfirmBody": "You can get a new one for this week. This can't be undone.",
+    "reportReady": "Your week is ready",
+    "reportDeleted": "Report deleted"
   },
   "safety": {
     "safetyTitle": "You don't have to go through this alone",

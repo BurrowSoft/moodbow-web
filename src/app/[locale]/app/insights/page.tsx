@@ -7,11 +7,14 @@ import type { Locale } from "@/i18n/routing";
 import { JournalUnavailable } from "@/components/JournalUnavailable";
 import { isRange, previousRangeStart, rangeDays, series, type InsightRow, type Range } from "@/lib/journal/insights";
 import { loadMilestone } from "@/lib/share/milestoneData";
+import { canReflect } from "@/lib/journal/ai";
+import { lastWeekStart, parseReportBody, type WeeklyReport as Report } from "@/lib/journal/report";
 import { getMe } from "@/lib/journal/me";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { tabMetadata } from "../pageMeta";
 import { InsightsView } from "./InsightsView";
 import { ShareMonth } from "./ShareMonth";
+import { WeeklyReport } from "./WeeklyReport";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/app/insights">): Promise<Metadata> {
   return tabMetadata("tabInsights", (await params).locale);
@@ -43,14 +46,32 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
   // (the chart card) and the milestone reached, if any.
   const rows = (data ?? []) as InsightRow[];
   const more = pageGate("share-cards-more") !== "hidden";
+  const dateLocaleTag = dateLocale(locale, (await headers()).get("accept-language"), me.profile?.country ?? null);
   const share =
     pageGate("share-cards") !== "hidden" ? (
       <ShareMonth
         month={me.today.slice(0, 7)}
-        dateLocaleTag={dateLocale(locale, (await headers()).get("accept-language"), me.profile?.country ?? null)}
+        dateLocaleTag={dateLocaleTag}
         chart={more ? { range, moods: series(rows, rangeDays(me.today, range), "mood") } : undefined}
         milestone={more ? await loadMilestone(supabase) : undefined}
       />
     ) : null;
-  return <InsightsView rows={rows} today={me.today} range={range} share={share} />;
+  // Your week (1.1 D): the last complete week's report, where AI is on for
+  // this user and the weekly report is (weekly-report-live). A stored one
+  // shows as is; a failed read just means the button.
+  let week: React.ReactNode = null;
+  if (pageGate("weekly-report-live") !== "hidden" && canReflect(me)) {
+    const weekStart = lastWeekStart(me.today);
+    const { data: stored } = await supabase
+      .from("ai_reports")
+      .select("id, period_start, body, tier, created_at")
+      .eq("kind", "weekly")
+      .eq("period_start", weekStart)
+      .maybeSingle();
+    const row = stored as { id: string; period_start: string; body: unknown; tier: string; created_at: string } | null;
+    const body = row ? parseReportBody(row.body) : null;
+    const initial: Report | null = row && body ? { id: row.id, week_start: row.period_start, body, tier: row.tier === "lite" ? "lite" : "full", created_at: row.created_at } : null;
+    week = <WeeklyReport initial={initial} weekStart={weekStart} dateLocaleTag={dateLocaleTag} balance={me.credits?.balance ?? 0} country={me.profile?.country ?? null} />;
+  }
+  return <InsightsView rows={rows} today={me.today} range={range} share={share} week={week} />;
 }
