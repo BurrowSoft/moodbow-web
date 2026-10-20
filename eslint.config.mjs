@@ -21,7 +21,12 @@ const SENTRY_RULES = [
 // must travel in an rpc's POST body instead (search_entries). No exceptions.
 const URL_FILTERS = "^(ilike|like|textSearch|or)$";
 const NO_URL_FILTERS = "No .ilike/.like/.textSearch/.or on Supabase queries: they put user text in the request URL and logs (decision 196). Use an rpc (POST body).";
-const QUERY_RULES = [{ selector: `CallExpression[callee.property.name=/${URL_FILTERS}/]`, message: NO_URL_FILTERS }];
+const QUERY_RULES = [
+  { selector: `CallExpression[callee.property.name=/${URL_FILTERS}/]`, message: NO_URL_FILTERS },
+  // The generic forms, .filter(col, "ilike", v) and .not(col, op, v), put
+  // values in the URL too; Array.prototype.filter never takes 3 arguments.
+  { selector: "CallExpression[callee.property.name=/^(filter|not)$/][arguments.length=3]", message: NO_URL_FILTERS },
+];
 
 const eslintConfig = defineConfig([
   ...nextVitals,
