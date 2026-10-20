@@ -551,3 +551,34 @@ describe("EntryEditor: writing prompts (1.1 I, decision 183)", () => {
     expect(screen.queryByTestId("entry-prompt")).toBeNull();
   });
 });
+
+describe("EntryEditor: a new entry's draft needs text (Web Tester #83)", () => {
+  const openOn = (startDate: string) =>
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <EntryEditor initial={null} newId={NEW_ID} uid="u1" today="2026-10-02" startDate={startDate} />
+      </NextIntlClientProvider>,
+    );
+
+  it("only the date (or moment) changed: nothing is kept when leaving", () => {
+    const { unmount } = openOn("2026-10-02");
+    fireEvent.change(screen.getByTestId("entry-date"), { target: { value: "2026-09-20" } });
+    fireEvent.click(screen.getByTestId("entry-moment"));
+    unmount();
+    expect(window.localStorage.getItem(NEW_KEY)).toBeNull();
+  });
+
+  it("an old blank draft doesn't win over the day asked for (?date=)", () => {
+    window.localStorage.setItem(NEW_KEY, JSON.stringify({ id: NEW_ID, body: "  ", date: "2026-09-20", isMoment: true, base: null }));
+    openOn("2026-09-28");
+    expect(screen.getByTestId("entry-date")).toHaveValue("2026-09-28");
+    expect(screen.getByTestId("entry-moment")).not.toBeChecked();
+  });
+
+  it("with text, the draft is kept and restored as before", () => {
+    const { unmount } = openOn("2026-10-02");
+    type("A few words");
+    unmount();
+    expect(stored(NEW_KEY)).toMatchObject({ body: "A few words" });
+  });
+});
