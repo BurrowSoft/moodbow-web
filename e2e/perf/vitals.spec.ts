@@ -25,7 +25,11 @@ type Sample = { lcp: number; cls: number; fcp: number; ttfb: number; inp: number
 async function throttle(page: Page) {
   const cdp = await page.context().newCDPSession(page);
   await cdp.send("Network.enable");
-  await cdp.send("Network.emulateNetworkConditions", { offline: false, latency: 150, downloadThroughput: (1.6 * 1024 * 1024) / 8, uploadThroughput: (750 * 1024) / 8 });
+  // One global rule (empty urlPattern = every request). The older
+  // Network.emulateNetworkConditions is deprecated and had no effect here
+  // (a 12 kB page arrived with a 41 ms TTFB under "150 ms" latency).
+  const conditions = { urlPattern: "", latency: 150, downloadThroughput: (1.6 * 1024 * 1024) / 8, uploadThroughput: (750 * 1024) / 8 };
+  await cdp.send("Network.emulateNetworkConditionsByRule", { matchedNetworkConditions: [conditions] });
   await cdp.send("Emulation.setCPUThrottlingRate", { rate: 4 });
 }
 
@@ -39,7 +43,8 @@ async function measure(page: Page, path: string): Promise<Sample> {
     webVitals.onINP((m) => { window.__v.inp = m.value; }, { reportAllChanges: true });
     new PerformanceObserver((l) => { for (const e of l.getEntries()) window.__v.long.push([e.startTime, e.duration]); }).observe({ type: "longtask", buffered: true });`);
   await throttle(page);
-  await page.goto(path, { waitUntil: "load" });
+  const nav = await page.goto(path, { waitUntil: "load" });
+  if (process.env.PERF_DEBUG) console.log("nav", path, nav?.status(), page.url(), await page.evaluate(() => JSON.stringify({ vis: document.visibilityState, nt: performance.getEntriesByType("navigation").map((e) => [Math.round((e as PerformanceNavigationTiming).responseStart), (e as PerformanceNavigationTiming).transferSize]), paint: performance.getEntriesByType("paint").map((e) => e.name) })));
   await page.waitForLoadState("networkidle");
   await page.waitForTimeout(1500);
   // One tap on a neutral spot: ends LCP observation and gives INP a sample.
@@ -89,6 +94,7 @@ for (const path of PAGES) {
       samples.push(await measure(page, path));
       await context.close();
     }
+    if (process.env.PERF_DEBUG) console.log("raw", path, JSON.stringify(samples));
     const inps = samples.map((s) => s.inp).filter((x): x is number => x !== null);
     results[path] = {
       lcp: Math.round(median(samples.map((s) => s.lcp))),
