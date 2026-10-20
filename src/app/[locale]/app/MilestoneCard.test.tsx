@@ -49,10 +49,27 @@ describe("MilestoneCard (decision 169)", () => {
     document.body.appendChild(heading);
     try {
       renderIt();
+      const focusSpy = vi.spyOn(heading, "focus");
       const close = screen.getByTestId("milestone-close");
       close.focus();
       fireEvent.click(close);
       expect(document.activeElement).toBe(heading);
+      // Without scrolling the page up to the heading (reviewer #82).
+      expect(focusSpy).toHaveBeenCalledWith({ preventScroll: true });
+    } finally {
+      heading.remove();
+    }
+  });
+
+  it("focus elsewhere (e.g. Safari doesn't focus a clicked button): left where it is", () => {
+    const heading = document.createElement("h1");
+    heading.id = "today-title";
+    heading.tabIndex = -1;
+    document.body.appendChild(heading);
+    try {
+      renderIt();
+      fireEvent.click(screen.getByTestId("milestone-not-now"));
+      expect(document.activeElement).not.toBe(heading);
     } finally {
       heading.remove();
     }

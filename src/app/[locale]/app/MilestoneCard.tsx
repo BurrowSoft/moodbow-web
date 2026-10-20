@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useRef, useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
 import { dialogButton } from "@/components/Dialog";
 import type { Milestone } from "@/lib/share/cards";
@@ -40,12 +40,16 @@ export function MilestoneCard({ n, colours, uid, month, dateLocaleTag, year = nu
       // storage unavailable: it may show again next time
     }
   }, [key]);
+  const card = useRef<HTMLElement>(null);
   const dismiss = useCallback(() => {
+    // The card (and the focused button) go: if focus was in it, it moves to
+    // Today's heading rather than dropping to the page (Web Tester #82, as
+    // #85), without scrolling the page up to it (the card floats at the
+    // bottom; reviewer #82).
+    const hadFocus = !!card.current?.contains(document.activeElement);
     markSeen();
     listeners.forEach((cb) => cb());
-    // The card (and the focused button) go: focus moves to Today's heading
-    // rather than dropping to the page (Web Tester #82, as #85).
-    document.getElementById("today-title")?.focus();
+    if (hadFocus) document.getElementById("today-title")?.focus({ preventScroll: true });
   }, [markSeen]);
   // While the card floats, the page gets room for it at its very end, after
   // the footer (Web Tester #82: an in-page spacer still left the footer
@@ -74,6 +78,7 @@ export function MilestoneCard({ n, colours, uid, month, dateLocaleTag, year = nu
     <>
       {!done && (
         <section
+          ref={card}
           aria-labelledby="milestone-title"
           data-testid="milestone-card"
           className="milestone-in fixed inset-x-3 bottom-20 z-10 rounded-3xl border border-border bg-surface p-5 shadow-lg min-[360px]:inset-x-4 md:inset-x-auto md:bottom-6 md:right-6 md:w-96"
