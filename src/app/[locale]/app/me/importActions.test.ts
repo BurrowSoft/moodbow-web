@@ -7,8 +7,13 @@ const rpc = vi.fn();
 let existingDays: string[] = [];
 let existingIds: string[] = [];
 let readError: unknown = null;
+// The session's state (coverage pass): signed in with a profile, signed
+// out, no profile, or no Supabase client at all.
+let user: { id: string } | null = { id: "u1" };
+let me: { today: string } | null = { today: "2026-10-20" };
+let noClient = false;
 const client = {
-  auth: { getUser: async () => ({ data: { user: { id: "u1" } } }) },
+  auth: { getUser: async () => ({ data: { user } }) },
   rpc: (...a: unknown[]) => rpc(...a),
   from: (table: string) => ({
     select: () => ({
@@ -19,8 +24,8 @@ const client = {
     }),
   }),
 };
-vi.mock("@/lib/supabase/server", () => ({ createSupabaseServerClient: async () => client }));
-vi.mock("@/lib/journal/me", () => ({ getMe: async () => ({ today: "2026-10-20" }) }));
+vi.mock("@/lib/supabase/server", () => ({ createSupabaseServerClient: async () => (noClient ? null : client) }));
+vi.mock("@/lib/journal/me", () => ({ getMe: async () => me }));
 vi.mock("@/i18n/navigation", () => ({ redirect: () => { throw new Error("NEXT_REDIRECT"); } }));
 vi.mock("next-intl/server", () => ({ getLocale: async () => "en" }));
 const { importCheckIns, importEntries } = await import("./importActions");
@@ -32,6 +37,9 @@ beforeEach(() => {
   existingDays = [];
   existingIds = [];
   readError = null;
+  user = { id: "u1" };
+  me = { today: "2026-10-20" };
+  noClient = false;
 });
 
 describe("importCheckIns", () => {
@@ -90,5 +98,49 @@ describe("importEntries", () => {
   it("a write that fails stops the batch with an error", async () => {
     rpc.mockResolvedValueOnce({ data: null, error: { message: "boom" } });
     expect(await importEntries([{ id: ID(1), date: "2026-10-01", body: "x" }])).toEqual({ status: "error" });
+  });
+});
+
+// Coverage pass (UX): nothing is written on any of these.
+describe("import batches: the session and the batch itself", () => {
+  const day = [{ date: "2026-10-01", mood: 4 }];
+  const note = [{ id: ID(1), date: "2026-10-01", body: "A walk" }];
+
+  it("signed out: to sign-in (both kinds of batch), nothing read or written", async () => {
+    user = null;
+    await expect(importCheckIns(day)).rejects.toThrow("NEXT_REDIRECT");
+    await expect(importEntries(note)).rejects.toThrow("NEXT_REDIRECT");
+    expect(rpc).not.toHaveBeenCalled();
+  });
+
+  it("no Supabase client, or no profile: an error, nothing written", async () => {
+    noClient = true;
+    expect(await importCheckIns(day)).toEqual({ status: "error" });
+    expect(await importEntries(note)).toEqual({ status: "error" });
+    noClient = false;
+    me = null;
+    expect(await importCheckIns(day)).toEqual({ status: "error" });
+    expect(await importEntries(note)).toEqual({ status: "error" });
+    expect(rpc).not.toHaveBeenCalled();
+  });
+
+  it("an empty batch, or not a list at all: an error before anything is asked", async () => {
+    for (const bad of [[], null, "rows", { date: "2026-10-01" }] as unknown[]) {
+      expect(await importCheckIns(bad as never)).toEqual({ status: "error" });
+      expect(await importEntries(bad as never)).toEqual({ status: "error" });
+    }
+    expect(rpc).not.toHaveBeenCalled();
+  });
+
+  it("a check-in write that fails stops the batch with an error", async () => {
+    rpc.mockResolvedValueOnce({ data: null, error: { message: "boom" } });
+    expect(await importCheckIns([...day, { date: "2026-10-02", mood: 3 }])).toEqual({ status: "error" });
+    expect(rpc).toHaveBeenCalledTimes(1);
+  });
+
+  it("the entries read fails: nothing written", async () => {
+    readError = { message: "x" };
+    expect(await importEntries(note)).toEqual({ status: "error" });
+    expect(rpc).not.toHaveBeenCalled();
   });
 });

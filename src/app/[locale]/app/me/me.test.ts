@@ -6,7 +6,9 @@ import { exportFileName } from "@/lib/journal/account";
 const rpc = vi.fn();
 const getUser = vi.fn();
 const signOut = vi.fn();
-vi.mock("@/lib/supabase/server", () => ({ createSupabaseServerClient: async () => ({ rpc, auth: { getUser, signOut } }) }));
+// No client at all: a build without the Supabase env (fails closed).
+let noClient = false;
+vi.mock("@/lib/supabase/server", () => ({ createSupabaseServerClient: async () => (noClient ? null : { rpc, auth: { getUser, signOut } }) }));
 vi.mock("next-intl/server", () => ({ getLocale: async () => "en" }));
 const setCookie = vi.fn();
 vi.mock("next/headers", () => ({ cookies: async () => ({ set: setCookie }) }));
@@ -18,7 +20,7 @@ vi.mock("@/i18n/navigation", () => ({
     throw new Redirect(args);
   },
 }));
-const { exportMyData, deleteMyAccount, saveReminder, setAiEnabled, recordAiWithdrawal, saveTone, saveFocusAreas, saveRegion } = await import("./actions");
+const { exportMyData, deleteMyAccount, saveReminder, setAiEnabled, recordAiWithdrawal, saveTone, saveFocusAreas, saveRegion, signOut: signOutAction } = await import("./actions");
 
 const UID = "0b5f2c1e-7d3a-4e8b-9c41-2a6f8e1d3b70";
 const confirm = (word: string) => {
@@ -29,6 +31,7 @@ const confirm = (word: string) => {
 const idle = { status: "idle" } as const;
 
 beforeEach(() => {
+  noClient = false;
   rpc.mockReset();
   getUser.mockReset();
   signOut.mockReset();
@@ -64,6 +67,46 @@ describe("exportMyData", () => {
     rpc.mockResolvedValue({ data: null, error: { message: "boom" } });
     expect(await exportMyData()).toEqual({ status: "error" });
   });
+
+  // Coverage pass (UX): the export's other ways out.
+  it("a lost session goes to sign-in, never an error file", async () => {
+    rpc.mockResolvedValue({ data: null, error: { message: "not_authenticated" } });
+    const thrown = (await exportMyData().catch((e) => e)) as Redirect;
+    expect(thrown.args).toEqual({ href: "/sign-in", locale: "en" });
+  });
+
+  it("no data and no error: still an error, never an empty file", async () => {
+    rpc.mockResolvedValue({ data: null, error: null });
+    expect(await exportMyData()).toEqual({ status: "error" });
+  });
+
+  it("no Supabase client (a build without the env): an error, nothing asked", async () => {
+    noClient = true;
+    expect(await exportMyData()).toEqual({ status: "error" });
+    expect(rpc).not.toHaveBeenCalled();
+  });
+
+  it("no exported_at, or a time zone that isn't a string: the JSON still comes back, the day is blank or UTC", async () => {
+    rpc.mockResolvedValue({ data: { format: "moodbow-export", format_version: 1 }, error: null });
+    expect(await exportMyData()).toMatchObject({ status: "ok", date: "" });
+    rpc.mockResolvedValue({ data: { format: "moodbow-export", format_version: 1, exported_at: "2026-10-02T23:30:00Z", profile: { time_zone: 7 } }, error: null });
+    expect(await exportMyData()).toMatchObject({ status: "ok", date: "2026-10-02" });
+  });
+});
+
+describe("signOut (Me → Sign out: this browser only)", () => {
+  it("signs out locally and goes to sign-in", async () => {
+    const thrown = (await signOutAction().catch((e) => e)) as Redirect;
+    expect(signOut).toHaveBeenCalledWith({ scope: "local" });
+    expect(thrown.args).toEqual({ href: "/sign-in", locale: "en" });
+  });
+
+  it("no Supabase client: still goes to sign-in", async () => {
+    noClient = true;
+    const thrown = (await signOutAction().catch((e) => e)) as Redirect;
+    expect(signOut).not.toHaveBeenCalled();
+    expect(thrown.args.href).toBe("/sign-in");
+  });
 });
 
 describe("deleteMyAccount", () => {
@@ -98,6 +141,26 @@ describe("deleteMyAccount", () => {
   it("an Auth outage is the generic error, never a sign-out", async () => {
     getUser.mockResolvedValue({ data: { user: null }, error: { name: "AuthRetryableFetchError" } });
     expect(await deleteMyAccount(idle, confirm("DELETE"))).toEqual({ status: "error", error: "generic" });
+    expect(rpc).not.toHaveBeenCalled();
+  });
+
+  // Coverage pass (UX): nothing is deleted on any of these.
+  it("signed out already (no user, not an outage): to sign-in, nothing deleted or wiped", async () => {
+    getUser.mockResolvedValue({ data: { user: null }, error: { name: "AuthSessionMissingError" } });
+    const thrown = (await deleteMyAccount(idle, confirm("DELETE")).catch((e) => e)) as Redirect;
+    expect(thrown.args).toEqual({ href: "/sign-in", locale: "en" });
+    expect(rpc).not.toHaveBeenCalled();
+    expect(setCookie).not.toHaveBeenCalled();
+  });
+
+  it("no Supabase client: the generic error, nothing deleted", async () => {
+    noClient = true;
+    expect(await deleteMyAccount(idle, confirm("DELETE"))).toEqual({ status: "error", error: "generic" });
+    expect(rpc).not.toHaveBeenCalled();
+  });
+
+  it("no confirm field at all: the confirm error", async () => {
+    expect(await deleteMyAccount(idle, new FormData())).toEqual({ status: "error", error: "confirm" });
     expect(rpc).not.toHaveBeenCalled();
   });
 });

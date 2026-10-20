@@ -123,3 +123,41 @@ describe("scrubBreadcrumb", () => {
     ).toEqual({ category: "fetch", type: "http", data: { url: "https://x.supabase.co/rest/v1/entries", method: "GET", status_code: 200 } });
   });
 });
+
+// Coverage pass (UX): the edges, where scrubbing must fail safe.
+describe("scrubbing at the edges", () => {
+  it("scrubUrl: nothing stays nothing; a relative path without a leading slash is still a path; an unparseable URL is dropped", () => {
+    expect(scrubUrl(undefined)).toBeUndefined();
+    expect(scrubUrl("")).toBe("");
+    expect(scrubUrl("app/entries/0b9c5f7e-1d2a-4c3b-9e8f-7a6b5c4d3e2f?x=1")).toBe("/app/entries/[id]");
+    expect(scrubUrl("https://[not-a-host/app?q=walk")).toBeUndefined();
+  });
+
+  it("a transaction that can't be parsed becomes [redacted], never the raw text", () => {
+    expect(scrubEvent({ transaction: `https://[not-a-host/${DIARY}` }).transaction).toBe(REDACTED);
+  });
+
+  it("URL tags that aren't strings are dropped; unknown tags never survive", () => {
+    const e = scrubEvent({ tags: { url: 42, transaction: "/app/timeline/2026-10-18?q=x", diary: DIARY } });
+    expect(e.tags).toEqual({ transaction: "/app/timeline/[date]" });
+  });
+
+  it("an event with nothing to scrub: no crash, empty breadcrumbs, nothing invented", () => {
+    const e = scrubEvent({}) as Record<string, unknown>;
+    expect(e).toEqual({ breadcrumbs: [] });
+  });
+
+  it("an exception with no value, mechanism or stack is kept as it is", () => {
+    const e = scrubEvent({ exception: { values: [{ type: "TypeError" }] } });
+    expect(e.exception?.values).toEqual([{ type: "TypeError" }]);
+  });
+
+  it("a breadcrumb's URL that isn't a string is dropped, never kept raw", () => {
+    expect(scrubBreadcrumb({ category: "fetch", data: { url: { href: `/x?q=${DIARY}` }, method: "POST" } })).toEqual({ category: "fetch", data: { method: "POST" } });
+  });
+
+  it("a trace context without its keys keeps nothing but an empty trace", () => {
+    const e = scrubEvent({ contexts: { trace: { data: { url: `/x?q=${DIARY}` } } } });
+    expect(e.contexts).toEqual({ trace: {} });
+  });
+});
