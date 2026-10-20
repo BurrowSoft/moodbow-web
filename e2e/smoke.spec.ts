@@ -138,6 +138,17 @@ test.describe("language: Thai is a draft, not offered (thai-offered-live)", () =
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Moodbow Privacy Policy");
     await expect(page.getByTestId("draft-banner")).toBeVisible();
   });
+
+  test("/th/account-deletion: treated as legal: the English page under the Thai line (UX, #112)", async ({ page }) => {
+    const res = await page.goto("/th/account-deletion");
+    expect(res?.status()).toBe(200);
+    await expect(page.getByTestId("page-notice")).toHaveText("หน้านี้มีให้อ่านเป็นภาษาอังกฤษ");
+    await expect(page.locator("article")).toHaveAttribute("lang", "en");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Delete your Moodbow account");
+    await expect(page.getByTestId("backups-line")).toHaveText("Copies in our encrypted backups are removed automatically within 8 days.");
+    // Never the draft Thai translation of this page (th.json accountDeletion.title).
+    await expect(page.locator("main")).not.toContainText("ลบบัญชี Moodbow ของคุณ");
+  });
 });
 
 test.describe("support", () => {
