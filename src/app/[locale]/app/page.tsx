@@ -65,7 +65,6 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
         </p>
       </header>
       <CheckInCard initial={(data as CheckIn | null) ?? null} uid={user.id} date={me.today} dateLocaleTag={dateLocaleTag} />
-      {milestone && <MilestoneCard n={milestone.n} colours={milestone.colours} uid={user.id} month={me.today.slice(0, 7)} dateLocaleTag={dateLocaleTag} />}
       <Link
         href="/app/write"
         data-testid="today-write"
@@ -86,6 +85,9 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
           <EntryPreviews entries={entries as EntrySummary[]} testIdPrefix="today-entry" from="/app" timeZone={me.profile?.time_zone ?? "UTC"} dateLocaleTag={dateLocaleTag} />
         </section>
       )}
+      {/* Last on the page: it floats above the tab bar (decision 186), and its
+          spacer is the page's end, so its late arrival moves nothing. */}
+      {milestone && <MilestoneCard n={milestone.n} colours={milestone.colours} uid={user.id} month={me.today.slice(0, 7)} dateLocaleTag={dateLocaleTag} />}
     </section>
   );
 }

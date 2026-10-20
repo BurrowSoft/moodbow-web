@@ -183,6 +183,21 @@ body {
   .fade-in { animation: none; }
 }
 
+/* Today's milestone offer (decision 186): slides up from below; it's fixed,
+   and a transform, so it moves nothing else. Reduced motion: just appears. */
+@keyframes milestone-in {
+  from { transform: translateY(1.5rem); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
+.milestone-in {
+  animation: milestone-in 300ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .milestone-in { animation: none; }
+}
+
 /* Long-form legal text (content/legal/*.md rendered by marked). */
 .legal-prose h2 { margin-top: 2rem; font-size: 1.25rem; font-weight: 500; color: var(--text); }
 .legal-prose h3 { margin-top: 1.5rem; font-size: 1.05rem; font-weight: 500; color: var(--text); }

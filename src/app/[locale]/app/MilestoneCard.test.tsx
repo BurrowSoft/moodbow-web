@@ -33,6 +33,26 @@ describe("MilestoneCard (decision 169)", () => {
     expect(share).toHaveAttribute("data-n", "30");
   });
 
+  it("decision 186: fixed above the tab bar (out of the flow), a spacer keeps the page's end reachable, announced once politely", () => {
+    renderIt();
+    expect(screen.getByTestId("milestone-card").className).toMatch(/\bfixed\b/);
+    expect(screen.getByTestId("milestone-card").className).toMatch(/\bmilestone-in\b/);
+    expect(screen.getByTestId("milestone-spacer")).toHaveAttribute("aria-hidden", "true");
+    expect(screen.getByRole("status")).toHaveTextContent("30 days of your story");
+  });
+
+  it("✕ is Not now by name, and does the same", () => {
+    renderIt();
+    // Two controls named "Not now": the ✕ and the text button.
+    expect(screen.getAllByRole("button", { name: messages.share.milestoneNotNow })).toHaveLength(2);
+    fireEvent.click(screen.getByTestId("milestone-close"));
+    expect(screen.queryByTestId("milestone-card")).toBeNull();
+    expect(screen.queryByTestId("milestone-spacer")).toBeNull();
+    expect(window.localStorage.getItem(KEY)).toBe("1");
+    // The live region stays (empty), so it's never re-announced.
+    expect(screen.getByRole("status")).toBeEmptyDOMElement();
+  });
+
   it("'Not now' hides it and remembers, for that person and milestone", () => {
     renderIt();
     fireEvent.click(screen.getByTestId("milestone-not-now"));
