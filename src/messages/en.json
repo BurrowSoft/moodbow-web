@@ -352,7 +352,7 @@
     "exportCheckins": "Check-ins",
     "exportEntries": "Entries",
     "exportReflections": "AI reflections",
-    "exportMemories": "What Moodbow remembers",
+    "exportMemories": "What the AI remembers",
     "exportField": "{label}: {value}",
     "exportMood": "Mood",
     "exportMoodValue": "{label} ({value}/5)",

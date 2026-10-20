@@ -352,7 +352,7 @@
     "exportCheckins": "การบันทึกอารมณ์",
     "exportEntries": "บันทึก",
     "exportReflections": "การสะท้อนความคิดจาก AI",
-    "exportMemories": "สิ่งที่ Moodbow จำไว้",
+    "exportMemories": "สิ่งที่ AI จำไว้",
     "exportField": "{label}: {value}",
     "exportMood": "อารมณ์",
     "exportMoodValue": "{label} ({value}/5)",
