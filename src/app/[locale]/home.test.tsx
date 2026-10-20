@@ -40,6 +40,18 @@ describe("Home page", () => {
     expect(screen.getByTestId("home-stores").querySelector("a")).toBeNull();
   });
 
+  it("JSON-LD (launch SEO): none before launch; with the web journal live, a free SoftwareApplication naming only Web", async () => {
+    met = [];
+    await renderHome();
+    expect(screen.queryByTestId("home-jsonld")).toBeNull();
+    cleanup();
+    met = ["web-journal-live"];
+    await renderHome();
+    const ld = JSON.parse(screen.getByTestId("home-jsonld").textContent ?? "");
+    expect(ld).toMatchObject({ "@type": "SoftwareApplication", name: "Moodbow", operatingSystem: "Web", offers: { price: "0" } });
+    expect(screen.getByTestId("home-jsonld")).toHaveAttribute("type", "application/ld+json");
+  });
+
   it("store line (decision 185): Play live alone gives its link and the App Store's coming soon", async () => {
     met = ["play-live"];
     await renderHome();
