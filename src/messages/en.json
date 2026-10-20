@@ -382,6 +382,8 @@
     "shareCardType": "Card type",
     "shareChart": "Chart",
     "shareMilestone": "Milestone",
+    "shareYear": "Year",
+    "shareYearTitle": "My {year} in colour",
     "shareMilestoneText": "{n} days of my story",
     "shareRangeWeek": "My last 7 days",
     "shareRangeMonth": "My last 30 days",
