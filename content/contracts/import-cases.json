@@ -12,7 +12,7 @@
   "cases": [
     {
       "name": "daylio sample (BOM, CRLF, a custom mood, activities, a future row, two rows on one day)",
-      "csv": "﻿full_date,date,weekday,time,mood,activities,note_title,note\r\n2026-10-19,October 19,Monday,8:15 pm,rad,friends | walk | good meal,A great day,\"Dinner with Maya, then a long walk by the river.\"\r\n2026-10-19,October 19,Monday,7:30 am,meh,work,,Slow start.\r\n2026-10-18,October 18,Sunday,21:05,good,family | cooking,,\"Made soup. Mum said it was \"\"the best yet\"\".\"\r\n2026-10-17,October 17,Saturday,10:00 am,bad,,,\r\n2026-10-16,October 16,Friday,11:45 pm,awful,work | deadline,Long week,\"Too much at once.\r\nCouldn't switch off.\r\n\r\nTomorrow will be better.\"\r\n2026-10-15,October 15,Thursday,6:00 pm,sleepy,reading,,Custom mood name.\r\n2026-10-14,October 14,Wednesday,9:00 pm,good,,,\r\n2099-01-01,January 1,Thursday,9:00 am,rad,,,From the future.\r\n",
+      "csv": "﻿full_date,date,weekday,time,mood,activities,note_title,note\n2026-10-19,October 19,Monday,8:15 pm,rad,friends | walk | good meal,A great day,\"Dinner with Maya, then a long walk by the river.\"\n2026-10-19,October 19,Monday,7:30 am,meh,work,,Slow start.\n2026-10-18,October 18,Sunday,21:05,good,family | cooking,,\"Made soup. Mum said it was \"\"the best yet\"\".\"\n2026-10-17,October 17,Saturday,10:00 am,bad,,,\n2026-10-16,October 16,Friday,11:45 pm,awful,work | deadline,Long week,\"Too much at once.\nCouldn't switch off.\n\nTomorrow will be better.\"\n2026-10-15,October 15,Thursday,6:00 pm,sleepy,reading,,Custom mood name.\n2026-10-14,October 14,Wednesday,9:00 pm,good,,,\n2099-01-01,January 1,Thursday,9:00 am,rad,,,From the future.\n",
       "result": {
         "status": "ok",
         "plan": {
@@ -49,7 +49,7 @@
             {
               "date": "2026-10-16",
               "time": "23:45",
-              "body": "Long week\n\nToo much at once.\r\nCouldn't switch off.\r\n\r\nTomorrow will be better."
+              "body": "Long week\n\nToo much at once.\nCouldn't switch off.\n\nTomorrow will be better."
             },
             {
               "date": "2026-10-18",
@@ -96,7 +96,7 @@
       },
       "ids": [
         "4fb497d1-094c-52a1-af71-702a4c0eb35e",
-        "0f521ca7-4710-546d-a8cf-02496763d2a0",
+        "f4c4342f-d671-5e1a-8ef1-d2df28c76bb0",
         "946b2cfd-a583-56d0-9efc-42a06202aff2",
         "9ab72596-f1c5-59be-8726-a188e1e4d50b",
         "ab10dd72-6d96-5200-b4b1-406881985849"
@@ -104,7 +104,7 @@
     },
     {
       "name": "daylio sample, the custom mood mapped (sleepy → 3)",
-      "csv": "﻿full_date,date,weekday,time,mood,activities,note_title,note\r\n2026-10-19,October 19,Monday,8:15 pm,rad,friends | walk | good meal,A great day,\"Dinner with Maya, then a long walk by the river.\"\r\n2026-10-19,October 19,Monday,7:30 am,meh,work,,Slow start.\r\n2026-10-18,October 18,Sunday,21:05,good,family | cooking,,\"Made soup. Mum said it was \"\"the best yet\"\".\"\r\n2026-10-17,October 17,Saturday,10:00 am,bad,,,\r\n2026-10-16,October 16,Friday,11:45 pm,awful,work | deadline,Long week,\"Too much at once.\r\nCouldn't switch off.\r\n\r\nTomorrow will be better.\"\r\n2026-10-15,October 15,Thursday,6:00 pm,sleepy,reading,,Custom mood name.\r\n2026-10-14,October 14,Wednesday,9:00 pm,good,,,\r\n2099-01-01,January 1,Thursday,9:00 am,rad,,,From the future.\r\n",
+      "csv": "﻿full_date,date,weekday,time,mood,activities,note_title,note\n2026-10-19,October 19,Monday,8:15 pm,rad,friends | walk | good meal,A great day,\"Dinner with Maya, then a long walk by the river.\"\n2026-10-19,October 19,Monday,7:30 am,meh,work,,Slow start.\n2026-10-18,October 18,Sunday,21:05,good,family | cooking,,\"Made soup. Mum said it was \"\"the best yet\"\".\"\n2026-10-17,October 17,Saturday,10:00 am,bad,,,\n2026-10-16,October 16,Friday,11:45 pm,awful,work | deadline,Long week,\"Too much at once.\nCouldn't switch off.\n\nTomorrow will be better.\"\n2026-10-15,October 15,Thursday,6:00 pm,sleepy,reading,,Custom mood name.\n2026-10-14,October 14,Wednesday,9:00 pm,good,,,\n2099-01-01,January 1,Thursday,9:00 am,rad,,,From the future.\n",
       "options": {
         "customMoods": {
           "sleepy": 3
@@ -150,7 +150,7 @@
             {
               "date": "2026-10-16",
               "time": "23:45",
-              "body": "Long week\n\nToo much at once.\r\nCouldn't switch off.\r\n\r\nTomorrow will be better."
+              "body": "Long week\n\nToo much at once.\nCouldn't switch off.\n\nTomorrow will be better."
             },
             {
               "date": "2026-10-18",
@@ -197,7 +197,7 @@
       },
       "ids": [
         "4fb497d1-094c-52a1-af71-702a4c0eb35e",
-        "0f521ca7-4710-546d-a8cf-02496763d2a0",
+        "f4c4342f-d671-5e1a-8ef1-d2df28c76bb0",
         "946b2cfd-a583-56d0-9efc-42a06202aff2",
         "9ab72596-f1c5-59be-8726-a188e1e4d50b",
         "ab10dd72-6d96-5200-b4b1-406881985849"

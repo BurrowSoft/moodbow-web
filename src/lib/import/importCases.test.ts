@@ -26,7 +26,9 @@ type Input = { csv: string } | { base64: string } | { generate: { kind: "days" |
 type Case = { name: string; options?: ImportOptions } & Input;
 
 const daylio = (rows: string[]) => ["full_date,date,weekday,time,mood,activities,note_title,note", ...rows].join("\n");
-const sample = readFileSync(join(process.cwd(), "src", "lib", "import", "fixtures", "daylio-sample.csv"), "utf8");
+// LF whatever the checkout does (git stores it LF; Windows may check it out
+// CRLF): the contract's text must be the same everywhere. CRLF has its own case.
+const sample = readFileSync(join(process.cwd(), "src", "lib", "import", "fixtures", "daylio-sample.csv"), "utf8").replace(/\r\n/g, "\n");
 const OURS = "date,mood,mood_word,sleep_hours,sleep_quality,movement_minutes,stress,moment,note";
 const t: Translate = (key) => key.split(".").reduce<unknown>((o, k) => (o as Record<string, unknown>)?.[k], en) as string;
 const b64 = (bytes: Uint8Array) => Buffer.from(bytes).toString("base64");
