@@ -29,7 +29,7 @@
   },
   "app-lock": {
     "met": false,
-    "what": "The app lock (PIN or fingerprint/face, PIN kept only on the device) is in a RELEASED app build (M7). App-only by design: the web has no app lock, so the web side is \"nothing to ship\"."
+    "what": "The app lock (1.1, decision 174) is in a RELEASED app build. App-only: on the web it only gates the Help article that explains it."
   },
   "share-cards": {
     "met": false,
@@ -82,5 +82,9 @@
   "weekly-report-live": {
     "met": false,
     "what": "1.1 D \"Your week\" (specs/m9-weekly-report.md, decision 180) is tested on the app and the web against staging; then the Insights card shows on Production, which also needs AI live there (the combined AI go-live)."
+  },
+  "widget-live": {
+    "met": false,
+    "what": "The home-screen widget (1.1 E) is in a RELEASED app build (Android first). App-only: on the web it only gates the Help article that explains it."
   }
 }
