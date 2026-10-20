@@ -14,7 +14,7 @@ import { backLabel } from "@/lib/journal/backLabel";
 import { dateLine, dateLocale } from "@/lib/journal/today";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { EntryPreviews, type EntrySummary } from "../../EntryPreviews";
-import { tabMetadata, titledMetadata } from "../../TabPlaceholder";
+import { tabMetadata, titledMetadata } from "../../pageMeta";
 import { DayCheckIn } from "./DayCheckIn";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/app/timeline/[date]">): Promise<Metadata> {

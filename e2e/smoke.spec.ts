@@ -171,7 +171,7 @@ test.describe("gated pages render as drafts outside Production", () => {
     }
   });
 
-  test("account deletion: the PM's copy, support email, the 7-day backups line (decision 44)", async ({ page }) => {
+  test("account deletion: the PM's copy, support email, the 8-day backups line (decisions 44 + 84)", async ({ page }) => {
     await page.goto("/account-deletion");
     await expect(page.getByText("In the app or on the web: open Me → Delete account, type DELETE, and confirm.")).toBeVisible();
     await expect(page.getByRole("link", { name: "support@moodbow.com" })).toHaveAttribute("href", "mailto:support@moodbow.com");

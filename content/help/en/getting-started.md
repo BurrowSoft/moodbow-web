@@ -13,4 +13,6 @@ Moodbow is a private journal that learns your story. Each day you can log how yo
 
 You can use Moodbow in the app and on the web at moodbow.com with the same account. Everything stays in sync.
 
+Tap the tab you're on to jump back to its top.
+
 There are no streaks and nothing to keep up with. Missing days is normal. Moodbow is here when you are.
