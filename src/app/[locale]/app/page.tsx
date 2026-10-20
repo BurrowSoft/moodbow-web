@@ -13,6 +13,7 @@ import { tabMetadata } from "./pageMeta";
 import { Link } from "@/i18n/navigation";
 import { pageGate } from "@/lib/conditions";
 import { loadMilestone } from "@/lib/share/milestoneData";
+import { yearOnOffer } from "@/lib/share/year";
 import { MilestoneCard } from "./MilestoneCard";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/app">): Promise<Metadata> {
@@ -65,7 +66,7 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
         </p>
       </header>
       <CheckInCard initial={(data as CheckIn | null) ?? null} uid={user.id} date={me.today} dateLocaleTag={dateLocaleTag} />
-      {milestone && <MilestoneCard n={milestone.n} colours={milestone.colours} uid={user.id} month={me.today.slice(0, 7)} dateLocaleTag={dateLocaleTag} />}
+      {milestone && <MilestoneCard n={milestone.n} colours={milestone.colours} uid={user.id} month={me.today.slice(0, 7)} dateLocaleTag={dateLocaleTag} year={pageGate("year-card") !== "hidden" ? yearOnOffer(me.today) : null} />}
       <Link
         href="/app/write"
         data-testid="today-write"
