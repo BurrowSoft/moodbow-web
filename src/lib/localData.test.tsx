@@ -61,4 +61,22 @@ describe("LocalDataWipe", () => {
     render(<LocalDataWipe />);
     expect(keys()).toHaveLength(4);
   });
+
+  // Coverage pass (UX): the wipe after deleting an account.
+  it("storage that throws (blocked, private mode): the cookie still goes, and nothing crashes", () => {
+    document.cookie = `mb_wipe=${GONE}; Path=/`;
+    const spy = vi.spyOn(Storage.prototype, "key").mockImplementation(() => {
+      throw new Error("SecurityError");
+    });
+    expect(() => render(<LocalDataWipe />)).not.toThrow();
+    spy.mockRestore();
+    expect(document.cookie).not.toContain("mb_wipe=");
+  });
+
+  it("a malformed cookie value is ignored: nothing wiped", () => {
+    document.cookie = "mb_wipe=not-a-uid; Path=/";
+    render(<LocalDataWipe />);
+    expect(keys()).toHaveLength(4);
+    document.cookie = "mb_wipe=; Max-Age=0; Path=/";
+  });
 });

@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
 import { planImport } from "./journalImport";
-import { importEntryId, uuidv5 } from "./uuidv5";
+import { IMPORT_NAMESPACE, importEntryId, uuidv5 } from "./uuidv5";
 
 describe("uuidv5 (RFC 4122, SHA-1)", () => {
   it("the standard reference vector: DNS namespace, www.example.com", async () => {
@@ -47,5 +47,17 @@ describe("importEntryId over a whole file: the same words more than once on a da
     const after = await ids(`${TWICE}2026-10-01,4,Same\n`);
     expect(after.slice(0, 2)).toEqual(before);
     expect(before).not.toContain(after[2]);
+// Coverage pass (UX): the default namespace and a note without a time.
+describe("the import namespace and untimed notes", () => {
+  it("without a namespace, the import namespace is used", async () => {
+    expect(await uuidv5("x")).toBe(await uuidv5("x", IMPORT_NAMESPACE));
+    expect(await uuidv5("x")).not.toBe(await uuidv5("x", "6ba7b810-9dad-11d1-80b4-00c04fd430c8"));
+  });
+
+  it("a note without a time (a generic CSV) has its own stable id, not the same as one at midnight", async () => {
+    const untimed = { date: "2026-10-19", time: null, body: "A good walk." };
+    const id = await importEntryId("u1", untimed);
+    expect(await importEntryId("u1", { ...untimed })).toBe(id);
+    expect(await importEntryId("u1", { ...untimed, time: "00:00" })).not.toBe(id);
   });
 });
