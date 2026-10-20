@@ -103,21 +103,26 @@ export function ImportData({ uid, today, dateLocaleTag, country }: { uid: string
     // What was actually written: its days, and its notes (for the crisis line).
     const writtenDates = new Set<string>();
     const writtenBodies: string[] = [];
+    // Per day: how many items (its check-in, its notes) the plan has, and how
+    // many were sent in a batch that ran. A day is "already in Moodbow" only
+    // when all of it was tried and nothing was new; after a part-way stop,
+    // days not reached yet aren't counted (reviewer #92).
+    const items = new Map<string, number>();
+    const tried = new Map<string, number>();
+    for (const d of [...plan.days.map((x) => x.date), ...plan.entries.map((x) => x.date)]) items.set(d, (items.get(d) ?? 0) + 1);
+    const markTried = (dates: string[]) => dates.forEach((d) => tried.set(d, (tried.get(d) ?? 0) + 1));
     let done = 0;
-    const summary = (): Summary => {
-      const planned = new Set([...plan.days.map((d) => d.date), ...plan.entries.map((e) => e.date)]);
-      return {
-        days: writtenDates.size,
-        // Days in the file that brought nothing new (all already in Moodbow).
-        skippedDays: [...planned].filter((d) => !writtenDates.has(d)).length,
-        crisis: writtenBodies.some((b) => flagsCrisis(b, CRISIS_KEYWORDS)),
-      };
-    };
+    const summary = (): Summary => ({
+      days: writtenDates.size,
+      skippedDays: [...items].filter(([d, n]) => tried.get(d) === n && !writtenDates.has(d)).length,
+      crisis: writtenBodies.some((b) => flagsCrisis(b, CRISIS_KEYWORDS)),
+    });
     try {
       for (const batch of chunks(plan.days, IMPORT_BATCH)) {
         const r = await importCheckIns(batch);
         if (r.status !== "ok") throw new Error("batch");
         r.written.forEach((d) => writtenDates.add(d));
+        markTried(batch.map((d) => d.date));
         done += batch.length;
         setPhase({ kind: "importing", done, total });
       }
@@ -130,6 +135,7 @@ export function ImportData({ uid, today, dateLocaleTag, country }: { uid: string
           writtenDates.add(e.date);
           writtenBodies.push(e.body);
         }
+        markTried(batch.map((e) => e.date));
         done += batch.length;
         setPhase({ kind: "importing", done, total });
       }

@@ -208,6 +208,17 @@ describe("ImportData", () => {
     expect(screen.getByTestId("import-skipped")).toHaveTextContent("1 days skipped (already in Moodbow).");
   });
 
+  it("after a part-way stop, days not reached yet aren't called already in Moodbow (reviewer #92)", async () => {
+    importCheckIns.mockResolvedValueOnce({ status: "ok", written: [], skipped: 1 });
+    importEntries.mockResolvedValueOnce({ status: "error" });
+    renderIt();
+    await choose("date,mood,note\n2026-10-01,3,\n2026-10-02,,A note\n");
+    fireEvent.click(screen.getByTestId("import-confirm"));
+    await settle();
+    expect(screen.getByTestId("import-failed")).toBeInTheDocument();
+    expect(screen.getByTestId("import-skipped")).toHaveTextContent("1 days skipped (already in Moodbow).");
+  });
+
   it("a notes-only file counts its days (M-a)", async () => {
     renderIt();
     await choose("date,mood,note\n2026-10-01,,A walk\n2026-10-02,,Tea\n");
