@@ -79,12 +79,24 @@ export function ShareMonth({
   // The loading line is filled a moment after the dialog opens: a live
   // region that appears with its text often isn't announced.
   const [sayLoading, setSayLoading] = useState(false);
+  // Cleared on close and on unmount, so it never fires after the dialog (or
+  // the page) is gone.
+  const sayLoadingTimer = useRef<number | null>(null);
+  const clearSayLoading = useCallback(() => {
+    if (sayLoadingTimer.current !== null) window.clearTimeout(sayLoadingTimer.current);
+    sayLoadingTimer.current = null;
+  }, []);
+  useEffect(() => clearSayLoading, [clearSayLoading]);
   const start = () => {
     setOpen(true);
     setType(types.includes(initialType) ? initialType : "moodbow");
     onOpen?.();
     setSayLoading(false);
-    window.setTimeout(() => setSayLoading(true), 100);
+    clearSayLoading();
+    sayLoadingTimer.current = window.setTimeout(() => {
+      sayLoadingTimer.current = null;
+      setSayLoading(true);
+    }, 100);
     setColours(null);
     setFailed(false);
     // The page's current theme is the default: one chosen in Me →
@@ -103,7 +115,10 @@ export function ShareMonth({
         .then((r) => r.status === "ok" && setYearRows(r.checkIns))
         .catch(() => undefined);
   };
-  const close = useCallback(() => setOpen(false), []);
+  const close = useCallback(() => {
+    clearSayLoading();
+    setOpen(false);
+  }, [clearSayLoading]);
 
   const enough = colours !== null && colours.length >= MIN_CHECK_INS;
   const maxChars = LAYOUT[format].line.maxChars;
