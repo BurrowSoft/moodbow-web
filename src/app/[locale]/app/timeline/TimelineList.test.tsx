@@ -114,6 +114,34 @@ describe("TimelineList", () => {
     await waitFor(() => expect(screen.getByTestId("timeline-day-2026-08-15")).toBeInTheDocument());
   });
 
+  it("Show more days: focus goes to the first new day, even when the button goes with the last page (a11y pass, 1.0)", async () => {
+    loadTimeline.mockResolvedValue({ status: "ok", days: [{ local_date: "2026-08-15", check_in: null, entries: [], entry_count: 0 }, { local_date: "2026-08-10", check_in: null, entries: [], entry_count: 0 }], done: true });
+    renderList();
+    const button = screen.getByTestId("timeline-load-more");
+    button.focus();
+    fireEvent.click(button);
+    await waitFor(() => expect(screen.getByTestId("timeline-day-2026-08-15")).toHaveFocus());
+    expect(screen.queryByTestId("timeline-load-more")).toBeNull();
+    expect(screen.getByTestId("timeline-loaded")).toHaveTextContent("2");
+  });
+
+  it("a load from scrolling never moves focus", async () => {
+    loadTimeline.mockResolvedValue({ status: "ok", days: [{ local_date: "2026-08-15", check_in: null, entries: [], entry_count: 0 }], done: false });
+    renderList();
+    const day = screen.getByTestId("timeline-day-2026-10-02");
+    day.focus();
+    await act(async () => seeEnd());
+    await waitFor(() => expect(screen.getByTestId("timeline-day-2026-08-15")).toBeInTheDocument());
+    expect(day).toHaveFocus();
+  });
+
+  it("Show more days that fails: focus on Try again, not the page", async () => {
+    loadTimeline.mockResolvedValueOnce({ status: "error" });
+    renderList();
+    fireEvent.click(screen.getByTestId("timeline-load-more"));
+    await waitFor(() => expect(screen.getByTestId("timeline-retry")).toHaveFocus());
+  });
+
   it("nothing yet: the empty states (All days / Moments)", () => {
     renderList({ initial: [], initialDone: true });
     expect(screen.getByTestId("timeline-empty")).toHaveTextContent(t.timelineEmptyTitle);

@@ -195,6 +195,20 @@ describe("EntryScreen: the view", () => {
     expect((deleteEntry.mock.calls[0][1] as FormData).get("from")).toBe("/app/timeline");
   });
 
+  it("⋯ → Delete, then Cancel or Esc: focus is back on ⋯, never on the page (a11y pass, 1.0)", () => {
+    renderIt();
+    const more = screen.getByTestId("entry-more");
+    for (const close of [() => fireEvent.click(screen.getByTestId("entry-delete-cancel")), () => fireEvent.keyDown(document, { key: "Escape" })]) {
+      more.focus();
+      fireEvent.click(more);
+      fireEvent.click(screen.getByTestId("entry-menu-delete"));
+      expect(screen.getByTestId("entry-delete-dialog")).toBeInTheDocument();
+      close();
+      expect(screen.queryByTestId("entry-delete-dialog")).toBeNull();
+      expect(more).toHaveFocus();
+    }
+  });
+
   it("an unsaved draft of this entry in the browser: the editor opens with it straight away", () => {
     window.localStorage.setItem(`mb:draft-entry:u1:${ENTRY.id}`, JSON.stringify({ id: ENTRY.id, body: "Unsaved words", date: ENTRY.entry_date, isMoment: false, base: ENTRY.updated_at }));
     renderIt();
