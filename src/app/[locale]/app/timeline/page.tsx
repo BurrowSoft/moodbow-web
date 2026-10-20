@@ -14,6 +14,7 @@ import { loadTimeline } from "./actions";
 import { segment } from "@/lib/ui/journalLayout";
 import { TimelineList } from "./TimelineList";
 import { OnThisDay } from "./OnThisDay";
+import { TimelineSearch } from "./TimelineSearch";
 import { MonthCalendar } from "./MonthCalendar";
 import { TimelineViews } from "./TimelineViews";
 import { loadCalendarMonth } from "./calendarActions";
@@ -116,26 +117,30 @@ export default async function TimelinePage({ params, searchParams }: PageProps<"
     </>
   );
 
+  const content = calendarLive ? (
+    <>
+      {onThisDayCard}
+      <TimelineViews
+        initialView={view}
+        list={list}
+        calendar={
+          <MonthCalendar today={me.today} dateLocaleTag={dateLocaleTag} initial={calendarInitial?.status === "ok" ? calendarInitial.days : null} shareable={shareable} printable={printable} />
+        }
+      />
+    </>
+  ) : (
+    list
+  );
+
   return (
     <section>
       {/* Focusable from code only: where focus goes when On this day is hidden. */}
       <h1 id="timeline-title" tabIndex={-1} className="text-3xl font-medium tracking-tight focus:outline-none">
         {t("timelineTitle")}
       </h1>
-      {calendarLive ? (
-        <>
-          {onThisDayCard}
-          <TimelineViews
-            initialView={view}
-            list={list}
-            calendar={
-              <MonthCalendar today={me.today} dateLocaleTag={dateLocaleTag} initial={calendarInitial?.status === "ok" ? calendarInitial.days : null} shareable={shareable} printable={printable} />
-            }
-          />
-        </>
-      ) : (
-        list
-      )}
+      {/* Search (1.1 L), when shown: while it's open its results replace
+          everything below the title (the list or the calendar). */}
+      {pageGate("search-live") !== "hidden" ? <TimelineSearch dateLocaleTag={dateLocaleTag}>{content}</TimelineSearch> : content}
     </section>
   );
 }
