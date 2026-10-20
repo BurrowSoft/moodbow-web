@@ -14,9 +14,10 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 export const STAGING_REF = "mnmkkrqponzlenvxiutd";
 const URL_ = process.env.SUPABASE_STAGING_URL ?? "";
 const SECRET = process.env.SUPABASE_STAGING_SECRET_KEY ?? "";
+const PUBLISHABLE = process.env.SUPABASE_STAGING_PUBLISHABLE_KEY ?? "";
 
-export const configured = URL_ !== "" && SECRET !== "";
-export const notConfigured = "the staging secrets aren't set (SUPABASE_STAGING_URL, SUPABASE_STAGING_SECRET_KEY): journeys skipped";
+export const configured = URL_ !== "" && SECRET !== "" && PUBLISHABLE !== "";
+export const notConfigured = "the staging secrets aren't set (SUPABASE_STAGING_URL, _PUBLISHABLE_KEY, _SECRET_KEY): journeys skipped";
 
 if (URL_ && new URL(URL_).hostname !== `${STAGING_REF}.supabase.co`) {
   throw new Error("journeys refuse this Supabase project: staging only");
@@ -74,4 +75,17 @@ export async function sweep(): Promise<number> {
   for await (const u of users()) if (ours(u.email) && Date.parse(u.created_at) < cutoff) stale.push(u.id);
   for (const id of stale) await admin().deleteUser(id);
   return stale.length;
+}
+
+// Whether staging offers AI to this user right now, read as the app reads it
+// (get_me().ai_available, as the signed-in user; the global switch is off
+// outside AI windows).
+export async function aiAvailable(email: string, password: string): Promise<boolean> {
+  const user = createClient(URL_, PUBLISHABLE, { auth: { persistSession: false, autoRefreshToken: false } });
+  const { error: signInError } = await user.auth.signInWithPassword({ email, password });
+  if (signInError) throw new Error(`sign-in for get_me failed: ${signInError.message}`);
+  const { data, error } = await user.rpc("get_me");
+  await user.auth.signOut({ scope: "local" });
+  if (error) throw new Error(`get_me failed: ${error.message}`);
+  return (data as { ai_available?: boolean } | null)?.ai_available === true;
 }

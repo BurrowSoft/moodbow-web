@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { expect, test, type Page } from "@playwright/test";
 import messages from "../../src/messages/en.json";
-import { cleanup, configured, confirmEmail, exists, newEmail, newPassword, notConfigured, sweep } from "./staging";
+import { aiAvailable, cleanup, configured, confirmEmail, exists, newEmail, newPassword, notConfigured, sweep } from "./staging";
 
 // The launch-critical journeys (1.0), end to end against staging with a
 // throwaway account each: sign-up → confirm → consent → setup → check-in →
@@ -18,7 +18,8 @@ test.beforeAll(async () => {
 const ENTRY = "A calm walk by the river after work, then tea with a friend.";
 
 // Welcome → Consent (AI as asked) → Sign-up → confirmed → Setup.
-async function signUp(page: Page, email: string, { ai }: { ai: boolean }) {
+async function signUp(page: Page, email: string, { ai }: { ai: boolean }): Promise<string> {
+  const password = newPassword();
   await page.goto("/welcome?slide=3");
   await page.getByTestId("welcome-start").click();
   await expect(page).toHaveURL(/\/consent$/);
@@ -30,7 +31,7 @@ async function signUp(page: Page, email: string, { ai }: { ai: boolean }) {
 
   await expect(page).toHaveURL(/\/sign-up$/);
   await page.getByLabel("Email").fill(email);
-  await page.getByLabel("Password").fill(newPassword());
+  await page.getByLabel("Password").fill(password);
   await page.getByTestId("signup-age").check();
   await page.getByTestId("signup-submit").click();
 
@@ -43,6 +44,7 @@ async function signUp(page: Page, email: string, { ai }: { ai: boolean }) {
     await page.getByTestId("check-email-confirmed").click();
   }
   await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+  return password;
 }
 
 test.describe("launch journeys", () => {
@@ -77,7 +79,8 @@ test.describe("launch journeys", () => {
       // Timeline: today's day, its mood and the entry.
       await page.getByTestId("tab-timeline").click();
       await expect(page).toHaveURL(/\/app\/timeline$/);
-      const day = page.locator('[data-testid^="timeline-day-"]').first();
+      // The day header is a link; the entries are its siblings in the row's <li>.
+      const day = page.locator("li").filter({ has: page.locator('[data-testid^="timeline-day-"]') }).first();
       await expect(day.getByTestId("timeline-mood-dot")).toBeVisible();
       await expect(day.locator('[data-testid^="timeline-entry-"]')).toHaveCount(1);
 
@@ -121,9 +124,12 @@ test.describe("launch journeys", () => {
   test("AI on: consent → setup's focus and tone → Today", async ({ page }) => {
     const email = newEmail();
     try {
-      await signUp(page, email, { ai: true });
+      const password = await signUp(page, email, { ai: true });
 
-      // Focus and tone (they need staging's AI switch on, too).
+      // Focus and tone also need staging's global AI switch, which is off
+      // outside AI windows (decision 123): read it as the app does, and skip
+      // rather than fail while it's off.
+      test.skip(!(await aiAvailable(email, password)), "staging's AI switch is off (get_me().ai_available false): AI-on journey skipped");
       const sleep = page.getByTestId("setup-focus-sleep");
       await expect(sleep).toHaveAttribute("aria-pressed", "false");
       await sleep.click();

@@ -83,8 +83,9 @@ jobs:
         env:
           URL: ${{ secrets.SUPABASE_STAGING_URL }}
           SECRET: ${{ secrets.SUPABASE_STAGING_SECRET_KEY }}
+          PUBLISHABLE: ${{ secrets.SUPABASE_STAGING_PUBLISHABLE_KEY }}
         run: |
-          if [ -z "$URL" ] || [ -z "$SECRET" ]; then
+          if [ -z "$URL" ] || [ -z "$SECRET" ] || [ -z "$PUBLISHABLE" ]; then
             echo "Staging secrets not set: journeys skipped."
             echo "ok=false" >> "$GITHUB_OUTPUT"
           elif [ "$(node -e 'console.log(new URL(process.env.URL).hostname)')" != "mnmkkrqponzlenvxiutd.supabase.co" ]; then
@@ -118,6 +119,7 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_STAGING_URL }}
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_STAGING_PUBLISHABLE_KEY }}
           SUPABASE_STAGING_URL: ${{ secrets.SUPABASE_STAGING_URL }}
+          SUPABASE_STAGING_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_STAGING_PUBLISHABLE_KEY }}
           SUPABASE_STAGING_SECRET_KEY: ${{ secrets.SUPABASE_STAGING_SECRET_KEY }}
       # Traces and screenshots only: the journey writes no secrets into them,
       # but the report holds the throwaway emails, so it's kept for 3 days.
