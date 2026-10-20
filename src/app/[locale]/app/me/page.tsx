@@ -19,6 +19,9 @@ import { countryOptions, languageOptions, timeZoneOptions } from "@/lib/region/c
 import { routing } from "@/i18n/routing";
 import { Reminder } from "./Reminder";
 import { YourData } from "./YourData";
+import { ImportData } from "./ImportData";
+import { headers } from "next/headers";
+import { dateLocale } from "@/lib/journal/today";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/app/me">): Promise<Metadata> {
   return tabMetadata("tabMe", (await params).locale);
@@ -69,6 +72,10 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
       />
       <Appearance />
       <YourData credits={me.credits?.balance ?? 0} uid={user.id} />
+      {/* Import from another app (1.1 K), with Your data, where it's on. */}
+      {pageGate("import-live") !== "hidden" && (
+        <ImportData uid={user.id} today={me.today} dateLocaleTag={dateLocale(locale, (await headers()).get("accept-language"), me.profile?.country ?? null)} country={me.profile?.country} />
+      )}
 
       <section aria-labelledby="me-help" className="rounded-3xl border border-border bg-surface p-6">
         <h2 id="me-help" className="text-lg font-medium text-text">
