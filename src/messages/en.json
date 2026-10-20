@@ -290,6 +290,7 @@
     "cancel": "Cancel",
     "exportReadable": "Readable copy (.txt)",
     "exportData": "Data file (.json)",
+    "exportCsv": "Spreadsheet (.csv)",
     "meReminder": "Daily reminder",
     "meReminderTime": "Time",
     "webReminderNote": "Reminders arrive on your phone. Install the Moodbow app to get them.",

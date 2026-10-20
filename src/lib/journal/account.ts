@@ -6,6 +6,9 @@ export const DELETE_WORD = "DELETE";
 // server made it; just "moodbow-export.json" if that's missing).
 export const exportFileName = (date: string) => (date ? `moodbow-export-${date}.json` : "moodbow-export.json");
 
+// The spreadsheet's name: moodbow-2026-10-02.csv (1.1 P).
+export const csvFileName = (date: string) => (date ? `moodbow-${date}.csv` : "moodbow.csv");
+
 // The readable copy's name: moodbow-journal-2026-10-02.txt (UX).
 export const journalFileName = (date: string) => (date ? `moodbow-journal-${date}.txt` : "moodbow-journal.txt");
 

@@ -7,10 +7,34 @@ import messages from "@/messages/en.json";
 // read here only; the server actions are mocked (importActions.test.ts).
 const importCheckIns = vi.fn();
 const importEntries = vi.fn();
+const existingNoteCounts = vi.fn();
 vi.mock("./importActions", () => ({
   importCheckIns: (...a: unknown[]) => importCheckIns(...a),
   importEntries: (...a: unknown[]) => importEntries(...a),
+  existingNoteCounts: (...a: unknown[]) => existingNoteCounts(...a),
 }));
+// The note key as plain "date|text" here (jsdom has no WebCrypto digest;
+// the real hashing is tested in noteDedupe.test, in Node).
+vi.mock("@/lib/import/noteDedupe", async () => {
+  const real = await vi.importActual<typeof import("@/lib/import/noteDedupe")>("@/lib/import/noteDedupe");
+  const key = (date: string, body: string) => `${date}|${real.normalizeNote(body)}`;
+  return {
+    ...real,
+    noteKey: async (date: string, body: string) => key(date, body),
+    dropExistingNotes: async (entries: { date: string; body: string }[], existing: Map<string, number>) => {
+      const seen = new Map<string, number>();
+      const keep: typeof entries = [];
+      const dropped: typeof entries = [];
+      for (const e of entries) {
+        const k = key(e.date, e.body);
+        const i = seen.get(k) ?? 0;
+        seen.set(k, i + 1);
+        (i < (existing.get(k) ?? 0) ? dropped : keep).push(e);
+      }
+      return { keep, dropped };
+    },
+  };
+});
 let idCount = 0;
 vi.mock("@/lib/import/uuidv5", () => ({ importEntryId: async () => `0b5f2c1e-7d3a-5e8b-9c41-2a6f8e1d3b${String(++idCount).padStart(2, "0")}` }));
 vi.mock("@/components/SafetyCard", () => ({ GetHelpNow: ({ testId }: { testId: string }) => <button type="button" data-testid={testId} /> }));
@@ -35,6 +59,7 @@ beforeEach(() => {
   idCount = 0;
   importCheckIns.mockReset().mockImplementation(async (days: { date: string }[]) => ({ status: "ok", written: days.map((d) => d.date), skipped: 0 }));
   importEntries.mockReset().mockImplementation(async (entries: { id: string }[]) => ({ status: "ok", written: entries.map((e) => e.id), skipped: 0 }));
+  existingNoteCounts.mockReset().mockResolvedValue({ status: "ok", counts: [] });
 });
 afterEach(cleanup);
 
@@ -132,6 +157,76 @@ describe("ImportData", () => {
     expect(failed).toHaveTextContent(m.importStopped);
     expect(failed).not.toHaveTextContent(m.importError);
     expect(screen.queryByTestId("import-offline")).toBeNull();
+  });
+
+  describe("notes already in the account (1.1 P M1)", () => {
+    const OURS = "date,mood,mood_word,sleep_hours,sleep_quality,movement_minutes,stress,moment,note";
+    const FILE = [OURS, "2026-10-01,4,Good,,,,,,Same", "2026-10-01,4,Good,,,,,,Same", "2026-10-02,3,Okay,,,,,,Other"].join("\n");
+
+    it("counted once, before anything is written, for the file's days", async () => {
+      const order: string[] = [];
+      existingNoteCounts.mockImplementation(async () => (order.push("counts"), { status: "ok", counts: [] }));
+      importCheckIns.mockImplementation(async (days: { date: string }[]) => (order.push("checkins"), { status: "ok", written: days.map((d) => d.date), skipped: 0 }));
+      renderIt();
+      await choose(FILE);
+      fireEvent.click(screen.getByTestId("import-confirm"));
+      await settle();
+      expect(order[0]).toBe("counts");
+      expect(existingNoteCounts).toHaveBeenCalledTimes(1);
+      expect(existingNoteCounts).toHaveBeenCalledWith(["2026-10-01", "2026-10-02"]);
+    });
+
+    it("(a) the same account, its own export again: 0 notes and 0 check-ins added; the days are 'already in Moodbow'", async () => {
+      existingNoteCounts.mockResolvedValue({ status: "ok", counts: [["2026-10-01|Same", 2], ["2026-10-02|Other", 1]] });
+      importCheckIns.mockImplementation(async (days: { date: string }[]) => ({ status: "ok", written: [], skipped: days.length }));
+      renderIt();
+      await choose(FILE);
+      fireEvent.click(screen.getByTestId("import-confirm"));
+      await settle();
+      expect(importEntries).not.toHaveBeenCalled();
+      expect(screen.getByTestId("import-done")).toHaveTextContent("Done. 0 days are in your Timeline.");
+      expect(screen.getByTestId("import-skipped")).toHaveTextContent("2 days skipped (already in Moodbow).");
+    });
+
+    it("(b) a fresh account gets both copies of a doubled note", async () => {
+      renderIt();
+      await choose(FILE);
+      fireEvent.click(screen.getByTestId("import-confirm"));
+      await settle();
+      const sent = importEntries.mock.calls.flatMap((c) => c[0] as { body: string }[]);
+      expect(sent.map((e) => e.body)).toEqual(["Same", "Same", "Other"]);
+    });
+
+    it("(c)/(d) an account with 1 copy, a file with 2: exactly 1 sent (a resumed run adds the rest, no duplicates)", async () => {
+      existingNoteCounts.mockResolvedValue({ status: "ok", counts: [["2026-10-01|Same", 1], ["2026-10-02|Other", 1]] });
+      renderIt();
+      await choose(FILE);
+      fireEvent.click(screen.getByTestId("import-confirm"));
+      await settle();
+      const sent = importEntries.mock.calls.flatMap((c) => c[0] as { date: string; body: string }[]);
+      expect(sent.map((e) => [e.date, e.body])).toEqual([["2026-10-01", "Same"]]);
+    });
+
+    it("(e) the same text on another day is not a copy", async () => {
+      existingNoteCounts.mockResolvedValue({ status: "ok", counts: [["2026-10-02|Same", 1]] });
+      renderIt();
+      await choose(FILE);
+      fireEvent.click(screen.getByTestId("import-confirm"));
+      await settle();
+      const sent = importEntries.mock.calls.flatMap((c) => c[0] as { body: string }[]);
+      expect(sent.map((e) => e.body)).toEqual(["Same", "Same", "Other"]);
+    });
+
+    it("the count can't be read: nothing is written, and it says the import stopped", async () => {
+      existingNoteCounts.mockResolvedValue({ status: "error" });
+      renderIt();
+      await choose(FILE);
+      fireEvent.click(screen.getByTestId("import-confirm"));
+      await settle();
+      expect(importCheckIns).not.toHaveBeenCalled();
+      expect(importEntries).not.toHaveBeenCalled();
+      expect(screen.getByTestId("import-failed")).toHaveTextContent(m.importStopped);
+    });
   });
 
   it("stopped part-way while offline: errOffline first, then importStopped", async () => {

@@ -4,11 +4,12 @@ import { useEffect, useId, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { dialogButton } from "@/components/Dialog";
 import { GetHelpNow } from "@/components/SafetyCard";
-import { decodeImportFile, IMPORT_BATCH, MAX_IMPORT_BYTES, planImport, type DateOrder, type ImportPlan, type Mood } from "@/lib/import/journalImport";
+import { decodeImportFile, IMPORT_BATCH, MAX_IMPORT_BYTES, planImport, type DateOrder, type ImportEntry, type ImportPlan, type Mood } from "@/lib/import/journalImport";
+import { dropExistingNotes } from "@/lib/import/noteDedupe";
 import { importEntryId } from "@/lib/import/uuidv5";
 import { flagsCrisis } from "@/lib/safety/crisis";
 import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
-import { importCheckIns, importEntries } from "./importActions";
+import { existingNoteCounts, importCheckIns, importEntries } from "./importActions";
 
 // Import from another journal (1.1 K, decision 189), in Me → Your data:
 // choose a file → it's read in this browser only → a preview (counts, what
@@ -97,9 +98,26 @@ export function ImportData({ uid, today, dateLocaleTag, country }: { uid: string
   const run = async (plan: ImportPlan) => {
     if (running.current) return;
     running.current = true;
-    const total = plan.days.length + plan.entries.length;
+    setPhase({ kind: "importing", done: 0, total: plan.days.length + plan.entries.length });
+    // The notes the account already has (per day and exact text), counted
+    // once before anything is written: those copies are skipped, so
+    // importing your own export again adds nothing (1.1 P "M1").
+    let kept: ImportEntry[];
+    let dropped: ImportEntry[];
+    try {
+      const counts = await existingNoteCounts([...new Set(plan.entries.map((e) => e.date))]);
+      if (counts.status !== "ok") throw new Error("counts");
+      ({ keep: kept, dropped } = await dropExistingNotes(plan.entries, new Map(counts.counts)));
+    } catch (e) {
+      if (typeof (e as { digest?: unknown })?.digest === "string") throw e; // a redirect (signed out)
+      text.current = null;
+      running.current = false;
+      setPhase({ kind: "failed", offline: !navigator.onLine, days: 0, skippedDays: 0, crisis: false });
+      return;
+    }
+    const total = plan.days.length + kept.length;
     setPhase({ kind: "importing", done: 0, total });
-    const entries = await Promise.all(plan.entries.map(async (e) => ({ id: await importEntryId(uid, e), date: e.date, body: e.body })));
+    const entries = await Promise.all(kept.map(async (e) => ({ id: await importEntryId(uid, e), date: e.date, body: e.body, ...(e.isMoment ? { isMoment: true } : {}) })));
     const byId = new Map(entries.map((e) => [e.id, e]));
     // What was actually written: its days, and its notes (for the crisis line).
     const writtenDates = new Set<string>();
@@ -112,6 +130,8 @@ export function ImportData({ uid, today, dateLocaleTag, country }: { uid: string
     const tried = new Map<string, number>();
     for (const d of [...plan.days.map((x) => x.date), ...plan.entries.map((x) => x.date)]) items.set(d, (items.get(d) ?? 0) + 1);
     const markTried = (dates: string[]) => dates.forEach((d) => tried.set(d, (tried.get(d) ?? 0) + 1));
+    // Copies already in the account: tried, and not new.
+    markTried(dropped.map((e) => e.date));
     let done = 0;
     const summary = (): Summary => ({
       days: writtenDates.size,

@@ -160,3 +160,42 @@ describe("helpers", () => {
     expect(toIso("29/02/2028", "dmy", "dmy")).toBe("2028-02-29");
   });
 });
+
+describe("planImport: our own CSV export's columns (1.1 P)", () => {
+  const OURS = "date,mood,mood_word,sleep_hours,sleep_quality,movement_minutes,stress,moment,note";
+
+  it("the check-in's other values, from the row with the mood; only allowed values", () => {
+    const plan = ok([OURS, "2026-10-01,4,Good,7.5,good,30,2,,", "2026-10-02,3,Okay,7.3,meh,20,9,,", "2026-10-03,,,8,good,30,2,,Just words."].join("\n"));
+    expect(plan.days).toEqual([
+      { date: "2026-10-01", mood: 4, sleep_hours: 7.5, sleep_quality: "good", exercise_minutes: 30, stress: 2 },
+      // 7.3 h, "meh", 20 min and stress 9 aren't check-in values: left out.
+      { date: "2026-10-02", mood: 3 },
+    ]);
+  });
+
+  it("moment yes → a moment; anything else isn't", () => {
+    const plan = ok([OURS, "2026-10-01,4,Good,,,,,yes,A", "2026-10-01,4,Good,,,,,no,B", "2026-10-01,4,Good,,,,,YES,C"].join("\n"));
+    expect(plan.entries.map((e) => [e.body, e.isMoment === true])).toEqual([
+      ["A", true],
+      ["B", false],
+      ["C", true],
+    ]);
+  });
+
+  it("a generic note keeps its spaces and blank lines (only line endings change); all-blank is no note", () => {
+    const plan = ok(`date,mood,note\n2026-10-01,4,"  two\r\nlines  \r\n"\n2026-10-02,3,"   "\n`);
+    expect(plan.entries).toEqual([{ date: "2026-10-01", time: null, body: "  two\nlines  \n" }]);
+  });
+
+  it("our ' in front of a formula start comes off (generic files only); a ' that isn't ours stays", () => {
+    const plan = ok(`date,mood,note\n2026-10-01,4,'- milk\n2026-10-02,4,''=x\n2026-10-03,4,'hello\n`);
+    expect(plan.entries.map((e) => e.body)).toEqual(["- milk", "'=x", "'hello"]);
+    const fromDaylio = ok(daylio(["2026-10-01,x,x,9:00 am,good,,,'- not ours"]));
+    expect(fromDaylio.entries[0].body).toBe("'- not ours");
+  });
+
+  it("the same words twice on one day: two entries, the second marked as a copy", () => {
+    const plan = ok("date,mood,note\n2026-10-01,4,Same\n2026-10-01,4,Same\n2026-10-02,4,Same\n");
+    expect(plan.entries.map((e) => e.dup ?? 0)).toEqual([0, 1, 0]);
+  });
+});

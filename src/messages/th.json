@@ -290,6 +290,7 @@
     "cancel": "ยกเลิก",
     "exportReadable": "สำเนาแบบอ่านได้ (.txt)",
     "exportData": "ไฟล์ข้อมูล (.json)",
+    "exportCsv": "สเปรดชีต (.csv)",
     "meReminder": "การแจ้งเตือนรายวัน",
     "meReminderTime": "เวลา",
     "webReminderNote": "การแจ้งเตือนจะส่งไปที่โทรศัพท์ของคุณ ติดตั้งแอป Moodbow เพื่อรับการแจ้งเตือน",
