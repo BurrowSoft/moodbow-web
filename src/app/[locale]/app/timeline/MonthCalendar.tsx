@@ -129,8 +129,11 @@ export function MonthCalendar({ today, dateLocaleTag, initial, shareable }: { to
       <div role="grid" aria-labelledby={titleId} aria-busy={load.kind === "loading"} onKeyDown={onKeyDown} className="mt-3" data-testid="calendar-grid">
         <div role="row" className="grid grid-cols-7">
           {weekdayNames(dateLocaleTag).map((w) => (
-            <div key={w.long} role="columnheader" aria-label={w.long} className="py-1 text-center text-xs font-medium text-muted">
+            // The initial on screen, the full name for screen readers (real
+            // text, not only a label: axe empty-table-header, Web Tester C7).
+            <div key={w.long} role="columnheader" className="py-1 text-center text-xs font-medium text-muted">
               <span aria-hidden="true">{w.short}</span>
+              <span className="sr-only">{w.long}</span>
             </div>
           ))}
         </div>
@@ -158,7 +161,9 @@ export function MonthCalendar({ today, dateLocaleTag, initial, shareable }: { to
               return (
                 <div key={date} role="gridcell" className="p-0.5" aria-current={date === today ? "date" : undefined}>
                   {future ? (
-                    <span className={`${cell} text-muted opacity-50`} data-testid={`calendar-day-${date}`}>
+                    // Muted by the token colour, not opacity, so the number
+                    // keeps its contrast (axe color-contrast, Web Tester C7).
+                    <span className={`${cell} text-muted`} data-testid={`calendar-day-${date}`}>
                       {marks}
                     </span>
                   ) : (
