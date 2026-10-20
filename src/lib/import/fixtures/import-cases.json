@@ -11,7 +11,7 @@
   },
   "cases": [
     {
-      "name": "daylio sample (BOM, CRLF, a custom mood, activities, a future row, two rows on one day)",
+      "name": "daylio sample (BOM, a custom mood, activities, a future row, two rows on one day)",
       "csv": "﻿full_date,date,weekday,time,mood,activities,note_title,note\n2026-10-19,October 19,Monday,8:15 pm,rad,friends | walk | good meal,A great day,\"Dinner with Maya, then a long walk by the river.\"\n2026-10-19,October 19,Monday,7:30 am,meh,work,,Slow start.\n2026-10-18,October 18,Sunday,21:05,good,family | cooking,,\"Made soup. Mum said it was \"\"the best yet\"\".\"\n2026-10-17,October 17,Saturday,10:00 am,bad,,,\n2026-10-16,October 16,Friday,11:45 pm,awful,work | deadline,Long week,\"Too much at once.\nCouldn't switch off.\n\nTomorrow will be better.\"\n2026-10-15,October 15,Thursday,6:00 pm,sleepy,reading,,Custom mood name.\n2026-10-14,October 14,Wednesday,9:00 pm,good,,,\n2099-01-01,January 1,Thursday,9:00 am,rad,,,From the future.\n",
       "result": {
         "status": "ok",

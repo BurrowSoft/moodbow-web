@@ -47,7 +47,7 @@ function generated(kind: "days" | "entries", count: number): string {
 
 const CASES: Case[] = [
   // Daylio
-  { name: "daylio sample (BOM, CRLF, a custom mood, activities, a future row, two rows on one day)", csv: sample },
+  { name: "daylio sample (BOM, a custom mood, activities, a future row, two rows on one day)", csv: sample },
   { name: "daylio sample, the custom mood mapped (sleepy → 3)", csv: sample, options: { customMoods: { sleepy: 3 } } },
   { name: "daylio: several rows on one day, the latest time sets the mood", csv: daylio(["2026-10-10,x,x,9:00 pm,rad,,,", "2026-10-10,x,x,7:15 am,awful,,,", "2026-10-10,x,x,12:30 pm,meh,,,"]) },
   { name: "daylio: custom moods unmapped (the UI blocks until each has a level or Skip; Skip = no key, no mood)", csv: daylio(["2026-10-10,x,x,9:00 am,sleepy,,,", "2026-10-11,x,x,9:00 am,wired,,,Note"]) },
