@@ -24,8 +24,12 @@ describe("conditions", () => {
 
   // The public 1.0 app release step (next-release.md, "Help flips with the
   // product"): the Help lines about the app's reminder and offline start
-  // go live together, with the store release (not the closed test).
-  it("the 1.0 app release flips as one step", () => {
+  // go live together, with the store release (not the closed test). Never
+  // before the legal pages: a store release needs the live Privacy URL, so
+  // this stays red until the legal flip is on master (UX, reviewer #101).
+  it("the 1.0 app release flips as one step, after the legal pages", () => {
+    expect(conditionMet("privacy-text-approved"), "privacy-text-approved").toBe(true);
+    expect(conditionMet("terms-text-approved"), "terms-text-approved").toBe(true);
     for (const id of ["reminder-live", "offline-start"] as const) expect(conditionMet(id), id).toBe(true);
   });
 
