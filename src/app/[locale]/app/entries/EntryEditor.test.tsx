@@ -537,6 +537,15 @@ describe("EntryEditor: writing prompts (1.1 I, decision 183)", () => {
     expect(screen.getByTestId("entry-prompt")).toBeInTheDocument();
   });
 
+  it("the entry moved to another day: the prompt (and its description) go; back on its day, it returns (reviewer #83)", () => {
+    renderWithPrompt("2026-10-20");
+    fireEvent.change(screen.getByTestId("entry-date"), { target: { value: "2026-10-15" } });
+    expect(screen.queryByTestId("entry-prompt")).toBeNull();
+    expect(screen.getByTestId("entry-text")).not.toHaveAttribute("aria-describedby");
+    fireEvent.change(screen.getByTestId("entry-date"), { target: { value: "2026-10-20" } });
+    expect(screen.getByTestId("entry-prompt")).toBeInTheDocument();
+  });
+
   it("no promptDate (off, or a crisis-flagged day): no prompt", () => {
     renderWithPrompt(null);
     expect(screen.queryByTestId("entry-prompt")).toBeNull();

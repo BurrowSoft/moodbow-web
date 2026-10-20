@@ -39,13 +39,14 @@ export default async function WritePage({ params, searchParams }: PageProps<"/[l
   const startDate = typeof asked === "string" && isIsoDate(asked) && asked <= me.today ? asked : me.today;
   const from = originOf((await searchParams).from);
   const tag = dateLocale(locale, (await headers()).get("accept-language"), me.profile?.country ?? null);
-  // Writing prompts (1.1 I, decision 183): today's, by the profile's date;
-  // none on a day where an earlier entry is crisis-flagged (every list, rule
-  // 5), and none if that can't be checked (fails closed).
+  // Writing prompts (1.1 I, decision 183): the prompt of the day the entry
+  // starts on (today, or a Timeline day's ?date=); none on a day where an
+  // earlier entry is crisis-flagged (every list, rule 5), and none if that
+  // can't be checked (fails closed). The editor hides it if the date changes.
   let promptDate: string | null = null;
   if (pageGate("writing-prompts") !== "hidden") {
-    const { data: todays, error } = await supabase.from("entries").select("body").eq("entry_date", me.today);
-    if (!error && !(todays ?? []).some((e) => flagsCrisis((e as { body: string }).body, CRISIS_KEYWORDS))) promptDate = me.today;
+    const { data: sameDay, error } = await supabase.from("entries").select("body").eq("entry_date", startDate);
+    if (!error && !(sameDay ?? []).some((e) => flagsCrisis((e as { body: string }).body, CRISIS_KEYWORDS))) promptDate = startDate;
   }
   return (
     <>

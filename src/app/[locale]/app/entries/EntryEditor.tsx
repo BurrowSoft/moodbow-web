@@ -66,9 +66,9 @@ export const hasDraft = (uid: string, entryId: string) => readDraft(localKey("dr
 // clicked, or at the end; with a question ("Write your answer") it's quoted
 // after the entry first. onLeave replaces going to backTo: Save and Cancel
 // return to the view, with the saved entry when there's a new version.
-// promptDate: today's writing prompt (1.1 I) for that date, where prompts
-// are on and nothing earlier that day was crisis-flagged (the page decides);
-// shown only while the text is empty.
+// promptDate: the writing prompt's day (1.1 I), where prompts are on and
+// nothing earlier that day was crisis-flagged (the page decides); shown only
+// while the text is empty and the entry is still on that day (reviewer #83).
 export type EditorStart = { at: number | "end"; question?: string };
 type Props = {
   promptDate?: string | null;
@@ -96,7 +96,7 @@ export function EntryEditor(props: Props) {
 function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app", start, onLeave, restore, promptDate }: Props & { restore: boolean }) {
   const t = useTranslations("entry");
   const language = useLocale();
-  // "Another" steps through the list from today's prompt.
+  // "Another" steps through the list from the day's prompt.
   const [promptStep, setPromptStep] = useState(0);
   const tt = useTranslations("today");
   const router = useRouter();
@@ -291,6 +291,7 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
   const closeDialog = useCallback(() => setDialog(null), []);
   const conflict = dialog && typeof dialog === "object" ? dialog.conflict : undefined;
 
+  const showPrompt = !!promptDate && fields.date === promptDate && fields.body.trim() === "";
   return (
     <form
       className="flex min-h-[70dvh] flex-col gap-4"
@@ -319,10 +320,10 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
         />
       </div>
       {/* A quiet invitation, never inserted: only while the entry is empty. */}
-      {promptDate && fields.body.trim() === "" && (
+      {showPrompt && (
         <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-muted" data-testid="entry-prompt">
           <span id="entry-prompt-text" data-testid="entry-prompt-text">
-            {promptText(promptFor(promptDate, promptStep), language)}
+            {promptText(promptFor(promptDate!, promptStep), language)}
           </span>
           <button type="button" data-testid="entry-prompt-another" onClick={() => setPromptStep((n) => n + 1)} className="min-h-11 font-medium text-accent underline underline-offset-4">
             {t("promptAnother")}
@@ -340,7 +341,7 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
         placeholder={t("entryPlaceholder")}
         // Too long: the message is tied to the text (a11y pass).
         aria-invalid={tooLong || undefined}
-        aria-describedby={[tooLong && "entry-error", promptDate && fields.body.trim() === "" && "entry-prompt-text"].filter(Boolean).join(" ") || undefined}
+        aria-describedby={[tooLong && "entry-error", showPrompt && "entry-prompt-text"].filter(Boolean).join(" ") || undefined}
         className="min-h-[50dvh] w-full flex-1 resize-none rounded-3xl border border-border bg-surface p-6 text-lg leading-relaxed text-text placeholder:text-muted"
       />
 
