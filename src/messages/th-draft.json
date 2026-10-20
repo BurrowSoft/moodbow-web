@@ -675,6 +675,36 @@
     "reason": "UX draft (native read pending)"
   },
   {
+    "key": "share.shareRangeWeek",
+    "en": "My last 7 days",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "share.shareRangeMonth",
+    "en": "My last 30 days",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "share.shareRange3Months",
+    "en": "My last 3 months",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "share.milestoneReachedTitle",
+    "en": "{n} days of your story",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "share.milestoneShare",
+    "en": "Share it",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "share.milestoneNotNow",
+    "en": "Not now",
+    "reason": "UX draft (native read pending)"
+  },
+  {
     "key": "ai.creditsBalance",
     "en": "{credits, plural, one {# credit} other {# credits}}",
     "reason": "UX draft (native read pending)"

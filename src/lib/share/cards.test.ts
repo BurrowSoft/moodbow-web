@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
-import fixture from "./cards-fixture.json";
+import fixture from "../../../content/contracts/share-cards.json";
 import { chartGeometry, latestBands, milestoneFor } from "./cards";
 import { MOOD_HEX, type CardFormat } from "./moodbow";
 
