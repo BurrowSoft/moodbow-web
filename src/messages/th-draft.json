@@ -80,6 +80,11 @@
     "reason": "UX draft (native read pending)"
   },
   {
+    "key": "common.languageNames.th",
+    "en": "ไทย",
+    "reason": "UX draft (native read pending)"
+  },
+  {
     "key": "common.burrowsoftProduct",
     "en": "A BurrowSoft product",
     "reason": "UX draft (native read pending)"
