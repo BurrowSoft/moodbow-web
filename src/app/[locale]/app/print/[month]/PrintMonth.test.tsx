@@ -71,6 +71,17 @@ describe("PrintMonth (1.1 N)", () => {
     expect(screen.getAllByTestId("print-entry").map((p) => p.textContent)).toEqual(["A long walk.\nThen tea.", "Evening."]);
   });
 
+  it("a long day may run over a page break; its date, mood and values stay together, with its text (Web Tester P2)", () => {
+    renderIt();
+    const day = screen.getByTestId("print-day-2026-10-01");
+    expect(day.className).not.toContain("break-inside-avoid");
+    const head = day.querySelector("[data-testid=print-day-head]")!;
+    expect(head.className).toContain("break-inside-avoid-page");
+    expect(head.className).toContain("break-after-avoid-page");
+    expect(head.querySelector("h2")).toHaveTextContent(messages.today.mood4);
+    expect(head.querySelector("[data-testid=print-values]")).not.toBeNull();
+  });
+
   it("the footer for every page reads Moodbow · month", () => {
     renderIt();
     expect(screen.getByTestId("print-footer")).toHaveTextContent("Moodbow · October 2026");
