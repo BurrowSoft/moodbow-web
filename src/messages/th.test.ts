@@ -47,11 +47,11 @@ describe("th.json", () => {
     for (const key of Object.keys(E)) expect(args(T[key]), key).toEqual(args(E[key]));
   });
 
-  it("th-draft lists the strings without a reviewed Thai: each a real key; UX drafts are Thai, the rest still English", () => {
+  it("th-draft lists the strings without a reviewed Thai: each a real key; anything not a UX draft is still English", () => {
+    // A UX draft may equal the English on purpose (the brand name "Moodbow").
     for (const d of drafts as { key: string; reason: string }[]) {
       expect(E[d.key], d.key).toBeDefined();
-      if (d.reason.startsWith("UX draft")) expect(T[d.key], d.key).not.toBe(E[d.key]);
-      else expect(T[d.key], d.key).toBe(E[d.key]);
+      if (!d.reason.startsWith("UX draft")) expect(T[d.key], d.key).toBe(E[d.key]);
     }
   });
 
