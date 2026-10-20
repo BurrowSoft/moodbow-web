@@ -15,6 +15,11 @@ describe("helplinesFor", () => {
     expect(helplinesFor("TH")).toMatchObject({ helpline: { name: "Department of Mental Health hotline", display: "1323", dial: "1323" }, emergency: { dial: "1669" } });
     expect(helplinesFor("us").helpline).not.toBeNull();
   });
+  it("the helpline's name in the UI language where the registry has one, else English", () => {
+    expect(helplinesFor("TH", "th").helpline?.name).toBe("สายด่วนสุขภาพจิต กรมสุขภาพจิต");
+    expect(helplinesFor("TH", "en").helpline?.name).toBe("Department of Mental Health hotline");
+    expect(helplinesFor("US", "th").helpline?.name).toBe(helplinesFor("US").helpline?.name);
+  });
   it("unknown or none: only the directory", () => {
     expect(helplinesFor("ZZ")).toEqual({ helpline: null, emergency: null, directoryUrl: "https://findahelpline.com" });
     expect(helplinesFor(null).helpline).toBeNull();
