@@ -1,0 +1,712 @@
+[
+  {
+    "key": "meta.siteName",
+    "en": "Moodbow",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "meta.title",
+    "en": "Moodbow — A journal that learns your story",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "meta.pageTitle",
+    "en": "{title} · Moodbow",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "meta.description",
+    "en": "Moodbow is a private journal that helps you notice patterns in your mood, sleep and habits over time. Coming soon from BurrowSoft.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "meta.ogDescription",
+    "en": "A private journal that helps you notice patterns in your mood, sleep and habits over time. Coming soon.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "meta.ogImageAlt",
+    "en": "Moodbow logo with the text: Coming soon. A journal that learns your story.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "meta.manifestDescription",
+    "en": "A journal that learns your story.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "common.logoAlt",
+    "en": "Moodbow",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "common.skipToContent",
+    "en": "Skip to content",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "common.homeAria",
+    "en": "Moodbow home",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "common.language",
+    "en": "Language",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "common.siteLinks",
+    "en": "Site links",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "common.languageNames.en",
+    "en": "English",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "common.burrowsoftProduct",
+    "en": "A BurrowSoft product",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "common.burrowsoftAria",
+    "en": "A BurrowSoft product. Visit burrowsoft.com",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "common.copyright",
+    "en": "© 2026 BurrowSoft",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "common.support",
+    "en": "Support",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "common.accountDeletion",
+    "en": "Delete your account",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "common.privacy",
+    "en": "Privacy",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "common.terms",
+    "en": "Terms",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "common.draftBanner",
+    "en": "Draft, not in effect. This page is only visible on test builds.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "home.comingSoon",
+    "en": "Coming soon",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "home.heroTitle",
+    "en": "Your month, as a rainbow",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "home.heroSub",
+    "en": "A private journal that learns your story and shows what shapes your days.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "home.notify",
+    "en": "Get notified",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "home.notifyAria",
+    "en": "Get notified by email when Moodbow launches",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "home.notifySubject",
+    "en": "Notify me about Moodbow",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "home.notifyNote",
+    "en": "Email us and we'll let you know when it's ready.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "home.start",
+    "en": "Start your journal",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "home.storeSoon",
+    "en": "Coming soon to Google Play and the App Store",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "home.featureCheckInTitle",
+    "en": "Check in in 10 seconds",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "home.featureCheckInBody",
+    "en": "Mood, sleep, movement, stress.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "home.featureWriteTitle",
+    "en": "Write it. Moodbow writes back.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "home.featureWriteBody",
+    "en": "A kind reflection when you want one.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "home.featureWriteNoAiTitle",
+    "en": "Write about your day",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "home.featureWriteNoAiBody",
+    "en": "In your own words, whenever you feel like it.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "home.featureInsightsTitle",
+    "en": "See what shapes your days",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "home.featureInsightsBody",
+    "en": "Week, month and 3-month charts.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "home.privateTitle",
+    "en": "Private by design",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "home.privateBody",
+    "en": "Only you can read your journal. Export or delete everything, anytime.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "support.title",
+    "en": "Support",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "support.description",
+    "en": "Get help with Moodbow: email us with questions, problems or ideas.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "support.body",
+    "en": "Questions, problems or ideas? Email us and we'll get back to you.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "support.deleteLink",
+    "en": "How to delete your account",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "support.emailLine",
+    "en": "Email: <link>{email}</link>",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "accountDeletion.title",
+    "en": "Delete your Moodbow account",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "accountDeletion.description",
+    "en": "How to delete your Moodbow account and everything in it.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "accountDeletion.intro",
+    "en": "You can delete your account and everything in it at any time. Deleting is immediate and can't be undone.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "accountDeletion.steps",
+    "en": "In the app or on the web: open Me → Delete account, type DELETE, and confirm.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "accountDeletion.what",
+    "en": "We delete your entries, check-ins, AI reflections and reports, what Moodbow remembers, your settings and your login.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "accountDeletion.backups",
+    "en": "Copies in our encrypted backups are removed automatically within {days} days.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "accountDeletion.noAccess",
+    "en": "Can't sign in? Email <support>{email}</support> from the address you signed up with and we'll delete it for you.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "emailConfirmed.metaTitle",
+    "en": "Email confirmed",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "emailConfirmed.successTitle",
+    "en": "Email confirmed.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "emailConfirmed.successBody",
+    "en": "Open Moodbow to continue.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "emailConfirmed.errorTitle",
+    "en": "This link has expired or was already used.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "emailConfirmed.errorBody",
+    "en": "Open Moodbow and ask for a new one.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "emailConfirmed.emailChangedTitle",
+    "en": "Your email address was updated.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "emailConfirmed.emailChangedBody",
+    "en": "Use the new one next time you sign in.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "emailConfirmed.emailChangePendingTitle",
+    "en": "Almost done.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "emailConfirmed.emailChangePendingBody",
+    "en": "Open the link we sent to your other email address to finish changing it.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "emailConfirmed.emailConfirmedRedirect",
+    "en": "Taking you to your journal in {seconds, plural, one {# second} other {# seconds}}…",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "confirmLink.signupTitle",
+    "en": "Confirm your email",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "confirmLink.signupBody",
+    "en": "One tap and your Moodbow journal is ready.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "confirmLink.signupButton",
+    "en": "Confirm email",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "confirmLink.recoveryTitle",
+    "en": "Reset your password",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "confirmLink.recoveryBody",
+    "en": "Tap Continue to choose a new password.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "confirmLink.recoveryButton",
+    "en": "Continue",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "confirmLink.emailChangeTitle",
+    "en": "Confirm your new email",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "confirmLink.emailChangeBody",
+    "en": "Tap the button to confirm the new email address for your Moodbow account.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "confirmLink.emailChangeButton",
+    "en": "Confirm email change",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "resetPassword.title",
+    "en": "Choose a new password",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "resetPassword.newPassword",
+    "en": "New password",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "resetPassword.confirmPassword",
+    "en": "Confirm new password",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "resetPassword.hint",
+    "en": "At least 8 characters",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "resetPassword.submit",
+    "en": "Save new password",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "resetPassword.errShort",
+    "en": "Use at least 8 characters",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "resetPassword.errMismatch",
+    "en": "The passwords don't match",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "resetPassword.errSame",
+    "en": "Choose a password that's different from your old one.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "resetPassword.errExpired",
+    "en": "This link has expired or was already used. Open Moodbow and ask for a new one.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "resetPassword.success",
+    "en": "Your password was changed, and you've been signed out on all your devices. Sign in with your new password in the app or on the web.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "resetPassword.successTitle",
+    "en": "Password changed",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "privacy.title",
+    "en": "Privacy policy",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "privacy.description",
+    "en": "How Moodbow handles your data.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "terms.title",
+    "en": "Terms of use",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "terms.description",
+    "en": "The terms for using Moodbow.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "legal.hiddenTitle",
+    "en": "Not shown yet: each block appears once its feature is live (test builds only)",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "onboarding.welcome3BodyNoAi",
+    "en": "Only you can read your journal, and you can delete everything at any time.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "onboarding.setupReminderTime",
+    "en": "Time",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "onboarding.back",
+    "en": "Back",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "app.retry",
+    "en": "Try again",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "today.stressChip",
+    "en": "Stress {level} of 5",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "today.offlineCheckinSuperseded",
+    "en": "Your offline check-in for {date} wasn't saved, because that day was updated on another device. You're seeing the latest version.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "today.dismiss",
+    "en": "Got it",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "today.checkinSavedOfflineWeb",
+    "en": "Saved in this browser. It will sync when you're online.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "today.errDateInFuture",
+    "en": "You can't log a day that hasn't happened yet.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "today.errStaleWrite",
+    "en": "This was changed on another device. We've loaded the latest version. Please try again.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "today.offlineCheckinRejected",
+    "en": "A check-in you saved offline for {date} couldn't be saved. Please add it again.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.entryTextLabel",
+    "en": "Your entry",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.entryDateLabel",
+    "en": "Date",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.entryConflictTitle",
+    "en": "This entry changed on another device",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.entryConflictBody",
+    "en": "Your version is still here. Which one do you want to keep?",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.entryConflictKeepMine",
+    "en": "Keep mine",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.entryConflictUseOther",
+    "en": "Use the other one",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.entryDeletedTitle",
+    "en": "This entry was deleted on another device",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.entryDeletedBody",
+    "en": "Your version is still here. Do you want to keep it?",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.entryDeletedKeep",
+    "en": "Keep it",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.entryDeletedDiscard",
+    "en": "Delete it",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.momentBadge",
+    "en": "Moment",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "notFound.title",
+    "en": "Page not found",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "notFound.body",
+    "en": "This page doesn't exist or has moved.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "notFound.home",
+    "en": "Go to the home page",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "me.deleteCredits",
+    "en": "You'll also lose your {credits, plural, one {# AI credit} other {# AI credits}}.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "me.exportReadable",
+    "en": "Readable copy (.txt)",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "me.exportData",
+    "en": "Data file (.json)",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "me.webReminderNote",
+    "en": "Reminders arrive on your phone. Install the Moodbow app to get them.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "export.exportTitle",
+    "en": "Moodbow: your journal",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "export.exportExported",
+    "en": "Exported: {when}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "export.exportAccount",
+    "en": "Account: {email}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "export.exportPrivateNote",
+    "en": "This file holds your private journal. Keep it somewhere safe.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "export.exportCheckins",
+    "en": "Check-ins",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "export.exportEntries",
+    "en": "Entries",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "export.exportReflections",
+    "en": "AI reflections",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "export.exportMemories",
+    "en": "What the AI remembers",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "export.exportField",
+    "en": "{label}: {value}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "export.exportMood",
+    "en": "Mood",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "export.exportMoodValue",
+    "en": "{label} ({value}/5)",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "export.exportSleep",
+    "en": "Sleep",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "export.exportSleepValue",
+    "en": "{hours}, {quality}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "export.exportExercise",
+    "en": "Movement",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "export.exportStress",
+    "en": "Stress",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "export.exportOfFive",
+    "en": "{value}/5",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "export.exportReflectionOn",
+    "en": "On your entry of {date}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "help.helpTitle",
+    "en": "Help & FAQ",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "help.helpIntro",
+    "en": "Answers to common questions about using Moodbow. Can't find what you need? Email {email}.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.chartAverageOfFive",
+    "en": "Average {value} / 5",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.chartNoChange",
+    "en": "Same as the previous {range, select, week {week} month {month} other {3 months}}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "share.shareThemeLight",
+    "en": "Light",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "share.shareThemeDark",
+    "en": "Dark",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "share.shareDownload",
+    "en": "Download image",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "share.shareThisMonth",
+    "en": "Share this month",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "ai.creditsBalance",
+    "en": "{credits, plural, one {# credit} other {# credits}}",
+    "reason": "UX draft (native read pending)"
+  }
+]

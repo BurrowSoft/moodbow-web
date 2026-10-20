@@ -217,7 +217,7 @@
     "stressTitle": "Stress",
     "stressLow": "Low",
     "stressHigh": "High",
-    "stressChip": "Stress {level}/5",
+    "stressChip": "Stress {level} of 5",
     "stressLevelLabel": "Stress {n} of 5",
     "offlineCheckinSuperseded": "Your offline check-in for {date} wasn't saved, because that day was updated on another device. You're seeing the latest version.",
     "dismiss": "Got it",

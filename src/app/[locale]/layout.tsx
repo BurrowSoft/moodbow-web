@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import { fontVariables } from "@/lib/fonts";
@@ -10,6 +11,7 @@ import { LocalDataWipe } from "@/components/LocalDataWipe";
 import { VisitCounts } from "@/components/VisitCounts";
 import { THEME_PRE_PAINT } from "@/lib/appearance";
 import { conditionMet } from "@/lib/conditions";
+import { NONCE_HEADER } from "@/lib/csp";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -48,6 +50,9 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: "common" });
+  // The CSP nonce for this request (proxy.ts): the pre-paint script is inline.
+  // Reading it renders every page per request, as a nonce requires.
+  const nonce = (await headers()).get(NONCE_HEADER) ?? undefined;
 
   return (
     // data-theme is set by the pre-paint script before React runs, so the
@@ -55,7 +60,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
     <html lang={locale} className={fontVariables} suppressHydrationWarning>
       <head>
         {/* Me → Appearance on this device (decision 133), before first paint. */}
-        <script dangerouslySetInnerHTML={{ __html: THEME_PRE_PAINT }} />
+        <script nonce={nonce} dangerouslySetInnerHTML={{ __html: THEME_PRE_PAINT }} />
       </head>
       <body className="flex min-h-dvh flex-col font-sans">
         <a
