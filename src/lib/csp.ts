@@ -3,8 +3,9 @@
 // the request's CSP header and stamps its scripts; the pre-paint theme
 // script takes it from x-nonce), and connections only to us, Supabase and
 // Sentry. Report-Only until "csp-enforced" is met (after a clean Preview run
-// of every page); violations go to Sentry's security endpoint when a DSN is
-// set.
+// of every page, read from the browser console). No report-uri: a report
+// carries the full page address, query included, past our scrubbing, and
+// /auth/confirm's carries a single-use token (reviewer #69).
 
 export const NONCE_HEADER = "x-nonce";
 
@@ -22,19 +23,6 @@ const origin = (url: string | undefined): string | null => {
     return null;
   }
 };
-
-// Sentry's CSP report URL from a DSN: https://<key>@<host>/<project>.
-export function sentryReportUri(dsn: string | undefined): string | null {
-  try {
-    if (!dsn) return null;
-    const u = new URL(dsn);
-    const project = u.pathname.replace(/^\//, "");
-    if (!u.username || !project) return null;
-    return `${u.protocol}//${u.host}/api/${project}/security/?sentry_key=${u.username}`;
-  } catch {
-    return null;
-  }
-}
 
 export function buildCsp(nonce: string, { supabaseUrl, sentryDsn, vercelEnv }: CspEnv): string {
   const supabase = origin(supabaseUrl);
@@ -61,8 +49,6 @@ export function buildCsp(nonce: string, { supabaseUrl, sentryDsn, vercelEnv }: C
     ["form-action", ["'self'"]],
     ["manifest-src", ["'self'"]],
   ];
-  const report = sentryReportUri(sentryDsn);
-  if (report) directives.push(["report-uri", [report]]);
   return directives.map(([name, values]) => `${name} ${values.join(" ")}`).join("; ");
 }
 

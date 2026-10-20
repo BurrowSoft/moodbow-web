@@ -40,7 +40,8 @@ export default async function proxy(req: NextRequest) {
   if (isHiddenPage(path)) {
     const url = req.nextUrl.clone();
     url.pathname = NOT_FOUND_PATH;
-    return withCsp(NextResponse.rewrite(url, { status: 404 }));
+    // The not-found page renders too: it needs this request's nonce (reviewer #69).
+    return withCsp(NextResponse.rewrite(url, { status: 404, request: { headers: req.headers } }));
   }
   // /email-confirmed keeps only ?result= (lib/authLink.ts): a code or error
   // details in the address are dropped before the page renders.

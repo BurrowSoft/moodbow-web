@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
-import { buildCsp, newNonce, sentryReportUri } from "./csp";
+import { buildCsp, newNonce } from "./csp";
 
 const ENV = { supabaseUrl: "https://abc.supabase.co", sentryDsn: "https://pubkey@o123.ingest.sentry.io/456", vercelEnv: "production" };
 const directive = (csp: string, name: string) => csp.split("; ").find((d) => d.startsWith(`${name} `))?.slice(name.length + 1).split(" ") ?? [];
@@ -30,16 +30,12 @@ describe("buildCsp (audit A1)", () => {
     expect(directive(buildCsp("n", ENV), "img-src")).toEqual(["'self'", "data:", "blob:"]);
   });
 
-  it("violations go to Sentry's security endpoint", () => {
-    expect(directive(buildCsp("n", ENV), "report-uri")).toEqual(["https://o123.ingest.sentry.io/api/456/security/?sentry_key=pubkey"]);
-    expect(sentryReportUri("not a url")).toBeNull();
-    expect(sentryReportUri(undefined)).toBeNull();
+  it("no report-uri: a report would carry the page's full address (an auth token on /auth/confirm) past our scrubbing", () => {
+    expect(buildCsp("n", ENV)).not.toMatch(/report-(uri|to)/);
   });
 
-  it("without Supabase or Sentry configured: just us, no report-uri", () => {
-    const csp = buildCsp("n", {});
-    expect(directive(csp, "connect-src")).toEqual(["'self'"]);
-    expect(csp).not.toContain("report-uri");
+  it("without Supabase or Sentry configured: just us", () => {
+    expect(directive(buildCsp("n", {}), "connect-src")).toEqual(["'self'"]);
   });
 
   it("Previews allow Vercel's toolbar; Production doesn't", () => {
