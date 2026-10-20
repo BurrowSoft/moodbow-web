@@ -101,6 +101,23 @@ describe("importEntries", () => {
   });
 });
 
+describe("our own CSV export's values (1.1 P)", () => {
+  it("a check-in's other values go to upsert_check_in, checked by the check-in's rules", async () => {
+    await importCheckIns([{ date: "2026-10-01", mood: 4, sleep_hours: 7.5, sleep_quality: "good", exercise_minutes: 30, stress: 2 }]);
+    expect(rpc).toHaveBeenCalledWith("upsert_check_in", expect.objectContaining({ p_sleep_hours: 7.5, p_sleep_quality: "good", p_exercise_minutes: 30, p_stress: 2 }));
+    for (const bad of [{ sleep_hours: 7.3 }, { sleep_quality: "meh" }, { exercise_minutes: 20 }, { stress: 6 }]) {
+      expect(await importCheckIns([{ date: "2026-10-01", mood: 4, ...bad }])).toEqual({ status: "error" });
+    }
+  });
+
+  it("an entry's moment goes to save_entry; none means false", async () => {
+    await importEntries([{ id: ID(1), date: "2026-10-01", body: "A", isMoment: true }]);
+    expect(rpc).toHaveBeenLastCalledWith("save_entry", expect.objectContaining({ p_is_moment: true }));
+    await importEntries([{ id: ID(2), date: "2026-10-01", body: "B" }]);
+    expect(rpc).toHaveBeenLastCalledWith("save_entry", expect.objectContaining({ p_is_moment: false }));
+  });
+});
+
 // Coverage pass (UX): nothing is written on any of these.
 describe("import batches: the session and the batch itself", () => {
   const day = [{ date: "2026-10-01", mood: 4 }];

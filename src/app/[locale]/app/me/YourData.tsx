@@ -4,16 +4,19 @@ import { startTransition, useActionState, useCallback, useEffect, useState, useT
 import { useTranslations } from "next-intl";
 import { Dialog, dialogButton } from "@/components/Dialog";
 import { canRenderText, renderExportText, type Translate } from "@/lib/exportText";
-import { DELETE_WORD, exportFileName, journalFileName } from "@/lib/journal/account";
+import { renderExportCsv } from "@/lib/exportCsv";
+import { csvFileName, DELETE_WORD, exportFileName, journalFileName } from "@/lib/journal/account";
 import { wipeLocalData } from "@/lib/localData";
 import { deleteMyAccount, exportMyData, type DeleteAccountState } from "./actions";
 
-type ExportFile = { kind: "txt" | "json"; name: string; url: string };
+type ExportFile = { kind: "txt" | "json" | "csv"; name: string; url: string };
+const LINK_LABELS = { txt: "exportReadable", json: "exportData", csv: "exportCsv" } as const;
 
 // Me → Your data (M7): Export my data, and Delete account behind a dialog
 // that warns about lost AI credits (only when there are any), offers the
-// export first, and needs DELETE typed.
-export function YourData({ credits, uid }: { credits: number; uid: string }) {
+// export first, and needs DELETE typed. csv: the spreadsheet link (1.1 P,
+// export-csv-live).
+export function YourData({ credits, uid, csv = false }: { credits: number; uid: string; csv?: boolean }) {
   const t = useTranslations("me");
   const tt = useTranslations("today");
   const [exporting, startExport] = useTransition();
@@ -47,7 +50,8 @@ export function YourData({ credits, uid }: { credits: number; uid: string }) {
   }, { status: "idle" });
 
   // The files are made here, in the browser: nothing is stored on the way.
-  // One Export, then two links (UX): the readable copy and the data file.
+  // One Export, then two links (UX): the readable copy and the data file,
+  // and a third, the spreadsheet, where 1.1 P is live.
   // Ignored while one runs (the button stays focusable: aria-disabled).
   const runExport = () => {
     if (exporting) return;
@@ -62,6 +66,10 @@ export function YourData({ credits, uid }: { credits: number; uid: string }) {
           next.push({ kind: "txt", name: journalFileName(result.date), url: URL.createObjectURL(new Blob([renderExportText(doc, tr as Translate)], { type: "text/plain;charset=utf-8" })) });
         }
         next.push({ kind: "json", name: exportFileName(result.date), url: URL.createObjectURL(new Blob([result.json], { type: "application/json" })) });
+        // The spreadsheet (1.1 P): from the same document, no AI text.
+        if (csv && canRenderText(doc)) {
+          next.push({ kind: "csv", name: csvFileName(result.date), url: URL.createObjectURL(new Blob([renderExportCsv(doc, tr as Translate)], { type: "text/csv;charset=utf-8" })) });
+        }
         setFiles(next);
         setExportState("ready");
       } catch {
@@ -85,7 +93,7 @@ export function YourData({ credits, uid }: { credits: number; uid: string }) {
           {files.map((f) => (
             <li key={f.kind}>
               <a href={f.url} download={f.name} data-testid={`me-export-${f.kind}`} className="font-medium text-accent underline underline-offset-4">
-                {f.kind === "txt" ? t("exportReadable") : t("exportData")}
+                {t(LINK_LABELS[f.kind])}
               </a>
             </li>
           ))}

@@ -1,3 +1,5 @@
+import { restoreCell } from "@/lib/csvSafety";
+import { EXERCISE_MINUTES, SLEEP_HOURS, SLEEP_QUALITIES, type SleepQuality } from "@/lib/journal/checkIn";
 import { MAX_ENTRY_CHARS } from "@/lib/journal/entry";
 import { parseCsv } from "./csv";
 
@@ -15,8 +17,12 @@ export type DateOrder = "dmy" | "mdy";
 // How the file's dates read: ISO, or day/month vs month/day, decided by the
 // file (a part > 12) or, when nothing decides, by the person (DMY default).
 export type DateFormat = "iso" | DateOrder | "ambiguous";
-export type ImportDay = { date: string; mood: Mood };
-export type ImportEntry = { date: string; time: string | null; body: string };
+// A day's check-in. The other values come only from a generic file that
+// has those columns (our own CSV export, 1.1 P); absent means none.
+export type ImportDay = { date: string; mood: Mood; sleep_hours?: number; sleep_quality?: SleepQuality; exercise_minutes?: number; stress?: number };
+// isMoment: our export's moment column. dup: the n-th copy of the same text
+// on the same day and time (n ≥ 1), so each copy keeps its own id.
+export type ImportEntry = { date: string; time: string | null; body: string; isMoment?: true; dup?: number };
 export type ImportPlan = {
   format: ImportFormat;
   dateFormat: DateFormat;
@@ -118,7 +124,24 @@ export function htmlToText(html: string): string {
   return (doc.body.textContent ?? "").replace(/\n{3,}/g, "\n\n").trim();
 }
 
-type Row = { date: string; time: string | null; mood: Mood | null; body: string; order: number };
+type Extras = Omit<ImportDay, "date" | "mood">;
+type Row = { date: string; time: string | null; mood: Mood | null; extras: Extras; body: string; isMoment: boolean; order: number };
+
+// A generic file's other check-in values (our CSV export's columns), each
+// only when it's one the check-in allows (the same rules as the form and
+// upsert_check_in); anything else is left out, not guessed.
+function checkInExtras(get: (name: string) => string): Extras {
+  const extras: Extras = {};
+  const sleep = get("sleep_hours");
+  if (/^\d+(\.\d+)?$/.test(sleep) && (SLEEP_HOURS as number[]).includes(Number(sleep))) extras.sleep_hours = Number(sleep);
+  const quality = get("sleep_quality").toLowerCase();
+  if ((SLEEP_QUALITIES as readonly string[]).includes(quality)) extras.sleep_quality = quality as SleepQuality;
+  const minutes = get("movement_minutes");
+  if (/^\d+$/.test(minutes) && (EXERCISE_MINUTES as readonly number[]).includes(Number(minutes))) extras.exercise_minutes = Number(minutes);
+  const stress = get("stress");
+  if (/^[1-5]$/.test(stress)) extras.stress = Number(stress);
+  return extras;
+}
 
 export function planImport(text: string, today: string, options: ImportOptions = {}): ImportResult {
   const table = parseCsv(text);
@@ -129,7 +152,13 @@ export function planImport(text: string, today: string, options: ImportOptions =
   const col = (name: string) => header.indexOf(name);
   const format: ImportFormat | null = col("full_date") >= 0 && col("mood") >= 0 ? "daylio" : col("date") >= 0 && col("mood") >= 0 ? "generic" : null;
   if (!format) return { status: "error", reason: "format" };
-  const records = table.slice(1).map((cells) => (name: string) => (col(name) >= 0 ? (cells[col(name)] ?? "").trim() : ""));
+  // A cell as written; in a generic file our export's ' in front of a formula
+  // start comes off first (lib/csvSafety, 1.1 P).
+  const raws = table.slice(1).map((cells) => (name: string) => {
+    const cell = col(name) >= 0 ? (cells[col(name)] ?? "") : "";
+    return format === "generic" ? restoreCell(cell) : cell;
+  });
+  const records = raws.map((raw) => (name: string) => raw(name).trim());
   // A row's number as the person sees it in a spreadsheet (the header is 1).
   const rowNumber = (i: number) => i + 2;
 
@@ -160,10 +189,23 @@ export function planImport(text: string, today: string, options: ImportOptions =
       if (!(name in DAYLIO_MOODS) && moodRaw !== "") custom.add(moodRaw);
       for (const a of get("activities").split("|").map((s) => s.trim()).filter(Boolean)) activities.add(a);
     } else if (/^[1-5]$/.test(moodRaw)) mood = Number(moodRaw) as Mood;
-    // Title + a blank line + the note; either alone if the other is empty.
-    const parts = format === "daylio" ? [htmlToText(get("note_title")), htmlToText(get("note"))] : [get("note")];
-    const body = parts.filter(Boolean).join("\n\n").replace(/\r\n?/g, "\n");
-    rows.push({ date, time: format === "daylio" ? parseTime(get("time")) : null, mood, body, order: i });
+    // Daylio: title + a blank line + the note; either alone if the other is
+    // empty. Generic: the note as written (only line endings change), so our
+    // own export comes back identical (1.1 P); all-blank is no note.
+    const body =
+      format === "daylio"
+        ? [htmlToText(get("note_title")), htmlToText(get("note"))].filter(Boolean).join("\n\n")
+        : raws[i]("note").replace(/\r\n?/g, "\n");
+    const generic = format === "generic";
+    rows.push({
+      date,
+      time: generic ? null : parseTime(get("time")),
+      mood,
+      extras: generic ? checkInExtras(get) : {},
+      body: body.trim() ? body : "",
+      isMoment: generic && get("moment").toLowerCase() === "yes",
+      order: i,
+    });
   });
 
   // The newest 2,000 days (the cap; the 3-year rule is dropped).
@@ -174,24 +216,29 @@ export function planImport(text: string, today: string, options: ImportOptions =
   // Within a day: by time where there is one, else in file order.
   kept.sort((a, b) => a.date.localeCompare(b.date) || (a.time ?? "").localeCompare(b.time ?? "") || a.order - b.order);
 
-  const moodOf = new Map<string, Mood>();
+  const dayOf = new Map<string, ImportDay>();
+  const copies = new Map<string, number>();
   let entries: ImportEntry[] = [];
   for (const r of kept) {
-    if (r.mood !== null) moodOf.set(r.date, r.mood); // the latest row of the day wins
+    // The latest row of the day with a mood wins, with its other values.
+    if (r.mood !== null) dayOf.set(r.date, { date: r.date, mood: r.mood, ...r.extras });
     if (!r.body) continue;
     // Over 20,000 characters: skipped and counted (H3).
     if (r.body.length > MAX_ENTRY_CHARS) {
       skipped.tooLong++;
       continue;
     }
-    entries.push({ date: r.date, time: r.time, body: r.body });
+    const key = `${r.date}|${r.time ?? ""}|${r.body}`;
+    const dup = copies.get(key) ?? 0;
+    copies.set(key, dup + 1);
+    entries.push({ date: r.date, time: r.time, body: r.body, ...(r.isMoment ? { isMoment: true as const } : {}), ...(dup ? { dup } : {}) });
   }
   // At most 5,000 entries, the newest (H4).
   if (entries.length > MAX_IMPORT_ENTRIES) {
     skipped.olderEntries = entries.length - MAX_IMPORT_ENTRIES;
     entries = entries.slice(-MAX_IMPORT_ENTRIES);
   }
-  const days = [...moodOf].map(([date, mood]) => ({ date, mood })).sort((a, b) => a.date.localeCompare(b.date));
+  const days = [...dayOf.values()].sort((a, b) => a.date.localeCompare(b.date));
   const all = [...days.map((d) => d.date), ...entries.map((e) => e.date)].sort();
   return {
     status: "ok",

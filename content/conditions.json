@@ -75,6 +75,10 @@
     "met": true,
     "what": "1.1 A \"On this day\" (specs/1.1-features.md) is tested on both the app and the web; then the Timeline card shows on Production (UX: not tied to a release, may be in time for 1.0)."
   },
+  "export-csv-live": {
+    "met": false,
+    "what": "1.1 P spreadsheet export (decision 201, specs/1.1-features.md §P) is tested on the web, including the round trip into a fresh account: then Me → Export my data offers the .csv on Production, with its Help line. Shown on Previews before that."
+  },
   "search-live": {
     "met": false,
     "what": "1.1 L search (decision 195) is tested on the web (and the app's own, for parity): then the Timeline's magnifier shows on Production. Shown on Previews before that."

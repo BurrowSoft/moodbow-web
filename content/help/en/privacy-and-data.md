@@ -5,7 +5,7 @@ topic: Privacy & account
 ---
 Only you can read your journal. We don't sell your data or show ads.
 
-**Download everything:** go to **Me → Export my data**. You get a file with everything you've written and logged.
+**Download everything:** go to **Me → Export my data**. You get a file with everything you've written and logged. {pending:export_csv_live}You can also get a spreadsheet (.csv) of your days, which opens in Excel or Google Sheets and which Moodbow can import again.{/pending}
 
 {pending:print_live}**Print a month:** on the web, open a month in **Timeline** and choose **Print this month**. Your browser's print window opens, where you can print it or choose "Save as PDF". It includes your check-ins and entries for that month, and it's made on your device: nothing is sent anywhere.{/pending}
 
