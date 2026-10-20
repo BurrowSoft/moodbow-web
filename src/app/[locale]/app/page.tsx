@@ -58,7 +58,8 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
   return (
     <section className="space-y-8">
       <header>
-        <h1 className="text-3xl font-medium tracking-tight" data-testid="today-greeting">
+        {/* Focusable from code only: where focus goes when the milestone card is dismissed. */}
+        <h1 id="today-title" tabIndex={-1} className="text-3xl font-medium tracking-tight focus:outline-none" data-testid="today-greeting">
           {t(greetingKey(localHour(timeZone)))}
         </h1>
         <p className="mt-1 text-muted" data-testid="today-date">

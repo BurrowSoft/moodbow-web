@@ -42,6 +42,22 @@ describe("MilestoneCard (decision 169)", () => {
     expect(screen.getByRole("status")).toHaveTextContent("30 days of your story");
   });
 
+  it("dismissing moves focus to Today's heading, not the page (Web Tester #82)", () => {
+    const heading = document.createElement("h1");
+    heading.id = "today-title";
+    heading.tabIndex = -1;
+    document.body.appendChild(heading);
+    try {
+      renderIt();
+      const close = screen.getByTestId("milestone-close");
+      close.focus();
+      fireEvent.click(close);
+      expect(document.activeElement).toBe(heading);
+    } finally {
+      heading.remove();
+    }
+  });
+
   it("✕ is Not now by name, and does the same", () => {
     renderIt();
     // Two controls named "Not now": the ✕ and the text button.

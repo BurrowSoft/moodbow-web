@@ -43,6 +43,9 @@ export function MilestoneCard({ n, colours, uid, month, dateLocaleTag, year = nu
   const dismiss = useCallback(() => {
     markSeen();
     listeners.forEach((cb) => cb());
+    // The card (and the focused button) go: focus moves to Today's heading
+    // rather than dropping to the page (Web Tester #82, as #85).
+    document.getElementById("today-title")?.focus();
   }, [markSeen]);
   // While the card floats, the page gets room for it at its very end, after
   // the footer (Web Tester #82: an in-page spacer still left the footer
