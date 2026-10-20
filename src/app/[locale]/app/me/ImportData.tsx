@@ -27,7 +27,7 @@ type Phase =
   | { kind: "importing"; done: number; total: number }
   | ({ kind: "done" } & Summary)
   // Stopped part-way: what's written stays (a re-import skips it).
-  | ({ kind: "failed" } & Summary);
+  | ({ kind: "failed"; offline: boolean } & Summary);
 
 // A custom mood's choice: a level, or "skip" (Don't import). Until every
 // name has one, Import stays disabled (settled, reviewer #92 B4).
@@ -40,6 +40,7 @@ const levelsOnly = (choices: Record<string, MoodChoice>) =>
 export function ImportData({ uid, today, dateLocaleTag, country }: { uid: string; today: string; dateLocaleTag: string; country?: string | null }) {
   const t = useTranslations("me");
   const tt = useTranslations("today");
+  const ta = useTranslations("ai");
   const inputId = useId();
   const [phase, setPhase] = useState<Phase>({ kind: "idle" });
   // The file's text, in memory only while the preview is open.
@@ -143,7 +144,7 @@ export function ImportData({ uid, today, dateLocaleTag, country }: { uid: string
       if (typeof (e as { digest?: unknown })?.digest === "string") throw e; // a redirect (signed out)
       text.current = null;
       running.current = false;
-      setPhase({ kind: "failed", ...summary() });
+      setPhase({ kind: "failed", offline: !navigator.onLine, ...summary() });
       return;
     }
     text.current = null;
@@ -210,10 +211,14 @@ export function ImportData({ uid, today, dateLocaleTag, country }: { uid: string
             {phase.skippedDays > 0 && <p data-testid="import-skipped">{t("importSkipped", { count: phase.skippedDays })}</p>}
           </>
         )}
+        {/* Stopped part-way (a lost connection, a server error): the file
+            was fine and what's done is saved, so the fix is the same file
+            again (Web Tester I13; UX). Offline says so first. */}
         {phase.kind === "failed" && (
-          <p role="alert" data-testid="import-failed" className="font-medium text-accent">
-            {t("importError")}
-          </p>
+          <div role="alert" data-testid="import-failed" className="font-medium text-accent">
+            {phase.offline && <p data-testid="import-offline">{ta("errOffline")}</p>}
+            <p>{t("importStopped")}</p>
+          </div>
         )}
       </div>
 

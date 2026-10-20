@@ -327,7 +327,8 @@
     "importMapMoods": "จับคู่อารมณ์ของคุณ",
     "importMapSkip": "ไม่นำเข้า",
     "importMapChoose": "เลือกอารมณ์…",
-    "importSkippedTooLong": "{count} บันทึกยาวเกินกว่าจะนำเข้าได้"
+    "importSkippedTooLong": "{count} บันทึกยาวเกินกว่าจะนำเข้าได้",
+    "importStopped": "การนำเข้าหยุดกลางคัน ทุกอย่างก่อนหน้านั้นบันทึกไว้แล้ว นำเข้าไฟล์เดิมอีกครั้งเพื่อให้เสร็จ"
   },
   "export": {
     "exportTitle": "Moodbow: ไดอารี่ของคุณ",

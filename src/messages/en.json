@@ -327,7 +327,8 @@
     "importMapMoods": "Match your moods",
     "importMapSkip": "Don't import",
     "importMapChoose": "Choose a mood…",
-    "importSkippedTooLong": "{count} notes too long to import."
+    "importSkippedTooLong": "{count} notes too long to import.",
+    "importStopped": "The import stopped partway. Everything up to that point is saved; import the same file again to finish."
   },
   "export": {
     "exportTitle": "Moodbow: your journal",

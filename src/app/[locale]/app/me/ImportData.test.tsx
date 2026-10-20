@@ -122,13 +122,28 @@ describe("ImportData", () => {
     expect(importCheckIns).not.toHaveBeenCalled();
   });
 
-  it("a failed batch: what's written stays, and the error says so", async () => {
+  it("a failed batch: what's written stays, and it says so: the same file again finishes (never 'couldn't read this file')", async () => {
     importEntries.mockResolvedValueOnce({ status: "error" });
     renderIt();
     await choose("date,mood,note\n2026-10-01,4,A walk\n");
     fireEvent.click(screen.getByTestId("import-confirm"));
     await settle();
-    expect(screen.getByTestId("import-failed")).toHaveTextContent(m.importError);
+    const failed = screen.getByTestId("import-failed");
+    expect(failed).toHaveTextContent(m.importStopped);
+    expect(failed).not.toHaveTextContent(m.importError);
+    expect(screen.queryByTestId("import-offline")).toBeNull();
+  });
+
+  it("stopped part-way while offline: errOffline first, then importStopped", async () => {
+    Object.defineProperty(navigator, "onLine", { configurable: true, get: () => false });
+    importEntries.mockRejectedValueOnce(new Error("Failed to fetch"));
+    renderIt();
+    await choose("date,mood,note\n2026-10-01,4,A walk\n");
+    fireEvent.click(screen.getByTestId("import-confirm"));
+    await settle();
+    const failed = screen.getByTestId("import-failed");
+    expect(failed.textContent).toBe(`${messages.ai.errOffline}${m.importStopped}`);
+    delete (navigator as { onLine?: boolean }).onLine;
   });
   it("\"Don't import\" is an explicit choice too: Import enabled, and that day gets no mood", async () => {
     renderIt();
