@@ -5,7 +5,8 @@ import { redirect } from "@/i18n/navigation";
 import { EXERCISE_MINUTES, SLEEP_HOURS, SLEEP_QUALITIES } from "@/lib/journal/checkIn";
 import { MAX_ENTRY_CHARS } from "@/lib/journal/entry";
 import { getMe } from "@/lib/journal/me";
-import { IMPORT_BATCH } from "@/lib/import/journalImport";
+import { IMPORT_BATCH, MAX_IMPORT_DAYS } from "@/lib/import/journalImport";
+import { noteKey } from "@/lib/import/noteDedupe";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 // Import from another journal (1.1 K): one batch of the plan the person
@@ -75,6 +76,40 @@ export async function importCheckIns(days: ImportCheckIn[]): Promise<ImportBatch
 // Notes as entries, with the ids the browser derived from the file (H1:
 // UUIDv5), so a re-import finds them all and writes nothing. In the order
 // given (date, then time), so the day's entries keep the file's order.
+// The notes already in the account on the file's days (1.1 P "M1"), as
+// counts per hashed (day, exact text): read once, before anything is
+// written, so the plan can skip what's already there. Dates only in the
+// requests (decision 196), no note text in the answer, paged past
+// PostgREST's 1,000-row cap.
+export type NoteCountsResult = { status: "ok"; counts: [string, number][] } | { status: "error" };
+const DATES_PER_READ = 100;
+const ROWS_PER_PAGE = 1000;
+export async function existingNoteCounts(dates: string[]): Promise<NoteCountsResult> {
+  if (!Array.isArray(dates) || dates.length > MAX_IMPORT_DAYS || !dates.every((d) => typeof d === "string" && ISO.test(d))) return { status: "error" };
+  const ctx = await signedIn();
+  if (!ctx) return { status: "error" };
+  const counts = new Map<string, number>();
+  for (let i = 0; i < dates.length; i += DATES_PER_READ) {
+    const slice = dates.slice(i, i + DATES_PER_READ);
+    for (let from = 0; ; from += ROWS_PER_PAGE) {
+      const { data, error } = await ctx.supabase
+        .from("entries")
+        .select("entry_date, body")
+        .in("entry_date", slice)
+        .order("id")
+        .range(from, from + ROWS_PER_PAGE - 1);
+      if (error) return { status: "error" };
+      const rows = (data ?? []) as { entry_date: string; body: string }[];
+      for (const r of rows) {
+        const key = await noteKey(r.entry_date, r.body);
+        counts.set(key, (counts.get(key) ?? 0) + 1);
+      }
+      if (rows.length < ROWS_PER_PAGE) break;
+    }
+  }
+  return { status: "ok", counts: [...counts] };
+}
+
 export async function importEntries(entries: { id: string; date: string; body: string; isMoment?: boolean }[]): Promise<ImportBatchResult> {
   if (!Array.isArray(entries) || entries.length === 0 || entries.length > IMPORT_BATCH) return { status: "error" };
   const ctx = await signedIn();
