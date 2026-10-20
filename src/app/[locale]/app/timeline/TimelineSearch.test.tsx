@@ -121,12 +121,29 @@ describe("TimelineSearch (1.1 L)", () => {
     expect(screen.getByTestId("the-list")).toBeInTheDocument();
   });
 
-  it("an error: Try again in the status line", async () => {
+  it("an error: the error text and a Try again button that asks again for the same text", async () => {
     searchEntries.mockResolvedValueOnce({ status: "error" });
     renderIt();
     open();
     type("walk");
     await wait(300);
-    expect(screen.getByTestId("timeline-search-status")).toHaveTextContent(messages.app.tryAgain);
+    expect(screen.getByRole("alert")).toHaveTextContent(messages.today.errGeneric);
+    fireEvent.click(screen.getByRole("button", { name: messages.app.tryAgain }));
+    await wait(0);
+    expect(searchEntries).toHaveBeenCalledTimes(2);
+    expect(searchEntries).toHaveBeenLastCalledWith("walk");
+    expect(screen.getByTestId("timeline-search-hit-e1")).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).toBeNull();
+  });
+
+  it("offline: errOffline", async () => {
+    const onLine = vi.spyOn(navigator, "onLine", "get").mockReturnValue(false);
+    searchEntries.mockRejectedValueOnce(new Error("Failed to fetch"));
+    renderIt();
+    open();
+    type("walk");
+    await wait(300);
+    expect(screen.getByRole("alert")).toHaveTextContent(messages.ai.errOffline);
+    onLine.mockRestore();
   });
 });

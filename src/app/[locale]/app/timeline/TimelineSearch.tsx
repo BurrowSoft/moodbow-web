@@ -16,13 +16,14 @@ import { searchEntries, type SearchHit } from "./searchActions";
 // characters. The text stays in this component: never in the URL, storage
 // or any log, and nothing is remembered ("no recent searches").
 
-type State = { kind: "idle" } | { kind: "searching" } | { kind: "results"; q: string; hits: SearchHit[]; more: boolean } | { kind: "error" };
+type State = { kind: "idle" } | { kind: "searching" } | { kind: "results"; q: string; hits: SearchHit[]; more: boolean } | { kind: "error"; q: string; offline: boolean };
 
 export function TimelineSearch({ dateLocaleTag, children }: { dateLocaleTag: string; children: ReactNode }) {
   const t = useTranslations("timeline");
   const tt = useTranslations("today");
   const te = useTranslations("entry");
   const ta = useTranslations("app");
+  const tai = useTranslations("ai");
   const inputId = useId();
   const [open, setOpen] = useState(false);
   const [text, setText] = useState("");
@@ -32,6 +33,19 @@ export function TimelineSearch({ dateLocaleTag, children }: { dateLocaleTag: str
   // Only the latest request's answer counts.
   const latest = useRef(0);
 
+  const run = (q: string) => {
+    const ask = ++latest.current;
+    setState({ kind: "searching" });
+    const failed = () => latest.current === ask && setState({ kind: "error", q, offline: !navigator.onLine });
+    searchEntries(q)
+      .then((r) => {
+        if (latest.current !== ask) return;
+        if (r.status === "ok") setState({ kind: "results", q, hits: r.hits, more: r.more });
+        else failed();
+      })
+      .catch(failed);
+  };
+
   useEffect(() => {
     if (!open) return;
     const q = searchTerm(text);
@@ -40,15 +54,7 @@ export function TimelineSearch({ dateLocaleTag, children }: { dateLocaleTag: str
       const reset = window.setTimeout(() => latest.current === ask && setState({ kind: "idle" }), 0);
       return () => window.clearTimeout(reset);
     }
-    const timer = window.setTimeout(() => {
-      setState({ kind: "searching" });
-      searchEntries(q)
-        .then((r) => {
-          if (latest.current !== ask) return;
-          setState(r.status === "ok" ? { kind: "results", q, hits: r.hits, more: r.more } : { kind: "error" });
-        })
-        .catch(() => latest.current === ask && setState({ kind: "error" }));
-    }, SEARCH_DEBOUNCE_MS);
+    const timer = window.setTimeout(() => run(q), SEARCH_DEBOUNCE_MS);
     return () => window.clearTimeout(timer);
   }, [text, open]);
 
@@ -123,8 +129,21 @@ export function TimelineSearch({ dateLocaleTag, children }: { dateLocaleTag: str
       <div role="status" className="mt-4 text-sm text-muted" data-testid="timeline-search-status">
         {state.kind === "idle" && t("searchHint")}
         {state.kind === "results" && (state.hits.length === 0 ? t("searchEmpty", { q: state.q }) : t("searchResultsCount", { n: state.hits.length }))}
-        {state.kind === "error" && ta("tryAgain")}
       </div>
+      {/* UX: the error itself, and a real button that asks again for the same text. */}
+      {state.kind === "error" && (
+        <div role="alert" className="mt-2" data-testid="timeline-search-error">
+          <p className="text-sm text-text">{state.offline ? tai("errOffline") : tt("errGeneric")}</p>
+          <button
+            type="button"
+            data-testid="timeline-search-retry"
+            onClick={() => run(state.q)}
+            className="mt-2 inline-flex min-h-11 items-center rounded-full border border-border px-4 text-sm font-medium text-text hover:bg-pill"
+          >
+            {ta("tryAgain")}
+          </button>
+        </div>
+      )}
 
       {state.kind === "results" && state.hits.length > 0 && (
         <ul className="mt-2 space-y-3" data-testid="timeline-search-results">
