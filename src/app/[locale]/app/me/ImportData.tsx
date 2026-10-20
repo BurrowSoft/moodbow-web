@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { dialogButton } from "@/components/Dialog";
 import { GetHelpNow } from "@/components/SafetyCard";
-import { decodeImportFile, IMPORT_BATCH, MAX_IMPORT_BYTES, planImport, type DateOrder, type ImportEntry, type ImportPlan, type Mood } from "@/lib/import/journalImport";
+import { decodeImportFile, displayOrder, IMPORT_BATCH, MAX_IMPORT_BYTES, planImport, type DateOrder, type ImportEntry, type ImportPlan, type Mood } from "@/lib/import/journalImport";
 import { dropExistingNotes } from "@/lib/import/noteDedupe";
 import { importEntryId } from "@/lib/import/uuidv5";
 import { flagsCrisis } from "@/lib/safety/crisis";
@@ -295,6 +295,8 @@ function Preview({
   moodChoices: Record<string, MoodChoice>;
   onMood: (name: string, choice: MoodChoice) => void;
 }) {
+  // The UI language (en / th), for the order of names shown (displayOrder).
+  const locale = useLocale();
   const dayCount = new Set([...plan.days.map((d) => d.date), ...plan.entries.map((e) => e.date)]).size;
   const capped = plan.skipped.olderDays + plan.skipped.olderEntries;
   return (
@@ -322,7 +324,9 @@ function Preview({
       {plan.customMoods.length > 0 && (
         <fieldset className="mt-2" data-testid="import-moods">
           <legend className="font-medium">{t("importMapMoods")}</legend>
-          {plan.customMoods.map((name, i) => (
+          {/* In the UI language's order (displayOrder); each choice is still
+              keyed by the name itself. */}
+          {displayOrder(plan.customMoods, locale).map((name, i) => (
             <label key={name} className="mt-1 flex min-h-11 flex-wrap items-center gap-2">
               <span>{name}</span>
               <select

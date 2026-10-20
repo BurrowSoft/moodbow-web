@@ -143,6 +143,16 @@ function checkInExtras(get: (name: string) => string): Extras {
   return extras;
 }
 
+// How names (Daylio's custom moods) are listed for the person (UX, #115):
+// the UI language's order, ignoring accents and case (people look for
+// "Ánimo" under A), then code units so the order is total and the same every
+// time ("Ánimo, zen, Zen"). Display only: the plan itself (and the shared
+// contract) keeps code-unit order, and choices are keyed by the raw name.
+export function displayOrder(names: readonly string[], uiLocale: string): string[] {
+  const collator = new Intl.Collator(uiLocale, { sensitivity: "base" });
+  return [...names].sort((a, b) => collator.compare(a, b) || (a < b ? -1 : a > b ? 1 : 0));
+}
+
 export function planImport(text: string, today: string, options: ImportOptions = {}): ImportResult {
   const table = parseCsv(text);
   // An unterminated quote (reviewer #92 B3): refused, not guessed at.
@@ -247,8 +257,10 @@ export function planImport(text: string, today: string, options: ImportOptions =
       dateFormat,
       days,
       entries,
-      customMoods: [...custom].sort((a, b) => a.localeCompare(b)),
-      notImported: { activities: [...activities].sort((a, b) => a.localeCompare(b)) },
+      // Plain code-unit order (sort()'s default), not localeCompare: the same
+      // on every device and in the app's port (import-cases.json).
+      customMoods: [...custom].sort(),
+      notImported: { activities: [...activities].sort() },
       skipped,
       range: all.length ? { first: all[0], last: all[all.length - 1] } : null,
     },
