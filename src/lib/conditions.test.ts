@@ -22,6 +22,13 @@ describe("conditions", () => {
     expect(!met("shortcuts-live") || met("search-live")).toBe(true);
   });
 
+  // The public 1.0 app release step (next-release.md, "Help flips with the
+  // product"): the Help lines about the app's reminder and offline start
+  // go live together, with the store release (not the closed test).
+  it("the 1.0 app release flips as one step", () => {
+    for (const id of ["reminder-live", "offline-start"] as const) expect(conditionMet(id), id).toBe(true);
+  });
+
   // Pinned: flipping any of these is its own reviewed PR (text = enforcement).
   // Live since the first closed-test build with M7 + M8 (Vitor, decisions 162 + 164): the legal pages, account
   // deletion, export and the help card (app side; the web side comes with the web journal).
