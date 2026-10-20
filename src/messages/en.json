@@ -319,6 +319,10 @@
     "helpIntro": "Answers to common questions about using Moodbow. Can't find what you need? Email {email}."
   },
   "timeline": {
+    "onThisDayMonth": "A month ago",
+    "onThisDay6Months": "6 months ago",
+    "onThisDayYear": "A year ago",
+    "onThisDayDismiss": "Hide for today",
     "timelineTitle": "Timeline",
     "timelineAll": "All days",
     "timelineMoments": "Moments",

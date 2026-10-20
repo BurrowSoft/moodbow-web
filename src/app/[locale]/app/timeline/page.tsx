@@ -12,6 +12,11 @@ import { tabMetadata } from "../TabPlaceholder";
 import { loadTimeline } from "./actions";
 import { segment } from "@/lib/ui/journalLayout";
 import { TimelineList } from "./TimelineList";
+import { OnThisDay } from "./OnThisDay";
+import { onThisDayDates, pickOnThisDay, type MomentRow, type OnThisDayKind } from "@/lib/journal/onThisDay";
+import { preview } from "@/lib/journal/entry";
+import { dateLine } from "@/lib/journal/today";
+import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/app/timeline">): Promise<Metadata> {
   return tabMetadata("tabTimeline", (await params).locale);
@@ -37,6 +42,20 @@ export default async function TimelinePage({ params, searchParams }: PageProps<"
 
   const t = await getTranslations("timeline");
   const dateLocaleTag = dateLocale(locale, (await headers()).get("accept-language"), me.profile?.country ?? null);
+
+  // On this day (1.1 A): a moment from a month, 6 months or a year ago today
+  // (the profile's today), never a crisis-flagged one. A failed read just
+  // means no card.
+  let onThisDay: { kind: OnThisDayKind; entry: MomentRow; mood: number | null } | null = null;
+  if (pageGate("on-this-day-live") !== "hidden") {
+    const dates = onThisDayDates(me.today).map((d) => d.date);
+    const { data: moments } = await supabase.from("entries").select("id, entry_date, body, is_moment, created_at").eq("is_moment", true).in("entry_date", dates);
+    const picked = pickOnThisDay((moments ?? []) as MomentRow[], me.today, CRISIS_KEYWORDS);
+    if (picked) {
+      const { data: checkIn } = await supabase.from("check_ins").select("mood").eq("local_date", picked.entry.entry_date).maybeSingle();
+      onThisDay = { ...picked, mood: (checkIn as { mood: number } | null)?.mood ?? null };
+    }
+  }
   const filter = segment;
 
   return (
@@ -56,6 +75,17 @@ export default async function TimelinePage({ params, searchParams }: PageProps<"
             {t("timelineMoments")}
           </Link>
         </nav>
+      )}
+      {onThisDay && (
+        <OnThisDay
+          kind={onThisDay.kind}
+          entryId={onThisDay.entry.id}
+          dateLabel={dateLine(onThisDay.entry.entry_date, dateLocaleTag)}
+          preview={preview(onThisDay.entry.body)}
+          mood={onThisDay.mood}
+          uid={user.id}
+          today={me.today}
+        />
       )}
       {/* Keyed by the view, so switching filters starts a fresh list. */}
       <TimelineList

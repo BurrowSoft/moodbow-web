@@ -319,6 +319,10 @@
     "helpIntro": "คำตอบสำหรับคำถามที่พบบ่อยในการใช้ Moodbow หาสิ่งที่ต้องการไม่เจอใช่ไหม? ส่งอีเมลถึง {email}"
   },
   "timeline": {
+    "onThisDayMonth": "เมื่อเดือนที่แล้ว",
+    "onThisDay6Months": "เมื่อ 6 เดือนก่อน",
+    "onThisDayYear": "เมื่อปีที่แล้ว",
+    "onThisDayDismiss": "ซ่อนสำหรับวันนี้",
     "timelineTitle": "ไทม์ไลน์",
     "timelineAll": "ทุกวัน",
     "timelineMoments": "ช่วงเวลาสำคัญ",
