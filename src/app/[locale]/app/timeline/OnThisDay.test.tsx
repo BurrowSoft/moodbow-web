@@ -35,12 +35,16 @@ describe("OnThisDay (1.1 A)", () => {
     expect(link).toHaveTextContent("Tuesday, October 21, 2025");
     expect(link.querySelector(".line-clamp-2")).toHaveTextContent("Sunrise swim with Maya.");
     expect(link.querySelector("[aria-hidden=true].rounded-full")).not.toBeNull();
+    // The mood in words after the date (decision 161), the "·" hidden from screen readers.
+    expect(screen.getByTestId("on-this-day-mood")).toHaveTextContent(`· ${messages.today.mood5}`);
+    expect(link).toHaveAccessibleName(/^Tuesday, October 21, 2025\s*Great\s*Sunrise swim with Maya\.$/);
   });
 
   it("each kind has its own words; no dot without a check-in that day", () => {
     renderCard({ kind: "sixMonths", mood: null });
     expect(screen.getByRole("heading", { name: t.onThisDay6Months })).toBeInTheDocument();
     expect(screen.getByTestId("on-this-day-entry").querySelector(".rounded-full")).toBeNull();
+    expect(screen.queryByTestId("on-this-day-mood")).toBeNull();
     cleanup();
     renderCard({ kind: "month" });
     expect(screen.getByRole("heading", { name: t.onThisDayMonth })).toBeInTheDocument();

@@ -1,0 +1,222 @@
+{
+  "version": 1,
+  "about": "On this day (1.1 A, decision 168). Given 'today' (the profile's local date) and the person's entries, the one card to show, or none. Rules: look 1 year, then 6 months, then 1 month back, in that order (the rarer first); the same day of the month, with no rounding (if that day doesn't exist in that month, that anniversary is skipped); moments (is_moment) only; skip any entry the crisis matcher flags (crisis-keywords.json v1, every list whatever the language, as on the write screen: crisis-keywords 1.0 rule 5); within a day, the newest by created_at. Dismissal ('Hide for today') is per person and local day, so it isn't in these cases.",
+  "monthsBefore": [
+    {
+      "today": "2026-10-21",
+      "months": 1,
+      "expected": "2026-09-21"
+    },
+    {
+      "today": "2026-10-21",
+      "months": 6,
+      "expected": "2026-04-21"
+    },
+    {
+      "today": "2026-10-21",
+      "months": 12,
+      "expected": "2025-10-21"
+    },
+    {
+      "today": "2026-01-15",
+      "months": 1,
+      "expected": "2025-12-15"
+    },
+    {
+      "today": "2026-03-31",
+      "months": 1,
+      "expected": null
+    },
+    {
+      "today": "2028-02-29",
+      "months": 12,
+      "expected": null
+    },
+    {
+      "today": "2026-08-31",
+      "months": 6,
+      "expected": null
+    }
+  ],
+  "dates": [
+    {
+      "today": "2026-10-21",
+      "expected": [
+        {
+          "kind": "year",
+          "date": "2025-10-21"
+        },
+        {
+          "kind": "sixMonths",
+          "date": "2026-04-21"
+        },
+        {
+          "kind": "month",
+          "date": "2026-09-21"
+        }
+      ]
+    },
+    {
+      "today": "2026-03-31",
+      "expected": [
+        {
+          "kind": "year",
+          "date": "2025-03-31"
+        }
+      ]
+    }
+  ],
+  "pick": [
+    {
+      "name": "the rarer anniversary wins; within a day, the newest moment",
+      "today": "2026-10-21",
+      "entries": [
+        {
+          "id": "month",
+          "entry_date": "2026-09-21",
+          "created_at": "2026-09-21T10:00:00Z",
+          "is_moment": true,
+          "body": "A good walk."
+        },
+        {
+          "id": "year-old",
+          "entry_date": "2025-10-21",
+          "created_at": "2025-10-21T08:00:00Z",
+          "is_moment": true,
+          "body": "A good walk."
+        },
+        {
+          "id": "year-new",
+          "entry_date": "2025-10-21",
+          "created_at": "2025-10-21T21:00:00Z",
+          "is_moment": true,
+          "body": "A good walk."
+        }
+      ],
+      "expected": {
+        "kind": "year",
+        "id": "year-new"
+      }
+    },
+    {
+      "name": "moments only: a plain entry never makes a card",
+      "today": "2026-10-21",
+      "entries": [
+        {
+          "id": "plain",
+          "entry_date": "2026-09-21",
+          "created_at": "2026-09-21T10:00:00Z",
+          "is_moment": false,
+          "body": "A good walk."
+        }
+      ],
+      "expected": null
+    },
+    {
+      "name": "a crisis-flagged moment is skipped, and the next anniversary shows",
+      "today": "2026-10-21",
+      "entries": [
+        {
+          "id": "hard",
+          "entry_date": "2025-10-21",
+          "created_at": "2025-10-21T10:00:00Z",
+          "is_moment": true,
+          "body": "Some days I want to die."
+        },
+        {
+          "id": "month",
+          "entry_date": "2026-09-21",
+          "created_at": "2026-09-21T10:00:00Z",
+          "is_moment": true,
+          "body": "A good walk."
+        }
+      ],
+      "expected": {
+        "kind": "month",
+        "id": "month"
+      }
+    },
+    {
+      "name": "every list, whatever the language (crisis-keywords rule 5): a Thai crisis moment is skipped for anyone, and the next anniversary shows",
+      "today": "2026-10-21",
+      "entries": [
+        {
+          "id": "thai-hard",
+          "entry_date": "2025-10-21",
+          "created_at": "2025-10-21T10:00:00Z",
+          "is_moment": true,
+          "body": "วันนี้เหนื่อยมาก ไม่อยากอยู่แล้ว"
+        },
+        {
+          "id": "thai-park",
+          "entry_date": "2026-04-21",
+          "created_at": "2026-04-21T10:00:00Z",
+          "is_moment": true,
+          "body": "ไปเดินเล่นที่สวนกับเพื่อน อากาศดีมาก"
+        }
+      ],
+      "expected": {
+        "kind": "sixMonths",
+        "id": "thai-park"
+      }
+    },
+    {
+      "name": "nothing on those days: no card",
+      "today": "2026-10-21",
+      "entries": [
+        {
+          "id": "near",
+          "entry_date": "2026-09-20",
+          "created_at": "2026-09-20T10:00:00Z",
+          "is_moment": true,
+          "body": "A good walk."
+        }
+      ],
+      "expected": null
+    },
+    {
+      "name": "no rounding: on 31 March, 28 February is not 'a month ago'",
+      "today": "2026-03-31",
+      "entries": [
+        {
+          "id": "feb",
+          "entry_date": "2026-02-28",
+          "created_at": "2026-02-28T10:00:00Z",
+          "is_moment": true,
+          "body": "A good walk."
+        }
+      ],
+      "expected": null
+    },
+    {
+      "name": "6 months beats a month",
+      "today": "2026-10-21",
+      "entries": [
+        {
+          "id": "month",
+          "entry_date": "2026-09-21",
+          "created_at": "2026-09-21T10:00:00Z",
+          "is_moment": true,
+          "body": "A good walk."
+        },
+        {
+          "id": "six",
+          "entry_date": "2026-04-21",
+          "created_at": "2026-04-21T10:00:00Z",
+          "is_moment": true,
+          "body": "A good walk."
+        }
+      ],
+      "expected": {
+        "kind": "sixMonths",
+        "id": "six"
+      }
+    }
+  ],
+  "labels": {
+    "year": "A year ago",
+    "sixMonths": "6 months ago",
+    "month": "A month ago",
+    "dismiss": "Hide for today"
+  }
+}
