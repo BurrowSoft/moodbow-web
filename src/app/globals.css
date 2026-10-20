@@ -156,6 +156,25 @@ body {
   to { opacity: 1; }
 }
 
+/* The home page's moodbow: each band draws from one end to the other
+   (pathLength 1), staggered by its own animation-delay; "backwards" holds
+   it undrawn until its turn. Reduced motion: no animation, already drawn. */
+@keyframes arc-draw {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+
+.arc-band {
+  stroke-dashoffset: 0;
+  animation: arc-draw 300ms ease-out backwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .arc-band {
+    animation: none;
+  }
+}
+
 .fade-in {
   animation: fade-in 400ms ease-out both;
 }
