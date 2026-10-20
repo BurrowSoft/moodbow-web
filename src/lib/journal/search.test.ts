@@ -3,12 +3,25 @@ import { describe, expect, it } from "vitest";
 import { searchTerm, snippet } from "./search";
 
 describe("searchTerm", () => {
-  it("trimmed, at least 2 characters, at most 100", () => {
+  it("trimmed, at least 2 characters", () => {
     expect(searchTerm("  walk ")).toBe("walk");
     expect(searchTerm("a")).toBeNull();
     expect(searchTerm("   ")).toBeNull();
-    expect(searchTerm("x".repeat(101))).toBeNull();
     expect(searchTerm(42)).toBeNull();
+  });
+
+  it("over 100 characters: cut to the first 100 and searched, as the server does (L2)", () => {
+    expect(searchTerm("x".repeat(100))).toBe("x".repeat(100));
+    expect(searchTerm("x".repeat(101))).toBe("x".repeat(100));
+    expect(searchTerm(`  ${"walk ".repeat(30)}`)).toBe("walk ".repeat(20));
+  });
+
+  it("characters are code points: an emoji at the cut stays whole, and counts once toward the minimum", () => {
+    const q = searchTerm(`${"x".repeat(99)}😀😀`)!;
+    expect([...q]).toHaveLength(100);
+    expect(q.endsWith("😀")).toBe(true);
+    expect(searchTerm("😀")).toBeNull();
+    expect(searchTerm("😀😀")).toBe("😀😀");
   });
 });
 
