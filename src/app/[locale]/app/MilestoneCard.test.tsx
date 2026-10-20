@@ -33,6 +33,60 @@ describe("MilestoneCard (decision 169)", () => {
     expect(share).toHaveAttribute("data-n", "30");
   });
 
+  it("decision 186: fixed above the tab bar (out of the flow), room at the page's very end keeps it reachable, announced once politely", () => {
+    renderIt();
+    expect(screen.getByTestId("milestone-card").className).toMatch(/\bfixed\b/);
+    expect(screen.getByTestId("milestone-card").className).toMatch(/\bmilestone-in\b/);
+    // Room at the page's very end (after the footer) while it floats.
+    expect(document.body).toHaveClass("has-floating-card");
+    expect(screen.getByRole("status")).toHaveTextContent("30 days of your story");
+  });
+
+  it("dismissing moves focus to Today's heading, not the page (Web Tester #82)", () => {
+    const heading = document.createElement("h1");
+    heading.id = "today-title";
+    heading.tabIndex = -1;
+    document.body.appendChild(heading);
+    try {
+      renderIt();
+      const focusSpy = vi.spyOn(heading, "focus");
+      const close = screen.getByTestId("milestone-close");
+      close.focus();
+      fireEvent.click(close);
+      expect(document.activeElement).toBe(heading);
+      // Without scrolling the page up to the heading (reviewer #82).
+      expect(focusSpy).toHaveBeenCalledWith({ preventScroll: true });
+    } finally {
+      heading.remove();
+    }
+  });
+
+  it("focus elsewhere (e.g. Safari doesn't focus a clicked button): left where it is", () => {
+    const heading = document.createElement("h1");
+    heading.id = "today-title";
+    heading.tabIndex = -1;
+    document.body.appendChild(heading);
+    try {
+      renderIt();
+      fireEvent.click(screen.getByTestId("milestone-not-now"));
+      expect(document.activeElement).not.toBe(heading);
+    } finally {
+      heading.remove();
+    }
+  });
+
+  it("✕ is Not now by name, and does the same", () => {
+    renderIt();
+    // Two controls named "Not now": the ✕ and the text button.
+    expect(screen.getAllByRole("button", { name: messages.share.milestoneNotNow })).toHaveLength(2);
+    fireEvent.click(screen.getByTestId("milestone-close"));
+    expect(screen.queryByTestId("milestone-card")).toBeNull();
+    expect(document.body).not.toHaveClass("has-floating-card");
+    expect(window.localStorage.getItem(KEY)).toBe("1");
+    // The live region stays (empty), so it's never re-announced.
+    expect(screen.getByRole("status")).toBeEmptyDOMElement();
+  });
+
   it("passes the year on offer to the sheet (the Year card from Today too; reviewer #84)", () => {
     render(
       <NextIntlClientProvider locale="en" messages={messages}>
@@ -54,6 +108,13 @@ describe("MilestoneCard (decision 169)", () => {
     fireEvent.click(screen.getByTestId("milestone-share"));
     expect(window.localStorage.getItem(KEY)).toBe("1");
     expect(screen.getByTestId("milestone-card")).toBeInTheDocument();
+  });
+
+  it("seen on an earlier visit: no card and no extra room at the page's end", () => {
+    window.localStorage.setItem(KEY, "1");
+    renderIt();
+    expect(screen.queryByTestId("milestone-card")).toBeNull();
+    expect(document.body).not.toHaveClass("has-floating-card");
   });
 
   it("already seen: nothing shown; another milestone or person still is", () => {
