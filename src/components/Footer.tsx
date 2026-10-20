@@ -19,7 +19,7 @@ export async function Footer() {
   ] as const;
 
   return (
-    <footer className="px-6 pb-6 pt-10 text-sm text-muted">
+    <footer className="px-6 pb-6 pt-10 text-sm text-muted print:hidden">
       <div className="mx-auto flex max-w-3xl flex-col items-center gap-2">
         <nav aria-label={t("siteLinks")} className="flex flex-wrap items-center justify-center gap-x-1">
           {links

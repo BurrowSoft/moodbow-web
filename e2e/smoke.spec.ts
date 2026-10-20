@@ -471,6 +471,22 @@ test.describe("onboarding (signed out)", () => {
       expect(response.status()).toBeLessThan(500);
       await expect(page.getByTestId("signup-error")).toHaveText("Enter a valid email");
     });
+
+    test("sign-in: a native POST, and the server answers (then fails closed)", async ({ page }) => {
+      await page.goto("/sign-in");
+      await page.getByLabel("Email").fill("not-an-email");
+      await page.getByLabel("Password").fill("whatever-123");
+      const [first] = await Promise.all([page.waitForResponse((r) => r.request().method() === "POST"), page.getByRole("button", { name: "Sign in" }).click()]);
+      expect(first.status()).toBeLessThan(500);
+      await expect(page.getByTestId("signin-error")).toHaveText("Enter a valid email");
+      // The typed email comes back in the server-rendered form.
+      await expect(page.getByLabel("Email")).toHaveValue("not-an-email");
+      await page.getByLabel("Email").fill("w0@example.invalid");
+      await page.getByLabel("Password").fill("whatever-123");
+      const [second] = await Promise.all([page.waitForResponse((r) => r.request().method() === "POST"), page.getByRole("button", { name: "Sign in" }).click()]);
+      expect(second.status()).toBeLessThan(500);
+      await expect(page.getByTestId("signin-error")).toHaveText("Something went wrong. Please try again.");
+    });
   });
 
   test("sign-up without consent → Consent", async ({ page }) => {

@@ -18,7 +18,8 @@
     "language": "Language",
     "siteLinks": "Site links",
     "languageNames": {
-      "en": "English"
+      "en": "English",
+      "th": "ไทย"
     },
     "burrowsoftProduct": "A BurrowSoft product",
     "burrowsoftAria": "A BurrowSoft product. Visit burrowsoft.com",
@@ -307,7 +308,28 @@
     "meLanguage": "Language",
     "meCountry": "Country",
     "meTimeZone": "Time zone",
-    "meCountryNone": "Not set"
+    "meCountryNone": "Not set",
+    "importTitle": "Import from another app",
+    "importBody": "Bring your past days from Daylio or a CSV file. Your file stays on this device; only the days you import are saved.",
+    "importChooseFile": "Choose a file",
+    "importPreview": "{days} days and {notes} notes found, from {first} to {last}.",
+    "importConfirm": "Import",
+    "importProgress": "Importing… {done} of {total}",
+    "importDone": "Done. {days} days are in your Timeline.",
+    "importSkipped": "{count} days skipped (already in Moodbow).",
+    "importNotImported": "Not imported: activities and tags.",
+    "importError": "We couldn't read this file. Try a Daylio CSV export or a CSV with date, mood and note columns.",
+    "importCrisisLine": "Some of what you imported sounds hard. If you'd like to talk to someone, help is here.",
+    "importSkippedFuture": "{count} rows skipped (dates in the future).",
+    "importSkippedCap": "{count} older days or notes not imported (up to 2,000 days and 5,000 notes per import).",
+    "importDateFormat": "Dates in this file are",
+    "importDateDMY": "Day/Month/Year (31/12/2025)",
+    "importDateMDY": "Month/Day/Year (12/31/2025)",
+    "importMapMoods": "Match your moods",
+    "importMapSkip": "Don't import",
+    "importMapChoose": "Choose a mood…",
+    "importSkippedTooLong": "{count} notes too long to import.",
+    "importStopped": "The import stopped partway. Everything up to that point is saved; import the same file again to finish."
   },
   "export": {
     "exportTitle": "Moodbow: your journal",
@@ -352,7 +374,10 @@
     "timelineViewCalendar": "Calendar",
     "calPrevMonth": "Previous month",
     "calNextMonth": "Next month",
-    "calDayLabel": "{date}{mood, select, none {} other {, {mood}}}{moment, select, yes {, moment} other {}}{entry, select, yes {, entry} other {}}"
+    "calDayLabel": "{date}{mood, select, none {} other {, {mood}}}{moment, select, yes {, moment} other {}}{entry, select, yes {, entry} other {}}",
+    "printMonth": "Print this month",
+    "printFooter": "Moodbow · {month}",
+    "printEmpty": "Nothing written this month yet."
   },
   "insights": {
     "insightsTitle": "Insights",
