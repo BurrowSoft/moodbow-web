@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { IntlMessageFormat } from "intl-messageformat";
 import { describe, expect, it } from "vitest";
-import { routing } from "@/i18n/routing";
+import { offeredLocales, routing } from "@/i18n/routing";
 import en from "./en.json";
 import th from "./th.json";
 import drafts from "./th-draft.json";
@@ -59,7 +59,9 @@ describe("th.json", () => {
     expect((drafts as { reason: string }[]).filter((d) => !d.reason.startsWith("UX draft"))).toEqual([]);
   });
 
-  it("isn't offered yet: English only until a native speaker has read it", () => {
+  it("isn't offered yet: English only until a native speaker has read it (thai-offered-live)", () => {
+    expect(offeredLocales()).toEqual(["en"]);
+    // This test build isn't a draft build either, so /th isn't served here.
     expect(routing.locales).toEqual(["en"]);
   });
 });

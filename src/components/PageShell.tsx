@@ -12,12 +12,17 @@ type Props = {
   article?: boolean;
   // Rendered after the article, outside it (e.g. a draft-only panel).
   after?: React.ReactNode;
+  // A line above the article in the page's language (legal in English on a
+  // /th page: legalEnglishOnly), and the article's own language when it
+  // differs from the page's.
+  notice?: React.ReactNode;
+  lang?: string;
   children: React.ReactNode;
 };
 
 // Layout for the inner pages: the horizontal logo linking home, an optional
 // draft banner, and a readable text column.
-export async function PageShell({ title, draft = false, article = false, after, children }: Props) {
+export async function PageShell({ title, draft = false, article = false, after, notice, lang, children }: Props) {
   const t = await getTranslations("common");
   return (
     <>
@@ -34,7 +39,12 @@ export async function PageShell({ title, draft = false, article = false, after, 
         </div>
       </header>
       <main id="main" className="flex-1 px-6 py-10">
-        <article className="mx-auto max-w-2xl">
+        {notice && (
+          <p data-testid="page-notice" className="mx-auto mb-6 max-w-2xl rounded-2xl bg-pill px-5 py-3 text-sm font-medium text-text">
+            {notice}
+          </p>
+        )}
+        <article lang={lang} className="mx-auto max-w-2xl">
           <h1 className="text-balance text-3xl font-medium tracking-tight sm:text-4xl">{title}</h1>
           <div data-content={article ? "article" : undefined} className="mt-6 space-y-5 text-base leading-relaxed text-muted sm:text-[17px]">{children}</div>
         </article>

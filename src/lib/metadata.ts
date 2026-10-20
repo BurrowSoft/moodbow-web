@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { routing, type Locale } from "@/i18n/routing";
+import { offeredLocales, routing, type Locale } from "@/i18n/routing";
 import { conditionMet } from "./conditions";
 import { SITE_URL } from "./site";
 
@@ -15,10 +15,11 @@ export function absoluteUrl(locale: Locale, path: string): string {
   return `${SITE_URL}${localizedPath(locale, path)}`;
 }
 
-// hreflang alternates for every locale, plus x-default (English).
+// hreflang alternates for every offered locale (a draft /th isn't one),
+// plus x-default (English).
 export function languageAlternates(path: string): Record<string, string> {
   const languages: Record<string, string> = {};
-  for (const l of routing.locales) languages[l] = absoluteUrl(l, path);
+  for (const l of offeredLocales()) languages[l] = absoluteUrl(l, path);
   languages["x-default"] = absoluteUrl(routing.defaultLocale, path);
   return languages;
 }

@@ -65,9 +65,19 @@ describe("dateLocale (decision 89: browser region → profile country → en-US)
     expect(dateLocale("en", "en-<script>", "GB")).toBe("en-GB");
     expect(dateLocale("en", "en-US-u-ca-buddhist", null)).toBe("en-US");
   });
-  it("Thai stays Thai", () => {
-    expect(dateLocale("th", "th-TH,en;q=0.8", "TH")).toBe("th-TH");
-    expect(dateLocale("th", null, null)).toBe("th");
+  it("Thai stays Thai, always in the Buddhist era (decision 193)", () => {
+    expect(dateLocale("th", "th-TH,en;q=0.8", "TH")).toBe("th-TH-u-ca-buddhist");
+    expect(dateLocale("th", null, null)).toBe("th-u-ca-buddhist");
+    // Thai UI with a US profile: th-US alone would be Gregorian.
+    expect(dateLocale("th", null, "US")).toBe("th-US-u-ca-buddhist");
+    expect(dateLocale("th", "th-US", null)).toBe("th-US-u-ca-buddhist");
+  });
+
+  it("every Thai tag shows พ.ศ. years; English never does", () => {
+    for (const [accept, country] of [["th-TH", null], [null, "US"], [null, "GB"], [null, null], ["th-TH-u-ca-gregory", "TH"]] as const) {
+      expect(dateLine("2026-10-02", dateLocale("th", accept, country)), `${accept} ${country}`).toContain("2569");
+    }
+    expect(dateLine("2026-10-02", dateLocale("en", "en-GB", "TH"))).toContain("2026");
   });
 });
 

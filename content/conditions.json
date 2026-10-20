@@ -126,5 +126,9 @@
   "import-live": {
     "met": false,
     "what": "1.1 K import from another journal (decision 189: Daylio + generic CSV, web first) is tested on the web; then Me → Your data offers it on Production."
+  },
+  "thai-offered-live": {
+    "met": false,
+    "what": "1.1 F: Thai is offered on the web: the native reader has read the Thai UI, Help and dates (thai_reviewed, decision 193), with UX's go. Until then /th is a draft on test builds only (Preview, dev, CI) and Production is English only; the switcher, Me → Language, hreflang and the sitemap offer Thai only once met. The legal pages keep their own gates in every language."
   }
 }

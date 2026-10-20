@@ -758,5 +758,10 @@
     "key": "ai.creditsBalance",
     "en": "{credits, plural, one {# credit} other {# credits}}",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "legal.legalEnglishOnly",
+    "en": "This page is available in English.",
+    "reason": "UX draft (native read pending)"
   }
 ]

@@ -7,7 +7,7 @@ import { DELETE_WORD, localDay } from "@/lib/journal/account";
 import { isFocusArea, isTone } from "@/lib/journal/ai";
 import { consentItem } from "@/lib/legalVersions";
 import { isCountry, isTimeZoneName } from "@/lib/region/countries";
-import { routing } from "@/i18n/routing";
+import { offeredLocales } from "@/i18n/routing";
 import { WIPE_COOKIE, WIPE_COOKIE_OPTIONS } from "@/lib/supabase/proxy";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -159,7 +159,8 @@ export type RegionField = "locale" | "country" | "time_zone";
 
 export async function saveRegion(field: RegionField, value: string): Promise<AiSaveResult> {
   const valid =
-    field === "locale" ? (routing.locales as readonly string[]).includes(value) : field === "country" ? value === "" || isCountry(value) : field === "time_zone" ? isTimeZoneName(value) : false;
+    // Only an offered language (thai-offered-live): a draft /th never saves "th".
+    field === "locale" ? (offeredLocales() as readonly string[]).includes(value) : field === "country" ? value === "" || isCountry(value) : field === "time_zone" ? isTimeZoneName(value) : false;
   if (!valid) return { ok: false };
   const supabase = await createSupabaseServerClient();
   if (!supabase) return { ok: false };

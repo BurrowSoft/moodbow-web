@@ -52,9 +52,17 @@ export function dateLocale(uiLocale: string, acceptLanguage: string | null, coun
   });
   // Only language-region: an extension (-u-ca-…, -u-nu-…) in the header
   // must not switch the calendar or the digits.
-  if (browser) return browser.tag.split("-").slice(0, 2).join("-");
-  if (country && /^[a-z]{2}$/i.test(country) && supported(`${lang}-${country.toUpperCase()}`)) return `${lang}-${country.toUpperCase()}`;
-  return lang === "en" ? "en-US" : lang;
+  const tag = browser
+    ? browser.tag.split("-").slice(0, 2).join("-")
+    : country && /^[a-z]{2}$/i.test(country) && supported(`${lang}-${country.toUpperCase()}`)
+      ? `${lang}-${country.toUpperCase()}`
+      : lang === "en"
+        ? "en-US"
+        : lang;
+  // Thai UI dates are always Buddhist era (พ.ศ., decision 193), whatever
+  // the region: th-TH already is, but th-US would be Gregorian. Storage,
+  // exports and file names never come through here: they stay Gregorian.
+  return lang === "th" ? `${tag}-u-ca-buddhist` : tag;
 }
 
 // The date line for a YYYY-MM-DD local date in the locale's own long form,

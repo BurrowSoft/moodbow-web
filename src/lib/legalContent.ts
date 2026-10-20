@@ -63,6 +63,12 @@ export function todos(source: string): string[] {
   return stripComments(source).match(TODO) ?? [];
 }
 
+// The language a page's legal text is in: its own where content/legal has
+// it, else English (Thai, 1.1 F: English text under legalEnglishOnly).
+export function legalLocale(locale: string): string {
+  return fs.existsSync(path.join(LEGAL_DIR, locale)) ? locale : "en";
+}
+
 export function legalSource(slug: LegalSlug, locale: string): string {
   const file = path.join(LEGAL_DIR, locale, `${slug}.md`);
   if (!fs.existsSync(file)) throw new Error(`Missing legal text: content/legal/${locale}/${slug}.md`);

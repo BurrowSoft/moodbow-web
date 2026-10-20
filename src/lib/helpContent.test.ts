@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
-import { routing } from "@/i18n/routing";
+import { ALL_LOCALES, routing } from "@/i18n/routing";
 import { findArticle, helpArticles, helpIndex, parseArticle, renderArticle, TOPICS } from "./helpContent";
 import { isPendingMet, pendingIds } from "./legalContent";
 import { isHiddenPage } from "./sitemapPages";
@@ -52,7 +52,21 @@ describe("help articles (content/help, copied verbatim from specs/help)", () => 
   it("the index keeps the topic order and every locale has its articles", () => {
     const topics = helpIndex("en", () => true).map((g) => g.topic);
     expect(topics).toEqual(TOPICS.filter((t) => topics.includes(t)));
-    for (const locale of routing.locales) expect(helpArticles(locale).length).toBeGreaterThan(0);
+    for (const locale of [...routing.locales, ...ALL_LOCALES]) expect(helpArticles(locale).length).toBeGreaterThan(0);
+  });
+
+  it("Thai (1.1 F) has every English article: the same slugs, topics and pending blocks, each parsing", () => {
+    const en = helpArticles("en");
+    const th = helpArticles("th");
+    expect(th.map((a) => a.slug)).toEqual(en.map((a) => a.slug));
+    for (const a of th) {
+      const e = en.find((x) => x.slug === a.slug)!;
+      expect(a.topic, a.slug).toBe(e.topic);
+      expect(pendingIds(a.source), a.slug).toEqual(pendingIds(e.source));
+      expect(a.title, a.slug).not.toBe(e.title);
+    }
+    // Every article a /th build publishes renders (the build prerenders them all).
+    for (const a of th) expect(() => renderArticle(a, () => true)).not.toThrow();
   });
 
   it("parsing refuses a malformed article; unknown slugs aren't found", () => {
