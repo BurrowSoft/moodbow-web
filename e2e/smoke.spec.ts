@@ -7,7 +7,9 @@ import conditions from "../content/conditions.json";
 // 404s (fail closed), pinned by the pageGate unit tests.
 
 const CANONICAL = "https://www.moodbow.com";
-// Whether the legal pages are live (as #100 derives it).
+// The legal pages' state (the launch-step guard requires them live): the
+// checks of /privacy and /terms follow it, so nothing here pins it
+// (reviewer #100 B2).
 const LEGAL = conditions["privacy-text-approved"].met && conditions["terms-text-approved"].met;
 
 test.describe("home", () => {
@@ -181,9 +183,14 @@ test.describe("the live legal pages and account deletion (decision 164)", () => 
     test(path, async ({ page }) => {
       await page.goto(path);
       await expect(page.getByRole("heading", { level: 1 })).toHaveText(heading);
-      await expect(page.getByTestId("draft-banner")).toHaveCount(0);
       await expect(page.locator('[data-content="article"]')).toHaveCount(1);
-      await expect(page.locator('meta[name="robots"]')).toHaveCount(0);
+      if (LEGAL) {
+        await expect(page.getByTestId("draft-banner")).toHaveCount(0);
+        await expect(page.locator('meta[name="robots"]')).toHaveCount(0);
+      } else {
+        await expect(page.getByTestId("draft-banner")).toBeVisible();
+        await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex, nofollow");
+      }
     });
   }
 
@@ -199,18 +206,22 @@ test.describe("the live legal pages and account deletion (decision 164)", () => 
     await expect(article).not.toContainText("app lock");
     // UX resolved every to-confirm mark (decision 67).
     await expect(article.locator("mark.legal-todo")).toHaveCount(0);
-    // Live: no draft panel; the web journal's "or the website" waits for it.
-    await expect(page.getByTestId("legal-hidden")).toHaveCount(0);
-    await expect(article).not.toContainText("or the website");
+    // The draft panel (unmet pending blocks) exists only while it's a draft.
+    const panel = page.getByTestId("legal-hidden");
+    if (LEGAL) await expect(panel).toHaveCount(0);
+    else await expect(panel).toContainText("purchases");
+    await expect(article.getByTestId("legal-hidden")).toHaveCount(0);
     await page.goto("/terms");
     await expect(page.locator('[data-content="article"]')).not.toContainText("AI credits");
   });
 
-  test("the footer links the live pages", async ({ page }) => {
+  test("the footer links only live pages: account deletion, and the legal pages once live", async ({ page }) => {
     await page.goto("/");
     const footer = page.getByRole("contentinfo");
-    for (const name of ["Support", "Privacy", "Terms", "Delete your account"]) {
-      await expect(footer.getByRole("link", { name })).toBeVisible();
+    await expect(footer.getByRole("link", { name: "Support" })).toBeVisible();
+    await expect(footer.getByRole("link", { name: "Delete your account" })).toHaveAttribute("href", "/account-deletion");
+    for (const name of ["Privacy", "Terms"]) {
+      await expect(footer.getByRole("link", { name })).toHaveCount(LEGAL ? 1 : 0);
     }
   });
 
@@ -296,8 +307,13 @@ test.describe("static files", () => {
     const body = await res.text();
     expect(body).toContain(`<loc>${CANONICAL}/</loc>`);
     expect(body).toContain(`<loc>${CANONICAL}/support</loc>`);
-    for (const live of ["privacy", "terms", "account-deletion", "help"]) expect(body, live).toContain(`<loc>${CANONICAL}/${live}</loc>`);
-    // Whole addresses: Help's article /help/privacy-and-data is listed too.
+    // Live: Help (decision 212) and the account-deletion page; the legal
+    // pages once met. Whole addresses: Help's /help/privacy-and-data is listed too.
+    expect(body).toContain(`<loc>${CANONICAL}/help</loc>`);
+    expect(body).toContain(`<loc>${CANONICAL}/account-deletion</loc>`);
+    for (const legal of ["/privacy", "/terms"]) {
+      expect(body.includes(`<loc>${CANONICAL}${legal}</loc>`), legal).toBe(LEGAL);
+    }
     for (const hidden of ["/email-confirmed", "/th"]) {
       expect(body, hidden).not.toContain(`<loc>${CANONICAL}${hidden}</loc>`);
     }

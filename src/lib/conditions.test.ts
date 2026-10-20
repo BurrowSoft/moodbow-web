@@ -73,9 +73,14 @@ describe("pageGate (fails closed)", () => {
   });
 });
 
+// The legal pages' state, as the launch-step guard requires it: everything
+// below follows it, so the guard is the only pinned value and this file is
+// green right after the legal flip, with no edits (reviewer #100 B2).
+const LEGAL = conditionMet("privacy-text-approved") && conditionMet("terms-text-approved");
+
 describe("sitemapPaths", () => {
-  it("after the web launch: the ungated pages, Help and account deletion (not the legal pages yet)", () => {
-    expect(sitemapPaths()).toEqual(["/", "/support", "/help", "/account-deletion"]);
+  it("after the web launch: the ungated pages, Help, the legal pages once live, and account deletion", () => {
+    expect(sitemapPaths()).toEqual(["/", "/support", "/help", ...(LEGAL ? ["/privacy", "/terms"] : []), "/account-deletion"]);
   });
 
   it("adds a gated page once its condition is met", () => {
@@ -87,9 +92,9 @@ describe("isHiddenPage (the proxy's routing-level 404)", () => {
   const prod = { vercelEnv: "production" };
   const preview = { vercelEnv: "preview" };
 
-  it("hides unmet gated pages on Production, with or without a trailing slash", () => {
+  it("hides the legal pages on Production until they're live, with or without a trailing slash", () => {
     for (const path of ["/privacy", "/terms", "/privacy/"]) {
-      expect(isHiddenPage(path, prod), path).toBe(true);
+      expect(isHiddenPage(path, prod), path).toBe(!LEGAL);
     }
     // Live with the web launch.
     expect(isHiddenPage("/account-deletion", prod)).toBe(false);
@@ -109,7 +114,7 @@ describe("isHiddenPage (the proxy's routing-level 404)", () => {
   });
 
   it("fails closed when the environment is unset", () => {
-    expect(isHiddenPage("/sign-in", {})).toBe(true);
+    expect(isHiddenPage("/privacy", {})).toBe(!LEGAL);
   });
 });
 
@@ -126,15 +131,15 @@ describe("pagePath (what the proxy checks)", () => {
   it("lowercases, because Vercel matches routes case-insensitively", () => {
     expect(pagePath("/PRIVACY", locales)).toBe("/privacy");
     expect(pagePath("/En/Account-Deletion", locales)).toBe("/account-deletion");
-    expect(isHiddenPage(pagePath("/Sign-In", locales), { vercelEnv: "production" })).toBe(true);
+    expect(isHiddenPage(pagePath("/Terms", locales), { vercelEnv: "production" })).toBe(!LEGAL);
   });
 
   it("leaves malformed escapes alone", () => {
     expect(pagePath("/%E0%A4%A", locales)).toBe("/%e0%a4%a");
   });
 
-  it("an encoded gated path is still hidden on Production", () => {
-    expect(isHiddenPage(pagePath("/%73ign-in", locales), { vercelEnv: "production" })).toBe(true);
+  it("an encoded gated path is treated like the plain one on Production", () => {
+    expect(isHiddenPage(pagePath("/%70rivacy", locales), { vercelEnv: "production" })).toBe(!LEGAL);
   });
 });
 
@@ -151,6 +156,7 @@ describe("the web journal gate (W0)", () => {
       expect(isHiddenPage(path, prod), path).toBe(false);
     }
     expect(isHiddenPage("/apples", prod)).toBe(false);
+    expect(isHiddenPage("/app", { vercelEnv: "preview" })).toBe(false);
   });
 
   it("never lists the signed-in area in the sitemap, even when live", () => {
