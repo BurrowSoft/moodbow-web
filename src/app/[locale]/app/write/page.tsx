@@ -11,6 +11,9 @@ import { backLabel } from "@/lib/journal/backLabel";
 import { originOf } from "@/lib/journal/origin";
 import { dateLocale } from "@/lib/journal/today";
 import { EntryEditor } from "../entries/EntryEditor";
+import { pageGate } from "@/lib/conditions";
+import { flagsCrisis } from "@/lib/safety/crisis";
+import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
 import { titledMetadata } from "../pageMeta";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/app/write">): Promise<Metadata> {
@@ -36,10 +39,19 @@ export default async function WritePage({ params, searchParams }: PageProps<"/[l
   const startDate = typeof asked === "string" && isIsoDate(asked) && asked <= me.today ? asked : me.today;
   const from = originOf((await searchParams).from);
   const tag = dateLocale(locale, (await headers()).get("accept-language"), me.profile?.country ?? null);
+  // Writing prompts (1.1 I, decision 183): the prompt of the day the entry
+  // starts on (today, or a Timeline day's ?date=); none on a day where an
+  // earlier entry is crisis-flagged (every list, rule 5), and none if that
+  // can't be checked (fails closed). The editor hides it if the date changes.
+  let promptDate: string | null = null;
+  if (pageGate("writing-prompts") !== "hidden") {
+    const { data: sameDay, error } = await supabase.from("entries").select("body").eq("entry_date", startDate);
+    if (!error && !(sameDay ?? []).some((e) => flagsCrisis((e as { body: string }).body, CRISIS_KEYWORDS))) promptDate = startDate;
+  }
   return (
     <>
       <BackLink href={from} label={await backLabel(from, tag)} testId="nav-back" />
-      <EntryEditor initial={null} newId={crypto.randomUUID()} uid={user.id} today={me.today} startDate={startDate} country={me.profile?.country} backTo={from} />
+      <EntryEditor initial={null} newId={crypto.randomUUID()} uid={user.id} today={me.today} startDate={startDate} country={me.profile?.country} backTo={from} promptDate={promptDate} />
     </>
   );
 }

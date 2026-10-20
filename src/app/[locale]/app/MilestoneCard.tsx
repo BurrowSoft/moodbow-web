@@ -11,7 +11,7 @@ import { ShareMonth } from "./insights/ShareMonth";
 // "Share it" opens the share sheet on the milestone card; "Not now" or
 // opening the sheet means it never shows again for that milestone, in this
 // browser. Total days journaled, never a streak.
-type Props = { n: Milestone; colours: string[]; uid: string; month: string; dateLocaleTag: string };
+type Props = { n: Milestone; colours: string[]; uid: string; month: string; dateLocaleTag: string; year?: number | null };
 
 const SHARE_LABEL = "milestoneShare" as const;
 const listeners = new Set<() => void>();
@@ -27,7 +27,7 @@ const seen = (key: string) => {
   }
 };
 
-export function MilestoneCard({ n, colours, uid, month, dateLocaleTag }: Props) {
+export function MilestoneCard({ n, colours, uid, month, dateLocaleTag, year = null }: Props) {
   const t = useTranslations("share");
   const key = localKey("milestone-seen", uid, String(n));
   // Until the browser says otherwise, assume it was seen: no flash of a card
@@ -53,7 +53,7 @@ export function MilestoneCard({ n, colours, uid, month, dateLocaleTag }: Props) 
       </h2>
       <div className="mt-4 flex flex-wrap gap-3">
         {/* Opening the sheet counts as seen; the card stays until the sheet closes. */}
-        <ShareMonth month={month} dateLocaleTag={dateLocaleTag} label={SHARE_LABEL} testId="milestone-share" milestone={{ n, colours }} initialType="milestone" onOpen={markSeen} />
+        <ShareMonth month={month} dateLocaleTag={dateLocaleTag} label={SHARE_LABEL} testId="milestone-share" milestone={{ n, colours }} year={year} initialType="milestone" onOpen={markSeen} />
         <button type="button" data-testid="milestone-not-now" onClick={dismiss} className={dialogButton()}>
           {t("milestoneNotNow")}
         </button>

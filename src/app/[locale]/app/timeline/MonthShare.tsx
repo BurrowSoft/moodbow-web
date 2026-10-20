@@ -30,7 +30,7 @@ function monthCount(counts: MonthCounts, month: string): Promise<number> {
 // enough check-ins for a card (MIN_CHECK_INS); otherwise nothing (hidden,
 // not disabled). The count comes from the month itself, not from the days
 // loaded so far (a month can span pages; Moments shows only some days).
-export function MonthShare({ month, dateLocaleTag, counts }: { month: string; dateLocaleTag: string; counts: MonthCounts }) {
+export function MonthShare({ month, dateLocaleTag, counts, year = null }: { month: string; dateLocaleTag: string; counts: MonthCounts; year?: number | null }) {
   const [enough, setEnough] = useState(false);
   useEffect(() => {
     let cancelled = false;
@@ -46,5 +46,5 @@ export function MonthShare({ month, dateLocaleTag, counts }: { month: string; da
     };
   }, [counts, month]);
   if (!enough) return null;
-  return <ShareMonth month={month} dateLocaleTag={dateLocaleTag} label={SHARE_LABEL} asLink testId={`timeline-share-${month}`} />;
+  return <ShareMonth month={month} dateLocaleTag={dateLocaleTag} label={SHARE_LABEL} asLink testId={`timeline-share-${month}`} year={year} />;
 }

@@ -83,6 +83,14 @@
     "met": false,
     "what": "1.1 D \"Your week\" (specs/m9-weekly-report.md, decision 180) is tested on the app and the web against staging; then the Insights card shows on Production, which also needs AI live there (the combined AI go-live)."
   },
+  "writing-prompts": {
+    "met": false,
+    "what": "1.1 I writing prompts (decision 183): the quiet prompt above an empty entry, from contracts/prompts.json, is tested on the app and the web."
+  },
+  "year-card": {
+    "met": false,
+    "what": "1.1 J \"My year's moodbow\" (decision 184): the Year card in the share sheet (December and January, ≥ 3 coloured months) is tested on the app and the web (needs share-cards too)."
+  },
   "play-live": {
     "met": false,
     "what": "The Play listing is public (Vitor). Then the web shows the Google Play link (decision 185) and the manifest names the app (related_applications)."

@@ -2,6 +2,7 @@
 
 import { isMonth, monthRange, type MonthCheckIn } from "@/lib/share/moodbow";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { yearRange } from "@/lib/share/year";
 
 export type MonthResult = { status: "ok"; checkIns: MonthCheckIn[] } | { status: "error" };
 
@@ -12,6 +13,18 @@ export async function loadMonthCheckIns(month: string): Promise<MonthResult> {
   const supabase = await createSupabaseServerClient();
   if (!supabase) return { status: "error" };
   const { from, to } = monthRange(month);
+  const { data, error } = await supabase.from("check_ins").select("local_date, mood").gte("local_date", from).lte("local_date", to);
+  if (error) return { status: "error" };
+  return { status: "ok", checkIns: (data ?? []) as MonthCheckIn[] };
+}
+
+// One year's moods for "My year's moodbow" (1.1 J): the date and mood only,
+// for at most 366 days (RLS: own rows).
+export async function loadYearCheckIns(year: number): Promise<MonthResult> {
+  if (!Number.isInteger(year) || year < 2000 || year > 9999) return { status: "error" };
+  const supabase = await createSupabaseServerClient();
+  if (!supabase) return { status: "error" };
+  const { from, to } = yearRange(year);
   const { data, error } = await supabase.from("check_ins").select("local_date, mood").gte("local_date", from).lte("local_date", to);
   if (error) return { status: "error" };
   return { status: "ok", checkIns: (data ?? []) as MonthCheckIn[] };

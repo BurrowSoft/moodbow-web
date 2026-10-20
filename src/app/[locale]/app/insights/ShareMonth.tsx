@@ -9,7 +9,9 @@ import { stripPngMetadata } from "@/lib/share/pngChunks";
 import { cardFileName, formatMonth, LAYOUT, MIN_CHECK_INS, monthBands, THEMES, type CardFormat, type CardTheme } from "@/lib/share/moodbow";
 import { MILESTONE_TITLE_SIZE, type Milestone } from "@/lib/share/cards";
 import { MIN_POINTS, type Range } from "@/lib/journal/insights";
-import { loadMonthCheckIns } from "./shareActions";
+import { loadMonthCheckIns, loadYearCheckIns } from "./shareActions";
+import { YEAR_MIN_MONTHS, yearBands, yearFileName } from "@/lib/share/year";
+import type { MonthCheckIn } from "@/lib/share/moodbow";
 
 // "My month's moodbow" (M10, specs/m10-share-card.md): preview first,
 // always. The card is drawn here in the browser from the month's moods and
@@ -19,7 +21,10 @@ import { loadMonthCheckIns } from "./shareActions";
 // The 1.1 cards (decision 169, behind share-cards-more): with chart and/or
 // milestone given, a type switch Moodbow / Chart / Milestone; initialType
 // picks the card it opens on (Today's milestone card opens on Milestone).
-export type CardType = "moodbow" | "chart" | "milestone";
+// year (1.1 J, decision 184): the year on offer (December: this year;
+// January: last year), where the year card is on; its type shows once that
+// year has at least 3 coloured months.
+export type CardType = "moodbow" | "chart" | "milestone" | "year";
 const RANGE_KEYS: Record<Range, "shareRangeWeek" | "shareRangeMonth" | "shareRange3Months"> = {
   week: "shareRangeWeek",
   month: "shareRangeMonth",
@@ -33,6 +38,7 @@ export function ShareMonth({
   testId = "share-open",
   chart,
   milestone,
+  year = null,
   initialType = "moodbow",
   onOpen,
 }: {
@@ -43,6 +49,7 @@ export function ShareMonth({
   testId?: string;
   chart?: { range: Range; moods: (number | null)[] };
   milestone?: { n: Milestone; colours: string[] } | null;
+  year?: number | null;
   initialType?: CardType;
   onOpen?: () => void;
 }) {
@@ -51,12 +58,15 @@ export function ShareMonth({
   const tm = useTranslations("me");
   const ti = useTranslations("insights");
   const [open, setOpen] = useState(false);
-  const types: CardType[] = ["moodbow", ...(chart ? (["chart"] as const) : []), ...(milestone ? (["milestone"] as const) : [])];
+  const [yearRows, setYearRows] = useState<MonthCheckIn[] | null>(null);
+  const [theme, setTheme] = useState<CardTheme>("light");
+  const yearCard = year !== null && yearRows ? yearBands(yearRows, year, theme) : null;
+  const yearOn = !!yearCard && yearCard.colouredMonths >= YEAR_MIN_MONTHS;
+  const types: CardType[] = ["moodbow", ...(chart ? (["chart"] as const) : []), ...(milestone ? (["milestone"] as const) : []), ...(yearOn ? (["year"] as const) : [])];
   const [type, setType] = useState<CardType>(initialType);
   const [colours, setColours] = useState<string[] | null>(null);
   const [failed, setFailed] = useState(false);
   const [format, setFormat] = useState<CardFormat>("story");
-  const [theme, setTheme] = useState<CardTheme>("light");
   const [line, setLine] = useState("");
   const [canShareFiles, setCanShareFiles] = useState(false);
   // The finished PNG, made when the preview has drawn (see send).
@@ -86,6 +96,12 @@ export function ShareMonth({
     loadMonthCheckIns(month)
       .then((r) => (r.status === "ok" ? setColours(monthBands(r.checkIns, month)) : setFailed(true)))
       .catch(() => setFailed(true));
+    // The year's moods, for its card (a failed read just means no Year type).
+    setYearRows(null);
+    if (year !== null)
+      loadYearCheckIns(year)
+        .then((r) => r.status === "ok" && setYearRows(r.checkIns))
+        .catch(() => undefined);
   };
   const close = useCallback(() => setOpen(false), []);
 
@@ -95,7 +111,9 @@ export function ShareMonth({
   // chart card draws the line instead), and the file's name.
   const chartPoints = chart ? chart.moods.filter((m) => m !== null).length : 0;
   const card =
-    type === "chart" && chart
+    type === "year" && yearCard && year !== null
+      ? { ready: yearOn, title: t("shareYearTitle", { year }), days: t("shareDaysJournaled", { n: yearCard.days }), colours: yearCard.colours, file: yearFileName(year), label: t("shareYear") }
+      : type === "chart" && chart
       ? { ready: chartPoints >= MIN_POINTS, title: t(RANGE_KEYS[chart.range]), days: t("shareDaysJournaled", { n: chartPoints }), colours: [] as string[], file: `moodbow-chart-${chart.range}.png`, label: t("shareChart") }
       : type === "milestone" && milestone
         ? { ready: true, title: t("shareMilestoneText", { n: milestone.n }), days: "", colours: milestone.colours, file: `moodbow-${milestone.n}-days.png`, label: t("shareMilestone") }
@@ -198,7 +216,7 @@ export function ShareMonth({
               <div className="flex flex-wrap gap-2" role="group" aria-label={t("shareCardType")}>
                 {types.map((k) => (
                   <button key={k} type="button" data-testid={`share-type-${k}`} aria-pressed={type === k} onClick={() => setType(k)} className={choice(type === k)}>
-                    {t(k === "moodbow" ? "shareMoodbow" : k === "chart" ? "shareChart" : "shareMilestone")}
+                    {t(k === "moodbow" ? "shareMoodbow" : k === "chart" ? "shareChart" : k === "year" ? "shareYear" : "shareMilestone")}
                   </button>
                 ))}
               </div>

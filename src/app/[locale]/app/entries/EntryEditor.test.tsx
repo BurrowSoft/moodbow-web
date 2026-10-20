@@ -2,6 +2,7 @@ import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-libra
 import { NextIntlClientProvider } from "next-intl";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import messages from "@/messages/en.json";
+import { PROMPTS } from "@/lib/journal/prompts";
 import type { Entry } from "@/lib/journal/entry";
 
 // The entry editor against mocked actions (CI has no Supabase to sign in to).
@@ -504,5 +505,49 @@ describe("EntryEditor: the date first (decision 161)", () => {
     const date = screen.getByTestId("entry-date");
     const text = screen.getByTestId("entry-text");
     expect(date.compareDocumentPosition(text) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+});
+
+describe("EntryEditor: writing prompts (1.1 I, decision 183)", () => {
+  // 2026-10-20 is prompt17, then prompt18 (the contract's fixture).
+  const renderWithPrompt = (promptDate: string | null) =>
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <EntryEditor initial={null} newId={NEW_ID} uid="u1" today="2026-10-20" promptDate={promptDate} />
+      </NextIntlClientProvider>,
+    );
+  const text = (id: string) => PROMPTS.find((p) => p.id === id)!.en;
+
+  it("an empty entry: today's prompt, read with the text field; Another shows the next", () => {
+    renderWithPrompt("2026-10-20");
+    expect(screen.getByTestId("entry-prompt-text")).toHaveTextContent(text("prompt17"));
+    expect(screen.getByTestId("entry-text")).toHaveAccessibleDescription(text("prompt17"));
+    fireEvent.click(screen.getByTestId("entry-prompt-another"));
+    expect(screen.getByTestId("entry-prompt-text")).toHaveTextContent(text("prompt18"));
+    expect(screen.getByTestId("entry-prompt-another")).toHaveTextContent(messages.entry.promptAnother);
+  });
+
+  it("it's only an invitation: nothing is inserted, and it goes once there's text", () => {
+    renderWithPrompt("2026-10-20");
+    expect(screen.getByTestId("entry-text")).toHaveValue("");
+    type("Today I");
+    expect(screen.queryByTestId("entry-prompt")).toBeNull();
+    expect(screen.getByTestId("entry-text")).not.toHaveAttribute("aria-describedby");
+    type("   ");
+    expect(screen.getByTestId("entry-prompt")).toBeInTheDocument();
+  });
+
+  it("the entry moved to another day: the prompt (and its description) go; back on its day, it returns (reviewer #83)", () => {
+    renderWithPrompt("2026-10-20");
+    fireEvent.change(screen.getByTestId("entry-date"), { target: { value: "2026-10-15" } });
+    expect(screen.queryByTestId("entry-prompt")).toBeNull();
+    expect(screen.getByTestId("entry-text")).not.toHaveAttribute("aria-describedby");
+    fireEvent.change(screen.getByTestId("entry-date"), { target: { value: "2026-10-20" } });
+    expect(screen.getByTestId("entry-prompt")).toBeInTheDocument();
+  });
+
+  it("no promptDate (off, or a crisis-flagged day): no prompt", () => {
+    renderWithPrompt(null);
+    expect(screen.queryByTestId("entry-prompt")).toBeNull();
   });
 });
