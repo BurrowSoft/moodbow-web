@@ -325,6 +325,43 @@
       ]
     },
     {
+      "name": "daylio: custom mood names and activities in plain code-unit order (non-ASCII, case)",
+      "csv": "full_date,date,weekday,time,mood,activities,note_title,note\n2026-10-10,x,x,9:00 am,zen,walk | Ánimo | ánimo | Zebra,,\n2026-10-11,x,x,9:00 am,Ánimo,éclair | apple,,\n2026-10-12,x,x,9:00 am,ánimo,,,\n2026-10-13,x,x,9:00 am,Zen,,,",
+      "result": {
+        "status": "ok",
+        "plan": {
+          "format": "daylio",
+          "dateFormat": "iso",
+          "days": [],
+          "entries": [],
+          "customMoods": [
+            "Zen",
+            "zen",
+            "Ánimo",
+            "ánimo"
+          ],
+          "notImported": {
+            "activities": [
+              "Zebra",
+              "apple",
+              "walk",
+              "Ánimo",
+              "ánimo",
+              "éclair"
+            ]
+          },
+          "skipped": {
+            "future": 0,
+            "tooLong": 0,
+            "olderDays": 0,
+            "olderEntries": 0
+          },
+          "range": null
+        }
+      },
+      "ids": []
+    },
+    {
       "name": "daylio: title only, note only",
       "csv": "full_date,date,weekday,time,mood,activities,note_title,note\n2026-10-10,x,x,9:00 am,good,,Just a title,\n2026-10-11,x,x,9:00 am,good,,,Just a note",
       "result": {

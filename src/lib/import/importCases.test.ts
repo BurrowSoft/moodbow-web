@@ -54,6 +54,10 @@ const CASES: Case[] = [
   { name: "daylio: several rows on one day, the latest time sets the mood", csv: daylio(["2026-10-10,x,x,9:00 pm,rad,,,", "2026-10-10,x,x,7:15 am,awful,,,", "2026-10-10,x,x,12:30 pm,meh,,,"]) },
   { name: "daylio: custom moods unmapped (the UI blocks until each has a level or Skip; Skip = no key, no mood)", csv: daylio(["2026-10-10,x,x,9:00 am,sleepy,,,", "2026-10-11,x,x,9:00 am,wired,,,Note"]) },
   { name: "daylio: one custom mood mapped, one skipped", csv: daylio(["2026-10-10,x,x,9:00 am,sleepy,,,", "2026-10-11,x,x,9:00 am,wired,,,Note"]), options: { customMoods: { sleepy: 2 } } },
+  {
+    name: "daylio: custom mood names and activities in plain code-unit order (non-ASCII, case)",
+    csv: daylio(["2026-10-10,x,x,9:00 am,zen,walk | Ánimo | ánimo | Zebra,,", "2026-10-11,x,x,9:00 am,Ánimo,éclair | apple,,", "2026-10-12,x,x,9:00 am,ánimo,,,", "2026-10-13,x,x,9:00 am,Zen,,,"]),
+  },
   { name: "daylio: title only, note only", csv: daylio(["2026-10-10,x,x,9:00 am,good,,Just a title,", "2026-10-11,x,x,9:00 am,good,,,Just a note"]) },
   {
     name: "daylio: HTML notes (<br>, block tags, entities, nested tags, an img)",

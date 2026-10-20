@@ -247,8 +247,10 @@ export function planImport(text: string, today: string, options: ImportOptions =
       dateFormat,
       days,
       entries,
-      customMoods: [...custom].sort((a, b) => a.localeCompare(b)),
-      notImported: { activities: [...activities].sort((a, b) => a.localeCompare(b)) },
+      // Plain code-unit order (sort()'s default), not localeCompare: the same
+      // on every device and in the app's port (import-cases.json).
+      customMoods: [...custom].sort(),
+      notImported: { activities: [...activities].sort() },
       skipped,
       range: all.length ? { first: all[0], last: all[all.length - 1] } : null,
     },
