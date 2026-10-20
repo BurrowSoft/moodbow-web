@@ -6,6 +6,7 @@ import { MomentStar } from "@/components/MomentStar";
 import { Link } from "@/i18n/navigation";
 import { MOOD_COLOURS, MOOD_DOT_OUTLINE } from "@/lib/journal/checkIn";
 import { withOrigin } from "@/lib/journal/origin";
+import { askToPrint } from "@/lib/journal/printOnce";
 import { dayLabel, groupByMonth, monthLabel, type TimelineDay } from "@/lib/journal/timeline";
 import { MonthShare, type MonthCounts } from "./MonthShare";
 import { loadTimeline } from "./actions";
@@ -92,7 +93,7 @@ export function TimelineList({ initial, initialDone, momentsOnly, dateLocaleTag,
             <div className="flex flex-wrap items-center gap-x-4">
               {shareable && <MonthShare month={month} dateLocaleTag={dateLocaleTag} counts={monthCounts} year={year} />}
               {printable && (
-                <Link href={`/app/print/${month}`} data-testid={`timeline-print-${month}`} className={PRINT_LINK}>
+                <Link href={`/app/print/${month}`} onClick={() => askToPrint(month)} data-testid={`timeline-print-${month}`} className={PRINT_LINK}>
                   {t("printMonth")}
                 </Link>
               )}

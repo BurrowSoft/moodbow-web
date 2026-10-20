@@ -44,6 +44,7 @@ export default async function PrintPage({ params }: PageProps<"/[locale]/app/pri
   const dateLocaleTag = dateLocale(locale, (await headers()).get("accept-language"), me.profile?.country ?? null);
   return (
     <PrintMonth
+      month={month}
       title={formatMonth(month, dateLocaleTag)}
       days={printDays((checkIns.data ?? []) as PrintCheckIn[], (entries.data ?? []) as PrintEntryRow[])}
       dateLocaleTag={dateLocaleTag}

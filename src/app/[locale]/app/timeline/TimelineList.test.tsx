@@ -206,3 +206,13 @@ describe("Print this month (1.1 N)", () => {
     expect(screen.queryByTestId("timeline-print-2026-10")).toBeNull();
   });
 });
+
+describe("Print this month: the click asks for the dialog once", () => {
+  it("clicking the link leaves a one-time request for that month", async () => {
+    const { takePrintRequest } = await import("@/lib/journal/printOnce");
+    renderList({ printable: true });
+    fireEvent.click(screen.getByTestId("timeline-print-2026-10"));
+    expect(takePrintRequest("2026-10")).toBe(true);
+    expect(takePrintRequest("2026-10")).toBe(false);
+  });
+});

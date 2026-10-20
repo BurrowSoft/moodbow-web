@@ -5,30 +5,33 @@ import { useTranslations } from "next-intl";
 import { MomentStar } from "@/components/MomentStar";
 import { dateLine } from "@/lib/journal/today";
 import type { PrintDay } from "@/lib/journal/printMonth";
+import { takePrintRequest } from "@/lib/journal/printOnce";
 import { checkInChips } from "../../checkInChips";
 
-// Print a month (1.1 N): a clean layout that opens the browser's print
-// dialog ("Save as PDF" is built in). Nothing is uploaded or made on a
-// server; the page prints locally. The mood word carries the mood (no
-// colours needed on paper); entries print as written.
-export function PrintMonth({ title, days, dateLocaleTag }: { title: string; days: PrintDay[]; dateLocaleTag: string }) {
+// Print a month (1.1 N): a clean layout and the browser's print dialog
+// ("Save as PDF" is built in). Nothing is uploaded or made on a server; the
+// page prints locally. The mood word carries the mood (no colours needed on
+// paper); entries print as written.
+export function PrintMonth({ month, title, days, dateLocaleTag }: { month: string; title: string; days: PrintDay[]; dateLocaleTag: string }) {
   const t = useTranslations("timeline");
   const tt = useTranslations("today");
   const te = useTranslations("entry");
 
-  // Once, when the page has drawn.
+  // Only when arriving from "Print this month", once the page has drawn
+  // (never on a refresh, Back or a link opened elsewhere: the button is here).
   useEffect(() => {
+    if (!takePrintRequest(month)) return;
     const frame = window.requestAnimationFrame(() => window.print());
     return () => window.cancelAnimationFrame(frame);
-  }, []);
+  }, [month]);
 
-  return (
-    <article data-testid="print-month" className="print:text-[11pt]">
+  const content = (
+    <>
       <div className="flex flex-wrap items-center justify-between gap-4">
         <h1 className="text-3xl font-medium tracking-tight">{title}</h1>
         <button
           type="button"
-          data-testid="print-again"
+          data-testid="print-button"
           onClick={() => window.print()}
           className="inline-flex min-h-11 items-center rounded-full border border-border px-4 text-sm font-medium text-text hover:bg-pill print:hidden"
         >
@@ -72,11 +75,26 @@ export function PrintMonth({ title, days, dateLocaleTag }: { title: string; days
           })}
         </div>
       )}
+    </>
+  );
 
-      {/* On every printed page (fixed in print). */}
-      <p className="hidden print:fixed print:inset-x-0 print:bottom-0 print:block print:text-center print:text-[9pt]" data-testid="print-footer">
-        {t("printFooter", { month: title })}
-      </p>
-    </article>
+  // A layout table only for its footer: browsers repeat a <tfoot> on every
+  // printed page in space of its own, so "Moodbow · {month}" never covers a
+  // page's last lines (a fixed footer would; reviewer #96). Not on screen.
+  return (
+    <table role="presentation" data-testid="print-month" className="w-full border-collapse print:text-[11pt]">
+      <tfoot className="hidden print:table-footer-group">
+        <tr>
+          <td className="pt-6 text-center text-[9pt]" data-testid="print-footer">
+            {t("printFooter", { month: title })}
+          </td>
+        </tr>
+      </tfoot>
+      <tbody>
+        <tr>
+          <td className="p-0 align-top">{content}</td>
+        </tr>
+      </tbody>
+    </table>
   );
 }

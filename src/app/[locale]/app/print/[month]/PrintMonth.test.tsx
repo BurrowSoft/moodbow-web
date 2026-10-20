@@ -3,6 +3,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import messages from "@/messages/en.json";
 import type { PrintDay } from "@/lib/journal/printMonth";
+import { askToPrint } from "@/lib/journal/printOnce";
 import { PrintMonth } from "./PrintMonth";
 
 const t = messages.timeline;
@@ -21,10 +22,11 @@ const DAYS: PrintDay[] = [
 const renderIt = (days = DAYS) =>
   render(
     <NextIntlClientProvider locale="en" messages={messages}>
-      <PrintMonth title={TITLE} days={days} dateLocaleTag="en-GB" />
+      <PrintMonth month="2026-10" title={TITLE} days={days} dateLocaleTag="en-GB" />
     </NextIntlClientProvider>,
   );
 const print = vi.fn();
+const frame = () => act(() => new Promise((r) => requestAnimationFrame(() => r(null))));
 
 beforeEach(() => {
   print.mockReset();
@@ -36,12 +38,26 @@ afterEach(() => {
 });
 
 describe("PrintMonth (1.1 N)", () => {
-  it("opens the browser's print dialog once, when drawn; the button prints again", async () => {
+  it("arriving from the link: the print dialog opens once; a refresh or Back (the request taken) doesn't", async () => {
+    askToPrint("2026-10");
     renderIt();
-    await act(() => new Promise((r) => requestAnimationFrame(() => r(null))));
+    await frame();
     expect(print).toHaveBeenCalledTimes(1);
+    cleanup();
+    renderIt();
+    await frame();
+    expect(print).toHaveBeenCalledTimes(1);
+  });
+
+  it("opened any other way: no dialog until the visible Print button", async () => {
+    askToPrint("2026-09");
+    renderIt();
+    await frame();
+    expect(print).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole("button", { name: t.printMonth }));
-    expect(print).toHaveBeenCalledTimes(2);
+    expect(print).toHaveBeenCalledTimes(1);
+    // Hidden on paper.
+    expect(screen.getByTestId("print-button").className).toContain("print:hidden");
   });
 
   it("the month's title, each day with the mood word, the values in words, ★ and the full text", () => {
