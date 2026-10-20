@@ -40,6 +40,20 @@ describe("weekRange", () => {
   });
 });
 
+describe("WeeklyReport: AI available but not turned on by this person (UX)", () => {
+  it("the card explains with meAiOffHint and offers nothing to press", () => {
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <WeeklyReport initial={null} weekStart="2026-10-12" dateLocaleTag="en-GB" balance={0} aiOff />
+      </NextIntlClientProvider>,
+    );
+    expect(screen.getByRole("heading", { name: m.reportWeekly })).toBeInTheDocument();
+    expect(screen.getByTestId("weekly-report-ai-off")).toHaveTextContent(m.meAiOffHint);
+    expect(screen.queryByTestId("weekly-report-button")).toBeNull();
+    expect(screen.queryByRole("button")).toBeNull();
+  });
+});
+
 describe("WeeklyReport (1.1 D)", () => {
   it("no report yet: the title, last week's range and See my week", () => {
     renderIt();

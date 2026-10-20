@@ -213,3 +213,24 @@ body {
 .legal-prose mark.legal-todo { background: var(--draft-bg); color: var(--draft-text); padding: 0 0.2em; border-radius: 0.25rem; }
 /* The in-app navigation bar (components/NavProgress.tsx): a segment sliding across. */
 @keyframes nav-progress { from { transform: translateX(-100%); } to { transform: translateX(300%); } }
+
+/* Paper (1.1 N "Print this month", and any page printed): black on white
+   whatever the theme, with no app chrome (print:hidden on the nav and the
+   footer). Last in the file, so it wins over the dark-theme rules of the
+   same specificity. */
+@media print {
+  :root,
+  :root:not([data-theme="light"]),
+  :root[data-theme="dark"] {
+    --bg: #ffffff;
+    --surface: #ffffff;
+    --text: #000000;
+    --muted: #333333;
+    --border: #999999;
+    --accent: #000000;
+    color-scheme: light;
+  }
+  @page {
+    margin: 16mm 16mm 20mm;
+  }
+}
