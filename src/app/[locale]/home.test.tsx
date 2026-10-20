@@ -40,6 +40,24 @@ describe("Home page", () => {
     expect(screen.getByTestId("home-stores").querySelector("a")).toBeNull();
   });
 
+  it("store line (decision 185): Play live alone gives its link and the App Store's coming soon", async () => {
+    met = ["play-live"];
+    await renderHome();
+    const stores = screen.getByTestId("home-stores");
+    expect(stores).toHaveTextContent(h.storeGetApp);
+    expect(screen.getByTestId("home-store-play")).toHaveAttribute("href", "https://play.google.com/store/apps/details?id=com.burrowsoft.moodbow");
+    expect(screen.getByTestId("home-store-play")).toHaveTextContent(h.storeGooglePlay);
+    expect(stores).toHaveTextContent(h.storeSoonAppStore);
+    expect(stores).not.toHaveTextContent(h.storeSoon);
+  });
+
+  it("store line: appstore-live without the listing's link yet still says coming soon (no dead link)", async () => {
+    met = ["appstore-live"];
+    await renderHome();
+    expect(screen.getByTestId("home-stores")).toHaveTextContent(h.storeSoon);
+    expect(screen.getByTestId("home-stores").querySelector("a")).toBeNull();
+  });
+
   it("once the web journal is live: Start your journal and I already have an account; no Coming soon", async () => {
     met = ["web-journal-live"];
     await renderHome();

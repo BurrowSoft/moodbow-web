@@ -7,6 +7,7 @@ import { MoodbowArc } from "@/components/MoodbowArc";
 import { conditionMet } from "@/lib/conditions";
 import { pageMetadata } from "@/lib/metadata";
 import { notifyMailto } from "@/lib/site";
+import { APP_STORE_URL, liveStores, PLAY_URL } from "@/lib/stores";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]">): Promise<Metadata> {
   const { locale } = await params;
@@ -28,6 +29,8 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
   const tc = await getTranslations("common");
   const to = await getTranslations("onboarding");
   const live = conditionMet("web-journal-live");
+  const stores = liveStores();
+  const storeLink = "font-medium text-accent underline underline-offset-4";
   const ai = conditionMet("ai-live");
 
   const features = [
@@ -78,10 +81,32 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
             <p className="mt-3 text-[13px] text-muted">{t("notifyNote")}</p>
           </>
         )}
-        {/* Text only until the real listings exist (UX): no badge art, no links. */}
-        <p className="mt-6 text-sm text-muted" data-testid="home-stores">
-          {t("storeSoon")}
-        </p>
+        {/* Per store, once its listing is live (decision 185): neutral text
+            links (the badge art waits for the listings), the other store's
+            "coming soon"; neither live, the joint line. */}
+        <div className="mt-6 text-sm text-muted" data-testid="home-stores">
+          {stores.play || stores.appStore ? (
+            <>
+              <p>
+                {t("storeGetApp")}{" "}
+                {stores.play && (
+                  <a href={PLAY_URL} data-testid="home-store-play" className={storeLink}>
+                    {t("storeGooglePlay")}
+                  </a>
+                )}
+                {stores.play && stores.appStore && <span aria-hidden="true"> · </span>}
+                {stores.appStore && (
+                  <a href={APP_STORE_URL!} data-testid="home-store-appstore" className={storeLink}>
+                    {t("storeAppStore")}
+                  </a>
+                )}
+              </p>
+              {!(stores.play && stores.appStore) && <p className="mt-1">{t(stores.play ? "storeSoonAppStore" : "storeSoonPlay")}</p>}
+            </>
+          ) : (
+            <p>{t("storeSoon")}</p>
+          )}
+        </div>
       </section>
 
       <ul className="grid w-full max-w-4xl gap-4 sm:grid-cols-3">
