@@ -72,7 +72,8 @@ export function KeyboardShortcuts({ search }: { search: boolean }) {
         {t("shortcutsTitle")}
       </h2>
       <dl className="mt-4 space-y-2">
-        {SHORTCUTS.filter((s) => s.action !== "search" || search).map((s) => (
+        {/* The keys, then "?" itself (this list; UX). */}
+        {[...SHORTCUTS.filter((s) => s.action !== "search" || search), { key: "?", label: "shortcutsTitle" } as const].map((s) => (
           <div key={s.key} className="flex items-center gap-3">
             <dt>
               <kbd className="inline-flex h-8 min-w-8 items-center justify-center rounded-lg border border-border bg-bg px-2 font-mono text-sm">{s.key}</kbd>

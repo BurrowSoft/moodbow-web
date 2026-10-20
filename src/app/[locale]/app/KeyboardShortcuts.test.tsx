@@ -78,6 +78,8 @@ describe("KeyboardShortcuts (1.1 O)", () => {
     const dialog = screen.getByTestId("shortcuts-dialog");
     expect(dialog).toHaveAccessibleName(m.shortcutsTitle);
     for (const label of [m.shortcutNew, m.shortcutCheckIn, m.shortcutTimeline, m.shortcutInsights]) expect(dialog).toHaveTextContent(label);
+    // "?" itself is listed too (UX).
+    expect([...dialog.querySelectorAll("kbd")].map((k) => k.textContent)).toEqual(["n", "c", "t", "i", "?"]);
     expect(dialog).not.toHaveTextContent(m.shortcutSearch);
     expect(dialog).toHaveTextContent(m.shortcutsOff);
     // A key inside the dialog does nothing.

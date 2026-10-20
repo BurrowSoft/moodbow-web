@@ -37,8 +37,10 @@ export function Appearance({ shortcuts = false }: { shortcuts?: boolean }) {
     writeTheme(next);
     listeners.forEach((cb) => cb());
   };
+  // Flips what this device has stored, not what was rendered: a page that
+  // loaded with shortcuts off renders the server's "on" first (Web Tester K6).
   const toggleShortcuts = () => {
-    writeShortcutsOn(!shortcutsOn);
+    writeShortcutsOn(!readShortcutsOn());
     listeners.forEach((cb) => cb());
   };
   return (
