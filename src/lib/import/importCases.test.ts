@@ -9,16 +9,18 @@ import type { ExportDoc, Translate } from "@/lib/exportText";
 import { decodeImportFile, MAX_IMPORT_BYTES, MAX_IMPORT_DAYS, MAX_IMPORT_ENTRIES, planImport, type ImportOptions, type ImportResult } from "./journalImport";
 import { IMPORT_NAMESPACE, importEntryId } from "./uuidv5";
 
-// content/contracts/import-cases.json (1.1 K, decision 208): the web's
-// import as a shared contract, so the app's port is checked against it
-// byte for byte. Each case's result is exactly what planImport returns,
+// src/lib/import/fixtures/import-cases.json (1.1 K, decision 208): the
+// web's import as a shared contract, so the app's port is checked against it
+// byte for byte. The web generates it; the app keeps its copy in
+// supabase/contracts (content/contracts holds only what's synced from the
+// app, decision 99, as with export-csv.json). Each case's result is exactly what planImport returns,
 // and ids are importEntryId for each planned entry, in order. This test
 // fails when the file and the code disagree; regenerate with
 //   WRITE_IMPORT_CASES=1 npx vitest run src/lib/import/importCases.test.ts
 // (jsdom: Daylio notes go through DOMParser, as in the browser.)
 if (!globalThis.crypto?.subtle) Object.defineProperty(globalThis, "crypto", { value: webcrypto, configurable: true });
 
-const FILE = join(process.cwd(), "content", "contracts", "import-cases.json");
+const FILE = join(process.cwd(), "src", "lib", "import", "fixtures", "import-cases.json");
 const TODAY = "2026-10-21";
 const USER = "00000000-0000-4000-8000-000000000001";
 
@@ -136,7 +138,7 @@ async function build() {
   };
 }
 
-describe("content/contracts/import-cases.json (1.1 K, shared with the app)", () => {
+describe("import-cases.json (1.1 K, shared with the app)", () => {
   it("matches what the web's import does today", async () => {
     const data = await build();
     const text = `${JSON.stringify(data, null, 2)}\n`;
