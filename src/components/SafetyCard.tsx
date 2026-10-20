@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Dialog, dialogButton } from "@/components/Dialog";
 import { helplinesFor, telHref } from "@/lib/safety/helplines";
 
@@ -15,7 +15,7 @@ import { helplinesFor, telHref } from "@/lib/safety/helplines";
 export function SafetyCard({ country, onClose }: { country: string | null | undefined; onClose: () => void }) {
   const t = useTranslations("safety");
   const tc = useTranslations("common");
-  const lines = helplinesFor(country);
+  const lines = helplinesFor(country, useLocale());
   const link = "font-medium text-accent underline underline-offset-4";
   return (
     <Dialog title={t("safetyTitle")} body={t("safetyBody")} onCancel={onClose} testId="safety-card" initialFocus="title">
