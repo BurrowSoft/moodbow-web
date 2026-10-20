@@ -104,9 +104,12 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
 
   // What "unchanged" means: the server version, or a blank new entry.
   const [saved, setSaved] = useState<Fields>(initial ? fromEntry(initial) : { body: "", date: startDate ?? today, isMoment: false });
+  // A new entry's draft is kept only with text in it: a changed date or
+  // moment alone isn't worth keeping, and must not win over the day the
+  // next "Add an entry" asks for (Web Tester #83).
   const [draft] = useState(() => {
     const d = restore ? readDraft(draftKey) : null;
-    return d && (!initial || d.id === initial.id) ? d : null;
+    return d && (!initial || d.id === initial.id) && (initial || d.body.trim() !== "") ? d : null;
   });
   const [id, setId] = useState(draft?.id ?? initial?.id ?? newId);
   const [base, setBase] = useState<string | null>(draft ? draft.base : (initial?.updated_at ?? null));
@@ -121,13 +124,17 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
   // it is sent or kept (decision 125).
   const [safety, setSafety] = useState<"closed" | "open">("closed");
   const dirty = !same(fields, saved);
+  // Whether there's anything to keep in this browser (see draft above).
+  const keep = dirty && (initial !== null || fields.body.trim() !== "");
 
   // The latest values for the unload handler and the autosave timer.
   const current = useRef<Draft>({ ...fields, id, base });
   const dirtyRef = useRef(dirty);
+  const keepRef = useRef(keep);
   useEffect(() => {
     current.current = { ...fields, id, base };
     dirtyRef.current = dirty;
+    keepRef.current = keep;
   });
   // Set once the text is saved, discarded or deleted: nothing left to keep.
   const finished = useRef(false);
@@ -137,7 +144,7 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
   useEffect(() => {
     if (!restore) return;
     return () => {
-      if (!finished.current && dirtyRef.current) writeDraft(draftKey, current.current);
+      if (!finished.current && keepRef.current) writeDraft(draftKey, current.current);
     };
   }, [draftKey, restore]);
 
@@ -175,19 +182,19 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
   // (the server-rendered pass), or it would be wiped before it's restored.
   useEffect(() => {
     if (!restore) return;
-    if (!dirty) {
+    if (!keep) {
       removeDraft(draftKey);
       return;
     }
     const timer = window.setTimeout(() => writeDraft(draftKey, current.current), AUTOSAVE_MS);
     return () => window.clearTimeout(timer);
-  }, [fields, dirty, draftKey, restore]);
+  }, [fields, keep, draftKey, restore]);
 
   useEffect(() => {
     if (!restore) return;
     const onUnload = (e: BeforeUnloadEvent) => {
       if (!dirtyRef.current) return;
-      writeDraft(draftKey, current.current);
+      if (keepRef.current) writeDraft(draftKey, current.current);
       e.preventDefault();
       e.returnValue = "";
     };
