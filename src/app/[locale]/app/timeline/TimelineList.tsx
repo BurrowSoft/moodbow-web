@@ -36,8 +36,32 @@ export function TimelineList({ initial, initialDone, momentsOnly, dateLocaleTag,
   // How many days the last load added, said in a status region that's
   // always there (new days arrive silently otherwise; a11y pass).
   const [loaded, setLoaded] = useState<number | null>(null);
+  // After a load the person asked for (Show more days, Retry), focus goes to
+  // the first day it added: the button may be gone (the last page), and
+  // focus must never drop to BODY (a11y pass, 1.0). A load from scrolling
+  // never moves focus.
+  const focusDay = useRef<string | null>(null);
+  const asked = useRef(false);
+  useEffect(() => {
+    const date = focusDay.current;
+    if (!date) return;
+    focusDay.current = null;
+    document.querySelector<HTMLElement>(`[data-testid="timeline-day-${date}"]`)?.focus();
+  }, [days]);
+  // A failed load the person asked for: the button they pressed is replaced
+  // by Retry, so focus goes there.
+  const focusRetry = useRef(false);
+  useEffect(() => {
+    if (!failed || !focusRetry.current) return;
+    focusRetry.current = false;
+    document.querySelector<HTMLElement>('[data-testid="timeline-retry"]')?.focus();
+  }, [failed]);
 
   const loadMore = useCallback(() => {
+    // Read and cleared first, so a skipped call can't pass it to a later
+    // load from scrolling.
+    const byPerson = asked.current;
+    asked.current = false;
     if (done || loading || days.length === 0) return;
     const before = days[days.length - 1].local_date;
     // Empty first, so the same count twice is announced again (reviewer #40).
@@ -45,18 +69,28 @@ export function TimelineList({ initial, initialDone, momentsOnly, dateLocaleTag,
     startLoading(async () => {
       try {
         const page = await loadTimeline(before, momentsOnly);
-        if (page.status === "error") return setFailed(true);
+        if (page.status === "error") {
+          focusRetry.current = byPerson;
+          return setFailed(true);
+        }
         setFailed(false);
         // Keyed by date, so a page that overlaps what's shown can't repeat a day.
         const fresh = page.days.filter((d) => !days.some((s) => s.local_date === d.local_date));
+        // Nothing new (the end was reached): the last day shown instead.
+        if (byPerson) focusDay.current = fresh[0]?.local_date ?? days[days.length - 1].local_date;
         setDays((shown) => [...shown, ...page.days.filter((d) => !shown.some((s) => s.local_date === d.local_date))]);
         setLoaded(fresh.length);
         setDone(page.done);
       } catch {
+        focusRetry.current = byPerson;
         setFailed(true);
       }
     });
   }, [days, done, loading, momentsOnly]);
+  const loadByPerson = useCallback(() => {
+    asked.current = true;
+    loadMore();
+  }, [loadMore]);
 
   useEffect(() => {
     const el = sentinel.current;
@@ -148,7 +182,7 @@ export function TimelineList({ initial, initialDone, momentsOnly, dateLocaleTag,
               <p role="alert" className="font-medium text-accent">
                 {tt("errGeneric")}
               </p>
-              <button type="button" data-testid="timeline-retry" onClick={loadMore} className="font-medium text-accent underline underline-offset-4">
+              <button type="button" data-testid="timeline-retry" onClick={loadByPerson} className="font-medium text-accent underline underline-offset-4">
                 {ta("retry")}
               </button>
             </>
@@ -157,7 +191,7 @@ export function TimelineList({ initial, initialDone, momentsOnly, dateLocaleTag,
               <span className="h-6 w-6 animate-spin rounded-full border-2 border-border border-t-accent motion-reduce:animate-none" aria-hidden="true" hidden={!loading} />
               {/* Scrolling loads more by itself; this is for keyboards and
                   screen readers, whose cursor may not scroll the page. */}
-              <button type="button" data-testid="timeline-load-more" onClick={loadMore} aria-disabled={loading} className="font-medium text-accent underline underline-offset-4 aria-disabled:opacity-60">
+              <button type="button" data-testid="timeline-load-more" onClick={loadByPerson} aria-disabled={loading} className="font-medium text-accent underline underline-offset-4 aria-disabled:opacity-60">
                 {t("timelineLoadMore")}
               </button>
             </>

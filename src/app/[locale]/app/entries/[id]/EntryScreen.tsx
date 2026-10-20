@@ -222,6 +222,10 @@ function Screen({ entry: initial, checkIn, from, backLabel, dateLocaleTag, uid, 
                     data-testid="entry-menu-delete"
                     onClick={() => {
                       setMenu(false);
+                      // The dialog gives focus back to what had it when it
+                      // opened: ⋯, not this item, which the closed menu hides
+                      // (Esc / Cancel left it on BODY; a11y pass, 1.0).
+                      more.current?.focus();
                       setConfirmDelete(true);
                     }}
                     className="flex min-h-11 w-full items-center rounded-xl px-4 text-left text-text hover:bg-pill"
