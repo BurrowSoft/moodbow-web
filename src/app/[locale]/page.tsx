@@ -8,6 +8,7 @@ import { conditionMet } from "@/lib/conditions";
 import { pageMetadata } from "@/lib/metadata";
 import { notifyMailto } from "@/lib/site";
 import { APP_STORE_URL, liveStores, PLAY_URL } from "@/lib/stores";
+import { jsonLdText, softwareApplication } from "@/lib/jsonLd";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]">): Promise<Metadata> {
   const { locale } = await params;
@@ -32,6 +33,10 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
   const stores = liveStores();
   const storeLink = "font-medium text-accent underline underline-offset-4";
   const ai = conditionMet("ai-live");
+  // schema.org SoftwareApplication, once a platform is live (launch SEO).
+  // A JSON data block isn't executed, so the CSP doesn't apply to it.
+  const tm = await getTranslations("meta");
+  const ld = softwareApplication({ web: live, play: stores.play, appStore: stores.appStore }, { name: tm("siteName"), description: tm("descriptionLaunch") });
 
   const features = [
     { key: "checkIn", title: t("featureCheckInTitle"), body: t("featureCheckInBody"), icon: <FaceIcon /> },
@@ -43,6 +48,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
 
   return (
     <main id="main" className="flex flex-1 flex-col items-center px-4 min-[360px]:px-6 sm:px-8">
+      {ld && <script type="application/ld+json" data-testid="home-jsonld" dangerouslySetInnerHTML={{ __html: jsonLdText(ld) }} />}
       <section className="flex w-full max-w-[600px] flex-col items-center pb-12 pt-8 text-center sm:pb-16 sm:pt-12">
         <div className="w-[104px] sm:w-[128px]">
           <Logo variant="stacked" width={128} alt={tc("logoAlt")} priority />
