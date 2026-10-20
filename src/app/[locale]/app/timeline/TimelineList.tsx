@@ -42,6 +42,7 @@ export function TimelineList({ initial, initialDone, momentsOnly, dateLocaleTag,
   // never moves focus.
   const focusDay = useRef<string | null>(null);
   const asked = useRef(false);
+  const joined = useRef(false);
   useEffect(() => {
     const date = focusDay.current;
     if (!date) return;
@@ -60,29 +61,40 @@ export function TimelineList({ initial, initialDone, momentsOnly, dateLocaleTag,
   const loadMore = useCallback(() => {
     // Read and cleared first, so a skipped call can't pass it to a later
     // load from scrolling.
-    const byPerson = asked.current;
+    const asking = asked.current;
     asked.current = false;
+    // Show more days pressed while a load from scrolling is already on its
+    // way (focusing the button scrolls it into view, which starts one): that
+    // load becomes the person's, so its result takes focus (UX, after #117).
+    if (loading && asking) joined.current = true;
     if (done || loading || days.length === 0) return;
+    joined.current = false;
     const before = days[days.length - 1].local_date;
     // Empty first, so the same count twice is announced again (reviewer #40).
     setLoaded(null);
     startLoading(async () => {
+      // The person's: asked for, joined while on its way, or focus is in the
+      // Show more days / Try again area, which the last page takes away.
+      const byPerson = () => asking || joined.current || sentinel.current?.contains(document.activeElement) === true;
       try {
         const page = await loadTimeline(before, momentsOnly);
         if (page.status === "error") {
-          focusRetry.current = byPerson;
+          focusRetry.current = byPerson();
+          joined.current = false;
           return setFailed(true);
         }
         setFailed(false);
         // Keyed by date, so a page that overlaps what's shown can't repeat a day.
         const fresh = page.days.filter((d) => !days.some((s) => s.local_date === d.local_date));
         // Nothing new (the end was reached): the last day shown instead.
-        if (byPerson) focusDay.current = fresh[0]?.local_date ?? days[days.length - 1].local_date;
+        if (byPerson()) focusDay.current = fresh[0]?.local_date ?? days[days.length - 1].local_date;
+        joined.current = false;
         setDays((shown) => [...shown, ...page.days.filter((d) => !shown.some((s) => s.local_date === d.local_date))]);
         setLoaded(fresh.length);
         setDone(page.done);
       } catch {
-        focusRetry.current = byPerson;
+        focusRetry.current = byPerson();
+        joined.current = false;
         setFailed(true);
       }
     });
