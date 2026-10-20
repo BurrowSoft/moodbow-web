@@ -22,7 +22,7 @@ const NOT_FOUND_PATH = `/${routing.defaultLocale}/_not-found-page`;
 
 // The Content-Security-Policy (lib/csp.ts), with a fresh nonce for every
 // page: on the request, where Next and the layout read it, and on every
-// response this proxy returns. Report-Only until "csp-enforced" is met.
+// response this proxy returns. Enforced once "csp-enforced" is met (Report-Only before).
 const CSP_HEADER = conditionMet("csp-enforced") ? "Content-Security-Policy" : "Content-Security-Policy-Report-Only";
 
 export default async function proxy(req: NextRequest) {

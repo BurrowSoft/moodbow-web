@@ -42,9 +42,17 @@ test.describe("home", () => {
     expect(notify!.x + notify!.width).toBeLessThanOrEqual(160);
   });
 
-  test("security headers: a per-request CSP nonce on every script (Report-Only for now), and Permissions-Policy (audit A1 + A2)", async ({ page, request }) => {
+  test("security headers: an enforced per-request CSP nonce on every script, no violations, and Permissions-Policy (audit A1 + A2)", async ({ page, request }) => {
+    // Enforced: anything the policy misses is blocked, so count violations.
+    await page.addInitScript(() => {
+      const w = window as unknown as { cspViolations: string[] };
+      w.cspViolations = [];
+      document.addEventListener("securitypolicyviolation", (e) => w.cspViolations.push(`${e.violatedDirective} ${e.blockedURI}`));
+    });
+    const violations = () => page.evaluate(() => (window as unknown as { cspViolations: string[] }).cspViolations);
     const res = await page.goto("/");
-    const csp = res!.headers()["content-security-policy-report-only"];
+    expect(res!.headers()["content-security-policy-report-only"]).toBeUndefined();
+    const csp = res!.headers()["content-security-policy"];
     expect(csp).toBeTruthy();
     const nonce = csp.match(/'nonce-([^']+)'/)?.[1];
     expect(nonce).toBeTruthy();
@@ -53,15 +61,19 @@ test.describe("home", () => {
     const scripts = await page.locator("script").evaluateAll((els) => els.map((e) => (e as HTMLScriptElement).nonce));
     expect(scripts.length).toBeGreaterThan(0);
     for (const n of scripts) expect(n).toBe(nonce);
+    await page.waitForLoadState("networkidle");
+    expect(await violations()).toEqual([]);
     // The 404 page too (rendered per request, not prerendered: Web Tester, #69).
     const missing = await page.goto("/this-page-does-not-exist");
     expect(missing!.status()).toBe(404);
-    const missingNonce = missing!.headers()["content-security-policy-report-only"].match(/'nonce-([^']+)'/)?.[1];
+    const missingNonce = missing!.headers()["content-security-policy"].match(/'nonce-([^']+)'/)?.[1];
     const missingScripts = await page.locator("script").evaluateAll((els) => els.map((e) => (e as HTMLScriptElement).nonce));
     expect(missingScripts.length).toBeGreaterThan(0);
     for (const n of missingScripts) expect(n).toBe(missingNonce);
+    await page.waitForLoadState("networkidle");
+    expect(await violations()).toEqual([]);
     // A fresh nonce per request.
-    const again = (await request.get("/")).headers()["content-security-policy-report-only"];
+    const again = (await request.get("/")).headers()["content-security-policy"];
     expect(again.match(/'nonce-([^']+)'/)?.[1]).not.toBe(nonce);
     const permissions = res!.headers()["permissions-policy"];
     expect(permissions).toContain("camera=()");

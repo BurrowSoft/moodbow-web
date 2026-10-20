@@ -72,7 +72,7 @@
     "what": "The daily reminder is in a RELEASED app build (local notification at the chosen time, skipped if that phone saw a check-in that day). Gates the Help article about reminders."
   },
   "csp-enforced": {
-    "met": false,
+    "met": true,
     "what": "The Content-Security-Policy (lib/csp.ts) is enforced instead of Report-Only. Flip only after a clean Preview run of every page (journal, share-card canvas, the OG route) with no violations reported to Sentry (reviewer's audit A1)."
   }
 }
