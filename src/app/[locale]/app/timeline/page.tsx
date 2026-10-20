@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 import { Link } from "@/i18n/navigation";
@@ -18,6 +18,7 @@ import { MonthCalendar } from "./MonthCalendar";
 import { TimelineViews } from "./TimelineViews";
 import { loadCalendarMonth } from "./calendarActions";
 import { monthOf } from "@/lib/journal/calendar";
+import { parseView, VIEW_COOKIE } from "@/lib/journal/timelineView";
 import { onThisDayDates, pickOnThisDay, type MomentRow, type OnThisDayKind } from "@/lib/journal/onThisDay";
 import { preview } from "@/lib/journal/entry";
 import { dateLine } from "@/lib/journal/today";
@@ -64,10 +65,12 @@ export default async function TimelinePage({ params, searchParams }: PageProps<"
   const filter = segment;
   const shareable = pageGate("share-cards") !== "hidden";
 
-  // Month calendar (1.1 M): List · Calendar, the calendar opening on this
-  // month (read here, so it draws at once). On this day stays above both.
+  // Month calendar (1.1 M): List · Calendar, the choice from its cookie so
+  // the chosen view paints first; this month is read here only for the
+  // calendar (it draws at once). On this day stays above both.
   const calendarLive = pageGate("calendar-live") !== "hidden";
-  const calendarInitial = calendarLive ? await loadCalendarMonth(monthOf(me.today)) : null;
+  const view = calendarLive ? parseView((await cookies()).get(VIEW_COOKIE)?.value) : "list";
+  const calendarInitial = view === "calendar" ? await loadCalendarMonth(monthOf(me.today)) : null;
 
   const onThisDayCard = onThisDay && (
     <OnThisDay
@@ -121,6 +124,7 @@ export default async function TimelinePage({ params, searchParams }: PageProps<"
         <>
           {onThisDayCard}
           <TimelineViews
+            initialView={view}
             list={list}
             calendar={
               <MonthCalendar today={me.today} dateLocaleTag={dateLocaleTag} initial={calendarInitial?.status === "ok" ? calendarInitial.days : null} shareable={shareable} />

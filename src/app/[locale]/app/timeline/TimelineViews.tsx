@@ -1,44 +1,26 @@
 "use client";
 
-import { useSyncExternalStore, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { segment } from "@/lib/ui/journalLayout";
+import { setViewCookie, type TimelineView } from "@/lib/journal/timelineView";
 
 // List · Calendar on the Timeline (1.1 M): a segment, the selected one in
-// rose; the choice is remembered on this device only (a convenience: if
-// storage is blocked it's List every time). Default List.
-
-export type TimelineView = "list" | "calendar";
-export const VIEW_KEY = "moodbow:timeline-view";
-
-const listeners = new Set<() => void>();
-function readView(): TimelineView {
-  try {
-    return window.localStorage.getItem(VIEW_KEY) === "calendar" ? "calendar" : "list";
-  } catch {
-    return "list";
-  }
-}
-function writeView(view: TimelineView) {
-  try {
-    window.localStorage.setItem(VIEW_KEY, view);
-  } catch {
-    // blocked storage: remembered for this page only
-    memory = view;
-  }
-  listeners.forEach((l) => l());
-}
-let memory: TimelineView | null = null;
-const subscribe = (l: () => void) => (listeners.add(l), () => listeners.delete(l));
-
-export function TimelineViews({ list, calendar }: { list: ReactNode; calendar: ReactNode }) {
+// rose. The choice is remembered on this device in a first-party cookie the
+// server reads (UX, option 1), so the chosen view is the first one painted
+// (no swap after hydration). Default List.
+export function TimelineViews({ initialView, list, calendar }: { initialView: TimelineView; list: ReactNode; calendar: ReactNode }) {
   const t = useTranslations("timeline");
-  const view = useSyncExternalStore(subscribe, () => memory ?? readView(), () => "list" as TimelineView);
+  const [view, setView] = useState(initialView);
+  const choose = (v: TimelineView) => {
+    setView(v);
+    setViewCookie(v);
+  };
   return (
     <>
       <div role="group" aria-label={t("timelineTitle")} className="mt-4 flex gap-2">
         {(["list", "calendar"] as const).map((v) => (
-          <button key={v} type="button" data-testid={`timeline-view-${v}`} aria-pressed={view === v} onClick={() => writeView(v)} className={segment(view === v)}>
+          <button key={v} type="button" data-testid={`timeline-view-${v}`} aria-pressed={view === v} onClick={() => choose(v)} className={segment(view === v)}>
             {t(v === "list" ? "timelineViewList" : "timelineViewCalendar")}
           </button>
         ))}
