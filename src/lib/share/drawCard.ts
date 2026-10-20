@@ -1,3 +1,4 @@
+import { preview } from "@/lib/journal/entry";
 import { CHART_STROKE, chartGeometry } from "./cards";
 import { bands, LAYOUT, LOGO_RATIO, THEMES, type CardFormat, type CardTheme } from "./moodbow";
 
@@ -79,7 +80,7 @@ export function drawCard(ctx: CanvasRenderingContext2D, c: CardContent): void {
 
   if (c.line.trim()) {
     ctx.font = font(400, L.line.size);
-    const lines = wrapLine(c.line.slice(0, L.line.maxChars), (s) => ctx.measureText(s).width, L.line.maxWidth, L.line.maxLines);
+    const lines = wrapLine(preview(c.line, L.line.maxChars),(s) => ctx.measureText(s).width, L.line.maxWidth, L.line.maxLines);
     lines.forEach((text, i) => centreText(text, L.line.top + i * Math.round(L.line.size * 1.3), 400, L.line.size, T.text));
   }
 

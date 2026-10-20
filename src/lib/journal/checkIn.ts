@@ -11,6 +11,8 @@ export const STRESS_LEVELS = [1, 2, 3, 4, 5] as const;
 // colour-map contract, in valueColours.ts.
 export { MOOD_COLOURS, MOOD_DOT_OUTLINE } from "./valueColours";
 export const SLEEP_HOURS = Array.from({ length: 29 }, (_, i) => i / 2); // 0, 0.5 … 14
+// Where the sleep stepper starts from empty (the app's sleepStart).
+export const SLEEP_START = 7;
 
 export type SleepQuality = (typeof SLEEP_QUALITIES)[number];
 

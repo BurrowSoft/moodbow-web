@@ -44,9 +44,15 @@ export const sameEntry = (row: Entry, input: Pick<EntryInput, "body" | "date" | 
 // The first `max` characters of a text as people see them (never half an
 // emoji or a split accent).
 export function preview(text: string, max = 240): string {
-  const graphemes = Array.from(new Intl.Segmenter(undefined, { granularity: "grapheme" }).segment(text), (s) => s.segment);
+  const graphemes = graphemesOf(text);
   return graphemes.length <= max ? text : graphemes.slice(0, max).join("");
 }
+
+const graphemesOf = (text: string) => Array.from(new Intl.Segmenter(undefined, { granularity: "grapheme" }).segment(text), (s) => s.segment);
+
+// How many characters a text has as people see them: an emoji or an accented
+// letter is one (the share line's limit, the same as the app; decision 206).
+export const graphemeCount = (text: string) => graphemesOf(text).length;
 
 // The RPC's error codes (supabase/contracts/errors.md) → what the editor does.
 export type EntryError = "dateInFuture" | "stale" | "tooLong" | "generic";

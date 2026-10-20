@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { promptFor, promptText } from "@/lib/journal/prompts";
 import { Dialog, dialogButton } from "@/components/Dialog";
 import { SafetyCard } from "@/components/SafetyCard";
+import { Switch } from "@/components/Switch";
 import { useRouter } from "@/i18n/navigation";
 import { withQuestion } from "@/lib/journal/answer";
 import { MAX_ENTRY_CHARS, sameEntry, type Entry } from "@/lib/journal/entry";
@@ -16,8 +17,9 @@ import { deleteEntry, getEntry, saveEntry, type DeleteState, type EntryState } f
 
 // The entry editor (M4): a full-page text area, a date (today or earlier)
 // and "Mark as a moment". A draft is autosaved in this browser, per user and
-// per entry, every couple of seconds; leaving with changes asks to keep or
-// discard it, and closing the tab gets the browser's own prompt (the draft
+// per entry, every couple of seconds; leaving with changes (Cancel or any
+// link in the page) asks to keep or discard it, and closing the tab gets
+// the browser's own prompt (the draft
 // is already saved). A save that meets a newer version from another device
 // asks which one to keep (decision 87).
 type Fields = { body: string; date: string; isMoment: boolean };
@@ -129,11 +131,9 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
 
   // The latest values for the unload handler and the autosave timer.
   const current = useRef<Draft>({ ...fields, id, base });
-  const dirtyRef = useRef(dirty);
   const keepRef = useRef(keep);
   useEffect(() => {
     current.current = { ...fields, id, base };
-    dirtyRef.current = dirty;
     keepRef.current = keep;
   });
   // Set once the text is saved, discarded or deleted: nothing left to keep.
@@ -190,17 +190,47 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
     return () => window.clearTimeout(timer);
   }, [fields, keep, draftKey, restore]);
 
+  // Closing or reloading the tab: the browser's own prompt (it can't show
+  // ours), only when there's something to keep (decision 206).
   useEffect(() => {
     if (!restore) return;
     const onUnload = (e: BeforeUnloadEvent) => {
-      if (!dirtyRef.current) return;
-      if (keepRef.current) writeDraft(draftKey, current.current);
+      if (!keepRef.current || finished.current) return;
+      writeDraft(draftKey, current.current);
       e.preventDefault();
       e.returnValue = "";
     };
     window.addEventListener("beforeunload", onUnload);
     return () => window.removeEventListener("beforeunload", onUnload);
   }, [draftKey, restore]);
+
+  // Every way out asks (decision 206): a link in the page (the tab bar, the
+  // Back chevron) is held before the router sees it, the leave dialog
+  // opens, and after Discard or Keep draft the same click is replayed on
+  // the same link, so it goes exactly where it would have.
+  const leaveVia = useRef<HTMLAnchorElement | null>(null);
+  const letThrough = useRef(false);
+  useEffect(() => {
+    if (!restore) return;
+    const onClick = (e: MouseEvent) => {
+      if (letThrough.current) {
+        letThrough.current = false;
+        return;
+      }
+      if (!keepRef.current || finished.current || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      const a = e.target instanceof Element ? e.target.closest("a[href]") : null;
+      if (!(a instanceof HTMLAnchorElement) || (a.target && a.target !== "_self") || a.hasAttribute("download")) return;
+      const url = new URL(a.href, window.location.href);
+      if (url.origin !== window.location.origin || (url.pathname === window.location.pathname && url.search === window.location.search)) return;
+      e.preventDefault();
+      e.stopPropagation();
+      leaveVia.current = a;
+      setDialog("leave");
+    };
+    // On window, in the capture phase: before React's own listeners.
+    window.addEventListener("click", onClick, true);
+    return () => window.removeEventListener("click", onClick, true);
+  }, [restore]);
 
   // Opened from the entry view: the caret goes where the text was clicked
   // (a draft may be shorter: then its end), or at the end, ready to write.
@@ -218,6 +248,17 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
   // later by Cancel (after a save the safety card kept us on the entry).
   const lastSaved = useRef<Entry | null>(null);
   const leave = useCallback(() => (onLeave ? onLeave(lastSaved.current) : router.push(backTo)), [router, backTo, onLeave]);
+  // After the leave dialog: on through the link that opened it, if any (and
+  // still there), else the editor's own way out.
+  const leaveOn = useCallback(() => {
+    const a = leaveVia.current;
+    leaveVia.current = null;
+    setDialog(null);
+    if (a?.isConnected) {
+      letThrough.current = true;
+      a.click();
+    } else leave();
+  }, [leave]);
   const closeSafety = useCallback(() => {
     setSafety("closed");
     // After the card's own focus restore (on its unmount): back into the entry.
@@ -295,7 +336,10 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
           ? tt("errGeneric")
           : null;
 
-  const closeDialog = useCallback(() => setDialog(null), []);
+  const closeDialog = useCallback(() => {
+    leaveVia.current = null;
+    setDialog(null);
+  }, []);
   const conflict = dialog && typeof dialog === "object" ? dialog.conflict : undefined;
 
   const showPrompt = !!promptDate && fields.date === promptDate && fields.body.trim() === "";
@@ -352,24 +396,16 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
         className="min-h-[50dvh] w-full flex-1 resize-none rounded-3xl border border-border bg-surface p-6 text-lg leading-relaxed text-text placeholder:text-muted"
       />
 
-      <div className="flex flex-wrap items-end gap-6">
-        <div className="flex flex-col gap-1">
-          <label className="flex min-h-11 items-center gap-3 font-medium text-text">
-            <input
-              type="checkbox"
-              data-testid="entry-moment"
-              checked={fields.isMoment}
-              onChange={(e) => setFields((f) => ({ ...f, isMoment: e.target.checked }))}
-              className="h-5 w-5 accent-[var(--color-accent)]"
-              aria-describedby="entry-moment-hint"
-            />
-            {t("entryMoment")}
-          </label>
-          <p id="entry-moment-hint" className="text-sm text-muted">
-            {t("entryMomentHint")}
-          </p>
-        </div>
-      </div>
+      {/* A switch with its hint under it, as the app (decision 206). */}
+      <Switch
+        checked={fields.isMoment}
+        onChange={(isMoment) => setFields((f) => ({ ...f, isMoment }))}
+        label={t("entryMoment")}
+        hint={t("entryMomentHint")}
+        hintId="entry-moment-hint"
+        testId="entry-moment"
+        className="flex max-w-md flex-col gap-1"
+      />
 
       {errorText && (
         <p id="entry-error" role="alert" data-testid="entry-error" className="font-medium text-accent">
@@ -386,7 +422,7 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
         >
           {t("entrySave")}
         </button>
-        <button type="button" data-testid="entry-cancel" onClick={() => (dirty ? setDialog("leave") : leave())} className={dialogButton()}>
+        <button type="button" data-testid="entry-cancel" onClick={() => (keep ? setDialog("leave") : leave())} className={dialogButton()}>
           {t("cancel")}
         </button>
         {initial && (
@@ -411,7 +447,7 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
               finished.current = true;
               removeDraft(draftKey);
               setFields(saved);
-              leave();
+              leaveOn();
             }}
           >
             {t("entryLeaveDiscard")}
@@ -419,17 +455,17 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
           <button
             type="button"
             data-testid="entry-keep-draft"
-            className={dialogButton(true)}
+            className={dialogButton()}
             onClick={() => {
               writeDraft(draftKey, current.current);
-              leave();
+              leaveOn();
             }}
           >
             {t("entryLeaveKeep")}
           </button>
-          {/* The safe choice, and where focus starts (initialFocus last;
-              decision 143): back to the text. */}
-          <button type="button" data-testid="entry-keep-editing" className={dialogButton()} onClick={closeDialog}>
+          {/* The safe choice, the filled default, and where focus starts
+              (initialFocus last; decisions 143, 206): back to the text. */}
+          <button type="button" data-testid="entry-keep-editing" className={dialogButton(true)} onClick={closeDialog}>
             {t("entryKeepEditing")}
           </button>
         </Dialog>

@@ -2,7 +2,7 @@
 
 import { startTransition, useActionState, useCallback, useEffect, useId, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { EXERCISE_MINUTES, MOODS, SLEEP_HOURS, SLEEP_QUALITIES, STRESS_LEVELS, type CheckIn, type SleepQuality } from "@/lib/journal/checkIn";
+import { EXERCISE_MINUTES, MOODS, SLEEP_HOURS, SLEEP_QUALITIES, SLEEP_START, STRESS_LEVELS, type CheckIn, type SleepQuality } from "@/lib/journal/checkIn";
 import { dateLine } from "@/lib/journal/today";
 import { valueHex } from "@/lib/journal/valueColours";
 import { localKey } from "@/lib/localData";
@@ -111,6 +111,17 @@ type Props = { initial: CheckIn | null; uid: string; date: string; dateLocaleTag
 // Never silent (decision 72): one notice per day, until dismissed.
 type Notice = { date: string; kind: "superseded" | "rejected" };
 type Notify = (notice: Notice) => void;
+
+// The sleep stepper's − and +: round icon buttons, ≥ 44 px targets.
+const STEP_BUTTON = "inline-flex h-11 w-11 items-center justify-center rounded-full text-accent hover:bg-pill";
+function StepIcon({ plus }: { plus: boolean }) {
+  return (
+    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="9" />
+      <path d={plus ? "M8 12h8M12 8v8" : "M8 12h8"} />
+    </svg>
+  );
+}
 
 export function CheckInCard(props: Props) {
   const t = useTranslations("today");
@@ -281,6 +292,15 @@ function Card({ initial, uid, date: cardDate, notify, announce, autoFocus }: Pro
   };
 
   const set = (patch: Partial<Fields>) => setFields((f) => ({ ...f, ...patch }));
+  // One step through SLEEP_HOURS (half an hour), stopping at both ends; from
+  // empty, either button starts at SLEEP_START (the app).
+  const stepSleep = (dir: 1 | -1) =>
+    setFields((f) => {
+      if (f.sleepHours === "") return { ...f, sleepHours: String(SLEEP_START) };
+      const at = SLEEP_HOURS.indexOf(Number(f.sleepHours));
+      const next = SLEEP_HOURS[Math.min(SLEEP_HOURS.length - 1, Math.max(0, (at < 0 ? SLEEP_HOURS.indexOf(SLEEP_START) : at) + dir))];
+      return { ...f, sleepHours: String(next) };
+    });
   const chip = (active: boolean) =>
     `inline-flex min-h-12 items-center justify-center gap-2 rounded-full border px-4 text-sm font-medium ${active ? "border-accent bg-pill text-accent" : "border-border text-text hover:bg-pill"}`;
   const errorKey = storageFailed
@@ -428,23 +448,38 @@ function Card({ initial, uid, date: cardDate, notify, announce, autoFocus }: Pro
             <legend className="text-sm font-medium text-text">
               {t("sleepTitle")} <span className="ml-2 font-normal text-muted">{t("optional")}</span>
             </legend>
-            <div className="mt-2 flex flex-wrap items-center gap-2">
-              <select
-                aria-label={t("sleepTitle")}
-                data-testid="checkin-sleep-hours"
-                value={fields.sleepHours}
-                onChange={(e) => set({ sleepHours: e.target.value })}
-                className="min-h-11 rounded-full border border-border bg-bg px-4 text-sm text-text"
+            {/* A stepper, as the app (decision 206): − value +, half an hour a
+                step, 0 to 14. Empty shows "–"; the first step either way
+                starts at 7. There's no way back to empty, the same as the
+                app. The value is spoken after each step. */}
+            <div className="mt-2 flex items-center gap-1">
+              <button
+                type="button"
+                data-testid="checkin-sleep-hours-minus"
+                aria-label={t("sleepLess")}
+                title={t("sleepLess")}
+                onClick={() => stepSleep(-1)}
+                className={STEP_BUTTON}
               >
-                <option value="">{t("optional")}</option>
-                {SLEEP_HOURS.map((h) => (
-                  <option key={h} value={String(h)}>
-                    {t("sleepHours", { hours: h })}
-                  </option>
-                ))}
-              </select>
-              {/* The chosen value's colour (decision 150): only once one is picked. */}
-              {fields.sleepHours !== "" && <ValueDot hex={valueHex("sleep_hours", fields.sleepHours)} testId="checkin-sleep-dot" />}
+                <StepIcon plus={false} />
+              </button>
+              <span data-testid="checkin-sleep-hours" aria-live="polite" className="inline-flex min-w-20 items-center justify-center gap-2 text-text">
+                {/* The chosen value's colour (decision 150): only once one is picked. */}
+                {fields.sleepHours !== "" && <ValueDot hex={valueHex("sleep_hours", fields.sleepHours)} testId="checkin-sleep-dot" />}
+                {fields.sleepHours === "" ? "–" : t("sleepHours", { hours: Number(fields.sleepHours) })}
+              </span>
+              <button
+                type="button"
+                data-testid="checkin-sleep-hours-plus"
+                aria-label={t("sleepMore")}
+                title={t("sleepMore")}
+                onClick={() => stepSleep(1)}
+                className={STEP_BUTTON}
+              >
+                <StepIcon plus />
+              </button>
+            </div>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
               {SLEEP_QUALITIES.map((q) => (
                 <button
                   key={q}

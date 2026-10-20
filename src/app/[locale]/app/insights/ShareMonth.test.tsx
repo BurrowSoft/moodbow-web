@@ -227,4 +227,20 @@ describe("ShareMonth for screen readers (decision 143)", () => {
     fireEvent.change(input, { target: { value: "x".repeat(80) } });
     expect(announce).toHaveTextContent("0 characters left");
   });
+
+  it("the limit counts characters as people see them: an emoji is one, and nothing is cut in half (decision 206)", async () => {
+    loadMonthCheckIns.mockResolvedValue({ status: "ok", checkIns: days(6) });
+    renderIt();
+    fireEvent.click(screen.getByTestId("share-open"));
+    const input = await screen.findByTestId("share-line");
+    expect(input).not.toHaveAttribute("maxlength");
+    fireEvent.change(input, { target: { value: "Calm 👨‍👩‍👧" } });
+    expect(screen.getByTestId("share-line-count")).toHaveTextContent("74 characters left");
+    fireEvent.change(input, { target: { value: "😊".repeat(81) } });
+    expect(input).toHaveValue("😊".repeat(80));
+    expect(screen.getByTestId("share-line-count")).toHaveTextContent("0 characters left");
+    // Square's limit is 60: the counter stops at 0, never below.
+    fireEvent.click(screen.getByTestId("share-format-square"));
+    expect(screen.getByTestId("share-line-count")).toHaveTextContent("0 characters left");
+  });
 });

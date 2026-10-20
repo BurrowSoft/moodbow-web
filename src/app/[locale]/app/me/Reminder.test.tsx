@@ -101,6 +101,38 @@ describe("Reminder: a failed save shows what the account has (decision 111)", ()
   });
 });
 
+describe("Reminder: a switch row that waits for its save (decision 206)", () => {
+  it("while the switch's save runs, the switch and the time wait; a second click sends nothing", async () => {
+    let answer: (v: unknown) => void = () => {};
+    saveReminder.mockImplementationOnce(() => new Promise((r) => (answer = r)));
+    renderIt(true, "21:00");
+    const sw = screen.getByRole("switch", { name: messages.me.meReminder });
+    fireEvent.click(sw);
+    await waitFor(() => expect(sw).toHaveAttribute("aria-disabled", "true"));
+    expect(screen.getByTestId("me-reminder-time")).toBeDisabled();
+    fireEvent.click(sw);
+    expect(saveReminder).toHaveBeenCalledTimes(1);
+    answer({ status: "saved", on: false, time: "21:00" });
+    await waitFor(() => expect(sw).not.toHaveAttribute("aria-disabled"));
+    expect(sw).not.toBeChecked();
+  });
+
+  it("a time saved on leaving the field doesn't block the switch", async () => {
+    let answer: (v: unknown) => void = () => {};
+    saveReminder.mockImplementationOnce(() => new Promise((r) => (answer = r)));
+    renderIt(true, "21:00");
+    const field = screen.getByTestId("me-reminder-time");
+    fireEvent.change(field, { target: { value: "06:45" } });
+    fireEvent.blur(field);
+    await waitFor(() => expect(saveReminder).toHaveBeenCalledTimes(1));
+    expect(screen.getByTestId("me-reminder-on")).not.toHaveAttribute("aria-disabled");
+    fireEvent.click(screen.getByTestId("me-reminder-on"));
+    answer({ status: "saved", on: true, time: "06:45" });
+    await waitFor(() => expect(saveReminder).toHaveBeenCalledTimes(2));
+    expect(sent(1)).toEqual({ reminder_on: "false", reminder_time: "06:45" });
+  });
+});
+
 describe("Reminder: a new time, then switching off before leaving the field (reviewer #19)", () => {
   it("sends the new time with the switch", async () => {
     renderIt(true, "21:00");

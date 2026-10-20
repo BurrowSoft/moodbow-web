@@ -202,6 +202,110 @@ describe("EntryEditor: editing", () => {
   });
 });
 
+describe("EntryEditor: every way out asks (decision 206)", () => {
+  // A link elsewhere in the page (the tab bar, the Back chevron). Its own
+  // listener stands in for the router: it sees the click only when let through.
+  const renderWithLink = (initial: Entry | null = null, href = "/app/timeline") => {
+    const view = render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <a href={href} data-testid="nav-link">
+          Timeline
+        </a>
+        <EntryEditor initial={initial} newId={initial?.id ?? NEW_ID} uid="u1" today="2026-10-02" />
+      </NextIntlClientProvider>,
+    );
+    const reached = vi.fn((e: Event) => e.preventDefault());
+    screen.getByTestId("nav-link").addEventListener("click", reached);
+    return { ...view, reached };
+  };
+
+  it("a link with unsaved text is held and asks; Keep editing stays, the link never sees the click", () => {
+    const { reached } = renderWithLink();
+    type("Half a thought");
+    fireEvent.click(screen.getByTestId("nav-link"));
+    expect(screen.getByRole("dialog", { name: m.entryLeaveTitle })).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId("entry-keep-editing"));
+    expect(screen.queryByTestId("entry-leave-dialog")).toBeNull();
+    expect(reached).not.toHaveBeenCalled();
+    expect(push).not.toHaveBeenCalled();
+  });
+
+  it("Keep draft keeps it and goes on through the same link (once), not to Today", () => {
+    const { reached } = renderWithLink();
+    type("Half a thought");
+    fireEvent.click(screen.getByTestId("nav-link"));
+    fireEvent.click(screen.getByTestId("entry-keep-draft"));
+    expect(stored(NEW_KEY)).toMatchObject({ body: "Half a thought" });
+    expect(reached).toHaveBeenCalledTimes(1);
+    expect(push).not.toHaveBeenCalled();
+  });
+
+  it("Discard drops it and goes on through the link", () => {
+    const { reached } = renderWithLink(ENTRY);
+    type("changed");
+    fireEvent.click(screen.getByTestId("nav-link"));
+    fireEvent.click(screen.getByTestId("entry-discard"));
+    expect(window.localStorage.getItem(EDIT_KEY)).toBeNull();
+    expect(reached).toHaveBeenCalledTimes(1);
+  });
+
+  it("nothing to keep, a new tab (Ctrl/⌘), or another site: the link just works", () => {
+    const { reached, unmount } = renderWithLink();
+    fireEvent.click(screen.getByTestId("nav-link"));
+    expect(reached).toHaveBeenCalledTimes(1);
+    type("Some text");
+    fireEvent.click(screen.getByTestId("nav-link"), { ctrlKey: true });
+    fireEvent.click(screen.getByTestId("nav-link"), { metaKey: true });
+    expect(reached).toHaveBeenCalledTimes(3);
+    expect(screen.queryByTestId("entry-leave-dialog")).toBeNull();
+    unmount();
+    const other = renderWithLink(null, "https://example.org/");
+    type("Some text");
+    fireEvent.click(screen.getByTestId("nav-link"));
+    expect(other.reached).toHaveBeenCalledTimes(1);
+    expect(screen.queryByTestId("entry-leave-dialog")).toBeNull();
+  });
+
+  it("a new entry with only the date or moment changed has nothing to keep: no dialog, no browser prompt", () => {
+    renderEditor();
+    fireEvent.change(screen.getByTestId("entry-date"), { target: { value: "2026-09-20" } });
+    fireEvent.click(screen.getByTestId("entry-moment"));
+    const event = new Event("beforeunload", { cancelable: true });
+    window.dispatchEvent(event);
+    expect(event.defaultPrevented).toBe(false);
+    fireEvent.click(screen.getByTestId("entry-cancel"));
+    expect(screen.queryByTestId("entry-leave-dialog")).toBeNull();
+    expect(push).toHaveBeenCalledWith("/app");
+  });
+
+  it("an existing entry with only the moment changed asks", () => {
+    renderEditor(ENTRY);
+    fireEvent.click(screen.getByTestId("entry-moment"));
+    fireEvent.click(screen.getByTestId("entry-cancel"));
+    expect(screen.getByTestId("entry-leave-dialog")).toBeInTheDocument();
+  });
+
+  it("Keep editing is the filled default; Discard and Keep draft are outlined", () => {
+    renderEditor();
+    type("x");
+    fireEvent.click(screen.getByTestId("entry-cancel"));
+    expect(screen.getByTestId("entry-keep-editing")).toHaveClass("bg-accent");
+    expect(screen.getByTestId("entry-keep-draft")).not.toHaveClass("bg-accent");
+    expect(screen.getByTestId("entry-discard")).not.toHaveClass("bg-accent");
+  });
+});
+
+describe("EntryEditor: Mark as a moment is a switch (decision 206)", () => {
+  it("named by its label, described by its hint, and its state is exposed", () => {
+    renderEditor();
+    const sw = screen.getByRole("switch", { name: m.entryMoment });
+    expect(sw).toHaveAccessibleDescription(m.entryMomentHint);
+    expect(sw).toHaveAttribute("aria-checked", "false");
+    fireEvent.click(sw);
+    expect(sw).toHaveAttribute("aria-checked", "true");
+  });
+});
+
 describe("EntryEditor: changed on another device (decision 87)", () => {
   const OTHER = { ...ENTRY, body: "Their version", updated_at: "2026-10-02T08:00:00Z" };
 

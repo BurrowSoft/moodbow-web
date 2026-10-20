@@ -48,7 +48,9 @@ describe("CheckInCard", () => {
     saveCheckIn.mockResolvedValue({ status: "saved", checkIn: ROW });
     renderCard(null);
     fireEvent.click(screen.getByTestId("checkin-mood-4"));
-    fireEvent.change(screen.getByTestId("checkin-sleep-hours"), { target: { value: "7.5" } });
+    // 7 (the start), then 7.5.
+    fireEvent.click(screen.getByTestId("checkin-sleep-hours-plus"));
+    fireEvent.click(screen.getByTestId("checkin-sleep-hours-plus"));
     fireEvent.click(screen.getByTestId("checkin-sleep-quality-good"));
     fireEvent.click(screen.getByTestId("checkin-exercise-30"));
     fireEvent.click(screen.getByTestId("checkin-stress-2"));
@@ -472,8 +474,51 @@ describe("CheckInCard: value colours (decision 150)", () => {
     expect(screen.queryByTestId("checkin-exercise-dot")).toBeNull();
     fireEvent.click(screen.getByTestId("checkin-exercise-30"));
     expect(screen.getByTestId("checkin-exercise-dot")).toHaveAttribute("data-value-colour", "#F3C24F");
-    fireEvent.change(screen.getByTestId("checkin-sleep-hours"), { target: { value: "5.5" } });
+    // 7, 6.5, 6, 5.5.
+    for (let i = 0; i < 4; i++) fireEvent.click(screen.getByTestId("checkin-sleep-hours-minus"));
+    expect(screen.getByTestId("checkin-sleep-hours")).toHaveTextContent("5.5 h");
     expect(screen.getByTestId("checkin-sleep-dot")).toHaveAttribute("data-value-colour", "#A99BD1");
+  });
+});
+
+describe("CheckInCard: sleep hours as a stepper (decision 206, the app's)", () => {
+  const open = (row: Parameters<typeof renderCard>[0] = null) => {
+    renderCard(row);
+    if (row) fireEvent.click(screen.getByTestId("checkin-edit"));
+    else fireEvent.click(screen.getByTestId("checkin-mood-3"));
+  };
+  const value = () => screen.getByTestId("checkin-sleep-hours");
+
+  it("empty shows a dash and no dot; the first step either way starts at 7", () => {
+    open();
+    expect(value()).toHaveTextContent("–");
+    expect(screen.queryByTestId("checkin-sleep-dot")).toBeNull();
+    fireEvent.click(screen.getByTestId("checkin-sleep-hours-minus"));
+    expect(value()).toHaveTextContent("7 h");
+    expect(screen.getByTestId("checkin-sleep-dot")).toBeInTheDocument();
+    cleanup();
+    open();
+    fireEvent.click(screen.getByTestId("checkin-sleep-hours-plus"));
+    expect(value()).toHaveTextContent("7 h");
+  });
+
+  it("half an hour a step, stopping at 0 and at 14", () => {
+    open({ ...ROW, sleep_hours: 0.5 });
+    fireEvent.click(screen.getByTestId("checkin-sleep-hours-minus"));
+    fireEvent.click(screen.getByTestId("checkin-sleep-hours-minus"));
+    expect(value()).toHaveTextContent("0 h");
+    cleanup();
+    open({ ...ROW, sleep_hours: 13.5 });
+    fireEvent.click(screen.getByTestId("checkin-sleep-hours-plus"));
+    fireEvent.click(screen.getByTestId("checkin-sleep-hours-plus"));
+    expect(value()).toHaveTextContent("14 h");
+  });
+
+  it("two buttons with their own names (a11y H2), and the value is spoken after each step", () => {
+    open();
+    expect(screen.getByRole("button", { name: messages.today.sleepLess })).toBe(screen.getByTestId("checkin-sleep-hours-minus"));
+    expect(screen.getByRole("button", { name: messages.today.sleepMore })).toBe(screen.getByTestId("checkin-sleep-hours-plus"));
+    expect(value()).toHaveAttribute("aria-live", "polite");
   });
 });
 

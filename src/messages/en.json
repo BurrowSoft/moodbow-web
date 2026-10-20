@@ -212,6 +212,8 @@
     "mood5": "Great",
     "sleepTitle": "Sleep last night",
     "sleepHours": "{hours} h",
+    "sleepLess": "Less sleep",
+    "sleepMore": "More sleep",
     "sleepPoor": "Poor",
     "sleepOkay": "Okay",
     "sleepGood": "Good",

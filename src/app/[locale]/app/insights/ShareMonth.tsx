@@ -9,6 +9,7 @@ import { stripPngMetadata } from "@/lib/share/pngChunks";
 import { cardFileName, formatMonth, LAYOUT, MIN_CHECK_INS, monthBands, THEMES, type CardFormat, type CardTheme } from "@/lib/share/moodbow";
 import { MILESTONE_TITLE_SIZE, type Milestone } from "@/lib/share/cards";
 import { MIN_POINTS, type Range } from "@/lib/journal/insights";
+import { graphemeCount, preview } from "@/lib/journal/entry";
 import { loadMonthCheckIns, loadYearCheckIns } from "./shareActions";
 import { YEAR_MIN_MONTHS, yearBands, yearFileName } from "@/lib/share/year";
 import type { MonthCheckIn } from "@/lib/share/moodbow";
@@ -122,6 +123,9 @@ export function ShareMonth({
 
   const enough = colours !== null && colours.length >= MIN_CHECK_INS;
   const maxChars = LAYOUT[format].line.maxChars;
+  // Characters left, as people see them; never below 0 after a switch to the
+  // shorter square limit (the card draws only the first maxChars).
+  const left = Math.max(0, maxChars - graphemeCount(line));
   // What the chosen card shows: its title, its count line, its colours (the
   // chart card draws the line instead), and the file's name.
   const chartPoints = chart ? chart.moods.filter((m) => m !== null).length : 0;
@@ -290,18 +294,19 @@ export function ShareMonth({
                   id="share-line"
                   data-testid="share-line"
                   value={line}
-                  maxLength={maxChars}
-                  onChange={(e) => setLine(e.target.value.slice(0, maxChars))}
+                  // The limit counts characters as people see them (an emoji
+                  // is one), so no maxLength: it counts code units (decision 206).
+                  onChange={(e) => setLine(preview(e.target.value, maxChars))}
                   aria-describedby="share-line-count"
                   className="block w-full rounded-2xl border border-border bg-bg px-4 py-3 text-text"
                 />
                 {/* Shown always; announced only at 10 left and at 0, not on
                     every key (decision 143). */}
                 <p id="share-line-count" data-testid="share-line-count" className="text-sm text-muted">
-                  {t("shareLineCount", { count: maxChars - line.length })}
+                  {t("shareLineCount", { count: left })}
                 </p>
                 <p role="status" className="sr-only" data-testid="share-line-count-announce">
-                  {maxChars - line.length === 10 || maxChars - line.length === 0 ? t("shareLineCount", { count: maxChars - line.length }) : null}
+                  {left === 10 || left === 0 ? t("shareLineCount", { count: left }) : null}
                 </p>
                 <p className="text-sm text-muted">{t("sharePrivacyNote")}</p>
                 {encodeFailed && (
