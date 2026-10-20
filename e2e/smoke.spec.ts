@@ -56,7 +56,7 @@ test.describe("home", () => {
   });
 
   test("the og image and icons are served", async ({ request }) => {
-    for (const path of ["/og-image.png", "/favicon.ico", "/favicon.svg", "/apple-touch-icon.png", "/manifest.webmanifest"]) {
+    for (const path of ["/og-image.png", "/og-launch.png", "/favicon.ico", "/favicon.svg", "/apple-touch-icon.png", "/manifest.webmanifest"]) {
       expect((await request.get(path)).status(), path).toBe(200);
     }
   });
