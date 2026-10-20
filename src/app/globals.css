@@ -151,11 +151,6 @@ body {
   outline-offset: 3px;
 }
 
-@keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
 /* The home page's moodbow: each band draws from one end to the other
    (pathLength 1), staggered by its own animation-delay; "backwards" holds
    it undrawn until its turn. Reduced motion: no animation, already drawn. */
@@ -175,19 +170,9 @@ body {
   }
 }
 
-.fade-in {
-  animation: fade-in 400ms ease-out both;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .fade-in { animation: none; }
-}
-
-/* Today's milestone offer (decision 186): slides up from below; it's fixed,
-   and a transform, so it moves nothing else. Reduced motion: just appears. */
 /* Room at the page's very end while the milestone card floats: its height
-   above the tab bar on phones (to ~15rem), above the corner on wide screens. */
-/* The body is a min-h-dvh flex column with border-box sizing: on a short page
+   above the tab bar on phones (to ~15rem), above the corner on wide screens.
+   The body is a min-h-dvh flex column with border-box sizing: on a short page
    the padding would come out of that minimum and pull the footer up, so the
    minimum grows by the same amount (reviewer #82). Unlayered: beats min-h-dvh. */
 .has-floating-card { padding-bottom: 15rem; min-height: calc(100dvh + 15rem); }
@@ -195,6 +180,8 @@ body {
   .has-floating-card { padding-bottom: 12rem; min-height: calc(100dvh + 12rem); }
 }
 
+/* Today's milestone offer (decision 186): slides up from below; it's fixed,
+   and a transform, so it moves nothing else. Reduced motion: just appears. */
 @keyframes milestone-in {
   from { transform: translateY(1.5rem); opacity: 0; }
   to { transform: none; opacity: 1; }

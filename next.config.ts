@@ -75,4 +75,13 @@ export default withSentryConfig(withNextIntl(nextConfig), {
   telemetry: false,
   widenClientFileUpload: true,
   sourcemaps: { deleteSourcemapsAfterUpload: true },
+  // Leave out what we never use (perf fix 1): tracing (tracesSampleRate is
+  // 0), debug logging, and the Session Replay pieces (no Replay).
+  bundleSizeOptimizations: {
+    excludeTracing: true,
+    excludeDebugStatements: true,
+    excludeReplayIframe: true,
+    excludeReplayShadowDom: true,
+    excludeReplayWorker: true,
+  },
 });

@@ -6,8 +6,8 @@ import messages from "@/messages/en.json";
 // The sheet itself is ShareMonth's (tested there); here, a stand-in that
 // shows what it was given and calls onOpen like the real one.
 vi.mock("./insights/ShareMonth", () => ({
-  ShareMonth: (p: { initialType?: string; milestone?: { n: number }; onOpen?: () => void; testId?: string }) => (
-    <button type="button" data-testid={p.testId} data-type={p.initialType} data-n={p.milestone?.n} onClick={() => p.onOpen?.()} />
+  ShareMonth: (p: { initialType?: string; milestone?: { n: number }; year?: number | null; onOpen?: () => void; testId?: string }) => (
+    <button type="button" data-testid={p.testId} data-type={p.initialType} data-n={p.milestone?.n} data-year={p.year ?? ""} onClick={() => p.onOpen?.()} />
   ),
 }));
 const { MilestoneCard } = await import("./MilestoneCard");
@@ -52,6 +52,15 @@ describe("MilestoneCard (decision 169)", () => {
     expect(window.localStorage.getItem(KEY)).toBe("1");
     // The live region stays (empty), so it's never re-announced.
     expect(screen.getByRole("status")).toBeEmptyDOMElement();
+  });
+
+  it("passes the year on offer to the sheet (the Year card from Today too; reviewer #84)", () => {
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <MilestoneCard n={30} colours={["#000000"]} uid={UID} month="2026-12" dateLocaleTag="en-US" year={2026} />
+      </NextIntlClientProvider>,
+    );
+    expect(screen.getByTestId("milestone-share")).toHaveAttribute("data-year", "2026");
   });
 
   it("'Not now' hides it and remembers, for that person and milestone", () => {

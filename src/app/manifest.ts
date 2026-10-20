@@ -1,9 +1,12 @@
 import type { MetadataRoute } from "next";
 import { getTranslations } from "next-intl/server";
 import { routing } from "@/i18n/routing";
+import { liveStores, PLAY_PACKAGE, PLAY_URL } from "@/lib/stores";
 
 // Carried over from the Flutter site's web/manifest.json. The manifest has
-// one language: the default locale's.
+// one language: the default locale's. Once the Play listing is live
+// (play-live, decision 185) it names the app too; prefer_related_applications
+// stays false: the web journal is a full product on its own (UX).
 export default async function manifest(): Promise<MetadataRoute.Manifest> {
   const t = await getTranslations({ locale: routing.defaultLocale, namespace: "meta" });
   return {
@@ -20,5 +23,8 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
       { src: "/icons/Icon-maskable-192.png", sizes: "192x192", type: "image/png", purpose: "maskable" },
       { src: "/icons/Icon-maskable-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
     ],
+    ...(liveStores().play
+      ? { related_applications: [{ platform: "play", url: PLAY_URL, id: PLAY_PACKAGE }], prefer_related_applications: false }
+      : {}),
   };
 }

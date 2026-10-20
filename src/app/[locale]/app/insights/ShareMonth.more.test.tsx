@@ -8,7 +8,8 @@ import type { ComponentProps } from "react";
 // The 1.1 cards (decision 169): the type switch, what each card draws and
 // the file it saves. ShareMonth.test.tsx covers the moodbow card itself.
 const loadMonthCheckIns = vi.fn();
-vi.mock("./shareActions", () => ({ loadMonthCheckIns: (...a: unknown[]) => loadMonthCheckIns(...a) }));
+const loadYearCheckIns = vi.fn();
+vi.mock("./shareActions", () => ({ loadMonthCheckIns: (...a: unknown[]) => loadMonthCheckIns(...a), loadYearCheckIns: (...a: unknown[]) => loadYearCheckIns(...a) }));
 const drawCard = vi.fn();
 vi.mock("@/lib/share/drawCard", () => ({ drawCard: (...a: unknown[]) => drawCard(...a) }));
 const { ShareMonth } = await import("./ShareMonth");
@@ -132,5 +133,45 @@ describe("ShareMonth: the 1.1 cards", () => {
     renderIt({ chart, initialType: "milestone" });
     fireEvent.click(screen.getByTestId("share-open"));
     expect(await screen.findByTestId("share-type-moodbow")).toHaveAttribute("aria-pressed", "true");
+  });
+});
+
+describe("ShareMonth: My year's moodbow (1.1 J, decision 184)", () => {
+  // Five check-ins a month, all mood 4, for the given months of 2026.
+  const yearOf = (months: number[]) =>
+    months.flatMap((m) => Array.from({ length: 5 }, (_, i) => ({ local_date: `2026-${String(m).padStart(2, "0")}-${String(i + 1).padStart(2, "0")}`, mood: 4 })));
+
+  it("a year with ≥ 3 coloured months: the Year type; 12 bands, the title, the year's days, moodbow-2026.png", async () => {
+    loadYearCheckIns.mockResolvedValue({ status: "ok", checkIns: yearOf([1, 5, 9]) });
+    renderIt({ year: 2026 });
+    fireEvent.click(screen.getByTestId("share-open"));
+    expect(loadYearCheckIns).toHaveBeenCalledWith(2026);
+    fireEvent.click(await screen.findByTestId("share-type-year"));
+    expect(screen.getByTestId("share-type-year")).toHaveTextContent(m.shareYear);
+    await download();
+    const drawn = lastDraw();
+    expect(drawn).toMatchObject({ monthLabel: "My 2026 in colour", daysLabel: "15 days journaled" });
+    expect(drawn.colours).toHaveLength(12);
+    expect(drawn.colours[0]).toBe(MOOD_HEX[3]);
+    expect(names).toEqual(["moodbow-2026.png"]);
+  });
+
+  it("fewer than 3 coloured months, no year on offer, or a failed read: no Year type", async () => {
+    loadYearCheckIns.mockResolvedValue({ status: "ok", checkIns: yearOf([1, 2]) });
+    renderIt({ year: 2026 });
+    fireEvent.click(screen.getByTestId("share-open"));
+    await screen.findByTestId("share-type-moodbow");
+    expect(screen.queryByTestId("share-type-year")).toBeNull();
+    cleanup();
+    loadYearCheckIns.mockClear();
+    renderIt();
+    fireEvent.click(screen.getByTestId("share-open"));
+    expect(loadYearCheckIns).not.toHaveBeenCalled();
+    cleanup();
+    loadYearCheckIns.mockResolvedValue({ status: "error" });
+    renderIt({ year: 2026 });
+    fireEvent.click(screen.getByTestId("share-open"));
+    await screen.findByTestId("share-type-moodbow");
+    expect(screen.queryByTestId("share-type-year")).toBeNull();
   });
 });

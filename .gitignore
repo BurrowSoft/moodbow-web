@@ -11,6 +11,7 @@ next-env.d.ts
 /coverage/
 /test-results/
 /playwright-report/
+/perf-results.json
 /blob-report/
 /playwright/.cache/
 

@@ -7,6 +7,7 @@ import type { Locale } from "@/i18n/routing";
 import { JournalUnavailable } from "@/components/JournalUnavailable";
 import { isRange, previousRangeStart, rangeDays, series, type InsightRow, type Range } from "@/lib/journal/insights";
 import { loadMilestone } from "@/lib/share/milestoneData";
+import { yearOnOffer } from "@/lib/share/year";
 import { canReflect } from "@/lib/journal/ai";
 import { lastWeekStart, parseReportBody, type WeeklyReport as Report } from "@/lib/journal/report";
 import { getMe } from "@/lib/journal/me";
@@ -54,6 +55,7 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
         dateLocaleTag={dateLocaleTag}
         chart={more ? { range, moods: series(rows, rangeDays(me.today, range), "mood") } : undefined}
         milestone={more ? await loadMilestone(supabase) : undefined}
+        year={pageGate("year-card") !== "hidden" ? yearOnOffer(me.today) : null}
       />
     ) : null;
   // Your week (1.1 D): the last complete week's report, where AI is on for
