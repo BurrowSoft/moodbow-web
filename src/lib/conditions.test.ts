@@ -14,6 +14,14 @@ describe("conditions", () => {
     }
   });
 
+  // A flip that depends on another: the keyboard shortcuts' Help article
+  // (1.1 O) mentions "/" for search without its own gate, so shortcuts-live
+  // never goes live before search-live (UX).
+  it("shortcuts-live only once search-live is met", () => {
+    const met = (id: string) => (conditions as Record<string, { met: boolean }>)[id]?.met === true;
+    expect(!met("shortcuts-live") || met("search-live")).toBe(true);
+  });
+
   // Pinned: flipping any of these is its own reviewed PR (text = enforcement).
   it("nothing is live yet", () => {
     expect(conditionMet("privacy-text-approved")).toBe(false);

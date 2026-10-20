@@ -77,7 +77,7 @@
   },
   "shortcuts-live": {
     "met": false,
-    "what": "1.1 O web keyboard shortcuts (decision 200, specs/1.1-features.md §O) are tested on the web: then the shortcuts, the ? list and the Me → Appearance switch (WCAG 2.1.4) are on for Production, with their Help mention. Shown on Previews before that."
+    "what": "1.1 O web keyboard shortcuts (decision 200, specs/1.1-features.md §O) are tested on the web: then the shortcuts, the ? list and the Me → Appearance switch (WCAG 2.1.4) are on for Production, with their Help article (keyboard-shortcuts.md). Never before search-live: the article mentions \"/\" for search (UX; conditions.test enforces it). Shown on Previews before that."
   },
   "csp-enforced": {
     "met": true,
