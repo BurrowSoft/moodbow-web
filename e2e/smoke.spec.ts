@@ -37,6 +37,13 @@ test.describe("home", () => {
     const scripts = await page.locator("script").evaluateAll((els) => els.map((e) => (e as HTMLScriptElement).nonce));
     expect(scripts.length).toBeGreaterThan(0);
     for (const n of scripts) expect(n).toBe(nonce);
+    // The 404 page too (rendered per request, not prerendered: Web Tester, #69).
+    const missing = await page.goto("/this-page-does-not-exist");
+    expect(missing!.status()).toBe(404);
+    const missingNonce = missing!.headers()["content-security-policy-report-only"].match(/'nonce-([^']+)'/)?.[1];
+    const missingScripts = await page.locator("script").evaluateAll((els) => els.map((e) => (e as HTMLScriptElement).nonce));
+    expect(missingScripts.length).toBeGreaterThan(0);
+    for (const n of missingScripts) expect(n).toBe(missingNonce);
     // A fresh nonce per request.
     const again = (await request.get("/")).headers()["content-security-policy-report-only"];
     expect(again.match(/'nonce-([^']+)'/)?.[1]).not.toBe(nonce);
