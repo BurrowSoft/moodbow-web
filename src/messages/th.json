@@ -347,7 +347,14 @@
     "dayAddCheckin": "เพิ่มการบันทึกอารมณ์",
     "dayAddEntry": "เพิ่มบันทึก",
     "timelineLoadMore": "แสดงวันเพิ่มเติม",
-    "timelineLoadedMore": "โหลดเพิ่มอีก {count} วัน"
+    "timelineLoadedMore": "โหลดเพิ่มอีก {count} วัน",
+    "searchLabel": "ค้นหาในไดอารี่ของคุณ",
+    "searchOpen": "ค้นหา",
+    "searchClose": "ปิดการค้นหา",
+    "searchHint": "ค้นหาคำที่คุณเคยเขียน",
+    "searchEmpty": "ไม่พบผลลัพธ์สำหรับ \"{q}\"",
+    "searchMore": "แสดง 50 รายการล่าสุด",
+    "searchResultsCount": "{n} บันทึก"
   },
   "insights": {
     "insightsTitle": "ข้อมูลเชิงลึก",

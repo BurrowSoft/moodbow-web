@@ -14,6 +14,7 @@ import { loadTimeline } from "./actions";
 import { segment } from "@/lib/ui/journalLayout";
 import { TimelineList } from "./TimelineList";
 import { OnThisDay } from "./OnThisDay";
+import { TimelineSearch } from "./TimelineSearch";
 import { onThisDayDates, pickOnThisDay, type MomentRow, type OnThisDayKind } from "@/lib/journal/onThisDay";
 import { preview } from "@/lib/journal/entry";
 import { dateLine } from "@/lib/journal/today";
@@ -58,6 +59,32 @@ export default async function TimelinePage({ params, searchParams }: PageProps<"
     }
   }
   const filter = segment;
+  // Search (1.1 L), when shown, replaces this while it's open.
+  const body = (
+    <>
+      {onThisDay && (
+        <OnThisDay
+          kind={onThisDay.kind}
+          entryId={onThisDay.entry.id}
+          dateLabel={dateLine(onThisDay.entry.entry_date, dateLocaleTag)}
+          preview={preview(onThisDay.entry.body)}
+          mood={onThisDay.mood}
+          uid={user.id}
+          today={me.today}
+        />
+      )}
+      {/* Keyed by the view, so switching filters starts a fresh list. */}
+      <TimelineList
+        key={momentsOnly ? "moments" : "all"}
+        initial={page.days}
+        initialDone={page.done}
+        momentsOnly={momentsOnly}
+        dateLocaleTag={dateLocaleTag}
+        shareable={pageGate("share-cards") !== "hidden"}
+        year={pageGate("year-card") !== "hidden" ? yearOnOffer(me.today) : null}
+      />
+    </>
+  );
 
   return (
     <section>
@@ -80,27 +107,7 @@ export default async function TimelinePage({ params, searchParams }: PageProps<"
           </Link>
         </nav>
       )}
-      {onThisDay && (
-        <OnThisDay
-          kind={onThisDay.kind}
-          entryId={onThisDay.entry.id}
-          dateLabel={dateLine(onThisDay.entry.entry_date, dateLocaleTag)}
-          preview={preview(onThisDay.entry.body)}
-          mood={onThisDay.mood}
-          uid={user.id}
-          today={me.today}
-        />
-      )}
-      {/* Keyed by the view, so switching filters starts a fresh list. */}
-      <TimelineList
-        key={momentsOnly ? "moments" : "all"}
-        initial={page.days}
-        initialDone={page.done}
-        momentsOnly={momentsOnly}
-        dateLocaleTag={dateLocaleTag}
-        shareable={pageGate("share-cards") !== "hidden"}
-        year={pageGate("year-card") !== "hidden" ? yearOnOffer(me.today) : null}
-      />
+      {pageGate("search-live") !== "hidden" ? <TimelineSearch dateLocaleTag={dateLocaleTag}>{body}</TimelineSearch> : body}
     </section>
   );
 }
