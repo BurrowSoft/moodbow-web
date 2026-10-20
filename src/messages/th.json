@@ -213,6 +213,8 @@
     "mood5": "ดีมาก",
     "sleepTitle": "การนอนเมื่อคืน",
     "sleepHours": "{hours} ชม.",
+    "sleepLess": "นอนน้อยลง",
+    "sleepMore": "นอนมากขึ้น",
     "sleepPoor": "ไม่ดี",
     "sleepOkay": "พอใช้",
     "sleepGood": "ดี",

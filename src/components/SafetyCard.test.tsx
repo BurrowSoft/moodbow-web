@@ -61,6 +61,12 @@ describe("SafetyCard", () => {
     expect(onClose).toHaveBeenCalledTimes(2);
   });
 
+  it("Close is the secondary (outline) button, not the accent fill (decision 206)", () => {
+    wrap(<SafetyCard country="GB" onClose={() => {}} />);
+    expect(screen.getByTestId("safety-close")).toHaveClass("border");
+    expect(screen.getByTestId("safety-close")).not.toHaveClass("bg-accent");
+  });
+
   it("Get help now opens it, and closing it returns focus to the button", () => {
     wrap(<GetHelpNow country="GB" testId="me-get-help" />);
     const button = screen.getByTestId("me-get-help");

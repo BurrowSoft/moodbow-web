@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { readShortcutsOn, shortcutFor, SHORTCUTS } from "@/lib/shortcuts";
 import { requestArrival } from "@/lib/ui/arrival";
+import { leaveThen } from "@/lib/ui/leaveGuard";
 
 // Web keyboard shortcuts (1.1 O, decision 200), for the whole journal:
 // n new entry, c Today's check-in, t Timeline, i Insights, / Timeline search
@@ -29,16 +30,23 @@ export function KeyboardShortcuts({ search }: { search: boolean }) {
       if (action === "help") {
         opener.current = document.activeElement;
         setOpen(true);
-      } else if (action === "new") router.push("/app/write");
-      else if (action === "timeline") router.push("/app/timeline");
-      else if (action === "insights") router.push("/app/insights");
-      else if (action === "checkIn") {
-        requestArrival("checkIn");
-        if (pathname !== "/app") router.push("/app");
-      } else if (action === "search") {
-        requestArrival("search");
-        if (pathname !== "/app/timeline") router.push("/app/timeline");
+        return;
       }
+      // Every way out asks first where there's unsaved text (the entry
+      // editor's leave dialog; decision 206): the arrival too, so Keep
+      // editing leaves none waiting.
+      leaveThen(() => {
+        if (action === "new") router.push("/app/write");
+        else if (action === "timeline") router.push("/app/timeline");
+        else if (action === "insights") router.push("/app/insights");
+        else if (action === "checkIn") {
+          requestArrival("checkIn");
+          if (pathname !== "/app") router.push("/app");
+        } else if (action === "search") {
+          requestArrival("search");
+          if (pathname !== "/app/timeline") router.push("/app/timeline");
+        }
+      });
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);

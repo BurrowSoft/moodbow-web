@@ -2,6 +2,7 @@
 
 import { startTransition, useActionState, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
+import { Switch } from "@/components/Switch";
 import { saveReminder, type ReminderState } from "./actions";
 
 // Me → Daily reminder (M7): on/off and the time, saved as soon as either
@@ -37,7 +38,13 @@ export function Reminder({ on: initialOn, time: initialTime }: { on: boolean; ti
     return result;
   }, { status: "idle" });
 
-  const save = (nextOn: boolean, nextTime: string) => {
+  // Only a save the switch started makes the controls wait: a time saved on
+  // leaving the field must not swallow the switch click that moved focus
+  // (the click sends the time with it; reviewer #19).
+  const [fromSwitch, setFromSwitch] = useState(false);
+  const busy = pending && fromSwitch;
+  const save = (nextOn: boolean, nextTime: string, bySwitch = false) => {
+    setFromSwitch(bySwitch);
     sentTime.current = nextTime;
     const form = new FormData();
     form.set("reminder_on", String(nextOn));
@@ -50,20 +57,19 @@ export function Reminder({ on: initialOn, time: initialTime }: { on: boolean; ti
       <h2 id="me-reminder" className="text-lg font-medium text-text">
         {t("meReminder")}
       </h2>
-      <label className="mt-4 flex min-h-11 items-center justify-between gap-4 text-text">
-        <span>{t("meReminder")}</span>
-        <input
-          type="checkbox"
-          role="switch"
-          data-testid="me-reminder-on"
-          checked={on}
-          onChange={(e) => {
-            setOn(e.target.checked);
-            save(e.target.checked, time);
-          }}
-          className="h-6 w-6 accent-[var(--color-accent)]"
-        />
-      </label>
+      {/* While a save runs, the switch and the time wait for it (the app,
+          decision 206); a failure puts both back (decision 111). */}
+      <Switch
+        checked={on}
+        busy={busy}
+        onChange={(next) => {
+          setOn(next);
+          save(next, time, true);
+        }}
+        label={t("meReminder")}
+        testId="me-reminder-on"
+        className="mt-4"
+      />
       <label htmlFor="me-reminder-time" className="mt-3 block text-sm font-medium text-text">
         {t("meReminderTime")}
       </label>
@@ -72,7 +78,7 @@ export function Reminder({ on: initialOn, time: initialTime }: { on: boolean; ti
         type="time"
         data-testid="me-reminder-time"
         value={time}
-        disabled={!on}
+        disabled={!on || busy}
         onChange={(e) => setTime(e.target.value)}
         onBlur={(e) => e.target.value && e.target.value !== sentTime.current && save(on, e.target.value)}
         className="mt-2 block rounded-2xl border border-border bg-bg px-4 py-3 text-text disabled:opacity-50"

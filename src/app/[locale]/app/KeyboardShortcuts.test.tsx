@@ -29,6 +29,27 @@ beforeEach(() => {
 });
 afterEach(cleanup);
 
+describe("KeyboardShortcuts: unsaved text asks first (decision 206, reviewer M1 on #110)", () => {
+  it("with a screen holding unsaved work, n/c/t/i go through it: nothing moves (nor any arrival) until it says go", async () => {
+    const { holdLeaving } = await import("@/lib/ui/leaveGuard");
+    const held: (() => void)[] = [];
+    const release = holdLeaving((go) => held.push(go));
+    renderIt();
+    key("t");
+    key("c");
+    expect(push).not.toHaveBeenCalled();
+    expect(takeArrival("checkIn")).toBe(false);
+    held[0]();
+    expect(push).toHaveBeenCalledWith("/app/timeline");
+    held[1]();
+    expect(push).toHaveBeenLastCalledWith("/app");
+    expect(takeArrival("checkIn")).toBe(true);
+    release();
+    key("i");
+    expect(push).toHaveBeenLastCalledWith("/app/insights");
+  });
+});
+
 describe("KeyboardShortcuts (1.1 O)", () => {
   it("n, t, i go to a new entry, Timeline and Insights", () => {
     renderIt();

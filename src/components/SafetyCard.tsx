@@ -55,7 +55,9 @@ export function SafetyCard({ country, onClose }: { country: string | null | unde
         </p>
         <p className="text-sm text-muted">{t("safetyNotTherapy")}</p>
       </div>
-      <button type="button" data-testid="safety-close" className={dialogButton(true)} onClick={onClose}>
+      {/* Close is secondary (outline): the help above is what stands out
+          (decision 206, the same as the app). */}
+      <button type="button" data-testid="safety-close" className={dialogButton()} onClick={onClose}>
         {t("safetyClose")}
       </button>
     </Dialog>

@@ -64,9 +64,13 @@ describe("ShareMonth", () => {
     expect(await screen.findByTestId("share-preview")).toBeInTheDocument();
     expect(screen.getByRole("dialog", { name: m.shareTitle })).toHaveTextContent(m.sharePrivacyNote);
     expect(screen.getByTestId("share-format-story")).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByLabelText(m.shareAddLine)).toHaveAttribute("maxLength", "80");
+    // Capped by what's kept (graphemes, decision 206), not by maxLength.
+    const line = screen.getByLabelText(m.shareAddLine);
+    fireEvent.change(line, { target: { value: "x".repeat(90) } });
+    expect(line).toHaveValue("x".repeat(80));
     fireEvent.click(screen.getByTestId("share-format-square"));
-    expect(screen.getByLabelText(m.shareAddLine)).toHaveAttribute("maxLength", "60");
+    fireEvent.change(line, { target: { value: "x".repeat(90) } });
+    expect(line).toHaveValue("x".repeat(60));
     fireEvent.click(screen.getByTestId("share-theme-dark"));
     expect(screen.getByTestId("share-theme-dark")).toHaveAttribute("aria-pressed", "true");
   });
@@ -226,5 +230,21 @@ describe("ShareMonth for screen readers (decision 143)", () => {
     expect(announce).toBeEmptyDOMElement();
     fireEvent.change(input, { target: { value: "x".repeat(80) } });
     expect(announce).toHaveTextContent("0 characters left");
+  });
+
+  it("the limit counts characters as people see them: an emoji is one, and nothing is cut in half (decision 206)", async () => {
+    loadMonthCheckIns.mockResolvedValue({ status: "ok", checkIns: days(6) });
+    renderIt();
+    fireEvent.click(screen.getByTestId("share-open"));
+    const input = await screen.findByTestId("share-line");
+    expect(input).not.toHaveAttribute("maxlength");
+    fireEvent.change(input, { target: { value: "Calm 👨‍👩‍👧" } });
+    expect(screen.getByTestId("share-line-count")).toHaveTextContent("74 characters left");
+    fireEvent.change(input, { target: { value: "😊".repeat(81) } });
+    expect(input).toHaveValue("😊".repeat(80));
+    expect(screen.getByTestId("share-line-count")).toHaveTextContent("0 characters left");
+    // Square's limit is 60: the counter stops at 0, never below.
+    fireEvent.click(screen.getByTestId("share-format-square"));
+    expect(screen.getByTestId("share-line-count")).toHaveTextContent("0 characters left");
   });
 });
