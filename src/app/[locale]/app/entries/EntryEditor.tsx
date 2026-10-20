@@ -264,17 +264,24 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
   const leave = useCallback(() => (onLeave ? onLeave(lastSaved.current) : router.push(backTo)), [router, backTo, onLeave]);
   // After the leave dialog: on through the link that opened it, if any (and
   // still there), else the editor's own way out.
+  // A held link or shortcut goes on only once the dialog has closed: its
+  // inert is off the page and its focus restored, so where the way out
+  // puts focus (the "c" shortcut: Today's first face) isn't undone or
+  // refused inside an inert page (Web Tester, #110 P8).
   const leaveOn = useCallback(() => {
     const a = leaveVia.current;
     const go = leaveGo.current;
     leaveVia.current = null;
     leaveGo.current = null;
     setDialog(null);
-    if (go) go();
-    else if (a?.isConnected) {
-      letThrough.current = true;
-      a.click();
-    } else leave();
+    if (!go && !a) return leave();
+    window.setTimeout(() => {
+      if (go) go();
+      else if (a?.isConnected) {
+        letThrough.current = true;
+        a.click();
+      } else leave();
+    }, 0);
   }, [leave]);
   const closeSafety = useCallback(() => {
     setSafety("closed");

@@ -230,23 +230,23 @@ describe("EntryEditor: every way out asks (decision 206)", () => {
     expect(push).not.toHaveBeenCalled();
   });
 
-  it("Keep draft keeps it and goes on through the same link (once), not to Today", () => {
+  it("Keep draft keeps it and goes on through the same link (once), not to Today", async () => {
     const { reached } = renderWithLink();
     type("Half a thought");
     fireEvent.click(screen.getByTestId("nav-link"));
     fireEvent.click(screen.getByTestId("entry-keep-draft"));
     expect(stored(NEW_KEY)).toMatchObject({ body: "Half a thought" });
-    expect(reached).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(reached).toHaveBeenCalledTimes(1));
     expect(push).not.toHaveBeenCalled();
   });
 
-  it("Discard drops it and goes on through the link", () => {
+  it("Discard drops it and goes on through the link", async () => {
     const { reached } = renderWithLink(ENTRY);
     type("changed");
     fireEvent.click(screen.getByTestId("nav-link"));
     fireEvent.click(screen.getByTestId("entry-discard"));
     expect(window.localStorage.getItem(EDIT_KEY)).toBeNull();
-    expect(reached).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(reached).toHaveBeenCalledTimes(1));
   });
 
   it("nothing to keep, a new tab (Ctrl/⌘), or another site: the link just works", () => {
@@ -307,9 +307,32 @@ describe("EntryEditor: ways out that aren't links ask too (the keyboard shortcut
     expect(go).not.toHaveBeenCalled();
     act(() => leaveThen(go));
     fireEvent.click(screen.getByTestId("entry-keep-draft"));
-    expect(go).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(go).toHaveBeenCalledTimes(1));
     expect(stored(NEW_KEY)).toMatchObject({ body: "Half a thought" });
     expect(push).not.toHaveBeenCalled();
+  });
+
+  it("the way out runs only once the dialog has closed: nothing inert, its focus restored, so the way out's own focus sticks (#110 P8: c + Discard)", async () => {
+    const { leaveThen } = await import("@/lib/ui/leaveGuard");
+    renderEditor();
+    type("Half a thought");
+    // The page the shortcut lands on, and what "c" focuses there.
+    const target = document.createElement("button");
+    document.body.appendChild(target);
+    const seen: { inert: number; dialog: boolean }[] = [];
+    const go = vi.fn(() => {
+      seen.push({ inert: document.querySelectorAll("[inert]").length, dialog: !!screen.queryByTestId("entry-leave-dialog") });
+      target.focus();
+    });
+    screen.getByTestId("entry-save").focus();
+    act(() => leaveThen(go));
+    fireEvent.click(screen.getByTestId("entry-discard"));
+    // Not inside the click: the dialog is still closing then.
+    expect(go).not.toHaveBeenCalled();
+    await waitFor(() => expect(go).toHaveBeenCalledTimes(1));
+    expect(seen).toEqual([{ inert: 0, dialog: false }]);
+    expect(target).toHaveFocus();
+    target.remove();
   });
 
   it("nothing to keep: it goes at once; with the editor gone, there's no guard left", async () => {
