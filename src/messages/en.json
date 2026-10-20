@@ -6,6 +6,9 @@
     "description": "Moodbow is a private journal that helps you notice patterns in your mood, sleep and habits over time. Coming soon from BurrowSoft.",
     "ogDescription": "A private journal that helps you notice patterns in your mood, sleep and habits over time. Coming soon.",
     "ogImageAlt": "Moodbow logo with the text: Coming soon. A journal that learns your story.",
+    "descriptionLaunch": "A private journal that learns your story and shows what shapes your days.",
+    "ogDescriptionLaunch": "A private journal that learns your story and shows what shapes your days.",
+    "ogImageAltLaunch": "Moodbow: your month, as a rainbow",
     "manifestDescription": "A journal that learns your story."
   },
   "common": {
