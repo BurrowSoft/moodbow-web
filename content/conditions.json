@@ -70,5 +70,9 @@
   "reminder-live": {
     "met": false,
     "what": "The daily reminder is in a RELEASED app build (local notification at the chosen time, skipped if that phone saw a check-in that day). Gates the Help article about reminders."
+  },
+  "share-cards-more": {
+    "met": false,
+    "what": "1.1 B (decision 169): the chart and milestone share cards and Today's milestone card are tested on the app and the web (needs share-cards too)."
   }
 }
