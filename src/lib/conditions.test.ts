@@ -25,14 +25,22 @@ describe("conditions", () => {
   // Pinned: flipping any of these is its own reviewed PR (text = enforcement).
   // Live since the first closed-test build with M7 + M8 (Vitor, decisions 162 + 164): the legal pages, account
   // deletion, export and the help card (app side; the web side comes with the web journal).
-  it("what's live: the legal pages and the app's delete / export / help card; not the web journal", () => {
+  it("what's live: the legal pages and the app's delete / export / help card", () => {
     for (const id of ["privacy-text-approved", "terms-text-approved", "delete-account-live", "export-live", "help-now-live"] as const) {
       expect(conditionMet(id), id).toBe(true);
     }
     // Decisions 44 + 84: backups are kept 8 days; the number and the flag go together.
     expect(conditionMet("backup-retention")).toBe(true);
     expect(BACKUP_RETENTION_DAYS).toBe(8);
-    expect(liveFeatures.webJournal).toBe(false);
+  });
+
+  // The web launch step (next-release.md, "Help flips with the product"):
+  // the journal and the features its Help describes go live together.
+  it("the web launch flips as one step", () => {
+    expect(liveFeatures.webJournal).toBe(true);
+    for (const id of ["web-journal-live", "share-cards", "help-now-live", "export-live", "delete-account-live"] as const) {
+      expect(conditionMet(id), id).toBe(true);
+    }
   });
 });
 
