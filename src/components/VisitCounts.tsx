@@ -4,15 +4,15 @@ import { useEffect, useState } from "react";
 import { useParams, usePathname } from "next/navigation";
 import { computeRoute } from "@vercel/analytics";
 import { Analytics } from "@vercel/analytics/react";
-import { NOT_FOUND_MARK, scrubEvent } from "@/lib/analytics";
+import { isPublicPage, NOT_FOUND_MARK, scrubEvent } from "@/lib/analytics";
 
 // Vercel Web Analytics with the URL scrubber (lib/analytics.ts). Rendered
 // only when the "web-analytics" condition is met (the locale layout).
 //
 // A page view is sent once the page has arrived, not on the URL change:
-// under /app a loading boundary streams first, and a missing entry's "not
-// found" only replaces it later, so counting at the URL change counted it
-// (Web Tester, #30). We wait until no loading boundary is on the page; if
+// a loading boundary may stream first, and a missing page's "not found"
+// only replaces it later, so counting at the URL change counted it
+// (Web Tester, #30, then on /app). We wait until no loading boundary is on the page; if
 // what arrived is a not-found page, nothing is sent. The route is the
 // pattern (/[locale]/app/entries/[id]), as in the Next adapter, never the
 // ids. 30 s without arriving: nothing is sent.
@@ -22,10 +22,16 @@ const LOADING = "[data-loading-boundary]";
 export function VisitCounts() {
   const path = usePathname();
   const params = useParams();
+  // Public pages only (UX, 1.0 launch): the script isn't even loaded until a
+  // public page has been shown, so opening the journal or a sign-in page
+  // first never injects it; once loaded (a public page, then the journal),
+  // nothing is counted there (route null, and scrubEvent drops it).
+  const isPublic = isPublicPage(path);
   // How the last page settled: counted (its route) or not (null, a
   // not-found page or no arrival). It only counts for the page it names.
   const [arrived, setArrived] = useState<{ path: string; route: string | null } | null>(null);
-  const counted = arrived !== null && arrived.path === path && arrived.route !== null ? arrived : null;
+  const [loaded, setLoaded] = useState(isPublic);
+  const counted = isPublic && arrived !== null && arrived.path === path && arrived.route !== null ? arrived : null;
 
   useEffect(() => {
     const route = computeRoute(path, params as Record<string, string | string[]> | null);
@@ -35,6 +41,7 @@ export function VisitCounts() {
       done = true;
       stop();
       setArrived({ path, route: document.querySelector(`[${NOT_FOUND_MARK}]`) ? null : route });
+      if (isPublicPage(path)) setLoaded(true);
     };
     const observer = new MutationObserver(settle);
     const timer = window.setTimeout(() => {
@@ -58,5 +65,6 @@ export function VisitCounts() {
 
   // route null (not undefined) until then: the script's own tracking stays
   // off and only these page views are sent.
+  if (!loaded && !isPublic) return null;
   return <Analytics framework="next" beforeSend={scrubEvent} route={counted?.route ?? null} path={counted?.path} />;
 }

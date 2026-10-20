@@ -99,6 +99,13 @@ test.describe("home", () => {
       expect((await request.get(path)).status(), path).toBe(200);
     }
   });
+
+  test("visit counts: no analytics script while web-analytics is unmet, even with campaign labels", async ({ page }) => {
+    for (const path of ["/?utm_source=ig&utm_campaign=launch", "/support", "/app"]) {
+      await page.goto(path);
+      await expect(page.locator('script[src*="/_vercel/insights"], script[src*="va.vercel-scripts"]'), path).toHaveCount(0);
+    }
+  });
 });
 
 // Thai (1.1 F) behind thai-offered-live, unmet: this CI build is a draft

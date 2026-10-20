@@ -1,13 +1,15 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { NOT_FOUND_MARK, scrubEvent, scrubUrl } from "./analytics";
+import { isPublicPage, NOT_FOUND_MARK, scrubEvent, scrubUrl } from "./analytics";
 
 const W = "https://www.moodbow.com";
 
 describe("scrubUrl (decision 79: page addresses only, nothing that identifies anyone)", () => {
-  it("drops every query string and fragment", () => {
+  it("drops every query string and fragment, except our own three campaign labels (UX)", () => {
     expect(scrubUrl(`${W}/insights?range=month`)).toBe(`${W}/insights`);
     expect(scrubUrl(`${W}/email-confirmed?code=abc123&error_description=x#frag`)).toBe(`${W}/email-confirmed`);
-    expect(scrubUrl(`${W}/?utm_source=ad`)).toBe(`${W}/`);
+    expect(scrubUrl(`${W}/?utm_source=ad`)).toBe(`${W}/?utm_source=ad`);
+    expect(scrubUrl(`${W}/?utm_campaign=launch&utm_source=ig&utm_term=x&gclid=1#f`)).toBe(`${W}/?utm_source=ig&utm_campaign=launch`);
+    expect(scrubUrl(`${W}/?utm_source=a%40b.com`)).toBe(`${W}/`);
   });
 
   it("entry ids and days become [id] / [date]", () => {
@@ -33,8 +35,29 @@ describe("scrubUrl (decision 79: page addresses only, nothing that identifies an
   });
 
   it("scrubEvent keeps the rest of the event, or drops it", () => {
-    expect(scrubEvent({ type: "pageview", url: `${W}/app/entries/3d6f1a2b-4c5d-4e6f-8a9b-0c1d2e3f4a5b?x=1` })).toEqual({ type: "pageview", url: `${W}/app/entries/[id]` });
+    expect(scrubEvent({ type: "pageview", url: `${W}/help/getting-started?x=1#f` })).toEqual({ type: "pageview", url: `${W}/help/getting-started` });
     expect(scrubEvent({ type: "pageview", url: `${W}/auth/confirm` })).toBeNull();
+  });
+});
+
+describe("public pages only (UX, the 1.0 launch item)", () => {
+  it("the website's pages, Help included, in any language", () => {
+    for (const p of ["/", "/support", "/privacy", "/terms", "/account-deletion", "/help", "/help/getting-started", "/th", "/th/help/search", "/th/privacy"]) {
+      expect(isPublicPage(p), p).toBe(true);
+    }
+  });
+
+  it("never the journal, the auth links or the sign-in/onboarding pages", () => {
+    for (const p of ["/app", "/app/entries/x", "/th/app/me", "/auth/confirm", "/sign-in", "/sign-up", "/forgot-password", "/welcome", "/consent", "/setup", "/email-confirmed", "/helpful", "/supports"]) {
+      expect(isPublicPage(p), p).toBe(false);
+    }
+  });
+
+  it("a journal page view is dropped even when the script is there (a public page first)", () => {
+    expect(scrubEvent({ type: "pageview", url: `${W}/app/entries/3d6f1a2b-4c5d-4e6f-8a9b-0c1d2e3f4a5b` })).toBeNull();
+    expect(scrubEvent({ type: "pageview", url: `${W}/th/app` })).toBeNull();
+    expect(scrubEvent({ type: "pageview", url: `${W}/sign-in?utm_source=ig` })).toBeNull();
+    expect(scrubEvent({ type: "pageview", url: `${W}/?utm_source=ig` })).toEqual({ type: "pageview", url: `${W}/?utm_source=ig` });
   });
 });
 
