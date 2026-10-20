@@ -114,6 +114,30 @@ describe("TimelineList", () => {
     await waitFor(() => expect(screen.getByTestId("timeline-day-2026-08-15")).toBeInTheDocument());
   });
 
+  it("Show more days pressed while a scroll load is on its way: that load moves focus when it lands, no second press (UX, after #117)", async () => {
+    let land: (v: unknown) => void = () => {};
+    loadTimeline.mockReturnValueOnce(new Promise((r) => (land = r)));
+    renderList();
+    await act(async () => seeEnd());
+    const button = screen.getByTestId("timeline-load-more");
+    button.focus();
+    fireEvent.click(button);
+    expect(loadTimeline).toHaveBeenCalledTimes(1);
+    await act(async () => land({ status: "ok", days: [{ local_date: "2026-08-15", check_in: null, entries: [], entry_count: 0 }], done: false }));
+    await waitFor(() => expect(screen.getByTestId("timeline-day-2026-08-15")).toHaveFocus());
+  });
+
+  it("a scroll load lands as the last page while focus is on Show more days: focus follows to the new day, never the page", async () => {
+    let land: (v: unknown) => void = () => {};
+    loadTimeline.mockReturnValueOnce(new Promise((r) => (land = r)));
+    renderList();
+    screen.getByTestId("timeline-load-more").focus();
+    await act(async () => seeEnd());
+    await act(async () => land({ status: "ok", days: [{ local_date: "2026-08-15", check_in: null, entries: [], entry_count: 0 }], done: true }));
+    await waitFor(() => expect(screen.getByTestId("timeline-day-2026-08-15")).toHaveFocus());
+    expect(screen.queryByTestId("timeline-load-more")).toBeNull();
+  });
+
   it("Show more days: focus goes to the first new day, even when the button goes with the last page (a11y pass, 1.0)", async () => {
     loadTimeline.mockResolvedValue({ status: "ok", days: [{ local_date: "2026-08-15", check_in: null, entries: [], entry_count: 0 }, { local_date: "2026-08-10", check_in: null, entries: [], entry_count: 0 }], done: true });
     renderList();
