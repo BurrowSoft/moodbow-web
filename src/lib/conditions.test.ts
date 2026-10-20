@@ -50,8 +50,13 @@ describe("conditions", () => {
 });
 
 describe("pageGate (fails closed)", () => {
-  // An unmet gate (the legal pages are live now).
-  const gate = (build: Parameters<typeof pageGate>[1]) => pageGate("web-journal-live", build);
+  // An unmet gate whatever the real config says (reviewer #100 B3).
+  const gate = (build: Parameters<typeof pageGate>[1]) => pageGate("privacy-text-approved", build, () => false);
+
+  it("a met gate is live everywhere", () => {
+    expect(pageGate("privacy-text-approved", { vercelEnv: "production" }, () => true)).toBe("live");
+    expect(pageGate("privacy-text-approved", {}, () => true)).toBe("live");
+  });
 
   it("unmet pages are 404 on Production, even with the drafts flag or in dev mode", () => {
     expect(gate({ vercelEnv: "production" })).toBe("hidden");
@@ -116,6 +121,26 @@ describe("isHiddenPage (the proxy's routing-level 404)", () => {
   it("fails closed when the environment is unset", () => {
     expect(isHiddenPage("/privacy", {})).toBe(!LEGAL);
   });
+
+  // The proxy's logic with a gate that's unmet, whatever the real config
+  // says, so it stays tested once every page is live (reviewer #100 B3).
+  describe("with an unmet gate", () => {
+    const unmet = () => false;
+    it("hidden on Production, with or without a trailing slash; a prefix gate covers what's below it", () => {
+      for (const path of ["/privacy", "/terms", "/privacy/", "/account-deletion", "/help", "/help/check-ins", "/app", "/app/me"]) {
+        expect(isHiddenPage(path, prod, unmet), path).toBe(true);
+      }
+    });
+    it("a draft on Previews; fails closed with the environment unset", () => {
+      expect(isHiddenPage("/privacy", preview, unmet)).toBe(false);
+      expect(isHiddenPage("/privacy", {}, unmet)).toBe(true);
+    });
+    it("ungated and unknown paths are never hidden", () => {
+      for (const path of ["/", "/support", "/email-confirmed", "/no-such-page", "/apples"]) {
+        expect(isHiddenPage(path, prod, unmet), path).toBe(false);
+      }
+    });
+  });
 });
 
 describe("pagePath (what the proxy checks)", () => {
@@ -140,6 +165,14 @@ describe("pagePath (what the proxy checks)", () => {
 
   it("an encoded gated path is treated like the plain one on Production", () => {
     expect(isHiddenPage(pagePath("/%70rivacy", locales), { vercelEnv: "production" })).toBe(!LEGAL);
+  });
+
+  it("with an unmet gate, encoded and differently cased paths are still hidden (reviewer #100 B3)", () => {
+    const prod = { vercelEnv: "production" };
+    const unmet = () => false;
+    for (const raw of ["/%70rivacy", "/Terms", "/en/%74erms", "/TH/Privacy", "/En/Account-Deletion"]) {
+      expect(isHiddenPage(pagePath(raw, locales), prod, unmet), raw).toBe(true);
+    }
   });
 });
 
