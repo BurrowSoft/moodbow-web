@@ -266,8 +266,16 @@ describe("signUpFlow: every other answer", () => {
     expect(await signUpFlow(idle, form(valid))).toMatchObject({ status: "error", error: "emailTaken" });
     auth.signUp.mockResolvedValue({ data: {}, error: { code: "email_address_invalid" } });
     expect(await signUpFlow(idle, form(valid))).toMatchObject({ status: "error", error: "emailInvalid" });
-    auth.signUp.mockResolvedValue({ data: {}, error: { code: "over_request_rate_limit", status: 429 } });
+    auth.signUp.mockResolvedValue({ data: {}, error: { code: "unexpected_failure", status: 500 } });
     expect(await signUpFlow(idle, form(valid))).toEqual({ status: "error", error: "generic", email: "new@example.invalid", age: true });
+  });
+
+  it("too many tries (429, or an over_* code): rateLimited, as Send it again says it (UX), the email and 18+ kept", async () => {
+    withConsent();
+    for (const error of [{ code: "over_request_rate_limit", status: 429 }, { code: "over_email_send_rate_limit" }, { status: 429 }]) {
+      auth.signUp.mockResolvedValue({ data: {}, error });
+      expect(await signUpFlow(idle, form(valid))).toEqual({ status: "error", error: "rateLimited", email: "new@example.invalid", age: true });
+    }
   });
 
   it("no confirmation needed on the project (a session at once): the consent cookie goes and it's /setup", async () => {

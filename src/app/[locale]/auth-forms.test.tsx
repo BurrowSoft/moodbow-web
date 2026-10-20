@@ -141,6 +141,14 @@ describe("SignUpForm", () => {
     expect(screen.getByTestId("signup-submit")).toBeEnabled();
   });
 
+  it("too many tries: the rate-limit message (the same as Send it again's), tied to no field (UX)", () => {
+    state = { status: "error", error: "rateLimited", email: "a@b.co", age: true };
+    wrap(<SignUpForm />);
+    expect(screen.getByTestId("signup-error")).toHaveTextContent(a.errRateLimited);
+    expect(screen.getByLabelText(a.emailLabel)).toHaveValue("a@b.co");
+    expect(screen.getByLabelText(a.emailLabel)).not.toHaveAttribute("aria-invalid");
+  });
+
   it("an error keeps the email and the age box; a failure is the generic message (no field)", () => {
     state = { status: "error", error: "generic", email: "a@b.co", age: true };
     wrap(<SignUpForm />);

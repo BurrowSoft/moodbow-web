@@ -12,6 +12,8 @@ const ERROR_KEYS = {
   passwordShort: ["onboarding", "errPasswordShort"],
   ageRequired: ["onboarding", "errAgeRequired"],
   emailTaken: ["onboarding", "errEmailTaken"],
+  // Too many tries: the same words as Send it again's notice (UX).
+  rateLimited: ["auth", "errRateLimited"],
   generic: ["auth", "errGeneric"],
 } as const;
 
