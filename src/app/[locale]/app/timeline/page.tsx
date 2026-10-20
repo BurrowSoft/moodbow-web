@@ -100,6 +100,7 @@ export default async function TimelinePage({ params, searchParams }: PageProps<"
         dateLocaleTag={dateLocaleTag}
         shareable={pageGate("share-cards") !== "hidden"}
         year={pageGate("year-card") !== "hidden" ? yearOnOffer(me.today) : null}
+        printable={pageGate("print-live") !== "hidden"}
       />
     </section>
   );

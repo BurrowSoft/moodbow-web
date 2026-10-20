@@ -44,7 +44,7 @@ export function AppNav() {
     <nav
       aria-label={t("appName")}
       data-keyboard={keyboard || undefined}
-      className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-bg data-[keyboard]:max-md:hidden md:static md:w-60 md:shrink-0 md:border-t-0 md:border-r md:px-4 md:py-6"
+      className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-bg data-[keyboard]:max-md:hidden print:hidden md:static md:w-60 md:shrink-0 md:border-t-0 md:border-r md:px-4 md:py-6"
     >
       <div className="hidden px-3 pb-8 md:block">
         {/* Not "Today": that's the first tab right after it (a11y pass). */}

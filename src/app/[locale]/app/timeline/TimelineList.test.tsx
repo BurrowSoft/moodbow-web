@@ -195,3 +195,33 @@ describe("TimelineList: Share this month (decision 161)", () => {
     expect(await screen.findByTestId("timeline-share-2026-10")).toBeInTheDocument();
   });
 });
+
+describe("Print this month (1.1 N)", () => {
+  it("a link per month header to /app/print/YYYY-MM, only where printing is live", () => {
+    renderList({ printable: true });
+    expect(screen.getByTestId("timeline-print-2026-10")).toHaveAttribute("href", "/app/print/2026-10");
+    expect(screen.getByTestId("timeline-print-2026-09")).toHaveTextContent(t.printMonth);
+    cleanup();
+    renderList();
+    expect(screen.queryByTestId("timeline-print-2026-10")).toBeNull();
+  });
+});
+
+describe("Print this month: the click asks for the dialog once", () => {
+  it("clicking the link leaves a one-time request for that month", async () => {
+    const { takePrintRequest } = await import("@/lib/journal/printOnce");
+    renderList({ printable: true });
+    fireEvent.click(screen.getByTestId("timeline-print-2026-10"));
+    expect(takePrintRequest("2026-10")).toBe(true);
+    expect(takePrintRequest("2026-10")).toBe(false);
+  });
+
+  it("a modified click (new tab or window) leaves no request", async () => {
+    const { takePrintRequest } = await import("@/lib/journal/printOnce");
+    renderList({ printable: true });
+    for (const mod of [{ ctrlKey: true }, { metaKey: true }, { shiftKey: true }, { button: 1 }]) {
+      fireEvent.click(screen.getByTestId("timeline-print-2026-10"), mod);
+      expect(takePrintRequest("2026-10")).toBe(false);
+    }
+  });
+});

@@ -369,7 +369,10 @@
     "dayAddCheckin": "เพิ่มการบันทึกอารมณ์",
     "dayAddEntry": "เพิ่มบันทึก",
     "timelineLoadMore": "แสดงวันเพิ่มเติม",
-    "timelineLoadedMore": "โหลดเพิ่มอีก {count} วัน"
+    "timelineLoadedMore": "โหลดเพิ่มอีก {count} วัน",
+    "printMonth": "พิมพ์เดือนนี้",
+    "printFooter": "Moodbow · {month}",
+    "printEmpty": "เดือนนี้ยังไม่มีบันทึก"
   },
   "insights": {
     "insightsTitle": "ข้อมูลเชิงลึก",

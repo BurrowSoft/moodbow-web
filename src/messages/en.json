@@ -369,7 +369,10 @@
     "dayAddCheckin": "Add a check-in",
     "dayAddEntry": "Add an entry",
     "timelineLoadMore": "Show more days",
-    "timelineLoadedMore": "{count, plural, one {# more day loaded} other {# more days loaded}}"
+    "timelineLoadedMore": "{count, plural, one {# more day loaded} other {# more days loaded}}",
+    "printMonth": "Print this month",
+    "printFooter": "Moodbow · {month}",
+    "printEmpty": "Nothing written this month yet."
   },
   "insights": {
     "insightsTitle": "Insights",
