@@ -33,7 +33,7 @@ describe("MilestoneCard (decision 169)", () => {
     expect(share).toHaveAttribute("data-n", "30");
   });
 
-  it("decision 186: fixed above the tab bar (out of the flow), a spacer keeps the page's end reachable, announced once politely", () => {
+  it("decision 186: fixed above the tab bar (out of the flow), room at the page's very end keeps it reachable, announced once politely", () => {
     renderIt();
     expect(screen.getByTestId("milestone-card").className).toMatch(/\bfixed\b/);
     expect(screen.getByTestId("milestone-card").className).toMatch(/\bmilestone-in\b/);
