@@ -1,1 +1,2 @@
 content/contracts/** -text
+src/lib/import/fixtures/import-cases.json -text
