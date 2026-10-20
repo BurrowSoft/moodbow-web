@@ -23,7 +23,7 @@ test.describe("home", () => {
     await expect(notify).toHaveAttribute("href", "mailto:support@moodbow.com?subject=Notify%20me%20about%20Moodbow");
     await expect(page.getByText("Email us and we'll let you know when it's ready.")).toBeVisible();
     await expect(page.getByTestId("home-start")).toHaveCount(0);
-    for (const title of ["Check in in 10 seconds", "Write about your day", "See what shapes your days", "Private by design"]) {
+    for (const title of ["A 10-second check-in", "Write about your day", "See what shapes your days", "Private by design"]) {
       await expect(page.getByRole("heading", { level: 2, name: title })).toBeVisible();
     }
     // No AI claim while AI isn't live; store badges are text only.
