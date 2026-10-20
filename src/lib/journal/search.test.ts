@@ -23,7 +23,7 @@ describe("escapeLike (UX: a user's % or _ is never a wildcard)", () => {
 
 describe("snippet: one line around the first match", () => {
   it("the match as written, case-insensitive; cut at word boundaries with …", () => {
-    const body = "We went for a long walk by the river and then had tea at the little cafe near the bridge before the rain started.";
+    const body = "It was a slow Sunday morning, so after breakfast we went for a long walk by the river and then had tea at the little cafe near the bridge before the rain started.";
     const s = snippet(body, "RIVER")!;
     expect(s.match).toBe("river");
     expect(s.before.startsWith("…")).toBe(true);

@@ -26,7 +26,7 @@ const renderIt = () =>
     </NextIntlClientProvider>,
   );
 const open = () => fireEvent.click(screen.getByRole("button", { name: t.searchOpen }));
-const type = (text: string) => fireEvent.change(screen.getByLabelText(t.searchLabel), { target: { value: text } });
+const type = (text: string) => fireEvent.change(screen.getByRole("searchbox", { name: t.searchLabel }), { target: { value: text } });
 const wait = (ms: number) => act(async () => vi.advanceTimersByTimeAsync(ms));
 
 beforeEach(() => {
@@ -44,7 +44,7 @@ describe("TimelineSearch (1.1 L)", () => {
     expect(screen.getByTestId("the-list")).toBeInTheDocument();
     open();
     expect(screen.queryByTestId("the-list")).toBeNull();
-    expect(screen.getByLabelText(t.searchLabel)).toHaveFocus();
+    expect(screen.getByRole("searchbox", { name: t.searchLabel })).toHaveFocus();
     expect(screen.getByTestId("timeline-search-status")).toHaveTextContent(t.searchHint);
   });
 
@@ -109,13 +109,13 @@ describe("TimelineSearch (1.1 L)", () => {
     renderIt();
     open();
     type("walk");
-    fireEvent.keyDown(screen.getByLabelText(t.searchLabel), { key: "Escape" });
+    fireEvent.keyDown(screen.getByRole("searchbox", { name: t.searchLabel }), { key: "Escape" });
     await wait(300);
     expect(screen.getByTestId("the-list")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: t.searchOpen })).toHaveFocus();
     expect(searchEntries).not.toHaveBeenCalled();
     open();
-    expect(screen.getByLabelText(t.searchLabel)).toHaveValue("");
+    expect(screen.getByRole("searchbox", { name: t.searchLabel })).toHaveValue("");
     fireEvent.click(screen.getByRole("button", { name: t.searchClose }));
     await wait(0);
     expect(screen.getByTestId("the-list")).toBeInTheDocument();
@@ -137,13 +137,14 @@ describe("TimelineSearch (1.1 L)", () => {
   });
 
   it("offline: errOffline", async () => {
-    const onLine = vi.spyOn(navigator, "onLine", "get").mockReturnValue(false);
+    Object.defineProperty(navigator, "onLine", { configurable: true, get: () => false });
     searchEntries.mockRejectedValueOnce(new Error("Failed to fetch"));
     renderIt();
     open();
     type("walk");
     await wait(300);
     expect(screen.getByRole("alert")).toHaveTextContent(messages.ai.errOffline);
-    onLine.mockRestore();
+    // Back to jsdom's own (on the prototype).
+    delete (navigator as { onLine?: boolean }).onLine;
   });
 });
