@@ -1,5 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
+import { planImport } from "./journalImport";
 import { importEntryId, uuidv5 } from "./uuidv5";
 
 describe("uuidv5 (RFC 4122, SHA-1)", () => {
@@ -24,5 +25,27 @@ describe("importEntryId: copies (1.1 P)", () => {
     const first = await importEntryId("u1", e);
     expect(await importEntryId("u1", { ...e, dup: 0 })).toBe(first);
     expect(await importEntryId("u1", { ...e, dup: 1 })).not.toBe(first);
+  });
+});
+
+describe("importEntryId over a whole file: the same words more than once on a day (UX, 1.1 P)", () => {
+  const ids = async (text: string) => {
+    const r = planImport(text, "2026-12-31");
+    if (r.status !== "ok") throw new Error("plan failed");
+    return Promise.all(r.plan.entries.map((e) => importEntryId("u1", e)));
+  };
+  const TWICE = "date,mood,note\n2026-10-01,4,Same\n2026-10-01,4,Same\n";
+
+  it("re-importing the same file gives the same ids, so nothing is new", async () => {
+    const first = await ids(TWICE);
+    expect(new Set(first).size).toBe(2);
+    expect(await ids(TWICE)).toEqual(first);
+  });
+
+  it("a third copy added later is the only new id", async () => {
+    const before = await ids(TWICE);
+    const after = await ids(`${TWICE}2026-10-01,4,Same\n`);
+    expect(after.slice(0, 2)).toEqual(before);
+    expect(before).not.toContain(after[2]);
   });
 });
