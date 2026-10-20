@@ -233,7 +233,7 @@ test.describe("static files", () => {
     expect(res.status()).toBe(200);
     const body = await res.text();
     expect(body).toContain("Allow: /");
-    expect(body).toContain("Disallow: /app/");
+    expect(body).toMatch(/^Disallow: /app$/m);
     expect(body).toContain("Disallow: /auth/");
     expect(body).toContain(`Sitemap: ${CANONICAL}/sitemap.xml`);
   });
