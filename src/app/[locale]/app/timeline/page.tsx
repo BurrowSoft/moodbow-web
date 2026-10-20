@@ -1,4 +1,3 @@
-import { yearOnOffer } from "@/lib/share/year";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -6,6 +5,7 @@ import type { Locale } from "@/i18n/routing";
 import { Link } from "@/i18n/navigation";
 import { JournalUnavailable } from "@/components/JournalUnavailable";
 import { pageGate } from "@/lib/conditions";
+import { yearOnOffer } from "@/lib/share/year";
 import { getMe } from "@/lib/journal/me";
 import { dateLocale } from "@/lib/journal/today";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
