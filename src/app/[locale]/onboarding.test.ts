@@ -253,6 +253,62 @@ describe("signUpFlow", () => {
   });
 });
 
+// Coverage pass (UX): the rest of Supabase's answers, and each step without
+// Supabase or out of order.
+describe("signUpFlow: every other answer", () => {
+  const withConsent = () => jar.set(CONSENT_COOKIE, { value: serializeConsent(grantedAtConsent()) });
+  const valid = { email: "new@example.invalid", password: "secret-123", age: "on", time_zone: "Asia/Bangkok", intent: "signup" };
+  const check = { status: "checkEmail", email: "new@example.invalid" } as const;
+
+  it("Supabase's codes: email_exists → emailTaken, email_address_invalid → emailInvalid, anything else → generic (the email and 18+ kept)", async () => {
+    withConsent();
+    auth.signUp.mockResolvedValue({ data: {}, error: { code: "email_exists" } });
+    expect(await signUpFlow(idle, form(valid))).toMatchObject({ status: "error", error: "emailTaken" });
+    auth.signUp.mockResolvedValue({ data: {}, error: { code: "email_address_invalid" } });
+    expect(await signUpFlow(idle, form(valid))).toMatchObject({ status: "error", error: "emailInvalid" });
+    auth.signUp.mockResolvedValue({ data: {}, error: { code: "over_request_rate_limit", status: 429 } });
+    expect(await signUpFlow(idle, form(valid))).toEqual({ status: "error", error: "generic", email: "new@example.invalid", age: true });
+  });
+
+  it("no confirmation needed on the project (a session at once): the consent cookie goes and it's /setup", async () => {
+    withConsent();
+    auth.signUp.mockResolvedValue({ data: { user: { identities: [{}] }, session: { access_token: "x" } }, error: null });
+    expect(await redirected(signUpFlow(idle, form(valid)))).toEqual({ redirect: "/setup" });
+    expect(jar.has(CONSENT_COOKIE)).toBe(false);
+  });
+
+  it("the password's length counts characters as people see them, not UTF-16 units", async () => {
+    withConsent();
+    // 4 emoji are 8 UTF-16 units but 4 characters: too short.
+    expect(await signUpFlow(idle, form({ ...valid, password: "😀😀😀😀" }))).toMatchObject({ error: "passwordShort" });
+    expect(auth.signUp).not.toHaveBeenCalled();
+  });
+
+  it("no Supabase client: the generic error for sign-up, a generic notice for confirm and resend; nothing sent", async () => {
+    withConsent();
+    configured = false;
+    expect(await signUpFlow(idle, form(valid))).toMatchObject({ status: "error", error: "generic" });
+    expect(await signUpFlow(check, form({ intent: "confirmed", password: "secret-123" }))).toEqual({ ...check, notice: "generic" });
+    expect(await signUpFlow(check, form({ intent: "resend" }))).toEqual({ ...check, notice: "generic" });
+    expect(auth.signUp).not.toHaveBeenCalled();
+  });
+
+  it("confirm or resend before there's a Check email step: nothing happens, the state is unchanged", async () => {
+    const error = { status: "error", error: "generic" } as const;
+    expect(await signUpFlow(idle, form({ intent: "confirmed", password: "x" }))).toBe(idle);
+    expect(await signUpFlow(error, form({ intent: "resend" }))).toBe(error);
+    expect(auth.signInWithPassword).not.toHaveBeenCalled();
+    expect(auth.resend).not.toHaveBeenCalled();
+  });
+
+  it("confirm with another sign-in error, or a resend that fails another way: the generic notice", async () => {
+    auth.signInWithPassword.mockResolvedValue({ error: { code: "invalid_credentials" } });
+    expect(await signUpFlow(check, form({ intent: "confirmed", password: "wrong" }))).toEqual({ ...check, notice: "generic" });
+    auth.resend.mockResolvedValue({ error: { code: "unexpected_failure", status: 500 } });
+    expect(await signUpFlow(check, form({ intent: "resend" }))).toEqual({ ...check, notice: "generic" });
+  });
+});
+
 describe("completeSetup", () => {
   it("saves the reminder and finishes onboarding → /app", async () => {
     rpc.mockResolvedValue({ data: {}, error: null });

@@ -9,15 +9,27 @@ type Row = { id: string; entry_date: string; body: string; is_moment: boolean; c
 let rows: Row[] = [];
 let readError: unknown = null;
 let live = true;
+// Coverage pass: no client, a null answer, and the day-mood read.
+let noClient = false;
+let nullRows = false;
+let checkIns: { local_date: string; mood: number }[] | null = [{ local_date: "2026-10-20", mood: 4 }];
 const rpc = vi.fn();
+const moodsAsked = vi.fn();
 const client = {
   rpc: async (...a: unknown[]) => {
     rpc(...a);
-    return readError ? { data: null, error: readError } : { data: rows, error: null };
+    return readError ? { data: null, error: readError } : { data: nullRows ? null : rows, error: null };
   },
-  from: () => ({ select: () => ({ in: async () => ({ data: [{ local_date: "2026-10-20", mood: 4 }], error: null }) }) }),
+  from: () => ({
+    select: () => ({
+      in: async (...a: unknown[]) => {
+        moodsAsked(...a);
+        return { data: checkIns, error: null };
+      },
+    }),
+  }),
 };
-vi.mock("@/lib/supabase/server", () => ({ createSupabaseServerClient: async () => client }));
+vi.mock("@/lib/supabase/server", () => ({ createSupabaseServerClient: async () => (noClient ? null : client) }));
 vi.mock("@/lib/conditions", () => ({ pageGate: () => (live ? "live" : "hidden") }));
 const { searchEntries } = await import("./searchActions");
 
@@ -33,7 +45,11 @@ beforeEach(() => {
   rows = [];
   readError = null;
   live = true;
+  noClient = false;
+  nullRows = false;
+  checkIns = [{ local_date: "2026-10-20", mood: 4 }];
   rpc.mockReset();
+  moodsAsked.mockReset();
 });
 
 describe("searchEntries", () => {
@@ -72,5 +88,36 @@ describe("searchEntries", () => {
     live = true;
     readError = { message: "boom" };
     expect(await searchEntries("walk")).toEqual({ status: "error" });
+  });
+});
+
+// Coverage pass (UX): the empty and odd answers.
+describe("searchEntries: empty and odd answers", () => {
+  it("no Supabase client: error, nothing asked", async () => {
+    noClient = true;
+    expect(await searchEntries("walk")).toEqual({ status: "error" });
+    expect(rpc).not.toHaveBeenCalled();
+  });
+
+  it("no hits (an empty list, or no data at all): ok and empty, and the day moods aren't asked", async () => {
+    expect(await searchEntries("walk")).toEqual({ status: "ok", hits: [], more: false });
+    nullRows = true;
+    expect(await searchEntries("walk")).toEqual({ status: "ok", hits: [], more: false });
+    expect(moodsAsked).not.toHaveBeenCalled();
+  });
+
+  it("the day moods asked once per day shown; none answered → no mood, the hits still come", async () => {
+    rows = [row(0), { ...row(2), entry_date: "2026-10-20" }, row(1)];
+    checkIns = null;
+    const r = await searchEntries("river");
+    expect(moodsAsked).toHaveBeenCalledTimes(1);
+    expect(moodsAsked).toHaveBeenCalledWith("local_date", ["2026-10-20", "2026-09-01"]);
+    expect(r.status === "ok" && r.hits.map((h) => h.mood)).toEqual([null, null, null]);
+  });
+
+  it("a hit the snippet can't place (the database folded case differently): the entry's opening, whitespace flattened, at most 80", async () => {
+    rows = [row(0, `Walked down the\n\nSTRASSE   today. ${"x".repeat(100)}`)];
+    const r = await searchEntries("straße");
+    expect(r.status === "ok" && r.hits[0].snippet).toEqual({ before: "", match: "", after: `Walked down the STRASSE today. ${"x".repeat(49)}` });
   });
 });
