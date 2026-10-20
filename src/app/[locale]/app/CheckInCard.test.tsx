@@ -485,7 +485,7 @@ describe("CheckInCard: the summary (decision 161)", () => {
     expect(mood).toHaveTextContent(messages.today.mood4);
     expect(screen.getByTestId("checkin-edit")).toBeInTheDocument();
     const chips = [...screen.getByTestId("checkin-summary-chips").querySelectorAll("li")];
-    expect(chips.map((c) => c.textContent)).toEqual(["7.5 h", messages.today.sleepGood, messages.today.exerciseNone, "Stress 2/5"]);
+    expect(chips.map((c) => c.textContent)).toEqual(["7.5 h", messages.today.sleepGood, messages.today.exerciseNone, "Stress 2 of 5"]);
     // Sleep and stress coloured; quality is words only; a rest day has no colour.
     expect(chips.map((c) => c.querySelector("[data-value-colour]")?.getAttribute("data-value-colour") ?? null)).toEqual(["#F3C24F", null, null, "#F4A77A"]);
   });

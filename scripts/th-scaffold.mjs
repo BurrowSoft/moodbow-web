@@ -5,7 +5,11 @@
 // src/messages/th-draft.json for UX & PM to translate. Thai isn't offered
 // anywhere until a native speaker has read every string (thai_reviewed).
 //
-//   node scripts/th-scaffold.mjs <path to r1-screens-and-copy.md>
+//   node scripts/th-scaffold.mjs <r1-screens-and-copy.md> [th-web-draft.json]
+//
+// The optional second file is UX & PM's Thai for strings r1 doesn't have
+// (key → Thai): used where its ICU arguments match, and still listed in
+// th-draft.json ("UX draft") until the native read.
 
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -32,7 +36,8 @@ export function icuArgs(message) {
 }
 
 const r1Path = process.argv[2];
-if (!r1Path) throw new Error("usage: node scripts/th-scaffold.mjs <r1-screens-and-copy.md>");
+if (!r1Path) throw new Error("usage: node scripts/th-scaffold.mjs <r1-screens-and-copy.md> [th-web-draft.json]");
+const uxDrafts = process.argv[3] ? JSON.parse(readFileSync(process.argv[3], "utf8")) : {};
 
 // r1's tables: | key | en | th |. A key may appear more than once (the
 // same string on several screens); the first row wins.
@@ -63,8 +68,12 @@ function walk(node, path) {
     // ("… again. (When the session was revoked …)"): compare without it.
     const r1en = row && !String(v).endsWith(")") ? row.en.replace(/\s+\([^()]*\)$/, "") : row?.en;
     const sameArgs = row?.th ? icuArgs(row.th) === icuArgs(v) : false;
+    const ux = uxDrafts[p];
     if (row && row.th && r1en === v && sameArgs) out[k] = row.th;
-    else {
+    else if (typeof ux === "string" && ux.trim() && icuArgs(ux) === icuArgs(v)) {
+      out[k] = ux;
+      drafts.push({ key: p, en: v, reason: "UX draft (native read pending)" });
+    } else {
       out[k] = v;
       const reason = !row ? "not in r1" : !row.th ? "no Thai in r1" : r1en !== v ? "English changed since r1" : "Thai's placeholders differ from English";
       drafts.push({ key: p, en: v, reason, r1en: row && r1en !== v ? row.en : undefined, r1th: reason === "Thai's placeholders differ from English" ? row.th : undefined });

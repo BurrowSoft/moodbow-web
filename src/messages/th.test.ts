@@ -43,18 +43,20 @@ describe("th.json", () => {
     expect(Object.keys(T).sort()).toEqual(Object.keys(E).sort());
   });
 
-  it("every translated string uses the same placeholders as English", () => {
-    for (const key of Object.keys(E)) {
-      if (draftKeys.has(key)) continue;
-      expect(args(T[key]), key).toEqual(args(E[key]));
+  it("every Thai string uses the same placeholders as English", () => {
+    for (const key of Object.keys(E)) expect(args(T[key]), key).toEqual(args(E[key]));
+  });
+
+  it("th-draft lists the strings without a reviewed Thai: each a real key; UX drafts are Thai, the rest still English", () => {
+    for (const d of drafts as { key: string; reason: string }[]) {
+      expect(E[d.key], d.key).toBeDefined();
+      if (d.reason.startsWith("UX draft")) expect(T[d.key], d.key).not.toBe(E[d.key]);
+      else expect(T[d.key], d.key).toBe(E[d.key]);
     }
   });
 
-  it("th-draft lists exactly the strings still in English, each a real key", () => {
-    for (const key of draftKeys) {
-      expect(E[key], key).toBeDefined();
-      expect(T[key], key).toBe(E[key]);
-    }
+  it("every string has its Thai: r1's or a UX draft (none left in English)", () => {
+    expect((drafts as { reason: string }[]).filter((d) => !d.reason.startsWith("UX draft"))).toEqual([]);
   });
 
   it("isn't offered yet: English only until a native speaker has read it", () => {
