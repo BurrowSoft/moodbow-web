@@ -8,6 +8,7 @@ import { MOOD_COLOURS, MOOD_DOT_OUTLINE } from "@/lib/journal/checkIn";
 import { formatMonth, MIN_CHECK_INS } from "@/lib/share/moodbow";
 import { ShareMonth } from "../insights/ShareMonth";
 import { loadCalendarMonth } from "./calendarActions";
+import { PrintMonthLink } from "./PrintMonthLink";
 
 // Month calendar (1.1 M, decision 197): one month per screen, weeks from
 // Monday. A day with a check-in has a dot in its Sunrise mood colour, plus
@@ -23,7 +24,19 @@ const KEY_STEP: Record<string, number> = { ArrowLeft: -1, ArrowRight: 1, ArrowUp
 
 type Load = { kind: "ready" } | { kind: "loading" } | { kind: "error" };
 
-export function MonthCalendar({ today, dateLocaleTag, initial, shareable }: { today: string; dateLocaleTag: string; initial: CalendarMonth | null; shareable: boolean }) {
+export function MonthCalendar({
+  today,
+  dateLocaleTag,
+  initial,
+  shareable,
+  printable = false,
+}: {
+  today: string;
+  dateLocaleTag: string;
+  initial: CalendarMonth | null;
+  shareable: boolean;
+  printable?: boolean;
+}) {
   const t = useTranslations("timeline");
   const tt = useTranslations("today");
   const ta = useTranslations("app");
@@ -209,10 +222,14 @@ export function MonthCalendar({ today, dateLocaleTag, initial, shareable }: { to
       )}
 
       {/* The existing share flow on this month's moodbow card, when the month
-          has enough check-ins for one (as in the Timeline list). */}
-      {shareable && load.kind === "ready" && moods >= MIN_CHECK_INS && (
-        <div className="mt-4">
-          <ShareMonth month={month} dateLocaleTag={dateLocaleTag} label={SHARE_LABEL} asLink testId="calendar-share" />
+          has enough check-ins for one (as in the Timeline list), and Print
+          this month (1.1 N, §N: "under the calendar"). */}
+      {((shareable && load.kind === "ready" && moods >= MIN_CHECK_INS) || printable) && (
+        <div className="mt-4 flex flex-wrap items-center gap-x-4">
+          {shareable && load.kind === "ready" && moods >= MIN_CHECK_INS && (
+            <ShareMonth month={month} dateLocaleTag={dateLocaleTag} label={SHARE_LABEL} asLink testId="calendar-share" />
+          )}
+          {printable && <PrintMonthLink month={month} testId="calendar-print" />}
         </div>
       )}
     </section>

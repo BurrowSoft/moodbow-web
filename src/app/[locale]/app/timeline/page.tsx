@@ -64,6 +64,7 @@ export default async function TimelinePage({ params, searchParams }: PageProps<"
   }
   const filter = segment;
   const shareable = pageGate("share-cards") !== "hidden";
+  const printable = pageGate("print-live") !== "hidden";
 
   // Month calendar (1.1 M): List · Calendar, the choice from its cookie so
   // the chosen view paints first; this month is read here only for the
@@ -110,7 +111,7 @@ export default async function TimelinePage({ params, searchParams }: PageProps<"
         dateLocaleTag={dateLocaleTag}
         shareable={shareable}
         year={pageGate("year-card") !== "hidden" ? yearOnOffer(me.today) : null}
-        printable={pageGate("print-live") !== "hidden"}
+        printable={printable}
       />
     </>
   );
@@ -128,7 +129,7 @@ export default async function TimelinePage({ params, searchParams }: PageProps<"
             initialView={view}
             list={list}
             calendar={
-              <MonthCalendar today={me.today} dateLocaleTag={dateLocaleTag} initial={calendarInitial?.status === "ok" ? calendarInitial.days : null} shareable={shareable} />
+              <MonthCalendar today={me.today} dateLocaleTag={dateLocaleTag} initial={calendarInitial?.status === "ok" ? calendarInitial.days : null} shareable={shareable} printable={printable} />
             }
           />
         </>

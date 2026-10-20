@@ -24,10 +24,10 @@ const OCTOBER: CalendarMonth = {
   "2026-10-02": { mood: null, moment: true, entry: true },
   "2026-10-20": { mood: 2, moment: false, entry: false },
 };
-const renderIt = (initial: CalendarMonth | null = OCTOBER, shareable = true) =>
+const renderIt = (initial: CalendarMonth | null = OCTOBER, shareable = true, printable = false) =>
   render(
     <NextIntlClientProvider locale="en" messages={messages}>
-      <MonthCalendar today={TODAY} dateLocaleTag="en-GB" initial={initial} shareable={shareable} />
+      <MonthCalendar today={TODAY} dateLocaleTag="en-GB" initial={initial} shareable={shareable} printable={printable} />
     </NextIntlClientProvider>,
   );
 const day = (date: string) => screen.getByTestId(`calendar-day-${date}`);
@@ -120,6 +120,18 @@ describe("MonthCalendar (1.1 M)", () => {
     cleanup();
     renderIt(five, false);
     expect(screen.queryByTestId("calendar-share")).toBeNull();
+  });
+
+  it("Print this month under the calendar (1.1 N): only where printing is live, for the month shown", async () => {
+    renderIt(OCTOBER, false);
+    expect(screen.queryByTestId("calendar-print")).toBeNull();
+    cleanup();
+    renderIt(OCTOBER, false, true);
+    expect(screen.getByTestId("calendar-print")).toHaveAttribute("href", "/app/print/2026-10");
+    expect(screen.getByTestId("calendar-print")).toHaveTextContent(t.printMonth);
+    fireEvent.click(screen.getByRole("button", { name: t.calPrevMonth }));
+    await settle();
+    expect(screen.getByTestId("calendar-print")).toHaveAttribute("href", "/app/print/2026-09");
   });
 
   it("a failed month: the error and a Try again that asks again", async () => {
