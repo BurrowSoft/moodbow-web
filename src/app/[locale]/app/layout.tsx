@@ -51,7 +51,11 @@ export default async function AppLayout({ children, params }: LayoutProps<"/[loc
           <NavProgress />
         </Suspense>
         <AppNav />
-        <main id="main" className={`flex-1 ${APP_MAIN_GUTTER} pb-28 pt-10 md:pb-10`}>
+        {/* At least a screen tall: the page streams in after a first paint
+            (the loading fallback) that's shorter than the screen, and the
+            footer under it would be pushed down in view. Kept below the fold,
+            nothing visible moves (Today CLS 0.13, Web Tester #82 isolation). */}
+        <main id="main" className={`min-h-dvh flex-1 ${APP_MAIN_GUTTER} pb-28 pt-10 md:pb-10`}>
           <div className="mx-auto max-w-3xl">{children}</div>
         </main>
       </div>
