@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
 import { dialogButton } from "@/components/Dialog";
 import type { Milestone } from "@/lib/share/cards";
@@ -40,17 +40,18 @@ export function MilestoneCard({ n, colours, uid, month, dateLocaleTag }: Props) 
       // storage unavailable: it may show again next time
     }
   }, [key]);
-  // The spacer is in the server HTML whenever there's a milestone (the
-  // server can't know it was seen), so it never appears late and never
-  // pushes the footer (reviewer #82); it goes only when dismissed here, a
-  // change right after the tap, which CLS doesn't count. Seen on an earlier
-  // visit, it stays as blank space at the page's end.
-  const [dismissedHere, setDismissedHere] = useState(false);
   const dismiss = useCallback(() => {
     markSeen();
-    setDismissedHere(true);
     listeners.forEach((cb) => cb());
   }, [markSeen]);
+  // While the card floats, the page gets room for it at its very end, after
+  // the footer (Web Tester #82: an in-page spacer still left the footer
+  // under the card): space added below everything moves nothing (no CLS).
+  useEffect(() => {
+    if (done) return;
+    document.body.classList.add("has-floating-card");
+    return () => document.body.classList.remove("has-floating-card");
+  }, [done]);
   // Said once to screen readers when the card appears: the polite live
   // region is always there (empty in the server HTML, where it counts as
   // seen) and gets the title when the browser finds the milestone unseen.
@@ -62,13 +63,12 @@ export function MilestoneCard({ n, colours, uid, month, dateLocaleTag }: Props) 
 
   // Fixed just above the bottom tab bar (bottom-right on wide screens), out
   // of the page's flow: appearing after hydration moves nothing (decision
-  // 186, Today's CLS). The spacer (above) keeps Today's last content
-  // reachable above it.
+  // 186, Today's CLS). The body's bottom room (above) keeps the page's end,
+  // footer included, reachable above it.
   // The live region keeps its place in the tree either way (a remounted one
   // may not be announced).
   return (
     <>
-      {!dismissedHere && <div aria-hidden="true" data-testid="milestone-spacer" className="h-44 md:h-40" />}
       {!done && (
         <section
           aria-labelledby="milestone-title"

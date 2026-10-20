@@ -185,6 +185,13 @@ body {
 
 /* Today's milestone offer (decision 186): slides up from below; it's fixed,
    and a transform, so it moves nothing else. Reduced motion: just appears. */
+/* Room at the page's very end while the milestone card floats: its height
+   above the tab bar on phones (to ~15rem), above the corner on wide screens. */
+.has-floating-card { padding-bottom: 15rem; }
+@media (min-width: 48rem) {
+  .has-floating-card { padding-bottom: 12rem; }
+}
+
 @keyframes milestone-in {
   from { transform: translateY(1.5rem); opacity: 0; }
   to { transform: none; opacity: 1; }

@@ -37,7 +37,8 @@ describe("MilestoneCard (decision 169)", () => {
     renderIt();
     expect(screen.getByTestId("milestone-card").className).toMatch(/\bfixed\b/);
     expect(screen.getByTestId("milestone-card").className).toMatch(/\bmilestone-in\b/);
-    expect(screen.getByTestId("milestone-spacer")).toHaveAttribute("aria-hidden", "true");
+    // Room at the page's very end (after the footer) while it floats.
+    expect(document.body).toHaveClass("has-floating-card");
     expect(screen.getByRole("status")).toHaveTextContent("30 days of your story");
   });
 
@@ -47,7 +48,7 @@ describe("MilestoneCard (decision 169)", () => {
     expect(screen.getAllByRole("button", { name: messages.share.milestoneNotNow })).toHaveLength(2);
     fireEvent.click(screen.getByTestId("milestone-close"));
     expect(screen.queryByTestId("milestone-card")).toBeNull();
-    expect(screen.queryByTestId("milestone-spacer")).toBeNull();
+    expect(document.body).not.toHaveClass("has-floating-card");
     expect(window.localStorage.getItem(KEY)).toBe("1");
     // The live region stays (empty), so it's never re-announced.
     expect(screen.getByRole("status")).toBeEmptyDOMElement();
@@ -67,11 +68,11 @@ describe("MilestoneCard (decision 169)", () => {
     expect(screen.getByTestId("milestone-card")).toBeInTheDocument();
   });
 
-  it("seen on an earlier visit: no card, but the spacer stays (it's in the server HTML: nothing moves, footer included)", () => {
+  it("seen on an earlier visit: no card and no extra room at the page's end", () => {
     window.localStorage.setItem(KEY, "1");
     renderIt();
     expect(screen.queryByTestId("milestone-card")).toBeNull();
-    expect(screen.getByTestId("milestone-spacer")).toBeInTheDocument();
+    expect(document.body).not.toHaveClass("has-floating-card");
   });
 
   it("already seen: nothing shown; another milestone or person still is", () => {
