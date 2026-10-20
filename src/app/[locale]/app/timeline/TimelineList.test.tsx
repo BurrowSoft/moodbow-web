@@ -215,4 +215,13 @@ describe("Print this month: the click asks for the dialog once", () => {
     expect(takePrintRequest("2026-10")).toBe(true);
     expect(takePrintRequest("2026-10")).toBe(false);
   });
+
+  it("a modified click (new tab or window) leaves no request", async () => {
+    const { takePrintRequest } = await import("@/lib/journal/printOnce");
+    renderList({ printable: true });
+    for (const mod of [{ ctrlKey: true }, { metaKey: true }, { shiftKey: true }, { button: 1 }]) {
+      fireEvent.click(screen.getByTestId("timeline-print-2026-10"), mod);
+      expect(takePrintRequest("2026-10")).toBe(false);
+    }
+  });
 });

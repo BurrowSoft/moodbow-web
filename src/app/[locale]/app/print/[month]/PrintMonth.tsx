@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { MomentStar } from "@/components/MomentStar";
 import { dateLine } from "@/lib/journal/today";
@@ -19,9 +19,16 @@ export function PrintMonth({ month, title, days, dateLocaleTag }: { month: strin
 
   // Only when arriving from "Print this month", once the page has drawn
   // (never on a refresh, Back or a link opened elsewhere: the button is here).
+  // The request is taken into a ref, so StrictMode's second effect run in
+  // development still prints (reviewer #96).
+  const wanted = useRef<boolean | null>(null);
   useEffect(() => {
-    if (!takePrintRequest(month)) return;
-    const frame = window.requestAnimationFrame(() => window.print());
+    wanted.current ??= takePrintRequest(month);
+    if (!wanted.current) return;
+    const frame = window.requestAnimationFrame(() => {
+      wanted.current = false;
+      window.print();
+    });
     return () => window.cancelAnimationFrame(frame);
   }, [month]);
 

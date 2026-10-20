@@ -93,7 +93,11 @@ export function TimelineList({ initial, initialDone, momentsOnly, dateLocaleTag,
             <div className="flex flex-wrap items-center gap-x-4">
               {shareable && <MonthShare month={month} dateLocaleTag={dateLocaleTag} counts={monthCounts} year={year} />}
               {printable && (
-                <Link href={`/app/print/${month}`} onClick={() => askToPrint(month)} data-testid={`timeline-print-${month}`} className={PRINT_LINK}>
+                <Link href={`/app/print/${month}`} onClick={(e) => {
+                    // A new tab or window (Ctrl/Cmd/Shift/middle click) opens
+                    // without the dialog, and leaves no request behind here.
+                    if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) askToPrint(month);
+                  }} data-testid={`timeline-print-${month}`} className={PRINT_LINK}>
                   {t("printMonth")}
                 </Link>
               )}
