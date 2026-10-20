@@ -23,6 +23,12 @@ describe("scrubUrl", () => {
     expect(scrubUrl("/help/2026-10-18-notes")).toBe("/help/2026-10-18-notes");
     expect(scrubEvent({ transaction: "/app/timeline/2026-10-18" }).transaction).toBe("/app/timeline/[date]");
   });
+
+  it("replaces months in the path too (1.1 N print, as the app's #73)", () => {
+    expect(scrubUrl("https://www.moodbow.com/app/print/2026-10")).toBe("https://www.moodbow.com/app/print/[date]");
+    expect(scrubUrl("/th/app/print/2026-10/")).toBe("/th/app/print/[date]/");
+    expect(scrubUrl("/help/2026-10-notes")).toBe("/help/2026-10-notes");
+  });
 });
 
 describe("scrubEvent", () => {

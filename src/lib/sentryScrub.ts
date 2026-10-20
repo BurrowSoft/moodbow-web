@@ -54,8 +54,9 @@ const URL_TAGS = new Set(["url", "transaction"]);
 const SAFE_CRUMB_KEYS = ["method", "status_code"];
 const URL_CRUMB_KEYS = ["url", "from", "to"];
 const UUID_SEGMENT = /\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?=\/|$)/gi;
-// A day in the path (/app/timeline/2026-10-18) says when someone journaled.
-const DATE_SEGMENT = /\/\d{4}-\d{2}-\d{2}(?=\/|$)/g;
+// A day or a month in the path (/app/timeline/2026-10-18, /app/print/2026-10)
+// says when someone journaled.
+const DATE_SEGMENT = /\/\d{4}-\d{2}(?:-\d{2})?(?=\/|$)/g;
 
 // Origin + path only: no query string and no fragment at all (tokens,
 // emails, search terms); record ids in the path become [id] and days [date].
