@@ -5,7 +5,9 @@ import { decodeImportFile, detectDateFormat, htmlToText, MAX_IMPORT_BYTES, parse
 
 // jsdom (the default environment) provides DOMParser, as the browser does.
 const TODAY = "2026-10-20";
-const sample = readFileSync(join(__dirname, "fixtures", "daylio-sample.csv"), "utf8");
+// LF whatever the checkout does: git stores it LF, but Windows may check it
+// out CRLF, which put \r into the multi-line note (reviewer, #115).
+const sample = readFileSync(join(__dirname, "fixtures", "daylio-sample.csv"), "utf8").replace(/\r\n/g, "\n");
 const ok = (text: string, options = {}): ImportPlan => {
   const r = planImport(text, TODAY, options);
   if (r.status !== "ok") throw new Error(`expected a plan, got ${JSON.stringify(r)}`);
