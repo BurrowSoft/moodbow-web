@@ -22,7 +22,7 @@ const renderIt = () =>
 // The id of the 100 ms timer that opening the dialog started.
 function openAndGetTimer(setSpy: ReturnType<typeof vi.spyOn>) {
   fireEvent.click(screen.getByTestId("share-open"));
-  const i = setSpy.mock.calls.findIndex((call) => call[1] === 100);
+  const i = setSpy.mock.calls.findIndex((call: unknown[]) => call[1] === 100);
   expect(i).toBeGreaterThanOrEqual(0);
   return setSpy.mock.results[i].value as number;
 }
