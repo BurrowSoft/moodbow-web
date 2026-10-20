@@ -1,6 +1,6 @@
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import messages from "@/messages/en.json";
 
@@ -41,9 +41,10 @@ afterEach(() => {
 describe("TimelineSearch (1.1 L)", () => {
   it("closed: the magnifier and the list; open: the labelled field, focused, with the hint, and no list", () => {
     renderIt();
-    expect(screen.getByTestId("the-list")).toBeInTheDocument();
+    expect(screen.getByTestId("the-list")).toBeVisible();
     open();
-    expect(screen.queryByTestId("the-list")).toBeNull();
+    // Hidden, not removed: closing returns to the same view (S9).
+    expect(screen.getByTestId("the-list")).not.toBeVisible();
     expect(screen.getByRole("searchbox", { name: t.searchLabel })).toHaveFocus();
     expect(screen.getByTestId("timeline-search-status")).toHaveTextContent(t.searchHint);
   });
@@ -111,14 +112,42 @@ describe("TimelineSearch (1.1 L)", () => {
     type("walk");
     fireEvent.keyDown(screen.getByRole("searchbox", { name: t.searchLabel }), { key: "Escape" });
     await wait(300);
-    expect(screen.getByTestId("the-list")).toBeInTheDocument();
+    expect(screen.getByTestId("the-list")).toBeVisible();
     expect(screen.getByRole("button", { name: t.searchOpen })).toHaveFocus();
     expect(searchEntries).not.toHaveBeenCalled();
     open();
     expect(screen.getByRole("searchbox", { name: t.searchLabel })).toHaveValue("");
     fireEvent.click(screen.getByRole("button", { name: t.searchClose }));
     await wait(0);
-    expect(screen.getByTestId("the-list")).toBeInTheDocument();
+    expect(screen.getByTestId("the-list")).toBeVisible();
+  });
+
+  it("closing returns to the view it was opened from: what search covers keeps its state (UX §L; Web Tester S9)", async () => {
+    // A stand-in for List · Calendar: its choice lives in its own state, as
+    // in TimelineViews.
+    function Views() {
+      const [calendar, setCalendar] = useState(false);
+      return calendar ? (
+        <p data-testid="the-calendar" />
+      ) : (
+        <button type="button" data-testid="to-calendar" onClick={() => setCalendar(true)} />
+      );
+    }
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <TimelineSearch dateLocaleTag="en-GB">
+          <Views />
+        </TimelineSearch>
+      </NextIntlClientProvider>,
+    );
+    fireEvent.click(screen.getByTestId("to-calendar"));
+    expect(screen.getByTestId("the-calendar")).toBeVisible();
+    open();
+    expect(screen.getByTestId("the-calendar")).not.toBeVisible();
+    fireEvent.keyDown(screen.getByRole("searchbox", { name: t.searchLabel }), { key: "Escape" });
+    await wait(0);
+    expect(screen.getByTestId("the-calendar")).toBeVisible();
+    expect(screen.queryByTestId("to-calendar")).toBeNull();
   });
 
   it("an error: the error text and a Try again button that asks again for the same text", async () => {

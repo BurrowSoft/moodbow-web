@@ -71,111 +71,124 @@ export function TimelineSearch({ dateLocaleTag, children }: { dateLocaleTag: str
     window.setTimeout(() => opener.current?.focus(), 0);
   };
 
-  if (!open)
-    return (
-      <>
-        <div className="mt-4 flex justify-end">
-          <button
-            ref={opener}
-            type="button"
-            data-testid="timeline-search-open"
-            onClick={() => setOpen(true)}
-            aria-label={t("searchOpen")}
-            title={t("searchOpen")}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-full text-text hover:bg-pill"
-          >
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-              <circle cx="11" cy="11" r="7" />
-              <path d="M20 20l-3.5-3.5" />
-            </svg>
-          </button>
-        </div>
-        {children}
-      </>
-    );
-
+  // What search covers (the list or the calendar) stays mounted, only
+  // hidden while search is open, so closing it returns to exactly that
+  // view: the calendar and its month, the list and the days it loaded
+  // (UX §L; Web Tester S9).
   return (
-    <section aria-label={t("searchLabel")} data-testid="timeline-search" className="mt-4">
-      <div className="flex items-center gap-2">
-        <label htmlFor={inputId} className="sr-only">
-          {t("searchLabel")}
-        </label>
-        <input
-          ref={field}
-          id={inputId}
-          type="search"
-          data-testid="timeline-search-input"
-          value={text}
-          placeholder={t("searchLabel")}
-          autoComplete="off"
-          onChange={(e) => setText(e.target.value)}
-          onKeyDown={(e) => e.key === "Escape" && close()}
-          className="min-h-11 w-full flex-1 rounded-full border border-border bg-surface px-4 text-text placeholder:text-muted"
-        />
+    <>
+      {open ? searchPanel() : magnifier()}
+      <div hidden={open} data-testid="timeline-search-covered">
+        {children}
+      </div>
+    </>
+  );
+
+  function magnifier() {
+    return (
+      <div className="mt-4 flex justify-end">
         <button
+          ref={opener}
           type="button"
-          data-testid="timeline-search-close"
-          onClick={close}
-          aria-label={t("searchClose")}
-          title={t("searchClose")}
-          className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-muted hover:bg-pill"
+          data-testid="timeline-search-open"
+          onClick={() => setOpen(true)}
+          aria-label={t("searchOpen")}
+          title={t("searchOpen")}
+          className="inline-flex h-11 w-11 items-center justify-center rounded-full text-text hover:bg-pill"
         >
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-            <path d="M6 6l12 12M18 6L6 18" />
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="7" />
+            <path d="M20 20l-3.5-3.5" />
           </svg>
         </button>
       </div>
+    );
+  }
 
-      <div role="status" className="mt-4 text-sm text-muted" data-testid="timeline-search-status">
-        {state.kind === "idle" && t("searchHint")}
-        {state.kind === "results" && (state.hits.length === 0 ? t("searchEmpty", { q: state.q }) : t("searchResultsCount", { n: state.hits.length }))}
-      </div>
-      {/* UX: the error itself, and a real button that asks again for the same text. */}
-      {state.kind === "error" && (
-        <div role="alert" className="mt-2" data-testid="timeline-search-error">
-          <p className="text-sm text-text">{state.offline ? tai("errOffline") : tt("errGeneric")}</p>
+  function searchPanel() {
+    return (
+      <section aria-label={t("searchLabel")} data-testid="timeline-search" className="mt-4">
+        <div className="flex items-center gap-2">
+          <label htmlFor={inputId} className="sr-only">
+            {t("searchLabel")}
+          </label>
+          <input
+            ref={field}
+            id={inputId}
+            type="search"
+            data-testid="timeline-search-input"
+            value={text}
+            placeholder={t("searchLabel")}
+            autoComplete="off"
+            onChange={(e) => setText(e.target.value)}
+            onKeyDown={(e) => e.key === "Escape" && close()}
+            className="min-h-11 w-full flex-1 rounded-full border border-border bg-surface px-4 text-text placeholder:text-muted"
+          />
           <button
             type="button"
-            data-testid="timeline-search-retry"
-            onClick={() => run(state.q)}
-            className="mt-2 inline-flex min-h-11 items-center rounded-full border border-border px-4 text-sm font-medium text-text hover:bg-pill"
+            data-testid="timeline-search-close"
+            onClick={close}
+            aria-label={t("searchClose")}
+            title={t("searchClose")}
+            className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-muted hover:bg-pill"
           >
-            {ta("tryAgain")}
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+              <path d="M6 6l12 12M18 6L6 18" />
+            </svg>
           </button>
         </div>
-      )}
 
-      {state.kind === "results" && state.hits.length > 0 && (
-        <ul className="mt-2 space-y-3" data-testid="timeline-search-results">
-          {state.hits.map((h) => (
-            <li key={h.id}>
-              <Link href={withOrigin(`/app/entries/${h.id}`, "/app/timeline")} data-testid={`timeline-search-hit-${h.id}`} className="block rounded-2xl border border-border bg-surface p-4 hover:border-accent">
-                <span className="flex flex-wrap items-center gap-x-2 font-medium text-text">
-                  {h.mood !== null && <span className={`h-3.5 w-3.5 shrink-0 rounded-full ${MOOD_COLOURS[h.mood - 1]} ${MOOD_DOT_OUTLINE}`} aria-hidden="true" />}
-                  <span>{dayLabel(h.date, dateLocaleTag)}</span>
-                  {h.mood !== null && (
-                    <span className="text-sm font-normal text-muted">
-                      <span aria-hidden="true">·</span> {tt(`mood${h.mood}` as "mood1")}
-                    </span>
-                  )}
-                  {h.isMoment && <MomentStar label={te("momentBadge")} />}
-                </span>
-                {/* The match in bold, never colour alone. */}
-                <span className="mt-1 block truncate text-sm text-text" data-testid="timeline-search-snippet">
-                  {h.snippet.before}
-                  {h.snippet.match && <strong>{h.snippet.match}</strong>}
-                  {h.snippet.after}
-                </span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
-      {state.kind === "results" && state.more && (
-        <p className="mt-3 text-sm text-muted" data-testid="timeline-search-more">
-          {t("searchMore")}
-        </p>
-      )}
-    </section>
-  );
+        <div role="status" className="mt-4 text-sm text-muted" data-testid="timeline-search-status">
+          {state.kind === "idle" && t("searchHint")}
+          {state.kind === "results" && (state.hits.length === 0 ? t("searchEmpty", { q: state.q }) : t("searchResultsCount", { n: state.hits.length }))}
+        </div>
+        {/* UX: the error itself, and a real button that asks again for the same text. */}
+        {state.kind === "error" && (
+          <div role="alert" className="mt-2" data-testid="timeline-search-error">
+            <p className="text-sm text-text">{state.offline ? tai("errOffline") : tt("errGeneric")}</p>
+            <button
+              type="button"
+              data-testid="timeline-search-retry"
+              onClick={() => run(state.q)}
+              className="mt-2 inline-flex min-h-11 items-center rounded-full border border-border px-4 text-sm font-medium text-text hover:bg-pill"
+            >
+              {ta("tryAgain")}
+            </button>
+          </div>
+        )}
+
+        {state.kind === "results" && state.hits.length > 0 && (
+          <ul className="mt-2 space-y-3" data-testid="timeline-search-results">
+            {state.hits.map((h) => (
+              <li key={h.id}>
+                <Link href={withOrigin(`/app/entries/${h.id}`, "/app/timeline")} data-testid={`timeline-search-hit-${h.id}`} className="block rounded-2xl border border-border bg-surface p-4 hover:border-accent">
+                  <span className="flex flex-wrap items-center gap-x-2 font-medium text-text">
+                    {h.mood !== null && <span className={`h-3.5 w-3.5 shrink-0 rounded-full ${MOOD_COLOURS[h.mood - 1]} ${MOOD_DOT_OUTLINE}`} aria-hidden="true" />}
+                    <span>{dayLabel(h.date, dateLocaleTag)}</span>
+                    {h.mood !== null && (
+                      <span className="text-sm font-normal text-muted">
+                        <span aria-hidden="true">·</span> {tt(`mood${h.mood}` as "mood1")}
+                      </span>
+                    )}
+                    {h.isMoment && <MomentStar label={te("momentBadge")} />}
+                  </span>
+                  {/* The match in bold, never colour alone. */}
+                  <span className="mt-1 block truncate text-sm text-text" data-testid="timeline-search-snippet">
+                    {h.snippet.before}
+                    {h.snippet.match && <strong>{h.snippet.match}</strong>}
+                    {h.snippet.after}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+        {state.kind === "results" && state.more && (
+          <p className="mt-3 text-sm text-muted" data-testid="timeline-search-more">
+            {t("searchMore")}
+          </p>
+        )}
+      </section>
+    );
+  }
 }
