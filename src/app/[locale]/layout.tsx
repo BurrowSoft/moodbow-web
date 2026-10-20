@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
-import { getTranslations, setRequestLocale } from "next-intl/server";
+import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
+import { pickMessages, PUBLIC_CLIENT_NAMESPACES } from "@/i18n/clientMessages";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
@@ -72,7 +73,9 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
         >
           {t("skipToContent")}
         </a>
-        <NextIntlClientProvider>
+        {/* Only the namespaces client components use outside the journal reach
+            the browser here (perf fix 3); /app's layout adds the rest. */}
+        <NextIntlClientProvider messages={pickMessages(await getMessages(), PUBLIC_CLIENT_NAMESPACES)}>
           <LocalDataWipe />
           <div className="fade-in flex flex-1 flex-col">
             {children}

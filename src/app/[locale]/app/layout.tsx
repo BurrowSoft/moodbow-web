@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
-import { setRequestLocale } from "next-intl/server";
+import { NextIntlClientProvider } from "next-intl";
+import { getMessages, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 import { redirect } from "@/i18n/navigation";
 import { pageGate } from "@/lib/conditions";
@@ -40,16 +41,20 @@ export default async function AppLayout({ children, params }: LayoutProps<"/[loc
   if (step === "consent") redirect({ href: "/consent", locale });
   if (step === "setup") redirect({ href: "/setup", locale });
 
+  // The journal's client components get every message (the root layout sends
+  // only the public namespaces, perf fix 3).
   return (
-    <div className="flex flex-1 flex-col md:flex-row">
-      {/* It reads the search params: its own Suspense boundary. */}
-      <Suspense fallback={null}>
-        <NavProgress />
-      </Suspense>
-      <AppNav />
-      <main id="main" className={`flex-1 ${APP_MAIN_GUTTER} pb-28 pt-10 md:pb-10`}>
-        <div className="mx-auto max-w-3xl">{children}</div>
-      </main>
-    </div>
+    <NextIntlClientProvider messages={await getMessages()}>
+      <div className="flex flex-1 flex-col md:flex-row">
+        {/* It reads the search params: its own Suspense boundary. */}
+        <Suspense fallback={null}>
+          <NavProgress />
+        </Suspense>
+        <AppNav />
+        <main id="main" className={`flex-1 ${APP_MAIN_GUTTER} pb-28 pt-10 md:pb-10`}>
+          <div className="mx-auto max-w-3xl">{children}</div>
+        </main>
+      </div>
+    </NextIntlClientProvider>
   );
 }
