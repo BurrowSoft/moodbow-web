@@ -11,6 +11,9 @@ import { CheckInCard } from "./CheckInCard";
 import { EntryPreviews, type EntrySummary } from "./EntryPreviews";
 import { tabMetadata } from "./pageMeta";
 import { Link } from "@/i18n/navigation";
+import { pageGate } from "@/lib/conditions";
+import { loadMilestone } from "@/lib/share/milestoneData";
+import { MilestoneCard } from "./MilestoneCard";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/app">): Promise<Metadata> {
   return tabMetadata("tabToday", (await params).locale);
@@ -48,6 +51,8 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
   const te = await getTranslations("entry");
   const timeZone = me.profile?.time_zone ?? "UTC";
   const dateLocaleTag = dateLocale(locale, (await headers()).get("accept-language"), me.profile?.country ?? null);
+  // A milestone reached (decision 169): offered once, where the 1.1 share cards are on.
+  const milestone = pageGate("share-cards") !== "hidden" && pageGate("share-cards-more") !== "hidden" ? await loadMilestone(supabase) : null;
 
   return (
     <section className="space-y-8">
@@ -60,6 +65,7 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
         </p>
       </header>
       <CheckInCard initial={(data as CheckIn | null) ?? null} uid={user.id} date={me.today} dateLocaleTag={dateLocaleTag} />
+      {milestone && <MilestoneCard n={milestone.n} colours={milestone.colours} uid={user.id} month={me.today.slice(0, 7)} dateLocaleTag={dateLocaleTag} />}
       <Link
         href="/app/write"
         data-testid="today-write"
