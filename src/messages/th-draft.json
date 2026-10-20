@@ -30,6 +30,21 @@
     "reason": "UX draft (native read pending)"
   },
   {
+    "key": "meta.descriptionLaunch",
+    "en": "A private journal that learns your story and shows what shapes your days.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "meta.ogDescriptionLaunch",
+    "en": "A private journal that learns your story and shows what shapes your days.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "meta.ogImageAltLaunch",
+    "en": "Moodbow: your month, as a rainbow",
+    "reason": "UX draft (native read pending)"
+  },
+  {
     "key": "meta.manifestDescription",
     "en": "A journal that learns your story.",
     "reason": "UX draft (native read pending)"
