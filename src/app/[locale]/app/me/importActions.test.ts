@@ -115,6 +115,9 @@ describe("our own CSV export's values (1.1 P)", () => {
     expect(rpc).toHaveBeenLastCalledWith("save_entry", expect.objectContaining({ p_is_moment: true }));
     await importEntries([{ id: ID(2), date: "2026-10-01", body: "B" }]);
     expect(rpc).toHaveBeenLastCalledWith("save_entry", expect.objectContaining({ p_is_moment: false }));
+  });
+});
+
 // Coverage pass (UX): nothing is written on any of these.
 describe("import batches: the session and the batch itself", () => {
   const day = [{ date: "2026-10-01", mood: 4 }];

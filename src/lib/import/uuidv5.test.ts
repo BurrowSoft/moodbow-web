@@ -47,6 +47,9 @@ describe("importEntryId over a whole file: the same words more than once on a da
     const after = await ids(`${TWICE}2026-10-01,4,Same\n`);
     expect(after.slice(0, 2)).toEqual(before);
     expect(before).not.toContain(after[2]);
+  });
+});
+
 // Coverage pass (UX): the default namespace and a note without a time.
 describe("the import namespace and untimed notes", () => {
   it("without a namespace, the import namespace is used", async () => {
