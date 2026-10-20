@@ -11,6 +11,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { JournalUnavailable } from "@/components/JournalUnavailable";
 import { isAuthOutage } from "@/lib/supabase/proxy";
 import { AppNav } from "./AppNav";
+import { KeyboardShortcuts } from "./KeyboardShortcuts";
 import { NavProgress } from "@/components/NavProgress";
 import { APP_MAIN_GUTTER } from "@/lib/ui/journalLayout";
 
@@ -51,6 +52,8 @@ export default async function AppLayout({ children, params }: LayoutProps<"/[loc
           <NavProgress />
         </Suspense>
         <AppNav />
+        {/* "/" opens Timeline search wherever search itself is shown. */}
+        {pageGate("shortcuts-live") !== "hidden" && <KeyboardShortcuts search={pageGate("search-live") !== "hidden"} />}
         {/* At least a screen tall: the page streams in after a first paint
             (the loading fallback) that's shorter than the screen, and the
             footer under it would be pushed down in view. Kept below the fold,

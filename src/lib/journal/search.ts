@@ -9,11 +9,14 @@ export const SEARCH_MAX_RESULTS = 50;
 export const SEARCH_MAX_CHARS = 100;
 export const SEARCH_DEBOUNCE_MS = 300;
 
-// The typed text as a search, or null when it's too short (or too long).
+// The typed text as a search: trimmed, then cut to its first 100 characters
+// (as search_entries does, so the app, the web and the server agree; L2), or
+// null when it's too short. Characters are code points, as Postgres counts
+// them, so an emoji at the cut is never split in half.
 export function searchTerm(raw: unknown): string | null {
   if (typeof raw !== "string") return null;
-  const q = raw.trim();
-  return q.length >= SEARCH_MIN && q.length <= SEARCH_MAX_CHARS ? q : null;
+  const chars = [...raw.trim()];
+  return chars.length >= SEARCH_MIN ? chars.slice(0, SEARCH_MAX_CHARS).join("") : null;
 }
 
 // One line around the first match: the text before (cut to a word boundary,
