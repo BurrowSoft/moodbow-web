@@ -10,8 +10,8 @@ const bypass = process.env.VERCEL_AUTOMATION_BYPASS_SECRET;
 
 export default defineConfig({
   testDir: "./e2e",
-  // The staging journeys have their own build and config (playwright.journey.config.ts).
-  testIgnore: "**/journey/**",
+  // The staging journeys and the perf run have their own configs (playwright.journey/perf.config.ts).
+  testIgnore: ["**/journey/**", "**/perf/**"],
   fullyParallel: true,
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [["list"], ["html", { open: "never" }]] : "list",

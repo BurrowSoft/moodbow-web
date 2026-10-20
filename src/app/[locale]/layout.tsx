@@ -77,7 +77,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
             the browser here (perf fix 3); /app's layout adds the rest. */}
         <NextIntlClientProvider messages={pickMessages(await getMessages(), PUBLIC_CLIENT_NAMESPACES)}>
           <LocalDataWipe />
-          <div className="fade-in flex flex-1 flex-col">
+          <div className="flex flex-1 flex-col">
             {children}
             <Footer />
           </div>

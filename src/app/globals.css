@@ -151,11 +151,6 @@ body {
   outline-offset: 3px;
 }
 
-@keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
 /* The home page's moodbow: each band draws from one end to the other
    (pathLength 1), staggered by its own animation-delay; "backwards" holds
    it undrawn until its turn. Reduced motion: no animation, already drawn. */
@@ -173,14 +168,6 @@ body {
   .arc-band {
     animation: none;
   }
-}
-
-.fade-in {
-  animation: fade-in 400ms ease-out both;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .fade-in { animation: none; }
 }
 
 /* Long-form legal text (content/legal/*.md rendered by marked). */
