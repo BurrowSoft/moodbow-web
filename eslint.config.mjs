@@ -1,6 +1,7 @@
 import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
+import { QUERY_RULES } from "./scripts/queryRules.mjs";
 
 // Attributes whose text users see or hear (screen readers, tooltips).
 const USER_FACING_ATTRS = "^(alt|title|placeholder|label|aria-label|aria-description|aria-placeholder|aria-roledescription|aria-valuetext)$";
@@ -16,17 +17,7 @@ const SENTRY_RULES = [
   { selector: `ImportSpecifier[imported.name=/${SENTRY_SETTERS}/]`, message: NO_SENTRY_SETTERS },
 ];
 
-// Text filters on a PostgREST select go into the request URL as query
-// parameters, and Supabase's API logs keep URLs (decision 196): a user's words
-// must travel in an rpc's POST body instead (search_entries). No exceptions.
-const URL_FILTERS = "^(ilike|like|textSearch|or)$";
-const NO_URL_FILTERS = "No .ilike/.like/.textSearch/.or on Supabase queries: they put user text in the request URL and logs (decision 196). Use an rpc (POST body).";
-const QUERY_RULES = [
-  { selector: `CallExpression[callee.property.name=/${URL_FILTERS}/]`, message: NO_URL_FILTERS },
-  // The generic forms, .filter(col, "ilike", v) and .not(col, op, v), put
-  // values in the URL too; Array.prototype.filter never takes 3 arguments.
-  { selector: "CallExpression[callee.property.name=/^(filter|not)$/][arguments.length=3]", message: NO_URL_FILTERS },
-];
+// No user text in a PostgREST request URL (decision 196): scripts/queryRules.mjs.
 
 const eslintConfig = defineConfig([
   ...nextVitals,

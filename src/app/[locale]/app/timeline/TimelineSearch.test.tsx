@@ -14,6 +14,7 @@ vi.mock("@/i18n/navigation", () => ({
 const searchEntries = vi.fn();
 vi.mock("./searchActions", () => ({ searchEntries: (...a: unknown[]) => searchEntries(...a) }));
 const { TimelineSearch } = await import("./TimelineSearch");
+const { requestArrival } = await import("@/lib/ui/arrival");
 
 const t = messages.timeline;
 const hit = (n: number, over: object = {}) => ({ id: `e${n}`, date: "2026-10-20", isMoment: false, mood: 4, snippet: { before: "A long ", match: "walk", after: " by the river." }, ...over });
@@ -175,5 +176,46 @@ describe("TimelineSearch (1.1 L)", () => {
     expect(screen.getByRole("alert")).toHaveTextContent(messages.ai.errOffline);
     // Back to jsdom's own (on the prototype).
     delete (navigator as { onLine?: boolean }).onLine;
+  });
+});
+
+describe("the / shortcut (1.1 O) and what search covers", () => {
+  it("/ pressed on another page: search is open on arrival, its field focused", async () => {
+    requestArrival("search");
+    renderIt();
+    await wait(0);
+    expect(screen.getByRole("searchbox", { name: t.searchLabel })).toHaveFocus();
+  });
+
+  it("/ pressed here: search opens; pressed again while open: still one search, the field focused", async () => {
+    renderIt();
+    act(() => requestArrival("search"));
+    await wait(0);
+    const field = screen.getByRole("searchbox", { name: t.searchLabel });
+    expect(field).toHaveFocus();
+    type("wa");
+    field.blur();
+    act(() => requestArrival("search"));
+    await wait(0);
+    expect(screen.getAllByRole("searchbox")).toHaveLength(1);
+    expect(screen.getByRole("searchbox", { name: t.searchLabel })).toHaveFocus();
+    expect(screen.getByRole("searchbox", { name: t.searchLabel })).toHaveValue("wa");
+  });
+
+  it("while search is open, what it covers is out of reach: hidden, so no key or Tab lands in it (reviewer #97)", async () => {
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <TimelineSearch dateLocaleTag="en-GB">
+          <button type="button" data-testid="covered-button" />
+        </TimelineSearch>
+      </NextIntlClientProvider>,
+    );
+    open();
+    const covered = screen.getByTestId("timeline-search-covered");
+    expect(covered).toHaveAttribute("hidden");
+    expect(screen.getByTestId("covered-button")).not.toBeVisible();
+    for (const key of ["n", "c", "t", "i", "/", "?", "ArrowLeft", "ArrowDown"]) fireEvent.keyDown(document, { key });
+    await wait(0);
+    expect(covered.contains(document.activeElement)).toBe(false);
   });
 });
