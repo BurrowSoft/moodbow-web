@@ -74,6 +74,7 @@ describe("ShareMonth: the 1.1 cards", () => {
     expect(await screen.findByTestId("share-type-moodbow")).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByTestId("share-type-chart")).toHaveAttribute("aria-pressed", "false");
     expect(screen.queryByTestId("share-type-milestone")).toBeNull();
+    expect(screen.getByRole("group", { name: m.shareCardType })).toContainElement(screen.getByTestId("share-type-chart"));
   });
 
   it("the chart card: the range's title, the points counted, the line drawn, moodbow-chart-<range>.png", async () => {
@@ -111,6 +112,20 @@ describe("ShareMonth: the 1.1 cards", () => {
     fireEvent.click(screen.getByTestId("share-format-square"));
     await download();
     expect(lastDraw()).toMatchObject({ format: "square", titleSize: 72 });
+  });
+
+  it("new moods with the same title and count redraw the chart (reviewer #72)", async () => {
+    const { rerender } = renderIt({ chart });
+    fireEvent.click(screen.getByTestId("share-open"));
+    fireEvent.click(await screen.findByTestId("share-type-chart"));
+    await waitFor(() => expect(lastDraw()).toMatchObject({ lineChart: chart.moods }));
+    const moods = [1, null, 2, 3, null, null, 5];
+    rerender(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <ShareMonth month="2026-10" dateLocaleTag="en-US" chart={{ range: "week", moods }} />
+      </NextIntlClientProvider>,
+    );
+    await waitFor(() => expect(lastDraw()).toMatchObject({ lineChart: moods, daysLabel: "4 days journaled" }));
   });
 
   it("an initialType that isn't offered falls back to the moodbow card", async () => {

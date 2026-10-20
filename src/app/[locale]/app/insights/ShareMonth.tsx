@@ -100,6 +100,9 @@ export function ShareMonth({
       : type === "milestone" && milestone
         ? { ready: true, title: t("shareMilestoneText", { n: milestone.n }), days: "", colours: milestone.colours, file: `moodbow-${milestone.n}-days.png`, label: t("shareMilestone") }
         : { ready: enough, title: formatMonth(month, dateLocaleTag), days: colours ? t("shareDaysJournaled", { n: colours.length }) : "", colours: colours ?? [], file: cardFileName(month), label: t("shareMoodbow") };
+  // What the card draws, as one value: a redraw whenever any of it changes
+  // (card itself is a new object each render, reviewer #72).
+  const drawKey = [type, card.title, card.days, card.colours.join(), type === "chart" ? (chart?.moods.join() ?? "") : ""].join("|");
 
   // Draw (again) whenever something on the card changes.
   useEffect(() => {
@@ -144,9 +147,9 @@ export function ShareMonth({
     return () => {
       cancelled = true;
     };
-    // card is rebuilt from these each render.
+    // card is a new object each render; drawKey stands for its content.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, card.ready, card.title, card.days, card.colours.length, type, colours, format, theme, line, month, dateLocaleTag, t]);
+  }, [open, card.ready, drawKey, colours, format, theme, line, month, dateLocaleTag, t]);
 
   const download = (f: File) => {
     const url = URL.createObjectURL(f);
@@ -192,7 +195,7 @@ export function ShareMonth({
               {sayLoading && type === "moodbow" && colours === null && !failed ? t("shareLoading") : null}
             </p>
             {types.length > 1 ? (
-              <div className="flex flex-wrap gap-2" role="group" aria-label={t("shareTitle")}>
+              <div className="flex flex-wrap gap-2" role="group" aria-label={t("shareCardType")}>
                 {types.map((k) => (
                   <button key={k} type="button" data-testid={`share-type-${k}`} aria-pressed={type === k} onClick={() => setType(k)} className={choice(type === k)}>
                     {t(k === "moodbow" ? "shareMoodbow" : k === "chart" ? "shareChart" : "shareMilestone")}
