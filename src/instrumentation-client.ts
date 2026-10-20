@@ -22,8 +22,14 @@ export function startSentry(): Promise<void> {
 
 if (dsn && typeof window !== "undefined") {
   const start = () => void startSentry();
-  if (typeof window.requestIdleCallback === "function") window.requestIdleCallback(start, { timeout: IDLE_TIMEOUT_MS });
-  else window.setTimeout(start, IDLE_TIMEOUT_MS);
+  // After the page's load event, then when idle: an idle callback alone can
+  // fire mid-load (Web Tester, #77), still competing with the page on slow 4G.
+  const whenIdle = () => {
+    if (typeof window.requestIdleCallback === "function") window.requestIdleCallback(start, { timeout: IDLE_TIMEOUT_MS });
+    else window.setTimeout(start, IDLE_TIMEOUT_MS);
+  };
+  if (document.readyState === "complete") whenIdle();
+  else window.addEventListener("load", whenIdle, { once: true });
 }
 
 // Navigations before Sentry has started simply aren't recorded.

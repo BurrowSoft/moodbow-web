@@ -35,6 +35,22 @@ describe("instrumentation-client", () => {
     expect(captureRouterTransitionStart).toHaveBeenCalledWith("/app", "push");
   });
 
+  it("while the page is still loading: nothing until its load event, then idle (Web Tester, #77)", async () => {
+    vi.stubEnv("NEXT_PUBLIC_SENTRY_DSN", "https://key@o0.ingest.sentry.io/1");
+    const ready = vi.spyOn(document, "readyState", "get").mockReturnValue("interactive");
+    try {
+      await import("./instrumentation-client");
+      expect(window.requestIdleCallback).not.toHaveBeenCalled();
+      window.dispatchEvent(new Event("load"));
+      expect(window.requestIdleCallback).toHaveBeenCalledTimes(1);
+      idle!();
+      await settle();
+      expect(init).toHaveBeenCalledTimes(1);
+    } finally {
+      ready.mockRestore();
+    }
+  });
+
   it("navigations before Sentry starts are dropped quietly", async () => {
     vi.stubEnv("NEXT_PUBLIC_SENTRY_DSN", "https://key@o0.ingest.sentry.io/1");
     const mod = await import("./instrumentation-client");
