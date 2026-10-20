@@ -209,7 +209,7 @@ describe("EntryEditor: every way out asks (decision 206)", () => {
     const view = render(
       <NextIntlClientProvider locale="en" messages={messages}>
         <a href={href} data-testid="nav-link">
-          Timeline
+          {messages.app.tabTimeline}
         </a>
         <EntryEditor initial={initial} newId={initial?.id ?? NEW_ID} uid="u1" today="2026-10-02" />
       </NextIntlClientProvider>,
