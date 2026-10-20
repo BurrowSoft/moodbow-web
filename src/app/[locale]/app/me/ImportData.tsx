@@ -42,8 +42,6 @@ export function ImportData({ uid, today, dateLocaleTag, country }: { uid: string
   const t = useTranslations("me");
   const tt = useTranslations("today");
   const ta = useTranslations("ai");
-  // The UI language (en / th), for the order of names shown (displayOrder).
-  const locale = useLocale();
   const inputId = useId();
   const [phase, setPhase] = useState<Phase>({ kind: "idle" });
   // The file's text, in memory only while the preview is open.
@@ -297,6 +295,8 @@ function Preview({
   moodChoices: Record<string, MoodChoice>;
   onMood: (name: string, choice: MoodChoice) => void;
 }) {
+  // The UI language (en / th), for the order of names shown (displayOrder).
+  const locale = useLocale();
   const dayCount = new Set([...plan.days.map((d) => d.date), ...plan.entries.map((e) => e.date)]).size;
   const capped = plan.skipped.olderDays + plan.skipped.olderEntries;
   return (
