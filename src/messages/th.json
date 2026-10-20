@@ -370,7 +370,15 @@
     "dayAddCheckin": "เพิ่มการบันทึกอารมณ์",
     "dayAddEntry": "เพิ่มบันทึก",
     "timelineLoadMore": "แสดงวันเพิ่มเติม",
-    "timelineLoadedMore": "โหลดเพิ่มอีก {count} วัน"
+    "timelineLoadedMore": "โหลดเพิ่มอีก {count} วัน",
+    "timelineViewList": "รายการ",
+    "timelineViewCalendar": "ปฏิทิน",
+    "calPrevMonth": "เดือนก่อนหน้า",
+    "calNextMonth": "เดือนถัดไป",
+    "calDayLabel": "{date}{mood, select, none {} other {, {mood}}}{moment, select, yes {, ช่วงเวลาสำคัญ} other {}}{entry, select, yes {, มีบันทึก} other {}}",
+    "printMonth": "พิมพ์เดือนนี้",
+    "printFooter": "Moodbow · {month}",
+    "printEmpty": "เดือนนี้ยังไม่มีบันทึก"
   },
   "insights": {
     "insightsTitle": "ข้อมูลเชิงลึก",
@@ -403,6 +411,7 @@
     "shareDaysJournaled": "บันทึกแล้ว {n} วัน",
     "shareNotEnough": "บันทึกอย่างน้อย 5 วันในเดือนนี้เพื่อสร้าง Moodbow ของคุณ",
     "shareThisMonth": "แชร์เดือนนี้",
+    "calShareMonth": "แชร์เดือนนี้",
     "shareCardType": "ประเภทการ์ด",
     "shareChart": "กราฟ",
     "shareMilestone": "เป้าหมายที่สำเร็จ",

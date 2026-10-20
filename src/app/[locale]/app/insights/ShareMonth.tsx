@@ -44,7 +44,7 @@ export function ShareMonth({
 }: {
   month: string;
   dateLocaleTag: string;
-  label?: "shareButton" | "shareThisMonth" | "milestoneShare";
+  label?: "shareButton" | "shareThisMonth" | "milestoneShare" | "calShareMonth";
   asLink?: boolean;
   testId?: string;
   chart?: { range: Range; moods: (number | null)[] };
