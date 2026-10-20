@@ -17,3 +17,12 @@ describe("uuidv5 (RFC 4122, SHA-1)", () => {
     expect(await importEntryId("u1", { ...e, body: "A good walk!" })).not.toBe(id);
   });
 });
+
+describe("importEntryId: copies (1.1 P)", () => {
+  it("the first copy keeps the id it always had; the second gets its own", async () => {
+    const e = { date: "2026-10-01", time: null, body: "Same" };
+    const first = await importEntryId("u1", e);
+    expect(await importEntryId("u1", { ...e, dup: 0 })).toBe(first);
+    expect(await importEntryId("u1", { ...e, dup: 1 })).not.toBe(first);
+  });
+});

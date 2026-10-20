@@ -21,5 +21,7 @@ export async function uuidv5(name: string, namespace: string = IMPORT_NAMESPACE)
 }
 
 // An imported note's id: the person, the day, the time and the text.
-export const importEntryId = (uid: string, entry: { date: string; time: string | null; body: string }) =>
-  uuidv5(`${uid}|${entry.date}|${entry.time ?? ""}|${entry.body}`);
+// A second copy of the same text on the same day and time (dup ≥ 1) gets
+// its own id; the first keeps the name it always had.
+export const importEntryId = (uid: string, entry: { date: string; time: string | null; body: string; dup?: number }) =>
+  uuidv5(`${uid}|${entry.date}|${entry.time ?? ""}|${entry.body}${entry.dup ? `|#${entry.dup}` : ""}`);

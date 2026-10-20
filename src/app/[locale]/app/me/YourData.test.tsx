@@ -45,6 +45,38 @@ describe("YourData: export", () => {
     expect(blobs[1].type).toBe("application/json");
   });
 
+  it("where 1.1 P is live, a third link: the spreadsheet (.csv), with a BOM, named by the day; not otherwise", async () => {
+    const doc = {
+      format: "moodbow-export",
+      format_version: 1,
+      exported_at: "2026-10-02T09:30:00Z",
+      account: { email: "a@b.co" },
+      check_ins: [{ local_date: "2026-10-01", mood: 4, sleep_hours: null, sleep_quality: null, exercise_minutes: null, stress: null }],
+      entries: [{ id: "e1", entry_date: "2026-10-01", body: "=A walk", is_moment: true }],
+    };
+    exportMyData.mockResolvedValue({ status: "ok", json: JSON.stringify(doc), date: "2026-10-02" });
+    const blobs: Blob[] = [];
+    (URL.createObjectURL as unknown as ReturnType<typeof vi.fn>).mockImplementation((b: Blob) => (blobs.push(b), `blob:${blobs.length}`));
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <YourData credits={0} uid={UID} csv />
+      </NextIntlClientProvider>,
+    );
+    fireEvent.click(screen.getByTestId("me-export"));
+    const csv = await screen.findByRole("link", { name: m.exportCsv });
+    expect(csv).toHaveAttribute("download", "moodbow-2026-10-02.csv");
+    const blob = blobs[2];
+    expect(blob.type).toBe("text/csv;charset=utf-8");
+    const bytes = new Uint8Array(await blob.arrayBuffer());
+    expect([...bytes.slice(0, 3)]).toEqual([0xef, 0xbb, 0xbf]);
+    expect(await blob.text()).toContain(`2026-10-01,4,${messages.today.mood4},,,,,yes,'=A walk`);
+    cleanup();
+    renderIt();
+    fireEvent.click(screen.getByTestId("me-export"));
+    expect(await screen.findByRole("link", { name: m.exportData })).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: m.exportCsv })).toBeNull();
+  });
+
   it("a format the renderer doesn't know: the data file alone (no partial text)", async () => {
     exportMyData.mockResolvedValue({ status: "ok", json: JSON.stringify({ format: "moodbow-export", format_version: 2 }), date: "2026-10-02" });
     renderIt();

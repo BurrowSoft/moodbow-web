@@ -2,6 +2,7 @@
 
 import { getLocale } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
+import { EXERCISE_MINUTES, SLEEP_HOURS, SLEEP_QUALITIES } from "@/lib/journal/checkIn";
 import { MAX_ENTRY_CHARS } from "@/lib/journal/entry";
 import { getMe } from "@/lib/journal/me";
 import { IMPORT_BATCH } from "@/lib/import/journalImport";
@@ -32,12 +33,22 @@ async function signedIn() {
 
 // Days' moods: a day that already has a check-in keeps ours (M5: its notes
 // still come in through importEntries).
-export async function importCheckIns(days: { date: string; mood: number }[]): Promise<ImportBatchResult> {
+type ImportCheckIn = { date: string; mood: number; sleep_hours?: number; sleep_quality?: string; exercise_minutes?: number; stress?: number };
+
+// The other values, when there: the check-in's own rules (as the form and
+// upsert_check_in), checked again because the rows come from the browser.
+const extrasOk = (d: ImportCheckIn) =>
+  (d.sleep_hours === undefined || (SLEEP_HOURS as number[]).includes(d.sleep_hours)) &&
+  (d.sleep_quality === undefined || (SLEEP_QUALITIES as readonly string[]).includes(d.sleep_quality)) &&
+  (d.exercise_minutes === undefined || (EXERCISE_MINUTES as readonly number[]).includes(d.exercise_minutes)) &&
+  (d.stress === undefined || (Number.isInteger(d.stress) && d.stress >= 1 && d.stress <= 5));
+
+export async function importCheckIns(days: ImportCheckIn[]): Promise<ImportBatchResult> {
   if (!Array.isArray(days) || days.length === 0 || days.length > IMPORT_BATCH) return { status: "error" };
   const ctx = await signedIn();
   if (!ctx) return { status: "error" };
   const { supabase, today } = ctx;
-  if (!days.every((d) => typeof d?.date === "string" && ISO.test(d.date) && d.date <= today && Number.isInteger(d.mood) && d.mood >= 1 && d.mood <= 5)) return { status: "error" };
+  if (!days.every((d) => typeof d?.date === "string" && ISO.test(d.date) && d.date <= today && Number.isInteger(d.mood) && d.mood >= 1 && d.mood <= 5 && extrasOk(d))) return { status: "error" };
   const { data: existing, error } = await supabase.from("check_ins").select("local_date").in("local_date", days.map((d) => d.date));
   if (error) return { status: "error" };
   const have = new Set((existing ?? []).map((r) => (r as { local_date: string }).local_date));
@@ -47,10 +58,11 @@ export async function importCheckIns(days: { date: string; mood: number }[]): Pr
     const { error: writeError } = await supabase.rpc("upsert_check_in", {
       p_date: d.date,
       p_mood: d.mood,
-      p_sleep_hours: null,
-      p_sleep_quality: null,
-      p_exercise_minutes: null,
-      p_stress: null,
+      // Our own CSV export's values (1.1 P); none from other files.
+      p_sleep_hours: d.sleep_hours ?? null,
+      p_sleep_quality: d.sleep_quality ?? null,
+      p_exercise_minutes: d.exercise_minutes ?? null,
+      p_stress: d.stress ?? null,
       // No version: a new day. Read just above, so it isn't there.
       p_expected_updated_at: null,
     });
@@ -63,7 +75,7 @@ export async function importCheckIns(days: { date: string; mood: number }[]): Pr
 // Notes as entries, with the ids the browser derived from the file (H1:
 // UUIDv5), so a re-import finds them all and writes nothing. In the order
 // given (date, then time), so the day's entries keep the file's order.
-export async function importEntries(entries: { id: string; date: string; body: string }[]): Promise<ImportBatchResult> {
+export async function importEntries(entries: { id: string; date: string; body: string; isMoment?: boolean }[]): Promise<ImportBatchResult> {
   if (!Array.isArray(entries) || entries.length === 0 || entries.length > IMPORT_BATCH) return { status: "error" };
   const ctx = await signedIn();
   if (!ctx) return { status: "error" };
@@ -84,7 +96,8 @@ export async function importEntries(entries: { id: string; date: string; body: s
       p_id: e.id,
       p_date: e.date,
       p_body: e.body,
-      p_is_moment: false,
+      // Our own CSV export's moment column (1.1 P); false from other files.
+      p_is_moment: e.isMoment === true,
       // New: read just above, so it isn't there (save_entry would otherwise update it).
       p_expected_updated_at: null,
     });

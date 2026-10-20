@@ -99,7 +99,7 @@ export function ImportData({ uid, today, dateLocaleTag, country }: { uid: string
     running.current = true;
     const total = plan.days.length + plan.entries.length;
     setPhase({ kind: "importing", done: 0, total });
-    const entries = await Promise.all(plan.entries.map(async (e) => ({ id: await importEntryId(uid, e), date: e.date, body: e.body })));
+    const entries = await Promise.all(plan.entries.map(async (e) => ({ id: await importEntryId(uid, e), date: e.date, body: e.body, ...(e.isMoment ? { isMoment: true } : {}) })));
     const byId = new Map(entries.map((e) => [e.id, e]));
     // What was actually written: its days, and its notes (for the crisis line).
     const writtenDates = new Set<string>();
