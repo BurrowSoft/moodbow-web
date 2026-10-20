@@ -13,6 +13,7 @@ import { VisitCounts } from "@/components/VisitCounts";
 import { THEME_PRE_PAINT } from "@/lib/appearance";
 import { conditionMet } from "@/lib/conditions";
 import { NONCE_HEADER } from "@/lib/csp";
+import { APP_STORE_ID, liveStores } from "@/lib/stores";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -26,6 +27,8 @@ export async function generateMetadata({ params }: LayoutProps<"/[locale]">): Pr
     applicationName: t("siteName"),
     appleWebApp: { title: t("siteName") },
     icons: ICONS,
+    // iOS Safari's smart app banner, once the App Store listing is live (decision 185).
+    ...(liveStores().appStore ? { itunes: { appId: APP_STORE_ID! } } : {}),
   };
 }
 
