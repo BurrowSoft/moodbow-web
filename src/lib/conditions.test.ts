@@ -36,7 +36,12 @@ describe("conditions", () => {
 
   // The web launch step (next-release.md, "Help flips with the product"):
   // the journal and the features its Help describes go live together.
-  it("the web launch flips as one step", () => {
+  // Never before the Privacy Policy and Terms are live (decisions 40 + 82):
+  // sign-up opens with this step, so this stays red until the legal flip
+  // is on master (reviewer #100 B1).
+  it("the web launch flips as one step, after the legal pages", () => {
+    expect(conditionMet("privacy-text-approved"), "privacy-text-approved").toBe(true);
+    expect(conditionMet("terms-text-approved"), "terms-text-approved").toBe(true);
     expect(liveFeatures.webJournal).toBe(true);
     for (const id of ["web-journal-live", "share-cards", "help-now-live", "export-live", "delete-account-live"] as const) {
       expect(conditionMet(id), id).toBe(true);
