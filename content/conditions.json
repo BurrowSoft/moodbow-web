@@ -72,7 +72,7 @@
     "what": "1.1 B (decision 169): the chart and milestone share cards and Today's milestone card are tested on the app and the web (needs share-cards too)."
   },
   "on-this-day-live": {
-    "met": false,
+    "met": true,
     "what": "1.1 A \"On this day\" (specs/1.1-features.md) is tested on both the app and the web; then the Timeline card shows on Production (UX: not tied to a release, may be in time for 1.0)."
   },
   "csp-enforced": {
