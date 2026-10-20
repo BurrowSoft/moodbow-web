@@ -31,6 +31,13 @@ const nextConfig: NextConfig = {
           // "Origin: null" on a no-JS form POST and Next rejects the server
           // action (500).
           { key: "Referrer-Policy", value: "strict-origin" },
+          // Powerful features off (reviewer's audit A2). Kept for us: sharing
+          // and copying the moodbow card, and fullscreen.
+          {
+            key: "Permissions-Policy",
+            value:
+              "camera=(), microphone=(), geolocation=(), payment=(), usb=(), serial=(), hid=(), bluetooth=(), midi=(), magnetometer=(), gyroscope=(), accelerometer=(), display-capture=(), browsing-topics=(), web-share=(self), clipboard-write=(self), fullscreen=(self)",
+          },
         ],
       },
       // Images linked from emails (public/email): the path never changes, since

@@ -60,7 +60,7 @@
     "what": "Vercel Web Analytics (cookie-free visit counts, decision 79) is enabled for the moodbow-web project by Vitor in Vercel. Flipping this shows the privacy policy's visit-count lines and loads the counter (with the URL scrubber, src/lib/analytics.ts) in the same deploy."
   },
   "timeline-moments-rpc": {
-    "met": false,
+    "met": true,
     "what": "get_timeline(p_before, p_limit, p_moments_only) from moodbow-app migration 005 is applied on PRODUCTION (Mobile Dev confirms; staging has it since 2026-10-19). Until then the Timeline's Moments filter shows on Previews only."
   },
   "offline-start": {
@@ -74,5 +74,9 @@
   "on-this-day-live": {
     "met": false,
     "what": "1.1 A \"On this day\" (specs/1.1-features.md) is tested on both the app and the web; then the Timeline card shows on Production (UX: not tied to a release, may be in time for 1.0)."
+  },
+  "csp-enforced": {
+    "met": false,
+    "what": "The Content-Security-Policy (lib/csp.ts) is enforced instead of Report-Only. Flip only after a clean Preview run of every page (journal, share-card canvas, the OG route) with no violations reported to Sentry (reviewer's audit A1)."
   }
 }

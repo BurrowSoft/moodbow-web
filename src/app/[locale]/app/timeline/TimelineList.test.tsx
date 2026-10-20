@@ -66,7 +66,7 @@ describe("TimelineList", () => {
     expect(within(day).getByTestId("timeline-mood-dot")).toBeInTheDocument();
     const row = day.closest("li")!;
     // The chips live in the day view and the entry view now.
-    for (const chip of ["7.5 h", "30 min", "Stress 2/5"]) expect(within(row).queryByText(chip)).toBeNull();
+    for (const chip of ["7.5 h", "30 min", "Stress 2 of 5"]) expect(within(row).queryByText(chip)).toBeNull();
     // Opened from the Timeline (decision 152): its nav and Back lead back here.
     expect(screen.getByTestId("timeline-entry-e1")).toHaveAttribute("href", "/app/entries/e1?from=%2Fapp%2Ftimeline");
   });
