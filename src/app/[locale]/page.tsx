@@ -39,7 +39,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
   ];
 
   return (
-    <main id="main" className="flex flex-1 flex-col items-center px-6 sm:px-8">
+    <main id="main" className="flex flex-1 flex-col items-center px-4 min-[360px]:px-6 sm:px-8">
       <section className="flex w-full max-w-[600px] flex-col items-center pb-12 pt-8 text-center sm:pb-16 sm:pt-12">
         <div className="w-[104px] sm:w-[128px]">
           <Logo variant="stacked" width={128} alt={tc("logoAlt")} priority />
@@ -50,14 +50,14 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
             {t("comingSoon")}
           </p>
         )}
-        <h1 className="mt-5 text-balance text-[30px] font-medium leading-tight tracking-tight sm:text-[44px]">{t("heroTitle")}</h1>
+        <h1 className="mt-5 text-balance break-words text-[30px] font-medium leading-tight tracking-tight sm:text-[44px]">{t("heroTitle")}</h1>
         <p className="mt-4 max-w-[480px] text-base leading-relaxed text-muted sm:text-[18px]">{t("heroSub")}</p>
         {live ? (
-          <div className="mt-9 flex flex-col items-center gap-4">
+          <div className="mt-9 flex w-full flex-col items-center gap-4 sm:w-auto">
             <Link
               href="/welcome"
               data-testid="home-start"
-              className="inline-flex min-h-[52px] min-w-[220px] items-center justify-center rounded-full bg-accent px-8 py-3.5 text-base font-medium text-on-accent transition-opacity hover:opacity-90"
+              className="inline-flex min-h-[52px] w-full items-center justify-center rounded-full text-center sm:w-auto sm:min-w-[220px] bg-accent px-5 py-3.5 sm:px-8 text-base font-medium text-on-accent transition-opacity hover:opacity-90"
             >
               {t("start")}
             </Link>
@@ -71,7 +71,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
               href={notifyMailto(t("notifySubject"))}
               aria-label={t("notifyAria")}
               data-testid="home-notify"
-              className="mt-9 inline-flex min-h-[52px] min-w-[200px] items-center justify-center rounded-full bg-accent px-8 py-3.5 text-base font-medium text-on-accent transition-opacity hover:opacity-90"
+              className="mt-9 inline-flex min-h-[52px] w-full items-center justify-center rounded-full text-center sm:w-auto sm:min-w-[200px] bg-accent px-5 py-3.5 sm:px-8 text-base font-medium text-on-accent transition-opacity hover:opacity-90"
             >
               {t("notify")}
             </a>
@@ -86,7 +86,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
 
       <ul className="grid w-full max-w-4xl gap-4 sm:grid-cols-3">
         {features.map(({ key, title, body, icon }) => (
-          <li key={key} className="rounded-3xl border border-border bg-surface p-6" data-testid={`home-feature-${key}`}>
+          <li key={key} className="rounded-3xl border border-border bg-surface p-5 break-words sm:p-6" data-testid={`home-feature-${key}`}>
             <span className="block h-8 w-8 text-accent" aria-hidden="true">
               {icon}
             </span>
@@ -96,7 +96,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
         ))}
       </ul>
 
-      <section className="my-10 flex w-full max-w-4xl flex-col items-center gap-3 rounded-3xl bg-pill px-6 py-10 text-center sm:my-14" aria-labelledby="home-private" data-testid="home-private">
+      <section className="my-10 flex w-full max-w-4xl flex-col items-center gap-3 break-words rounded-3xl bg-pill px-5 py-10 sm:px-6 text-center sm:my-14" aria-labelledby="home-private" data-testid="home-private">
         <span className="block h-8 w-8 text-accent" aria-hidden="true">
           <LockIcon />
         </span>

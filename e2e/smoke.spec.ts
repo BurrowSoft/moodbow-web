@@ -33,6 +33,15 @@ test.describe("home", () => {
     await expect(page.getByTestId("home-stores").getByRole("link")).toHaveCount(0);
   });
 
+  test("200% zoom on a phone (a 160 px page): nothing scrolls sideways (Web Tester, #65)", async ({ page }) => {
+    await page.setViewportSize({ width: 160, height: 640 });
+    await page.goto("/");
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    expect(overflow).toBeLessThanOrEqual(0);
+    const notify = await page.getByTestId("home-notify").boundingBox();
+    expect(notify!.x + notify!.width).toBeLessThanOrEqual(160);
+  });
+
   test("SEO tags use the www canonical host", async ({ page }) => {
     await page.goto("/");
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", CANONICAL);
