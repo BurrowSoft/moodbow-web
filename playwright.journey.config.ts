@@ -10,4 +10,7 @@ export default defineConfig({
   testIgnore: undefined,
   retries: 0,
   projects: [{ name: "desktop", use: { ...devices["Desktop Chrome"], locale: "en-US" } }],
+  // The server needs only the public staging values; the admin key stays in
+  // the test process (webServer.env merges over process.env).
+  webServer: base.webServer && !Array.isArray(base.webServer) ? { ...base.webServer, env: { SUPABASE_STAGING_SECRET_KEY: "" } } : base.webServer,
 });

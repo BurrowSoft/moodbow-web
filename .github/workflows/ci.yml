@@ -67,13 +67,15 @@ jobs:
 
   # The launch journeys (e2e/journey): sign-up to delete account against
   # STAGING, with throwaway @example.invalid accounts. Its own build, pointed
-  # at staging (the smoke job's build has no Supabase on purpose). The secrets
-  # reach only the steps below that need them (never fork PRs: GitHub withholds
-  # them; this workflow is pull_request, never pull_request_target), the
-  # secret key only the test step (never the build), and nothing prints them.
+  # at staging (the smoke job's build has no Supabase on purpose). PR runs
+  # only: the job is skipped on pushes to master, and the trigger is
+  # pull_request, never pull_request_target, so fork PRs get no secrets. The
+  # secrets reach only the steps below that need them, the secret key only the
+  # test step (never the build), and nothing prints them.
   # Without the secrets every step after the check is skipped.
   journeys:
     name: Staging journeys
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
