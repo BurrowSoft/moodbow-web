@@ -377,6 +377,8 @@
     "shareCardType": "ประเภทการ์ด",
     "shareChart": "กราฟ",
     "shareMilestone": "เป้าหมายที่สำเร็จ",
+    "shareYear": "ปี",
+    "shareYearTitle": "ปี {year} ของฉันในสีสัน",
     "shareMilestoneText": "{n} วันของเรื่องราวฉัน",
     "shareRangeWeek": "7 วันที่ผ่านมาของฉัน",
     "shareRangeMonth": "30 วันที่ผ่านมาของฉัน",
