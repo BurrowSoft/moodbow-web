@@ -16,9 +16,11 @@ import { loadTimeline } from "./actions";
 // then its entry previews (2 lines, ★ for moments); the chips live in the
 // day and entry views. More days load as the end of the list comes into
 // view (by days, not months: a month can span two pages).
-type Props = { initial: TimelineDay[]; initialDone: boolean; momentsOnly: boolean; dateLocaleTag: string; shareable?: boolean };
+// year: the Year card on offer in the month shares (1.1 J, Dec/Jan; UX: the
+// same entry points as the app).
+type Props = { initial: TimelineDay[]; initialDone: boolean; momentsOnly: boolean; dateLocaleTag: string; shareable?: boolean; year?: number | null };
 
-export function TimelineList({ initial, initialDone, momentsOnly, dateLocaleTag, shareable = false }: Props) {
+export function TimelineList({ initial, initialDone, momentsOnly, dateLocaleTag, shareable = false, year = null }: Props) {
   const t = useTranslations("timeline");
   const tt = useTranslations("today");
   const te = useTranslations("entry");
@@ -84,7 +86,7 @@ export function TimelineList({ initial, initialDone, momentsOnly, dateLocaleTag,
             <h2 id={`month-${month}`} className="text-sm font-medium uppercase tracking-wide text-muted">
               {monthLabel(month, dateLocaleTag)}
             </h2>
-            {shareable && <MonthShare month={month} dateLocaleTag={dateLocaleTag} counts={monthCounts} />}
+            {shareable && <MonthShare month={month} dateLocaleTag={dateLocaleTag} counts={monthCounts} year={year} />}
           </div>
           <ul className="mt-3 space-y-3">
             {monthDays.map((day) => {

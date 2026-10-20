@@ -17,7 +17,8 @@ vi.mock("@/i18n/navigation", () => ({
 }));
 // The month header's share (decision 161) asks the month's check-ins.
 const loadMonthCheckIns = vi.fn();
-vi.mock("../insights/shareActions", () => ({ loadMonthCheckIns: (...args: unknown[]) => loadMonthCheckIns(...args) }));
+const loadYearCheckIns = vi.fn();
+vi.mock("../insights/shareActions", () => ({ loadMonthCheckIns: (...args: unknown[]) => loadMonthCheckIns(...args), loadYearCheckIns: (...args: unknown[]) => loadYearCheckIns(...args) }));
 const { TimelineList } = await import("./TimelineList");
 
 let seeEnd: () => void = () => {};
@@ -149,6 +150,16 @@ describe("TimelineList: Share this month (decision 161)", () => {
     expect(loadMonthCheckIns).toHaveBeenCalledWith("2026-09");
     await act(async () => {});
     expect(screen.queryByTestId("timeline-share-2026-09")).toBeNull();
+  });
+
+  it("in Dec/Jan the month share offers the Year card too (1.1 J; UX: the app's entry points)", async () => {
+    loadMonthCheckIns.mockResolvedValue(moods(5));
+    const months = [1, 4, 8].flatMap((m) => Array.from({ length: 5 }, (_, i) => ({ local_date: `2026-${String(m).padStart(2, "0")}-0${i + 1}`, mood: 4 })));
+    loadYearCheckIns.mockResolvedValue({ status: "ok", checkIns: months });
+    renderList({ shareable: true, year: 2026 });
+    fireEvent.click(await screen.findByTestId("timeline-share-2026-10"));
+    expect(loadYearCheckIns).toHaveBeenCalledWith(2026);
+    expect(await screen.findByTestId("share-type-year")).toHaveTextContent(messages.share.shareYear);
   });
 
   it("not where share cards are off", async () => {

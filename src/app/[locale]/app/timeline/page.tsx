@@ -1,3 +1,4 @@
+import { yearOnOffer } from "@/lib/share/year";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -95,6 +96,7 @@ export default async function TimelinePage({ params, searchParams }: PageProps<"
         momentsOnly={momentsOnly}
         dateLocaleTag={dateLocaleTag}
         shareable={pageGate("share-cards") !== "hidden"}
+        year={pageGate("year-card") !== "hidden" ? yearOnOffer(me.today) : null}
       />
     </section>
   );
