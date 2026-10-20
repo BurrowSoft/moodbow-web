@@ -65,23 +65,24 @@ export function Appearance({ shortcuts = false }: { shortcuts?: boolean }) {
       </fieldset>
       {shortcuts && (
         <div className="mt-6 border-t border-border pt-4">
-          <div className="flex min-h-11 items-center justify-between gap-4">
-            <span id="me-shortcuts" className="text-text">
-              {t("shortcutsEnabled")}
-            </span>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={shortcutsOn}
-              aria-labelledby="me-shortcuts"
-              aria-describedby="me-shortcuts-hint"
-              data-testid="me-shortcuts"
-              onClick={toggleShortcuts}
+          {/* The whole row is the switch (a big target; reviewer #97). */}
+          <button
+            type="button"
+            role="switch"
+            aria-checked={shortcutsOn}
+            aria-describedby="me-shortcuts-hint"
+            data-testid="me-shortcuts"
+            onClick={toggleShortcuts}
+            className="flex min-h-11 w-full items-center justify-between gap-4 rounded-xl text-left text-text"
+          >
+            <span>{t("shortcutsEnabled")}</span>
+            <span
+              aria-hidden="true"
               className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full border border-border transition-colors ${shortcutsOn ? "bg-accent" : "bg-pill"}`}
             >
-              <span aria-hidden="true" className={`inline-block h-5 w-5 rounded-full bg-surface shadow transition-transform ${shortcutsOn ? "translate-x-6" : "translate-x-1"}`} />
-            </button>
-          </div>
+              <span className={`inline-block h-5 w-5 rounded-full bg-surface shadow transition-transform ${shortcutsOn ? "translate-x-6" : "translate-x-1"}`} />
+            </span>
+          </button>
           <p id="me-shortcuts-hint" className="text-sm text-muted">
             {t("shortcutsHint")}
           </p>

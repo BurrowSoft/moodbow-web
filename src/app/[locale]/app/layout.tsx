@@ -52,7 +52,9 @@ export default async function AppLayout({ children, params }: LayoutProps<"/[loc
           <NavProgress />
         </Suspense>
         <AppNav />
-        {pageGate("shortcuts-live") !== "hidden" && <KeyboardShortcuts search={pageGate("search-live") !== "hidden"} />}
+        {/* "/" (search) arrives with search itself (#94): wired by whichever
+            of the two reaches master second. */}
+        {pageGate("shortcuts-live") !== "hidden" && <KeyboardShortcuts search={false} />}
         {/* At least a screen tall: the page streams in after a first paint
             (the loading fallback) that's shorter than the screen, and the
             footer under it would be pushed down in view. Kept below the fold,

@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it, vi } from "vitest";
-import { onArrival, requestArrival, takeArrival } from "./arrival";
+import { ARRIVAL_TTL_MS, onArrival, requestArrival, takeArrival } from "./arrival";
 
 describe("arrival (1.1 O)", () => {
   it("a request waits for its target, is taken once, and only by that kind", () => {
@@ -21,5 +21,13 @@ describe("arrival (1.1 O)", () => {
     requestArrival("checkIn");
     expect(later).toHaveBeenCalledTimes(2);
     expect(takeArrival("checkIn")).toBe(true);
+  });
+
+  it("a request nobody took expires: a later visit never acts on it", () => {
+    vi.useFakeTimers();
+    requestArrival("search");
+    vi.advanceTimersByTime(ARRIVAL_TTL_MS + 1);
+    expect(takeArrival("search")).toBe(false);
+    vi.useRealTimers();
   });
 });

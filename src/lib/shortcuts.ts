@@ -40,10 +40,13 @@ export function writeShortcutsOn(on: boolean): void {
   }
 }
 
-// Somewhere a key press is text, or belongs to a dialog.
+// Somewhere a key press is text or picks an option (native fields, editable
+// areas, and their ARIA roles), or belongs to a dialog.
+const TYPING =
+  "input, textarea, select, [contenteditable]:not([contenteditable='false']), [role='textbox'], [role='searchbox'], [role='combobox'], [role='spinbutton'], [role='menu'], [role='menubar'], [role='listbox']";
 export function isTypingTarget(target: EventTarget | null): boolean {
   if (!(target instanceof Element)) return false;
-  if (target.closest("input, textarea, select, [contenteditable]:not([contenteditable='false'])")) return true;
+  if (target.closest(TYPING)) return true;
   return !!target.closest("dialog, [role='dialog'], [role='alertdialog']");
 }
 

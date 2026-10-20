@@ -56,3 +56,12 @@ describe("the switch, on this device (WCAG 2.1.4)", () => {
     expect(readShortcutsOn()).toBe(true);
   });
 });
+
+describe("ARIA text and option widgets count as typing (reviewer #97)", () => {
+  it("textbox, searchbox, combobox, spinbutton, menu, listbox", () => {
+    for (const role of ["textbox", "searchbox", "combobox", "spinbutton", "menu", "listbox"]) {
+      document.body.innerHTML = `<div role="${role}"><span id="x"></span></div>`;
+      expect(shortcutFor(press("t", {}, document.getElementById("x")), on), role).toBeNull();
+    }
+  });
+});
