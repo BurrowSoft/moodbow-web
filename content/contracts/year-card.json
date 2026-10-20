@@ -1,0 +1,599 @@
+{
+  "version": 1,
+  "about": "My year's moodbow (1.1 J, decision 184). Given today (the profile's date) and the check-ins (one per day), the year on offer (December: this year; January: last year; else none), each month's band January first (the month's most frequent mood, ties to the higher; null = faint: fewer than 5 check-ins, drawn as a full band in the card theme's muted colour at 25%), the year's check-in days (faint months included; moods outside 1-5 ignored) and whether the Year card is offered (at least 3 non-faint months).",
+  "cases": [
+    {
+      "name": "December: this year; modes, a tie to the higher, a faint month; offered",
+      "today": "2026-12-15",
+      "checkIns": [
+        {
+          "date": "2026-01-01",
+          "mood": 4
+        },
+        {
+          "date": "2026-01-02",
+          "mood": 4
+        },
+        {
+          "date": "2026-01-03",
+          "mood": 4
+        },
+        {
+          "date": "2026-01-04",
+          "mood": 4
+        },
+        {
+          "date": "2026-01-05",
+          "mood": 4
+        },
+        {
+          "date": "2026-01-06",
+          "mood": 2
+        },
+        {
+          "date": "2026-03-01",
+          "mood": 1
+        },
+        {
+          "date": "2026-03-02",
+          "mood": 1
+        },
+        {
+          "date": "2026-03-03",
+          "mood": 1
+        },
+        {
+          "date": "2026-03-04",
+          "mood": 2
+        },
+        {
+          "date": "2026-03-05",
+          "mood": 2
+        },
+        {
+          "date": "2026-03-06",
+          "mood": 3
+        },
+        {
+          "date": "2026-03-07",
+          "mood": 3
+        },
+        {
+          "date": "2026-05-01",
+          "mood": 2
+        },
+        {
+          "date": "2026-05-02",
+          "mood": 2
+        },
+        {
+          "date": "2026-05-03",
+          "mood": 4
+        },
+        {
+          "date": "2026-05-04",
+          "mood": 4
+        },
+        {
+          "date": "2026-05-05",
+          "mood": 3
+        },
+        {
+          "date": "2026-07-01",
+          "mood": 5
+        },
+        {
+          "date": "2026-07-02",
+          "mood": 5
+        }
+      ],
+      "expect": {
+        "year": 2026,
+        "moods": [
+          4,
+          null,
+          1,
+          null,
+          4,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "days": 20,
+        "offered": true
+      }
+    },
+    {
+      "name": "January: last year; this year's rows don't count",
+      "today": "2027-01-10",
+      "checkIns": [
+        {
+          "date": "2026-01-01",
+          "mood": 4
+        },
+        {
+          "date": "2026-01-02",
+          "mood": 4
+        },
+        {
+          "date": "2026-01-03",
+          "mood": 4
+        },
+        {
+          "date": "2026-01-04",
+          "mood": 4
+        },
+        {
+          "date": "2026-01-05",
+          "mood": 4
+        },
+        {
+          "date": "2026-01-06",
+          "mood": 2
+        },
+        {
+          "date": "2026-03-01",
+          "mood": 1
+        },
+        {
+          "date": "2026-03-02",
+          "mood": 1
+        },
+        {
+          "date": "2026-03-03",
+          "mood": 1
+        },
+        {
+          "date": "2026-03-04",
+          "mood": 2
+        },
+        {
+          "date": "2026-03-05",
+          "mood": 2
+        },
+        {
+          "date": "2026-03-06",
+          "mood": 3
+        },
+        {
+          "date": "2026-03-07",
+          "mood": 3
+        },
+        {
+          "date": "2026-05-01",
+          "mood": 2
+        },
+        {
+          "date": "2026-05-02",
+          "mood": 2
+        },
+        {
+          "date": "2026-05-03",
+          "mood": 4
+        },
+        {
+          "date": "2026-05-04",
+          "mood": 4
+        },
+        {
+          "date": "2026-05-05",
+          "mood": 3
+        },
+        {
+          "date": "2026-07-01",
+          "mood": 5
+        },
+        {
+          "date": "2026-07-02",
+          "mood": 5
+        },
+        {
+          "date": "2027-01-01",
+          "mood": 5
+        },
+        {
+          "date": "2027-01-02",
+          "mood": 5
+        },
+        {
+          "date": "2027-01-03",
+          "mood": 5
+        },
+        {
+          "date": "2027-01-04",
+          "mood": 5
+        },
+        {
+          "date": "2027-01-05",
+          "mood": 5
+        }
+      ],
+      "expect": {
+        "year": 2026,
+        "moods": [
+          4,
+          null,
+          1,
+          null,
+          4,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "days": 20,
+        "offered": true
+      }
+    },
+    {
+      "name": "any other month: no offer",
+      "today": "2026-10-20",
+      "checkIns": [
+        {
+          "date": "2026-01-01",
+          "mood": 4
+        },
+        {
+          "date": "2026-01-02",
+          "mood": 4
+        },
+        {
+          "date": "2026-01-03",
+          "mood": 4
+        },
+        {
+          "date": "2026-01-04",
+          "mood": 4
+        },
+        {
+          "date": "2026-01-05",
+          "mood": 4
+        },
+        {
+          "date": "2026-01-06",
+          "mood": 2
+        },
+        {
+          "date": "2026-03-01",
+          "mood": 1
+        },
+        {
+          "date": "2026-03-02",
+          "mood": 1
+        },
+        {
+          "date": "2026-03-03",
+          "mood": 1
+        },
+        {
+          "date": "2026-03-04",
+          "mood": 2
+        },
+        {
+          "date": "2026-03-05",
+          "mood": 2
+        },
+        {
+          "date": "2026-03-06",
+          "mood": 3
+        },
+        {
+          "date": "2026-03-07",
+          "mood": 3
+        },
+        {
+          "date": "2026-05-01",
+          "mood": 2
+        },
+        {
+          "date": "2026-05-02",
+          "mood": 2
+        },
+        {
+          "date": "2026-05-03",
+          "mood": 4
+        },
+        {
+          "date": "2026-05-04",
+          "mood": 4
+        },
+        {
+          "date": "2026-05-05",
+          "mood": 3
+        },
+        {
+          "date": "2026-07-01",
+          "mood": 5
+        },
+        {
+          "date": "2026-07-02",
+          "mood": 5
+        }
+      ],
+      "expect": {
+        "year": null,
+        "moods": null,
+        "days": null,
+        "offered": false
+      }
+    },
+    {
+      "name": "only 2 coloured months: not offered",
+      "today": "2026-12-01",
+      "checkIns": [
+        {
+          "date": "2026-02-01",
+          "mood": 3
+        },
+        {
+          "date": "2026-02-02",
+          "mood": 3
+        },
+        {
+          "date": "2026-02-03",
+          "mood": 3
+        },
+        {
+          "date": "2026-02-04",
+          "mood": 3
+        },
+        {
+          "date": "2026-02-05",
+          "mood": 3
+        },
+        {
+          "date": "2026-04-01",
+          "mood": 5
+        },
+        {
+          "date": "2026-04-02",
+          "mood": 5
+        },
+        {
+          "date": "2026-04-03",
+          "mood": 5
+        },
+        {
+          "date": "2026-04-04",
+          "mood": 5
+        },
+        {
+          "date": "2026-04-05",
+          "mood": 4
+        },
+        {
+          "date": "2026-06-01",
+          "mood": 1
+        },
+        {
+          "date": "2026-06-02",
+          "mood": 1
+        }
+      ],
+      "expect": {
+        "year": 2026,
+        "moods": [
+          null,
+          3,
+          null,
+          5,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "days": 12,
+        "offered": false
+      }
+    },
+    {
+      "name": "the year's edges: 31 Dec counts, the previous 31 Dec doesn't; moods outside 1–5 are ignored",
+      "today": "2026-12-31",
+      "checkIns": [
+        {
+          "date": "2025-12-31",
+          "mood": 5
+        },
+        {
+          "date": "2026-12-01",
+          "mood": 2
+        },
+        {
+          "date": "2026-12-02",
+          "mood": 2
+        },
+        {
+          "date": "2026-12-03",
+          "mood": 2
+        },
+        {
+          "date": "2026-12-04",
+          "mood": 2
+        },
+        {
+          "date": "2026-12-05",
+          "mood": 0
+        },
+        {
+          "date": "2026-12-31",
+          "mood": 2
+        },
+        {
+          "date": "2026-08-01",
+          "mood": 3
+        },
+        {
+          "date": "2026-08-02",
+          "mood": 3
+        },
+        {
+          "date": "2026-08-03",
+          "mood": 3
+        },
+        {
+          "date": "2026-08-04",
+          "mood": 3
+        },
+        {
+          "date": "2026-08-05",
+          "mood": 3
+        },
+        {
+          "date": "2026-09-01",
+          "mood": 4
+        },
+        {
+          "date": "2026-09-02",
+          "mood": 4
+        },
+        {
+          "date": "2026-09-03",
+          "mood": 4
+        },
+        {
+          "date": "2026-09-04",
+          "mood": 4
+        },
+        {
+          "date": "2026-09-05",
+          "mood": 6
+        },
+        {
+          "date": "2026-09-06",
+          "mood": 4
+        }
+      ],
+      "expect": {
+        "year": 2026,
+        "moods": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          3,
+          4,
+          null,
+          null,
+          2
+        ],
+        "days": 15,
+        "offered": true
+      }
+    },
+    {
+      "name": "exactly 5 check-ins colours a month; 4 is faint",
+      "today": "2026-12-20",
+      "checkIns": [
+        {
+          "date": "2026-01-01",
+          "mood": 3
+        },
+        {
+          "date": "2026-01-02",
+          "mood": 3
+        },
+        {
+          "date": "2026-01-03",
+          "mood": 3
+        },
+        {
+          "date": "2026-01-04",
+          "mood": 3
+        },
+        {
+          "date": "2026-01-05",
+          "mood": 3
+        },
+        {
+          "date": "2026-02-01",
+          "mood": 3
+        },
+        {
+          "date": "2026-02-02",
+          "mood": 3
+        },
+        {
+          "date": "2026-02-03",
+          "mood": 3
+        },
+        {
+          "date": "2026-02-04",
+          "mood": 3
+        },
+        {
+          "date": "2026-10-01",
+          "mood": 5
+        },
+        {
+          "date": "2026-10-02",
+          "mood": 4
+        },
+        {
+          "date": "2026-10-03",
+          "mood": 5
+        },
+        {
+          "date": "2026-10-04",
+          "mood": 4
+        },
+        {
+          "date": "2026-10-05",
+          "mood": 5
+        },
+        {
+          "date": "2026-11-01",
+          "mood": 1
+        },
+        {
+          "date": "2026-11-02",
+          "mood": 2
+        },
+        {
+          "date": "2026-11-03",
+          "mood": 3
+        },
+        {
+          "date": "2026-11-04",
+          "mood": 4
+        },
+        {
+          "date": "2026-11-05",
+          "mood": 5
+        }
+      ],
+      "expect": {
+        "year": 2026,
+        "moods": [
+          3,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          5,
+          5,
+          null
+        ],
+        "days": 19,
+        "offered": true
+      }
+    }
+  ]
+}

@@ -1,7 +1,8 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
 import { MOOD_HEX, THEMES } from "./moodbow";
-import { yearBands, yearFileName, yearOnOffer, yearRange } from "./year";
+import contract from "../../../content/contracts/year-card.json";
+import { YEAR_MIN_MONTHS, yearBands, yearFileName, yearOnOffer, yearRange } from "./year";
 
 const day = (month: number, d: number, mood: number) => ({ local_date: `2026-${String(month).padStart(2, "0")}-${String(d).padStart(2, "0")}`, mood });
 const month = (m: number, moods: number[]) => moods.map((mood, i) => day(m, i + 1, mood));
@@ -47,4 +48,22 @@ describe("yearOnOffer: December this year, January last year", () => {
 it("the file and the range", () => {
   expect(yearFileName(2026)).toBe("moodbow-2026.png");
   expect(yearRange(2026)).toEqual({ from: "2026-01-01", to: "2026-12-31" });
+});
+
+// The shared contract (moodbow-app supabase/contracts/year-card.json): the
+// app runs the same cases. Bands as moods 1–5, null for a faint month.
+describe("the year-card.json contract (v1)", () => {
+  it.each(contract.cases)("$name", ({ today, checkIns, expect: want }) => {
+    const year = yearOnOffer(today);
+    expect(year).toBe(want.year);
+    if (year === null) return;
+    const card = yearBands(
+      checkIns.map((c) => ({ local_date: c.date, mood: c.mood })),
+      year,
+      "light",
+    );
+    expect(card.colours.map((hex) => (MOOD_HEX.indexOf(hex) >= 0 ? MOOD_HEX.indexOf(hex) + 1 : null))).toEqual(want.moods);
+    expect(card.days).toBe(want.days);
+    expect(card.colouredMonths >= YEAR_MIN_MONTHS).toBe(want.offered);
+  });
 });
