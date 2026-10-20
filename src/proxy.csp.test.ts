@@ -20,7 +20,7 @@ vi.mock("./lib/supabase/proxy", () => ({
 vi.mock("next-intl/middleware", () => ({ default: () => (req: NextRequest) => NextResponse.next({ request: { headers: req.headers } }) }));
 const { default: proxy } = await import("./proxy");
 
-const CSP = "content-security-policy-report-only";
+const CSP = "content-security-policy";
 const nonceOf = (csp: string | null) => csp?.match(/'nonce-([^']+)'/)?.[1];
 
 describe("proxy: the CSP nonce reaches the page that renders", () => {
