@@ -14,10 +14,10 @@ const m = messages.me;
 const UID = "0b5f2c1e-7d3a-4e8b-9c41-2a6f8e1d3b70";
 const KEYS = [`mb:pending-checkin:${UID}:2026-10-02`, `mb:draft-entry:${UID}:new`];
 
-const renderIt = (credits = 0) =>
+const renderIt = (credits = 0, ai = true) =>
   render(
     <NextIntlClientProvider locale="en" messages={messages}>
-      <YourData credits={credits} uid={UID} />
+      <YourData credits={credits} uid={UID} ai={ai} />
     </NextIntlClientProvider>,
   );
 
@@ -108,7 +108,15 @@ describe("YourData: delete account", () => {
     expect(screen.getByTestId("delete-confirm")).toBeEnabled();
   });
 
-  it("credits: warned only when there are some (one / many)", () => {
+  it("AI not live: no credits line, even with credits (text = enforcement)", () => {
+    renderIt(40, false);
+    fireEvent.click(screen.getByTestId("me-delete"));
+    expect(screen.getByTestId("delete-dialog")).toBeInTheDocument();
+    expect(screen.queryByTestId("delete-credits")).toBeNull();
+    expect(screen.getByTestId("delete-dialog")).not.toHaveTextContent("AI credit");
+  });
+
+  it("credits: with AI live, warned only when there are some (one / many)", () => {
     renderIt(0);
     fireEvent.click(screen.getByTestId("me-delete"));
     expect(screen.queryByTestId("delete-credits")).toBeNull();

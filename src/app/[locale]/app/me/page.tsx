@@ -3,7 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 import { Link } from "@/i18n/navigation";
 import { JournalUnavailable } from "@/components/JournalUnavailable";
-import { pageGate } from "@/lib/conditions";
+import { conditionMet, pageGate } from "@/lib/conditions";
 import { aiShown, FOCUS_AREAS, isTone } from "@/lib/journal/ai";
 import { getMe, hasCurrentConsent } from "@/lib/journal/me";
 import { SUPPORT_EMAIL } from "@/lib/site";
@@ -71,7 +71,7 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
         languages={languageOptions(routing.locales)}
       />
       <Appearance shortcuts={pageGate("shortcuts-live") !== "hidden"} />
-      <YourData credits={me.credits?.balance ?? 0} uid={user.id} csv={pageGate("export-csv-live") !== "hidden"} />
+      <YourData credits={me.credits?.balance ?? 0} uid={user.id} csv={pageGate("export-csv-live") !== "hidden"} ai={conditionMet("ai-live")} />
       {/* Import from another app (1.1 K), with Your data, where it's on. */}
       {pageGate("import-live") !== "hidden" && (
         <ImportData uid={user.id} today={me.today} dateLocaleTag={dateLocale(locale, (await headers()).get("accept-language"), me.profile?.country ?? null)} country={me.profile?.country} />
