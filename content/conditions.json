@@ -70,5 +70,9 @@
   "reminder-live": {
     "met": false,
     "what": "The daily reminder is in a RELEASED app build (local notification at the chosen time, skipped if that phone saw a check-in that day). Gates the Help article about reminders."
+  },
+  "on-this-day-live": {
+    "met": false,
+    "what": "1.1 A \"On this day\" (specs/1.1-features.md) is tested on both the app and the web; then the Timeline card shows on Production (UX: not tied to a release, may be in time for 1.0)."
   }
 }
