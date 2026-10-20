@@ -1,13 +1,14 @@
 {
   "format": "moodbow-countries",
   "version": "2026-10-19",
+  "names_note": "helpline.names: the helpline's name per UI language; \"en\" always, others when known; clients fall back to \"en\" (UX, 1.1 F).",
   "default": {
     "directory_url": "https://findahelpline.com"
   },
   "countries": [
     {
       "code": "AU",
-      "helpline": { "name": "Lifeline", "display": "13 11 14", "dial": "131114", "sms": false },
+      "helpline": { "names": { "en": "Lifeline" }, "display": "13 11 14", "dial": "131114", "sms": false },
       "emergency": { "display": "000", "dial": "000" },
       "status": "verified",
       "checked_on": "2026-10-19",
@@ -15,7 +16,7 @@
     },
     {
       "code": "BR",
-      "helpline": { "name": "CVV", "display": "188", "dial": "188", "sms": false },
+      "helpline": { "names": { "en": "CVV" }, "display": "188", "dial": "188", "sms": false },
       "emergency": { "display": "192", "dial": "192" },
       "status": "verified",
       "checked_on": "2026-10-19",
@@ -23,7 +24,7 @@
     },
     {
       "code": "CA",
-      "helpline": { "name": "9-8-8 Suicide Crisis Helpline", "display": "988", "dial": "988", "sms": true },
+      "helpline": { "names": { "en": "9-8-8 Suicide Crisis Helpline" }, "display": "988", "dial": "988", "sms": true },
       "emergency": { "display": "911", "dial": "911" },
       "status": "verified",
       "checked_on": "2026-10-19",
@@ -31,7 +32,7 @@
     },
     {
       "code": "DE",
-      "helpline": { "name": "TelefonSeelsorge", "display": "0800 111 0 111", "dial": "08001110111", "sms": false },
+      "helpline": { "names": { "en": "TelefonSeelsorge" }, "display": "0800 111 0 111", "dial": "08001110111", "sms": false },
       "emergency": { "display": "112", "dial": "112" },
       "status": "verified",
       "checked_on": "2026-10-19",
@@ -39,7 +40,7 @@
     },
     {
       "code": "ES",
-      "helpline": { "name": "Línea 024", "display": "024", "dial": "024", "sms": false },
+      "helpline": { "names": { "en": "Línea 024" }, "display": "024", "dial": "024", "sms": false },
       "emergency": { "display": "112", "dial": "112" },
       "status": "verified",
       "checked_on": "2026-10-19",
@@ -47,7 +48,7 @@
     },
     {
       "code": "FR",
-      "helpline": { "name": "3114", "display": "3114", "dial": "3114", "sms": false },
+      "helpline": { "names": { "en": "3114" }, "display": "3114", "dial": "3114", "sms": false },
       "emergency": { "display": "112", "dial": "112" },
       "status": "verified",
       "checked_on": "2026-10-19",
@@ -55,7 +56,7 @@
     },
     {
       "code": "GB",
-      "helpline": { "name": "Samaritans", "display": "116 123", "dial": "116123", "sms": false },
+      "helpline": { "names": { "en": "Samaritans" }, "display": "116 123", "dial": "116123", "sms": false },
       "emergency": { "display": "999", "dial": "999" },
       "status": "verified",
       "checked_on": "2026-10-19",
@@ -63,7 +64,7 @@
     },
     {
       "code": "IE",
-      "helpline": { "name": "Samaritans", "display": "116 123", "dial": "116123", "sms": false },
+      "helpline": { "names": { "en": "Samaritans" }, "display": "116 123", "dial": "116123", "sms": false },
       "emergency": { "display": "112", "dial": "112" },
       "status": "verified",
       "checked_on": "2026-10-19",
@@ -71,7 +72,7 @@
     },
     {
       "code": "NZ",
-      "helpline": { "name": "Need to talk? 1737", "display": "1737", "dial": "1737", "sms": true },
+      "helpline": { "names": { "en": "Need to talk? 1737" }, "display": "1737", "dial": "1737", "sms": true },
       "emergency": { "display": "111", "dial": "111" },
       "status": "verified",
       "checked_on": "2026-10-19",
@@ -79,7 +80,7 @@
     },
     {
       "code": "TH",
-      "helpline": { "name": "Department of Mental Health hotline", "display": "1323", "dial": "1323", "sms": false },
+      "helpline": { "names": { "en": "Department of Mental Health hotline", "th": "สายด่วนสุขภาพจิต กรมสุขภาพจิต" }, "display": "1323", "dial": "1323", "sms": false },
       "emergency": { "display": "1669", "dial": "1669" },
       "status": "verified",
       "checked_on": "2026-10-19",
@@ -87,7 +88,7 @@
     },
     {
       "code": "US",
-      "helpline": { "name": "988 Suicide & Crisis Lifeline", "display": "988", "dial": "988", "sms": true },
+      "helpline": { "names": { "en": "988 Suicide & Crisis Lifeline" }, "display": "988", "dial": "988", "sms": true },
       "emergency": { "display": "911", "dial": "911" },
       "status": "verified",
       "checked_on": "2026-10-19",
