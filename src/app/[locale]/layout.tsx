@@ -9,6 +9,7 @@ import { fontVariables } from "@/lib/fonts";
 import { SITE_URL } from "@/lib/site";
 import { Footer } from "@/components/Footer";
 import { LocalDataWipe } from "@/components/LocalDataWipe";
+import { CampaignLanding } from "@/components/CampaignLanding";
 import { VisitCounts } from "@/components/VisitCounts";
 import { THEME_PRE_PAINT } from "@/lib/appearance";
 import { conditionMet } from "@/lib/conditions";
@@ -77,6 +78,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
             the browser here (perf fix 3); /app's layout adds the rest. */}
         <NextIntlClientProvider messages={pickMessages(await getMessages(), PUBLIC_CLIENT_NAMESPACES)}>
           <LocalDataWipe />
+          <CampaignLanding />
           <div className="flex flex-1 flex-col">
             {children}
             <Footer />
