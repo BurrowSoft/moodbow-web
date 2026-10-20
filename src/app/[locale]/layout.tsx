@@ -71,7 +71,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
         </a>
         <NextIntlClientProvider>
           <LocalDataWipe />
-          <div className="fade-in flex flex-1 flex-col">
+          <div className="flex flex-1 flex-col">
             {children}
             <Footer />
           </div>
