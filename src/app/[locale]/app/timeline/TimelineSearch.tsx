@@ -8,6 +8,7 @@ import { MOOD_COLOURS, MOOD_DOT_OUTLINE } from "@/lib/journal/checkIn";
 import { withOrigin } from "@/lib/journal/origin";
 import { SEARCH_DEBOUNCE_MS, searchTerm } from "@/lib/journal/search";
 import { dayLabel } from "@/lib/journal/timeline";
+import { onArrival } from "@/lib/ui/arrival";
 import { searchEntries, type SearchHit } from "./searchActions";
 
 // Search your journal (1.1 L, decision 195): a magnifier at the top of the
@@ -57,6 +58,17 @@ export function TimelineSearch({ dateLocaleTag, children }: { dateLocaleTag: str
     const timer = window.setTimeout(() => run(q), SEARCH_DEBOUNCE_MS);
     return () => window.clearTimeout(timer);
   }, [text, open]);
+
+  // The "/" shortcut (1.1 O): open search (or, open already, focus its
+  // field), whether it was pressed here or on another page.
+  useEffect(
+    () =>
+      onArrival("search", () => {
+        setOpen(true);
+        field.current?.focus();
+      }),
+    [],
+  );
 
   useEffect(() => {
     if (open) field.current?.focus();

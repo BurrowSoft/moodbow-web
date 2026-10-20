@@ -70,7 +70,7 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
         zones={timeZoneOptions(me.profile?.time_zone)}
         languages={languageOptions(routing.locales)}
       />
-      <Appearance />
+      <Appearance shortcuts={pageGate("shortcuts-live") !== "hidden"} />
       <YourData credits={me.credits?.balance ?? 0} uid={user.id} csv={pageGate("export-csv-live") !== "hidden"} />
       {/* Import from another app (1.1 K), with Your data, where it's on. */}
       {pageGate("import-live") !== "hidden" && (
