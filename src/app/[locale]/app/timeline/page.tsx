@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 import { Link } from "@/i18n/navigation";
@@ -14,6 +14,11 @@ import { loadTimeline } from "./actions";
 import { segment } from "@/lib/ui/journalLayout";
 import { TimelineList } from "./TimelineList";
 import { OnThisDay } from "./OnThisDay";
+import { MonthCalendar } from "./MonthCalendar";
+import { TimelineViews } from "./TimelineViews";
+import { loadCalendarMonth } from "./calendarActions";
+import { monthOf } from "@/lib/journal/calendar";
+import { parseView, VIEW_COOKIE } from "@/lib/journal/timelineView";
 import { onThisDayDates, pickOnThisDay, type MomentRow, type OnThisDayKind } from "@/lib/journal/onThisDay";
 import { preview } from "@/lib/journal/entry";
 import { dateLine } from "@/lib/journal/today";
@@ -58,13 +63,29 @@ export default async function TimelinePage({ params, searchParams }: PageProps<"
     }
   }
   const filter = segment;
+  const shareable = pageGate("share-cards") !== "hidden";
+  const printable = pageGate("print-live") !== "hidden";
 
-  return (
-    <section>
-      {/* Focusable from code only: where focus goes when On this day is hidden. */}
-      <h1 id="timeline-title" tabIndex={-1} className="text-3xl font-medium tracking-tight focus:outline-none">
-        {t("timelineTitle")}
-      </h1>
+  // Month calendar (1.1 M): List · Calendar, the choice from its cookie so
+  // the chosen view paints first; this month is read here only for the
+  // calendar (it draws at once). On this day stays above both.
+  const calendarLive = pageGate("calendar-live") !== "hidden";
+  const view = calendarLive ? parseView((await cookies()).get(VIEW_COOKIE)?.value) : "list";
+  const calendarInitial = view === "calendar" ? await loadCalendarMonth(monthOf(me.today)) : null;
+
+  const onThisDayCard = onThisDay && (
+    <OnThisDay
+      kind={onThisDay.kind}
+      entryId={onThisDay.entry.id}
+      dateLabel={dateLine(onThisDay.entry.entry_date, dateLocaleTag)}
+      preview={preview(onThisDay.entry.body)}
+      mood={onThisDay.mood}
+      uid={user.id}
+      today={me.today}
+    />
+  );
+  const list = (
+    <>
       {momentsReady && (
         <nav aria-label={t("timelineTitle")} className="mt-4 flex gap-2">
           <Link href="/app/timeline" data-testid="timeline-filter-all" aria-current={!momentsOnly ? "page" : undefined} className={filter(!momentsOnly)}>
@@ -80,17 +101,7 @@ export default async function TimelinePage({ params, searchParams }: PageProps<"
           </Link>
         </nav>
       )}
-      {onThisDay && (
-        <OnThisDay
-          kind={onThisDay.kind}
-          entryId={onThisDay.entry.id}
-          dateLabel={dateLine(onThisDay.entry.entry_date, dateLocaleTag)}
-          preview={preview(onThisDay.entry.body)}
-          mood={onThisDay.mood}
-          uid={user.id}
-          today={me.today}
-        />
-      )}
+      {!calendarLive && onThisDayCard}
       {/* Keyed by the view, so switching filters starts a fresh list. */}
       <TimelineList
         key={momentsOnly ? "moments" : "all"}
@@ -98,10 +109,33 @@ export default async function TimelinePage({ params, searchParams }: PageProps<"
         initialDone={page.done}
         momentsOnly={momentsOnly}
         dateLocaleTag={dateLocaleTag}
-        shareable={pageGate("share-cards") !== "hidden"}
+        shareable={shareable}
         year={pageGate("year-card") !== "hidden" ? yearOnOffer(me.today) : null}
-        printable={pageGate("print-live") !== "hidden"}
+        printable={printable}
       />
+    </>
+  );
+
+  return (
+    <section>
+      {/* Focusable from code only: where focus goes when On this day is hidden. */}
+      <h1 id="timeline-title" tabIndex={-1} className="text-3xl font-medium tracking-tight focus:outline-none">
+        {t("timelineTitle")}
+      </h1>
+      {calendarLive ? (
+        <>
+          {onThisDayCard}
+          <TimelineViews
+            initialView={view}
+            list={list}
+            calendar={
+              <MonthCalendar today={me.today} dateLocaleTag={dateLocaleTag} initial={calendarInitial?.status === "ok" ? calendarInitial.days : null} shareable={shareable} printable={printable} />
+            }
+          />
+        </>
+      ) : (
+        list
+      )}
     </section>
   );
 }
