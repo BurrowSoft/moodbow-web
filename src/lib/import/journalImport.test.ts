@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { decodeImportFile, detectDateFormat, htmlToText, MAX_IMPORT_BYTES, parseTime, planImport, toIso, type ImportPlan } from "./journalImport";
+import { decodeImportFile, detectDateFormat, displayOrder, htmlToText, MAX_IMPORT_BYTES, parseTime, planImport, toIso, type ImportPlan } from "./journalImport";
 
 // jsdom (the default environment) provides DOMParser, as the browser does.
 const TODAY = "2026-10-20";
@@ -197,5 +197,28 @@ describe("planImport: our own CSV export's columns (1.1 P)", () => {
   it("the same words twice on one day: two entries, the second marked as a copy", () => {
     const plan = ok("date,mood,note\n2026-10-01,4,Same\n2026-10-01,4,Same\n2026-10-02,4,Same\n");
     expect(plan.entries.map((e) => e.dup ?? 0)).toEqual([0, 1, 0]);
+  });
+});
+
+describe("displayOrder: custom moods as the person sees them (UX, #115)", () => {
+  const names = ["zen", "Ánimo", "Zen", "ánimo", "Bold", "apple"];
+
+  it("the UI language's order, ignoring accents and case; code units break ties, so it's total and stable", () => {
+    expect(displayOrder(names, "en")).toEqual(["Ánimo", "ánimo", "apple", "Bold", "Zen", "zen"]);
+    expect(displayOrder(["zen", "Ánimo", "Zen"], "en")).toEqual(["Ánimo", "Zen", "zen"]);
+    expect(displayOrder([...names].reverse(), "en")).toEqual(displayOrder(names, "en"));
+  });
+
+  it("Thai UI: Thai names in Thai order, the Latin ones still accent- and case-insensitive", () => {
+    const order = displayOrder(["เหนื่อย", "zen", "กังวล", "Ánimo"], "th");
+    expect(order.filter((n) => /[a-zÁ]/i.test(n))).toEqual(["Ánimo", "zen"]);
+    expect(order.filter((n) => !/[a-zÁ]/i.test(n))).toEqual(["กังวล", "เหนื่อย"]);
+  });
+
+  it("display only: the plan (and the shared contract) keeps code-unit order, and the input isn't changed", () => {
+    const plan = ok(daylio(["2026-10-10,x,x,9:00 am,zen,,,", "2026-10-11,x,x,9:00 am,Ánimo,,,", "2026-10-12,x,x,9:00 am,Zen,,,"]));
+    expect(plan.customMoods).toEqual(["Zen", "zen", "Ánimo"]);
+    displayOrder(plan.customMoods, "en");
+    expect(plan.customMoods).toEqual(["Zen", "zen", "Ánimo"]);
   });
 });
