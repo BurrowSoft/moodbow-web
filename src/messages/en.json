@@ -347,7 +347,12 @@
     "dayAddCheckin": "Add a check-in",
     "dayAddEntry": "Add an entry",
     "timelineLoadMore": "Show more days",
-    "timelineLoadedMore": "{count, plural, one {# more day loaded} other {# more days loaded}}"
+    "timelineLoadedMore": "{count, plural, one {# more day loaded} other {# more days loaded}}",
+    "timelineViewList": "List",
+    "timelineViewCalendar": "Calendar",
+    "calPrevMonth": "Previous month",
+    "calNextMonth": "Next month",
+    "calDayLabel": "{date}{mood, select, none {} other {, {mood}}}{moment, select, yes {, moment} other {}}{entry, select, yes {, entry} other {}}"
   },
   "insights": {
     "insightsTitle": "Insights",
@@ -380,6 +385,7 @@
     "shareDaysJournaled": "{n} days journaled",
     "shareNotEnough": "Check in on at least 5 days this month to make your moodbow.",
     "shareThisMonth": "Share this month",
+    "calShareMonth": "Share this month",
     "shareCardType": "Card type",
     "shareChart": "Chart",
     "shareMilestone": "Milestone",
