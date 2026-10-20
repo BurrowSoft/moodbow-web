@@ -26,6 +26,33 @@ test.describe("home", () => {
     await expect(page.getByText(/\bAI\b/)).toHaveCount(0);
   });
 
+  test("security headers: a per-request CSP nonce on every script (Report-Only for now), and Permissions-Policy (audit A1 + A2)", async ({ page, request }) => {
+    const res = await page.goto("/");
+    const csp = res!.headers()["content-security-policy-report-only"];
+    expect(csp).toBeTruthy();
+    const nonce = csp.match(/'nonce-([^']+)'/)?.[1];
+    expect(nonce).toBeTruthy();
+    expect(csp).toContain("frame-ancestors 'none'");
+    // Every script Next and the layout render carries this request's nonce.
+    const scripts = await page.locator("script").evaluateAll((els) => els.map((e) => (e as HTMLScriptElement).nonce));
+    expect(scripts.length).toBeGreaterThan(0);
+    for (const n of scripts) expect(n).toBe(nonce);
+    // The 404 page too (rendered per request, not prerendered: Web Tester, #69).
+    const missing = await page.goto("/this-page-does-not-exist");
+    expect(missing!.status()).toBe(404);
+    const missingNonce = missing!.headers()["content-security-policy-report-only"].match(/'nonce-([^']+)'/)?.[1];
+    const missingScripts = await page.locator("script").evaluateAll((els) => els.map((e) => (e as HTMLScriptElement).nonce));
+    expect(missingScripts.length).toBeGreaterThan(0);
+    for (const n of missingScripts) expect(n).toBe(missingNonce);
+    // A fresh nonce per request.
+    const again = (await request.get("/")).headers()["content-security-policy-report-only"];
+    expect(again.match(/'nonce-([^']+)'/)?.[1]).not.toBe(nonce);
+    const permissions = res!.headers()["permissions-policy"];
+    expect(permissions).toContain("camera=()");
+    expect(permissions).toContain("geolocation=()");
+    expect(permissions).toContain("web-share=(self)");
+  });
+
   test("SEO tags use the www canonical host", async ({ page }) => {
     await page.goto("/");
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", CANONICAL);

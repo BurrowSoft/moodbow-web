@@ -1,6 +1,8 @@
 import createMiddleware from "next-intl/middleware";
 import { NextResponse, type NextRequest } from "next/server";
 import { routing } from "./i18n/routing";
+import { conditionMet } from "./lib/conditions";
+import { buildCsp, newNonce, NONCE_HEADER } from "./lib/csp";
 import { canonicalEmailConfirmedSearch } from "./lib/authLink";
 import { isHiddenPage, pagePath } from "./lib/sitemapPages";
 import { AUTH_OUTAGE_HEADER } from "./lib/supabase/deadline";
@@ -18,14 +20,28 @@ const intl = createMiddleware(routing);
 // instead: no <h1>, no lang until JS runs.)
 const NOT_FOUND_PATH = `/${routing.defaultLocale}/_not-found-page`;
 
+// The Content-Security-Policy (lib/csp.ts), with a fresh nonce for every
+// page: on the request, where Next and the layout read it, and on every
+// response this proxy returns. Report-Only until "csp-enforced" is met.
+const CSP_HEADER = conditionMet("csp-enforced") ? "Content-Security-Policy" : "Content-Security-Policy-Report-Only";
+
 export default async function proxy(req: NextRequest) {
+  const nonce = newNonce();
+  const csp = buildCsp(nonce, { supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL, sentryDsn: process.env.NEXT_PUBLIC_SENTRY_DSN, vercelEnv: process.env.VERCEL_ENV });
+  req.headers.set(NONCE_HEADER, nonce);
+  req.headers.set(CSP_HEADER, csp);
+  const withCsp = (res: NextResponse) => {
+    res.headers.set(CSP_HEADER, csp);
+    return res;
+  };
   const path = pagePath(req.nextUrl.pathname, routing.locales);
   // Gated pages that aren't live yet (content/conditions.json) are 404s on
   // Production; drafts elsewhere render normally (pageGate).
   if (isHiddenPage(path)) {
     const url = req.nextUrl.clone();
     url.pathname = NOT_FOUND_PATH;
-    return NextResponse.rewrite(url, { status: 404 });
+    // The not-found page renders too: it needs this request's nonce (reviewer #69).
+    return withCsp(NextResponse.rewrite(url, { status: 404, request: { headers: req.headers } }));
   }
   // /email-confirmed keeps only ?result= (lib/authLink.ts): a code or error
   // details in the address are dropped before the page renders.
@@ -34,7 +50,7 @@ export default async function proxy(req: NextRequest) {
     if (search !== req.nextUrl.search) {
       const url = req.nextUrl.clone();
       url.search = search;
-      return NextResponse.redirect(url, 307);
+      return withCsp(NextResponse.redirect(url, 307));
     }
   }
   // The signed-in area and the auth pages keep the Supabase session fresh:
@@ -81,12 +97,12 @@ export default async function proxy(req: NextRequest) {
     // revoked session keeps them for when the same person signs back in
     // (decision 81).
     if (goneUid) res.cookies.set(WIPE_COOKIE, goneUid, WIPE_COOKIE_OPTIONS);
-    return res;
+    return withCsp(res);
   }
 
   const res = intl(req);
   for (const { name, value, options } of refreshed) res.cookies.set(name, value, options);
-  return res;
+  return withCsp(res);
 }
 
 export const config = {
