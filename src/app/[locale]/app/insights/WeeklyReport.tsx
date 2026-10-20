@@ -48,8 +48,10 @@ const SECTIONS = [
 // plain text in Moodbow's voice card (decision 150), four headed sections,
 // or, for a crisis week, only its text and the Get help button (decisions
 // 124, 157). Shown only where canReflect(me) (the page decides).
-type Props = { initial: Report | null; weekStart: string; dateLocaleTag: string; balance: number; country?: string | null };
-export function WeeklyReport({ initial, weekStart, dateLocaleTag, balance, country }: Props) {
+// aiOff: AI is available but this person hasn't turned it on: the card
+// explains (meAiOffHint, as Me → AI does) and offers nothing to press.
+type Props = { initial: Report | null; weekStart: string; dateLocaleTag: string; balance: number; country?: string | null; aiOff?: boolean };
+export function WeeklyReport({ initial, weekStart, dateLocaleTag, balance, country, aiOff = false }: Props) {
   const t = useTranslations("ai");
   const ta = useTranslations("app");
   const tt = useTranslations("today");
@@ -168,6 +170,20 @@ export function WeeklyReport({ initial, weekStart, dateLocaleTag, balance, count
   }, [report]);
 
   if (hidden) return null;
+  if (aiOff)
+    return (
+      <section aria-labelledby="week-title" data-testid="weekly-report" className="mt-8 rounded-3xl border border-border bg-surface p-5">
+        <h2 id="week-title" className="text-lg font-medium text-text">
+          {t("reportWeekly")}
+        </h2>
+        <p data-testid="weekly-report-range" className="text-sm text-muted">
+          {weekRange(weekStart, dateLocaleTag)}
+        </p>
+        <p data-testid="weekly-report-ai-off" className="mt-4 text-muted">
+          {t("meAiOffHint")}
+        </p>
+      </section>
+    );
   // Too few check-ins that week (422 not_enough): the note replaces the button.
   const notEnough = phase.kind === "error" && phase.message === "reportNotEnough";
 

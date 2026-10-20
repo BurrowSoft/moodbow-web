@@ -79,6 +79,14 @@
     "met": false,
     "what": "1.1 L search (decision 195) is tested on the web (and the app's own, for parity): then the Timeline's magnifier shows on Production. Shown on Previews before that."
   },
+  "calendar-live": {
+    "met": false,
+    "what": "1.1 M month calendar (decision 197, specs/1.1-features.md §M) is tested on the web: then Timeline's List · Calendar switch shows on Production. Shown on Previews before that."
+  },
+  "print-live": {
+    "met": false,
+    "what": "1.1 N \"Print this month\" (decision 199, specs/1.1-features.md §N, web only) is tested on the web, and /app/print/YYYY-MM is scrubbed to [date] in Sentry (#90): then the Timeline's print links and /app/print show on Production. Shown on Previews before that."
+  },
   "csp-enforced": {
     "met": true,
     "what": "The Content-Security-Policy (lib/csp.ts) is enforced instead of Report-Only. Flip only after a clean Preview run of every page (journal, share-card canvas, the OG route) with no violations reported to Sentry (reviewer's audit A1)."
@@ -106,5 +114,9 @@
   "appstore-live": {
     "met": false,
     "what": "The App Store listing is public (Vitor), and src/lib/stores.ts has its URL and id. Then the web shows the App Store link and the iOS smart app banner (decision 185)."
+  },
+  "import-live": {
+    "met": false,
+    "what": "1.1 K import from another journal (decision 189: Daylio + generic CSV, web first) is tested on the web; then Me → Your data offers it on Production."
   }
 }
