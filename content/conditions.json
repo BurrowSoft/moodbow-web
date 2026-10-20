@@ -86,5 +86,17 @@
   "writing-prompts": {
     "met": false,
     "what": "1.1 I writing prompts (decision 183): the quiet prompt above an empty entry, from contracts/prompts.json, is tested on the app and the web."
+  },
+  "year-card": {
+    "met": false,
+    "what": "1.1 J \"My year's moodbow\" (decision 184): the Year card in the share sheet (December and January, ≥ 3 coloured months) is tested on the app and the web (needs share-cards too)."
+  },
+  "play-live": {
+    "met": false,
+    "what": "The Play listing is public (Vitor). Then the web shows the Google Play link (decision 185) and the manifest names the app (related_applications)."
+  },
+  "appstore-live": {
+    "met": false,
+    "what": "The App Store listing is public (Vitor), and src/lib/stores.ts has its URL and id. Then the web shows the App Store link and the iOS smart app banner (decision 185)."
   }
 }
