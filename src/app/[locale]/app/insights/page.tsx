@@ -8,7 +8,7 @@ import { JournalUnavailable } from "@/components/JournalUnavailable";
 import { isRange, previousRangeStart, rangeDays, series, type InsightRow, type Range } from "@/lib/journal/insights";
 import { loadMilestone } from "@/lib/share/milestoneData";
 import { yearOnOffer } from "@/lib/share/year";
-import { canReflect } from "@/lib/journal/ai";
+import { aiShown, canReflect } from "@/lib/journal/ai";
 import { lastWeekStart, parseReportBody, type WeeklyReport as Report } from "@/lib/journal/report";
 import { getMe } from "@/lib/journal/me";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -60,9 +60,14 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
     ) : null;
   // Your week (1.1 D): the last complete week's report, where AI is on for
   // this user and the weekly report is (weekly-report-live). A stored one
-  // shows as is; a failed read just means the button.
+  // shows as is; a failed read just means the button. AI available but not
+  // turned on by this person: the card explains, with no button (UX); AI
+  // off for everyone: no card at all (text = enforcement).
   let week: React.ReactNode = null;
-  if (pageGate("weekly-report-live") !== "hidden" && canReflect(me)) {
+  const weekly = pageGate("weekly-report-live") !== "hidden";
+  if (weekly && aiShown(me) && !canReflect(me)) {
+    week = <WeeklyReport initial={null} weekStart={lastWeekStart(me.today)} dateLocaleTag={dateLocaleTag} balance={0} aiOff />;
+  } else if (weekly && canReflect(me)) {
     const weekStart = lastWeekStart(me.today);
     const { data: stored } = await supabase
       .from("ai_reports")
