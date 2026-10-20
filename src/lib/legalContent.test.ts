@@ -1,8 +1,10 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
-import { routing } from "@/i18n/routing";
+import { ALL_LOCALES, routing } from "@/i18n/routing";
+import messages from "@/messages/en.json";
+import thMessages from "@/messages/th.json";
 import { conditionMet, type ConditionId } from "./conditions";
-import { applyPending, isPendingMet, legalSource, pendingIds, renderLegal, todos, type LegalSlug } from "./legalContent";
+import { applyPending, isPendingMet, legalLocale, legalSource, pendingIds, renderLegal, todos, type LegalSlug } from "./legalContent";
 import { BACKUP_RETENTION_DAYS } from "./site";
 
 const PAGES: { slug: LegalSlug; gate: ConditionId }[] = [
@@ -11,11 +13,18 @@ const PAGES: { slug: LegalSlug; gate: ConditionId }[] = [
 ];
 
 describe("legal content files", () => {
-  it("exist for every shipped locale (no silent fallback to English)", () => {
-    for (const locale of routing.locales) {
-      for (const { slug } of PAGES) expect(() => legalSource(slug, locale), `${locale}/${slug}`).not.toThrow();
+  it("exist for every locale's text language; never a silent fallback", () => {
+    for (const locale of [...routing.locales, ...ALL_LOCALES]) {
+      for (const { slug } of PAGES) expect(() => legalSource(slug, legalLocale(locale)), `${locale}/${slug}`).not.toThrow();
     }
     expect(() => legalSource("privacy", "xx")).toThrow("Missing legal text: content/legal/xx/privacy.md");
+  });
+
+  it("Thai pages show the English text, said so on the page (legalEnglishOnly, 1.1 F)", () => {
+    expect(legalLocale("en")).toBe("en");
+    expect(legalLocale("th")).toBe("en");
+    expect(messages.legal.legalEnglishOnly).toBe("This page is available in English.");
+    expect(thMessages.legal.legalEnglishOnly).toBe("หน้านี้มีให้อ่านเป็นภาษาอังกฤษ");
   });
 
   it("every {pending:id} maps to a condition", () => {

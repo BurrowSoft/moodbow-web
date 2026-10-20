@@ -101,21 +101,42 @@ test.describe("home", () => {
   });
 });
 
-test.describe("language (English-only beta)", () => {
-  test("a Thai browser stays on English at /", async ({ browser }) => {
+// Thai (1.1 F) behind thai-offered-live, unmet: this CI build is a draft
+// build (NEXT_PUBLIC_SHOW_DRAFTS=1), so /th is served there to be read,
+// but it isn't offered (Production: a 404, see the unit tests).
+test.describe("language: Thai is a draft, not offered (thai-offered-live)", () => {
+  test("a Thai browser stays on English at /, and there is no language switcher", async ({ browser }) => {
     const context = await browser.newContext({ locale: "th-TH" });
     const page = await context.newPage();
     await page.goto("/");
     await expect(page).toHaveURL(/\/$/);
     await expect(page.locator("html")).toHaveAttribute("lang", "en");
+    await expect(page.getByRole("navigation", { name: "Language" })).toHaveCount(0);
     await context.close();
   });
 
-  test("/th is not a route yet, and there is no language switcher", async ({ page }) => {
+  test("/th: the home page in Thai, no switcher, no hreflang to it", async ({ page }) => {
     const res = await page.goto("/th");
-    expect(res?.status()).toBe(404);
+    expect(res?.status()).toBe(200);
+    await expect(page.locator("html")).toHaveAttribute("lang", "th");
+    await expect(page.getByRole("navigation", { name: "ภาษา" })).toHaveCount(0);
     await page.goto("/");
-    await expect(page.getByRole("navigation", { name: "Language" })).toHaveCount(0);
+    await expect(page.locator('link[rel="alternate"][hreflang="th"]')).toHaveCount(0);
+  });
+
+  test("/th/help/getting-started: the Thai article", async ({ page }) => {
+    const res = await page.goto("/th/help/getting-started");
+    expect(res?.status()).toBe(200);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("เริ่มต้นใช้ Moodbow");
+  });
+
+  test("/th/privacy: the English text under the Thai line, as /privacy's draft", async ({ page }) => {
+    const res = await page.goto("/th/privacy");
+    expect(res?.status()).toBe(200);
+    await expect(page.getByTestId("page-notice")).toHaveText("หน้านี้มีให้อ่านเป็นภาษาอังกฤษ");
+    await expect(page.locator("article")).toHaveAttribute("lang", "en");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Moodbow Privacy Policy");
+    await expect(page.getByTestId("draft-banner")).toBeVisible();
   });
 });
 
@@ -259,7 +280,8 @@ test("unknown pages are a 404 with the site's not-found page", async ({ page }) 
 test.describe("404s are server-rendered (no JS)", () => {
   test.use({ javaScriptEnabled: false });
 
-  for (const path of ["/no-such-page", "/th"]) {
+  // /xx: a language we don't have (/th is a draft on this build).
+  for (const path of ["/no-such-page", "/xx"]) {
     test(path, async ({ page }) => {
       const res = await page.goto(path);
       expect(res?.status()).toBe(404);

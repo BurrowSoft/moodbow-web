@@ -123,7 +123,8 @@
     "description": "The terms for using Moodbow."
   },
   "legal": {
-    "hiddenTitle": "Not shown yet: each block appears once its feature is live (test builds only)"
+    "hiddenTitle": "Not shown yet: each block appears once its feature is live (test builds only)",
+    "legalEnglishOnly": "This page is available in English."
   },
   "auth": {
     "signinTitle": "Welcome back",

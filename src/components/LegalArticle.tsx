@@ -2,7 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { PageShell } from "./PageShell";
 import { pageGate, type ConditionId } from "@/lib/conditions";
-import { legalSource, renderLegal, type LegalSlug } from "@/lib/legalContent";
+import { legalLocale, legalSource, renderLegal, type LegalSlug } from "@/lib/legalContent";
 
 type Props = { slug: LegalSlug; locale: string; gate: ConditionId };
 
@@ -11,11 +11,17 @@ type Props = { slug: LegalSlug; locale: string; gate: ConditionId };
 // removed). On a draft build (Preview / CI), a panel after the article lists
 // the hidden blocks so reviewers can read them; it never reaches Production
 // (the page is a 404 there until its condition is met).
+// The legal text exists in English only (decision 164): another language's
+// page shows it under one line in that language (legalEnglishOnly), marked
+// lang="en". Its gate is the same in every language (the proxy checks the
+// path without its locale).
 export async function LegalArticle({ slug, locale, gate }: Props) {
   const state = pageGate(gate);
   if (state === "hidden") notFound();
-  const { title, html, hidden } = renderLegal(legalSource(slug, locale));
+  const textLocale = legalLocale(locale);
+  const { title, html, hidden } = renderLegal(legalSource(slug, textLocale));
   const t = await getTranslations("legal");
+  const english = textLocale !== locale;
 
   const panel =
     state === "draft" && hidden.length > 0 ? (
@@ -33,7 +39,7 @@ export async function LegalArticle({ slug, locale, gate }: Props) {
     ) : null;
 
   return (
-    <PageShell title={title} draft={state === "draft"} article after={panel}>
+    <PageShell title={title} draft={state === "draft"} article after={panel} notice={english ? t("legalEnglishOnly") : undefined} lang={english ? textLocale : undefined}>
       <div className="legal-prose" dangerouslySetInnerHTML={{ __html: html }} />
     </PageShell>
   );
