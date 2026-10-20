@@ -67,6 +67,13 @@ describe("MilestoneCard (decision 169)", () => {
     expect(screen.getByTestId("milestone-card")).toBeInTheDocument();
   });
 
+  it("seen on an earlier visit: no card, but the spacer stays (it's in the server HTML: nothing moves, footer included)", () => {
+    window.localStorage.setItem(KEY, "1");
+    renderIt();
+    expect(screen.queryByTestId("milestone-card")).toBeNull();
+    expect(screen.getByTestId("milestone-spacer")).toBeInTheDocument();
+  });
+
   it("already seen: nothing shown; another milestone or person still is", () => {
     window.localStorage.setItem(KEY, "1");
     renderIt();
