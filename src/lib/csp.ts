@@ -2,7 +2,7 @@
 // each page's own inline scripts by a per-request nonce (Next reads it from
 // the request's CSP header and stamps its scripts; the pre-paint theme
 // script takes it from x-nonce), and connections only to us, Supabase and
-// Sentry. Report-Only until "csp-enforced" is met (after a clean Preview run
+// Sentry. Enforced since "csp-enforced" was met (after a clean Preview run
 // of every page, read from the browser console). No report-uri: a report
 // carries the full page address, query included, past our scrubbing, and
 // /auth/confirm's carries a single-use token (reviewer #69).
