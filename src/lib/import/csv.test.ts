@@ -31,4 +31,9 @@ describe("parseCsv (RFC 4180, M2)", () => {
   it("empty input: no rows", () => {
     expect(parseCsv("")).toEqual([]);
   });
+
+  it("an unterminated quote: null, never a guess (reviewer #92 B3)", () => {
+    expect(parseCsv('date,mood,note\n2026-10-01,3,"never closed\n2026-10-02,4,x\n')).toBeNull();
+    expect(parseCsv('a,"b')).toBeNull();
+  });
 });

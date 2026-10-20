@@ -33,8 +33,8 @@ const settle = () => act(async () => {});
 
 beforeEach(() => {
   idCount = 0;
-  importCheckIns.mockReset().mockImplementation(async (days: unknown[]) => ({ status: "ok", written: days.length, skipped: 0 }));
-  importEntries.mockReset().mockImplementation(async (entries: unknown[]) => ({ status: "ok", written: entries.length, skipped: 0 }));
+  importCheckIns.mockReset().mockImplementation(async (days: { date: string }[]) => ({ status: "ok", written: days.map((d) => d.date), skipped: 0 }));
+  importEntries.mockReset().mockImplementation(async (entries: { id: string }[]) => ({ status: "ok", written: entries.map((e) => e.id), skipped: 0 }));
 });
 afterEach(cleanup);
 
@@ -64,7 +64,7 @@ describe("ImportData", () => {
   });
 
   it("days already in Moodbow are reported as skipped", async () => {
-    importCheckIns.mockResolvedValueOnce({ status: "ok", written: 1, skipped: 1 });
+    importCheckIns.mockResolvedValueOnce({ status: "ok", written: ["2026-10-01"], skipped: 1 });
     renderIt();
     await choose("date,mood\n2026-10-01,4\n2026-10-02,3\n");
     fireEvent.click(screen.getByTestId("import-confirm"));
@@ -85,7 +85,12 @@ describe("ImportData", () => {
     renderIt();
     await choose("full_date,date,weekday,time,mood,activities,note_title,note\n2026-10-10,x,x,9:00 am,ecstatic,,,\n");
     expect(screen.getByTestId("import-moods")).toHaveTextContent(m.importMapMoods);
+    // Nothing chosen yet: "Choose a mood…", and Import disabled (reviewer #92 B4).
+    expect(screen.getByTestId("import-mood-0")).toHaveValue("");
+    expect(screen.getByRole("option", { name: m.importMapChoose })).toBeDisabled();
+    expect(screen.getByTestId("import-confirm")).toBeDisabled();
     fireEvent.change(screen.getByTestId("import-mood-0"), { target: { value: "5" } });
+    expect(screen.getByTestId("import-confirm")).toBeEnabled();
     fireEvent.click(screen.getByTestId("import-confirm"));
     await settle();
     expect(importCheckIns).toHaveBeenCalledWith([{ date: "2026-10-10", mood: 5 }]);
@@ -124,5 +129,91 @@ describe("ImportData", () => {
     fireEvent.click(screen.getByTestId("import-confirm"));
     await settle();
     expect(screen.getByTestId("import-failed")).toHaveTextContent(m.importError);
+  });
+  it("\"Don't import\" is an explicit choice too: Import enabled, and that day gets no mood", async () => {
+    renderIt();
+    await choose("full_date,date,weekday,time,mood,activities,note_title,note\n2026-10-10,x,x,9:00 am,ecstatic,,,A note\n");
+    fireEvent.change(screen.getByTestId("import-mood-0"), { target: { value: "skip" } });
+    fireEvent.click(screen.getByTestId("import-confirm"));
+    await settle();
+    expect(importCheckIns).not.toHaveBeenCalled();
+    expect(importEntries).toHaveBeenCalledTimes(1);
+  });
+
+  it("a double click starts one import (reviewer #92 B1)", async () => {
+    let release!: () => void;
+    importCheckIns.mockImplementationOnce(() => new Promise((r) => (release = () => r({ status: "ok", written: ["2026-10-01"], skipped: 0 }))));
+    renderIt();
+    await choose("date,mood\n2026-10-01,4\n");
+    const confirm = screen.getByTestId("import-confirm");
+    fireEvent.click(confirm);
+    fireEvent.click(confirm);
+    await settle();
+    await act(async () => release());
+    expect(importCheckIns).toHaveBeenCalledTimes(1);
+  });
+
+  it("while importing, leaving the page asks first", async () => {
+    let release!: () => void;
+    importCheckIns.mockImplementationOnce(() => new Promise((r) => (release = () => r({ status: "ok", written: ["2026-10-01"], skipped: 0 }))));
+    renderIt();
+    await choose("date,mood\n2026-10-01,4\n");
+    fireEvent.click(screen.getByTestId("import-confirm"));
+    await settle();
+    const event = new Event("beforeunload", { cancelable: true });
+    window.dispatchEvent(event);
+    expect(event.defaultPrevented).toBe(true);
+    await act(async () => release());
+  });
+
+  it("over 10 MB: refused before the file is read (reviewer #92 B2)", async () => {
+    renderIt();
+    const file = new File(["date,mood\n"], "big.csv", { type: "text/csv" });
+    Object.defineProperty(file, "size", { value: 10 * 1024 * 1024 + 1 });
+    const read = vi.spyOn(file, "arrayBuffer");
+    await act(async () => {
+      fireEvent.change(screen.getByTestId("import-file"), { target: { files: [file] } });
+    });
+    expect(read).not.toHaveBeenCalled();
+    expect(screen.getByTestId("import-error")).toHaveTextContent(m.importError);
+  });
+
+  it("an unterminated quote: importError (reviewer #92 B3)", async () => {
+    renderIt();
+    await choose('date,mood,note\n2026-10-01,3,"never closed\n');
+    expect(screen.getByTestId("import-error")).toBeInTheDocument();
+  });
+
+  it("stopped part-way: the crisis line still shows if a note that was written matched (reviewer #92 B5)", async () => {
+    importEntries.mockImplementationOnce(async (entries: { id: string }[]) => ({ status: "ok", written: entries.map((e) => e.id), skipped: 0 }));
+    const notes = Array.from({ length: 101 }, (_, i) => `2026-${String(1 + Math.floor(i / 28)).padStart(2, "0")}-${String(1 + (i % 28)).padStart(2, "0")},3,${i === 0 ? "Some days I want to die." : "A walk"}`);
+    importEntries.mockResolvedValueOnce({ status: "error" });
+    renderIt();
+    await choose(["date,mood,note", ...notes].join("\n"));
+    fireEvent.click(screen.getByTestId("import-confirm"));
+    await settle();
+    expect(screen.getByTestId("import-failed")).toBeInTheDocument();
+    expect(screen.getByTestId("import-crisis")).toHaveTextContent(m.importCrisisLine);
+  });
+
+  it("only notes already there are skipped: the crisis line counts only what was written", async () => {
+    importEntries.mockResolvedValueOnce({ status: "ok", written: [], skipped: 1 });
+    importCheckIns.mockResolvedValueOnce({ status: "ok", written: [], skipped: 1 });
+    renderIt();
+    await choose("date,mood,note\n2026-10-01,2,Some days I want to die.\n");
+    fireEvent.click(screen.getByTestId("import-confirm"));
+    await settle();
+    expect(screen.queryByTestId("import-crisis")).toBeNull();
+    expect(screen.getByTestId("import-done")).toHaveTextContent("Done. 0 days are in your Timeline.");
+    expect(screen.getByTestId("import-skipped")).toHaveTextContent("1 days skipped (already in Moodbow).");
+  });
+
+  it("a notes-only file counts its days (M-a)", async () => {
+    renderIt();
+    await choose("date,mood,note\n2026-10-01,,A walk\n2026-10-02,,Tea\n");
+    fireEvent.click(screen.getByTestId("import-confirm"));
+    await settle();
+    expect(importCheckIns).not.toHaveBeenCalled();
+    expect(screen.getByTestId("import-done")).toHaveTextContent("Done. 2 days are in your Timeline.");
   });
 });

@@ -13,7 +13,9 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 // they're checked again here; no note text is logged, and nothing about
 // the file reaches the server. Errors carry counts only.
 
-export type ImportBatchResult = { status: "ok"; written: number; skipped: number } | { status: "error" };
+// written: what this batch actually added (the days, or the entry ids), so
+// the summary and the crisis line count only real writes (reviewer #92 B5).
+export type ImportBatchResult = { status: "ok"; written: string[]; skipped: number } | { status: "error" };
 
 const ISO = /^\d{4}-\d{2}-\d{2}$/;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -39,7 +41,7 @@ export async function importCheckIns(days: { date: string; mood: number }[]): Pr
   const { data: existing, error } = await supabase.from("check_ins").select("local_date").in("local_date", days.map((d) => d.date));
   if (error) return { status: "error" };
   const have = new Set((existing ?? []).map((r) => (r as { local_date: string }).local_date));
-  let written = 0;
+  const written: string[] = [];
   for (const d of days) {
     if (have.has(d.date)) continue;
     const { error: writeError } = await supabase.rpc("upsert_check_in", {
@@ -53,9 +55,9 @@ export async function importCheckIns(days: { date: string; mood: number }[]): Pr
       p_expected_updated_at: null,
     });
     if (writeError) return { status: "error" };
-    written++;
+    written.push(d.date);
   }
-  return { status: "ok", written, skipped: days.length - written };
+  return { status: "ok", written, skipped: days.length - written.length };
 }
 
 // Notes as entries, with the ids the browser derived from the file (H1:
@@ -75,7 +77,7 @@ export async function importEntries(entries: { id: string; date: string; body: s
   const { data: existing, error } = await supabase.from("entries").select("id").in("id", entries.map((e) => e.id));
   if (error) return { status: "error" };
   const have = new Set((existing ?? []).map((r) => (r as { id: string }).id));
-  let written = 0;
+  const written: string[] = [];
   for (const e of entries) {
     if (have.has(e.id)) continue;
     const { error: writeError } = await supabase.rpc("save_entry", {
@@ -87,7 +89,7 @@ export async function importEntries(entries: { id: string; date: string; body: s
       p_expected_updated_at: null,
     });
     if (writeError) return { status: "error" };
-    written++;
+    written.push(e.id);
   }
-  return { status: "ok", written, skipped: entries.length - written };
+  return { status: "ok", written, skipped: entries.length - written.length };
 }

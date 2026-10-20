@@ -41,7 +41,7 @@ describe("importCheckIns", () => {
       { date: "2026-10-01", mood: 4 },
       { date: "2026-10-02", mood: 1 },
     ]);
-    expect(r).toEqual({ status: "ok", written: 1, skipped: 1 });
+    expect(r).toEqual({ status: "ok", written: ["2026-10-01"], skipped: 1 });
     expect(rpc).toHaveBeenCalledTimes(1);
     expect(rpc).toHaveBeenCalledWith("upsert_check_in", expect.objectContaining({ p_date: "2026-10-01", p_mood: 4, p_expected_updated_at: null }));
   });
@@ -69,13 +69,13 @@ describe("importEntries", () => {
       { id: ID(2), date: "2026-10-01", body: "Second" },
       { id: ID(3), date: "2026-10-02", body: "Third" },
     ]);
-    expect(r).toEqual({ status: "ok", written: 2, skipped: 1 });
+    expect(r).toEqual({ status: "ok", written: [ID(1), ID(3)], skipped: 1 });
     expect(rpc.mock.calls.map((c) => (c[1] as { p_id: string }).p_id)).toEqual([ID(1), ID(3)]);
     expect(rpc).toHaveBeenCalledWith("save_entry", expect.objectContaining({ p_body: "First", p_is_moment: false, p_expected_updated_at: null }));
 
     rpc.mockClear();
     existingIds = [ID(1), ID(2), ID(3)];
-    expect(await importEntries([{ id: ID(1), date: "2026-10-01", body: "First" }])).toEqual({ status: "ok", written: 0, skipped: 1 });
+    expect(await importEntries([{ id: ID(1), date: "2026-10-01", body: "First" }])).toEqual({ status: "ok", written: [], skipped: 1 });
     expect(rpc).not.toHaveBeenCalled();
   });
 

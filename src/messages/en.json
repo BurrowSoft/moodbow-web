@@ -326,6 +326,7 @@
     "importDateMDY": "Month/Day/Year (12/31/2025)",
     "importMapMoods": "Match your moods",
     "importMapSkip": "Don't import",
+    "importMapChoose": "Choose a mood…",
     "importSkippedTooLong": "{count} notes too long to import."
   },
   "export": {

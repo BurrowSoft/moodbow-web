@@ -122,6 +122,8 @@ type Row = { date: string; time: string | null; mood: Mood | null; body: string;
 
 export function planImport(text: string, today: string, options: ImportOptions = {}): ImportResult {
   const table = parseCsv(text);
+  // An unterminated quote (reviewer #92 B3): refused, not guessed at.
+  if (table === null) return { status: "error", reason: "format" };
   if (table.length < 2) return { status: "error", reason: "empty" };
   const header = table[0].map((h) => h.trim().toLowerCase());
   const col = (name: string) => header.indexOf(name);

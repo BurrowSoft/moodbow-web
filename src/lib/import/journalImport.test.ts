@@ -78,6 +78,10 @@ describe("planImport: generic CSV and dates (settled 4)", () => {
     expect(planImport(daylio(["2026-13-01,x,x,9:00 pm,good,,,"]), TODAY)).toEqual({ status: "error", reason: "dates", row: 2 });
   });
 
+  it("an unterminated quote → importError (reviewer #92 B3)", () => {
+    expect(planImport('date,mood,note\n2026-10-01,3,"never closed\n', TODAY)).toEqual({ status: "error", reason: "format" });
+  });
+
   it("no header or no rows → the matching error", () => {
     expect(planImport("2026-10-01,3,No header\n2026-10-02,4,\n", TODAY)).toEqual({ status: "error", reason: "format" });
     expect(planImport("date,mood\n", TODAY)).toEqual({ status: "error", reason: "empty" });

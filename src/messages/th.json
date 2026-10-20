@@ -326,6 +326,7 @@
     "importDateMDY": "เดือน/วัน/ปี (12/31/2025)",
     "importMapMoods": "จับคู่อารมณ์ของคุณ",
     "importMapSkip": "ไม่นำเข้า",
+    "importMapChoose": "เลือกอารมณ์…",
     "importSkippedTooLong": "{count} บันทึกยาวเกินกว่าจะนำเข้าได้"
   },
   "export": {

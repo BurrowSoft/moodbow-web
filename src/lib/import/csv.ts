@@ -20,7 +20,9 @@ export function detectDelimiter(text: string): Delimiter {
   return semis > commas ? ";" : ",";
 }
 
-export function parseCsv(text: string, delimiter: Delimiter = detectDelimiter(text)): string[][] {
+// The rows, or null when the file ends inside a quoted field (an
+// unterminated quote: not a CSV we can trust, so the import refuses it).
+export function parseCsv(text: string, delimiter: Delimiter = detectDelimiter(text)): string[][] | null {
   const s = text.charCodeAt(0) === 0xfeff ? text.slice(1) : text;
   const rows: string[][] = [];
   let row: string[] = [];
@@ -49,6 +51,7 @@ export function parseCsv(text: string, delimiter: Delimiter = detectDelimiter(te
       row = [];
     } else field += c;
   }
+  if (quoted) return null;
   row.push(field);
   if (row.some((f) => f !== "")) rows.push(row);
   return rows;
