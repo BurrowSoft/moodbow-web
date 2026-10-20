@@ -60,7 +60,7 @@
     "what": "Vercel Web Analytics (cookie-free visit counts, decision 79) is enabled for the moodbow-web project by Vitor in Vercel. Flipping this shows the privacy policy's visit-count lines and loads the counter (with the URL scrubber, src/lib/analytics.ts) in the same deploy."
   },
   "timeline-moments-rpc": {
-    "met": false,
+    "met": true,
     "what": "get_timeline(p_before, p_limit, p_moments_only) from moodbow-app migration 005 is applied on PRODUCTION (Mobile Dev confirms; staging has it since 2026-10-19). Until then the Timeline's Moments filter shows on Previews only."
   },
   "offline-start": {
