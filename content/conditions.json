@@ -75,6 +75,10 @@
     "met": true,
     "what": "1.1 A \"On this day\" (specs/1.1-features.md) is tested on both the app and the web; then the Timeline card shows on Production (UX: not tied to a release, may be in time for 1.0)."
   },
+  "shortcuts-live": {
+    "met": false,
+    "what": "1.1 O web keyboard shortcuts (decision 200, specs/1.1-features.md §O) are tested on the web: then the shortcuts, the ? list and the Me → Appearance switch (WCAG 2.1.4) are on for Production, with their Help mention. Shown on Previews before that."
+  },
   "csp-enforced": {
     "met": true,
     "what": "The Content-Security-Policy (lib/csp.ts) is enforced instead of Report-Only. Flip only after a clean Preview run of every page (journal, share-card canvas, the OG route) with no violations reported to Sentry (reviewer's audit A1)."

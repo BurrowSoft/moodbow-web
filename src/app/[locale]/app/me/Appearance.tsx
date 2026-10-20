@@ -3,6 +3,7 @@
 import { useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
 import { applyTheme, readTheme, THEME_KEY, THEMES, writeTheme, type Theme } from "@/lib/appearance";
+import { readShortcutsOn, writeShortcutsOn } from "@/lib/shortcuts";
 
 const LABELS = { system: "themeSystem", light: "themeLight", dark: "themeDark" } as const;
 
@@ -26,11 +27,18 @@ const subscribe = (cb: () => void) => {
 // Me → Appearance (r1 §M7, decision 133): Same as device / Light / Dark,
 // for this device only, applied at once. Nothing is sent to the server, so
 // there's no save to fail (decision 111 doesn't apply).
-export function Appearance() {
+// shortcuts: the keyboard shortcuts switch (1.1 O, WCAG 2.1.4), on by
+// default, also for this device only.
+export function Appearance({ shortcuts = false }: { shortcuts?: boolean }) {
   const t = useTranslations("me");
   const theme = useSyncExternalStore(subscribe, readTheme, () => "system" as Theme);
+  const shortcutsOn = useSyncExternalStore(subscribe, readShortcutsOn, () => true);
   const choose = (next: Theme) => {
     writeTheme(next);
+    listeners.forEach((cb) => cb());
+  };
+  const toggleShortcuts = () => {
+    writeShortcutsOn(!shortcutsOn);
     listeners.forEach((cb) => cb());
   };
   return (
@@ -55,6 +63,30 @@ export function Appearance() {
           ))}
         </div>
       </fieldset>
+      {shortcuts && (
+        <div className="mt-6 border-t border-border pt-4">
+          <div className="flex min-h-11 items-center justify-between gap-4">
+            <span id="me-shortcuts" className="text-text">
+              {t("shortcutsEnabled")}
+            </span>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={shortcutsOn}
+              aria-labelledby="me-shortcuts"
+              aria-describedby="me-shortcuts-hint"
+              data-testid="me-shortcuts"
+              onClick={toggleShortcuts}
+              className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full border border-border transition-colors ${shortcutsOn ? "bg-accent" : "bg-pill"}`}
+            >
+              <span aria-hidden="true" className={`inline-block h-5 w-5 rounded-full bg-surface shadow transition-transform ${shortcutsOn ? "translate-x-6" : "translate-x-1"}`} />
+            </button>
+          </div>
+          <p id="me-shortcuts-hint" className="text-sm text-muted">
+            {t("shortcutsHint")}
+          </p>
+        </div>
+      )}
     </section>
   );
 }

@@ -9,6 +9,7 @@ import { localKey } from "@/lib/localData";
 import { ValueDot } from "@/components/ValueDot";
 import { JOURNAL_CARD, MOOD_FACE, MOOD_LABEL, MOOD_ROW, PRIMARY_SAVE } from "@/lib/ui/journalLayout";
 import { MoodFace } from "@/components/MoodFace";
+import { onArrival } from "@/lib/ui/arrival";
 import { saveCheckIn, type CheckInState } from "./actions";
 
 // The daily check-in (M4): mood required (5 labelled circles), then the
@@ -311,6 +312,16 @@ function Card({ initial, uid, date: cardDate, notify, announce, autoFocus }: Pro
   const seen = useRef(false);
   const showsSummary = !editing && fields.mood !== null;
   const moodTitle = useId();
+  // The "c" shortcut (1.1 O): focus the mood (the chosen face, else the
+  // first) or, once checked in, the summary's heading.
+  useEffect(
+    () =>
+      onArrival("checkIn", () => {
+        const card = root.current;
+        (card?.querySelector<HTMLElement>("[role=radio][tabindex='0']") ?? card?.querySelector<HTMLElement>("h2"))?.focus();
+      }),
+    [],
+  );
   useEffect(() => {
     if (!seen.current) {
       seen.current = true;

@@ -3,6 +3,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import messages from "@/messages/en.json";
 import { THEME_KEY } from "@/lib/appearance";
+import { SHORTCUTS_KEY } from "@/lib/shortcuts";
 import { Appearance } from "./Appearance";
 
 const renderIt = () =>
@@ -69,5 +70,31 @@ describe("Me → Appearance with storage blocked (Web Tester #41)", () => {
     expect(screen.getByTestId("me-theme-dark")).toBeChecked();
     get.mockRestore();
     set.mockRestore();
+  });
+});
+
+describe("Me → Appearance: keyboard shortcuts (1.1 O, WCAG 2.1.4)", () => {
+  const withSwitch = () =>
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <Appearance shortcuts />
+      </NextIntlClientProvider>,
+    );
+
+  it("a switch, on by default, with the hint; off is kept on this device", () => {
+    withSwitch();
+    const sw = screen.getByRole("switch", { name: messages.me.shortcutsEnabled });
+    expect(sw).toHaveAttribute("aria-checked", "true");
+    expect(sw).toHaveAccessibleDescription(messages.me.shortcutsHint);
+    fireEvent.click(sw);
+    expect(sw).toHaveAttribute("aria-checked", "false");
+    expect(window.localStorage.getItem(SHORTCUTS_KEY)).toBe("off");
+    fireEvent.click(sw);
+    expect(window.localStorage.getItem(SHORTCUTS_KEY)).toBeNull();
+  });
+
+  it("not shown where shortcuts aren't live", () => {
+    renderIt();
+    expect(screen.queryByRole("switch")).toBeNull();
   });
 });

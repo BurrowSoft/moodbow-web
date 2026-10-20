@@ -67,7 +67,7 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
         zones={timeZoneOptions(me.profile?.time_zone)}
         languages={languageOptions(routing.locales)}
       />
-      <Appearance />
+      <Appearance shortcuts={pageGate("shortcuts-live") !== "hidden"} />
       <YourData credits={me.credits?.balance ?? 0} uid={user.id} />
 
       <section aria-labelledby="me-help" className="rounded-3xl border border-border bg-surface p-6">
