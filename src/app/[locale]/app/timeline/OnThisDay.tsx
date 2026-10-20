@@ -45,6 +45,9 @@ export function OnThisDay({ kind, entryId, dateLabel, preview, mood, uid, today 
       // storage unavailable: hidden until the page reloads
     }
     listeners.forEach((cb) => cb());
+    // The ✕ goes with the card: focus moves to the Timeline's heading rather
+    // than dropping to the page (Web Tester a11y pass).
+    document.getElementById("timeline-title")?.focus();
   }, [key]);
   if (hidden) return null;
 

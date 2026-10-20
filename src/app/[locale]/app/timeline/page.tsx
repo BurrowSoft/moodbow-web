@@ -61,7 +61,10 @@ export default async function TimelinePage({ params, searchParams }: PageProps<"
 
   return (
     <section>
-      <h1 className="text-3xl font-medium tracking-tight">{t("timelineTitle")}</h1>
+      {/* Focusable from code only: where focus goes when On this day is hidden. */}
+      <h1 id="timeline-title" tabIndex={-1} className="text-3xl font-medium tracking-tight focus:outline-none">
+        {t("timelineTitle")}
+      </h1>
       {momentsReady && (
         <nav aria-label={t("timelineTitle")} className="mt-4 flex gap-2">
           <Link href="/app/timeline" data-testid="timeline-filter-all" aria-current={!momentsOnly ? "page" : undefined} className={filter(!momentsOnly)}>

@@ -50,6 +50,22 @@ describe("OnThisDay (1.1 A)", () => {
     expect(screen.getByRole("heading", { name: t.onThisDayMonth })).toBeInTheDocument();
   });
 
+  it("✕ by keyboard: focus moves to the Timeline heading, not the page", () => {
+    const heading = document.createElement("h1");
+    heading.id = "timeline-title";
+    heading.tabIndex = -1;
+    document.body.appendChild(heading);
+    try {
+      renderCard();
+      const close = screen.getByRole("button", { name: t.onThisDayDismiss });
+      close.focus();
+      fireEvent.click(close);
+      expect(document.activeElement).toBe(heading);
+    } finally {
+      heading.remove();
+    }
+  });
+
   it("✕ hides it for today; a new day shows it again", () => {
     renderCard();
     fireEvent.click(screen.getByRole("button", { name: t.onThisDayDismiss }));
