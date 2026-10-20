@@ -6,7 +6,9 @@ import fixture from "../../../content/contracts/export_fixture.json";
 import en from "@/messages/en.json";
 import { renderExportCsv } from "@/lib/exportCsv";
 import type { ExportDoc, Translate } from "@/lib/exportText";
-import { decodeImportFile, MAX_IMPORT_BYTES, MAX_IMPORT_DAYS, MAX_IMPORT_ENTRIES, planImport, type ImportOptions, type ImportResult } from "./journalImport";
+import { MAX_ENTRY_CHARS } from "@/lib/journal/entry";
+import { decodeImportFile, MAX_IMPORT_BYTES, MAX_IMPORT_DAYS, MAX_IMPORT_ENTRIES, planImport, type ImportEntry, type ImportOptions, type ImportResult } from "./journalImport";
+import { dropExistingNotes, noteKey } from "./noteDedupe";
 import { IMPORT_NAMESPACE, importEntryId } from "./uuidv5";
 
 // src/lib/import/fixtures/import-cases.json (1.1 K, decision 208): the
@@ -24,7 +26,7 @@ const FILE = join(process.cwd(), "src", "lib", "import", "fixtures", "import-cas
 const TODAY = "2026-10-21";
 const USER = "00000000-0000-4000-8000-000000000001";
 
-type Input = { csv: string } | { base64: string } | { generate: { kind: "days" | "entries"; count: number } };
+type Input = { csv: string } | { base64: string } | { generate: { kind: "days" | "entries" | "bytes"; count: number } };
 type Case = { name: string; options?: ImportOptions } & Input;
 
 const daylio = (rows: string[]) => ["full_date,date,weekday,time,mood,activities,note_title,note", ...rows].join("\n");
@@ -86,11 +88,11 @@ const CASES: Case[] = [
   { name: "bytes: not UTF-8 (a renamed image)", base64: b64(new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0xff, 0xfe, 0x00])) },
   { name: "bytes: Latin-1 (é as 0xE9)", base64: b64(new Uint8Array([...new TextEncoder().encode("date,mood,note\n2026-10-01,4,caf"), 0xe9])) },
   // Limits
-  { name: "a note over 20,000 characters (UTF-16 units): skipped, its day's mood kept", csv: `date,mood,note\n2026-10-01,3,${"x".repeat(20001)}\n2026-10-02,3,${"y".repeat(20000)}` },
+  { name: "a note over 20,000 characters (UTF-16 units): skipped, its day's mood kept", csv: `date,mood,note\n2026-10-01,3,${"x".repeat(MAX_ENTRY_CHARS + 1)}\n2026-10-02,3,${"y".repeat(MAX_ENTRY_CHARS)}` },
   { name: "future: after today (the profile zone's, passed in)", csv: `date,mood\n${TODAY},3\n2026-10-22,4` },
   { name: `caps: ${MAX_IMPORT_DAYS + 100} days → the newest ${MAX_IMPORT_DAYS}`, generate: { kind: "days", count: MAX_IMPORT_DAYS + 100 } },
   { name: `caps: ${MAX_IMPORT_ENTRIES + 100} notes → the newest ${MAX_IMPORT_ENTRIES}`, generate: { kind: "entries", count: MAX_IMPORT_ENTRIES + 100 } },
-  // Our own CSV export (1.1 P)
+  { name: `caps: a file of ${MAX_IMPORT_BYTES + 1} bytes → size (checked before decoding)`, generate: { kind: "bytes", count: MAX_IMPORT_BYTES + 1 } },  // Our own CSV export (1.1 P)
   { name: "ours: check-in values, only allowed ones", csv: [OURS, "2026-10-01,4,Good,7.5,good,30,2,,", "2026-10-02,3,Okay,7.3,meh,20,9,,", "2026-10-03,,,8,good,30,2,,Just words."].join("\n") },
   { name: "ours: moment yes / no / YES", csv: [OURS, "2026-10-01,4,Good,,,,,yes,A", "2026-10-01,4,Good,,,,,no,B", "2026-10-01,4,Good,,,,,YES,C"].join("\n") },
   { name: "ours: spaces and blank lines kept, CRLF → LF, all-blank is no note", csv: `date,mood,note\n2026-10-01,4,"  two\r\nlines  \r\n"\n2026-10-02,3,"   "\n` },
@@ -104,12 +106,13 @@ type Summary = { status: string; days: number; entries: number; skipped: unknown
 
 async function run(c: Case): Promise<Outcome> {
   let text: string;
-  if ("base64" in c) {
-    const bytes = Uint8Array.from(Buffer.from(c.base64, "base64"));
+  if ("base64" in c || ("generate" in c && c.generate.kind === "bytes")) {
+    // bytes: count zero bytes (the size cap, too big to write out).
+    const bytes = "base64" in c ? Uint8Array.from(Buffer.from(c.base64, "base64")) : new Uint8Array(c.generate.count);
     const decoded = decodeImportFile(bytes.buffer as ArrayBuffer);
     if (decoded.status === "error") return { decoded };
     text = decoded.text;
-  } else text = "generate" in c ? generated(c.generate.kind, c.generate.count) : c.csv;
+  } else text = "generate" in c ? generated(c.generate.kind as "days" | "entries", c.generate.count) : c.csv;
   const result = planImport(text, TODAY, c.options ?? {});
   if (result.status !== "ok") return { result };
   const ids = await Promise.all(result.plan.entries.map((e) => importEntryId(USER, e)));
@@ -122,6 +125,44 @@ async function run(c: Case): Promise<Outcome> {
   };
 }
 
+// The same-account rule (1.1 P, §P M1; lib/import/noteDedupe), outside
+// planImport: the server counts the account's notes per noteKey, and
+// dropExistingNotes keeps max(0, copies in the plan − copies already
+// there), dropping the FIRST copies so the rest keep their ids.
+const note = (date: string, body: string, dup?: number): ImportEntry => ({ date, time: null, body, ...(dup ? { dup } : {}) });
+const KEY_PAIRS: [string, string][] = [
+  ["2026-10-01", "a\r\nb"],
+  ["2026-10-01", "a\nb"],
+  ["2026-10-01", "a\rb"],
+  ["2026-10-01", "a"],
+  ["2026-10-01", " a"],
+  ["2026-10-01", "A"],
+  ["2026-10-02", "a"],
+  ["2026-10-01", "วันนี้ดี ✨"],
+];
+const PLAN_NOTES = [note("2026-10-01", "Same"), note("2026-10-01", "Same", 1), note("2026-10-02", "Other")];
+const DROP_CASES: { name: string; existing: { date: string; body: string; count: number }[] }[] = [
+  { name: "(a) everything already there: nothing kept", existing: [{ date: "2026-10-01", body: "Same", count: 2 }, { date: "2026-10-02", body: "Other", count: 1 }] },
+  { name: "(b) a fresh account: every copy kept", existing: [] },
+  { name: "(c) 1 copy there, 2 in the file: exactly the second (dup 1)", existing: [{ date: "2026-10-01", body: "Same", count: 1 }] },
+  { name: "(d) more already there than in the file: none of it, never negative", existing: [{ date: "2026-10-01", body: "Same", count: 5 }] },
+  { name: "(e) the same text on another day is not a copy", existing: [{ date: "2026-10-03", body: "Same", count: 1 }, { date: "2026-10-01", body: "Other", count: 1 }] },
+];
+
+async function dedupeSection() {
+  return {
+    $comment: "noteKey = SHA-256 hex of UTF-8 `${date}\\n${body with \\r\\n and \\r → \\n}` (no trim, no case folding). existing: the account's note counts by noteKey (shown here by date + body). keep/dropped: dropExistingNotes(plan, existing), in plan order.",
+    keys: await Promise.all(KEY_PAIRS.map(async ([date, body]) => ({ date, body, key: await noteKey(date, body) }))),
+    plan: PLAN_NOTES,
+    cases: await Promise.all(
+      DROP_CASES.map(async (c) => {
+        const existing = new Map(await Promise.all(c.existing.map(async (e) => [await noteKey(e.date, e.body), e.count] as [string, number])));
+        return { ...c, ...(await dropExistingNotes(PLAN_NOTES, existing)) };
+      }),
+    ),
+  };
+}
+
 async function build() {
   return {
     $comment:
@@ -129,12 +170,13 @@ async function build() {
       "Inputs: csv (text), base64 (file bytes, through decodeImportFile first), or generate (days: one 'date,mood' row a day going back from today; entries: 'date,mood,note' rows, three a day, 'Note <i>'; results summarized, ids = first and last). " +
       "Entry id: UUIDv5(namespace, UTF-8 of `${userId}|${date}|${time ?? ''}|${body}` + (dup ? `|#${dup}` : '')). " +
       "Daylio notes: DOMParser text/html, <br> → \\n, p/div/li get \\n appended, textContent, 3+ newlines → 2, trim. " +
-      `Caps: ${MAX_IMPORT_DAYS} days, ${MAX_IMPORT_ENTRIES} entries (the newest), ${MAX_IMPORT_BYTES} bytes, a note over 20000 UTF-16 units skipped.`,
+      `Caps: ${MAX_IMPORT_DAYS} days, ${MAX_IMPORT_ENTRIES} entries (the newest), ${MAX_IMPORT_BYTES} bytes, a note over ${MAX_ENTRY_CHARS} UTF-16 units skipped.`,
     namespace: IMPORT_NAMESPACE,
     today: TODAY,
     userId: USER,
-    caps: { days: MAX_IMPORT_DAYS, entries: MAX_IMPORT_ENTRIES, bytes: MAX_IMPORT_BYTES, noteChars: 20000 },
+    caps: { days: MAX_IMPORT_DAYS, entries: MAX_IMPORT_ENTRIES, bytes: MAX_IMPORT_BYTES, noteChars: MAX_ENTRY_CHARS },
     cases: await Promise.all(CASES.map(async (c) => ({ ...c, ...(await run(c)) }))),
+    dedupe: await dedupeSection(),
   };
 }
 

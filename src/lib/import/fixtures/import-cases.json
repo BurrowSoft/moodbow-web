@@ -1102,6 +1102,17 @@
       ]
     },
     {
+      "name": "caps: a file of 10485761 bytes → size (checked before decoding)",
+      "generate": {
+        "kind": "bytes",
+        "count": 10485761
+      },
+      "decoded": {
+        "status": "error",
+        "reason": "size"
+      }
+    },
+    {
       "name": "ours: check-in values, only allowed ones",
       "csv": "date,mood,mood_word,sleep_hours,sleep_quality,movement_minutes,stress,moment,note\n2026-10-01,4,Good,7.5,good,30,2,,\n2026-10-02,3,Okay,7.3,meh,20,9,,\n2026-10-03,,,8,good,30,2,,Just words.",
       "result": {
@@ -1451,5 +1462,221 @@
         "4d23afb5-e7f6-5439-b757-ad6cc7379287"
       ]
     }
-  ]
+  ],
+  "dedupe": {
+    "$comment": "noteKey = SHA-256 hex of UTF-8 `${date}\\n${body with \\r\\n and \\r → \\n}` (no trim, no case folding). existing: the account's note counts by noteKey (shown here by date + body). keep/dropped: dropExistingNotes(plan, existing), in plan order.",
+    "keys": [
+      {
+        "date": "2026-10-01",
+        "body": "a\r\nb",
+        "key": "b30ba50201757fd5d5961f8540a5b63f5d6eaeac67303f7997dec7758d3a2d06"
+      },
+      {
+        "date": "2026-10-01",
+        "body": "a\nb",
+        "key": "b30ba50201757fd5d5961f8540a5b63f5d6eaeac67303f7997dec7758d3a2d06"
+      },
+      {
+        "date": "2026-10-01",
+        "body": "a\rb",
+        "key": "b30ba50201757fd5d5961f8540a5b63f5d6eaeac67303f7997dec7758d3a2d06"
+      },
+      {
+        "date": "2026-10-01",
+        "body": "a",
+        "key": "54b71a48875eb3acce2aba548dcd1c899b2169b6ee60b82f7e0045bf4a0234d0"
+      },
+      {
+        "date": "2026-10-01",
+        "body": " a",
+        "key": "76829b094f6cc168d89780c44b742088bb13716276c181d5d72e4edb7fd7c4a3"
+      },
+      {
+        "date": "2026-10-01",
+        "body": "A",
+        "key": "e5ec1999f5ccc9920f7ab219c9f3911aada4f6c87ecae977f98e453590716a73"
+      },
+      {
+        "date": "2026-10-02",
+        "body": "a",
+        "key": "9978020568e16c51ec8351ac4b6841537a481fb6542bc496f264140a7430368b"
+      },
+      {
+        "date": "2026-10-01",
+        "body": "วันนี้ดี ✨",
+        "key": "a915f97ba54a66673781a24c87d8fb8362570d11019d3e5e5e8068759a78550c"
+      }
+    ],
+    "plan": [
+      {
+        "date": "2026-10-01",
+        "time": null,
+        "body": "Same"
+      },
+      {
+        "date": "2026-10-01",
+        "time": null,
+        "body": "Same",
+        "dup": 1
+      },
+      {
+        "date": "2026-10-02",
+        "time": null,
+        "body": "Other"
+      }
+    ],
+    "cases": [
+      {
+        "name": "(a) everything already there: nothing kept",
+        "existing": [
+          {
+            "date": "2026-10-01",
+            "body": "Same",
+            "count": 2
+          },
+          {
+            "date": "2026-10-02",
+            "body": "Other",
+            "count": 1
+          }
+        ],
+        "keep": [],
+        "dropped": [
+          {
+            "date": "2026-10-01",
+            "time": null,
+            "body": "Same"
+          },
+          {
+            "date": "2026-10-01",
+            "time": null,
+            "body": "Same",
+            "dup": 1
+          },
+          {
+            "date": "2026-10-02",
+            "time": null,
+            "body": "Other"
+          }
+        ]
+      },
+      {
+        "name": "(b) a fresh account: every copy kept",
+        "existing": [],
+        "keep": [
+          {
+            "date": "2026-10-01",
+            "time": null,
+            "body": "Same"
+          },
+          {
+            "date": "2026-10-01",
+            "time": null,
+            "body": "Same",
+            "dup": 1
+          },
+          {
+            "date": "2026-10-02",
+            "time": null,
+            "body": "Other"
+          }
+        ],
+        "dropped": []
+      },
+      {
+        "name": "(c) 1 copy there, 2 in the file: exactly the second (dup 1)",
+        "existing": [
+          {
+            "date": "2026-10-01",
+            "body": "Same",
+            "count": 1
+          }
+        ],
+        "keep": [
+          {
+            "date": "2026-10-01",
+            "time": null,
+            "body": "Same",
+            "dup": 1
+          },
+          {
+            "date": "2026-10-02",
+            "time": null,
+            "body": "Other"
+          }
+        ],
+        "dropped": [
+          {
+            "date": "2026-10-01",
+            "time": null,
+            "body": "Same"
+          }
+        ]
+      },
+      {
+        "name": "(d) more already there than in the file: none of it, never negative",
+        "existing": [
+          {
+            "date": "2026-10-01",
+            "body": "Same",
+            "count": 5
+          }
+        ],
+        "keep": [
+          {
+            "date": "2026-10-02",
+            "time": null,
+            "body": "Other"
+          }
+        ],
+        "dropped": [
+          {
+            "date": "2026-10-01",
+            "time": null,
+            "body": "Same"
+          },
+          {
+            "date": "2026-10-01",
+            "time": null,
+            "body": "Same",
+            "dup": 1
+          }
+        ]
+      },
+      {
+        "name": "(e) the same text on another day is not a copy",
+        "existing": [
+          {
+            "date": "2026-10-03",
+            "body": "Same",
+            "count": 1
+          },
+          {
+            "date": "2026-10-01",
+            "body": "Other",
+            "count": 1
+          }
+        ],
+        "keep": [
+          {
+            "date": "2026-10-01",
+            "time": null,
+            "body": "Same"
+          },
+          {
+            "date": "2026-10-01",
+            "time": null,
+            "body": "Same",
+            "dup": 1
+          },
+          {
+            "date": "2026-10-02",
+            "time": null,
+            "body": "Other"
+          }
+        ],
+        "dropped": []
+      }
+    ]
+  }
 }
