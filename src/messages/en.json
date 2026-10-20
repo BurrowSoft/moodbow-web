@@ -234,6 +234,7 @@
     "writeButton": "Write about your day",
     "entryTextLabel": "Your entry",
     "entryPlaceholder": "What happened today? How did it feel?",
+    "promptAnother": "Another",
     "entryDateLabel": "Date",
     "entrySave": "Save",
     "entryMoment": "Mark as a moment",

@@ -1,0 +1,188 @@
+{
+  "version": 1,
+  "note": "Writing prompts (1.1 I, decision 183): local, no AI, the same on app and web. Today's prompt = prompts[dayNumber(date) mod N], where date is the profile-zone date (YYYY-MM-DD) and dayNumber its days since 1970-01-01; \"Another\" (promptAnother) moves to the next, wrapping. Shown only when the entry is empty, never on a day whose earlier entries the crisis matcher flags (every list, crisis-keywords rule 5). th is a draft until thai_reviewed. Generated from r1 by tool/gen_prompts.cjs; edit r1, not this file.",
+  "prompts": [
+    {
+      "id": "prompt01",
+      "en": "What's one thing you'd like to remember about today?",
+      "th": "วันนี้มีเรื่องไหนที่คุณอยากจำไว้บ้าง?"
+    },
+    {
+      "id": "prompt02",
+      "en": "What took more energy than you expected?",
+      "th": "อะไรที่ใช้พลังมากกว่าที่คุณคิดไว้?"
+    },
+    {
+      "id": "prompt03",
+      "en": "Who made today a little better?",
+      "th": "ใครที่ทำให้วันนี้ดีขึ้นอีกนิด?"
+    },
+    {
+      "id": "prompt04",
+      "en": "What are you looking forward to?",
+      "th": "คุณกำลังรอคอยอะไรอยู่?"
+    },
+    {
+      "id": "prompt05",
+      "en": "What would you tell a friend who had your day?",
+      "th": "ถ้าเพื่อนมีวันแบบคุณ คุณจะบอกอะไรเขา?"
+    },
+    {
+      "id": "prompt06",
+      "en": "What surprised you today?",
+      "th": "วันนี้มีอะไรทำให้คุณแปลกใจบ้าง?"
+    },
+    {
+      "id": "prompt07",
+      "en": "What did you need today that you didn't get?",
+      "th": "วันนี้คุณต้องการอะไรที่ไม่ได้รับ?"
+    },
+    {
+      "id": "prompt08",
+      "en": "What's something small that went right?",
+      "th": "มีเรื่องเล็กๆ อะไรที่เป็นไปด้วยดีบ้าง?"
+    },
+    {
+      "id": "prompt09",
+      "en": "Where did you feel most like yourself today?",
+      "th": "วันนี้คุณรู้สึกเป็นตัวเองมากที่สุดตอนไหน?"
+    },
+    {
+      "id": "prompt10",
+      "en": "What's on your mind that you haven't said out loud?",
+      "th": "มีเรื่องอะไรในใจที่คุณยังไม่ได้พูดออกมา?"
+    },
+    {
+      "id": "prompt11",
+      "en": "What made you laugh, even a little?",
+      "th": "อะไรที่ทำให้คุณหัวเราะ แม้แค่นิดเดียว?"
+    },
+    {
+      "id": "prompt12",
+      "en": "What would make tomorrow a bit easier?",
+      "th": "อะไรจะทำให้พรุ่งนี้ง่ายขึ้นอีกหน่อย?"
+    },
+    {
+      "id": "prompt13",
+      "en": "What did you do today just for you?",
+      "th": "วันนี้คุณทำอะไรเพื่อตัวเองบ้าง?"
+    },
+    {
+      "id": "prompt14",
+      "en": "What's been taking up space in your head lately?",
+      "th": "ช่วงนี้มีเรื่องอะไรวนอยู่ในหัวคุณบ้าง?"
+    },
+    {
+      "id": "prompt15",
+      "en": "What's a sound, smell or taste from today?",
+      "th": "วันนี้มีเสียง กลิ่น หรือรสชาติอะไรที่จำได้?"
+    },
+    {
+      "id": "prompt16",
+      "en": "What are you proud of this week?",
+      "th": "สัปดาห์นี้คุณภูมิใจกับอะไร?"
+    },
+    {
+      "id": "prompt17",
+      "en": "What would you like to let go of?",
+      "th": "มีอะไรที่คุณอยากปล่อยวางบ้าง?"
+    },
+    {
+      "id": "prompt18",
+      "en": "Who do you miss right now?",
+      "th": "ตอนนี้คุณคิดถึงใคร?"
+    },
+    {
+      "id": "prompt19",
+      "en": "What did your body need today?",
+      "th": "วันนี้ร่างกายของคุณต้องการอะไร?"
+    },
+    {
+      "id": "prompt20",
+      "en": "What's a question you keep coming back to?",
+      "th": "มีคำถามไหนที่คุณวนกลับมาคิดอยู่เรื่อยๆ?"
+    },
+    {
+      "id": "prompt21",
+      "en": "What went differently than you planned?",
+      "th": "อะไรที่เป็นไปไม่ตรงกับที่คุณวางแผนไว้?"
+    },
+    {
+      "id": "prompt22",
+      "en": "What's one kind thing someone did, or you did?",
+      "th": "มีเรื่องใจดีอะไรที่ใครสักคนทำ หรือคุณทำบ้าง?"
+    },
+    {
+      "id": "prompt23",
+      "en": "What helped you rest today?",
+      "th": "วันนี้อะไรช่วยให้คุณได้พักบ้าง?"
+    },
+    {
+      "id": "prompt24",
+      "en": "What's a small change you'd like to try?",
+      "th": "มีการเปลี่ยนแปลงเล็กๆ อะไรที่คุณอยากลองบ้าง?"
+    },
+    {
+      "id": "prompt25",
+      "en": "What did you learn today, about anything?",
+      "th": "วันนี้คุณได้เรียนรู้อะไร เรื่องอะไรก็ได้?"
+    },
+    {
+      "id": "prompt26",
+      "en": "Where were you happiest today?",
+      "th": "วันนี้คุณมีความสุขที่สุดตอนอยู่ที่ไหน?"
+    },
+    {
+      "id": "prompt27",
+      "en": "What would you like more of in your days?",
+      "th": "คุณอยากให้วันของคุณมีอะไรมากขึ้น?"
+    },
+    {
+      "id": "prompt28",
+      "en": "What's something you're carrying that you could put down?",
+      "th": "มีอะไรที่คุณแบกอยู่และพอจะวางลงได้บ้าง?"
+    },
+    {
+      "id": "prompt29",
+      "en": "How did you take care of yourself today?",
+      "th": "วันนี้คุณดูแลตัวเองอย่างไรบ้าง?"
+    },
+    {
+      "id": "prompt30",
+      "en": "If today had a title, what would it be?",
+      "th": "ถ้าวันนี้มีชื่อเรื่อง จะชื่อว่าอะไร?"
+    }
+  ],
+  "fixture": [
+    {
+      "date": "1970-01-01",
+      "today": "prompt01",
+      "another": "prompt02"
+    },
+    {
+      "date": "2026-10-20",
+      "today": "prompt17",
+      "another": "prompt18"
+    },
+    {
+      "date": "2026-10-21",
+      "today": "prompt18",
+      "another": "prompt19"
+    },
+    {
+      "date": "2026-12-31",
+      "today": "prompt29",
+      "another": "prompt30"
+    },
+    {
+      "date": "2027-01-01",
+      "today": "prompt30",
+      "another": "prompt01"
+    },
+    {
+      "date": "2028-02-29",
+      "today": "prompt04",
+      "another": "prompt05"
+    }
+  ]
+}

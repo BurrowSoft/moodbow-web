@@ -1,7 +1,8 @@
 "use client";
 
 import { startTransition, useActionState, useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { promptFor, promptText } from "@/lib/journal/prompts";
 import { Dialog, dialogButton } from "@/components/Dialog";
 import { SafetyCard } from "@/components/SafetyCard";
 import { useRouter } from "@/i18n/navigation";
@@ -65,8 +66,12 @@ export const hasDraft = (uid: string, entryId: string) => readDraft(localKey("dr
 // clicked, or at the end; with a question ("Write your answer") it's quoted
 // after the entry first. onLeave replaces going to backTo: Save and Cancel
 // return to the view, with the saved entry when there's a new version.
+// promptDate: today's writing prompt (1.1 I) for that date, where prompts
+// are on and nothing earlier that day was crisis-flagged (the page decides);
+// shown only while the text is empty.
 export type EditorStart = { at: number | "end"; question?: string };
 type Props = {
+  promptDate?: string | null;
   initial: Entry | null;
   newId: string;
   uid: string;
@@ -88,8 +93,11 @@ export function EntryEditor(props: Props) {
   return <Editor key={inBrowser ? "browser" : "server"} {...props} restore={inBrowser} />;
 }
 
-function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app", start, onLeave, restore }: Props & { restore: boolean }) {
+function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app", start, onLeave, restore, promptDate }: Props & { restore: boolean }) {
   const t = useTranslations("entry");
+  const language = useLocale();
+  // "Another" steps through the list from today's prompt.
+  const [promptStep, setPromptStep] = useState(0);
   const tt = useTranslations("today");
   const router = useRouter();
   const draftKey = localKey("draft-entry", uid, initial ? initial.id : "new");
@@ -310,6 +318,17 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
           className="min-h-11 w-fit rounded-full border border-border bg-bg px-4 text-text"
         />
       </div>
+      {/* A quiet invitation, never inserted: only while the entry is empty. */}
+      {promptDate && fields.body.trim() === "" && (
+        <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-muted" data-testid="entry-prompt">
+          <span id="entry-prompt-text" data-testid="entry-prompt-text">
+            {promptText(promptFor(promptDate, promptStep), language)}
+          </span>
+          <button type="button" data-testid="entry-prompt-another" onClick={() => setPromptStep((n) => n + 1)} className="min-h-11 font-medium text-accent underline underline-offset-4">
+            {t("promptAnother")}
+          </button>
+        </p>
+      )}
       <label className="sr-only" htmlFor="entry-text">
         {t("entryTextLabel")}
       </label>
@@ -321,7 +340,7 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
         placeholder={t("entryPlaceholder")}
         // Too long: the message is tied to the text (a11y pass).
         aria-invalid={tooLong || undefined}
-        aria-describedby={tooLong ? "entry-error" : undefined}
+        aria-describedby={[tooLong && "entry-error", promptDate && fields.body.trim() === "" && "entry-prompt-text"].filter(Boolean).join(" ") || undefined}
         className="min-h-[50dvh] w-full flex-1 resize-none rounded-3xl border border-border bg-surface p-6 text-lg leading-relaxed text-text placeholder:text-muted"
       />
 
