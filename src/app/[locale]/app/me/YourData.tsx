@@ -13,10 +13,12 @@ type ExportFile = { kind: "txt" | "json" | "csv"; name: string; url: string };
 const LINK_LABELS = { txt: "exportReadable", json: "exportData", csv: "exportCsv" } as const;
 
 // Me → Your data (M7): Export my data, and Delete account behind a dialog
-// that warns about lost AI credits (only when there are any), offers the
-// export first, and needs DELETE typed. csv: the spreadsheet link (1.1 P,
-// export-csv-live).
-export function YourData({ credits, uid, csv = false }: { credits: number; uid: string; csv?: boolean }) {
+// that warns about lost AI credits, offers the export first, and needs
+// DELETE typed. The credits line only once AI is live (ai: "ai-live" met)
+// and there are some: text = enforcement, as the Help article's
+// {pending:ai_live} clause (UX, the Web Tester's forced pass). csv: the
+// spreadsheet link (1.1 P, export-csv-live).
+export function YourData({ credits, uid, csv = false, ai = false }: { credits: number; uid: string; csv?: boolean; ai?: boolean }) {
   const t = useTranslations("me");
   const tt = useTranslations("today");
   const [exporting, startExport] = useTransition();
@@ -134,7 +136,7 @@ export function YourData({ credits, uid, csv = false }: { credits: number; uid: 
               startTransition(() => action(form));
             }}
           >
-            {credits > 0 && (
+            {ai && credits > 0 && (
               <p className="font-medium text-text" data-testid="delete-credits">
                 {t("deleteCredits", { credits })}
               </p>
