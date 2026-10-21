@@ -21,8 +21,9 @@ import { existingNoteCounts, importCheckIns, importEntries } from "./importActio
 // matcher without a safety card each; one quiet line at the end if any of
 // the notes actually written did.
 
-// keptExisting: some check-in from the file wasn't written because the day
-// already had one in the account (kept as it was; never overwritten).
+// keptExisting: a day counted as imported (something of it was written)
+// kept the check-in it already had: the file's wasn't written (never
+// overwritten). A day with nothing new is just "skipped" (decision 214).
 type Summary = { days: number; skippedDays: number; crisis: boolean; keptExisting: boolean };
 type Phase =
   | { kind: "idle" }
@@ -137,21 +138,21 @@ export function ImportData({ uid, today, dateLocaleTag, country }: { uid: string
     const markTried = (dates: string[]) => dates.forEach((d) => tried.set(d, (tried.get(d) ?? 0) + 1));
     // Copies already in the account: tried, and not new.
     markTried(dropped.map((e) => e.date));
-    // Check-ins the account already had on their day (the server wrote nothing).
-    let keptExisting = false;
+    // Days whose check-in the account already had (the server wrote nothing).
+    const keptDates = new Set<string>();
     let done = 0;
     const summary = (): Summary => ({
       days: writtenDates.size,
       skippedDays: [...items].filter(([d, n]) => tried.get(d) === n && !writtenDates.has(d)).length,
       crisis: writtenBodies.some((b) => flagsCrisis(b, CRISIS_KEYWORDS)),
-      keptExisting,
+      keptExisting: [...keptDates].some((d) => writtenDates.has(d)),
     });
     try {
       for (const batch of chunks(plan.days, IMPORT_BATCH)) {
         const r = await withTimeout(importCheckIns(batch), IMPORT_BATCH_WAIT_MS);
         if (r.status !== "ok") throw new Error("batch");
         r.written.forEach((d) => writtenDates.add(d));
-        if (r.written.length < batch.length) keptExisting = true;
+        for (const d of batch) if (!r.written.includes(d.date)) keptDates.add(d.date);
         markTried(batch.map((d) => d.date));
         done += batch.length;
         setPhase({ kind: "importing", done, total });
