@@ -1,15 +1,15 @@
 {
   "privacy-text-approved": {
-    "met": false,
+    "met": true,
     "what": "The privacy policy's final text is written by UX & PM, approved by Vitor, and every claim in it matches what the system enforces today (W3)."
   },
   "terms-text-approved": {
-    "met": false,
+    "met": true,
     "what": "The terms of use's final text is written by UX & PM and approved by Vitor (W3)."
   },
   "delete-account-live": {
-    "met": false,
-    "what": "Me → Delete account (type DELETE, confirm) works in a RELEASED app build and on the live web journal, and deletes every row plus the auth user immediately (M7 + the web Me screen)."
+    "met": true,
+    "what": "Me → Delete account (type DELETE, confirm) works in a RELEASED app build (the Play closed track counts, decision 164) and deletes every row plus the auth user immediately (M7); on the web it comes with the web journal (web-journal-live)."
   },
   "backup-retention": {
     "met": true,
@@ -44,12 +44,12 @@
     "what": "New accounts get starter credits after confirming their email (app_config.starter_credits > 0, enforced server-side). Flips with ai-live (the same AI go-live day: starter credits only mean something with AI; UX)."
   },
   "export-live": {
-    "met": false,
-    "what": "Me → Export my data (JSON + readable text, everything the user created) works in a RELEASED app build and on the live web journal (M7)."
+    "met": true,
+    "what": "Me → Export my data (JSON + readable text, everything the user created) works in a RELEASED app build (the Play closed track counts, decision 164; M7); on the web it comes with the web journal (web-journal-live)."
   },
   "help-now-live": {
-    "met": false,
-    "what": "Me → Get help now (the safety card with local hotlines from the country registry) is in a RELEASED app build and on the live web journal (M7 + M8)."
+    "met": true,
+    "what": "Me → Want to talk to someone? (the safety card with local hotlines from the country registry) is in a RELEASED app build (the Play closed track counts, decision 164; M7 + M8); on the web it comes with the web journal (web-journal-live)."
   },
   "web-analytics": {
     "met": false,

@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import conditions from "../content/conditions.json";
 
 // Smoke tests for the public site. They expect a test build, where gated
 // pages render as drafts: a Vercel Preview, or a local/CI build made with
@@ -6,6 +7,8 @@ import { expect, test } from "@playwright/test";
 // 404s (fail closed), pinned by the pageGate unit tests.
 
 const CANONICAL = "https://www.moodbow.com";
+// Whether the legal pages are live (as #100 derives it).
+const LEGAL = conditions["privacy-text-approved"].met && conditions["terms-text-approved"].met;
 
 test.describe("home", () => {
   test("English at /", async ({ page }) => {
@@ -137,13 +140,13 @@ test.describe("language: Thai is a draft, not offered (thai-offered-live)", () =
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("เริ่มต้นใช้ Moodbow");
   });
 
-  test("/th/privacy: the English text under the Thai line, as /privacy's draft", async ({ page }) => {
+  test("/th/privacy: the English text under the Thai line, as /privacy is (draft or live)", async ({ page }) => {
     const res = await page.goto("/th/privacy");
     expect(res?.status()).toBe(200);
     await expect(page.getByTestId("page-notice")).toHaveText("หน้านี้มีให้อ่านเป็นภาษาอังกฤษ");
     await expect(page.locator("article")).toHaveAttribute("lang", "en");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Moodbow Privacy Policy");
-    await expect(page.getByTestId("draft-banner")).toBeVisible();
+    await expect(page.getByTestId("draft-banner")).toHaveCount(LEGAL ? 0 : 1);
   });
 
   test("/th/account-deletion: treated as legal: the English page under the Thai line (UX, #112)", async ({ page }) => {
@@ -167,7 +170,7 @@ test.describe("support", () => {
   });
 });
 
-test.describe("gated pages render as drafts outside Production", () => {
+test.describe("the live legal pages and account deletion (decision 164)", () => {
   for (const [path, heading] of [
     ["/privacy", "Moodbow Privacy Policy"],
     ["/terms", "Moodbow Terms of Use"],
@@ -176,13 +179,13 @@ test.describe("gated pages render as drafts outside Production", () => {
     test(path, async ({ page }) => {
       await page.goto(path);
       await expect(page.getByRole("heading", { level: 1 })).toHaveText(heading);
-      await expect(page.getByTestId("draft-banner")).toBeVisible();
+      await expect(page.getByTestId("draft-banner")).toHaveCount(0);
       await expect(page.locator('[data-content="article"]')).toHaveCount(1);
-      await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex, nofollow");
+      await expect(page.locator('meta[name="robots"]')).toHaveCount(0);
     });
   }
 
-  test("legal drafts: the real text, unmet pending blocks only in the draft panel, no to-confirm marks left", async ({ page }) => {
+  test("the live privacy text: unmet pending blocks hidden, met ones shown, no to-confirm marks", async ({ page }) => {
     await page.goto("/privacy");
     const article = page.locator('[data-content="article"]');
     await expect(article.getByRole("heading", { level: 2, name: "The short version" })).toBeVisible();
@@ -194,19 +197,18 @@ test.describe("gated pages render as drafts outside Production", () => {
     await expect(article).not.toContainText("app lock");
     // UX resolved every to-confirm mark (decision 67).
     await expect(article.locator("mark.legal-todo")).toHaveCount(0);
-    const panel = page.getByTestId("legal-hidden");
-    await expect(panel).toContainText("purchases");
-    await expect(article.getByTestId("legal-hidden")).toHaveCount(0);
+    // Live: no draft panel; the web journal's "or the website" waits for it.
+    await expect(page.getByTestId("legal-hidden")).toHaveCount(0);
+    await expect(article).not.toContainText("or the website");
     await page.goto("/terms");
     await expect(page.locator('[data-content="article"]')).not.toContainText("AI credits");
   });
 
-  test("gated pages are not linked from the footer", async ({ page }) => {
+  test("the footer links the live pages", async ({ page }) => {
     await page.goto("/");
     const footer = page.getByRole("contentinfo");
-    await expect(footer.getByRole("link", { name: "Support" })).toBeVisible();
-    for (const name of ["Privacy", "Terms", "Delete your account"]) {
-      await expect(footer.getByRole("link", { name })).toHaveCount(0);
+    for (const name of ["Support", "Privacy", "Terms", "Delete your account"]) {
+      await expect(footer.getByRole("link", { name })).toBeVisible();
     }
   });
 
@@ -283,7 +285,8 @@ test.describe("static files", () => {
     const body = await res.text();
     expect(body).toContain(`<loc>${CANONICAL}/</loc>`);
     expect(body).toContain(`<loc>${CANONICAL}/support</loc>`);
-    for (const hidden of ["privacy", "terms", "account-deletion", "email-confirmed", "/th"]) {
+    for (const live of ["privacy", "terms", "account-deletion"]) expect(body, live).toContain(`<loc>${CANONICAL}/${live}</loc>`);
+    for (const hidden of ["email-confirmed", "/help", "/th"]) {
       expect(body, hidden).not.toContain(hidden);
     }
   });
