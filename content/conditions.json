@@ -27,6 +27,10 @@
     "met": true,
     "what": "Help only (decision 212): the daily reminder is in the app build people have (0.9 closed test on), so its Help lines show. Not the web's own reminder feature (reminder-live)."
   },
+  "app-app-lock": {
+    "met": true,
+    "what": "Help only (decision 212): app lock (PIN, fingerprint or face; decision 188) is in the app build people have (0.9 closed test on), so its Help article shows. Not app-lock (the privacy text's clause, Vitor's)."
+  },
   "app-share-cards": {
     "met": true,
     "what": "Help only (decision 212): \"My month's moodbow\" sharing is in the app build people have (0.9 closed test on), so its Help lines show. Not the web's own share cards (share-cards); Chart, Milestone and Year cards stay hidden."

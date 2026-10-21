@@ -89,9 +89,14 @@ describe("Help is public, scoped to what's live (decision 212)", () => {
   const published = (slug: string) => renderArticle(findArticle("en", slug)!);
 
   it("articles about features that are off have nothing left: a 404", () => {
-    for (const slug of ["ai-reflections", "app-lock", "calendar", "import", "keyboard-shortcuts", "search", "widget", "your-week"]) {
+    for (const slug of ["ai-reflections", "calendar", "import", "keyboard-shortcuts", "search", "widget", "your-week"]) {
       expect(published(slug), slug).toBe("");
     }
+  });
+
+  it("the app's app lock shows (decision 188), without the widget it doesn't have yet", () => {
+    expect(published("app-lock")).toContain("Forgot your PIN?");
+    expect(published("app-lock")).not.toContain("widget");
   });
 
   it("the app's on this day, daily reminder and month share card show", () => {
