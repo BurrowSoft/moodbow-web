@@ -7,6 +7,7 @@ import { GetHelpNow } from "@/components/SafetyCard";
 import { decodeImportFile, displayOrder, IMPORT_BATCH, MAX_IMPORT_BYTES, planImport, type DateOrder, type ImportEntry, type ImportPlan, type Mood } from "@/lib/import/journalImport";
 import { dropExistingNotes } from "@/lib/import/noteDedupe";
 import { importEntryId } from "@/lib/import/uuidv5";
+import { IMPORT_BATCH_WAIT_MS, withTimeout } from "@/lib/ui/withTimeout";
 import { flagsCrisis } from "@/lib/safety/crisis";
 import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
 import { existingNoteCounts, importCheckIns, importEntries } from "./importActions";
@@ -105,7 +106,9 @@ export function ImportData({ uid, today, dateLocaleTag, country }: { uid: string
     let kept: ImportEntry[];
     let dropped: ImportEntry[];
     try {
-      const counts = await existingNoteCounts([...new Set(plan.entries.map((e) => e.date))]);
+      // Each call gets 60 s; past it the import stops ("failed"), safe to run
+      // again: the same file gives the same ids (the timeout audit).
+      const counts = await withTimeout(existingNoteCounts([...new Set(plan.entries.map((e) => e.date))]), IMPORT_BATCH_WAIT_MS);
       if (counts.status !== "ok") throw new Error("counts");
       ({ keep: kept, dropped } = await dropExistingNotes(plan.entries, new Map(counts.counts)));
     } catch (e) {
@@ -140,7 +143,7 @@ export function ImportData({ uid, today, dateLocaleTag, country }: { uid: string
     });
     try {
       for (const batch of chunks(plan.days, IMPORT_BATCH)) {
-        const r = await importCheckIns(batch);
+        const r = await withTimeout(importCheckIns(batch), IMPORT_BATCH_WAIT_MS);
         if (r.status !== "ok") throw new Error("batch");
         r.written.forEach((d) => writtenDates.add(d));
         markTried(batch.map((d) => d.date));
@@ -148,7 +151,7 @@ export function ImportData({ uid, today, dateLocaleTag, country }: { uid: string
         setPhase({ kind: "importing", done, total });
       }
       for (const batch of chunks(entries, IMPORT_BATCH)) {
-        const r = await importEntries(batch);
+        const r = await withTimeout(importEntries(batch), IMPORT_BATCH_WAIT_MS);
         if (r.status !== "ok") throw new Error("batch");
         for (const id of r.written) {
           const e = byId.get(id);

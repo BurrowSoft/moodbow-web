@@ -23,6 +23,10 @@ import { ImportData } from "./ImportData";
 import { headers } from "next/headers";
 import { dateLocale } from "@/lib/journal/today";
 
+// A stuck request ends here at the latest (UX, the timeout audit); each
+// data call gives up after 15 s on its own (lib/supabase/deadline).
+export const maxDuration = 30;
+
 export async function generateMetadata({ params }: PageProps<"/[locale]/app/me">): Promise<Metadata> {
   return tabMetadata("tabMe", (await params).locale);
 }

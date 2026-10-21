@@ -16,6 +16,10 @@ import { loadMilestone } from "@/lib/share/milestoneData";
 import { yearOnOffer } from "@/lib/share/year";
 import { MilestoneCard } from "./MilestoneCard";
 
+// A stuck request ends here at the latest (UX, the timeout audit); each
+// data call gives up after 15 s on its own (lib/supabase/deadline).
+export const maxDuration = 30;
+
 export async function generateMetadata({ params }: PageProps<"/[locale]/app">): Promise<Metadata> {
   return tabMetadata("tabToday", (await params).locale);
 }

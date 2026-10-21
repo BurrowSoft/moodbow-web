@@ -6,6 +6,7 @@ import { EXERCISE_MINUTES, MOODS, SLEEP_HOURS, SLEEP_QUALITIES, SLEEP_START, STR
 import { dateLine } from "@/lib/journal/today";
 import { valueHex } from "@/lib/journal/valueColours";
 import { localKey } from "@/lib/localData";
+import { SAVE_WAIT_MS, withTimeout } from "@/lib/ui/withTimeout";
 import { ValueDot } from "@/components/ValueDot";
 import { JOURNAL_CARD, MOOD_FACE, MOOD_LABEL, MOOD_ROW, PRIMARY_SAVE } from "@/lib/ui/journalLayout";
 import { MoodFace } from "@/components/MoodFace";
@@ -183,7 +184,9 @@ function Card({ initial, uid, date: cardDate, notify, announce, autoFocus }: Pro
   const [state, action, pending] = useActionState<CheckInState, FormData>(async (prev, form) => {
     let next: CheckInState;
     try {
-      next = await saveCheckIn(prev, form);
+      // No answer in 30 s counts as a dropped connection: kept as a pending
+      // copy, like saving offline (the timeout audit).
+      next = await withTimeout(saveCheckIn(prev, form), SAVE_WAIT_MS);
     } catch (e) {
       // A redirect (consent, sign-in) is the navigation itself.
       const fromPending = form.get("from_pending") === "1";

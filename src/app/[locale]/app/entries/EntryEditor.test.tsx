@@ -23,6 +23,8 @@ vi.mock("@/lib/safety/keywords", () => ({
     return keywords;
   },
 }));
+// The save's wait, shortened (30 s in the app; withTimeout.test pins it).
+vi.mock("@/lib/ui/withTimeout", async (orig) => ({ ...(await orig<typeof import("@/lib/ui/withTimeout")>()), SAVE_WAIT_MS: 300 }));
 const { EntryEditor } = await import("./EntryEditor");
 
 const NEW_ID = "11111111-1111-4111-8111-111111111111";
@@ -104,6 +106,18 @@ describe("EntryEditor: a new entry", () => {
     fireEvent.change(screen.getByTestId("entry-date"), { target: { value: "2026-10-03" } });
     expect(screen.getByTestId("entry-error")).toHaveTextContent(messages.today.errDateInFuture);
     expect(screen.getByTestId("entry-save")).toBeDisabled();
+  });
+
+  it("a save that never answers: after the wait, the generic error, the text and its draft kept (the timeout audit)", async () => {
+    saveEntry.mockReturnValue(new Promise(() => {}));
+    renderEditor();
+    type("Still here");
+    fireEvent.click(screen.getByTestId("entry-save"));
+    expect(await screen.findByTestId("entry-error", {}, { timeout: 2000 })).toHaveTextContent(messages.today.errGeneric);
+    expect(push).not.toHaveBeenCalled();
+    expect(screen.getByTestId("entry-text")).toHaveValue("Still here");
+    expect(stored(NEW_KEY)).toMatchObject({ body: "Still here" });
+    expect(screen.getByTestId("entry-save")).toBeEnabled();
   });
 
   it("a failed request (offline): the generic error, and the draft stays", async () => {

@@ -13,6 +13,10 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { tabMetadata, titledMetadata } from "../../pageMeta";
 import { PrintMonth } from "./PrintMonth";
 
+// A stuck request ends here at the latest (UX, the timeout audit); each
+// data call gives up after 15 s on its own (lib/supabase/deadline).
+export const maxDuration = 30;
+
 export async function generateMetadata({ params }: PageProps<"/[locale]/app/print/[month]">): Promise<Metadata> {
   // The month is the title, so "Save as PDF" suggests "October 2026 · Moodbow".
   const { locale, month } = await params;

@@ -9,6 +9,8 @@ import type { CheckIn } from "@/lib/journal/checkIn";
 // in to, so this is where the card's flows are covered.
 const saveCheckIn = vi.fn();
 vi.mock("./actions", () => ({ saveCheckIn: (...args: unknown[]) => saveCheckIn(...args) }));
+// The save's wait, shortened (30 s in the app; withTimeout.test pins it).
+vi.mock("@/lib/ui/withTimeout", async (orig) => ({ ...(await orig<typeof import("@/lib/ui/withTimeout")>()), SAVE_WAIT_MS: 300 }));
 const { CheckInCard } = await import("./CheckInCard");
 
 const ROW: CheckIn = { local_date: "2026-10-02", mood: 4, sleep_hours: 7.5, sleep_quality: "good", exercise_minutes: 30, stress: 2, updated_at: "2026-10-02T10:00:00Z" };
@@ -296,6 +298,15 @@ describe("CheckInCard: a request lost at the network level (Web Tester, #11)", (
     fireEvent.click(screen.getByTestId("checkin-save"));
     expect(await screen.findByTestId("checkin-status")).toHaveTextContent(messages.today.checkinSavedOfflineWeb);
     expect(JSON.parse(window.localStorage.getItem(dayKey("2026-10-02"))!)).toMatchObject({ fields: { mood: 3 }, expected: "", date: "2026-10-02" });
+  });
+
+  it("a save that never answers: after the wait, kept like an offline save (the timeout audit)", async () => {
+    saveCheckIn.mockReturnValue(new Promise(() => {}));
+    renderCard(null);
+    fireEvent.click(screen.getByTestId("checkin-mood-4"));
+    fireEvent.click(screen.getByTestId("checkin-save"));
+    expect(await screen.findByTestId("checkin-status", {}, { timeout: 2000 })).toHaveTextContent(messages.today.checkinSavedOfflineWeb);
+    expect(JSON.parse(window.localStorage.getItem(dayKey("2026-10-02"))!)).toMatchObject({ fields: { mood: 4 }, date: "2026-10-02" });
   });
 
   it("…and with storage unavailable too: the generic error", async () => {

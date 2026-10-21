@@ -7,6 +7,7 @@ import { canRenderText, renderExportText, type Translate } from "@/lib/exportTex
 import { renderExportCsv } from "@/lib/exportCsv";
 import { csvFileName, DELETE_WORD, exportFileName, journalFileName } from "@/lib/journal/account";
 import { wipeLocalData } from "@/lib/localData";
+import { EXPORT_WAIT_MS, withTimeout } from "@/lib/ui/withTimeout";
 import { deleteMyAccount, exportMyData, type DeleteAccountState } from "./actions";
 
 type ExportFile = { kind: "txt" | "json" | "csv"; name: string; url: string };
@@ -59,7 +60,8 @@ export function YourData({ credits, uid, csv = false, ai = false }: { credits: n
     if (exporting) return;
     startExport(async () => {
       try {
-        const result = await exportMyData();
+        // No answer in 45 s: the export's error and Try again (the timeout audit).
+        const result = await withTimeout(exportMyData(), EXPORT_WAIT_MS);
         if (result.status !== "ok") return setExportState("error");
         const doc: unknown = JSON.parse(result.json);
         const next: ExportFile[] = [];

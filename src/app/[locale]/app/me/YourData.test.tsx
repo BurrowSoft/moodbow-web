@@ -9,6 +9,8 @@ vi.mock("./actions", () => ({
   exportMyData: (...a: unknown[]) => exportMyData(...a),
   deleteMyAccount: (...a: unknown[]) => deleteMyAccount(...a),
 }));
+// The export's wait, shortened (45 s in the app; withTimeout.test pins it).
+vi.mock("@/lib/ui/withTimeout", async (orig) => ({ ...(await orig<typeof import("@/lib/ui/withTimeout")>()), EXPORT_WAIT_MS: 300 }));
 const { YourData } = await import("./YourData");
 const m = messages.me;
 const UID = "0b5f2c1e-7d3a-4e8b-9c41-2a6f8e1d3b70";
@@ -204,6 +206,19 @@ describe("YourData: this browser forgets a deleted account (decision 85; reviewe
     confirmDelete();
     await screen.findByTestId("delete-error");
     expect(KEYS.every((k) => window.localStorage.getItem(k) === "x")).toBe(true);
+  });
+});
+
+describe("YourData: an export that never answers (the timeout audit)", () => {
+  it("after the wait: the error, and Export works again (Try again)", async () => {
+    exportMyData.mockReturnValueOnce(new Promise(() => {}));
+    renderIt();
+    fireEvent.click(screen.getByTestId("me-export"));
+    expect(await screen.findByTestId("me-export-status", {}, { timeout: 2000 })).toHaveTextContent(messages.today.errGeneric);
+    await waitFor(() => expect(screen.getByTestId("me-export")).not.toHaveAttribute("aria-disabled", "true"));
+    exportMyData.mockResolvedValueOnce({ status: "error" });
+    fireEvent.click(screen.getByTestId("me-export"));
+    await waitFor(() => expect(exportMyData).toHaveBeenCalledTimes(2));
   });
 });
 

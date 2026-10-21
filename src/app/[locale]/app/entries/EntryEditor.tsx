@@ -12,6 +12,7 @@ import { MAX_ENTRY_CHARS, sameEntry, type Entry } from "@/lib/journal/entry";
 import { localKey } from "@/lib/localData";
 import { flagsCrisis } from "@/lib/safety/crisis";
 import { holdLeaving } from "@/lib/ui/leaveGuard";
+import { SAVE_WAIT_MS, withTimeout } from "@/lib/ui/withTimeout";
 import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
 import { PRIMARY_SAVE } from "@/lib/ui/journalLayout";
 import { deleteEntry, getEntry, saveEntry, type DeleteState, type EntryState } from "./actions";
@@ -292,7 +293,9 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
   const [state, action, pending] = useActionState<EntryState, FormData>(async (prev, form) => {
     let next: EntryState;
     try {
-      next = await saveEntry(prev, form);
+      // No answer in 30 s: the same as a failed request (the draft is kept;
+      // Save again; the timeout audit).
+      next = await withTimeout(saveEntry(prev, form), SAVE_WAIT_MS);
     } catch (e) {
       if (isRedirect(e)) throw e;
       // offline or the request failed: the draft is still here
