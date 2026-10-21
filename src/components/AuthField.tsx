@@ -38,6 +38,6 @@ export function AuthField({ id, label, type, autoComplete, hint, defaultValue, e
 }
 
 export const primaryButtonClass =
-  "inline-flex min-h-[52px] min-w-[200px] items-center justify-center rounded-full bg-accent px-8 py-3.5 text-base font-medium text-on-accent hover:opacity-90 disabled:opacity-60";
+  "inline-flex min-h-[52px] min-w-[200px] items-center justify-center rounded-full bg-accent px-8 py-3.5 text-base font-medium text-on-accent hover:bg-accent-hover disabled:opacity-60";
 
 export const textLinkClass = "font-medium text-accent underline underline-offset-4";
