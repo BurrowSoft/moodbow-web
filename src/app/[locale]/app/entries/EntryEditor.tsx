@@ -74,6 +74,11 @@ export const hasDraft = (uid: string, entryId: string) => readDraft(localKey("dr
 // nothing earlier that day was crisis-flagged (the page decides); shown only
 // while the text is empty and the entry is still on that day (reviewer #83).
 export type EditorStart = { at: number | "end"; question?: string };
+// Save in the top row (narrow screens only): the primary button, sized for
+// a bar.
+const TOP_SAVE =
+  "ml-auto inline-flex min-h-11 items-center justify-center rounded-full bg-accent px-6 font-medium text-on-accent hover:opacity-90 disabled:opacity-50 aria-disabled:opacity-50 sm:hidden";
+
 type Props = {
   promptDate?: string | null;
   initial: Entry | null;
@@ -85,6 +90,9 @@ type Props = {
   backTo?: string;
   start?: EditorStart;
   onLeave?: (saved: Entry | null) => void;
+  // The screen's Back link: the editor's top row holds it, with Save beside
+  // it on a narrow screen.
+  back?: React.ReactNode;
 };
 
 const noSubscribe = () => () => {};
@@ -97,7 +105,7 @@ export function EntryEditor(props: Props) {
   return <Editor key={inBrowser ? "browser" : "server"} {...props} restore={inBrowser} />;
 }
 
-function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app", start, onLeave, restore, promptDate }: Props & { restore: boolean }) {
+function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app", start, onLeave, restore, promptDate, back }: Props & { restore: boolean }) {
   const t = useTranslations("entry");
   const language = useLocale();
   // "Another" steps through the list from the day's prompt.
@@ -353,6 +361,10 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
     if (!pending) window.clearTimeout(waitTimer.current);
   }, [pending]);
   const stuck = pending && waitedOut;
+  // While a save is out, Save says so (aria-disabled) and ignores presses,
+  // but isn't disabled: a disabled button drops focus to BODY, and after a
+  // failed save focus stays on Save (Web Tester's keyboard-up row, UX).
+  const busy = pending && !stuck;
 
   const send = (withBase: string | null) => {
     window.clearTimeout(waitTimer.current);
@@ -373,6 +385,7 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
   const tooLong = fields.body.length > MAX_ENTRY_CHARS;
   const future = fields.date > today;
   const blank = fields.body.trim() === "";
+  const cantSave = blank || tooLong || future || deleting;
   const errorText = tooLong
     ? t("entryTooLong")
     : future
@@ -402,11 +415,31 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
       className="flex min-h-[70dvh] flex-col gap-4"
       onSubmit={(e) => {
         e.preventDefault();
-        if (!blank && !tooLong && !future) send(base);
+        if (!blank && !tooLong && !future && !busy) send(base);
       }}
     >
       {/* The page's heading (also its title), for heading navigation. */}
       <h1 className="sr-only">{initial ? t("entryEditTitle") : t("entryNewTitle")}</h1>
+      {/* The top row, as the app: Back, and on a narrow screen Save, kept at
+          the top while the text scrolls, so it's in reach with the keyboard
+          up (Web Tester: the bottom Save sat below the fold at 360 × 380). */}
+      {/* On a narrow screen the error is pinned with the row, right under
+          it (the app), so text scrolled up can't hide it (Web Tester, #123
+          N2). From sm the wrapper is display: contents, and the error goes
+          just above Save at the bottom (sm:order-last, as the buttons). */}
+      <div className="sticky top-0 z-10 flex flex-col gap-2 bg-bg pb-2 sm:contents">
+        <div className="flex min-h-11 items-center justify-between gap-3" data-testid="entry-top-row">
+          {back}
+          <button type="submit" data-testid="entry-save-top" disabled={cantSave} aria-disabled={busy || undefined} className={TOP_SAVE}>
+            {t("entrySave")}
+          </button>
+        </div>
+        {errorText && (
+          <p id="entry-error" role="alert" data-testid="entry-error" className="font-medium text-accent sm:order-last">
+            {errorText}
+          </p>
+        )}
+      </div>
       {/* The date first, then the text (the mockups, decision 161). */}
       <div className="flex flex-col gap-1">
         <label htmlFor="entry-date" className="text-sm font-medium text-text">
@@ -461,21 +494,13 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
         className="flex max-w-md flex-col gap-1"
       />
 
-      {errorText && (
-        <p id="entry-error" role="alert" data-testid="entry-error" className="font-medium text-accent">
-          {errorText}
-        </p>
-      )}
-
-      <div className="flex flex-wrap items-center gap-3">
-        <button
-          type="submit"
-          data-testid="entry-save"
-          disabled={blank || tooLong || future || (pending && !stuck) || deleting}
-          className={PRIMARY_SAVE}
-        >
-          {t("entrySave")}
-        </button>
+      <div className="flex flex-wrap items-center gap-3 sm:order-last">
+        {/* Wider screens only: on a narrow one Save is in the top row. */}
+        <span className="hidden sm:contents">
+          <button type="submit" data-testid="entry-save" disabled={cantSave} aria-disabled={busy || undefined} className={`${PRIMARY_SAVE} aria-disabled:opacity-50`}>
+            {t("entrySave")}
+          </button>
+        </span>
         <button type="button" data-testid="entry-cancel" onClick={() => (keep ? setDialog("leave") : leave())} className={dialogButton()}>
           {t("cancel")}
         </button>

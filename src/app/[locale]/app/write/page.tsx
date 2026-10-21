@@ -53,9 +53,16 @@ export default async function WritePage({ params, searchParams }: PageProps<"/[l
     if (!error && !(sameDay ?? []).some((e) => flagsCrisis((e as { body: string }).body, CRISIS_KEYWORDS))) promptDate = startDate;
   }
   return (
-    <>
-      <BackLink href={from} label={await backLabel(from, tag)} testId="nav-back" />
-      <EntryEditor initial={null} newId={crypto.randomUUID()} uid={user.id} today={me.today} startDate={startDate} country={me.profile?.country} backTo={from} promptDate={promptDate} />
-    </>
+    <EntryEditor
+      initial={null}
+      newId={crypto.randomUUID()}
+      uid={user.id}
+      today={me.today}
+      startDate={startDate}
+      country={me.profile?.country}
+      backTo={from}
+      promptDate={promptDate}
+      back={<BackLink href={from} label={await backLabel(from, tag)} testId="nav-back" />}
+    />
   );
 }

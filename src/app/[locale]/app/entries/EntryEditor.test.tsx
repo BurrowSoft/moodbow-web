@@ -136,9 +136,9 @@ describe("EntryEditor: a new entry", () => {
       renderEditor();
       type("Held");
       fireEvent.click(screen.getByTestId("entry-save"));
-      expect(screen.getByTestId("entry-save")).toBeDisabled();
+      expect(screen.getByTestId("entry-save")).toHaveAttribute("aria-disabled", "true");
       expect(await screen.findByTestId("entry-error", {}, { timeout: 2000 })).toHaveTextContent(messages.today.errGeneric);
-      expect(screen.getByTestId("entry-save")).toBeEnabled();
+      expect(screen.getByTestId("entry-save")).not.toHaveAttribute("aria-disabled");
       expect(screen.getByTestId("entry-text")).toHaveValue("Held");
       expect(stored(NEW_KEY)).toMatchObject({ body: "Held" });
       expect(push).not.toHaveBeenCalled();
@@ -146,6 +146,25 @@ describe("EntryEditor: a new entry", () => {
       held = false;
       await act(async () => answer({ status: "error", error: "generic" }));
     }
+  });
+
+  it("while a save is out: Save says so (aria-disabled) but isn't disabled, so focus stays on it; a second press sends nothing", async () => {
+    let answer: (state: unknown) => void = () => {};
+    saveEntry.mockReturnValue(new Promise((resolve) => (answer = resolve)));
+    renderEditor();
+    type("Once");
+    const save = screen.getByTestId("entry-save");
+    save.focus();
+    fireEvent.click(save);
+    expect(save).toHaveAttribute("aria-disabled", "true");
+    expect(save).not.toBeDisabled();
+    expect(screen.getByTestId("entry-save-top")).toHaveAttribute("aria-disabled", "true");
+    fireEvent.click(save);
+    expect(saveEntry).toHaveBeenCalledTimes(1);
+    await act(async () => answer({ status: "error", error: "generic" }));
+    expect(await screen.findByTestId("entry-error")).toHaveTextContent(messages.today.errGeneric);
+    expect(save).toHaveFocus();
+    expect(save).not.toHaveAttribute("aria-disabled");
   });
 
   it("a failed request (offline): the generic error, and the draft stays", async () => {
@@ -156,6 +175,33 @@ describe("EntryEditor: a new entry", () => {
     expect(await screen.findByTestId("entry-error")).toHaveTextContent(messages.today.errGeneric);
     expect(push).not.toHaveBeenCalled();
     expect(screen.getByTestId("entry-text")).toHaveValue("Not lost");
+  });
+});
+
+describe("EntryEditor: the top row (Save in reach with the keyboard up; the app)", () => {
+  it("holds the screen's Back and a Save that saves; the error comes right under it", async () => {
+    saveEntry.mockRejectedValue(new TypeError("Failed to fetch"));
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <EntryEditor initial={null} newId={NEW_ID} uid="u1" today="2026-10-02" back={<button type="button" data-testid="nav-back" />} />
+      </NextIntlClientProvider>,
+    );
+    const row = screen.getByTestId("entry-top-row");
+    expect(row).toContainElement(screen.getByTestId("nav-back"));
+    const top = screen.getByTestId("entry-save-top");
+    expect(row).toContainElement(top);
+    expect(top).toHaveTextContent(m.entrySave);
+    expect(top).toBeDisabled();
+    type("From the top");
+    expect(top).toBeEnabled();
+    fireEvent.click(top);
+    await waitFor(() => expect(saveEntry).toHaveBeenCalledTimes(1));
+    expect(sent()).toMatchObject({ body: "From the top" });
+    const error = await screen.findByTestId("entry-error");
+    expect(row.nextElementSibling).toBe(error);
+    // Pinned with the row on a narrow screen, so scrolled text can't hide it (#123 N2).
+    expect(row.parentElement).toHaveClass("sticky");
+    expect(row.parentElement).toContainElement(error);
   });
 });
 
