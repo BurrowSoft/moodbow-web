@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { DATA_DEADLINE_MS, dataDeadlineMs, EXPORT_DEADLINE_MS, fetchUntil } from "./deadline";
+import { DATA_DEADLINE_MS, dataDeadlineMs, EXPORT_DEADLINE_MS, fetchUntil, isDeadlineError } from "./deadline";
 
 // The data deadline (UX, the timeout audit): a PostgREST request is given up
 // after 15 s (the export after 30 s) with an AbortError, which postgrest-js
@@ -18,6 +18,16 @@ beforeEach(() => {
 afterEach(() => {
   vi.useRealTimers();
   vi.unstubAllGlobals();
+});
+
+describe("isDeadlineError", () => {
+  it("postgrest-js's answer to an aborted request; nothing else", () => {
+    expect(isDeadlineError({ message: "AbortError: Supabase didn't answer in time" })).toBe(true);
+    expect(isDeadlineError({ message: "AbortError: Supabase Auth didn't answer in time" })).toBe(true);
+    expect(isDeadlineError({ message: "TypeError: fetch failed" })).toBe(false);
+    expect(isDeadlineError({ message: "stale_write" })).toBe(false);
+    expect(isDeadlineError(null)).toBe(false);
+  });
 });
 
 describe("dataDeadlineMs", () => {

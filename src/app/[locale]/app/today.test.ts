@@ -149,6 +149,34 @@ describe("saveCheckIn", () => {
     expect(await saveCheckIn(idle, form({ mood: "3" }))).toEqual({ status: "error", error: "generic" });
   });
 
+  describe("Supabase not answering in time (a data deadline; Web Tester, #122 T1a)", () => {
+    // What postgrest-js answers for a request fetchUntil aborted.
+    const ABORTED = { message: "AbortError: Supabase didn't answer in time" };
+
+    it("the save itself: unreachable, so the card keeps a pending copy", async () => {
+      rpcAnswers({ data: null, error: ABORTED });
+      expect(await saveCheckIn(idle, form({ mood: "3", expected_updated_at: "2026-10-02T08:00:00Z" }))).toEqual({ status: "error", error: "unreachable" });
+    });
+
+    it("get_me: unreachable, and nothing is written", async () => {
+      rpc.mockResolvedValue({ data: null, error: ABORTED });
+      expect(await saveCheckIn(idle, form({ mood: "3" }))).toEqual({ status: "error", error: "unreachable" });
+      expect(rpc).not.toHaveBeenCalledWith("upsert_check_in", expect.anything());
+    });
+
+    it("the read before a first check-in: unreachable, and nothing is written", async () => {
+      rpcAnswers({ data: ROW, error: null });
+      maybeSingle.mockResolvedValue({ data: null, error: ABORTED });
+      expect(await saveCheckIn(idle, form({ mood: "3", expected_updated_at: "" }))).toEqual({ status: "error", error: "unreachable" });
+      expect(rpc).not.toHaveBeenCalledWith("upsert_check_in", expect.anything());
+    });
+
+    it("get_me failing any other way stays generic", async () => {
+      rpc.mockResolvedValue({ data: null, error: { message: "boom" } });
+      expect(await saveCheckIn(idle, form({ mood: "3" }))).toEqual({ status: "error", error: "generic" });
+    });
+  });
+
   it("consent_required → Consent", async () => {
     rpcAnswers({ data: null, error: { message: "consent_required" } });
     const result = await saveCheckIn(idle, form({ mood: "3" })).catch((e) => e);

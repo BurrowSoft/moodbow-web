@@ -52,6 +52,14 @@ export function dataDeadlineMs(url: string): number | null {
   return url.includes("/rpc/export_my_data") ? EXPORT_DEADLINE_MS : DATA_DEADLINE_MS;
 }
 
+// Whether a PostgREST { error } is one of these deadlines (or the Auth one):
+// postgrest-js answers an aborted request as "AbortError: <message>" instead
+// of throwing. The request never got an answer, so callers treat it as a
+// dropped connection, not a refusal (Web Tester, #122 T1a).
+export function isDeadlineError(error: { message?: string } | null | undefined): boolean {
+  return !!error?.message?.startsWith("AbortError");
+}
+
 const urlOf = (input: Parameters<typeof fetch>[0]) => (typeof input === "string" ? input : input instanceof URL ? input.href : input.url);
 
 // fetch for a Supabase client that also stops at the Auth deadline, and a

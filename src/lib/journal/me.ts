@@ -1,4 +1,5 @@
 import type { createSupabaseServerClient } from "@/lib/supabase/server";
+import { isDeadlineError } from "@/lib/supabase/deadline";
 import { POLICY_VERSIONS, REQUIRED_KINDS, type ConsentKind } from "@/lib/legalVersions";
 
 type Client = NonNullable<Awaited<ReturnType<typeof createSupabaseServerClient>>>;
@@ -29,9 +30,15 @@ export type Me = {
 };
 
 export async function getMe(supabase: Client): Promise<Me | null> {
+  return (await readMe(supabase)).me;
+}
+
+// getMe, also saying whether get_me never answered (a data deadline), for a
+// caller that handles a dropped connection itself (the check-in save).
+export async function readMe(supabase: Client): Promise<{ me: Me | null; unreachable: boolean }> {
   const { data, error } = await supabase.rpc("get_me");
-  if (error || !data) return null;
-  return data as Me;
+  if (error || !data) return { me: null, unreachable: isDeadlineError(error) };
+  return { me: data as Me, unreachable: false };
 }
 
 // Where a signed-in person belongs before the journal (M3: anyone without

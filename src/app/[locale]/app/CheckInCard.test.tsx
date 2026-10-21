@@ -319,6 +319,26 @@ describe("CheckInCard: a request lost at the network level (Web Tester, #11)", (
     expect(JSON.parse(window.localStorage.getItem(dayKey("2026-10-02"))!)).toMatchObject({ fields: { mood: 4 }, date: "2026-10-02" });
   });
 
+  it("the server gave up waiting on Supabase (unreachable): kept like an offline save, not the generic error (#122 T1a)", async () => {
+    saveCheckIn.mockResolvedValue({ status: "error", error: "unreachable" });
+    renderCard(null);
+    fireEvent.click(screen.getByTestId("checkin-mood-5"));
+    fireEvent.click(screen.getByTestId("checkin-save"));
+    expect(await screen.findByTestId("checkin-status")).toHaveTextContent(messages.today.checkinSavedOfflineWeb);
+    expect(screen.queryByTestId("checkin-error")).toBeNull();
+    expect(JSON.parse(window.localStorage.getItem(dayKey("2026-10-02"))!)).toMatchObject({ fields: { mood: 5 }, date: "2026-10-02" });
+  });
+
+  it("…and a flush answered unreachable keeps its copy", async () => {
+    window.localStorage.setItem(dayKey("2026-10-02"), JSON.stringify({ fields: { mood: 2, sleepHours: "", sleepQuality: "", exercise: "", stress: "" }, expected: "", date: "2026-10-02" }));
+    saveCheckIn.mockResolvedValue({ status: "error", error: "unreachable" });
+    renderCard(null);
+    await waitFor(() => expect(saveCheckIn).toHaveBeenCalledTimes(1));
+    await new Promise((r) => setTimeout(r, 20));
+    expect(anyPending()).toBe(true);
+    expect(screen.queryByTestId("checkin-error")).toBeNull();
+  });
+
   it("…and with storage unavailable too: the generic error", async () => {
     saveCheckIn.mockRejectedValue(new TypeError("Failed to fetch"));
     const setItem = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {

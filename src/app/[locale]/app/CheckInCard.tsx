@@ -6,7 +6,7 @@ import { EXERCISE_MINUTES, MOODS, SLEEP_HOURS, SLEEP_QUALITIES, SLEEP_START, STR
 import { dateLine } from "@/lib/journal/today";
 import { valueHex } from "@/lib/journal/valueColours";
 import { localKey } from "@/lib/localData";
-import { SAVE_WAIT_MS, withTimeout } from "@/lib/ui/withTimeout";
+import { SAVE_WAIT_MS, TimedOut, withTimeout } from "@/lib/ui/withTimeout";
 import { ValueDot } from "@/components/ValueDot";
 import { JOURNAL_CARD, MOOD_FACE, MOOD_LABEL, MOOD_ROW, PRIMARY_SAVE } from "@/lib/ui/journalLayout";
 import { MoodFace } from "@/components/MoodFace";
@@ -191,6 +191,9 @@ function Card({ initial, uid, date: cardDate, notify, announce, autoFocus }: Pro
       // No answer in 30 s counts as a dropped connection: kept as a pending
       // copy, like saving offline (the timeout audit).
       next = await withTimeout(saveCheckIn(prev, form), SAVE_WAIT_MS);
+      // The server gave up waiting on Supabase (its own deadline): the same
+      // dropped connection, so the same path below (Web Tester, #122 T1a).
+      if (next.status === "error" && next.error === "unreachable") throw new TimedOut();
     } catch (e) {
       // A redirect (consent, sign-in) is the navigation itself.
       const fromPending = form.get("from_pending") === "1";

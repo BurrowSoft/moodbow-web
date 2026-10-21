@@ -24,7 +24,13 @@ vi.mock("@/lib/safety/keywords", () => ({
   },
 }));
 // The save's wait, shortened (30 s in the app; withTimeout.test pins it).
-vi.mock("@/lib/ui/withTimeout", async (orig) => ({ ...(await orig<typeof import("@/lib/ui/withTimeout")>()), SAVE_WAIT_MS: 300 }));
+// held: the action's own wait never settles either, as when Next holds the
+// action's result behind its open router transition (Web Tester, #122 T2b).
+let held = false;
+vi.mock("@/lib/ui/withTimeout", async (orig) => {
+  const real = await orig<typeof import("@/lib/ui/withTimeout")>();
+  return { ...real, SAVE_WAIT_MS: 300, withTimeout: <T,>(call: Promise<T>, ms: number) => (held ? call : real.withTimeout(call, ms)) };
+});
 const { EntryEditor } = await import("./EntryEditor");
 
 const NEW_ID = "11111111-1111-4111-8111-111111111111";
@@ -118,6 +124,24 @@ describe("EntryEditor: a new entry", () => {
     expect(screen.getByTestId("entry-text")).toHaveValue("Still here");
     expect(stored(NEW_KEY)).toMatchObject({ body: "Still here" });
     expect(screen.getByTestId("entry-save")).toBeEnabled();
+  });
+
+  it("…even when the action itself can't settle: the editor's own wait shows the error and Save works again (#122 T2b)", async () => {
+    saveEntry.mockReturnValue(new Promise(() => {}));
+    held = true;
+    try {
+      renderEditor();
+      type("Held");
+      fireEvent.click(screen.getByTestId("entry-save"));
+      expect(screen.getByTestId("entry-save")).toBeDisabled();
+      expect(await screen.findByTestId("entry-error", {}, { timeout: 2000 })).toHaveTextContent(messages.today.errGeneric);
+      expect(screen.getByTestId("entry-save")).toBeEnabled();
+      expect(screen.getByTestId("entry-text")).toHaveValue("Held");
+      expect(stored(NEW_KEY)).toMatchObject({ body: "Held" });
+      expect(push).not.toHaveBeenCalled();
+    } finally {
+      held = false;
+    }
   });
 
   it("a failed request (offline): the generic error, and the draft stays", async () => {

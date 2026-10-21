@@ -339,7 +339,21 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
     }
   }, { status: "idle" });
 
+  // The save's wait, kept outside the action (Web Tester, #122 T2b): while a
+  // server action is held, Next keeps its router transition open, and the
+  // action's own result (even withTimeout's) can't commit until that ends;
+  // the error came at 71 s, not 30. This timer's update is urgent: past
+  // SAVE_WAIT_MS of the latest send, the editor shows the generic error and
+  // Save works again. Only meaningful while the save is still pending.
+  const [waitedOut, setWaitedOut] = useState(false);
+  const waitTimer = useRef<number | undefined>(undefined);
+  useEffect(() => () => window.clearTimeout(waitTimer.current), []);
+  const stuck = pending && waitedOut;
+
   const send = (withBase: string | null) => {
+    window.clearTimeout(waitTimer.current);
+    setWaitedOut(false);
+    waitTimer.current = window.setTimeout(() => setWaitedOut(true), SAVE_WAIT_MS);
     // Kept before the request: a redirect (session ended, consent) unmounts
     // the editor before any answer comes back.
     if (restore) writeDraft(draftKey, { ...fields, id, base: withBase });
@@ -359,15 +373,17 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
     ? t("entryTooLong")
     : future
       ? tt("errDateInFuture")
-      : state.status === "error" && state.error !== "stale"
-        ? state.error === "dateInFuture"
-          ? tt("errDateInFuture")
-          : state.error === "tooLong"
-            ? t("entryTooLong")
-            : tt("errGeneric")
-        : deleteState.status === "error"
-          ? tt("errGeneric")
-          : null;
+      : stuck
+        ? tt("errGeneric")
+        : state.status === "error" && state.error !== "stale"
+          ? state.error === "dateInFuture"
+            ? tt("errDateInFuture")
+            : state.error === "tooLong"
+              ? t("entryTooLong")
+              : tt("errGeneric")
+          : deleteState.status === "error"
+            ? tt("errGeneric")
+            : null;
 
   const closeDialog = useCallback(() => {
     leaveVia.current = null;
@@ -451,7 +467,7 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
         <button
           type="submit"
           data-testid="entry-save"
-          disabled={blank || tooLong || future || pending || deleting}
+          disabled={blank || tooLong || future || (pending && !stuck) || deleting}
           className={PRIMARY_SAVE}
         >
           {t("entrySave")}
