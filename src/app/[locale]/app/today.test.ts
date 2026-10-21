@@ -55,6 +55,8 @@ describe("saveCheckIn", () => {
       p_exercise_minutes: 30,
       p_stress: 2,
       p_expected_updated_at: "2026-10-01T09:00:00Z",
+      // A lock: an ordinary save (last write wins unless stale).
+      p_insert_only: false,
     });
   });
 
@@ -70,43 +72,44 @@ describe("saveCheckIn", () => {
     expect(rpc.mock.calls.find((c) => c[0] === "upsert_check_in")![1].p_date).toBe("2026-10-02");
   });
 
-  describe("an offline copy with no base version (decision 72)", () => {
+  describe("no base version: insert-only (migration 012, decision 209)", () => {
     const pending = { mood: "4", sleep_hours: "7.5", sleep_quality: "good", exercise_minutes: "30", stress: "2", local_date: "2026-10-02", expected_updated_at: "", from_pending: "1" };
+    const EXISTS = { message: "check_in_exists" };
+    const upsertArgs = () => rpc.mock.calls.find((c) => c[0] === "upsert_check_in")![1];
 
-    it("the day is still empty: saved", async () => {
+    it("the day is still empty: saved, sent insert-only with no lock, no read first", async () => {
       rpcAnswers({ data: ROW, error: null });
-      maybeSingle.mockResolvedValue({ data: null, error: null });
       expect(await saveCheckIn(idle, form(pending))).toEqual({ status: "saved", checkIn: ROW });
-      expect(rpc).toHaveBeenCalledWith("upsert_check_in", expect.anything());
+      expect(upsertArgs()).toMatchObject({ p_expected_updated_at: null, p_insert_only: true });
+      expect(maybeSingle).not.toHaveBeenCalled();
     });
 
-    it("the day has this same check-in (an earlier answer was lost): saved, nothing written", async () => {
+    it("the live card's first check-in is insert-only too (agreed with Mobile Dev)", async () => {
       rpcAnswers({ data: ROW, error: null });
+      await saveCheckIn(idle, form({ ...pending, from_pending: "" }));
+      expect(upsertArgs()).toMatchObject({ p_insert_only: true });
+    });
+
+    it("the day has this same check-in (an earlier answer was lost): saved", async () => {
+      rpcAnswers({ data: null, error: EXISTS });
       maybeSingle.mockResolvedValue({ data: { ...ROW, sleep_hours: "7.5" }, error: null });
       expect(await saveCheckIn(idle, form(pending))).toMatchObject({ status: "saved" });
-      expect(rpc).not.toHaveBeenCalledWith("upsert_check_in", expect.anything());
     });
 
-    it("another device checked in meanwhile: stale with its row, never overwritten", async () => {
-      rpcAnswers({ data: ROW, error: null });
+    it("another device checked in meanwhile: a conflict with its row, never overwritten", async () => {
+      rpcAnswers({ data: null, error: EXISTS });
       const theirs = { ...ROW, mood: 1 };
       maybeSingle.mockResolvedValue({ data: theirs, error: null });
-      expect(await saveCheckIn(idle, form(pending))).toEqual({ status: "error", error: "stale", checkIn: theirs });
-      expect(rpc).not.toHaveBeenCalledWith("upsert_check_in", expect.anything());
+      expect(await saveCheckIn(idle, form(pending))).toEqual({ status: "error", error: "conflict", checkIn: theirs });
+      expect(eq).toHaveBeenLastCalledWith("local_date", "2026-10-02");
     });
 
-    it("the read fails: generic (the copy is kept for a retry)", async () => {
-      rpcAnswers({ data: ROW, error: null });
+    it("a conflict whose row can't be read: generic (the copy is kept for a retry), or unreachable on a deadline", async () => {
+      rpcAnswers({ data: null, error: EXISTS });
       maybeSingle.mockResolvedValue({ data: null, error: { message: "boom" } });
       expect(await saveCheckIn(idle, form(pending))).toEqual({ status: "error", error: "generic" });
-    });
-
-    it("the live card's first check-in reads first too (agreed with Mobile Dev): another device's day is never overwritten", async () => {
-      rpcAnswers({ data: ROW, error: null });
-      const theirs = { ...ROW, mood: 1 };
-      maybeSingle.mockResolvedValue({ data: theirs, error: null });
-      expect(await saveCheckIn(idle, form({ ...pending, from_pending: "" }))).toEqual({ status: "error", error: "stale", checkIn: theirs });
-      expect(rpc).not.toHaveBeenCalledWith("upsert_check_in", expect.anything());
+      maybeSingle.mockResolvedValue({ data: null, error: { message: "AbortError: Supabase didn't answer in time" } });
+      expect(await saveCheckIn(idle, form(pending))).toEqual({ status: "error", error: "unreachable" });
     });
   });
 
@@ -161,13 +164,6 @@ describe("saveCheckIn", () => {
     it("get_me: unreachable, and nothing is written", async () => {
       rpc.mockResolvedValue({ data: null, error: ABORTED });
       expect(await saveCheckIn(idle, form({ mood: "3" }))).toEqual({ status: "error", error: "unreachable" });
-      expect(rpc).not.toHaveBeenCalledWith("upsert_check_in", expect.anything());
-    });
-
-    it("the read before a first check-in: unreachable, and nothing is written", async () => {
-      rpcAnswers({ data: ROW, error: null });
-      maybeSingle.mockResolvedValue({ data: null, error: ABORTED });
-      expect(await saveCheckIn(idle, form({ mood: "3", expected_updated_at: "" }))).toEqual({ status: "error", error: "unreachable" });
       expect(rpc).not.toHaveBeenCalledWith("upsert_check_in", expect.anything());
     });
 

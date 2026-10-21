@@ -64,9 +64,13 @@ export async function importCheckIns(days: ImportCheckIn[]): Promise<ImportBatch
       p_sleep_quality: d.sleep_quality ?? null,
       p_exercise_minutes: d.exercise_minutes ?? null,
       p_stress: d.stress ?? null,
-      // No version: a new day. Read just above, so it isn't there.
+      // No version: a new day. Read just above, so it isn't there; and
+      // insert-only (migration 012, decision 209), so a check-in another
+      // device saved in between is never overwritten: that day is skipped.
       p_expected_updated_at: null,
+      p_insert_only: true,
     });
+    if (writeError?.message.includes("check_in_exists")) continue;
     if (writeError) return { status: "error" };
     written.push(d.date);
   }

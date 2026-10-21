@@ -54,6 +54,16 @@ describe("importCheckIns", () => {
     expect(rpc).toHaveBeenCalledWith("upsert_check_in", expect.objectContaining({ p_date: "2026-10-01", p_mood: 4, p_expected_updated_at: null }));
   });
 
+  it("insert-only (migration 012): a day another device saved after the read is skipped, never overwritten", async () => {
+    rpc.mockImplementation(async (_name: string, args: { p_date: string }) => (args.p_date === "2026-10-02" ? { data: null, error: { message: "check_in_exists" } } : { data: {}, error: null }));
+    const r = await importCheckIns([
+      { date: "2026-10-01", mood: 4 },
+      { date: "2026-10-02", mood: 1 },
+    ]);
+    expect(r).toEqual({ status: "ok", written: ["2026-10-01"], skipped: 1 });
+    for (const call of rpc.mock.calls) expect(call[1]).toMatchObject({ p_insert_only: true });
+  });
+
   it("rejects the whole batch for any bad row: a future day, a mood out of range, too many rows", async () => {
     expect(await importCheckIns([{ date: "2026-10-21", mood: 3 }])).toEqual({ status: "error" });
     expect(await importCheckIns([{ date: "2026-10-01", mood: 6 }])).toEqual({ status: "error" });

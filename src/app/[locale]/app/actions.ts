@@ -16,7 +16,8 @@ const COLUMNS = "local_date, mood, sleep_hours, sleep_quality, exercise_minutes,
 // from get_me (never the browser's), or the day an offline copy was made.
 // expected_updated_at (the row the card was showing) makes an edit made
 // meanwhile on another device a stale_write: the card then shows the latest
-// version and asks to retry.
+// version and asks to retry. Without one, a day that already has a check-in
+// is a conflict: both versions go to the check-in conflict dialog.
 export async function saveCheckIn(_prev: CheckInState, form: FormData): Promise<CheckInState> {
   const input = parseCheckIn(form);
   if (!input) return { status: "error", error: "invalid" };
@@ -34,19 +35,10 @@ export async function saveCheckIn(_prev: CheckInState, form: FormData): Promise<
   const expected = String(form.get("expected_updated_at") ?? "") || null;
 
   // A check-in made when the day had none (the card, or an offline copy)
-  // has no version to lock against. If the day has one now, it's either this
-  // one saved before (the answer was lost) or another device's: never
-  // overwrite that silently (decision 72; agreed with Mobile Dev for every
-  // card, Today and the day view).
-  if (expected === null) {
-    const { data: existing, error: readError } = await supabase.from("check_ins").select(COLUMNS).eq("local_date", date).maybeSingle();
-    if (readError) return { status: "error", error: isDeadlineError(readError) ? "unreachable" : "generic" };
-    if (existing) {
-      const row = existing as CheckIn;
-      return sameCheckIn(row, input) ? { status: "saved", checkIn: row } : { status: "error", error: "stale", checkIn: row };
-    }
-  }
-
+  // has no version to lock against: it's saved insert-only (migration 012,
+  // decision 209), so a check-in already there is never overwritten, not
+  // even one saved on another device a moment ago. The database decides,
+  // in the same statement (no read-then-write race).
   const { data, error } = await supabase.rpc("upsert_check_in", {
     p_date: date,
     p_mood: input.mood,
@@ -55,17 +47,21 @@ export async function saveCheckIn(_prev: CheckInState, form: FormData): Promise<
     p_exercise_minutes: input.exercise_minutes,
     p_stress: input.stress,
     p_expected_updated_at: expected,
+    p_insert_only: expected === null,
   });
   if (error) {
     const action = checkInErrorAction(error.message);
     if (action.kind === "redirect") return redirect({ href: action.to, locale: await getLocale() });
-    if (action.error === "stale") {
-      const { data: latest } = await supabase.from("check_ins").select(COLUMNS).eq("local_date", date).maybeSingle();
+    if (action.error === "stale" || action.error === "conflict") {
+      const { data: latest, error: readError } = await supabase.from("check_ins").select(COLUMNS).eq("local_date", date).maybeSingle();
       const row = (latest as CheckIn | null) ?? undefined;
       // The day already holds exactly these values: this same save went
       // through before and only its answer was lost. Saved, not a conflict.
       if (row && sameCheckIn(row, input)) return { status: "saved", checkIn: row };
-      return { status: "error", error: "stale", checkIn: row };
+      // conflict: the day has another check-in. Without it to show, the
+      // person can't choose (the dialog shows both): kept for a retry.
+      if (action.error === "conflict" && !row) return { status: "error", error: isDeadlineError(readError) ? "unreachable" : "generic" };
+      return { status: "error", error: action.error, checkIn: row };
     }
     return { status: "error", error: action.error };
   }

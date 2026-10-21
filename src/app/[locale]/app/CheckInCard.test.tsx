@@ -169,17 +169,103 @@ describe("CheckInCard", () => {
     }
   });
 
-  const superseded = (date: string) => messages.today.offlineCheckinSuperseded.replace("{date}", date);
+  describe("a copy that meets another device's check-in: the conflict dialog (decision 209)", () => {
+    const theirs = { ...ROW, mood: 5, updated_at: "2026-10-02T11:00:00Z" };
 
-  it("a stale flush for today: dropped, never silently; the newer row is shown (decision 72)", async () => {
-    pendingFrom("2026-10-02");
-    saveCheckIn.mockResolvedValue({ status: "error", error: "stale", checkIn: { ...ROW, mood: 5 } });
-    renderCard(null);
-    expect(await screen.findByTestId("checkin-superseded")).toHaveTextContent(superseded("Friday, October 2, 2026"));
-    expect(anyPending()).toBe(false);
-    expect(screen.getByTestId("checkin-summary")).toHaveTextContent(messages.today.mood5);
-    expect(screen.getByTestId("checkin-status")).toHaveTextContent(messages.today.checkinSaved);
-    expect(screen.queryByTestId("checkin-error")).toBeNull();
+    it("both versions with the day; the copy stays until the person chooses; Use the other one shows theirs", async () => {
+      pendingFrom("2026-10-02");
+      saveCheckIn.mockResolvedValue({ status: "error", error: "conflict", checkIn: theirs });
+      renderCard(null);
+      const dialog = await screen.findByTestId("checkin-conflict-dialog");
+      expect(dialog).toHaveTextContent(messages.today.checkInConflictTitle);
+      expect(screen.getByTestId("checkin-conflict-date")).toHaveTextContent("Friday, October 2, 2026");
+      expect(screen.getByTestId("checkin-conflict-mine")).toHaveTextContent(messages.today.mood2);
+      expect(screen.getByTestId("checkin-conflict-other")).toHaveTextContent(messages.today.mood5);
+      expect(anyPending()).toBe(true);
+      fireEvent.click(screen.getByTestId("checkin-conflict-use-other"));
+      expect(screen.queryByTestId("checkin-conflict-dialog")).toBeNull();
+      expect(anyPending()).toBe(false);
+      expect(screen.getByTestId("checkin-summary")).toHaveTextContent(messages.today.mood5);
+      expect(screen.queryByTestId("checkin-rejected")).toBeNull();
+    });
+
+    it("Keep mine: sent again over theirs (their version as the lock), and the copy goes once saved", async () => {
+      pendingFrom("2026-10-02");
+      saveCheckIn.mockResolvedValueOnce({ status: "error", error: "conflict", checkIn: theirs });
+      saveCheckIn.mockResolvedValueOnce({ status: "saved", checkIn: { ...ROW, mood: 2, updated_at: "2026-10-02T11:05:00Z" } });
+      renderCard(null);
+      fireEvent.click(await screen.findByTestId("checkin-conflict-keep-mine"));
+      await waitFor(() => expect(saveCheckIn).toHaveBeenCalledTimes(2));
+      expect(sent(1)).toMatchObject({ mood: "2", expected_updated_at: theirs.updated_at, local_date: "2026-10-02", from_pending: "1" });
+      await waitFor(() => expect(anyPending()).toBe(false));
+      expect(screen.getByTestId("checkin-summary")).toHaveTextContent(messages.today.mood2);
+    });
+
+    it("versions that differ only in sleep quality don't look the same (reviewer F1)", async () => {
+      window.localStorage.setItem(dayKey("2026-10-02"), JSON.stringify({ fields: { mood: 5, sleepHours: "7.5", sleepQuality: "poor", exercise: "", stress: "" }, expected: "", date: "2026-10-02" }));
+      saveCheckIn.mockResolvedValue({ status: "error", error: "conflict", checkIn: { ...theirs, sleep_hours: 7.5, sleep_quality: "good", exercise_minutes: null, stress: null } });
+      renderCard(null);
+      expect(await screen.findByTestId("checkin-conflict-mine")).toHaveTextContent(messages.today.sleepPoor);
+      expect(screen.getByTestId("checkin-conflict-other")).toHaveTextContent(messages.today.sleepGood);
+      expect(screen.getByTestId("checkin-conflict-other")).not.toHaveTextContent(messages.today.sleepPoor);
+    });
+
+    it("an older request's clash that answers after Keep mine was chosen doesn't ask again (reviewer Q2)", async () => {
+      pendingFrom("2026-10-02");
+      let late: (state: unknown) => void = () => {};
+      saveCheckIn.mockResolvedValueOnce({ status: "error", error: "conflict", checkIn: theirs });
+      saveCheckIn.mockReturnValueOnce(new Promise((resolve) => (late = resolve)));
+      saveCheckIn.mockResolvedValueOnce({ status: "saved", checkIn: { ...ROW, mood: 2, updated_at: "2026-10-02T11:05:00Z" } });
+      renderCard(null);
+      await screen.findByTestId("checkin-conflict-dialog");
+      // A reconnect sends the copy again while the dialog is open.
+      await act(async () => {
+        window.dispatchEvent(new Event("online"));
+      });
+      await waitFor(() => expect(saveCheckIn).toHaveBeenCalledTimes(2));
+      fireEvent.click(screen.getByTestId("checkin-conflict-keep-mine"));
+      await act(async () => late({ status: "error", error: "conflict", checkIn: theirs }));
+      await waitFor(() => expect(saveCheckIn).toHaveBeenCalledTimes(3));
+      expect(sent(2)).toMatchObject({ expected_updated_at: theirs.updated_at });
+      await waitFor(() => expect(anyPending()).toBe(false));
+      expect(screen.queryByTestId("checkin-conflict-dialog")).toBeNull();
+      expect(screen.getByTestId("checkin-summary")).toHaveTextContent(messages.today.mood2);
+    });
+
+    it("a stale copy (changed since its version) asks the same way, never a notice-only drop", async () => {
+      window.localStorage.setItem(dayKey("2026-10-02"), JSON.stringify({ fields: { mood: 2, sleepHours: "", sleepQuality: "", exercise: "", stress: "" }, expected: ROW.updated_at, date: "2026-10-02" }));
+      saveCheckIn.mockResolvedValue({ status: "error", error: "stale", checkIn: theirs });
+      renderCard(ROW);
+      expect(await screen.findByTestId("checkin-conflict-dialog")).toBeInTheDocument();
+      expect(anyPending()).toBe(true);
+    });
+
+    it("Escape: no choice, nothing dropped; the copy asks again on the next sync", async () => {
+      pendingFrom("2026-10-02");
+      saveCheckIn.mockResolvedValue({ status: "error", error: "conflict", checkIn: theirs });
+      renderCard(null);
+      await screen.findByTestId("checkin-conflict-dialog");
+      fireEvent.keyDown(document, { key: "Escape" });
+      expect(screen.queryByTestId("checkin-conflict-dialog")).toBeNull();
+      expect(anyPending()).toBe(true);
+      await act(async () => {
+        window.dispatchEvent(new Event("online"));
+      });
+      expect(await screen.findByTestId("checkin-conflict-dialog")).toBeInTheDocument();
+    });
+
+    it("a live first check-in that meets one saved elsewhere: kept as a copy, both versions shown, no error line", async () => {
+      saveCheckIn.mockResolvedValue({ status: "error", error: "conflict", checkIn: theirs });
+      renderCard(null);
+      fireEvent.click(screen.getByTestId("checkin-mood-3"));
+      fireEvent.click(screen.getByTestId("checkin-save"));
+      expect(await screen.findByTestId("checkin-conflict-mine")).toHaveTextContent(messages.today.mood3);
+      expect(JSON.parse(window.localStorage.getItem(dayKey("2026-10-02"))!)).toMatchObject({ fields: { mood: 3 }, expected: "" });
+      expect(screen.queryByTestId("checkin-error")).toBeNull();
+      fireEvent.click(screen.getByTestId("checkin-conflict-use-other"));
+      expect(screen.getByTestId("checkin-summary")).toHaveTextContent(messages.today.mood5);
+      expect(anyPending()).toBe(false);
+    });
   });
 
   it("a stale flush whose server row holds exactly what was sent (our own late save): saved, no notice (after the timeout audit)", async () => {
@@ -187,20 +273,19 @@ describe("CheckInCard", () => {
     saveCheckIn.mockResolvedValue({ status: "error", error: "stale", checkIn: { ...ROW, mood: 2, sleep_hours: null, sleep_quality: null, exercise_minutes: null, stress: null } });
     renderCard(null);
     await waitFor(() => expect(screen.getByTestId("checkin-summary")).toHaveTextContent(messages.today.mood2));
-    expect(screen.queryByTestId("checkin-superseded")).toBeNull();
+    expect(screen.queryByTestId("checkin-conflict-dialog")).toBeNull();
     expect(anyPending()).toBe(false);
     expect(screen.getByTestId("checkin-status")).toHaveTextContent(messages.today.checkinSaved);
   });
 
-  it("a stale flush for an earlier day: a dismissible notice naming that day; today's card unchanged", async () => {
+  it("a conflict for an earlier day: the dialog names that day; Use the other one leaves today's card unchanged", async () => {
     pendingFrom("2026-10-01");
-    saveCheckIn.mockResolvedValue({ status: "error", error: "stale", checkIn: { ...ROW, local_date: "2026-10-01", mood: 5 } });
+    saveCheckIn.mockResolvedValue({ status: "error", error: "conflict", checkIn: { ...ROW, local_date: "2026-10-01", mood: 5 } });
     renderCard(null);
-    expect(await screen.findByTestId("checkin-superseded")).toHaveTextContent(superseded("Thursday, October 1, 2026"));
+    expect(await screen.findByTestId("checkin-conflict-date")).toHaveTextContent("Thursday, October 1, 2026");
+    fireEvent.click(screen.getByTestId("checkin-conflict-use-other"));
     expect(anyPending()).toBe(false);
     expect(screen.getByTestId("checkin-mood-5")).toHaveAttribute("aria-checked", "false");
-    fireEvent.click(screen.getByTestId("checkin-superseded-dismiss"));
-    expect(screen.queryByTestId("checkin-superseded")).toBeNull();
   });
 
   it("a corrupt pending copy is ignored", () => {

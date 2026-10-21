@@ -12,6 +12,7 @@ import { createPortal } from "react-dom";
 export function Dialog({
   title,
   body,
+  details,
   onCancel,
   children,
   testId,
@@ -19,6 +20,8 @@ export function Dialog({
 }: {
   title: string;
   body?: string;
+  // Shown between the body and the buttons (the check-in conflict's two versions).
+  details?: React.ReactNode;
   onCancel: () => void;
   children: React.ReactNode;
   testId?: string;
@@ -89,6 +92,7 @@ export function Dialog({
             {body}
           </p>
         )}
+        {details && <div className="mt-4">{details}</div>}
         <div className="mt-6 flex flex-wrap justify-end gap-3">{children}</div>
       </div>
     </div>,
