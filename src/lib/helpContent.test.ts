@@ -99,8 +99,9 @@ describe("Help is public, scoped to what's live (decision 212)", () => {
     expect(published("app-lock")).not.toContain("widget");
   });
 
-  it("the app's on this day, daily reminder and month share card show", () => {
+  it("the app's on this day, daily reminder, offline start and month share card show", () => {
     expect(published("on-this-day")).toContain("Hide for today");
+    expect(published("offline")).toContain("opens without a connection");
     expect(published("reminders")).toContain("Daily reminder");
     expect(published("share-card")).toContain("Moodbow rainbow");
     expect(published("timeline")).toContain("Share this month");
