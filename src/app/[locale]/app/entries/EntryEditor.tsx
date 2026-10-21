@@ -423,19 +423,23 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
       {/* The top row, as the app: Back, and on a narrow screen Save, kept at
           the top while the text scrolls, so it's in reach with the keyboard
           up (Web Tester: the bottom Save sat below the fold at 360 × 380). */}
-      <div className="sticky top-0 z-10 flex min-h-11 items-center justify-between gap-3 bg-bg sm:static" data-testid="entry-top-row">
-        {back}
-        <button type="submit" data-testid="entry-save-top" disabled={cantSave} aria-disabled={busy || undefined} className={TOP_SAVE}>
-          {t("entrySave")}
-        </button>
+      {/* On a narrow screen the error is pinned with the row, right under
+          it (the app), so text scrolled up can't hide it (Web Tester, #123
+          N2). From sm the wrapper is display: contents, and the error goes
+          just above Save at the bottom (sm:order-last, as the buttons). */}
+      <div className="sticky top-0 z-10 flex flex-col gap-2 bg-bg pb-2 sm:contents">
+        <div className="flex min-h-11 items-center justify-between gap-3" data-testid="entry-top-row">
+          {back}
+          <button type="submit" data-testid="entry-save-top" disabled={cantSave} aria-disabled={busy || undefined} className={TOP_SAVE}>
+            {t("entrySave")}
+          </button>
+        </div>
+        {errorText && (
+          <p id="entry-error" role="alert" data-testid="entry-error" className="font-medium text-accent sm:order-last">
+            {errorText}
+          </p>
+        )}
       </div>
-      {/* Right under the top row on a narrow screen (the app); just above
-          Save at the bottom on a wider one (sm:order-last, as the buttons). */}
-      {errorText && (
-        <p id="entry-error" role="alert" data-testid="entry-error" className="font-medium text-accent sm:order-last">
-          {errorText}
-        </p>
-      )}
       {/* The date first, then the text (the mockups, decision 161). */}
       <div className="flex flex-col gap-1">
         <label htmlFor="entry-date" className="text-sm font-medium text-text">

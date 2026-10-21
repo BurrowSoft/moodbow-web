@@ -199,6 +199,9 @@ describe("EntryEditor: the top row (Save in reach with the keyboard up; the app)
     expect(sent()).toMatchObject({ body: "From the top" });
     const error = await screen.findByTestId("entry-error");
     expect(row.nextElementSibling).toBe(error);
+    // Pinned with the row on a narrow screen, so scrolled text can't hide it (#123 N2).
+    expect(row.parentElement).toHaveClass("sticky");
+    expect(row.parentElement).toContainElement(error);
   });
 });
 
