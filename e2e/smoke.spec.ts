@@ -194,7 +194,9 @@ test.describe("the live legal pages and account deletion (decision 164)", () => 
     await expect(article).toContainText("disappear automatically within 8 days");
     // AI is off: no line may point at a Me → AI screen (decision 69).
     await expect(article).not.toContainText("Me → AI");
-    await expect(article).not.toContainText("app lock");
+    // What stays on the device, as the 0.9 app has it (Vitor's "ok device
+    // sentences"): the app-lock PIN and the share cards.
+    await expect(article).toContainText("unsent drafts, your app-lock PIN, and the share cards you create.");
     // UX resolved every to-confirm mark (decision 67).
     await expect(article.locator("mark.legal-todo")).toHaveCount(0);
     // Live: no draft panel; the web journal's "or the website" waits for it.
