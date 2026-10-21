@@ -99,6 +99,25 @@ describe("ImportData", () => {
     expect(screen.getByTestId("import-skipped")).toHaveTextContent("1 days skipped (already in Moodbow).");
   });
 
+  it("a day whose check-in was kept but whose note was imported: counted, and one line says why its mood is the old one (C4, UX)", async () => {
+    importCheckIns.mockResolvedValueOnce({ status: "ok", written: ["2026-10-01"], skipped: 1 });
+    renderIt();
+    await choose("date,mood,note\n2026-10-01,4,\n2026-10-02,3,A new note\n");
+    fireEvent.click(screen.getByTestId("import-confirm"));
+    await settle();
+    expect(screen.getByTestId("import-done")).toHaveTextContent("Done. 2 days are in your Timeline.");
+    expect(screen.queryByTestId("import-skipped")).toBeNull();
+    expect(screen.getByTestId("import-kept-existing")).toHaveTextContent(messages.me.importKeptExisting);
+  });
+
+  it("no such line when every check-in was new", async () => {
+    renderIt();
+    await choose("date,mood\n2026-10-01,4\n");
+    fireEvent.click(screen.getByTestId("import-confirm"));
+    await settle();
+    expect(screen.queryByTestId("import-kept-existing")).toBeNull();
+  });
+
   it("an ambiguous file: the DMY/MDY radio, DMY first; switching re-reads the dates", async () => {
     renderIt();
     await choose("date,mood\n03/10/2026,3\n05/09/2026,4\n");
