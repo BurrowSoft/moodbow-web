@@ -34,6 +34,19 @@ export default async function proxy(req: NextRequest) {
     res.headers.set(CSP_HEADER, csp);
     return res;
   };
+  // The app's Me → Help & FAQ opens /<language>/help, and its legal links
+  // /<language>/privacy and so on (moodbow-app lib/core/policy.dart). Until
+  // Thai is served on this build, a Thai app's /th/help…, /th/privacy,
+  // /th/terms and /th/account-deletion go to the same English page, not a
+  // 404 (decision 212: a safety net, the app is English-only for now).
+  if (!(routing.locales as readonly string[]).includes("th")) {
+    const english = req.nextUrl.pathname.match(/^\/th(\/(?:help(?:\/.*)?|privacy|terms|account-deletion))\/?$/i);
+    if (english) {
+      const url = req.nextUrl.clone();
+      url.pathname = english[1];
+      return withCsp(NextResponse.redirect(url, 307));
+    }
+  }
   const path = pagePath(req.nextUrl.pathname, routing.locales);
   // Gated pages that aren't live yet (content/conditions.json) are 404s on
   // Production; drafts elsewhere render normally (pageGate).

@@ -3,7 +3,7 @@ title: Using Moodbow offline
 summary: What happens when you have no connection.
 topic: Your journal
 ---
-You can check in and write while offline. Check-ins you save offline are kept on your device (in the app) or in your browser (on the web) and sync automatically when you're back online. An entry you write offline is kept as a draft: save it again once you're back online.
+You can check in and write while offline. Check-ins you save offline are kept on your device{pending:web_journal_live} (in the app) or in your browser (on the web){/pending} and sync automatically when you're back online. An entry you write offline is kept as a draft: save it again once you're back online.
 
 {pending:offline_start}In the app, if you've signed in before, Moodbow also opens without a connection and shows the journal saved on your phone.{/pending}
 

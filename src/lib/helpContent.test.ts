@@ -77,11 +77,37 @@ describe("help articles (content/help, copied verbatim from specs/help)", () => 
   });
 });
 
-describe("Help is gated like the journal it describes (reviewer #23)", () => {
-  it("hidden on Production while its condition is unmet, a draft on Previews", () => {
+describe("Help is public, scoped to what's live (decision 212)", () => {
+  it("live on Production: the app's Me → Help & FAQ opens it", () => {
     for (const path of ["/help", "/help/check-ins", "/help/delete-account"]) {
-      expect(isHiddenPage(path, { vercelEnv: "production" }), path).toBe(true);
-      expect(isHiddenPage(path, { vercelEnv: "preview" }), path).toBe(false);
+      expect(isHiddenPage(path, { vercelEnv: "production" }), path).toBe(false);
     }
+  });
+
+  // What the 0.9 app build has (the Mobile Dev's list): shown; the rest, and
+  // the web journal's lines, hidden until their own conditions.
+  const published = (slug: string) => renderArticle(findArticle("en", slug)!);
+
+  it("articles about features that are off have nothing left: a 404", () => {
+    for (const slug of ["ai-reflections", "app-lock", "calendar", "import", "keyboard-shortcuts", "search", "widget", "your-week"]) {
+      expect(published(slug), slug).toBe("");
+    }
+  });
+
+  it("the app's on this day, daily reminder and month share card show", () => {
+    expect(published("on-this-day")).toContain("Hide for today");
+    expect(published("reminders")).toContain("Daily reminder");
+    expect(published("share-card")).toContain("Moodbow rainbow");
+    expect(published("timeline")).toContain("Share this month");
+    // More cards and the year card aren't in the build.
+    expect(published("share-card")).not.toContain("Milestone");
+  });
+
+  it("no web journal line while it's off, and no AI line while AI is off", () => {
+    expect(published("getting-started")).not.toContain("moodbow.com");
+    expect(published("offline")).not.toContain("browser");
+    expect(published("sign-in")).not.toContain("on the web");
+    expect(published("reminders")).not.toContain("on the web");
+    expect(published("delete-account")).not.toContain("AI");
   });
 });

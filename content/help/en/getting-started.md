@@ -8,10 +8,10 @@ Moodbow is a private journal for your story. Each day you can log how you feel i
 **Your first minute**
 - Create your account and confirm your email.
 {pending:ai_live}- Pick what you'd like Moodbow to pay attention to, and how it should talk to you.{/pending}
-{pending:reminder_live}- Choose a daily reminder time on your phone, or turn reminders off.{/pending}
+{pending:app_reminders}- Choose a daily reminder time on your phone, or turn reminders off.{/pending}
 - Do your first check-in on **Today**.
 
-You can use Moodbow in the app and on the web at moodbow.com with the same account. Everything stays in sync.
+{pending:web_journal_live}You can use Moodbow in the app and on the web at moodbow.com with the same account. Everything stays in sync.{/pending}
 
 Tap the tab you're on to jump back to its top.
 
