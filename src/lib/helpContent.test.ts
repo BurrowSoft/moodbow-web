@@ -109,11 +109,14 @@ describe("Help is public, scoped to what's live (decision 212)", () => {
     expect(published("share-card")).not.toContain("Milestone");
   });
 
-  it("no web journal line while it's off, and no AI line while AI is off", () => {
-    expect(published("getting-started")).not.toContain("moodbow.com");
-    expect(published("offline")).not.toContain("browser");
-    expect(published("sign-in")).not.toContain("on the web");
-    expect(published("reminders")).not.toContain("on the web");
-    expect(published("delete-account")).not.toContain("AI");
+  // The web journal's lines follow web-journal-live (the web launch step
+  // shows them), the AI line ai-live: these hold before and after each flip.
+  it("the web journal's lines show only with the web journal, the AI line only with AI", () => {
+    const web = isPendingMet("web_journal_live");
+    expect(published("getting-started").includes("moodbow.com")).toBe(web);
+    expect(published("offline").includes("browser")).toBe(web);
+    expect(published("sign-in").includes("on the web")).toBe(web);
+    expect(published("reminders").includes("on the web")).toBe(web);
+    expect(published("delete-account").includes("AI")).toBe(isPendingMet("ai_live"));
   });
 });
