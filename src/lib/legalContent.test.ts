@@ -50,8 +50,8 @@ describe("legal content files", () => {
   // The legal texts describe these as available today, unconditioned
   // (decisions 40 + 69: real people only arrive after M7 + M8), so neither
   // page may go live before them (Code Reviewer, #9). The app lock is not a
-  // prerequisite (decision 83: it comes after 1.0, and its lines stay
-  // wrapped in {pending:app_lock}).
+  // prerequisite: its clause is wrapped in {pending:app_app_lock}, met once
+  // the app build people have includes it (decisions 188, 212).
   it("a live legal page needs delete account, export and Get help now live first", () => {
     for (const { slug, gate } of PAGES) {
       if (!conditionMet(gate)) continue;
@@ -133,7 +133,7 @@ describe("renderLegal (the real privacy text, nothing met)", () => {
     expect(page.html).not.toContain("Google Play, Apple App Store");
     expect(page.html).not.toContain("What Moodbow remembers");
     expect(page.html).not.toContain("{pending");
-    expect(page.hidden.map((h) => h.id)).toEqual(expect.arrayContaining(["purchases", "ai_memory", "backup_retention", "app_lock", "share_cards"]));
+    expect(page.hidden.map((h) => h.id)).toEqual(expect.arrayContaining(["purchases", "ai_memory", "backup_retention", "app_app_lock", "app_share_cards"]));
   });
 
   it("highlights facts still to confirm (if any come back)", () => {
