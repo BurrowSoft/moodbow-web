@@ -25,7 +25,11 @@
   },
   "app-reminders": {
     "met": true,
-    "what": "Help only (decision 212): the daily reminder is in the app build people have (0.9 closed test on), so its Help lines show. Not the web's own reminder feature (reminder-live)."
+    "what": "Help only (decision 212): the daily reminder is in the app build people have (0.9 closed test on), so its Help lines show. The web's own reminder setting comes with the web journal (web-journal-live)."
+  },
+  "app-offline-start": {
+    "met": true,
+    "what": "Help only (decisions 212, 214): the app opens without a connection for a user who signed in before, showing the journal saved on the phone (the app's offline start, in the 0.9 build). Gates the Help article line about it."
   },
   "app-app-lock": {
     "met": true,
@@ -74,14 +78,6 @@
   "timeline-moments-rpc": {
     "met": true,
     "what": "get_timeline(p_before, p_limit, p_moments_only) from moodbow-app migration 005 is applied on PRODUCTION (Mobile Dev confirms; staging has it since 2026-10-19). Until then the Timeline's Moments filter shows on Previews only."
-  },
-  "offline-start": {
-    "met": false,
-    "what": "The app opens without a connection for a user who signed in before, showing the journal saved on the phone (the app's offline start, Mobile Dev). Gates the Help article line about it."
-  },
-  "reminder-live": {
-    "met": false,
-    "what": "The daily reminder is in a RELEASED app build (local notification at the chosen time, skipped if that phone saw a check-in that day). Gates the Help article about reminders."
   },
   "share-cards-more": {
     "met": false,
