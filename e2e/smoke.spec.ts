@@ -7,7 +7,9 @@ import conditions from "../content/conditions.json";
 // 404s (fail closed), pinned by the pageGate unit tests.
 
 const CANONICAL = "https://www.moodbow.com";
-// Whether the legal pages are live (as #100 derives it).
+// The legal pages' state (the launch-step guard requires them live): the
+// checks of /privacy and /terms follow it, so nothing here pins it
+// (reviewer #100 B2).
 const LEGAL = conditions["privacy-text-approved"].met && conditions["terms-text-approved"].met;
 
 test.describe("home", () => {
@@ -20,12 +22,12 @@ test.describe("home", () => {
     await expect(page.getByTestId("moodbow-arc")).toBeVisible();
     await expect(page.getByTestId("moodbow-arc")).toHaveAttribute("aria-hidden", "true");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Your month, as a rainbow");
-    // Before the web journal is live: Coming soon and Get notified (a mailto).
-    await expect(page.getByText("Coming soon", { exact: true })).toBeVisible();
-    const notify = page.getByRole("link", { name: "Get notified by email when Moodbow launches" });
-    await expect(notify).toHaveAttribute("href", "mailto:support@moodbow.com?subject=Notify%20me%20about%20Moodbow");
-    await expect(page.getByText("Email us and we'll let you know when it's ready.")).toBeVisible();
-    await expect(page.getByTestId("home-start")).toHaveCount(0);
+    // The web journal is live (launch step): Start and Sign in, no Coming
+    // soon and no Get notified.
+    await expect(page.getByTestId("home-start")).toHaveAttribute("href", "/welcome");
+    await expect(page.getByTestId("home-sign-in")).toHaveAttribute("href", "/sign-in");
+    await expect(page.getByTestId("home-coming-soon")).toHaveCount(0);
+    await expect(page.getByTestId("home-notify")).toHaveCount(0);
     for (const title of ["A 10-second check-in", "Write about your day", "See what shapes your days", "Private by design"]) {
       await expect(page.getByRole("heading", { level: 2, name: title })).toBeVisible();
     }
@@ -41,8 +43,8 @@ test.describe("home", () => {
     await page.goto("/");
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     expect(overflow).toBeLessThanOrEqual(0);
-    const notify = await page.getByTestId("home-notify").boundingBox();
-    expect(notify!.x + notify!.width).toBeLessThanOrEqual(160);
+    const start = await page.getByTestId("home-start").boundingBox();
+    expect(start!.x + start!.width).toBeLessThanOrEqual(160);
   });
 
   test("security headers: an enforced per-request CSP nonce on every script, no violations, and Permissions-Policy (audit A1 + A2)", async ({ page, request }) => {
@@ -61,7 +63,9 @@ test.describe("home", () => {
     expect(nonce).toBeTruthy();
     expect(csp).toContain("frame-ancestors 'none'");
     // Every script Next and the layout render carries this request's nonce.
-    const scripts = await page.locator("script").evaluateAll((els) => els.map((e) => (e as HTMLScriptElement).nonce));
+    // The JSON-LD data block (live platforms, #89) isn't executed, so the CSP
+    // doesn't apply to it.
+    const scripts = await page.locator('script:not([type="application/ld+json"])').evaluateAll((els) => els.map((e) => (e as HTMLScriptElement).nonce));
     expect(scripts.length).toBeGreaterThan(0);
     for (const n of scripts) expect(n).toBe(nonce);
     await page.waitForLoadState("networkidle");
@@ -88,7 +92,8 @@ test.describe("home", () => {
     await page.goto("/");
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", CANONICAL);
     await expect(page.locator('meta[property="og:url"]')).toHaveAttribute("content", CANONICAL);
-    await expect(page.locator('meta[property="og:image"]')).toHaveAttribute("content", `${CANONICAL}/og-image.png`);
+    // The launch image once the web journal is live (metadata.ts).
+    await expect(page.locator('meta[property="og:image"]')).toHaveAttribute("content", `${CANONICAL}/og-launch.png`);
     await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute("content", "summary_large_image");
     await expect(page.locator('link[rel="alternate"][hreflang="en"]')).toHaveAttribute("href", CANONICAL);
     await expect(page.locator('link[rel="alternate"][hreflang="x-default"]')).toHaveAttribute("href", CANONICAL);
@@ -174,14 +179,18 @@ test.describe("the live legal pages and account deletion (decision 164)", () => 
   for (const [path, heading] of [
     ["/privacy", "Moodbow Privacy Policy"],
     ["/terms", "Moodbow Terms of Use"],
-    ["/account-deletion", "Delete your Moodbow account"],
   ] as const) {
     test(path, async ({ page }) => {
       await page.goto(path);
       await expect(page.getByRole("heading", { level: 1 })).toHaveText(heading);
-      await expect(page.getByTestId("draft-banner")).toHaveCount(0);
       await expect(page.locator('[data-content="article"]')).toHaveCount(1);
-      await expect(page.locator('meta[name="robots"]')).toHaveCount(0);
+      if (LEGAL) {
+        await expect(page.getByTestId("draft-banner")).toHaveCount(0);
+        await expect(page.locator('meta[name="robots"]')).toHaveCount(0);
+      } else {
+        await expect(page.getByTestId("draft-banner")).toBeVisible();
+        await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex, nofollow");
+      }
     });
   }
 
@@ -197,19 +206,30 @@ test.describe("the live legal pages and account deletion (decision 164)", () => 
     await expect(article).not.toContainText("app lock");
     // UX resolved every to-confirm mark (decision 67).
     await expect(article.locator("mark.legal-todo")).toHaveCount(0);
-    // Live: no draft panel; the web journal's "or the website" waits for it.
-    await expect(page.getByTestId("legal-hidden")).toHaveCount(0);
-    await expect(article).not.toContainText("or the website");
+    // The draft panel (unmet pending blocks) exists only while it's a draft.
+    const panel = page.getByTestId("legal-hidden");
+    if (LEGAL) await expect(panel).toHaveCount(0);
+    else await expect(panel).toContainText("purchases");
+    await expect(article.getByTestId("legal-hidden")).toHaveCount(0);
     await page.goto("/terms");
     await expect(page.locator('[data-content="article"]')).not.toContainText("AI credits");
   });
 
-  test("the footer links the live pages", async ({ page }) => {
+  test("the footer links only live pages: account deletion, and the legal pages once live", async ({ page }) => {
     await page.goto("/");
     const footer = page.getByRole("contentinfo");
-    for (const name of ["Support", "Privacy", "Terms", "Delete your account"]) {
-      await expect(footer.getByRole("link", { name })).toBeVisible();
+    await expect(footer.getByRole("link", { name: "Support" })).toBeVisible();
+    await expect(footer.getByRole("link", { name: "Delete your account" })).toHaveAttribute("href", "/account-deletion");
+    for (const name of ["Privacy", "Terms"]) {
+      await expect(footer.getByRole("link", { name })).toHaveCount(LEGAL ? 1 : 0);
     }
+  });
+
+  test("/account-deletion is live: the page, no draft banner", async ({ page }) => {
+    await page.goto("/account-deletion");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Delete your Moodbow account");
+    await expect(page.getByTestId("draft-banner")).toHaveCount(0);
+    await expect(page.locator('[data-content="article"]')).toHaveCount(1);
   });
 
   test("account deletion: the PM's copy, support email, the 8-day backups line (decisions 44 + 84)", async ({ page }) => {
@@ -224,10 +244,12 @@ test.describe("email confirmed", () => {
   test("success", async ({ page }) => {
     await page.goto("/email-confirmed");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Email confirmed.");
-    await expect(page.getByText("Open Moodbow to continue.")).toBeVisible();
-    // Until the web journal is live: no Continue and no countdown (decision 134).
-    await expect(page.getByTestId("email-confirmed-countdown")).toHaveCount(0);
-    await expect(page.getByRole("link", { name: "Continue" })).toHaveCount(0);
+    // The web journal is live (decision 134): it moves on. No session here
+    // (no Supabase in this build), so to sign in, with Continue and the
+    // countdown.
+    await expect(page.getByText("You're all set.")).toBeVisible();
+    await expect(page.getByTestId("email-confirmed-countdown")).toBeVisible();
+    await expect(page.getByTestId("email-confirmed-continue")).toHaveAttribute("href", "/sign-in");
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex, nofollow");
   });
 
@@ -285,10 +307,17 @@ test.describe("static files", () => {
     const body = await res.text();
     expect(body).toContain(`<loc>${CANONICAL}/</loc>`);
     expect(body).toContain(`<loc>${CANONICAL}/support</loc>`);
-    for (const live of ["privacy", "terms", "account-deletion", "help"]) expect(body, live).toContain(`<loc>${CANONICAL}/${live}</loc>`);
-    for (const hidden of ["email-confirmed", "/th"]) {
-      expect(body, hidden).not.toContain(hidden);
+    // Live: Help (decision 212) and the account-deletion page; the legal
+    // pages once met. Whole addresses: Help's /help/privacy-and-data is listed too.
+    expect(body).toContain(`<loc>${CANONICAL}/help</loc>`);
+    expect(body).toContain(`<loc>${CANONICAL}/account-deletion</loc>`);
+    for (const legal of ["/privacy", "/terms"]) {
+      expect(body.includes(`<loc>${CANONICAL}${legal}</loc>`), legal).toBe(LEGAL);
     }
+    for (const hidden of ["/email-confirmed", "/th"]) {
+      expect(body, hidden).not.toContain(`<loc>${CANONICAL}${hidden}</loc>`);
+    }
+    expect(body).not.toContain(`${CANONICAL}/th/`);
   });
 });
 

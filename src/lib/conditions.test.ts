@@ -25,20 +25,38 @@ describe("conditions", () => {
   // Pinned: flipping any of these is its own reviewed PR (text = enforcement).
   // Live since the first closed-test build with M7 + M8 (Vitor, decisions 162 + 164): the legal pages, account
   // deletion, export and the help card (app side; the web side comes with the web journal).
-  it("what's live: the legal pages and the app's delete / export / help card; not the web journal", () => {
+  it("what's live: the legal pages and the app's delete / export / help card", () => {
     for (const id of ["privacy-text-approved", "terms-text-approved", "delete-account-live", "export-live", "help-now-live"] as const) {
       expect(conditionMet(id), id).toBe(true);
     }
     // Decisions 44 + 84: backups are kept 8 days; the number and the flag go together.
     expect(conditionMet("backup-retention")).toBe(true);
     expect(BACKUP_RETENTION_DAYS).toBe(8);
-    expect(liveFeatures.webJournal).toBe(false);
+  });
+
+  // The web launch step (next-release.md, "Help flips with the product"):
+  // the journal and the features its Help describes go live together.
+  // Never before the Privacy Policy and Terms are live (decisions 40 + 82):
+  // sign-up opens with this step, so this stays red until the legal flip
+  // is on master (reviewer #100 B1).
+  it("the web launch flips as one step, after the legal pages", () => {
+    expect(conditionMet("privacy-text-approved"), "privacy-text-approved").toBe(true);
+    expect(conditionMet("terms-text-approved"), "terms-text-approved").toBe(true);
+    expect(liveFeatures.webJournal).toBe(true);
+    for (const id of ["web-journal-live", "share-cards", "help-now-live", "export-live", "delete-account-live"] as const) {
+      expect(conditionMet(id), id).toBe(true);
+    }
   });
 });
 
 describe("pageGate (fails closed)", () => {
-  // An unmet gate (the legal pages are live now).
-  const gate = (build: Parameters<typeof pageGate>[1]) => pageGate("web-journal-live", build);
+  // An unmet gate whatever the real config says (reviewer #100 B3).
+  const gate = (build: Parameters<typeof pageGate>[1]) => pageGate("privacy-text-approved", build, () => false);
+
+  it("a met gate is live everywhere", () => {
+    expect(pageGate("privacy-text-approved", { vercelEnv: "production" }, () => true)).toBe("live");
+    expect(pageGate("privacy-text-approved", {}, () => true)).toBe("live");
+  });
 
   it("unmet pages are 404 on Production, even with the drafts flag or in dev mode", () => {
     expect(gate({ vercelEnv: "production" })).toBe("hidden");
@@ -60,13 +78,14 @@ describe("pageGate (fails closed)", () => {
   });
 });
 
-describe("sitemapPaths", () => {
-  it("today: the ungated pages plus the met ones (Help: decision 212, the legal pages, account deletion)", () => {
-    expect(sitemapPaths()).toEqual(["/", "/support", "/help", "/privacy", "/terms", "/account-deletion"]);
-  });
+// The legal pages' state, as the launch-step guard requires it: everything
+// below follows it, so the guard is the only pinned value and this file is
+// green right after the legal flip, with no edits (reviewer #100 B2).
+const LEGAL = conditionMet("privacy-text-approved") && conditionMet("terms-text-approved");
 
-  it("lists only ungated pages while nothing is met", () => {
-    expect(sitemapPaths(() => false)).toEqual(["/", "/support"]);
+describe("sitemapPaths", () => {
+  it("after the web launch: the ungated pages, Help, the legal pages once live, and account deletion", () => {
+    expect(sitemapPaths()).toEqual(["/", "/support", "/help", ...(LEGAL ? ["/privacy", "/terms"] : []), "/account-deletion"]);
   });
 
   it("adds a gated page once its condition is met", () => {
@@ -78,10 +97,12 @@ describe("isHiddenPage (the proxy's routing-level 404)", () => {
   const prod = { vercelEnv: "production" };
   const preview = { vercelEnv: "preview" };
 
-  it("hides unmet gated pages on Production, with or without a trailing slash", () => {
-    for (const path of ["/sign-in", "/welcome", "/sign-in/"]) {
-      expect(isHiddenPage(path, prod), path).toBe(true);
+  it("hides the legal pages on Production until they're live, with or without a trailing slash", () => {
+    for (const path of ["/privacy", "/terms", "/privacy/"]) {
+      expect(isHiddenPage(path, prod), path).toBe(!LEGAL);
     }
+    // Live with the web launch.
+    expect(isHiddenPage("/account-deletion", prod)).toBe(false);
   });
 
   it("met gated pages are live on Production (the legal pages, account deletion, Help: decision 212)", () => {
@@ -98,7 +119,27 @@ describe("isHiddenPage (the proxy's routing-level 404)", () => {
   });
 
   it("fails closed when the environment is unset", () => {
-    expect(isHiddenPage("/sign-in", {})).toBe(true);
+    expect(isHiddenPage("/privacy", {})).toBe(!LEGAL);
+  });
+
+  // The proxy's logic with a gate that's unmet, whatever the real config
+  // says, so it stays tested once every page is live (reviewer #100 B3).
+  describe("with an unmet gate", () => {
+    const unmet = () => false;
+    it("hidden on Production, with or without a trailing slash; a prefix gate covers what's below it", () => {
+      for (const path of ["/privacy", "/terms", "/privacy/", "/account-deletion", "/help", "/help/check-ins", "/app", "/app/me"]) {
+        expect(isHiddenPage(path, prod, unmet), path).toBe(true);
+      }
+    });
+    it("a draft on Previews; fails closed with the environment unset", () => {
+      expect(isHiddenPage("/privacy", preview, unmet)).toBe(false);
+      expect(isHiddenPage("/privacy", {}, unmet)).toBe(true);
+    });
+    it("ungated and unknown paths are never hidden", () => {
+      for (const path of ["/", "/support", "/email-confirmed", "/no-such-page", "/apples"]) {
+        expect(isHiddenPage(path, prod, unmet), path).toBe(false);
+      }
+    });
   });
 });
 
@@ -115,29 +156,37 @@ describe("pagePath (what the proxy checks)", () => {
   it("lowercases, because Vercel matches routes case-insensitively", () => {
     expect(pagePath("/PRIVACY", locales)).toBe("/privacy");
     expect(pagePath("/En/Account-Deletion", locales)).toBe("/account-deletion");
-    expect(isHiddenPage(pagePath("/Sign-In", locales), { vercelEnv: "production" })).toBe(true);
+    expect(isHiddenPage(pagePath("/Terms", locales), { vercelEnv: "production" })).toBe(!LEGAL);
   });
 
   it("leaves malformed escapes alone", () => {
     expect(pagePath("/%E0%A4%A", locales)).toBe("/%e0%a4%a");
   });
 
-  it("an encoded gated path is still hidden on Production", () => {
-    expect(isHiddenPage(pagePath("/%73ign-in", locales), { vercelEnv: "production" })).toBe(true);
+  it("an encoded gated path is treated like the plain one on Production", () => {
+    expect(isHiddenPage(pagePath("/%70rivacy", locales), { vercelEnv: "production" })).toBe(!LEGAL);
+  });
+
+  it("with an unmet gate, encoded and differently cased paths are still hidden (reviewer #100 B3)", () => {
+    const prod = { vercelEnv: "production" };
+    const unmet = () => false;
+    for (const raw of ["/%70rivacy", "/Terms", "/en/%74erms", "/TH/Privacy", "/En/Account-Deletion"]) {
+      expect(isHiddenPage(pagePath(raw, locales), prod, unmet), raw).toBe(true);
+    }
   });
 });
 
 describe("the web journal gate (W0)", () => {
   const prod = { vercelEnv: "production" };
 
-  it("is off, and liveFeatures.webJournal follows the condition", () => {
-    expect(conditionMet("web-journal-live")).toBe(false);
+  it("is on, and liveFeatures.webJournal follows the condition", () => {
+    expect(conditionMet("web-journal-live")).toBe(true);
     expect(liveFeatures.webJournal).toBe(conditionMet("web-journal-live"));
   });
 
-  it("hides /app and everything below it, sign-in and forgot-password on Production", () => {
+  it("shows /app and everything below it, sign-in and forgot-password on Production", () => {
     for (const path of ["/app", "/app/me", "/app/timeline", "/sign-in", "/forgot-password"]) {
-      expect(isHiddenPage(path, prod), path).toBe(true);
+      expect(isHiddenPage(path, prod), path).toBe(false);
     }
     expect(isHiddenPage("/apples", prod)).toBe(false);
     expect(isHiddenPage("/app", { vercelEnv: "preview" })).toBe(false);
