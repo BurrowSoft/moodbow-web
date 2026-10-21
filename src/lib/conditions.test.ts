@@ -61,8 +61,8 @@ describe("pageGate (fails closed)", () => {
 });
 
 describe("sitemapPaths", () => {
-  it("today: the ungated pages plus the met ones (the legal pages, account deletion); not Help (the web journal)", () => {
-    expect(sitemapPaths()).toEqual(["/", "/support", "/privacy", "/terms", "/account-deletion"]);
+  it("today: the ungated pages plus the met ones (Help: decision 212, the legal pages, account deletion)", () => {
+    expect(sitemapPaths()).toEqual(["/", "/support", "/help", "/privacy", "/terms", "/account-deletion"]);
   });
 
   it("lists only ungated pages while nothing is met", () => {
