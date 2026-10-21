@@ -285,8 +285,8 @@ test.describe("static files", () => {
     const body = await res.text();
     expect(body).toContain(`<loc>${CANONICAL}/</loc>`);
     expect(body).toContain(`<loc>${CANONICAL}/support</loc>`);
-    for (const live of ["privacy", "terms", "account-deletion"]) expect(body, live).toContain(`<loc>${CANONICAL}/${live}</loc>`);
-    for (const hidden of ["email-confirmed", "/help", "/th"]) {
+    for (const live of ["privacy", "terms", "account-deletion", "help"]) expect(body, live).toContain(`<loc>${CANONICAL}/${live}</loc>`);
+    for (const hidden of ["email-confirmed", "/th"]) {
       expect(body, hidden).not.toContain(hidden);
     }
   });

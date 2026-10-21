@@ -61,8 +61,8 @@ describe("pageGate (fails closed)", () => {
 });
 
 describe("sitemapPaths", () => {
-  it("today: the ungated pages plus the met ones (the legal pages, account deletion); not Help (the web journal)", () => {
-    expect(sitemapPaths()).toEqual(["/", "/support", "/privacy", "/terms", "/account-deletion"]);
+  it("today: the ungated pages plus the met ones (Help: decision 212, the legal pages, account deletion)", () => {
+    expect(sitemapPaths()).toEqual(["/", "/support", "/help", "/privacy", "/terms", "/account-deletion"]);
   });
 
   it("lists only ungated pages while nothing is met", () => {
@@ -79,13 +79,13 @@ describe("isHiddenPage (the proxy's routing-level 404)", () => {
   const preview = { vercelEnv: "preview" };
 
   it("hides unmet gated pages on Production, with or without a trailing slash", () => {
-    for (const path of ["/help", "/sign-in", "/welcome", "/help/"]) {
+    for (const path of ["/sign-in", "/welcome", "/sign-in/"]) {
       expect(isHiddenPage(path, prod), path).toBe(true);
     }
   });
 
-  it("met gated pages are live on Production (the legal pages, account deletion)", () => {
-    for (const path of ["/privacy", "/terms", "/account-deletion", "/privacy/"]) {
+  it("met gated pages are live on Production (the legal pages, account deletion, Help: decision 212)", () => {
+    for (const path of ["/privacy", "/terms", "/account-deletion", "/privacy/", "/help", "/help/", "/help/check-ins"]) {
       expect(isHiddenPage(path, prod), path).toBe(false);
     }
   });
@@ -94,11 +94,11 @@ describe("isHiddenPage (the proxy's routing-level 404)", () => {
     for (const path of ["/", "/support", "/email-confirmed", "/no-such-page"]) {
       expect(isHiddenPage(path, prod), path).toBe(false);
     }
-    expect(isHiddenPage("/help", preview)).toBe(false);
+    expect(isHiddenPage("/sign-in", preview)).toBe(false);
   });
 
   it("fails closed when the environment is unset", () => {
-    expect(isHiddenPage("/help", {})).toBe(true);
+    expect(isHiddenPage("/sign-in", {})).toBe(true);
   });
 });
 

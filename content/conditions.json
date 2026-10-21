@@ -19,6 +19,22 @@
     "met": false,
     "what": "The signed-in web journal (W0 shell + onboarding + Today, at parity with the released app) is live for users, with Vitor's go. Gates /app, /sign-in, /forgot-password and the \"Continue on the web\" button."
   },
+  "help-public": {
+    "met": true,
+    "what": "Help & FAQ (/help, /help/<article>) is public from the 0.9 closed test on (decision 212): the app's Me → Help & FAQ opens it. Each article shows only what's live (its own pending blocks); an article with nothing left is a 404. The web journal's lines wait for web-journal-live."
+  },
+  "app-reminders": {
+    "met": true,
+    "what": "Help only (decision 212): the daily reminder is in the app build people have (0.9 closed test on), so its Help lines show. Not the web's own reminder feature (reminder-live)."
+  },
+  "app-app-lock": {
+    "met": true,
+    "what": "Help only (decision 212): app lock (PIN, fingerprint or face; decision 188) is in the app build people have (0.9 closed test on), so its Help article shows. Not app-lock (the privacy text's clause, Vitor's)."
+  },
+  "app-share-cards": {
+    "met": true,
+    "what": "Help only (decision 212): \"My month's moodbow\" sharing is in the app build people have (0.9 closed test on), so its Help lines show. Not the web's own share cards (share-cards); Chart, Milestone and Year cards stay hidden."
+  },
   "ai-memory": {
     "met": false,
     "what": "The AI memory screen (Me → What Moodbow remembers: see, edit, delete facts) is live on the app and the web (R2)."
