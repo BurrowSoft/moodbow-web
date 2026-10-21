@@ -72,10 +72,13 @@ jobs:
   # pull_request, never pull_request_target, so fork PRs get no secrets. The
   # secrets reach only the steps below that need them, the secret key only the
   # test step (never the build), and nothing prints them.
-  # Without the secrets every step after the check is skipped.
+  # Without the secrets every step after the check is skipped. They're the
+  # "staging" environment's secrets (VITOR.md item 4), which a job sees only
+  # when it names that environment.
   journeys:
     name: Staging journeys
     if: github.event_name == 'pull_request'
+    environment: staging
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
