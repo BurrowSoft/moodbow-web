@@ -121,6 +121,41 @@ test.describe("launch journeys", () => {
     }
   });
 
+  test("an entry save that never answers: the generic error at the editor's 30 s wait, Save works again, the text is kept (#122 T2b)", async ({ page }) => {
+    test.setTimeout(120_000);
+    const email = newEmail();
+    try {
+      await signUp(page, email, { ai: false });
+      await page.getByTestId("setup-done").click();
+      await expect(page).toHaveURL(/\/app$/);
+      await page.getByTestId("today-write").click();
+      await expect(page).toHaveURL(/\/app\/write/);
+
+      // Only the Save POST (a server action) is held; every other request goes through.
+      const held: (() => Promise<void>)[] = [];
+      await page.route(
+        (url) => url.pathname.endsWith("/app/write"),
+        async (route) => {
+          const request = route.request();
+          if (request.method() === "POST" && (await request.headerValue("next-action"))) held.push(() => route.abort());
+          else await route.continue();
+        },
+      );
+      await page.getByTestId("entry-text").fill(ENTRY);
+      const sent = Date.now();
+      await page.getByTestId("entry-save").click();
+      await expect(page.getByTestId("entry-error")).toHaveText(messages.today.errGeneric, { timeout: 40_000 });
+      expect(Date.now() - sent).toBeLessThan(40_000);
+      expect(held.length).toBe(1);
+      await expect(page.getByTestId("entry-save")).toBeEnabled();
+      await expect(page.getByTestId("entry-text")).toHaveValue(ENTRY);
+      await expect(page).toHaveURL(/\/app\/write/);
+      for (const release of held) await release();
+    } finally {
+      await cleanup(email);
+    }
+  });
+
   test("AI on: consent → setup's focus and tone → Today", async ({ page }) => {
     const email = newEmail();
     try {

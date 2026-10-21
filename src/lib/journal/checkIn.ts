@@ -67,8 +67,10 @@ export function sameCheckIn(row: CheckIn, input: CheckInInput): boolean {
 // The RPC's error codes (supabase/contracts/errors.md) → what the card does.
 // invalid: the values themselves were refused (invalid_value, or a form this
 // file rejects); a retry can never succeed. generic: anything else (the
-// network, an outage), which may.
-export type CheckInError = "dateInFuture" | "stale" | "invalid" | "generic";
+// network, an outage), which may. unreachable: Supabase never answered (a
+// data deadline, lib/supabase/deadline): the card keeps the check-in as a
+// pending copy, like a dropped connection.
+export type CheckInError = "dateInFuture" | "stale" | "invalid" | "unreachable" | "generic";
 export type CheckInErrorAction = { kind: "error"; error: CheckInError } | { kind: "redirect"; to: "/consent" | "/sign-in" };
 
 export function checkInErrorAction(message: string): CheckInErrorAction {
@@ -77,5 +79,8 @@ export function checkInErrorAction(message: string): CheckInErrorAction {
   if (message.includes("date_in_future")) return { kind: "error", error: "dateInFuture" };
   if (message.includes("stale_write")) return { kind: "error", error: "stale" };
   if (message.includes("invalid_value")) return { kind: "error", error: "invalid" };
+  // postgrest-js's answer to an aborted request (lib/supabase/deadline
+  // isDeadlineError; not imported: this file is in the browser bundle too).
+  if (message.startsWith("AbortError")) return { kind: "error", error: "unreachable" };
   return { kind: "error", error: "generic" };
 }

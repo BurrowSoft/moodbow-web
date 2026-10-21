@@ -6,6 +6,7 @@ import { EXERCISE_MINUTES, MOODS, SLEEP_HOURS, SLEEP_QUALITIES, SLEEP_START, STR
 import { dateLine } from "@/lib/journal/today";
 import { valueHex } from "@/lib/journal/valueColours";
 import { localKey } from "@/lib/localData";
+import { SAVE_WAIT_MS, TimedOut, withTimeout } from "@/lib/ui/withTimeout";
 import { ValueDot } from "@/components/ValueDot";
 import { JOURNAL_CARD, MOOD_FACE, MOOD_LABEL, MOOD_ROW, PRIMARY_SAVE } from "@/lib/ui/journalLayout";
 import { MoodFace } from "@/components/MoodFace";
@@ -25,6 +26,10 @@ const fromRow = (row: CheckIn | null): Fields => ({
   exercise: row?.exercise_minutes != null ? String(row.exercise_minutes) : "",
   stress: row?.stress != null ? String(row.stress) : "",
 });
+
+// The same five values (a check-in's content, without its version).
+const sameFields = (a: Fields, b: Fields) =>
+  a.mood === b.mood && a.sleepHours === b.sleepHours && a.sleepQuality === b.sleepQuality && a.exercise === b.exercise && a.stress === b.stress;
 
 // One pending copy per user per day (UX): saving offline on two days keeps
 // both, a later save for the same day replaces only that day's, and every
@@ -180,10 +185,22 @@ function Card({ initial, uid, date: cardDate, notify, announce, autoFocus }: Pro
   const [storageFailed, setStorageFailed] = useState(false);
   // The pending copies being sent right now (by key), so none goes twice.
   const flushing = useRef(new Set<string>());
+  // The live save's wait, kept outside the action (Web Tester, #122 T1a/T1b):
+  // while the save's request is open, the action's own result can't commit
+  // (React entangles it with Next's open transition; "saved in this browser"
+  // came at 46-61 s, not 30). Past SAVE_WAIT_MS this timer keeps the pending
+  // copy itself, with urgent updates. keptFor: the form whose copy it kept.
+  const waitTimer = useRef<number | undefined>(undefined);
+  const keptFor = useRef<FormData | null>(null);
   const [state, action, pending] = useActionState<CheckInState, FormData>(async (prev, form) => {
     let next: CheckInState;
     try {
-      next = await saveCheckIn(prev, form);
+      // No answer in 30 s counts as a dropped connection: kept as a pending
+      // copy, like saving offline (the timeout audit).
+      next = await withTimeout(saveCheckIn(prev, form), SAVE_WAIT_MS);
+      // The server gave up waiting on Supabase (its own deadline): the same
+      // dropped connection, so the same path below (Web Tester, #122 T1a).
+      if (next.status === "error" && next.error === "unreachable") throw new TimedOut();
     } catch (e) {
       // A redirect (consent, sign-in) is the navigation itself.
       const fromPending = form.get("from_pending") === "1";
@@ -215,6 +232,24 @@ function Card({ initial, uid, date: cardDate, notify, announce, autoFocus }: Pro
       setOffline(true);
       setEditing(false);
       return prev;
+    }
+    // "Changed elsewhere", but the day holds exactly what was sent: our own
+    // save, which landed after the browser stopped waiting (30 s). It's saved;
+    // no notice, no conflict (UX, after the timeout audit).
+    if (next.status === "error" && next.error === "stale" && next.checkIn && sameFields(fromRow(next.checkIn), pendingFromForm(form).fields)) {
+      next = { status: "saved", checkIn: next.checkIn };
+    }
+    // A late answer to a live save the card's own wait already kept: the
+    // copy goes once it's answered (as a synced copy's would).
+    if (form.get("from_pending") !== "1" && keptFor.current === form) {
+      keptFor.current = null;
+      if (next.status === "saved" || (next.status === "error" && next.error !== "generic")) removePending(pendingKey(uid, pendingFromForm(form).date));
+      // Refused or changed elsewhere: back to the form with its error, not
+      // "saved in this browser".
+      if (next.status === "error" && next.error !== "generic") {
+        setOffline(false);
+        setEditing(true);
+      }
     }
     if (form.get("from_pending") === "1") {
       const key = String(form.get("pending_key"));
@@ -289,8 +324,27 @@ function Card({ initial, uid, date: cardDate, notify, announce, autoFocus }: Pro
       setEditing(false);
       return;
     }
-    startTransition(() => action(toFormData(fields, expected, cardDate)));
+    const form = toFormData(fields, expected, cardDate);
+    window.clearTimeout(waitTimer.current);
+    keptFor.current = null;
+    waitTimer.current = window.setTimeout(() => {
+      try {
+        window.localStorage.setItem(pendingKey(uid, cardDate), JSON.stringify(pendingFromForm(form)));
+      } catch {
+        setStorageFailed(true);
+        return;
+      }
+      keptFor.current = form;
+      setOffline(true);
+      setEditing(false);
+    }, SAVE_WAIT_MS);
+    startTransition(() => action(form));
   };
+  // A save that settled needs no wait; nor does a card that's gone.
+  useEffect(() => {
+    if (!pending) window.clearTimeout(waitTimer.current);
+  }, [pending]);
+  useEffect(() => () => window.clearTimeout(waitTimer.current), []);
 
   const set = (patch: Partial<Fields>) => setFields((f) => ({ ...f, ...patch }));
   // One step through SLEEP_HOURS (half an hour), stopping at both ends; from

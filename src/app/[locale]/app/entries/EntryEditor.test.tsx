@@ -23,6 +23,14 @@ vi.mock("@/lib/safety/keywords", () => ({
     return keywords;
   },
 }));
+// The save's wait, shortened (30 s in the app; withTimeout.test pins it).
+// held: the action's own wait never settles either, as when Next holds the
+// action's result behind its open router transition (Web Tester, #122 T2b).
+let held = false;
+vi.mock("@/lib/ui/withTimeout", async (orig) => {
+  const real = await orig<typeof import("@/lib/ui/withTimeout")>();
+  return { ...real, SAVE_WAIT_MS: 300, withTimeout: <T,>(call: Promise<T>, ms: number) => (held ? call : real.withTimeout(call, ms)) };
+});
 const { EntryEditor } = await import("./EntryEditor");
 
 const NEW_ID = "11111111-1111-4111-8111-111111111111";
@@ -104,6 +112,40 @@ describe("EntryEditor: a new entry", () => {
     fireEvent.change(screen.getByTestId("entry-date"), { target: { value: "2026-10-03" } });
     expect(screen.getByTestId("entry-error")).toHaveTextContent(messages.today.errDateInFuture);
     expect(screen.getByTestId("entry-save")).toBeDisabled();
+  });
+
+  it("a save that never answers: after the wait, the generic error, the text and its draft kept (the timeout audit)", async () => {
+    saveEntry.mockReturnValue(new Promise(() => {}));
+    renderEditor();
+    type("Still here");
+    fireEvent.click(screen.getByTestId("entry-save"));
+    expect(await screen.findByTestId("entry-error", {}, { timeout: 2000 })).toHaveTextContent(messages.today.errGeneric);
+    expect(push).not.toHaveBeenCalled();
+    expect(screen.getByTestId("entry-text")).toHaveValue("Still here");
+    expect(stored(NEW_KEY)).toMatchObject({ body: "Still here" });
+    expect(screen.getByTestId("entry-save")).toBeEnabled();
+  });
+
+  it("…even when the action itself can't settle: the editor's own wait shows the error and Save works again (#122 T2b)", async () => {
+    // Answered at the end: an action left open keeps every later transition
+    // in this file from committing (React entangles them with it).
+    let answer: (state: unknown) => void = () => {};
+    saveEntry.mockReturnValue(new Promise((resolve) => (answer = resolve)));
+    held = true;
+    try {
+      renderEditor();
+      type("Held");
+      fireEvent.click(screen.getByTestId("entry-save"));
+      expect(screen.getByTestId("entry-save")).toBeDisabled();
+      expect(await screen.findByTestId("entry-error", {}, { timeout: 2000 })).toHaveTextContent(messages.today.errGeneric);
+      expect(screen.getByTestId("entry-save")).toBeEnabled();
+      expect(screen.getByTestId("entry-text")).toHaveValue("Held");
+      expect(stored(NEW_KEY)).toMatchObject({ body: "Held" });
+      expect(push).not.toHaveBeenCalled();
+    } finally {
+      held = false;
+      await act(async () => answer({ status: "error", error: "generic" }));
+    }
   });
 
   it("a failed request (offline): the generic error, and the draft stays", async () => {
@@ -362,6 +404,25 @@ describe("EntryEditor: Mark as a moment is a switch (decision 206)", () => {
 
 describe("EntryEditor: changed on another device (decision 87)", () => {
   const OTHER = { ...ENTRY, body: "Their version", updated_at: "2026-10-02T08:00:00Z" };
+
+  it("stale, but the server's version is exactly this text, date and moment (our own late save): saved and back, no dialog (after the timeout audit)", async () => {
+    const mine = { ...ENTRY, body: "My version", updated_at: "2026-10-02T08:00:00Z" };
+    saveEntry.mockResolvedValue({ status: "error", error: "stale", latest: mine });
+    renderEditor(ENTRY);
+    type("My version");
+    fireEvent.click(screen.getByTestId("entry-save"));
+    await waitFor(() => expect(push).toHaveBeenCalledWith("/app"));
+    expect(screen.queryByTestId("entry-conflict-dialog")).toBeNull();
+    expect(window.localStorage.getItem(EDIT_KEY)).toBeNull();
+  });
+
+  it("stale with a different version (only the moment differs): the dialog as before", async () => {
+    saveEntry.mockResolvedValue({ status: "error", error: "stale", latest: { ...ENTRY, body: "My version", is_moment: true, updated_at: "2026-10-02T08:00:00Z" } });
+    renderEditor(ENTRY);
+    type("My version");
+    fireEvent.click(screen.getByTestId("entry-save"));
+    expect(await screen.findByRole("dialog", { name: m.entryConflictTitle })).toBeInTheDocument();
+  });
 
   it("Keep mine: saves mine again, locked to the version just seen", async () => {
     saveEntry.mockResolvedValueOnce({ status: "error", error: "stale", latest: OTHER });

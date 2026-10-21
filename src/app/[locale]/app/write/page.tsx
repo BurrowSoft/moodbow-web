@@ -16,6 +16,10 @@ import { flagsCrisis } from "@/lib/safety/crisis";
 import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
 import { titledMetadata } from "../pageMeta";
 
+// A stuck request ends here at the latest (UX, the timeout audit); each
+// data call gives up after 15 s on its own (lib/supabase/deadline).
+export const maxDuration = 30;
+
 export async function generateMetadata({ params }: PageProps<"/[locale]/app/write">): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "entry" });

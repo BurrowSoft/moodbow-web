@@ -23,6 +23,11 @@ import { ImportData } from "./ImportData";
 import { headers } from "next/headers";
 import { dateLocale } from "@/lib/journal/today";
 
+// The export (export_my_data may take 30 s: lib/supabase/deadline) and the
+// import batches run in this page's functions: 60, so their own clean error
+// comes back before the platform stops the function (reviewer, #122).
+export const maxDuration = 60;
+
 export async function generateMetadata({ params }: PageProps<"/[locale]/app/me">): Promise<Metadata> {
   return tabMetadata("tabMe", (await params).locale);
 }

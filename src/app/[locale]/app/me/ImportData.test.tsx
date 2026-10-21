@@ -38,6 +38,8 @@ vi.mock("@/lib/import/noteDedupe", async () => {
 let idCount = 0;
 vi.mock("@/lib/import/uuidv5", () => ({ importEntryId: async () => `0b5f2c1e-7d3a-5e8b-9c41-2a6f8e1d3b${String(++idCount).padStart(2, "0")}` }));
 vi.mock("@/components/SafetyCard", () => ({ GetHelpNow: ({ testId }: { testId: string }) => <button type="button" data-testid={testId} /> }));
+// The batch wait, shortened (60 s in the app; withTimeout.test pins it).
+vi.mock("@/lib/ui/withTimeout", async (orig) => ({ ...(await orig<typeof import("@/lib/ui/withTimeout")>()), IMPORT_BATCH_WAIT_MS: 300 }));
 const { ImportData } = await import("./ImportData");
 const m = messages.me;
 
@@ -157,6 +159,15 @@ describe("ImportData", () => {
     expect(failed).toHaveTextContent(m.importStopped);
     expect(failed).not.toHaveTextContent(m.importError);
     expect(screen.queryByTestId("import-offline")).toBeNull();
+  });
+
+  it("a batch that never answers: after the wait it stops (importStopped), safe to run again (the timeout audit)", async () => {
+    importCheckIns.mockImplementationOnce(() => new Promise(() => {}));
+    renderIt();
+    await choose("date,mood,note\n2026-10-01,4,A walk\n");
+    fireEvent.click(screen.getByTestId("import-confirm"));
+    expect(await screen.findByTestId("import-failed", {}, { timeout: 2000 })).toHaveTextContent(m.importStopped);
+    expect(importEntries).not.toHaveBeenCalled();
   });
 
   describe("notes already in the account (1.1 P M1)", () => {

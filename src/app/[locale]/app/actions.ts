@@ -3,7 +3,8 @@
 import { getLocale } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
 import { checkInErrorAction, parseCheckIn, sameCheckIn, type CheckIn, type CheckInError } from "@/lib/journal/checkIn";
-import { getMe } from "@/lib/journal/me";
+import { readMe } from "@/lib/journal/me";
+import { isDeadlineError } from "@/lib/supabase/deadline";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export type CheckInState = { status: "idle" } | { status: "saved"; checkIn: CheckIn } | { status: "error"; error: CheckInError; checkIn?: CheckIn };
@@ -21,8 +22,10 @@ export async function saveCheckIn(_prev: CheckInState, form: FormData): Promise<
   if (!input) return { status: "error", error: "invalid" };
   const supabase = await createSupabaseServerClient();
   if (!supabase) return { status: "error", error: "generic" };
-  const me = await getMe(supabase);
-  if (!me) return { status: "error", error: "generic" };
+  // Supabase not answering in time (a data deadline) is "unreachable": the
+  // card keeps the check-in as a pending copy.
+  const { me, unreachable } = await readMe(supabase);
+  if (!me) return { status: "error", error: unreachable ? "unreachable" : "generic" };
 
   // A pending copy synced later names its own day; the card itself sends
   // today. The RPC rejects a future date (date_in_future).
@@ -37,7 +40,7 @@ export async function saveCheckIn(_prev: CheckInState, form: FormData): Promise<
   // card, Today and the day view).
   if (expected === null) {
     const { data: existing, error: readError } = await supabase.from("check_ins").select(COLUMNS).eq("local_date", date).maybeSingle();
-    if (readError) return { status: "error", error: "generic" };
+    if (readError) return { status: "error", error: isDeadlineError(readError) ? "unreachable" : "generic" };
     if (existing) {
       const row = existing as CheckIn;
       return sameCheckIn(row, input) ? { status: "saved", checkIn: row } : { status: "error", error: "stale", checkIn: row };

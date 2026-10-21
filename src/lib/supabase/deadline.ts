@@ -39,7 +39,48 @@ export function startDeadline(ms = AUTH_DEADLINE_MS): Deadline {
   return { signal: controller.signal, expired, clear: () => clearTimeout(timer) };
 }
 
-// fetch for a Supabase client that also stops at the deadline.
+// How long one data request (PostgREST: .rpc / .from) may take before it's
+// given up (UX, the timeout audit): a dead connection otherwise waits on
+// Node's 300 s defaults or Vercel's function limit. The full export reads
+// everything, so it gets longer. Edge functions (/functions/v1/: reflect,
+// report) aren't bounded here: they pass their own 45 s timeout.
+export const DATA_DEADLINE_MS = 15_000;
+export const EXPORT_DEADLINE_MS = 30_000;
+
+export function dataDeadlineMs(url: string): number | null {
+  if (!url.includes("/rest/v1/")) return null;
+  return url.includes("/rpc/export_my_data") ? EXPORT_DEADLINE_MS : DATA_DEADLINE_MS;
+}
+
+// Whether a PostgREST { error } is one of these deadlines (or the Auth one):
+// postgrest-js answers an aborted request as "AbortError: <message>" instead
+// of throwing. The request never got an answer, so callers treat it as a
+// dropped connection, not a refusal (Web Tester, #122 T1a).
+export function isDeadlineError(error: { message?: string } | null | undefined): boolean {
+  return !!error?.message?.startsWith("AbortError");
+}
+
+const urlOf = (input: Parameters<typeof fetch>[0]) => (typeof input === "string" ? input : input instanceof URL ? input.href : input.url);
+
+// fetch for a Supabase client that also stops at the Auth deadline, and a
+// data request at its own deadline. A timed-out request rejects with an
+// AbortError, the one error postgrest-js answers as { error } without
+// retrying (a TimeoutError would be retried 3 more times, 1 + 2 + 4 s apart).
 export function fetchUntil(signal: AbortSignal): typeof fetch {
-  return (input, init) => fetch(input, { ...init, signal: init?.signal ? AbortSignal.any([init.signal, signal]) : signal });
+  return async (input, init) => {
+    const ms = dataDeadlineMs(urlOf(input));
+    const own = ms === null ? null : new AbortController();
+    // Left running after the headers arrive, so a body that stalls is cut
+    // too (aborting a finished request does nothing); unref'd, so it never
+    // keeps a function alive.
+    const timer = own ? setTimeout(() => own.abort(new DOMException("Supabase didn't answer in time", "AbortError")), ms!) : undefined;
+    (timer as { unref?: () => void } | undefined)?.unref?.();
+    const signals = [signal, init?.signal, own?.signal].filter((s): s is AbortSignal => !!s);
+    try {
+      return await fetch(input, { ...init, signal: signals.length === 1 ? signals[0] : AbortSignal.any(signals) });
+    } catch (e) {
+      clearTimeout(timer);
+      throw e;
+    }
+  };
 }

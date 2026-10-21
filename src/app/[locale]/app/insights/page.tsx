@@ -17,6 +17,10 @@ import { InsightsView } from "./InsightsView";
 import { ShareMonth } from "./ShareMonth";
 import { WeeklyReport } from "./WeeklyReport";
 
+// The weekly report runs in this page's functions and waits up to 45 s
+// (REFLECT_SERVER_DEADLINE_MS): the page allows 60, as the entry page does.
+export const maxDuration = 60;
+
 export async function generateMetadata({ params }: PageProps<"/[locale]/app/insights">): Promise<Metadata> {
   return tabMetadata("tabInsights", (await params).locale);
 }

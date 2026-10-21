@@ -9,6 +9,14 @@ import type { CheckIn } from "@/lib/journal/checkIn";
 // in to, so this is where the card's flows are covered.
 const saveCheckIn = vi.fn();
 vi.mock("./actions", () => ({ saveCheckIn: (...args: unknown[]) => saveCheckIn(...args) }));
+// The save's wait, shortened (30 s in the app; withTimeout.test pins it).
+// held: the action's own wait never settles either, as when the action's
+// result can't commit while Next's transition is open (Web Tester, #122 T1).
+let held = false;
+vi.mock("@/lib/ui/withTimeout", async (orig) => {
+  const real = await orig<typeof import("@/lib/ui/withTimeout")>();
+  return { ...real, SAVE_WAIT_MS: 300, withTimeout: <T,>(call: Promise<T>, ms: number) => (held ? call : real.withTimeout(call, ms)) };
+});
 const { CheckInCard } = await import("./CheckInCard");
 
 const ROW: CheckIn = { local_date: "2026-10-02", mood: 4, sleep_hours: 7.5, sleep_quality: "good", exercise_minutes: 30, stress: 2, updated_at: "2026-10-02T10:00:00Z" };
@@ -174,6 +182,16 @@ describe("CheckInCard", () => {
     expect(screen.queryByTestId("checkin-error")).toBeNull();
   });
 
+  it("a stale flush whose server row holds exactly what was sent (our own late save): saved, no notice (after the timeout audit)", async () => {
+    pendingFrom("2026-10-02", 2);
+    saveCheckIn.mockResolvedValue({ status: "error", error: "stale", checkIn: { ...ROW, mood: 2, sleep_hours: null, sleep_quality: null, exercise_minutes: null, stress: null } });
+    renderCard(null);
+    await waitFor(() => expect(screen.getByTestId("checkin-summary")).toHaveTextContent(messages.today.mood2));
+    expect(screen.queryByTestId("checkin-superseded")).toBeNull();
+    expect(anyPending()).toBe(false);
+    expect(screen.getByTestId("checkin-status")).toHaveTextContent(messages.today.checkinSaved);
+  });
+
   it("a stale flush for an earlier day: a dismissible notice naming that day; today's card unchanged", async () => {
     pendingFrom("2026-10-01");
     saveCheckIn.mockResolvedValue({ status: "error", error: "stale", checkIn: { ...ROW, local_date: "2026-10-01", mood: 5 } });
@@ -296,6 +314,77 @@ describe("CheckInCard: a request lost at the network level (Web Tester, #11)", (
     fireEvent.click(screen.getByTestId("checkin-save"));
     expect(await screen.findByTestId("checkin-status")).toHaveTextContent(messages.today.checkinSavedOfflineWeb);
     expect(JSON.parse(window.localStorage.getItem(dayKey("2026-10-02"))!)).toMatchObject({ fields: { mood: 3 }, expected: "", date: "2026-10-02" });
+  });
+
+  it("a save that never answers: after the wait, kept like an offline save (the timeout audit)", async () => {
+    saveCheckIn.mockReturnValue(new Promise(() => {}));
+    renderCard(null);
+    fireEvent.click(screen.getByTestId("checkin-mood-4"));
+    fireEvent.click(screen.getByTestId("checkin-save"));
+    expect(await screen.findByTestId("checkin-status", {}, { timeout: 2000 })).toHaveTextContent(messages.today.checkinSavedOfflineWeb);
+    expect(JSON.parse(window.localStorage.getItem(dayKey("2026-10-02"))!)).toMatchObject({ fields: { mood: 4 }, date: "2026-10-02" });
+  });
+
+  it("the server gave up waiting on Supabase (unreachable): kept like an offline save, not the generic error (#122 T1a)", async () => {
+    saveCheckIn.mockResolvedValue({ status: "error", error: "unreachable" });
+    renderCard(null);
+    fireEvent.click(screen.getByTestId("checkin-mood-5"));
+    fireEvent.click(screen.getByTestId("checkin-save"));
+    expect(await screen.findByTestId("checkin-status")).toHaveTextContent(messages.today.checkinSavedOfflineWeb);
+    expect(screen.queryByTestId("checkin-error")).toBeNull();
+    expect(JSON.parse(window.localStorage.getItem(dayKey("2026-10-02"))!)).toMatchObject({ fields: { mood: 5 }, date: "2026-10-02" });
+  });
+
+  describe("…even when the action itself can't settle: the card's own wait (#122 T1a/T1b)", () => {
+    // Each held save is answered at the end: an action left open keeps every
+    // later transition in this file from committing.
+    let answer: (state: unknown) => void = () => {};
+    beforeEach(() => {
+      held = true;
+      saveCheckIn.mockReturnValue(new Promise((resolve) => (answer = resolve)));
+    });
+    afterEach(async () => {
+      held = false;
+      await act(async () => answer({ status: "error", error: "generic" }));
+    });
+
+    it("kept in this browser after the wait, while the save is still open", async () => {
+      renderCard(null);
+      fireEvent.click(screen.getByTestId("checkin-mood-3"));
+      fireEvent.click(screen.getByTestId("checkin-save"));
+      expect(await screen.findByTestId("checkin-status", {}, { timeout: 2000 })).toHaveTextContent(messages.today.checkinSavedOfflineWeb);
+      expect(JSON.parse(window.localStorage.getItem(dayKey("2026-10-02"))!)).toMatchObject({ fields: { mood: 3 }, expected: "", date: "2026-10-02" });
+    });
+
+    it("a late answer that it saved: the copy goes, and the card says Saved", async () => {
+      renderCard(null);
+      fireEvent.click(screen.getByTestId("checkin-mood-3"));
+      fireEvent.click(screen.getByTestId("checkin-save"));
+      expect(await screen.findByTestId("checkin-status", {}, { timeout: 2000 })).toHaveTextContent(messages.today.checkinSavedOfflineWeb);
+      await act(async () => answer({ status: "saved", checkIn: { ...ROW, mood: 3 } }));
+      await waitFor(() => expect(screen.getByTestId("checkin-status")).toHaveTextContent(messages.today.checkinSaved));
+      expect(anyPending()).toBe(false);
+    });
+
+    it("a late answer that another device changed the day: back to the form with the error, no copy left", async () => {
+      renderCard(null);
+      fireEvent.click(screen.getByTestId("checkin-mood-3"));
+      fireEvent.click(screen.getByTestId("checkin-save"));
+      expect(await screen.findByTestId("checkin-status", {}, { timeout: 2000 })).toHaveTextContent(messages.today.checkinSavedOfflineWeb);
+      await act(async () => answer({ status: "error", error: "stale", checkIn: { ...ROW, mood: 1 } }));
+      expect(await screen.findByTestId("checkin-error")).toHaveTextContent(messages.today.errStaleWrite);
+      expect(anyPending()).toBe(false);
+    });
+  });
+
+  it("…and a flush answered unreachable keeps its copy", async () => {
+    window.localStorage.setItem(dayKey("2026-10-02"), JSON.stringify({ fields: { mood: 2, sleepHours: "", sleepQuality: "", exercise: "", stress: "" }, expected: "", date: "2026-10-02" }));
+    saveCheckIn.mockResolvedValue({ status: "error", error: "unreachable" });
+    renderCard(null);
+    await waitFor(() => expect(saveCheckIn).toHaveBeenCalledTimes(1));
+    await new Promise((r) => setTimeout(r, 20));
+    expect(anyPending()).toBe(true);
+    expect(screen.queryByTestId("checkin-error")).toBeNull();
   });
 
   it("…and with storage unavailable too: the generic error", async () => {

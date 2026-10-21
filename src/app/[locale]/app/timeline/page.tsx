@@ -25,6 +25,10 @@ import { preview } from "@/lib/journal/entry";
 import { dateLine } from "@/lib/journal/today";
 import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
 
+// A stuck request ends here at the latest (UX, the timeout audit); each
+// data call gives up after 15 s on its own (lib/supabase/deadline).
+export const maxDuration = 30;
+
 export async function generateMetadata({ params }: PageProps<"/[locale]/app/timeline">): Promise<Metadata> {
   return tabMetadata("tabTimeline", (await params).locale);
 }

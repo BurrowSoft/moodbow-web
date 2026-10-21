@@ -17,6 +17,10 @@ import { EntryPreviews, type EntrySummary } from "../../EntryPreviews";
 import { tabMetadata, titledMetadata } from "../../pageMeta";
 import { DayCheckIn } from "./DayCheckIn";
 
+// A stuck request ends here at the latest (UX, the timeout audit); each
+// data call gives up after 15 s on its own (lib/supabase/deadline).
+export const maxDuration = 30;
+
 export async function generateMetadata({ params }: PageProps<"/[locale]/app/timeline/[date]">): Promise<Metadata> {
   // The day's date (in the browser language's format; the profile's
   // region would need another get_me() here), else Timeline.

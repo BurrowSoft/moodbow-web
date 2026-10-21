@@ -12,6 +12,7 @@ import { MAX_ENTRY_CHARS, sameEntry, type Entry } from "@/lib/journal/entry";
 import { localKey } from "@/lib/localData";
 import { flagsCrisis } from "@/lib/safety/crisis";
 import { holdLeaving } from "@/lib/ui/leaveGuard";
+import { SAVE_WAIT_MS, withTimeout } from "@/lib/ui/withTimeout";
 import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
 import { PRIMARY_SAVE } from "@/lib/ui/journalLayout";
 import { deleteEntry, getEntry, saveEntry, type DeleteState, type EntryState } from "./actions";
@@ -292,7 +293,15 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
   const [state, action, pending] = useActionState<EntryState, FormData>(async (prev, form) => {
     let next: EntryState;
     try {
-      next = await saveEntry(prev, form);
+      // No answer in 30 s: the same as a failed request (the draft is kept;
+      // Save again; the timeout audit).
+      next = await withTimeout(saveEntry(prev, form), SAVE_WAIT_MS);
+      // "Changed elsewhere", but the server's version is exactly this one:
+      // our own save that landed after the browser stopped waiting. Saved;
+      // no conflict dialog (UX, after the timeout audit).
+      if (next.status === "error" && next.error === "stale" && next.latest && sameEntry(next.latest, { body: String(form.get("body") ?? ""), date: String(form.get("entry_date") ?? ""), isMoment: form.get("is_moment") === "true" })) {
+        next = { status: "saved", entry: next.latest };
+      }
     } catch (e) {
       if (isRedirect(e)) throw e;
       // offline or the request failed: the draft is still here
@@ -330,7 +339,25 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
     }
   }, { status: "idle" });
 
+  // The save's wait, kept outside the action (Web Tester, #122 T2b): while a
+  // server action is held, Next keeps its router transition open, and the
+  // action's own result (even withTimeout's) can't commit until that ends;
+  // the error came at 71 s, not 30. This timer's update is urgent: past
+  // SAVE_WAIT_MS of the latest send, the editor shows the generic error and
+  // Save works again. Only meaningful while the save is still pending.
+  const [waitedOut, setWaitedOut] = useState(false);
+  const waitTimer = useRef<number | undefined>(undefined);
+  useEffect(() => () => window.clearTimeout(waitTimer.current), []);
+  // A save that settled needs no wait (stuck is pending-only anyway).
+  useEffect(() => {
+    if (!pending) window.clearTimeout(waitTimer.current);
+  }, [pending]);
+  const stuck = pending && waitedOut;
+
   const send = (withBase: string | null) => {
+    window.clearTimeout(waitTimer.current);
+    setWaitedOut(false);
+    waitTimer.current = window.setTimeout(() => setWaitedOut(true), SAVE_WAIT_MS);
     // Kept before the request: a redirect (session ended, consent) unmounts
     // the editor before any answer comes back.
     if (restore) writeDraft(draftKey, { ...fields, id, base: withBase });
@@ -350,15 +377,17 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
     ? t("entryTooLong")
     : future
       ? tt("errDateInFuture")
-      : state.status === "error" && state.error !== "stale"
-        ? state.error === "dateInFuture"
-          ? tt("errDateInFuture")
-          : state.error === "tooLong"
-            ? t("entryTooLong")
-            : tt("errGeneric")
-        : deleteState.status === "error"
-          ? tt("errGeneric")
-          : null;
+      : stuck
+        ? tt("errGeneric")
+        : state.status === "error" && state.error !== "stale"
+          ? state.error === "dateInFuture"
+            ? tt("errDateInFuture")
+            : state.error === "tooLong"
+              ? t("entryTooLong")
+              : tt("errGeneric")
+          : deleteState.status === "error"
+            ? tt("errGeneric")
+            : null;
 
   const closeDialog = useCallback(() => {
     leaveVia.current = null;
@@ -442,7 +471,7 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
         <button
           type="submit"
           data-testid="entry-save"
-          disabled={blank || tooLong || future || pending || deleting}
+          disabled={blank || tooLong || future || (pending && !stuck) || deleting}
           className={PRIMARY_SAVE}
         >
           {t("entrySave")}
