@@ -1,6 +1,7 @@
 <!--
-  Source: specs/legal-privacy-draft.md (UX & PM), copied verbatim. Published text only; edit the
-  spec first, then copy here. {pending:<id>}…{/pending} renders only when that
+  This file is the source of the Privacy Policy (UX, 21 Oct 2026;
+  specs/legal-privacy-draft.md is superseded). Wording changes are Vitor's:
+  edit here only on his approval. {pending:<id>}…{/pending} renders only when that
   condition is met (content/conditions.json, id with "-" for "_"). ⏳ and [VITOR]
   mark facts still to confirm: the page can't go live while any remain
   (src/lib/legalContent.test.ts).
@@ -13,24 +14,27 @@ Moodbow is a private journal made by Vitor Ribeiro Carvalho, trading as BurrowSo
 ### The short version
 - Only you can read your journal. BurrowSoft staff don't read journals; direct database access is limited to maintenance by Vitor Ribeiro Carvalho. We don't sell your data, show ads, or use your journal to train AI.
 {pending:ai_live}- AI features are optional. If you turn them on, the parts of your journal needed for a reflection or report are sent to our AI provider, Anthropic, in the USA.{/pending}
-- You can export everything, or delete your account and everything in it, at any time, from the app or the website.
+- You can export everything, or delete your account and everything in it, at any time, from the app{pending:web_journal_live} or the website{/pending}.
 
 ### 1. What we collect
 **Your account:** your email address, your password (stored only as a secure hash), and when you agreed to our Terms and this policy, and confirmed you're 18 or older.
-**Your journal:** the entries you write, your daily check-ins (mood, sleep, movement (minutes of exercise), stress), the dates they belong to, and which entries you mark as moments.
+**Your journal:** the entries you write, your daily check-ins (mood, sleep, movement (active minutes), stress), the dates they belong to, and which entries you mark as moments.
 **Your settings:** language, country, time zone, reminder time, and your AI choices (on or off, tone, focus areas).
 **AI content (only if AI is on):** the reflections and reports the AI writes for you{pending:ai_memory}, and the short facts Moodbow remembers about you, which you can see, edit and delete in Me → What Moodbow remembers{/pending}.
 **AI usage:** for each AI request, the feature, the model, the number of tokens, the cost and the credits used. Not the text of your entries or of the AI's answer.
 {pending:purchases}**Purchases:** if you buy AI credits, Google Play or the App Store handles the payment. We receive a purchase reference and the number of credits, never your card details.{/pending}
-**Crash reports:** if the app or website crashes, a technical report (device type, app or browser version, the error) is sent to our error-tracking provider. We remove personal details and any text you've written before it's sent, and the provider doesn't store your IP address.
+**Error reports:** if the app or website crashes or another error happens, a technical report (device type, app or browser version, the error) is sent to our error-tracking provider. We remove personal details and any text you've written before it's sent, and the provider doesn't store your IP address.
+
+**Cookies and storage on your device:** the website uses only the cookies it needs to work: one that keeps you signed in, and one that remembers whether you view your Timeline as a list or a calendar. It also keeps a few display choices in your browser, such as light or dark appearance and the cards you've already closed. None of them track you across sites or are used for advertising or analytics.
 
 **What stays only on your device:** unsent drafts{pending:app_lock}, your app-lock PIN{/pending}{pending:share_cards}, and the share cards you create. Share cards are made on your device and only leave it if you share them yourself{/pending}.
 
 **Technical logs:** like almost every online service, our hosting providers record IP addresses and device or browser information when you connect, for security and to fix problems. They keep these logs for a limited time (see §4). We also keep daily totals of AI use (how many reflections were made that day and what they cost us), with no link to any person, so we can keep costs under control.
+**Emails you send us:** if you write to support@moodbow.com, we keep the conversation so we can answer you, and delete it when it's no longer needed.
 
 We don't collect your name, contacts, precise location, or advertising identifiers, and we don't use advertising trackers.
 
-{pending:web_analytics}**Visit counts (website and web journal only):** we count visits with a cookie-free tool from our host, Vercel: which pages were opened, from what kind of device and country. It never sees what you write, page addresses are stripped of anything that could identify you, and it can't tell who you are. The mobile app sends no analytics.{/pending}
+{pending:web_analytics}**Visit counts (public website only):** we count visits to our public pages with a cookie-free tool from our host, Vercel: which page was opened, from what kind of device and country, and which of our campaign links brought you there, if any. It uses no cookies or identifiers, never runs in the web journal, never sees what you write, and can't tell who you are. The mobile app sends no analytics.{/pending}
 
 ### 2. Why we use it, and on what legal basis
 | Purpose | Legal basis |
@@ -38,7 +42,7 @@ We don't collect your name, contacts, precise location, or advertising identifie
 | Running your account and your journal | Our contract with you (the Terms) |
 | Processing your journal, which can reveal health and wellbeing information | Your explicit consent, given separately when you create your account (you can withdraw it by deleting your account) |
 {pending:ai_live}| AI reflections and reports | Your separate, explicit AI consent. You can withdraw it at any time in Me → AI |{/pending}
-| Keeping the service secure and fixing crashes | Our legitimate interest in a working, safe service |
+| Keeping the service secure and fixing crashes and errors | Our legitimate interest in a working, safe service |
 | Answering your emails | Our legitimate interest, or our contract with you |
 
 ### 3. Who processes your data for us
@@ -46,9 +50,9 @@ We don't collect your name, contacts, precise location, or advertising identifie
 |---|---|---|
 | Supabase (on Amazon Web Services) | Database, accounts, file storage | Ireland (EU) |
 | Anthropic | AI reflections and reports, only if AI is on | USA |
-| Vercel | Hosting the website and web journal{pending:web_analytics}; counting visits (no cookies){/pending} | USA and global edge network |
+| Vercel | Hosting the website and web journal{pending:web_analytics}; counting visits to the public website (no cookies){/pending} | USA and global edge network |
 | Resend | Sending account emails (confirmation, password reset) | USA (company); emails are sent from Japan |
-| Sentry | Crash reports, with personal details removed | USA |
+| Sentry | Error and crash reports, with personal details removed | USA |
 {pending:purchases}| Google Play, Apple App Store | Payments for AI credits | Global |{/pending}
 
 Each provider may use your data only to provide its service to us. Anthropic doesn't use data sent through its API to train its models, and it deletes it after a short period (at most 30 days) that it keeps for safety and abuse monitoring.
@@ -60,7 +64,7 @@ We never sell your data, and we never share it with advertisers.
 - Everything is kept until you delete it or delete your account.
 - **Deleting your account** removes your journal, check-ins, AI content, settings, credits history and login from our live database immediately.
 - Copies in our encrypted backups disappear automatically within {pending:backup_retention}8{/pending} days.
-- Crash reports are kept by our error-tracking provider for up to 90 days.
+- Error and crash reports are kept by our error-tracking provider for up to 90 days.
 - Technical logs at our providers (hosting, database, email delivery) are kept only for a limited period set by each provider, and then deleted.
 - When you delete your account, copies in those providers' logs also expire under these retention periods.
 

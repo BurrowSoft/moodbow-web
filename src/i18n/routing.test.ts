@@ -1,5 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
+import { conditionMet } from "@/lib/conditions";
 import { isHiddenPage, pagePath } from "@/lib/sitemapPages";
 import { ALL_LOCALES, offeredLocales, routing, servedLocales } from "./routing";
 
@@ -42,6 +43,9 @@ describe("offeredLocales: what the switcher, Me, hreflang and the sitemap offer"
   });
 });
 
+// Whether the legal pages are live (as #100 derives it): the pins below hold either way.
+const LEGAL = conditionMet("privacy-text-approved") && conditionMet("terms-text-approved");
+
 describe("the legal pages keep their own gate in every language (UX, decision 164)", () => {
   it("/th/privacy and /th/terms are hidden exactly when /privacy and /terms are, on every build", () => {
     for (const build of BUILDS) {
@@ -49,7 +53,7 @@ describe("the legal pages keep their own gate in every language (UX, decision 16
         expect(isHiddenPage(pagePath(`/th${page}`, ALL_LOCALES), build), `${page} ${JSON.stringify(build)}`).toBe(isHiddenPage(page, build));
       }
     }
-    // Production, unmet: both 404.
-    expect(isHiddenPage(pagePath("/th/privacy", ALL_LOCALES), { vercelEnv: "production" })).toBe(true);
+    // Production: both 404 until the legal pages are met (decision 164), then both served.
+    expect(isHiddenPage(pagePath("/th/privacy", ALL_LOCALES), { vercelEnv: "production" })).toBe(!LEGAL);
   });
 });

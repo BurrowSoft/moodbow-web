@@ -23,10 +23,12 @@ describe("conditions", () => {
   });
 
   // Pinned: flipping any of these is its own reviewed PR (text = enforcement).
-  it("nothing is live yet", () => {
-    expect(conditionMet("privacy-text-approved")).toBe(false);
-    expect(conditionMet("terms-text-approved")).toBe(false);
-    expect(conditionMet("delete-account-live")).toBe(false);
+  // Live since the first closed-test build with M7 + M8 (Vitor, decisions 162 + 164): the legal pages, account
+  // deletion, export and the help card (app side; the web side comes with the web journal).
+  it("what's live: the legal pages and the app's delete / export / help card; not the web journal", () => {
+    for (const id of ["privacy-text-approved", "terms-text-approved", "delete-account-live", "export-live", "help-now-live"] as const) {
+      expect(conditionMet(id), id).toBe(true);
+    }
     // Decisions 44 + 84: backups are kept 8 days; the number and the flag go together.
     expect(conditionMet("backup-retention")).toBe(true);
     expect(BACKUP_RETENTION_DAYS).toBe(8);
@@ -35,7 +37,8 @@ describe("conditions", () => {
 });
 
 describe("pageGate (fails closed)", () => {
-  const gate = (build: Parameters<typeof pageGate>[1]) => pageGate("privacy-text-approved", build);
+  // An unmet gate (the legal pages are live now).
+  const gate = (build: Parameters<typeof pageGate>[1]) => pageGate("web-journal-live", build);
 
   it("unmet pages are 404 on Production, even with the drafts flag or in dev mode", () => {
     expect(gate({ vercelEnv: "production" })).toBe("hidden");
@@ -58,8 +61,12 @@ describe("pageGate (fails closed)", () => {
 });
 
 describe("sitemapPaths", () => {
+  it("today: the ungated pages plus the met ones (the legal pages, account deletion); not Help (the web journal)", () => {
+    expect(sitemapPaths()).toEqual(["/", "/support", "/privacy", "/terms", "/account-deletion"]);
+  });
+
   it("lists only ungated pages while nothing is met", () => {
-    expect(sitemapPaths()).toEqual(["/", "/support"]);
+    expect(sitemapPaths(() => false)).toEqual(["/", "/support"]);
   });
 
   it("adds a gated page once its condition is met", () => {
@@ -72,8 +79,14 @@ describe("isHiddenPage (the proxy's routing-level 404)", () => {
   const preview = { vercelEnv: "preview" };
 
   it("hides unmet gated pages on Production, with or without a trailing slash", () => {
-    for (const path of ["/privacy", "/terms", "/account-deletion", "/privacy/"]) {
+    for (const path of ["/help", "/sign-in", "/welcome", "/help/"]) {
       expect(isHiddenPage(path, prod), path).toBe(true);
+    }
+  });
+
+  it("met gated pages are live on Production (the legal pages, account deletion)", () => {
+    for (const path of ["/privacy", "/terms", "/account-deletion", "/privacy/"]) {
+      expect(isHiddenPage(path, prod), path).toBe(false);
     }
   });
 
@@ -81,11 +94,11 @@ describe("isHiddenPage (the proxy's routing-level 404)", () => {
     for (const path of ["/", "/support", "/email-confirmed", "/no-such-page"]) {
       expect(isHiddenPage(path, prod), path).toBe(false);
     }
-    expect(isHiddenPage("/privacy", preview)).toBe(false);
+    expect(isHiddenPage("/help", preview)).toBe(false);
   });
 
   it("fails closed when the environment is unset", () => {
-    expect(isHiddenPage("/privacy", {})).toBe(true);
+    expect(isHiddenPage("/help", {})).toBe(true);
   });
 });
 
@@ -102,7 +115,7 @@ describe("pagePath (what the proxy checks)", () => {
   it("lowercases, because Vercel matches routes case-insensitively", () => {
     expect(pagePath("/PRIVACY", locales)).toBe("/privacy");
     expect(pagePath("/En/Account-Deletion", locales)).toBe("/account-deletion");
-    expect(isHiddenPage(pagePath("/Terms", locales), { vercelEnv: "production" })).toBe(true);
+    expect(isHiddenPage(pagePath("/Sign-In", locales), { vercelEnv: "production" })).toBe(true);
   });
 
   it("leaves malformed escapes alone", () => {
@@ -110,7 +123,7 @@ describe("pagePath (what the proxy checks)", () => {
   });
 
   it("an encoded gated path is still hidden on Production", () => {
-    expect(isHiddenPage(pagePath("/%70rivacy", locales), { vercelEnv: "production" })).toBe(true);
+    expect(isHiddenPage(pagePath("/%73ign-in", locales), { vercelEnv: "production" })).toBe(true);
   });
 });
 

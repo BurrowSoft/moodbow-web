@@ -1,6 +1,7 @@
 <!--
-  Source: specs/legal-terms-draft.md (UX & PM), copied verbatim. Published text only; edit the
-  spec first, then copy here. {pending:<id>}…{/pending} renders only when that
+  This file is the source of the Terms of Use (UX, 21 Oct 2026;
+  specs/legal-terms-draft.md is superseded). Wording changes are Vitor's:
+  edit here only on his approval. {pending:<id>}…{/pending} renders only when that
   condition is met (content/conditions.json, id with "-" for "_"). ⏳ and [VITOR]
   mark facts still to confirm: the page can't go live while any remain
   (src/lib/legalContent.test.ts).
@@ -11,7 +12,7 @@ Last updated: 2 October 2026
 These terms are an agreement between you and Vitor Ribeiro Carvalho, trading as BurrowSoft (297 Moo 1, Baan Sanian, Mueang Nan, Nan 55000, Thailand) about using Moodbow, the app and the website moodbow.com. By creating an account you agree to them.
 
 ### What Moodbow is, and isn't
-Moodbow is a private journal that helps you notice patterns in your mood, sleep and habits. It is **not** medical care, therapy or a diagnosis, and it isn't a crisis service. The AI's reflections are suggestions to think about, not professional advice. If you're in danger or thinking about harming yourself, contact your local emergency number or a crisis line right away; Moodbow lists some in Me → Get help now.
+Moodbow is a private journal that helps you notice patterns in your mood, sleep and habits. It is **not** medical care, therapy or a diagnosis, and it isn't a crisis service. The AI's reflections are suggestions to think about, not professional advice. If you're in danger or thinking about harming yourself, contact your local emergency number or a crisis line right away; Moodbow lists some in Me → Want to talk to someone?.
 
 ### Who can use it
 You must be 18 or older and able to agree to these terms. One account per person. Keep your password private; you're responsible for what happens in your account.
@@ -53,3 +54,5 @@ These terms are governed by the laws of Thailand, without taking away the protec
 
 ### Changes and contact
 If we change these terms in a way that matters, we'll update the date and tell you in the app before the change applies. Questions: support@moodbow.com.
+
+---
