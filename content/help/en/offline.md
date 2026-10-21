@@ -7,4 +7,4 @@ You can check in and write while offline. Check-ins you save offline are kept on
 
 {pending:offline_start}In the app, if you've signed in before, Moodbow also opens without a connection and shows the journal saved on your phone.{/pending}
 
-If a day was changed on another device in the meantime, Moodbow keeps the latest version and tells you. If something saved offline can't be synced, you'll see a short note so you can add it again.
+If the same day's check-in was changed on another device in the meantime, Moodbow shows you both versions and asks which one to keep. If something saved offline can't be synced, you'll see a short note so you can add it again.
