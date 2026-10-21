@@ -201,6 +201,37 @@ describe("CheckInCard", () => {
       expect(screen.getByTestId("checkin-summary")).toHaveTextContent(messages.today.mood2);
     });
 
+    it("versions that differ only in sleep quality don't look the same (reviewer F1)", async () => {
+      window.localStorage.setItem(dayKey("2026-10-02"), JSON.stringify({ fields: { mood: 5, sleepHours: "7.5", sleepQuality: "poor", exercise: "", stress: "" }, expected: "", date: "2026-10-02" }));
+      saveCheckIn.mockResolvedValue({ status: "error", error: "conflict", checkIn: { ...theirs, sleep_hours: 7.5, sleep_quality: "good", exercise_minutes: null, stress: null } });
+      renderCard(null);
+      expect(await screen.findByTestId("checkin-conflict-mine")).toHaveTextContent(messages.today.sleepPoor);
+      expect(screen.getByTestId("checkin-conflict-other")).toHaveTextContent(messages.today.sleepGood);
+      expect(screen.getByTestId("checkin-conflict-other")).not.toHaveTextContent(messages.today.sleepPoor);
+    });
+
+    it("an older request's clash that answers after Keep mine was chosen doesn't ask again (reviewer Q2)", async () => {
+      pendingFrom("2026-10-02");
+      let late: (state: unknown) => void = () => {};
+      saveCheckIn.mockResolvedValueOnce({ status: "error", error: "conflict", checkIn: theirs });
+      saveCheckIn.mockReturnValueOnce(new Promise((resolve) => (late = resolve)));
+      saveCheckIn.mockResolvedValueOnce({ status: "saved", checkIn: { ...ROW, mood: 2, updated_at: "2026-10-02T11:05:00Z" } });
+      renderCard(null);
+      await screen.findByTestId("checkin-conflict-dialog");
+      // A reconnect sends the copy again while the dialog is open.
+      await act(async () => {
+        window.dispatchEvent(new Event("online"));
+      });
+      await waitFor(() => expect(saveCheckIn).toHaveBeenCalledTimes(2));
+      fireEvent.click(screen.getByTestId("checkin-conflict-keep-mine"));
+      await act(async () => late({ status: "error", error: "conflict", checkIn: theirs }));
+      await waitFor(() => expect(saveCheckIn).toHaveBeenCalledTimes(3));
+      expect(sent(2)).toMatchObject({ expected_updated_at: theirs.updated_at });
+      await waitFor(() => expect(anyPending()).toBe(false));
+      expect(screen.queryByTestId("checkin-conflict-dialog")).toBeNull();
+      expect(screen.getByTestId("checkin-summary")).toHaveTextContent(messages.today.mood2);
+    });
+
     it("a stale copy (changed since its version) asks the same way, never a notice-only drop", async () => {
       window.localStorage.setItem(dayKey("2026-10-02"), JSON.stringify({ fields: { mood: 2, sleepHours: "", sleepQuality: "", exercise: "", stress: "" }, expected: ROW.updated_at, date: "2026-10-02" }));
       saveCheckIn.mockResolvedValue({ status: "error", error: "stale", checkIn: theirs });

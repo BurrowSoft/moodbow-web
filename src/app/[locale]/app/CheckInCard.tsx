@@ -129,6 +129,7 @@ type Conflict = { date: string; mine: Fields; theirs: CheckIn; key: string | nul
 const valuesOf = (f: Fields) => ({
   mood: f.mood ?? 0,
   sleep_hours: f.sleepHours === "" ? null : Number(f.sleepHours),
+  sleep_quality: f.sleepQuality === "" ? null : f.sleepQuality,
   exercise_minutes: f.exercise === "" ? null : Number(f.exercise),
   stress: f.stress === "" ? null : Number(f.stress),
 });
@@ -145,10 +146,17 @@ function StepIcon({ plus }: { plus: boolean }) {
   );
 }
 
-// One side of the conflict dialog: the mood's face and word, then sleep,
-// movement and stress with their colour dots (r1, decision 209).
-function ConflictVersion({ label, values, testId }: { label: string; values: Pick<CheckIn, "mood" | "sleep_hours" | "exercise_minutes" | "stress">; testId: string }) {
+// One side of the conflict dialog: the mood's face and word, then sleep
+// (hours and quality, as the summary), movement and stress with their colour
+// dots (r1, decision 209). Every value is shown, so two versions that differ
+// in any of them never look the same (reviewer).
+function ConflictVersion({ label, values, testId }: { label: string; values: Pick<CheckIn, "mood" | "sleep_hours" | "sleep_quality" | "exercise_minutes" | "stress">; testId: string }) {
   const t = useTranslations("today");
+  const chips = checkInChips(values, t);
+  if (values.sleep_quality) {
+    const q = values.sleep_quality;
+    chips.splice(values.sleep_hours != null ? 1 : 0, 0, { label: t(`sleep${q[0].toUpperCase()}${q.slice(1)}` as "sleepPoor"), hex: null });
+  }
   return (
     <div className="rounded-2xl bg-pill p-3" data-testid={testId}>
       <p className="text-sm text-muted">{label}</p>
@@ -157,7 +165,7 @@ function ConflictVersion({ label, values, testId }: { label: string; values: Pic
         {t(`mood${values.mood}` as "mood1")}
       </p>
       <ul className="mt-2 space-y-1 text-sm text-text">
-        {checkInChips(values, t).map(({ label: chip, hex }) => (
+        {chips.map(({ label: chip, hex }) => (
           <li key={chip} className="flex items-center gap-2">
             <ValueDot hex={hex} />
             {chip}
@@ -220,6 +228,10 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
   // Waiting for the person's choice, oldest first; the dialog shows the first.
   const [conflicts, setConflicts] = useState<Conflict[]>([]);
   const addConflict = (c: Conflict) => setConflicts((all) => [...all.filter((x) => x.date !== c.date), c]);
+  // The Keep mine save per day, while it's out: an older request for that day
+  // still in flight may answer "conflict" after the choice was made, and must
+  // not ask again (reviewer).
+  const resolving = useRef(new Map<string, FormData>());
   const [row, setRow] = useState<CheckIn | null>(initial);
   const [fields, setFields] = useState<Fields>(fromRow(initial));
   const [editing, setEditing] = useState(initial === null);
@@ -244,6 +256,8 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
       // dropped connection, so the same path below (Web Tester, #122 T1a).
       if (next.status === "error" && next.error === "unreachable") throw new TimedOut();
     } catch (e) {
+      const day = String(form.get("local_date"));
+      if (resolving.current.get(day) === form) resolving.current.delete(day);
       // A redirect (consent, sign-in) is the navigation itself.
       const fromPending = form.get("from_pending") === "1";
       if (fromPending) flushing.current.delete(String(form.get("pending_key")));
@@ -283,6 +297,16 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
     }
     // A late answer to a live save the card's own wait already kept: the
     // copy goes once it's answered (as a synced copy's would).
+    // An older request's clash for a day whose Keep mine is already out: the
+    // choice was made, so it's ignored (the copy, now with the new lock, stays
+    // until Keep mine is answered).
+    const day = String(form.get("local_date"));
+    const keeping = resolving.current.get(day);
+    if (keeping === form) resolving.current.delete(day);
+    else if (keeping && next.status === "error" && (next.error === "conflict" || next.error === "stale")) {
+      if (form.get("from_pending") === "1") flushing.current.delete(String(form.get("pending_key")));
+      return prev;
+    }
     // A conflict keeps "mine" as a pending copy until the person chooses.
     const answered = next.status === "saved" || (next.status === "error" && next.error !== "generic" && next.error !== "conflict" && next.error !== "stale");
     if (form.get("from_pending") !== "1" && keptFor.current === form) {
@@ -422,7 +446,9 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
         }
         flushing.current.add(c.key);
       }
-      startTransition(() => action(toFormData(c.mine, c.theirs.updated_at, c.date, c.key ?? undefined)));
+      const form = toFormData(c.mine, c.theirs.updated_at, c.date, c.key ?? undefined);
+      resolving.current.set(c.date, form);
+      startTransition(() => action(form));
       return;
     }
     if (c.key) removePending(c.key);
