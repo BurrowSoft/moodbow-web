@@ -788,5 +788,10 @@
     "key": "legal.legalEnglishOnly",
     "en": "This page is available in English.",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "me.importKeptExisting",
+    "en": "Some days already had a check-in, so we kept those.",
+    "reason": "Web Dev draft (native read pending)"
   }
 ]
