@@ -167,7 +167,8 @@ function Screen({ entry: initial, checkIn, from, backLabel, dateLocaleTag, uid, 
   return (
     <>
       <div className="flex items-center gap-1">
-        <BackLink href={from} label={backLabel} testId="nav-back" />
+        {/* While editing, the editor's top row holds Back (with Save). */}
+        {mode.kind === "view" && <BackLink href={from} label={backLabel} testId="nav-back" />}
         {mode.kind === "view" && (
           <>
             <button
@@ -239,7 +240,7 @@ function Screen({ entry: initial, checkIn, from, backLabel, dateLocaleTag, uid, 
         )}
       </div>
       {/* The editor has its own heading, Edit entry (a11y pass 5). */}
-      {mode.kind === "edit" && <EntryEditor key={opened} initial={entry} newId={entry.id} uid={uid} today={today} country={country} backTo={from} start={mode.start} onLeave={onLeave} />}
+      {mode.kind === "edit" && <EntryEditor key={opened} initial={entry} newId={entry.id} uid={uid} today={today} country={country} backTo={from} start={mode.start} onLeave={onLeave} back={<BackLink href={from} label={backLabel} testId="nav-back" />} />}
       {/* Hidden, not unmounted, while editing: a reflection made on this
           visit is still here after (ReflectPanel keeps it). */}
       <article hidden={mode.kind === "edit"} className="mt-6 space-y-6" data-testid="entry-view">
