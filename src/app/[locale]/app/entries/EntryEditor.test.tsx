@@ -183,7 +183,7 @@ describe("EntryEditor: the top row (Save in reach with the keyboard up; the app)
     saveEntry.mockRejectedValue(new TypeError("Failed to fetch"));
     render(
       <NextIntlClientProvider locale="en" messages={messages}>
-        <EntryEditor initial={null} newId={NEW_ID} uid="u1" today="2026-10-02" back={<a href="/app" data-testid="nav-back" />} />
+        <EntryEditor initial={null} newId={NEW_ID} uid="u1" today="2026-10-02" back={<button type="button" data-testid="nav-back" />} />
       </NextIntlClientProvider>,
     );
     const row = screen.getByTestId("entry-top-row");
