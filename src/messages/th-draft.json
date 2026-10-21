@@ -480,11 +480,6 @@
     "reason": "UX draft (native read pending)"
   },
   {
-    "key": "today.offlineCheckinSuperseded",
-    "en": "Your offline check-in for {date} wasn't saved, because that day was updated on another device. You're seeing the latest version.",
-    "reason": "UX draft (native read pending)"
-  },
-  {
     "key": "today.dismiss",
     "en": "Got it",
     "reason": "UX draft (native read pending)"
@@ -507,6 +502,36 @@
   {
     "key": "today.offlineCheckinRejected",
     "en": "A check-in you saved offline for {date} couldn't be saved. Please add it again.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "today.checkInConflictTitle",
+    "en": "This day already has a check-in",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "today.checkInConflictBody",
+    "en": "It was saved on another device. Which one do you want to keep?",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "today.checkInConflictMine",
+    "en": "Yours (this device)",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "today.checkInConflictOther",
+    "en": "Saved elsewhere",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "today.checkInConflictKeepMine",
+    "en": "Keep mine",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "today.checkInConflictUseOther",
+    "en": "Use the other one",
     "reason": "UX draft (native read pending)"
   },
   {

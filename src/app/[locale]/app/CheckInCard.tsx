@@ -8,6 +8,8 @@ import { valueHex } from "@/lib/journal/valueColours";
 import { localKey } from "@/lib/localData";
 import { SAVE_WAIT_MS, TimedOut, withTimeout } from "@/lib/ui/withTimeout";
 import { ValueDot } from "@/components/ValueDot";
+import { Dialog, dialogButton } from "@/components/Dialog";
+import { checkInChips } from "./checkInChips";
 import { JOURNAL_CARD, MOOD_FACE, MOOD_LABEL, MOOD_ROW, PRIMARY_SAVE } from "@/lib/ui/journalLayout";
 import { MoodFace } from "@/components/MoodFace";
 import { onArrival } from "@/lib/ui/arrival";
@@ -111,11 +113,25 @@ function toFormData(fields: Fields, expectedUpdatedAt: string, date: string, fro
 // autoFocus: focus the first mood when the card opens ("Add a check-in").
 type Props = { initial: CheckIn | null; uid: string; date: string; dateLocaleTag: string; autoFocus?: boolean };
 
-// What became of an offline copy that couldn't be saved as it was: another
-// device changed that day ("superseded"), or the server refused it
-// ("rejected": e.g. a day that is in the future for the account's zone).
-// Never silent (decision 72): one notice per day, until dismissed.
-type Notice = { date: string; kind: "superseded" | "rejected" };
+// An offline copy the server refused ("rejected": e.g. a day that is in the
+// future for the account's zone). Never silent (decision 72): one notice per
+// day, until dismissed. A copy that meets another device's check-in isn't a
+// notice: it opens the check-in conflict dialog (decision 209).
+type Notice = { date: string; kind: "rejected" };
+
+// A check-in saved without knowing the day's version that met another one
+// (decision 209): both are shown, and nothing is dropped until the person
+// chooses. key: the pending copy holding "mine" meanwhile (none if this
+// browser can't store one).
+type Conflict = { date: string; mine: Fields; theirs: CheckIn; key: string | null };
+
+// A check-in's values as the conflict dialog and checkInChips show them.
+const valuesOf = (f: Fields) => ({
+  mood: f.mood ?? 0,
+  sleep_hours: f.sleepHours === "" ? null : Number(f.sleepHours),
+  exercise_minutes: f.exercise === "" ? null : Number(f.exercise),
+  stress: f.stress === "" ? null : Number(f.stress),
+});
 type Notify = (notice: Notice) => void;
 
 // The sleep stepper's − and +: round icon buttons, ≥ 44 px targets.
@@ -126,6 +142,29 @@ function StepIcon({ plus }: { plus: boolean }) {
       <circle cx="12" cy="12" r="9" />
       <path d={plus ? "M8 12h8M12 8v8" : "M8 12h8"} />
     </svg>
+  );
+}
+
+// One side of the conflict dialog: the mood's face and word, then sleep,
+// movement and stress with their colour dots (r1, decision 209).
+function ConflictVersion({ label, values, testId }: { label: string; values: Pick<CheckIn, "mood" | "sleep_hours" | "exercise_minutes" | "stress">; testId: string }) {
+  const t = useTranslations("today");
+  return (
+    <div className="rounded-2xl bg-pill p-3" data-testid={testId}>
+      <p className="text-sm text-muted">{label}</p>
+      <p className="mt-2 flex items-center gap-2 font-medium text-text">
+        <MoodFace mood={values.mood} className="h-7 w-7" />
+        {t(`mood${values.mood}` as "mood1")}
+      </p>
+      <ul className="mt-2 space-y-1 text-sm text-text">
+        {checkInChips(values, t).map(({ label: chip, hex }) => (
+          <li key={chip} className="flex items-center gap-2">
+            <ValueDot hex={hex} />
+            {chip}
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 
@@ -152,7 +191,7 @@ export function CheckInCard(props: Props) {
           className="flex items-start gap-4 rounded-2xl bg-pill p-4 text-sm text-text"
         >
           <p className="flex-1">
-            {t(notice.kind === "superseded" ? "offlineCheckinSuperseded" : "offlineCheckinRejected", { date: dateLine(notice.date, props.dateLocaleTag) })}
+            {t("offlineCheckinRejected", { date: dateLine(notice.date, props.dateLocaleTag) })}
           </p>
           <button
             type="button"
@@ -176,8 +215,11 @@ export function CheckInCard(props: Props) {
   );
 }
 
-function Card({ initial, uid, date: cardDate, notify, announce, autoFocus }: Props & { notify: Notify; announce: (text: string) => void }) {
+function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, autoFocus }: Props & { notify: Notify; announce: (text: string) => void }) {
   const t = useTranslations("today");
+  // Waiting for the person's choice, oldest first; the dialog shows the first.
+  const [conflicts, setConflicts] = useState<Conflict[]>([]);
+  const addConflict = (c: Conflict) => setConflicts((all) => [...all.filter((x) => x.date !== c.date), c]);
   const [row, setRow] = useState<CheckIn | null>(initial);
   const [fields, setFields] = useState<Fields>(fromRow(initial));
   const [editing, setEditing] = useState(initial === null);
@@ -241,9 +283,11 @@ function Card({ initial, uid, date: cardDate, notify, announce, autoFocus }: Pro
     }
     // A late answer to a live save the card's own wait already kept: the
     // copy goes once it's answered (as a synced copy's would).
+    // A conflict keeps "mine" as a pending copy until the person chooses.
+    const answered = next.status === "saved" || (next.status === "error" && next.error !== "generic" && next.error !== "conflict" && next.error !== "stale");
     if (form.get("from_pending") !== "1" && keptFor.current === form) {
       keptFor.current = null;
-      if (next.status === "saved" || (next.status === "error" && next.error !== "generic")) removePending(pendingKey(uid, pendingFromForm(form).date));
+      if (answered || (next.status === "error" && next.error === "stale")) removePending(pendingKey(uid, pendingFromForm(form).date));
       // Refused or changed elsewhere: back to the form with its error, not
       // "saved in this browser".
       if (next.status === "error" && next.error !== "generic") {
@@ -255,29 +299,51 @@ function Card({ initial, uid, date: cardDate, notify, announce, autoFocus }: Pro
       const key = String(form.get("pending_key"));
       flushing.current.delete(key);
       // The copy is removed only once it's answered, and kept while a retry
-      // can still succeed ("generic", e.g. the network dropped again). A
-      // redirect (consent, sign-in) throws before this line: the copy stays.
-      if (next.status === "saved" || (next.status === "error" && next.error !== "generic")) removePending(key);
+      // can still succeed ("generic", e.g. the network dropped again) or
+      // while the person hasn't chosen (a conflict). A redirect (consent,
+      // sign-in) throws before this line: the copy stays.
+      if (answered) removePending(key);
       const date = String(form.get("local_date"));
       // Dropped, but never silently (decision 72).
       if (next.status === "error" && (next.error === "dateInFuture" || next.error === "invalid")) {
         notify({ date, kind: "rejected" });
         return prev;
       }
-      // The day changed on another device meanwhile; this card shows the
-      // latest version if it's that day's.
-      if (next.status === "error" && next.error === "stale") {
-        notify({ date, kind: "superseded" });
-        if (date === cardDate && next.checkIn) {
-          setRow(next.checkIn);
-          setFields(fromRow(next.checkIn));
-          setEditing(false);
-          setOffline(false);
+      // The day has another check-in now (saved elsewhere while this copy
+      // waited, or changed since the version it was based on): both
+      // versions, and the person chooses (decision 209, never a notice-only
+      // drop). With no other version left to show (deleted elsewhere), the
+      // copy simply becomes a new check-in on the next sync.
+      if (next.status === "error" && (next.error === "conflict" || next.error === "stale")) {
+        const mine = pendingFromForm(form);
+        if (next.checkIn) addConflict({ date, mine: mine.fields, theirs: next.checkIn, key });
+        else {
+          try {
+            window.localStorage.setItem(key, JSON.stringify({ ...mine, expected: "" } satisfies Pending));
+          } catch {
+            // storage unavailable: the copy stays as it was
+          }
         }
         return prev;
       }
       // A copy for another day doesn't change this card.
       if (date !== cardDate) return prev;
+    } else if (next.status === "error" && next.error === "conflict" && next.checkIn) {
+      // A first check-in from this card met one saved elsewhere: kept as a
+      // pending copy (so nothing is lost before the person chooses), and
+      // both versions shown. The form stays as it was, with no error line.
+      const mine = pendingFromForm(form);
+      const key = pendingKey(uid, mine.date);
+      let kept = true;
+      try {
+        window.localStorage.setItem(key, JSON.stringify(mine));
+      } catch {
+        kept = false;
+      }
+      addConflict({ date: mine.date, mine: mine.fields, theirs: next.checkIn, key: kept ? key : null });
+      setOffline(false);
+      setEditing(true);
+      return prev;
     }
     if (next.status === "saved") {
       setRow(next.checkIn);
@@ -340,6 +406,63 @@ function Card({ initial, uid, date: cardDate, notify, announce, autoFocus }: Pro
     }, SAVE_WAIT_MS);
     startTransition(() => action(form));
   };
+  // The person's choice in the conflict dialog (decision 209).
+  const conflict = conflicts[0];
+  const resolve = (c: Conflict, keepMine: boolean) => {
+    setConflicts((all) => all.filter((x) => x !== c));
+    if (keepMine) {
+      // Mine over theirs: the lock moves to the version just seen, so a
+      // third change meanwhile asks again. Sent as the pending copy (kept
+      // first with the new lock), so a dropped request loses nothing.
+      if (c.key) {
+        try {
+          window.localStorage.setItem(c.key, JSON.stringify({ fields: c.mine, expected: c.theirs.updated_at, date: c.date } satisfies Pending));
+        } catch {
+          // storage unavailable: the request below still goes
+        }
+        flushing.current.add(c.key);
+      }
+      startTransition(() => action(toFormData(c.mine, c.theirs.updated_at, c.date, c.key ?? undefined)));
+      return;
+    }
+    if (c.key) removePending(c.key);
+    if (c.date === cardDate) {
+      setRow(c.theirs);
+      setFields(fromRow(c.theirs));
+      setEditing(false);
+      setOffline(false);
+    }
+  };
+  // Escape: no choice yet, so nothing is dropped; a kept copy asks again on the next sync.
+  const later = useCallback(() => setConflicts((all) => all.slice(1)), []);
+  const conflictDialog = conflict && (
+    <Dialog
+      title={t("checkInConflictTitle")}
+      body={t("checkInConflictBody")}
+      onCancel={later}
+      testId="checkin-conflict-dialog"
+      initialFocus="title"
+      details={
+        <>
+          <p className="text-sm font-medium text-text" data-testid="checkin-conflict-date">
+            {dateLine(conflict.date, dateLocaleTag)}
+          </p>
+          <div className="mt-3 grid grid-cols-2 gap-3">
+            <ConflictVersion label={t("checkInConflictMine")} values={valuesOf(conflict.mine)} testId="checkin-conflict-mine" />
+            <ConflictVersion label={t("checkInConflictOther")} values={conflict.theirs} testId="checkin-conflict-other" />
+          </div>
+        </>
+      }
+    >
+      <button type="button" data-testid="checkin-conflict-use-other" className={dialogButton()} onClick={() => resolve(conflict, false)}>
+        {t("checkInConflictUseOther")}
+      </button>
+      <button type="button" data-testid="checkin-conflict-keep-mine" className={dialogButton(true)} onClick={() => resolve(conflict, true)}>
+        {t("checkInConflictKeepMine")}
+      </button>
+    </Dialog>
+  );
+
   // A save that settled needs no wait; nor does a card that's gone.
   useEffect(() => {
     if (!pending) window.clearTimeout(waitTimer.current);
@@ -431,6 +554,7 @@ function Card({ initial, uid, date: cardDate, notify, announce, autoFocus }: Pro
     ].filter((c): c is { label: string; hex: string | null } => c !== null);
     return (
       <section ref={root} className={JOURNAL_CARD} data-testid="checkin-summary">
+        {conflictDialog}
         {/* The mockups (decision 161): the mood's face and its name, Edit on
             the right. The heading still says what it answers, for screen
             readers ("How are you today? Good"). */}
@@ -471,6 +595,7 @@ function Card({ initial, uid, date: cardDate, notify, announce, autoFocus }: Pro
 
   return (
     <form ref={(el) => void (root.current = el)} onSubmit={submit} className={JOURNAL_CARD} data-testid="checkin-card">
+      {conflictDialog}
       {/* One group, named once (a fieldset + a radiogroup were read twice;
           a11y pass): the title labels the radiogroup. */}
       <div>
