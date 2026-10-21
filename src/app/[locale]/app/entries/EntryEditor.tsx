@@ -348,6 +348,10 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
   const [waitedOut, setWaitedOut] = useState(false);
   const waitTimer = useRef<number | undefined>(undefined);
   useEffect(() => () => window.clearTimeout(waitTimer.current), []);
+  // A save that settled needs no wait (stuck is pending-only anyway).
+  useEffect(() => {
+    if (!pending) window.clearTimeout(waitTimer.current);
+  }, [pending]);
   const stuck = pending && waitedOut;
 
   const send = (withBase: string | null) => {

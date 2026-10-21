@@ -127,7 +127,10 @@ describe("EntryEditor: a new entry", () => {
   });
 
   it("…even when the action itself can't settle: the editor's own wait shows the error and Save works again (#122 T2b)", async () => {
-    saveEntry.mockReturnValue(new Promise(() => {}));
+    // Answered at the end: an action left open keeps every later transition
+    // in this file from committing (React entangles them with it).
+    let answer: (state: unknown) => void = () => {};
+    saveEntry.mockReturnValue(new Promise((resolve) => (answer = resolve)));
     held = true;
     try {
       renderEditor();
@@ -141,6 +144,7 @@ describe("EntryEditor: a new entry", () => {
       expect(push).not.toHaveBeenCalled();
     } finally {
       held = false;
+      await act(async () => answer({ status: "error", error: "generic" }));
     }
   });
 
