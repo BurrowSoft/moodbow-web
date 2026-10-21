@@ -792,6 +792,6 @@
   {
     "key": "me.importKeptExisting",
     "en": "Some days already had a check-in, so we kept those.",
-    "reason": "Web Dev draft (native read pending)"
+    "reason": "UX draft (native read pending; Web Dev's wording, accepted by UX, decision 214)"
   }
 ]
