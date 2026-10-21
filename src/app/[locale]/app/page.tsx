@@ -74,7 +74,7 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
       <Link
         href="/app/write"
         data-testid="today-write"
-        className="inline-flex min-h-12 items-center justify-center rounded-full bg-accent px-8 font-medium text-on-accent hover:opacity-90"
+        className="inline-flex min-h-12 items-center justify-center rounded-full bg-accent px-8 font-medium text-on-accent hover:bg-accent-hover"
       >
         {te("writeButton")}
       </Link>

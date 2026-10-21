@@ -77,7 +77,7 @@ export type EditorStart = { at: number | "end"; question?: string };
 // Save in the top row (narrow screens only): the primary button, sized for
 // a bar.
 const TOP_SAVE =
-  "ml-auto inline-flex min-h-11 items-center justify-center rounded-full bg-accent px-6 font-medium text-on-accent hover:opacity-90 disabled:opacity-50 aria-disabled:opacity-50 sm:hidden";
+  "ml-auto inline-flex min-h-11 items-center justify-center rounded-full bg-accent px-6 font-medium text-on-accent hover:bg-accent-hover disabled:opacity-50 aria-disabled:opacity-50 sm:hidden";
 
 type Props = {
   promptDate?: string | null;

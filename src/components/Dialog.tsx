@@ -98,5 +98,5 @@ export function Dialog({
 
 export const dialogButton = (primary = false) =>
   `inline-flex min-h-11 items-center justify-center rounded-full px-5 font-medium ${
-    primary ? "bg-accent text-on-accent hover:opacity-90" : "border border-border text-text hover:bg-pill"
+    primary ? "bg-accent text-on-accent hover:bg-accent-hover" : "border border-border text-text hover:bg-pill"
   }`;

@@ -67,7 +67,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
             <Link
               href="/welcome"
               data-testid="home-start"
-              className="inline-flex min-h-[52px] w-full items-center justify-center rounded-full text-center sm:w-auto sm:min-w-[220px] bg-accent px-5 py-3.5 sm:px-8 text-base font-medium text-on-accent transition-opacity hover:opacity-90"
+              className="inline-flex min-h-[52px] w-full items-center justify-center rounded-full text-center sm:w-auto sm:min-w-[220px] bg-accent px-5 py-3.5 sm:px-8 text-base font-medium text-on-accent transition-opacity hover:bg-accent-hover"
             >
               {t("start")}
             </Link>
@@ -81,7 +81,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
               href={notifyMailto(t("notifySubject"))}
               aria-label={t("notifyAria")}
               data-testid="home-notify"
-              className="mt-9 inline-flex min-h-[52px] w-full items-center justify-center rounded-full text-center sm:w-auto sm:min-w-[200px] bg-accent px-5 py-3.5 sm:px-8 text-base font-medium text-on-accent transition-opacity hover:opacity-90"
+              className="mt-9 inline-flex min-h-[52px] w-full items-center justify-center rounded-full text-center sm:w-auto sm:min-w-[200px] bg-accent px-5 py-3.5 sm:px-8 text-base font-medium text-on-accent transition-opacity hover:bg-accent-hover"
             >
               {t("notify")}
             </a>
