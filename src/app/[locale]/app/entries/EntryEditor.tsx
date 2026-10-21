@@ -296,6 +296,12 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
       // No answer in 30 s: the same as a failed request (the draft is kept;
       // Save again; the timeout audit).
       next = await withTimeout(saveEntry(prev, form), SAVE_WAIT_MS);
+      // "Changed elsewhere", but the server's version is exactly this one:
+      // our own save that landed after the browser stopped waiting. Saved;
+      // no conflict dialog (UX, after the timeout audit).
+      if (next.status === "error" && next.error === "stale" && next.latest && sameEntry(next.latest, { body: String(form.get("body") ?? ""), date: String(form.get("entry_date") ?? ""), isMoment: form.get("is_moment") === "true" })) {
+        next = { status: "saved", entry: next.latest };
+      }
     } catch (e) {
       if (isRedirect(e)) throw e;
       // offline or the request failed: the draft is still here

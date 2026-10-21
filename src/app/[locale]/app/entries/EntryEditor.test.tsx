@@ -377,6 +377,25 @@ describe("EntryEditor: Mark as a moment is a switch (decision 206)", () => {
 describe("EntryEditor: changed on another device (decision 87)", () => {
   const OTHER = { ...ENTRY, body: "Their version", updated_at: "2026-10-02T08:00:00Z" };
 
+  it("stale, but the server's version is exactly this text, date and moment (our own late save): saved and back, no dialog (after the timeout audit)", async () => {
+    const mine = { ...ENTRY, body: "My version", updated_at: "2026-10-02T08:00:00Z" };
+    saveEntry.mockResolvedValue({ status: "error", error: "stale", latest: mine });
+    renderEditor(ENTRY);
+    type("My version");
+    fireEvent.click(screen.getByTestId("entry-save"));
+    await waitFor(() => expect(push).toHaveBeenCalledWith("/app"));
+    expect(screen.queryByTestId("entry-conflict-dialog")).toBeNull();
+    expect(window.localStorage.getItem(EDIT_KEY)).toBeNull();
+  });
+
+  it("stale with a different version (only the moment differs): the dialog as before", async () => {
+    saveEntry.mockResolvedValue({ status: "error", error: "stale", latest: { ...ENTRY, body: "My version", is_moment: true, updated_at: "2026-10-02T08:00:00Z" } });
+    renderEditor(ENTRY);
+    type("My version");
+    fireEvent.click(screen.getByTestId("entry-save"));
+    expect(await screen.findByRole("dialog", { name: m.entryConflictTitle })).toBeInTheDocument();
+  });
+
   it("Keep mine: saves mine again, locked to the version just seen", async () => {
     saveEntry.mockResolvedValueOnce({ status: "error", error: "stale", latest: OTHER });
     saveEntry.mockResolvedValueOnce({ status: "saved", entry: { ...OTHER, body: "My version", updated_at: "2026-10-02T09:00:00Z" } });

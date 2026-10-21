@@ -27,6 +27,10 @@ const fromRow = (row: CheckIn | null): Fields => ({
   stress: row?.stress != null ? String(row.stress) : "",
 });
 
+// The same five values (a check-in's content, without its version).
+const sameFields = (a: Fields, b: Fields) =>
+  a.mood === b.mood && a.sleepHours === b.sleepHours && a.sleepQuality === b.sleepQuality && a.exercise === b.exercise && a.stress === b.stress;
+
 // One pending copy per user per day (UX): saving offline on two days keeps
 // both, a later save for the same day replaces only that day's, and every
 // pending day syncs on reconnect (decision 72: never a silent drop).
@@ -218,6 +222,12 @@ function Card({ initial, uid, date: cardDate, notify, announce, autoFocus }: Pro
       setOffline(true);
       setEditing(false);
       return prev;
+    }
+    // "Changed elsewhere", but the day holds exactly what was sent: our own
+    // save, which landed after the browser stopped waiting (30 s). It's saved;
+    // no notice, no conflict (UX, after the timeout audit).
+    if (next.status === "error" && next.error === "stale" && next.checkIn && sameFields(fromRow(next.checkIn), pendingFromForm(form).fields)) {
+      next = { status: "saved", checkIn: next.checkIn };
     }
     if (form.get("from_pending") === "1") {
       const key = String(form.get("pending_key"));

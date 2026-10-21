@@ -176,6 +176,16 @@ describe("CheckInCard", () => {
     expect(screen.queryByTestId("checkin-error")).toBeNull();
   });
 
+  it("a stale flush whose server row holds exactly what was sent (our own late save): saved, no notice (after the timeout audit)", async () => {
+    pendingFrom("2026-10-02", 2);
+    saveCheckIn.mockResolvedValue({ status: "error", error: "stale", checkIn: { ...ROW, mood: 2, sleep_hours: null, sleep_quality: null, exercise_minutes: null, stress: null } });
+    renderCard(null);
+    await waitFor(() => expect(screen.getByTestId("checkin-summary")).toHaveTextContent(messages.today.mood2));
+    expect(screen.queryByTestId("checkin-superseded")).toBeNull();
+    expect(anyPending()).toBe(false);
+    expect(screen.getByTestId("checkin-status")).toHaveTextContent(messages.today.checkinSaved);
+  });
+
   it("a stale flush for an earlier day: a dismissible notice naming that day; today's card unchanged", async () => {
     pendingFrom("2026-10-01");
     saveCheckIn.mockResolvedValue({ status: "error", error: "stale", checkIn: { ...ROW, local_date: "2026-10-01", mood: 5 } });
