@@ -215,9 +215,10 @@ describe("ImportData", () => {
       fireEvent.click(screen.getByTestId("import-confirm"));
       await settle();
       expect(importEntries).not.toHaveBeenCalled();
-      expect(screen.getByTestId("import-done")).toHaveTextContent("Done. 0 days are in your Timeline.");
-      expect(screen.getByTestId("import-skipped")).toHaveTextContent("2 days skipped (already in Moodbow).");
-      // Said once: no kept-check-in line on a pure re-import (decision 214).
+      // Nothing new: one line, not "0 days are in your Timeline" + the skipped count (UX, 1.1 §K).
+      expect(screen.getByTestId("import-nothing-new")).toHaveTextContent(m.importNothingNew);
+      expect(screen.queryByTestId("import-done")).toBeNull();
+      expect(screen.queryByTestId("import-skipped")).toBeNull();
       expect(screen.queryByTestId("import-kept-existing")).toBeNull();
     });
 
@@ -347,8 +348,7 @@ describe("ImportData", () => {
     fireEvent.click(screen.getByTestId("import-confirm"));
     await settle();
     expect(screen.queryByTestId("import-crisis")).toBeNull();
-    expect(screen.getByTestId("import-done")).toHaveTextContent("Done. 0 days are in your Timeline.");
-    expect(screen.getByTestId("import-skipped")).toHaveTextContent("1 days skipped (already in Moodbow).");
+    expect(screen.getByTestId("import-nothing-new")).toHaveTextContent(m.importNothingNew);
   });
 
   it("after a part-way stop, days not reached yet aren't called already in Moodbow (reviewer #92)", async () => {
