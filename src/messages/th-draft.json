@@ -793,5 +793,10 @@
     "key": "me.importKeptExisting",
     "en": "Some days already had a check-in, so we kept those.",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "me.importNothingNew",
+    "en": "Nothing new to add. Everything in this file is already in Moodbow.",
+    "reason": "UX draft (native read pending)"
   }
 ]
