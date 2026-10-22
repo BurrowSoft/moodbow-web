@@ -21,7 +21,10 @@ import { existingNoteCounts, importCheckIns, importEntries } from "./importActio
 // matcher without a safety card each; one quiet line at the end if any of
 // the notes actually written did.
 
-type Summary = { days: number; skippedDays: number; crisis: boolean };
+// keptExisting: a day counted as imported (something of it was written)
+// kept the check-in it already had: the file's wasn't written (never
+// overwritten). A day with nothing new is just "skipped" (decision 214).
+type Summary = { days: number; skippedDays: number; crisis: boolean; keptExisting: boolean };
 type Phase =
   | { kind: "idle" }
   | { kind: "error" }
@@ -115,7 +118,7 @@ export function ImportData({ uid, today, dateLocaleTag, country }: { uid: string
       if (typeof (e as { digest?: unknown })?.digest === "string") throw e; // a redirect (signed out)
       text.current = null;
       running.current = false;
-      setPhase({ kind: "failed", offline: !navigator.onLine, days: 0, skippedDays: 0, crisis: false });
+      setPhase({ kind: "failed", offline: !navigator.onLine, days: 0, skippedDays: 0, crisis: false, keptExisting: false });
       return;
     }
     const total = plan.days.length + kept.length;
@@ -135,17 +138,21 @@ export function ImportData({ uid, today, dateLocaleTag, country }: { uid: string
     const markTried = (dates: string[]) => dates.forEach((d) => tried.set(d, (tried.get(d) ?? 0) + 1));
     // Copies already in the account: tried, and not new.
     markTried(dropped.map((e) => e.date));
+    // Days whose check-in the account already had (the server wrote nothing).
+    const keptDates = new Set<string>();
     let done = 0;
     const summary = (): Summary => ({
       days: writtenDates.size,
       skippedDays: [...items].filter(([d, n]) => tried.get(d) === n && !writtenDates.has(d)).length,
       crisis: writtenBodies.some((b) => flagsCrisis(b, CRISIS_KEYWORDS)),
+      keptExisting: [...keptDates].some((d) => writtenDates.has(d)),
     });
     try {
       for (const batch of chunks(plan.days, IMPORT_BATCH)) {
         const r = await withTimeout(importCheckIns(batch), IMPORT_BATCH_WAIT_MS);
         if (r.status !== "ok") throw new Error("batch");
         r.written.forEach((d) => writtenDates.add(d));
+        for (const d of batch) if (!r.written.includes(d.date)) keptDates.add(d.date);
         markTried(batch.map((d) => d.date));
         done += batch.length;
         setPhase({ kind: "importing", done, total });
@@ -232,6 +239,10 @@ export function ImportData({ uid, today, dateLocaleTag, country }: { uid: string
           <>
             {phase.kind === "done" && <p data-testid="import-done">{t("importDone", { days: phase.days })}</p>}
             {phase.skippedDays > 0 && <p data-testid="import-skipped">{t("importSkipped", { count: phase.skippedDays })}</p>}
+            {/* A day whose check-in was kept still counts in "days are in your
+                Timeline" when a note of it was written: say why its mood is
+                the one already there (Web Tester's C4, UX). */}
+            {phase.keptExisting && <p data-testid="import-kept-existing">{t("importKeptExisting")}</p>}
           </>
         )}
         {/* Stopped part-way (a lost connection, a server error): the file

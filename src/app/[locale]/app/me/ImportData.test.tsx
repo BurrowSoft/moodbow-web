@@ -90,13 +90,33 @@ describe("ImportData", () => {
     expect(screen.getByTestId("import-done")).toHaveTextContent("Done. 2 days are in your Timeline.");
   });
 
-  it("days already in Moodbow are reported as skipped", async () => {
+  it("days already in Moodbow are reported as skipped, and only that (no kept line: nothing new on them; decision 214)", async () => {
     importCheckIns.mockResolvedValueOnce({ status: "ok", written: ["2026-10-01"], skipped: 1 });
     renderIt();
     await choose("date,mood\n2026-10-01,4\n2026-10-02,3\n");
     fireEvent.click(screen.getByTestId("import-confirm"));
     await settle();
     expect(screen.getByTestId("import-skipped")).toHaveTextContent("1 days skipped (already in Moodbow).");
+    expect(screen.queryByTestId("import-kept-existing")).toBeNull();
+  });
+
+  it("a day whose check-in was kept but whose note was imported: counted, and one line says why its mood is the old one (C4, UX)", async () => {
+    importCheckIns.mockResolvedValueOnce({ status: "ok", written: ["2026-10-01"], skipped: 1 });
+    renderIt();
+    await choose("date,mood,note\n2026-10-01,4,\n2026-10-02,3,A new note\n");
+    fireEvent.click(screen.getByTestId("import-confirm"));
+    await settle();
+    expect(screen.getByTestId("import-done")).toHaveTextContent("Done. 2 days are in your Timeline.");
+    expect(screen.queryByTestId("import-skipped")).toBeNull();
+    expect(screen.getByTestId("import-kept-existing")).toHaveTextContent(messages.me.importKeptExisting);
+  });
+
+  it("no such line when every check-in was new", async () => {
+    renderIt();
+    await choose("date,mood\n2026-10-01,4\n");
+    fireEvent.click(screen.getByTestId("import-confirm"));
+    await settle();
+    expect(screen.queryByTestId("import-kept-existing")).toBeNull();
   });
 
   it("an ambiguous file: the DMY/MDY radio, DMY first; switching re-reads the dates", async () => {
@@ -197,6 +217,8 @@ describe("ImportData", () => {
       expect(importEntries).not.toHaveBeenCalled();
       expect(screen.getByTestId("import-done")).toHaveTextContent("Done. 0 days are in your Timeline.");
       expect(screen.getByTestId("import-skipped")).toHaveTextContent("2 days skipped (already in Moodbow).");
+      // Said once: no kept-check-in line on a pure re-import (decision 214).
+      expect(screen.queryByTestId("import-kept-existing")).toBeNull();
     });
 
     it("(b) a fresh account gets both copies of a doubled note", async () => {
