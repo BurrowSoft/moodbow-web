@@ -31,6 +31,10 @@
     "met": true,
     "what": "Help only (decisions 212, 214): the app opens without a connection for a user who signed in before, showing the journal saved on the phone (the app's offline start, in the 0.9 build). Gates the Help article line about it."
   },
+  "anon-start-live": {
+    "met": false,
+    "what": "Decision 216 (specs/no-signup-start.md): the app build people have starts without an email (ANON_START_ENABLED on in that release; Vitor turns on anonymous sign-ins on prod that day). Gates the privacy policy's \"Using Moodbow without an email\" paragraph (Vitor's \"ok anonymous sentence\") and the web's \"Started in the app?\" line on sign-in and sign-up."
+  },
   "app-app-lock": {
     "met": true,
     "what": "Help only (decision 212): app lock (PIN, fingerprint or face; decision 188) is in the app build people have (0.9 closed test on), so its Help article shows. Not app-lock (the privacy text's clause, Vitor's)."
