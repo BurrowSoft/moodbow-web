@@ -58,12 +58,17 @@ describe("ContinueCountdown (decision 134)", () => {
 });
 
 describe("EmailConfirmedMessage: when the countdown shows", () => {
-  it("confirmed or email changed, with somewhere to go: yes; the journal not live (null): the page stays as it is", () => {
+  it("confirmed, with somewhere to go: yes; an email confirmed (a first email from the app, or a change) or the journal not live (null): the page stays as it is", () => {
     const first = wrap(<EmailConfirmedMessage fromQuery="ok" continueTo="/app" />);
     expect(screen.getByTestId("email-confirmed-countdown")).toBeInTheDocument();
     first.unmount();
+    // Decision 216 (UX): someone who started in the app goes back to it; never
+    // sent on to the web journal (a 404 on Production until it's live).
     const changed = wrap(<EmailConfirmedMessage fromQuery="email_changed" continueTo="/app" />);
-    expect(screen.getByTestId("email-confirmed-countdown")).toBeInTheDocument();
+    expect(screen.queryByTestId("email-confirmed-countdown")).toBeNull();
+    expect(screen.getByTestId("email-confirmed-email_changed")).toHaveTextContent(m.emailChangedBody);
+    seconds(10);
+    expect(push).not.toHaveBeenCalled();
     changed.unmount();
     const notLive = wrap(<EmailConfirmedMessage fromQuery="ok" continueTo={null} />);
     expect(screen.queryByTestId("email-confirmed-countdown")).toBeNull();

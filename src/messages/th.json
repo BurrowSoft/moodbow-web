@@ -79,8 +79,8 @@
     "successBody": "เปิด Moodbow เพื่อไปต่อ",
     "errorTitle": "ลิงก์นี้หมดอายุหรือถูกใช้ไปแล้ว",
     "errorBody": "เปิด Moodbow แล้วขอลิงก์ใหม่",
-    "emailChangedTitle": "อัปเดตอีเมลของคุณแล้ว",
-    "emailChangedBody": "ใช้อีเมลใหม่ในครั้งถัดไปที่เข้าสู่ระบบ",
+    "emailChangedTitle": "ยืนยันอีเมลของคุณแล้ว",
+    "emailChangedBody": "ใช้อีเมลนี้ในการลงชื่อเข้าใช้ครั้งต่อไป ถ้าคุณเริ่มจากแอป กลับไปที่แอปได้เลย",
     "emailChangePendingTitle": "ใกล้เสร็จแล้ว",
     "emailChangePendingBody": "เปิดลิงก์ที่เราส่งไปยังอีเมลอีกฉบับของคุณเพื่อเปลี่ยนอีเมลให้เสร็จ",
     "emailConfirmedRedirect": "กำลังพาคุณไปที่ไดอารี่ใน {seconds} วินาที…",
@@ -96,9 +96,9 @@
     "recoveryTitle": "ตั้งรหัสผ่านใหม่",
     "recoveryBody": "แตะ ต่อไป เพื่อเลือกรหัสผ่านใหม่",
     "recoveryButton": "ต่อไป",
-    "emailChangeTitle": "ยืนยันอีเมลใหม่ของคุณ",
-    "emailChangeBody": "แตะปุ่มเพื่อยืนยันอีเมลใหม่ของบัญชี Moodbow",
-    "emailChangeButton": "ยืนยันการเปลี่ยนอีเมล"
+    "emailChangeTitle": "ยืนยันอีเมลของคุณ",
+    "emailChangeBody": "แตะปุ่มเพื่อยืนยันอีเมลนี้สำหรับบัญชี Moodbow ของคุณ",
+    "emailChangeButton": "ยืนยันอีเมล"
   },
   "resetPassword": {
     "title": "เลือกรหัสผ่านใหม่",
