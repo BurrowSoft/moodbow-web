@@ -70,6 +70,17 @@ describe("legal content files", () => {
     }
   });
 
+  // Decision 216: Vitor's anonymous-start paragraph goes live only with the
+  // app release that starts without an email (anon-start-live).
+  it("the 'without an email' paragraph shows only once anon-start-live is met", () => {
+    const source = legalSource("privacy", "en");
+    const heading = "Using Moodbow without an email:";
+    const met = (on: boolean) => (id: string) => (id === "anon_start_live" ? on : isPendingMet(id));
+    expect(renderLegal(source, met(false)).html).not.toContain(heading);
+    expect(renderLegal(source, met(true)).html.split(heading)).toHaveLength(2);
+    expect(renderLegal(source).html.includes(heading)).toBe(conditionMet("anon-start-live"));
+  });
+
   it("todos() finds every kind of to-confirm mark, but not in editor comments", () => {
     expect(todos("a ⏳(check X) b ⏳[90] c [VITOR] d ⏳ e")).toEqual(["⏳(check X)", "⏳[90]", "[VITOR]", "⏳"]);
     expect(todos("<!-- ⏳ and [VITOR] mark facts -->\nclean text")).toEqual([]);
