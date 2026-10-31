@@ -42,7 +42,10 @@ export function EmailConfirmedMessage({ fromQuery, continueTo }: { fromQuery: Au
     }
   }, []);
 
-  const moveOn = result === "ok" || result === "email_changed";
+  // Only a confirmed sign-up moves on. A confirmed email (an app account's
+  // first email, or a change) stays put: "If you started in the app, go back
+  // to it now" (decision 216; never a countdown into a journal that may 404).
+  const moveOn = result === "ok";
   const copy = COPY[result];
   return (
     <div data-testid={`email-confirmed-${result}`} className="flex flex-col items-center text-center">

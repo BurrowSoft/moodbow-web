@@ -389,6 +389,8 @@ test.describe("auth links", () => {
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Your email address is confirmed.");
     await expect(page.getByText("Use it next time you sign in. If you started in the app, go back to it now.")).toBeVisible();
     await expect(page).toHaveURL(/\/email-confirmed$/);
+    // Stays put: no countdown into the web journal (decision 216, UX).
+    await expect(page.getByTestId("email-confirmed-countdown")).toHaveCount(0);
     await page.goto("/email-confirmed?result=email_change_pending");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Almost done.");
   });
