@@ -306,12 +306,12 @@
   },
   {
     "key": "emailConfirmed.emailChangedTitle",
-    "en": "Your email address was updated.",
+    "en": "Your email address is confirmed.",
     "reason": "UX draft (native read pending)"
   },
   {
     "key": "emailConfirmed.emailChangedBody",
-    "en": "Use the new one next time you sign in.",
+    "en": "Use it next time you sign in. If you started in the app, go back to it now.",
     "reason": "UX draft (native read pending)"
   },
   {
@@ -361,17 +361,17 @@
   },
   {
     "key": "confirmLink.emailChangeTitle",
-    "en": "Confirm your new email",
+    "en": "Confirm your email",
     "reason": "UX draft (native read pending)"
   },
   {
     "key": "confirmLink.emailChangeBody",
-    "en": "Tap the button to confirm the new email address for your Moodbow account.",
+    "en": "Tap the button to confirm this email address for your Moodbow account.",
     "reason": "UX draft (native read pending)"
   },
   {
     "key": "confirmLink.emailChangeButton",
-    "en": "Confirm email change",
+    "en": "Confirm email",
     "reason": "UX draft (native read pending)"
   },
   {

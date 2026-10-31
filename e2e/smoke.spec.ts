@@ -344,7 +344,9 @@ test.describe("auth links", () => {
     await page.goto("/auth/confirm?token_hash=a1b2c3d4e5f60718293a4b5c6d7e8f90&type=recovery");
     await expect(page.getByRole("button", { name: "Continue" })).toBeVisible();
     await page.goto("/auth/confirm?token_hash=a1b2c3d4e5f60718293a4b5c6d7e8f90&type=email_change");
-    await expect(page.getByRole("button", { name: "Confirm email change" })).toBeVisible();
+    // Neutral for a first email (an app backup) and a change alike (UX, decision 216).
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Confirm your email");
+    await expect(page.getByRole("button", { name: "Confirm email" })).toBeVisible();
     await page.goto("/auth/confirm?type=signup");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("This link has expired or was already used.");
     await expect(page.getByRole("button")).toHaveCount(0);
@@ -384,8 +386,8 @@ test.describe("auth links", () => {
 
   test("email change results", async ({ page }) => {
     await page.goto("/email-confirmed?result=email_changed");
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Your email address was updated.");
-    await expect(page.getByText("Use the new one next time you sign in.")).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Your email address is confirmed.");
+    await expect(page.getByText("Use it next time you sign in. If you started in the app, go back to it now.")).toBeVisible();
     await expect(page).toHaveURL(/\/email-confirmed$/);
     await page.goto("/email-confirmed?result=email_change_pending");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Almost done.");

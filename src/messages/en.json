@@ -79,8 +79,8 @@
     "successBody": "Open Moodbow to continue.",
     "errorTitle": "This link has expired or was already used.",
     "errorBody": "Open Moodbow and ask for a new one.",
-    "emailChangedTitle": "Your email address was updated.",
-    "emailChangedBody": "Use the new one next time you sign in.",
+    "emailChangedTitle": "Your email address is confirmed.",
+    "emailChangedBody": "Use it next time you sign in. If you started in the app, go back to it now.",
     "emailChangePendingTitle": "Almost done.",
     "emailChangePendingBody": "Open the link we sent to your other email address to finish changing it.",
     "emailConfirmedRedirect": "Taking you to your journal in {seconds, plural, one {# second} other {# seconds}}…",
@@ -96,9 +96,9 @@
     "recoveryTitle": "Reset your password",
     "recoveryBody": "Tap Continue to choose a new password.",
     "recoveryButton": "Continue",
-    "emailChangeTitle": "Confirm your new email",
-    "emailChangeBody": "Tap the button to confirm the new email address for your Moodbow account.",
-    "emailChangeButton": "Confirm email change"
+    "emailChangeTitle": "Confirm your email",
+    "emailChangeBody": "Tap the button to confirm this email address for your Moodbow account.",
+    "emailChangeButton": "Confirm email"
   },
   "resetPassword": {
     "title": "Choose a new password",
