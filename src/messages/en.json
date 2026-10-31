@@ -128,6 +128,7 @@
   },
   "auth": {
     "signinTitle": "Welcome back",
+    "startedInApp": "Started in the app? Back up your journal there first, then sign in here with that email.",
     "accountGoneNotice": "You've been signed out. If you deleted your account, everything in it is gone.",
     "sessionEndedNotice": "You've been signed out. Please sign in again.",
     "emailLabel": "Email",

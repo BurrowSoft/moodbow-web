@@ -798,5 +798,10 @@
     "key": "me.importNothingNew",
     "en": "Nothing new to add. Everything in this file is already in Moodbow.",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "auth.startedInApp",
+    "en": "Started in the app? Back up your journal there first, then sign in here with that email.",
+    "reason": "UX draft (native read pending)"
   }
 ]

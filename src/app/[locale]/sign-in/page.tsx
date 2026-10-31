@@ -44,6 +44,13 @@ export default async function SignInPage({ params, searchParams }: PageProps<"/[
           {notice}
         </p>
       )}
+      {/* Someone who started in the app without an email (decision 216):
+          the web has no anonymous sessions, so they back up there first. */}
+      {pageGate("anon-start-live") !== "hidden" && (
+        <p data-testid="auth-started-in-app" className="text-muted">
+          {t("startedInApp")}
+        </p>
+      )}
       <SignInForm />
     </PageShell>
   );
