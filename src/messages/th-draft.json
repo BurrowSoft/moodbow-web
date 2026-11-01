@@ -650,6 +650,11 @@
     "reason": "UX draft (native read pending)"
   },
   {
+    "key": "export.exportAccountNotBackedUp",
+    "en": "Account: not backed up yet",
+    "reason": "UX draft (native read pending)"
+  },
+  {
     "key": "export.exportPrivateNote",
     "en": "This file holds your private journal. Keep it somewhere safe.",
     "reason": "UX draft (native read pending)"
@@ -671,7 +676,7 @@
   },
   {
     "key": "export.exportMemories",
-    "en": "What the AI remembers",
+    "en": "What Moodbow remembers",
     "reason": "UX draft (native read pending)"
   },
   {

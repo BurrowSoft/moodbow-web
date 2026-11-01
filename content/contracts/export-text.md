@@ -23,7 +23,7 @@ Render in the JSON's array order (the server already sorts it: check-ins by date
 2. **Check-ins** (`check_ins`).
 3. **Entries** (`entries`).
 4. **AI reflections** (`ai_reflections`).
-5. **What the AI remembers** (`ai_memories`).
+5. **What Moodbow remembers** (`ai_memories`).
 
 A section with no items is left out entirely, heading included. There's exactly one blank line between blocks (header → section, section → section), and none at the very end.
 
@@ -36,6 +36,8 @@ A section with no items is left out entirely, heading included. There's exactly 
 {exportAccount(email)}
 {exportPrivateNote}
 ```
+The account line is `{exportAccountNotBackedUp}` instead when `account.email` is null, missing or blank after trimming: an account started without an email (decision 216). Never `Account: ` with nothing after it.
+
 `when` = `exported_at` **converted to UTC** (whatever offset it carries), as `YYYY-MM-DD HH:MM UTC`: 24 h, zero-padded, seconds and fractions **truncated, not rounded** (`20:15:59.9` → `20:15`).
 
 ## Check-ins
@@ -62,7 +64,7 @@ The heading `{exportReflections}`, then one block per reflection, with a blank l
 ```
 `date` = the `entry_date` of the entry whose `id` = `entry_id`. If that entry is no longer in the export: `created_at`'s UTC date.
 
-## What the AI remembers
+## What Moodbow remembers
 The heading `{exportMemories}`, then one line per memory: `- {fact}`.
 
 ## Keys (en; approved by UX & PM 2026-10-19)
@@ -71,11 +73,12 @@ The heading `{exportMemories}`, then one line per memory: `- {fact}`.
 | exportTitle | Moodbow: your journal |
 | exportExported | Exported: {when} |
 | exportAccount | Account: {email} |
+| exportAccountNotBackedUp | Account: not backed up yet |
 | exportPrivateNote | This file holds your private journal. Keep it somewhere safe. |
 | exportCheckins | Check-ins |
 | exportEntries | Entries |
 | exportReflections | AI reflections |
-| exportMemories | What the AI remembers |
+| exportMemories | What Moodbow remembers |
 | exportField | {label}: {value} |
 | exportMood | Mood |
 | exportMoodValue | {label} ({value}/5) |
