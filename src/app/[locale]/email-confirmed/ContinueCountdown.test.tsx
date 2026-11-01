@@ -110,3 +110,46 @@ describe("decision 134 refinements (review of #42)", () => {
     expect(screen.getByText(m.successBody)).toBeInTheDocument();
   });
 });
+
+describe("EmailConfirmedMessage: back to the app after an email is confirmed (decision 216)", () => {
+  const INTENT = "intent://app/me/backup#Intent;scheme=moodbow;package=com.burrowsoft.moodbow;end";
+  const setUserAgent = (ua: string) => Object.defineProperty(window.navigator, "userAgent", { value: ua, configurable: true });
+  const ANDROID = "Mozilla/5.0 (Linux; Android 14; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0 Mobile Safari/537.36";
+  const IPHONE = "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1";
+  const DESKTOP = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0 Safari/537.36";
+  const original = window.navigator.userAgent;
+  afterEach(() => setUserAgent(original));
+
+  it("Android, once the app build handles the link: the Open Moodbow button into its backup screen", () => {
+    setUserAgent(ANDROID);
+    wrap(<EmailConfirmedMessage fromQuery="email_changed" continueTo={null} openApp={INTENT} />);
+    expect(screen.getByTestId("email-confirmed-open-app")).toHaveAttribute("href", INTENT);
+    expect(screen.getByTestId("email-confirmed-open-app")).toHaveTextContent(m.emailConfirmedOpenApp);
+    expect(screen.queryByTestId("email-confirmed-app-line")).toBeNull();
+    expect(screen.getByText(m.emailChangedBody)).toBeInTheDocument();
+  });
+
+  it("iPhone and desktop, or before the app build handles it: the line, no button", () => {
+    for (const [ua, openApp] of [
+      [IPHONE, INTENT],
+      [DESKTOP, INTENT],
+      [ANDROID, null],
+    ] as const) {
+      setUserAgent(ua);
+      const view = wrap(<EmailConfirmedMessage fromQuery="email_changed" continueTo={null} openApp={openApp} />);
+      expect(screen.getByTestId("email-confirmed-app-line")).toHaveTextContent(m.emailConfirmedDesktopLine);
+      expect(screen.queryByTestId("email-confirmed-open-app")).toBeNull();
+      view.unmount();
+    }
+  });
+
+  it("only after an email is confirmed: not on a confirmed sign-up or an error", () => {
+    setUserAgent(ANDROID);
+    for (const fromQuery of ["ok", "error", "email_change_pending"] as const) {
+      const view = wrap(<EmailConfirmedMessage fromQuery={fromQuery} continueTo={null} openApp={INTENT} />);
+      expect(screen.queryByTestId("email-confirmed-open-app")).toBeNull();
+      expect(screen.queryByTestId("email-confirmed-app-line")).toBeNull();
+      view.unmount();
+    }
+  });
+});

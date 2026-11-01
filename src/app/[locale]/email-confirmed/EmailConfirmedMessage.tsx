@@ -3,7 +3,12 @@
 import { useEffect, useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
 import { classifyAuthLink, type AuthLinkResult } from "@/lib/authLink";
+import { STATUS_BUTTON } from "@/components/statusButton";
 import { ContinueCountdown } from "./ContinueCountdown";
+
+// An Android browser: the only place an intent:// link can open the app.
+const onAndroid = () => /Android/i.test(navigator.userAgent);
+const notOnServer = () => false;
 
 // The query (?result=… from /auth/confirm, Supabase's ?error=…) is read on
 // the server and passed in as `fromQuery`: window.location can still show
@@ -28,9 +33,12 @@ const COPY = {
 
 // continueTo: where Continue (and the countdown, decision 134) goes, or
 // null while the web journal isn't live (the page stays as it is).
-export function EmailConfirmedMessage({ fromQuery, continueTo }: { fromQuery: AuthLinkResult; continueTo: string | null }) {
+// openApp: the intent link into the app's backup screen once the app build
+// people have handles it (app-open-link), else null.
+export function EmailConfirmedMessage({ fromQuery, continueTo, openApp = null }: { fromQuery: AuthLinkResult; continueTo: string | null; openApp?: string | null }) {
   const t = useTranslations("emailConfirmed");
   const fromHash = useSyncExternalStore(subscribe, readHash, noHashOnServer);
+  const android = useSyncExternalStore(subscribe, onAndroid, notOnServer);
   const result: AuthLinkResult = fromHash === "error" ? "error" : fromQuery;
 
   // Confirmation links can carry tokens in the query or fragment: drop them
@@ -43,8 +51,8 @@ export function EmailConfirmedMessage({ fromQuery, continueTo }: { fromQuery: Au
   }, []);
 
   // Only a confirmed sign-up moves on. A confirmed email (an app account's
-  // first email, or a change) stays put: "If you started in the app, go back
-  // to it now" (decision 216; never a countdown into a journal that may 404).
+  // first email, or a change) stays put and points back to the app (decision
+  // 216; never a countdown into a journal that may 404).
   const moveOn = result === "ok";
   const copy = COPY[result];
   return (
@@ -54,6 +62,18 @@ export function EmailConfirmedMessage({ fromQuery, continueTo }: { fromQuery: Au
           the web line instead (decision 134). */}
       <p className="mt-4 text-base leading-relaxed text-muted sm:text-[17px]">{result === "ok" && continueTo ? t("emailConfirmedWebBody") : t(copy.body)}</p>
       {moveOn && continueTo && <ContinueCountdown href={continueTo} />}
+      {/* Back to the app: a button that opens it on Android once the app
+          build handles the link; everywhere else (and until then) the line. */}
+      {result === "email_changed" &&
+        (openApp && android ? (
+          <a href={openApp} data-testid="email-confirmed-open-app" className={`mt-9 ${STATUS_BUTTON}`}>
+            {t("emailConfirmedOpenApp")}
+          </a>
+        ) : (
+          <p data-testid="email-confirmed-app-line" className="mt-4 text-base font-medium leading-relaxed text-text sm:text-[17px]">
+            {t("emailConfirmedDesktopLine")}
+          </p>
+        ))}
     </div>
   );
 }

@@ -311,7 +311,17 @@
   },
   {
     "key": "emailConfirmed.emailChangedBody",
-    "en": "Use it next time you sign in. If you started in the app, go back to it now.",
+    "en": "Use it next time you sign in.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "emailConfirmed.emailConfirmedOpenApp",
+    "en": "Open Moodbow",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "emailConfirmed.emailConfirmedDesktopLine",
+    "en": "Open the Moodbow app to finish backing up.",
     "reason": "UX draft (native read pending)"
   },
   {

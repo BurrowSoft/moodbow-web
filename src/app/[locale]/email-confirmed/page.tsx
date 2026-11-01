@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 import { Logo } from "@/components/Logo";
+import { conditionMet } from "@/lib/conditions";
 import { liveFeatures } from "@/lib/liveFeatures";
+import { openAppIntent } from "@/lib/stores";
 import { pageMetadata } from "@/lib/metadata";
 import { classifyAuthLink } from "@/lib/authLink";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -33,6 +35,10 @@ export default async function EmailConfirmedPage({ params, searchParams }: PageP
     const user = supabase ? (await supabase.auth.getUser()).data.user : null;
     continueTo = user ? "/app" : "/sign-in";
   }
+  // After an email is confirmed, back to the app (decision 216): an "Open
+  // Moodbow" link into its backup screen, once the app build people have
+  // handles it. Production opens the prod app, any other build the staging one.
+  const openApp = conditionMet("app-open-link") ? openAppIntent(process.env.VERCEL_ENV === "production") : null;
 
   return (
     <main id="main" className="flex flex-1 flex-col items-center justify-center px-6 py-16">
@@ -40,7 +46,7 @@ export default async function EmailConfirmedPage({ params, searchParams }: PageP
         <div className="mb-10 w-[120px]">
           <Logo variant="stacked" width={120} alt={tc("logoAlt")} />
         </div>
-        <EmailConfirmedMessage fromQuery={classifyAuthLink(query.toString(), "")} continueTo={continueTo} />
+        <EmailConfirmedMessage fromQuery={classifyAuthLink(query.toString(), "")} continueTo={continueTo} openApp={openApp} />
       </div>
     </main>
   );

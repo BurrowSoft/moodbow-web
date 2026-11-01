@@ -35,6 +35,10 @@
     "met": false,
     "what": "Decision 216 (specs/no-signup-start.md): the app build people have starts without an email (ANON_START_ENABLED on in that release; Vitor turns on anonymous sign-ins on prod that day). Gates the privacy policy's \"Using Moodbow without an email\" paragraph (Vitor's \"ok anonymous sentence\") and the web's \"Started in the app?\" line on sign-in and sign-up."
   },
+  "app-open-link": {
+    "met": false,
+    "what": "Decision 216: the Android app build people have opens moodbow://app/me/backup (app PR C; the first numbered build with it, the Mobile Dev names its versionCode). Gates the \"Open Moodbow\" button on /email-confirmed after an email is confirmed, Android browsers only; until then, and on iPhone and desktop, the line \"Open the Moodbow app to finish backing up.\""
+  },
   "app-app-lock": {
     "met": true,
     "what": "Help only (decision 212): app lock (PIN, fingerprint or face; decision 188) is in the app build people have (0.9 closed test on), so its Help article shows. Not app-lock (the privacy text's clause, Vitor's)."
