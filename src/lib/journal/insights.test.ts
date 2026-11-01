@@ -29,8 +29,10 @@ describe("ranges (rolling, ending today)", () => {
 describe("summarize", () => {
   it("fewer than 3 points: not enough, no average", () => {
     const s = summarize([row("2026-10-01", 4), row("2026-10-02", 5)], "2026-10-02", "week", "mood");
-    expect(s).toMatchObject({ enough: false, average: null, change: null });
+    expect(s).toMatchObject({ enough: false, missing: 1, average: null, change: null });
     expect(s.points.filter((p) => p !== null)).toEqual([4, 5]);
+    expect(summarize([], "2026-10-02", "week", "mood").missing).toBe(3);
+    expect(summarize([row("2026-09-30", 3), row("2026-10-01", 4), row("2026-10-02", 5)], "2026-10-02", "week", "mood").missing).toBe(0);
   });
 
   it("averages only the days with a value (never counting a gap as 0)", () => {

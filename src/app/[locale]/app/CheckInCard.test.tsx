@@ -52,6 +52,22 @@ describe("CheckInCard", () => {
     expect(screen.getByTestId("checkin-save")).toBeEnabled();
   });
 
+  it("a server refresh (router.refresh / revalidate re-rendering Today) keeps unsaved choices (#9765 M-01)", () => {
+    const { rerender } = renderCard(null);
+    fireEvent.click(screen.getByTestId("checkin-mood-3"));
+    fireEvent.click(screen.getByTestId("checkin-exercise-30"));
+    fireEvent.click(screen.getByTestId("checkin-stress-4"));
+    rerender(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <CheckInCard initial={null} uid="u1" date="2026-10-02" dateLocaleTag="en-US" />
+      </NextIntlClientProvider>,
+    );
+    expect(screen.getByTestId("checkin-mood-3")).toHaveAttribute("aria-checked", "true");
+    expect(screen.getByTestId("checkin-exercise-30")).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByTestId("checkin-stress-4")).toHaveAttribute("aria-pressed", "true");
+    expect(saveCheckIn).not.toHaveBeenCalled();
+  });
+
   it("saves the whole card, then shows the summary with Edit", async () => {
     saveCheckIn.mockResolvedValue({ status: "saved", checkIn: ROW });
     renderCard(null);

@@ -16,6 +16,13 @@ const CHARTS: Record<Metric, { title: "chartMood" | "chartSleep" | "chartStress"
   stress: { title: "chartStress", kind: "line", min: 1, max: 5, colourKey: "stress" },
   exercise: { title: "chartExercise", kind: "bars", min: 0, max: 90, colourKey: "exercise_minutes" },
 };
+// Too few days: how many more, per chart (#9765 S-02, the same as the app).
+const NEED_MORE: Record<Metric, "insightsNeedMore" | "insightsNeedMoreSleep" | "insightsNeedMoreStress" | "insightsNeedMoreMovement"> = {
+  mood: "insightsNeedMore",
+  sleep: "insightsNeedMoreSleep",
+  stress: "insightsNeedMoreStress",
+  exercise: "insightsNeedMoreMovement",
+};
 
 // The Insights screen for loaded check-ins: range tabs, then one card per
 // chart with its average and the change vs the range before. The change is
@@ -95,7 +102,7 @@ export function InsightsView({ rows, today, range, share, week }: { rows: Insigh
                 </>
               ) : (
                 <p className="mt-3 text-sm text-muted" data-testid={`insights-not-enough-${metric}`}>
-                  {t("chartNotEnough")}
+                  {t(NEED_MORE[metric], { count: s.missing })}
                 </p>
               )}
             </section>
