@@ -14,6 +14,7 @@ import { JOURNAL_CARD, MOOD_FACE, MOOD_LABEL, MOOD_ROW, PRIMARY_SAVE } from "@/l
 import { MoodFace } from "@/components/MoodFace";
 import { onArrival } from "@/lib/ui/arrival";
 import { saveCheckIn, type CheckInState } from "./actions";
+import { useCheckInDraft } from "./CheckInDraft";
 
 // The daily check-in (M4): mood required (5 labelled circles), then the
 // optional sleep / exercise / stress rows. After saving, a summary row with
@@ -111,7 +112,9 @@ function toFormData(fields: Fields, expectedUpdatedAt: string, date: string, fro
 
 // date: the day this card is for (today on Today, the day in the day view).
 // autoFocus: focus the first mood when the card opens ("Add a check-in").
-type Props = { initial: CheckIn | null; uid: string; date: string; dateLocaleTag: string; autoFocus?: boolean };
+// keepDraft: Today's card; its unsaved choices survive leaving Today
+// (CheckInDraft, in memory only, #9765 M-01).
+type Props = { initial: CheckIn | null; uid: string; date: string; dateLocaleTag: string; autoFocus?: boolean; keepDraft?: boolean };
 
 // An offline copy the server refused ("rejected": e.g. a day that is in the
 // future for the account's zone). Never silent (decision 72): one notice per
@@ -223,8 +226,11 @@ export function CheckInCard(props: Props) {
   );
 }
 
-function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, autoFocus }: Props & { notify: Notify; announce: (text: string) => void }) {
+function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, autoFocus, keepDraft }: Props & { notify: Notify; announce: (text: string) => void }) {
   const t = useTranslations("today");
+  const slot = useCheckInDraft<Fields>();
+  const drafts = keepDraft ? slot : null;
+  const [draft] = useState(() => drafts?.get(cardDate) ?? null);
   // Waiting for the person's choice, oldest first; the dialog shows the first.
   const [conflicts, setConflicts] = useState<Conflict[]>([]);
   const addConflict = (c: Conflict) => setConflicts((all) => [...all.filter((x) => x.date !== c.date), c]);
@@ -233,8 +239,13 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
   // not ask again (reviewer).
   const resolving = useRef(new Map<string, FormData>());
   const [row, setRow] = useState<CheckIn | null>(initial);
-  const [fields, setFields] = useState<Fields>(fromRow(initial));
-  const [editing, setEditing] = useState(initial === null);
+  const [fields, setFields] = useState<Fields>(draft ?? fromRow(initial));
+  const [editing, setEditing] = useState(initial === null || draft !== null);
+  // Unsaved choices go to the draft; anything else (saved, cancelled, a
+  // new day's empty card) clears it.
+  useEffect(() => {
+    drafts?.set(cardDate, editing && !sameFields(fields, fromRow(row)) ? fields : null);
+  }, [drafts, cardDate, editing, fields, row]);
   const [offline, setOffline] = useState(false);
   const [storageFailed, setStorageFailed] = useState(false);
   // The pending copies being sent right now (by key), so none goes twice.

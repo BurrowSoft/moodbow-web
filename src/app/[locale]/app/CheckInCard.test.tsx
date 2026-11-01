@@ -18,6 +18,7 @@ vi.mock("@/lib/ui/withTimeout", async (orig) => {
   return { ...real, SAVE_WAIT_MS: 300, withTimeout: <T,>(call: Promise<T>, ms: number) => (held ? call : real.withTimeout(call, ms)) };
 });
 const { CheckInCard } = await import("./CheckInCard");
+const { CheckInDraftProvider } = await import("./CheckInDraft");
 
 const ROW: CheckIn = { local_date: "2026-10-02", mood: 4, sleep_hours: 7.5, sleep_quality: "good", exercise_minutes: 30, stress: 2, updated_at: "2026-10-02T10:00:00Z" };
 const KEY = "mb:pending-checkin:u1";
@@ -723,5 +724,81 @@ describe("CheckInCard: the summary (decision 161)", () => {
     expect(chips.map((c) => c.textContent)).toEqual(["7.5 h", messages.today.sleepGood, messages.today.exerciseNone, "Stress 2 of 5"]);
     // Sleep and stress coloured; quality is words only; a rest day has no colour.
     expect(chips.map((c) => c.querySelector("[data-value-colour]")?.getAttribute("data-value-colour") ?? null)).toEqual(["#F3C24F", null, null, "#F4A77A"]);
+  });
+});
+
+// Today's unsaved choices, in memory above the routes (#9765 M-01).
+describe("CheckInCard: the in-memory draft", () => {
+  const Today = ({ date = "2026-10-02", keepDraft = true, initial = null as CheckIn | null }) => (
+    <CheckInCard initial={initial} uid="u1" date={date} dateLocaleTag="en-US" keepDraft={keepDraft} />
+  );
+  const withDraft = (ui: React.ReactNode) => (
+    <NextIntlClientProvider locale="en" messages={messages}>
+      <CheckInDraftProvider>{ui}</CheckInDraftProvider>
+    </NextIntlClientProvider>
+  );
+  const choose = () => {
+    fireEvent.click(screen.getByTestId("checkin-mood-2"));
+    fireEvent.click(screen.getByTestId("checkin-stress-5"));
+  };
+
+  it("leaving Today and coming back keeps the unsaved choices, never in browser storage", () => {
+    const { rerender } = render(withDraft(<Today />));
+    choose();
+    rerender(withDraft(null));
+    expect(screen.queryByTestId("checkin-card")).toBeNull();
+    rerender(withDraft(<Today />));
+    expect(screen.getByTestId("checkin-mood-2")).toHaveAttribute("aria-checked", "true");
+    expect(screen.getByTestId("checkin-stress-5")).toHaveAttribute("aria-pressed", "true");
+    expect(window.localStorage.length).toBe(0);
+    expect(window.sessionStorage.length).toBe(0);
+  });
+
+  it("an unsaved edit of a saved check-in comes back in edit mode", () => {
+    const { rerender } = render(withDraft(<Today initial={ROW} />));
+    fireEvent.click(screen.getByTestId("checkin-edit"));
+    fireEvent.click(screen.getByTestId("checkin-mood-1"));
+    rerender(withDraft(null));
+    rerender(withDraft(<Today initial={ROW} />));
+    expect(screen.getByTestId("checkin-mood-1")).toHaveAttribute("aria-checked", "true");
+    expect(screen.queryByTestId("checkin-summary")).toBeNull();
+  });
+
+  it("saved: the draft is gone", async () => {
+    saveCheckIn.mockResolvedValue({ status: "saved", checkIn: { ...ROW, mood: 2, stress: 5 } });
+    const { rerender } = render(withDraft(<Today />));
+    choose();
+    fireEvent.click(screen.getByTestId("checkin-save"));
+    await screen.findByTestId("checkin-summary");
+    rerender(withDraft(null));
+    rerender(withDraft(<Today />));
+    expect(screen.getByTestId("checkin-mood-2")).toHaveAttribute("aria-checked", "false");
+  });
+
+  it("the day changed: a new empty card, and yesterday's draft is dropped", () => {
+    const { rerender } = render(withDraft(<Today />));
+    choose();
+    rerender(withDraft(null));
+    rerender(withDraft(<Today date="2026-10-03" />));
+    expect(screen.getByTestId("checkin-mood-2")).toHaveAttribute("aria-checked", "false");
+    rerender(withDraft(null));
+    rerender(withDraft(<Today />));
+    expect(screen.getByTestId("checkin-mood-2")).toHaveAttribute("aria-checked", "false");
+  });
+
+  it("a card without keepDraft (a day in the timeline) neither keeps nor reads it", () => {
+    const { rerender } = render(withDraft(<Today keepDraft={false} />));
+    choose();
+    rerender(withDraft(null));
+    rerender(withDraft(<Today />));
+    expect(screen.getByTestId("checkin-mood-2")).toHaveAttribute("aria-checked", "false");
+  });
+
+  it("a new provider (sign-out, another account: the layout's key) starts empty", () => {
+    render(withDraft(<Today />));
+    choose();
+    cleanup();
+    render(withDraft(<Today />));
+    expect(screen.getByTestId("checkin-mood-2")).toHaveAttribute("aria-checked", "false");
   });
 });
