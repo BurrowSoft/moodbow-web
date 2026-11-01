@@ -1,7 +1,17 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
 import conditions from "../../content/conditions.json";
-import { APP_STORE_ID, APP_STORE_URL, liveStores, PLAY_URL } from "./stores";
+import { APP_STORE_ID, APP_STORE_URL, liveStores, openAppIntent, PLAY_URL } from "./stores";
+
+describe("openAppIntent (decision 216, app PR C's moodbow://app/me/backup)", () => {
+  it("the prod app on Production, the staging app elsewhere; Play as the fallback", () => {
+    expect(openAppIntent(true)).toBe(
+      "intent://app/me/backup#Intent;scheme=moodbow;package=com.burrowsoft.moodbow;S.browser_fallback_url=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Dcom.burrowsoft.moodbow;end",
+    );
+    expect(openAppIntent(false)).toContain("package=com.burrowsoft.moodbow.staging;");
+    expect(decodeURIComponent(openAppIntent(false).match(/S\.browser_fallback_url=([^;]+)/)![1])).toBe(PLAY_URL);
+  });
+});
 
 describe("liveStores (decision 185)", () => {
   it("each store by its own condition", () => {

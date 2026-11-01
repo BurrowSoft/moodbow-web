@@ -12,6 +12,17 @@ export const PLAY_URL = `https://play.google.com/store/apps/details?id=${PLAY_PA
 export const APP_STORE_URL: string | null = null;
 export const APP_STORE_ID: string | null = null;
 
+// The app's backup screen, from a browser on Android (decision 216; the
+// Mobile Dev's contract for app PR C): moodbow://app/me/backup as an intent
+// link, so Chrome opens the app if it can and the Play listing (which offers
+// Install or Update) if it can't. The staging app has its own package; a
+// Preview opens that one. The Play page is the prod listing either way.
+export const STAGING_PACKAGE = `${PLAY_PACKAGE}.staging`;
+export function openAppIntent(production: boolean): string {
+  const pkg = production ? PLAY_PACKAGE : STAGING_PACKAGE;
+  return `intent://app/me/backup#Intent;scheme=moodbow;package=${pkg};S.browser_fallback_url=${encodeURIComponent(PLAY_URL)};end`;
+}
+
 export type LiveStores = { play: boolean; appStore: boolean };
 
 export function liveStores(met: (id: "play-live" | "appstore-live") => boolean = conditionMet): LiveStores {
