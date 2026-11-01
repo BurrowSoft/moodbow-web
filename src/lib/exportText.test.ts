@@ -24,6 +24,19 @@ describe("readable export (content/contracts/export-text.md)", () => {
     expect(actual.equals(expected)).toBe(true);
   });
 
+  // The contract (decision 216, app #88): an account started without an
+  // email has no email in the export; the header says so, never "Account: ".
+  it("an account with no email: 'Account: not backed up yet' (null, blank, missing)", () => {
+    const base = JSON.parse(fs.readFileSync(path.join(dir, "export_fixture.json"), "utf8"));
+    const second = (doc: unknown) => renderExportText(doc as never, t).split("\n").slice(0, 4);
+    for (const account of [{ email: null }, { email: "" }, { email: "  " }, {}, undefined, null]) {
+      const lines = second({ ...base, account });
+      expect(lines[2], JSON.stringify(account)).toBe("Account: not backed up yet");
+      expect(lines.some((l) => l === "Account: " || l === "Account:")).toBe(false);
+    }
+    expect(second(base)[2]).toBe(`Account: ${base.account.email}`);
+  });
+
   it("only moodbow-export v1 is rendered", () => {
     expect(canRenderText({ format: "moodbow-export", format_version: 2 })).toBe(false);
     expect(canRenderText({ format: "other", format_version: 1 })).toBe(false);

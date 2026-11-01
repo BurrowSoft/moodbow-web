@@ -16,7 +16,8 @@ export type ExportDoc = {
   format: string;
   format_version: number;
   exported_at: string;
-  account: { email: string };
+  // No email for an account started without one (decision 216).
+  account?: { email?: string | null } | null;
   check_ins?: CheckInRow[];
   entries?: EntryRow[];
   ai_reflections?: ReflectionRow[];
@@ -51,12 +52,16 @@ const QUALITY = { poor: "today.sleepPoor", okay: "today.sleepOkay", good: "today
 export function renderExportText(doc: ExportDoc, t: Translate): string {
   const field = (label: string, value: string) => t("export.exportField", { label, value });
   const blocks: string[] = [];
+  // The contract (decision 216): an account with no email (null, missing or
+  // blank after trimming) is "not backed up yet", never "Account: " alone.
+  const email = doc.account?.email;
+  const accountLine = email && email.trim() ? t("export.exportAccount", { email }) : t("export.exportAccountNotBackedUp");
 
   blocks.push(
     [
       t("export.exportTitle"),
       t("export.exportExported", { when: exportedWhen(doc.exported_at) }),
-      t("export.exportAccount", { email: doc.account.email }),
+      accountLine,
       t("export.exportPrivateNote"),
     ].join("\n"),
   );
