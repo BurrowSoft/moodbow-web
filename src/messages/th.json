@@ -424,7 +424,11 @@
     "chartChangeUp": "เพิ่มขึ้น {value} เทียบกับ{range, select, week {สัปดาห์} month {เดือน} other {3 เดือน}}ก่อน",
     "chartChangeDown": "ลดลง {value} เทียบกับ{range, select, week {สัปดาห์} month {เดือน} other {3 เดือน}}ก่อน",
     "chartNoChange": "เท่ากับ{range, select, week {สัปดาห์} month {เดือน} other {3 เดือน}}ก่อน",
-    "chartNotEnough": "บันทึกอีกสักหน่อย แล้วกราฟของคุณจะปรากฏ"
+    "chartNotEnough": "บันทึกอีกสักหน่อย แล้วกราฟของคุณจะปรากฏ",
+    "insightsNeedMore": "บันทึกอารมณ์อีก {count} วันเพื่อดูกราฟของคุณ",
+    "insightsNeedMoreSleep": "เพิ่มข้อมูลการนอนอีก {count} วันเพื่อดูกราฟนี้",
+    "insightsNeedMoreMovement": "เพิ่มข้อมูลการเคลื่อนไหวอีก {count} วันเพื่อดูกราฟนี้",
+    "insightsNeedMoreStress": "เพิ่มข้อมูลความเครียดอีก {count} วันเพื่อดูกราฟนี้"
   },
   "share": {
     "shareButton": "แชร์",
@@ -517,6 +521,7 @@
   "safety": {
     "safetyTitle": "คุณไม่จำเป็นต้องผ่านเรื่องนี้ไปคนเดียว",
     "safetyBody": "ดูเหมือนตอนนี้ทุกอย่างหนักมากสำหรับคุณ การได้พูดคุยกับใครสักคนช่วยได้ ตั้งแต่วันนี้",
+    "safetyBodyNeutral": "การได้พูดคุยกับใครสักคนช่วยได้ คนเหล่านี้พร้อมรับฟังคุณ",
     "safetyEmergency": "หากคุณตกอยู่ในอันตรายตอนนี้ โทรหาหมายเลขฉุกเฉินในพื้นที่ของคุณ",
     "safetyFindHelpline": "ค้นหาสายด่วนในประเทศของคุณ",
     "safetyCall": "โทร {name} ({number})",

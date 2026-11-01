@@ -424,7 +424,11 @@
     "chartChangeUp": "Up {value} vs the previous {range, select, week {week} month {month} other {3 months}}",
     "chartChangeDown": "Down {value} vs the previous {range, select, week {week} month {month} other {3 months}}",
     "chartNoChange": "Same as the previous {range, select, week {week} month {month} other {3 months}}",
-    "chartNotEnough": "A few more check-ins and your chart will appear."
+    "chartNotEnough": "A few more check-ins and your chart will appear.",
+    "insightsNeedMore": "Check in on {count, plural, =1 {1 more day} other {{count} more days}} to see your charts.",
+    "insightsNeedMoreSleep": "Add sleep on {count, plural, =1 {1 more day} other {{count} more days}} to see this chart.",
+    "insightsNeedMoreMovement": "Add movement on {count, plural, =1 {1 more day} other {{count} more days}} to see this chart.",
+    "insightsNeedMoreStress": "Add stress on {count, plural, =1 {1 more day} other {{count} more days}} to see this chart."
   },
   "share": {
     "shareButton": "Share",
@@ -517,6 +521,7 @@
   "safety": {
     "safetyTitle": "You don't have to go through this alone",
     "safetyBody": "It sounds like things are really hard right now. Talking to someone can help, today.",
+    "safetyBodyNeutral": "Talking to someone can help. These people are ready to listen.",
     "safetyEmergency": "If you're in danger right now, call your local emergency number.",
     "safetyFindHelpline": "Find a helpline in your country",
     "safetyCall": "Call {name} ({number})",

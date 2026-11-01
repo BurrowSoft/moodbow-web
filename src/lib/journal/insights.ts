@@ -59,6 +59,9 @@ export const roundFor = (metric: Metric, v: number) => roundTo(v, metric === "ex
 export type MetricSummary = {
   points: (number | null)[];
   enough: boolean;
+  // Days with a value still needed for the chart (0 when enough;
+  // insightsNeedMore…, #9765 S-02).
+  missing: number;
   average: number | null;
   // This range's average minus the previous one's, rounded (0 = the same,
   // shown as chartNoChange); null when either range has too few points, and
@@ -81,5 +84,5 @@ export function summarize(rows: InsightRow[], today: string, range: Range, metri
     // + 0 turns a -0 into 0.
     change = roundFor(metric, roundFor(metric, average) - roundFor(metric, previousAverage)) + 0;
   }
-  return { points, enough, average: average === null ? null : roundFor(metric, average), change };
+  return { points, enough, missing: Math.max(0, MIN_POINTS - count), average: average === null ? null : roundFor(metric, average), change };
 }

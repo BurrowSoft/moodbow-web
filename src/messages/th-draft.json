@@ -818,5 +818,30 @@
     "key": "auth.startedInApp",
     "en": "Started in the app? Back up your journal there first, then sign in here with that email.",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.insightsNeedMore",
+    "en": "Check in on {count, plural, =1 {1 more day} other {{count} more days}} to see your charts.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.insightsNeedMoreSleep",
+    "en": "Add sleep on {count, plural, =1 {1 more day} other {{count} more days}} to see this chart.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.insightsNeedMoreMovement",
+    "en": "Add movement on {count, plural, =1 {1 more day} other {{count} more days}} to see this chart.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.insightsNeedMoreStress",
+    "en": "Add stress on {count, plural, =1 {1 more day} other {{count} more days}} to see this chart.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "safety.safetyBodyNeutral",
+    "en": "Talking to someone can help. These people are ready to listen.",
+    "reason": "UX draft (native read pending)"
   }
 ]
