@@ -396,11 +396,21 @@ test.describe("auth links", () => {
     if (testInfo.project.name === "mobile") {
       await expect(page.getByTestId("email-confirmed-open-app")).toHaveText("Open Moodbow");
       await expect(page.getByTestId("email-confirmed-open-app")).toHaveAttribute("href", /^intent:\/\/app\/me\/backup#Intent;scheme=moodbow;package=com\.burrowsoft\.moodbow(\.staging)?;/);
+      // No app: back to this page on this host (not Play while it isn't public).
+      const href = (await page.getByTestId("email-confirmed-open-app").getAttribute("href")) ?? "";
+      const fallback = decodeURIComponent(/S\.browser_fallback_url=([^;]+)/.exec(href)?.[1] ?? "");
+      expect(fallback).toBe(`${new URL(page.url()).origin}/email-confirmed?result=email_changed&app=missing`);
       await expect(page.getByTestId("email-confirmed-app-line")).toHaveCount(0);
     } else {
       await expect(page.getByTestId("email-confirmed-app-line")).toHaveText("Open the Moodbow app to finish backing up.");
       await expect(page.getByTestId("email-confirmed-open-app")).toHaveCount(0);
     }
+    // Back as that fallback: only the confirmation, on every device (UX).
+    await page.goto("/email-confirmed?result=email_changed&app=missing");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Your email address is confirmed.");
+    await expect(page.getByText("Use it next time you sign in.", { exact: true })).toBeVisible();
+    await expect(page.getByTestId("email-confirmed-open-app")).toHaveCount(0);
+    await expect(page.getByTestId("email-confirmed-app-line")).toHaveCount(0);
     await page.goto("/email-confirmed?result=email_change_pending");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Almost done.");
   });
