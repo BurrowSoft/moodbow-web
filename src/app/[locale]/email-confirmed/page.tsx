@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
+import { getPathname } from "@/i18n/navigation";
 import { Logo } from "@/components/Logo";
 import { conditionMet } from "@/lib/conditions";
 import { liveFeatures } from "@/lib/liveFeatures";
@@ -38,8 +39,13 @@ export default async function EmailConfirmedPage({ params, searchParams }: PageP
   // After an email is confirmed, back to the app (decision 216): an "Open
   // Moodbow" link into its backup screen, once the app build people have
   // handles it. Production opens the prod app, any other build the staging one;
-  // the browser builds the link (its fallback is this page's own URL).
-  const openApp = conditionMet("app-open-link") ? { production: process.env.VERCEL_ENV === "production", playLive: liveStores().play } : null;
+  // the browser builds the link (its fallback is this page on its own origin).
+  // The path comes from here, not window.location: arriving from the confirm
+  // button is a client navigation, and the address bar can still show
+  // /auth/confirm while this renders (Reviewer, #139 F1).
+  const openApp = conditionMet("app-open-link")
+    ? { production: process.env.VERCEL_ENV === "production", playLive: liveStores().play, path: getPathname({ href: "/email-confirmed", locale }) }
+    : null;
 
   return (
     <main id="main" className="flex flex-1 flex-col items-center justify-center px-6 py-16">

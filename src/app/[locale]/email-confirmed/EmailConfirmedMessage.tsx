@@ -10,10 +10,11 @@ import { ContinueCountdown } from "./ContinueCountdown";
 // An Android browser: the only place an intent:// link can open the app.
 const onAndroid = () => /Android/i.test(navigator.userAgent);
 const notOnServer = () => false;
-// This page's own absolute URL (origin + locale path, no query): the
-// fallback when the app can't open, on whatever deployment this is.
-const thisPage = () => `${window.location.origin}${window.location.pathname}`;
-const noPageOnServer = () => "";
+// This deployment's origin, for the fallback's absolute URL. Only the origin:
+// the path comes from the server (openApp.path), since window.location can
+// still show /auth/confirm during the client navigation here.
+const thisOrigin = () => window.location.origin;
+const noOriginOnServer = () => "";
 
 // The query (?result=… from /auth/confirm, Supabase's ?error=…) is read on
 // the server and passed in as `fromQuery`: window.location can still show
@@ -39,16 +40,17 @@ const COPY = {
 // continueTo: where Continue (and the countdown, decision 134) goes, or
 // null while the web journal isn't live (the page stays as it is).
 // openApp: once the app build people have handles the link (app-open-link),
-// which app (production) and whether its Play listing is public (playLive),
-// for the intent link into its backup screen; else null.
+// which app (production), whether its Play listing is public (playLive) and
+// this page's locale path (path), for the intent link into its backup
+// screen; else null.
 // appMissing: back here as that link's fallback (the app didn't open):
 // neither the button nor the app line, only the confirmation (UX: a web-only
 // account isn't backing anything up).
-export function EmailConfirmedMessage({ fromQuery, continueTo, openApp = null, appMissing = false }: { fromQuery: AuthLinkResult; continueTo: string | null; openApp?: { production: boolean; playLive: boolean } | null; appMissing?: boolean }) {
+export function EmailConfirmedMessage({ fromQuery, continueTo, openApp = null, appMissing = false }: { fromQuery: AuthLinkResult; continueTo: string | null; openApp?: { production: boolean; playLive: boolean; path: string } | null; appMissing?: boolean }) {
   const t = useTranslations("emailConfirmed");
   const fromHash = useSyncExternalStore(subscribe, readHash, noHashOnServer);
   const android = useSyncExternalStore(subscribe, onAndroid, notOnServer);
-  const page = useSyncExternalStore(subscribe, thisPage, noPageOnServer);
+  const origin = useSyncExternalStore(subscribe, thisOrigin, noOriginOnServer);
   const result: AuthLinkResult = fromHash === "error" ? "error" : fromQuery;
 
   // Confirmation links can carry tokens in the query or fragment: drop them
@@ -76,8 +78,8 @@ export function EmailConfirmedMessage({ fromQuery, continueTo, openApp = null, a
           build handles the link; everywhere else (and until then) the line. */}
       {result === "email_changed" &&
         !appMissing &&
-        (openApp && android && page ? (
-          <a href={openAppIntent(openApp.production, openAppFallback(openApp.playLive, page))} data-testid="email-confirmed-open-app" className={`mt-9 ${STATUS_BUTTON}`}>
+        (openApp && android && origin ? (
+          <a href={openAppIntent(openApp.production, openAppFallback(openApp.playLive, `${origin}${openApp.path}`))} data-testid="email-confirmed-open-app" className={`mt-9 ${STATUS_BUTTON}`}>
             {t("emailConfirmedOpenApp")}
           </a>
         ) : (

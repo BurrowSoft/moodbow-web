@@ -113,7 +113,7 @@ describe("decision 134 refinements (review of #42)", () => {
 
 describe("EmailConfirmedMessage: back to the app after an email is confirmed (decision 216)", () => {
   // The prod app; Play not public yet (play-live unmet).
-  const INTENT = { production: true, playLive: false };
+  const INTENT = { production: true, playLive: false, path: "/th/email-confirmed" };
   const fallbackOf = (href: string | null) => decodeURIComponent(/S\.browser_fallback_url=([^;]+)/.exec(href ?? "")?.[1] ?? "");
   const setUserAgent = (ua: string) => Object.defineProperty(window.navigator, "userAgent", { value: ua, configurable: true });
   const ANDROID = "Mozilla/5.0 (Linux; Android 14; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0 Mobile Safari/537.36";
@@ -128,15 +128,29 @@ describe("EmailConfirmedMessage: back to the app after an email is confirmed (de
     const href = screen.getByTestId("email-confirmed-open-app").getAttribute("href");
     expect(href).toMatch(/^intent:\/\/app\/me\/backup#Intent;scheme=moodbow;package=com\.burrowsoft\.moodbow;S\.browser_fallback_url=/);
     // No app: back to this page on this deployment, without the button (not Play's "item not found").
-    expect(fallbackOf(href)).toBe(`${window.location.origin}${window.location.pathname}?result=email_changed&app=missing`);
+    expect(fallbackOf(href)).toBe(`${window.location.origin}/th/email-confirmed?result=email_changed&app=missing`);
     expect(screen.getByTestId("email-confirmed-open-app")).toHaveTextContent(m.emailConfirmedOpenApp);
     expect(screen.queryByTestId("email-confirmed-app-line")).toBeNull();
     expect(screen.getByText(m.emailChangedBody)).toBeInTheDocument();
   });
 
+  it("arriving from the confirm button (the address bar still on /auth/confirm): the fallback is still this page (Reviewer, #139 F1)", () => {
+    setUserAgent(ANDROID);
+    const before = window.location.pathname;
+    window.history.replaceState(null, "", "/th/auth/confirm?token_hash=x&type=email_change");
+    try {
+      wrap(<EmailConfirmedMessage fromQuery="email_changed" continueTo={null} openApp={INTENT} />);
+      const fallback = fallbackOf(screen.getByTestId("email-confirmed-open-app").getAttribute("href"));
+      expect(fallback).toBe(`${window.location.origin}/th/email-confirmed?result=email_changed&app=missing`);
+      expect(fallback).not.toContain("auth/confirm");
+    } finally {
+      window.history.replaceState(null, "", before);
+    }
+  });
+
   it("the staging app off Production; Play as the fallback once play-live is met", () => {
     setUserAgent(ANDROID);
-    wrap(<EmailConfirmedMessage fromQuery="email_changed" continueTo={null} openApp={{ production: false, playLive: true }} />);
+    wrap(<EmailConfirmedMessage fromQuery="email_changed" continueTo={null} openApp={{ production: false, playLive: true, path: "/email-confirmed" }} />);
     const href = screen.getByTestId("email-confirmed-open-app").getAttribute("href");
     expect(href).toContain("package=com.burrowsoft.moodbow.staging;");
     expect(fallbackOf(href)).toBe("https://play.google.com/store/apps/details?id=com.burrowsoft.moodbow");
