@@ -112,7 +112,9 @@ describe("decision 134 refinements (review of #42)", () => {
 });
 
 describe("EmailConfirmedMessage: back to the app after an email is confirmed (decision 216)", () => {
-  const INTENT = "intent://app/me/backup#Intent;scheme=moodbow;package=com.burrowsoft.moodbow;end";
+  // The prod app; Play not public yet (play-live unmet).
+  const INTENT = { production: true, playLive: false };
+  const fallbackOf = (href: string | null) => decodeURIComponent(/S\.browser_fallback_url=([^;]+)/.exec(href ?? "")?.[1] ?? "");
   const setUserAgent = (ua: string) => Object.defineProperty(window.navigator, "userAgent", { value: ua, configurable: true });
   const ANDROID = "Mozilla/5.0 (Linux; Android 14; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0 Mobile Safari/537.36";
   const IPHONE = "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1";
@@ -123,10 +125,33 @@ describe("EmailConfirmedMessage: back to the app after an email is confirmed (de
   it("Android, once the app build handles the link: the Open Moodbow button into its backup screen", () => {
     setUserAgent(ANDROID);
     wrap(<EmailConfirmedMessage fromQuery="email_changed" continueTo={null} openApp={INTENT} />);
-    expect(screen.getByTestId("email-confirmed-open-app")).toHaveAttribute("href", INTENT);
+    const href = screen.getByTestId("email-confirmed-open-app").getAttribute("href");
+    expect(href).toMatch(/^intent:\/\/app\/me\/backup#Intent;scheme=moodbow;package=com\.burrowsoft\.moodbow;S\.browser_fallback_url=/);
+    // No app: back to this page on this deployment, without the button (not Play's "item not found").
+    expect(fallbackOf(href)).toBe(`${window.location.origin}${window.location.pathname}?result=email_changed&app=missing`);
     expect(screen.getByTestId("email-confirmed-open-app")).toHaveTextContent(m.emailConfirmedOpenApp);
     expect(screen.queryByTestId("email-confirmed-app-line")).toBeNull();
     expect(screen.getByText(m.emailChangedBody)).toBeInTheDocument();
+  });
+
+  it("the staging app off Production; Play as the fallback once play-live is met", () => {
+    setUserAgent(ANDROID);
+    wrap(<EmailConfirmedMessage fromQuery="email_changed" continueTo={null} openApp={{ production: false, playLive: true }} />);
+    const href = screen.getByTestId("email-confirmed-open-app").getAttribute("href");
+    expect(href).toContain("package=com.burrowsoft.moodbow.staging;");
+    expect(fallbackOf(href)).toBe("https://play.google.com/store/apps/details?id=com.burrowsoft.moodbow");
+  });
+
+  it("back as the fallback (app=missing): only the confirmation, no button and no app line (UX)", () => {
+    for (const ua of [ANDROID, DESKTOP]) {
+      setUserAgent(ua);
+      const view = wrap(<EmailConfirmedMessage fromQuery="email_changed" continueTo={null} openApp={INTENT} appMissing />);
+      expect(screen.getByText(m.emailChangedTitle)).toBeInTheDocument();
+      expect(screen.getByText(m.emailChangedBody)).toBeInTheDocument();
+      expect(screen.queryByTestId("email-confirmed-open-app")).toBeNull();
+      expect(screen.queryByTestId("email-confirmed-app-line")).toBeNull();
+      view.unmount();
+    }
   });
 
   it("iPhone and desktop, or before the app build handles it: the line, no button", () => {

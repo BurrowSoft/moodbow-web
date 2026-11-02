@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { CONFIRM_FAILED, confirmTarget, keepsSession, parseConfirmLink } from "./authConfirm";
-import { canonicalEmailConfirmedSearch, classifyAuthLink } from "./authLink";
+import { appMissing, canonicalEmailConfirmedSearch, classifyAuthLink } from "./authLink";
 import { validateNewPassword } from "./password";
 
 const HASH = "a1b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f6071829";
@@ -74,5 +74,12 @@ describe("canonicalEmailConfirmedSearch", () => {
     expect(canonicalEmailConfirmedSearch("?result=email_changed&code=x")).toBe("?result=email_changed");
     expect(canonicalEmailConfirmedSearch("?result=email_change_pending")).toBe("?result=email_change_pending");
     expect(canonicalEmailConfirmedSearch("?result=whatever")).toBe("");
+    // The app link's fallback (app=missing) is kept, only after an email change.
+    expect(canonicalEmailConfirmedSearch("?result=email_changed&app=missing&code=x")).toBe("?result=email_changed&app=missing");
+    expect(canonicalEmailConfirmedSearch("?result=email_changed&app=other")).toBe("?result=email_changed");
+    expect(canonicalEmailConfirmedSearch("?result=email_change_pending&app=missing")).toBe("?result=email_change_pending");
+    expect(canonicalEmailConfirmedSearch("?app=missing")).toBe("");
+    expect(appMissing("?result=email_changed&app=missing")).toBe(true);
+    expect(appMissing("?result=expired&app=missing")).toBe(false);
   });
 });
