@@ -384,16 +384,23 @@ test.describe("auth links", () => {
     );
   });
 
-  test("email change results", async ({ page }) => {
+  test("email change results", async ({ page }, testInfo) => {
     await page.goto("/email-confirmed?result=email_changed");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Your email address is confirmed.");
     await expect(page.getByText("Use it next time you sign in.", { exact: true })).toBeVisible();
     await expect(page).toHaveURL(/\/email-confirmed$/);
     // Stays put: no countdown into the web journal (decision 216, UX).
     await expect(page.getByTestId("email-confirmed-countdown")).toHaveCount(0);
-    // Back to the app: the line until app-open-link is met (and never on desktop).
-    await expect(page.getByTestId("email-confirmed-app-line")).toHaveText("Open the Moodbow app to finish backing up.");
-    await expect(page.getByTestId("email-confirmed-open-app")).toHaveCount(0);
+    // Back to the app (app-open-link met, 0.9.3 (4)): "Open Moodbow" on
+    // Android (the mobile project is a Pixel 7), the line everywhere else.
+    if (testInfo.project.name === "mobile") {
+      await expect(page.getByTestId("email-confirmed-open-app")).toHaveText("Open Moodbow");
+      await expect(page.getByTestId("email-confirmed-open-app")).toHaveAttribute("href", /^intent:\/\/app\/me\/backup#Intent;scheme=moodbow;package=com\.burrowsoft\.moodbow(\.staging)?;/);
+      await expect(page.getByTestId("email-confirmed-app-line")).toHaveCount(0);
+    } else {
+      await expect(page.getByTestId("email-confirmed-app-line")).toHaveText("Open the Moodbow app to finish backing up.");
+      await expect(page.getByTestId("email-confirmed-open-app")).toHaveCount(0);
+    }
     await page.goto("/email-confirmed?result=email_change_pending");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Almost done.");
   });

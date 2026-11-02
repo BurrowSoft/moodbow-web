@@ -34,6 +34,13 @@ describe("conditions", () => {
     expect(BACKUP_RETENTION_DAYS).toBe(8);
     expect(liveFeatures.webJournal).toBe(false);
   });
+
+  // Decision 216: "Open Moodbow" since 0.9.3 (4) on closed testing; the
+  // no-email start waits for 0.9.4 (UX).
+  it("the app opens moodbow://app/me/backup; the no-email start isn't live yet", () => {
+    expect(conditionMet("app-open-link")).toBe(true);
+    expect(conditionMet("anon-start-live")).toBe(false);
+  });
 });
 
 describe("pageGate (fails closed)", () => {
