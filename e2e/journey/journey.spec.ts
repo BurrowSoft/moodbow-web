@@ -186,9 +186,9 @@ test.describe("launch journeys", () => {
 // Each journey runs once its PR is on master: flip its entry here in the
 // same follow-up that lands it (until then it's skipped, not failed).
 const LANDED = {
-  hiddenDraft: false, // #142: the draft is written when the page is hidden
+  hiddenDraft: true, // #142: the draft is written when the page is hidden
   signOutChoice: false, // #147: Sign out asks Keep it / Delete it
-  deleteAnnounce: false, // #145 + #146: "Entry deleted", focus on the h1
+  deleteAnnounce: true, // #145 + #146: "Entry deleted", focus on the h1
 };
 
 async function signIn(page: Page, email: string, password: string): Promise<void> {
