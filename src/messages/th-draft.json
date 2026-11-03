@@ -848,5 +848,10 @@
     "key": "safety.safetyBodyNeutral",
     "en": "Talking to someone can help. These people are ready to listen.",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "share.shareMilestone",
+    "en": "Milestone",
+    "reason": "UX draft (native read pending): shorter, so the 4 segments fit at 320 px"
   }
 ]

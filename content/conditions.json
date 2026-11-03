@@ -39,6 +39,30 @@
     "met": true,
     "what": "Decision 216: the Android app build people have opens moodbow://app/me/backup (app PR C; met with 0.9.3 (4) on closed testing, UX 2026-11-03). Gates the \"Open Moodbow\" button on /email-confirmed after an email is confirmed, Android browsers only; until then, and on iPhone and desktop, the line \"Open the Moodbow app to finish backing up.\""
   },
+  "app-calendar": {
+    "met": false,
+    "what": "Help only (decision 212 pattern, UX 2026-11-03): the month calendar (1.1 M) is in the app build people have (0.9.5), so its Help article shows. Not calendar-live (the web's own switch)."
+  },
+  "app-search": {
+    "met": false,
+    "what": "Help only (decision 212 pattern, UX 2026-11-03): search (1.1 L) is in the app build people have (0.9.5), so its Help article shows. Not search-live (the web's own magnifier)."
+  },
+  "app-export-csv": {
+    "met": false,
+    "what": "Help only (decision 212 pattern, UX 2026-11-03): the spreadsheet export (1.1 P) is in the app build people have (0.9.5), so its Help line shows. Not export-csv-live (the web's own .csv)."
+  },
+  "app-writing-prompts": {
+    "met": false,
+    "what": "Help only (decision 212 pattern, UX 2026-11-03): writing prompts (1.1 I) are in the app build people have (0.9.6), so their Help line shows. Not writing-prompts (tested on the app and the web)."
+  },
+  "app-share-cards-more": {
+    "met": false,
+    "what": "Help only (decision 212 pattern, UX 2026-11-03): the chart and milestone cards (1.1 B) are in the app build people have (0.9.6), so their Help line shows. Not share-cards-more."
+  },
+  "app-year-card": {
+    "met": false,
+    "what": "Help only (decision 212 pattern, UX 2026-11-03): the Year card (1.1 J) is in the app build people have (0.9.6), so its Help line shows. Not year-card."
+  },
   "app-app-lock": {
     "met": true,
     "what": "Help only (decision 212): app lock (PIN, fingerprint or face; decision 188) is in the app build people have (0.9 closed test on), so its Help article shows. Not app-lock (the privacy text's clause, Vitor's)."
