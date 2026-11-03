@@ -1060,3 +1060,20 @@ describe("EntryEditor: a save answered after a sign-out in another tab (Reviewer
     expect(push).not.toHaveBeenCalled();
   });
 });
+
+describe("EntryEditor: the leave dialog open when a sign-out arrives (Reviewer #147 nit)", () => {
+  beforeEach(() => vi.stubGlobal("BroadcastChannel", undefined));
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("Keep draft keeps nothing for the signed-out user", () => {
+    renderEditor();
+    type("Asked about, then signed out elsewhere");
+    fireEvent.click(screen.getByTestId("entry-cancel"));
+    expect(screen.getByTestId("entry-leave-dialog")).toBeInTheDocument();
+    act(() => {
+      window.dispatchEvent(new StorageEvent("storage", { key: "mb:signed-out", newValue: JSON.stringify({ uid: "u1", mode: "delete" }) }));
+    });
+    fireEvent.click(screen.getByTestId("entry-keep-draft"));
+    expect(window.localStorage.getItem(NEW_KEY)).toBeNull();
+  });
+});

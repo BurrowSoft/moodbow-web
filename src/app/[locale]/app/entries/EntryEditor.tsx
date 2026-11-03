@@ -632,7 +632,9 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
             data-testid="entry-keep-draft"
             className={dialogButton()}
             onClick={() => {
-              writeDraft(draftKey, current.current);
+              // The dialog may have been open when a sign-out in another
+              // tab arrived: nothing is kept for that user then (Reviewer).
+              if (!signedOut.current) writeDraft(draftKey, current.current);
               leaveOn();
             }}
           >
