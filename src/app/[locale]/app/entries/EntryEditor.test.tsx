@@ -32,6 +32,7 @@ vi.mock("@/lib/ui/withTimeout", async (orig) => {
   return { ...real, SAVE_WAIT_MS: 300, withTimeout: <T,>(call: Promise<T>, ms: number) => (held ? call : real.withTimeout(call, ms)) };
 });
 const { EntryEditor } = await import("./EntryEditor");
+const { AnnounceContext, FocusTitleContext } = await import("../Announcer");
 
 const NEW_ID = "11111111-1111-4111-8111-111111111111";
 const DRAFT_ID = "22222222-2222-4222-8222-222222222222";
@@ -241,6 +242,36 @@ describe("EntryEditor: leaving", () => {
     expect(stored(NEW_KEY)).toMatchObject({ body: "Before closing" });
   });
 
+  it("a phone sending the tab to the background: the text not yet autosaved is written then (the app's #101)", () => {
+    const setVisibility = (state: DocumentVisibilityState) => Object.defineProperty(document, "visibilityState", { value: state, configurable: true });
+    try {
+      renderEditor();
+      type("Typed just now");
+      // Within the 2 s autosave: nothing written yet.
+      expect(window.localStorage.getItem(NEW_KEY)).toBeNull();
+      setVisibility("hidden");
+      document.dispatchEvent(new Event("visibilitychange"));
+      expect(stored(NEW_KEY)).toMatchObject({ body: "Typed just now" });
+      setVisibility("visible");
+      type("Typed just now, and more");
+      window.dispatchEvent(new Event("pagehide"));
+      expect(stored(NEW_KEY)).toMatchObject({ body: "Typed just now, and more" });
+    } finally {
+      setVisibility("visible");
+    }
+  });
+
+  it("hidden with nothing to keep, or after Discard: nothing is written", () => {
+    renderEditor();
+    window.dispatchEvent(new Event("pagehide"));
+    expect(window.localStorage.getItem(NEW_KEY)).toBeNull();
+    type("Not wanted");
+    fireEvent.click(screen.getByTestId("entry-cancel"));
+    fireEvent.click(screen.getByTestId("entry-discard"));
+    window.dispatchEvent(new Event("pagehide"));
+    expect(window.localStorage.getItem(NEW_KEY)).toBeNull();
+  });
+
   it("Escape closes a dialog", () => {
     renderEditor();
     type("x");
@@ -282,6 +313,45 @@ describe("EntryEditor: editing", () => {
     await waitFor(() => expect(deleteEntry).toHaveBeenCalled());
     expect(Object.fromEntries((deleteEntry.mock.calls[0][1] as FormData).entries())).toEqual({ id: ENTRY.id, from: "/app" });
     expect(window.localStorage.getItem(EDIT_KEY)).toBeNull();
+  });
+
+  it("deleted: 'Entry deleted' is said from above the routes (the redirect replaces the page; parity with the app); not when the session ended", async () => {
+    const onError = vi.spyOn(console, "error").mockImplementation(() => {});
+    const swallow = (e: Event) => e.preventDefault();
+    window.addEventListener("error", swallow);
+    try {
+      for (const [url, said] of [
+        ["/app/timeline", true],
+        ["/th/app", true],
+        ["/sign-in?signed_out=session", false],
+      ] as const) {
+        const announce = vi.fn();
+        const focusTitle = vi.fn();
+        deleteEntry.mockReset();
+        deleteEntry.mockRejectedValue(Object.assign(new Error("NEXT_REDIRECT"), { digest: `NEXT_REDIRECT;replace;${url};303;` }));
+        const view = render(
+          <AnnounceContext.Provider value={announce}>
+            <FocusTitleContext.Provider value={focusTitle}>
+              <NextIntlClientProvider locale="en" messages={messages}>
+                <EntryEditor initial={ENTRY} newId={ENTRY.id} uid="u1" today="2026-10-02" />
+              </NextIntlClientProvider>
+            </FocusTitleContext.Provider>
+          </AnnounceContext.Provider>,
+        );
+        fireEvent.click(screen.getByTestId("entry-delete"));
+        fireEvent.click(screen.getByTestId("entry-delete-confirm"));
+        await waitFor(() => expect(deleteEntry).toHaveBeenCalled());
+        await new Promise((r) => setTimeout(r, 20));
+        if (said) expect(announce, url).toHaveBeenCalledWith(m.entryDeletedAnnounce);
+        else expect(announce, url).not.toHaveBeenCalled();
+        // App #104: focus goes to the destination's title once it's there.
+        expect(focusTitle, url).toHaveBeenCalledTimes(said ? 1 : 0);
+        view.unmount();
+      }
+    } finally {
+      window.removeEventListener("error", swallow);
+      onError.mockRestore();
+    }
   });
 
   it("a new entry has no Delete", () => {
@@ -550,6 +620,85 @@ describe("EntryEditor: nothing typed is lost (reviewer #12)", () => {
     type("Typed, then the tab bar");
     unmount();
     expect(stored(NEW_KEY)).toMatchObject({ body: "Typed, then the tab bar" });
+  });
+
+  it("a save answered after leaving and coming back: the newer draft stays, and nothing leaves (the app's #101, note 2)", async () => {
+    let answer: (value: unknown) => void = () => {};
+    saveEntry.mockReturnValue(new Promise((resolve) => (answer = resolve)));
+    const first = renderEditor();
+    type("First");
+    fireEvent.click(screen.getByTestId("entry-save"));
+    first.unmount();
+    // Back in the editor: the draft is restored, and more is typed.
+    renderEditor();
+    expect(screen.getByTestId("entry-text")).toHaveValue("First");
+    type("First, and more");
+    window.dispatchEvent(new Event("beforeunload", { cancelable: true }));
+    expect(stored(NEW_KEY)).toMatchObject({ id: NEW_ID, body: "First, and more" });
+    await act(async () => answer({ status: "saved", entry: { ...ENTRY, id: NEW_ID, entry_date: "2026-10-02", body: "First" } }));
+    expect(stored(NEW_KEY)).toMatchObject({ id: NEW_ID, body: "First, and more" });
+    expect(screen.getByTestId("entry-text")).toHaveValue("First, and more");
+    expect(push).not.toHaveBeenCalled();
+  });
+
+  it("typed while the save was out, still in the editor: it stays, with the newer text on top of the saved version (UX, #143 F1)", async () => {
+    let answer: (value: unknown) => void = () => {};
+    saveEntry.mockReturnValueOnce(new Promise((resolve) => (answer = resolve)));
+    renderEditor(ENTRY);
+    type("Calm, then busy.");
+    fireEvent.click(screen.getByTestId("entry-save"));
+    type("Calm, then busy. Then calm again.");
+    const SAVED = { ...ENTRY, body: "Calm, then busy.", updated_at: "2026-10-02T09:00:00Z" };
+    await act(async () => answer({ status: "saved", entry: SAVED }));
+    expect(screen.getByTestId("entry-text")).toHaveValue("Calm, then busy. Then calm again.");
+    expect(push).not.toHaveBeenCalled();
+    expect(stored(EDIT_KEY)).toMatchObject({ body: "Calm, then busy. Then calm again.", base: SAVED.updated_at });
+    // The next Save is a plain update of the version just saved.
+    saveEntry.mockResolvedValueOnce({ status: "saved", entry: { ...SAVED, body: "Calm, then busy. Then calm again.", updated_at: "2026-10-02T09:01:00Z" } });
+    fireEvent.click(screen.getByTestId("entry-save"));
+    await waitFor(() => expect(saveEntry).toHaveBeenCalledTimes(2));
+    expect(sent(1)).toMatchObject({ body: "Calm, then busy. Then calm again.", expected_updated_at: SAVED.updated_at });
+    await waitFor(() => expect(push).toHaveBeenCalledWith("/app"));
+    expect(window.localStorage.getItem(EDIT_KEY)).toBeNull();
+  });
+
+  it("typed and autosaved during the save, then back to what was sent: saved, no draft left, and the editor leaves (Reviewer, #143)", async () => {
+    let answer: (value: unknown) => void = () => {};
+    saveEntry.mockReturnValueOnce(new Promise((resolve) => (answer = resolve)));
+    renderEditor(ENTRY);
+    type("A");
+    fireEvent.click(screen.getByTestId("entry-save"));
+    type("AB");
+    // The autosave of "AB" (as the 2 s timer would write it).
+    window.dispatchEvent(new Event("beforeunload", { cancelable: true }));
+    expect(stored(EDIT_KEY)).toMatchObject({ body: "AB" });
+    type("A");
+    await act(async () => answer({ status: "saved", entry: { ...ENTRY, body: "A", updated_at: "2026-10-02T09:00:00Z" } }));
+    expect(window.localStorage.getItem(EDIT_KEY)).toBeNull();
+    await waitFor(() => expect(push).toHaveBeenCalledWith("/app"));
+    expect(window.localStorage.getItem(EDIT_KEY)).toBeNull();
+  });
+
+  it("nothing typed while the save was out: as before, the draft is cleared and the editor leaves", async () => {
+    saveEntry.mockResolvedValueOnce({ status: "saved", entry: { ...ENTRY, body: "Just this.", updated_at: "2026-10-02T09:00:00Z" } });
+    renderEditor(ENTRY);
+    type("Just this.");
+    fireEvent.click(screen.getByTestId("entry-save"));
+    await waitFor(() => expect(push).toHaveBeenCalledWith("/app"));
+    expect(window.localStorage.getItem(EDIT_KEY)).toBeNull();
+  });
+
+  it("a save answered after leaving, nothing newer typed: its own draft is cleared, and nothing leaves", async () => {
+    let answer: (value: unknown) => void = () => {};
+    saveEntry.mockReturnValue(new Promise((resolve) => (answer = resolve)));
+    const first = renderEditor();
+    type("Only this");
+    fireEvent.click(screen.getByTestId("entry-save"));
+    first.unmount();
+    expect(stored(NEW_KEY)).toMatchObject({ body: "Only this" });
+    await act(async () => answer({ status: "saved", entry: { ...ENTRY, id: NEW_ID, entry_date: "2026-10-02", body: "Only this" } }));
+    expect(window.localStorage.getItem(NEW_KEY)).toBeNull();
+    expect(push).not.toHaveBeenCalled();
   });
 
   it("after a save, Discard or Delete nothing is written back", async () => {
@@ -845,5 +994,86 @@ describe("EntryEditor: a new entry's draft needs text (Web Tester #83)", () => {
     type("A few words");
     unmount();
     expect(stored(NEW_KEY)).toMatchObject({ body: "A few words" });
+  });
+});
+
+describe("EntryEditor: a sign-out in another tab (UX & PM 2026-11-03, option C)", () => {
+  // The storage-event route (no BroadcastChannel): what another tab's write looks like here.
+  const signedOutElsewhere = (uid: string, mode: "keep" | "delete") =>
+    act(() => {
+      window.dispatchEvent(new StorageEvent("storage", { key: "mb:signed-out", newValue: JSON.stringify({ uid, mode }) }));
+    });
+  beforeEach(() => vi.stubGlobal("BroadcastChannel", undefined));
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("Keep it: what's here is kept once, then nothing more is written (no autosave, unmount or unload)", async () => {
+    const { unmount } = renderEditor();
+    type("Kept for next time");
+    signedOutElsewhere("u1", "keep");
+    expect(stored(NEW_KEY)).toMatchObject({ body: "Kept for next time" });
+    type("Typed after the sign-out");
+    window.dispatchEvent(new Event("beforeunload", { cancelable: true }));
+    await new Promise((r) => setTimeout(r, 2100));
+    unmount();
+    expect(stored(NEW_KEY)).toMatchObject({ body: "Kept for next time" });
+  }, 5000);
+
+  it("Delete it: what this editor holds goes too, and nothing is written back", () => {
+    const { unmount } = renderEditor();
+    type("Not to be kept");
+    window.dispatchEvent(new Event("beforeunload", { cancelable: true }));
+    expect(stored(NEW_KEY)).toMatchObject({ body: "Not to be kept" });
+    signedOutElsewhere("u1", "delete");
+    expect(window.localStorage.getItem(NEW_KEY)).toBeNull();
+    type("Still typing");
+    window.dispatchEvent(new Event("beforeunload", { cancelable: true }));
+    unmount();
+    expect(window.localStorage.getItem(NEW_KEY)).toBeNull();
+  });
+
+  it("another user's sign-out changes nothing here", () => {
+    const { unmount } = renderEditor();
+    type("Mine");
+    signedOutElsewhere("someone-else", "delete");
+    unmount();
+    expect(stored(NEW_KEY)).toMatchObject({ body: "Mine" });
+  });
+});
+
+describe("EntryEditor: a save answered after a sign-out in another tab (Reviewer #147, merge note)", () => {
+  beforeEach(() => vi.stubGlobal("BroadcastChannel", undefined));
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("typed during the save, then signed out elsewhere (Delete it): the late answer writes nothing back", async () => {
+    let answer: (value: unknown) => void = () => {};
+    saveEntry.mockReturnValueOnce(new Promise((resolve) => (answer = resolve)));
+    renderEditor(ENTRY);
+    type("Sent");
+    fireEvent.click(screen.getByTestId("entry-save"));
+    type("Sent, and more");
+    act(() => {
+      window.dispatchEvent(new StorageEvent("storage", { key: "mb:signed-out", newValue: JSON.stringify({ uid: "u1", mode: "delete" }) }));
+    });
+    expect(window.localStorage.getItem(EDIT_KEY)).toBeNull();
+    await act(async () => answer({ status: "saved", entry: { ...ENTRY, body: "Sent", updated_at: "2026-10-02T09:00:00Z" } }));
+    expect(window.localStorage.getItem(EDIT_KEY)).toBeNull();
+    expect(push).not.toHaveBeenCalled();
+  });
+});
+
+describe("EntryEditor: the leave dialog open when a sign-out arrives (Reviewer #147 nit)", () => {
+  beforeEach(() => vi.stubGlobal("BroadcastChannel", undefined));
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("Keep draft keeps nothing for the signed-out user", () => {
+    renderEditor();
+    type("Asked about, then signed out elsewhere");
+    fireEvent.click(screen.getByTestId("entry-cancel"));
+    expect(screen.getByTestId("entry-leave-dialog")).toBeInTheDocument();
+    act(() => {
+      window.dispatchEvent(new StorageEvent("storage", { key: "mb:signed-out", newValue: JSON.stringify({ uid: "u1", mode: "delete" }) }));
+    });
+    fireEvent.click(screen.getByTestId("entry-keep-draft"));
+    expect(window.localStorage.getItem(NEW_KEY)).toBeNull();
   });
 });

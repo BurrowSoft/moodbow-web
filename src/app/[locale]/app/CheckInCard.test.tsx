@@ -541,6 +541,50 @@ describe("CheckInCard: a live save sent to sign-in or Consent (reviewer #11/#22)
   });
 });
 
+describe("CheckInCard: signed out in another tab (UX & PM 2026-11-03, option C; Reviewer #147 F1)", () => {
+  // The storage-event route (no BroadcastChannel): what another tab's sign-out looks like here.
+  const signedOutElsewhere = (uid: string, mode: "keep" | "delete") =>
+    act(() => {
+      window.dispatchEvent(new StorageEvent("storage", { key: "mb:signed-out", newValue: JSON.stringify({ uid, mode }) }));
+    });
+  beforeEach(() => vi.stubGlobal("BroadcastChannel", undefined));
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("a shared computer: this tab still shows the old account, the next person taps a mood; nothing is kept under the old uid", async () => {
+    saveCheckIn.mockRejectedValue(Object.assign(new Error("NEXT_REDIRECT"), { digest: "NEXT_REDIRECT;replace;/sign-in?signed_out=session;307;" }));
+    const onError = vi.spyOn(console, "error").mockImplementation(() => {});
+    const swallow = (e: Event) => e.preventDefault();
+    window.addEventListener("error", swallow);
+    try {
+      renderCard(null);
+      signedOutElsewhere("u1", "delete");
+      fireEvent.click(screen.getByTestId("checkin-mood-4"));
+      fireEvent.click(screen.getByTestId("checkin-save"));
+      await waitFor(() => expect(saveCheckIn).toHaveBeenCalled());
+      await new Promise((r) => setTimeout(r, 20));
+      expect(anyPending()).toBe(false);
+    } finally {
+      window.removeEventListener("error", swallow);
+      onError.mockRestore();
+    }
+  });
+
+  it("Delete it: this user's copies still here are removed (a write in the async window); another user's sign-out changes nothing", () => {
+    window.localStorage.setItem(dayKey("2026-10-01"), JSON.stringify({ fields: { mood: 3, sleepHours: "", sleepQuality: "", exercise: "", stress: "" }, expected: "", date: "2026-10-01" }));
+    // Offline, so the copy isn't simply synced on mount.
+    setOnline(false);
+    try {
+      renderCard(null);
+      signedOutElsewhere("someone-else", "delete");
+      expect(anyPending()).toBe(true);
+      signedOutElsewhere("u1", "delete");
+      expect(anyPending()).toBe(false);
+    } finally {
+      setOnline(true);
+    }
+  });
+});
+
 describe("CheckInCard: the mood faces (mood-faces.json; UX, superseding decision 105)", () => {
   it("each face: its Sunrise circle with the contract's eyes and mouth; all five labels shown, the chosen one in the accent", () => {
     renderCard(null);

@@ -5,7 +5,7 @@ topic: Your journal
 ---
 Tap **Write about your day** to start an entry. Write as much or as little as you like (up to 20,000 characters), and change the date if it's about an earlier day.
 
-{pending:writing_prompts}When a new entry is empty, Moodbow may offer one gentle question to start from; tap **Another** for a different one, or just start writing.{/pending}
+{pending:app_writing_prompts}When a new entry is empty, Moodbow may offer one gentle question to start from; tap **Another** for a different one, or just start writing.{/pending}
 
 Open an entry to read it. To change it, tap the text (or ⋯ → **Edit entry**); to add more, tap **Add to this entry…** at the bottom.
 

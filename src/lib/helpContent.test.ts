@@ -116,6 +116,40 @@ describe("Help is public, scoped to what's live (decision 212)", () => {
     expect(findArticle("en", "backing-up")!.topic).toBe("Privacy & account");
   });
 
+  // The app releases' features (UX 2026-11-03): each article or line shows
+  // once its help-only app id is met (the app build people have), in en and
+  // th, with the app's way (✕ or Back) and no web-only steps until the web
+  // journal is live.
+  describe("0.9.5 / 0.9.6: shown by the app build people have", () => {
+    const withMet = (ids: string[]) => (id: string) => ids.includes(id) || isPendingMet(id);
+    const render = (locale: string, slug: string, ids: string[]) => renderArticle(findArticle(locale, slug)!, withMet(ids));
+    for (const [id, slug, text] of [
+      ["app_calendar", "calendar", "Calendar"],
+      ["app_search", "search", "(or use Back)"],
+      ["app_export_csv", "privacy-and-data", "Spreadsheet (.csv)"],
+      ["app_writing_prompts", "entries", "Another"],
+      ["app_share_cards_more", "share-card", "Milestone"],
+      ["app_year_card", "share-card", "twelve bands"],
+    ] as const) {
+      it(`${id}: ${slug} says "${text}" only once it's met`, () => {
+        expect(render("en", slug, []), id).not.toContain(text);
+        expect(render("en", slug, [id]), id).toContain(text);
+        // th has the same block (parity), so it appears with the same id.
+        expect(render("th", slug, []), id).not.toBe(render("th", slug, [id]));
+      });
+    }
+
+    it("search and the CSV line: no web-only steps or web import while those are off", () => {
+      const search = render("en", "search", ["app_search"]);
+      expect(search).not.toContain("Esc");
+      expect(render("en", "search", ["app_search", "web_journal_live"])).toContain("press Esc on the web");
+      const csv = render("en", "privacy-and-data", ["app_export_csv"]);
+      expect(csv).toContain("Excel or Google Sheets.");
+      expect(csv).not.toContain("import");
+      expect(render("en", "privacy-and-data", ["app_export_csv", "import_live"])).toContain("which Moodbow can import again on the web.");
+    });
+  });
+
   it("no web journal line while it's off, and no AI line while AI is off", () => {
     expect(published("getting-started")).not.toContain("moodbow.com");
     expect(published("getting-started")).not.toContain("on the web");

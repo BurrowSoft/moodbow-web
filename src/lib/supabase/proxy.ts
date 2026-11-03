@@ -60,6 +60,16 @@ export function authCookieNames(req: NextRequest): string[] {
     .filter((name) => AUTH_COOKIE.test(name));
 }
 
+// A form on a signed-in page sent with no session cookie at all (cleared,
+// or gone from the browser while the page stayed open). There's no session
+// for Supabase to end, so the action would run signed out, and Supabase
+// refuses its RPC with a permission error, not not_authenticated: the form
+// showed its generic error instead of going to sign in (Web Tester, #146
+// A2). The proxy answers it as an ended session. Only with Supabase set up.
+export function actionWithoutSession(req: NextRequest, path: string): boolean {
+  return !!supabaseConfig() && signedInOnly(path) && req.method === "POST" && req.headers.has("next-action") && authCookieNames(req).length === 0;
+}
+
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const fromB64url = (s: string) => Buffer.from(s, "base64url").toString("utf8");
 
