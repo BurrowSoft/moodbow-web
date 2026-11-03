@@ -20,7 +20,17 @@ const SET_AFTER_MS = 100;
 const CLEAR_AFTER_MS = 5000;
 const FOCUS_EXPIRES_MS = 10_000;
 
+// Nobody has moved focus since the old page went: it's on the body, nowhere,
+// or on a node that left with that page.
+function focusUnclaimed(): boolean {
+  const active = document.activeElement;
+  return !active || active === document.body || active === document.documentElement || !active.isConnected;
+}
+
+// Returns true when done: focused, or focus was already taken in the new
+// page (Reviewer, #146 F1: never pulled back from where the person went).
 function focusTitle(): boolean {
+  if (!focusUnclaimed()) return true;
   const h1 = document.querySelector<HTMLElement>("#main h1");
   if (!h1) return false;
   // Focusable from script only, not a tab stop.

@@ -103,6 +103,18 @@ describe("AnnouncerProvider: focus on the title after leaving (app #104)", () =>
     expect(screen.getByRole("heading", { level: 1 })).toHaveFocus();
   });
 
+  it("focus already taken in the new page while the title streams in: it isn't pulled back (Reviewer, #146 F1)", async () => {
+    const view = render(<Page title={false} />);
+    fireEvent.click(screen.getByTestId("leave"));
+    pathname = "/app";
+    view.rerender(<Page title={false} />);
+    // The person tabs into the page before its title arrives.
+    screen.getByTestId("leave").focus();
+    await act(async () => view.rerender(<Page title />));
+    expect(screen.getByTestId("leave")).toHaveFocus();
+    expect(screen.getByRole("heading", { level: 1 })).not.toHaveFocus();
+  });
+
   it("a request whose navigation never came expires: a later page change doesn't move focus", () => {
     const view = render(<Page title />);
     fireEvent.click(screen.getByTestId("leave"));
