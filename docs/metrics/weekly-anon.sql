@@ -2,7 +2,8 @@
 -- 2026-11-10. Drafted by Web Dev for UX's review; NOT run anywhere yet.
 --
 -- Read-only and counts only: no ids, emails or journal text leave the
--- database. It runs inside a READ ONLY transaction, so any write fails.
+-- database. The leading SET TRANSACTION READ ONLY makes any write fail,
+-- and the SQL editor still shows the rows.
 -- It needs postgres (auth.* isn't readable by the client roles).
 --
 -- Who runs it:
@@ -33,6 +34,10 @@
 --   public.check_ins user_id, created_at (when it was saved, not
 --                    local_date, which can be an earlier day)
 --
+-- Caveat for (c): check_ins.created_at is when the server received the
+-- check-in. One saved offline on the phone syncs later, so a check-in made
+-- on day 6 that syncs on day 8 isn't counted; (c) can read slightly low.
+--
 -- "Started anonymous", the one assumption to confirm on staging: linking
 -- an email clears is_anonymous, and nothing else records how an account
 -- started. An email sign-up gets its 'email' identity in the same request
@@ -53,7 +58,7 @@
 -- Staging fixture accounts are counted on staging; read staging for the
 -- shape, prod for the numbers.
 
-BEGIN TRANSACTION READ ONLY;
+SET TRANSACTION READ ONLY;
 
 WITH accounts AS (
   SELECT
@@ -93,5 +98,3 @@ SELECT
 FROM anon a
 GROUP BY 2, 1
 ORDER BY week_start;
-
-ROLLBACK;
