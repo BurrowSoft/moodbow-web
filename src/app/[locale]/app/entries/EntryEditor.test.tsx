@@ -32,7 +32,7 @@ vi.mock("@/lib/ui/withTimeout", async (orig) => {
   return { ...real, SAVE_WAIT_MS: 300, withTimeout: <T,>(call: Promise<T>, ms: number) => (held ? call : real.withTimeout(call, ms)) };
 });
 const { EntryEditor } = await import("./EntryEditor");
-const { AnnounceContext } = await import("../Announcer");
+const { AnnounceContext, FocusTitleContext } = await import("../Announcer");
 
 const NEW_ID = "11111111-1111-4111-8111-111111111111";
 const DRAFT_ID = "22222222-2222-4222-8222-222222222222";
@@ -326,13 +326,16 @@ describe("EntryEditor: editing", () => {
         ["/sign-in?signed_out=session", false],
       ] as const) {
         const announce = vi.fn();
+        const focusTitle = vi.fn();
         deleteEntry.mockReset();
         deleteEntry.mockRejectedValue(Object.assign(new Error("NEXT_REDIRECT"), { digest: `NEXT_REDIRECT;replace;${url};303;` }));
         const view = render(
           <AnnounceContext.Provider value={announce}>
-            <NextIntlClientProvider locale="en" messages={messages}>
-              <EntryEditor initial={ENTRY} newId={ENTRY.id} uid="u1" today="2026-10-02" />
-            </NextIntlClientProvider>
+            <FocusTitleContext.Provider value={focusTitle}>
+              <NextIntlClientProvider locale="en" messages={messages}>
+                <EntryEditor initial={ENTRY} newId={ENTRY.id} uid="u1" today="2026-10-02" />
+              </NextIntlClientProvider>
+            </FocusTitleContext.Provider>
           </AnnounceContext.Provider>,
         );
         fireEvent.click(screen.getByTestId("entry-delete"));
@@ -341,6 +344,8 @@ describe("EntryEditor: editing", () => {
         await new Promise((r) => setTimeout(r, 20));
         if (said) expect(announce, url).toHaveBeenCalledWith(m.entryDeletedAnnounce);
         else expect(announce, url).not.toHaveBeenCalled();
+        // App #104: focus goes to the destination's title once it's there.
+        expect(focusTitle, url).toHaveBeenCalledTimes(said ? 1 : 0);
         view.unmount();
       }
     } finally {
