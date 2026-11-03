@@ -105,8 +105,13 @@ describe("Help is public, scoped to what's live (decision 212)", () => {
     expect(published("reminders")).toContain("Daily reminder");
     expect(published("share-card")).toContain("Moodbow rainbow");
     expect(published("timeline")).toContain("Share this month");
-    // More cards and the year card aren't in the build.
-    expect(published("share-card")).not.toContain("Milestone");
+    // 0.9.6 is published (UX): the chart, milestone and year cards and the
+    // writing prompt show too, in en and th.
+    const th = (slug: string) => renderArticle(findArticle("th", slug)!);
+    for (const label of ["Chart", "Milestone", "Year"]) expect(published("share-card")).toContain(`<strong>${label}</strong>`);
+    for (const label of ["กราฟ", "หมุดหมาย", "ปี"]) expect(th("share-card")).toContain(`<strong>${label}</strong>`);
+    expect(published("entries")).toContain("<strong>Another</strong>");
+    expect(th("entries")).toContain("<strong>ข้อความอื่น</strong>");
   });
 
   it("the app's start without an email (0.9.4, decision 216): getting started and backing up show", () => {
