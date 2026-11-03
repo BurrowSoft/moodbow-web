@@ -42,10 +42,11 @@
 -- an email clears is_anonymous, and nothing else records how an account
 -- started. An email sign-up gets its 'email' identity in the same request
 -- as the user (milliseconds apart); an anonymous account gets one only when
--- its email is confirmed (Back up), later. So an account started
--- anonymous if it still is, or if its email identity came more than a
--- minute after the account (the staging check above). Google/Apple
--- sign-in (H) would need its own rule; it isn't live.
+-- it links an email (Back up), later. So an account started anonymous if
+-- it still is, or if its email identity came more than a minute after the
+-- account (the staging check above). Accepted blind spot (UX): an
+-- anonymous account backed up within its first minute isn't counted at
+-- all. Google/Apple sign-in (H) would need its own rule; it isn't live.
 --
 -- Converted = no longer anonymous and the email confirmed (a link that's
 -- only pending isn't a backup, as in 013). Its date is
