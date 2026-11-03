@@ -13,6 +13,7 @@ import { MAX_ENTRY_CHARS, sameEntry, type Entry } from "@/lib/journal/entry";
 import { localKey } from "@/lib/localData";
 import { flagsCrisis } from "@/lib/safety/crisis";
 import { holdLeaving } from "@/lib/ui/leaveGuard";
+import { onSignOut } from "@/lib/signOutSignal";
 import { SAVE_WAIT_MS, withTimeout } from "@/lib/ui/withTimeout";
 import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
 import { PRIMARY_SAVE } from "@/lib/ui/journalLayout";
@@ -168,6 +169,25 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
   });
   // Set once the text is saved, discarded or deleted: nothing left to keep.
   const finished = useRef(false);
+  // Signed out in another tab: nothing more is written for this user here.
+  const signedOut = useRef(false);
+
+  // A deliberate sign-out elsewhere in this browser (UX & PM 2026-11-03,
+  // option C): "Keep it" (or nothing to ask about) keeps what's here once,
+  // "Delete it" drops it; either way this editor stops writing, so it can't
+  // put back what the sign-out wiped. finished covers the unmount, unload
+  // and hide writes; signedOut the autosave and Save's own copy.
+  useEffect(() => {
+    if (!restore) return;
+    return onSignOut(({ uid: who, mode }) => {
+      if (who !== uid || signedOut.current) return;
+      if (mode === "keep" && keepRef.current && !finished.current) writeDraft(draftKey, current.current);
+      signedOut.current = true;
+      finished.current = true;
+      if (mode === "delete") removeDraft(draftKey);
+    });
+  }, [draftKey, restore, uid]);
+
   // A save's answer can come after the editor was left: it then neither
   // leaves (again, from wherever the person is now) nor touches this one.
   const mounted = useRef(true);
@@ -225,7 +245,9 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
       removeDraft(draftKey);
       return;
     }
-    const timer = window.setTimeout(() => writeDraft(draftKey, current.current), AUTOSAVE_MS);
+    const timer = window.setTimeout(() => {
+      if (!signedOut.current) writeDraft(draftKey, current.current);
+    }, AUTOSAVE_MS);
     return () => window.clearTimeout(timer);
   }, [fields, keep, draftKey, restore]);
 
@@ -374,7 +396,9 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
       // update (not "changed elsewhere"); it stays a draft, nothing leaves.
       if (!same(current.current, sent)) {
         const newer = { ...current.current, base: next.entry.updated_at };
-        writeDraft(draftKey, newer);
+        // Not once signed out in another tab: a save answered after that
+        // mustn't write the text back (Reviewer #147, merge note).
+        if (!signedOut.current) writeDraft(draftKey, newer);
         lastSaved.current = next.entry;
         setBase(next.entry.updated_at);
         setSaved(fromEntry(next.entry));
@@ -444,7 +468,7 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
     waitTimer.current = window.setTimeout(() => setWaitedOut(true), SAVE_WAIT_MS);
     // Kept before the request: a redirect (session ended, consent) unmounts
     // the editor before any answer comes back.
-    if (restore) writeDraft(draftKey, { ...fields, id, base: withBase });
+    if (restore && !signedOut.current) writeDraft(draftKey, { ...fields, id, base: withBase });
     const form = new FormData();
     form.set("id", id);
     form.set("entry_date", fields.date);
@@ -608,7 +632,9 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
             data-testid="entry-keep-draft"
             className={dialogButton()}
             onClick={() => {
-              writeDraft(draftKey, current.current);
+              // The dialog may have been open when a sign-out in another
+              // tab arrived: nothing is kept for that user then (Reviewer).
+              if (!signedOut.current) writeDraft(draftKey, current.current);
               leaveOn();
             }}
           >

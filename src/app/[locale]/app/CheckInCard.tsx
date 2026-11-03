@@ -6,6 +6,7 @@ import { EXERCISE_MINUTES, MOODS, SLEEP_HOURS, SLEEP_QUALITIES, SLEEP_START, STR
 import { dateLine } from "@/lib/journal/today";
 import { valueHex } from "@/lib/journal/valueColours";
 import { localKey } from "@/lib/localData";
+import { onSignOut } from "@/lib/signOutSignal";
 import { SAVE_WAIT_MS, TimedOut, withTimeout } from "@/lib/ui/withTimeout";
 import { ValueDot } from "@/components/ValueDot";
 import { Dialog, dialogButton } from "@/components/Dialog";
@@ -68,7 +69,7 @@ function readAllPending(uid: string): { key: string; pending: Pending }[] {
   return found.sort((a, b) => a.pending.date.localeCompare(b.pending.date));
 }
 
-function removePending(key: string) {
+export function removePending(key: string) {
   try {
     window.localStorage.removeItem(key);
   } catch {
@@ -90,6 +91,12 @@ function pendingFromForm(form: FormData): Pending {
     expected: text("expected_updated_at"),
     date: text("local_date"),
   };
+}
+
+// This user's pending copies as the forms that save them, oldest day first:
+// Me → Sign out tries them once before it asks (UX & PM 2026-11-03).
+export function pendingForms(uid: string): { key: string; form: FormData }[] {
+  return readAllPending(uid).map(({ key, pending }) => ({ key, form: toFormData(pending.fields, pending.expected, pending.date, key) }));
 }
 
 function toFormData(fields: Fields, expectedUpdatedAt: string, date: string, fromPending?: string): FormData {
@@ -250,6 +257,25 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
   const [storageFailed, setStorageFailed] = useState(false);
   // The pending copies being sent right now (by key), so none goes twice.
   const flushing = useRef(new Set<string>());
+  // Signed out in another tab (UX & PM 2026-11-03, option C; Reviewer #147
+  // F1): this card keeps no more copies for that user, so a mood tapped here
+  // afterwards (on a shared computer, by the next person) or a save still in
+  // flight can't land in the old account's journal later. "Delete it" also
+  // removes this user's copies that are still here.
+  const signedOut = useRef(false);
+  useEffect(
+    () =>
+      onSignOut(({ uid: who, mode }) => {
+        if (who !== uid) return;
+        signedOut.current = true;
+        if (mode === "delete") for (const { key } of readAllPending(uid)) removePending(key);
+      }),
+    [uid],
+  );
+  // Every pending copy this card writes goes through here.
+  const putPending = (key: string, value: string) => {
+    if (!signedOut.current) window.localStorage.setItem(key, value);
+  };
   // The live save's wait, kept outside the action (Web Tester, #122 T1a/T1b):
   // while the save's request is open, the action's own result can't commit
   // (React entangles it with Next's open transition; "saved in this browser"
@@ -279,7 +305,7 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
         if (!fromPending) {
           try {
             const copy = pendingFromForm(form);
-            window.localStorage.setItem(pendingKey(uid, copy.date), JSON.stringify(copy));
+            putPending(pendingKey(uid, copy.date), JSON.stringify(copy));
           } catch {
             // storage unavailable: nothing more can be done before leaving
           }
@@ -292,7 +318,7 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
       if (fromPending) return prev;
       try {
         const copy = pendingFromForm(form);
-        window.localStorage.setItem(pendingKey(uid, copy.date), JSON.stringify(copy));
+        putPending(pendingKey(uid, copy.date), JSON.stringify(copy));
       } catch {
         return { status: "error", error: "generic" };
       }
@@ -354,7 +380,7 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
         if (next.checkIn) addConflict({ date, mine: mine.fields, theirs: next.checkIn, key });
         else {
           try {
-            window.localStorage.setItem(key, JSON.stringify({ ...mine, expected: "" } satisfies Pending));
+            putPending(key, JSON.stringify({ ...mine, expected: "" } satisfies Pending));
           } catch {
             // storage unavailable: the copy stays as it was
           }
@@ -371,7 +397,7 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
       const key = pendingKey(uid, mine.date);
       let kept = true;
       try {
-        window.localStorage.setItem(key, JSON.stringify(mine));
+        putPending(key, JSON.stringify(mine));
       } catch {
         kept = false;
       }
@@ -415,7 +441,7 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
     setStorageFailed(false);
     if (!navigator.onLine) {
       try {
-        window.localStorage.setItem(pendingKey(uid, cardDate), JSON.stringify({ fields, expected, date: cardDate } satisfies Pending));
+        putPending(pendingKey(uid, cardDate), JSON.stringify({ fields, expected, date: cardDate } satisfies Pending));
       } catch {
         // storage unavailable: nothing was kept, so don't say it was saved
         setStorageFailed(true);
@@ -430,7 +456,7 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
     keptFor.current = null;
     waitTimer.current = window.setTimeout(() => {
       try {
-        window.localStorage.setItem(pendingKey(uid, cardDate), JSON.stringify(pendingFromForm(form)));
+        putPending(pendingKey(uid, cardDate), JSON.stringify(pendingFromForm(form)));
       } catch {
         setStorageFailed(true);
         return;
@@ -451,7 +477,7 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
       // first with the new lock), so a dropped request loses nothing.
       if (c.key) {
         try {
-          window.localStorage.setItem(c.key, JSON.stringify({ fields: c.mine, expected: c.theirs.updated_at, date: c.date } satisfies Pending));
+          putPending(c.key, JSON.stringify({ fields: c.mine, expected: c.theirs.updated_at, date: c.date } satisfies Pending));
         } catch {
           // storage unavailable: the request below still goes
         }
