@@ -187,7 +187,7 @@ test.describe("launch journeys", () => {
 // same follow-up that lands it (until then it's skipped, not failed).
 const LANDED = {
   hiddenDraft: true, // #142: the draft is written when the page is hidden
-  signOutChoice: false, // #147: Sign out asks Keep it / Delete it
+  signOutChoice: true, // #147: Sign out asks Keep it / Delete it
   deleteAnnounce: true, // #145 + #146: "Entry deleted", focus on the h1
 };
 
