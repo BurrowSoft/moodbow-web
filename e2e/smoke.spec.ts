@@ -134,6 +134,17 @@ test.describe("language: Thai is a draft, not offered (thai-offered-live)", () =
     await expect(page.locator('link[rel="alternate"][hreflang="th"]')).toHaveCount(0);
   });
 
+  test("/help/backing-up: the steps keep their numbers (an ol in help or legal text)", async ({ page }) => {
+    const res = await page.goto("/help/backing-up");
+    expect(res?.status()).toBe(200);
+    const steps = page.locator(".legal-prose ol");
+    await expect(steps).toHaveCSS("list-style-type", "decimal");
+    await expect(steps.locator("li")).toHaveCount(4);
+    // The bullets stay as they were.
+    await page.goto("/help/getting-started");
+    await expect(page.locator(".legal-prose ul").first()).toHaveCSS("list-style-type", "disc");
+  });
+
   test("/th/help/getting-started: the Thai article", async ({ page }) => {
     const res = await page.goto("/th/help/getting-started");
     expect(res?.status()).toBe(200);
