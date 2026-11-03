@@ -121,8 +121,10 @@ describe("Help is public, scoped to what's live (decision 212)", () => {
   // th, with the app's way (✕ or Back) and no web-only steps until the web
   // journal is live.
   describe("0.9.5 / 0.9.6: shown by the app build people have", () => {
-    const withMet = (ids: string[]) => (id: string) => ids.includes(id) || isPendingMet(id);
-    const render = (locale: string, slug: string, ids: string[]) => renderArticle(findArticle(locale, slug)!, withMet(ids));
+    // Both ways named, so these hold whether or not the id is met in
+    // content/conditions.json yet (the 0.9.5 / 0.9.6 flips just flip it).
+    const withMet = (on: string[], off: string[] = []) => (id: string) => on.includes(id) || (!off.includes(id) && isPendingMet(id));
+    const render = (locale: string, slug: string, on: string[], off: string[] = []) => renderArticle(findArticle(locale, slug)!, withMet(on, off));
     for (const [id, slug, text] of [
       ["app_calendar", "calendar", "Calendar"],
       ["app_search", "search", "(or use Back)"],
@@ -132,18 +134,18 @@ describe("Help is public, scoped to what's live (decision 212)", () => {
       ["app_year_card", "share-card", "twelve bands"],
     ] as const) {
       it(`${id}: ${slug} says "${text}" only once it's met`, () => {
-        expect(render("en", slug, []), id).not.toContain(text);
+        expect(render("en", slug, [], [id]), id).not.toContain(text);
         expect(render("en", slug, [id]), id).toContain(text);
         // th has the same block (parity), so it appears with the same id.
-        expect(render("th", slug, []), id).not.toBe(render("th", slug, [id]));
+        expect(render("th", slug, [], [id]), id).not.toBe(render("th", slug, [id]));
       });
     }
 
     it("search and the CSV line: no web-only steps or web import while those are off", () => {
-      const search = render("en", "search", ["app_search"]);
+      const search = render("en", "search", ["app_search"], ["web_journal_live"]);
       expect(search).not.toContain("Esc");
       expect(render("en", "search", ["app_search", "web_journal_live"])).toContain("press Esc on the web");
-      const csv = render("en", "privacy-and-data", ["app_export_csv"]);
+      const csv = render("en", "privacy-and-data", ["app_export_csv"], ["import_live"]);
       expect(csv).toContain("Excel or Google Sheets.");
       expect(csv).not.toContain("import");
       expect(render("en", "privacy-and-data", ["app_export_csv", "import_live"])).toContain("which Moodbow can import again on the web.");
