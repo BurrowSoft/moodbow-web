@@ -241,6 +241,36 @@ describe("EntryEditor: leaving", () => {
     expect(stored(NEW_KEY)).toMatchObject({ body: "Before closing" });
   });
 
+  it("a phone sending the tab to the background: the text not yet autosaved is written then (the app's #101)", () => {
+    const setVisibility = (state: DocumentVisibilityState) => Object.defineProperty(document, "visibilityState", { value: state, configurable: true });
+    try {
+      renderEditor();
+      type("Typed just now");
+      // Within the 2 s autosave: nothing written yet.
+      expect(window.localStorage.getItem(NEW_KEY)).toBeNull();
+      setVisibility("hidden");
+      document.dispatchEvent(new Event("visibilitychange"));
+      expect(stored(NEW_KEY)).toMatchObject({ body: "Typed just now" });
+      setVisibility("visible");
+      type("Typed just now, and more");
+      window.dispatchEvent(new Event("pagehide"));
+      expect(stored(NEW_KEY)).toMatchObject({ body: "Typed just now, and more" });
+    } finally {
+      setVisibility("visible");
+    }
+  });
+
+  it("hidden with nothing to keep, or after Discard: nothing is written", () => {
+    renderEditor();
+    window.dispatchEvent(new Event("pagehide"));
+    expect(window.localStorage.getItem(NEW_KEY)).toBeNull();
+    type("Not wanted");
+    fireEvent.click(screen.getByTestId("entry-cancel"));
+    fireEvent.click(screen.getByTestId("entry-discard"));
+    window.dispatchEvent(new Event("pagehide"));
+    expect(window.localStorage.getItem(NEW_KEY)).toBeNull();
+  });
+
   it("Escape closes a dialog", () => {
     renderEditor();
     type("x");

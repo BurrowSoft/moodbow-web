@@ -214,6 +214,27 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
     return () => window.removeEventListener("beforeunload", onUnload);
   }, [draftKey, restore]);
 
+  // A phone browser sent to the background (another app, the home screen)
+  // may never unload the page: the system can close the tab later without
+  // beforeunload (iOS Safari never sends it). Hidden is the last sure
+  // moment, so the text the 2 s autosave hasn't written yet is kept then
+  // (the app's #101: its last seconds of typing).
+  useEffect(() => {
+    if (!restore) return;
+    const flush = () => {
+      if (keepRef.current && !finished.current) writeDraft(draftKey, current.current);
+    };
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") flush();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("pagehide", flush);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("pagehide", flush);
+    };
+  }, [draftKey, restore]);
+
   // Every way out asks (decision 206): a link in the page (the tab bar, the
   // Back chevron) is held before the router sees it, the leave dialog
   // opens, and after Discard or Keep draft the same click is replayed on
