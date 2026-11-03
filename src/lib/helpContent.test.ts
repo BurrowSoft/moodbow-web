@@ -109,8 +109,17 @@ describe("Help is public, scoped to what's live (decision 212)", () => {
     expect(published("share-card")).not.toContain("Milestone");
   });
 
+  it("the app's start without an email (0.9.4, decision 216): getting started and backing up show", () => {
+    expect(published("getting-started")).toContain("Skip for now");
+    expect(published("getting-started")).not.toContain("Create your account");
+    expect(published("backing-up")).toContain("Back up your journal");
+    expect(findArticle("en", "backing-up")!.topic).toBe("Privacy & account");
+  });
+
   it("no web journal line while it's off, and no AI line while AI is off", () => {
     expect(published("getting-started")).not.toContain("moodbow.com");
+    expect(published("getting-started")).not.toContain("on the web");
+    expect(published("backing-up")).not.toContain("moodbow.com");
     expect(published("offline")).not.toContain("browser");
     expect(published("sign-in")).not.toContain("on the web");
     expect(published("reminders")).not.toContain("on the web");

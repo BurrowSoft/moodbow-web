@@ -32,8 +32,8 @@
     "what": "Help only (decisions 212, 214): the app opens without a connection for a user who signed in before, showing the journal saved on the phone (the app's offline start, in the 0.9 build). Gates the Help article line about it."
   },
   "anon-start-live": {
-    "met": false,
-    "what": "Decision 216 (specs/no-signup-start.md): the app build people have starts without an email (ANON_START_ENABLED on in that release; Vitor turns on anonymous sign-ins on prod that day). Gates the privacy policy's \"Using Moodbow without an email\" paragraph (Vitor's \"ok anonymous sentence\") and the web's \"Started in the app?\" line on sign-in and sign-up."
+    "met": true,
+    "what": "Decision 216 (specs/no-signup-start.md): the app build people have starts without an email (ANON_START_ENABLED on in that release; Vitor turns on anonymous sign-ins on prod that day; met with 0.9.4 (5) on closed testing, UX 2026-11-03). Gates the privacy policy's \"Using Moodbow without an email\" paragraph (Vitor's \"ok anonymous sentence\") and the web's \"Started in the app?\" line on sign-in and sign-up."
   },
   "app-open-link": {
     "met": true,
