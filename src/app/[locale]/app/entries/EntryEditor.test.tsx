@@ -1039,3 +1039,24 @@ describe("EntryEditor: a sign-out in another tab (UX & PM 2026-11-03, option C)"
     expect(stored(NEW_KEY)).toMatchObject({ body: "Mine" });
   });
 });
+
+describe("EntryEditor: a save answered after a sign-out in another tab (Reviewer #147, merge note)", () => {
+  beforeEach(() => vi.stubGlobal("BroadcastChannel", undefined));
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("typed during the save, then signed out elsewhere (Delete it): the late answer writes nothing back", async () => {
+    let answer: (value: unknown) => void = () => {};
+    saveEntry.mockReturnValueOnce(new Promise((resolve) => (answer = resolve)));
+    renderEditor(ENTRY);
+    type("Sent");
+    fireEvent.click(screen.getByTestId("entry-save"));
+    type("Sent, and more");
+    act(() => {
+      window.dispatchEvent(new StorageEvent("storage", { key: "mb:signed-out", newValue: JSON.stringify({ uid: "u1", mode: "delete" }) }));
+    });
+    expect(window.localStorage.getItem(EDIT_KEY)).toBeNull();
+    await act(async () => answer({ status: "saved", entry: { ...ENTRY, body: "Sent", updated_at: "2026-10-02T09:00:00Z" } }));
+    expect(window.localStorage.getItem(EDIT_KEY)).toBeNull();
+    expect(push).not.toHaveBeenCalled();
+  });
+});

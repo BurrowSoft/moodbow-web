@@ -396,7 +396,9 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
       // update (not "changed elsewhere"); it stays a draft, nothing leaves.
       if (!same(current.current, sent)) {
         const newer = { ...current.current, base: next.entry.updated_at };
-        writeDraft(draftKey, newer);
+        // Not once signed out in another tab: a save answered after that
+        // mustn't write the text back (Reviewer #147, merge note).
+        if (!signedOut.current) writeDraft(draftKey, newer);
         lastSaved.current = next.entry;
         setBase(next.entry.updated_at);
         setSaved(fromEntry(next.entry));
