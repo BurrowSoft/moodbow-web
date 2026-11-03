@@ -868,5 +868,10 @@
     "key": "me.signOutDelete",
     "en": "Delete it",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "share.shareMilestone",
+    "en": "Milestone",
+    "reason": "UX draft (native read pending): shorter, so the 4 segments fit at 320 px"
   }
 ]
