@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { startTransition, useActionState, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Dialog, dialogButton } from "@/components/Dialog";
 import { hasLocalKinds, SIGN_OUT_TRACE_KINDS, UNSYNCED_KINDS, wipeLocalKinds } from "@/lib/localData";
@@ -46,56 +46,78 @@ function hasUnsynced(uid: string): boolean {
   }
 }
 
+const isRedirect = (e: unknown) => typeof (e as { digest?: unknown })?.digest === "string" && (e as { digest: string }).digest.startsWith("NEXT_REDIRECT");
+
 export function SignOutButton({ uid }: { uid: string }) {
   const t = useTranslations("app");
   const tm = useTranslations("me");
-  const form = useRef<HTMLFormElement>(null);
-  const [busy, setBusy] = useState(false);
+  const tt = useTranslations("today");
+  const [syncing, setSyncing] = useState(false);
   const [asking, setAsking] = useState(false);
 
-  const signOutWith = (mode: SignOutMode) => {
-    setAsking(false);
-    // The other tabs first, so their editors stop writing before this wipes.
-    broadcastSignOut({ uid, mode });
+  // Signed out first (Reviewer #147 F2, UX): the action's redirect to sign
+  // in is its success, and only then are the other tabs told and this
+  // user's keys wiped, as chosen. If it fails (offline, a server error),
+  // nothing is wiped or broadcast, the other tabs keep protecting typing,
+  // and the error shows here.
+  const [failed, signOutWith, signingOut] = useActionState<boolean, SignOutMode>(async (_prev, mode) => {
     try {
-      if (mode === "delete") wipeLocalKinds(window.localStorage, uid, UNSYNCED_KINDS);
-      wipeLocalKinds(window.localStorage, uid, SIGN_OUT_TRACE_KINDS);
-    } catch {
-      // storage unavailable: nothing is there to wipe
+      await signOut();
+    } catch (e) {
+      if (!isRedirect(e)) return true;
+      broadcastSignOut({ uid, mode });
+      try {
+        if (mode === "delete") wipeLocalKinds(window.localStorage, uid, UNSYNCED_KINDS);
+        wipeLocalKinds(window.localStorage, uid, SIGN_OUT_TRACE_KINDS);
+      } catch {
+        // storage unavailable: nothing is there to wipe
+      }
+      throw e;
     }
-    form.current?.requestSubmit();
+    return true;
+  }, false);
+  const busy = syncing || signingOut;
+  const go = (mode: SignOutMode) => {
+    setAsking(false);
+    startTransition(() => signOutWith(mode));
   };
 
+  // Cancel in the dialog leaves everything as it is, except what the sync
+  // try already saved (and so removed) before the dialog opened: what the
+  // next sync would have done anyway (Reviewer #147).
   const start = async () => {
     if (busy) return;
-    setBusy(true);
+    setSyncing(true);
     await syncPending(uid);
-    setBusy(false);
+    setSyncing(false);
     if (hasUnsynced(uid)) setAsking(true);
-    else signOutWith("keep");
+    else go("keep");
   };
 
   return (
     <>
-      <form ref={form} action={signOut}>
-        <button
-          type="button"
-          data-testid="me-sign-out"
-          onClick={start}
-          aria-disabled={busy || undefined}
-          aria-busy={busy || undefined}
-          className="inline-flex min-h-12 items-center rounded-full border border-border px-6 font-medium text-accent hover:bg-pill aria-disabled:opacity-50"
-        >
-          {t("meSignOut")}
-        </button>
-      </form>
+      <button
+        type="button"
+        data-testid="me-sign-out"
+        onClick={start}
+        aria-disabled={busy || undefined}
+        aria-busy={busy || undefined}
+        className="inline-flex min-h-12 items-center rounded-full border border-border px-6 font-medium text-accent hover:bg-pill aria-disabled:opacity-50"
+      >
+        {t("meSignOut")}
+      </button>
+      {failed && !busy && (
+        <p role="alert" data-testid="me-sign-out-error" className="font-medium text-accent">
+          {tt("errGeneric")}
+        </p>
+      )}
       {asking && (
         // The safe choice last, filled, and where focus starts (decision 143).
         <Dialog title={tm("signOutKeepTitle")} body={tm("signOutKeepBody")} onCancel={() => setAsking(false)} testId="sign-out-dialog" initialFocus="last">
-          <button type="button" data-testid="sign-out-delete" className={dialogButton()} onClick={() => signOutWith("delete")}>
+          <button type="button" data-testid="sign-out-delete" className={dialogButton()} onClick={() => go("delete")}>
             {tm("signOutDelete")}
           </button>
-          <button type="button" data-testid="sign-out-keep" className={dialogButton(true)} onClick={() => signOutWith("keep")}>
+          <button type="button" data-testid="sign-out-keep" className={dialogButton(true)} onClick={() => go("keep")}>
             {tm("signOutKeep")}
           </button>
         </Dialog>

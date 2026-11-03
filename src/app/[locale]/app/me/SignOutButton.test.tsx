@@ -30,22 +30,33 @@ const renderIt = () =>
 const signOutPressed = () => fireEvent.click(screen.getByTestId("me-sign-out"));
 const has = (key: string) => window.localStorage.getItem(key) !== null;
 
+// The action's success is its redirect to sign in, rethrown for Next.
+const swallow = (e: Event) => e.preventDefault();
+let onError: ReturnType<typeof vi.spyOn>;
 beforeEach(() => {
   signOut.mockReset();
+  signOut.mockRejectedValue(Object.assign(new Error("NEXT_REDIRECT"), { digest: "NEXT_REDIRECT;replace;/sign-in;303;" }));
   saveCheckIn.mockReset();
   broadcastSignOut.mockReset();
   window.localStorage.clear();
   window.localStorage.setItem(HIDDEN, "1");
   window.localStorage.setItem(SEEN, "1");
   window.localStorage.setItem(localKey("draft-entry", OTHER, "new"), "theirs");
+  onError = vi.spyOn(console, "error").mockImplementation(() => {});
+  window.addEventListener("error", swallow);
 });
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  window.removeEventListener("error", swallow);
+  onError.mockRestore();
+});
 
 describe("Me → Sign out (UX & PM 2026-11-03, option C)", () => {
   it("nothing unsynced: signs out at once, tells the other tabs, drops On this day's marks, keeps milestone-seen", async () => {
     renderIt();
     signOutPressed();
-    await waitFor(() => expect(signOut).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(broadcastSignOut).toHaveBeenCalledTimes(1));
+    expect(signOut).toHaveBeenCalledTimes(1);
     expect(screen.queryByTestId("sign-out-dialog")).toBeNull();
     expect(broadcastSignOut).toHaveBeenCalledWith({ uid: UID, mode: "keep" });
     expect(has(HIDDEN)).toBe(false);
@@ -57,7 +68,8 @@ describe("Me → Sign out (UX & PM 2026-11-03, option C)", () => {
     saveCheckIn.mockResolvedValue({ status: "saved", checkIn: {} });
     renderIt();
     signOutPressed();
-    await waitFor(() => expect(signOut).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(broadcastSignOut).toHaveBeenCalledTimes(1));
+    expect(signOut).toHaveBeenCalledTimes(1);
     expect(Object.fromEntries((saveCheckIn.mock.calls[0][1] as FormData).entries())).toMatchObject({ local_date: "2026-10-02", mood: "4" });
     expect(has(PENDING)).toBe(false);
     expect(screen.queryByTestId("sign-out-dialog")).toBeNull();
@@ -91,7 +103,8 @@ describe("Me → Sign out (UX & PM 2026-11-03, option C)", () => {
     renderIt();
     signOutPressed();
     fireEvent.click(await screen.findByTestId("sign-out-keep"));
-    await waitFor(() => expect(signOut).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(broadcastSignOut).toHaveBeenCalledTimes(1));
+    expect(signOut).toHaveBeenCalledTimes(1);
     expect(broadcastSignOut).toHaveBeenCalledWith({ uid: UID, mode: "keep" });
     expect(has(DRAFT)).toBe(true);
     expect(has(PENDING)).toBe(true);
@@ -104,13 +117,27 @@ describe("Me → Sign out (UX & PM 2026-11-03, option C)", () => {
     renderIt();
     signOutPressed();
     fireEvent.click(await screen.findByTestId("sign-out-delete"));
-    await waitFor(() => expect(signOut).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(broadcastSignOut).toHaveBeenCalledTimes(1));
+    expect(signOut).toHaveBeenCalledTimes(1);
     expect(broadcastSignOut).toHaveBeenCalledWith({ uid: UID, mode: "delete" });
     expect(has(DRAFT)).toBe(false);
     expect(has(PENDING)).toBe(false);
     expect(has(HIDDEN)).toBe(false);
     expect(has(SEEN)).toBe(true);
     expect(window.localStorage.getItem(localKey("draft-entry", OTHER, "new"))).toBe("theirs");
+  });
+
+  it("the sign-out itself fails (offline): nothing is wiped or broadcast, the error shows (Reviewer #147 F2)", async () => {
+    signOut.mockRejectedValue(new Error("Failed to fetch"));
+    window.localStorage.setItem(DRAFT, "{}");
+    renderIt();
+    signOutPressed();
+    fireEvent.click(await screen.findByTestId("sign-out-delete"));
+    expect(await screen.findByTestId("me-sign-out-error")).toHaveTextContent(messages.today.errGeneric);
+    expect(signOut).toHaveBeenCalledTimes(1);
+    expect(broadcastSignOut).not.toHaveBeenCalled();
+    expect(has(DRAFT)).toBe(true);
+    expect(has(HIDDEN)).toBe(true);
   });
 
   it("Cancel (Escape): still signed in, nothing changes, nobody is told", async () => {
