@@ -582,6 +582,85 @@ describe("EntryEditor: nothing typed is lost (reviewer #12)", () => {
     expect(stored(NEW_KEY)).toMatchObject({ body: "Typed, then the tab bar" });
   });
 
+  it("a save answered after leaving and coming back: the newer draft stays, and nothing leaves (the app's #101, note 2)", async () => {
+    let answer: (value: unknown) => void = () => {};
+    saveEntry.mockReturnValue(new Promise((resolve) => (answer = resolve)));
+    const first = renderEditor();
+    type("First");
+    fireEvent.click(screen.getByTestId("entry-save"));
+    first.unmount();
+    // Back in the editor: the draft is restored, and more is typed.
+    renderEditor();
+    expect(screen.getByTestId("entry-text")).toHaveValue("First");
+    type("First, and more");
+    window.dispatchEvent(new Event("beforeunload", { cancelable: true }));
+    expect(stored(NEW_KEY)).toMatchObject({ id: NEW_ID, body: "First, and more" });
+    await act(async () => answer({ status: "saved", entry: { ...ENTRY, id: NEW_ID, entry_date: "2026-10-02", body: "First" } }));
+    expect(stored(NEW_KEY)).toMatchObject({ id: NEW_ID, body: "First, and more" });
+    expect(screen.getByTestId("entry-text")).toHaveValue("First, and more");
+    expect(push).not.toHaveBeenCalled();
+  });
+
+  it("typed while the save was out, still in the editor: it stays, with the newer text on top of the saved version (UX, #143 F1)", async () => {
+    let answer: (value: unknown) => void = () => {};
+    saveEntry.mockReturnValueOnce(new Promise((resolve) => (answer = resolve)));
+    renderEditor(ENTRY);
+    type("Calm, then busy.");
+    fireEvent.click(screen.getByTestId("entry-save"));
+    type("Calm, then busy. Then calm again.");
+    const SAVED = { ...ENTRY, body: "Calm, then busy.", updated_at: "2026-10-02T09:00:00Z" };
+    await act(async () => answer({ status: "saved", entry: SAVED }));
+    expect(screen.getByTestId("entry-text")).toHaveValue("Calm, then busy. Then calm again.");
+    expect(push).not.toHaveBeenCalled();
+    expect(stored(EDIT_KEY)).toMatchObject({ body: "Calm, then busy. Then calm again.", base: SAVED.updated_at });
+    // The next Save is a plain update of the version just saved.
+    saveEntry.mockResolvedValueOnce({ status: "saved", entry: { ...SAVED, body: "Calm, then busy. Then calm again.", updated_at: "2026-10-02T09:01:00Z" } });
+    fireEvent.click(screen.getByTestId("entry-save"));
+    await waitFor(() => expect(saveEntry).toHaveBeenCalledTimes(2));
+    expect(sent(1)).toMatchObject({ body: "Calm, then busy. Then calm again.", expected_updated_at: SAVED.updated_at });
+    await waitFor(() => expect(push).toHaveBeenCalledWith("/app"));
+    expect(window.localStorage.getItem(EDIT_KEY)).toBeNull();
+  });
+
+  it("typed and autosaved during the save, then back to what was sent: saved, no draft left, and the editor leaves (Reviewer, #143)", async () => {
+    let answer: (value: unknown) => void = () => {};
+    saveEntry.mockReturnValueOnce(new Promise((resolve) => (answer = resolve)));
+    renderEditor(ENTRY);
+    type("A");
+    fireEvent.click(screen.getByTestId("entry-save"));
+    type("AB");
+    // The autosave of "AB" (as the 2 s timer would write it).
+    window.dispatchEvent(new Event("beforeunload", { cancelable: true }));
+    expect(stored(EDIT_KEY)).toMatchObject({ body: "AB" });
+    type("A");
+    await act(async () => answer({ status: "saved", entry: { ...ENTRY, body: "A", updated_at: "2026-10-02T09:00:00Z" } }));
+    expect(window.localStorage.getItem(EDIT_KEY)).toBeNull();
+    await waitFor(() => expect(push).toHaveBeenCalledWith("/app"));
+    expect(window.localStorage.getItem(EDIT_KEY)).toBeNull();
+  });
+
+  it("nothing typed while the save was out: as before, the draft is cleared and the editor leaves", async () => {
+    saveEntry.mockResolvedValueOnce({ status: "saved", entry: { ...ENTRY, body: "Just this.", updated_at: "2026-10-02T09:00:00Z" } });
+    renderEditor(ENTRY);
+    type("Just this.");
+    fireEvent.click(screen.getByTestId("entry-save"));
+    await waitFor(() => expect(push).toHaveBeenCalledWith("/app"));
+    expect(window.localStorage.getItem(EDIT_KEY)).toBeNull();
+  });
+
+  it("a save answered after leaving, nothing newer typed: its own draft is cleared, and nothing leaves", async () => {
+    let answer: (value: unknown) => void = () => {};
+    saveEntry.mockReturnValue(new Promise((resolve) => (answer = resolve)));
+    const first = renderEditor();
+    type("Only this");
+    fireEvent.click(screen.getByTestId("entry-save"));
+    first.unmount();
+    expect(stored(NEW_KEY)).toMatchObject({ body: "Only this" });
+    await act(async () => answer({ status: "saved", entry: { ...ENTRY, id: NEW_ID, entry_date: "2026-10-02", body: "Only this" } }));
+    expect(window.localStorage.getItem(NEW_KEY)).toBeNull();
+    expect(push).not.toHaveBeenCalled();
+  });
+
   it("after a save, Discard or Delete nothing is written back", async () => {
     saveEntry.mockResolvedValue({ status: "saved", entry: { ...ENTRY, id: NEW_ID, body: "Done" } });
     const first = renderEditor();
