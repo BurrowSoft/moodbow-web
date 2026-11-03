@@ -181,3 +181,122 @@ test.describe("launch journeys", () => {
     }
   });
 });
+
+// Tonight's flows (UX & PM 2026-11-03), so they stay protected after merge.
+// Each journey runs once its PR is on master: flip its entry here in the
+// same follow-up that lands it (until then it's skipped, not failed).
+const LANDED = {
+  hiddenDraft: false, // #142: the draft is written when the page is hidden
+  signOutChoice: false, // #147: Sign out asks Keep it / Delete it
+  deleteAnnounce: false, // #145 + #146: "Entry deleted", focus on the h1
+};
+
+async function signIn(page: Page, email: string, password: string): Promise<void> {
+  await page.goto("/sign-in");
+  await page.getByLabel("Email").fill(email);
+  await page.getByLabel("Password").fill(password);
+  await page.getByRole("button", { name: messages.auth.signinSubmit }).click();
+  await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
+}
+
+// The draft keys this browser holds (mb:draft-entry:<uid>:…).
+const draftKeys = (page: Page) => page.evaluate(() => Object.keys(window.localStorage).filter((k) => k.startsWith("mb:draft-entry:")));
+
+// From the editor to Me with unsaved text: the leave dialog, Keep draft.
+async function keepDraftAndGoToMe(page: Page): Promise<void> {
+  await page.getByTestId("tab-me").click();
+  await page.getByTestId("entry-keep-draft").click();
+  await expect(page).toHaveURL(/\/app\/me$/);
+}
+
+test.describe("tonight's flows", () => {
+  test("a phone hiding the tab: the text not yet autosaved survives the tab being closed (#142)", async ({ page, context }) => {
+    test.skip(!LANDED.hiddenDraft, "#142 isn't on master yet");
+    const email = newEmail();
+    try {
+      await signUp(page, email, { ai: false });
+      await page.getByTestId("setup-done").click();
+      await expect(page).toHaveURL(/\/app$/);
+      await page.getByTestId("today-write").click();
+      await expect(page).toHaveURL(/\/app\/write/);
+      await page.getByTestId("entry-text").fill(ENTRY);
+      // Hidden at once (well inside the 2 s autosave), the way a phone
+      // backgrounds a tab, then closed without beforeunload (Playwright's
+      // close doesn't run it), as the system closing it later would.
+      await page.evaluate(() => {
+        Object.defineProperty(document, "visibilityState", { configurable: true, get: () => "hidden" });
+        document.dispatchEvent(new Event("visibilitychange"));
+      });
+      await page.close();
+      const again = await context.newPage();
+      await again.goto("/app/write");
+      await expect(again.getByTestId("entry-text")).toHaveValue(ENTRY);
+    } finally {
+      await cleanup(email);
+    }
+  });
+
+  test("sign out with unsaved writing: Keep it brings it back after signing in; Delete it leaves nothing (#147)", async ({ page }) => {
+    test.skip(!LANDED.signOutChoice, "#147 isn't on master yet");
+    const email = newEmail();
+    try {
+      const password = await signUp(page, email, { ai: false });
+      await page.getByTestId("setup-done").click();
+      await expect(page).toHaveURL(/\/app$/);
+
+      // Keep it.
+      await page.getByTestId("today-write").click();
+      await page.getByTestId("entry-text").fill(ENTRY);
+      await keepDraftAndGoToMe(page);
+      await page.getByTestId("me-sign-out").click();
+      await expect(page.getByTestId("sign-out-dialog")).toBeVisible();
+      await expect(page.getByTestId("sign-out-keep")).toBeFocused();
+      await page.getByTestId("sign-out-keep").click();
+      await expect(page).toHaveURL(/\/sign-in/, { timeout: 20_000 });
+      expect(await draftKeys(page)).toHaveLength(1);
+      await signIn(page, email, password);
+      await page.goto("/app/write");
+      await expect(page.getByTestId("entry-text")).toHaveValue(ENTRY);
+
+      // Delete it.
+      await page.getByTestId("entry-text").fill("Not for the next person.");
+      await keepDraftAndGoToMe(page);
+      await page.getByTestId("me-sign-out").click();
+      await page.getByTestId("sign-out-delete").click();
+      await expect(page).toHaveURL(/\/sign-in/, { timeout: 20_000 });
+      expect(await draftKeys(page)).toHaveLength(0);
+      await signIn(page, email, password);
+      await page.goto("/app/write");
+      await expect(page.getByTestId("entry-text")).toHaveValue("");
+    } finally {
+      await cleanup(email);
+    }
+  });
+
+  test("delete an entry: 'Entry deleted' is said, and focus is on the destination's title (#145, #146)", async ({ page }) => {
+    test.skip(!LANDED.deleteAnnounce, "#145 and #146 aren't on master yet");
+    const email = newEmail();
+    try {
+      await signUp(page, email, { ai: false });
+      await page.getByTestId("setup-done").click();
+      await expect(page).toHaveURL(/\/app$/);
+      await page.getByTestId("today-write").click();
+      await page.getByTestId("entry-text").fill(ENTRY);
+      await page.getByTestId("entry-save").click();
+      await expect(page).toHaveURL(/\/app$/);
+      await page.locator('[data-testid^="today-entry-"]').first().click();
+      await expect(page).toHaveURL(/\/app\/entries\/[0-9a-f-]{36}$/);
+      await page.getByTestId("entry-more").click();
+      await page.getByTestId("entry-menu-delete").click();
+      await page.getByTestId("entry-delete-confirm").click();
+      // Back on Today, where it was opened from (decision 152).
+      await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
+      // Said within the region's 5 s, before it clears.
+      await expect(page.getByTestId("app-announce")).toHaveText(messages.entry.entryDeletedAnnounce);
+      await expect(page.locator("#main h1")).toBeFocused();
+      await expect(page.locator('[data-testid^="today-entry-"]')).toHaveCount(0);
+    } finally {
+      await cleanup(email);
+    }
+  });
+});
