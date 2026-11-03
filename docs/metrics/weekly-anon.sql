@@ -11,6 +11,8 @@
 --   prod     Vitor, pasting it into the Supabase SQL editor (read-only),
 --            first on 2026-11-10; UX & PM reads the result
 --
+-- Step by step (Vitor, 2026-11-10): docs/metrics/weekly-anon.md.
+--
 -- Staging check, before the first prod read: one fresh email sign-up and
 -- one anonymous account backed up (email confirmed) a few minutes after
 -- it was created. Expected: the email sign-up isn't counted at all; the
