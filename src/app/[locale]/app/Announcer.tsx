@@ -63,14 +63,15 @@ export function AnnouncerProvider({ children }: { children: React.ReactNode }) {
     focusRequest.current = null;
     if (Date.now() - request.at > FOCUS_EXPIRES_MS || focusTitle()) return;
     // The page may still be streaming in: its title, as soon as it's there.
-    let timer: number | undefined;
+    // The observer's callback runs only after a later DOM change, by which
+    // time the timer below exists.
     const observer = new MutationObserver(() => {
       if (!focusTitle()) return;
       observer.disconnect();
       window.clearTimeout(timer);
     });
     observer.observe(document.body, { childList: true, subtree: true });
-    timer = window.setTimeout(() => observer.disconnect(), FOCUS_EXPIRES_MS);
+    const timer = window.setTimeout(() => observer.disconnect(), FOCUS_EXPIRES_MS);
     return () => {
       observer.disconnect();
       window.clearTimeout(timer);
