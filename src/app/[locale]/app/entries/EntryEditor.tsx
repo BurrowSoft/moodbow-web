@@ -333,8 +333,21 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
       return { status: "error", error: "generic" };
     }
     if (next.status === "saved") {
-      removeSentDraft(draftKey, { id: String(form.get("id") ?? ""), body: String(form.get("body") ?? ""), date: String(form.get("entry_date") ?? ""), isMoment: form.get("is_moment") === "true", base: null });
+      const sent: Draft = { id: String(form.get("id") ?? ""), body: String(form.get("body") ?? ""), date: String(form.get("entry_date") ?? ""), isMoment: form.get("is_moment") === "true", base: null };
+      removeSentDraft(draftKey, sent);
       if (!mounted.current) return next;
+      // Typed while the save was out (UX, #143 F1): stay with the newer text,
+      // now on top of the version just saved, so the next Save is a plain
+      // update (not "changed elsewhere"); it stays a draft, nothing leaves.
+      if (!same(current.current, sent)) {
+        const newer = { ...current.current, base: next.entry.updated_at };
+        writeDraft(draftKey, newer);
+        lastSaved.current = next.entry;
+        setBase(next.entry.updated_at);
+        setSaved(fromEntry(next.entry));
+        if (flagsCrisis(next.entry.body, CRISIS_KEYWORDS)) setSafety("open");
+        return next;
+      }
       finished.current = true;
       lastSaved.current = next.entry;
       setSaved(fromEntry(next.entry));

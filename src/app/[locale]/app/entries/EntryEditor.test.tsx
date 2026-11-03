@@ -571,6 +571,36 @@ describe("EntryEditor: nothing typed is lost (reviewer #12)", () => {
     expect(push).not.toHaveBeenCalled();
   });
 
+  it("typed while the save was out, still in the editor: it stays, with the newer text on top of the saved version (UX, #143 F1)", async () => {
+    let answer: (value: unknown) => void = () => {};
+    saveEntry.mockReturnValueOnce(new Promise((resolve) => (answer = resolve)));
+    renderEditor(ENTRY);
+    type("Calm, then busy.");
+    fireEvent.click(screen.getByTestId("entry-save"));
+    type("Calm, then busy. Then calm again.");
+    const SAVED = { ...ENTRY, body: "Calm, then busy.", updated_at: "2026-10-02T09:00:00Z" };
+    await act(async () => answer({ status: "saved", entry: SAVED }));
+    expect(screen.getByTestId("entry-text")).toHaveValue("Calm, then busy. Then calm again.");
+    expect(push).not.toHaveBeenCalled();
+    expect(stored(EDIT_KEY)).toMatchObject({ body: "Calm, then busy. Then calm again.", base: SAVED.updated_at });
+    // The next Save is a plain update of the version just saved.
+    saveEntry.mockResolvedValueOnce({ status: "saved", entry: { ...SAVED, body: "Calm, then busy. Then calm again.", updated_at: "2026-10-02T09:01:00Z" } });
+    fireEvent.click(screen.getByTestId("entry-save"));
+    await waitFor(() => expect(saveEntry).toHaveBeenCalledTimes(2));
+    expect(sent(1)).toMatchObject({ body: "Calm, then busy. Then calm again.", expected_updated_at: SAVED.updated_at });
+    await waitFor(() => expect(push).toHaveBeenCalledWith("/app"));
+    expect(window.localStorage.getItem(EDIT_KEY)).toBeNull();
+  });
+
+  it("nothing typed while the save was out: as before, the draft is cleared and the editor leaves", async () => {
+    saveEntry.mockResolvedValueOnce({ status: "saved", entry: { ...ENTRY, body: "Just this.", updated_at: "2026-10-02T09:00:00Z" } });
+    renderEditor(ENTRY);
+    type("Just this.");
+    fireEvent.click(screen.getByTestId("entry-save"));
+    await waitFor(() => expect(push).toHaveBeenCalledWith("/app"));
+    expect(window.localStorage.getItem(EDIT_KEY)).toBeNull();
+  });
+
   it("a save answered after leaving, nothing newer typed: its own draft is cleared, and nothing leaves", async () => {
     let answer: (value: unknown) => void = () => {};
     saveEntry.mockReturnValue(new Promise((resolve) => (answer = resolve)));
