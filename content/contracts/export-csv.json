@@ -1,0 +1,433 @@
+{
+  "$comment": "1.1 P (decision 201): the spreadsheet export. Both clients render `input` (export_my_data's JSON) in `locale` and must produce `csv` byte for byte. mood_word is the locale's mood label (moods 1-5 in order below). Generated from moodbow-web's renderExportCsv (#103).",
+  "moodWords": {
+    "en": [
+      "Awful",
+      "Bad",
+      "Okay",
+      "Good",
+      "Great"
+    ],
+    "th": [
+      "แย่มาก",
+      "ไม่ค่อยดี",
+      "เฉยๆ",
+      "ดี",
+      "ดีมาก"
+    ]
+  },
+  "cases": [
+    {
+      "name": "hard cases, en",
+      "locale": "en",
+      "input": {
+        "format": "moodbow-export",
+        "format_version": 1,
+        "exported_at": "2026-10-21T09:00:00Z",
+        "account": {
+          "email": "a@example.com"
+        },
+        "check_ins": [
+          {
+            "local_date": "2026-10-01",
+            "mood": 4,
+            "sleep_hours": "7.5",
+            "sleep_quality": "good",
+            "exercise_minutes": 30,
+            "stress": 2
+          },
+          {
+            "local_date": "2026-10-02",
+            "mood": 1,
+            "sleep_hours": 0,
+            "sleep_quality": null,
+            "exercise_minutes": 0,
+            "stress": null
+          },
+          {
+            "local_date": "2026-10-05",
+            "mood": 5,
+            "sleep_hours": null,
+            "sleep_quality": "poor",
+            "exercise_minutes": null,
+            "stress": 5
+          }
+        ],
+        "entries": [
+          {
+            "id": "e1",
+            "entry_date": "2026-10-01",
+            "body": "Morning walk.",
+            "is_moment": true
+          },
+          {
+            "id": "e2",
+            "entry_date": "2026-10-01",
+            "body": "Evening: tea, and \"a quiet\" talk.\r\nTwo lines.\r\n\r\n",
+            "is_moment": false
+          },
+          {
+            "id": "e3",
+            "entry_date": "2026-10-03",
+            "body": "- milk\n- eggs",
+            "is_moment": false
+          },
+          {
+            "id": "e4",
+            "entry_date": "2026-10-03",
+            "body": "=SUM(A1:A9) is not a formula here",
+            "is_moment": false
+          },
+          {
+            "id": "e5",
+            "entry_date": "2026-10-03",
+            "body": "'= starts with an apostrophe",
+            "is_moment": false
+          },
+          {
+            "id": "e6",
+            "entry_date": "2026-10-04",
+            "body": "  indented, with spaces at the end  ",
+            "is_moment": false
+          },
+          {
+            "id": "e7",
+            "entry_date": "2026-10-04",
+            "body": "@mention +1 -1",
+            "is_moment": false
+          },
+          {
+            "id": "e8",
+            "entry_date": "2026-10-04",
+            "body": "\tstarts with a tab",
+            "is_moment": false
+          },
+          {
+            "id": "e9",
+            "entry_date": "2026-10-04",
+            "body": "it's fine; 'quoted' too",
+            "is_moment": false
+          },
+          {
+            "id": "e10",
+            "entry_date": "2026-10-04",
+            "body": "Same words twice",
+            "is_moment": false
+          },
+          {
+            "id": "e11",
+            "entry_date": "2026-10-04",
+            "body": "Same words twice",
+            "is_moment": false
+          },
+          {
+            "id": "e12",
+            "entry_date": "2026-10-05",
+            "body": "วันนี้ไปเดินเล่นกับ Mai ✨",
+            "is_moment": true
+          }
+        ],
+        "ai_reflections": [
+          {
+            "entry_id": "e1",
+            "body": "AI TEXT NEVER IN THE CSV",
+            "created_at": "2026-10-01T10:00:00Z"
+          }
+        ]
+      },
+      "csv": "﻿date,mood,mood_word,sleep_hours,sleep_quality,movement_minutes,stress,moment,note\r\n2026-10-01,4,Good,7.5,good,30,2,yes,Morning walk.\r\n2026-10-01,4,Good,7.5,good,30,2,,\"Evening: tea, and \"\"a quiet\"\" talk.\r\nTwo lines.\r\n\r\n\"\r\n2026-10-02,1,Awful,0,,0,,,\r\n2026-10-03,,,,,,,,\"'- milk\n- eggs\"\r\n2026-10-03,,,,,,,,'=SUM(A1:A9) is not a formula here\r\n2026-10-03,,,,,,,,''= starts with an apostrophe\r\n2026-10-04,,,,,,,,\"  indented, with spaces at the end  \"\r\n2026-10-04,,,,,,,,'@mention +1 -1\r\n2026-10-04,,,,,,,,'\tstarts with a tab\r\n2026-10-04,,,,,,,,it's fine; 'quoted' too\r\n2026-10-04,,,,,,,,Same words twice\r\n2026-10-04,,,,,,,,Same words twice\r\n2026-10-05,5,Great,,poor,,5,yes,วันนี้ไปเดินเล่นกับ Mai ✨\r\n"
+    },
+    {
+      "name": "hard cases, th (Thai mood words)",
+      "locale": "th",
+      "input": {
+        "format": "moodbow-export",
+        "format_version": 1,
+        "exported_at": "2026-10-21T09:00:00Z",
+        "account": {
+          "email": "a@example.com"
+        },
+        "check_ins": [
+          {
+            "local_date": "2026-10-01",
+            "mood": 4,
+            "sleep_hours": "7.5",
+            "sleep_quality": "good",
+            "exercise_minutes": 30,
+            "stress": 2
+          },
+          {
+            "local_date": "2026-10-02",
+            "mood": 1,
+            "sleep_hours": 0,
+            "sleep_quality": null,
+            "exercise_minutes": 0,
+            "stress": null
+          },
+          {
+            "local_date": "2026-10-05",
+            "mood": 5,
+            "sleep_hours": null,
+            "sleep_quality": "poor",
+            "exercise_minutes": null,
+            "stress": 5
+          }
+        ],
+        "entries": [
+          {
+            "id": "e1",
+            "entry_date": "2026-10-01",
+            "body": "Morning walk.",
+            "is_moment": true
+          },
+          {
+            "id": "e2",
+            "entry_date": "2026-10-01",
+            "body": "Evening: tea, and \"a quiet\" talk.\r\nTwo lines.\r\n\r\n",
+            "is_moment": false
+          },
+          {
+            "id": "e3",
+            "entry_date": "2026-10-03",
+            "body": "- milk\n- eggs",
+            "is_moment": false
+          },
+          {
+            "id": "e4",
+            "entry_date": "2026-10-03",
+            "body": "=SUM(A1:A9) is not a formula here",
+            "is_moment": false
+          },
+          {
+            "id": "e5",
+            "entry_date": "2026-10-03",
+            "body": "'= starts with an apostrophe",
+            "is_moment": false
+          },
+          {
+            "id": "e6",
+            "entry_date": "2026-10-04",
+            "body": "  indented, with spaces at the end  ",
+            "is_moment": false
+          },
+          {
+            "id": "e7",
+            "entry_date": "2026-10-04",
+            "body": "@mention +1 -1",
+            "is_moment": false
+          },
+          {
+            "id": "e8",
+            "entry_date": "2026-10-04",
+            "body": "\tstarts with a tab",
+            "is_moment": false
+          },
+          {
+            "id": "e9",
+            "entry_date": "2026-10-04",
+            "body": "it's fine; 'quoted' too",
+            "is_moment": false
+          },
+          {
+            "id": "e10",
+            "entry_date": "2026-10-04",
+            "body": "Same words twice",
+            "is_moment": false
+          },
+          {
+            "id": "e11",
+            "entry_date": "2026-10-04",
+            "body": "Same words twice",
+            "is_moment": false
+          },
+          {
+            "id": "e12",
+            "entry_date": "2026-10-05",
+            "body": "วันนี้ไปเดินเล่นกับ Mai ✨",
+            "is_moment": true
+          }
+        ],
+        "ai_reflections": [
+          {
+            "entry_id": "e1",
+            "body": "AI TEXT NEVER IN THE CSV",
+            "created_at": "2026-10-01T10:00:00Z"
+          }
+        ]
+      },
+      "csv": "﻿date,mood,mood_word,sleep_hours,sleep_quality,movement_minutes,stress,moment,note\r\n2026-10-01,4,ดี,7.5,good,30,2,yes,Morning walk.\r\n2026-10-01,4,ดี,7.5,good,30,2,,\"Evening: tea, and \"\"a quiet\"\" talk.\r\nTwo lines.\r\n\r\n\"\r\n2026-10-02,1,แย่มาก,0,,0,,,\r\n2026-10-03,,,,,,,,\"'- milk\n- eggs\"\r\n2026-10-03,,,,,,,,'=SUM(A1:A9) is not a formula here\r\n2026-10-03,,,,,,,,''= starts with an apostrophe\r\n2026-10-04,,,,,,,,\"  indented, with spaces at the end  \"\r\n2026-10-04,,,,,,,,'@mention +1 -1\r\n2026-10-04,,,,,,,,'\tstarts with a tab\r\n2026-10-04,,,,,,,,it's fine; 'quoted' too\r\n2026-10-04,,,,,,,,Same words twice\r\n2026-10-04,,,,,,,,Same words twice\r\n2026-10-05,5,ดีมาก,,poor,,5,yes,วันนี้ไปเดินเล่นกับ Mai ✨\r\n"
+    },
+    {
+      "name": "export_fixture.json, en",
+      "locale": "en",
+      "input": {
+        "format": "moodbow-export",
+        "format_version": 1,
+        "exported_at": "2026-10-20T03:15:59.987654+07:00",
+        "account": {
+          "email": "sam@example.invalid"
+        },
+        "profile": {
+          "locale": "en",
+          "time_zone": "Asia/Bangkok",
+          "country": "TH",
+          "onboarded_at": "2026-09-01T03:00:00+00:00",
+          "created_at": "2026-09-01T02:58:00+00:00",
+          "updated_at": "2026-09-01T03:00:00+00:00"
+        },
+        "settings": {
+          "tone": "warm",
+          "focus_areas": [
+            "sleep",
+            "work"
+          ],
+          "reminder_on": true,
+          "reminder_time": "21:00:00",
+          "ai_enabled": false
+        },
+        "consents": [
+          {
+            "kind": "privacy",
+            "version": "2026-10-02",
+            "granted": true,
+            "created_at": "2026-09-01T02:58:00+00:00"
+          }
+        ],
+        "check_ins": [
+          {
+            "id": "c1",
+            "local_date": "2026-09-28",
+            "mood": 2,
+            "sleep_hours": null,
+            "sleep_quality": null,
+            "exercise_minutes": null,
+            "stress": null,
+            "created_at": "2026-09-28T13:00:00+00:00",
+            "updated_at": "2026-09-28T13:00:00+00:00"
+          },
+          {
+            "id": "c2",
+            "local_date": "2026-09-29",
+            "mood": 3,
+            "sleep_hours": 7,
+            "sleep_quality": null,
+            "exercise_minutes": 0,
+            "stress": 4,
+            "created_at": "2026-09-29T13:00:00+00:00",
+            "updated_at": "2026-09-29T13:00:00+00:00"
+          },
+          {
+            "id": "c3",
+            "local_date": "2026-09-30",
+            "mood": 5,
+            "sleep_hours": null,
+            "sleep_quality": "poor",
+            "exercise_minutes": 90,
+            "stress": null,
+            "created_at": "2026-09-30T13:00:00+00:00",
+            "updated_at": "2026-09-30T13:00:00+00:00"
+          },
+          {
+            "id": "c4",
+            "local_date": "2026-10-02",
+            "mood": 4,
+            "sleep_hours": 7.5,
+            "sleep_quality": "good",
+            "exercise_minutes": 30,
+            "stress": 2,
+            "created_at": "2026-10-02T01:30:00+00:00",
+            "updated_at": "2026-10-02T01:30:00+00:00"
+          }
+        ],
+        "entries": [
+          {
+            "id": "e1",
+            "entry_date": "2026-09-30",
+            "body": "Long day.\r\nBut a good talk with Mai at the end — ขอบคุณ.\r\n\r\n",
+            "is_moment": false,
+            "created_at": "2026-09-30T14:00:00+00:00",
+            "updated_at": "2026-09-30T14:00:00+00:00"
+          },
+          {
+            "id": "e2",
+            "entry_date": "2026-10-02",
+            "body": "A walk by the river.",
+            "is_moment": true,
+            "created_at": "2026-10-02T02:00:00+00:00",
+            "updated_at": "2026-10-02T02:10:00+00:00"
+          },
+          {
+            "id": "e3",
+            "entry_date": "2026-10-02",
+            "body": "\nGroceries  \n\n- rice\n- tea\n \t\n\t\n",
+            "is_moment": false,
+            "created_at": "2026-10-02T09:00:00+00:00",
+            "updated_at": "2026-10-02T09:00:00+00:00"
+          }
+        ],
+        "ai_reflections": [
+          {
+            "id": "r1",
+            "entry_id": "e2",
+            "body": "Time outside seems to lift your mood.",
+            "tier": "lite",
+            "model": "claude-haiku-5-5",
+            "created_at": "2026-10-02T02:11:00+00:00"
+          },
+          {
+            "id": "r2",
+            "entry_id": "e-deleted",
+            "body": "You named what you needed.",
+            "tier": "lite",
+            "model": "claude-haiku-5-5",
+            "created_at": "2026-10-01T23:30:00+00:00"
+          }
+        ],
+        "ai_reports": [
+          {
+            "id": "w1",
+            "kind": "weekly",
+            "period_start": "2026-09-28",
+            "period_end": "2026-10-04",
+            "body": {
+              "summary": "Not in the text in format 1."
+            },
+            "tier": "lite",
+            "model": "claude-haiku-5-5",
+            "created_at": "2026-10-05T01:00:00+00:00"
+          }
+        ],
+        "ai_memories": [
+          {
+            "id": "m1",
+            "fact": "Walks by the river help.",
+            "source_entry_id": "e2",
+            "created_at": "2026-10-02T02:11:00+00:00",
+            "updated_at": "2026-10-02T02:11:00+00:00"
+          }
+        ],
+        "ai_usage": [],
+        "credits": {
+          "balance": 5,
+          "ledger": []
+        }
+      },
+      "csv": "﻿date,mood,mood_word,sleep_hours,sleep_quality,movement_minutes,stress,moment,note\r\n2026-09-28,2,Bad,,,,,,\r\n2026-09-29,3,Okay,7,,0,4,,\r\n2026-09-30,5,Great,,poor,90,,,\"Long day.\r\nBut a good talk with Mai at the end — ขอบคุณ.\r\n\r\n\"\r\n2026-10-02,4,Good,7.5,good,30,2,yes,A walk by the river.\r\n2026-10-02,4,Good,7.5,good,30,2,,\"\nGroceries  \n\n- rice\n- tea\n \t\n\t\n\"\r\n"
+    },
+    {
+      "name": "empty journal (header only)",
+      "locale": "en",
+      "input": {
+        "format": "moodbow-export",
+        "format_version": 1,
+        "exported_at": "2026-10-21T09:00:00Z",
+        "account": {
+          "email": "a@example.com"
+        },
+        "check_ins": [],
+        "entries": []
+      },
+      "csv": "﻿date,mood,mood_word,sleep_hours,sleep_quality,movement_minutes,stress,moment,note\r\n"
+    }
+  ]
+}

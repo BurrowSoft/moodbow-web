@@ -1,5 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
+import csvContract from "../../content/contracts/export-csv.json";
 import fixture from "../../content/contracts/export_fixture.json";
 import en from "@/messages/en.json";
 import th from "@/messages/th.json";
@@ -139,4 +140,25 @@ describe("csvCell: RFC 4180 and formula injection", () => {
     expect(csvCell("\rx")).toBe('"\'\rx"');
     expect(csvCell('=HYPERLINK("http://x","y")')).toBe('"\'=HYPERLINK(""http://x"",""y"")"');
   });
+});
+
+// The app renders the same CSV (decision 201): export-csv.json, synced from
+// the app's supabase/contracts, holds the cases both clients must match byte
+// for byte (the BOM, CRLF rows, quoting, cell safety, each locale's mood
+// words).
+describe("export-csv.json (the contract the app's CSV export matches)", () => {
+  const MESSAGES: Record<string, object> = { en, th };
+
+  it("its mood words are this locale's mood labels, moods 1-5 in order", () => {
+    for (const [locale, words] of Object.entries(csvContract.moodWords)) {
+      const tl = translator(MESSAGES[locale]);
+      expect([1, 2, 3, 4, 5].map((mood) => tl(`today.mood${mood}`)), locale).toEqual(words);
+    }
+  });
+
+  for (const c of csvContract.cases) {
+    it(`renders "${c.name}" byte for byte`, () => {
+      expect(renderExportCsv(c.input as unknown as ExportDoc,translator(MESSAGES[c.locale]))).toBe(c.csv);
+    });
+  }
 });
