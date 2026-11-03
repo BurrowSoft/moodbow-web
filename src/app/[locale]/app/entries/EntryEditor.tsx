@@ -55,6 +55,14 @@ function removeDraft(key: string) {
     // storage unavailable
   }
 }
+// After a save: only the draft that save sent is done with. By the time the
+// answer comes, the editor may have been left and opened again, and newer
+// typing kept under the same key must stay (the app's #101, note 2).
+function removeSentDraft(key: string, sent: Draft) {
+  const d = readDraft(key);
+  if (d && (d.id !== sent.id || !same(d, sent))) return;
+  removeDraft(key);
+}
 
 const isRedirect = (e: unknown) => typeof (e as { digest?: unknown })?.digest === "string" && (e as { digest: string }).digest.startsWith("NEXT_REDIRECT");
 
@@ -148,6 +156,15 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
   });
   // Set once the text is saved, discarded or deleted: nothing left to keep.
   const finished = useRef(false);
+  // A save's answer can come after the editor was left: it then neither
+  // leaves (again, from wherever the person is now) nor touches this one.
+  const mounted = useRef(true);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
 
   // Leaving by any route (a redirect after Save, the tab bar, Back) keeps
   // unsaved text: the 2 s autosave timer dies with the editor.
@@ -316,8 +333,9 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
       return { status: "error", error: "generic" };
     }
     if (next.status === "saved") {
+      removeSentDraft(draftKey, { id: String(form.get("id") ?? ""), body: String(form.get("body") ?? ""), date: String(form.get("entry_date") ?? ""), isMoment: form.get("is_moment") === "true", base: null });
+      if (!mounted.current) return next;
       finished.current = true;
-      removeDraft(draftKey);
       lastSaved.current = next.entry;
       setSaved(fromEntry(next.entry));
       setFields(fromEntry(next.entry));

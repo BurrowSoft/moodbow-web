@@ -552,6 +552,38 @@ describe("EntryEditor: nothing typed is lost (reviewer #12)", () => {
     expect(stored(NEW_KEY)).toMatchObject({ body: "Typed, then the tab bar" });
   });
 
+  it("a save answered after leaving and coming back: the newer draft stays, and nothing leaves (the app's #101, note 2)", async () => {
+    let answer: (value: unknown) => void = () => {};
+    saveEntry.mockReturnValue(new Promise((resolve) => (answer = resolve)));
+    const first = renderEditor();
+    type("First");
+    fireEvent.click(screen.getByTestId("entry-save"));
+    first.unmount();
+    // Back in the editor: the draft is restored, and more is typed.
+    renderEditor();
+    expect(screen.getByTestId("entry-text")).toHaveValue("First");
+    type("First, and more");
+    window.dispatchEvent(new Event("beforeunload", { cancelable: true }));
+    expect(stored(NEW_KEY)).toMatchObject({ id: NEW_ID, body: "First, and more" });
+    await act(async () => answer({ status: "saved", entry: { ...ENTRY, id: NEW_ID, entry_date: "2026-10-02", body: "First" } }));
+    expect(stored(NEW_KEY)).toMatchObject({ id: NEW_ID, body: "First, and more" });
+    expect(screen.getByTestId("entry-text")).toHaveValue("First, and more");
+    expect(push).not.toHaveBeenCalled();
+  });
+
+  it("a save answered after leaving, nothing newer typed: its own draft is cleared, and nothing leaves", async () => {
+    let answer: (value: unknown) => void = () => {};
+    saveEntry.mockReturnValue(new Promise((resolve) => (answer = resolve)));
+    const first = renderEditor();
+    type("Only this");
+    fireEvent.click(screen.getByTestId("entry-save"));
+    first.unmount();
+    expect(stored(NEW_KEY)).toMatchObject({ body: "Only this" });
+    await act(async () => answer({ status: "saved", entry: { ...ENTRY, id: NEW_ID, entry_date: "2026-10-02", body: "Only this" } }));
+    expect(window.localStorage.getItem(NEW_KEY)).toBeNull();
+    expect(push).not.toHaveBeenCalled();
+  });
+
   it("after a save, Discard or Delete nothing is written back", async () => {
     saveEntry.mockResolvedValue({ status: "saved", entry: { ...ENTRY, id: NEW_ID, body: "Done" } });
     const first = renderEditor();
