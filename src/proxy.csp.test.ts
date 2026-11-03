@@ -10,6 +10,7 @@ vi.mock("./lib/sitemapPages", () => ({ isHiddenPage: () => hidden, pagePath: (p:
 vi.mock("./lib/supabase/proxy", () => ({
   needsSession: () => false,
   refreshSession: async () => ({ cookies: [], signedOut: null, outage: false }),
+  actionWithoutSession: () => false,
   authCookieNames: () => [],
   authCookieUid: () => null,
   signedInOnly: () => false,
