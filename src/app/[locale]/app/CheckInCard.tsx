@@ -68,7 +68,7 @@ function readAllPending(uid: string): { key: string; pending: Pending }[] {
   return found.sort((a, b) => a.pending.date.localeCompare(b.pending.date));
 }
 
-function removePending(key: string) {
+export function removePending(key: string) {
   try {
     window.localStorage.removeItem(key);
   } catch {
@@ -90,6 +90,12 @@ function pendingFromForm(form: FormData): Pending {
     expected: text("expected_updated_at"),
     date: text("local_date"),
   };
+}
+
+// This user's pending copies as the forms that save them, oldest day first:
+// Me → Sign out tries them once before it asks (UX & PM 2026-11-03).
+export function pendingForms(uid: string): { key: string; form: FormData }[] {
+  return readAllPending(uid).map(({ key, pending }) => ({ key, form: toFormData(pending.fields, pending.expected, pending.date, key) }));
 }
 
 function toFormData(fields: Fields, expectedUpdatedAt: string, date: string, fromPending?: string): FormData {

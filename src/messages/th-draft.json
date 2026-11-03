@@ -843,5 +843,25 @@
     "key": "safety.safetyBodyNeutral",
     "en": "Talking to someone can help. These people are ready to listen.",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "me.signOutKeepTitle",
+    "en": "Keep your unsaved writing on this browser?",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "me.signOutKeepBody",
+    "en": "Something you wrote hasn't been saved to your journal yet. Keep it here for next time, or delete it if other people use this computer.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "me.signOutKeep",
+    "en": "Keep it",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "me.signOutDelete",
+    "en": "Delete it",
+    "reason": "UX draft (native read pending)"
   }
 ]

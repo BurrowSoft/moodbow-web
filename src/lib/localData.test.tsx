@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 let pathname = "/app/me";
 vi.mock("next/navigation", () => ({ usePathname: () => pathname }));
 const { LocalDataWipe } = await import("@/components/LocalDataWipe");
-import { localKey, wipeCookieUid, wipeLocalData } from "./localData";
+import { hasLocalKinds, localKey, SIGN_OUT_TRACE_KINDS, UNSYNCED_KINDS, wipeCookieUid, wipeLocalData, wipeLocalKinds } from "./localData";
 
 const GONE = "0b5f2c1e-7d3a-4e8b-9c41-2a6f8e1d3b70";
 const OTHER = "9a1d4c3b-2e5f-4a6b-8c7d-1e2f3a4b5c6d";
@@ -78,5 +78,22 @@ describe("LocalDataWipe", () => {
     render(<LocalDataWipe />);
     expect(keys()).toHaveLength(4);
     document.cookie = "mb_wipe=; Max-Age=0; Path=/";
+  });
+});
+
+describe("hasLocalKinds / wipeLocalKinds (sign-out, UX & PM 2026-11-03)", () => {
+  it("finds and wipes only this user's keys of those kinds", () => {
+    window.localStorage.setItem(localKey("milestone-seen", GONE, "30"), "1");
+    window.localStorage.setItem(localKey("on-this-day-hidden", GONE, "2026-10-02"), "1");
+    window.localStorage.setItem(localKey("on-this-day-hidden", OTHER, "2026-10-02"), "1");
+    expect(hasLocalKinds(window.localStorage, GONE, UNSYNCED_KINDS)).toBe(true);
+    wipeLocalKinds(window.localStorage, GONE, SIGN_OUT_TRACE_KINDS);
+    expect(window.localStorage.getItem(localKey("on-this-day-hidden", GONE, "2026-10-02"))).toBeNull();
+    expect(window.localStorage.getItem(localKey("on-this-day-hidden", OTHER, "2026-10-02"))).toBe("1");
+    expect(window.localStorage.getItem(localKey("milestone-seen", GONE, "30"))).toBe("1");
+    wipeLocalKinds(window.localStorage, GONE, UNSYNCED_KINDS);
+    expect(hasLocalKinds(window.localStorage, GONE, UNSYNCED_KINDS)).toBe(false);
+    expect(window.localStorage.getItem(localKey("pending-checkin", OTHER))).toBe("c");
+    expect(window.localStorage.getItem("NEXT_LOCALE")).toBe("en");
   });
 });

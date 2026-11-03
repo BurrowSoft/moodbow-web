@@ -847,3 +847,46 @@ describe("EntryEditor: a new entry's draft needs text (Web Tester #83)", () => {
     expect(stored(NEW_KEY)).toMatchObject({ body: "A few words" });
   });
 });
+
+describe("EntryEditor: a sign-out in another tab (UX & PM 2026-11-03, option C)", () => {
+  // The storage-event route (no BroadcastChannel): what another tab's write looks like here.
+  const signedOutElsewhere = (uid: string, mode: "keep" | "delete") =>
+    act(() => {
+      window.dispatchEvent(new StorageEvent("storage", { key: "mb:signed-out", newValue: JSON.stringify({ uid, mode }) }));
+    });
+  beforeEach(() => vi.stubGlobal("BroadcastChannel", undefined));
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("Keep it: what's here is kept once, then nothing more is written (no autosave, unmount or unload)", async () => {
+    const { unmount } = renderEditor();
+    type("Kept for next time");
+    signedOutElsewhere("u1", "keep");
+    expect(stored(NEW_KEY)).toMatchObject({ body: "Kept for next time" });
+    type("Typed after the sign-out");
+    window.dispatchEvent(new Event("beforeunload", { cancelable: true }));
+    await new Promise((r) => setTimeout(r, 2100));
+    unmount();
+    expect(stored(NEW_KEY)).toMatchObject({ body: "Kept for next time" });
+  }, 5000);
+
+  it("Delete it: what this editor holds goes too, and nothing is written back", () => {
+    const { unmount } = renderEditor();
+    type("Not to be kept");
+    window.dispatchEvent(new Event("beforeunload", { cancelable: true }));
+    expect(stored(NEW_KEY)).toMatchObject({ body: "Not to be kept" });
+    signedOutElsewhere("u1", "delete");
+    expect(window.localStorage.getItem(NEW_KEY)).toBeNull();
+    type("Still typing");
+    window.dispatchEvent(new Event("beforeunload", { cancelable: true }));
+    unmount();
+    expect(window.localStorage.getItem(NEW_KEY)).toBeNull();
+  });
+
+  it("another user's sign-out changes nothing here", () => {
+    const { unmount } = renderEditor();
+    type("Mine");
+    signedOutElsewhere("someone-else", "delete");
+    unmount();
+    expect(stored(NEW_KEY)).toMatchObject({ body: "Mine" });
+  });
+});
