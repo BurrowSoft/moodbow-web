@@ -169,6 +169,14 @@ describe("Help is public, scoped to what's live (decision 212)", () => {
     expect(th("privacy-and-data")).toContain("<strong>สเปรดชีต (.csv)</strong>");
   });
 
+  it("backing up's steps are a numbered list (styled in globals.css; Web Tester's regression pass)", () => {
+    for (const locale of ["en", "th"]) {
+      const html = renderArticle(findArticle(locale, "backing-up")!);
+      expect(html, locale).toMatch(/<ol>\s*<li>/);
+      expect(html.match(/<li>/g), locale).toHaveLength(4);
+    }
+  });
+
   it("no web journal line while it's off, and no AI line while AI is off", () => {
     expect(published("getting-started")).not.toContain("moodbow.com");
     expect(published("getting-started")).not.toContain("on the web");
