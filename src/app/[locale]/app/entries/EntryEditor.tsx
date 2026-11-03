@@ -7,6 +7,7 @@ import { Dialog, dialogButton } from "@/components/Dialog";
 import { SafetyCard } from "@/components/SafetyCard";
 import { Switch } from "@/components/Switch";
 import { useRouter } from "@/i18n/navigation";
+import { useAnnounce } from "../Announcer";
 import { withQuestion } from "@/lib/journal/answer";
 import { MAX_ENTRY_CHARS, sameEntry, type Entry } from "@/lib/journal/entry";
 import { localKey } from "@/lib/localData";
@@ -57,6 +58,15 @@ function removeDraft(key: string) {
 }
 
 const isRedirect = (e: unknown) => typeof (e as { digest?: unknown })?.digest === "string" && (e as { digest: string }).digest.startsWith("NEXT_REDIRECT");
+
+// A delete's redirect back where the entry was opened from: it's gone (the
+// app says "Entry deleted"). Not one to sign in (the session ended, nothing
+// was deleted). The digest is "NEXT_REDIRECT;<type>;<url>;<status>;".
+export function deletedRedirect(e: unknown): boolean {
+  if (!isRedirect(e)) return false;
+  const url = (e as { digest: string }).digest.split(";")[2] ?? "";
+  return !new URL(url, "https://moodbow.invalid").pathname.endsWith("/sign-in");
+}
 
 // Whether this browser holds an unsaved draft of the entry: the entry view
 // opens the editor straight away, so the draft isn't hidden (decision 151).
@@ -112,7 +122,8 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
   const [promptStep, setPromptStep] = useState(0);
   const tt = useTranslations("today");
   const router = useRouter();
-  const draftKey = localKey("draft-entry", uid, initial ? initial.id : "new");
+  const announce = useAnnounce();
+  const draftKey =localKey("draft-entry", uid, initial ? initial.id : "new");
 
   // What "unchanged" means: the server version, or a blank new entry.
   const [saved, setSaved] = useState<Fields>(initial ? fromEntry(initial) : { body: "", date: startDate ?? today, isMoment: false });
@@ -340,6 +351,7 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
       if (next.status === "error") finished.current = false;
       return next;
     } catch (e) {
+      if (deletedRedirect(e)) announce?.(t("entryDeletedAnnounce"));
       if (isRedirect(e)) throw e;
       // offline or the request failed: nothing was deleted
       finished.current = false;

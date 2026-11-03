@@ -273,6 +273,7 @@
     "entryDeletedBody": "Your version is still here. Do you want to keep it?",
     "entryDeletedKeep": "Keep it",
     "entryDeletedDiscard": "Delete it",
+    "entryDeletedAnnounce": "Entry deleted",
     "momentBadge": "Moment",
     "entryKeepEditing": "Keep editing",
     "entryNewTitle": "New entry",
