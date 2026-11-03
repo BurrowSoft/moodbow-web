@@ -595,6 +595,11 @@
     "reason": "UX draft (native read pending)"
   },
   {
+    "key": "entry.entryDeletedAnnounce",
+    "en": "Entry deleted",
+    "reason": "UX draft (native read pending)"
+  },
+  {
     "key": "entry.momentBadge",
     "en": "Moment",
     "reason": "UX draft (native read pending)"
