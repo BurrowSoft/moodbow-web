@@ -124,7 +124,7 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
   const router = useRouter();
   const announce = useAnnounce();
   const focusTitleAfterLeaving = useFocusTitleAfterLeaving();
-  const draftKey =localKey("draft-entry", uid, initial ? initial.id : "new");
+  const draftKey = localKey("draft-entry", uid, initial ? initial.id : "new");
 
   // What "unchanged" means: the server version, or a blank new entry.
   const [saved, setSaved] = useState<Fields>(initial ? fromEntry(initial) : { body: "", date: startDate ?? today, isMoment: false });
