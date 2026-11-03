@@ -592,6 +592,23 @@ describe("EntryEditor: nothing typed is lost (reviewer #12)", () => {
     expect(window.localStorage.getItem(EDIT_KEY)).toBeNull();
   });
 
+  it("typed and autosaved during the save, then back to what was sent: saved, no draft left, and the editor leaves (Reviewer, #143)", async () => {
+    let answer: (value: unknown) => void = () => {};
+    saveEntry.mockReturnValueOnce(new Promise((resolve) => (answer = resolve)));
+    renderEditor(ENTRY);
+    type("A");
+    fireEvent.click(screen.getByTestId("entry-save"));
+    type("AB");
+    // The autosave of "AB" (as the 2 s timer would write it).
+    window.dispatchEvent(new Event("beforeunload", { cancelable: true }));
+    expect(stored(EDIT_KEY)).toMatchObject({ body: "AB" });
+    type("A");
+    await act(async () => answer({ status: "saved", entry: { ...ENTRY, body: "A", updated_at: "2026-10-02T09:00:00Z" } }));
+    expect(window.localStorage.getItem(EDIT_KEY)).toBeNull();
+    await waitFor(() => expect(push).toHaveBeenCalledWith("/app"));
+    expect(window.localStorage.getItem(EDIT_KEY)).toBeNull();
+  });
+
   it("nothing typed while the save was out: as before, the draft is cleared and the editor leaves", async () => {
     saveEntry.mockResolvedValueOnce({ status: "saved", entry: { ...ENTRY, body: "Just this.", updated_at: "2026-10-02T09:00:00Z" } });
     renderEditor(ENTRY);

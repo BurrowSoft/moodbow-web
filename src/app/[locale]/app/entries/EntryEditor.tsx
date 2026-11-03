@@ -348,6 +348,10 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
         if (flagsCrisis(next.entry.body, CRISIS_KEYWORDS)) setSafety("open");
         return next;
       }
+      // Still here and showing what was sent: that's saved, so no draft is
+      // left, even one autosaved while the text was briefly different
+      // ("AB" typed, then back to "A"; Reviewer, #143).
+      removeDraft(draftKey);
       finished.current = true;
       lastSaved.current = next.entry;
       setSaved(fromEntry(next.entry));
