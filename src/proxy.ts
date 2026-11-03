@@ -6,7 +6,7 @@ import { buildCsp, newNonce, NONCE_HEADER } from "./lib/csp";
 import { canonicalEmailConfirmedSearch } from "./lib/authLink";
 import { isHiddenPage, pagePath } from "./lib/sitemapPages";
 import { AUTH_OUTAGE_HEADER } from "./lib/supabase/deadline";
-import { authCookieNames, authCookieUid, needsSession, refreshSession, signedInOnly, WIPE_COOKIE, WIPE_COOKIE_OPTIONS } from "./lib/supabase/proxy";
+import { actionWithoutSession, authCookieNames, authCookieUid, needsSession, refreshSession, signedInOnly, WIPE_COOKIE, WIPE_COOKIE_OPTIONS } from "./lib/supabase/proxy";
 
 // Locale routing (src/i18n/routing.ts): the default locale is unprefixed,
 // others get /<locale>. With more than one locale, a first visit is matched
@@ -81,10 +81,13 @@ export default async function proxy(req: NextRequest) {
   // session cookies everywhere, and send signed-in pages to sign-in with the
   // matching notice (never to Consent). A server error or being offline
   // doesn't count (lib/supabase/proxy.ts).
-  if (signedOut) {
+  // An action from a signed-in page with no session cookie at all counts
+  // as an ended session too (lib/supabase/proxy.ts, actionWithoutSession).
+  const ended = signedOut ?? (actionWithoutSession(req, path) ? "session_ended" : null);
+  if (ended) {
     const stale = authCookieNames(req);
     // Read before the session cookies are dropped below.
-    const goneUid = signedOut === "account_gone" ? authCookieUid(req) : null;
+    const goneUid = ended === "account_gone" ? authCookieUid(req) : null;
     for (const name of stale) req.cookies.delete(name);
     let res: NextResponse;
     if (signedInOnly(path)) {
@@ -92,7 +95,7 @@ export default async function proxy(req: NextRequest) {
       const [, first = ""] = url.pathname.split("/");
       const prefix = (routing.locales as readonly string[]).includes(first) && first !== routing.defaultLocale ? `/${first}` : "";
       url.pathname = `${prefix}/sign-in`;
-      url.search = `?signed_out=${signedOut === "account_gone" ? "account" : "session"}`;
+      url.search = `?signed_out=${ended === "account_gone" ? "account" : "session"}`;
       // A server action's request (a form on a signed-in page) can't follow
       // a page redirect: fetch would follow it to the sign-in HTML and Next
       // reports "an unexpected response" (the form shows its generic error,

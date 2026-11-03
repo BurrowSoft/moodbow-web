@@ -101,6 +101,23 @@ describe("Supabase ended the session (decisions 68 + 70, parity with the app)", 
     expect(res.headers.get("set-cookie") ?? "").toContain(`${COOKIE}=;`);
   });
 
+  it("a form on a signed-in page with no session cookie at all: answered as an ended session, to sign in (Web Tester, #146 A2)", async () => {
+    const action = (path: string, cookie?: string) =>
+      new NextRequest(`https://www.moodbow.com${path}`, { method: "POST", headers: { "next-action": "abc123", ...(cookie ? { cookie } : {}) } });
+    for (const path of ["/app/entries/33333333-3333-4333-8333-333333333333", "/app/me", "/setup"]) {
+      const res = await proxy(action(path));
+      expect(res.status, path).toBe(200);
+      expect(res.headers.get("x-action-redirect"), path).toBe("/sign-in?signed_out=session;replace");
+      expect(seenByIntl).toBeUndefined();
+    }
+    // A page load (no action) goes as before: the page itself sends anyone signed out to sign in.
+    const page = await proxy(request("/app"));
+    expect(page.headers.get("x-action-redirect")).toBeNull();
+    // With a session cookie, the usual refresh decides; off the signed-in pages, nothing changes.
+    expect((await proxy(action("/app/me", `${COOKIE}=VALID`))).headers.get("x-action-redirect")).toBeNull();
+    expect((await proxy(action("/sign-in"))).headers.get("x-action-redirect")).toBeNull();
+  });
+
   it("a server error never signs anyone out", async () => {
     const res = await proxy(request("/app", "OUTAGE"));
     expect(res.status).toBe(200);
