@@ -569,7 +569,7 @@ test.describe("onboarding (signed out)", () => {
     await page.getByTestId("consent-health").check();
     await page.getByTestId("consent-continue").click();
     await expect(page).toHaveURL(/\/sign-up$/);
-    // Decision 216: a draft until anon-start-live (this build shows drafts).
+    // Decision 216: live since anon-start-live (0.9.4).
     await expect(page.getByTestId("auth-started-in-app")).toHaveText("Started in the app? Back up your journal there first, then sign in here with that email.");
     await page.getByLabel("Email").fill("nope");
     await page.getByLabel("Password").fill("secret-123");
@@ -589,7 +589,7 @@ test.describe("onboarding (signed out)", () => {
 
   test("sign-in links to Create account (Welcome); setup needs a session", async ({ page }) => {
     await page.goto("/sign-in");
-    // Decision 216: a draft until anon-start-live (this build shows drafts).
+    // Decision 216: live since anon-start-live (0.9.4).
     await expect(page.getByTestId("auth-started-in-app")).toHaveText("Started in the app? Back up your journal there first, then sign in here with that email.");
     await page.getByTestId("signin-to-signup").click();
     await expect(page).toHaveURL(/\/welcome$/);
