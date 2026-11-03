@@ -10,6 +10,7 @@ import { getMe, onboardingStep } from "@/lib/journal/me";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { JournalUnavailable } from "@/components/JournalUnavailable";
 import { isAuthOutage } from "@/lib/supabase/proxy";
+import { AnnouncerProvider } from "./Announcer";
 import { AppNav } from "./AppNav";
 import { CheckInDraftProvider } from "./CheckInDraft";
 import { KeyboardShortcuts } from "./KeyboardShortcuts";
@@ -63,7 +64,9 @@ export default async function AppLayout({ children, params }: LayoutProps<"/[loc
         <main id="main" className={`min-h-dvh flex-1 ${APP_MAIN_GUTTER} pb-28 pt-10 md:pb-10 print:min-h-0 print:p-0`}>
           {/* Per user: another account signing in starts empty (#9765 M-01). */}
           <div className="mx-auto max-w-3xl">
-            <CheckInDraftProvider key={user.id}>{children}</CheckInDraftProvider>
+            <AnnouncerProvider>
+              <CheckInDraftProvider key={user.id}>{children}</CheckInDraftProvider>
+            </AnnouncerProvider>
           </div>
         </main>
       </div>

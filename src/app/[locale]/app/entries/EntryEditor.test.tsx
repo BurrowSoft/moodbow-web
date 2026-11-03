@@ -32,6 +32,7 @@ vi.mock("@/lib/ui/withTimeout", async (orig) => {
   return { ...real, SAVE_WAIT_MS: 300, withTimeout: <T,>(call: Promise<T>, ms: number) => (held ? call : real.withTimeout(call, ms)) };
 });
 const { EntryEditor } = await import("./EntryEditor");
+const { AnnounceContext } = await import("../Announcer");
 
 const NEW_ID = "11111111-1111-4111-8111-111111111111";
 const DRAFT_ID = "22222222-2222-4222-8222-222222222222";
@@ -312,6 +313,40 @@ describe("EntryEditor: editing", () => {
     await waitFor(() => expect(deleteEntry).toHaveBeenCalled());
     expect(Object.fromEntries((deleteEntry.mock.calls[0][1] as FormData).entries())).toEqual({ id: ENTRY.id, from: "/app" });
     expect(window.localStorage.getItem(EDIT_KEY)).toBeNull();
+  });
+
+  it("deleted: 'Entry deleted' is said from above the routes (the redirect replaces the page; parity with the app); not when the session ended", async () => {
+    const onError = vi.spyOn(console, "error").mockImplementation(() => {});
+    const swallow = (e: Event) => e.preventDefault();
+    window.addEventListener("error", swallow);
+    try {
+      for (const [url, said] of [
+        ["/app/timeline", true],
+        ["/th/app", true],
+        ["/sign-in?signed_out=session", false],
+      ] as const) {
+        const announce = vi.fn();
+        deleteEntry.mockReset();
+        deleteEntry.mockRejectedValue(Object.assign(new Error("NEXT_REDIRECT"), { digest: `NEXT_REDIRECT;replace;${url};303;` }));
+        const view = render(
+          <AnnounceContext.Provider value={announce}>
+            <NextIntlClientProvider locale="en" messages={messages}>
+              <EntryEditor initial={ENTRY} newId={ENTRY.id} uid="u1" today="2026-10-02" />
+            </NextIntlClientProvider>
+          </AnnounceContext.Provider>,
+        );
+        fireEvent.click(screen.getByTestId("entry-delete"));
+        fireEvent.click(screen.getByTestId("entry-delete-confirm"));
+        await waitFor(() => expect(deleteEntry).toHaveBeenCalled());
+        await new Promise((r) => setTimeout(r, 20));
+        if (said) expect(announce, url).toHaveBeenCalledWith(m.entryDeletedAnnounce);
+        else expect(announce, url).not.toHaveBeenCalled();
+        view.unmount();
+      }
+    } finally {
+      window.removeEventListener("error", swallow);
+      onError.mockRestore();
+    }
   });
 
   it("a new entry has no Delete", () => {

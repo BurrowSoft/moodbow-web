@@ -273,6 +273,7 @@
     "entryDeletedBody": "เวอร์ชันของคุณยังอยู่ คุณอยากเก็บไว้ไหม?",
     "entryDeletedKeep": "เก็บไว้",
     "entryDeletedDiscard": "ลบทิ้ง",
+    "entryDeletedAnnounce": "ลบบันทึกแล้ว",
     "momentBadge": "ช่วงเวลาสำคัญ",
     "entryKeepEditing": "แก้ไขต่อ",
     "entryNewTitle": "บันทึกใหม่",
