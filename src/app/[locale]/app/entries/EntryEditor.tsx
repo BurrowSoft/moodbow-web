@@ -7,7 +7,7 @@ import { Dialog, dialogButton } from "@/components/Dialog";
 import { SafetyCard } from "@/components/SafetyCard";
 import { Switch } from "@/components/Switch";
 import { useRouter } from "@/i18n/navigation";
-import { useAnnounce } from "../Announcer";
+import { useAnnounce, useFocusTitleAfterLeaving } from "../Announcer";
 import { withQuestion } from "@/lib/journal/answer";
 import { MAX_ENTRY_CHARS, sameEntry, type Entry } from "@/lib/journal/entry";
 import { localKey } from "@/lib/localData";
@@ -123,6 +123,7 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
   const tt = useTranslations("today");
   const router = useRouter();
   const announce = useAnnounce();
+  const focusTitleAfterLeaving = useFocusTitleAfterLeaving();
   const draftKey =localKey("draft-entry", uid, initial ? initial.id : "new");
 
   // What "unchanged" means: the server version, or a blank new entry.
@@ -351,7 +352,10 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
       if (next.status === "error") finished.current = false;
       return next;
     } catch (e) {
-      if (deletedRedirect(e)) announce?.(t("entryDeletedAnnounce"));
+      if (deletedRedirect(e)) {
+        announce?.(t("entryDeletedAnnounce"));
+        focusTitleAfterLeaving?.();
+      }
       if (isRedirect(e)) throw e;
       // offline or the request failed: nothing was deleted
       finished.current = false;
