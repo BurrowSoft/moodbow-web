@@ -3,8 +3,18 @@
 --
 -- Read-only and counts only: no ids, emails or journal text leave the
 -- database. It runs inside a READ ONLY transaction, so any write fails.
--- Run it as postgres (SQL editor), staging first: auth.* isn't readable
--- by the client roles.
+-- It needs postgres (auth.* isn't readable by the client roles).
+--
+-- Who runs it:
+--   staging  Web Dev, in a slot from UX & PM, first with the check below
+--   prod     Vitor, pasting it into the Supabase SQL editor (read-only),
+--            first on 2026-11-10; UX & PM reads the result
+--
+-- Staging check, before the first prod read: one fresh email sign-up and
+-- one anonymous account backed up (email confirmed) a few minutes after
+-- it was created. Expected: the email sign-up isn't counted at all; the
+-- backed-up one is in anon_created and converted. That confirms both rules
+-- below (started anonymous; converted).
 --
 -- One row per ISO week (Monday, UTC) in which accounts were created:
 --   anon_created        (a) anonymous accounts created that week
@@ -29,13 +39,14 @@
 -- as the user (milliseconds apart); an anonymous account gets one only when
 -- its email is confirmed (Back up), later. So an account started
 -- anonymous if it still is, or if its email identity came more than a
--- minute after the account. Check on staging with one fresh email sign-up
--- and one anonymous account backed up a few minutes later. Google/Apple
+-- minute after the account (the staging check above). Google/Apple
 -- sign-in (H) would need its own rule; it isn't live.
 --
 -- Converted = no longer anonymous and the email confirmed (a link that's
--- only pending isn't a backup, as in 013). Its date is the email
--- identity's created_at.
+-- only pending isn't a backup, as in 013). Its date is
+-- auth.users.email_confirmed_at, never the identity's created_at: the
+-- identity can come when the link is requested, before it's confirmed.
+-- The identity is used only for "started anonymous" above.
 --
 -- Not counted: deleted accounts (Delete account, and the 12-month sweep in
 -- 013, cascade from auth.users), so a week's numbers can drop later.
@@ -76,7 +87,7 @@ SELECT
   CASE WHEN count(*) FILTER (WHERE a.created_at + interval '30 days' <= now()) > 0
     THEN count(*) FILTER (
       WHERE a.created_at + interval '30 days' <= now()
-        AND NOT (a.converted AND a.email_linked_at <= a.created_at + interval '30 days')
+        AND NOT (a.converted AND a.email_confirmed_at <= a.created_at + interval '30 days')
     )
   END AS no_email_at_30d
 FROM anon a
