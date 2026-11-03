@@ -89,7 +89,7 @@ describe("Help is public, scoped to what's live (decision 212)", () => {
   const published = (slug: string) => renderArticle(findArticle("en", slug)!);
 
   it("articles about features that are off have nothing left: a 404", () => {
-    for (const slug of ["ai-reflections", "calendar", "import", "keyboard-shortcuts", "search", "widget", "your-week"]) {
+    for (const slug of ["ai-reflections", "import", "keyboard-shortcuts", "widget", "your-week"]) {
       expect(published(slug), slug).toBe("");
     }
   });
@@ -150,6 +150,23 @@ describe("Help is public, scoped to what's live (decision 212)", () => {
       expect(csv).not.toContain("import");
       expect(render("en", "privacy-and-data", ["app_export_csv", "import_live"])).toContain("which Moodbow can import again on the web.");
     });
+  });
+
+  // 0.9.5 is published (UX): calendar, search and the CSV line show, in en
+  // and th, as the app has them; no web-only step or web import yet.
+  it("the app's 0.9.5: the calendar and search articles and the CSV line are published, en and th", () => {
+    const th = (slug: string) => renderArticle(findArticle("th", slug)!);
+    const slugs = helpIndex("en").flatMap((g) => g.articles.map((a) => a.slug));
+    expect(slugs).toEqual(expect.arrayContaining(["calendar", "search"]));
+    expect(published("calendar")).toContain("<strong>Calendar</strong>");
+    expect(th("calendar")).toContain("<strong>ปฏิทิน</strong>");
+    expect(published("search")).toContain("(or use Back)");
+    expect(published("search")).not.toContain("Esc");
+    expect(th("search")).toContain("(หรือใช้ปุ่มย้อนกลับ)");
+    expect(th("search")).not.toContain("Esc");
+    expect(published("privacy-and-data")).toContain("<strong>Spreadsheet (.csv)</strong>");
+    expect(published("privacy-and-data")).not.toContain("import");
+    expect(th("privacy-and-data")).toContain("<strong>สเปรดชีต (.csv)</strong>");
   });
 
   it("no web journal line while it's off, and no AI line while AI is off", () => {
