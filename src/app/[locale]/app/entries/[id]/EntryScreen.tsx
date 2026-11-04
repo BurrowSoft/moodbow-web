@@ -14,7 +14,8 @@ import type { Reflection } from "@/lib/journal/reflect";
 import { dateLine } from "@/lib/journal/today";
 import { checkInChips } from "../../checkInChips";
 import { deleteEntry, saveEntry, type DeleteState } from "../actions";
-import { EntryEditor, hasDraft, type EditorStart } from "../EntryEditor";
+import { deletedRedirect, EntryEditor, hasDraft, type EditorStart } from "../EntryEditor";
+import { useAnnounce, useFocusTitleAfterLeaving } from "../../Announcer";
 import { ReflectPanel } from "../ReflectPanel";
 
 // The entry view (decision 151, the same layout as the app): a top bar with
@@ -77,6 +78,8 @@ function Screen({ entry: initial, checkIn, from, backLabel, dateLocaleTag, uid, 
   const tt = useTranslations("today");
   const ta = useTranslations("app");
   const router = useRouter();
+  const announce = useAnnounce();
+  const focusTitleAfterLeaving = useFocusTitleAfterLeaving();
   const [entry, setEntry] = useState(initial);
   const [mode, setMode] = useState<Mode>(startEditing ? { kind: "edit", start: { at: "end" } } : { kind: "view" });
   // Each opening of the editor starts fresh (a new caret, a new question).
@@ -149,6 +152,10 @@ function Screen({ entry: initial, checkIn, from, backLabel, dateLocaleTag, uid, 
     try {
       return await deleteEntry(prev, form);
     } catch (e) {
+      if (deletedRedirect(e)) {
+        announce?.(t("entryDeletedAnnounce"));
+        focusTitleAfterLeaving?.();
+      }
       if (isRedirect(e)) throw e;
       // offline or the request failed: nothing was deleted
       return { status: "error" };

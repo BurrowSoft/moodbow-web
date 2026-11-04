@@ -23,5 +23,12 @@ export function classifyAuthLink(search: string, hash: string): AuthLinkResult {
 // reaches the page's props or its RSC payload (Web Tester's note, #9).
 export function canonicalEmailConfirmedSearch(search: string): string {
   const result = classifyAuthLink(search, "");
+  if (result === "email_changed" && appMissing(search)) return "?result=email_changed&app=missing";
   return result === "ok" ? "" : `?result=${result === "error" ? "expired" : result}`;
+}
+
+// ?app=missing: Android's fallback from "Open Moodbow" when the app couldn't
+// open it (openAppFallback). Only meaningful after an email change.
+export function appMissing(search: string): boolean {
+  return classifyAuthLink(search, "") === "email_changed" && new URLSearchParams(search).get("app") === "missing";
 }

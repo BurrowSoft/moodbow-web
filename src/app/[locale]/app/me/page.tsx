@@ -10,7 +10,7 @@ import { SUPPORT_EMAIL } from "@/lib/site";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import packageJson from "../../../../../package.json";
 import { tabMetadata } from "../pageMeta";
-import { signOut } from "./actions";
+import { SignOutButton } from "./SignOutButton";
 import { GetHelpNow } from "@/components/SafetyCard";
 import { AiSettings } from "./AiSettings";
 import { Appearance } from "./Appearance";
@@ -56,7 +56,7 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
       <h1 className="text-3xl font-medium tracking-tight">{t("tabMe")}</h1>
       {/* Get help now (M8): at the top, on its own, AI or not; not repeated
           under Help (decision 128). */}
-      <GetHelpNow country={me.profile?.country} testId="me-get-help" />
+      <GetHelpNow country={me.profile?.country} testId="me-get-help" neutral />
 
       {aiShown(me) && (
         <AiSettings
@@ -115,15 +115,7 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
         </ul>
       </section>
 
-      <form action={signOut}>
-        <button
-          type="submit"
-          data-testid="me-sign-out"
-          className="inline-flex min-h-12 items-center rounded-full border border-border px-6 font-medium text-accent hover:bg-pill"
-        >
-          {t("meSignOut")}
-        </button>
-      </form>
+      <SignOutButton uid={user.id} />
       <p className="text-sm text-muted" data-testid="me-version">
         {tm("meVersion", { version: packageJson.version })}
       </p>

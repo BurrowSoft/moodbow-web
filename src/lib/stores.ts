@@ -12,6 +12,25 @@ export const PLAY_URL = `https://play.google.com/store/apps/details?id=${PLAY_PA
 export const APP_STORE_URL: string | null = null;
 export const APP_STORE_ID: string | null = null;
 
+// The app's backup screen, from a browser on Android (decision 216; the
+// Mobile Dev's contract for app PR C): moodbow://app/me/backup as an intent
+// link, so Chrome opens the app if it can and `fallback` if it can't (no app,
+// or a build without the link). The staging app has its own package; a
+// Preview opens that one.
+export const STAGING_PACKAGE = `${PLAY_PACKAGE}.staging`;
+export function openAppIntent(production: boolean, fallback: string): string {
+  const pkg = production ? PLAY_PACKAGE : STAGING_PACKAGE;
+  return `intent://app/me/backup#Intent;scheme=moodbow;package=${pkg};S.browser_fallback_url=${encodeURIComponent(fallback)};end`;
+}
+
+// Where a missing app falls back (UX, after #138 on prod): the Play listing
+// only once it's public (play-live); before that it's "item not found" for
+// anyone outside the closed test, so the confirmed page itself, without the
+// button (?app=missing). pageUrl: this page's absolute URL, no query.
+export function openAppFallback(playLive: boolean, pageUrl: string): string {
+  return playLive ? PLAY_URL : `${pageUrl}?result=email_changed&app=missing`;
+}
+
 export type LiveStores = { play: boolean; appStore: boolean };
 
 export function liveStores(met: (id: "play-live" | "appstore-live") => boolean = conditionMet): LiveStores {

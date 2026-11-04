@@ -89,12 +89,30 @@ describe("Get help now's style (decision 128)", () => {
   });
 });
 
-describe("SafetyCard: numbers as plain text too (decision 142) and the new-tab cue", () => {
-  it("each number is also selectable text beside its link (not read twice); Find a helpline says it opens a new tab", () => {
+describe("SafetyCard: each number once (#9765 S-03) and the new-tab cue", () => {
+  it("each number appears once, inside its link; Find a helpline says it opens a new tab", () => {
     wrap(<SafetyCard country="TH" onClose={() => {}} />);
-    expect(screen.getByTestId("safety-number-helpline")).toHaveTextContent("1323");
-    expect(screen.getByTestId("safety-number-helpline")).toHaveAttribute("aria-hidden", "true");
-    expect(screen.getByTestId("safety-number-emergency")).toHaveTextContent("1669");
+    const text = screen.getByTestId("safety-card").textContent ?? "";
+    expect(text.split("1323")).toHaveLength(2);
+    expect(text.split("1669")).toHaveLength(2);
+    expect(screen.getByTestId("safety-call-helpline")).toHaveTextContent("1323");
+    expect(screen.getByTestId("safety-call-emergency")).toHaveTextContent("1669");
     expect(screen.getByTestId("safety-find-helpline")).toHaveAccessibleName(`${s.safetyFindHelpline} ${messages.common.opensInNewTab}`);
+  });
+});
+
+describe("SafetyCard: the opener (#9765 S-03)", () => {
+  it("from Me (neutral): safetyBodyNeutral, not safetyBody", () => {
+    wrap(<GetHelpNow country="TH" testId="me-get-help" neutral />);
+    fireEvent.click(screen.getByTestId("me-get-help"));
+    const card = screen.getByTestId("safety-card");
+    expect(card).toHaveTextContent(s.safetyBodyNeutral);
+    expect(card).not.toHaveTextContent(s.safetyBody);
+  });
+  it("after a flag or a crisis signal (the default): safetyBody", () => {
+    wrap(<GetHelpNow country="TH" testId="reflect-get-help" />);
+    fireEvent.click(screen.getByTestId("reflect-get-help"));
+    expect(screen.getByTestId("safety-card")).toHaveTextContent(s.safetyBody);
+    expect(screen.getByTestId("safety-card")).not.toHaveTextContent(s.safetyBodyNeutral);
   });
 });

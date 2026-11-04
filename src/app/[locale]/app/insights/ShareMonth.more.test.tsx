@@ -73,6 +73,9 @@ describe("ShareMonth: the 1.1 cards", () => {
     renderIt({ chart });
     fireEvent.click(screen.getByTestId("share-open"));
     expect(await screen.findByTestId("share-type-moodbow")).toHaveAttribute("aria-pressed", "true");
+    // The segment says "Month" (the app's); the card itself keeps its title.
+    expect(screen.getByTestId("share-type-moodbow")).toHaveTextContent(m.shareTypeMonth);
+    expect(screen.getByTestId("share-type-moodbow")).not.toHaveTextContent(m.shareMoodbow);
     expect(screen.getByTestId("share-type-chart")).toHaveAttribute("aria-pressed", "false");
     expect(screen.queryByTestId("share-type-milestone")).toBeNull();
     expect(screen.getByRole("group", { name: m.shareCardType })).toContainElement(screen.getByTestId("share-type-chart"));

@@ -7,11 +7,13 @@ import { Dialog, dialogButton } from "@/components/Dialog";
 import { SafetyCard } from "@/components/SafetyCard";
 import { Switch } from "@/components/Switch";
 import { useRouter } from "@/i18n/navigation";
+import { useAnnounce, useFocusTitleAfterLeaving } from "../Announcer";
 import { withQuestion } from "@/lib/journal/answer";
 import { MAX_ENTRY_CHARS, sameEntry, type Entry } from "@/lib/journal/entry";
 import { localKey } from "@/lib/localData";
 import { flagsCrisis } from "@/lib/safety/crisis";
 import { holdLeaving } from "@/lib/ui/leaveGuard";
+import { onSignOut } from "@/lib/signOutSignal";
 import { SAVE_WAIT_MS, withTimeout } from "@/lib/ui/withTimeout";
 import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
 import { PRIMARY_SAVE } from "@/lib/ui/journalLayout";
@@ -55,8 +57,25 @@ function removeDraft(key: string) {
     // storage unavailable
   }
 }
+// After a save: only the draft that save sent is done with. By the time the
+// answer comes, the editor may have been left and opened again, and newer
+// typing kept under the same key must stay (the app's #101, note 2).
+function removeSentDraft(key: string, sent: Draft) {
+  const d = readDraft(key);
+  if (d && (d.id !== sent.id || !same(d, sent))) return;
+  removeDraft(key);
+}
 
 const isRedirect = (e: unknown) => typeof (e as { digest?: unknown })?.digest === "string" && (e as { digest: string }).digest.startsWith("NEXT_REDIRECT");
+
+// A delete's redirect back where the entry was opened from: it's gone (the
+// app says "Entry deleted"). Not one to sign in (the session ended, nothing
+// was deleted). The digest is "NEXT_REDIRECT;<type>;<url>;<status>;".
+export function deletedRedirect(e: unknown): boolean {
+  if (!isRedirect(e)) return false;
+  const url = (e as { digest: string }).digest.split(";")[2] ?? "";
+  return !new URL(url, "https://moodbow.invalid").pathname.endsWith("/sign-in");
+}
 
 // Whether this browser holds an unsaved draft of the entry: the entry view
 // opens the editor straight away, so the draft isn't hidden (decision 151).
@@ -112,6 +131,8 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
   const [promptStep, setPromptStep] = useState(0);
   const tt = useTranslations("today");
   const router = useRouter();
+  const announce = useAnnounce();
+  const focusTitleAfterLeaving = useFocusTitleAfterLeaving();
   const draftKey = localKey("draft-entry", uid, initial ? initial.id : "new");
 
   // What "unchanged" means: the server version, or a blank new entry.
@@ -148,6 +169,34 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
   });
   // Set once the text is saved, discarded or deleted: nothing left to keep.
   const finished = useRef(false);
+  // Signed out in another tab: nothing more is written for this user here.
+  const signedOut = useRef(false);
+
+  // A deliberate sign-out elsewhere in this browser (UX & PM 2026-11-03,
+  // option C): "Keep it" (or nothing to ask about) keeps what's here once,
+  // "Delete it" drops it; either way this editor stops writing, so it can't
+  // put back what the sign-out wiped. finished covers the unmount, unload
+  // and hide writes; signedOut the autosave and Save's own copy.
+  useEffect(() => {
+    if (!restore) return;
+    return onSignOut(({ uid: who, mode }) => {
+      if (who !== uid || signedOut.current) return;
+      if (mode === "keep" && keepRef.current && !finished.current) writeDraft(draftKey, current.current);
+      signedOut.current = true;
+      finished.current = true;
+      if (mode === "delete") removeDraft(draftKey);
+    });
+  }, [draftKey, restore, uid]);
+
+  // A save's answer can come after the editor was left: it then neither
+  // leaves (again, from wherever the person is now) nor touches this one.
+  const mounted = useRef(true);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
 
   // Leaving by any route (a redirect after Save, the tab bar, Back) keeps
   // unsaved text: the 2 s autosave timer dies with the editor.
@@ -196,7 +245,9 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
       removeDraft(draftKey);
       return;
     }
-    const timer = window.setTimeout(() => writeDraft(draftKey, current.current), AUTOSAVE_MS);
+    const timer = window.setTimeout(() => {
+      if (!signedOut.current) writeDraft(draftKey, current.current);
+    }, AUTOSAVE_MS);
     return () => window.clearTimeout(timer);
   }, [fields, keep, draftKey, restore]);
 
@@ -212,6 +263,27 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
     };
     window.addEventListener("beforeunload", onUnload);
     return () => window.removeEventListener("beforeunload", onUnload);
+  }, [draftKey, restore]);
+
+  // A phone browser sent to the background (another app, the home screen)
+  // may never unload the page: the system can close the tab later without
+  // beforeunload (iOS Safari never sends it). Hidden is the last sure
+  // moment, so the text the 2 s autosave hasn't written yet is kept then
+  // (the app's #101: its last seconds of typing).
+  useEffect(() => {
+    if (!restore) return;
+    const flush = () => {
+      if (keepRef.current && !finished.current) writeDraft(draftKey, current.current);
+    };
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") flush();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("pagehide", flush);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("pagehide", flush);
+    };
   }, [draftKey, restore]);
 
   // Every way out asks (decision 206): a link in the page (the tab bar, the
@@ -316,8 +388,28 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
       return { status: "error", error: "generic" };
     }
     if (next.status === "saved") {
-      finished.current = true;
+      const sent: Draft = { id: String(form.get("id") ?? ""), body: String(form.get("body") ?? ""), date: String(form.get("entry_date") ?? ""), isMoment: form.get("is_moment") === "true", base: null };
+      removeSentDraft(draftKey, sent);
+      if (!mounted.current) return next;
+      // Typed while the save was out (UX, #143 F1): stay with the newer text,
+      // now on top of the version just saved, so the next Save is a plain
+      // update (not "changed elsewhere"); it stays a draft, nothing leaves.
+      if (!same(current.current, sent)) {
+        const newer = { ...current.current, base: next.entry.updated_at };
+        // Not once signed out in another tab: a save answered after that
+        // mustn't write the text back (Reviewer #147, merge note).
+        if (!signedOut.current) writeDraft(draftKey, newer);
+        lastSaved.current = next.entry;
+        setBase(next.entry.updated_at);
+        setSaved(fromEntry(next.entry));
+        if (flagsCrisis(next.entry.body, CRISIS_KEYWORDS)) setSafety("open");
+        return next;
+      }
+      // Still here and showing what was sent: that's saved, so no draft is
+      // left, even one autosaved while the text was briefly different
+      // ("AB" typed, then back to "A"; Reviewer, #143).
       removeDraft(draftKey);
+      finished.current = true;
       lastSaved.current = next.entry;
       setSaved(fromEntry(next.entry));
       setFields(fromEntry(next.entry));
@@ -340,6 +432,10 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
       if (next.status === "error") finished.current = false;
       return next;
     } catch (e) {
+      if (deletedRedirect(e)) {
+        announce?.(t("entryDeletedAnnounce"));
+        focusTitleAfterLeaving?.();
+      }
       if (isRedirect(e)) throw e;
       // offline or the request failed: nothing was deleted
       finished.current = false;
@@ -372,7 +468,7 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
     waitTimer.current = window.setTimeout(() => setWaitedOut(true), SAVE_WAIT_MS);
     // Kept before the request: a redirect (session ended, consent) unmounts
     // the editor before any answer comes back.
-    if (restore) writeDraft(draftKey, { ...fields, id, base: withBase });
+    if (restore && !signedOut.current) writeDraft(draftKey, { ...fields, id, base: withBase });
     const form = new FormData();
     form.set("id", id);
     form.set("entry_date", fields.date);
@@ -536,7 +632,9 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
             data-testid="entry-keep-draft"
             className={dialogButton()}
             onClick={() => {
-              writeDraft(draftKey, current.current);
+              // The dialog may have been open when a sign-out in another
+              // tab arrived: nothing is kept for that user then (Reviewer).
+              if (!signedOut.current) writeDraft(draftKey, current.current);
               leaveOn();
             }}
           >

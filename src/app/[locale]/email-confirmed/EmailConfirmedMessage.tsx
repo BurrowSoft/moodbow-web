@@ -3,7 +3,18 @@
 import { useEffect, useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
 import { classifyAuthLink, type AuthLinkResult } from "@/lib/authLink";
+import { STATUS_BUTTON } from "@/components/statusButton";
+import { openAppFallback, openAppIntent } from "@/lib/stores";
 import { ContinueCountdown } from "./ContinueCountdown";
+
+// An Android browser: the only place an intent:// link can open the app.
+const onAndroid = () => /Android/i.test(navigator.userAgent);
+const notOnServer = () => false;
+// This deployment's origin, for the fallback's absolute URL. Only the origin:
+// the path comes from the server (openApp.path), since window.location can
+// still show /auth/confirm during the client navigation here.
+const thisOrigin = () => window.location.origin;
+const noOriginOnServer = () => "";
 
 // The query (?result=… from /auth/confirm, Supabase's ?error=…) is read on
 // the server and passed in as `fromQuery`: window.location can still show
@@ -28,9 +39,18 @@ const COPY = {
 
 // continueTo: where Continue (and the countdown, decision 134) goes, or
 // null while the web journal isn't live (the page stays as it is).
-export function EmailConfirmedMessage({ fromQuery, continueTo }: { fromQuery: AuthLinkResult; continueTo: string | null }) {
+// openApp: once the app build people have handles the link (app-open-link),
+// which app (production), whether its Play listing is public (playLive) and
+// this page's locale path (path), for the intent link into its backup
+// screen; else null.
+// appMissing: back here as that link's fallback (the app didn't open):
+// neither the button nor the app line, only the confirmation (UX: a web-only
+// account isn't backing anything up).
+export function EmailConfirmedMessage({ fromQuery, continueTo, openApp = null, appMissing = false }: { fromQuery: AuthLinkResult; continueTo: string | null; openApp?: { production: boolean; playLive: boolean; path: string } | null; appMissing?: boolean }) {
   const t = useTranslations("emailConfirmed");
   const fromHash = useSyncExternalStore(subscribe, readHash, noHashOnServer);
+  const android = useSyncExternalStore(subscribe, onAndroid, notOnServer);
+  const origin = useSyncExternalStore(subscribe, thisOrigin, noOriginOnServer);
   const result: AuthLinkResult = fromHash === "error" ? "error" : fromQuery;
 
   // Confirmation links can carry tokens in the query or fragment: drop them
@@ -42,7 +62,10 @@ export function EmailConfirmedMessage({ fromQuery, continueTo }: { fromQuery: Au
     }
   }, []);
 
-  const moveOn = result === "ok" || result === "email_changed";
+  // Only a confirmed sign-up moves on. A confirmed email (an app account's
+  // first email, or a change) stays put and points back to the app (decision
+  // 216; never a countdown into a journal that may 404).
+  const moveOn = result === "ok";
   const copy = COPY[result];
   return (
     <div data-testid={`email-confirmed-${result}`} className="flex flex-col items-center text-center">
@@ -51,6 +74,19 @@ export function EmailConfirmedMessage({ fromQuery, continueTo }: { fromQuery: Au
           the web line instead (decision 134). */}
       <p className="mt-4 text-base leading-relaxed text-muted sm:text-[17px]">{result === "ok" && continueTo ? t("emailConfirmedWebBody") : t(copy.body)}</p>
       {moveOn && continueTo && <ContinueCountdown href={continueTo} />}
+      {/* Back to the app: a button that opens it on Android once the app
+          build handles the link; everywhere else (and until then) the line. */}
+      {result === "email_changed" &&
+        !appMissing &&
+        (openApp && android && origin ? (
+          <a href={openAppIntent(openApp.production, openAppFallback(openApp.playLive, `${origin}${openApp.path}`))} data-testid="email-confirmed-open-app" className={`mt-9 ${STATUS_BUTTON}`}>
+            {t("emailConfirmedOpenApp")}
+          </a>
+        ) : (
+          <p data-testid="email-confirmed-app-line" className="mt-4 text-base font-medium leading-relaxed text-text sm:text-[17px]">
+            {t("emailConfirmedDesktopLine")}
+          </p>
+        ))}
     </div>
   );
 }

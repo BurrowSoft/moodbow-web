@@ -100,8 +100,9 @@ describe("Help is public, scoped to what's live (decision 212)", () => {
     expect(published("app-lock")).not.toContain("widget");
   });
 
-  it("the app's on this day, daily reminder and month share card show", () => {
+  it("the app's on this day, daily reminder, offline start and month share card show", () => {
     expect(published("on-this-day")).toContain("Hide for today");
+    expect(published("offline")).toContain("opens without a connection");
     expect(published("reminders")).toContain("Daily reminder");
     expect(published("share-card")).toContain("Moodbow rainbow");
     expect(published("timeline")).toContain("Share this month");
@@ -109,11 +110,64 @@ describe("Help is public, scoped to what's live (decision 212)", () => {
     expect(published("share-card")).not.toContain("Milestone");
   });
 
+  it("the app's start without an email (0.9.4, decision 216): getting started and backing up show", () => {
+    expect(published("getting-started")).toContain("Skip for now");
+    expect(published("getting-started")).not.toContain("Create your account");
+    expect(published("backing-up")).toContain("Back up your journal");
+    expect(findArticle("en", "backing-up")!.topic).toBe("Privacy & account");
+  });
+
+  // The app releases' features (UX 2026-11-03): each article or line shows
+  // once its help-only app id is met (the app build people have), in en and
+  // th, with the app's way (✕ or Back) and no web-only steps until the web
+  // journal is live.
+  describe("0.9.5 / 0.9.6: shown by the app build people have", () => {
+    // Both ways named, so these hold whether or not the id is met in
+    // content/conditions.json yet (the 0.9.5 / 0.9.6 flips just flip it).
+    const withMet = (on: string[], off: string[] = []) => (id: string) => on.includes(id) || (!off.includes(id) && isPendingMet(id));
+    const render = (locale: string, slug: string, on: string[], off: string[] = []) => renderArticle(findArticle(locale, slug)!, withMet(on, off));
+    for (const [id, slug, text] of [
+      ["app_calendar", "calendar", "Calendar"],
+      ["app_search", "search", "(or use Back)"],
+      ["app_export_csv", "privacy-and-data", "Spreadsheet (.csv)"],
+      ["app_writing_prompts", "entries", "Another"],
+      ["app_share_cards_more", "share-card", "Milestone"],
+      ["app_year_card", "share-card", "twelve bands"],
+    ] as const) {
+      it(`${id}: ${slug} says "${text}" only once it's met`, () => {
+        expect(render("en", slug, [], [id]), id).not.toContain(text);
+        expect(render("en", slug, [id]), id).toContain(text);
+        // th has the same block (parity), so it appears with the same id.
+        expect(render("th", slug, [], [id]), id).not.toBe(render("th", slug, [id]));
+      });
+    }
+
+    it("search and the CSV line: no web-only steps or web import while those are off", () => {
+      const search = render("en", "search", ["app_search"], ["web_journal_live"]);
+      expect(search).not.toContain("Esc");
+      expect(render("en", "search", ["app_search", "web_journal_live"])).toContain("press Esc on the web");
+      const csv = render("en", "privacy-and-data", ["app_export_csv"], ["import_live"]);
+      expect(csv).toContain("Excel or Google Sheets.");
+      expect(csv).not.toContain("import");
+      expect(render("en", "privacy-and-data", ["app_export_csv", "import_live"])).toContain("which Moodbow can import again on the web.");
+    });
+  });
+
+  it("backing up's steps are a numbered list (styled in globals.css; Web Tester's regression pass)", () => {
+    for (const locale of ["en", "th"]) {
+      const html = renderArticle(findArticle(locale, "backing-up")!);
+      expect(html, locale).toMatch(/<ol>\s*<li>/);
+      expect(html.match(/<li>/g), locale).toHaveLength(4);
+    }
+  });
+
   // The web journal's lines follow web-journal-live (the web launch step
   // shows them), the AI line ai-live: these hold before and after each flip.
   it("the web journal's lines show only with the web journal, the AI line only with AI", () => {
     const web = isPendingMet("web_journal_live");
     expect(published("getting-started").includes("moodbow.com")).toBe(web);
+    expect(published("getting-started").includes("on the web")).toBe(web);
+    expect(published("backing-up").includes("moodbow.com")).toBe(web);
     expect(published("offline").includes("browser")).toBe(web);
     expect(published("sign-in").includes("on the web")).toBe(web);
     expect(published("reminders").includes("on the web")).toBe(web);

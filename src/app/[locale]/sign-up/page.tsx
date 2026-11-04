@@ -32,8 +32,16 @@ export default async function SignUpPage({ params }: PageProps<"/[locale]/sign-u
   if (!parseConsentCookie((await cookies()).get(CONSENT_COOKIE)?.value)) redirect({ href: "/consent", locale });
 
   const t = await getTranslations("onboarding");
+  const ta = await getTranslations("auth");
   return (
     <PageShell title={t("signupTitle")}>
+      {/* Someone who started in the app without an email (decision 216):
+          the web has no anonymous sessions, so they back up there first. */}
+      {pageGate("anon-start-live") !== "hidden" && (
+        <p data-testid="auth-started-in-app" className="text-muted">
+          {ta("startedInApp")}
+        </p>
+      )}
       <SignUpForm />
     </PageShell>
   );

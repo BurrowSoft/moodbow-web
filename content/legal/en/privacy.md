@@ -18,6 +18,7 @@ Moodbow is a private journal made by Vitor Ribeiro Carvalho, trading as BurrowSo
 
 ### 1. What we collect
 **Your account:** your email address, your password (stored only as a secure hash), and when you agreed to our Terms and this policy, and confirmed you're 18 or older.
+{pending:anon_start_live}**Using Moodbow without an email:** you can start without giving us an email. We create an account for your phone that only it can use, and store your journal there like any other account. If you add an email later, your journal stays the same account. If you never add an email and don't open the app while connected to the internet for 12 months, we delete that account and its journal.{/pending}
 **Your journal:** the entries you write, your daily check-ins (mood, sleep, movement (active minutes), stress), the dates they belong to, and which entries you mark as moments.
 **Your settings:** language, country, time zone, reminder time, and your AI choices (on or off, tone, focus areas).
 **AI content (only if AI is on):** the reflections and reports the AI writes for you{pending:ai_memory}, and the short facts Moodbow remembers about you, which you can see, edit and delete in Me → What Moodbow remembers{/pending}.
@@ -27,7 +28,7 @@ Moodbow is a private journal made by Vitor Ribeiro Carvalho, trading as BurrowSo
 
 **Cookies and storage on your device:** the website uses only the cookies it needs to work: one that keeps you signed in, and one that remembers whether you view your Timeline as a list or a calendar. It also keeps a few display choices in your browser, such as light or dark appearance and the cards you've already closed. None of them track you across sites or are used for advertising or analytics.
 
-**What stays only on your device:** unsent drafts{pending:app_lock}, your app-lock PIN{/pending}{pending:share_cards}, and the share cards you create. Share cards are made on your device and only leave it if you share them yourself{/pending}.
+**What stays only on your device:** unsent drafts{pending:app_app_lock}, your app-lock PIN{/pending}{pending:app_share_cards}, and the share cards you create. Share cards are made on your device and only leave it if you share them yourself{/pending}.
 
 **Technical logs:** like almost every online service, our hosting providers record IP addresses and device or browser information when you connect, for security and to fix problems. They keep these logs for a limited time (see §4). We also keep daily totals of AI use (how many reflections were made that day and what they cost us), with no link to any person, so we can keep costs under control.
 **Emails you send us:** if you write to support@moodbow.com, we keep the conversation so we can answer you, and delete it when it's no longer needed.

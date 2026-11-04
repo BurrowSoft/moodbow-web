@@ -6,6 +6,7 @@ import { EXERCISE_MINUTES, MOODS, SLEEP_HOURS, SLEEP_QUALITIES, SLEEP_START, STR
 import { dateLine } from "@/lib/journal/today";
 import { valueHex } from "@/lib/journal/valueColours";
 import { localKey } from "@/lib/localData";
+import { onSignOut } from "@/lib/signOutSignal";
 import { SAVE_WAIT_MS, TimedOut, withTimeout } from "@/lib/ui/withTimeout";
 import { ValueDot } from "@/components/ValueDot";
 import { Dialog, dialogButton } from "@/components/Dialog";
@@ -14,6 +15,7 @@ import { JOURNAL_CARD, MOOD_FACE, MOOD_LABEL, MOOD_ROW, PRIMARY_SAVE } from "@/l
 import { MoodFace } from "@/components/MoodFace";
 import { onArrival } from "@/lib/ui/arrival";
 import { saveCheckIn, type CheckInState } from "./actions";
+import { useCheckInDraft } from "./CheckInDraft";
 
 // The daily check-in (M4): mood required (5 labelled circles), then the
 // optional sleep / exercise / stress rows. After saving, a summary row with
@@ -67,7 +69,7 @@ function readAllPending(uid: string): { key: string; pending: Pending }[] {
   return found.sort((a, b) => a.pending.date.localeCompare(b.pending.date));
 }
 
-function removePending(key: string) {
+export function removePending(key: string) {
   try {
     window.localStorage.removeItem(key);
   } catch {
@@ -91,6 +93,12 @@ function pendingFromForm(form: FormData): Pending {
   };
 }
 
+// This user's pending copies as the forms that save them, oldest day first:
+// Me → Sign out tries them once before it asks (UX & PM 2026-11-03).
+export function pendingForms(uid: string): { key: string; form: FormData }[] {
+  return readAllPending(uid).map(({ key, pending }) => ({ key, form: toFormData(pending.fields, pending.expected, pending.date, key) }));
+}
+
 function toFormData(fields: Fields, expectedUpdatedAt: string, date: string, fromPending?: string): FormData {
   const form = new FormData();
   form.set("local_date", date);
@@ -111,7 +119,9 @@ function toFormData(fields: Fields, expectedUpdatedAt: string, date: string, fro
 
 // date: the day this card is for (today on Today, the day in the day view).
 // autoFocus: focus the first mood when the card opens ("Add a check-in").
-type Props = { initial: CheckIn | null; uid: string; date: string; dateLocaleTag: string; autoFocus?: boolean };
+// keepDraft: Today's card; its unsaved choices survive leaving Today
+// (CheckInDraft, in memory only, #9765 M-01).
+type Props = { initial: CheckIn | null; uid: string; date: string; dateLocaleTag: string; autoFocus?: boolean; keepDraft?: boolean };
 
 // An offline copy the server refused ("rejected": e.g. a day that is in the
 // future for the account's zone). Never silent (decision 72): one notice per
@@ -223,8 +233,11 @@ export function CheckInCard(props: Props) {
   );
 }
 
-function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, autoFocus }: Props & { notify: Notify; announce: (text: string) => void }) {
+function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, autoFocus, keepDraft }: Props & { notify: Notify; announce: (text: string) => void }) {
   const t = useTranslations("today");
+  const slot = useCheckInDraft<Fields>();
+  const drafts = keepDraft ? slot : null;
+  const [draft] = useState(() => drafts?.get(cardDate) ?? null);
   // Waiting for the person's choice, oldest first; the dialog shows the first.
   const [conflicts, setConflicts] = useState<Conflict[]>([]);
   const addConflict = (c: Conflict) => setConflicts((all) => [...all.filter((x) => x.date !== c.date), c]);
@@ -233,12 +246,36 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
   // not ask again (reviewer).
   const resolving = useRef(new Map<string, FormData>());
   const [row, setRow] = useState<CheckIn | null>(initial);
-  const [fields, setFields] = useState<Fields>(fromRow(initial));
-  const [editing, setEditing] = useState(initial === null);
+  const [fields, setFields] = useState<Fields>(draft ?? fromRow(initial));
+  const [editing, setEditing] = useState(initial === null || draft !== null);
+  // Unsaved choices go to the draft; anything else (saved, cancelled, a
+  // new day's empty card) clears it.
+  useEffect(() => {
+    drafts?.set(cardDate, editing && !sameFields(fields, fromRow(row)) ? fields : null);
+  }, [drafts, cardDate, editing, fields, row]);
   const [offline, setOffline] = useState(false);
   const [storageFailed, setStorageFailed] = useState(false);
   // The pending copies being sent right now (by key), so none goes twice.
   const flushing = useRef(new Set<string>());
+  // Signed out in another tab (UX & PM 2026-11-03, option C; Reviewer #147
+  // F1): this card keeps no more copies for that user, so a mood tapped here
+  // afterwards (on a shared computer, by the next person) or a save still in
+  // flight can't land in the old account's journal later. "Delete it" also
+  // removes this user's copies that are still here.
+  const signedOut = useRef(false);
+  useEffect(
+    () =>
+      onSignOut(({ uid: who, mode }) => {
+        if (who !== uid) return;
+        signedOut.current = true;
+        if (mode === "delete") for (const { key } of readAllPending(uid)) removePending(key);
+      }),
+    [uid],
+  );
+  // Every pending copy this card writes goes through here.
+  const putPending = (key: string, value: string) => {
+    if (!signedOut.current) window.localStorage.setItem(key, value);
+  };
   // The live save's wait, kept outside the action (Web Tester, #122 T1a/T1b):
   // while the save's request is open, the action's own result can't commit
   // (React entangles it with Next's open transition; "saved in this browser"
@@ -268,7 +305,7 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
         if (!fromPending) {
           try {
             const copy = pendingFromForm(form);
-            window.localStorage.setItem(pendingKey(uid, copy.date), JSON.stringify(copy));
+            putPending(pendingKey(uid, copy.date), JSON.stringify(copy));
           } catch {
             // storage unavailable: nothing more can be done before leaving
           }
@@ -281,7 +318,7 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
       if (fromPending) return prev;
       try {
         const copy = pendingFromForm(form);
-        window.localStorage.setItem(pendingKey(uid, copy.date), JSON.stringify(copy));
+        putPending(pendingKey(uid, copy.date), JSON.stringify(copy));
       } catch {
         return { status: "error", error: "generic" };
       }
@@ -343,7 +380,7 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
         if (next.checkIn) addConflict({ date, mine: mine.fields, theirs: next.checkIn, key });
         else {
           try {
-            window.localStorage.setItem(key, JSON.stringify({ ...mine, expected: "" } satisfies Pending));
+            putPending(key, JSON.stringify({ ...mine, expected: "" } satisfies Pending));
           } catch {
             // storage unavailable: the copy stays as it was
           }
@@ -360,7 +397,7 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
       const key = pendingKey(uid, mine.date);
       let kept = true;
       try {
-        window.localStorage.setItem(key, JSON.stringify(mine));
+        putPending(key, JSON.stringify(mine));
       } catch {
         kept = false;
       }
@@ -404,7 +441,7 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
     setStorageFailed(false);
     if (!navigator.onLine) {
       try {
-        window.localStorage.setItem(pendingKey(uid, cardDate), JSON.stringify({ fields, expected, date: cardDate } satisfies Pending));
+        putPending(pendingKey(uid, cardDate), JSON.stringify({ fields, expected, date: cardDate } satisfies Pending));
       } catch {
         // storage unavailable: nothing was kept, so don't say it was saved
         setStorageFailed(true);
@@ -419,7 +456,7 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
     keptFor.current = null;
     waitTimer.current = window.setTimeout(() => {
       try {
-        window.localStorage.setItem(pendingKey(uid, cardDate), JSON.stringify(pendingFromForm(form)));
+        putPending(pendingKey(uid, cardDate), JSON.stringify(pendingFromForm(form)));
       } catch {
         setStorageFailed(true);
         return;
@@ -440,7 +477,7 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
       // first with the new lock), so a dropped request loses nothing.
       if (c.key) {
         try {
-          window.localStorage.setItem(c.key, JSON.stringify({ fields: c.mine, expected: c.theirs.updated_at, date: c.date } satisfies Pending));
+          putPending(c.key, JSON.stringify({ fields: c.mine, expected: c.theirs.updated_at, date: c.date } satisfies Pending));
         } catch {
           // storage unavailable: the request below still goes
         }

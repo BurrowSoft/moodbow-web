@@ -58,12 +58,17 @@ describe("ContinueCountdown (decision 134)", () => {
 });
 
 describe("EmailConfirmedMessage: when the countdown shows", () => {
-  it("confirmed or email changed, with somewhere to go: yes; the journal not live (null): the page stays as it is", () => {
+  it("confirmed, with somewhere to go: yes; an email confirmed (a first email from the app, or a change) or the journal not live (null): the page stays as it is", () => {
     const first = wrap(<EmailConfirmedMessage fromQuery="ok" continueTo="/app" />);
     expect(screen.getByTestId("email-confirmed-countdown")).toBeInTheDocument();
     first.unmount();
+    // Decision 216 (UX): someone who started in the app goes back to it; never
+    // sent on to the web journal (a 404 on Production until it's live).
     const changed = wrap(<EmailConfirmedMessage fromQuery="email_changed" continueTo="/app" />);
-    expect(screen.getByTestId("email-confirmed-countdown")).toBeInTheDocument();
+    expect(screen.queryByTestId("email-confirmed-countdown")).toBeNull();
+    expect(screen.getByTestId("email-confirmed-email_changed")).toHaveTextContent(m.emailChangedBody);
+    seconds(10);
+    expect(push).not.toHaveBeenCalled();
     changed.unmount();
     const notLive = wrap(<EmailConfirmedMessage fromQuery="ok" continueTo={null} />);
     expect(screen.queryByTestId("email-confirmed-countdown")).toBeNull();
@@ -103,5 +108,87 @@ describe("decision 134 refinements (review of #42)", () => {
     live.unmount();
     wrap(<EmailConfirmedMessage fromQuery="ok" continueTo={null} />);
     expect(screen.getByText(m.successBody)).toBeInTheDocument();
+  });
+});
+
+describe("EmailConfirmedMessage: back to the app after an email is confirmed (decision 216)", () => {
+  // The prod app; Play not public yet (play-live unmet).
+  const INTENT = { production: true, playLive: false, path: "/th/email-confirmed" };
+  const fallbackOf = (href: string | null) => decodeURIComponent(/S\.browser_fallback_url=([^;]+)/.exec(href ?? "")?.[1] ?? "");
+  const setUserAgent = (ua: string) => Object.defineProperty(window.navigator, "userAgent", { value: ua, configurable: true });
+  const ANDROID = "Mozilla/5.0 (Linux; Android 14; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0 Mobile Safari/537.36";
+  const IPHONE = "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1";
+  const DESKTOP = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0 Safari/537.36";
+  const original = window.navigator.userAgent;
+  afterEach(() => setUserAgent(original));
+
+  it("Android, once the app build handles the link: the Open Moodbow button into its backup screen", () => {
+    setUserAgent(ANDROID);
+    wrap(<EmailConfirmedMessage fromQuery="email_changed" continueTo={null} openApp={INTENT} />);
+    const href = screen.getByTestId("email-confirmed-open-app").getAttribute("href");
+    expect(href).toMatch(/^intent:\/\/app\/me\/backup#Intent;scheme=moodbow;package=com\.burrowsoft\.moodbow;S\.browser_fallback_url=/);
+    // No app: back to this page on this deployment, without the button (not Play's "item not found").
+    expect(fallbackOf(href)).toBe(`${window.location.origin}/th/email-confirmed?result=email_changed&app=missing`);
+    expect(screen.getByTestId("email-confirmed-open-app")).toHaveTextContent(m.emailConfirmedOpenApp);
+    expect(screen.queryByTestId("email-confirmed-app-line")).toBeNull();
+    expect(screen.getByText(m.emailChangedBody)).toBeInTheDocument();
+  });
+
+  it("arriving from the confirm button (the address bar still on /auth/confirm): the fallback is still this page (Reviewer, #139 F1)", () => {
+    setUserAgent(ANDROID);
+    const before = window.location.pathname;
+    window.history.replaceState(null, "", "/th/auth/confirm?token_hash=x&type=email_change");
+    try {
+      wrap(<EmailConfirmedMessage fromQuery="email_changed" continueTo={null} openApp={INTENT} />);
+      const fallback = fallbackOf(screen.getByTestId("email-confirmed-open-app").getAttribute("href"));
+      expect(fallback).toBe(`${window.location.origin}/th/email-confirmed?result=email_changed&app=missing`);
+      expect(fallback).not.toContain("auth/confirm");
+    } finally {
+      window.history.replaceState(null, "", before);
+    }
+  });
+
+  it("the staging app off Production; Play as the fallback once play-live is met", () => {
+    setUserAgent(ANDROID);
+    wrap(<EmailConfirmedMessage fromQuery="email_changed" continueTo={null} openApp={{ production: false, playLive: true, path: "/email-confirmed" }} />);
+    const href = screen.getByTestId("email-confirmed-open-app").getAttribute("href");
+    expect(href).toContain("package=com.burrowsoft.moodbow.staging;");
+    expect(fallbackOf(href)).toBe("https://play.google.com/store/apps/details?id=com.burrowsoft.moodbow");
+  });
+
+  it("back as the fallback (app=missing): only the confirmation, no button and no app line (UX)", () => {
+    for (const ua of [ANDROID, DESKTOP]) {
+      setUserAgent(ua);
+      const view = wrap(<EmailConfirmedMessage fromQuery="email_changed" continueTo={null} openApp={INTENT} appMissing />);
+      expect(screen.getByText(m.emailChangedTitle)).toBeInTheDocument();
+      expect(screen.getByText(m.emailChangedBody)).toBeInTheDocument();
+      expect(screen.queryByTestId("email-confirmed-open-app")).toBeNull();
+      expect(screen.queryByTestId("email-confirmed-app-line")).toBeNull();
+      view.unmount();
+    }
+  });
+
+  it("iPhone and desktop, or before the app build handles it: the line, no button", () => {
+    for (const [ua, openApp] of [
+      [IPHONE, INTENT],
+      [DESKTOP, INTENT],
+      [ANDROID, null],
+    ] as const) {
+      setUserAgent(ua);
+      const view = wrap(<EmailConfirmedMessage fromQuery="email_changed" continueTo={null} openApp={openApp} />);
+      expect(screen.getByTestId("email-confirmed-app-line")).toHaveTextContent(m.emailConfirmedDesktopLine);
+      expect(screen.queryByTestId("email-confirmed-open-app")).toBeNull();
+      view.unmount();
+    }
+  });
+
+  it("only after an email is confirmed: not on a confirmed sign-up or an error", () => {
+    setUserAgent(ANDROID);
+    for (const fromQuery of ["ok", "error", "email_change_pending"] as const) {
+      const view = wrap(<EmailConfirmedMessage fromQuery={fromQuery} continueTo={null} openApp={INTENT} />);
+      expect(screen.queryByTestId("email-confirmed-open-app")).toBeNull();
+      expect(screen.queryByTestId("email-confirmed-app-line")).toBeNull();
+      view.unmount();
+    }
   });
 });

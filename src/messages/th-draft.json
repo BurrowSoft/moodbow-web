@@ -306,12 +306,22 @@
   },
   {
     "key": "emailConfirmed.emailChangedTitle",
-    "en": "Your email address was updated.",
+    "en": "Your email address is confirmed.",
     "reason": "UX draft (native read pending)"
   },
   {
     "key": "emailConfirmed.emailChangedBody",
-    "en": "Use the new one next time you sign in.",
+    "en": "Use it next time you sign in.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "emailConfirmed.emailConfirmedOpenApp",
+    "en": "Open Moodbow",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "emailConfirmed.emailConfirmedDesktopLine",
+    "en": "Open the Moodbow app to finish backing up.",
     "reason": "UX draft (native read pending)"
   },
   {
@@ -361,17 +371,17 @@
   },
   {
     "key": "confirmLink.emailChangeTitle",
-    "en": "Confirm your new email",
+    "en": "Confirm your email",
     "reason": "UX draft (native read pending)"
   },
   {
     "key": "confirmLink.emailChangeBody",
-    "en": "Tap the button to confirm the new email address for your Moodbow account.",
+    "en": "Tap the button to confirm this email address for your Moodbow account.",
     "reason": "UX draft (native read pending)"
   },
   {
     "key": "confirmLink.emailChangeButton",
-    "en": "Confirm email change",
+    "en": "Confirm email",
     "reason": "UX draft (native read pending)"
   },
   {
@@ -585,6 +595,11 @@
     "reason": "UX draft (native read pending)"
   },
   {
+    "key": "entry.entryDeletedAnnounce",
+    "en": "Entry deleted",
+    "reason": "UX draft (native read pending)"
+  },
+  {
     "key": "entry.momentBadge",
     "en": "Moment",
     "reason": "UX draft (native read pending)"
@@ -640,6 +655,11 @@
     "reason": "UX draft (native read pending)"
   },
   {
+    "key": "export.exportAccountNotBackedUp",
+    "en": "Account: not backed up yet",
+    "reason": "UX draft (native read pending)"
+  },
+  {
     "key": "export.exportPrivateNote",
     "en": "This file holds your private journal. Keep it somewhere safe.",
     "reason": "UX draft (native read pending)"
@@ -661,7 +681,7 @@
   },
   {
     "key": "export.exportMemories",
-    "en": "What the AI remembers",
+    "en": "What Moodbow remembers",
     "reason": "UX draft (native read pending)"
   },
   {
@@ -788,5 +808,75 @@
     "key": "legal.legalEnglishOnly",
     "en": "This page is available in English.",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "me.importKeptExisting",
+    "en": "Some days already had a check-in, so we kept those.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "me.importNothingNew",
+    "en": "Nothing new to add. Everything in this file is already in Moodbow.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "auth.startedInApp",
+    "en": "Started in the app? Back up your journal there first, then sign in here with that email.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.insightsNeedMore",
+    "en": "Check in on {count, plural, =1 {1 more day} other {{count} more days}} to see your charts.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.insightsNeedMoreSleep",
+    "en": "Add sleep on {count, plural, =1 {1 more day} other {{count} more days}} to see this chart.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.insightsNeedMoreMovement",
+    "en": "Add movement on {count, plural, =1 {1 more day} other {{count} more days}} to see this chart.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.insightsNeedMoreStress",
+    "en": "Add stress on {count, plural, =1 {1 more day} other {{count} more days}} to see this chart.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "safety.safetyBodyNeutral",
+    "en": "Talking to someone can help. These people are ready to listen.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "me.signOutKeepTitle",
+    "en": "Keep your unsaved writing on this browser?",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "me.signOutKeepBody",
+    "en": "Something you wrote hasn't been saved to your journal yet. Keep it here for next time, or delete it if other people use this computer.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "me.signOutKeep",
+    "en": "Keep it",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "me.signOutDelete",
+    "en": "Delete it",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "share.shareMilestone",
+    "en": "Milestone",
+    "reason": "UX draft (native read pending): shorter, so the 4 segments fit at 320 px"
+  },
+  {
+    "key": "share.shareTypeMonth",
+    "en": "Month",
+    "reason": "UX draft (native read pending): the card type segment's first option, at parity with the app (the card's title stays shareMoodbow)"
   }
 ]

@@ -139,6 +139,17 @@ test.describe("language: Thai is a draft, not offered (thai-offered-live)", () =
     await expect(page.locator('link[rel="alternate"][hreflang="th"]')).toHaveCount(0);
   });
 
+  test("/help/backing-up: the steps keep their numbers (an ol in help or legal text)", async ({ page }) => {
+    const res = await page.goto("/help/backing-up");
+    expect(res?.status()).toBe(200);
+    const steps = page.locator(".legal-prose ol");
+    await expect(steps).toHaveCSS("list-style-type", "decimal");
+    await expect(steps.locator("li")).toHaveCount(4);
+    // The bullets stay as they were.
+    await page.goto("/help/getting-started");
+    await expect(page.locator(".legal-prose ul").first()).toHaveCSS("list-style-type", "disc");
+  });
+
   test("/th/help/getting-started: the Thai article", async ({ page }) => {
     const res = await page.goto("/th/help/getting-started");
     expect(res?.status()).toBe(200);
@@ -203,7 +214,9 @@ test.describe("the live legal pages and account deletion (decision 164)", () => 
     await expect(article).toContainText("disappear automatically within 8 days");
     // AI is off: no line may point at a Me → AI screen (decision 69).
     await expect(article).not.toContainText("Me → AI");
-    await expect(article).not.toContainText("app lock");
+    // What stays on the device, as the 0.9 app has it (Vitor's "ok device
+    // sentences"): the app-lock PIN and the share cards.
+    await expect(article).toContainText("unsent drafts, your app-lock PIN, and the share cards you create.");
     // UX resolved every to-confirm mark (decision 67).
     await expect(article.locator("mark.legal-todo")).toHaveCount(0);
     // The draft panel (unmet pending blocks) exists only while it's a draft.
@@ -371,7 +384,9 @@ test.describe("auth links", () => {
     await page.goto("/auth/confirm?token_hash=a1b2c3d4e5f60718293a4b5c6d7e8f90&type=recovery");
     await expect(page.getByRole("button", { name: "Continue" })).toBeVisible();
     await page.goto("/auth/confirm?token_hash=a1b2c3d4e5f60718293a4b5c6d7e8f90&type=email_change");
-    await expect(page.getByRole("button", { name: "Confirm email change" })).toBeVisible();
+    // Neutral for a first email (an app backup) and a change alike (UX, decision 216).
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Confirm your email");
+    await expect(page.getByRole("button", { name: "Confirm email" })).toBeVisible();
     await page.goto("/auth/confirm?type=signup");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("This link has expired or was already used.");
     await expect(page.getByRole("button")).toHaveCount(0);
@@ -409,11 +424,33 @@ test.describe("auth links", () => {
     );
   });
 
-  test("email change results", async ({ page }) => {
+  test("email change results", async ({ page }, testInfo) => {
     await page.goto("/email-confirmed?result=email_changed");
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Your email address was updated.");
-    await expect(page.getByText("Use the new one next time you sign in.")).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Your email address is confirmed.");
+    await expect(page.getByText("Use it next time you sign in.", { exact: true })).toBeVisible();
     await expect(page).toHaveURL(/\/email-confirmed$/);
+    // Stays put: no countdown into the web journal (decision 216, UX).
+    await expect(page.getByTestId("email-confirmed-countdown")).toHaveCount(0);
+    // Back to the app (app-open-link met, 0.9.3 (4)): "Open Moodbow" on
+    // Android (the mobile project is a Pixel 7), the line everywhere else.
+    if (testInfo.project.name === "mobile") {
+      await expect(page.getByTestId("email-confirmed-open-app")).toHaveText("Open Moodbow");
+      await expect(page.getByTestId("email-confirmed-open-app")).toHaveAttribute("href", /^intent:\/\/app\/me\/backup#Intent;scheme=moodbow;package=com\.burrowsoft\.moodbow(\.staging)?;/);
+      // No app: back to this page on this host (not Play while it isn't public).
+      const href = (await page.getByTestId("email-confirmed-open-app").getAttribute("href")) ?? "";
+      const fallback = decodeURIComponent(/S\.browser_fallback_url=([^;]+)/.exec(href)?.[1] ?? "");
+      expect(fallback).toBe(`${new URL(page.url()).origin}/email-confirmed?result=email_changed&app=missing`);
+      await expect(page.getByTestId("email-confirmed-app-line")).toHaveCount(0);
+    } else {
+      await expect(page.getByTestId("email-confirmed-app-line")).toHaveText("Open the Moodbow app to finish backing up.");
+      await expect(page.getByTestId("email-confirmed-open-app")).toHaveCount(0);
+    }
+    // Back as that fallback: only the confirmation, on every device (UX).
+    await page.goto("/email-confirmed?result=email_changed&app=missing");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Your email address is confirmed.");
+    await expect(page.getByText("Use it next time you sign in.", { exact: true })).toBeVisible();
+    await expect(page.getByTestId("email-confirmed-open-app")).toHaveCount(0);
+    await expect(page.getByTestId("email-confirmed-app-line")).toHaveCount(0);
     await page.goto("/email-confirmed?result=email_change_pending");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Almost done.");
   });
@@ -572,6 +609,8 @@ test.describe("onboarding (signed out)", () => {
     await page.getByTestId("consent-health").check();
     await page.getByTestId("consent-continue").click();
     await expect(page).toHaveURL(/\/sign-up$/);
+    // Decision 216: live since anon-start-live (0.9.4).
+    await expect(page.getByTestId("auth-started-in-app")).toHaveText("Started in the app? Back up your journal there first, then sign in here with that email.");
     await page.getByLabel("Email").fill("nope");
     await page.getByLabel("Password").fill("secret-123");
     await page.getByTestId("signup-submit").click();
@@ -590,6 +629,8 @@ test.describe("onboarding (signed out)", () => {
 
   test("sign-in links to Create account (Welcome); setup needs a session", async ({ page }) => {
     await page.goto("/sign-in");
+    // Decision 216: live since anon-start-live (0.9.4).
+    await expect(page.getByTestId("auth-started-in-app")).toHaveText("Started in the app? Back up your journal there first, then sign in here with that email.");
     await page.getByTestId("signin-to-signup").click();
     await expect(page).toHaveURL(/\/welcome$/);
     await page.goto("/setup");

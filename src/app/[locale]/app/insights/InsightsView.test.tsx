@@ -41,10 +41,13 @@ describe("InsightsView", () => {
     expect(screen.getByTestId("insights-range-3months")).toHaveTextContent(messages.insights.range3Months);
   });
 
-  it("fewer than 3 points: chartNotEnough for every chart", () => {
-    renderView([row("2026-10-02", 3)]);
+  it("fewer than 3 points: each chart says how many more days (#9765 S-02)", () => {
+    renderView([row("2026-10-02", 3), row("2026-10-01", 4, { sleep_hours: 7 })]);
+    expect(screen.getByTestId("insights-not-enough-mood")).toHaveTextContent("Check in on 1 more day to see your charts.");
+    expect(screen.getByTestId("insights-not-enough-sleep")).toHaveTextContent("Add sleep on 2 more days to see this chart.");
+    expect(screen.getByTestId("insights-not-enough-stress")).toHaveTextContent("Add stress on 3 more days to see this chart.");
+    expect(screen.getByTestId("insights-not-enough-exercise")).toHaveTextContent("Add movement on 3 more days to see this chart.");
     for (const m of ["mood", "sleep", "stress", "exercise"]) {
-      expect(screen.getByTestId(`insights-not-enough-${m}`)).toHaveTextContent(messages.insights.chartNotEnough);
       expect(within(screen.getByTestId(`insights-chart-${m}`)).queryByRole("img")).toBeNull();
     }
   });
