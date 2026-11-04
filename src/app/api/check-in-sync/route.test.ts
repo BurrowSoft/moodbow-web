@@ -14,7 +14,11 @@ const form = () => {
 const post = (origin: string | null, body: BodyInit = form()) =>
   POST(new Request("https://www.moodbow.com/api/check-in-sync", { method: "POST", body, headers: origin ? { origin } : {} }));
 
-beforeEach(() => saveCheckIn.mockReset());
+// Braces: a function returned from beforeEach is a teardown hook, and mockReset() returns the spy itself, which
+// Vitest would then call after the test (rejecting, in the redirect case).
+beforeEach(() => {
+  saveCheckIn.mockReset();
+});
 
 // Sign-out's one sync try (#147), a plain request so it can be aborted and
 // never queues ahead of the sign-out action (Web Tester, before #100).
