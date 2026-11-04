@@ -32,12 +32,22 @@ describe("POST /api/check-in-sync", () => {
     expect(Object.fromEntries(sent.entries())).toEqual({ local_date: "2026-10-02", mood: "4" });
   });
 
-  it("another origin, or none: refused, nothing saved", async () => {
-    for (const origin of ["https://evil.example", null]) {
+  it("another origin, none, \"null\" or a malformed one: refused (403, never a crash), nothing saved", async () => {
+    for (const origin of ["https://evil.example", null, "null", "not a url"]) {
       const res = await post(origin);
       expect(res.status, String(origin)).toBe(403);
     }
     expect(saveCheckIn).not.toHaveBeenCalled();
+  });
+
+  // Behind Vercel the host the browser asked for comes as x-forwarded-host / host
+  // (Reviewer #166: if it ever differed from req.url's, every sync would 403).
+  it("the public host from x-forwarded-host / host is what the Origin must match", async () => {
+    saveCheckIn.mockResolvedValue({ status: "saved", checkIn: { mood: 4 } });
+    const at = (headers: Record<string, string>) => POST(new Request("http://internal.local/api/check-in-sync", { method: "POST", body: form(), headers }));
+    expect((await at({ origin: "https://www.moodbow.com", "x-forwarded-host": "www.moodbow.com" })).status).toBe(200);
+    expect((await at({ origin: "https://www.moodbow.com", host: "www.moodbow.com" })).status).toBe(200);
+    expect((await at({ origin: "https://www.moodbow.com", host: "internal.local" })).status).toBe(403);
   });
 
   it("not saved: the save's own error as is; a redirect (session ended, consent) is generic, so the copy stays", async () => {

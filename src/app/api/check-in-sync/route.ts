@@ -8,9 +8,23 @@ import { saveCheckIn } from "@/app/[locale]/app/actions";
 // the same rules as the card, and the answer is its result (what the server
 // action returned to the card before). Same-origin only: a route handler has
 // no server action's origin check.
-export async function POST(req: Request): Promise<Response> {
+// The page's origin must be this host: the public host the browser asked for
+// (x-forwarded-host / host, as Vercel passes them; req.url as a fallback).
+// A missing, "null" (sandboxed frames, some redirects) or malformed Origin is
+// refused, never a crash (Reviewer #166).
+function sameOrigin(req: Request): boolean {
   const origin = req.headers.get("origin");
-  if (!origin || new URL(origin).host !== new URL(req.url).host) return Response.json({ status: "error", error: "generic" }, { status: 403 });
+  if (!origin) return false;
+  try {
+    const host = req.headers.get("x-forwarded-host") ?? req.headers.get("host") ?? new URL(req.url).host;
+    return new URL(origin).host === host;
+  } catch {
+    return false;
+  }
+}
+
+export async function POST(req: Request): Promise<Response> {
+  if (!sameOrigin(req)) return Response.json({ status: "error", error: "generic" }, { status: 403 });
   let form: FormData;
   try {
     form = await req.formData();
