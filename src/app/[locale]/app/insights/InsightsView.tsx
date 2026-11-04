@@ -1,6 +1,7 @@
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { METRICS, summarize, type InsightRow, type Metric, type Range } from "@/lib/journal/insights";
+import type { Pattern, PatternId } from "@/lib/journal/patterns";
 import type { ValueKey } from "@/lib/journal/valueColours";
 import { segment } from "@/lib/ui/journalLayout";
 import { Chart } from "./Chart";
@@ -23,6 +24,12 @@ const NEED_MORE: Record<Metric, "insightsNeedMore" | "insightsNeedMoreSleep" | "
   stress: "insightsNeedMoreStress",
   exercise: "insightsNeedMoreMovement",
 };
+// Each pattern's sentence: two numbers ("shown"), or "about the same".
+const PATTERN_TEXT: Record<PatternId, Record<"shown" | "same", `patterns${"Sleep" | "Movement" | "Stress"}${"Shown" | "Same"}`>> = {
+  sleep: { shown: "patternsSleepShown", same: "patternsSleepSame" },
+  movement: { shown: "patternsMovementShown", same: "patternsMovementSame" },
+  stress: { shown: "patternsStressShown", same: "patternsStressSame" },
+};
 
 // The Insights screen for loaded check-ins: range tabs, then one card per
 // chart with its average and the change vs the range before. The change is
@@ -31,7 +38,23 @@ const NEED_MORE: Record<Metric, "insightsNeedMore" | "insightsNeedMoreSleep" | "
 // share: the "My month's moodbow" button, where share cards are on (M10).
 // week: "Your week" (1.1 D), between the range tabs and the charts, where AI
 // and the weekly report are on.
-export function InsightsView({ rows, today, range, share, week }: { rows: InsightRow[]; today: string; range: Range; share?: React.ReactNode; week?: React.ReactNode }) {
+// patterns: Patterns (no AI), after the charts, where patterns-live is on;
+// the same on every tab (a fixed 90 days).
+export function InsightsView({
+  rows,
+  today,
+  range,
+  share,
+  week,
+  patterns,
+}: {
+  rows: InsightRow[];
+  today: string;
+  range: Range;
+  share?: React.ReactNode;
+  week?: React.ReactNode;
+  patterns?: Pattern[];
+}) {
   const t = useTranslations("insights");
   const tt = useTranslations("today");
   // Always one decimal for mood, stress and sleep ("4.0", "↑ 1.0": the
@@ -109,6 +132,43 @@ export function InsightsView({ rows, today, range, share, week }: { rows: Insigh
           );
         })}
       </div>
+
+      {patterns && <Patterns patterns={patterns} format={(v) => number.format(v)} />}
+    </section>
+  );
+}
+
+// Patterns (no AI): the shown and "about the same" sentences in their fixed
+// order (sleep, movement, stress), never sorted by size; a pattern without
+// enough days is left out; nothing to show is one line. Descriptive, never
+// causal: the footnote says so under the sentences.
+function Patterns({ patterns, format }: { patterns: Pattern[]; format: (v: number) => string }) {
+  const t = useTranslations("insights");
+  const visible = patterns.filter((p) => p.state !== "not_enough");
+  return (
+    <section data-testid="insights-patterns" aria-labelledby="patterns-title" className="mt-6 rounded-3xl border border-border bg-surface p-5">
+      <h2 id="patterns-title" className="text-lg font-medium text-text">
+        {t("patternsTitle")}
+      </h2>
+      <p className="text-sm text-muted">{t("patternsSubtitle")}</p>
+      {visible.length > 0 ? (
+        <>
+          <ul className="mt-3 space-y-2 text-sm text-text">
+            {visible.map((p) => (
+              <li key={p.id} data-testid={`insights-pattern-${p.id}`} data-state={p.state}>
+                {t(PATTERN_TEXT[p.id][p.state], { a: format(p.a.mood), b: format(p.b.mood) })}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-3 text-xs text-muted" data-testid="insights-patterns-footnote">
+            {t("patternsFootnote")}
+          </p>
+        </>
+      ) : (
+        <p className="mt-3 text-sm text-muted" data-testid="insights-patterns-none">
+          {t("patternsNone")}
+        </p>
+      )}
     </section>
   );
 }
