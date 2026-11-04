@@ -3,6 +3,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import messages from "@/messages/en.json";
 import type { InsightRow, Range } from "@/lib/journal/insights";
+import type { Pattern } from "@/lib/journal/patterns";
 
 vi.mock("@/i18n/navigation", () => ({
   Link: ({ href, children, ...rest }: { href: string; children: React.ReactNode }) => (
@@ -115,5 +116,47 @@ describe("InsightsView: number format (app parity)", () => {
     expect(screen.getByTestId("insights-average-mood")).toHaveTextContent("Average 4.0 / 5");
     expect(screen.getByTestId("insights-average-sleep")).toHaveTextContent("Average 7.0 h");
     expect(screen.getByTestId("insights-average-exercise")).toHaveTextContent("Average 30 min");
+  });
+});
+
+// Patterns (no AI): the sentences in their fixed order, "about the same"
+// with both numbers, a short pattern left out, one line when nothing shows,
+// nothing at all where the card is off.
+describe("InsightsView: Patterns", () => {
+  const renderPatterns = (patterns?: Pattern[]) =>
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <InsightsView rows={[]} today="2026-10-02" range="week" patterns={patterns} />
+      </NextIntlClientProvider>,
+    );
+  const side = (days: number, mood: number) => ({ days, mood });
+
+  it("shown and same sentences, one decimal always, the short one left out, the footnote", () => {
+    renderPatterns([
+      { id: "sleep", state: "shown", a: side(10, 4), b: side(8, 3.4), diff: 0.6 },
+      { id: "movement", state: "not_enough", a: null, b: null, diff: null },
+      { id: "stress", state: "same", a: side(6, 3.5), b: side(5, 3.2), diff: 0.3 },
+    ]);
+    const card = screen.getByTestId("insights-patterns");
+    expect(within(card).getByRole("heading", { name: messages.insights.patternsTitle })).toBeInTheDocument();
+    expect(card).toHaveTextContent(messages.insights.patternsSubtitle);
+    expect(screen.getByTestId("insights-pattern-sleep")).toHaveTextContent("On days after 7 or more hours of sleep, your mood averaged 4.0 of 5. After less sleep, 3.4.");
+    expect(screen.getByTestId("insights-pattern-stress")).toHaveTextContent("On low- and high-stress days, your mood was about the same (3.5 and 3.2 of 5).");
+    expect(screen.queryByTestId("insights-pattern-movement")).toBeNull();
+    expect(within(card).getAllByRole("listitem").map((li) => li.getAttribute("data-testid"))).toEqual(["insights-pattern-sleep", "insights-pattern-stress"]);
+    expect(screen.getByTestId("insights-patterns-footnote")).toHaveTextContent(messages.insights.patternsFootnote);
+    expect(screen.queryByTestId("insights-patterns-none")).toBeNull();
+  });
+
+  it("nothing shown or same: the one line, no footnote", () => {
+    renderPatterns((["sleep", "movement", "stress"] as const).map((id) => ({ id, state: "not_enough" as const, a: null, b: null, diff: null })));
+    expect(screen.getByTestId("insights-patterns-none")).toHaveTextContent(messages.insights.patternsNone);
+    expect(screen.queryByRole("listitem")).toBeNull();
+    expect(screen.queryByTestId("insights-patterns-footnote")).toBeNull();
+  });
+
+  it("off (patterns-live hidden): no card", () => {
+    renderPatterns(undefined);
+    expect(screen.queryByTestId("insights-patterns")).toBeNull();
   });
 });
