@@ -13,4 +13,4 @@ It always looks at the last 3 months, whichever range you're viewing. A comparis
 
 When the two averages are close (less than half a point apart), Moodbow says your mood was **about the same** and shows both numbers.
 
-These are your own check-ins side by side. They may show what tends to go together, not what causes what. Patterns are worked out on your device from the check-ins you've already saved: nothing extra is sent anywhere, and no AI is involved.{/pending}
+These are your own check-ins side by side. They may show what tends to go together, not what causes what. Patterns are worked out from the check-ins you've already saved, with no AI and nothing sent anywhere else.{/pending}
