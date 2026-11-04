@@ -235,7 +235,7 @@ export function ShareMonth({
               <div className="flex flex-wrap gap-2" role="group" aria-label={t("shareCardType")}>
                 {types.map((k) => (
                   <button key={k} type="button" data-testid={`share-type-${k}`} aria-pressed={type === k} onClick={() => setType(k)} className={choice(type === k)}>
-                    {t(k === "moodbow" ? "shareMoodbow" : k === "chart" ? "shareChart" : k === "year" ? "shareYear" : "shareMilestone")}
+                    {t(k === "moodbow" ? "shareTypeMonth" : k === "chart" ? "shareChart" : k === "year" ? "shareYear" : "shareMilestone")}
                   </button>
                 ))}
               </div>
