@@ -112,7 +112,7 @@
     "what": "get_timeline(p_before, p_limit, p_moments_only) from moodbow-app migration 005 is applied on PRODUCTION (Mobile Dev confirms; staging has it since 2026-10-19). Until then the Timeline's Moments filter shows on Previews only."
   },
   "share-cards-more": {
-    "met": false,
+    "met": true,
     "what": "1.1 B (decision 169): the chart and milestone share cards and Today's milestone card are tested on the app and the web (needs share-cards too)."
   },
   "on-this-day-live": {
@@ -124,15 +124,15 @@
     "what": "1.1 O web keyboard shortcuts (decision 200, specs/1.1-features.md §O) are tested on the web: then the shortcuts, the ? list and the Me → Appearance switch (WCAG 2.1.4) are on for Production, with their Help article (keyboard-shortcuts.md). Never before search-live: the article mentions \"/\" for search (UX; conditions.test enforces it). Shown on Previews before that."
   },
   "export-csv-live": {
-    "met": false,
+    "met": true,
     "what": "1.1 P spreadsheet export (decision 201, specs/1.1-features.md §P) is tested on the web, including the round trip into a fresh account: then Me → Export my data offers the .csv on Production, with its Help line. Shown on Previews before that."
   },
   "search-live": {
-    "met": false,
+    "met": true,
     "what": "1.1 L search (decision 195) is tested on the web (and the app's own, for parity): then the Timeline's magnifier shows on Production. Shown on Previews before that."
   },
   "calendar-live": {
-    "met": false,
+    "met": true,
     "what": "1.1 M month calendar (decision 197, specs/1.1-features.md §M) is tested on the web: then Timeline's List · Calendar switch shows on Production. Shown on Previews before that."
   },
   "print-live": {
@@ -152,11 +152,11 @@
     "what": "The home-screen widget (1.1 E) is in a RELEASED app build (Android first). App-only: on the web it only gates the Help article that explains it."
   },
   "writing-prompts": {
-    "met": false,
+    "met": true,
     "what": "1.1 I writing prompts (decision 183): the quiet prompt above an empty entry, from contracts/prompts.json, is tested on the app and the web."
   },
   "year-card": {
-    "met": false,
+    "met": true,
     "what": "1.1 J \"My year's moodbow\" (decision 184): the Year card in the share sheet (December and January, ≥ 3 coloured months) is tested on the app and the web (needs share-cards too)."
   },
   "play-live": {
@@ -168,7 +168,7 @@
     "what": "The App Store listing is public (Vitor), and src/lib/stores.ts has its URL and id. Then the web shows the App Store link and the iOS smart app banner (decision 185)."
   },
   "import-live": {
-    "met": false,
+    "met": true,
     "what": "1.1 K import from another journal (decision 189: Daylio + generic CSV, web first) is tested on the web; then Me → Your data offers it on Production."
   },
   "thai-offered-live": {

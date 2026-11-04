@@ -35,7 +35,9 @@ describe("conditions", () => {
   });
 
   // The web launch step (next-release.md, "Help flips with the product"):
-  // the journal and the features its Help describes go live together.
+  // the journal and the features its Help describes go live together, at
+  // full parity with the app's built set (UX 2026-11-04: calendar, search,
+  // the .csv, writing prompts, more cards, the Year card and import).
   // Never before the Privacy Policy and Terms are live (decisions 40 + 82):
   // sign-up opens with this step, so this stays red until the legal flip
   // is on master (reviewer #100 B1).
@@ -43,7 +45,20 @@ describe("conditions", () => {
     expect(conditionMet("privacy-text-approved"), "privacy-text-approved").toBe(true);
     expect(conditionMet("terms-text-approved"), "terms-text-approved").toBe(true);
     expect(liveFeatures.webJournal).toBe(true);
-    for (const id of ["web-journal-live", "share-cards", "help-now-live", "export-live", "delete-account-live"] as const) {
+    for (const id of [
+      "web-journal-live",
+      "share-cards",
+      "help-now-live",
+      "export-live",
+      "delete-account-live",
+      "calendar-live",
+      "search-live",
+      "export-csv-live",
+      "writing-prompts",
+      "share-cards-more",
+      "year-card",
+      "import-live",
+    ] as const) {
       expect(conditionMet(id), id).toBe(true);
     }
   });
