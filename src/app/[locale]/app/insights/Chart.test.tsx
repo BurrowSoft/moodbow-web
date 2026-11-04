@@ -51,8 +51,8 @@ describe("Chart dots", () => {
     // isolated; days 2–3 and 7–8 each have a neighbour.
     const c = line([3, null, 4, 4, null, 5, null, 2, 2], "isolated");
     expect(colours(c, "g[data-value-colour]")).toEqual([valueHex("mood", 3), valueHex("mood", 5)]);
-    // The line still goes through every day with a value.
-    expect(c.querySelector("polyline")!.getAttribute("points")!.split(" ")).toHaveLength(6);
+    // The lines: one per run (days 2–3, 7–8); the isolated days are dots alone.
+    expect([...c.querySelectorAll("polyline")].map((p) => p.getAttribute("points")!.split(" ").length)).toEqual([2, 2]);
   });
 
   it("isolated: a run of days has no dots; a single day alone has its dot", () => {
@@ -63,6 +63,26 @@ describe("Chart dots", () => {
   it("all (the default, Week and Month): a dot on every day with a value", () => {
     expect(dots(line([3, null, 4, 4, null, 5]))).toBe(4);
     expect(dots(line([3, null, 4, 4, null, 5], "all"))).toBe(4);
+  });
+
+  // The line breaks at empty days (app parity, UX 2026-11-04): a line
+  // across a gap would invent a value.
+  it("a gap splits the line in two; a lone day gets no line, only its dot", () => {
+    const lines = (c: HTMLElement) => [...c.querySelectorAll("polyline")].map((p) => p.getAttribute("points"));
+    const run = line([2, 3, null, 4, 5]);
+    expect(lines(run)).toHaveLength(2);
+    // The two lines share no point: nothing is drawn across day 2.
+    const [a, b] = lines(run).map((p) => p!.split(" "));
+    expect(a).toHaveLength(2);
+    expect(b).toHaveLength(2);
+    expect(a.some((pt) => b.includes(pt))).toBe(false);
+    const lone = line([null, 4, null, null]);
+    expect(lines(lone)).toHaveLength(0);
+    expect(dots(lone)).toBe(1);
+    // The same on 3 months: the lone day's dot is its only mark.
+    const lone3 = line([4, 4, null, 3, null], "isolated");
+    expect(lines(lone3)).toHaveLength(1);
+    expect(colours(lone3, "g[data-value-colour]")).toEqual([valueHex("mood", 3)]);
   });
 
   it("bars keep their ring whatever the dots", () => {
