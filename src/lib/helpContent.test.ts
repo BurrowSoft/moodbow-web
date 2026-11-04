@@ -152,6 +152,27 @@ describe("Help is public, scoped to what's live (decision 212)", () => {
     });
   });
 
+  // Shown by whichever comes first, the app build people have (app-*) or
+  // the web's own switch ({pending:a|b}, UX 2026-11-04): Patterns (0.9.7 /
+  // patterns-live) and import (0.9.7 / import-live).
+  describe("Patterns and import: the app's or the web's", () => {
+    const only = (on: string[], off: string[]) => (id: string) => on.includes(id) || (!off.includes(id) && isPendingMet(id));
+    for (const [slug, app, web, text] of [
+      ["patterns", "app_patterns", "patterns_live", "Patterns in your check-ins"],
+      ["import", "app_import", "import_live", "Import from another app"],
+    ] as const) {
+      it(`${slug}: a 404 with neither, the same article with either`, () => {
+        for (const locale of ["en", "th"]) {
+          const render = (on: string[], off: string[]) => renderArticle(findArticle(locale, slug)!, only(on, off));
+          expect(render([], [app, web]), `${locale} neither`).toBe("");
+          expect(render([app], [web]), `${locale} app`).not.toBe("");
+          expect(render([web], [app]), `${locale} web`).toBe(render([app], [web]));
+        }
+        expect(renderArticle(findArticle("en", slug)!, only([app], [web]))).toContain(text);
+      });
+    }
+  });
+
   it("backing up's steps are a numbered list (styled in globals.css; Web Tester's regression pass)", () => {
     for (const locale of ["en", "th"]) {
       const html = renderArticle(findArticle(locale, "backing-up")!);

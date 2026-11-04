@@ -63,6 +63,14 @@
     "met": false,
     "what": "Help only (decision 212 pattern, UX 2026-11-03): the Year card (1.1 J) is in the app build people have (0.9.6), so its Help line shows. Not year-card."
   },
+  "app-patterns": {
+    "met": false,
+    "what": "Help only (decision 212 pattern, UX 2026-11-04): Patterns (no AI) is in the app build people have (0.9.7), so its Help article shows ({pending:app_patterns|patterns_live}: the app's or the web's). Not patterns-live (the web's own card)."
+  },
+  "app-import": {
+    "met": false,
+    "what": "Help only (decision 212 pattern, UX 2026-11-04): import from another app (1.1 K) is in the app build people have (0.9.7), so its Help article shows for app users ({pending:app_import|import_live}). Not import-live (the web's own import)."
+  },
   "app-app-lock": {
     "met": true,
     "what": "Help only (decision 212): app lock (PIN, fingerprint or face; decision 188) is in the app build people have (0.9 closed test on), so its Help article shows. Not app-lock (the privacy text's clause, Vitor's)."

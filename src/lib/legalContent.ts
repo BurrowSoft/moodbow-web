@@ -8,7 +8,9 @@ import conditions from "../../content/conditions.json";
 // text sits in content files, not in messages (decision 36).
 // - {pending:<id>}…{/pending} renders only when the condition
 //   <id with "-" for "_"> is met (content/conditions.json); blocks can nest.
-//   Unmet blocks are removed exactly as Production would remove them.
+//   {pending:a|b} renders when either is met (a Help article about a
+//   feature in the app build people have OR on the web). Unmet blocks are
+//   removed exactly as Production would remove them.
 // - ⏳(…), ⏳[…] and [VITOR] mark facts still to confirm. They're
 //   highlighted on drafts, and a page can't go live while any remain
 //   (legalContent.test.ts).
@@ -19,15 +21,16 @@ export type HiddenBlock = { id: string; text: string };
 
 const LEGAL_DIR = path.join(process.cwd(), "content", "legal");
 // Innermost first: a block whose content holds no other {pending:…}.
-const PENDING = /\{pending:([a-z_]+)\}((?:(?!\{pending:)[\s\S])*?)\{\/pending\}/;
+const PENDING = /\{pending:([a-z_]+(?:\|[a-z_]+)*)\}((?:(?!\{pending:)[\s\S])*?)\{\/pending\}/;
 const TODO = /⏳\([^)]*\)|⏳\[[^\]]*\]|⏳|\[VITOR\]/g;
 
 export function conditionForPending(id: string): string {
   return id.replace(/_/g, "-");
 }
 
+// Every condition id named, each alternative of an "a|b" block on its own.
 export function pendingIds(source: string): string[] {
-  return [...source.matchAll(/\{pending:([a-z_]+)\}/g)].map((m) => m[1]);
+  return [...source.matchAll(/\{pending:([a-z_]+(?:\|[a-z_]+)*)\}/g)].flatMap((m) => m[1].split("|"));
 }
 
 export function isPendingMet(id: string): boolean {
@@ -41,7 +44,7 @@ export function applyPending(source: string, met: (id: string) => boolean = isPe
   const hidden: HiddenBlock[] = [];
   for (let m = PENDING.exec(text); m; m = PENDING.exec(text)) {
     const [whole, id, content] = m;
-    const keep = met(id);
+    const keep = id.split("|").some((one) => met(one));
     if (!keep) hidden.push({ id, text: content.trim() });
     let end = m.index + whole.length;
     // An unmet block that fills its whole line (e.g. a table row) takes its
