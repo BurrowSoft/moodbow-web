@@ -90,9 +90,12 @@ describe("Help is public, scoped to what's live (decision 212)", () => {
   const published = (slug: string) => renderArticle(findArticle("en", slug)!);
 
   it("articles about features that are off have nothing left: a 404", () => {
-    for (const slug of ["ai-reflections", "calendar", "keyboard-shortcuts", "search", "widget", "your-week"]) {
+    for (const slug of ["ai-reflections", "calendar", "search", "widget", "your-week"]) {
       expect(published(slug), slug).toBe("");
     }
+    // The shortcuts go live with the web launch step (UX 2026-11-04): a
+    // 404 before it, published after.
+    expect(published("keyboard-shortcuts") === "").toBe(!isPendingMet("shortcuts_live"));
     // Import goes live with the web launch step (UX 2026-11-04): a 404
     // before it, published after.
     expect(published("import") === "").toBe(!isPendingMet("import_live"));

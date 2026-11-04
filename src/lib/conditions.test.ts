@@ -58,6 +58,11 @@ describe("conditions", () => {
       "share-cards-more",
       "year-card",
       "import-live",
+      // UX 2026-11-04: Patterns (app #129), and the web-only shortcuts and
+      // print (Web Tester K/P 🟢 on #100), launch with the journal too.
+      "patterns-live",
+      "shortcuts-live",
+      "print-live",
     ] as const) {
       expect(conditionMet(id), id).toBe(true);
     }
