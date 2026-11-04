@@ -4,7 +4,7 @@ import { ALL_LOCALES, routing } from "@/i18n/routing";
 import messages from "@/messages/en.json";
 import thMessages from "@/messages/th.json";
 import { conditionMet, type ConditionId } from "./conditions";
-import { applyPending, isPendingMet, legalLocale, legalSource, pendingIds, renderLegal, todos, type LegalSlug } from "./legalContent";
+import { applyPending, isPendingMet, legalLocale, legalSource, pendingIds, renderLegal, scrollableTables, todos, type LegalSlug } from "./legalContent";
 import { BACKUP_RETENTION_DAYS } from "./site";
 
 const PAGES: { slug: LegalSlug; gate: ConditionId }[] = [
@@ -132,6 +132,24 @@ describe("renderLegal (the real privacy text, nothing met)", () => {
     expect(bodyRows(tables[0])).toBe(4);
     expect(bodyRows(tables[1])).toBe(5);
     expect(page.html.split("\n").some((line) => line.startsWith("|") || line.startsWith("<p>|"))).toBe(false);
+  });
+
+  // axe scrollable-region-focusable at 390 px (Web Tester): each table's
+  // sideways scroller is a focusable region named by its section.
+  it("each table scrolls in a keyboard-reachable region named by its section", () => {
+    const regions = [...page.html.matchAll(/<div class="table-scroll" role="region" tabindex="0" aria-label="([^"]*)"><table>/g)].map((m) => m[1]);
+    expect(regions).toEqual(["2. Why we use it, and on what legal basis", "3. Who processes your data for us"]);
+    expect(page.html.match(/<table>/g)).toHaveLength(2);
+    expect(page.html.match(/<\/table><\/div>/g)).toHaveLength(2);
+  });
+
+  it("the wrapper is markup only: taking it off gives back exactly what marked rendered", () => {
+    const html = "<h2>Who &amp; why</h2>\n<p>Text</p>\n<table>\n<tr><td>1</td></tr>\n</table>\n<p>After</p>\n";
+    const wrapped = scrollableTables(html);
+    expect(wrapped).toContain('<div class="table-scroll" role="region" tabindex="0" aria-label="Who &amp; why"><table>');
+    expect(wrapped.replace(/<div class="table-scroll"[^>]*>/g, "").replace(/<\/table><\/div>/g, "</table>")).toBe(html);
+    // No section before it: a plain name.
+    expect(scrollableTables("<table></table>")).toBe('<div class="table-scroll" role="region" tabindex="0" aria-label="Table"><table></table></div>');
   });
 
   it("renders the tables and strips the source comment", () => {

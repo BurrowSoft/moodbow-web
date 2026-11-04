@@ -91,5 +91,21 @@ export function renderLegal(source: string, met: (id: string) => boolean = isPen
     .replace(/^### /gm, "## ")
     .replace(TODO, (t) => `<mark class="legal-todo">${t}</mark>`);
   const html = marked.parse(body, { async: false, gfm: true }) as string;
-  return { title, html, hidden };
+  return { title, html: scrollableTables(html), hidden };
+}
+
+// A wide table scrolls sideways on a phone, so its scroller must be
+// reachable by keyboard (axe scrollable-region-focusable, Web Tester): each
+// table goes in a focusable region named by the section it's in (its h2's
+// text, already escaped by marked), "Table" if none. Markup only: the
+// legal text itself is unchanged.
+export function scrollableTables(html: string): string {
+  let heading = "";
+  return html.replace(/<h2[^>]*>([\s\S]*?)<\/h2>|<table>([\s\S]*?)<\/table>/g, (match, h2: string | undefined) => {
+    if (h2 !== undefined) {
+      heading = h2.replace(/<[^>]+>/g, "").trim();
+      return match;
+    }
+    return `<div class="table-scroll" role="region" tabindex="0" aria-label="${heading || "Table"}">${match}</div>`;
+  });
 }
