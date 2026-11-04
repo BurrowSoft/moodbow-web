@@ -150,6 +150,27 @@ test.describe("language: Thai is a draft, not offered (thai-offered-live)", () =
     await expect(page.locator(".legal-prose ul").first()).toHaveCSS("list-style-type", "disc");
   });
 
+  // axe scrollable-region-focusable at 390 px (Web Tester): the tables
+  // scroll inside a focusable, named region; the page itself doesn't.
+  test("/privacy at 390 px: each table scrolls in a region the keyboard reaches", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    const res = await page.goto("/privacy");
+    expect(res?.status()).toBe(200);
+    const regions = page.locator(".legal-prose .table-scroll");
+    await expect(regions).toHaveCount(2);
+    for (const region of await regions.all()) {
+      await expect(region).toHaveAttribute("role", "region");
+      await expect(region).toHaveAttribute("tabindex", "0");
+      await expect(region).toHaveAttribute("aria-label", /\S/);
+      await expect(region.locator("table")).toHaveCount(1);
+      await expect(region).toHaveCSS("overflow-x", "auto");
+      await region.focus();
+      await expect(region).toBeFocused();
+    }
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    expect(overflow).toBeLessThanOrEqual(0);
+  });
+
   test("/th/help/getting-started: the Thai article", async ({ page }) => {
     const res = await page.goto("/th/help/getting-started");
     expect(res?.status()).toBe(200);

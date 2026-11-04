@@ -433,7 +433,17 @@
     "insightsNeedMore": "Check in on {count, plural, =1 {1 more day} other {{count} more days}} to see your charts.",
     "insightsNeedMoreSleep": "Add sleep on {count, plural, =1 {1 more day} other {{count} more days}} to see this chart.",
     "insightsNeedMoreMovement": "Add movement on {count, plural, =1 {1 more day} other {{count} more days}} to see this chart.",
-    "insightsNeedMoreStress": "Add stress on {count, plural, =1 {1 more day} other {{count} more days}} to see this chart."
+    "insightsNeedMoreStress": "Add stress on {count, plural, =1 {1 more day} other {{count} more days}} to see this chart.",
+    "patternsTitle": "Patterns in your check-ins",
+    "patternsSubtitle": "In the last 3 months",
+    "patternsSleepShown": "On days after 7 or more hours of sleep, your mood averaged {a} of 5. After less sleep, {b}.",
+    "patternsSleepSame": "After 7 or more hours of sleep and after less, your mood was about the same ({a} and {b} of 5).",
+    "patternsMovementShown": "On days you moved, your mood averaged {a} of 5. On days you didn't, {b}.",
+    "patternsMovementSame": "On days you moved and days you didn't, your mood was about the same ({a} and {b} of 5).",
+    "patternsStressShown": "On low-stress days, your mood averaged {a} of 5. On high-stress days, {b}.",
+    "patternsStressSame": "On low- and high-stress days, your mood was about the same ({a} and {b} of 5).",
+    "patternsFootnote": "These are your own check-ins side by side. They may show what tends to go together, not what causes what.",
+    "patternsNone": "Patterns show up here once you have more check-ins with sleep, movement or stress."
   },
   "share": {
     "shareButton": "Share",
