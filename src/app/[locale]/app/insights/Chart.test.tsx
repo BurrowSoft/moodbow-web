@@ -1,6 +1,6 @@
 import { cleanup, render } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
-import { STEP_HEX } from "@/lib/journal/valueColours";
+import { STEP_HEX, valueHex } from "@/lib/journal/valueColours";
 import { Chart } from "./Chart";
 
 // The chart colours (decision 150): stored values only, from colour-map.json.
@@ -36,5 +36,38 @@ describe("Chart colours", () => {
     ]);
     expect(container.querySelector("polyline")).toHaveAttribute("stroke", "url(#chart-stress-gradient)");
     expect(colours(container, "g[data-value-colour]")).toEqual([STEP_HEX[4], STEP_HEX[2], STEP_HEX[0]]);
+  });
+});
+
+// 3 months (app parity, UX 2026-11-04): dots only on isolated days, the
+// line carries the rest; Week and Month keep a dot on every day.
+describe("Chart dots", () => {
+  const dots = (container: HTMLElement) => container.querySelectorAll("g[data-value-colour]").length;
+  const line = (points: (number | null)[], mode?: "all" | "isolated") =>
+    render(<Chart kind="line" points={points} min={1} max={5} labelledBy="t" colourKey="mood" gradientId="g" dots={mode} />).container;
+
+  it("isolated: a dot only on a day with no value on either side (the ends count as empty)", () => {
+    // Day 0 (an end, empty after it) and day 5 (empty both sides) are
+    // isolated; days 2–3 and 7–8 each have a neighbour.
+    const c = line([3, null, 4, 4, null, 5, null, 2, 2], "isolated");
+    expect(colours(c, "g[data-value-colour]")).toEqual([valueHex("mood", 3), valueHex("mood", 5)]);
+    // The line still goes through every day with a value.
+    expect(c.querySelector("polyline")!.getAttribute("points")!.split(" ")).toHaveLength(6);
+  });
+
+  it("isolated: a run of days has no dots; a single day alone has its dot", () => {
+    expect(dots(line([1, 2, 3, 4, 5], "isolated"))).toBe(0);
+    expect(dots(line([null, null, 4, null], "isolated"))).toBe(1);
+  });
+
+  it("all (the default, Week and Month): a dot on every day with a value", () => {
+    expect(dots(line([3, null, 4, 4, null, 5]))).toBe(4);
+    expect(dots(line([3, null, 4, 4, null, 5], "all"))).toBe(4);
+  });
+
+  it("bars keep their ring whatever the dots", () => {
+    const { container } = render(<Chart kind="bars" points={[7, 8, null, 6]} min={0} max={12} labelledBy="t" colourKey="sleep_hours" gradientId="g" dots="isolated" />);
+    expect(container.querySelectorAll("rect")).toHaveLength(3);
+    for (const r of container.querySelectorAll("rect")) expect(r).toHaveAttribute("stroke-width", "1");
   });
 });

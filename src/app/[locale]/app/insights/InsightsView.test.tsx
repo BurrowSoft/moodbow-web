@@ -82,6 +82,21 @@ describe("InsightsView", () => {
     expect(screen.getByTestId("insights-change-mood")).toHaveTextContent("Up 1.0 vs the previous 3 months");
   });
 
+  it("line dots: every day on Week and Month, only isolated days on 3 months (app parity)", () => {
+    // Three days in a row, and one alone (empty on both sides).
+    const rows = [row("2026-09-29", 4, { stress: 2 }), row("2026-09-30", 3, { stress: 3 }), row("2026-10-01", 4, { stress: 2 }), row("2026-09-27", 2, { stress: 4 })];
+    const dots = (metric: string) => screen.getByTestId(`insights-chart-${metric}`).querySelectorAll("g[data-value-colour]").length;
+    for (const range of ["week", "month"] as const) {
+      renderView(rows, range);
+      expect(dots("mood"), range).toBe(4);
+      expect(dots("stress"), range).toBe(4);
+      cleanup();
+    }
+    renderView(rows, "3months");
+    expect(dots("mood")).toBe(1);
+    expect(dots("stress")).toBe(1);
+  });
+
   it("a drawn chart is an image named by its title and summary", () => {
     renderView(thisWeek);
     const img = within(screen.getByTestId("insights-chart-mood")).getByRole("img");
