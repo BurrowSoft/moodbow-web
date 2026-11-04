@@ -23,11 +23,11 @@ beforeEach(() => {
 // Sign-out's one sync try (#147), a plain request so it can be aborted and
 // never queues ahead of the sign-out action (Web Tester, before #100).
 describe("POST /api/check-in-sync", () => {
-  it("same origin: saves with the card's rules and answers the status only", async () => {
+  it("same origin: saves with the card's rules and answers its result", async () => {
     saveCheckIn.mockResolvedValue({ status: "saved", checkIn: { mood: 4 } });
     const res = await post("https://www.moodbow.com");
     expect(res.status).toBe(200);
-    expect(await res.json()).toEqual({ status: "saved" });
+    expect(await res.json()).toEqual({ status: "saved", checkIn: { mood: 4 } });
     const sent = saveCheckIn.mock.calls[0][1] as FormData;
     expect(Object.fromEntries(sent.entries())).toEqual({ local_date: "2026-10-02", mood: "4" });
   });
@@ -40,10 +40,10 @@ describe("POST /api/check-in-sync", () => {
     expect(saveCheckIn).not.toHaveBeenCalled();
   });
 
-  it("not saved (an error, or the session ended and it redirects): an error status, the check-in stays", async () => {
+  it("not saved: the save's own error as is; a redirect (session ended, consent) is generic, so the copy stays", async () => {
     saveCheckIn.mockResolvedValue({ status: "error", error: "unreachable" });
-    expect(await (await post("https://www.moodbow.com")).json()).toEqual({ status: "error" });
+    expect(await (await post("https://www.moodbow.com")).json()).toEqual({ status: "error", error: "unreachable" });
     saveCheckIn.mockRejectedValue(Object.assign(new Error("NEXT_REDIRECT"), { digest: "NEXT_REDIRECT;replace;/sign-in;303;" }));
-    expect(await (await post("https://www.moodbow.com")).json()).toEqual({ status: "error" });
+    expect(await (await post("https://www.moodbow.com")).json()).toEqual({ status: "error", error: "generic" });
   });
 });

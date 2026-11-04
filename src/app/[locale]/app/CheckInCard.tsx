@@ -95,6 +95,24 @@ function pendingFromForm(form: FormData): Pending {
 
 // This user's pending copies as the forms that save them, oldest day first:
 // Me → Sign out tries them once before it asks (UX & PM 2026-11-03).
+// A check-in saved offline, synced through /api/check-in-sync (saveCheckIn's
+// own rules), never the saveCheckIn server action: Next runs server actions
+// one at a time, so a sync stalled on the network would hold every other
+// action (Me → Sign out's) behind it (Web Tester, #166). This request is
+// aborted after `ms`, which the card treats as a dropped connection (the
+// copy stays for the next reconnect).
+export async function syncCheckIn(form: FormData, ms: number): Promise<CheckInState> {
+  const stop = new AbortController();
+  const timer = window.setTimeout(() => stop.abort(), ms);
+  try {
+    const res = await fetch("/api/check-in-sync", { method: "POST", body: form, signal: stop.signal });
+    if (!res.ok) throw new Error(`check-in sync answered ${res.status}`);
+    return (await res.json()) as CheckInState;
+  } finally {
+    window.clearTimeout(timer);
+  }
+}
+
 export function pendingForms(uid: string): { key: string; form: FormData }[] {
   return readAllPending(uid).map(({ key, pending }) => ({ key, form: toFormData(pending.fields, pending.expected, pending.date, key) }));
 }
@@ -288,7 +306,9 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
     try {
       // No answer in 30 s counts as a dropped connection: kept as a pending
       // copy, like saving offline (the timeout audit).
-      next = await withTimeout(saveCheckIn(prev, form), SAVE_WAIT_MS);
+      // A synced copy goes through the abortable route, never the server
+      // action (#166): a live save is what the person is waiting on.
+      next = form.get("from_pending") === "1" ? await syncCheckIn(form, SAVE_WAIT_MS) : await withTimeout(saveCheckIn(prev, form), SAVE_WAIT_MS);
       // The server gave up waiting on Supabase (its own deadline): the same
       // dropped connection, so the same path below (Web Tester, #122 T1a).
       if (next.status === "error" && next.error === "unreachable") throw new TimedOut();
