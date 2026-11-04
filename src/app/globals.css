@@ -157,6 +157,14 @@ body {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
 }
+/* A date field's calendar button sits inside the input (the browser's own
+   part): with focus on it the input isn't :focus-visible and the ring went
+   (WCAG 2.4.7, Web Tester). The field keeps the same ring while focus is
+   anywhere inside it. */
+input[type="date"]:focus-within {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
 
 /* The home page's moodbow: each band draws from one end to the other
    (pathLength 1), staggered by its own animation-delay; "backwards" holds
