@@ -9,7 +9,10 @@ import { valueHex, type ValueKey } from "@/lib/journal/valueColours";
 // Sunrise colour (colourKey, colour-map.json), with the muted outline;
 // movement 0 stays neutral. The line is a vertical gradient along the value
 // axis (each whole value at its own colour). Axes stay neutral.
-type Props = { kind: "line" | "bars"; points: (number | null)[]; min: number; max: number; labelledBy: string; colourKey: ValueKey; gradientId: string };
+// dots (lines only): "all" puts a point on every day with a value;
+// "isolated" (3 months, app parity) only on a day with no value on either
+// side, which the line alone wouldn't show; the line carries the rest.
+type Props = { kind: "line" | "bars"; points: (number | null)[]; min: number; max: number; labelledBy: string; colourKey: ValueKey; gradientId: string; dots?: "all" | "isolated" };
 
 const W = 300;
 const H = 120;
@@ -18,12 +21,15 @@ const PAD = 8;
 // a circle although the chart stretches (preserveAspectRatio="none").
 const DOT = 7;
 
-export function Chart({ kind, points, min, max, labelledBy, colourKey, gradientId }: Props) {
+export function Chart({ kind, points, min, max, labelledBy, colourKey, gradientId, dots = "all" }: Props) {
   const slot = (W - PAD * 2) / points.length;
   const x = (i: number) => PAD + slot * i + slot / 2;
   const y = (v: number) => H - PAD - ((Math.min(Math.max(v, min), max) - min) / (max - min || 1)) * (H - PAD * 2);
   const present = points.map((v, i) => ({ v, i })).filter((p): p is { v: number; i: number } => p.v !== null);
   const wholeValues = Array.from({ length: max - min + 1 }, (_, k) => min + k);
+  // A day past either end of the range has no value.
+  const isolated = (i: number) => (points[i - 1] ?? null) === null && (points[i + 1] ?? null) === null;
+  const dotted = dots === "all" ? present : present.filter(({ i }) => isolated(i));
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-labelledby={labelledBy} className="h-32 w-full text-muted" preserveAspectRatio="none">
@@ -67,7 +73,7 @@ export function Chart({ kind, points, min, max, labelledBy, colourKey, gradientI
             strokeLinecap="round"
             vectorEffect="non-scaling-stroke"
           />
-          {present.map(({ v, i }) => {
+          {dotted.map(({ v, i }) => {
             const hex = valueHex(colourKey, v);
             return (
               <g key={i} data-value-colour={hex ?? "neutral"}>

@@ -83,7 +83,7 @@ export function InsightsView({ rows, today, range, share, week }: { rows: Insigh
               {s.enough && s.average !== null ? (
                 <>
                   <div className="mt-3">
-                    <Chart kind={chart.kind} points={s.points} min={chart.min} max={chart.max} labelledBy={`${titleId} ${summaryId}`} colourKey={chart.colourKey} gradientId={`chart-${metric}-gradient`} />
+                    <Chart kind={chart.kind} points={s.points} min={chart.min} max={chart.max} labelledBy={`${titleId} ${summaryId}`} colourKey={chart.colourKey} gradientId={`chart-${metric}-gradient`} dots={range === "3months" ? "isolated" : "all"} />
                   </div>
                   <div id={summaryId} className="mt-3 space-y-1 text-sm">
                     <p className="font-medium text-text" data-testid={`insights-average-${metric}`}>
