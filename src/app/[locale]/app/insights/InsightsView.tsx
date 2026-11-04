@@ -154,13 +154,11 @@ function Patterns({ patterns, format }: { patterns: Pattern[]; format: (v: numbe
       {visible.length > 0 ? (
         <>
           <ul className="mt-3 space-y-2 text-sm text-text">
-            {visible.map((p) =>
-              p.state === "not_enough" ? null : (
-                <li key={p.id} data-testid={`insights-pattern-${p.id}`} data-state={p.state}>
-                  {t(PATTERN_TEXT[p.id][p.state], { a: format(p.a.mood), b: format(p.b.mood) })}
-                </li>
-              ),
-            )}
+            {visible.map((p) => (
+              <li key={p.id} data-testid={`insights-pattern-${p.id}`} data-state={p.state}>
+                {t(PATTERN_TEXT[p.id][p.state], { a: format(p.a.mood), b: format(p.b.mood) })}
+              </li>
+            ))}
           </ul>
           <p className="mt-3 text-xs text-muted" data-testid="insights-patterns-footnote">
             {t("patternsFootnote")}
