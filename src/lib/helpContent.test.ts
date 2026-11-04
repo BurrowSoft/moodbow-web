@@ -89,14 +89,21 @@ describe("Help is public, scoped to what's live (decision 212)", () => {
   const published = (slug: string) => renderArticle(findArticle("en", slug)!);
 
   it("articles about features that are off have nothing left: a 404", () => {
-    for (const slug of ["ai-reflections", "calendar", "import", "keyboard-shortcuts", "search", "widget", "your-week"]) {
+    for (const slug of ["ai-reflections", "calendar", "keyboard-shortcuts", "search", "your-week"]) {
       expect(published(slug), slug).toBe("");
     }
+    // The 0.9.7 app build's (UX): the widget, import and Patterns, a 404
+    // until the app build people have has them (or the web, for import and
+    // Patterns).
+    const either = (...ids: string[]) => ids.some((id) => isPendingMet(id));
+    expect(published("widget") === "", "widget").toBe(!either("widget_live"));
+    expect(published("import") === "", "import").toBe(!either("app_import", "import_live"));
+    expect(published("patterns") === "", "patterns").toBe(!either("app_patterns", "patterns_live"));
   });
 
-  it("the app's app lock shows (decision 188), without the widget it doesn't have yet", () => {
+  it("the app's app lock shows (decision 188), and its widget line only with the widget", () => {
     expect(published("app-lock")).toContain("Forgot your PIN?");
-    expect(published("app-lock")).not.toContain("widget");
+    expect(published("app-lock").includes("widget")).toBe(isPendingMet("widget_live"));
   });
 
   it("the app's on this day, daily reminder, offline start and month share card show", () => {
