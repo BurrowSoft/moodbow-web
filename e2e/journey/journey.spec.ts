@@ -420,6 +420,36 @@ test.describe("a first run reaches Today without a reload", () => {
     }
   });
 
+  test("no session on the next tab: says so, and signing in reaches Today", async ({ page, context }) => {
+    const email = newEmail();
+    const password = newPassword();
+    try {
+      await signedUpUnconfirmed(email, password);
+      await confirmEmail(email);
+      await page.goto("/sign-in");
+      await page.getByLabel("Email").fill(email);
+      await page.getByLabel("Password").fill(password);
+      await page.getByRole("button", { name: messages.auth.signinSubmit }).click();
+      await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+      await finishSetup(page);
+      await page.getByTestId("tab-me").click();
+      await expect(page).toHaveURL(/\/app\/me$/);
+      await context.clearCookies();
+      await page.getByTestId("tab-today").click();
+      await expect(page.getByTestId("session-ended")).toContainText(messages.auth.sessionEndedTitle, { timeout: 20_000 });
+      await expect(page.getByTestId("journal-unavailable")).toHaveCount(0);
+      await page.getByTestId("session-ended-sign-in").click();
+      await expect(page).toHaveURL(/\/sign-in/, { timeout: 20_000 });
+      await page.getByLabel("Email").fill(email);
+      await page.getByLabel("Password").fill(password);
+      await page.getByRole("button", { name: messages.auth.signinSubmit }).click();
+      await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
+      await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    } finally {
+      await cleanup(email);
+    }
+  });
+
   test("an account with no consents yet: sign-in, Consent, Setup, then Today", async ({ page }) => {
     const email = newEmail();
     const password = newPassword();

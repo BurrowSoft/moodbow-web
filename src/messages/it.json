@@ -138,6 +138,7 @@
     "startedInApp": "Hai iniziato nell'app? Prima fai lì il backup del diario, poi accedi qui con quella email.",
     "accountGoneNotice": "La sessione è terminata. Se hai eliminato l'account, tutto ciò che conteneva non c'è più.",
     "sessionEndedNotice": "La sessione è terminata. Accedi di nuovo.",
+    "sessionEndedTitle": "La tua sessione è terminata. Accedi di nuovo.",
     "emailLabel": "Email",
     "passwordLabel": "Password",
     "signinSubmit": "Accedi",

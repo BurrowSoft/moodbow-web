@@ -5,6 +5,8 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 import { Link } from "@/i18n/navigation";
 import { JournalUnavailable } from "@/components/JournalUnavailable";
+import { SessionEnded } from "@/components/SessionEnded";
+import { currentUser } from "@/lib/journal/currentUser";
 import type { CheckIn } from "@/lib/journal/checkIn";
 import { getMe } from "@/lib/journal/me";
 import { isIsoDate } from "@/lib/journal/timeline";
@@ -37,7 +39,8 @@ export default async function DayPage({ params }: PageProps<"/[locale]/app/timel
   setRequestLocale(locale as Locale);
   if (!isIsoDate(date)) notFound();
   const supabase = await createSupabaseServerClient();
-  const user = supabase ? (await supabase.auth.getUser()).data.user : null;
+  const { user, ended } = await currentUser(supabase);
+  if (ended) return <SessionEnded />;
   if (!supabase || !user) return <JournalUnavailable />;
   const me = await getMe(supabase);
   if (!me) return <JournalUnavailable />;
