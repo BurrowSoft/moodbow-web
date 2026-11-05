@@ -78,10 +78,9 @@ describe("help articles (content/help, copied verbatim from specs/help)", () => 
 });
 
 describe("Help is public, scoped to what's live (decision 212)", () => {
-  it("live on Production (the app's Me → Help & FAQ opens it) and on Previews", () => {
+  it("live on Production: the app's Me → Help & FAQ opens it", () => {
     for (const path of ["/help", "/help/check-ins", "/help/delete-account"]) {
       expect(isHiddenPage(path, { vercelEnv: "production" }), path).toBe(false);
-      expect(isHiddenPage(path, { vercelEnv: "preview" }), path).toBe(false);
     }
   });
 
@@ -90,12 +89,9 @@ describe("Help is public, scoped to what's live (decision 212)", () => {
   const published = (slug: string) => renderArticle(findArticle("en", slug)!);
 
   it("articles about features that are off have nothing left: a 404", () => {
-    for (const slug of ["ai-reflections", "your-week"]) {
+    for (const slug of ["ai-reflections", "keyboard-shortcuts", "your-week"]) {
       expect(published(slug), slug).toBe("");
     }
-    // The shortcuts go live with the web launch step (UX 2026-11-04): a
-    // 404 before it, published after.
-    expect(published("keyboard-shortcuts") === "").toBe(!isPendingMet("shortcuts_live"));
     // The 0.9.7 app build's (UX): the widget, import and Patterns, a 404
     // until the app build people have has them (or the web, for import and
     // Patterns).
@@ -169,7 +165,7 @@ describe("Help is public, scoped to what's live (decision 212)", () => {
   });
 
   // In 0.9.7 (7) (0.9.5 was frozen, never uploaded; UX): calendar, search and the CSV line show, in en
-  // and th, as the app has them; the web-only step and web import only with those switches.
+  // and th, as the app has them; no web-only step or web import yet.
   it("the app's 0.9.7: the calendar and search articles and the CSV line are published, en and th", () => {
     const th = (slug: string) => renderArticle(findArticle("th", slug)!);
     const slugs = helpIndex("en").flatMap((g) => g.articles.map((a) => a.slug));
@@ -177,11 +173,11 @@ describe("Help is public, scoped to what's live (decision 212)", () => {
     expect(published("calendar")).toContain("<strong>Calendar</strong>");
     expect(th("calendar")).toContain("<strong>ปฏิทิน</strong>");
     expect(published("search")).toContain("(or use Back)");
-    expect(published("search").includes("Esc")).toBe(isPendingMet("web_journal_live"));
+    expect(published("search")).not.toContain("Esc");
     expect(th("search")).toContain("(หรือใช้ปุ่มย้อนกลับ)");
-    expect(th("search").includes("Esc")).toBe(isPendingMet("web_journal_live"));
+    expect(th("search")).not.toContain("Esc");
     expect(published("privacy-and-data")).toContain("<strong>Spreadsheet (.csv)</strong>");
-    expect(published("privacy-and-data").includes("import")).toBe(isPendingMet("import_live"));
+    expect(published("privacy-and-data")).not.toContain("import");
     expect(th("privacy-and-data")).toContain("<strong>สเปรดชีต (.csv)</strong>");
   });
 
@@ -214,16 +210,13 @@ describe("Help is public, scoped to what's live (decision 212)", () => {
     }
   });
 
-  // The web journal's lines follow web-journal-live (the web launch step
-  // shows them), the AI line ai-live: these hold before and after each flip.
-  it("the web journal's lines show only with the web journal, the AI line only with AI", () => {
-    const web = isPendingMet("web_journal_live");
-    expect(published("getting-started").includes("moodbow.com")).toBe(web);
-    expect(published("getting-started").includes("on the web")).toBe(web);
-    expect(published("backing-up").includes("moodbow.com")).toBe(web);
-    expect(published("offline").includes("browser")).toBe(web);
-    expect(published("sign-in").includes("on the web")).toBe(web);
-    expect(published("reminders").includes("on the web")).toBe(web);
-    expect(published("delete-account").includes("AI")).toBe(isPendingMet("ai_live"));
+  it("no web journal line while it's off, and no AI line while AI is off", () => {
+    expect(published("getting-started")).not.toContain("moodbow.com");
+    expect(published("getting-started")).not.toContain("on the web");
+    expect(published("backing-up")).not.toContain("moodbow.com");
+    expect(published("offline")).not.toContain("browser");
+    expect(published("sign-in")).not.toContain("on the web");
+    expect(published("reminders")).not.toContain("on the web");
+    expect(published("delete-account")).not.toContain("AI");
   });
 });
