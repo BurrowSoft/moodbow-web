@@ -79,7 +79,7 @@ describe("ImportData", () => {
   it("preview: days, notes and the range; Import writes check-ins then entries; Done with the count", async () => {
     renderIt();
     await choose("date,mood,note\n2026-10-01,4,A walk\n2026-10-02,3,\n");
-    expect(screen.getByTestId("import-summary")).toHaveTextContent("2 days and 1 notes found, from 1 Oct 2026 to 2 Oct 2026.");
+    expect(screen.getByTestId("import-summary")).toHaveTextContent("2 days and 1 note found, from 1 Oct 2026 to 2 Oct 2026.");
     fireEvent.click(screen.getByTestId("import-confirm"));
     await settle();
     expect(importCheckIns).toHaveBeenCalledWith([
