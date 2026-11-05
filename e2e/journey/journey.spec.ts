@@ -1,5 +1,5 @@
 import { readFile } from "node:fs/promises";
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Frame, type Page, type Request } from "@playwright/test";
 import conditions from "../../content/conditions.json";
 import messages from "../../src/messages/en.json";
 import { aiAvailable, cleanup, configured, confirmEmail, createConfirmedUser, exists, newEmail, newPassword, notConfigured, profileLocale, revokeSessions, signedUpUnconfirmed, sweep } from "./staging";
@@ -489,14 +489,21 @@ test.describe("the saved language in the journal", () => {
     // The whole path: "/app/me" must not match /pt-br/app/me, still on its way.
     const url = new RegExp(`^https?://[^/]+${path}$`);
     await expect(page).toHaveURL(url, { timeout: 20_000 });
-    let loads = 0;
-    const count = (frame: { parentFrame: () => unknown }) => {
-      if (!frame.parentFrame()) loads += 1;
+    // A move: a new page load, or any other address (a soft bounce). The
+    // router's own history update on this address isn't one.
+    const moves: string[] = [];
+    const load = (request: Request) => {
+      if (request.isNavigationRequest() && request.frame() === page.mainFrame()) moves.push(request.url());
     };
-    page.on("framenavigated", count);
+    const elsewhere = (frame: Frame) => {
+      if (frame === page.mainFrame() && !url.test(frame.url())) moves.push(frame.url());
+    };
+    page.on("request", load);
+    page.on("framenavigated", elsewhere);
     await page.waitForTimeout(2_000);
-    page.off("framenavigated", count);
-    expect(loads, "the page kept moving").toBe(0);
+    page.off("request", load);
+    page.off("framenavigated", elsewhere);
+    expect(moves, "the page kept moving").toEqual([]);
     await expect(page).toHaveURL(url);
     await expect(page.locator("html")).toHaveAttribute("lang", lang);
   };
