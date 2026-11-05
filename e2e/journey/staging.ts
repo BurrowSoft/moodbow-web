@@ -57,6 +57,19 @@ export async function confirmEmail(email: string): Promise<void> {
   if (error) throw new Error(`confirm failed: ${error.message}`);
 }
 
+// The token an email link would carry, for the real /auth/confirm page.
+export async function confirmLinkHash(email: string, password: string): Promise<string> {
+  const { data, error } = await admin().generateLink({ type: "signup", email, password });
+  if (error) throw new Error(`generateLink failed: ${error.message}`);
+  return data.properties.hashed_token;
+}
+
+// A confirmed account with no consents recorded yet.
+export async function createConfirmedUser(email: string, password: string): Promise<void> {
+  const { error } = await admin().createUser({ email, password, email_confirm: true });
+  if (error) throw new Error(`createUser failed: ${error.message}`);
+}
+
 export async function exists(email: string): Promise<boolean> {
   return (await userId(email)) !== null;
 }

@@ -1,7 +1,8 @@
 import { readFile } from "node:fs/promises";
 import { expect, test, type Page } from "@playwright/test";
+import conditions from "../../content/conditions.json";
 import messages from "../../src/messages/en.json";
-import { aiAvailable, cleanup, configured, confirmEmail, exists, newEmail, newPassword, notConfigured, sweep } from "./staging";
+import { aiAvailable, cleanup, configured, confirmEmail, confirmLinkHash, createConfirmedUser, exists, newEmail, newPassword, notConfigured, sweep } from "./staging";
 
 // The launch-critical journeys (1.0), end to end against staging with a
 // throwaway account each: sign-up → confirm → consent → setup → check-in →
@@ -17,9 +18,8 @@ test.beforeAll(async () => {
 
 const ENTRY = "A calm walk by the river after work, then tea with a friend.";
 
-// Welcome → Consent (AI as asked) → Sign-up → confirmed → Setup.
-async function signUp(page: Page, email: string, { ai }: { ai: boolean }): Promise<string> {
-  const password = newPassword();
+// Welcome → Consent (AI as asked) → Sign-up, up to its answer.
+async function submitSignUp(page: Page, email: string, password: string, { ai }: { ai: boolean }): Promise<void> {
   await page.goto("/welcome?slide=3");
   await page.getByTestId("welcome-start").click();
   await expect(page).toHaveURL(/\/consent$/);
@@ -34,6 +34,12 @@ async function signUp(page: Page, email: string, { ai }: { ai: boolean }): Promi
   await page.getByLabel("Password").fill(password);
   await page.getByTestId("signup-age").check();
   await page.getByTestId("signup-submit").click();
+}
+
+// Welcome → Consent (AI as asked) → Sign-up → confirmed → Setup.
+async function signUp(page: Page, email: string, { ai }: { ai: boolean }): Promise<string> {
+  const password = newPassword();
+  await submitSignUp(page, email, password, { ai });
 
   // Staging asks for confirmation: confirm through the admin API, then the
   // "I've confirmed" button signs in. (Without confirmation it goes straight on.)
@@ -295,6 +301,79 @@ test.describe("tonight's flows", () => {
       await expect(page.getByTestId("app-announce")).toHaveText(messages.entry.entryDeletedAnnounce);
       await expect(page.locator("#main h1")).toBeFocused();
       await expect(page.locator('[data-testid^="today-entry-"]')).toHaveCount(0);
+    } finally {
+      await cleanup(email);
+    }
+  });
+});
+
+// Every way into a first run, on to Today by client navigation alone. The
+// journeys above go from Sign-up straight to Setup, so the browser never saw
+// /app send a not-yet-onboarded person away; these do. Today's content is the
+// assertion: the address and title were already right on the blank page.
+test.describe("a first run reaches Today without a reload", () => {
+  const finishSetup = async (page: Page) => {
+    await page.getByTestId("setup-done").click();
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId("tab-today")).toBeVisible();
+  };
+
+  // The real email link: it only keeps a web session once the journal is live.
+  for (const how of ["countdown", "Continue"] as const) {
+    test(`the email link, then ${how}: Setup, then Today`, async ({ page }) => {
+      test.skip(!conditions["web-journal-live"].met, "the confirm link keeps a session only with web-journal-live met");
+      const email = newEmail();
+      const password = newPassword();
+      try {
+        await submitSignUp(page, email, password, { ai: false });
+        await expect(page.getByTestId("check-email")).toBeVisible({ timeout: 20_000 });
+        await page.goto(`/auth/confirm?token_hash=${await confirmLinkHash(email, password)}&type=signup`);
+        await page.locator("main form button[type=submit]").click();
+        await expect(page.getByTestId("email-confirmed-continue")).toBeVisible({ timeout: 20_000 });
+        if (how === "Continue") await page.getByTestId("email-confirmed-continue").click();
+        await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+        await finishSetup(page);
+      } finally {
+        await cleanup(email);
+      }
+    });
+  }
+
+  test("signing in before finishing Setup: Setup, then Today; the journal stays closed until then", async ({ page }) => {
+    const email = newEmail();
+    const password = newPassword();
+    try {
+      await submitSignUp(page, email, password, { ai: false });
+      await expect(page.getByTestId("check-email")).toBeVisible({ timeout: 20_000 });
+      await confirmEmail(email);
+      await page.goto("/sign-in");
+      await page.getByLabel("Email").fill(email);
+      await page.getByLabel("Password").fill(password);
+      await page.getByRole("button", { name: messages.auth.signinSubmit }).click();
+      await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+      await finishSetup(page);
+    } finally {
+      await cleanup(email);
+    }
+  });
+
+  test("an account with no consents yet: sign-in, Consent, Setup, then Today", async ({ page }) => {
+    const email = newEmail();
+    const password = newPassword();
+    try {
+      await createConfirmedUser(email, password);
+      await page.goto("/sign-in");
+      await page.getByLabel("Email").fill(email);
+      await page.getByLabel("Password").fill(password);
+      await page.getByRole("button", { name: messages.auth.signinSubmit }).click();
+      await expect(page).toHaveURL(/\/consent$/, { timeout: 20_000 });
+      await page.getByTestId("consent-privacy").check();
+      await page.getByTestId("consent-health").check();
+      await page.getByTestId("consent-age").check();
+      await page.getByTestId("consent-continue").click();
+      await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+      await finishSetup(page);
     } finally {
       await cleanup(email);
     }
