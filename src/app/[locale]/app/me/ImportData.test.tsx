@@ -1,4 +1,4 @@
-import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import messages from "@/messages/en.json";
@@ -88,6 +88,22 @@ describe("ImportData", () => {
     ]);
     expect(importEntries).toHaveBeenCalledWith([{ id: expect.any(String), date: "2026-10-01", body: "A walk" }]);
     expect(screen.getByTestId("import-done")).toHaveTextContent("Done. 2 days are in your Timeline.");
+  });
+
+  it("while importing, and only then: large files take a while, keep the page open, no duplicates", async () => {
+    let finish = () => {};
+    importCheckIns.mockImplementationOnce(
+      (days: { date: string }[]) => new Promise((resolve) => (finish = () => resolve({ status: "ok", written: days.map((d) => d.date), skipped: 0 }))),
+    );
+    renderIt();
+    await choose("date,mood\n2026-10-01,4\n");
+    expect(screen.queryByTestId("import-large")).toBeNull();
+    fireEvent.click(screen.getByTestId("import-confirm"));
+    expect(await screen.findByTestId("import-large")).toHaveTextContent(m.importLarge);
+    // Not in the status region: it would be read again with every count.
+    expect(screen.getByTestId("import-status")).not.toContainElement(screen.getByTestId("import-large"));
+    finish();
+    await waitFor(() => expect(screen.queryByTestId("import-large")).toBeNull());
   });
 
   it("days already in Moodbow are reported as skipped, and only that (no kept line: nothing new on them; decision 214)", async () => {

@@ -265,6 +265,13 @@ export function ImportData({ uid, today, dateLocaleTag, country }: { uid: string
           </div>
         )}
       </div>
+      {/* Outside the status above: that region is atomic, so this sentence would
+          be read again with every count. */}
+      {importing && (
+        <p data-testid="import-large" className="mt-2 text-sm text-muted">
+          {t("importLarge")}
+        </p>
+      )}
 
       {phase.kind === "preview" && (
         <div className="mt-4 flex flex-wrap gap-3">

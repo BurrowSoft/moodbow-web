@@ -352,6 +352,7 @@
     "importPreview": "{days, number} days and {notes, number} notes found, from {first} to {last}.",
     "importConfirm": "Import",
     "importProgress": "Importing… {done, number} of {total, number}",
+    "importLarge": "Large files can take several minutes. Keep this page open. If it stops, importing again won't create duplicates.",
     "importDone": "Done. {days, number} days are in your Timeline.",
     "importSkipped": "{count, number} days skipped (already in Moodbow).",
     "importKeptExisting": "Some days already had a check-in, so we kept those.",
