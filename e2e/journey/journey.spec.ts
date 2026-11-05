@@ -728,3 +728,70 @@ test.describe("the tab bar in every language", () => {
     });
   }
 });
+
+// Stopped partway, the screen says to import the same file again. A browser
+// fires no change for the file an input already holds, so the input has to let
+// go of it, or nothing happens (Web Tester, #178).
+test.describe("importing the same file again", () => {
+  const signedIn = async (page: Page, email: string, password: string) => {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.getByLabel("Email").fill(email);
+    await page.getByLabel("Password").fill(password);
+    await page.getByRole("button", { name: messages.auth.signinSubmit }).click();
+    await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    await page.getByTestId("tab-me").click();
+    await expect(page).toHaveURL(/\/app\/me$/);
+  };
+  // 150 days: two batches of check-ins.
+  const days = Array.from({ length: 150 }, (_, i) => new Date(Date.UTC(2025, 0, 1 + i)).toISOString().slice(0, 10));
+  const file = { name: "export.csv", mimeType: "text/csv", buffer: Buffer.from(`date,mood\n${days.map((d) => `${d},4`).join("\n")}\n`) };
+  const held = (page: Page) => page.getByTestId("import-file").evaluate((el) => (el as HTMLInputElement).files?.length ?? -1);
+
+  test("stopped partway: the same file can be chosen again, without a reload, and finishes", async ({ page }) => {
+    const email = newEmail();
+    const password = newPassword();
+    try {
+      await signedIn(page, email, password);
+      // The counts and the first batch go through; the second doesn't.
+      let posts = 0;
+      await page.route("**/app/me", async (route) => {
+        if (route.request().method() === "POST" && ++posts > 2) await route.abort();
+        else await route.continue();
+      });
+      await page.getByTestId("import-file").setInputFiles(file);
+      await page.getByTestId("import-confirm").click();
+      await expect(page.getByTestId("import-failed")).toContainText(messages.me.importStopped, { timeout: 60_000 });
+      await page.unroute("**/app/me");
+
+      // What makes a browser fire for the same file again.
+      expect(await held(page)).toBe(0);
+      await page.getByTestId("import-file").setInputFiles(file);
+      await page.getByTestId("import-confirm").click();
+      await expect(page.getByTestId("import-done")).toBeVisible({ timeout: 90_000 });
+      expect(await held(page)).toBe(0);
+    } finally {
+      await cleanup(email);
+    }
+  });
+
+  test("a file it couldn't read, and Cancel: the same file can be chosen again", async ({ page }) => {
+    const email = newEmail();
+    const password = newPassword();
+    try {
+      await signedIn(page, email, password);
+      await page.getByTestId("import-file").setInputFiles({ name: "bad.csv", mimeType: "text/csv", buffer: Buffer.from("not,a,journal\n") });
+      await expect(page.getByTestId("import-error")).toBeVisible();
+      expect(await held(page)).toBe(0);
+      await page.getByTestId("import-file").setInputFiles(file);
+      await expect(page.getByTestId("import-confirm")).toBeVisible();
+      await page.getByTestId("import-cancel").click();
+      expect(await held(page)).toBe(0);
+    } finally {
+      await cleanup(email);
+    }
+  });
+});

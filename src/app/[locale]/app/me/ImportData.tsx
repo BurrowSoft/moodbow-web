@@ -54,7 +54,6 @@ export function ImportData({ uid, today, dateLocaleTag, country }: { uid: string
   const text = useRef<string | null>(null);
   const [dateOrder, setDateOrder] = useState<DateOrder>("dmy");
   const [moodChoices, setMoodChoices] = useState<Record<string, MoodChoice>>({});
-  const input = useRef<HTMLInputElement>(null);
   // Set the moment Import is pressed, before any await (reviewer #92 B1).
   const running = useRef(false);
 
@@ -98,7 +97,6 @@ export function ImportData({ uid, today, dateLocaleTag, country }: { uid: string
   const reset = () => {
     text.current = null;
     setPhase({ kind: "idle" });
-    if (input.current) input.current.value = "";
   };
 
   const run = async (plan: ImportPlan) => {
@@ -199,14 +197,20 @@ export function ImportData({ uid, today, dateLocaleTag, country }: { uid: string
           {t("importChooseFile")}
         </label>
         <input
-          ref={input}
           id={inputId}
           type="file"
           accept=".csv,text/csv"
           data-testid="import-file"
           disabled={importing}
           className="sr-only"
-          onChange={(e) => void choose(e.target.files?.[0])}
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            // The file is taken from here on, and the input lets go of it: a
+            // browser fires no change for the file an input still holds, so
+            // "import the same file again" would do nothing (Web Tester, #178).
+            e.target.value = "";
+            void choose(file);
+          }}
         />
       </div>
 
