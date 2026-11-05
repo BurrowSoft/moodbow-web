@@ -49,6 +49,21 @@ function hasUnsynced(uid: string): boolean {
   }
 }
 
+// Why the sign-out didn't go through. Signing out needs the server, so offline
+// it stays signed in, nothing wiped (UX): the line says so, and calls safe only
+// what is actually in this browser.
+type SignOutFailure = "generic" | "signOutOffline" | "signOutOfflineCheckIn" | "signOutOfflineWriting";
+function failureFor(uid: string): SignOutFailure {
+  if (navigator.onLine) return "generic";
+  try {
+    if (hasLocalKinds(window.localStorage, uid, ["pending-checkin"])) return "signOutOfflineCheckIn";
+    if (hasLocalKinds(window.localStorage, uid, ["draft-entry"])) return "signOutOfflineWriting";
+  } catch {
+    // storage unavailable: nothing to name
+  }
+  return "signOutOffline";
+}
+
 const isRedirect = (e: unknown) => typeof (e as { digest?: unknown })?.digest === "string" && (e as { digest: string }).digest.startsWith("NEXT_REDIRECT");
 
 export function SignOutButton({ uid }: { uid: string }) {
@@ -63,11 +78,11 @@ export function SignOutButton({ uid }: { uid: string }) {
   // user's keys wiped, as chosen. If it fails (offline, a server error),
   // nothing is wiped or broadcast, the other tabs keep protecting typing,
   // and the error shows here.
-  const [failed, signOutWith, signingOut] = useActionState<boolean, SignOutMode>(async (_prev, mode) => {
+  const [failed, signOutWith, signingOut] = useActionState<SignOutFailure | null, SignOutMode>(async (_prev, mode) => {
     try {
       await signOut();
     } catch (e) {
-      if (!isRedirect(e)) return true;
+      if (!isRedirect(e)) return failureFor(uid);
       broadcastSignOut({ uid, mode });
       try {
         if (mode === "delete") wipeLocalKinds(window.localStorage, uid, UNSYNCED_KINDS);
@@ -77,8 +92,8 @@ export function SignOutButton({ uid }: { uid: string }) {
       }
       throw e;
     }
-    return true;
-  }, false);
+    return "generic";
+  }, null);
   const busy = syncing || signingOut;
   const go = (mode: SignOutMode) => {
     setAsking(false);
@@ -111,7 +126,7 @@ export function SignOutButton({ uid }: { uid: string }) {
       </button>
       {failed && !busy && (
         <p role="alert" data-testid="me-sign-out-error" className="font-medium text-accent">
-          {tt("errGeneric")}
+          {failed === "generic" ? tt("errGeneric") : tm(failed)}
         </p>
       )}
       {asking && (

@@ -928,5 +928,20 @@
     "key": "insights.patternsNone",
     "en": "Patterns show up here once you have more check-ins with sleep, movement or stress.",
     "reason": "UX draft (native read pending): Patterns (no AI), the same text as the app ARB"
+  },
+  {
+    "key": "me.signOutOffline",
+    "en": "You're offline. Connect to the internet to sign out.",
+    "reason": "UX draft (native read pending): sign-out while offline"
+  },
+  {
+    "key": "me.signOutOfflineCheckIn",
+    "en": "You're offline. Connect to the internet to sign out. Your check-in is safe on this device.",
+    "reason": "UX draft (native read pending): sign-out while offline"
+  },
+  {
+    "key": "me.signOutOfflineWriting",
+    "en": "You're offline. Connect to the internet to sign out. Your writing is safe on this device.",
+    "reason": "UX draft (native read pending): sign-out while offline"
   }
 ]
