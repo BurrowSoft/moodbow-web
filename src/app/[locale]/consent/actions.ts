@@ -51,6 +51,6 @@ export async function giveConsent(_prev: ConsentState, form: FormData): Promise<
   const items: ConsentItem[] = [...grantedAtConsent(ai), ...(needsAge ? [consentItem("age_18")] : [])];
   const { error } = await supabase.rpc("record_consents", { p_items: items });
   if (error) return { status: "error", error: "generic" };
-  gateChanged();
+  void gateChanged;
   return redirect({ href: "/app", locale });
 }

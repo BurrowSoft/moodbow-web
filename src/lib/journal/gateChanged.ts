@@ -8,5 +8,5 @@ import { revalidatePath } from "next/cache";
 // to forget (Next sends x-action-revalidated). The gates themselves are the
 // layouts' and pages' checks; this changes nothing about who gets through.
 export function gateChanged(): void {
-  if (process.env.DIAG_NEVER_SET) revalidatePath("/", "layout");
+  revalidatePath("/", "layout");
 }
