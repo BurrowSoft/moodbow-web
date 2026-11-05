@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { MomentStar } from "@/components/MomentStar";
 import { dateLine } from "@/lib/journal/today";
 import type { PrintDay } from "@/lib/journal/printMonth";
@@ -16,6 +16,7 @@ export function PrintMonth({ month, title, days, dateLocaleTag }: { month: strin
   const t = useTranslations("timeline");
   const tt = useTranslations("today");
   const te = useTranslations("entry");
+  const locale = useLocale();
 
   // Only when arriving from "Print this month", once the page has drawn
   // (never on a refresh, Back or a link opened elsewhere: the button is here).
@@ -55,7 +56,7 @@ export function PrintMonth({ month, title, days, dateLocaleTag }: { month: strin
           {days.map((d) => {
             const c = d.checkIn;
             const moment = d.entries.some((e) => e.isMoment);
-            const values = c ? checkInChips(c, tt).map((chip) => chip.label) : [];
+            const values = c ? checkInChips(c, tt, locale).map((chip) => chip.label) : [];
             return (
               // A long day may run over a page break (a whole day moved to the
               // next page left page 1 almost blank: Web Tester P2); its date,

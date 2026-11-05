@@ -6,9 +6,11 @@ import { valueHex } from "@/lib/journal/valueColours";
 // "Stress 2 of 5"), the ones it has, each with its value's Sunrise colour
 // (decision 150; null for a rest day): the entry view's strip (decision 161).
 export type CheckInChip = { label: string; hex: string | null };
-export function checkInChips(c: Pick<CheckIn, "sleep_hours" | "exercise_minutes" | "stress">, tt: ReturnType<typeof useTranslations<"today">>): CheckInChip[] {
+// Hours in the UI language's digits (7,5 in French; 7.5 and 8 in English).
+export const formatHours = (hours: number | string, locale: string) => new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(Number(hours));
+export function checkInChips(c: Pick<CheckIn, "sleep_hours" | "exercise_minutes" | "stress">, tt: ReturnType<typeof useTranslations<"today">>, locale: string): CheckInChip[] {
   return [
-    c.sleep_hours != null ? { label: tt("sleepHours", { hours: Number(c.sleep_hours) }), hex: valueHex("sleep_hours", c.sleep_hours) } : null,
+    c.sleep_hours != null ? { label: tt("sleepHours", { hours: formatHours(c.sleep_hours, locale) }), hex: valueHex("sleep_hours", c.sleep_hours) } : null,
     c.exercise_minutes != null
       ? {
           label: c.exercise_minutes === 0 ? tt("exerciseNone") : c.exercise_minutes === 90 ? tt("exercise90") : tt("exerciseMinutes", { minutes: c.exercise_minutes }),

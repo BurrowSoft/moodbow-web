@@ -27,5 +27,9 @@ describe("writing prompts (contracts/prompts.json)", () => {
     expect(promptText(p, "en")).toBe(p.en);
     expect(promptText(p, "th")).toBe(p.th);
     expect(promptText({ id: "x", en: "Hello" }, "th")).toBe("Hello");
+    // Each language's own; /pt-br reads the contract's pt.
+    expect(promptText({ id: "x", en: "Hello", fr: "Bonjour", pt: "Olá" }, "fr")).toBe("Bonjour");
+    expect(promptText({ id: "x", en: "Hello", fr: "Bonjour", pt: "Olá" }, "pt-br")).toBe("Olá");
+    expect(promptText({ id: "x", en: "Hello", fr: "Bonjour", pt: "Olá" }, "es")).toBe("Hello");
   });
 });

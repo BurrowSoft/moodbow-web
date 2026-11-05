@@ -56,9 +56,11 @@ export function dateLocale(uiLocale: string, acceptLanguage: string | null, coun
     ? browser.tag.split("-").slice(0, 2).join("-")
     : country && /^[a-z]{2}$/i.test(country) && supported(`${lang}-${country.toUpperCase()}`)
       ? `${lang}-${country.toUpperCase()}`
-      : lang === "en"
-        ? "en-US"
-        : lang;
+      : lang === "pt"
+        ? "pt-BR"
+        : lang === "en"
+          ? "en-US"
+          : lang;
   // Thai UI dates are always Buddhist era (พ.ศ., decision 193), whatever
   // the region: th-TH already is, but th-US would be Gregorian. Storage,
   // exports and file names never come through here: they stay Gregorian.

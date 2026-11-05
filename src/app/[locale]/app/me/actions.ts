@@ -7,7 +7,7 @@ import { deleteWordTyped, localDay } from "@/lib/journal/account";
 import { isFocusArea, isTone } from "@/lib/journal/ai";
 import { consentItem } from "@/lib/legalVersions";
 import { isCountry, isTimeZoneName } from "@/lib/region/countries";
-import { offeredLocales } from "@/i18n/routing";
+import { dataLocale, offeredLocales } from "@/i18n/routing";
 import { WIPE_COOKIE, WIPE_COOKIE_OPTIONS } from "@/lib/supabase/proxy";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -159,12 +159,24 @@ export type RegionField = "locale" | "country" | "time_zone";
 
 export async function saveRegion(field: RegionField, value: string): Promise<AiSaveResult> {
   const valid =
-    // Only an offered language (thai-offered-live): a draft /th never saves "th".
+    // Only an offered language (its offered condition): a draft never saves its code.
     field === "locale" ? (offeredLocales() as readonly string[]).includes(value) : field === "country" ? value === "" || isCountry(value) : field === "time_zone" ? isTimeZoneName(value) : false;
   if (!valid) return { ok: false };
   const supabase = await createSupabaseServerClient();
   if (!supabase) return { ok: false };
   const param = field === "locale" ? "p_locale" : field === "country" ? "p_country" : "p_time_zone";
-  const { error } = await supabase.rpc("update_profile", { [param]: value });
-  return error ? settingsFailed(error.message) : { ok: true };
+  // The language as the data knows it (/pt-br is "pt", routing.dataLocale).
+  const stored = field === "locale" ? dataLocale(value) : value;
+  const { error } = await supabase.rpc("update_profile", { [param]: stored });
+  if (error) return settingsFailed(error.message);
+  // send-email picks its text from user_metadata.locale, as in the app. Best
+  // effort: the profile holds the choice either way.
+  if (field === "locale") {
+    try {
+      await supabase.auth.updateUser({ data: { locale: stored } });
+    } catch {
+      // the language is saved; only the next email's language is at stake
+    }
+  }
+  return { ok: true };
 }

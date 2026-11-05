@@ -1,3 +1,4 @@
+import { dataLocale } from "@/i18n/routing";
 import registry from "../../../content/contracts/countries.json";
 
 // Helpline numbers for the safety card (M8), from the shared country
@@ -22,7 +23,7 @@ export function helplinesFor(country: string | null | undefined, language = "en"
   const directoryUrl = registry.default.directory_url;
   const entry = country ? (registry.countries as Country[]).find((c) => c.code === country.toUpperCase()) : undefined;
   return {
-    helpline: entry?.helpline ? { name: entry.helpline.names[language] ?? entry.helpline.names.en, display: entry.helpline.display, dial: entry.helpline.dial } : null,
+    helpline: entry?.helpline ? { name: entry.helpline.names[dataLocale(language)] ?? entry.helpline.names.en, display: entry.helpline.display, dial: entry.helpline.dial } : null,
     emergency: entry?.emergency ? { display: entry.emergency.display, dial: entry.emergency.dial } : null,
     directoryUrl,
   };

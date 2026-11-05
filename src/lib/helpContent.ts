@@ -39,8 +39,8 @@ export function parseArticle(slug: string, raw: string): HelpArticle {
 }
 
 export function helpArticles(locale: string): HelpArticle[] {
-  const dir = path.join(HELP_DIR, locale);
-  if (!fs.existsSync(dir)) throw new Error(`Missing help articles: content/help/${locale}`);
+  // A language whose Help is not in yet reads the English articles, never a 404.
+  const dir = path.join(HELP_DIR, fs.existsSync(path.join(HELP_DIR, locale)) ? locale : "en");
   return fs
     .readdirSync(dir)
     .filter((f) => f.endsWith(".md"))

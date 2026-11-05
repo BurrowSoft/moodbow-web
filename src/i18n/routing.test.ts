@@ -2,13 +2,14 @@
 import { describe, expect, it } from "vitest";
 import { conditionMet } from "@/lib/conditions";
 import { isHiddenPage, pagePath } from "@/lib/sitemapPages";
-import { ALL_LOCALES, offeredLocales, routing, servedLocales } from "./routing";
+import { ALL_LOCALES, dataLocale, offeredLocales, routeLocale, routing, servedLocales } from "./routing";
 
-// Thai on the web (1.1 F) behind thai-offered-live: served as a draft on
+// Each language behind its own offered condition: served as a draft on
 // test builds, offered (switcher, Me → Language, hreflang, sitemap) only
 // once met; Production is English only until then.
 const unmet = () => false;
 const met = () => true;
+const ALL = ["en", "th", "fr", "es", "pt-br", "de", "it"];
 const BUILDS = [{ vercelEnv: "production" }, { vercelEnv: "preview" }, { nodeEnv: "development" }, { nodeEnv: "production", showDrafts: "1" }, {}];
 
 describe("servedLocales: which languages a build serves", () => {
@@ -16,13 +17,13 @@ describe("servedLocales: which languages a build serves", () => {
     expect(servedLocales({ vercelEnv: "production" }, unmet)).toEqual(["en"]);
     expect(servedLocales({ vercelEnv: "production", showDrafts: "1", nodeEnv: "development" }, unmet)).toEqual(["en"]);
     expect(servedLocales({}, unmet)).toEqual(["en"]);
-    expect(servedLocales({ vercelEnv: "preview" }, unmet)).toEqual(["en", "th"]);
-    expect(servedLocales({ nodeEnv: "development" }, unmet)).toEqual(["en", "th"]);
-    expect(servedLocales({ nodeEnv: "production", showDrafts: "1" }, unmet)).toEqual(["en", "th"]);
+    expect(servedLocales({ vercelEnv: "preview" }, unmet)).toEqual(ALL);
+    expect(servedLocales({ nodeEnv: "development" }, unmet)).toEqual(ALL);
+    expect(servedLocales({ nodeEnv: "production", showDrafts: "1" }, unmet)).toEqual(ALL);
   });
 
   it("met: every build serves Thai", () => {
-    for (const build of BUILDS) expect(servedLocales(build, met)).toEqual(["en", "th"]);
+    for (const build of BUILDS) expect(servedLocales(build, met)).toEqual(ALL);
   });
 
   it("English first and the default, unprefixed", () => {
@@ -35,7 +36,7 @@ describe("servedLocales: which languages a build serves", () => {
 describe("offeredLocales: what the switcher, Me, hreflang and the sitemap offer", () => {
   it("only once met, never for a draft", () => {
     expect(offeredLocales(unmet)).toEqual(["en"]);
-    expect(offeredLocales(met)).toEqual(["en", "th"]);
+    expect(offeredLocales(met)).toEqual(ALL);
   });
 
   it("not met in content/conditions.json yet: English only", () => {
@@ -55,5 +56,28 @@ describe("the legal pages keep their own gate in every language (UX, decision 16
     }
     // Production: both 404 until the legal pages are met (decision 164), then both served.
     expect(isHiddenPage(pagePath("/th/privacy", ALL_LOCALES), { vercelEnv: "production" })).toBe(!LEGAL);
+  });
+});
+
+describe("one gate per language", () => {
+  const only = (gate: string) => (id: string) => id === gate;
+  it("offering one language offers only that one", () => {
+    expect(offeredLocales(only("fr-offered-live"))).toEqual(["en", "fr"]);
+    expect(offeredLocales(only("pt-br-offered-live"))).toEqual(["en", "pt-br"]);
+  });
+  it("Production serves a language only once it's offered", () => {
+    expect(servedLocales({ vercelEnv: "production" }, only("es-offered-live"))).toEqual(["en", "es"]);
+  });
+});
+
+// /pt-br is "pt" in the profile, user_metadata, send-email and the contracts.
+describe("dataLocale / routeLocale", () => {
+  it("/pt-br is stored as pt, and pt comes back as /pt-br; the rest are their own code", () => {
+    expect(dataLocale("pt-br")).toBe("pt");
+    expect(routeLocale("pt")).toBe("pt-br");
+    for (const l of ["en", "th", "fr", "es", "de", "it"]) {
+      expect(dataLocale(l)).toBe(l);
+      expect(routeLocale(l)).toBe(l);
+    }
   });
 });

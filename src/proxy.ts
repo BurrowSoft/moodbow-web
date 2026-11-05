@@ -35,15 +35,18 @@ export default async function proxy(req: NextRequest) {
     return res;
   };
   // The app's Me → Help & FAQ opens /<language>/help, and its legal links
-  // /<language>/privacy and so on (moodbow-app lib/core/policy.dart). Until
-  // Thai is served on this build, a Thai app's /th/help…, /th/privacy,
-  // /th/terms and /th/account-deletion go to the same English page, not a
-  // 404 (decision 212: a safety net, the app is English-only for now).
-  if (!(routing.locales as readonly string[]).includes("th")) {
-    const english = req.nextUrl.pathname.match(/^\/th(\/(?:help(?:\/.*)?|privacy|terms|account-deletion))\/?$/i);
-    if (english) {
+  // /<language>/privacy and so on (moodbow-app lib/core/policy.dart). Until a
+  // language is served on this build, the app's /<language>/help…, /privacy,
+  // /terms and /account-deletion go to the same English page, not a 404
+  // (decision 212). The app's Portuguese is "pt" (UX), the web's route /pt-br.
+  const appLink = req.nextUrl.pathname.match(/^\/(th|fr|es|pt|pt-br|de|it)(\/(?:help(?:\/.*)?|privacy|terms|account-deletion))\/?$/i);
+  if (appLink) {
+    const language = appLink[1].toLowerCase();
+    const route = language === "pt" ? "pt-br" : language;
+    const served = (routing.locales as readonly string[]).includes(route);
+    if (!served || route !== language) {
       const url = req.nextUrl.clone();
-      url.pathname = english[1];
+      url.pathname = served ? `/${route}${appLink[2]}` : appLink[2];
       return withCsp(NextResponse.redirect(url, 307));
     }
   }

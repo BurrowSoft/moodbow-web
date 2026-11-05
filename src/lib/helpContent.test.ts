@@ -55,18 +55,18 @@ describe("help articles (content/help, copied verbatim from specs/help)", () => 
     for (const locale of [...routing.locales, ...ALL_LOCALES]) expect(helpArticles(locale).length).toBeGreaterThan(0);
   });
 
-  it("Thai (1.1 F) has every English article: the same slugs, topics and pending blocks, each parsing", () => {
+  it.each(["th", "fr", "es", "pt-br", "de", "it"])("%s has every English article: the same slugs, topics and pending blocks, each parsing", (locale) => {
     const en = helpArticles("en");
-    const th = helpArticles("th");
-    expect(th.map((a) => a.slug)).toEqual(en.map((a) => a.slug));
-    for (const a of th) {
+    const articles = helpArticles(locale);
+    expect(articles.map((a) => a.slug)).toEqual(en.map((a) => a.slug));
+    for (const a of articles) {
       const e = en.find((x) => x.slug === a.slug)!;
       expect(a.topic, a.slug).toBe(e.topic);
       expect(pendingIds(a.source), a.slug).toEqual(pendingIds(e.source));
       expect(a.title, a.slug).not.toBe(e.title);
     }
-    // Every article a /th build publishes renders (the build prerenders them all).
-    for (const a of th) expect(() => renderArticle(a, () => true)).not.toThrow();
+    // Every article a build of this language publishes renders (the build prerenders them all).
+    for (const a of articles) expect(() => renderArticle(a, () => true)).not.toThrow();
   });
 
   it("parsing refuses a malformed article; unknown slugs aren't found", () => {

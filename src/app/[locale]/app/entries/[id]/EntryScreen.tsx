@@ -1,7 +1,7 @@
 "use client";
 
 import { startTransition, useActionState, useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { BackLink } from "@/components/BackLink";
 import { Dialog, dialogButton } from "@/components/Dialog";
 import { useRouter } from "@/i18n/navigation";
@@ -76,6 +76,7 @@ function caretOffset(el: HTMLElement, x: number, y: number): number | "end" {
 function Screen({ entry: initial, checkIn, from, backLabel, dateLocaleTag, uid, today, country, reflect, startEditing }: Props & { startEditing: boolean }) {
   const t = useTranslations("entry");
   const tt = useTranslations("today");
+  const locale = useLocale();
   const ta = useTranslations("app");
   const router = useRouter();
   const announce = useAnnounce();
@@ -170,7 +171,7 @@ function Screen({ entry: initial, checkIn, from, backLabel, dateLocaleTag, uid, 
     edit({ at: caretOffset(e.currentTarget, e.clientX, e.clientY) });
   };
 
-  const chips = checkIn ? checkInChips(checkIn, tt) : [];
+  const chips = checkIn ? checkInChips(checkIn, tt, locale) : [];
   return (
     <>
       <div className="flex items-center gap-1">

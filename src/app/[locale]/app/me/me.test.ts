@@ -6,9 +6,10 @@ import { exportFileName } from "@/lib/journal/account";
 const rpc = vi.fn();
 const getUser = vi.fn();
 const signOut = vi.fn();
+const updateUser = vi.fn();
 // No client at all: a build without the Supabase env (fails closed).
 let noClient = false;
-vi.mock("@/lib/supabase/server", () => ({ createSupabaseServerClient: async () => (noClient ? null : { rpc, auth: { getUser, signOut } }) }));
+vi.mock("@/lib/supabase/server", () => ({ createSupabaseServerClient: async () => (noClient ? null : { rpc, auth: { updateUser, getUser, signOut } }) }));
 vi.mock("next-intl/server", () => ({ getLocale: async () => "en" }));
 const setCookie = vi.fn();
 vi.mock("next/headers", () => ({ cookies: async () => ({ set: setCookie }) }));
@@ -255,6 +256,8 @@ describe("saveRegion (Me → Language & region)", () => {
     expect(rpc).toHaveBeenLastCalledWith("update_profile", { p_time_zone: "Asia/Bangkok" });
     expect(await saveRegion("locale", "en")).toEqual({ ok: true });
     expect(rpc).toHaveBeenLastCalledWith("update_profile", { p_locale: "en" });
+    // send-email reads this, as in the app.
+    expect(updateUser).toHaveBeenLastCalledWith({ data: { locale: "en" } });
     rpc.mockClear();
     for (const [field, value] of [["country", "XX"], ["country", "th"], ["time_zone", "../x"], ["locale", "fr"], ["nope", "x"]] as const) {
       expect(await saveRegion(field as "country", value), `${field}=${value}`).toEqual({ ok: false });
