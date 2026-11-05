@@ -140,6 +140,26 @@ test.describe("typing before the page has loaded", () => {
     }
   });
 
+  test("a draft, clicked into before it loaded: the next letters go after the draft, on a new line", async ({ page }) => {
+    const email = newEmail();
+    const password = newPassword();
+    try {
+      await onboarded(page, email, password);
+      await page.goto("/app/write");
+      await box(page).click();
+      await page.keyboard.type("The draft");
+      await page.waitForTimeout(2_500);
+      await beforeLoad(page, "/app/write", async () => {
+        await box(page).click();
+      });
+      await page.keyboard.type("tnci");
+      await expect(box(page)).toHaveValue("The draft\n\ntnci");
+      await expect(page).toHaveURL(/\/app\/write$/);
+    } finally {
+      await cleanup(email);
+    }
+  });
+
   test("a draft, and nothing typed: the draft comes back as before, and nothing is added", async ({ page }) => {
     const email = newEmail();
     const password = newPassword();
