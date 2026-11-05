@@ -17,7 +17,7 @@ import { GetHelpNow } from "@/components/SafetyCard";
 import { AiSettings } from "./AiSettings";
 import { Appearance } from "./Appearance";
 import { LanguageRegion } from "./LanguageRegion";
-import { countryOptions, languageOptions, timeZoneOptions } from "@/lib/region/countries";
+import { countryOptions, timeZoneOptions } from "@/lib/region/countries";
 import { offeredLocales, routeLocale } from "@/i18n/routing";
 import { Reminder } from "./Reminder";
 import { YourData } from "./YourData";
@@ -52,6 +52,7 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
   if (!me) return <JournalUnavailable />;
   const t = await getTranslations("app");
   const tm = await getTranslations("me");
+  const tc = await getTranslations("common");
   const link = "font-medium text-accent underline underline-offset-4";
 
   return (
@@ -76,7 +77,7 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
         initial={{ locale: routeLocale(me.profile?.locale ?? locale), country: me.profile?.country ?? "", time_zone: me.profile?.time_zone ?? "UTC" }}
         countries={countryOptions(locale)}
         zones={timeZoneOptions(me.profile?.time_zone)}
-        languages={languageOptions(offeredLocales())}
+        languages={offeredLocales().map((code): [string, string] => [code, tc(`languageNames.${code}`)])}
       />
       <Appearance shortcuts={pageGate("shortcuts-live") !== "hidden"} />
       <YourData credits={me.credits?.balance ?? 0} uid={user.id} csv={pageGate("export-csv-live") !== "hidden"} ai={conditionMet("ai-live")} />

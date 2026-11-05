@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import { expect, test, type Frame, type Page, type Request } from "@playwright/test";
 import conditions from "../../content/conditions.json";
 import messages from "../../src/messages/en.json";
-import { aiAvailable, cleanup, configured, confirmEmail, createConfirmedUser, exists, newEmail, newPassword, notConfigured, profileLocale, revokeSessions, signedUpUnconfirmed, sweep } from "./staging";
+import { aiAvailable, cleanup, configured, confirmEmail, createConfirmedUser, exists, newEmail, newPassword, notConfigured, profileLocale, revokeSessions, setProfileLocale, signedUpUnconfirmed, sweep } from "./staging";
 
 // The launch-critical journeys (1.0), end to end against staging with a
 // throwaway account each: sign-up → confirm → consent → setup → check-in →
@@ -685,4 +685,46 @@ test.describe("the saved language in the journal", () => {
       await cleanup(email);
     }
   });
+});
+
+// The longest words we have, at the narrowest phones: whole words in the tab
+// bar, in every language, with nothing scrolling sideways (Web Tester, #178).
+test.describe("the tab bar in every language", () => {
+  for (const width of [320, 390]) {
+    test(`${width} px: no label breaks inside a word`, async ({ page }) => {
+      const email = newEmail();
+      const password = newPassword();
+      try {
+        await signedUpUnconfirmed(email, password);
+        await confirmEmail(email);
+        await page.goto("/sign-in");
+        await page.getByLabel("Email").fill(email);
+        await page.getByLabel("Password").fill(password);
+        await page.getByRole("button", { name: messages.auth.signinSubmit }).click();
+        await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+        await page.getByTestId("setup-done").click();
+        await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+        await page.setViewportSize({ width, height: 800 });
+        for (const [route, saved] of [["", "en"], ["/th", "th"], ["/fr", "fr"], ["/es", "es"], ["/pt-br", "pt"], ["/de", "de"], ["/it", "it"]]) {
+          await setProfileLocale(email, saved);
+          await page.goto(`${route}/app`);
+          await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+          // A label's lines: one per word at most; a broken word adds one.
+          const labels = await page.locator('a[data-testid^="tab-"] > span:last-child').evaluateAll((spans) =>
+            spans.filter((span) => getComputedStyle(span).display !== "none").map((span) => {
+              const range = document.createRange();
+              range.selectNodeContents(span);
+              const tops = new Set([...range.getClientRects()].map((r) => Math.round(r.top)));
+              return { text: span.textContent ?? "", lines: tops.size };
+            }),
+          );
+          expect(labels, route).toHaveLength(4);
+          for (const { text, lines } of labels) expect(lines, `${route || "/en"}: ${text}`).toBeLessThanOrEqual(text.trim().split(/\s+/).length);
+          expect(await page.evaluate(() => document.documentElement.scrollWidth), route).toBeLessThanOrEqual(width);
+        }
+      } finally {
+        await cleanup(email);
+      }
+    });
+  }
 });

@@ -99,6 +99,14 @@ export async function profileLocale(email: string): Promise<string | null> {
   return data?.locale ?? null;
 }
 
+// Saves a language on the profile, as Me → Language does.
+export async function setProfileLocale(email: string, locale: string): Promise<void> {
+  const id = await userId(email);
+  const db = createClient(URL_, SECRET, { auth: { persistSession: false, autoRefreshToken: false } });
+  const { error } = await db.from("profiles").update({ locale }).eq("user_id", id);
+  if (error) throw new Error(`updating the profile failed: ${error.message}`);
+}
+
 // The token a password reset email would carry.
 export async function recoveryLinkHash(email: string): Promise<string> {
   const { data, error } = await admin().generateLink({ type: "recovery", email });
