@@ -40,16 +40,16 @@
     "what": "Decision 216: the Android app build people have opens moodbow://app/me/backup (app PR C; met with 0.9.3 (4) on closed testing, UX 2026-11-03). Gates the \"Open Moodbow\" button on /email-confirmed after an email is confirmed, Android browsers only; until then, and on iPhone and desktop, the line \"Open the Moodbow app to finish backing up.\""
   },
   "app-calendar": {
-    "met": false,
-    "what": "Help only (decision 212 pattern, UX 2026-11-03): the month calendar (1.1 M) is in the app build people have (0.9.5), so its Help article shows. Not calendar-live (the web's own switch)."
+    "met": true,
+    "what": "Help only (decision 212 pattern, UX 2026-11-03): the month calendar (1.1 M) is in the app build people have (0.9.5; met on its publish, UX), so its Help article shows. Not calendar-live (the web's own switch)."
   },
   "app-search": {
-    "met": false,
-    "what": "Help only (decision 212 pattern, UX 2026-11-03): search (1.1 L) is in the app build people have (0.9.5), so its Help article shows. Not search-live (the web's own magnifier)."
+    "met": true,
+    "what": "Help only (decision 212 pattern, UX 2026-11-03): search (1.1 L) is in the app build people have (0.9.5; met on its publish, UX), so its Help article shows. Not search-live (the web's own magnifier)."
   },
   "app-export-csv": {
-    "met": false,
-    "what": "Help only (decision 212 pattern, UX 2026-11-03): the spreadsheet export (1.1 P) is in the app build people have (0.9.5), so its Help line shows. Not export-csv-live (the web's own .csv)."
+    "met": true,
+    "what": "Help only (decision 212 pattern, UX 2026-11-03): the spreadsheet export (1.1 P) is in the app build people have (0.9.5; met on its publish, UX), so its Help line shows. Not export-csv-live (the web's own .csv)."
   },
   "app-writing-prompts": {
     "met": false,
