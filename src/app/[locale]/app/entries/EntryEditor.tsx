@@ -560,6 +560,8 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
           id="entry-date"
           data-testid="entry-date"
           type="date"
+          // As the text: a restored date would save the entry on the wrong day.
+          autoComplete="off"
           max={today}
           aria-invalid={future || undefined}
           aria-describedby={future ? "entry-error" : undefined}
