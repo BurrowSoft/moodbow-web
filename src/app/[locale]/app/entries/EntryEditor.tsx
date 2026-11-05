@@ -1,6 +1,6 @@
 "use client";
 
-import { startTransition, useActionState, useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { startTransition, useActionState, useCallback, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { promptFor, promptText } from "@/lib/journal/prompts";
 import { Dialog, dialogButton } from "@/components/Dialog";
@@ -9,6 +9,7 @@ import { Switch } from "@/components/Switch";
 import { useRouter } from "@/i18n/navigation";
 import { useAnnounce, useFocusTitleAfterLeaving } from "../Announcer";
 import { withQuestion } from "@/lib/journal/answer";
+import { readServerBox, withTyped } from "@/lib/journal/typedBeforeLoad";
 import { MAX_ENTRY_CHARS, sameEntry, type Entry } from "@/lib/journal/entry";
 import { localKey } from "@/lib/localData";
 import { flagsCrisis } from "@/lib/safety/crisis";
@@ -146,10 +147,24 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
   });
   const [id, setId] = useState(draft?.id ?? initial?.id ?? newId);
   const [base, setBase] = useState<string | null>(draft ? draft.base : (initial?.updated_at ?? null));
-  const [fields, setFields] = useState<Fields>(() => {
+  // Whatever was typed in the server's box before the page's code ran: it's
+  // still in the document during this first render, and it comes along.
+  const [arrival] = useState(() => {
     const f = draft ? { body: draft.body, date: draft.date, isMoment: draft.isMoment } : saved;
-    return start?.question ? { ...f, body: withQuestion(f.body, start.question) } : f;
+    const fresh = start?.question ? { ...f, body: withQuestion(f.body, start.question) } : f;
+    const box = restore ? readServerBox() : null;
+    const { body, start: from, end } = withTyped(fresh.body, box, !!draft);
+    return { fields: { ...fresh, body, date: box?.date ?? fresh.date }, focused: !!box?.focused, from, end };
   });
+  const [fields, setFields] = useState<Fields>(arrival.fields);
+  // Before anything can paint or a key can land: a letter on the bare page
+  // would be a keyboard shortcut (Web Tester, #100).
+  useLayoutEffect(() => {
+    if (!arrival.focused) return;
+    const el = document.getElementById("entry-text") as HTMLTextAreaElement | null;
+    el?.focus();
+    el?.setSelectionRange(arrival.from, arrival.end);
+  }, [arrival]);
   const [dialog, setDialog] = useState<null | "leave" | "delete" | { conflict: Entry | null }>(null);
   // The safety card after a save the keyword check flagged (M8, decision
   // 124): the entry is already saved; we stay on it, and closing the card
@@ -331,13 +346,13 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
   // (a draft may be shorter: then its end), or at the end, ready to write.
   const startAt = start && (start.question || start.at === "end" ? "end" : start.at);
   useEffect(() => {
-    if (!restore || startAt === undefined) return;
+    if (!restore || startAt === undefined || arrival.focused) return;
     const el = document.getElementById("entry-text") as HTMLTextAreaElement | null;
     if (!el) return;
     const at = startAt === "end" ? el.value.length : Math.min(startAt, el.value.length);
     el.focus();
     el.setSelectionRange(at, at);
-  }, [restore, startAt]);
+  }, [restore, startAt, arrival]);
 
   // The last version saved from here: the view shows it even when leaving
   // later by Cancel (after a save the safety card kept us on the entry).
