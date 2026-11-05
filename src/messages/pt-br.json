@@ -138,6 +138,7 @@
     "startedInApp": "Começou no app? Faça backup do seu diário lá primeiro e depois entre aqui com esse e-mail.",
     "accountGoneNotice": "Sua sessão foi encerrada. Se você apagou sua conta, tudo o que havia nela foi apagado.",
     "sessionEndedNotice": "Sua sessão foi encerrada. Entre de novo.",
+    "sessionEndedTitle": "Sua sessão terminou. Entre novamente.",
     "emailLabel": "E-mail",
     "passwordLabel": "Senha",
     "signinSubmit": "Entrar",

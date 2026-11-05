@@ -3,6 +3,8 @@ import { headers } from "next/headers";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 import { JournalUnavailable } from "@/components/JournalUnavailable";
+import { SessionEnded } from "@/components/SessionEnded";
+import { currentUser } from "@/lib/journal/currentUser";
 import type { CheckIn } from "@/lib/journal/checkIn";
 import { getMe } from "@/lib/journal/me";
 import { dateLine, dateLocale, greetingKey, localHour } from "@/lib/journal/today";
@@ -33,7 +35,8 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
   const { locale } = await params;
   setRequestLocale(locale as Locale);
   const supabase = await createSupabaseServerClient();
-  const user = supabase ? (await supabase.auth.getUser()).data.user : null;
+  const { user, ended } = await currentUser(supabase);
+  if (ended) return <SessionEnded />;
   if (!supabase || !user) return <JournalUnavailable />;
   const me = await getMe(supabase);
   if (!me) return <JournalUnavailable />;

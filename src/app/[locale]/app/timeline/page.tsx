@@ -4,6 +4,8 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 import { Link } from "@/i18n/navigation";
 import { JournalUnavailable } from "@/components/JournalUnavailable";
+import { SessionEnded } from "@/components/SessionEnded";
+import { currentUser } from "@/lib/journal/currentUser";
 import { pageGate } from "@/lib/conditions";
 import { yearOnOffer } from "@/lib/share/year";
 import { getMe } from "@/lib/journal/me";
@@ -41,7 +43,8 @@ export default async function TimelinePage({ params, searchParams }: PageProps<"
   const { locale } = await params;
   setRequestLocale(locale as Locale);
   const supabase = await createSupabaseServerClient();
-  const user = supabase ? (await supabase.auth.getUser()).data.user : null;
+  const { user, ended } = await currentUser(supabase);
+  if (ended) return <SessionEnded />;
   if (!supabase || !user) return <JournalUnavailable />;
   const me = await getMe(supabase);
   if (!me) return <JournalUnavailable />;

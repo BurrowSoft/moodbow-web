@@ -138,6 +138,7 @@
     "startedInApp": "Vous avez commencé dans l'app ? Sauvegardez d'abord votre journal là-bas, puis connectez-vous ici avec cet e-mail.",
     "accountGoneNotice": "Votre session a été fermée. Si vous avez supprimé votre compte, tout son contenu a disparu.",
     "sessionEndedNotice": "Votre session a été fermée. Veuillez vous reconnecter.",
+    "sessionEndedTitle": "Votre session a expiré. Veuillez vous reconnecter.",
     "emailLabel": "E-mail",
     "passwordLabel": "Mot de passe",
     "signinSubmit": "Se connecter",

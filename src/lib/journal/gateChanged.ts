@@ -7,6 +7,8 @@ import { revalidatePath } from "next/cache";
 // two alternate on a blank page until a reload. Revalidating tells the router
 // to forget (Next sends x-action-revalidated). The gates themselves are the
 // layouts' and pages' checks; this changes nothing about who gets through.
+// It also purges the server's cache, for everyone: harmless while every page is
+// rendered per request and nothing in src uses a cache layer (Reviewer, #173).
 export function gateChanged(): void {
   revalidatePath("/", "layout");
 }
