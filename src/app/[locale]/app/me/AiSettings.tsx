@@ -4,6 +4,7 @@ import { useRef, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { FOCUS_AREAS, FOCUS_KEYS, TONE_KEYS, TONES, type FocusArea, type Tone } from "@/lib/journal/ai";
 import { recordAiWithdrawal, saveFocusAreas, saveTone, setAiEnabled, type AiSaveResult, type AiSwitchResult } from "./actions";
+import { useUntilLoaded } from "@/lib/ui/untilLoaded";
 
 type Values = { on: boolean; tone: Tone; focus: FocusArea[] };
 type Field = keyof Values;
@@ -14,6 +15,7 @@ type Field = keyof Values;
 // with the error and Try again (decision 111). Tone and focus only while AI
 // is on, as in Set up.
 export function AiSettings({ initial, credits }: { initial: Values; credits: { balance: number } }) {
+  const untilLoaded = useUntilLoaded();
   const t = useTranslations("ai");
   const ta = useTranslations("app");
   const tt = useTranslations("today");
@@ -61,7 +63,7 @@ export function AiSettings({ initial, credits }: { initial: Values; credits: { b
     `inline-flex min-h-12 items-center rounded-full border px-4 text-sm font-medium aria-disabled:opacity-60 ${active ? "border-accent bg-pill text-accent" : "border-border text-muted hover:bg-pill"}`;
 
   return (
-    <section aria-labelledby="me-ai" className="rounded-3xl border border-border bg-surface p-6">
+    <section {...untilLoaded} aria-labelledby="me-ai" className="rounded-3xl border border-border bg-surface p-6">
       <h2 id="me-ai" className="text-lg font-medium text-text">
         {t("meAi")}
       </h2>

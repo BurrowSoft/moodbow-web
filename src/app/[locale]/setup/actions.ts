@@ -3,6 +3,7 @@
 import { getLocale } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
 import { isFocusArea, isTone } from "@/lib/journal/ai";
+import { gateChanged } from "@/lib/journal/gateChanged";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export type SetupState = { status: "idle" } | { status: "error" };
@@ -35,5 +36,6 @@ export async function completeSetup(_prev: SetupState, form: FormData): Promise<
     if (error.message.includes("not_authenticated")) return redirect({ href: "/sign-in", locale });
     return { status: "error" };
   }
+  gateChanged();
   return redirect({ href: "/app", locale });
 }

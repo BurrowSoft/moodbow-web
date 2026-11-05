@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { getLocale } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
 import { askAiConsent } from "@/lib/journal/ai";
+import { gateChanged } from "@/lib/journal/gateChanged";
 import { getMe, hasCurrentConsent } from "@/lib/journal/me";
 import { consentItem, type ConsentItem } from "@/lib/legalVersions";
 import { CONSENT_COOKIE, CONSENT_COOKIE_MAX_AGE, grantedAtConsent, serializeConsent } from "@/lib/onboardingConsent";
@@ -50,5 +51,6 @@ export async function giveConsent(_prev: ConsentState, form: FormData): Promise<
   const items: ConsentItem[] = [...grantedAtConsent(ai), ...(needsAge ? [consentItem("age_18")] : [])];
   const { error } = await supabase.rpc("record_consents", { p_items: items });
   if (error) return { status: "error", error: "generic" };
+  gateChanged();
   return redirect({ href: "/app", locale });
 }
