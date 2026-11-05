@@ -1,11 +1,11 @@
 "use client";
 
 import { startTransition, useActionState, useCallback, useEffect, useState, useTransition } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Dialog, dialogButton } from "@/components/Dialog";
 import { canRenderText, renderExportText, type Translate } from "@/lib/exportText";
 import { renderExportCsv } from "@/lib/exportCsv";
-import { csvFileName, DELETE_WORD, exportFileName, journalFileName } from "@/lib/journal/account";
+import { csvFileName, deleteWordTyped, exportFileName, journalFileName } from "@/lib/journal/account";
 import { wipeLocalData } from "@/lib/localData";
 import { EXPORT_WAIT_MS, withTimeout } from "@/lib/ui/withTimeout";
 import { deleteMyAccount, exportMyData, type DeleteAccountState } from "./actions";
@@ -22,6 +22,7 @@ const LINK_LABELS = { txt: "exportReadable", json: "exportData", csv: "exportCsv
 export function YourData({ credits, uid, csv = false, ai = false }: { credits: number; uid: string; csv?: boolean; ai?: boolean }) {
   const t = useTranslations("me");
   const tt = useTranslations("today");
+  const locale = useLocale();
   const [exporting, startExport] = useTransition();
   const [exportState, setExportState] = useState<"idle" | "ready" | "error">("idle");
   const [files, setFiles] = useState<ExportFile[]>([]);
@@ -172,7 +173,7 @@ export function YourData({ credits, uid, csv = false, ai = false }: { credits: n
               <button type="button" data-testid="delete-cancel" onClick={closeDelete} className={dialogButton()}>
                 {t("cancel")}
               </button>
-              <button type="submit" data-testid="delete-confirm" disabled={typed.trim() !== DELETE_WORD || pending} className={`${dialogButton(true)} disabled:opacity-50`}>
+              <button type="submit" data-testid="delete-confirm" disabled={!deleteWordTyped(typed, locale) || pending} className={`${dialogButton(true)} disabled:opacity-50`}>
                 {t("deleteConfirm")}
               </button>
             </div>

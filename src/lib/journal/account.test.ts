@@ -1,6 +1,33 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
-import { DELETE_WORD, exportFileName, journalFileName, localDay } from "./account";
+import { DELETE_WORD, deleteWordTyped, exportFileName, journalFileName, localDay } from "./account";
+
+// The typed word (app #141's cases, delete_word_test.dart).
+describe("deleteWordTyped", () => {
+  for (const [locale, word] of [["en", "DELETE"], ["th", "DELETE"], ["fr", "SUPPRIMER"], ["es", "ELIMINAR"], ["pt-br", "EXCLUIR"], ["de", "LÖSCHEN"], ["it", "ELIMINA"]]) {
+    it(`${locale}: ${word}, in any case, or DELETE`, () => {
+      expect(deleteWordTyped(word, locale)).toBe(true);
+      expect(deleteWordTyped(` ${word.toLowerCase()} `, locale)).toBe(true);
+      expect(deleteWordTyped("DELETE", locale)).toBe(true);
+      expect(deleteWordTyped("delete", locale)).toBe(true);
+      expect(deleteWordTyped(word.slice(1), locale)).toBe(false);
+      expect(deleteWordTyped("", locale)).toBe(false);
+      expect(deleteWordTyped("   ", locale)).toBe(false);
+    });
+  }
+  it("another language's word is not accepted", () => {
+    expect(deleteWordTyped("LÖSCHEN", "fr")).toBe(false);
+    expect(deleteWordTyped("SUPPRIMER", "en")).toBe(false);
+  });
+  it("German without umlauts: LOESCHEN and LOSCHEN too, any case", () => {
+    for (const t of ["LÖSCHEN", "LOESCHEN", "LOSCHEN", "loeschen", "Löschen"]) expect(deleteWordTyped(t, "de"), t).toBe(true);
+    expect(deleteWordTyped("LOEESCHEN", "de")).toBe(false);
+  });
+  it("pt: EXCLUIR and APAGAR", () => {
+    expect(deleteWordTyped("apagar", "pt-br")).toBe(true);
+    expect(deleteWordTyped("APAGAR", "es")).toBe(false);
+  });
+});
 
 // Coverage pass (UX): the export files' names and the day they carry.
 describe("account helpers", () => {
