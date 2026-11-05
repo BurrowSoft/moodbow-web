@@ -100,6 +100,8 @@ describe("ImportData", () => {
     expect(screen.queryByTestId("import-large")).toBeNull();
     fireEvent.click(screen.getByTestId("import-confirm"));
     expect(await screen.findByTestId("import-large")).toHaveTextContent(m.importLarge);
+    // Not in the status region: it would be read again with every count.
+    expect(screen.getByTestId("import-status")).not.toContainElement(screen.getByTestId("import-large"));
     finish();
     await waitFor(() => expect(screen.queryByTestId("import-large")).toBeNull());
   });

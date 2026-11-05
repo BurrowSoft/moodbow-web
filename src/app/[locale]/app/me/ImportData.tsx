@@ -235,7 +235,6 @@ export function ImportData({ uid, today, dateLocaleTag, country }: { uid: string
           />
         )}
         {importing && <p data-testid="import-progress">{t("importProgress", { done: phase.done, total: phase.total })}</p>}
-        {importing && <p data-testid="import-large" className="text-muted">{t("importLarge")}</p>}
         {/* Done, and nothing was new (your own export again): one line, not
             "0 days are in your Timeline" plus the skipped count (UX, 1.1 §K). */}
         {phase.kind === "done" && phase.days === 0 && phase.skippedDays > 0 ? (
@@ -260,6 +259,13 @@ export function ImportData({ uid, today, dateLocaleTag, country }: { uid: string
           </div>
         )}
       </div>
+      {/* Outside the status above: that region is atomic, so this sentence would
+          be read again with every count. */}
+      {importing && (
+        <p data-testid="import-large" className="mt-2 text-sm text-muted">
+          {t("importLarge")}
+        </p>
+      )}
 
       {phase.kind === "preview" && (
         <div className="mt-4 flex flex-wrap gap-3">
