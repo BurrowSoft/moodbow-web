@@ -35,9 +35,7 @@ export function draftsAllowed({ vercelEnv, nodeEnv, showDrafts }: BuildEnv = cur
   return vercelEnv === "preview" || vercelEnv === "development" || nodeEnv === "development" || showDrafts === "1";
 }
 
-// met: which conditions count as met (the real ones by default; tests pass
-// their own, so the hidden path stays tested once everything is live).
-export function pageGate(id: ConditionId, build: BuildEnv = currentBuild, met: (id: ConditionId) => boolean = conditionMet): PageGate {
-  if (met(id)) return "live";
+export function pageGate(id: ConditionId, build: BuildEnv = currentBuild): PageGate {
+  if (conditionMet(id)) return "live";
   return draftsAllowed(build) ? "draft" : "hidden";
 }
