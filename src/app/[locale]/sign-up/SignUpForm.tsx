@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState, useSyncExternalStore } from "react";
+import { useActionState, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { AuthField, primaryButtonClass, textLinkClass } from "@/components/AuthField";
@@ -30,6 +30,13 @@ export function SignUpForm() {
   const ta = useTranslations("auth");
   const [state, action, pending] = useActionState<SignUpState, FormData>(signUpFlow, { status: "idle" });
   const [password, setPassword] = useState("");
+  // Typed before the page's code ran: taken into state here, or the next render
+  // would empty the field. It stays in this component, as ever.
+  const passwordField = useRef<HTMLInputElement>(null);
+  useLayoutEffect(() => {
+    const typed = passwordField.current?.value;
+    if (typed) setPassword(typed);
+  }, []);
   const timeZone = useSyncExternalStore(subscribe, browserTimeZone, noTimeZoneOnServer);
   // "Sent again" twice in a row is the same text: empty the region on each
   // resend, so the next answer is announced again (reviewer #39). A new
@@ -102,6 +109,7 @@ export function SignUpForm() {
             {ta("passwordLabel")}
           </label>
           <input
+            ref={passwordField}
             id="password"
             name="password"
             type="password"
