@@ -99,12 +99,14 @@ export async function profileLocale(email: string): Promise<string | null> {
   return data?.locale ?? null;
 }
 
-// Saves a language on the profile, as Me → Language does.
-export async function setProfileLocale(email: string, locale: string): Promise<void> {
-  const id = await userId(email);
-  const db = createClient(URL_, SECRET, { auth: { persistSession: false, autoRefreshToken: false } });
-  const { error } = await db.from("profiles").update({ locale }).eq("user_id", id);
-  if (error) throw new Error(`updating the profile failed: ${error.message}`);
+// Saves a language on the profile, the way Me → Language does: as the user,
+// through update_profile (the table takes no direct writes, even from the admin key).
+export async function setProfileLocale(email: string, password: string, locale: string): Promise<void> {
+  const user = createClient(URL_, PUBLISHABLE, { auth: { persistSession: false, autoRefreshToken: false } });
+  const { error: signInError } = await user.auth.signInWithPassword({ email, password });
+  if (signInError) throw new Error(`sign-in to save a language failed: ${signInError.message}`);
+  const { error } = await user.rpc("update_profile", { p_locale: locale });
+  if (error) throw new Error(`saving the language failed: ${error.message}`);
 }
 
 // The token a password reset email would carry.

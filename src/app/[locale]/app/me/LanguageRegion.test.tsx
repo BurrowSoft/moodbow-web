@@ -16,7 +16,7 @@ const { countryOptions, timeZoneOptions } = await import("@/lib/region/countries
 const renderIt = (initial = { locale: "en", country: "TH", time_zone: "Asia/Bangkok" }) =>
   render(
     <NextIntlClientProvider locale="en" messages={messages}>
-      <LanguageRegion initial={initial} countries={countryOptions("en")} zones={timeZoneOptions(initial.time_zone)} languages={["en"].map((code): [string, string] => [code, code])} />
+      <LanguageRegion initial={initial} countries={countryOptions("en")} zones={timeZoneOptions(initial.time_zone)} languages={[["en", "English"]]} />
     </NextIntlClientProvider>,
   );
 

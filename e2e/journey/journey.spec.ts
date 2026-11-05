@@ -706,7 +706,7 @@ test.describe("the tab bar in every language", () => {
         await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
         await page.setViewportSize({ width, height: 800 });
         for (const [route, saved] of [["", "en"], ["/th", "th"], ["/fr", "fr"], ["/es", "es"], ["/pt-br", "pt"], ["/de", "de"], ["/it", "it"]]) {
-          await setProfileLocale(email, saved);
+          await setProfileLocale(email, password, saved);
           await page.goto(`${route}/app`);
           await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
           // A label's lines: one per word at most; a broken word adds one.
