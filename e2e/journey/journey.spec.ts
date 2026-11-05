@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import { expect, test, type Page } from "@playwright/test";
 import conditions from "../../content/conditions.json";
 import messages from "../../src/messages/en.json";
-import { aiAvailable, cleanup, configured, confirmEmail, confirmLinkHash, createConfirmedUser, exists, newEmail, newPassword, notConfigured, sweep } from "./staging";
+import { aiAvailable, cleanup, configured, confirmEmail, confirmLinkHash, createConfirmedUser, exists, newEmail, newPassword, notConfigured, revokeSessions, sweep } from "./staging";
 
 // The launch-critical journeys (1.0), end to end against staging with a
 // throwaway account each: sign-up → confirm → consent → setup → check-in →
@@ -358,14 +358,14 @@ test.describe("a first run reaches Today without a reload", () => {
     }
   });
 
-  test("a session gone mid-visit: the next tab goes to sign-in, and signing in reaches Today", async ({ page, context }) => {
+  test("a session revoked mid-visit: the next tab goes to sign-in, and signing in reaches Today", async ({ page }) => {
     const email = newEmail();
     try {
       const password = await signUp(page, email, { ai: false });
       await finishSetup(page);
       await page.getByTestId("tab-me").click();
       await expect(page).toHaveURL(/\/app\/me$/);
-      await context.clearCookies();
+      await revokeSessions(email, password);
       await page.getByTestId("tab-today").click();
       await expect(page).toHaveURL(/\/sign-in/, { timeout: 20_000 });
       await page.getByLabel("Email").fill(email);
