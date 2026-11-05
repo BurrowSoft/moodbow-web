@@ -12,6 +12,22 @@ export function savedLanguageRoute(saved: string | null | undefined, route: stri
 // English is unprefixed (routing: "as-needed").
 export const languageUrl = (locale: string, path: string) => (locale === "en" ? path : `/${locale}${path}`);
 
+// Whether to try moving to this language: not if it was tried moments ago and
+// we're back (the cookie didn't stick), and not if this browser can't remember
+// trying. Holds only a language and a time, this tab only.
+const MOVE_KEY = "mb:language-move";
+const MOVE_RETRY_MS = 30_000;
+export function mayMoveTo(locale: string, now = Date.now()): boolean {
+  try {
+    const [last, at] = (sessionStorage.getItem(MOVE_KEY) ?? "").split("|");
+    if (last === locale && now - Number(at) < MOVE_RETRY_MS) return false;
+    sessionStorage.setItem(MOVE_KEY, `${locale}|${now}`);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 // A language change inside the journal: the cookie first, then one full page
 // load. Not a server redirect or a client navigation: the proxy matches an
 // unprefixed address to the cookie or the browser, and only sets the cookie on

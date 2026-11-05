@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { goToLanguage, languageUrl, savedLanguageRoute } from "./savedLanguage";
+import { goToLanguage, languageUrl, mayMoveTo, savedLanguageRoute } from "./savedLanguage";
 
 const OFFERED = ["en", "fr", "es", "pt-br"];
 
@@ -26,6 +26,28 @@ describe("savedLanguageRoute", () => {
   it("a draft route on a test build stays, so it can be read", () => {
     expect(savedLanguageRoute("en", "th", OFFERED)).toBeNull();
     expect(savedLanguageRoute("fr", "de", OFFERED)).toBeNull();
+  });
+});
+
+describe("mayMoveTo: never a reload loop", () => {
+  afterEach(() => {
+    sessionStorage.clear();
+    vi.restoreAllMocks();
+  });
+  it("the first try goes; the same language moments later doesn't; later, it does again", () => {
+    expect(mayMoveTo("en", 1_000)).toBe(true);
+    expect(mayMoveTo("en", 2_000)).toBe(false);
+    expect(mayMoveTo("en", 40_000)).toBe(true);
+  });
+  it("another language isn't held back", () => {
+    expect(mayMoveTo("en", 1_000)).toBe(true);
+    expect(mayMoveTo("fr", 2_000)).toBe(true);
+  });
+  it("storage that doesn't work: no automatic move at all", () => {
+    vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
+      throw new Error("blocked");
+    });
+    expect(mayMoveTo("en", 1_000)).toBe(false);
   });
 });
 
