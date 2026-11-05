@@ -38,6 +38,27 @@ const args = (msg: string) => {
 const E = flatten(en);
 const DRAFTS = { fr, es, "pt-br": ptBr, de, it: it_ } as const;
 
+// `one` also covers 0 in French and Portuguese: a literal 1 goes under =1.
+describe("counts where 0 isn't 1", () => {
+  const say = (msg: string, locale: string, values: Record<string, number>) => new IntlMessageFormat(msg, locale).format(values);
+  it.each([["fr", fr, "0 notes", "1 note"], ["pt-BR", ptBr, "0 anotações", "1 anotação"]] as const)("%s: search results", (locale, m, zero, one) => {
+    expect(say(m.timeline.searchResultsCount, locale, { n: 0 })).toBe(zero);
+    expect(say(m.timeline.searchResultsCount, locale, { n: 1 })).toBe(one);
+  });
+  it.each([["fr", fr], ["pt-BR", ptBr]] as const)("%s: the sign-in countdown at 0 doesn't say 1", (locale, m) => {
+    expect(say(m.emailConfirmed.emailConfirmedRedirectSignIn, locale, { seconds: 0 })).toContain("0");
+    expect(say(m.emailConfirmed.emailConfirmedRedirectSignIn, locale, { seconds: 1 })).toContain("1");
+  });
+  it("no plural in any language has a literal 1 under one", () => {
+    for (const m of [en, ...Object.values(DRAFTS)]) {
+      for (const [key, msg] of Object.entries(flatten(m))) expect(msg, key).not.toMatch(/\bone\s*\{[^{}]*\b1\b/);
+    }
+  });
+  it("search results group a large count", () => {
+    expect(say(fr.timeline.searchResultsCount, "fr", { n: 1000 })).not.toContain("1000");
+  });
+});
+
 describe.each(Object.entries(DRAFTS))("%s.json", (locale, messages) => {
   const M = flatten(messages);
   it("has exactly en.json's keys", () => {

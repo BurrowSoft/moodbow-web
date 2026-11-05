@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState, useSyncExternalStore } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { primaryButtonClass, textLinkClass } from "@/components/AuthField";
 import { BackLink } from "@/components/BackLink";
@@ -37,6 +37,7 @@ export function ConsentForm({ askAge, askAi = false, showBack }: { askAge: boole
   const t = useTranslations("onboarding");
   const ta = useTranslations("auth");
   const tc = useTranslations("common");
+  const locale = useLocale();
   const [state, action, pending] = useActionState<ConsentState, FormData>(giveConsent, { status: "idle" });
   const [privacy, setPrivacy] = useState(false);
   const [health, setHealth] = useState(false);
@@ -59,6 +60,12 @@ export function ConsentForm({ askAge, askAi = false, showBack }: { askAge: boole
           <span className="sr-only">{tc("opensInNewTab")}</span>
         </Link>
       </p>
+      {/* The legal pages are in English for now, as on the app (UX 2026-11-05). */}
+      {locale !== "en" && (
+        <p data-testid="consent-legal-english" className="px-1 text-sm text-muted">
+          {t("consentLegalEnglish")}
+        </p>
+      )}
       <Checkbox name="health" testId="consent-health" label={t("consentHealth")} checked={health} onChange={setHealth} />
       {askAge && <Checkbox name="age" testId="consent-age" label={t("ageConfirm")} checked={age} onChange={setAge} />}
       {askAi && (

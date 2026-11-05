@@ -1,6 +1,7 @@
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import getHelpLabel from "../../../../../content/contracts/get-help-label.json";
 import messages from "@/messages/en.json";
 
 const reflectOnEntry = vi.fn();
@@ -249,6 +250,41 @@ describe("ReflectPanel: a crisis reply (r1)", () => {
     );
     expect(screen.getByTestId("reflect-get-help")).toBeInTheDocument();
     expect(screen.queryByTestId("reflect-answer")).toBeNull();
+  });
+
+  // The contract's French label has a no-break space before "?" (safety check, must-fix).
+  it.each([["a plain space", " "], ["a no-break space", "\u00A0"], ["a narrow no-break space", "\u202F"]])("French's label with %s still shows the button", (_, space) => {
+    expect(getHelpLabel.labels.fr).toContain("\u00A0?");
+    const body = `C'est lourd à porter. ${getHelpLabel.labels.fr.replace("\u00A0?", `${space}?`)}`;
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <ReflectPanel entryId={ENTRY} initial={reflection({ body })} balance={600} onAnswer={vi.fn()} />
+      </NextIntlClientProvider>,
+    );
+    expect(screen.getByTestId("reflect-get-help")).toBeInTheDocument();
+  });
+
+  it.each([
+    ["a curly apostrophe", "Envie de parler à quelqu’un ?"],
+    ["no question mark", "Envie de parler à quelqu'un"],
+    ["another case", "ENVIE DE PARLER À QUELQU'UN ?"],
+    ["no opening ¿", "Quieres hablar con alguien?"],
+  ])("a label with %s still shows the button", (_, label) => {
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <ReflectPanel entryId={ENTRY} initial={reflection({ body: `Ça a l'air lourd. ${label}` })} balance={600} onAnswer={vi.fn()} />
+      </NextIntlClientProvider>,
+    );
+    expect(screen.getByTestId("reflect-get-help")).toBeInTheDocument();
+  });
+
+  it("part of a label doesn't count", () => {
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <ReflectPanel entryId={ENTRY} initial={reflection({ body: "Envie de parler de votre journée ?" })} balance={600} onAnswer={vi.fn()} />
+      </NextIntlClientProvider>,
+    );
+    expect(screen.queryByTestId("reflect-get-help")).toBeNull();
   });
 });
 
