@@ -99,6 +99,13 @@ export async function profileLocale(email: string): Promise<string | null> {
   return data?.locale ?? null;
 }
 
+// The token a password reset email would carry.
+export async function recoveryLinkHash(email: string): Promise<string> {
+  const { data, error } = await admin().generateLink({ type: "recovery", email });
+  if (error) throw new Error(`generateLink failed: ${error.message}`);
+  return data.properties.hashed_token;
+}
+
 export async function exists(email: string): Promise<boolean> {
   return (await userId(email)) !== null;
 }
