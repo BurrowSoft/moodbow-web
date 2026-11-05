@@ -9,7 +9,7 @@
   "countries": [
     {
       "code": "AR",
-      "helpline": { "names": { "en": "Centro de Asistencia al Suicida", "es": "Centro de Asistencia al Suicida" }, "display": "0800 345 1435", "dial": "08003451435", "sms": false, "hours": { "en": "8 am to midnight, every day", "es": "Todos los días, de 8:00 a 24:00" } },
+      "helpline": { "names": { "en": "Centro de Asistencia al Suicida", "es": "la línea del Centro de Asistencia al Suicida" }, "display": "0800 345 1435", "dial": "08003451435", "sms": false, "hours": { "en": "8 am to midnight, every day", "es": "Todos los días, de 8:00 a 24:00" } },
       "emergency": { "display": "911", "dial": "911" },
       "status": "verified",
       "checked_on": "2026-11-05",

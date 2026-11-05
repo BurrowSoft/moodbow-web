@@ -112,7 +112,7 @@ describe("ImportData", () => {
     await choose("date,mood\n2026-10-01,4\n2026-10-02,3\n");
     fireEvent.click(screen.getByTestId("import-confirm"));
     await settle();
-    expect(screen.getByTestId("import-skipped")).toHaveTextContent("1 days skipped (already in Moodbow).");
+    expect(screen.getByTestId("import-skipped")).toHaveTextContent("1 day skipped (already in Moodbow).");
     expect(screen.queryByTestId("import-kept-existing")).toBeNull();
   });
 
@@ -375,7 +375,7 @@ describe("ImportData", () => {
     fireEvent.click(screen.getByTestId("import-confirm"));
     await settle();
     expect(screen.getByTestId("import-failed")).toBeInTheDocument();
-    expect(screen.getByTestId("import-skipped")).toHaveTextContent("1 days skipped (already in Moodbow).");
+    expect(screen.getByTestId("import-skipped")).toHaveTextContent("1 day skipped (already in Moodbow).");
   });
 
   it("a notes-only file counts its days (M-a)", async () => {

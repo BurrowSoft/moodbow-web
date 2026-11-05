@@ -86,3 +86,24 @@ describe.each(Object.entries(DRAFTS))("%s.json", (locale, messages) => {
     expect(space(M["me.meGetHelpNow"])).toBe(space((label.labels as Record<string, string>)[dataLocale(locale)]));
   });
 });
+
+// One of something isn't "1 days" (the app's words, 3a01a50). Each line counts
+// its own thing; the numbers in the cap's bracket are fixed text.
+describe("the import lines", () => {
+  const say = (msg: string, n: number, locale: string) => new IntlMessageFormat(msg, locale).format({ days: n, count: n, notes: n, first: "a", last: "b" }) as string;
+  const lines = ["me.importPreview", "me.importDone", "me.importSkipped", "me.importSkippedFuture", "me.importSkippedCap", "me.importSkippedTooLong"];
+  it.each([["en", en], ["de", de], ["es", es], ["fr", fr], ["it", it_], ["pt-br", ptBr]] as const)("%s says one differently from two, and groups large counts", (locale, messages) => {
+    const M = flatten(messages);
+    for (const key of lines) {
+      expect(say(M[key], 1, locale).replaceAll("1", "2"), `${locale} ${key}`).not.toBe(say(M[key], 2, locale));
+      expect(say(M[key], 12000, locale), `${locale} ${key}`).not.toContain("12000");
+    }
+  });
+  it("reads right in English and Spanish", () => {
+    const S = flatten(es);
+    expect(say(E["me.importDone"], 1, "en")).toBe("Done. 1 day is in your Timeline.");
+    expect(say(E["me.importSkipped"], 1, "en")).toBe("1 day skipped (already in Moodbow).");
+    expect(say(E["me.importSkippedFuture"], 1, "en")).toBe("1 row skipped (date in the future).");
+    expect(say(S["me.importPreview"], 1, "es")).toBe("Se encontró 1 día y 1 nota, del a al b.");
+  });
+});
