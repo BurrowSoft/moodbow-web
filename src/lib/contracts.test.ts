@@ -3,7 +3,7 @@ import { createHash } from "node:crypto";
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { routing } from "@/i18n/routing";
+import { dataLocale, routing } from "@/i18n/routing";
 
 // content/contracts is a byte-for-byte copy of the app repo's
 // supabase/contracts (decision 99), made by scripts/sync-contracts.mjs,
@@ -28,7 +28,7 @@ describe("shared contracts (synced from the app)", () => {
     expect(contract.key).toBe("meGetHelpNow");
     for (const locale of routing.locales) {
       const messages = (await import(`@/messages/${locale}.json`)).default as { me: Record<string, string> };
-      expect(messages.me.meGetHelpNow, locale).toBe(contract.labels[locale]);
+      expect(messages.me.meGetHelpNow, locale).toBe(contract.labels[dataLocale(locale)]);
     }
   });
 });

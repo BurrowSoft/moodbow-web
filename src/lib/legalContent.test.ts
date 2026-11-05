@@ -30,7 +30,7 @@ describe("legal content files", () => {
   it("every {pending:id} maps to a condition", () => {
     for (const locale of routing.locales) {
       for (const { slug } of PAGES) {
-        for (const id of pendingIds(legalSource(slug, locale))) expect(() => isPendingMet(id), `${slug}: ${id}`).not.toThrow();
+        for (const id of pendingIds(legalSource(slug, legalLocale(locale)))) expect(() => isPendingMet(id), `${slug}: ${id}`).not.toThrow();
       }
     }
   });
@@ -40,7 +40,7 @@ describe("legal content files", () => {
     for (const locale of routing.locales) {
       for (const { slug, gate } of PAGES) {
         if (!conditionMet(gate)) continue;
-        const source = legalSource(slug, locale);
+        const source = legalSource(slug, legalLocale(locale));
         expect(todos(source), `${locale}/${slug}`).toEqual([]);
         if (slug === "privacy") expect(conditionMet("backup-retention"), "backup-retention must be met first").toBe(true);
       }
@@ -65,7 +65,7 @@ describe("legal content files", () => {
   // number the account-deletion page uses.
   it("the privacy policy's backup days match BACKUP_RETENTION_DAYS", () => {
     for (const locale of routing.locales) {
-      const days = legalSource("privacy", locale).match(/\{pending:backup_retention\}(\d+)\{\/pending\}/)?.[1];
+      const days = legalSource("privacy", legalLocale(locale)).match(/\{pending:backup_retention\}(\d+)\{\/pending\}/)?.[1];
       expect(Number(days), locale).toBe(BACKUP_RETENTION_DAYS);
     }
   });

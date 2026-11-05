@@ -1,10 +1,12 @@
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { IntlMessageFormat } from "intl-messageformat";
 import { routing } from "@/i18n/routing";
 import en from "./en.json";
 
-// One entry per shipped locale (English only for the beta; the localization
-// PR adds th, es, pt-BR, fr, de here and in routing.locales).
+// The source language's own checks. The other languages have theirs in
+// th.test.ts and locales.test.ts.
 const FILES: Record<string, unknown> = { en };
 
 // "a.b.c" → string, for every leaf.
@@ -29,7 +31,7 @@ describe("message files", () => {
   const base = flatten(en);
 
   it("has a file for every locale", () => {
-    expect(Object.keys(FILES).sort()).toEqual([...routing.locales].sort());
+    for (const locale of routing.locales) expect(existsSync(join(process.cwd(), "src", "messages", `${locale}.json`)), locale).toBe(true);
   });
 
   for (const [locale, messages] of Object.entries(FILES)) {

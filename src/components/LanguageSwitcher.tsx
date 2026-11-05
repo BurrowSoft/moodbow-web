@@ -10,13 +10,13 @@ export function LanguageSwitcher() {
   const t = useTranslations("common");
   const locale = useLocale();
   const pathname = usePathname();
-  // Only offered languages (thai-offered-live): a draft /th on a test build
-  // has no switcher, and nothing to switch between while one ships.
+  // Only offered languages (OFFER_GATE): a draft isn't listed, and with only
+  // one language offered there's nothing to switch between.
   const locales = offeredLocales();
   if (locales.length < 2) return null;
 
   return (
-    <nav aria-label={t("language")} className="flex items-center gap-1">
+    <nav aria-label={t("language")} className="flex flex-wrap items-center justify-center gap-1">
       {locales.map((l) =>
         l === locale ? (
           <span key={l} aria-current="true" lang={l} className="inline-flex min-h-12 items-center px-3 font-medium text-text">
