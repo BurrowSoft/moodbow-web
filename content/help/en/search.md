@@ -5,4 +5,4 @@ topic: Your journal
 ---
 {pending:app_search}On **Timeline**, tap the search icon and type at least two letters. Moodbow shows your entries that contain those words, newest first, with the matching words in bold. Tap one to read it again; tap ✕ (or use Back){pending:web_journal_live}, or press Esc on the web,{/pending} to go back to **Timeline**.
 
-Search looks only at what you wrote in your entries. Upper and lower case don't matter, but accents do: "cafe" won't find "café". Your searches aren't saved or sent anywhere else, and there's no list of recent searches.{/pending}
+Search looks only at what you wrote in your entries. Upper and lower case don't matter, and neither do accents: "cafe" finds "café". Your searches aren't saved or sent anywhere else, and there's no list of recent searches.{/pending}
