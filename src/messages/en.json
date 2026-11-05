@@ -91,7 +91,7 @@
     "emailChangePendingTitle": "Almost done.",
     "emailChangePendingBody": "Open the link we sent to your other email address to finish changing it.",
     "emailConfirmedRedirect": "Taking you to your journal in {seconds, plural, one {# second} other {# seconds}}…",
-    "emailConfirmedRedirectSignIn": "{seconds, plural, one {Taking you to the sign-in page in 1 second…} other {Taking you to the sign-in page in {seconds} seconds…}}",
+    "emailConfirmedRedirectSignIn": "{seconds, plural, =1 {Taking you to the sign-in page in 1 second…} other {Taking you to the sign-in page in {seconds} seconds…}}",
     "emailConfirmedContinue": "Continue",
     "emailConfirmedStay": "Stay on this page",
     "emailConfirmedWebBody": "You're all set."
@@ -415,7 +415,7 @@
     "searchHint": "Search the words you wrote.",
     "searchEmpty": "Nothing found for \"{q}\".",
     "searchMore": "Showing the newest 50.",
-    "searchResultsCount": "{n, plural, one {1 entry} other {{n} entries}}",
+    "searchResultsCount": "{n, plural, =1 {1 entry} other {# entries}}",
     "timelineViewList": "List",
     "timelineViewCalendar": "Calendar",
     "calPrevMonth": "Previous month",

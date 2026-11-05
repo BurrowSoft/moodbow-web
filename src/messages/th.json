@@ -415,7 +415,7 @@
     "searchHint": "ค้นหาคำที่คุณเคยเขียน",
     "searchEmpty": "ไม่พบผลลัพธ์สำหรับ \"{q}\"",
     "searchMore": "แสดง 50 รายการล่าสุด",
-    "searchResultsCount": "{n} บันทึก",
+    "searchResultsCount": "{n, plural, other {# บันทึก}}",
     "timelineViewList": "รายการ",
     "timelineViewCalendar": "ปฏิทิน",
     "calPrevMonth": "เดือนก่อนหน้า",
