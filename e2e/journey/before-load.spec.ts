@@ -69,13 +69,15 @@ test.describe("typing before the page has loaded", () => {
       await expect(box(page)).toHaveValue("Typed on a slow phone");
       await expect(page.getByTestId("entry-save")).toBeEnabled();
       await expect(box(page)).toBeFocused();
-      // Still typing, from where the caret was, with no click.
-      await page.keyboard.type(", and on");
-      await expect(box(page)).toHaveValue("Typed on a slow phone, and on");
-      // The caret in the middle comes through too.
+      // Still typing, from where the caret was, with no click. On the bare page
+      // these letters would be keyboard shortcuts (t: Timeline).
+      await page.keyboard.type(", tnci");
+      await expect(box(page)).toHaveValue("Typed on a slow phone, tnci");
+      await expect(page).toHaveURL(/\/app\/write$/);
+      // The draft has it.
       await page.waitForTimeout(2_500);
       await page.reload();
-      await expect(box(page)).toHaveValue("Typed on a slow phone, and on");
+      await expect(box(page)).toHaveValue("Typed on a slow phone, tnci");
       expect(errors).toEqual([]);
     } finally {
       await cleanup(email);
@@ -94,6 +96,23 @@ test.describe("typing before the page has loaded", () => {
       });
       await page.keyboard.type("b");
       await expect(box(page)).toHaveValue("abc");
+    } finally {
+      await cleanup(email);
+    }
+  });
+
+  test("clicked into the box before it loaded, nothing typed yet: the next letters go in the box, not to the shortcuts", async ({ page }) => {
+    const email = newEmail();
+    const password = newPassword();
+    try {
+      await onboarded(page, email, password);
+      await beforeLoad(page, "/app/write", async () => {
+        await box(page).click();
+      });
+      await expect(box(page)).toBeFocused();
+      await page.keyboard.type("tnci");
+      await expect(box(page)).toHaveValue("tnci");
+      await expect(page).toHaveURL(/\/app\/write$/);
     } finally {
       await cleanup(email);
     }
@@ -137,47 +156,58 @@ test.describe("typing before the page has loaded", () => {
     }
   });
 
-  // What every other control does. Measures and prints; the asserts follow
-  // once the table has been read.
-  test("measure: every other control", async ({ page, browser }) => {
+  test("sign-in and forgot password: what was typed stays", async ({ page }) => {
+    await beforeLoad(page, "/sign-in", async () => {
+      await page.locator("#email").click();
+      await page.keyboard.type("a@b.co");
+      await page.locator("#password").click();
+      await page.keyboard.type("secret");
+    });
+    await expect(page.locator("#email")).toHaveValue("a@b.co");
+    await expect(page.locator("#password")).toHaveValue("secret");
+    await expect(page.locator("#password")).toBeFocused();
+    await beforeLoad(page, "/forgot-password", async () => {
+      await page.locator("#email").click();
+      await page.keyboard.type("a@b.co");
+    });
+    await expect(page.locator("#email")).toHaveValue("a@b.co");
+  });
+
+  test("sign-up: the email, the password and the age box stay", async ({ page }) => {
+    await page.goto("/consent");
+    await page.getByTestId("consent-privacy").check();
+    await page.getByTestId("consent-health").check();
+    await page.getByTestId("consent-continue").click();
+    await expect(page).toHaveURL(/\/sign-up$/);
+    await beforeLoad(page, "/sign-up", async () => {
+      await page.locator("#email").click();
+      await page.keyboard.type("a@b.co");
+      await page.locator("#password").click();
+      await page.keyboard.type("secret123");
+      await page.getByTestId("signup-age").check();
+    });
+    await expect(page.locator("#email")).toHaveValue("a@b.co");
+    await expect(page.locator("#password")).toHaveValue("secret123");
+    await expect(page.getByTestId("signup-age")).toBeChecked();
+    // It's in the page's state too: one more key, and it's all there.
+    await page.locator("#password").click();
+    await page.keyboard.press("End");
+    await page.keyboard.type("4");
+    await expect(page.locator("#password")).toHaveValue("secret1234");
+  });
+
+  // What the journal's other controls do. Measures and prints; the asserts
+  // follow once the table has been read.
+  test("measure: consent and setup", async ({ page }) => {
     const email = newEmail();
     const password = newPassword();
     const row = (name: string, seen: unknown) => console.log(`[before-load] ${name}: ${JSON.stringify(seen)}`);
     try {
-      // Signed out.
-      const out = await (await browser.newContext()).newPage();
-      await beforeLoad(out, "/sign-in", async () => {
-        await out.locator("#email").click();
-        await out.keyboard.type("a@b.co");
-        await out.locator("#password").click();
-        await out.keyboard.type("secret");
+      await beforeLoad(page, "/consent", async () => {
+        await page.getByTestId("consent-privacy").check();
+        await page.getByTestId("consent-health").check();
       });
-      row("sign-in", { email: await out.locator("#email").inputValue(), password: (await out.locator("#password").inputValue()).length });
-      await beforeLoad(out, "/forgot-password", async () => {
-        await out.locator("#email").click();
-        await out.keyboard.type("a@b.co");
-      });
-      row("forgot-password", { email: await out.locator("#email").inputValue() });
-      await beforeLoad(out, "/consent", async () => {
-        await out.getByTestId("consent-privacy").check();
-        await out.getByTestId("consent-health").check();
-      });
-      row("consent", { privacy: await out.getByTestId("consent-privacy").isChecked(), health: await out.getByTestId("consent-health").isChecked(), continueDisabled: await out.getByTestId("consent-continue").isDisabled() });
-      await out.goto("/consent");
-      await out.getByTestId("consent-privacy").check();
-      await out.getByTestId("consent-health").check();
-      await out.getByTestId("consent-continue").click();
-      await expect(out).toHaveURL(/\/sign-up$/);
-      await beforeLoad(out, "/sign-up", async () => {
-        await out.locator("#email").click();
-        await out.keyboard.type("a@b.co");
-        await out.locator("#password").click();
-        await out.keyboard.type("secret123");
-        await out.getByTestId("signup-age").check();
-      });
-      row("sign-up", { email: await out.locator("#email").inputValue(), password: (await out.locator("#password").inputValue()).length, age: await out.getByTestId("signup-age").isChecked() });
-
-      // Setup.
+      row("consent", { privacy: await page.getByTestId("consent-privacy").isChecked(), health: await page.getByTestId("consent-health").isChecked(), continueDisabled: await page.getByTestId("consent-continue").isDisabled() });
       await signedUpUnconfirmed(email, password);
       await confirmEmail(email);
       await signIn(page, email, password);
@@ -187,22 +217,24 @@ test.describe("typing before the page has loaded", () => {
         await page.getByTestId("setup-reminder-off").check();
       });
       row("setup", { time: await page.getByTestId("setup-reminder-time").inputValue(), off: await page.getByTestId("setup-reminder-off").isChecked(), timeDisabled: await page.getByTestId("setup-reminder-time").isDisabled() });
-      await page.goto("/setup");
-      await page.getByTestId("setup-done").click();
-      await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    } finally {
+      await cleanup(email);
+    }
+  });
 
-      // The journal.
+  test("measure: Today, Timeline and Me", async ({ page }) => {
+    const email = newEmail();
+    const password = newPassword();
+    const row = (name: string, seen: unknown) => console.log(`[before-load] ${name}: ${JSON.stringify(seen)}`);
+    try {
+      await onboarded(page, email, password);
       await beforeLoad(page, "/app", async () => {
         await page.getByTestId("checkin-mood-4").click();
       });
-      row("today: a mood tapped", { saveEnabled: await page.getByTestId("checkin-save").isEnabled().catch(() => null), pressed: await page.getByTestId("checkin-mood-4").getAttribute("aria-pressed") });
+      row("today: a mood tapped", { saveEnabled: await page.getByTestId("checkin-save").isEnabled().catch(() => null), pressed: await page.getByTestId("checkin-mood-4").getAttribute("aria-pressed"), url: new URL(page.url()).pathname });
       await beforeLoad(page, "/app/timeline", async () => {
-        await page.getByTestId("timeline-search-input").click();
-        await page.keyboard.type("river");
+        row("timeline: search box in the server's page", { count: await page.getByTestId("timeline-search-input").count() });
       });
-      row("timeline search", { value: await page.getByTestId("timeline-search-input").inputValue(), focused: await page.getByTestId("timeline-search-input").evaluate((el) => el === document.activeElement) });
-      await page.keyboard.type("s");
-      row("timeline search, one more key", { value: await page.getByTestId("timeline-search-input").inputValue() });
       await beforeLoad(page, "/app/me", async () => {
         await page.getByTestId("me-country").selectOption("FR");
         await page.getByTestId("me-reminder-time").fill("07:30");
