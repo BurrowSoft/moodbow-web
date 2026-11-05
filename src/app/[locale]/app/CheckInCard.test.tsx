@@ -526,8 +526,11 @@ describe("CheckInCard: a request lost at the network level (Web Tester, #11)", (
 
   // #166 (Web Tester): Next runs server actions one at a time, so a flush
   // stalled on the network would hold sign-out (or any action) behind it.
+  const pendingCopy = () =>
+    window.localStorage.setItem(dayKey("2026-10-02"), JSON.stringify({ fields: { mood: 2, sleepHours: "", sleepQuality: "", exercise: "", stress: "" }, expected: "", date: "2026-10-02" }));
+
   it("a flush goes through /api/check-in-sync, never the server action queue", async () => {
-    pendingFrom("2026-10-02");
+    pendingCopy();
     saveCheckIn.mockResolvedValue({ status: "saved", checkIn: { ...ROW, mood: 2 } });
     renderCard(null);
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
@@ -540,7 +543,7 @@ describe("CheckInCard: a request lost at the network level (Web Tester, #11)", (
   });
 
   it("a flush that never answers is aborted after the wait; the copy stays for the next reconnect", async () => {
-    pendingFrom("2026-10-02");
+    pendingCopy();
     let signal: AbortSignal | undefined;
     fetchMock.mockImplementation((_url: string, init: RequestInit) => {
       signal = init.signal ?? undefined;
