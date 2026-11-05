@@ -349,7 +349,7 @@
     "importTitle": "นำเข้าจากแอปอื่น",
     "importBody": "นำวันที่ผ่านมาจาก Daylio หรือไฟล์ CSV มาไว้ที่นี่ ไฟล์ของคุณอยู่บนอุปกรณ์นี้เท่านั้น เราจะบันทึกเฉพาะวันที่คุณนำเข้า",
     "importChooseFile": "เลือกไฟล์",
-    "importPreview": "พบ {days} วันและ {notes} บันทึก ตั้งแต่ {first} ถึง {last}",
+    "importPreview": "พบ {days, plural, other {# วัน}}และ {notes, plural, other {# บันทึก}} ตั้งแต่ {first} ถึง {last}",
     "importConfirm": "นำเข้า",
     "importProgress": "กำลังนำเข้า… {done} จาก {total}",
     "importLarge": "ไฟล์ขนาดใหญ่อาจใช้เวลาหลายนาที โปรดเปิดหน้านี้ไว้ หากหยุดกลางคัน การนำเข้าอีกครั้งจะไม่ทำให้ข้อมูลซ้ำ",

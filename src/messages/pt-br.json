@@ -349,7 +349,7 @@
     "importTitle": "Importar de outro app",
     "importBody": "Traga seus dias anteriores do Daylio ou de um arquivo CSV. Seu arquivo fica neste aparelho; só os dias que você importar são salvos.",
     "importChooseFile": "Escolher arquivo",
-    "importPreview": "{days, number} dias e {notes, number} notas encontrados, de {first} a {last}.",
+    "importPreview": "{days, plural, =1 {1 dia} other {# dias}} e {notes, plural, =1 {1 nota} other {# notas}} encontrados, de {first} a {last}.",
     "importConfirm": "Importar",
     "importProgress": "Importando… {done, number} de {total, number}",
     "importLarge": "Arquivos grandes podem levar vários minutos. Mantenha esta página aberta. Se parar, importar de novo não cria duplicatas.",
