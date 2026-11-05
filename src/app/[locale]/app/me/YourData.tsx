@@ -150,7 +150,7 @@ export function YourData({ credits, uid, csv = false, ai = false }: { credits: n
             {exportResult}
             <div>
               <label htmlFor="delete-confirm" className="block text-sm font-medium text-text">
-                {t("deleteTypeConfirm")}
+                {t("deleteTypeConfirm", { word: t("deleteWord") })}
               </label>
               <input
                 id="delete-confirm"

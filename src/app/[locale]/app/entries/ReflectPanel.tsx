@@ -18,9 +18,12 @@ type Phase =
   | { kind: "offline" };
 
 // The reply names the button in the entry's language, which may not be the
-// UI's: any label in the shared contract counts (reviewer #35).
-const GET_HELP_LABELS = Object.values(getHelpLabel.labels);
-const namesGetHelp = (body: string) => GET_HELP_LABELS.some((label) => body.includes(label));
+// UI's: any label in the shared contract counts (reviewer #35). French's has
+// a no-break space before "?", and the AI may write a plain one: no-break
+// spaces count as spaces on both sides (safety check, must-fix).
+const plainSpaces = (s: string) => s.replace(/[\u00A0\u202F]/g, " ");
+const GET_HELP_LABELS = Object.values(getHelpLabel.labels).map(plainSpaces);
+const namesGetHelp = (body: string) => GET_HELP_LABELS.some((label) => plainSpaces(body).includes(label));
 
 // One call, or no answer after ms (a hung request): the late answer, if
 // any, is ignored; the same key is resent on Try again.

@@ -1,5 +1,12 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
+import de from "@/messages/de.json";
+import en from "@/messages/en.json";
+import es from "@/messages/es.json";
+import fr from "@/messages/fr.json";
+import it_ from "@/messages/it.json";
+import ptBr from "@/messages/pt-br.json";
+import th from "@/messages/th.json";
 import { DELETE_WORD, deleteWordTyped, exportFileName, journalFileName, localDay } from "./account";
 
 // The typed word (app #141's cases, delete_word_test.dart).
@@ -26,6 +33,14 @@ describe("deleteWordTyped", () => {
   it("pt: EXCLUIR and APAGAR", () => {
     expect(deleteWordTyped("apagar", "pt-br")).toBe(true);
     expect(deleteWordTyped("APAGAR", "es")).toBe(false);
+  });
+  it("the word each language's page asks for is one it accepts, and the steps name it", () => {
+    for (const [locale, m] of Object.entries({ en, th, fr, es, "pt-br": ptBr, de, it: it_ })) {
+      expect(deleteWordTyped(m.me.deleteWord, locale), locale).toBe(true);
+      expect(m.me.deleteTypeConfirm, locale).toContain("{word}");
+      expect(m.accountDeletion.steps, locale).toContain(m.me.deleteWord);
+    }
+    expect(ptBr.me.deleteWord).toBe("APAGAR");
   });
 });
 

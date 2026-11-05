@@ -102,7 +102,7 @@ describe("YourData: delete account", () => {
     const dialog = screen.getByRole("dialog", { name: m.deleteTitle });
     expect(dialog).toHaveAccessibleDescription(m.deleteBody);
     expect(screen.getByTestId("delete-export-first")).toHaveTextContent(m.deleteExportFirst);
-    expect(screen.getByLabelText(m.deleteTypeConfirm)).toBeInTheDocument();
+    expect(screen.getByLabelText(m.deleteTypeConfirm.replace("{word}", m.deleteWord))).toBeInTheDocument();
     expect(screen.getByTestId("delete-confirm")).toBeDisabled();
     fireEvent.change(screen.getByTestId("delete-confirm-input"), { target: { value: "DELET" } });
     expect(screen.getByTestId("delete-confirm")).toBeDisabled();

@@ -3,6 +3,7 @@ import { NextIntlClientProvider } from "next-intl";
 import type { ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import messages from "@/messages/en.json";
+import fr from "@/messages/fr.json";
 
 vi.mock("./actions", () => ({ giveConsent: vi.fn() }));
 vi.mock("@/i18n/navigation", () => ({
@@ -21,6 +22,20 @@ const renderIt = (askAi: boolean) =>
       <ConsentForm askAge={false} askAi={askAi} showBack={false} />
     </NextIntlClientProvider>,
   );
+
+describe("ConsentForm: the legal pages are in English", () => {
+  it("said in any other language, not in English", () => {
+    const view = renderIt(false);
+    expect(screen.queryByTestId("consent-legal-english")).toBeNull();
+    view.unmount();
+    render(
+      <NextIntlClientProvider locale="fr" messages={fr}>
+        <ConsentForm askAge={false} showBack={false} />
+      </NextIntlClientProvider>,
+    );
+    expect(screen.getByTestId("consent-legal-english")).toHaveTextContent(fr.onboarding.consentLegalEnglish);
+  });
+});
 
 describe("ConsentForm: the optional AI box (r1 §M3)", () => {
   it("hidden while this build doesn't show AI", () => {

@@ -3,12 +3,12 @@ import { foldForSearch } from "./searchFold";
 // What the user types to confirm deleting their account (M7): the UI
 // language's word, in any case and with or without accents; English DELETE
 // always works too (app #141, UX 2026-11-05). The same words as the app; pt
-// also takes APAGAR.
+// shows APAGAR (me.deleteWord) and also takes EXCLUIR.
 export const DELETE_WORD = "DELETE";
 const DELETE_WORDS: Record<string, string[]> = {
   fr: ["SUPPRIMER"],
   es: ["ELIMINAR"],
-  "pt-br": ["EXCLUIR", "APAGAR"],
+  "pt-br": ["APAGAR", "EXCLUIR"],
   de: ["LÖSCHEN"],
   it: ["ELIMINA"],
 };
