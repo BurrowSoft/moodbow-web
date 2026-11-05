@@ -81,6 +81,7 @@ describe.runIf(existsSync(CONTRACT))("the contract's fixture", () => {
     const contract = load();
     expect(CRISIS_KEYWORDS?.version).toBe(contract.version);
     for (const text of contract.fixture.should_flag) expect(flagsCrisis(text, CRISIS_KEYWORDS), text).toBe(true);
+    for (const text of contract.fixture.should_not_flag) expect(flagsCrisis(text, CRISIS_KEYWORDS), text).toBe(false);
   });
   it("the app uses it", () => {
     expect(CRISIS_KEYWORDS).not.toBeNull();
