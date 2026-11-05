@@ -3,13 +3,17 @@ import { valueHex, type ValueKey } from "@/lib/journal/valueColours";
 // One Insights chart, drawn as SVG on the server (no chart library, no JS):
 // a line for 1–5 scales (mood, stress) or bars for amounts (sleep hours,
 // exercise minutes), one slot per day of the range. A day with no value is
-// a gap: no bar, and the line skips it. Exercise 0 ("None") is a value and
-// gets a flat bar.
+// a gap: no bar, and the line breaks there (app parity; a line across it
+// would invent a value), so a lone day is its dot alone. Exercise 0
+// ("None") is a value and gets a flat bar.
 // Colours (decision 150): each bar and point takes its stored value's
 // Sunrise colour (colourKey, colour-map.json), with the muted outline;
 // movement 0 stays neutral. The line is a vertical gradient along the value
 // axis (each whole value at its own colour). Axes stay neutral.
-type Props = { kind: "line" | "bars"; points: (number | null)[]; min: number; max: number; labelledBy: string; colourKey: ValueKey; gradientId: string };
+// dots (lines only): "all" puts a point on every day with a value;
+// "isolated" (3 months, app parity) only on a day with no value on either
+// side, which the line alone wouldn't show; the line carries the rest.
+type Props = { kind: "line" | "bars"; points: (number | null)[]; min: number; max: number; labelledBy: string; colourKey: ValueKey; gradientId: string; dots?: "all" | "isolated" };
 
 const W = 300;
 const H = 120;
@@ -18,12 +22,22 @@ const PAD = 8;
 // a circle although the chart stretches (preserveAspectRatio="none").
 const DOT = 7;
 
-export function Chart({ kind, points, min, max, labelledBy, colourKey, gradientId }: Props) {
+export function Chart({ kind, points, min, max, labelledBy, colourKey, gradientId, dots = "all" }: Props) {
   const slot = (W - PAD * 2) / points.length;
   const x = (i: number) => PAD + slot * i + slot / 2;
   const y = (v: number) => H - PAD - ((Math.min(Math.max(v, min), max) - min) / (max - min || 1)) * (H - PAD * 2);
   const present = points.map((v, i) => ({ v, i })).filter((p): p is { v: number; i: number } => p.v !== null);
   const wholeValues = Array.from({ length: max - min + 1 }, (_, k) => min + k);
+  // A day past either end of the range has no value.
+  const isolated = (i: number) => (points[i - 1] ?? null) === null && (points[i + 1] ?? null) === null;
+  const dotted = dots === "all" ? present : present.filter(({ i }) => isolated(i));
+  // Runs of consecutive days with a value: one line each, from two days on.
+  const runs = present.reduce<{ v: number; i: number }[][]>((acc, p) => {
+    const last = acc.at(-1);
+    if (last && last.at(-1)!.i === p.i - 1) last.push(p);
+    else acc.push([p]);
+    return acc;
+  }, []);
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-labelledby={labelledBy} className="h-32 w-full text-muted" preserveAspectRatio="none">
@@ -58,16 +72,21 @@ export function Chart({ kind, points, min, max, labelledBy, colourKey, gradientI
               ))}
             </linearGradient>
           </defs>
-          <polyline
-            points={present.map(({ v, i }) => `${x(i)},${y(v)}`).join(" ")}
-            fill="none"
-            stroke={`url(#${gradientId})`}
-            strokeWidth={2}
-            strokeLinejoin="round"
-            strokeLinecap="round"
-            vectorEffect="non-scaling-stroke"
-          />
-          {present.map(({ v, i }) => {
+          {runs
+            .filter((run) => run.length > 1)
+            .map((run) => (
+              <polyline
+                key={run[0].i}
+                points={run.map(({ v, i }) => `${x(i)},${y(v)}`).join(" ")}
+                fill="none"
+                stroke={`url(#${gradientId})`}
+                strokeWidth={2}
+                strokeLinejoin="round"
+                strokeLinecap="round"
+                vectorEffect="non-scaling-stroke"
+              />
+            ))}
+          {dotted.map(({ v, i }) => {
             const hex = valueHex(colourKey, v);
             return (
               <g key={i} data-value-colour={hex ?? "neutral"}>
