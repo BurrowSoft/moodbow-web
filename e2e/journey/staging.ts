@@ -1,5 +1,7 @@
 import { randomBytes } from "node:crypto";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { consentItem } from "../../src/lib/legalVersions";
+import { grantedAtConsent } from "../../src/lib/onboardingConsent";
 
 // Staging-only helpers for the launch journeys. Rules (UX & PM, 1.0):
 // - the STAGING project only: anything else throws before a single call;
@@ -55,6 +57,44 @@ export async function confirmEmail(email: string): Promise<void> {
   if (!id) throw new Error("the signed-up user isn't on staging");
   const { error } = await admin().updateUserById(id, { email_confirm: true });
   if (error) throw new Error(`confirm failed: ${error.message}`);
+}
+
+// The account the sign-up form makes (profile and consents, through the auth
+// trigger), still unconfirmed, without the form's email: staging rate-limits
+// those, and only the journeys above need the form itself. Returns the token
+// the email link would carry, for the real /auth/confirm page. Without
+// consents, the account still owes Consent.
+export async function signedUpUnconfirmed(email: string, password: string, { consents = true } = {}): Promise<string> {
+  const { data, error } = await admin().generateLink({
+    type: "signup",
+    email,
+    password,
+    options: { data: { locale: "en", time_zone: "UTC", ...(consents ? { consents: [...grantedAtConsent(), consentItem("age_18")] } : {}) } },
+  });
+  if (error) throw new Error(`generateLink failed: ${error.message}`);
+  return data.properties.hashed_token;
+}
+
+// A confirmed account with no consents recorded yet.
+export async function createConfirmedUser(email: string, password: string): Promise<void> {
+  const { error } = await admin().createUser({ email, password, email_confirm: true });
+  if (error) throw new Error(`createUser failed: ${error.message}`);
+}
+
+// Ends every session of this user, as "sign out everywhere" on another device does.
+export async function revokeSessions(email: string, password: string): Promise<void> {
+  const user = createClient(URL_, PUBLISHABLE, { auth: { persistSession: false, autoRefreshToken: false } });
+  const { error: signInError } = await user.auth.signInWithPassword({ email, password });
+  if (signInError) throw new Error(`sign-in to revoke failed: ${signInError.message}`);
+  const { error } = await user.auth.signOut({ scope: "global" });
+  if (error) throw new Error(`revoke failed: ${error.message}`);
+}
+
+// The token a password reset email would carry.
+export async function recoveryLinkHash(email: string): Promise<string> {
+  const { data, error } = await admin().generateLink({ type: "recovery", email });
+  if (error) throw new Error(`generateLink failed: ${error.message}`);
+  return data.properties.hashed_token;
 }
 
 export async function exists(email: string): Promise<boolean> {

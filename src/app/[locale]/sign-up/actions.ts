@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { getLocale } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
 import { dataLocale } from "@/i18n/routing";
-import { isRateLimit } from "@/lib/authErrors";
+import { isRateLimit, logAuthFailure } from "@/lib/authErrors";
 import { isValidEmail, normalizeEmail } from "@/lib/email";
 import { consentItem } from "@/lib/legalVersions";
 import { CONSENT_COOKIE, parseConsentCookie } from "@/lib/onboardingConsent";
@@ -52,7 +52,10 @@ async function signUp(form: FormData): Promise<SignUpState> {
   if (!consents) return redirect({ href: "/consent", locale });
 
   const supabase = await createSupabaseServerClient();
-  if (!supabase) return fail("generic");
+  if (!supabase) {
+    logAuthFailure("sign-up", { name: "no_config" });
+    return fail("generic");
+  }
   const tz = String(form.get("time_zone") ?? "");
   const { data, error } = await supabase.auth.signUp({
     email,
@@ -67,6 +70,7 @@ async function signUp(form: FormData): Promise<SignUpState> {
     if (error.code === "email_address_invalid") return fail("emailInvalid");
     // Too many tries (429 / over_*): said plainly, as Send it again does (UX).
     if (isRateLimit(error)) return fail("rateLimited");
+    logAuthFailure("sign-up", error);
     return fail("generic");
   }
   // With email confirmation on, Supabase answers an existing address with a
