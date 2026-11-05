@@ -35,7 +35,7 @@ export function draftsAllowed({ vercelEnv, nodeEnv, showDrafts }: BuildEnv = cur
   return vercelEnv === "preview" || vercelEnv === "development" || nodeEnv === "development" || showDrafts === "1";
 }
 
-export function pageGate(id: ConditionId, build: BuildEnv = currentBuild): PageGate {
-  if (conditionMet(id)) return "live";
+export function pageGate(id: ConditionId, build: BuildEnv = currentBuild, met: (id: ConditionId) => boolean = conditionMet): PageGate {
+  if (met(id)) return "live";
   return draftsAllowed(build) ? "draft" : "hidden";
 }

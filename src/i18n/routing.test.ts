@@ -2,7 +2,7 @@
 import { describe, expect, it } from "vitest";
 import { conditionMet } from "@/lib/conditions";
 import { isHiddenPage, pagePath } from "@/lib/sitemapPages";
-import { ALL_LOCALES, dataLocale, OFFER_GATE, offeredLocales, routeLocale, routing, servedLocales } from "./routing";
+import { ALL_LOCALES, dataLocale, offeredLocales, routeLocale, routing, servedLocales } from "./routing";
 
 // Each language behind its own offered condition: served as a draft on
 // test builds, offered (switcher, Me → Language, hreflang, sitemap) only
@@ -10,8 +10,6 @@ import { ALL_LOCALES, dataLocale, OFFER_GATE, offeredLocales, routeLocale, routi
 const unmet = () => false;
 const met = () => true;
 const ALL = ["en", "th", "fr", "es", "pt-br", "de", "it"];
-// A draft is a language not offered yet in content/conditions.json.
-const WITH_DRAFTS = ALL.filter((l) => l === "en" || !conditionMet(OFFER_GATE[l as keyof typeof OFFER_GATE]));
 const BUILDS = [{ vercelEnv: "production" }, { vercelEnv: "preview" }, { nodeEnv: "development" }, { nodeEnv: "production", showDrafts: "1" }, {}];
 
 describe("servedLocales: which languages a build serves", () => {
@@ -19,9 +17,9 @@ describe("servedLocales: which languages a build serves", () => {
     expect(servedLocales({ vercelEnv: "production" }, unmet)).toEqual(["en"]);
     expect(servedLocales({ vercelEnv: "production", showDrafts: "1", nodeEnv: "development" }, unmet)).toEqual(["en"]);
     expect(servedLocales({}, unmet)).toEqual(["en"]);
-    expect(servedLocales({ vercelEnv: "preview" }, unmet)).toEqual(WITH_DRAFTS);
-    expect(servedLocales({ nodeEnv: "development" }, unmet)).toEqual(WITH_DRAFTS);
-    expect(servedLocales({ nodeEnv: "production", showDrafts: "1" }, unmet)).toEqual(WITH_DRAFTS);
+    expect(servedLocales({ vercelEnv: "preview" }, unmet)).toEqual(ALL);
+    expect(servedLocales({ nodeEnv: "development" }, unmet)).toEqual(ALL);
+    expect(servedLocales({ nodeEnv: "production", showDrafts: "1" }, unmet)).toEqual(ALL);
   });
 
   it("met: every build serves Thai", () => {
