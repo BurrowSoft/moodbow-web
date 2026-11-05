@@ -62,13 +62,14 @@ export async function confirmEmail(email: string): Promise<void> {
 // The account the sign-up form makes (profile and consents, through the auth
 // trigger), still unconfirmed, without the form's email: staging rate-limits
 // those, and only the journeys above need the form itself. Returns the token
-// the email link would carry, for the real /auth/confirm page.
-export async function signedUpUnconfirmed(email: string, password: string): Promise<string> {
+// the email link would carry, for the real /auth/confirm page. Without
+// consents, the account still owes Consent.
+export async function signedUpUnconfirmed(email: string, password: string, { consents = true } = {}): Promise<string> {
   const { data, error } = await admin().generateLink({
     type: "signup",
     email,
     password,
-    options: { data: { locale: "en", time_zone: "UTC", consents: [...grantedAtConsent(), consentItem("age_18")] } },
+    options: { data: { locale: "en", time_zone: "UTC", ...(consents ? { consents: [...grantedAtConsent(), consentItem("age_18")] } : {}) } },
   });
   if (error) throw new Error(`generateLink failed: ${error.message}`);
   return data.properties.hashed_token;

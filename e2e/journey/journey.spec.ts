@@ -333,7 +333,50 @@ test.describe("a first run reaches Today without a reload", () => {
     });
   }
 
-  test("signing in before finishing Setup: Setup, then Today; the journal stays closed until then", async ({ page }) => {
+  test("the email link on an account that still owes Consent: Consent, Setup, then Today", async ({ page }) => {
+    test.skip(!conditions["web-journal-live"].met, "the confirm link keeps a session only with web-journal-live met");
+    const email = newEmail();
+    const password = newPassword();
+    try {
+      await page.goto(`/auth/confirm?token_hash=${await signedUpUnconfirmed(email, password, { consents: false })}&type=signup`);
+      await page.locator("main form button[type=submit]").click();
+      await expect(page.getByTestId("email-confirmed-continue")).toBeVisible({ timeout: 20_000 });
+      await page.getByTestId("email-confirmed-continue").click();
+      await expect(page).toHaveURL(/\/consent$/, { timeout: 20_000 });
+      await page.getByTestId("consent-privacy").check();
+      await page.getByTestId("consent-health").check();
+      await page.getByTestId("consent-age").check();
+      await page.getByTestId("consent-continue").click();
+      await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+      await expect(page.getByTestId("setup-done")).toBeVisible({ timeout: 15_000 });
+      await finishSetup(page);
+    } finally {
+      await cleanup(email);
+    }
+  });
+
+  test("the journal stays closed until Setup is done", async ({ page }) => {
+    const email = newEmail();
+    const password = newPassword();
+    try {
+      await signedUpUnconfirmed(email, password);
+      await confirmEmail(email);
+      await page.goto("/sign-in");
+      await page.getByLabel("Email").fill(email);
+      await page.getByLabel("Password").fill(password);
+      await page.getByRole("button", { name: messages.auth.signinSubmit }).click();
+      await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+      for (const path of ["/app", "/app/timeline", "/app/me"]) {
+        await page.goto(path);
+        await expect(page).toHaveURL(/\/setup$/);
+        await expect(page.getByTestId("setup-done")).toBeVisible();
+      }
+    } finally {
+      await cleanup(email);
+    }
+  });
+
+  test("signing in before finishing Setup: Setup, then Today", async ({ page }) => {
     const email = newEmail();
     const password = newPassword();
     try {
