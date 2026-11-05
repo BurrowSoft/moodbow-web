@@ -485,7 +485,9 @@ test.describe("the saved language in the journal", () => {
     await page.locator("main form button[type=submit]").first().click();
   };
   // Settled here: the address holds for two seconds, with no page load in that time.
-  const settled = async (page: Page, url: RegExp, lang: string | RegExp) => {
+  const settled = async (page: Page, path: string, lang: string | RegExp) => {
+    // The whole path: "/app/me" must not match /pt-br/app/me, still on its way.
+    const url = new RegExp(`^https?://[^/]+${path}$`);
     await expect(page).toHaveURL(url, { timeout: 20_000 });
     let loads = 0;
     const count = (frame: { parentFrame: () => unknown }) => {
@@ -514,10 +516,10 @@ test.describe("the saved language in the journal", () => {
       await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
       await page.getByTestId("setup-done").click();
       await today(page);
-      await settled(page, /\/app$/, "en");
+      await settled(page, "/app", "en");
       await today(page);
       await page.reload();
-      await settled(page, /\/app$/, "en");
+      await settled(page, "/app", "en");
       await today(page);
     } finally {
       await cleanup(email);
@@ -536,11 +538,11 @@ test.describe("the saved language in the journal", () => {
       await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
       await page.getByTestId("setup-done").click();
       await today(page);
-      await settled(page, /\/fr\/app$/, "fr");
+      await settled(page, "/fr/app", "fr");
       await page.getByTestId("tab-me").click();
-      await settled(page, /\/fr\/app\/me$/, "fr");
+      await settled(page, "/fr/app/me", "fr");
       await page.getByTestId("tab-today").click();
-      await settled(page, /\/fr\/app$/, "fr");
+      await settled(page, "/fr/app", "fr");
       await today(page);
     } finally {
       await cleanup(email);
@@ -559,7 +561,7 @@ test.describe("the saved language in the journal", () => {
       await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
       await page.getByTestId("setup-done").click();
       await today(page);
-      await settled(page, /\/app$/, "en");
+      await settled(page, "/app", "en");
     } finally {
       await cleanup(email);
     }
@@ -581,29 +583,28 @@ test.describe("the saved language in the journal", () => {
       await expect(page).toHaveURL(/\/app\/me$/);
 
       await page.getByTestId("me-language").selectOption("fr");
-      await settled(page, /\/fr\/app\/me$/, "fr");
+      await settled(page, "/fr/app/me", "fr");
       await expect(page.getByTestId("me-language")).toHaveValue("fr");
       expect(await profileLocale(email)).toBe("fr");
       await page.getByTestId("tab-today").click();
-      await settled(page, /\/fr\/app$/, "fr");
+      await settled(page, "/fr/app", "fr");
       await today(page);
 
       await page.getByTestId("tab-me").click();
       await expect(page).toHaveURL(/\/fr\/app\/me$/);
       await page.getByTestId("me-language").selectOption("pt-br");
-      await settled(page, /\/pt-br\/app\/me$/, /^pt/i);
+      await settled(page, "/pt-br/app/me", /^pt/i);
       await expect(page.getByTestId("me-language")).toHaveValue("pt-br");
       expect(await profileLocale(email)).toBe("pt");
 
       await page.getByTestId("me-language").selectOption("en");
-      await settled(page, /\/app\/me$/, "en");
-      await expect(page).not.toHaveURL(/\/(fr|pt-br)\//);
+      await settled(page, "/app/me", "en");
       await expect(page.getByTestId("me-language")).toHaveValue("en");
       expect(await profileLocale(email)).toBe("en");
       await page.reload();
-      await settled(page, /\/app\/me$/, "en");
+      await settled(page, "/app/me", "en");
       await page.getByTestId("tab-today").click();
-      await settled(page, /\/app$/, "en");
+      await settled(page, "/app", "en");
       await today(page);
 
       await page.goto("/help");
@@ -635,9 +636,9 @@ test.describe("the saved language in the journal", () => {
       expect(await profileLocale(email)).toBe("pt");
       await page.getByTestId("setup-done").click();
       await today(page);
-      await settled(page, /\/pt-br\/app$/, /^pt/i);
+      await settled(page, "/pt-br/app", /^pt/i);
       await page.reload();
-      await settled(page, /\/pt-br\/app$/, /^pt/i);
+      await settled(page, "/pt-br/app", /^pt/i);
       await today(page);
     } finally {
       await cleanup(email);
