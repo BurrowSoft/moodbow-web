@@ -3,7 +3,7 @@
 import { cookies } from "next/headers";
 import { getLocale } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
-import { DELETE_WORD, localDay } from "@/lib/journal/account";
+import { deleteWordTyped, localDay } from "@/lib/journal/account";
 import { isFocusArea, isTone } from "@/lib/journal/ai";
 import { consentItem } from "@/lib/legalVersions";
 import { isCountry, isTimeZoneName } from "@/lib/region/countries";
@@ -48,10 +48,10 @@ export type DeleteAccountState = { status: "idle" } | { status: "error"; error: 
 // session and the user's local copies (pending check-ins, drafts:
 // decision 85), and sign-in says it's done.
 export async function deleteMyAccount(_prev: DeleteAccountState, form: FormData): Promise<DeleteAccountState> {
-  if (String(form.get("confirm") ?? "").trim() !== DELETE_WORD) return { status: "error", error: "confirm" };
+  const locale = await getLocale();
+  if (!deleteWordTyped(String(form.get("confirm") ?? ""), locale)) return { status: "error", error: "confirm" };
   const supabase = await createSupabaseServerClient();
   if (!supabase) return { status: "error", error: "generic" };
-  const locale = await getLocale();
   const { data, error: userError } = await supabase.auth.getUser();
   const uid = data.user?.id;
   if (!uid) return userError?.name === "AuthRetryableFetchError" ? { status: "error", error: "generic" } : redirect({ href: "/sign-in", locale });

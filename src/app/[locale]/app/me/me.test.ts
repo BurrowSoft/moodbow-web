@@ -112,7 +112,7 @@ describe("signOut (Me → Sign out: this browser only)", () => {
 
 describe("deleteMyAccount", () => {
   it("needs DELETE typed: anything else never reaches the RPC", async () => {
-    for (const word of ["", "delete", "DELET", "SUPPRIMER"]) expect(await deleteMyAccount(idle, confirm(word))).toEqual({ status: "error", error: "confirm" });
+    for (const word of ["", "DELET", "SUPPRIMER"]) expect(await deleteMyAccount(idle, confirm(word))).toEqual({ status: "error", error: "confirm" });
     expect(rpc).not.toHaveBeenCalled();
   });
 
