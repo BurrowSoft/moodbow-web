@@ -358,6 +358,26 @@ test.describe("a first run reaches Today without a reload", () => {
     }
   });
 
+  test("a session gone mid-visit: the next tab goes to sign-in, and signing in reaches Today", async ({ page, context }) => {
+    const email = newEmail();
+    try {
+      const password = await signUp(page, email, { ai: false });
+      await finishSetup(page);
+      await page.getByTestId("tab-me").click();
+      await expect(page).toHaveURL(//app/me$/);
+      await context.clearCookies();
+      await page.getByTestId("tab-today").click();
+      await expect(page).toHaveURL(//sign-in/, { timeout: 20_000 });
+      await page.getByLabel("Email").fill(email);
+      await page.getByLabel("Password").fill(password);
+      await page.getByRole("button", { name: messages.auth.signinSubmit }).click();
+      await expect(page).toHaveURL(//app$/, { timeout: 20_000 });
+      await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    } finally {
+      await cleanup(email);
+    }
+  });
+
   test("an account with no consents yet: sign-in, Consent, Setup, then Today", async ({ page }) => {
     const email = newEmail();
     const password = newPassword();
