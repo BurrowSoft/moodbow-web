@@ -90,6 +90,16 @@ export async function revokeSessions(email: string, password: string): Promise<v
   if (error) throw new Error(`revoke failed: ${error.message}`);
 }
 
+// Saves a language on the profile, the way Me → Language does: as the user,
+// through update_profile (the table takes no direct writes, even from the admin key).
+export async function setProfileLocale(email: string, password: string, locale: string): Promise<void> {
+  const user = createClient(URL_, PUBLISHABLE, { auth: { persistSession: false, autoRefreshToken: false } });
+  const { error: signInError } = await user.auth.signInWithPassword({ email, password });
+  if (signInError) throw new Error(`sign-in to save a language failed: ${signInError.message}`);
+  const { error } = await user.rpc("update_profile", { p_locale: locale });
+  if (error) throw new Error(`saving the language failed: ${error.message}`);
+}
+
 // The token a password reset email would carry.
 export async function recoveryLinkHash(email: string): Promise<string> {
   const { data, error } = await admin().generateLink({ type: "recovery", email });

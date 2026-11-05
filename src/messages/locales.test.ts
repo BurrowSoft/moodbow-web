@@ -54,6 +54,14 @@ describe("counts where 0 isn't 1", () => {
       for (const [key, msg] of Object.entries(flatten(m))) expect(msg, key).not.toMatch(/\bone\s*\{[^{}]*\b1\b/);
     }
   });
+  it("the import's preview: one day, one note; and a large count is grouped", () => {
+    const preview = (msg: string, locale: string, days: number, notes: number) => new IntlMessageFormat(msg, locale).format({ days, notes, first: "a", last: "b" });
+    expect(preview(en.me.importPreview, "en", 1, 1)).toBe("1 day and 1 note found, from a to b.");
+    expect(preview(en.me.importPreview, "en", 2, 0)).toBe("2 days and 0 notes found, from a to b.");
+    expect(preview(fr.me.importPreview, "fr", 1, 1)).toBe("1 jour et 1 note trouvés, du a au b.");
+    expect(preview(fr.me.importPreview, "fr", 2000, 0)).not.toContain("2000");
+  });
+
   it("search results group a large count", () => {
     expect(say(fr.timeline.searchResultsCount, "fr", { n: 1000 })).not.toContain("1000");
   });

@@ -2,7 +2,12 @@
 import { describe, expect, it } from "vitest";
 import csvContract from "../../content/contracts/export-csv.json";
 import fixture from "../../content/contracts/export_fixture.json";
+import de from "@/messages/de.json";
 import en from "@/messages/en.json";
+import es from "@/messages/es.json";
+import fr from "@/messages/fr.json";
+import it_ from "@/messages/it.json";
+import ptBr from "@/messages/pt-br.json";
 import th from "@/messages/th.json";
 import { BOM, CSV_COLUMNS, csvCell, renderExportCsv } from "./exportCsv";
 import type { ExportDoc, Translate } from "./exportText";
@@ -147,12 +152,23 @@ describe("csvCell: RFC 4180 and formula injection", () => {
 // for byte (the BOM, CRLF rows, quoting, cell safety, each locale's mood
 // words).
 describe("export-csv.json (the contract the app's CSV export matches)", () => {
-  const MESSAGES: Record<string, object> = { en, th };
+  // The contract's language codes: pt is the /pt-br route's.
+  const MESSAGES: Record<string, object> = { en, th, fr, es, pt: ptBr, de, it: it_ };
 
   it("its mood words are this locale's mood labels, moods 1-5 in order", () => {
     for (const [locale, words] of Object.entries(csvContract.moodWords)) {
       const tl = translator(MESSAGES[locale]);
       expect([1, 2, 3, 4, 5].map((mood) => tl(`today.mood${mood}`)), locale).toEqual(words);
+    }
+  });
+
+  // The contract's cases are in English and Thai. Every other language is the
+  // same file, byte for byte, with only the mood_word cells in its own words.
+  it.each(Object.keys(csvContract.moodWords))("%s: the whole file, with this language's mood words", (locale) => {
+    const words = (csvContract.moodWords as Record<string, string[]>)[locale];
+    for (const c of csvContract.cases.filter((x) => x.locale === "en")) {
+      const expected = c.csv.replace(/^(\uFEFF?\d{4}-\d{2}-\d{2},([1-5]),)[^,]*,/gm, (_, start: string, mood: string) => `${start}${words[Number(mood) - 1]},`);
+      expect(renderExportCsv(c.input as unknown as ExportDoc, translator(MESSAGES[locale])), c.name).toBe(expected);
     }
   });
 
