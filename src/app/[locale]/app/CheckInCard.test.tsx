@@ -34,13 +34,33 @@ const renderCard = (initial: CheckIn | null) =>
   );
 const sent = (call = 0) => Object.fromEntries((saveCheckIn.mock.calls[call][1] as FormData).entries());
 const setOnline = (online: boolean) => Object.defineProperty(navigator, "onLine", { configurable: true, get: () => online });
+// A synced copy goes through fetch (/api/check-in-sync), never the server
+// action (#166). The route runs saveCheckIn, so this stub does too: a redirect
+// becomes "generic" (the route's answer), any other throw a dropped connection.
+const fetchMock = vi.fn();
+const viaRoute = async (_url: string, init: RequestInit) => {
+  let result: unknown;
+  try {
+    result = await saveCheckIn({ status: "idle" }, init.body);
+  } catch (e) {
+    if (typeof (e as { digest?: unknown })?.digest !== "string") throw e;
+    result = { status: "error", error: "generic" };
+  }
+  return { ok: true, json: async () => result };
+};
 
 beforeEach(() => {
   saveCheckIn.mockReset();
+  fetchMock.mockReset();
+  fetchMock.mockImplementation(viaRoute);
+  vi.stubGlobal("fetch", fetchMock);
   window.localStorage.clear();
   setOnline(true);
 });
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.unstubAllGlobals();
+});
 
 describe("CheckInCard", () => {
   it("mood first: Save is disabled and the optional rows hidden until a mood is picked", () => {
@@ -502,6 +522,50 @@ describe("CheckInCard: a request lost at the network level (Web Tester, #11)", (
     } finally {
       setItem.mockRestore();
     }
+  });
+
+  // #166 (Web Tester): Next runs server actions one at a time, so a flush
+  // stalled on the network would hold sign-out (or any action) behind it.
+  const pendingCopy = () =>
+    window.localStorage.setItem(dayKey("2026-10-02"), JSON.stringify({ fields: { mood: 2, sleepHours: "", sleepQuality: "", exercise: "", stress: "" }, expected: "", date: "2026-10-02" }));
+
+  it("a flush goes through /api/check-in-sync, never the server action queue", async () => {
+    pendingCopy();
+    saveCheckIn.mockResolvedValue({ status: "saved", checkIn: { ...ROW, mood: 2 } });
+    renderCard(null);
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+    const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(url).toBe("/api/check-in-sync");
+    expect(init.method).toBe("POST");
+    expect(init.signal).toBeInstanceOf(AbortSignal);
+    expect((init.body as FormData).get("from_pending")).toBe("1");
+    await waitFor(() => expect(anyPending()).toBe(false));
+  });
+
+  it("a flush that never answers is aborted after the wait; the copy stays for the next reconnect", async () => {
+    pendingCopy();
+    let signal: AbortSignal | undefined;
+    fetchMock.mockImplementation((_url: string, init: RequestInit) => {
+      signal = init.signal ?? undefined;
+      return new Promise((_, reject) => signal?.addEventListener("abort", () => reject(new DOMException("aborted", "AbortError"))));
+    });
+    renderCard(null);
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+    // SAVE_WAIT_MS is 300 here.
+    await waitFor(() => expect(signal?.aborted).toBe(true), { timeout: 2000 });
+    await new Promise((r) => setTimeout(r, 20));
+    expect(anyPending()).toBe(true);
+    expect(saveCheckIn).not.toHaveBeenCalled();
+    expect(screen.queryByTestId("checkin-error")).toBeNull();
+  });
+
+  it("a live save is still the save action (the person is waiting on it), not the sync route", async () => {
+    saveCheckIn.mockResolvedValue({ status: "saved", checkIn: ROW });
+    renderCard(null);
+    fireEvent.click(screen.getByTestId("checkin-mood-4"));
+    fireEvent.click(screen.getByTestId("checkin-save"));
+    await waitFor(() => expect(saveCheckIn).toHaveBeenCalledTimes(1));
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it("a flush that can't reach the server keeps the copy and tries again on the next reconnect", async () => {

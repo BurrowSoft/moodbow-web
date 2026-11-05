@@ -97,6 +97,16 @@ describe("applyPending", () => {
     expect(applyPending(src, (id) => id === "y")).toEqual({ text: "a  b Y c", hidden: [{ id: "x", text: "X" }] });
   });
 
+  // A Help article about a feature in the app OR on the web (UX 2026-11-04).
+  it("{pending:a|b} shows when either is met, and goes only when neither is", () => {
+    const src = "x {pending:app_y|web_y}Y {pending:z}Z{/pending}{/pending} w";
+    expect(applyPending(src, (id) => id === "app_y" || id === "z").text).toBe("x Y Z w");
+    expect(applyPending(src, (id) => id === "web_y").text).toBe("x Y  w");
+    expect(applyPending(src, () => false)).toEqual({ text: "x  w", hidden: [{ id: "z", text: "Z" }, { id: "app_y|web_y", text: "Y" }] });
+    // The ids named, each alternative on its own (so each is checked as a condition).
+    expect(pendingIds(src)).toEqual(["app_y", "web_y", "z"]);
+  });
+
   it("an unmet block filling a whole line removes the line (tables stay tables)", () => {
     const table = "| A | B |\n|---|---|\n| 1 | 2 |\n{pending:x}| 3 | 4 |{/pending}\n| 5 | 6 |\n";
     expect(applyPending(table, () => false).text).toBe("| A | B |\n|---|---|\n| 1 | 2 |\n| 5 | 6 |\n");
