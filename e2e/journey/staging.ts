@@ -90,6 +90,13 @@ export async function revokeSessions(email: string, password: string): Promise<v
   if (error) throw new Error(`revoke failed: ${error.message}`);
 }
 
+// The token a password reset email would carry.
+export async function recoveryLinkHash(email: string): Promise<string> {
+  const { data, error } = await admin().generateLink({ type: "recovery", email });
+  if (error) throw new Error(`generateLink failed: ${error.message}`);
+  return data.properties.hashed_token;
+}
+
 export async function exists(email: string): Promise<boolean> {
   return (await userId(email)) !== null;
 }

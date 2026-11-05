@@ -4,6 +4,7 @@ import { useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
 import { applyTheme, readTheme, THEME_KEY, THEMES, writeTheme, type Theme } from "@/lib/appearance";
 import { readShortcutsOn, writeShortcutsOn } from "@/lib/shortcuts";
+import { useUntilLoaded } from "@/lib/ui/untilLoaded";
 
 const LABELS = { system: "themeSystem", light: "themeLight", dark: "themeDark" } as const;
 
@@ -30,6 +31,7 @@ const subscribe = (cb: () => void) => {
 // shortcuts: the keyboard shortcuts switch (1.1 O, WCAG 2.1.4), on by
 // default, also for this device only.
 export function Appearance({ shortcuts = false }: { shortcuts?: boolean }) {
+  const untilLoaded = useUntilLoaded();
   const t = useTranslations("me");
   const theme = useSyncExternalStore(subscribe, readTheme, () => "system" as Theme);
   const shortcutsOn = useSyncExternalStore(subscribe, readShortcutsOn, () => true);
@@ -44,7 +46,7 @@ export function Appearance({ shortcuts = false }: { shortcuts?: boolean }) {
     listeners.forEach((cb) => cb());
   };
   return (
-    <section aria-labelledby="me-appearance" className="rounded-3xl border border-border bg-surface p-6">
+    <section {...untilLoaded} aria-labelledby="me-appearance" className="rounded-3xl border border-border bg-surface p-6">
       <fieldset>
         <legend id="me-appearance" className="text-lg font-medium text-text">
           {t("meAppearance")}
