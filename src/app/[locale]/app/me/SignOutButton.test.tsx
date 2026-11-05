@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import messages from "@/messages/en.json";
@@ -222,6 +222,9 @@ describe("Me → Sign out (UX & PM 2026-11-03, option C)", () => {
     renderIt();
     signOutPressed();
     await screen.findByTestId("sign-out-dialog");
+    // The dialog opens after an await, outside act: findBy can see it before
+    // its Escape listener's effect has run.
+    await act(async () => {});
     fireEvent.keyDown(document, { key: "Escape" });
     expect(screen.queryByTestId("sign-out-dialog")).toBeNull();
     expect(signOut).not.toHaveBeenCalled();
