@@ -63,13 +63,13 @@ export async function confirmEmail(email: string): Promise<void> {
 // trigger), still unconfirmed, without the form's email: staging rate-limits
 // those, and only the journeys above need the form itself. Returns the token
 // the email link would carry, for the real /auth/confirm page. Without
-// consents, the account still owes Consent.
-export async function signedUpUnconfirmed(email: string, password: string, { consents = true } = {}): Promise<string> {
+// consents, the account still owes Consent. locale: the language it's saved with.
+export async function signedUpUnconfirmed(email: string, password: string, { consents = true, locale = "en" } = {}): Promise<string> {
   const { data, error } = await admin().generateLink({
     type: "signup",
     email,
     password,
-    options: { data: { locale: "en", time_zone: "UTC", ...(consents ? { consents: [...grantedAtConsent(), consentItem("age_18")] } : {}) } },
+    options: { data: { locale, time_zone: "UTC", ...(consents ? { consents: [...grantedAtConsent(), consentItem("age_18")] } : {}) } },
   });
   if (error) throw new Error(`generateLink failed: ${error.message}`);
   return data.properties.hashed_token;
@@ -88,6 +88,15 @@ export async function revokeSessions(email: string, password: string): Promise<v
   if (signInError) throw new Error(`sign-in to revoke failed: ${signInError.message}`);
   const { error } = await user.auth.signOut({ scope: "global" });
   if (error) throw new Error(`revoke failed: ${error.message}`);
+}
+
+// The language the profile holds.
+export async function profileLocale(email: string): Promise<string | null> {
+  const id = await userId(email);
+  const db = createClient(URL_, SECRET, { auth: { persistSession: false, autoRefreshToken: false } });
+  const { data, error } = await db.from("profiles").select("locale").eq("user_id", id).maybeSingle();
+  if (error) throw new Error(`reading the profile failed: ${error.message}`);
+  return data?.locale ?? null;
 }
 
 export async function exists(email: string): Promise<boolean> {

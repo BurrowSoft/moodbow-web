@@ -3,6 +3,7 @@
 import { useRef, useState, useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { usePathname, useRouter } from "@/i18n/navigation";
+import { goToLanguage } from "@/lib/savedLanguage";
 import { saveRegion, type AiSaveResult, type RegionField } from "./actions";
 
 type Values = Record<RegionField, string>;
@@ -45,7 +46,7 @@ export function LanguageRegion({ initial, countries, zones, languages }: { initi
         return;
       }
       saved.current = { ...saved.current, [field]: next };
-      if (field === "locale" && next !== locale) router.replace(pathname, { locale: next });
+      if (field === "locale" && next !== locale) goToLanguage(next, pathname);
       else if (field === "time_zone") router.refresh();
     });
   };
