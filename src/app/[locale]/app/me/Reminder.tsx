@@ -4,6 +4,7 @@ import { startTransition, useActionState, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Switch } from "@/components/Switch";
 import { saveReminder, type ReminderState } from "./actions";
+import { useUntilLoaded } from "@/lib/ui/untilLoaded";
 
 // Me → Daily reminder (M7): on/off and the time, saved as soon as either
 // changes (update_settings). The notification itself only exists on the
@@ -12,6 +13,7 @@ import { saveReminder, type ReminderState } from "./actions";
 // error and Try again (which resends what was tried): a control never shows
 // a state the server doesn't have (decision 111, after the Web Tester's #19).
 export function Reminder({ on: initialOn, time: initialTime }: { on: boolean; time: string }) {
+  const untilLoaded = useUntilLoaded();
   const t = useTranslations("me");
   const tt = useTranslations("today");
   const ta = useTranslations("app");
@@ -53,7 +55,7 @@ export function Reminder({ on: initialOn, time: initialTime }: { on: boolean; ti
   };
 
   return (
-    <section aria-labelledby="me-reminder" className="rounded-3xl border border-border bg-surface p-6">
+    <section {...untilLoaded} aria-labelledby="me-reminder" className="rounded-3xl border border-border bg-surface p-6">
       <h2 id="me-reminder" className="text-lg font-medium text-text">
         {t("meReminder")}
       </h2>

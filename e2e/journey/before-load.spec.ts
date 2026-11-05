@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import messages from "../../src/messages/en.json";
-import { cleanup, configured, confirmEmail, newEmail, newPassword, notConfigured, signedUpUnconfirmed } from "./staging";
+import { cleanup, configured, confirmEmail, newEmail, newPassword, notConfigured, recoveryLinkHash, signedUpUnconfirmed } from "./staging";
 
 // A slow phone: the page has drawn, its code hasn't run, and the person is
 // already typing. The page's scripts are held back so this is the same every
@@ -196,18 +196,39 @@ test.describe("typing before the page has loaded", () => {
     await expect(page.locator("#password")).toHaveValue("secret1234");
   });
 
-  // What the journal's other controls do. Measures and prints; the asserts
-  // follow once the table has been read.
-  test("measure: consent and setup", async ({ page }) => {
+  test("reset password: what was typed stays", async ({ page }) => {
     const email = newEmail();
     const password = newPassword();
-    const row = (name: string, seen: unknown) => console.log(`[before-load] ${name}: ${JSON.stringify(seen)}`);
+    try {
+      await signedUpUnconfirmed(email, password);
+      await confirmEmail(email);
+      await page.goto(`/auth/confirm?token_hash=${await recoveryLinkHash(email)}&type=recovery`);
+      await page.locator("main form button[type=submit]").click();
+      await expect(page).toHaveURL(/\/auth\/reset-password/, { timeout: 20_000 });
+      await beforeLoad(page, "/auth/reset-password", async () => {
+        await page.locator("#password").click();
+        await page.keyboard.type("a-new-secret");
+      });
+      await expect(page.locator("#password")).toHaveValue("a-new-secret");
+      await expect(page.locator("#password")).toBeFocused();
+    } finally {
+      await cleanup(email);
+    }
+  });
+
+  // Ticks before load go back to unticked, and Continue waits: nobody consents
+  // by something the page didn't take in (UX). Setup's form reads the page itself.
+  test("consent goes back to unticked; setup keeps its choices", async ({ page }) => {
+    const email = newEmail();
+    const password = newPassword();
     try {
       await beforeLoad(page, "/consent", async () => {
         await page.getByTestId("consent-privacy").check();
         await page.getByTestId("consent-health").check();
       });
-      row("consent", { privacy: await page.getByTestId("consent-privacy").isChecked(), health: await page.getByTestId("consent-health").isChecked(), continueDisabled: await page.getByTestId("consent-continue").isDisabled() });
+      await expect(page.getByTestId("consent-privacy")).not.toBeChecked();
+      await expect(page.getByTestId("consent-health")).not.toBeChecked();
+      await expect(page.getByTestId("consent-continue")).toBeDisabled();
       await signedUpUnconfirmed(email, password);
       await confirmEmail(email);
       await signIn(page, email, password);
@@ -216,34 +237,59 @@ test.describe("typing before the page has loaded", () => {
         await page.getByTestId("setup-reminder-time").fill("07:30");
         await page.getByTestId("setup-reminder-off").check();
       });
-      row("setup", { time: await page.getByTestId("setup-reminder-time").inputValue(), off: await page.getByTestId("setup-reminder-off").isChecked(), timeDisabled: await page.getByTestId("setup-reminder-time").isDisabled() });
+      await expect(page.getByTestId("setup-reminder-time")).toHaveValue("07:30");
+      await expect(page.getByTestId("setup-reminder-off")).toBeChecked();
     } finally {
       await cleanup(email);
     }
   });
 
-  test("measure: Today, Timeline and Me", async ({ page }) => {
+  test("Today and Timeline: a tap does nothing, and there's no search box to type in yet", async ({ page }) => {
     const email = newEmail();
     const password = newPassword();
-    const row = (name: string, seen: unknown) => console.log(`[before-load] ${name}: ${JSON.stringify(seen)}`);
     try {
       await onboarded(page, email, password);
       await beforeLoad(page, "/app", async () => {
         await page.getByTestId("checkin-mood-4").click();
       });
-      row("today: a mood tapped", { saveEnabled: await page.getByTestId("checkin-save").isEnabled().catch(() => null), pressed: await page.getByTestId("checkin-mood-4").getAttribute("aria-pressed"), url: new URL(page.url()).pathname });
+      await expect(page).toHaveURL(/\/app$/);
+      await expect(page.getByTestId("checkin-save")).toBeDisabled();
+      // Works from here on.
+      await page.getByTestId("checkin-mood-4").click();
+      await expect(page.getByTestId("checkin-save")).toBeEnabled();
       await beforeLoad(page, "/app/timeline", async () => {
-        row("timeline: search box in the server's page", { count: await page.getByTestId("timeline-search-input").count() });
+        await expect(page.getByTestId("tab-today")).toBeVisible();
+        await expect(page.getByTestId("timeline-search-input")).toHaveCount(0);
       });
+    } finally {
+      await cleanup(email);
+    }
+  });
+
+  test("Me: nothing can be changed until it has loaded, so nothing looks saved that isn't", async ({ page }) => {
+    const email = newEmail();
+    const password = newPassword();
+    const sections = ["me-country", "me-reminder-time", "me-theme-dark", "import-file"];
+    try {
+      await onboarded(page, email, password);
       await beforeLoad(page, "/app/me", async () => {
-        await page.getByTestId("me-country").selectOption("FR");
-        await page.getByTestId("me-reminder-time").fill("07:30");
-        await page.getByTestId("me-theme-dark").check();
+        for (const id of sections) {
+          await expect(page.getByTestId(id).locator("xpath=ancestor::*[@inert]"), id).toHaveCount(1);
+        }
+        // A real click where the control is: it doesn't take.
+        await page.getByTestId("me-theme-dark").click({ force: true });
+        await expect(page.getByTestId("me-theme-dark")).not.toBeChecked();
       });
-      row("me", { country: await page.getByTestId("me-country").inputValue(), time: await page.getByTestId("me-reminder-time").inputValue(), dark: await page.getByTestId("me-theme-dark").isChecked() });
+      for (const id of sections) {
+        await expect(page.getByTestId(id).locator("xpath=ancestor::*[@inert]"), id).toHaveCount(0);
+      }
+      await expect(page.locator("[data-until-loaded]")).toHaveCount(0);
+      await expect(page.getByTestId("me-theme-dark")).not.toBeChecked();
+      // And it works from here on, and saves.
+      await page.getByTestId("me-country").selectOption("FR");
+      await page.waitForTimeout(1_000);
       await page.reload();
-      await loaded(page);
-      row("me, after a reload (saved?)", { country: await page.getByTestId("me-country").inputValue(), time: await page.getByTestId("me-reminder-time").inputValue(), dark: await page.getByTestId("me-theme-dark").isChecked() });
+      await expect(page.getByTestId("me-country")).toHaveValue("FR");
     } finally {
       await cleanup(email);
     }

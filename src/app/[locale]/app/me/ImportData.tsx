@@ -11,6 +11,7 @@ import { IMPORT_BATCH_WAIT_MS, withTimeout } from "@/lib/ui/withTimeout";
 import { flagsCrisis } from "@/lib/safety/crisis";
 import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
 import { existingNoteCounts, importCheckIns, importEntries } from "./importActions";
+import { useUntilLoaded } from "@/lib/ui/untilLoaded";
 
 // Import from another journal (1.1 K, decision 189), in Me → Your data:
 // choose a file → it's read in this browser only → a preview (counts, what
@@ -43,6 +44,7 @@ const levelsOnly = (choices: Record<string, MoodChoice>) =>
   Object.fromEntries(Object.entries(choices).filter((e): e is [string, Mood] => e[1] !== "skip"));
 
 export function ImportData({ uid, today, dateLocaleTag, country }: { uid: string; today: string; dateLocaleTag: string; country?: string | null }) {
+  const untilLoaded = useUntilLoaded();
   const t = useTranslations("me");
   const tt = useTranslations("today");
   const ta = useTranslations("ai");
@@ -187,7 +189,7 @@ export function ImportData({ uid, today, dateLocaleTag, country }: { uid: string
   const finished = phase.kind === "done" || phase.kind === "failed";
 
   return (
-    <section aria-labelledby="import-title" data-testid="import" className="mt-6">
+    <section {...untilLoaded} aria-labelledby="import-title" data-testid="import" className="mt-6">
       <h3 id="import-title" className="font-medium text-text">
         {t("importTitle")}
       </h3>
