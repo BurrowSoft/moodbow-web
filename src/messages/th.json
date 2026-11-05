@@ -19,7 +19,12 @@
     "siteLinks": "ลิงก์ของเว็บไซต์",
     "languageNames": {
       "en": "English",
-      "th": "ไทย"
+      "th": "ไทย",
+      "fr": "Français",
+      "es": "Español",
+      "pt-br": "Português",
+      "de": "Deutsch",
+      "it": "Italiano"
     },
     "burrowsoftProduct": "ผลิตภัณฑ์ของ BurrowSoft",
     "burrowsoftAria": "ผลิตภัณฑ์ของ BurrowSoft ไปที่ burrowsoft.com",

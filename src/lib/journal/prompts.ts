@@ -1,10 +1,11 @@
 import contract from "../../../content/contracts/prompts.json";
+import { dataLocale } from "@/i18n/routing";
 
 // Writing prompts (1.1 I, decision 183): one quiet invitation above an empty
 // entry, from the shared list (content/contracts/prompts.json, the same on
 // the app). Today's is the date's day number since 1970-01-01 (the profile's
 // date) mod the list's length; "Another" steps to the next, wrapping round.
-export type Prompt = { id: string; en: string; th?: string };
+export type Prompt = { id: string; en: string; th?: string; fr?: string; es?: string; pt?: string; de?: string; it?: string };
 export const PROMPTS: Prompt[] = contract.prompts;
 
 export function daysSinceEpoch(isoDate: string): number {
@@ -18,5 +19,5 @@ export function promptFor(isoDate: string, step = 0): Prompt {
   return PROMPTS[i];
 }
 
-// Its text in the UI language, else English.
-export const promptText = (p: Prompt, language: string): string => (language === "th" && p.th ? p.th : p.en);
+// Its text in the UI language (/pt-br reads the contract's pt), else English.
+export const promptText = (p: Prompt, language: string): string => (p[dataLocale(language) as keyof Prompt] ?? p.en);

@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
-import { addDays, addMonths, calendarDate, calendarMonth, monthGrid, weekdayNames } from "./calendar";
+import { addDays, addMonths, calendarDate, calendarMonth, monthGrid, weekdayNames, weekStartFor } from "./calendar";
 
 describe("monthGrid (weeks from Monday)", () => {
   it("October 2026 starts on a Thursday: 3 blanks, 31 days, padded to whole weeks", () => {
@@ -55,5 +55,17 @@ describe("calendarMonth", () => {
       "2026-10-01": { mood: 4, moment: false, entry: true },
       "2026-10-02": { mood: null, moment: true, entry: true },
     });
+  });
+});
+
+describe("weekStartFor (UX 2026-11-05)", () => {
+  it("Monday, except pt-BR's Sunday: the grid and the day names follow it", () => {
+    expect(weekStartFor("en")).toBe(1);
+    expect(weekStartFor("fr")).toBe(1);
+    expect(weekStartFor("pt-br")).toBe(0);
+    // October 2026 starts on a Thursday.
+    expect(monthGrid("2026-10", weekStartFor("pt-br"))[0].filter((d) => d === null)).toHaveLength(4);
+    expect(monthGrid("2026-10", weekStartFor("en"))[0].filter((d) => d === null)).toHaveLength(3);
+    expect(weekdayNames("pt-BR", 0)[0].long).toBe("domingo");
   });
 });

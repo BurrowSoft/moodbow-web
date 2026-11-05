@@ -70,3 +70,21 @@ describe("proxy: /th pages the app links to, while Thai isn't served", () => {
     }
   });
 });
+
+describe("proxy: the app's other languages", () => {
+  const to = async (path: string) => (await go(path)).headers.get("location");
+  it("not served: the English page", async () => {
+    locales = ["en"];
+    expect(await to("/fr/help/check-ins")).toBe("https://www.moodbow.com/help/check-ins");
+    expect(await to("/de/privacy")).toBe("https://www.moodbow.com/privacy");
+    expect(await to("/pt/help")).toBe("https://www.moodbow.com/help");
+    expect(await to("/pt-br/help")).toBe("https://www.moodbow.com/help");
+  });
+  it("the app's /pt goes to the web's /pt-br when that's served; a served language stays", async () => {
+    locales = ["en", "pt-br", "fr"];
+    expect(await to("/pt/help/check-ins")).toBe("https://www.moodbow.com/pt-br/help/check-ins");
+    expect(await to("/pt/terms")).toBe("https://www.moodbow.com/pt-br/terms");
+    expect(await to("/pt-br/help")).toBeNull();
+    expect(await to("/fr/help")).toBeNull();
+  });
+});

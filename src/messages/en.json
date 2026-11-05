@@ -19,7 +19,12 @@
     "siteLinks": "Site links",
     "languageNames": {
       "en": "English",
-      "th": "ไทย"
+      "th": "ไทย",
+      "fr": "Français",
+      "es": "Español",
+      "pt-br": "Português",
+      "de": "Deutsch",
+      "it": "Italiano"
     },
     "burrowsoftProduct": "A BurrowSoft product",
     "burrowsoftAria": "A BurrowSoft product. Visit burrowsoft.com",

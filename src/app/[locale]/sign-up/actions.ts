@@ -3,6 +3,7 @@
 import { cookies } from "next/headers";
 import { getLocale } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
+import { dataLocale } from "@/i18n/routing";
 import { isRateLimit } from "@/lib/authErrors";
 import { isValidEmail, normalizeEmail } from "@/lib/email";
 import { consentItem } from "@/lib/legalVersions";
@@ -58,7 +59,7 @@ async function signUp(form: FormData): Promise<SignUpState> {
     password,
     // Read by the auth trigger (moodbow-app migration 001): profile + consents.
     // No country: the web doesn't know it (the registry default applies).
-    options: { data: { locale, time_zone: TIME_ZONE.test(tz) ? tz : null, consents: [...consents, consentItem("age_18")] } },
+    options: { data: { locale: dataLocale(locale), time_zone: TIME_ZONE.test(tz) ? tz : null, consents: [...consents, consentItem("age_18")] } },
   });
   if (error) {
     if (error.code === "user_already_exists" || error.code === "email_exists") return fail("emailTaken");

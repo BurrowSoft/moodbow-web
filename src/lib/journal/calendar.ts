@@ -2,9 +2,10 @@
 // plain YYYY-MM-DD strings at noon UTC (no time zone drift; the profile's
 // today decides what's in the future).
 
-// The week starts on Monday, as Insights' weeks do (the profile has no
-// week-start setting yet).
+// The week starts on Monday, as Insights' weeks do, except where the language's
+// calendars start on Sunday (pt-BR, UX 2026-11-05). The profile has no setting yet.
 export const WEEK_START = 1;
+export const weekStartFor = (locale: string) => (locale === "pt-br" ? 0 : WEEK_START);
 
 export type CalendarDay = { mood: number | null; moment: boolean; entry: boolean };
 export type CalendarMonth = Record<string, CalendarDay>;

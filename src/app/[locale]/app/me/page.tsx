@@ -16,7 +16,7 @@ import { AiSettings } from "./AiSettings";
 import { Appearance } from "./Appearance";
 import { LanguageRegion } from "./LanguageRegion";
 import { countryOptions, languageOptions, timeZoneOptions } from "@/lib/region/countries";
-import { offeredLocales } from "@/i18n/routing";
+import { offeredLocales, routeLocale } from "@/i18n/routing";
 import { Reminder } from "./Reminder";
 import { YourData } from "./YourData";
 import { ImportData } from "./ImportData";
@@ -70,7 +70,7 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
       )}
       <Reminder on={me.settings?.reminder_on ?? true} time={hhmm(me.settings?.reminder_time)} />
       <LanguageRegion
-        initial={{ locale: me.profile?.locale ?? locale, country: me.profile?.country ?? "", time_zone: me.profile?.time_zone ?? "UTC" }}
+        initial={{ locale: routeLocale(me.profile?.locale ?? locale), country: me.profile?.country ?? "", time_zone: me.profile?.time_zone ?? "UTC" }}
         countries={countryOptions(locale)}
         zones={timeZoneOptions(me.profile?.time_zone)}
         languages={languageOptions(offeredLocales())}

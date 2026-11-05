@@ -1,7 +1,7 @@
 "use client";
 
 import { startTransition, useActionState, useCallback, useEffect, useId, useRef, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { EXERCISE_MINUTES, MOODS, SLEEP_HOURS, SLEEP_QUALITIES, SLEEP_START, STRESS_LEVELS, type CheckIn, type SleepQuality } from "@/lib/journal/checkIn";
 import { dateLine } from "@/lib/journal/today";
 import { valueHex } from "@/lib/journal/valueColours";
@@ -10,7 +10,7 @@ import { onSignOut } from "@/lib/signOutSignal";
 import { SAVE_WAIT_MS, TimedOut, withTimeout } from "@/lib/ui/withTimeout";
 import { ValueDot } from "@/components/ValueDot";
 import { Dialog, dialogButton } from "@/components/Dialog";
-import { checkInChips } from "./checkInChips";
+import { checkInChips, formatHours } from "./checkInChips";
 import { JOURNAL_CARD, MOOD_FACE, MOOD_LABEL, MOOD_ROW, PRIMARY_SAVE } from "@/lib/ui/journalLayout";
 import { MoodFace } from "@/components/MoodFace";
 import { onArrival } from "@/lib/ui/arrival";
@@ -180,7 +180,7 @@ function StepIcon({ plus }: { plus: boolean }) {
 // in any of them never look the same (reviewer).
 function ConflictVersion({ label, values, testId }: { label: string; values: Pick<CheckIn, "mood" | "sleep_hours" | "sleep_quality" | "exercise_minutes" | "stress">; testId: string }) {
   const t = useTranslations("today");
-  const chips = checkInChips(values, t);
+  const chips = checkInChips(values, t, useLocale());
   if (values.sleep_quality) {
     const q = values.sleep_quality;
     chips.splice(values.sleep_hours != null ? 1 : 0, 0, { label: t(`sleep${q[0].toUpperCase()}${q.slice(1)}` as "sleepPoor"), hex: null });
@@ -253,6 +253,7 @@ export function CheckInCard(props: Props) {
 
 function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, autoFocus, keepDraft }: Props & { notify: Notify; announce: (text: string) => void }) {
   const t = useTranslations("today");
+  const locale = useLocale();
   const slot = useCheckInDraft<Fields>();
   const drafts = keepDraft ? slot : null;
   const [draft] = useState(() => drafts?.get(cardDate) ?? null);
@@ -625,7 +626,7 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
     // 150); sleep quality is words only, and a rest day has no colour.
     const mood = fields.mood as number;
     const chips = [
-      fields.sleepHours !== "" ? { label: t("sleepHours", { hours: Number(fields.sleepHours) }), hex: valueHex("sleep_hours", fields.sleepHours) } : null,
+      fields.sleepHours !== "" ? { label: t("sleepHours", { hours: formatHours(fields.sleepHours, locale) }), hex: valueHex("sleep_hours", fields.sleepHours) } : null,
       fields.sleepQuality ? { label: t(`sleep${fields.sleepQuality[0].toUpperCase()}${fields.sleepQuality.slice(1)}` as "sleepPoor"), hex: null } : null,
       fields.exercise !== ""
         ? {
@@ -739,7 +740,7 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
               <span data-testid="checkin-sleep-hours" aria-live="polite" className="inline-flex min-w-20 items-center justify-center gap-2 text-text">
                 {/* The chosen value's colour (decision 150): only once one is picked. */}
                 {fields.sleepHours !== "" && <ValueDot hex={valueHex("sleep_hours", fields.sleepHours)} testId="checkin-sleep-dot" />}
-                {fields.sleepHours === "" ? "–" : t("sleepHours", { hours: Number(fields.sleepHours) })}
+                {fields.sleepHours === "" ? "–" : t("sleepHours", { hours: formatHours(fields.sleepHours, locale) })}
               </span>
               <button
                 type="button"
