@@ -51,7 +51,10 @@ async function signUp(form: FormData): Promise<SignUpState> {
   if (!consents) return redirect({ href: "/consent", locale });
 
   const supabase = await createSupabaseServerClient();
-  if (!supabase) return fail("generic");
+  if (!supabase) {
+    logAuthFailure("sign-up", { name: "no_config" });
+    return fail("generic");
+  }
   const tz = String(form.get("time_zone") ?? "");
   const { data, error } = await supabase.auth.signUp({
     email,

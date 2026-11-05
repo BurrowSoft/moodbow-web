@@ -25,7 +25,10 @@ export async function signIn(prev: SignInState, form: FormData): Promise<SignInS
   if (!password) return { status: "error", error: "badCredentials", email: typed };
 
   const supabase = await createSupabaseServerClient();
-  if (!supabase) return { status: "error", error: "generic", email: typed };
+  if (!supabase) {
+    logAuthFailure("sign-in", { name: "no_config" });
+    return { status: "error", error: "generic", email: typed };
+  }
   const { error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) {
     if (error.code === "invalid_credentials") return { status: "error", error: "badCredentials", email: typed };

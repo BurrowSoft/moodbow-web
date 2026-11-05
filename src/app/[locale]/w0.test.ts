@@ -82,9 +82,12 @@ describe("signIn", () => {
     log.mockRestore();
   });
 
-  it("fails closed without Supabase config", async () => {
+  it("fails closed without Supabase config, and the log says so", async () => {
     configured = false;
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
     expect(await signIn(idle, form({ email: "a@b.co", password: "x" }))).toMatchObject({ status: "error", error: "generic" });
+    expect(log).toHaveBeenCalledWith("auth failure: sign-in", { name: "no_config", status: undefined, code: undefined });
+    log.mockRestore();
   });
 });
 
