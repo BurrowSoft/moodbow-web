@@ -276,7 +276,9 @@ test.describe("typing before the page has loaded", () => {
         for (const id of sections) {
           await expect(page.getByTestId(id).locator("xpath=ancestor::*[@inert]"), id).toHaveCount(1);
         }
-        // A real click where the control is: it doesn't take.
+        // A real click where the control is: it doesn't take. A forced click
+        // doesn't wait for anything, and the streamed page may not be showing yet.
+        await expect(page.getByTestId("me-theme-dark")).toBeVisible();
         await page.getByTestId("me-theme-dark").click({ force: true });
         await expect(page.getByTestId("me-theme-dark")).not.toBeChecked();
       });
