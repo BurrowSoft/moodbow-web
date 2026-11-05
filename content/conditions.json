@@ -52,16 +52,16 @@
     "what": "Help only (decision 212 pattern, UX 2026-11-03): the spreadsheet export (1.1 P) is in the app build people have (0.9.5; met on its publish, UX), so its Help line shows. Not export-csv-live (the web's own .csv)."
   },
   "app-writing-prompts": {
-    "met": false,
-    "what": "Help only (decision 212 pattern, UX 2026-11-03): writing prompts (1.1 I) are in the app build people have (0.9.6), so their Help line shows. Not writing-prompts (tested on the app and the web)."
+    "met": true,
+    "what": "Help only (decision 212 pattern, UX 2026-11-03): writing prompts (1.1 I) are in the app build people have (0.9.6; met on its publish, UX), so their Help line shows. Not writing-prompts (tested on the app and the web)."
   },
   "app-share-cards-more": {
-    "met": false,
-    "what": "Help only (decision 212 pattern, UX 2026-11-03): the chart and milestone cards (1.1 B) are in the app build people have (0.9.6), so their Help line shows. Not share-cards-more."
+    "met": true,
+    "what": "Help only (decision 212 pattern, UX 2026-11-03): the chart and milestone cards (1.1 B) are in the app build people have (0.9.6; met on its publish, UX), so their Help line shows. Not share-cards-more."
   },
   "app-year-card": {
-    "met": false,
-    "what": "Help only (decision 212 pattern, UX 2026-11-03): the Year card (1.1 J) is in the app build people have (0.9.6), so its Help line shows. Not year-card."
+    "met": true,
+    "what": "Help only (decision 212 pattern, UX 2026-11-03): the Year card (1.1 J) is in the app build people have (0.9.6; met on its publish, UX), so its Help line shows. Not year-card."
   },
   "app-patterns": {
     "met": false,
