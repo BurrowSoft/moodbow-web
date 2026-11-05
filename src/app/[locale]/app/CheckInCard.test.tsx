@@ -282,6 +282,9 @@ describe("CheckInCard", () => {
       saveCheckIn.mockResolvedValue({ status: "error", error: "conflict", checkIn: theirs });
       renderCard(null);
       await screen.findByTestId("checkin-conflict-dialog");
+      // The dialog comes from an update after the sync's request, outside
+      // act: findBy can see it before its Escape listener's effect has run.
+      await act(async () => {});
       fireEvent.keyDown(document, { key: "Escape" });
       expect(screen.queryByTestId("checkin-conflict-dialog")).toBeNull();
       expect(anyPending()).toBe(true);

@@ -115,9 +115,11 @@ describe("searchEntries: empty and odd answers", () => {
     expect(r.status === "ok" && r.hits.map((h) => h.mood)).toEqual([null, null, null]);
   });
 
-  it("a hit the snippet can't place (the database folded case differently): the entry's opening, whitespace flattened, at most 80", async () => {
-    rows = [row(0, `Walked down the\n\nSTRASSE   today. ${"x".repeat(100)}`)];
-    const r = await searchEntries("straße");
-    expect(r.status === "ok" && r.hits[0].snippet).toEqual({ before: "", match: "", after: `Walked down the STRASSE today. ${"x".repeat(49)}` });
+  // A symbol only the server's unaccent folds, not the contract's table: the
+  // ﬁ ligature (ß and accents are placed now, search-fold.json).
+  it("a hit the snippet can't place (the database folded a symbol the table leaves out): the entry's opening, whitespace flattened, at most 80, no bold", async () => {
+    rows = [row(0, `Walked down the\n\nﬁnal   road. ${"x".repeat(100)}`)];
+    const r = await searchEntries("final");
+    expect(r.status === "ok" && r.hits[0].snippet).toEqual({ before: "", match: "", after: `Walked down the ﬁnal road. ${"x".repeat(53)}` });
   });
 });

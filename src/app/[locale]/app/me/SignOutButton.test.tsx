@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import messages from "@/messages/en.json";
@@ -177,11 +177,54 @@ describe("Me → Sign out (UX & PM 2026-11-03, option C)", () => {
     expect(has(HIDDEN)).toBe(true);
   });
 
+  // Offline the sign-out can't reach the server (UX): the line says so, and
+  // calls safe only what's actually here. Nothing is wiped or broadcast.
+  describe("offline", () => {
+    const setOnline = (online: boolean) => Object.defineProperty(navigator, "onLine", { configurable: true, get: () => online });
+    beforeEach(() => {
+      setOnline(false);
+      signOut.mockRejectedValue(new TypeError("Failed to fetch"));
+    });
+    afterEach(() => {
+      setOnline(true);
+    });
+
+    it("a pending check-in: the line names it, and Keep it leaves it there", async () => {
+      window.localStorage.setItem(PENDING, pendingCopy);
+      renderIt();
+      signOutPressed();
+      fireEvent.click(await screen.findByTestId("sign-out-keep"));
+      expect(await screen.findByTestId("me-sign-out-error")).toHaveTextContent(m.signOutOfflineCheckIn);
+      expect(fetchMock).not.toHaveBeenCalled();
+      expect(broadcastSignOut).not.toHaveBeenCalled();
+      expect(has(PENDING)).toBe(true);
+    });
+
+    it("only unsaved writing: the line names that, also after Delete it (nothing was deleted)", async () => {
+      window.localStorage.setItem(DRAFT, "{}");
+      renderIt();
+      signOutPressed();
+      fireEvent.click(await screen.findByTestId("sign-out-delete"));
+      expect(await screen.findByTestId("me-sign-out-error")).toHaveTextContent(m.signOutOfflineWriting);
+      expect(has(DRAFT)).toBe(true);
+    });
+
+    it("nothing pending: the plain line, no promise about anything", async () => {
+      renderIt();
+      signOutPressed();
+      expect(await screen.findByTestId("me-sign-out-error")).toHaveTextContent(m.signOutOffline);
+      expect(screen.getByTestId("me-sign-out-error")).not.toHaveTextContent("safe");
+    });
+  });
+
   it("Cancel (Escape): still signed in, nothing changes, nobody is told", async () => {
     window.localStorage.setItem(DRAFT, "{}");
     renderIt();
     signOutPressed();
     await screen.findByTestId("sign-out-dialog");
+    // The dialog opens after an await, outside act: findBy can see it before
+    // its Escape listener's effect has run.
+    await act(async () => {});
     fireEvent.keyDown(document, { key: "Escape" });
     expect(screen.queryByTestId("sign-out-dialog")).toBeNull();
     expect(signOut).not.toHaveBeenCalled();

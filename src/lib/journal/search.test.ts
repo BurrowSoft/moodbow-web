@@ -1,6 +1,8 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
+import contract from "../../../content/contracts/search-fold.json";
 import { searchTerm, snippet } from "./search";
+import { findFolded } from "./searchFold";
 
 describe("searchTerm", () => {
   it("trimmed, at least 2 characters", () => {
@@ -46,4 +48,26 @@ describe("snippet: one line around the first match", () => {
   it("no match: null", () => {
     expect(snippet("Nothing here", "walk")).toBeNull();
   });
+
+  it("accents and case don't matter; the bold is the text as written", () => {
+    expect(snippet("Un café avec Léa", "cafe")).toEqual({ before: "Un ", match: "café", after: " avec Léa" });
+    // A decomposed é (e + combining mark): the mark stays with its letter.
+    expect(snippet("Un café ici", "cafe")).toEqual({ before: "Un ", match: "café", after: " ici" });
+    // One letter folding to two: the whole letter is bold, never half of it.
+    expect(snippet("Le cœur léger", "coeur")).toEqual({ before: "Le ", match: "cœur", after: " léger" });
+  });
+});
+
+// content/contracts/search-fold.json: the same cases hold on the server
+// (supabase/tests/search_fold.sql), in the app and here.
+describe("the contract's search-fold cases", () => {
+  for (const c of contract.cases as { q: string; body: string; match: boolean; bold?: string }[]) {
+    it(`"${c.q}" in "${c.body}": ${c.match ? `bold "${c.bold}"` : "no match"}`, () => {
+      const found = findFolded(c.body, c.q);
+      if (!c.match) return expect(found).toBeNull();
+      expect(found).not.toBeNull();
+      expect(c.body.slice(found![0], found![1])).toBe(c.bold);
+      expect(snippet(c.body, c.q)?.match).toBe(c.bold);
+    });
+  }
 });
