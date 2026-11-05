@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import { expect, test, type Page } from "@playwright/test";
 import conditions from "../../content/conditions.json";
 import messages from "../../src/messages/en.json";
-import { aiAvailable, cleanup, configured, confirmEmail, confirmLinkHash, createConfirmedUser, exists, newEmail, newPassword, notConfigured, revokeSessions, sweep } from "./staging";
+import { aiAvailable, cleanup, configured, confirmEmail, createConfirmedUser, exists, newEmail, newPassword, notConfigured, revokeSessions, signedUpUnconfirmed, sweep } from "./staging";
 
 // The launch-critical journeys (1.0), end to end against staging with a
 // throwaway account each: sign-up → confirm → consent → setup → check-in →
@@ -18,8 +18,9 @@ test.beforeAll(async () => {
 
 const ENTRY = "A calm walk by the river after work, then tea with a friend.";
 
-// Welcome → Consent (AI as asked) → Sign-up, up to its answer.
-async function submitSignUp(page: Page, email: string, password: string, { ai }: { ai: boolean }): Promise<void> {
+// Welcome → Consent (AI as asked) → Sign-up → confirmed → Setup.
+async function signUp(page: Page, email: string, { ai }: { ai: boolean }): Promise<string> {
+  const password = newPassword();
   await page.goto("/welcome?slide=3");
   await page.getByTestId("welcome-start").click();
   await expect(page).toHaveURL(/\/consent$/);
@@ -34,12 +35,6 @@ async function submitSignUp(page: Page, email: string, password: string, { ai }:
   await page.getByLabel("Password").fill(password);
   await page.getByTestId("signup-age").check();
   await page.getByTestId("signup-submit").click();
-}
-
-// Welcome → Consent (AI as asked) → Sign-up → confirmed → Setup.
-async function signUp(page: Page, email: string, { ai }: { ai: boolean }): Promise<string> {
-  const password = newPassword();
-  await submitSignUp(page, email, password, { ai });
 
   // Staging asks for confirmation: confirm through the admin API, then the
   // "I've confirmed" button signs in. (Without confirmation it goes straight on.)
@@ -326,9 +321,7 @@ test.describe("a first run reaches Today without a reload", () => {
       const email = newEmail();
       const password = newPassword();
       try {
-        await submitSignUp(page, email, password, { ai: false });
-        await expect(page.getByTestId("check-email")).toBeVisible({ timeout: 20_000 });
-        await page.goto(`/auth/confirm?token_hash=${await confirmLinkHash(email, password)}&type=signup`);
+        await page.goto(`/auth/confirm?token_hash=${await signedUpUnconfirmed(email, password)}&type=signup`);
         await page.locator("main form button[type=submit]").click();
         await expect(page.getByTestId("email-confirmed-continue")).toBeVisible({ timeout: 20_000 });
         if (how === "Continue") await page.getByTestId("email-confirmed-continue").click();
@@ -344,8 +337,7 @@ test.describe("a first run reaches Today without a reload", () => {
     const email = newEmail();
     const password = newPassword();
     try {
-      await submitSignUp(page, email, password, { ai: false });
-      await expect(page.getByTestId("check-email")).toBeVisible({ timeout: 20_000 });
+      await signedUpUnconfirmed(email, password);
       await confirmEmail(email);
       await page.goto("/sign-in");
       await page.getByLabel("Email").fill(email);
@@ -360,8 +352,15 @@ test.describe("a first run reaches Today without a reload", () => {
 
   test("a session revoked mid-visit: the next tab goes to sign-in, and signing in reaches Today", async ({ page }) => {
     const email = newEmail();
+    const password = newPassword();
     try {
-      const password = await signUp(page, email, { ai: false });
+      await signedUpUnconfirmed(email, password);
+      await confirmEmail(email);
+      await page.goto("/sign-in");
+      await page.getByLabel("Email").fill(email);
+      await page.getByLabel("Password").fill(password);
+      await page.getByRole("button", { name: messages.auth.signinSubmit }).click();
+      await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
       await finishSetup(page);
       await page.getByTestId("tab-me").click();
       await expect(page).toHaveURL(/\/app\/me$/);
