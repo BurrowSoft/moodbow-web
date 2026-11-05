@@ -1,5 +1,7 @@
 import { randomBytes } from "node:crypto";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { consentItem } from "../../src/lib/legalVersions";
+import { grantedAtConsent } from "../../src/lib/onboardingConsent";
 
 // Staging-only helpers for the launch journeys. Rules (UX & PM, 1.0):
 // - the STAGING project only: anything else throws before a single call;
@@ -57,9 +59,17 @@ export async function confirmEmail(email: string): Promise<void> {
   if (error) throw new Error(`confirm failed: ${error.message}`);
 }
 
-// The token an email link would carry, for the real /auth/confirm page.
-export async function confirmLinkHash(email: string, password: string): Promise<string> {
-  const { data, error } = await admin().generateLink({ type: "signup", email, password });
+// The account the sign-up form makes (profile and consents, through the auth
+// trigger), still unconfirmed, without the form's email: staging rate-limits
+// those, and only the journeys above need the form itself. Returns the token
+// the email link would carry, for the real /auth/confirm page.
+export async function signedUpUnconfirmed(email: string, password: string): Promise<string> {
+  const { data, error } = await admin().generateLink({
+    type: "signup",
+    email,
+    password,
+    options: { data: { locale: "en", time_zone: "UTC", consents: [...grantedAtConsent(), consentItem("age_18")] } },
+  });
   if (error) throw new Error(`generateLink failed: ${error.message}`);
   return data.properties.hashed_token;
 }
