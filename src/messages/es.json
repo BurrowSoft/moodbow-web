@@ -352,6 +352,7 @@
     "importPreview": "Se encontraron {days} días y {notes} notas, del {first} al {last}.",
     "importConfirm": "Importar",
     "importProgress": "Importando… {done} de {total}",
+    "importLarge": "Los archivos grandes pueden tardar varios minutos. Mantén esta página abierta. Si se detiene, importar de nuevo no creará duplicados.",
     "importDone": "Listo. {days} días están en tu Cronología.",
     "importSkipped": "Se omitieron {count} días (ya estaban en Moodbow).",
     "importKeptExisting": "Algunos días ya tenían un registro, así que los conservamos.",

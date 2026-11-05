@@ -235,6 +235,7 @@ export function ImportData({ uid, today, dateLocaleTag, country }: { uid: string
           />
         )}
         {importing && <p data-testid="import-progress">{t("importProgress", { done: phase.done, total: phase.total })}</p>}
+        {importing && <p data-testid="import-large" className="text-muted">{t("importLarge")}</p>}
         {/* Done, and nothing was new (your own export again): one line, not
             "0 days are in your Timeline" plus the skipped count (UX, 1.1 §K). */}
         {phase.kind === "done" && phase.days === 0 && phase.skippedDays > 0 ? (

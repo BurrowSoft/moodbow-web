@@ -90,6 +90,20 @@ describe("ImportData", () => {
     expect(screen.getByTestId("import-done")).toHaveTextContent("Done. 2 days are in your Timeline.");
   });
 
+  it("while importing, and only then: large files take a while, keep the page open, no duplicates", async () => {
+    let finish = () => {};
+    importCheckIns.mockImplementationOnce(
+      (days: { date: string }[]) => new Promise((resolve) => (finish = () => resolve({ status: "ok", written: days.map((d) => d.date), skipped: 0 }))),
+    );
+    renderIt();
+    await choose("date,mood\n2026-10-01,4\n");
+    expect(screen.queryByTestId("import-large")).toBeNull();
+    fireEvent.click(screen.getByTestId("import-confirm"));
+    expect(await screen.findByTestId("import-large")).toHaveTextContent(m.importLarge);
+    finish();
+    await waitFor(() => expect(screen.queryByTestId("import-large")).toBeNull());
+  });
+
   it("days already in Moodbow are reported as skipped, and only that (no kept line: nothing new on them; decision 214)", async () => {
     importCheckIns.mockResolvedValueOnce({ status: "ok", written: ["2026-10-01"], skipped: 1 });
     renderIt();
