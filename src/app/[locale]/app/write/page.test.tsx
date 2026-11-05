@@ -16,6 +16,7 @@ vi.mock("next/headers", () => ({ headers: async () => new Headers() }));
 vi.mock("next-intl/server", () => ({ setRequestLocale: () => {}, getTranslations: async () => (k: string) => k }));
 vi.mock("@/lib/journal/backLabel", () => ({ backLabel: async () => "Back" }));
 vi.mock("@/components/BackLink", () => ({ BackLink: () => null }));
+vi.mock("@/components/SessionEnded", () => ({ SessionEnded: () => null }));
 let gate = "draft";
 vi.mock("@/lib/conditions", async (importOriginal) => ({ ...(await importOriginal<typeof import("@/lib/conditions")>()), pageGate: () => gate }));
 const editorProps = vi.fn();

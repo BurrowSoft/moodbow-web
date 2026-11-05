@@ -20,6 +20,8 @@ vi.mock("next/headers", () => ({
   }),
 }));
 vi.mock("next-intl/server", () => ({ getLocale: async () => "en" }));
+const revalidatePath = vi.fn();
+vi.mock("next/cache", () => ({ revalidatePath }));
 class Redirect {
   constructor(public args: { href: unknown; locale: string }) {}
 }
@@ -318,6 +320,16 @@ describe("signUpFlow: every other answer", () => {
 });
 
 describe("completeSetup", () => {
+  it("makes the router forget where /app went, only when onboarding really finished", async () => {
+    revalidatePath.mockClear();
+    rpc.mockResolvedValue({ data: null, error: { message: "boom" } });
+    expect(await completeSetup({ status: "idle" }, form({}))).toEqual({ status: "error" });
+    expect(revalidatePath).not.toHaveBeenCalled();
+    rpc.mockResolvedValue({ data: {}, error: null });
+    await redirected(completeSetup({ status: "idle" }, form({})));
+    expect(revalidatePath).toHaveBeenCalledWith("/", "layout");
+  });
+
   it("saves the reminder and finishes onboarding → /app", async () => {
     rpc.mockResolvedValue({ data: {}, error: null });
     expect(await redirected(completeSetup({ status: "idle" }, form({ reminder_time: "07:30" })))).toEqual({ redirect: "/app" });

@@ -138,6 +138,7 @@
     "startedInApp": "¿Empezaste en la app? Primero guarda allí una copia de tu diario y luego inicia sesión aquí con ese correo.",
     "accountGoneNotice": "Se cerró tu sesión. Si eliminaste tu cuenta, todo lo que contenía ya no existe.",
     "sessionEndedNotice": "Se cerró tu sesión. Vuelve a iniciar sesión.",
+    "sessionEndedTitle": "Tu sesión terminó. Vuelve a iniciar sesión.",
     "emailLabel": "Correo electrónico",
     "passwordLabel": "Contraseña",
     "signinSubmit": "Iniciar sesión",

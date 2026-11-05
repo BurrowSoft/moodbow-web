@@ -14,6 +14,9 @@ export function LanguageSwitcher() {
   // one language offered there's nothing to switch between.
   const locales = offeredLocales();
   if (locales.length < 2) return null;
+  // In the journal the saved language decides, and Me → Language is the one
+  // control: a link here would be sent straight back (UX 2026-11-05).
+  if (pathname === "/app" || pathname.startsWith("/app/")) return null;
 
   return (
     <nav aria-label={t("language")} className="flex flex-wrap items-center justify-center gap-1">

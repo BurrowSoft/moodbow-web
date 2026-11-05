@@ -1,7 +1,8 @@
 import { readFile } from "node:fs/promises";
 import { expect, test, type Page } from "@playwright/test";
+import conditions from "../../content/conditions.json";
 import messages from "../../src/messages/en.json";
-import { aiAvailable, cleanup, configured, confirmEmail, exists, newEmail, newPassword, notConfigured, sweep } from "./staging";
+import { aiAvailable, cleanup, configured, confirmEmail, createConfirmedUser, exists, newEmail, newPassword, notConfigured, profileLocale, revokeSessions, signedUpUnconfirmed, sweep } from "./staging";
 
 // The launch-critical journeys (1.0), end to end against staging with a
 // throwaway account each: sign-up → confirm → consent → setup → check-in →
@@ -295,6 +296,349 @@ test.describe("tonight's flows", () => {
       await expect(page.getByTestId("app-announce")).toHaveText(messages.entry.entryDeletedAnnounce);
       await expect(page.locator("#main h1")).toBeFocused();
       await expect(page.locator('[data-testid^="today-entry-"]')).toHaveCount(0);
+    } finally {
+      await cleanup(email);
+    }
+  });
+});
+
+// Every way into a first run, on to Today by client navigation alone. The
+// journeys above go from Sign-up straight to Setup, so the browser never saw
+// /app send a not-yet-onboarded person away; these do. Today's content is the
+// assertion: the address and title were already right on the blank page.
+test.describe("a first run reaches Today without a reload", () => {
+  const finishSetup = async (page: Page) => {
+    await page.getByTestId("setup-done").click();
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId("tab-today")).toBeVisible();
+  };
+
+  // The real email link: it only keeps a web session once the journal is live.
+  for (const how of ["countdown", "Continue"] as const) {
+    test(`the email link, then ${how}: Setup, then Today`, async ({ page }) => {
+      test.skip(!conditions["web-journal-live"].met, "the confirm link keeps a session only with web-journal-live met");
+      const email = newEmail();
+      const password = newPassword();
+      try {
+        await page.goto(`/auth/confirm?token_hash=${await signedUpUnconfirmed(email, password)}&type=signup`);
+        await page.locator("main form button[type=submit]").click();
+        await expect(page.getByTestId("email-confirmed-continue")).toBeVisible({ timeout: 20_000 });
+        if (how === "Continue") await page.getByTestId("email-confirmed-continue").click();
+        await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+        await finishSetup(page);
+      } finally {
+        await cleanup(email);
+      }
+    });
+  }
+
+  test("the email link on an account that still owes Consent: Consent, Setup, then Today", async ({ page }) => {
+    test.skip(!conditions["web-journal-live"].met, "the confirm link keeps a session only with web-journal-live met");
+    const email = newEmail();
+    const password = newPassword();
+    try {
+      await page.goto(`/auth/confirm?token_hash=${await signedUpUnconfirmed(email, password, { consents: false })}&type=signup`);
+      await page.locator("main form button[type=submit]").click();
+      await expect(page.getByTestId("email-confirmed-continue")).toBeVisible({ timeout: 20_000 });
+      await page.getByTestId("email-confirmed-continue").click();
+      await expect(page).toHaveURL(/\/consent$/, { timeout: 20_000 });
+      await page.getByTestId("consent-privacy").check();
+      await page.getByTestId("consent-health").check();
+      await page.getByTestId("consent-age").check();
+      await page.getByTestId("consent-continue").click();
+      await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+      await expect(page.getByTestId("setup-done")).toBeVisible({ timeout: 15_000 });
+      await finishSetup(page);
+    } finally {
+      await cleanup(email);
+    }
+  });
+
+  test("the journal stays closed until Setup is done", async ({ page }) => {
+    const email = newEmail();
+    const password = newPassword();
+    try {
+      await signedUpUnconfirmed(email, password);
+      await confirmEmail(email);
+      await page.goto("/sign-in");
+      await page.getByLabel("Email").fill(email);
+      await page.getByLabel("Password").fill(password);
+      await page.getByRole("button", { name: messages.auth.signinSubmit }).click();
+      await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+      for (const path of ["/app", "/app/timeline", "/app/me"]) {
+        await page.goto(path);
+        await expect(page).toHaveURL(/\/setup$/);
+        await expect(page.getByTestId("setup-done")).toBeVisible();
+      }
+    } finally {
+      await cleanup(email);
+    }
+  });
+
+  test("signing in before finishing Setup: Setup, then Today", async ({ page }) => {
+    const email = newEmail();
+    const password = newPassword();
+    try {
+      await signedUpUnconfirmed(email, password);
+      await confirmEmail(email);
+      await page.goto("/sign-in");
+      await page.getByLabel("Email").fill(email);
+      await page.getByLabel("Password").fill(password);
+      await page.getByRole("button", { name: messages.auth.signinSubmit }).click();
+      await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+      await finishSetup(page);
+    } finally {
+      await cleanup(email);
+    }
+  });
+
+  test("a session revoked mid-visit: the next tab goes to sign-in, and signing in reaches Today", async ({ page }) => {
+    const email = newEmail();
+    const password = newPassword();
+    try {
+      await signedUpUnconfirmed(email, password);
+      await confirmEmail(email);
+      await page.goto("/sign-in");
+      await page.getByLabel("Email").fill(email);
+      await page.getByLabel("Password").fill(password);
+      await page.getByRole("button", { name: messages.auth.signinSubmit }).click();
+      await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+      await finishSetup(page);
+      await page.getByTestId("tab-me").click();
+      await expect(page).toHaveURL(/\/app\/me$/);
+      await revokeSessions(email, password);
+      await page.getByTestId("tab-today").click();
+      await expect(page).toHaveURL(/\/sign-in/, { timeout: 20_000 });
+      await page.getByLabel("Email").fill(email);
+      await page.getByLabel("Password").fill(password);
+      await page.getByRole("button", { name: messages.auth.signinSubmit }).click();
+      await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
+      await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    } finally {
+      await cleanup(email);
+    }
+  });
+
+  test("no session on the next tab: says so, and signing in reaches Today", async ({ page, context }) => {
+    const email = newEmail();
+    const password = newPassword();
+    try {
+      await signedUpUnconfirmed(email, password);
+      await confirmEmail(email);
+      await page.goto("/sign-in");
+      await page.getByLabel("Email").fill(email);
+      await page.getByLabel("Password").fill(password);
+      await page.getByRole("button", { name: messages.auth.signinSubmit }).click();
+      await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+      await finishSetup(page);
+      await page.getByTestId("tab-me").click();
+      await expect(page).toHaveURL(/\/app\/me$/);
+      await context.clearCookies();
+      await page.getByTestId("tab-today").click();
+      await expect(page.getByTestId("session-ended")).toContainText(messages.auth.sessionEndedTitle, { timeout: 20_000 });
+      await expect(page.getByTestId("journal-unavailable")).toHaveCount(0);
+      await page.getByTestId("session-ended-sign-in").click();
+      await expect(page).toHaveURL(/\/sign-in/, { timeout: 20_000 });
+      await page.getByLabel("Email").fill(email);
+      await page.getByLabel("Password").fill(password);
+      await page.getByRole("button", { name: messages.auth.signinSubmit }).click();
+      await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
+      await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    } finally {
+      await cleanup(email);
+    }
+  });
+
+  test("an account with no consents yet: sign-in, Consent, Setup, then Today", async ({ page }) => {
+    const email = newEmail();
+    const password = newPassword();
+    try {
+      await createConfirmedUser(email, password);
+      await page.goto("/sign-in");
+      await page.getByLabel("Email").fill(email);
+      await page.getByLabel("Password").fill(password);
+      await page.getByRole("button", { name: messages.auth.signinSubmit }).click();
+      await expect(page).toHaveURL(/\/consent$/, { timeout: 20_000 });
+      await page.getByTestId("consent-privacy").check();
+      await page.getByTestId("consent-health").check();
+      await page.getByTestId("consent-age").check();
+      await page.getByTestId("consent-continue").click();
+      await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+      await finishSetup(page);
+    } finally {
+      await cleanup(email);
+    }
+  });
+});
+
+// Inside the journal the saved language wins, if it's offered (row RT4). Each
+// one asserts Today's content and that the page has stopped moving: an address
+// alone was right on the blank page (#173).
+test.describe("the saved language in the journal", () => {
+  test.skip(!conditions["fr-offered-live"].met, "needs French offered");
+
+  // The labels are in the page's language, so by field, not by name.
+  const signInForm = async (page: Page, email: string, password: string) => {
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+  };
+  // Settled here: the address holds for two seconds, with no page load in that time.
+  const settled = async (page: Page, url: RegExp, lang: string | RegExp) => {
+    await expect(page).toHaveURL(url, { timeout: 20_000 });
+    let loads = 0;
+    const count = (frame: { parentFrame: () => unknown }) => {
+      if (!frame.parentFrame()) loads += 1;
+    };
+    page.on("framenavigated", count);
+    await page.waitForTimeout(2_000);
+    page.off("framenavigated", count);
+    expect(loads, "the page kept moving").toBe(0);
+    await expect(page).toHaveURL(url);
+    await expect(page.locator("html")).toHaveAttribute("lang", lang);
+  };
+  const today = (page: Page) => expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+
+  test("English saved, a French browser: Today in English, and it stays there", async ({ browser }) => {
+    const context = await browser.newContext({ locale: "fr-FR" });
+    const page = await context.newPage();
+    const email = newEmail();
+    const password = newPassword();
+    try {
+      await signedUpUnconfirmed(email, password);
+      await confirmEmail(email);
+      await page.goto("/sign-in");
+      await expect(page).toHaveURL(/\/fr\/sign-in/);
+      await signInForm(page, email, password);
+      await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+      await page.getByTestId("setup-done").click();
+      await today(page);
+      await settled(page, /\/app$/, "en");
+      await today(page);
+      await page.reload();
+      await settled(page, /\/app$/, "en");
+      await today(page);
+    } finally {
+      await cleanup(email);
+      await context.close();
+    }
+  });
+
+  test("French saved, an English browser: Today in French; a tab keeps it", async ({ page }) => {
+    const email = newEmail();
+    const password = newPassword();
+    try {
+      await signedUpUnconfirmed(email, password, { locale: "fr" });
+      await confirmEmail(email);
+      await page.goto("/sign-in");
+      await signInForm(page, email, password);
+      await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+      await page.getByTestId("setup-done").click();
+      await today(page);
+      await settled(page, /\/fr\/app$/, "fr");
+      await page.getByTestId("tab-me").click();
+      await settled(page, /\/fr\/app\/me$/, "fr");
+      await page.getByTestId("tab-today").click();
+      await settled(page, /\/fr\/app$/, "fr");
+      await today(page);
+    } finally {
+      await cleanup(email);
+    }
+  });
+
+  test("a saved language that isn't offered keeps the route", async ({ page }) => {
+    test.skip(conditions["de-offered-live"].met, "needs German not offered");
+    const email = newEmail();
+    const password = newPassword();
+    try {
+      await signedUpUnconfirmed(email, password, { locale: "de" });
+      await confirmEmail(email);
+      await page.goto("/sign-in");
+      await signInForm(page, email, password);
+      await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+      await page.getByTestId("setup-done").click();
+      await today(page);
+      await settled(page, /\/app$/, "en");
+    } finally {
+      await cleanup(email);
+    }
+  });
+
+  test("Me → Language, there and back: content each time, no bounce; the switcher only outside the journal", async ({ page }) => {
+    const email = newEmail();
+    const password = newPassword();
+    try {
+      await signedUpUnconfirmed(email, password);
+      await confirmEmail(email);
+      await page.goto("/sign-in");
+      await signInForm(page, email, password);
+      await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+      await page.getByTestId("setup-done").click();
+      await today(page);
+      await expect(page.locator("footer nav [lang]")).toHaveCount(0);
+      await page.getByTestId("tab-me").click();
+      await expect(page).toHaveURL(/\/app\/me$/);
+
+      await page.getByTestId("me-language").selectOption("fr");
+      await settled(page, /\/fr\/app\/me$/, "fr");
+      await expect(page.getByTestId("me-language")).toHaveValue("fr");
+      expect(await profileLocale(email)).toBe("fr");
+      await page.getByTestId("tab-today").click();
+      await settled(page, /\/fr\/app$/, "fr");
+      await today(page);
+
+      await page.getByTestId("tab-me").click();
+      await expect(page).toHaveURL(/\/fr\/app\/me$/);
+      await page.getByTestId("me-language").selectOption("pt-br");
+      await settled(page, /\/pt-br\/app\/me$/, /^pt/i);
+      await expect(page.getByTestId("me-language")).toHaveValue("pt-br");
+      expect(await profileLocale(email)).toBe("pt");
+
+      await page.getByTestId("me-language").selectOption("en");
+      await settled(page, /\/app\/me$/, "en");
+      await expect(page).not.toHaveURL(/\/(fr|pt-br)\//);
+      await expect(page.getByTestId("me-language")).toHaveValue("en");
+      expect(await profileLocale(email)).toBe("en");
+      await page.reload();
+      await settled(page, /\/app\/me$/, "en");
+      await page.getByTestId("tab-today").click();
+      await settled(page, /\/app$/, "en");
+      await today(page);
+
+      await page.goto("/help");
+      await expect(page.locator("footer nav [lang]").first()).toBeVisible();
+    } finally {
+      await cleanup(email);
+    }
+  });
+
+  test("a first sign-up on /pt-br: saved as pt, Today in Portuguese, no bounce", async ({ page }) => {
+    const email = newEmail();
+    const password = newPassword();
+    try {
+      await page.goto("/pt-br/welcome?slide=3");
+      await page.getByTestId("welcome-start").click();
+      await expect(page).toHaveURL(/\/pt-br\/consent$/);
+      await page.getByTestId("consent-privacy").check();
+      await page.getByTestId("consent-health").check();
+      await page.getByTestId("consent-continue").click();
+      await expect(page).toHaveURL(/\/pt-br\/sign-up$/);
+      await page.locator("#email").fill(email);
+      await page.locator("#password").fill(password);
+      await page.getByTestId("signup-age").check();
+      await page.getByTestId("signup-submit").click();
+      await expect(page.getByTestId("check-email")).toBeVisible({ timeout: 20_000 });
+      await confirmEmail(email);
+      await page.getByTestId("check-email-confirmed").click();
+      await expect(page).toHaveURL(/\/pt-br\/setup$/, { timeout: 20_000 });
+      expect(await profileLocale(email)).toBe("pt");
+      await page.getByTestId("setup-done").click();
+      await today(page);
+      await settled(page, /\/pt-br\/app$/, /^pt/i);
+      await page.reload();
+      await settled(page, /\/pt-br\/app$/, /^pt/i);
+      await today(page);
     } finally {
       await cleanup(email);
     }

@@ -5,6 +5,8 @@ import { dateLocale } from "@/lib/journal/today";
 import { setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 import { JournalUnavailable } from "@/components/JournalUnavailable";
+import { SessionEnded } from "@/components/SessionEnded";
+import { currentUser } from "@/lib/journal/currentUser";
 import { isRange, previousRangeStart, rangeDays, series, type InsightRow, type Range } from "@/lib/journal/insights";
 import { loadMilestone } from "@/lib/share/milestoneData";
 import { yearOnOffer } from "@/lib/share/year";
@@ -34,7 +36,8 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
   const { locale } = await params;
   setRequestLocale(locale as Locale);
   const supabase = await createSupabaseServerClient();
-  const user = supabase ? (await supabase.auth.getUser()).data.user : null;
+  const { user, ended } = await currentUser(supabase);
+  if (ended) return <SessionEnded />;
   if (!supabase || !user) return <JournalUnavailable />;
   const me = await getMe(supabase);
   if (!me) return <JournalUnavailable />;
