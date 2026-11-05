@@ -184,15 +184,15 @@
     "what": "1.1 K import from another journal (decision 189: Daylio + generic CSV, web first) is tested on the web; then Me → Your data offers it on Production."
   },
   "fr-offered-live": {
-    "met": false,
+    "met": true,
     "what": "French is offered on the web (Vitor 2026-11-05: no native review; instead the AI back-translation safety check, specs/i18n/safety-check-fr-es-pt.md, its fixes applied, and the Web Tester's rows, plans/PLAN-web-i18n-rows.md). Until then /fr is a draft on test builds only."
   },
   "es-offered-live": {
-    "met": false,
+    "met": true,
     "what": "Spanish is offered on the web (Vitor 2026-11-05: no native review; instead the AI back-translation safety check, specs/i18n/safety-check-fr-es-pt.md, its fixes applied, and the Web Tester's rows, plans/PLAN-web-i18n-rows.md). Until then /es is a draft on test builds only."
   },
   "pt-br-offered-live": {
-    "met": false,
+    "met": true,
     "what": "Portuguese (Brazil) is offered on the web (Vitor 2026-11-05: no native review; instead the AI back-translation safety check, specs/i18n/safety-check-fr-es-pt.md, its fixes applied, and the Web Tester's rows, plans/PLAN-web-i18n-rows.md). Until then /pt-br is a draft on test builds only."
   },
   "de-offered-live": {
