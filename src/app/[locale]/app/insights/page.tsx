@@ -11,6 +11,7 @@ import { yearOnOffer } from "@/lib/share/year";
 import { aiShown, canReflect } from "@/lib/journal/ai";
 import { lastWeekStart, parseReportBody, type WeeklyReport as Report } from "@/lib/journal/report";
 import { getMe } from "@/lib/journal/me";
+import { patterns, patternsWindowStart } from "@/lib/journal/patterns";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { tabMetadata } from "../pageMeta";
 import { InsightsView } from "./InsightsView";
@@ -40,10 +41,15 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
 
   const asked = (await searchParams).range;
   const range: Range = isRange(asked) ? asked : "week";
+  // Patterns (no AI) use a fixed 90 days on every tab: where they're on,
+  // the one read starts early enough for them too (still one request).
+  const withPatterns = pageGate("patterns-live") !== "hidden";
+  const chartsStart = previousRangeStart(me.today, range);
+  const patternsStart = patternsWindowStart(me.today);
   const { data, error } = await supabase
     .from("check_ins")
     .select("local_date, mood, sleep_hours, stress, exercise_minutes")
-    .gte("local_date", previousRangeStart(me.today, range))
+    .gte("local_date", withPatterns && patternsStart < chartsStart ? patternsStart : chartsStart)
     .lte("local_date", me.today);
   if (error) return <JournalUnavailable />;
   // Share: the current month's moodbow (M10), where share cards are on; and,
@@ -84,5 +90,5 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
     const initial: Report | null = row && body ? { id: row.id, week_start: row.period_start, body, tier: row.tier === "lite" ? "lite" : "full", created_at: row.created_at } : null;
     week = <WeeklyReport initial={initial} weekStart={weekStart} dateLocaleTag={dateLocaleTag} balance={me.credits?.balance ?? 0} country={me.profile?.country ?? null} />;
   }
-  return <InsightsView rows={rows} today={me.today} range={range} share={share} week={week} />;
+  return <InsightsView rows={rows} today={me.today} range={range} share={share} week={week} patterns={withPatterns ? patterns(rows, me.today) : undefined} />;
 }

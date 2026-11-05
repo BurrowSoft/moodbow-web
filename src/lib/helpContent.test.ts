@@ -89,7 +89,7 @@ describe("Help is public, scoped to what's live (decision 212)", () => {
   const published = (slug: string) => renderArticle(findArticle("en", slug)!);
 
   it("articles about features that are off have nothing left: a 404", () => {
-    for (const slug of ["ai-reflections", "calendar", "import", "keyboard-shortcuts", "search", "widget", "your-week"]) {
+    for (const slug of ["ai-reflections", "import", "keyboard-shortcuts", "widget", "your-week"]) {
       expect(published(slug), slug).toBe("");
     }
   });
@@ -155,6 +155,44 @@ describe("Help is public, scoped to what's live (decision 212)", () => {
       expect(csv).not.toContain("import");
       expect(render("en", "privacy-and-data", ["app_export_csv", "import_live"])).toContain("which Moodbow can import again on the web.");
     });
+  });
+
+  // 0.9.5 is published (UX): calendar, search and the CSV line show, in en
+  // and th, as the app has them; no web-only step or web import yet.
+  it("the app's 0.9.5: the calendar and search articles and the CSV line are published, en and th", () => {
+    const th = (slug: string) => renderArticle(findArticle("th", slug)!);
+    const slugs = helpIndex("en").flatMap((g) => g.articles.map((a) => a.slug));
+    expect(slugs).toEqual(expect.arrayContaining(["calendar", "search"]));
+    expect(published("calendar")).toContain("<strong>Calendar</strong>");
+    expect(th("calendar")).toContain("<strong>ปฏิทิน</strong>");
+    expect(published("search")).toContain("(or use Back)");
+    expect(published("search")).not.toContain("Esc");
+    expect(th("search")).toContain("(หรือใช้ปุ่มย้อนกลับ)");
+    expect(th("search")).not.toContain("Esc");
+    expect(published("privacy-and-data")).toContain("<strong>Spreadsheet (.csv)</strong>");
+    expect(published("privacy-and-data")).not.toContain("import");
+    expect(th("privacy-and-data")).toContain("<strong>สเปรดชีต (.csv)</strong>");
+  });
+
+  // Shown by whichever comes first, the app build people have (app-*) or
+  // the web's own switch ({pending:a|b}, UX 2026-11-04): Patterns (0.9.7 /
+  // patterns-live) and import (0.9.7 / import-live).
+  describe("Patterns and import: the app's or the web's", () => {
+    const only = (on: string[], off: string[]) => (id: string) => on.includes(id) || (!off.includes(id) && isPendingMet(id));
+    for (const [slug, app, web, text] of [
+      ["patterns", "app_patterns", "patterns_live", "Patterns in your check-ins"],
+      ["import", "app_import", "import_live", "Import from another app"],
+    ] as const) {
+      it(`${slug}: a 404 with neither, the same article with either`, () => {
+        for (const locale of ["en", "th"]) {
+          const render = (on: string[], off: string[]) => renderArticle(findArticle(locale, slug)!, only(on, off));
+          expect(render([], [app, web]), `${locale} neither`).toBe("");
+          expect(render([app], [web]), `${locale} app`).not.toBe("");
+          expect(render([web], [app]), `${locale} web`).toBe(render([app], [web]));
+        }
+        expect(renderArticle(findArticle("en", slug)!, only([app], [web]))).toContain(text);
+      });
+    }
   });
 
   it("backing up's steps are a numbered list (styled in globals.css; Web Tester's regression pass)", () => {

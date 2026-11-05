@@ -40,16 +40,16 @@
     "what": "Decision 216: the Android app build people have opens moodbow://app/me/backup (app PR C; met with 0.9.3 (4) on closed testing, UX 2026-11-03). Gates the \"Open Moodbow\" button on /email-confirmed after an email is confirmed, Android browsers only; until then, and on iPhone and desktop, the line \"Open the Moodbow app to finish backing up.\""
   },
   "app-calendar": {
-    "met": false,
-    "what": "Help only (decision 212 pattern, UX 2026-11-03): the month calendar (1.1 M) is in the app build people have (0.9.5), so its Help article shows. Not calendar-live (the web's own switch)."
+    "met": true,
+    "what": "Help only (decision 212 pattern, UX 2026-11-03): the month calendar (1.1 M) is in the app build people have (0.9.5; met on its publish, UX), so its Help article shows. Not calendar-live (the web's own switch)."
   },
   "app-search": {
-    "met": false,
-    "what": "Help only (decision 212 pattern, UX 2026-11-03): search (1.1 L) is in the app build people have (0.9.5), so its Help article shows. Not search-live (the web's own magnifier)."
+    "met": true,
+    "what": "Help only (decision 212 pattern, UX 2026-11-03): search (1.1 L) is in the app build people have (0.9.5; met on its publish, UX), so its Help article shows. Not search-live (the web's own magnifier)."
   },
   "app-export-csv": {
-    "met": false,
-    "what": "Help only (decision 212 pattern, UX 2026-11-03): the spreadsheet export (1.1 P) is in the app build people have (0.9.5), so its Help line shows. Not export-csv-live (the web's own .csv)."
+    "met": true,
+    "what": "Help only (decision 212 pattern, UX 2026-11-03): the spreadsheet export (1.1 P) is in the app build people have (0.9.5; met on its publish, UX), so its Help line shows. Not export-csv-live (the web's own .csv)."
   },
   "app-writing-prompts": {
     "met": true,
@@ -62,6 +62,14 @@
   "app-year-card": {
     "met": true,
     "what": "Help only (decision 212 pattern, UX 2026-11-03): the Year card (1.1 J) is in the app build people have (0.9.6; met on its publish, UX), so its Help line shows. Not year-card."
+  },
+  "app-patterns": {
+    "met": false,
+    "what": "Help only (decision 212 pattern, UX 2026-11-04): Patterns (no AI) is in the app build people have (0.9.7), so its Help article shows ({pending:app_patterns|patterns_live}: the app's or the web's). Not patterns-live (the web's own card)."
+  },
+  "app-import": {
+    "met": false,
+    "what": "Help only (decision 212 pattern, UX 2026-11-04): import from another app (1.1 K) is in the app build people have (0.9.7), so its Help article shows for app users ({pending:app_import|import_live}). Not import-live (the web's own import)."
   },
   "app-app-lock": {
     "met": true,
@@ -118,6 +126,10 @@
   "on-this-day-live": {
     "met": true,
     "what": "1.1 A \"On this day\" (specs/1.1-features.md) is tested on both the app and the web; then the Timeline card shows on Production (UX: not tied to a release, may be in time for 1.0)."
+  },
+  "patterns-live": {
+    "met": false,
+    "what": "Patterns (no AI; UX 2026-11-04, contracts/patterns.json): the Insights card that sets the person's own check-ins side by side (mood after 7+ h of sleep vs less, on days with movement vs none, on low- vs high-stress days; the last 90 days) is tested on the app and the web. Then it shows on Production. Shown on Previews before that."
   },
   "shortcuts-live": {
     "met": false,
