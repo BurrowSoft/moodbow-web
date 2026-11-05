@@ -1,7 +1,8 @@
 import { readFile } from "node:fs/promises";
 import { expect, test, type Page } from "@playwright/test";
+import conditions from "../../content/conditions.json";
 import messages from "../../src/messages/en.json";
-import { aiAvailable, cleanup, configured, confirmEmail, exists, newEmail, newPassword, notConfigured, sweep } from "./staging";
+import { aiAvailable, cleanup, configured, confirmEmail, createConfirmedUser, exists, newEmail, newPassword, notConfigured, revokeSessions, signedUpUnconfirmed, sweep } from "./staging";
 
 // The launch-critical journeys (1.0), end to end against staging with a
 // throwaway account each: sign-up → confirm → consent → setup → check-in →
@@ -295,6 +296,213 @@ test.describe("tonight's flows", () => {
       await expect(page.getByTestId("app-announce")).toHaveText(messages.entry.entryDeletedAnnounce);
       await expect(page.locator("#main h1")).toBeFocused();
       await expect(page.locator('[data-testid^="today-entry-"]')).toHaveCount(0);
+    } finally {
+      await cleanup(email);
+    }
+  });
+});
+
+// Every way into a first run, on to Today by client navigation alone. The
+// journeys above go from Sign-up straight to Setup, so the browser never saw
+// /app send a not-yet-onboarded person away; these do. Today's content is the
+// assertion: the address and title were already right on the blank page.
+test.describe("a first run reaches Today without a reload", () => {
+  const finishSetup = async (page: Page) => {
+    await page.getByTestId("setup-done").click();
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId("tab-today")).toBeVisible();
+  };
+
+  // The real email link: it only keeps a web session once the journal is live.
+  for (const how of ["countdown", "Continue"] as const) {
+    test(`the email link, then ${how}: Setup, then Today`, async ({ page }) => {
+      test.skip(!conditions["web-journal-live"].met, "the confirm link keeps a session only with web-journal-live met");
+      const email = newEmail();
+      const password = newPassword();
+      try {
+        await page.goto(`/auth/confirm?token_hash=${await signedUpUnconfirmed(email, password)}&type=signup`);
+        await page.locator("main form button[type=submit]").click();
+        await expect(page.getByTestId("email-confirmed-continue")).toBeVisible({ timeout: 20_000 });
+        if (how === "Continue") await page.getByTestId("email-confirmed-continue").click();
+        await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+        await finishSetup(page);
+      } finally {
+        await cleanup(email);
+      }
+    });
+  }
+
+  test("the email link on an account that still owes Consent: Consent, Setup, then Today", async ({ page }) => {
+    test.skip(!conditions["web-journal-live"].met, "the confirm link keeps a session only with web-journal-live met");
+    const email = newEmail();
+    const password = newPassword();
+    try {
+      await page.goto(`/auth/confirm?token_hash=${await signedUpUnconfirmed(email, password, { consents: false })}&type=signup`);
+      await page.locator("main form button[type=submit]").click();
+      await expect(page.getByTestId("email-confirmed-continue")).toBeVisible({ timeout: 20_000 });
+      await page.getByTestId("email-confirmed-continue").click();
+      await expect(page).toHaveURL(/\/consent$/, { timeout: 20_000 });
+      await page.getByTestId("consent-privacy").check();
+      await page.getByTestId("consent-health").check();
+      await page.getByTestId("consent-age").check();
+      await page.getByTestId("consent-continue").click();
+      await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+      await expect(page.getByTestId("setup-done")).toBeVisible({ timeout: 15_000 });
+      await finishSetup(page);
+    } finally {
+      await cleanup(email);
+    }
+  });
+
+  test("the journal stays closed until Setup is done", async ({ page }) => {
+    const email = newEmail();
+    const password = newPassword();
+    try {
+      await signedUpUnconfirmed(email, password);
+      await confirmEmail(email);
+      await page.goto("/sign-in");
+      await page.getByLabel("Email").fill(email);
+      await page.getByLabel("Password").fill(password);
+      await page.getByRole("button", { name: messages.auth.signinSubmit }).click();
+      await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+      for (const path of ["/app", "/app/timeline", "/app/me"]) {
+        await page.goto(path);
+        await expect(page).toHaveURL(/\/setup$/);
+        await expect(page.getByTestId("setup-done")).toBeVisible();
+      }
+    } finally {
+      await cleanup(email);
+    }
+  });
+
+  test("signing in before finishing Setup: Setup, then Today", async ({ page }) => {
+    const email = newEmail();
+    const password = newPassword();
+    try {
+      await signedUpUnconfirmed(email, password);
+      await confirmEmail(email);
+      await page.goto("/sign-in");
+      await page.getByLabel("Email").fill(email);
+      await page.getByLabel("Password").fill(password);
+      await page.getByRole("button", { name: messages.auth.signinSubmit }).click();
+      await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+      await finishSetup(page);
+    } finally {
+      await cleanup(email);
+    }
+  });
+
+  test("a session revoked mid-visit: the next tab goes to sign-in, and signing in reaches Today", async ({ page }) => {
+    const email = newEmail();
+    const password = newPassword();
+    try {
+      await signedUpUnconfirmed(email, password);
+      await confirmEmail(email);
+      await page.goto("/sign-in");
+      await page.getByLabel("Email").fill(email);
+      await page.getByLabel("Password").fill(password);
+      await page.getByRole("button", { name: messages.auth.signinSubmit }).click();
+      await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+      await finishSetup(page);
+      await page.getByTestId("tab-me").click();
+      await expect(page).toHaveURL(/\/app\/me$/);
+      await revokeSessions(email, password);
+      await page.getByTestId("tab-today").click();
+      await expect(page).toHaveURL(/\/sign-in/, { timeout: 20_000 });
+      await page.getByLabel("Email").fill(email);
+      await page.getByLabel("Password").fill(password);
+      await page.getByRole("button", { name: messages.auth.signinSubmit }).click();
+      await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
+      await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    } finally {
+      await cleanup(email);
+    }
+  });
+
+  test("an account with no consents yet: sign-in, Consent, Setup, then Today", async ({ page }) => {
+    const email = newEmail();
+    const password = newPassword();
+    try {
+      await createConfirmedUser(email, password);
+      await page.goto("/sign-in");
+      await page.getByLabel("Email").fill(email);
+      await page.getByLabel("Password").fill(password);
+      await page.getByRole("button", { name: messages.auth.signinSubmit }).click();
+      await expect(page).toHaveURL(/\/consent$/, { timeout: 20_000 });
+      await page.getByTestId("consent-privacy").check();
+      await page.getByTestId("consent-health").check();
+      await page.getByTestId("consent-age").check();
+      await page.getByTestId("consent-continue").click();
+      await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+      await finishSetup(page);
+    } finally {
+      await cleanup(email);
+    }
+  });
+});
+
+// Stopped partway, the screen says to import the same file again. A browser
+// fires no change for the file an input already holds, so the input has to let
+// go of it, or nothing happens (Web Tester, #178).
+test.describe("importing the same file again", () => {
+  const signedIn = async (page: Page, email: string, password: string) => {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.getByLabel("Email").fill(email);
+    await page.getByLabel("Password").fill(password);
+    await page.getByRole("button", { name: messages.auth.signinSubmit }).click();
+    await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    await page.getByTestId("tab-me").click();
+    await expect(page).toHaveURL(/\/app\/me$/);
+  };
+  // 150 days: two batches of check-ins.
+  const days = Array.from({ length: 150 }, (_, i) => new Date(Date.UTC(2025, 0, 1 + i)).toISOString().slice(0, 10));
+  const file = { name: "export.csv", mimeType: "text/csv", buffer: Buffer.from(`date,mood\n${days.map((d) => `${d},4`).join("\n")}\n`) };
+  const held = (page: Page) => page.getByTestId("import-file").evaluate((el) => (el as HTMLInputElement).files?.length ?? -1);
+
+  test("stopped partway: the same file can be chosen again, without a reload, and finishes", async ({ page }) => {
+    const email = newEmail();
+    const password = newPassword();
+    try {
+      await signedIn(page, email, password);
+      // The counts and the first batch go through; the second doesn't.
+      let posts = 0;
+      await page.route("**/app/me", async (route) => {
+        if (route.request().method() === "POST" && ++posts > 2) await route.abort();
+        else await route.continue();
+      });
+      await page.getByTestId("import-file").setInputFiles(file);
+      await page.getByTestId("import-confirm").click();
+      await expect(page.getByTestId("import-failed")).toContainText(messages.me.importStopped, { timeout: 60_000 });
+      await page.unroute("**/app/me");
+
+      // What makes a browser fire for the same file again.
+      expect(await held(page)).toBe(0);
+      await page.getByTestId("import-file").setInputFiles(file);
+      await page.getByTestId("import-confirm").click();
+      await expect(page.getByTestId("import-done")).toBeVisible({ timeout: 90_000 });
+      expect(await held(page)).toBe(0);
+    } finally {
+      await cleanup(email);
+    }
+  });
+
+  test("a file it couldn't read, and Cancel: the same file can be chosen again", async ({ page }) => {
+    const email = newEmail();
+    const password = newPassword();
+    try {
+      await signedIn(page, email, password);
+      await page.getByTestId("import-file").setInputFiles({ name: "bad.csv", mimeType: "text/csv", buffer: Buffer.from("not,a,journal\n") });
+      await expect(page.getByTestId("import-error")).toBeVisible();
+      expect(await held(page)).toBe(0);
+      await page.getByTestId("import-file").setInputFiles(file);
+      await expect(page.getByTestId("import-confirm")).toBeVisible();
+      await page.getByTestId("import-cancel").click();
+      expect(await held(page)).toBe(0);
     } finally {
       await cleanup(email);
     }
