@@ -585,6 +585,9 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
       <textarea
         id="entry-text"
         data-testid="entry-text"
+        // A browser's restored text on reload must not count as typed
+        // (lib/journal/typedBeforeLoad.ts): the draft is what's kept.
+        autoComplete="off"
         value={fields.body}
         onChange={(e) => setFields((f) => ({ ...f, body: e.target.value }))}
         placeholder={t("entryPlaceholder")}

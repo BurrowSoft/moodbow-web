@@ -169,17 +169,6 @@ input[type="date"]:focus-within {
 /* The home page's moodbow: each band draws from one end to the other
    (pathLength 1), staggered by its own animation-delay; "backwards" holds
    it undrawn until its turn. Reduced motion: no animation, already drawn. */
-/* Settings before the page's code has run (lib/ui/untilLoaded.ts): the normal
-   disabled look, only if that takes more than a moment, so nothing flashes. */
-[data-until-loaded] {
-  animation: until-loaded 0s linear 1s forwards;
-}
-@keyframes until-loaded {
-  to {
-    opacity: 0.6;
-  }
-}
-
 @keyframes arc-draw {
   from { stroke-dashoffset: 1; }
   to { stroke-dashoffset: 0; }
@@ -252,6 +241,17 @@ input[type="date"]:focus-within {
    whatever the theme, with no app chrome (print:hidden on the nav and the
    footer). Last in the file, so it wins over the dark-theme rules of the
    same specificity. */
+/* Settings before the page's code has run (lib/ui/untilLoaded.ts): the normal
+   disabled look, only if that takes more than a moment, so nothing flashes. */
+[data-until-loaded] {
+  animation: until-loaded 0s linear 1s forwards;
+}
+@keyframes until-loaded {
+  to {
+    opacity: 0.6;
+  }
+}
+
 @media print {
   :root,
   :root:not([data-theme="light"]),
