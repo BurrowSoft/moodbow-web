@@ -41,35 +41,35 @@
   },
   "app-calendar": {
     "met": true,
-    "what": "Help only (decision 212 pattern, UX 2026-11-03): the month calendar (1.1 M) is in the app build people have (0.9.5; met on its publish, UX), so its Help article shows. Not calendar-live (the web's own switch)."
+    "what": "Help only (decision 212 pattern, UX 2026-11-03): the month calendar (1.1 M) is in the app build people have (first shipped in 0.9.7 (7); 0.9.5 was never uploaded; UX), so its Help article shows. Not calendar-live (the web's own switch)."
   },
   "app-search": {
     "met": true,
-    "what": "Help only (decision 212 pattern, UX 2026-11-03): search (1.1 L) is in the app build people have (0.9.5; met on its publish, UX), so its Help article shows. Not search-live (the web's own magnifier)."
+    "what": "Help only (decision 212 pattern, UX 2026-11-03): search (1.1 L) is in the app build people have (first shipped in 0.9.7 (7); 0.9.5 was never uploaded; UX), so its Help article shows. Not search-live (the web's own magnifier)."
   },
   "app-export-csv": {
     "met": true,
-    "what": "Help only (decision 212 pattern, UX 2026-11-03): the spreadsheet export (1.1 P) is in the app build people have (0.9.5; met on its publish, UX), so its Help line shows. Not export-csv-live (the web's own .csv)."
+    "what": "Help only (decision 212 pattern, UX 2026-11-03): the spreadsheet export (1.1 P) is in the app build people have (first shipped in 0.9.7 (7); 0.9.5 was never uploaded; UX), so its Help line shows. Not export-csv-live (the web's own .csv)."
   },
   "app-writing-prompts": {
     "met": true,
-    "what": "Help only (decision 212 pattern, UX 2026-11-03): writing prompts (1.1 I) are in the app build people have (0.9.6; met on its publish, UX), so their Help line shows. Not writing-prompts (tested on the app and the web)."
+    "what": "Help only (decision 212 pattern, UX 2026-11-03): writing prompts (1.1 I) are in the app build people have (first shipped in 0.9.7 (7); no 0.9.6 was uploaded; UX), so their Help line shows. Not writing-prompts (tested on the app and the web)."
   },
   "app-share-cards-more": {
     "met": true,
-    "what": "Help only (decision 212 pattern, UX 2026-11-03): the chart and milestone cards (1.1 B) are in the app build people have (0.9.6; met on its publish, UX), so their Help line shows. Not share-cards-more."
+    "what": "Help only (decision 212 pattern, UX 2026-11-03): the chart and milestone cards (1.1 B) are in the app build people have (first shipped in 0.9.7 (7); no 0.9.6 was uploaded; UX), so their Help line shows. Not share-cards-more."
   },
   "app-year-card": {
     "met": true,
-    "what": "Help only (decision 212 pattern, UX 2026-11-03): the Year card (1.1 J) is in the app build people have (0.9.6; met on its publish, UX), so its Help line shows. Not year-card."
+    "what": "Help only (decision 212 pattern, UX 2026-11-03): the Year card (1.1 J) is in the app build people have (first shipped in 0.9.7 (7); no 0.9.6 was uploaded; UX), so its Help line shows. Not year-card."
   },
   "app-patterns": {
-    "met": false,
-    "what": "Help only (decision 212 pattern, UX 2026-11-04): Patterns (no AI) is in the app build people have (0.9.7), so its Help article shows ({pending:app_patterns|patterns_live}: the app's or the web's). Not patterns-live (the web's own card)."
+    "met": true,
+    "what": "Help only (decision 212 pattern, UX 2026-11-04): Patterns (no AI) is in the app build people have (0.9.7; met on its publish, UX), so its Help article shows ({pending:app_patterns|patterns_live}: the app's or the web's). Not patterns-live (the web's own card)."
   },
   "app-import": {
-    "met": false,
-    "what": "Help only (decision 212 pattern, UX 2026-11-04): import from another app (1.1 K) is in the app build people have (0.9.7), so its Help article shows for app users ({pending:app_import|import_live}). Not import-live (the web's own import)."
+    "met": true,
+    "what": "Help only (decision 212 pattern, UX 2026-11-04): import from another app (1.1 K) is in the app build people have (0.9.7; met on its publish, UX), so its Help article shows for app users ({pending:app_import|import_live}). Not import-live (the web's own import)."
   },
   "app-app-lock": {
     "met": true,
@@ -160,8 +160,8 @@
     "what": "1.1 D \"Your week\" (specs/m9-weekly-report.md, decision 180) is tested on the app and the web against staging; then the Insights card shows on Production, which also needs AI live there (the combined AI go-live)."
   },
   "widget-live": {
-    "met": false,
-    "what": "The home-screen widget (1.1 E) is in a RELEASED app build (Android first). App-only: on the web it only gates the Help article that explains it."
+    "met": true,
+    "what": "The home-screen widget (1.1 E) is in a RELEASED app build (Android first; 0.9.7, met on its publish, UX). App-only: on the web it only gates the Help article that explains it."
   },
   "writing-prompts": {
     "met": false,

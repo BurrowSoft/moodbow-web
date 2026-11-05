@@ -89,14 +89,21 @@ describe("Help is public, scoped to what's live (decision 212)", () => {
   const published = (slug: string) => renderArticle(findArticle("en", slug)!);
 
   it("articles about features that are off have nothing left: a 404", () => {
-    for (const slug of ["ai-reflections", "import", "keyboard-shortcuts", "widget", "your-week"]) {
+    for (const slug of ["ai-reflections", "keyboard-shortcuts", "your-week"]) {
       expect(published(slug), slug).toBe("");
     }
+    // The 0.9.7 app build's (UX): the widget, import and Patterns, a 404
+    // until the app build people have has them (or the web, for import and
+    // Patterns).
+    const either = (...ids: string[]) => ids.some((id) => isPendingMet(id));
+    expect(published("widget") === "", "widget").toBe(!either("widget_live"));
+    expect(published("import") === "", "import").toBe(!either("app_import", "import_live"));
+    expect(published("patterns") === "", "patterns").toBe(!either("app_patterns", "patterns_live"));
   });
 
-  it("the app's app lock shows (decision 188), without the widget it doesn't have yet", () => {
+  it("the app's app lock shows (decision 188), and its widget line only with the widget", () => {
     expect(published("app-lock")).toContain("Forgot your PIN?");
-    expect(published("app-lock")).not.toContain("widget");
+    expect(published("app-lock").includes("widget")).toBe(isPendingMet("widget_live"));
   });
 
   it("the app's on this day, daily reminder, offline start and month share card show", () => {
@@ -105,7 +112,7 @@ describe("Help is public, scoped to what's live (decision 212)", () => {
     expect(published("reminders")).toContain("Daily reminder");
     expect(published("share-card")).toContain("Moodbow rainbow");
     expect(published("timeline")).toContain("Share this month");
-    // 0.9.6 is published (UX): the chart, milestone and year cards and the
+    // In 0.9.7 (7) (no 0.9.6 was ever uploaded; UX): the chart, milestone and year cards and the
     // writing prompt show too, in en and th.
     const th = (slug: string) => renderArticle(findArticle("th", slug)!);
     for (const label of ["Chart", "Milestone", "Year"]) expect(published("share-card")).toContain(`<strong>${label}</strong>`);
@@ -125,9 +132,9 @@ describe("Help is public, scoped to what's live (decision 212)", () => {
   // once its help-only app id is met (the app build people have), in en and
   // th, with the app's way (✕ or Back) and no web-only steps until the web
   // journal is live.
-  describe("0.9.5 / 0.9.6: shown by the app build people have", () => {
+  describe("the 0.9.7 features: shown by the app build people have", () => {
     // Both ways named, so these hold whether or not the id is met in
-    // content/conditions.json yet (the 0.9.5 / 0.9.6 flips just flip it).
+    // content/conditions.json yet (the publish-day flips just flip it).
     const withMet = (on: string[], off: string[] = []) => (id: string) => on.includes(id) || (!off.includes(id) && isPendingMet(id));
     const render = (locale: string, slug: string, on: string[], off: string[] = []) => renderArticle(findArticle(locale, slug)!, withMet(on, off));
     for (const [id, slug, text] of [
@@ -157,9 +164,9 @@ describe("Help is public, scoped to what's live (decision 212)", () => {
     });
   });
 
-  // 0.9.5 is published (UX): calendar, search and the CSV line show, in en
+  // In 0.9.7 (7) (0.9.5 was frozen, never uploaded; UX): calendar, search and the CSV line show, in en
   // and th, as the app has them; no web-only step or web import yet.
-  it("the app's 0.9.5: the calendar and search articles and the CSV line are published, en and th", () => {
+  it("the app's 0.9.7: the calendar and search articles and the CSV line are published, en and th", () => {
     const th = (slug: string) => renderArticle(findArticle("th", slug)!);
     const slugs = helpIndex("en").flatMap((g) => g.articles.map((a) => a.slug));
     expect(slugs).toEqual(expect.arrayContaining(["calendar", "search"]));
