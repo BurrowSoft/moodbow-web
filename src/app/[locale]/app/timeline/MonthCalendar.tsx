@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { addDays, addMonths, calendarDate, dayNumber, monthGrid, monthOf, weekdayNames, weekStartFor, type CalendarMonth } from "@/lib/journal/calendar";
+import { addDays, addMonths, calendarDate, dayNumber, monthGrid, monthOf, weekdayNames, type CalendarMonth } from "@/lib/journal/calendar";
 import { MOOD_COLOURS, MOOD_DOT_OUTLINE } from "@/lib/journal/checkIn";
 import { formatMonth, MIN_CHECK_INS } from "@/lib/share/moodbow";
 import { ShareMonth } from "../insights/ShareMonth";
@@ -38,7 +38,6 @@ export function MonthCalendar({
   printable?: boolean;
 }) {
   const t = useTranslations("timeline");
-  const weekStart = weekStartFor(useLocale());
   const tt = useTranslations("today");
   const ta = useTranslations("app");
   const thisMonth = monthOf(today);
@@ -142,7 +141,7 @@ export function MonthCalendar({
 
       <div role="grid" aria-labelledby={titleId} aria-busy={load.kind === "loading"} onKeyDown={onKeyDown} className="mt-3" data-testid="calendar-grid">
         <div role="row" className="grid grid-cols-7">
-          {weekdayNames(dateLocaleTag, weekStart).map((w) => (
+          {weekdayNames(dateLocaleTag).map((w) => (
             // The initial on screen, the full name for screen readers (real
             // text, not only a label: axe empty-table-header, Web Tester C7).
             <div key={w.long} role="columnheader" className="py-1 text-center text-xs font-medium text-muted">
@@ -151,7 +150,7 @@ export function MonthCalendar({
             </div>
           ))}
         </div>
-        {monthGrid(month, weekStart).map((week, i) => (
+        {monthGrid(month).map((week, i) => (
           <div key={i} role="row" className="grid grid-cols-7">
             {week.map((date, j) => {
               if (!date) return <div key={j} role="gridcell" />;
