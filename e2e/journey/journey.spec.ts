@@ -556,6 +556,37 @@ test.describe("the saved language in the journal", () => {
     }
   });
 
+  test("the language cookie can't be written: it stops with a link, and doesn't reload forever", async ({ browser }) => {
+    const context = await browser.newContext({ locale: "fr-FR" });
+    const page = await context.newPage();
+    // As a privacy extension does: this one cookie never sticks.
+    await page.addInitScript(() => {
+      const cookie = Object.getOwnPropertyDescriptor(Document.prototype, "cookie")!;
+      Object.defineProperty(document, "cookie", {
+        get: () => cookie.get!.call(document),
+        set: (value: string) => {
+          if (!value.startsWith("NEXT_LOCALE=")) cookie.set!.call(document, value);
+        },
+      });
+    });
+    const email = newEmail();
+    const password = newPassword();
+    try {
+      await signedUpUnconfirmed(email, password);
+      await confirmEmail(email);
+      await page.goto("/sign-in");
+      await signInForm(page, email, password);
+      await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+      await page.getByTestId("setup-done").click();
+      await expect(page.getByTestId("saved-language-link")).toBeVisible({ timeout: 20_000 });
+      await settled(page, "/fr/app", "fr");
+      await expect(page.getByTestId("saved-language-link")).toHaveAttribute("href", "/app");
+    } finally {
+      await cleanup(email);
+      await context.close();
+    }
+  });
+
   test("a saved language that isn't offered keeps the route", async ({ page }) => {
     test.skip(conditions["de-offered-live"].met, "needs German not offered");
     const email = newEmail();
