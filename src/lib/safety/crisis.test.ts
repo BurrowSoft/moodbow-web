@@ -46,6 +46,22 @@ describe("flagsCrisis", () => {
     expect(flagsCrisis("วันนี้อยากตายมาก", LIST)).toBe(true);
     expect(flagsCrisis("วันนี้ไปเดินเล่นที่สวน", LIST)).toBe(false);
   });
+  // Rule 7 (contract v2, specs/crisis-keywords-1.0.md): a German compound
+  // puts the word anywhere, so a stem matches inside words.
+  it("stems match inside a word on either side, diacritics stripped; phrases stay whole words", () => {
+    const stems: CrisisKeywords = { version: 2, languages: { de: { match: "word", stems: ["suizid", "lebensmud", "lebensmued"], phrases: ["mich umbringen"] } } };
+    expect(flagsCrisis("Ich habe wieder Suizidgedanken", stems)).toBe(true);
+    expect(flagsCrisis("Jugendsuizid", stems)).toBe(true);
+    expect(flagsCrisis("Ich bin so lebensmüde", stems)).toBe(true);
+    expect(flagsCrisis("ich bin so lebensmuede", stems)).toBe(true);
+    expect(flagsCrisis("Heute war ein guter Tag", stems)).toBe(false);
+    // A phrase is still whole words, even in a list with stems.
+    expect(flagsCrisis("mich umbringen", stems)).toBe(true);
+    expect(flagsCrisis("mich umbringender", stems)).toBe(false);
+    // A list without stems behaves as before.
+    expect(flagsCrisis("Suizidgedanken", LIST)).toBe(false);
+  });
+
   it("no list (the contract not synced yet) or an empty entry: never a match", () => {
     expect(flagsCrisis("I want to die", null)).toBe(false);
     expect(flagsCrisis("   ", LIST)).toBe(false);
@@ -60,6 +76,11 @@ describe.runIf(existsSync(CONTRACT))("the contract's fixture", () => {
     const contract = load();
     for (const text of contract.fixture.should_flag) expect(flagsCrisis(text, contract), text).toBe(true);
     for (const text of contract.fixture.should_not_flag) expect(flagsCrisis(text, contract), text).toBe(false);
+  });
+  it("the matcher the journal uses reads the same contract (a new version needs only the sync)", () => {
+    const contract = load();
+    expect(CRISIS_KEYWORDS?.version).toBe(contract.version);
+    for (const text of contract.fixture.should_flag) expect(flagsCrisis(text, CRISIS_KEYWORDS), text).toBe(true);
   });
   it("the app uses it", () => {
     expect(CRISIS_KEYWORDS).not.toBeNull();

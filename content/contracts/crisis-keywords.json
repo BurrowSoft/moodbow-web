@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "rules": "specs/crisis-keywords-1.0.md",
   "languages": {
     "en": {
@@ -41,10 +41,10 @@
     },
     "de": {
       "match": "word",
+      "stems": ["suizid", "selbstmord", "selbstverletz", "lebensmud", "lebensmued"],
       "phrases": [
-        "selbstmord", "suizid", "suizidal",
-        "ich will mich umbringen", "mich selbst umbringen", "mir das leben nehmen",
-        "ich will sterben", "will nicht mehr leben", "möchte nicht mehr leben",
+        "ich will mich umbringen", "mich selbst umbringen", "mich umbringen", "mir das leben nehmen",
+        "ich will sterben", "will nicht mehr leben", "möchte nicht mehr leben", "moechte nicht mehr leben",
         "mich selbst verletzen", "mich ritzen", "ritze mich"
       ]
     },
@@ -76,6 +76,11 @@
       "Ya no quiero vivir así",
       "nao quero mais viver",
       "Ich will nicht mehr leben.",
+      "Ich habe wieder Suizidgedanken",
+      "manchmal will ich mich umbringen",
+      "Ich bin so lebensmüde",
+      "ich bin so lebensmuede",
+      "Ich moechte nicht mehr leben",
       "J'ai envie de mourir ce soir",
       "ไม่อยากอยู่แล้ว เหนื่อยมาก คิดว่าจะจบชีวิตตัวเอง",
       "วันนี้อยากตายมาก"
