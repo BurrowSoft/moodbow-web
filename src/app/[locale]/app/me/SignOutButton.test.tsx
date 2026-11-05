@@ -5,7 +5,11 @@ import messages from "@/messages/en.json";
 import { localKey } from "@/lib/localData";
 
 const signOut = vi.fn();
+// The sync goes through fetch (/api/check-in-sync), never the saveCheckIn
+// server action: nothing may sit in Next's action queue ahead of sign-out.
 const saveCheckIn = vi.fn();
+const fetchMock = vi.fn();
+const answer = (status: string) => ({ ok: true, json: async () => ({ status }) });
 const broadcastSignOut = vi.fn();
 vi.mock("./actions", () => ({ signOut: (...a: unknown[]) => signOut(...a) }));
 vi.mock("../actions", () => ({ saveCheckIn: (...a: unknown[]) => saveCheckIn(...a) }));
@@ -37,6 +41,9 @@ beforeEach(() => {
   signOut.mockReset();
   signOut.mockRejectedValue(Object.assign(new Error("NEXT_REDIRECT"), { digest: "NEXT_REDIRECT;replace;/sign-in;303;" }));
   saveCheckIn.mockReset();
+  fetchMock.mockReset();
+  fetchMock.mockRejectedValue(new Error("unexpected request"));
+  vi.stubGlobal("fetch", fetchMock);
   broadcastSignOut.mockReset();
   window.localStorage.clear();
   window.localStorage.setItem(HIDDEN, "1");
@@ -47,6 +54,8 @@ beforeEach(() => {
 });
 afterEach(() => {
   cleanup();
+  vi.useRealTimers();
+  vi.unstubAllGlobals();
   window.removeEventListener("error", swallow);
   onError.mockRestore();
 });
@@ -65,23 +74,51 @@ describe("Me → Sign out (UX & PM 2026-11-03, option C)", () => {
 
   it("a check-in saved offline gets one try first: synced, nothing is left to ask about", async () => {
     window.localStorage.setItem(PENDING, pendingCopy);
-    saveCheckIn.mockResolvedValue({ status: "saved", checkIn: {} });
+    fetchMock.mockResolvedValue(answer("saved"));
     renderIt();
     signOutPressed();
     await waitFor(() => expect(broadcastSignOut).toHaveBeenCalledTimes(1));
     expect(signOut).toHaveBeenCalledTimes(1);
-    expect(Object.fromEntries((saveCheckIn.mock.calls[0][1] as FormData).entries())).toMatchObject({ local_date: "2026-10-02", mood: "4" });
+    const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(url).toBe("/api/check-in-sync");
+    expect(init.method).toBe("POST");
+    expect(Object.fromEntries((init.body as FormData).entries())).toMatchObject({ local_date: "2026-10-02", mood: "4" });
+    expect(saveCheckIn).not.toHaveBeenCalled();
     expect(has(PENDING)).toBe(false);
     expect(screen.queryByTestId("sign-out-dialog")).toBeNull();
   });
 
   it("a check-in that doesn't sync: the dialog asks, as for a draft", async () => {
     window.localStorage.setItem(PENDING, pendingCopy);
-    saveCheckIn.mockRejectedValue(new Error("offline"));
+    fetchMock.mockRejectedValue(new Error("offline"));
     renderIt();
     signOutPressed();
     expect(await screen.findByTestId("sign-out-dialog")).toBeInTheDocument();
     expect(signOut).not.toHaveBeenCalled();
+  });
+
+  // Web Tester (before #100): Next runs server actions one at a time, so a
+  // hung sync held "Keep it" / "Delete it" for 60 s. The request is aborted at
+  // the 5 s cap and is never a server action, so sign-out goes at once.
+  it("a sync that never answers: aborted at 5 s, the dialog asks, and Keep it signs out at once", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    window.localStorage.setItem(PENDING, pendingCopy);
+    let signal: AbortSignal | undefined;
+    fetchMock.mockImplementation((_url: string, init: RequestInit) => {
+      signal = init.signal ?? undefined;
+      return new Promise((_, reject) => signal?.addEventListener("abort", () => reject(new DOMException("aborted", "AbortError"))));
+    });
+    renderIt();
+    signOutPressed();
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+    expect(screen.queryByTestId("sign-out-dialog")).toBeNull();
+    vi.advanceTimersByTime(5000);
+    expect(await screen.findByTestId("sign-out-dialog")).toBeInTheDocument();
+    expect(signal?.aborted).toBe(true);
+    fireEvent.click(screen.getByTestId("sign-out-keep"));
+    await waitFor(() => expect(signOut).toHaveBeenCalledTimes(1));
+    expect(saveCheckIn).not.toHaveBeenCalled();
+    expect(has(PENDING)).toBe(true);
   });
 
   it("unsaved writing: the dialog, with Keep it as the filled default where focus starts", async () => {
@@ -94,7 +131,7 @@ describe("Me → Sign out (UX & PM 2026-11-03, option C)", () => {
     expect(screen.getByTestId("sign-out-keep")).toHaveFocus();
     expect(screen.getByTestId("sign-out-delete")).toHaveTextContent(m.signOutDelete);
     expect(signOut).not.toHaveBeenCalled();
-    expect(saveCheckIn).not.toHaveBeenCalled();
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it("Keep it: the writing stays for next time; signs out", async () => {

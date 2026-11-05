@@ -5,8 +5,6 @@ import { useTranslations } from "next-intl";
 import { Dialog, dialogButton } from "@/components/Dialog";
 import { hasLocalKinds, SIGN_OUT_TRACE_KINDS, UNSYNCED_KINDS, wipeLocalKinds } from "@/lib/localData";
 import { broadcastSignOut, type SignOutMode } from "@/lib/signOutSignal";
-import { withTimeout } from "@/lib/ui/withTimeout";
-import { saveCheckIn } from "../actions";
 import { pendingForms, removePending } from "../CheckInCard";
 import { signOut } from "./actions";
 
@@ -19,22 +17,27 @@ import { signOut } from "./actions";
 // "hidden today" marks go, and the other tabs are told (lib/signOutSignal).
 
 // One try, 5 s in all (UX): whatever isn't saved by then is asked about.
-const SYNC_BUDGET_MS = 5000;
+export const SYNC_BUDGET_MS = 5000;
 
+// Through /api/check-in-sync, not the saveCheckIn server action: Next runs
+// server actions one at a time, so a hung sync would hold the sign-out
+// action behind it, past any timeout of ours (Web Tester: 60 s). A fetch is
+// aborted at the cap, so the sign-out never waits on it.
 async function syncPending(uid: string): Promise<void> {
   if (!navigator.onLine) return;
-  const deadline = Date.now() + SYNC_BUDGET_MS;
-  for (const { key, form } of pendingForms(uid)) {
-    const left = deadline - Date.now();
-    if (left <= 0) return;
-    try {
-      const result = await withTimeout(saveCheckIn({ status: "idle" }, form), left);
-      if (result.status === "saved") removePending(key);
-    } catch {
-      // failed, timed out or redirected (the session already ended): the
-      // rest stays, as decision 81 keeps it
-      return;
+  const stop = new AbortController();
+  const timer = setTimeout(() => stop.abort(), SYNC_BUDGET_MS);
+  try {
+    for (const { key, form } of pendingForms(uid)) {
+      const res = await fetch("/api/check-in-sync", { method: "POST", body: form, signal: stop.signal });
+      if (!res.ok) return;
+      if (((await res.json()) as { status?: string }).status === "saved") removePending(key);
     }
+  } catch {
+    // failed, aborted at the cap, or the session already ended: the rest
+    // stays, as decision 81 keeps it
+  } finally {
+    clearTimeout(timer);
   }
 }
 

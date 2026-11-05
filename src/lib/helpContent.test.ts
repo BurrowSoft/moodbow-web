@@ -89,7 +89,7 @@ describe("Help is public, scoped to what's live (decision 212)", () => {
   const published = (slug: string) => renderArticle(findArticle("en", slug)!);
 
   it("articles about features that are off have nothing left: a 404", () => {
-    for (const slug of ["ai-reflections", "calendar", "keyboard-shortcuts", "search", "your-week"]) {
+    for (const slug of ["ai-reflections", "keyboard-shortcuts", "your-week"]) {
       expect(published(slug), slug).toBe("");
     }
     // The 0.9.7 app build's (UX): the widget, import and Patterns, a 404
@@ -112,8 +112,13 @@ describe("Help is public, scoped to what's live (decision 212)", () => {
     expect(published("reminders")).toContain("Daily reminder");
     expect(published("share-card")).toContain("Moodbow rainbow");
     expect(published("timeline")).toContain("Share this month");
-    // More cards and the year card aren't in the build.
-    expect(published("share-card")).not.toContain("Milestone");
+    // In 0.9.7 (7) (no 0.9.6 was ever uploaded; UX): the chart, milestone and year cards and the
+    // writing prompt show too, in en and th.
+    const th = (slug: string) => renderArticle(findArticle("th", slug)!);
+    for (const label of ["Chart", "Milestone", "Year"]) expect(published("share-card")).toContain(`<strong>${label}</strong>`);
+    for (const label of ["กราฟ", "หมุดหมาย", "ปี"]) expect(th("share-card")).toContain(`<strong>${label}</strong>`);
+    expect(published("entries")).toContain("<strong>Another</strong>");
+    expect(th("entries")).toContain("<strong>ข้อความอื่น</strong>");
   });
 
   it("the app's start without an email (0.9.4, decision 216): getting started and backing up show", () => {
@@ -127,9 +132,9 @@ describe("Help is public, scoped to what's live (decision 212)", () => {
   // once its help-only app id is met (the app build people have), in en and
   // th, with the app's way (✕ or Back) and no web-only steps until the web
   // journal is live.
-  describe("0.9.5 / 0.9.6: shown by the app build people have", () => {
+  describe("the 0.9.7 features: shown by the app build people have", () => {
     // Both ways named, so these hold whether or not the id is met in
-    // content/conditions.json yet (the 0.9.5 / 0.9.6 flips just flip it).
+    // content/conditions.json yet (the publish-day flips just flip it).
     const withMet = (on: string[], off: string[] = []) => (id: string) => on.includes(id) || (!off.includes(id) && isPendingMet(id));
     const render = (locale: string, slug: string, on: string[], off: string[] = []) => renderArticle(findArticle(locale, slug)!, withMet(on, off));
     for (const [id, slug, text] of [
@@ -157,6 +162,23 @@ describe("Help is public, scoped to what's live (decision 212)", () => {
       expect(csv).not.toContain("import");
       expect(render("en", "privacy-and-data", ["app_export_csv", "import_live"])).toContain("which Moodbow can import again on the web.");
     });
+  });
+
+  // In 0.9.7 (7) (0.9.5 was frozen, never uploaded; UX): calendar, search and the CSV line show, in en
+  // and th, as the app has them; no web-only step or web import yet.
+  it("the app's 0.9.7: the calendar and search articles and the CSV line are published, en and th", () => {
+    const th = (slug: string) => renderArticle(findArticle("th", slug)!);
+    const slugs = helpIndex("en").flatMap((g) => g.articles.map((a) => a.slug));
+    expect(slugs).toEqual(expect.arrayContaining(["calendar", "search"]));
+    expect(published("calendar")).toContain("<strong>Calendar</strong>");
+    expect(th("calendar")).toContain("<strong>ปฏิทิน</strong>");
+    expect(published("search")).toContain("(or use Back)");
+    expect(published("search")).not.toContain("Esc");
+    expect(th("search")).toContain("(หรือใช้ปุ่มย้อนกลับ)");
+    expect(th("search")).not.toContain("Esc");
+    expect(published("privacy-and-data")).toContain("<strong>Spreadsheet (.csv)</strong>");
+    expect(published("privacy-and-data")).not.toContain("import");
+    expect(th("privacy-and-data")).toContain("<strong>สเปรดชีต (.csv)</strong>");
   });
 
   // Shown by whichever comes first, the app build people have (app-*) or
