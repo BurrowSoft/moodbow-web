@@ -70,6 +70,15 @@ export async function createConfirmedUser(email: string, password: string): Prom
   if (error) throw new Error(`createUser failed: ${error.message}`);
 }
 
+// Ends every session of this user, as "sign out everywhere" on another device does.
+export async function revokeSessions(email: string, password: string): Promise<void> {
+  const user = createClient(URL_, PUBLISHABLE, { auth: { persistSession: false, autoRefreshToken: false } });
+  const { error: signInError } = await user.auth.signInWithPassword({ email, password });
+  if (signInError) throw new Error(`sign-in to revoke failed: ${signInError.message}`);
+  const { error } = await user.auth.signOut({ scope: "global" });
+  if (error) throw new Error(`revoke failed: ${error.message}`);
+}
+
 export async function exists(email: string): Promise<boolean> {
   return (await userId(email)) !== null;
 }
