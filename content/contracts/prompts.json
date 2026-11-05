@@ -1,156 +1,306 @@
 {
   "version": 1,
-  "note": "Writing prompts (1.1 I, decision 183): local, no AI, the same on app and web. Today's prompt = prompts[dayNumber(date) mod N], where date is the profile-zone date (YYYY-MM-DD) and dayNumber its days since 1970-01-01; \"Another\" (promptAnother) moves to the next, wrapping. Shown only when the entry is empty, never on a day whose earlier entries the crisis matcher flags (every list, crisis-keywords rule 5). th is a draft until thai_reviewed. Generated from r1 by tool/gen_prompts.cjs; edit r1, not this file.",
+  "note": "Writing prompts (1.1 I, decision 183): local, no AI, the same on app and web. Today's prompt = prompts[dayNumber(date) mod N], where date is the profile-zone date (YYYY-MM-DD) and dayNumber its days since 1970-01-01; \"Another\" (promptAnother) moves to the next, wrapping. Shown only when the entry is empty, never on a day whose earlier entries the crisis matcher flags (every list, crisis-keywords rule 5). th is a draft until thai_reviewed; fr, es, pt (pt-BR), de and it are drafts from specs/i18n until each <lang>_reviewed. A client shows a language's text only when it is the UI language, else en. Generated from r1 + the drafts by tool/gen_prompts.cjs; edit r1 or the drafts, not this file.",
   "prompts": [
     {
       "id": "prompt01",
       "en": "What's one thing you'd like to remember about today?",
-      "th": "วันนี้มีเรื่องไหนที่คุณอยากจำไว้บ้าง?"
+      "th": "วันนี้มีเรื่องไหนที่คุณอยากจำไว้บ้าง?",
+      "fr": "Quelle chose aimeriez-vous retenir d'aujourd'hui ?",
+      "es": "¿Qué te gustaría recordar de hoy?",
+      "pt": "O que você gostaria de lembrar sobre hoje?",
+      "de": "Woran möchtest du dich von heute erinnern?",
+      "it": "Qual è una cosa di oggi che ti piacerebbe ricordare?"
     },
     {
       "id": "prompt02",
       "en": "What took more energy than you expected?",
-      "th": "อะไรที่ใช้พลังมากกว่าที่คุณคิดไว้?"
+      "th": "อะไรที่ใช้พลังมากกว่าที่คุณคิดไว้?",
+      "fr": "Qu'est-ce qui vous a demandé plus d'énergie que prévu ?",
+      "es": "¿Qué te costó más energía de lo que esperabas?",
+      "pt": "O que exigiu mais energia do que você esperava?",
+      "de": "Was hat dich mehr Kraft gekostet, als du gedacht hättest?",
+      "it": "Cosa ti ha chiesto più energia del previsto?"
     },
     {
       "id": "prompt03",
       "en": "Who made today a little better?",
-      "th": "ใครที่ทำให้วันนี้ดีขึ้นอีกนิด?"
+      "th": "ใครที่ทำให้วันนี้ดีขึ้นอีกนิด?",
+      "fr": "Qui a rendu votre journée un peu plus belle ?",
+      "es": "¿Quién hizo que hoy fuera un poco mejor?",
+      "pt": "Quem deixou o seu dia um pouco melhor?",
+      "de": "Wer hat deinen Tag ein bisschen schöner gemacht?",
+      "it": "Chi ha reso la giornata un po' migliore?"
     },
     {
       "id": "prompt04",
       "en": "What are you looking forward to?",
-      "th": "คุณกำลังรอคอยอะไรอยู่?"
+      "th": "คุณกำลังรอคอยอะไรอยู่?",
+      "fr": "Qu'attendez-vous avec plaisir ?",
+      "es": "¿Qué esperas con ilusión?",
+      "pt": "Que coisa boa você está esperando?",
+      "de": "Worauf freust du dich?",
+      "it": "Cosa aspetti con piacere?"
     },
     {
       "id": "prompt05",
       "en": "What would you tell a friend who had your day?",
-      "th": "ถ้าเพื่อนมีวันแบบคุณ คุณจะบอกอะไรเขา?"
+      "th": "ถ้าเพื่อนมีวันแบบคุณ คุณจะบอกอะไรเขา?",
+      "fr": "Que diriez-vous à un proche qui aurait vécu votre journée ?",
+      "es": "¿Qué le dirías a alguien cercano que hubiera tenido tu día?",
+      "pt": "O que você diria a uma pessoa querida que teve o seu dia?",
+      "de": "Was würdest du einem lieben Menschen sagen, der deinen Tag gehabt hätte?",
+      "it": "Cosa diresti a una persona cara che avesse avuto la tua giornata?"
     },
     {
       "id": "prompt06",
       "en": "What surprised you today?",
-      "th": "วันนี้มีอะไรทำให้คุณแปลกใจบ้าง?"
+      "th": "วันนี้มีอะไรทำให้คุณแปลกใจบ้าง?",
+      "fr": "Quelle surprise cette journée vous a-t-elle réservée ?",
+      "es": "¿Qué te sorprendió hoy?",
+      "pt": "O que surpreendeu você hoje?",
+      "de": "Was hat dich heute überrascht?",
+      "it": "Cosa ti ha sorpreso oggi?"
     },
     {
       "id": "prompt07",
       "en": "What did you need today that you didn't get?",
-      "th": "วันนี้คุณต้องการอะไรที่ไม่ได้รับ?"
+      "th": "วันนี้คุณต้องการอะไรที่ไม่ได้รับ?",
+      "fr": "De quoi aviez-vous besoin aujourd'hui, sans l'avoir reçu ?",
+      "es": "¿Qué necesitabas hoy y no tuviste?",
+      "pt": "Do que você precisou hoje e não teve?",
+      "de": "Was hast du heute gebraucht und nicht bekommen?",
+      "it": "Di cosa avevi bisogno oggi che non hai avuto?"
     },
     {
       "id": "prompt08",
       "en": "What's something small that went right?",
-      "th": "มีเรื่องเล็กๆ อะไรที่เป็นไปด้วยดีบ้าง?"
+      "th": "มีเรื่องเล็กๆ อะไรที่เป็นไปด้วยดีบ้าง?",
+      "fr": "Quelle petite chose s'est bien passée ?",
+      "es": "¿Qué cosa pequeña salió bien?",
+      "pt": "Que coisa pequena deu certo?",
+      "de": "Was Kleines ist heute gut gelaufen?",
+      "it": "Qual è una piccola cosa che è andata bene?"
     },
     {
       "id": "prompt09",
       "en": "Where did you feel most like yourself today?",
-      "th": "วันนี้คุณรู้สึกเป็นตัวเองมากที่สุดตอนไหน?"
+      "th": "วันนี้คุณรู้สึกเป็นตัวเองมากที่สุดตอนไหน?",
+      "fr": "Quand avez-vous eu le plus l'impression d'être vous-même aujourd'hui ?",
+      "es": "¿Dónde te sentiste más tú hoy?",
+      "pt": "Em que momento de hoje você se sentiu mais você?",
+      "de": "Wo hast du dich heute am meisten wie du selbst gefühlt?",
+      "it": "Quando, oggi, hai sentito di essere davvero te?"
     },
     {
       "id": "prompt10",
       "en": "What's on your mind that you haven't said out loud?",
-      "th": "มีเรื่องอะไรในใจที่คุณยังไม่ได้พูดออกมา?"
+      "th": "มีเรื่องอะไรในใจที่คุณยังไม่ได้พูดออกมา?",
+      "fr": "Qu'avez-vous en tête que vous n'avez pas encore dit à voix haute ?",
+      "es": "¿Qué tienes en mente que aún no has dicho en voz alta?",
+      "pt": "O que está na sua cabeça e você ainda não disse em voz alta?",
+      "de": "Was beschäftigt dich, das du noch nicht laut ausgesprochen hast?",
+      "it": "Cosa hai in mente che non hai ancora detto ad alta voce?"
     },
     {
       "id": "prompt11",
       "en": "What made you laugh, even a little?",
-      "th": "อะไรที่ทำให้คุณหัวเราะ แม้แค่นิดเดียว?"
+      "th": "อะไรที่ทำให้คุณหัวเราะ แม้แค่นิดเดียว?",
+      "fr": "Qu'est-ce qui vous a fait rire, même un peu ?",
+      "es": "¿Qué te hizo reír, aunque fuera un poco?",
+      "pt": "O que fez você rir, nem que fosse um pouco?",
+      "de": "Was hat dich zum Lachen gebracht, und sei es nur ein bisschen?",
+      "it": "Cosa ti ha fatto ridere, anche solo un po'?"
     },
     {
       "id": "prompt12",
       "en": "What would make tomorrow a bit easier?",
-      "th": "อะไรจะทำให้พรุ่งนี้ง่ายขึ้นอีกหน่อย?"
+      "th": "อะไรจะทำให้พรุ่งนี้ง่ายขึ้นอีกหน่อย?",
+      "fr": "Qu'est-ce qui rendrait demain un peu plus facile ?",
+      "es": "¿Qué haría que mañana fuera un poco más fácil?",
+      "pt": "O que deixaria o dia de amanhã um pouco mais leve?",
+      "de": "Was würde den morgigen Tag ein bisschen leichter machen?",
+      "it": "Cosa renderebbe domani un po' più facile?"
     },
     {
       "id": "prompt13",
       "en": "What did you do today just for you?",
-      "th": "วันนี้คุณทำอะไรเพื่อตัวเองบ้าง?"
+      "th": "วันนี้คุณทำอะไรเพื่อตัวเองบ้าง?",
+      "fr": "Qu'avez-vous fait aujourd'hui rien que pour vous ?",
+      "es": "¿Qué hiciste hoy solo para ti?",
+      "pt": "O que você fez hoje só para você?",
+      "de": "Was hast du heute nur für dich getan?",
+      "it": "Cosa hai fatto oggi solo per te?"
     },
     {
       "id": "prompt14",
       "en": "What's been taking up space in your head lately?",
-      "th": "ช่วงนี้มีเรื่องอะไรวนอยู่ในหัวคุณบ้าง?"
+      "th": "ช่วงนี้มีเรื่องอะไรวนอยู่ในหัวคุณบ้าง?",
+      "fr": "Qu'est-ce qui occupe vos pensées ces temps-ci ?",
+      "es": "¿Qué ha estado ocupando espacio en tu cabeza últimamente?",
+      "pt": "O que tem ocupado espaço na sua cabeça ultimamente?",
+      "de": "Was geht dir in letzter Zeit viel durch den Kopf?",
+      "it": "Cosa ti occupa i pensieri ultimamente?"
     },
     {
       "id": "prompt15",
       "en": "What's a sound, smell or taste from today?",
-      "th": "วันนี้มีเสียง กลิ่น หรือรสชาติอะไรที่จำได้?"
+      "th": "วันนี้มีเสียง กลิ่น หรือรสชาติอะไรที่จำได้?",
+      "fr": "Quel son, quelle odeur ou quel goût vous reste de cette journée ?",
+      "es": "¿Qué sonido, olor o sabor te deja el día de hoy?",
+      "pt": "Que som, cheiro ou sabor ficou do dia de hoje?",
+      "de": "Welches Geräusch, welchen Duft oder Geschmack nimmst du aus dem heutigen Tag mit?",
+      "it": "Un suono, un profumo o un sapore di oggi?"
     },
     {
       "id": "prompt16",
       "en": "What are you proud of this week?",
-      "th": "สัปดาห์นี้คุณภูมิใจกับอะไร?"
+      "th": "สัปดาห์นี้คุณภูมิใจกับอะไร?",
+      "fr": "Qu'est-ce qui vous a donné de la fierté cette semaine ?",
+      "es": "¿Qué te enorgullece esta semana?",
+      "pt": "Do que você se orgulha nesta semana?",
+      "de": "Worauf bist du diese Woche stolz?",
+      "it": "Cosa ti ha dato soddisfazione questa settimana?"
     },
     {
       "id": "prompt17",
       "en": "What would you like to let go of?",
-      "th": "มีอะไรที่คุณอยากปล่อยวางบ้าง?"
+      "th": "มีอะไรที่คุณอยากปล่อยวางบ้าง?",
+      "fr": "Qu'aimeriez-vous laisser derrière vous ?",
+      "es": "¿Qué te gustaría soltar?",
+      "pt": "Do que você gostaria de se desapegar?",
+      "de": "Was möchtest du loslassen?",
+      "it": "Di cosa ti piacerebbe liberarti?"
     },
     {
       "id": "prompt18",
       "en": "Who do you miss right now?",
-      "th": "ตอนนี้คุณคิดถึงใคร?"
+      "th": "ตอนนี้คุณคิดถึงใคร?",
+      "fr": "Qui vous manque en ce moment ?",
+      "es": "¿A quién extrañas ahora mismo?",
+      "pt": "De quem você sente falta agora?",
+      "de": "Wen vermisst du gerade?",
+      "it": "Chi ti manca in questo momento?"
     },
     {
       "id": "prompt19",
       "en": "What did your body need today?",
-      "th": "วันนี้ร่างกายของคุณต้องการอะไร?"
+      "th": "วันนี้ร่างกายของคุณต้องการอะไร?",
+      "fr": "De quoi votre corps avait-il besoin aujourd'hui ?",
+      "es": "¿Qué necesitó tu cuerpo hoy?",
+      "pt": "Do que o seu corpo precisou hoje?",
+      "de": "Was hat dein Körper heute gebraucht?",
+      "it": "Di cosa aveva bisogno il tuo corpo oggi?"
     },
     {
       "id": "prompt20",
       "en": "What's a question you keep coming back to?",
-      "th": "มีคำถามไหนที่คุณวนกลับมาคิดอยู่เรื่อยๆ?"
+      "th": "มีคำถามไหนที่คุณวนกลับมาคิดอยู่เรื่อยๆ?",
+      "fr": "Quelle question vous revient souvent à l'esprit ?",
+      "es": "¿Qué pregunta vuelve una y otra vez a tu cabeza?",
+      "pt": "Que pergunta sempre volta à sua cabeça?",
+      "de": "Zu welcher Frage kehrst du immer wieder zurück?",
+      "it": "Qual è una domanda a cui continui a tornare?"
     },
     {
       "id": "prompt21",
       "en": "What went differently than you planned?",
-      "th": "อะไรที่เป็นไปไม่ตรงกับที่คุณวางแผนไว้?"
+      "th": "อะไรที่เป็นไปไม่ตรงกับที่คุณวางแผนไว้?",
+      "fr": "Qu'est-ce qui ne s'est pas passé comme prévu ?",
+      "es": "¿Qué salió distinto de lo que habías planeado?",
+      "pt": "O que saiu diferente do que você planejou?",
+      "de": "Was ist anders gelaufen als geplant?",
+      "it": "Cosa è andato diversamente da come avevi previsto?"
     },
     {
       "id": "prompt22",
       "en": "What's one kind thing someone did, or you did?",
-      "th": "มีเรื่องใจดีอะไรที่ใครสักคนทำ หรือคุณทำบ้าง?"
+      "th": "มีเรื่องใจดีอะไรที่ใครสักคนทำ หรือคุณทำบ้าง?",
+      "fr": "Quel geste de gentillesse avez-vous reçu ou offert ?",
+      "es": "¿Qué gesto amable tuvo alguien, o tuviste tú?",
+      "pt": "Qual foi um gesto gentil, de alguém ou seu?",
+      "de": "Was Freundliches hat heute jemand getan, oder du selbst?",
+      "it": "Qual è un gesto gentile che qualcuno ha fatto, o che hai fatto tu?"
     },
     {
       "id": "prompt23",
       "en": "What helped you rest today?",
-      "th": "วันนี้อะไรช่วยให้คุณได้พักบ้าง?"
+      "th": "วันนี้อะไรช่วยให้คุณได้พักบ้าง?",
+      "fr": "Qu'est-ce qui vous a permis de vous reposer aujourd'hui ?",
+      "es": "¿Qué te ayudó a descansar hoy?",
+      "pt": "O que ajudou você a descansar hoje?",
+      "de": "Was hat dir heute geholfen, zur Ruhe zu kommen?",
+      "it": "Cosa ti ha aiutato a riposare oggi?"
     },
     {
       "id": "prompt24",
       "en": "What's a small change you'd like to try?",
-      "th": "มีการเปลี่ยนแปลงเล็กๆ อะไรที่คุณอยากลองบ้าง?"
+      "th": "มีการเปลี่ยนแปลงเล็กๆ อะไรที่คุณอยากลองบ้าง?",
+      "fr": "Quel petit changement aimeriez-vous essayer ?",
+      "es": "¿Qué pequeño cambio te gustaría probar?",
+      "pt": "Que pequena mudança você gostaria de experimentar?",
+      "de": "Welche kleine Veränderung möchtest du ausprobieren?",
+      "it": "Qual è un piccolo cambiamento che ti piacerebbe provare?"
     },
     {
       "id": "prompt25",
       "en": "What did you learn today, about anything?",
-      "th": "วันนี้คุณได้เรียนรู้อะไร เรื่องอะไรก็ได้?"
+      "th": "วันนี้คุณได้เรียนรู้อะไร เรื่องอะไรก็ได้?",
+      "fr": "Qu'avez-vous appris aujourd'hui, sur n'importe quel sujet ?",
+      "es": "¿Qué aprendiste hoy, sobre lo que sea?",
+      "pt": "O que você aprendeu hoje, sobre qualquer coisa?",
+      "de": "Was hast du heute gelernt, ganz egal worüber?",
+      "it": "Cosa hai imparato oggi, su qualsiasi cosa?"
     },
     {
       "id": "prompt26",
       "en": "Where were you happiest today?",
-      "th": "วันนี้คุณมีความสุขที่สุดตอนอยู่ที่ไหน?"
+      "th": "วันนี้คุณมีความสุขที่สุดตอนอยู่ที่ไหน?",
+      "fr": "À quel endroit vous sentiez-vous le mieux aujourd'hui ?",
+      "es": "¿Dónde fuiste más feliz hoy?",
+      "pt": "Onde você esteve mais feliz hoje?",
+      "de": "Wo warst du heute am glücklichsten?",
+      "it": "Dove hai provato più felicità oggi?"
     },
     {
       "id": "prompt27",
       "en": "What would you like more of in your days?",
-      "th": "คุณอยากให้วันของคุณมีอะไรมากขึ้น?"
+      "th": "คุณอยากให้วันของคุณมีอะไรมากขึ้น?",
+      "fr": "Qu'aimeriez-vous trouver davantage dans vos journées ?",
+      "es": "¿De qué te gustaría tener más en tus días?",
+      "pt": "Do que você gostaria de ter mais nos seus dias?",
+      "de": "Wovon möchtest du mehr in deinen Tagen?",
+      "it": "Di cosa vorresti di più nelle tue giornate?"
     },
     {
       "id": "prompt28",
       "en": "What's something you're carrying that you could put down?",
-      "th": "มีอะไรที่คุณแบกอยู่และพอจะวางลงได้บ้าง?"
+      "th": "มีอะไรที่คุณแบกอยู่และพอจะวางลงได้บ้าง?",
+      "fr": "Qu'est-ce que vous portez en ce moment et que vous pourriez déposer ?",
+      "es": "¿Qué llevas encima que podrías dejar a un lado?",
+      "pt": "O que você está carregando e poderia deixar de lado?",
+      "de": "Was trägst du mit dir herum, das du ablegen könntest?",
+      "it": "Cosa ti porti dietro che potresti lasciar andare?"
     },
     {
       "id": "prompt29",
       "en": "How did you take care of yourself today?",
-      "th": "วันนี้คุณดูแลตัวเองอย่างไรบ้าง?"
+      "th": "วันนี้คุณดูแลตัวเองอย่างไรบ้าง?",
+      "fr": "Comment avez-vous pris soin de vous aujourd'hui ?",
+      "es": "¿Cómo te cuidaste hoy?",
+      "pt": "Como você cuidou de si hoje?",
+      "de": "Wie hast du heute für dich gesorgt?",
+      "it": "Come hai avuto cura di te oggi?"
     },
     {
       "id": "prompt30",
       "en": "If today had a title, what would it be?",
-      "th": "ถ้าวันนี้มีชื่อเรื่อง จะชื่อว่าอะไร?"
+      "th": "ถ้าวันนี้มีชื่อเรื่อง จะชื่อว่าอะไร?",
+      "fr": "Si aujourd'hui avait un titre, quel serait-il ?",
+      "es": "Si hoy tuviera un título, ¿cuál sería?",
+      "pt": "Se o dia de hoje tivesse um título, qual seria?",
+      "de": "Wenn der heutige Tag einen Titel hätte, wie würde er lauten?",
+      "it": "Se oggi avesse un titolo, quale sarebbe?"
     }
   ],
   "fixture": [

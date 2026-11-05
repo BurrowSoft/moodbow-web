@@ -6,7 +6,7 @@
 
 export type CrisisKeywords = {
   version: number;
-  languages: Record<string, { match: "word" | "substring"; phrases: string[] }>;
+  languages: Record<string, { match: "word" | "substring"; phrases: string[]; stems?: string[] }>;
 };
 
 const APOSTROPHES = /[’‘ʼ]/g;
@@ -25,12 +25,19 @@ export function normalizeForCrisis(text: string, stripMarks: boolean): string {
 
 // Rules 3–5: every list, whatever the UI language; whole words for "word"
 // lists (diacritics stripped), substrings for "substring" lists (Thai,
-// marks kept). No keywords (the contract not synced yet) → never a match.
+// marks kept). Rule 7 (contract v2): a list's stems match anywhere in the
+// text, inside a word too (Suizidgedanken, Jugendsuizid), diacritics stripped.
+// Everything comes from the contract, so a new version's lists and stems only
+// need the sync. No keywords (the contract not synced yet) → never a match.
 export function flagsCrisis(text: string, keywords: CrisisKeywords | null): boolean {
   if (!keywords || !text.trim()) return false;
   const words = ` ${normalizeForCrisis(text, true)} `;
   const raw = normalizeForCrisis(text, false);
   for (const list of Object.values(keywords.languages)) {
+    for (const stem of list.stems ?? []) {
+      const p = normalizeForCrisis(stem, true);
+      if (p && words.includes(p)) return true;
+    }
     for (const phrase of list.phrases) {
       if (list.match === "substring") {
         const p = normalizeForCrisis(phrase, false);

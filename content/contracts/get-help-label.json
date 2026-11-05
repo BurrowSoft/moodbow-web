@@ -1,8 +1,13 @@
 {
   "key": "meGetHelpNow",
-  "note": "The help button label (decision 153) per UI language. The reflect function names it in crisis replies (server copy), so it must equal the apps' meGetHelpNow and the web's. Tests on all three sides compare against this file.",
+  "note": "The help button label (decision 153) per UI language. The reflect function names it in crisis replies (server copy), so it must equal the apps' meGetHelpNow and the web's. Tests on all three sides compare against this file. fr, es, pt (pt-BR), de and it are drafts until each <lang>_reviewed (localization plan, 2026-11-05).",
   "labels": {
     "en": "Want to talk to someone?",
-    "th": "อยากคุยกับใครสักคนไหม?"
+    "th": "อยากคุยกับใครสักคนไหม?",
+    "fr": "Envie de parler à quelqu'un ?",
+    "es": "¿Quieres hablar con alguien?",
+    "pt": "Quer conversar com alguém?",
+    "de": "Möchtest du mit jemandem reden?",
+    "it": "Vuoi parlare con qualcuno?"
   }
 }
