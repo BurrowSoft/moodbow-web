@@ -580,7 +580,10 @@ test.describe("the saved language in the journal", () => {
       await page.getByTestId("setup-done").click();
       await expect(page.getByTestId("saved-language-link")).toBeVisible({ timeout: 20_000 });
       await settled(page, "/fr/app", "fr");
-      await expect(page.getByTestId("saved-language-link")).toHaveAttribute("href", "/app");
+      // The link gets them there: the server sets the cookie on that load.
+      await page.getByTestId("saved-language-link").click();
+      await settled(page, "/app", "en");
+      await today(page);
     } finally {
       await cleanup(email);
       await context.close();

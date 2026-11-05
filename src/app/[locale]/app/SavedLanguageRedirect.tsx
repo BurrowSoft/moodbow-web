@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { usePathname } from "@/i18n/navigation";
-import { goToLanguage, languageUrl, mayMoveTo } from "@/lib/savedLanguage";
+import { goToLanguage, mayMoveTo } from "@/lib/savedLanguage";
 
 // The same page in the person's saved language (the /app layout decides;
 // lib/savedLanguage.ts says why it's a full page load). Only for that moment,
@@ -21,9 +21,10 @@ export function SavedLanguageRedirect({ locale }: { locale: string }) {
   return (
     <main id="main" className="flex min-h-dvh items-center justify-center" data-testid="saved-language-redirect">
       {stuck && (
-        // A plain link, a full page load: the router must not cache this page.
-        // eslint-disable-next-line @next/next/no-html-link-for-pages
-        <a href={languageUrl(locale, pathname)} lang={locale} data-testid="saved-language-link" className="inline-flex min-h-12 items-center px-3 font-medium text-accent underline underline-offset-4">
+        // A plain link, a full page load, always with the language in the
+        // address (/en/app too): the proxy then sets the cookie itself, which a
+        // script couldn't, and an unprefixed /app would be sent straight back.
+        <a href={`/${locale}${pathname}`} lang={locale} data-testid="saved-language-link" className="inline-flex min-h-12 items-center px-3 font-medium text-accent underline underline-offset-4">
           {t(`languageNames.${locale}` as "languageNames.en")}
         </a>
       )}
