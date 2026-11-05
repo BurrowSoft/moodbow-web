@@ -551,6 +551,7 @@
     "safetyEmergency": "Si estás en peligro ahora mismo, llama al número de emergencias de tu zona.",
     "safetyFindHelpline": "Busca una línea de ayuda en tu país",
     "safetyCall": "Llamar a {name} ({number})",
+    "safetyDialKeypad": "Marca {number} en el teclado de tu teléfono",
     "safetyCallEmergency": "Llamar al número de emergencias {number}",
     "safetyClose": "Cerrar",
     "safetyNotTherapy": "Moodbow no sustituye la ayuda profesional."

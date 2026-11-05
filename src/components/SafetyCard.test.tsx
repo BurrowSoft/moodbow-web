@@ -2,7 +2,7 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import messages from "@/messages/en.json";
-import { helplinesFor, telHref } from "@/lib/safety/helplines";
+import { helplinesFor, isIos, telHref } from "@/lib/safety/helplines";
 import { GetHelpNow, SafetyCard } from "./SafetyCard";
 
 // The safety card (M8, decision 124) and its numbers from countries.json.
@@ -12,21 +12,46 @@ afterEach(cleanup);
 
 describe("helplinesFor", () => {
   it("a listed country: its helpline and emergency number, verified or not (TH ships as listed)", () => {
-    expect(helplinesFor("TH")).toMatchObject({ helpline: { name: "Department of Mental Health hotline", display: "1323", dial: "1323" }, emergency: { dial: "1669" } });
+    expect(helplinesFor("TH")).toMatchObject({ helpline: { name: "the Department of Mental Health hotline", display: "1323", dial: "1323" }, emergency: { dial: "1669" } });
     expect(helplinesFor("us").helpline).not.toBeNull();
   });
   it("the helpline's name in the UI language where the registry has one, else English", () => {
     expect(helplinesFor("TH", "th").helpline?.name).toBe("สายด่วนสุขภาพจิต กรมสุขภาพจิต");
-    expect(helplinesFor("TH", "en").helpline?.name).toBe("Department of Mental Health hotline");
+    expect(helplinesFor("TH", "en").helpline?.name).toBe("the Department of Mental Health hotline");
     expect(helplinesFor("US", "th").helpline?.name).toBe(helplinesFor("US").helpline?.name);
   });
   it("unknown or none: only the directory", () => {
     expect(helplinesFor("ZZ")).toEqual({ helpline: null, emergency: null, directoryUrl: "https://findahelpline.com" });
     expect(helplinesFor(null).helpline).toBeNull();
   });
-  it("tel: links carry digits only", () => {
+  it("names read after the verb, with their article, and fall back to English", () => {
+    expect(helplinesFor("FR", "fr").helpline?.name).toBe("le numéro national de prévention du suicide");
+    expect(helplinesFor("BR", "pt-br").helpline?.name).toBe("o CVV");
+    expect(helplinesFor("BR", "de").helpline?.name).toBe("CVV");
+  });
+  it("hours only for a line that isn't always open, in the UI language, else English", () => {
+    expect(helplinesFor("AR", "es").helpline?.hours).toBe("Todos los días, de 8:00 a 24:00");
+    expect(helplinesFor("AR", "de").helpline?.hours).toBe("8 am to midnight, every day");
+    expect(helplinesFor("FR", "fr").helpline?.hours).toBeNull();
+  });
+  it("a country with no verified line: the emergency number only", () => {
+    expect(helplinesFor("CO").helpline).toBeNull();
+    expect(helplinesFor("CO").emergency?.dial).toBe("123");
+  });
+  it("tel: links keep digits, +, * and #, with # as %23", () => {
     expect(telHref("0800 111 0 111")).toBe("tel:08001110111");
     expect(telHref("+44 116 123")).toBe("tel:+44116123");
+    expect(telHref("*4141")).toBe("tel:*4141");
+    expect(telHref("*123#")).toBe("tel:*123%23");
+    expect(telHref("12#34")).toBe("tel:12%2334");
+    expect(telHref("(020) 7-123")).toBe("tel:0207123");
+  });
+  it("iOS: iPhone and iPad, an iPad that says it's a Mac, not a real Mac or Android", () => {
+    expect(isIos("Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)", 5)).toBe(true);
+    expect(isIos("Mozilla/5.0 (iPad; CPU OS 18_0 like Mac OS X)", 5)).toBe(true);
+    expect(isIos("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)", 5)).toBe(true);
+    expect(isIos("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)", 0)).toBe(false);
+    expect(isIos("Mozilla/5.0 (Linux; Android 14)", 5)).toBe(false);
   });
 });
 
@@ -37,7 +62,7 @@ describe("SafetyCard", () => {
     expect(screen.getByRole("heading", { name: s.safetyTitle })).toHaveFocus();
     expect(card).toHaveTextContent(s.safetyBody);
     expect(screen.getByTestId("safety-call-helpline")).toHaveAttribute("href", "tel:1323");
-    expect(screen.getByTestId("safety-call-helpline")).toHaveTextContent("Call Department of Mental Health hotline (1323)");
+    expect(screen.getByTestId("safety-call-helpline")).toHaveTextContent("Call the Department of Mental Health hotline (1323)");
     expect(screen.getByTestId("safety-call-emergency")).toHaveAttribute("href", "tel:1669");
     // The visible text is the spoken name (safetyCallEmergency).
     expect(screen.getByRole("link", { name: "Call emergency number 1669" })).toBe(screen.getByTestId("safety-call-emergency"));
@@ -51,6 +76,46 @@ describe("SafetyCard", () => {
     expect(screen.getByTestId("safety-find-helpline")).toHaveAttribute("href", "https://findahelpline.com");
     expect(screen.getByTestId("safety-card")).toHaveTextContent(s.safetyEmergency);
     expect(screen.queryByTestId("safety-call-helpline")).toBeNull();
+  });
+
+  it("a country with no verified line: the emergency number and the directory, no helpline", () => {
+    wrap(<SafetyCard country="CO" onClose={() => {}} />);
+    expect(screen.queryByTestId("safety-call-helpline")).toBeNull();
+    expect(screen.queryByTestId("safety-helpline-hours")).toBeNull();
+    expect(screen.getByTestId("safety-call-emergency")).toHaveAttribute("href", "tel:123");
+    expect(screen.getByTestId("safety-find-helpline")).toBeInTheDocument();
+  });
+
+  it("a line with set hours says them under its number; an always-open one doesn't", () => {
+    const view = wrap(<SafetyCard country="AR" onClose={() => {}} />);
+    expect(screen.getByTestId("safety-helpline-hours")).toHaveTextContent("8 am to midnight, every day");
+    view.unmount();
+    wrap(<SafetyCard country="FR" onClose={() => {}} />);
+    expect(screen.queryByTestId("safety-helpline-hours")).toBeNull();
+  });
+
+  describe("a short code (Chile's *4141)", () => {
+    afterEach(() => vi.restoreAllMocks());
+
+    it("a link everywhere but iOS", () => {
+      wrap(<SafetyCard country="CL" onClose={() => {}} />);
+      expect(screen.getByTestId("safety-call-helpline")).toHaveAttribute("href", "tel:*4141");
+      expect(screen.queryByTestId("safety-helpline-keypad")).toBeNull();
+    });
+
+    it("on iOS: no link, the number, and to dial it by hand", () => {
+      vi.spyOn(navigator, "userAgent", "get").mockReturnValue("Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)");
+      wrap(<SafetyCard country="CL" onClose={() => {}} />);
+      expect(screen.queryByTestId("safety-call-helpline")).toBeNull();
+      expect(screen.getByTestId("safety-card")).toHaveTextContent("*4141");
+      expect(screen.getByTestId("safety-helpline-keypad")).toHaveTextContent(s.safetyDialKeypad.replace("{number}", "*4141"));
+    });
+
+    it("on iOS an ordinary number is still a link", () => {
+      vi.spyOn(navigator, "userAgent", "get").mockReturnValue("Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)");
+      wrap(<SafetyCard country="FR" onClose={() => {}} />);
+      expect(screen.getByTestId("safety-call-helpline")).toHaveAttribute("href", "tel:3114");
+    });
   });
 
   it("Close and Esc close it", () => {

@@ -1,9 +1,11 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useState, useSyncExternalStore } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Dialog, dialogButton } from "@/components/Dialog";
-import { helplinesFor, telHref } from "@/lib/safety/helplines";
+import { helplinesFor, isIos, isShortCode, telHref } from "@/lib/safety/helplines";
+
+const noSubscribe = () => () => {};
 
 // The safety card (M8, r1 §M8, decision 124): the same card after a flagged
 // save, behind Me → the help button (meGetHelpNow, "Want to talk to someone?")
@@ -19,15 +21,30 @@ export function SafetyCard({ country, onClose, neutral = false }: { country: str
   const t = useTranslations("safety");
   const tc = useTranslations("common");
   const lines = helplinesFor(country, useLocale());
+  const ios = useSyncExternalStore(noSubscribe, () => isIos(navigator.userAgent, navigator.maxTouchPoints), () => false);
   const link = "font-medium text-accent underline underline-offset-4";
   return (
     <Dialog title={t("safetyTitle")} body={t(neutral ? "safetyBodyNeutral" : "safetyBody")} onCancel={onClose} testId="safety-card" initialFocus="title">
       <div className="w-full space-y-3 text-left">
-        {lines.helpline && (
-          <p>
-            <a href={telHref(lines.helpline.dial)} data-testid="safety-call-helpline" className={link}>
-              {t("safetyCall", { name: lines.helpline.name, number: lines.helpline.display })}
-            </a>
+        {lines.helpline &&
+          (ios && isShortCode(lines.helpline.dial) ? (
+            <div>
+              {/* iOS can't dial this from a link: the number, and what to do with it. */}
+              <p className="font-medium text-text">{t("safetyCall", { name: lines.helpline.name, number: lines.helpline.display })}</p>
+              <p data-testid="safety-helpline-keypad" className="text-sm text-muted">
+                {t("safetyDialKeypad", { number: lines.helpline.display })}
+              </p>
+            </div>
+          ) : (
+            <p>
+              <a href={telHref(lines.helpline.dial)} data-testid="safety-call-helpline" className={link}>
+                {t("safetyCall", { name: lines.helpline.name, number: lines.helpline.display })}
+              </a>
+            </p>
+          ))}
+        {lines.helpline?.hours && (
+          <p data-testid="safety-helpline-hours" className="text-sm text-muted">
+            {lines.helpline.hours}
           </p>
         )}
         <p className="text-text">{t("safetyEmergency")}</p>
