@@ -263,6 +263,29 @@ describe("ReflectPanel: a crisis reply (r1)", () => {
     );
     expect(screen.getByTestId("reflect-get-help")).toBeInTheDocument();
   });
+
+  it.each([
+    ["a curly apostrophe", "Envie de parler à quelqu’un ?"],
+    ["no question mark", "Envie de parler à quelqu'un"],
+    ["another case", "ENVIE DE PARLER À QUELQU'UN ?"],
+    ["no opening ¿", "Quieres hablar con alguien?"],
+  ])("a label with %s still shows the button", (_, label) => {
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <ReflectPanel entryId={ENTRY} initial={reflection({ body: `Ça a l'air lourd. ${label}` })} balance={600} onAnswer={vi.fn()} />
+      </NextIntlClientProvider>,
+    );
+    expect(screen.getByTestId("reflect-get-help")).toBeInTheDocument();
+  });
+
+  it("part of a label doesn't count", () => {
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <ReflectPanel entryId={ENTRY} initial={reflection({ body: "Envie de parler de votre journée ?" })} balance={600} onAnswer={vi.fn()} />
+      </NextIntlClientProvider>,
+    );
+    expect(screen.queryByTestId("reflect-get-help")).toBeNull();
+  });
 });
 
 describe("ReflectPanel: focus with one-shot Reflect (reviewer #51)", () => {

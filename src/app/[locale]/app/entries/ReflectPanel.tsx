@@ -7,6 +7,7 @@ import { GetHelpNow } from "@/components/SafetyCard";
 import { lastQuestion } from "@/lib/journal/answer";
 import getHelpLabel from "../../../../../content/contracts/get-help-label.json";
 import { IN_PROGRESS_LIMIT_MS, IN_PROGRESS_RETRY_MS, REFLECT_CLIENT_DEADLINE_MS, type Reflection, type ReflectErrorKey, type ReflectResult } from "@/lib/journal/reflect";
+import { normalizeForCrisis } from "@/lib/safety/crisis";
 import { deleteReflection, reflectOnEntry } from "./reflectActions";
 
 type Phase =
@@ -18,12 +19,15 @@ type Phase =
   | { kind: "offline" };
 
 // The reply names the button in the entry's language, which may not be the
-// UI's: any label in the shared contract counts (reviewer #35). French's has
-// a no-break space before "?", and the AI may write a plain one: no-break
-// spaces count as spaces on both sides (safety check, must-fix).
-const plainSpaces = (s: string) => s.replace(/[\u00A0\u202F]/g, " ");
-const GET_HELP_LABELS = Object.values(getHelpLabel.labels).map(plainSpaces);
-const namesGetHelp = (body: string) => GET_HELP_LABELS.some((label) => plainSpaces(body).includes(label));
+// UI's: any label in the shared contract counts (reviewer #35). Both sides go
+// through the crisis normalizer, as on the app (namesHelpLabel): a no-break
+// space, a curly apostrophe, a missing ? or ¿, or the case can't hide the button.
+const forMatch = (s: string) => normalizeForCrisis(s, false);
+const GET_HELP_LABELS = Object.values(getHelpLabel.labels).map(forMatch).filter(Boolean);
+const namesGetHelp = (body: string) => {
+  const reply = forMatch(body);
+  return GET_HELP_LABELS.some((label) => reply.includes(label));
+};
 
 // One call, or no answer after ms (a hung request): the late answer, if
 // any, is ignored; the same key is resent on Try again.
