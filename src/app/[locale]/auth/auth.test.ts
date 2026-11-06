@@ -108,12 +108,12 @@ describe("confirmLink (the button's POST)", () => {
     throw new Error("expected a redirect");
   };
 
-  it("signup: verifies, ends the web session, redirects to /email-confirmed", async () => {
+  it("signup: verifies, keeps the web session now the journal is live (decision 134), redirects to /email-confirmed", async () => {
     auth.verifyOtp.mockResolvedValue({ data: { session }, error: null });
     // A plain path when there's no result (no trailing "?").
     expect(await post({ token_hash: HASH, type: "signup" })).toEqual({ href: "/email-confirmed", locale: "en" });
     expect(auth.verifyOtp).toHaveBeenCalledWith({ type: "signup", token_hash: HASH });
-    expect(auth.signOut).toHaveBeenCalledWith({ scope: "local" });
+    expect(auth.signOut).not.toHaveBeenCalled();
   });
 
   it("recovery: keeps the session and goes to /auth/reset-password", async () => {

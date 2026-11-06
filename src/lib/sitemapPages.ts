@@ -43,9 +43,9 @@ export function pagePath(pathname: string, locales: readonly string[]): string {
 }
 
 // True when `path` (without a locale prefix, e.g. "/privacy") is a gated
-// page that is hidden on this build (pageGate → "hidden").
-export function isHiddenPage(path: string, build?: BuildEnv): boolean {
+// page that is hidden on this build (pageGate → "hidden"). met: as pageGate.
+export function isHiddenPage(path: string, build?: BuildEnv, met?: (id: ConditionId) => boolean): boolean {
   const normalized = path.length > 1 ? path.replace(/\/+$/, "") : path;
   const page = PAGES.find((p) => p.path === normalized || (p.prefix && normalized.startsWith(`${p.path}/`)));
-  return !!page?.gate && pageGate(page.gate, build) === "hidden";
+  return !!page?.gate && pageGate(page.gate, build, met) === "hidden";
 }
