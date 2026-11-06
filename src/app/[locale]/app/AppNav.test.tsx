@@ -43,14 +43,14 @@ describe("tabLabelSize: the four labels share the row", () => {
   it("they don't: one size for all, just under the exact fit", () => {
     const size = tabLabelSize(240, [120, 120, 120, 120], 24);
     expect(size).toBeCloseTo(11.76, 1);
-    expect((480 * size!) / 24).toBeLessThanOrEqual(240);
+    expect((480 * (size as number)) / 24).toBeLessThanOrEqual(240);
   });
 
   it("a label narrower than its icon: its tab takes the icon's width, and the others share what's left", () => {
     // The row: 300. "Me" (20) sits under a 48 px icon, so the other three share 300 × 0.98 − 48 = 246 of their 360.
     const size = tabLabelSize(300, [120, 120, 120, 20], 24, 48);
     expect(size).toBeCloseTo(16.4, 1);
-    const scaled = [120, 120, 120, 20].map((width) => Math.max((width * size!) / 24, 48));
+    const scaled = [120, 120, 120, 20].map((width) => Math.max((width * (size as number)) / 24, 48));
     expect(scaled.reduce((sum, width) => sum + width, 0)).toBeLessThanOrEqual(300);
     // They fit once the icon's width is counted.
     expect(tabLabelSize(408, [120, 120, 120, 20], 24, 48)).toBeNull();
