@@ -904,7 +904,8 @@ describe("EntryEditor: the safety card after a failed save (UX & PM 2026-11-06)"
     fireEvent.click(screen.getByTestId("entry-save"));
     expect(await screen.findByTestId("safety-card")).toBeInTheDocument();
     expect(screen.getByTestId("safety-call-emergency")).toHaveAttribute("href", expect.stringMatching(/^tel:/));
-    expect(screen.getByTestId("entry-error")).toHaveTextContent(messages.today.errGeneric);
+    // The card opens during the action; the error comes with its result.
+    expect(await screen.findByTestId("entry-error")).toHaveTextContent(messages.today.errGeneric);
     expect(screen.getByTestId("entry-text")).toHaveValue(FLAGGED);
     expect(stored(NEW_KEY)).toMatchObject({ body: FLAGGED });
     expect(push).not.toHaveBeenCalled();
@@ -991,6 +992,57 @@ describe("EntryEditor: the safety card after a failed save (UX & PM 2026-11-06)"
     type(FLAGGED);
     fireEvent.click(screen.getByTestId("entry-save"));
     expect(await screen.findByTestId("entry-conflict-dialog")).toBeInTheDocument();
+    expect(screen.queryByTestId("safety-card")).toBeNull();
+  });
+
+  it("changed elsewhere, Use the other one: the card for the text given up, over the other version", async () => {
+    saveEntry.mockResolvedValue({ status: "error", error: "stale", latest: { ...ENTRY, body: "Another version" } });
+    renderEditor(ENTRY);
+    type(FLAGGED);
+    fireEvent.click(screen.getByTestId("entry-save"));
+    fireEvent.click(await screen.findByTestId("entry-conflict-use-other"));
+    expect(await screen.findByTestId("safety-card")).toBeInTheDocument();
+    expect(screen.getByTestId("entry-text")).toHaveValue("Another version");
+    fireEvent.click(screen.getByTestId("safety-close"));
+    await waitFor(() => expect(screen.getByTestId("entry-text")).toHaveFocus());
+    expect(push).not.toHaveBeenCalled();
+  });
+
+  it("Use the other one with ordinary text, or Cancel with flagged text: no card", async () => {
+    saveEntry.mockResolvedValue({ status: "error", error: "stale", latest: { ...ENTRY, body: "Another version" } });
+    renderEditor(ENTRY);
+    type(FLAGGED);
+    fireEvent.click(screen.getByTestId("entry-save"));
+    fireEvent.click(await screen.findByTestId("entry-conflict-cancel"));
+    expect(screen.queryByTestId("safety-card")).toBeNull();
+    expect(screen.getByTestId("entry-text")).toHaveValue(FLAGGED);
+    type("A calm day.");
+    fireEvent.click(screen.getByTestId("entry-save"));
+    fireEvent.click(await screen.findByTestId("entry-conflict-use-other"));
+    await waitFor(() => expect(screen.getByTestId("entry-text")).toHaveValue("Another version"));
+    expect(screen.queryByTestId("safety-card")).toBeNull();
+  });
+
+  it("deleted elsewhere, Delete it: the card first, and closing it leaves; no draft comes back", async () => {
+    saveEntry.mockResolvedValue({ status: "error", error: "stale", latest: null });
+    renderEditor(ENTRY);
+    type(FLAGGED);
+    fireEvent.click(screen.getByTestId("entry-save"));
+    fireEvent.click(await screen.findByTestId("entry-deleted-discard"));
+    expect(await screen.findByTestId("safety-card")).toBeInTheDocument();
+    expect(push).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId("safety-close"));
+    expect(push).toHaveBeenCalledWith("/app");
+    expect(window.localStorage.getItem(EDIT_KEY)).toBeNull();
+  });
+
+  it("Delete it with ordinary text: leaves at once, no card", async () => {
+    saveEntry.mockResolvedValue({ status: "error", error: "stale", latest: null });
+    renderEditor(ENTRY);
+    type("A calm day.");
+    fireEvent.click(screen.getByTestId("entry-save"));
+    fireEvent.click(await screen.findByTestId("entry-deleted-discard"));
+    expect(push).toHaveBeenCalledWith("/app");
     expect(screen.queryByTestId("safety-card")).toBeNull();
   });
 });

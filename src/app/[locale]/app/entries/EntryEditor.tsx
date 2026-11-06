@@ -381,11 +381,15 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
       } else leave();
     }, 0);
   }, [leave]);
+  // Set when the card comes on the way out of a deleted entry: leaving first
+  // would take the card away with the editor.
+  const leaveAfterCard = useRef(false);
   const closeSafety = useCallback(() => {
     setSafety("closed");
+    if (leaveAfterCard.current) return router.push(backTo);
     // After the card's own focus restore (on its unmount): back into the entry.
     window.setTimeout(() => document.getElementById("entry-text")?.focus(), 0);
-  }, []);
+  }, [router, backTo]);
 
   // The card comes once per Save press, whichever answers first: the 30 s
   // wait, the failure itself, or a save that lands after the wait. Each press
@@ -731,6 +735,8 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
               lastSaved.current = conflict;
               setSaved(fromEntry(conflict));
               setFields(fromEntry(conflict));
+              // The text given up here was written all the same (the app, #171).
+              if (flagsCrisis(fields.body, CRISIS_KEYWORDS)) setSafety("open");
             }}
           >
             {t("entryConflictUseOther")}
@@ -763,6 +769,15 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
               finished.current = true;
               setDialog(null);
               removeDraft(draftKey);
+              // The text given up here was written all the same (the app, #171):
+              // the card first, and closing it leaves. The text goes now, so
+              // the autosave can't put the draft back behind the card.
+              if (flagsCrisis(fields.body, CRISIS_KEYWORDS)) {
+                leaveAfterCard.current = true;
+                setFields(saved);
+                setSafety("open");
+                return;
+              }
               // There's no entry left to view: back where it was opened from.
               router.push(backTo);
             }}
