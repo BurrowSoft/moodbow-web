@@ -94,6 +94,16 @@ describe("legal content files", () => {
       expect(renderLegal(text(slug), live(false)).html).not.toMatch(/\bBo\b/);
       expect(renderLegal(text(slug), live(true)).html).toMatch(/\bBo\b/);
     });
+    it("the age check's lines follow the age signal, not Bo", () => {
+      const age = (bo: boolean, signal: boolean) => (id: string) => (id === "age_signal_live" ? signal : live(bo)(id));
+      expect(renderLegal(text("privacy"), age(true, false)).html).not.toContain("store tells us");
+      expect(renderLegal(text("privacy"), age(false, true)).html).toContain("store tells us");
+      expect(renderLegal(text("privacy"), age(false, true)).html).not.toMatch(/\bBo\b/);
+    });
+    it("what's true of Reflect's usage isn't said of Bo", () => {
+      expect(renderLegal(text("privacy"), live(false)).html).toContain("AI usage");
+      expect(renderLegal(text("privacy"), live(true)).html).not.toContain("AI usage");
+    });
     it("what Bo replaces goes when it comes", () => {
       expect(renderLegal(text("privacy"), live(true)).html).not.toContain("Only you can read your journal");
       expect(renderLegal(text("privacy"), live(true)).html).not.toContain("at most 30 days");

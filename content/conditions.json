@@ -219,6 +219,10 @@
     "met": true,
     "what": "The Consumer Health Data Privacy Policy is approved by Vitor (6 November 2026, through UX & PM). Its link is in the footer of every page: Washington's RCW 19.373 counts any page collecting personal information as a homepage. Wording changes are his."
   },
+  "age-signal-live": {
+    "met": false,
+    "what": "The store age signal (specs/age-signal.md) is in the app build people have. The privacy policy's age check lines show with it, whether or not Bo is live. Vitor's wording; he approves it in the legal batch."
+  },
   "bo-off": {
     "met": true,
     "what": "The legal text Bo replaces (specs/bo-legal-drafts.md): met while Bo isn't live, flipped with bo-live, never on its own. A test keeps them opposite."
