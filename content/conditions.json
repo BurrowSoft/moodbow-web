@@ -203,6 +203,10 @@
     "met": false,
     "what": "Italian is offered on the web: a native reader has read the UI, Help, dates and crisis list (it_reviewed, localization plan), with UX's go. Until then /it is a draft on test builds only."
   },
+  "your-week-live": {
+    "met": false,
+    "what": "Your week (specs/your-week.md): the rule-based card at the top of Insights, no AI, on the web. Met after the Web Tester's row."
+  },
   "thai-offered-live": {
     "met": false,
     "what": "1.1 F: Thai is offered on the web: the native reader has read the Thai UI, Help and dates (thai_reviewed, decision 193), with UX's go. Until then /th is a draft on test builds only (Preview, dev, CI) and Production is English only; the switcher, Me → Language, hreflang and the sitemap offer Thai only once met. The legal pages keep their own gates in every language."

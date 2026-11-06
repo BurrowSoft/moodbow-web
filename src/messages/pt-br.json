@@ -455,7 +455,17 @@
     "patternsStressShown": "Nos dias de estresse baixo, seu humor ficou em média {a} de 5. Nos dias de estresse alto, {b}.",
     "patternsStressSame": "Nos dias de estresse baixo e de estresse alto, seu humor ficou mais ou menos igual ({a} e {b} de 5).",
     "patternsFootnote": "São os seus próprios check-ins lado a lado. Eles podem mostrar o que costuma andar junto, não o que causa o quê.",
-    "patternsNone": "Os padrões aparecem aqui quando você tiver mais check-ins com sono, movimento ou estresse."
+    "patternsNone": "Os padrões aparecem aqui quando você tiver mais check-ins com sono, movimento ou estresse.",
+    "yourWeekTitle": "Sua semana",
+    "yourWeekPatternSleep": "Nos dias em que você dormiu mais, seu humor estava melhor.",
+    "yourWeekPatternMovement": "Nos dias mais ativos, seu humor estava melhor.",
+    "yourWeekPatternStress": "Nos dias com menos estresse, seu humor estava melhor.",
+    "yourWeekLookMoreGood": "Sua semana teve mais dias bons do que baixos.",
+    "yourWeekLookSteady": "Sua semana foi bem estável.",
+    "yourWeekLookMixed": "Sua semana teve dias bons e dias baixos.",
+    "yourWeekMoment": "Um momento desta semana: {date}",
+    "yourWeekHard": "Esta semana pareceu difícil.",
+    "yourWeekCaption": "Isso pode mostrar o que costuma andar junto, não o que causa o quê."
   },
   "share": {
     "shareButton": "Compartilhar",

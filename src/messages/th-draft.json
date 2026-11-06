@@ -953,5 +953,55 @@
     "key": "me.deleteBody",
     "en": "This deletes everything in your account, including your entries, check-ins and settings, right away. It can't be undone.",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.yourWeekTitle",
+    "en": "Your week",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.yourWeekPatternSleep",
+    "en": "On days you slept more, your mood was higher.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.yourWeekPatternMovement",
+    "en": "On more active days, your mood was higher.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.yourWeekPatternStress",
+    "en": "On lower-stress days, your mood was higher.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.yourWeekLookMoreGood",
+    "en": "Your week had more good days than low ones.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.yourWeekLookSteady",
+    "en": "Your week was mostly steady.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.yourWeekLookMixed",
+    "en": "Your week had good days and low ones.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.yourWeekMoment",
+    "en": "A moment from this week: {date}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.yourWeekHard",
+    "en": "This looked like a hard week.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.yourWeekCaption",
+    "en": "This may show what tends to go together, not what causes what.",
+    "reason": "UX draft (native read pending)"
   }
 ]

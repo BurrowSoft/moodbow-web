@@ -455,7 +455,17 @@
     "patternsStressShown": "Nei giorni con poco stress, il tuo umore medio è stato {a} su 5. Nei giorni con molto stress, {b}.",
     "patternsStressSame": "Nei giorni con poco e con molto stress, il tuo umore è stato più o meno lo stesso ({a} e {b} su 5).",
     "patternsFootnote": "Sono i tuoi check-in messi uno accanto all'altro. Possono mostrare cosa tende ad andare insieme, non cosa causa cosa.",
-    "patternsNone": "Le tendenze appaiono qui quando avrai più check-in con sonno, movimento o stress."
+    "patternsNone": "Le tendenze appaiono qui quando avrai più check-in con sonno, movimento o stress.",
+    "yourWeekTitle": "La tua settimana",
+    "yourWeekPatternSleep": "Nei giorni in cui hai dormito di più, il tuo umore era migliore.",
+    "yourWeekPatternMovement": "Nei giorni più attivi, il tuo umore era migliore.",
+    "yourWeekPatternStress": "Nei giorni con meno stress, il tuo umore era migliore.",
+    "yourWeekLookMoreGood": "La tua settimana ha avuto più giorni buoni che bassi.",
+    "yourWeekLookSteady": "La tua settimana è stata per lo più stabile.",
+    "yourWeekLookMixed": "La tua settimana ha avuto giorni buoni e giorni bassi.",
+    "yourWeekMoment": "Un momento di questa settimana: {date}",
+    "yourWeekHard": "Sembra sia stata una settimana difficile.",
+    "yourWeekCaption": "Può mostrare cosa tende ad andare insieme, non cosa causa cosa."
   },
   "share": {
     "shareButton": "Condividi",

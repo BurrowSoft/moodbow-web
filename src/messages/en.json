@@ -455,7 +455,17 @@
     "patternsStressShown": "On low-stress days, your mood averaged {a} of 5. On high-stress days, {b}.",
     "patternsStressSame": "On low- and high-stress days, your mood was about the same ({a} and {b} of 5).",
     "patternsFootnote": "These are your own check-ins side by side. They may show what tends to go together, not what causes what.",
-    "patternsNone": "Patterns show up here once you have more check-ins with sleep, movement or stress."
+    "patternsNone": "Patterns show up here once you have more check-ins with sleep, movement or stress.",
+    "yourWeekTitle": "Your week",
+    "yourWeekPatternSleep": "On days you slept more, your mood was higher.",
+    "yourWeekPatternMovement": "On more active days, your mood was higher.",
+    "yourWeekPatternStress": "On lower-stress days, your mood was higher.",
+    "yourWeekLookMoreGood": "Your week had more good days than low ones.",
+    "yourWeekLookSteady": "Your week was mostly steady.",
+    "yourWeekLookMixed": "Your week had good days and low ones.",
+    "yourWeekMoment": "A moment from this week: {date}",
+    "yourWeekHard": "This looked like a hard week.",
+    "yourWeekCaption": "This may show what tends to go together, not what causes what."
   },
   "share": {
     "shareButton": "Share",
