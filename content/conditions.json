@@ -211,9 +211,17 @@
     "met": false,
     "what": "/api/region answers on Production: the signed country token for functions that are only on in some countries (Bo first, specs/bo-design.md section 7). Before it's met, on Production: REGION_SECRET set by Vitor, and the Web Tester's forged-header row passed on Preview."
   },
+  "bo-live": {
+    "met": false,
+    "what": "Bo, Moodbow's AI, on the web (specs/moodpal-1.0.md, plans/PLAN-bo-web-rows.md): the button, the conversation and /api/bo. Its own gate: ai-live stays off. Before it's met: the go-live runbook, the eval, the new AI consent, the legal text and Vitor's word."
+  },
   "consumer-health-data-approved": {
     "met": true,
     "what": "The Consumer Health Data Privacy Policy is approved by Vitor (6 November 2026, through UX & PM). Its link is in the footer of every page: Washington's RCW 19.373 counts any page collecting personal information as a homepage. Wording changes are his."
+  },
+  "bo-off": {
+    "met": true,
+    "what": "The legal text Bo replaces (specs/bo-legal-drafts.md): met while Bo isn't live, flipped with bo-live, never on its own. A test keeps them opposite."
   },
   "thai-offered-live": {
     "met": false,

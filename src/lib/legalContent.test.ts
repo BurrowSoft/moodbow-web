@@ -1,4 +1,6 @@
 // @vitest-environment node
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { ALL_LOCALES, routing } from "@/i18n/routing";
 import messages from "@/messages/en.json";
@@ -80,6 +82,25 @@ describe("legal content files", () => {
     expect(renderLegal(source, met(false)).html).not.toContain(heading);
     expect(renderLegal(source, met(true)).html.split(heading)).toHaveLength(2);
     expect(renderLegal(source).html.includes(heading)).toBe(conditionMet("anon-start-live"));
+  });
+
+  describe("Bo's text", () => {
+    const text = (slug: string) => readFileSync(path.join(process.cwd(), `content/legal/en/${slug}.md`), "utf8");
+    const live = (bo: boolean) => (id: string) => (id === "bo_live" ? bo : id === "bo_off" ? !bo : isPendingMet(id));
+    it("bo-live and bo-off are always opposite", () => {
+      expect(isPendingMet("bo_live")).toBe(!isPendingMet("bo_off"));
+    });
+    it.each(["privacy", "terms", "consumer-health-data"])("%s: nothing about Bo until the flip, and it says so after", (slug) => {
+      expect(renderLegal(text(slug), live(false)).html).not.toMatch(/\bBo\b/);
+      expect(renderLegal(text(slug), live(true)).html).toMatch(/\bBo\b/);
+    });
+    it("what Bo replaces goes when it comes", () => {
+      expect(renderLegal(text("privacy"), live(true)).html).not.toContain("Only you can read your journal");
+      expect(renderLegal(text("privacy"), live(true)).html).not.toContain("at most 30 days");
+      expect(renderLegal(text("privacy"), live(false)).html).toContain("Only you can read your journal");
+      expect(renderLegal(text("consumer-health-data"), live(true)).html).not.toContain("AI features are off today");
+      expect(renderLegal(text("terms"), live(true)).html).not.toContain("reflections are suggestions to think about");
+    });
   });
 
   it("todos() finds every kind of to-confirm mark, but not in editor comments", () => {
