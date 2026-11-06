@@ -586,7 +586,7 @@ test.describe("onboarding (signed out)", () => {
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("See your patterns");
     await page.getByTestId("welcome-skip").click();
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Private, and yours");
-    await expect(page.getByText("Only you can read your journal, and you can delete everything at any time.")).toBeVisible();
+    await expect(page.getByText("Only you can read your journal, and you can delete everything at any time in Me.")).toBeVisible();
     await expect(page.getByTestId("welcome-skip")).toHaveCount(0);
     await expect(page).toHaveURL(/\/welcome\?slide=3$/);
     await page.getByTestId("welcome-start").click();
