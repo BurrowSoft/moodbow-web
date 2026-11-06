@@ -1,6 +1,7 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { tabLabelSize } from "@/lib/ui/journalLayout";
 import messages from "@/messages/en.json";
 
 // The journal nav highlights the parent tab (decision 152): an entry or New
@@ -32,6 +33,23 @@ const current = (path: string, query = "") => {
   );
   return ["tab-today", "tab-timeline", "tab-insights", "tab-me"].filter((id) => screen.getByTestId(id).getAttribute("aria-current") === "page");
 };
+
+describe("tabLabelSize: the four labels share the row", () => {
+  it("they fit: nothing to change", () => {
+    expect(tabLabelSize(300, [60, 60, 60, 60], 12)).toBeNull();
+    expect(tabLabelSize(240, [60, 60, 60, 60], 12)).toBeNull();
+  });
+
+  it("they don't: one size for all, just under the exact fit", () => {
+    const size = tabLabelSize(240, [120, 120, 120, 120], 24);
+    expect(size).toBe(11.76);
+    expect((480 * size!) / 24).toBeLessThanOrEqual(240);
+  });
+
+  it("no room to measure (hidden): nothing to change", () => {
+    expect(tabLabelSize(0, [60], 12)).toBeNull();
+  });
+});
 
 describe("AppNav: the parent tab (decision 152)", () => {
   it("each tab and the pages under it", () => {

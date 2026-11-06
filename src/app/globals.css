@@ -121,6 +121,8 @@ body {
   background: var(--bg);
   color: var(--text);
   -webkit-font-smoothing: antialiased;
+  /* A long word or address wraps rather than scrolling a narrow page sideways. */
+  overflow-wrap: break-word;
 }
 
 /* Every error message (role=alert) gets an error icon before its words:

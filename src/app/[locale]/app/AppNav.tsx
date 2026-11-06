@@ -1,11 +1,12 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { Link, usePathname } from "@/i18n/navigation";
 import { originOf, originTab } from "@/lib/journal/origin";
 import { Logo } from "@/components/Logo";
-import { TAB_COLUMNS, TAB_ITEM, TAB_LABEL, TAB_LINK_NARROW } from "@/lib/ui/journalLayout";
+import { TAB_COLUMNS, TAB_ITEM, TAB_LABEL, TAB_LINK_NARROW, tabLabelSize } from "@/lib/ui/journalLayout";
 import { useKeyboardOpen } from "@/lib/ui/keyboardOpen";
 
 // The web journal's tabs, the same four as the app (Today · Timeline ·
@@ -18,6 +19,47 @@ const TABS = [
   { href: "/app/me", key: "tabMe", id: "tab-me", icon: <PersonIcon /> },
 ] as const;
 
+// The phone bar's labels stay on one line: when the four don't fit, they scale
+// down together (see TAB_LABEL). Measured again when the row's width or the
+// browser's text size changes; after the frame, so changing the row's height
+// here can't re-enter the observer. The sidebar from md up has room.
+function useTabLabelsFit() {
+  const row = useRef<HTMLUListElement>(null);
+  useEffect(() => {
+    const ul = row.current;
+    if (!ul || typeof ResizeObserver === "undefined") return;
+    let measured = "";
+    let frame = 0;
+    const fit = () => {
+      const now = `${ul.clientWidth}:${getComputedStyle(document.documentElement).fontSize}`;
+      if (now === measured) return;
+      measured = now;
+      ul.style.removeProperty("--tab-label-size");
+      if (getComputedStyle(ul).display !== "grid") return;
+      const labels = [...ul.querySelectorAll<HTMLElement>("[data-tab-label]")];
+      if (!labels[0]) return;
+      const padding = [...ul.querySelectorAll("a")].reduce((sum, a) => {
+        const style = getComputedStyle(a);
+        return sum + parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+      }, 0);
+      const widths = labels.map((label) => label.getBoundingClientRect().width);
+      const size = tabLabelSize(ul.clientWidth - padding, widths, parseFloat(getComputedStyle(labels[0]).fontSize));
+      if (size !== null) ul.style.setProperty("--tab-label-size", `${size}px`);
+    };
+    fit();
+    const observer = new ResizeObserver(() => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(fit);
+    });
+    observer.observe(ul);
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+    };
+  }, []);
+  return row;
+}
+
 export function AppNav() {
   const t = useTranslations("app");
   const tc = useTranslations("common");
@@ -25,6 +67,7 @@ export function AppNav() {
   // The phone bar steps aside while the on-screen keyboard is up (UX); the
   // sidebar from md up never does.
   const keyboard = useKeyboardOpen();
+  const row = useTabLabelsFit();
   const from = useSearchParams().get("from");
   // An entry page or New entry belongs to the tab it was opened from (Today
   // or the Timeline; Today on a direct load), decision 152.
@@ -52,7 +95,7 @@ export function AppNav() {
           <Logo variant="horizontal" width={130} alt="" />
         </Link>
       </div>
-      <ul className={`grid ${TAB_COLUMNS} md:flex md:flex-col md:gap-1`}>
+      <ul ref={row} className={`grid ${TAB_COLUMNS} md:flex md:flex-col md:gap-1`}>
         {TABS.map((tab) => {
           const active = isActive(tab.href);
           return (
@@ -71,7 +114,9 @@ export function AppNav() {
                 <span className="h-6 w-6" aria-hidden="true">
                   {tab.icon}
                 </span>
-                <span className={TAB_LABEL}>{t(tab.key)}</span>
+                <span data-tab-label className={TAB_LABEL}>
+                  {t(tab.key)}
+                </span>
               </Link>
             </li>
           );

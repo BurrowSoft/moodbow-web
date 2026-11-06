@@ -788,6 +788,22 @@ test.describe("the tab bar in every language", () => {
           expect(labels, route).toHaveLength(4);
           for (const { text, lines } of labels) expect(lines, `${route || "/en"}: ${text}`).toBeLessThanOrEqual(text.trim().split(/\s+/).length);
           expect(await page.evaluate(() => document.documentElement.scrollWidth), route).toBeLessThanOrEqual(width);
+          // Browser text at 200%: still one line each, scaled to share the row.
+          await page.addStyleTag({ content: "html { font-size: 200% }" });
+          await expect
+            .poll(
+              () =>
+                page.locator('a[data-testid^="tab-"]').evaluateAll((links) =>
+                  links.every((link) => {
+                    const label = link.querySelector("[data-tab-label]");
+                    const range = document.createRange();
+                    if (label) range.selectNodeContents(label);
+                    return new Set([...range.getClientRects()].map((r) => Math.round(r.top))).size === 1 && link.scrollWidth <= link.clientWidth;
+                  }),
+                ),
+              { message: `${route || "/en"} at 200%` },
+            )
+            .toBe(true);
         }
       } finally {
         await cleanup(email);
