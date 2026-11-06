@@ -1,11 +1,28 @@
 {
   "format": "moodbow-countries",
-  "version": "2026-10-19",
-  "names_note": "helpline.names: the helpline's name per UI language; \"en\" always, others when known; clients fall back to \"en\" (UX, 1.1 F).",
+  "version": "2026-11-05",
+  "names_note": "helpline.names: the helpline's name per UI language; as read after the verb in \"Call {name} ({number})\" (with its article where the language needs one); \"en\" always, others when known; clients fall back to \"en\" (UX, 1.1 F).",
   "default": {
     "directory_url": "https://findahelpline.com"
   },
+  "hours_note": "helpline.hours: only for a line that is not open around the clock, per UI language like names (\"en\" always); 24/7 lines omit it. helpline.dial may hold * and # for short codes (Chile *4141); in a tel: link # is sent as %23 (2026-11-05). \"helpline\": null = emergency only (no verified national line: the card shows the directory and the emergency number; CO). A helpline name never holds its own number: the call button adds it.",
   "countries": [
+    {
+      "code": "AR",
+      "helpline": { "names": { "en": "Centro de Asistencia al Suicida", "es": "la línea del Centro de Asistencia al Suicida" }, "display": "0800 345 1435", "dial": "08003451435", "sms": false, "hours": { "en": "8 am to midnight, every day", "es": "Todos los días, de 8:00 a 24:00" } },
+      "emergency": { "display": "911", "dial": "911" },
+      "status": "verified",
+      "checked_on": "2026-11-05",
+      "source": "https://www.asistenciaalsuicida.org.ar/horarios-de-atencion"
+    },
+    {
+      "code": "AT",
+      "helpline": { "names": { "en": "TelefonSeelsorge", "de": "TelefonSeelsorge" }, "display": "142", "dial": "142", "sms": false },
+      "emergency": { "display": "112", "dial": "112" },
+      "status": "verified",
+      "checked_on": "2026-11-05",
+      "source": "https://www.telefonseelsorge.at"
+    },
     {
       "code": "AU",
       "helpline": { "names": { "en": "Lifeline" }, "display": "13 11 14", "dial": "131114", "sms": false },
@@ -15,8 +32,16 @@
       "source": "https://www.lifeline.org.au"
     },
     {
+      "code": "BE",
+      "helpline": { "names": { "en": "the Suicide Prevention Centre", "fr": "le Centre de Prévention du Suicide" }, "display": "0800 32 123", "dial": "080032123", "sms": false },
+      "emergency": { "display": "112", "dial": "112" },
+      "status": "verified",
+      "checked_on": "2026-11-05",
+      "source": "https://www.preventionsuicide.be/la-ligne-decoute-0800-32-123"
+    },
+    {
       "code": "BR",
-      "helpline": { "names": { "en": "CVV" }, "display": "188", "dial": "188", "sms": false },
+      "helpline": { "names": { "en": "CVV", "pt": "o CVV" }, "display": "188", "dial": "188", "sms": false },
       "emergency": { "display": "192", "dial": "192" },
       "status": "verified",
       "checked_on": "2026-10-19",
@@ -24,11 +49,35 @@
     },
     {
       "code": "CA",
-      "helpline": { "names": { "en": "9-8-8 Suicide Crisis Helpline" }, "display": "988", "dial": "988", "sms": true },
+      "helpline": { "names": { "en": "the Suicide Crisis Helpline", "fr": "la Ligne d'aide en cas de crise de suicide" }, "display": "988", "dial": "988", "sms": true },
       "emergency": { "display": "911", "dial": "911" },
       "status": "verified",
       "checked_on": "2026-10-19",
       "source": "https://988.ca"
+    },
+    {
+      "code": "CH",
+      "helpline": { "names": { "en": "Die Dargebotene Hand", "de": "Die Dargebotene Hand", "fr": "La Main Tendue", "it": "Telefono Amico" }, "display": "143", "dial": "143", "sms": false },
+      "emergency": { "display": "144", "dial": "144" },
+      "status": "verified",
+      "checked_on": "2026-11-05",
+      "source": "https://www.143.ch"
+    },
+    {
+      "code": "CL",
+      "helpline": { "names": { "en": "the Suicide Prevention Line", "es": "la Línea de Prevención del Suicidio" }, "display": "*4141", "dial": "*4141", "sms": false },
+      "emergency": { "display": "131", "dial": "131" },
+      "status": "verified",
+      "checked_on": "2026-11-05",
+      "source": "https://www.minsal.cl/linea-de-atencion-4141-no-estas-solo-no-estas-sola/"
+    },
+    {
+      "code": "CO",
+      "helpline": null,
+      "emergency": { "display": "123", "dial": "123" },
+      "status": "verified",
+      "checked_on": "2026-11-05",
+      "source": "https://travel.gc.ca/assistance/embassies-consulates/colombia"
     },
     {
       "code": "DE",
@@ -40,15 +89,15 @@
     },
     {
       "code": "ES",
-      "helpline": { "names": { "en": "Línea 024" }, "display": "024", "dial": "024", "sms": false },
+      "helpline": { "names": { "en": "the Suicidal behaviour support line", "es": "la Línea de atención a la conducta suicida" }, "display": "024", "dial": "024", "sms": false },
       "emergency": { "display": "112", "dial": "112" },
       "status": "verified",
-      "checked_on": "2026-10-19",
-      "source": "https://www.sanidad.gob.es"
+      "checked_on": "2026-11-05",
+      "source": "https://www.sanidad.gob.es/linea024/home.htm"
     },
     {
       "code": "FR",
-      "helpline": { "names": { "en": "3114" }, "display": "3114", "dial": "3114", "sms": false },
+      "helpline": { "names": { "en": "the National suicide prevention line", "fr": "le numéro national de prévention du suicide" }, "display": "3114", "dial": "3114", "sms": false },
       "emergency": { "display": "112", "dial": "112" },
       "status": "verified",
       "checked_on": "2026-10-19",
@@ -71,16 +120,56 @@
       "source": "https://www.samaritans.org"
     },
     {
+      "code": "IT",
+      "helpline": { "names": { "en": "Telefono Amico Italia", "it": "Telefono Amico Italia" }, "display": "02 2327 2327", "dial": "0223272327", "sms": false },
+      "emergency": { "display": "112", "dial": "112" },
+      "status": "verified",
+      "checked_on": "2026-11-05",
+      "source": "https://www.telefonoamico.it"
+    },
+    {
+      "code": "LU",
+      "helpline": { "names": { "en": "SOS Détresse", "fr": "SOS Détresse" }, "display": "45 45 45", "dial": "454545", "sms": false, "hours": { "en": "Every day 11 am to 11 pm; Fri and Sat until 3 am", "fr": "Tous les jours de 11 h à 23 h ; vendredi et samedi jusqu'à 3 h" } },
+      "emergency": { "display": "112", "dial": "112" },
+      "status": "verified",
+      "checked_on": "2026-11-05",
+      "source": "https://www.454545.lu/telephone"
+    },
+    {
+      "code": "MX",
+      "helpline": { "names": { "en": "Línea de la Vida", "es": "la Línea de la Vida" }, "display": "800 911 2000", "dial": "8009112000", "sms": false },
+      "emergency": { "display": "911", "dial": "911" },
+      "status": "verified",
+      "checked_on": "2026-11-05",
+      "source": "https://findahelpline.com/countries/mx"
+    },
+    {
       "code": "NZ",
-      "helpline": { "names": { "en": "Need to talk? 1737" }, "display": "1737", "dial": "1737", "sms": true },
+      "helpline": { "names": { "en": "the Need to Talk helpline" }, "display": "1737", "dial": "1737", "sms": true },
       "emergency": { "display": "111", "dial": "111" },
       "status": "verified",
       "checked_on": "2026-10-19",
       "source": "https://1737.org.nz"
     },
     {
+      "code": "PE",
+      "helpline": { "names": { "en": "the Health line, option 5: mental health", "es": "la Línea de salud, opción 5: salud mental" }, "display": "113", "dial": "113", "sms": false },
+      "emergency": { "display": "106", "dial": "106" },
+      "status": "verified",
+      "checked_on": "2026-11-05",
+      "source": "https://findahelpline.com/countries/pe"
+    },
+    {
+      "code": "PT",
+      "helpline": { "names": { "en": "the Suicide Prevention Line", "pt": "a Linha Nacional de Prevenção do Suicídio e Apoio Psicológico" }, "display": "1411", "dial": "1411", "sms": false },
+      "emergency": { "display": "112", "dial": "112" },
+      "status": "verified",
+      "checked_on": "2026-11-05",
+      "source": "https://portugal.gov.pt/pt/gc25/comunicacao/noticias/nova-linha-de-prevencao-do-suicidio-entra-em-funcionamento"
+    },
+    {
       "code": "TH",
-      "helpline": { "names": { "en": "Department of Mental Health hotline", "th": "สายด่วนสุขภาพจิต กรมสุขภาพจิต" }, "display": "1323", "dial": "1323", "sms": false },
+      "helpline": { "names": { "en": "the Department of Mental Health hotline", "th": "สายด่วนสุขภาพจิต กรมสุขภาพจิต" }, "display": "1323", "dial": "1323", "sms": false },
       "emergency": { "display": "1669", "dial": "1669" },
       "status": "verified",
       "checked_on": "2026-10-19",
@@ -88,7 +177,7 @@
     },
     {
       "code": "US",
-      "helpline": { "names": { "en": "988 Suicide & Crisis Lifeline" }, "display": "988", "dial": "988", "sms": true },
+      "helpline": { "names": { "en": "the Suicide & Crisis Lifeline", "es": "la Línea de Prevención del Suicidio y Crisis" }, "display": "988", "dial": "988", "sms": true },
       "emergency": { "display": "911", "dial": "911" },
       "status": "verified",
       "checked_on": "2026-10-19",

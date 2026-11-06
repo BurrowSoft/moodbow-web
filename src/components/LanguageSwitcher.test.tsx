@@ -6,9 +6,10 @@ import messages from "@/messages/en.json";
 // The switcher offers Thai only once thai-offered-live is met (1.1 F): a
 // draft /th on a test build is reachable by its address, never offered.
 let offered: ("en" | "th")[] = ["en"];
+let pathname = "/help";
 vi.mock("@/i18n/routing", () => ({ offeredLocales: () => offered }));
 vi.mock("@/i18n/navigation", () => ({
-  usePathname: () => "/help",
+  usePathname: () => pathname,
   Link: ({ children, href, locale, ...rest }: { children: React.ReactNode; href: string; locale: string }) => (
     <a href={`/${locale}${href}`} {...rest}>
       {children}
@@ -26,6 +27,21 @@ const renderIt = () =>
 afterEach(cleanup);
 
 describe("LanguageSwitcher", () => {
+  it("not inside the journal: Me → Language is the control there", () => {
+    offered = ["en", "th"];
+    for (const path of ["/app", "/app/me", "/app/timeline/2026-10-01"]) {
+      pathname = path;
+      const { container, unmount } = renderIt();
+      expect(container, path).toBeEmptyDOMElement();
+      unmount();
+    }
+    // A public page whose name only starts the same keeps it.
+    pathname = "/app-store";
+    expect(renderIt().container).not.toBeEmptyDOMElement();
+    cleanup();
+    pathname = "/help";
+  });
+
   it("unmet (English only offered): no switcher at all", () => {
     offered = ["en"];
     const { container } = renderIt();

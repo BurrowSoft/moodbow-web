@@ -1,4 +1,4 @@
-import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import messages from "@/messages/en.json";
@@ -79,7 +79,7 @@ describe("ImportData", () => {
   it("preview: days, notes and the range; Import writes check-ins then entries; Done with the count", async () => {
     renderIt();
     await choose("date,mood,note\n2026-10-01,4,A walk\n2026-10-02,3,\n");
-    expect(screen.getByTestId("import-summary")).toHaveTextContent("2 days and 1 notes found, from 1 Oct 2026 to 2 Oct 2026.");
+    expect(screen.getByTestId("import-summary")).toHaveTextContent("2 days and 1 note found, from 1 Oct 2026 to 2 Oct 2026.");
     fireEvent.click(screen.getByTestId("import-confirm"));
     await settle();
     expect(importCheckIns).toHaveBeenCalledWith([
@@ -90,13 +90,29 @@ describe("ImportData", () => {
     expect(screen.getByTestId("import-done")).toHaveTextContent("Done. 2 days are in your Timeline.");
   });
 
+  it("while importing, and only then: large files take a while, keep the page open, no duplicates", async () => {
+    let finish = () => {};
+    importCheckIns.mockImplementationOnce(
+      (days: { date: string }[]) => new Promise((resolve) => (finish = () => resolve({ status: "ok", written: days.map((d) => d.date), skipped: 0 }))),
+    );
+    renderIt();
+    await choose("date,mood\n2026-10-01,4\n");
+    expect(screen.queryByTestId("import-large")).toBeNull();
+    fireEvent.click(screen.getByTestId("import-confirm"));
+    expect(await screen.findByTestId("import-large")).toHaveTextContent(m.importLarge);
+    // Not in the status region: it would be read again with every count.
+    expect(screen.getByTestId("import-status")).not.toContainElement(screen.getByTestId("import-large"));
+    finish();
+    await waitFor(() => expect(screen.queryByTestId("import-large")).toBeNull());
+  });
+
   it("days already in Moodbow are reported as skipped, and only that (no kept line: nothing new on them; decision 214)", async () => {
     importCheckIns.mockResolvedValueOnce({ status: "ok", written: ["2026-10-01"], skipped: 1 });
     renderIt();
     await choose("date,mood\n2026-10-01,4\n2026-10-02,3\n");
     fireEvent.click(screen.getByTestId("import-confirm"));
     await settle();
-    expect(screen.getByTestId("import-skipped")).toHaveTextContent("1 days skipped (already in Moodbow).");
+    expect(screen.getByTestId("import-skipped")).toHaveTextContent("1 day skipped (already in Moodbow).");
     expect(screen.queryByTestId("import-kept-existing")).toBeNull();
   });
 
@@ -359,7 +375,7 @@ describe("ImportData", () => {
     fireEvent.click(screen.getByTestId("import-confirm"));
     await settle();
     expect(screen.getByTestId("import-failed")).toBeInTheDocument();
-    expect(screen.getByTestId("import-skipped")).toHaveTextContent("1 days skipped (already in Moodbow).");
+    expect(screen.getByTestId("import-skipped")).toHaveTextContent("1 day skipped (already in Moodbow).");
   });
 
   it("a notes-only file counts its days (M-a)", async () => {

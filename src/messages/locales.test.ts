@@ -54,6 +54,14 @@ describe("counts where 0 isn't 1", () => {
       for (const [key, msg] of Object.entries(flatten(m))) expect(msg, key).not.toMatch(/\bone\s*\{[^{}]*\b1\b/);
     }
   });
+  it("the import's preview: one day, one note; and a large count is grouped", () => {
+    const preview = (msg: string, locale: string, days: number, notes: number) => new IntlMessageFormat(msg, locale).format({ days, notes, first: "a", last: "b" });
+    expect(preview(en.me.importPreview, "en", 1, 1)).toBe("1 day and 1 note found, from a to b.");
+    expect(preview(en.me.importPreview, "en", 2, 0)).toBe("2 days and 0 notes found, from a to b.");
+    expect(preview(fr.me.importPreview, "fr", 1, 1)).toBe("1 jour et 1 note trouvés, du a au b.");
+    expect(preview(fr.me.importPreview, "fr", 2000, 0)).not.toContain("2000");
+  });
+
   it("search results group a large count", () => {
     expect(say(fr.timeline.searchResultsCount, "fr", { n: 1000 })).not.toContain("1000");
   });
@@ -76,5 +84,26 @@ describe.each(Object.entries(DRAFTS))("%s.json", (locale, messages) => {
   it("the help button's label is the contract's", () => {
     const space = (s: string) => s.replace(/\s+/gu, " ");
     expect(space(M["me.meGetHelpNow"])).toBe(space((label.labels as Record<string, string>)[dataLocale(locale)]));
+  });
+});
+
+// One of something isn't "1 days" (the app's words, 3a01a50). Each line counts
+// its own thing; the numbers in the cap's bracket are fixed text.
+describe("the import lines", () => {
+  const say = (msg: string, n: number, locale: string) => new IntlMessageFormat(msg, locale).format({ days: n, count: n, notes: n, first: "a", last: "b" }) as string;
+  const lines = ["me.importPreview", "me.importDone", "me.importSkipped", "me.importSkippedFuture", "me.importSkippedCap", "me.importSkippedTooLong"];
+  it.each([["en", en], ["de", de], ["es", es], ["fr", fr], ["it", it_], ["pt-br", ptBr]] as const)("%s says one differently from two, and groups large counts", (locale, messages) => {
+    const M = flatten(messages);
+    for (const key of lines) {
+      expect(say(M[key], 1, locale).replaceAll("1", "2"), `${locale} ${key}`).not.toBe(say(M[key], 2, locale));
+      expect(say(M[key], 12000, locale), `${locale} ${key}`).not.toContain("12000");
+    }
+  });
+  it("reads right in English and Spanish", () => {
+    const S = flatten(es);
+    expect(say(E["me.importDone"], 1, "en")).toBe("Done. 1 day is in your Timeline.");
+    expect(say(E["me.importSkipped"], 1, "en")).toBe("1 day skipped (already in Moodbow).");
+    expect(say(E["me.importSkippedFuture"], 1, "en")).toBe("1 row skipped (date in the future).");
+    expect(say(S["me.importPreview"], 1, "es")).toBe("Se encontró 1 día y 1 nota, del a al b.");
   });
 });

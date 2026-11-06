@@ -25,7 +25,7 @@ export function languageAlternates(path: string): Record<string, string> {
 }
 
 // Open Graph locale codes for the languages we may ship.
-const OG_LOCALES: Record<string, string> = { en: "en_US", th: "th_TH", es: "es_ES", "pt-BR": "pt_BR", fr: "fr_FR", de: "de_DE" };
+const OG_LOCALES: Record<Locale, string> = { en: "en_US", th: "th_TH", fr: "fr_FR", es: "es_ES", "pt-br": "pt_BR", de: "de_DE", it: "it_IT" };
 
 type PageMetaInput = {
   locale: Locale;
@@ -57,7 +57,7 @@ export async function pageMetadata({ locale, path, title, description, noindex }
       url,
       title: fullTitle,
       description: title ? desc : ogDescription,
-      locale: OG_LOCALES[locale] ?? "en_US",
+      locale: OG_LOCALES[locale],
       images: [{ url: image.url, width: 1200, height: 630, alt: image.alt }],
     },
     twitter: {
