@@ -753,6 +753,19 @@ describe("EntryEditor: a restored new draft that was already saved (reviewer #12
     fireEvent.click(screen.getByTestId("entry-save"));
     await waitFor(() => expect(saveEntry).toHaveBeenCalled());
     expect(sent()).toMatchObject({ id: NEW_ID, expected_updated_at: "" });
+    expect(screen.queryByTestId("safety-card")).toBeNull();
+  });
+
+  it("saved with the same flagged text: its card, which that save's lost answer never showed, over the fresh entry", async () => {
+    keywords = { version: 1, languages: { en: { match: "word", phrases: ["want to die"] } } };
+    window.localStorage.setItem(NEW_KEY, JSON.stringify({ ...draft, body: "I want to die." }));
+    getEntry.mockResolvedValue({ status: "ok", entry: { ...row, body: "I want to die." } });
+    renderEditor();
+    expect(await screen.findByTestId("safety-card")).toBeInTheDocument();
+    expect(screen.getByTestId("entry-text")).toHaveValue("");
+    expect(window.localStorage.getItem(NEW_KEY)).toBeNull();
+    fireEvent.click(screen.getByTestId("safety-close"));
+    await waitFor(() => expect(screen.getByTestId("entry-text")).toHaveFocus());
   });
 
   it("saved and edited since: the decision 87 dialog, never a silent overwrite", async () => {
@@ -870,6 +883,166 @@ describe("EntryEditor: the safety card after a flagged save (M8, decisions 124/1
     type("Some days I want to die.");
     fireEvent.click(screen.getByTestId("entry-save"));
     await waitFor(() => expect(push).toHaveBeenCalledWith("/app"));
+    expect(screen.queryByTestId("safety-card")).toBeNull();
+  });
+});
+
+describe("EntryEditor: the safety card after a failed save (UX & PM 2026-11-06)", () => {
+  const FLAGGED = "Some days I want to die.";
+  beforeEach(() => {
+    keywords = { version: 1, languages: { en: { match: "word", phrases: ["want to die"] } } };
+  });
+
+  it("offline: the card with its numbers, the error, the text and its draft kept; closing it puts focus back in the entry", async () => {
+    saveEntry.mockRejectedValue(new TypeError("Failed to fetch"));
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <EntryEditor initial={null} newId={NEW_ID} uid="u1" today="2026-10-02" country="BR" />
+      </NextIntlClientProvider>,
+    );
+    type(FLAGGED);
+    fireEvent.click(screen.getByTestId("entry-save"));
+    expect(await screen.findByTestId("safety-card")).toBeInTheDocument();
+    expect(screen.getByTestId("safety-call-emergency")).toHaveAttribute("href", expect.stringMatching(/^tel:/));
+    // The card opens during the action; the error comes with its result.
+    expect(await screen.findByTestId("entry-error")).toHaveTextContent(messages.today.errGeneric);
+    expect(screen.getByTestId("entry-text")).toHaveValue(FLAGGED);
+    expect(stored(NEW_KEY)).toMatchObject({ body: FLAGGED });
+    expect(push).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId("safety-close"));
+    expect(screen.queryByTestId("safety-card")).toBeNull();
+    await waitFor(() => expect(screen.getByTestId("entry-text")).toHaveFocus());
+  });
+
+  it("each failed press shows it again", async () => {
+    saveEntry.mockRejectedValue(new TypeError("Failed to fetch"));
+    renderEditor();
+    type(FLAGGED);
+    fireEvent.click(screen.getByTestId("entry-save"));
+    fireEvent.click(await screen.findByTestId("safety-close"));
+    await waitFor(() => expect(screen.getByTestId("entry-save")).not.toHaveAttribute("aria-disabled"));
+    fireEvent.click(screen.getByTestId("entry-save"));
+    expect(await screen.findByTestId("safety-card")).toBeInTheDocument();
+    expect(saveEntry).toHaveBeenCalledTimes(2);
+  });
+
+  it("a failure the server answers: the card", async () => {
+    saveEntry.mockResolvedValue({ status: "error", error: "generic" });
+    renderEditor();
+    type(FLAGGED);
+    fireEvent.click(screen.getByTestId("entry-save"));
+    expect(await screen.findByTestId("safety-card")).toBeInTheDocument();
+  });
+
+  it("the text that was sent is what's checked, not what was typed after", async () => {
+    let answer: (state: unknown) => void = () => {};
+    saveEntry.mockReturnValue(new Promise((resolve) => (answer = resolve)));
+    renderEditor();
+    type("A calm day.");
+    fireEvent.click(screen.getByTestId("entry-save"));
+    type(FLAGGED);
+    await act(async () => answer({ status: "error", error: "generic" }));
+    expect(await screen.findByTestId("entry-error")).toBeInTheDocument();
+    expect(screen.queryByTestId("safety-card")).toBeNull();
+  });
+
+  it("the wait runs out and the save fails after it: one card, closed stays closed", async () => {
+    let answer: (state: unknown) => void = () => {};
+    saveEntry.mockReturnValue(new Promise((resolve) => (answer = resolve)));
+    held = true;
+    try {
+      renderEditor();
+      type(FLAGGED);
+      fireEvent.click(screen.getByTestId("entry-save"));
+      fireEvent.click(await screen.findByTestId("safety-close", {}, { timeout: 2000 }));
+      expect(screen.getByTestId("entry-error")).toHaveTextContent(messages.today.errGeneric);
+    } finally {
+      held = false;
+      await act(async () => answer({ status: "error", error: "generic" }));
+    }
+    expect(screen.queryByTestId("safety-card")).toBeNull();
+  });
+
+  it("the wait runs out and the save lands after it: one card, closed stays closed", async () => {
+    let answer: (state: unknown) => void = () => {};
+    saveEntry.mockReturnValue(new Promise((resolve) => (answer = resolve)));
+    held = true;
+    try {
+      renderEditor();
+      type(FLAGGED);
+      fireEvent.click(screen.getByTestId("entry-save"));
+      fireEvent.click(await screen.findByTestId("safety-close", {}, { timeout: 2000 }));
+    } finally {
+      held = false;
+      await act(async () => answer({ status: "saved", entry: { ...ENTRY, id: NEW_ID, entry_date: "2026-10-02", body: FLAGGED } }));
+    }
+    expect(screen.queryByTestId("safety-card")).toBeNull();
+    expect(push).not.toHaveBeenCalled();
+    expect(screen.getByTestId("entry-text")).toHaveValue(FLAGGED);
+  });
+
+  it("nothing flagged, or changed elsewhere: no card", async () => {
+    saveEntry.mockRejectedValueOnce(new TypeError("Failed to fetch"));
+    renderEditor();
+    type("A calm day.");
+    fireEvent.click(screen.getByTestId("entry-save"));
+    expect(await screen.findByTestId("entry-error")).toBeInTheDocument();
+    expect(screen.queryByTestId("safety-card")).toBeNull();
+    saveEntry.mockResolvedValueOnce({ status: "error", error: "stale", latest: { ...ENTRY, id: NEW_ID, body: "Another version" } });
+    type(FLAGGED);
+    fireEvent.click(screen.getByTestId("entry-save"));
+    expect(await screen.findByTestId("entry-conflict-dialog")).toBeInTheDocument();
+    expect(screen.queryByTestId("safety-card")).toBeNull();
+  });
+
+  it("changed elsewhere, Use the other one: the card for the text given up, over the other version", async () => {
+    saveEntry.mockResolvedValue({ status: "error", error: "stale", latest: { ...ENTRY, body: "Another version" } });
+    renderEditor(ENTRY);
+    type(FLAGGED);
+    fireEvent.click(screen.getByTestId("entry-save"));
+    fireEvent.click(await screen.findByTestId("entry-conflict-use-other"));
+    expect(await screen.findByTestId("safety-card")).toBeInTheDocument();
+    expect(screen.getByTestId("entry-text")).toHaveValue("Another version");
+    fireEvent.click(screen.getByTestId("safety-close"));
+    await waitFor(() => expect(screen.getByTestId("entry-text")).toHaveFocus());
+    expect(push).not.toHaveBeenCalled();
+  });
+
+  it("Use the other one with ordinary text, or Cancel with flagged text: no card", async () => {
+    saveEntry.mockResolvedValue({ status: "error", error: "stale", latest: { ...ENTRY, body: "Another version" } });
+    renderEditor(ENTRY);
+    type(FLAGGED);
+    fireEvent.click(screen.getByTestId("entry-save"));
+    fireEvent.click(await screen.findByTestId("entry-conflict-cancel"));
+    expect(screen.queryByTestId("safety-card")).toBeNull();
+    expect(screen.getByTestId("entry-text")).toHaveValue(FLAGGED);
+    type("A calm day.");
+    fireEvent.click(screen.getByTestId("entry-save"));
+    fireEvent.click(await screen.findByTestId("entry-conflict-use-other"));
+    await waitFor(() => expect(screen.getByTestId("entry-text")).toHaveValue("Another version"));
+    expect(screen.queryByTestId("safety-card")).toBeNull();
+  });
+
+  it("deleted elsewhere, Delete it: the card first, and closing it leaves; no draft comes back", async () => {
+    saveEntry.mockResolvedValue({ status: "error", error: "stale", latest: null });
+    renderEditor(ENTRY);
+    type(FLAGGED);
+    fireEvent.click(screen.getByTestId("entry-save"));
+    fireEvent.click(await screen.findByTestId("entry-deleted-discard"));
+    expect(await screen.findByTestId("safety-card")).toBeInTheDocument();
+    expect(push).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId("safety-close"));
+    expect(push).toHaveBeenCalledWith("/app");
+    expect(window.localStorage.getItem(EDIT_KEY)).toBeNull();
+  });
+
+  it("Delete it with ordinary text: leaves at once, no card", async () => {
+    saveEntry.mockResolvedValue({ status: "error", error: "stale", latest: null });
+    renderEditor(ENTRY);
+    type("A calm day.");
+    fireEvent.click(screen.getByTestId("entry-save"));
+    fireEvent.click(await screen.findByTestId("entry-deleted-discard"));
+    expect(push).toHaveBeenCalledWith("/app");
     expect(screen.queryByTestId("safety-card")).toBeNull();
   });
 });
