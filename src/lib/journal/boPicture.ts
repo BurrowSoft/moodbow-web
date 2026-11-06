@@ -33,6 +33,32 @@ export function jpegMetadataSegments(bytes: Uint8Array): number[] | null {
   return null;
 }
 
+// The same JPEG without those segments. A browser's own encoder may add one, such as a
+// colour profile, so it's removed rather than trusted. null: not a JPEG we can read.
+export function withoutMetadata(bytes: Uint8Array): Uint8Array<ArrayBuffer> | null {
+  if (bytes.length < 4 || bytes[0] !== 0xff || bytes[1] !== 0xd8) return null;
+  const parts: Uint8Array[] = [bytes.subarray(0, 2)];
+  let at = 2;
+  while (at + 3 < bytes.length) {
+    if (bytes[at] !== 0xff) return null;
+    const marker = bytes[at + 1];
+    if (marker === 0xda) {
+      parts.push(bytes.subarray(at));
+      const clean = new Uint8Array(parts.reduce((sum, part) => sum + part.length, 0));
+      let to = 0;
+      for (const part of parts) {
+        clean.set(part, to);
+        to += part.length;
+      }
+      return clean;
+    }
+    const end = at + 2 + ((bytes[at + 2] << 8) | bytes[at + 3]);
+    if (!((marker >= 0xe1 && marker <= 0xef) || marker === 0xfe)) parts.push(bytes.subarray(at, end));
+    at = end;
+  }
+  return null;
+}
+
 const encoded = (canvas: HTMLCanvasElement, quality: number) => new Promise<Blob | null>((done) => canvas.toBlob(done, "image/jpeg", quality));
 
 const asBase64 = (blob: Blob) =>
@@ -64,12 +90,14 @@ export async function preparePicture(file: File): Promise<BoPicture> {
     return { ok: false };
   }
   for (const quality of QUALITIES) {
-    const blob = await encoded(canvas, quality);
-    if (!blob) return { ok: false };
-    if (blob.size > BO_PICTURE_MAX_BYTES) continue;
+    const made = await encoded(canvas, quality);
+    if (!made) return { ok: false };
+    const clean = withoutMetadata(new Uint8Array(await made.arrayBuffer()));
     // Checked, not assumed: anything but a clean JPEG doesn't leave.
-    const segments = jpegMetadataSegments(new Uint8Array(await blob.arrayBuffer()));
-    if (!segments || segments.length > 0) return { ok: false };
+    const segments = clean && jpegMetadataSegments(clean);
+    if (!clean || !segments || segments.length > 0) return { ok: false };
+    if (clean.length > BO_PICTURE_MAX_BYTES) continue;
+    const blob = new Blob([clean], { type: "image/jpeg" });
     return { ok: true, blob, base64: await asBase64(blob), width: canvas.width, height: canvas.height };
   }
   return { ok: false };

@@ -209,7 +209,7 @@ export function BoConversation({ initial, country, back, healthData = false, con
     else setPictureConsent("asking");
   };
 
-  const retry = () => void (closed || text.trim() === "" ? callBo<BoStatus>({ action: "status" }).then(showStatus) : send());
+  const retry = () => void (closed || (text.trim() === "" && !picture) ? callBo<BoStatus>({ action: "status" }).then(showStatus) : send());
 
   return (
     <div data-testid="bo-conversation" className="flex flex-col gap-4">
