@@ -171,6 +171,27 @@ test.describe("language: Thai is a draft, not offered (thai-offered-live)", () =
     expect(overflow).toBeLessThanOrEqual(0);
   });
 
+  // Vitor, UX & PM 2026-11-06: on phone widths only, every public page.
+  test("Try the app: in the footer on a phone width, not on a desktop", async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 640 });
+    for (const path of ["/", "/help", "/privacy", "/sign-in"]) {
+      await page.goto(path);
+      const button = page.getByTestId("try-app");
+      await expect(button, path).toBeVisible();
+      await expect(button, path).toHaveAttribute("href", "/welcome");
+      expect((await button.boundingBox())?.height ?? 0, path).toBeGreaterThanOrEqual(44);
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+      expect(overflow, path).toBeLessThanOrEqual(0);
+    }
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto("/");
+    await expect(page.getByTestId("try-app")).toBeHidden();
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.getByTestId("try-app").click();
+    await expect(page).toHaveURL(/\/welcome$/);
+    await expect(page.getByTestId("try-app")).toHaveCount(0);
+  });
+
   test("/th/help/getting-started: the Thai article", async ({ page }) => {
     const res = await page.goto("/th/help/getting-started");
     expect(res?.status()).toBe(200);
