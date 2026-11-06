@@ -86,6 +86,26 @@ test.describe("Bo's pictures: the bytes that would leave the browser", () => {
     }
   });
 
+  // Why the check first refused everything: what this browser's own encoder writes, printed
+  // so the run's log says, and what the code does with it. Not an assertion on the browser.
+  test("what the browser's encoder adds, and that it doesn't survive", async ({ page }) => {
+    const seen = await page.evaluate(async () => {
+      const w = window as unknown as { jpeg: (w: number, h: number) => Promise<Uint8Array>; bo: { jpegMetadataSegments: (b: Uint8Array) => number[] | null; preparePicture: (f: File) => Promise<{ ok: boolean; base64: string }> } };
+      const raw = await w.jpeg(400, 300);
+      const markers: string[] = [];
+      for (let at = 2; at + 3 < raw.length && raw[at] === 0xff; at += 2 + ((raw[at + 2] << 8) | raw[at + 3])) {
+        markers.push(raw[at + 1].toString(16));
+        if (raw[at + 1] === 0xda) break;
+      }
+      const out = await w.bo.preparePicture(new File([raw as BlobPart], "x.jpg", { type: "image/jpeg" }));
+      const bytes = Uint8Array.from(atob(out.base64), (c) => c.charCodeAt(0));
+      return { markers, found: w.bo.jpegMetadataSegments(raw), ok: out.ok, after: w.bo.jpegMetadataSegments(bytes) };
+    });
+    console.log(`The encoder's markers: ${seen.markers.join(" ")}; metadata found: ${JSON.stringify(seen.found)}; after: ${JSON.stringify(seen.after)}`);
+    expect(seen.ok).toBe(true);
+    expect(seen.after).toEqual([]);
+  });
+
   test("the file's name isn't in the bytes", async ({ page }) => {
     const out = await prepare(page, "await jpeg(400, 300)", "my-secret-name.jpg");
     expect(out.ok).toBe(true);
