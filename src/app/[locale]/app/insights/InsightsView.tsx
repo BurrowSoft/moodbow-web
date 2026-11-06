@@ -3,7 +3,7 @@ import { Link } from "@/i18n/navigation";
 import { METRICS, summarize, type InsightRow, type Metric, type Range } from "@/lib/journal/insights";
 import type { Pattern, PatternId } from "@/lib/journal/patterns";
 import type { ValueKey } from "@/lib/journal/valueColours";
-import { segment } from "@/lib/ui/journalLayout";
+import { JOURNAL_HEADING, segment } from "@/lib/ui/journalLayout";
 import { Chart } from "./Chart";
 
 const RANGE_TABS: { range: Range; key: "rangeWeek" | "rangeMonth" | "range3Months" }[] = [
@@ -76,7 +76,7 @@ export function InsightsView({
   return (
     <section>
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="min-w-0 text-3xl font-medium tracking-tight [overflow-wrap:anywhere]">{t("insightsTitle")}</h1>
+        <h1 className={`min-w-0 ${JOURNAL_HEADING}`}>{t("insightsTitle")}</h1>
         {share}
       </div>
       {summary}

@@ -1174,6 +1174,20 @@ test("large text, set in the browser: Today after a mood, calendar, day, entry a
         await page.goto(`${route}/app/write`);
         await expect(page.getByTestId("entry-text")).toBeVisible();
         await measure(`${saved} writing`, percent);
+        // A page's heading keeps its words whole at 200 %, and isn't smaller than the body.
+        for (const path of ["/app/timeline", "/app/insights", "/app/me"]) {
+          await page.goto(`${route}${path}`);
+          const heading = page.getByRole("heading", { level: 1 });
+          await expect(heading).toBeVisible();
+          const size = await heading.evaluate((h) => {
+            const style = getComputedStyle(h);
+            const ruler = document.createElement("canvas").getContext("2d")!;
+            ruler.font = style.font;
+            return { widest: Math.max(...(h.textContent ?? "").split(" ").map((w) => ruler.measureText(w).width)), room: h.clientWidth, font: parseFloat(style.fontSize), body: parseFloat(getComputedStyle(document.documentElement).fontSize) };
+          });
+          expect.soft(size.font, `${saved} ${path} heading at ${percent}%`).toBeGreaterThanOrEqual(size.body);
+          if (percent === 200) expect.soft(size.widest, `${saved} ${path} heading's words at 200%`).toBeLessThanOrEqual(size.room);
+        }
         // Me's reminder reads whole in a 12-hour browser (this one's en-US), with its PM: a
         // clipped one makes 21:00 read "09:00" (Web Tester, #206).
         await page.goto(`${route}/app/me`);
