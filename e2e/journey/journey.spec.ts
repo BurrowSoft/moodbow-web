@@ -935,9 +935,15 @@ test.describe("the tab bar in every language", () => {
         await setProfileLocale(email, password, saved);
         await page.goto(`${route}/app/me`);
         await page.getByTestId("me-get-help").click();
+        // Taller than the window: it opens at its top, with a fade showing there's
+        // more, and the first help line starts on the first screen.
+        const card = page.getByTestId("safety-card");
+        await expect(card.getByRole("heading", { level: 2 })).toBeInViewport();
+        await expect(card.getByTestId("dialog-more")).toBeVisible();
+        expect(await card.evaluate((el) => el.scrollTop), "opens at its top").toBe(0);
+        const firstHelp = await card.locator("a").first().evaluate((a) => a.getBoundingClientRect().top);
+        expect(firstHelp, `the first help line starts on screen, ${route || "/en"}`).toBeLessThan(640);
         const close = page.getByTestId("safety-close");
-        // At this size the card is taller than the window: it opens at its top, with
-        // the help, and scrolls inside itself to Close.
         await close.scrollIntoViewIfNeeded();
         await expect(close, route || "/en").toBeInViewport();
         const lines = await close.evaluate((button) => {
@@ -950,6 +956,15 @@ test.describe("the tab bar in every language", () => {
         await expect(page.getByTestId("safety-card"), route || "/en").toHaveCount(0);
       }
       await setProfileLocale(email, password, "en");
+
+      // The delete dialog: its title and warning first, not scrolled down to a button.
+      await page.goto("/app/me");
+      await page.getByTestId("me-delete").click();
+      const deleting = page.getByTestId("delete-dialog");
+      await expect(deleting.getByRole("heading", { level: 2 })).toBeInViewport();
+      expect(await deleting.evaluate((el) => el.scrollTop), "the delete dialog opens at its top").toBe(0);
+      await page.keyboard.press("Escape");
+      await expect(deleting).toHaveCount(0);
 
       // Today's check-in once a mood is picked, where its details open.
       await textAt(200);
