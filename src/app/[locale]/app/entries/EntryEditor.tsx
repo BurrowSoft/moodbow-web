@@ -15,7 +15,7 @@ import { localKey } from "@/lib/localData";
 import { flagsCrisis } from "@/lib/safety/crisis";
 import { holdLeaving } from "@/lib/ui/leaveGuard";
 import { onSignOut } from "@/lib/signOutSignal";
-import { SAVE_WAIT_MS, withTimeout } from "@/lib/ui/withTimeout";
+import { SAVE_WAIT_MS, TimedOut, withTimeout } from "@/lib/ui/withTimeout";
 import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
 import { PRIMARY_SAVE } from "@/lib/ui/journalLayout";
 import { deleteEntry, getEntry, saveEntry, type DeleteState, type EntryState } from "./actions";
@@ -406,12 +406,40 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
     if (flagsCrisis(String(form.get("body") ?? ""), CRISIS_KEYWORDS)) openCard(form);
   };
 
+  // A save that lands after the wait (Web Tester, #190 R6): its error would
+  // say it failed, so it goes, and this is the version edits start from. The
+  // editor stays: the person may have moved on to something else by now, and a
+  // screen reader hears "Saved" (UX). Only the latest press counts; a newer one
+  // has its own answer coming.
+  const [landedLate, setLandedLate] = useState(false);
+  const latestForm = useRef<FormData | null>(null);
+  const hearLateAnswer = (call: Promise<EntryState>, form: FormData) => {
+    call
+      .then((late) => {
+        if (late.status !== "saved") return;
+        const sent: Draft = { id: String(form.get("id") ?? ""), body: String(form.get("body") ?? ""), date: String(form.get("entry_date") ?? ""), isMoment: form.get("is_moment") === "true", base: null };
+        removeSentDraft(draftKey, sent);
+        if (!mounted.current || latestForm.current !== form) return;
+        lastSaved.current = late.entry;
+        setBase(late.entry.updated_at);
+        setSaved(fromEntry(late.entry));
+        setLandedLate(true);
+        announce?.(tt("checkinSaved"));
+        if (same(current.current, sent)) removeDraft(draftKey);
+        else if (!signedOut.current && !finished.current) writeDraft(draftKey, { ...current.current, base: late.entry.updated_at });
+      })
+      .catch(() => {
+        // no answer after all: the error stands, and the draft is still here
+      });
+  };
+
   const [state, action, pending] = useActionState<EntryState, FormData>(async (prev, form) => {
     let next: EntryState;
+    const call = saveEntry(prev, form);
     try {
       // No answer in 30 s: the same as a failed request (the draft is kept;
       // Save again; the timeout audit).
-      next = await withTimeout(saveEntry(prev, form), SAVE_WAIT_MS);
+      next = await withTimeout(call, SAVE_WAIT_MS);
       // "Changed elsewhere", but the server's version is exactly this one:
       // our own save that landed after the browser stopped waiting. Saved;
       // no conflict dialog (UX, after the timeout audit).
@@ -422,6 +450,7 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
       if (isRedirect(e)) throw e;
       // offline or the request failed: the draft is still here
       failedSave(form);
+      if (e instanceof TimedOut) hearLateAnswer(call, form);
       return { status: "error", error: "generic" };
     }
     if (next.status === "saved") {
@@ -508,6 +537,8 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
     form.set("body", fields.body);
     form.set("is_moment", String(fields.isMoment));
     form.set("expected_updated_at", withBase ?? "");
+    latestForm.current = form;
+    setLandedLate(false);
     window.clearTimeout(waitTimer.current);
     setWaitedOut(false);
     waitTimer.current = window.setTimeout(() => {
@@ -528,9 +559,9 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
     ? t("entryTooLong")
     : future
       ? tt("errDateInFuture")
-      : stuck
+      : stuck && !landedLate
         ? tt("errGeneric")
-        : state.status === "error" && state.error !== "stale"
+        : state.status === "error" && state.error !== "stale" && !landedLate
           ? state.error === "dateInFuture"
             ? tt("errDateInFuture")
             : state.error === "tooLong"
