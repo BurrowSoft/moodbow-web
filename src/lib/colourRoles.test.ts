@@ -39,7 +39,8 @@ describe("colour roles", () => {
 describe("the saved language's fallback link", () => {
   it("is held back 2 s, and no reduced-motion rule can leave it hidden", () => {
     const css = readFileSync(join("src", "app", "globals.css"), "utf8");
-    expect(css).toContain("animation: after-wait 0s linear 2s forwards;");
+    expect(css).toContain("animation: after-wait 2s step-end;");
+    expect(css.slice(css.indexOf("[data-after-wait] {"), css.indexOf("@keyframes after-wait"))).not.toContain("opacity");
     for (const block of css.split("@media (prefers-reduced-motion").slice(1)) expect(block.slice(0, block.indexOf("}\n}"))).not.toContain("after-wait");
   });
 });

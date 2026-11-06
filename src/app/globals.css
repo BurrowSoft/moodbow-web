@@ -133,15 +133,16 @@ fieldset {
 /* The saved language's fallback link (SavedLanguageRedirect): only if the move
    hasn't happened after 2 s, so a normal move shows no lone link on the way. On
    purpose not under prefers-reduced-motion: there's no motion, only a wait, and
-   turning this animation off would change when the link appears. CSS, so it
-   also appears without JavaScript. */
+   turning this animation off would change when the link appears. Visible by
+   default: anything that stops the animation leaves it showing, never hidden for
+   good. CSS, so it also appears without JavaScript. */
 [data-after-wait] {
-  opacity: 0;
-  animation: after-wait 0s linear 2s forwards;
+  animation: after-wait 2s step-end;
 }
 @keyframes after-wait {
+  from,
   to {
-    opacity: 1;
+    opacity: 0;
   }
 }
 
