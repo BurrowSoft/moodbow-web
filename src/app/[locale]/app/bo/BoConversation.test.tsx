@@ -26,17 +26,19 @@ const reply = (over: object = {}) => ({ status: "ok", reply: "A reply", showHelp
 const flagged = CRISIS_KEYWORDS?.languages.en.phrases[0] as string;
 
 let answers: unknown[];
+let statusAnswer: unknown;
 let calls: { action: string; client_key?: string; text?: string }[];
 
 beforeEach(() => {
   answers = [];
   calls = [];
+  statusAnswer = ok;
   vi.stubGlobal(
     "fetch",
     vi.fn(async (_url: string, init: { body: string }) => {
       const body = JSON.parse(init.body) as (typeof calls)[number];
       calls.push(body);
-      if (body.action === "status") return { json: async () => ok };
+      if (body.action === "status") return { json: async () => statusAnswer };
       if (body.action === "notice_shown") return { json: async () => ({ ok: true }) };
       const next = answers.shift();
       if (next === "throw") throw new Error("offline");
@@ -133,7 +135,6 @@ describe("BoConversation", () => {
 
   it.each([
     ["region_off", b.regionOff],
-    ["region_unknown", b.regionUnknown],
     ["bo_resting", b.resting],
     ["bo_unavailable", b.unavailable],
   ])("%s closes the box and keeps help", async (code, line) => {
@@ -145,6 +146,73 @@ describe("BoConversation", () => {
     expect(screen.queryByTestId("bo-text")).toBeNull();
     expect(screen.queryByTestId("bo-retry")).toBeNull();
     expect(screen.getByTestId("bo-get-help")).toBeInTheDocument();
+  });
+
+  it("region_unknown: the line and help, and Try again looks again, with the text still there", async () => {
+    await open();
+    answers.push({ status: "error", code: "region_unknown" });
+    type("Hello");
+    await send();
+    expect(screen.getByTestId("bo-problem")).toHaveTextContent(b.regionUnknown);
+    expect(screen.queryByTestId("bo-text")).toBeNull();
+    expect(screen.getByTestId("bo-get-help")).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId("bo-retry"));
+    await act(async () => {});
+    expect(screen.queryByTestId("bo-problem")).toBeNull();
+    expect(screen.getByTestId("bo-text")).toHaveValue("Hello");
+  });
+
+  it("the status call finds Bo off or unanswered, on opening: its line and help, no box", async () => {
+    statusAnswer = { status: "error", code: "region_off" };
+    await open();
+    expect(screen.getByTestId("bo-problem")).toHaveTextContent(b.regionOff);
+    expect(screen.queryByTestId("bo-text")).toBeNull();
+    expect(screen.getByTestId("bo-get-help")).toBeInTheDocument();
+    cleanup();
+    statusAnswer = { status: "no_answer" };
+    await open();
+    expect(screen.getByTestId("bo-problem")).toHaveTextContent(b.regionUnknown);
+  });
+
+  it("known offline: no request, its line, help, and crisis words still open the card; Try again sends once back", async () => {
+    await open();
+    const online = vi.spyOn(navigator, "onLine", "get").mockReturnValue(false);
+    type(flagged);
+    await send();
+    expect(sends()).toHaveLength(0);
+    expect(screen.getByTestId("bo-problem")).toHaveTextContent(b.offline);
+    expect(screen.getByTestId("safety-card")).toBeInTheDocument();
+    expect(screen.getByTestId("bo-get-help")).toBeInTheDocument();
+    expect(screen.getByTestId("bo-text")).toHaveValue(flagged);
+    online.mockReturnValue(true);
+    answers.push(reply());
+    fireEvent.click(screen.getByTestId("bo-retry"));
+    await act(async () => {});
+    expect(sends()).toHaveLength(1);
+    online.mockRestore();
+  });
+
+  it("offline on opening: Try again looks again rather than sending nothing", async () => {
+    const online = vi.spyOn(navigator, "onLine", "get").mockReturnValue(false);
+    statusAnswer = { status: "no_answer" };
+    await open();
+    expect(screen.getByTestId("bo-problem")).toHaveTextContent(b.offline);
+    online.mockReturnValue(true);
+    statusAnswer = ok;
+    fireEvent.click(screen.getByTestId("bo-retry"));
+    await act(async () => {});
+    expect(screen.queryByTestId("bo-problem")).toBeNull();
+    online.mockRestore();
+  });
+
+  it("changing the text clears a line about the last send", async () => {
+    await open();
+    answers.push({ status: "error", code: "bo_failed" });
+    type("Hello");
+    await send();
+    expect(screen.getByTestId("bo-problem")).toBeInTheDocument();
+    type("Hello there");
+    expect(screen.queryByTestId("bo-problem")).toBeNull();
   });
 
   it("the day's limit: the kind line, with help", async () => {
@@ -287,6 +355,34 @@ describe("BoConversation", () => {
     type("Hello");
     await send();
     expect(screen.getByTestId("bo-notice")).toHaveTextContent(b.notice);
+    expect(calls.filter((c) => c.action === "notice_shown")).toHaveLength(1);
+    // Three hours on, in the same visit: asked again, said again.
+    answers.push(reply({ showNotice: true }));
+    type("Hello again");
+    await send();
+    expect(calls.filter((c) => c.action === "notice_shown")).toHaveLength(2);
+  });
+
+  it("the notice is only said to be shown once it's in view", async () => {
+    let inView: ((entries: { isIntersecting: boolean }[], observer: { disconnect: () => void }) => void) | undefined;
+    vi.stubGlobal(
+      "IntersectionObserver",
+      class {
+        constructor(callback: typeof inView) {
+          inView = callback;
+        }
+        observe() {}
+        disconnect() {}
+      },
+    );
+    await open();
+    answers.push(reply({ showNotice: true }));
+    type("Hello");
+    await send();
+    expect(screen.getByTestId("bo-notice")).toBeInTheDocument();
+    inView?.([{ isIntersecting: false }], { disconnect() {} });
+    expect(calls.filter((c) => c.action === "notice_shown")).toHaveLength(0);
+    inView?.([{ isIntersecting: true }], { disconnect() {} });
     expect(calls.filter((c) => c.action === "notice_shown")).toHaveLength(1);
   });
 

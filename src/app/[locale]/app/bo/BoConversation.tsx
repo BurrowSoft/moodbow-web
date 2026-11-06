@@ -14,8 +14,9 @@ import { PRIMARY_SAVE } from "@/lib/ui/journalLayout";
 
 // These end the conversation for now: there's no sending from here.
 const CLOSED: BoProblem[] = ["region_off", "region_unknown", "bo_unavailable", "needs_email", "bo_resting"];
-// The same message may simply go again.
-const RETRY: BoProblem[] = ["bo_failed", "no_answer", "offline", "in_progress", "rate_limited"];
+// The same message may simply go again, or (region_unknown: the route may have failed)
+// Bo may answer on a second look.
+const RETRY: BoProblem[] = ["bo_failed", "no_answer", "offline", "in_progress", "rate_limited", "region_unknown"];
 
 async function callBo<T>(body: object): Promise<T | { status: "no_answer" }> {
   try {
@@ -47,7 +48,9 @@ export function BoConversation({ initial, country, back, healthData = false, con
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
   const [problem, setProblem] = useState<BoProblem | null>(null);
-  const [notice, setNotice] = useState(false);
+  // How many times the function has asked for the notice: each one says it was shown.
+  const [noticeShows, setNoticeShows] = useState(0);
+  const noticeLine = useRef<HTMLParagraphElement>(null);
   const [full, setFull] = useState(false);
   const [maxChars, setMaxChars] = useState(BO_DEFAULT_MAX_CHARS);
   const [card, setCard] = useState(false);
@@ -67,27 +70,36 @@ export function BoConversation({ initial, country, back, healthData = false, con
   }, []);
   const closeCard = useCallback(() => setCard(false), []);
 
-  useEffect(() => {
-    let current = true;
-    void callBo<BoStatus>({ action: "status" }).then((status) => {
-      if (!current) return;
-      if (status.status === "ok") {
-        setMaxChars(status.maxChars);
-        if (!status.available) setProblem("region_unknown");
-      } else if (status.status === "error") {
-        if (status.code === "not_authenticated") window.location.reload();
-        else setProblem(status.code);
-      } else setProblem(navigator.onLine ? "region_unknown" : "offline");
-    });
-    return () => {
-      current = false;
-    };
+  const readStatus = useCallback(async () => {
+    const status = await callBo<BoStatus>({ action: "status" });
+    if (status.status === "ok") {
+      setMaxChars(status.maxChars);
+      setProblem(status.available ? null : "region_unknown");
+    } else if (status.status === "error") {
+      if (status.code === "not_authenticated") window.location.reload();
+      else setProblem(status.code);
+    } else setProblem(navigator.onLine ? "region_unknown" : "offline");
   }, []);
 
-  // Only once it's really on screen, or the three-hour timer resets (bo.md).
   useEffect(() => {
-    if (notice) void callBo({ action: "notice_shown" });
-  }, [notice]);
+    void readStatus();
+  }, [readStatus]);
+
+  // Only once it's really on screen, or the three-hour timer resets (bo.md). A long
+  // conversation can have it out of view, so it waits to be seen.
+  useEffect(() => {
+    const line = noticeLine.current;
+    if (noticeShows === 0 || !line) return;
+    const shown = () => void callBo({ action: "notice_shown" });
+    if (typeof IntersectionObserver === "undefined") return shown();
+    const seen = new IntersectionObserver((entries, observer) => {
+      if (!entries.some((e) => e.isIntersecting)) return;
+      observer.disconnect();
+      shown();
+    });
+    seen.observe(line);
+    return () => seen.disconnect();
+  }, [noticeShows]);
 
   useEffect(() => {
     end.current?.scrollIntoView?.({ block: "end" });
@@ -101,6 +113,8 @@ export function BoConversation({ initial, country, back, healthData = false, con
   // this is the only check that text gets: once, when it crosses (Mobile Dev, H10).
   const change = (next: string) => {
     if ([...next].length > maxChars && !tooLong && flagsCrisis(next, CRISIS_KEYWORDS)) openCard();
+    // A line about the last send doesn't belong to what's now in the box.
+    if (problem && !closed) setProblem(null);
     setText(next);
   };
 
@@ -110,6 +124,9 @@ export function BoConversation({ initial, country, back, healthData = false, con
     // Before any request: the card needs no network (as for entries, #190).
     if (flagsCrisis(sent, CRISIS_KEYWORDS)) openCard();
     if (attempt.current?.text !== sent) attempt.current = { key: crypto.randomUUID(), text: sent };
+    // Known to be offline: no request. navigator.onLine can also say online with no
+    // connection, and that ends as no_answer.
+    if (!navigator.onLine) return setProblem("offline");
     const client_key = attempt.current.key;
     setSending(true);
     setProblem(null);
@@ -122,7 +139,7 @@ export function BoConversation({ initial, country, back, healthData = false, con
     setSending(false);
     if (answer.status === "ok") {
       if (answer.openCard) openCard();
-      if (answer.showNotice) setNotice(true);
+      if (answer.showNotice) setNoticeShows((n) => n + 1);
       setFull(answer.conversationFull);
       const { reply, conversationFull } = answer;
       setMessages((list) => [...list, { id: client_key, author: "person", body: sent }, { id: `${client_key}-reply`, author: "ai", body: reply, sentWith: client_key, unkept: conversationFull }]);
@@ -137,6 +154,8 @@ export function BoConversation({ initial, country, back, healthData = false, con
     if (answer.code === "ai_consent_required") return setNeedsConsent(true);
     setProblem(answer.code);
   };
+
+  const retry = () => void (closed || text.trim() === "" ? readStatus() : send());
 
   return (
     <div data-testid="bo-conversation" className="flex flex-col gap-4">
@@ -156,11 +175,6 @@ export function BoConversation({ initial, country, back, healthData = false, con
           </>
         )}
       </p>
-      {notice && (
-        <p data-testid="bo-notice" className="rounded-2xl border border-border bg-surface p-[16px] text-sm text-text">
-          {t("notice")}
-        </p>
-      )}
       <div role="log" aria-label={t("screenLine")} className="flex flex-col gap-3">
         {messages.length === 0 && <p className={bubble("ai")}>{t("firstLine")}</p>}
         {messages.map((m) =>
@@ -179,6 +193,11 @@ export function BoConversation({ initial, country, back, healthData = false, con
           </p>
         )}
       </div>
+      {noticeShows > 0 && (
+        <p ref={noticeLine} data-testid="bo-notice" className="rounded-2xl border border-border bg-surface p-[16px] text-sm text-text">
+          {t("notice")}
+        </p>
+      )}
       <div ref={end} />
       {full && (
         <div data-testid="bo-full" className="flex flex-col items-start gap-2 text-sm text-text">
@@ -201,7 +220,7 @@ export function BoConversation({ initial, country, back, healthData = false, con
         <div role="alert" data-testid="bo-problem" className="flex flex-col items-start gap-2">
           <p className="text-text">{t(tooLong ? "tooLong" : BO_ERROR_TEXT[problem as BoProblem])}</p>
           {problem && RETRY.includes(problem) && !tooLong && (
-            <button type="button" data-testid="bo-retry" disabled={sending} onClick={() => void send()} className="inline-flex min-h-12 items-center rounded-full px-[12px] font-medium text-accent underline underline-offset-4">
+            <button type="button" data-testid="bo-retry" disabled={sending} onClick={retry} className="inline-flex min-h-12 items-center rounded-full px-[12px] font-medium text-accent underline underline-offset-4">
               {t("tryAgain")}
             </button>
           )}
