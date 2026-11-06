@@ -564,6 +564,34 @@
     "safetyNotTherapy": "Moodbow ersetzt keine professionelle Hilfe."
   },
   "bo": {
-    "boButton": "Mit Bo sprechen"
+    "boButton": "Mit Bo sprechen",
+    "screenLine": "Bo, die KI von Moodbow",
+    "smallLine": "Bo ist eine KI, kein Therapeut.",
+    "notice": "Du sprichst mit Bo, einer KI. Bo ist weder ein Mensch noch ein Therapeut und kann niemanden anrufen.",
+    "firstLine": "Wie läuft dein Tag?",
+    "journalSwitch": "Bo meine letzten Check-ins und Einträge lesen lassen",
+    "clearAction": "Unterhaltung löschen",
+    "meRow": "Deine Unterhaltung mit Bo",
+    "meRowEmpty": "Noch keine Unterhaltung",
+    "regionOff": "Bo ist in ausgewählten Ländern verfügbar.",
+    "regionUnknown": "Bo ist gerade nicht verfügbar.",
+    "resting": "Bo ruht sich aus. Versuch es später noch einmal.",
+    "messageBox": "Schreib Bo",
+    "send": "Senden",
+    "typing": "Bo schreibt",
+    "failed": "Das wurde nicht gesendet. Deine Nachricht ist noch da.",
+    "tryAgain": "Wiederholen",
+    "wait": "Einen Moment, dann versuch es noch einmal.",
+    "dailyLimit": "Das waren alle Nachrichten mit Bo für heute. Morgen kannst du wieder schreiben.",
+    "unavailable": "Bo ist für dieses Konto nicht verfügbar.",
+    "tooLong": "Das ist zu lang für eine Nachricht.",
+    "clearTitle": "Diese Unterhaltung löschen?",
+    "clearBody": "Damit wird deine Unterhaltung mit Bo gelöscht. Das lässt sich nicht rückgängig machen.",
+    "clearConfirm": "Löschen",
+    "cancel": "Abbrechen",
+    "reportAction": "Diese Antwort melden",
+    "reportScreen": "Danke für den Hinweis. Niemand liest das sofort.",
+    "offline": "Du bist offline. Bo braucht eine Verbindung.",
+    "conversationFull": "Diese Unterhaltung ist voll, neue Nachrichten werden nicht gespeichert. Exportiere sie, wenn du eine Kopie möchtest, und lösche sie dann unter Ich."
   }
 }

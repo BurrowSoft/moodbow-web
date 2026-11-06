@@ -564,6 +564,34 @@
     "safetyNotTherapy": "Moodbow non sostituisce l'aiuto di un professionista."
   },
   "bo": {
-    "boButton": "Parla con Bo"
+    "boButton": "Parla con Bo",
+    "screenLine": "Bo, l'AI di Moodbow",
+    "smallLine": "Bo è un'AI, non un terapeuta.",
+    "notice": "Stai parlando con Bo, un'AI. Non è una persona né un terapeuta e non può chiamare nessuno.",
+    "firstLine": "Come sta andando la tua giornata?",
+    "journalSwitch": "Lascia che Bo legga i miei check-in e le mie pagine recenti",
+    "clearAction": "Cancella la conversazione",
+    "meRow": "La tua conversazione con Bo",
+    "meRowEmpty": "Ancora nessuna conversazione",
+    "regionOff": "Bo è disponibile in alcuni Paesi.",
+    "regionUnknown": "Bo non è disponibile in questo momento.",
+    "resting": "Bo sta riposando. Riprova più tardi.",
+    "messageBox": "Scrivi a Bo",
+    "send": "Invia",
+    "typing": "Bo sta scrivendo",
+    "failed": "Non è stato inviato. Il tuo messaggio è ancora qui.",
+    "tryAgain": "Riprova",
+    "wait": "Un momento, poi riprova.",
+    "dailyLimit": "Per oggi i messaggi con Bo sono finiti. Potrai scrivere di nuovo domani.",
+    "unavailable": "Bo non è disponibile per questo account.",
+    "tooLong": "È troppo lungo per un messaggio.",
+    "clearTitle": "Cancellare questa conversazione?",
+    "clearBody": "La tua conversazione con Bo verrà cancellata. Non si può annullare.",
+    "clearConfirm": "Cancella",
+    "cancel": "Annulla",
+    "reportAction": "Segnala questa risposta",
+    "reportScreen": "Grazie per avercelo detto. Nessuno lo legge subito.",
+    "offline": "Sei offline. Bo ha bisogno di una connessione.",
+    "conversationFull": "Questa conversazione è piena, quindi i nuovi messaggi non vengono conservati. Esportala se vuoi una copia, poi cancellala in Io."
   }
 }

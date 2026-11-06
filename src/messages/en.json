@@ -564,6 +564,34 @@
     "safetyNotTherapy": "Moodbow isn't a substitute for professional help."
   },
   "bo": {
-    "boButton": "Talk to Bo"
+    "boButton": "Talk to Bo",
+    "screenLine": "Bo, Moodbow's AI",
+    "smallLine": "Bo is an AI, not a therapist.",
+    "notice": "You're talking with Bo, an AI. It isn't a person or a therapist, and it can't call anyone.",
+    "firstLine": "How's your day going?",
+    "journalSwitch": "Let Bo read my recent check-ins and entries",
+    "clearAction": "Clear conversation",
+    "meRow": "Your conversation with Bo",
+    "meRowEmpty": "No conversation yet",
+    "regionOff": "Bo is available in selected countries.",
+    "regionUnknown": "Bo isn't available right now.",
+    "resting": "Bo is resting. Try again later.",
+    "messageBox": "Message Bo",
+    "send": "Send",
+    "typing": "Bo is writing",
+    "failed": "That didn't send. Your message is still here.",
+    "tryAgain": "Try again",
+    "wait": "One moment, then try again.",
+    "dailyLimit": "That's all of today's messages with Bo. You can write again tomorrow.",
+    "unavailable": "Bo isn't available for this account.",
+    "tooLong": "That's too long for one message.",
+    "clearTitle": "Clear this conversation?",
+    "clearBody": "This deletes your conversation with Bo. It can't be undone.",
+    "reportAction": "Report this reply",
+    "reportScreen": "Thanks for telling us. No one reads this right away.",
+    "offline": "You're offline. Bo needs a connection.",
+    "clearConfirm": "Clear",
+    "cancel": "Cancel",
+    "conversationFull": "This conversation is full, so new messages aren't kept. Export it if you want a copy, then clear it in Me."
   }
 }

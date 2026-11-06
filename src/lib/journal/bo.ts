@@ -53,3 +53,37 @@ export function parseBoStatus(data: unknown): BoStatus {
   if (typeof d.available !== "boolean") return { status: "no_answer" };
   return { status: "ok", available: d.available, pictures: d.pictures === true, maxChars: typeof d.limits?.max_chars === "number" ? d.limits.max_chars : 2000 };
 }
+
+// What this screen needs of a conversation: kept messages only, as plain text.
+export type BoMessage = { id: string; author: "person" | "ai"; body: string };
+export type BoProblem = BoError | "no_answer" | "offline";
+
+export const BO_HISTORY_SHOWN = 200;
+export const BO_DEFAULT_MAX_CHARS = 2000;
+export const BO_WAIT_RETRY_MS = 2000;
+
+// The card reopens on each match unless it opened in the last 10 minutes (UX).
+const BO_CARD_QUIET_MS = 10 * 60_000;
+export const boCardMayOpen = (openedAt: number | null, now: number) => openedAt === null || now - openedAt >= BO_CARD_QUIET_MS;
+
+// The line for each stop. The web has no anonymous sessions, so needs_email is
+// neutral here, and pictures aren't sent yet, so those are only a failed send.
+export const BO_ERROR_TEXT = {
+  invalid_value: "tooLong",
+  not_authenticated: "failed",
+  ai_consent_required: "failed",
+  region_off: "regionOff",
+  bo_unavailable: "unavailable",
+  needs_email: "unavailable",
+  pictures_off: "failed",
+  pictures_need_email: "failed",
+  in_progress: "wait",
+  rate_limited: "wait",
+  daily_limit: "dailyLimit",
+  picture_limit: "failed",
+  region_unknown: "regionUnknown",
+  bo_resting: "resting",
+  bo_failed: "failed",
+  no_answer: "failed",
+  offline: "offline",
+} as const satisfies Record<BoProblem, string>;
