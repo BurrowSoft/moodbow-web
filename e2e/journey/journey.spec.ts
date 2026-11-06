@@ -1174,6 +1174,18 @@ test("large text, set in the browser: Today after a mood, calendar, day, entry a
         await page.goto(`${route}/app/write`);
         await expect(page.getByTestId("entry-text")).toBeVisible();
         await measure(`${saved} writing`, percent);
+        // Me's reminder reads whole in a 12-hour browser (this one's en-US), with its PM: a
+        // clipped one makes 21:00 read "09:00" (Web Tester, #206).
+        await page.goto(`${route}/app/me`);
+        const time = await page.getByTestId("me-reminder-time").evaluate((input) => {
+          const style = getComputedStyle(input);
+          const ruler = document.createElement("canvas").getContext("2d")!;
+          ruler.font = style.font;
+          const needs = ruler.measureText("09:00 PM").width + parseFloat(style.paddingLeft) + parseFloat(style.paddingRight) + parseFloat(style.fontSize) * 1.5;
+          return { needs: Math.ceil(needs), has: Math.floor(input.clientWidth) };
+        });
+        console.log(`Me's time, ${saved} at ${percent}%: needs ${time.needs}, has ${time.has}`);
+        expect.soft(time.needs, `${saved} Me's time at ${percent}%`).toBeLessThanOrEqual(time.has);
       }
       // List, for the next person and the next language.
       await textAt(100);
