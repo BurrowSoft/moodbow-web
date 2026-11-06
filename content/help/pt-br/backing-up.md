@@ -18,4 +18,4 @@ Você pode começar a usar o Moodbow no app sem e-mail. Seu diário fica salvo e
 
 **Diários sem e-mail:** se você nunca adicionar um e-mail e não abrir o app conectado à internet por 12 meses, apagamos esse diário. O Moodbow avisa um mês antes.
 
-Sem e-mail não existe **Sair**, porque você não conseguiria entrar de novo. **Apagar conta** funciona normalmente.
+Sem e-mail não existe **Sair** em **Perfil**, porque você não conseguiria entrar de novo. **Apagar conta** funciona normalmente.
