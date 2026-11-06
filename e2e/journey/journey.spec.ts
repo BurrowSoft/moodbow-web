@@ -931,6 +931,7 @@ test.describe("the tab bar in every language", () => {
       // The safety card at the largest text: Close is a button to tap, not a
       // column of letters, and it closes.
       await textAt(300);
+      await page.setViewportSize({ width: 320, height: 640 });
       for (const [route, saved] of [["", "en"], ["/fr", "fr"], ["/es", "es"], ["/pt-br", "pt"]]) {
         await setProfileLocale(email, password, saved);
         await page.goto(`${route}/app/me`);
@@ -942,7 +943,7 @@ test.describe("the tab bar in every language", () => {
         await expect(card.getByTestId("dialog-more")).toBeVisible();
         expect(await card.evaluate((el) => el.scrollTop), "opens at its top").toBe(0);
         const firstHelp = await card.locator("a").first().evaluate((a) => a.getBoundingClientRect().top);
-        expect(firstHelp, `the first help line starts on screen, ${route || "/en"}`).toBeLessThan(640);
+        expect(firstHelp, `the first help line starts on the first screen, ${route || "/en"}`).toBeLessThan(640);
         const close = page.getByTestId("safety-close");
         await close.scrollIntoViewIfNeeded();
         await expect(close, route || "/en").toBeInViewport();
@@ -956,6 +957,7 @@ test.describe("the tab bar in every language", () => {
         await expect(page.getByTestId("safety-card"), route || "/en").toHaveCount(0);
       }
       await setProfileLocale(email, password, "en");
+      await page.setViewportSize({ width: 320, height: 800 });
 
       // The delete dialog: its title and warning first, not scrolled down to a button.
       await page.goto("/app/me");
