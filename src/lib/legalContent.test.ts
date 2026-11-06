@@ -147,7 +147,7 @@ describe("applyPending", () => {
   });
 });
 
-describe("renderLegal (the real privacy text, nothing met)", () => {
+describe("renderLegal (the real privacy text, nothing met but bo-off, which holds today's lines)", () => {
   const page = renderLegal(legalSource("privacy", "en"), () => false);
 
   it("takes the title from the first ## line and moves sections up a level", () => {
@@ -198,7 +198,7 @@ describe("renderLegal (the real privacy text, nothing met)", () => {
   });
 
   it("highlights facts still to confirm (if any come back)", () => {
-    expect(renderLegal("## T\nSee ⏳[90] days.", () => false).html).toContain('<mark class="legal-todo">⏳[90]</mark>');
+    expect(renderLegal("## T\nSee ⏳[90] days.", (id) => id === "bo_off").html).toContain('<mark class="legal-todo">⏳[90]</mark>');
   });
 
   it("terms: AI and credit sections stay out until live", () => {
