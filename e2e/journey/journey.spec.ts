@@ -852,6 +852,7 @@ test.describe("the tab bar in every language", () => {
         await page.setViewportSize({ width: 320, height: 800 });
         await page.goto(`${route}/app`);
         await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+        expect(await page.evaluate(() => getComputedStyle(document.documentElement).fontSize), route || "/en").toBe("32px");
         await expect.poll(labelSize, { message: `${route || "/en"} at 320` }).toBeGreaterThanOrEqual(11);
         const narrow = (await labelSize()) as number;
         await page.setViewportSize({ width: 390, height: 800 });
@@ -868,6 +869,8 @@ test.describe("the tab bar in every language", () => {
           await page.waitForLoadState("networkidle");
           await expect(page.getByTestId("app-loading")).toHaveCount(0);
           await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))));
+          // The setting really is on, or all of this would pass at the normal size.
+          expect(await page.evaluate(() => getComputedStyle(document.documentElement).fontSize), `${path} at ${percent}%`).toBe(`${(16 * percent) / 100}px`);
           // What sticks out, named, so a failure says where to look.
           const sticksOut = await page.evaluate(() => {
             const inScroller = (e: Element) => {
