@@ -75,7 +75,7 @@
     "description": "Come eliminare il tuo account Moodbow e tutto ciò che contiene.",
     "intro": "Puoi eliminare il tuo account e tutto ciò che contiene in qualsiasi momento. L'eliminazione è immediata e non si può annullare.",
     "steps": "Nell'app o sul web: apri Profilo → Elimina account, scrivi ELIMINA e conferma.",
-    "what": "Eliminiamo tutto ciò che c'è nel tuo account, comprese le tue pagine, i check-in e le impostazioni, e i tuoi dati di accesso.",
+    "what": "Eliminiamo le tue pagine, i check-in, le riflessioni e i resoconti dell'AI, ciò che Moodbow ricorda, le tue impostazioni e i tuoi dati di accesso.",
     "backups": "Le copie nei nostri backup cifrati vengono rimosse automaticamente entro {days} giorni.",
     "noAccess": "Non riesci ad accedere? Scrivi a <support>{email}</support> dall'indirizzo usato per la registrazione e lo elimineremo noi."
   },

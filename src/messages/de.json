@@ -75,7 +75,7 @@
     "description": "So löschst du dein Moodbow-Konto und alles darin.",
     "intro": "Du kannst dein Konto und alles darin jederzeit löschen. Das Löschen passiert sofort und lässt sich nicht rückgängig machen.",
     "steps": "In der App oder im Web: Öffne Ich → Konto löschen, gib LÖSCHEN ein und bestätige.",
-    "what": "Wir löschen alles in deinem Konto, auch deine Einträge, Check-ins und Einstellungen, sowie deine Anmeldedaten.",
+    "what": "Wir löschen deine Einträge, Check-ins, KI-Reflexionen und -Berichte, alles, was Moodbow sich merkt, deine Einstellungen und deine Anmeldedaten.",
     "backups": "Kopien in unseren verschlüsselten Backups werden innerhalb von {days} Tagen automatisch entfernt.",
     "noAccess": "Du kannst dich nicht anmelden? Schreib an <support>{email}</support>, und zwar von der Adresse, mit der du dich registriert hast. Dann löschen wir das Konto für dich."
   },
