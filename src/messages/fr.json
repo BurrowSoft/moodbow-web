@@ -463,7 +463,7 @@
     "yourWeekLookMoreGood": "Votre semaine a compté plus de bons jours que de jours moins bons.",
     "yourWeekLookSteady": "Votre semaine a été plutôt stable.",
     "yourWeekLookMixed": "Votre semaine a eu de bons jours et des jours moins bons.",
-    "yourWeekMoment": "Un moment de cette semaine : {date}",
+    "yourWeekMoment": "Un moment de cette semaine-là : {date}",
     "yourWeekHard": "Cette semaine a semblé difficile.",
     "yourWeekCaption": "Cela peut montrer ce qui va souvent ensemble, pas ce qui cause quoi."
   },

@@ -463,7 +463,7 @@
     "yourWeekLookMoreGood": "Your week had more good days than low ones.",
     "yourWeekLookSteady": "Your week was mostly steady.",
     "yourWeekLookMixed": "Your week had good days and low ones.",
-    "yourWeekMoment": "A moment from this week: {date}",
+    "yourWeekMoment": "A moment from that week: {date}",
     "yourWeekHard": "This looked like a hard week.",
     "yourWeekCaption": "This may show what tends to go together, not what causes what."
   },

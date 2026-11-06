@@ -14,7 +14,7 @@ import { aiShown, canReflect } from "@/lib/journal/ai";
 import { lastWeekStart, parseReportBody, type WeeklyReport as Report } from "@/lib/journal/report";
 import { getMe } from "@/lib/journal/me";
 import { patterns, patternsWindowStart } from "@/lib/journal/patterns";
-import { yourWeek, type YourWeekMoment } from "@/lib/journal/yourWeek";
+import { sixDaysAfter, yourWeek, type YourWeekMoment } from "@/lib/journal/yourWeek";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { YourWeekCard } from "./YourWeekCard";
 import { tabMetadata } from "../pageMeta";
@@ -101,7 +101,7 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
   let summary: React.ReactNode = null;
   if (withYourWeek) {
     const start = lastWeekStart(me.today);
-    const { data: moments } = await supabase.from("entries").select("id, entry_date").eq("is_moment", true).gte("entry_date", start);
+    const { data: moments } = await supabase.from("entries").select("id, entry_date").eq("is_moment", true).gte("entry_date", start).lte("entry_date", sixDaysAfter(start));
     const result = yourWeek(rows, me.today, (moments ?? []) as YourWeekMoment[]);
     if (result) summary = <YourWeekCard week={result} country={me.profile?.country} dateLocaleTag={dateLocaleTag} />;
   }

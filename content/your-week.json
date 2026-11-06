@@ -19,7 +19,7 @@
     "lookMoreGood": "Your week had more good days than low ones.",
     "lookSteady": "Your week was mostly steady.",
     "lookMixed": "Your week had good days and low ones.",
-    "moment": "A moment from this week: {date}",
+    "moment": "A moment from that week: {date}",
     "hard": "This looked like a hard week.",
     "caption": "This may show what tends to go together, not what causes what."
   },

@@ -991,7 +991,7 @@
   },
   {
     "key": "insights.yourWeekMoment",
-    "en": "A moment from this week: {date}",
+    "en": "A moment from that week: {date}",
     "reason": "UX draft (native read pending)"
   },
   {
