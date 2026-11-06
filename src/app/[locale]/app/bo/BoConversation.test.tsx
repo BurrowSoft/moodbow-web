@@ -8,6 +8,8 @@ import { BoConversation } from "./BoConversation";
 
 const prepare = vi.fn(async (_file: File): Promise<unknown> => ({ ok: true, blob: new Blob(["jpeg"]), base64: "QUJD", width: 10, height: 10 }));
 vi.mock("@/lib/journal/boPicture", () => ({ BO_PICTURE_ACCEPT: "image/jpeg", preparePicture: (file: File) => prepare(file) }));
+let keyboard = false;
+vi.mock("@/lib/ui/keyboardOpen", () => ({ useKeyboardOpen: () => keyboard }));
 
 const give = vi.fn(async () => ({ ok: true }));
 const report = vi.fn(async (_reply: object) => ({ ok: true }));
@@ -33,6 +35,7 @@ let statusAnswer: unknown;
 let calls: { action: string; client_key?: string; text?: string }[];
 
 beforeEach(() => {
+  keyboard = false;
   answers = [];
   calls = [];
   statusAnswer = ok;
@@ -109,6 +112,19 @@ describe("BoConversation", () => {
     expect(screen.getByTestId("bo-header")).toHaveClass("sticky");
     expect(screen.queryByTestId("bo-get-help-end")).toBeNull();
     height.mockRestore();
+  });
+
+  it("with the phone's keyboard up: the line and help sit just above the box, and nothing's pinned", async () => {
+    keyboard = true;
+    await open();
+    const row = screen.getByTestId("bo-typing-row");
+    expect(row).toHaveTextContent(b.screenLine);
+    expect(row).toContainElement(screen.getByTestId("bo-get-help-typing"));
+    expect(row.compareDocumentPosition(screen.getByTestId("bo-text")) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(screen.getByTestId("bo-header")).not.toHaveClass("sticky");
+    expect(screen.queryByTestId("bo-end-row")).toBeNull();
+    fireEvent.click(screen.getByTestId("bo-get-help-typing"));
+    expect(screen.getByTestId("safety-card")).toBeInTheDocument();
   });
 
   it("a reply: both messages show, the box empties, and a reply's markup stays text", async () => {
