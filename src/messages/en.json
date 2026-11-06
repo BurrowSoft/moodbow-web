@@ -604,7 +604,7 @@
     "clearConfirm": "Clear",
     "cancel": "Cancel",
     "consentTitle": "Before you talk to Bo",
-    "consentBody": "[Placeholder: Vitor's AI consent text goes here. It isn't final.]",
+    "consentBody": "[Placeholder, not final: this text isn't approved yet.]\n\nBo is an AI. It isn't a person or a therapist, and it can't call anyone.\n\nTo reply, Moodbow sends your messages to Anthropic (USA), the company that makes the AI, with an ID we create for you, not your name or email. Your messages aren't used to train AI models. Anthropic's automated systems check them for safety and may report illegal material to the authorities. Anthropic normally deletes them within 30 days and may keep flagged content longer.\n\nBo also checks your messages for signs of crisis, so it can point you to help. We don't keep a record of these checks. Nobody at Moodbow reads your conversation unless you report a reply.\n\nYou can turn this off at any time in Me → AI. The rest of Moodbow works without it.",
     "consentAccept": "Agree and continue",
     "consentDecline": "Not now",
     "consentFailed": "That didn't save. Please try again."
