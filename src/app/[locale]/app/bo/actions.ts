@@ -3,6 +3,7 @@
 import { pageGate } from "@/lib/conditions";
 import { isUuid } from "@/lib/journal/reflect";
 import { gateChanged } from "@/lib/journal/gateChanged";
+import { POLICY_VERSIONS } from "@/lib/legalVersions";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { setAiEnabled } from "../me/actions";
 
@@ -18,18 +19,18 @@ export async function giveBoConsent(): Promise<{ ok: boolean }> {
   return { ok };
 }
 
-// Me → Use Bo, off: the journal switch first, so a failure part-way never leaves Bo
-// reading the journal; then AI off and the withdrawal, which the button goes with. The
-// conversation stays, to read, export and clear. On again goes through the consent.
+// Me → Use Bo, off: one transaction on the server sets bo_off (which the button goes
+// with), turns the journal switch off and records the withdrawal, so nothing else is
+// called here. The conversation stays, to read, export and clear. On again goes
+// through the consent, whose grant clears bo_off; the journal switch stays off.
 export async function turnBoOff(): Promise<{ ok: boolean }> {
   if (pageGate("bo-live") === "hidden") return { ok: false };
   const supabase = await createSupabaseServerClient();
   if (!supabase) return { ok: false };
-  const { error } = await supabase.rpc("set_bo_reads_journal", { p_on: false });
+  const { error } = await supabase.rpc("bo_turn_off", { p_ai_version: POLICY_VERSIONS.ai });
   if (error) return { ok: false };
-  const { ok } = await setAiEnabled(false);
-  if (ok) gateChanged();
-  return { ok };
+  gateChanged();
+  return { ok: true };
 }
 
 // Clear conversation. RLS keeps it to their own messages, and replies go with them.

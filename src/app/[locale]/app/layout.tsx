@@ -55,11 +55,10 @@ export default async function AppLayout({ children, params }: LayoutProps<"/[loc
   // Bo's button: where bo-live is on, and the country is on Bo's list or this person
   // is exempt. It only decides whether the button shows; the function decides
   // whether Bo opens, from a signed token. A failed read: no button. Nor once Me → Use
-  // Bo has turned it off. FIXME before the flip: this also hides it from someone who
-  // declined AI at sign-up in the app (they keep it, UX); bo_off (app's migration 018)
-  // replaces this read.
+  // Bo has turned it off (bo_off). Someone who declined AI at sign-up keeps it, and is
+  // asked for consent on opening (UX).
   let boVisible = false;
-  if (pageGate("bo-live") !== "hidden" && me.consents?.ai?.granted !== false) {
+  if (pageGate("bo-live") !== "hidden" && me.settings?.bo_off !== true) {
     const { data: visible } = await supabase.rpc("bo_visible", { p_country: (await headers()).get("x-vercel-ip-country") });
     boVisible = visible === true;
   }
