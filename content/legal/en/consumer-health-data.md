@@ -36,7 +36,7 @@ We may also disclose data if the law requires it.
 - **Delete:** delete any item, or everything through Me → Delete account. We delete it from our live database right away, and encrypted backup copies expire within 8 days. Copies in our providers' logs expire on their own schedules, as in our Privacy Policy.
 - **Withdraw consent:** delete your account. We can't keep your journal without this consent.
 - **Other requests:** email support@moodbow.com. It's free. We answer within 45 days. If we need longer, we'll tell you within that time, and we may take up to 45 more days once.
-- **If you use Moodbow without an email:** we have no way to confirm by email that the account is yours. Use Export and Delete account in the app; they work on your phone without an email. Without an email, this needs access to the app on your phone.
+- **If you use Moodbow without an email:** we have no way to confirm by email that the account is yours. Use Export and Delete account in the app; they work on your phone without an email, as long as you can still open the app.
 
 ### If we say no
 You can appeal by emailing support@moodbow.com with "Appeal" in the subject. We'll answer in writing within 45 days and explain why. If your appeal is denied, you can complain to the Washington State Attorney General at www.atg.wa.gov/file-complaint, or the Nevada Attorney General at ag.nv.gov/Complaints/Consumer_Complaint.

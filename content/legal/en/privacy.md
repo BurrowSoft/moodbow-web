@@ -76,7 +76,7 @@ We never sell your data, and we never share it with advertisers.
 Wherever you live, you can:
 - **see and download** everything: Me → Export my data;
 - **correct** it: edit any entry, check-in or setting;
-- **delete** it: delete any item, or your whole account in Me → Delete account{pending:anon_start_live}. Without an email, this needs access to the app on your phone{/pending};
+- **delete** it: delete any item, or your whole account in Me → Delete account{pending:anon_start_live} (without an email, this needs access to the app on your phone){/pending};
 {pending:ai_live}- **withdraw your AI consent** at any time in Me → AI. This stops new AI requests; past reflections stay until you delete them;{/pending}
 - **object or ask questions**: email support@moodbow.com. We answer within 30 days.
 You can also complain to a data-protection authority: in Thailand, the Personal Data Protection Committee (PDPC); in the EU or UK, your local authority.
