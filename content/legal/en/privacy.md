@@ -7,7 +7,7 @@
   (src/lib/legalContent.test.ts).
 -->
 ## Moodbow Privacy Policy
-Last updated: 2 October 2026
+Last updated: 6 November 2026
 
 Moodbow is a private journal made by Vitor Ribeiro Carvalho, trading as BurrowSoft (297 Moo 1, Baan Sanian, Mueang Nan, Nan 55000, Thailand), "we" in this policy. We wrote this to be read, not skimmed past. If anything is unclear, email support@moodbow.com.
 
