@@ -788,6 +788,9 @@ test.describe("the tab bar in every language", () => {
           expect(labels, route).toHaveLength(4);
           for (const { text, lines } of labels) expect(lines, `${route || "/en"}: ${text}`).toBeLessThanOrEqual(text.trim().split(/\s+/).length);
           expect(await page.evaluate(() => document.documentElement.scrollWidth), route).toBeLessThanOrEqual(width);
+          // Text at its normal size keeps its words: icons only is for large text.
+          await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))));
+          await expect(page.locator("ul[data-tab-icons]"), `${route || "/en"} at 100%`).toHaveCount(0);
           // Browser text at 200% and 300%: one line each, scaled to share the row
           // and never under 11 px; or icons only, each tab still named.
           for (const percent of [200, 300]) {
