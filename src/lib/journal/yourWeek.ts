@@ -36,7 +36,7 @@ export type YourWeek =
 
 const PATTERN_TEMPLATE = { sleep: "patternSleep", movement: "patternMovement", stress: "patternStress" } as const;
 
-const sixDaysAfter = (date: string) => {
+export const sixDaysAfter = (date: string) => {
   const d = new Date(`${date}T00:00:00Z`);
   d.setUTCDate(d.getUTCDate() + 6);
   return d.toISOString().slice(0, 10);

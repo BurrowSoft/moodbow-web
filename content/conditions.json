@@ -203,6 +203,10 @@
     "met": false,
     "what": "Italian is offered on the web: a native reader has read the UI, Help, dates and crisis list (it_reviewed, localization plan), with UX's go. Until then /it is a draft on test builds only."
   },
+  "your-week-live": {
+    "met": false,
+    "what": "Your week (specs/your-week.md): the rule-based card at the top of Insights, no AI, on the web. Met after the Web Tester's row."
+  },
   "region-live": {
     "met": false,
     "what": "/api/region answers on Production: the signed country token for functions that are only on in some countries (Bo first, specs/bo-design.md section 7). Before it's met, on Production: REGION_SECRET set by Vitor, and the Web Tester's forged-header row passed on Preview."
