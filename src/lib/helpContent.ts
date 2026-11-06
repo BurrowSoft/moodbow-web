@@ -59,7 +59,7 @@ export function renderArticle(article: HelpArticle, met: (id: string) => boolean
 
 // What a Help page shows on this build. Bo's article follows Bo's own gate, so it can be
 // read on a Preview with the screen that links to it; everything else, its condition.
-export const helpPageMet = (id: string) => (id === "bo_live" ? pageGate("bo-live") !== "hidden" : isPendingMet(id));
+export const helpPageMet = (id: string, build?: Parameters<typeof pageGate>[1]) => (id === "bo_live" ? pageGate("bo-live", build) !== "hidden" : isPendingMet(id));
 
 // The published articles, grouped by topic in TOPICS order.
 export function helpIndex(locale: string, met: (id: string) => boolean = isPendingMet): { topic: Topic; articles: HelpArticle[] }[] {
