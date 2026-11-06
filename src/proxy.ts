@@ -40,7 +40,7 @@ export default async function proxy(req: NextRequest) {
   // /terms and /account-deletion go to the same English page, not a 404
   // (decision 212). /support too, though the app doesn't link it: someone looking
   // for support never gets a 404 (UX). The app's Portuguese is "pt" (UX), the web's route /pt-br.
-  const appLink = req.nextUrl.pathname.match(/^\/(th|fr|es|pt|pt-br|de|it)(\/(?:help(?:\/.*)?|support|privacy|terms|consumer-health-data|account-deletion))\/?$/i);
+  const appLink = req.nextUrl.pathname.match(/^\/(th|fr|es|pt|pt-br|de|it)(\/(?:help(?:\/.*)?|support|privacy(?:\/next)?|terms|consumer-health-data|account-deletion))\/?$/i);
   if (appLink) {
     const language = appLink[1].toLowerCase();
     const route = language === "pt" ? "pt-br" : language;

@@ -58,7 +58,7 @@ describe("proxy: /th pages the app links to, while Thai isn't served", () => {
 
   it("nothing else under /th, and no lookalikes", async () => {
     locales = ["en"];
-    for (const path of ["/th", "/th/app", "/th/sign-in", "/th/helpful", "/th/support-x", "/th/privacy-x", "/help", "/support"]) {
+    for (const path of ["/th", "/th/app", "/th/sign-in", "/th/helpful", "/th/support-x", "/th/privacy-x", "/th/privacy/other", "/help", "/support"]) {
       expect((await go(path)).status, path).not.toBe(307);
     }
   });
@@ -77,6 +77,7 @@ describe("proxy: the app's other languages", () => {
     locales = ["en"];
     expect(await to("/fr/help/check-ins")).toBe("https://www.moodbow.com/help/check-ins");
     expect(await to("/de/privacy")).toBe("https://www.moodbow.com/privacy");
+    for (const language of ["de", "it", "th"]) expect(await to(`/${language}/privacy/next`), language).toBe("https://www.moodbow.com/privacy/next");
     for (const language of ["de", "it", "th", "fr", "es", "pt", "pt-br"]) expect(await to(`/${language}/support`), language).toBe("https://www.moodbow.com/support");
     expect(await to("/pt/help")).toBe("https://www.moodbow.com/help");
     expect(await to("/pt-br/help")).toBe("https://www.moodbow.com/help");
@@ -87,6 +88,8 @@ describe("proxy: the app's other languages", () => {
     expect(await to("/pt/terms")).toBe("https://www.moodbow.com/pt-br/terms");
     expect(await to("/pt/support")).toBe("https://www.moodbow.com/pt-br/support");
     expect(await to("/fr/support")).toBeNull();
+    expect(await to("/pt/privacy/next")).toBe("https://www.moodbow.com/pt-br/privacy/next");
+    expect(await to("/fr/privacy/next")).toBeNull();
     expect(await to("/pt-br/help")).toBeNull();
     expect(await to("/fr/help")).toBeNull();
   });
