@@ -1234,6 +1234,18 @@ test("Bo's screen at large text: the header covers nothing, and help is reachabl
       await page.getByTestId("bo-text").fill("Another");
       await page.getByTestId("bo-send").click({ trial: true });
 
+      // The line and help are on screen wherever the conversation has got to, at the top
+      // and at the end, whichever holds them at this size.
+      for (const position of ["top", "end"]) {
+        await page.evaluate((to) => window.scrollTo(0, to === "top" ? 0 : document.documentElement.scrollHeight), position);
+        await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))));
+        const pinnedHere = (await page.getByTestId("bo-header").getAttribute("data-pinned")) !== null;
+        const line = pinnedHere ? page.getByRole("heading", { level: 1 }) : page.getByTestId("bo-end-line");
+        const atHand = page.getByTestId(pinnedHere ? "bo-get-help" : "bo-get-help-end");
+        await expect(line, `the line, ${position}, ${percent}%`).toBeInViewport({ ratio: 1 });
+        await expect(atHand, `help, ${position}, ${percent}%`).toBeInViewport({ ratio: 1 });
+      }
+
       // Help, from wherever the conversation has got to.
       const pinned = (await page.getByTestId("bo-header").getAttribute("data-pinned")) !== null;
       const help = page.getByTestId(pinned ? "bo-get-help" : "bo-get-help-end");

@@ -95,12 +95,14 @@ describe("BoConversation", () => {
     expect(document.documentElement.dataset.boScreen).toBeUndefined();
   });
 
-  it("a header past a quarter of the window stops being pinned, and help also sits by the box", async () => {
+  it("a header past a quarter of the window stops being pinned, and a row holds the line and help", async () => {
     const height = vi.spyOn(HTMLElement.prototype, "offsetHeight", "get").mockReturnValue(500);
     await open();
     expect(screen.getByTestId("bo-header")).not.toHaveClass("sticky");
     expect(screen.getByTestId("bo-get-help")).toBeInTheDocument();
     expect(screen.getByTestId("bo-get-help-end")).toBeInTheDocument();
+    expect(screen.getByTestId("bo-end-row")).toHaveClass("sticky");
+    expect(screen.getByTestId("bo-end-line")).toHaveTextContent(b.screenLine);
     cleanup();
     height.mockReturnValue(60);
     await open();
