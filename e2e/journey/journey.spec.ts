@@ -560,13 +560,13 @@ test.describe("Your week on Insights", () => {
       const monday = await lastWeekMonday(email);
 
       // Three check-ins: nothing, not even a message about too few days.
-      await seedCheckIns(email, monday, [0, 1, 2].map((offset) => ({ offset, mood: 5 })));
+      await seedCheckIns(email, password, monday, [0, 1, 2].map((offset) => ({ offset, mood: 5 })));
       await page.goto("/app/insights");
       await expect(page.getByTestId("insights-range-week")).toBeVisible({ timeout: 15_000 });
       await expect(page.getByTestId("your-week")).toHaveCount(0);
 
       // A pattern (sleep), then how it looked, with the quiet line.
-      await seedCheckIns(email, monday, [
+      await seedCheckIns(email, password, monday, [
         { offset: 0, mood: 5, sleep_hours: 8 },
         { offset: 1, mood: 5, sleep_hours: 8 },
         { offset: 2, mood: 4, sleep_hours: 7 },
@@ -580,7 +580,7 @@ test.describe("Your week on Insights", () => {
       await expect(card.getByTestId("your-week-caption")).toHaveText(messages.insights.yourWeekCaption);
 
       // A hard week: only that, and the help opens the card.
-      await seedCheckIns(email, monday, [
+      await seedCheckIns(email, password, monday, [
         { offset: 0, mood: 1, sleep_hours: 8 },
         { offset: 1, mood: 2, sleep_hours: 8 },
         { offset: 2, mood: 1, sleep_hours: 5 },

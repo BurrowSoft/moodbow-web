@@ -113,16 +113,28 @@ export async function lastWeekMonday(email: string): Promise<string> {
   return lastWeekStart(today);
 }
 
-export async function seedCheckIns(email: string, monday: string, days: { offset: number; mood: number; sleep_hours?: number }[]): Promise<void> {
+export async function seedCheckIns(email: string, password: string, monday: string, days: { offset: number; mood: number; sleep_hours?: number }[]): Promise<void> {
   if (!ours(email)) throw new Error("seedCheckIns only touches this helper's own users");
-  const id = await userId(email);
-  const rows = days.map(({ offset, mood, sleep_hours }) => {
+  // Through the app's own RPC, signed in as them: the service role has no write on
+  // check_ins (staging, #201).
+  const user = createClient(URL_, PUBLISHABLE, { auth: { persistSession: false, autoRefreshToken: false } });
+  const { error: signInError } = await user.auth.signInWithPassword({ email, password });
+  if (signInError) throw new Error(`sign-in to seed check-ins failed: ${signInError.message}`);
+  for (const { offset, mood, sleep_hours } of days) {
     const d = new Date(`${monday}T00:00:00Z`);
     d.setUTCDate(d.getUTCDate() + offset);
-    return { user_id: id, local_date: d.toISOString().slice(0, 10), mood, sleep_hours: sleep_hours ?? null };
-  });
-  const { error } = await database().from("check_ins").upsert(rows, { onConflict: "user_id,local_date" });
-  if (error) throw new Error(`seeding check-ins failed: ${error.message}`);
+    const { error } = await user.rpc("upsert_check_in", {
+      p_date: d.toISOString().slice(0, 10),
+      p_mood: mood,
+      p_sleep_hours: sleep_hours ?? null,
+      p_sleep_quality: null,
+      p_exercise_minutes: null,
+      p_stress: null,
+      p_expected_updated_at: null,
+      p_insert_only: false,
+    });
+    if (error) throw new Error(`seeding check-ins failed: ${error.message}`);
+  }
 }
 
 // The token a password reset email would carry.
