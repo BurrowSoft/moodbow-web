@@ -75,7 +75,7 @@ When data goes outside your country (for example from the EU to the USA), we rel
 We never sell your data, and we never share it with advertisers.
 
 ### 4. How long we keep it
-- Everything is kept until you delete it or delete your account.
+- Everything is kept until you delete it or delete your account, except as this policy says.
 - **Deleting your account** removes your journal, check-ins, {pending:ai_live|bo_off}AI content, {/pending}settings, {pending:ai_live|bo_off}credits history {/pending}and login from our live database immediately.
 {pending:bo_live}- Clearing your conversation with Bo deletes it from our live database right away. If you delete your account, we also ask Anthropic to delete the ID we gave it, but Anthropic may keep its safety records.{/pending}
 - Copies in our encrypted backups disappear automatically within {pending:backup_retention}8{/pending} days.
