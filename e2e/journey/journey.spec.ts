@@ -1082,6 +1082,17 @@ test.describe("the tab bar in every language", () => {
           const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
           // Soft: one run lists every page that needs a look.
           expect.soft({ path, percent, overflow, sticksOut }).toEqual({ path, percent, overflow: 0, sticksOut: [] });
+          // Gutters and card padding stay what they are at the normal size: rem would triple
+          // at 300 %, leaving 176 px of a 320 px phone for 48 px text (Web Tester, #201).
+          const tripled = await page.evaluate(() => {
+            const left = (e: Element) => parseFloat(getComputedStyle(e).paddingLeft);
+            const cards = [...document.querySelectorAll('#main, #main [class*="rounded-3xl"], #main [class*="rounded-2xl"][class*="border"]')];
+            return cards.filter((e) => left(e) > 24).slice(0, 6).map((e) => `${e.tagName.toLowerCase()} ${left(e)}`);
+          });
+          expect.soft({ path, percent, tripled }).toEqual({ path, percent, tripled: [] });
+          // A negative margin must match the px padding it pairs with.
+          const pulledOut = await page.evaluate(() => [...document.querySelectorAll("#main *")].filter((e) => Math.abs(parseFloat(getComputedStyle(e).marginLeft)) > 24 && parseFloat(getComputedStyle(e).marginLeft) < 0).slice(0, 6).map((e) => e.tagName.toLowerCase()));
+          expect.soft({ path, percent, pulledOut }).toEqual({ path, percent, pulledOut: [] });
         }
       }
     } finally {

@@ -26,7 +26,7 @@ export async function EntryPreviews({ entries, testIdPrefix, from, timeZone, dat
           <Link
             href={withOrigin(`/app/entries/${entry.id}`, from)}
             data-testid={`${testIdPrefix}-${entry.id}`}
-            className="block rounded-2xl border border-border bg-surface p-4 text-text hover:bg-pill"
+            className="block rounded-2xl border border-border bg-surface p-[16px] text-text hover:bg-pill"
           >
             <span className="flex items-center justify-between gap-2 text-xs text-muted">
               {localDate.format(new Date(entry.created_at)) === entry.entry_date ? <time dateTime={entry.created_at}>{time.format(new Date(entry.created_at))}</time> : <span />}

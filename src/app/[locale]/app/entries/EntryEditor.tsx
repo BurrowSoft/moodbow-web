@@ -654,7 +654,7 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
         // Too long: the message is tied to the text (a11y pass).
         aria-invalid={tooLong || undefined}
         aria-describedby={[tooLong && "entry-error", showPrompt && "entry-prompt-text"].filter(Boolean).join(" ") || undefined}
-        className="min-h-[50dvh] w-full flex-1 resize-none rounded-3xl border border-border bg-surface p-6 text-lg leading-relaxed text-text placeholder:text-muted"
+        className="min-h-[50dvh] w-full flex-1 resize-none rounded-3xl border border-border bg-surface p-[24px] text-lg leading-relaxed text-text placeholder:text-muted"
       />
 
       {/* A switch with its hint under it, as the app (decision 206). */}

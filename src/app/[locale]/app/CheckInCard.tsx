@@ -186,7 +186,7 @@ function ConflictVersion({ label, values, testId }: { label: string; values: Pic
     chips.splice(values.sleep_hours != null ? 1 : 0, 0, { label: t(`sleep${q[0].toUpperCase()}${q.slice(1)}` as "sleepPoor"), hex: null });
   }
   return (
-    <div className="rounded-2xl bg-pill p-3" data-testid={testId}>
+    <div className="rounded-2xl bg-pill p-[12px]" data-testid={testId}>
       <p className="text-sm text-muted">{label}</p>
       <p className="mt-2 flex items-center gap-2 font-medium text-text">
         <MoodFace mood={values.mood} className="h-7 w-7" />
@@ -224,7 +224,7 @@ export function CheckInCard(props: Props) {
         <div
           key={`${notice.kind}-${notice.date}`}
           data-testid={`checkin-${notice.kind}`}
-          className="flex items-start gap-4 rounded-2xl bg-pill p-4 text-sm text-text"
+          className="flex items-start gap-4 rounded-2xl bg-pill p-[16px] text-sm text-text"
         >
           <p className="flex-1">
             {t("offlineCheckinRejected", { date: dateLine(notice.date, props.dateLocaleTag) })}

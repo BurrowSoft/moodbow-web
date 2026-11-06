@@ -219,7 +219,7 @@ function Screen({ entry: initial, checkIn, from, backLabel, dateLocaleTag, uid, 
                   <circle cx="19" cy="12" r="1.8" />
                 </svg>
               </button>
-              <ul id="entry-menu" hidden={!menu} className="absolute right-0 top-12 z-10 min-w-44 rounded-2xl border border-border bg-surface p-1 shadow-lg">
+              <ul id="entry-menu" hidden={!menu} className="absolute right-0 top-12 z-10 min-w-44 rounded-2xl border border-border bg-surface p-[4px] shadow-lg">
                 <li>
                   <button type="button" data-testid="entry-menu-edit" onClick={() => edit({ at: "end" })} className="flex min-h-11 w-full items-center rounded-xl px-4 text-left text-text hover:bg-pill">
                     {t("entryEditTitle")}
@@ -294,7 +294,7 @@ function Screen({ entry: initial, checkIn, from, backLabel, dateLocaleTag, uid, 
       <div
         data-testid="entry-body"
         onClick={openAt}
-        className="-mx-3 cursor-text whitespace-pre-wrap rounded-2xl px-3 py-2 text-lg leading-relaxed text-text [overflow-wrap:anywhere] hover:bg-pill"
+        className="-mx-[12px] cursor-text whitespace-pre-wrap rounded-2xl px-[12px] py-2 text-lg leading-relaxed text-text [overflow-wrap:anywhere] hover:bg-pill"
       >
         {entry.body}
       </div>
@@ -307,7 +307,7 @@ function Screen({ entry: initial, checkIn, from, backLabel, dateLocaleTag, uid, 
         type="button"
         data-testid="entry-add-more"
         onClick={() => edit({ at: "end" })}
-        className="flex min-h-12 w-full items-center rounded-2xl border border-dashed border-border px-4 text-left text-muted hover:bg-pill"
+        className="flex min-h-12 w-full items-center rounded-2xl border border-dashed border-border px-[16px] text-left text-muted hover:bg-pill"
       >
         {t("entryAddMore")}
       </button>

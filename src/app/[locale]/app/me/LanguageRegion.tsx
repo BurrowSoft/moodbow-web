@@ -53,10 +53,10 @@ export function LanguageRegion({ initial, countries, zones, languages }: { initi
     });
   };
 
-  const select = "mt-2 block w-full rounded-2xl border border-border bg-bg px-4 py-3 text-text disabled:opacity-50";
+  const select = "mt-2 block w-full rounded-2xl border border-border bg-bg px-[16px] py-3 text-text disabled:opacity-50";
 
   return (
-    <section {...untilLoaded} aria-labelledby="me-region" className="rounded-3xl border border-border bg-surface p-6" aria-busy={pending}>
+    <section {...untilLoaded} aria-labelledby="me-region" className="rounded-3xl border border-border bg-surface p-[24px]" aria-busy={pending}>
       <h2 id="me-region" className="text-lg font-medium text-text">
         {t("meLanguageRegion")}
       </h2>

@@ -74,7 +74,7 @@ export function KeyboardShortcuts({ search }: { search: boolean }) {
       aria-labelledby="shortcuts-title"
       data-testid="shortcuts-dialog"
       onClose={close}
-      className="m-auto w-[min(24rem,calc(100vw-2rem))] rounded-3xl border border-border bg-surface p-6 text-text backdrop:bg-black/40"
+      className="m-auto w-[min(24rem,calc(100vw-2rem))] rounded-3xl border border-border bg-surface p-[24px] text-text backdrop:bg-black/40"
     >
       <h2 id="shortcuts-title" className="text-lg font-medium">
         {t("shortcutsTitle")}
