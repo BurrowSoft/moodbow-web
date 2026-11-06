@@ -1,30 +1,30 @@
 ---
-title: Talking with Bo
-summary: What Bo is, how your conversation is handled, and how to stop.
+title: Conversar com o Bo
+summary: O que o Bo é, como a sua conversa é tratada e como parar.
 topic: AI
 ---
-{pending:bo_live}Bo is Moodbow's AI. You can talk to it about your day or whatever is on your mind. Tap "Talk to Bo" on Today, Timeline, Insights or Me. Bo is available in selected countries.
+{pending:bo_live}O Bo é a IA do Moodbow. Você pode falar com ele sobre o seu dia ou sobre o que estiver pensando. Toque em "Falar com o Bo" em Hoje, Linha do tempo, Insights ou Perfil. O Bo está disponível em alguns países.
 
-**What Bo is, and isn't**
-Bo is an AI, not a person or a therapist. It isn't there to diagnose anything or give medical advice, and it can't call anyone for you. It can be wrong. Nobody at Moodbow reads your conversation. If you report a reply, we read that reply and any note you add. Moodbow is for people aged 18 and older, and so is Bo.
+**O que o Bo é, e o que não é**
+O Bo é uma IA, não uma pessoa nem um terapeuta. Ele não está aqui para fazer diagnósticos nem dar conselhos médicos, e não pode ligar para ninguém por você. Ele pode errar. Ninguém no Moodbow lê a sua conversa. Se você reportar uma resposta, lemos essa resposta e qualquer nota que você adicionar. O Moodbow é para pessoas com 18 anos ou mais, e o Bo também.
 
-**If you need someone now**
-Tap "Want to talk to someone?". It's always on Bo's screen, and it shows helplines and emergency numbers where we have them. If you're in danger right now, call your local emergency number.
+**Se você precisa de alguém agora**
+Toque em "Quer conversar com alguém?". Esse botão está sempre na tela do Bo e mostra linhas de apoio e números de emergência onde os temos. Se você está em perigo agora, ligue para o número de emergência local.
 
-**How your conversation is handled**
-- Your messages go to Anthropic, the company whose AI writes Bo's replies, with an ID we create for you, not your name or email. Anthropic normally deletes them within 30 days and may keep them longer if its safety systems flag them. Those systems may report illegal material to the authorities.
-- Your conversation is stored in your account so you can come back to it, until you clear it or delete your account.
-- Bo checks your messages and its replies for signs of crisis, on your phone and on our servers, so it can point you to help. We don't keep a record of those checks, and nobody at Moodbow is told.
-- Your conversation isn't used to train AI models.
+**Como a sua conversa é tratada**
+- Suas mensagens vão para a Anthropic, a empresa cuja IA escreve as respostas do Bo, com um identificador que criamos para você, sem seu nome nem seu e-mail. A Anthropic normalmente as apaga em 30 dias e pode mantê-las por mais tempo se os sistemas de segurança dela as sinalizarem. Esses sistemas podem denunciar material ilegal às autoridades.
+- Sua conversa fica salva na sua conta para você voltar a ela, até você apagá-la ou excluir sua conta.
+- O Bo verifica suas mensagens e as respostas dele em busca de sinais de crise, no seu dispositivo e nos nossos servidores, para poder indicar ajuda. Não guardamos registro dessas verificações, e ninguém no Moodbow é avisado.
+- Sua conversa não é usada para treinar modelos de IA.
 
-**Your journal**
-Bo doesn't read your journal unless you turn on "Let Bo read my recent check-ins and entries" in Me. If you do, your check-ins and entries from the last 7 days go to Anthropic with each message. You can turn it off at any time.
+**Seu diário**
+O Bo não lê o seu diário, a menos que você ative "Deixar o Bo ler meus check-ins e anotações recentes" em Perfil. Se ativar, seus check-ins e anotações dos últimos 7 dias vão para a Anthropic com cada mensagem. Você pode desativar quando quiser.
 
-**Clear, export or stop**
-In Me, under "Your conversation with Bo", you can export it, clear it, or turn off "Use Bo". Clearing deletes it from Moodbow and can't be undone; what Anthropic already received follows its own deletion times, above. Turning off "Use Bo" stops new messages and turns off the journal switch; your conversation stays until you clear it.
+**Apagar, exportar ou parar**
+Em Perfil, em "Sua conversa com o Bo", você pode exportar, apagar ou desativar "Usar o Bo". Apagar remove a conversa do Moodbow e não dá para desfazer; o que a Anthropic já recebeu segue os prazos de exclusão dela, indicados acima. Desativar "Usar o Bo" interrompe as mensagens novas e desativa a leitura do seu diário; sua conversa fica até você apagá-la.
 
-**Limits**
-There's a daily limit on messages. Accounts with an email get more. If Bo is resting or you've reached the limit, the rest of Moodbow works as usual, and help is still there.
+**Limites**
+Há um limite diário de mensagens. Contas com e-mail têm mais. Se o Bo estiver descansando ou você tiver chegado ao limite, o resto do Moodbow funciona normalmente, e a ajuda continua ali.
 
-**Reporting a reply**
-If a reply seems wrong or harmful, tap "Report this reply". No one reads reports right away, so if you need someone now, use "Want to talk to someone?". We delete reports after 90 days, unless we need one longer to deal with illegal material.{/pending}
+**Reportar uma resposta**
+Se uma resposta parecer errada ou prejudicial, toque em "Reportar esta resposta". Ninguém lê os reportes na hora: se você precisa de alguém agora, use "Quer conversar com alguém?". Apagamos os reportes após 90 dias, a menos que precisemos manter algum por mais tempo por causa de material ilegal.{/pending}

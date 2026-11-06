@@ -15,7 +15,7 @@ Tap "Want to talk to someone?". It's always on Bo's screen, and it shows helplin
 **How your conversation is handled**
 - Your messages go to Anthropic, the company whose AI writes Bo's replies, with an ID we create for you, not your name or email. Anthropic normally deletes them within 30 days and may keep them longer if its safety systems flag them. Those systems may report illegal material to the authorities.
 - Your conversation is stored in your account so you can come back to it, until you clear it or delete your account.
-- Bo checks your messages and its replies for signs of crisis, on your phone and on our servers, so it can point you to help. We don't keep a record of those checks, and nobody at Moodbow is told.
+- Bo checks your messages and its replies for signs of crisis, on your device and on our servers, so it can point you to help. We don't keep a record of those checks, and nobody at Moodbow is told.
 - Your conversation isn't used to train AI models.
 
 **Your journal**
