@@ -242,5 +242,7 @@ describe("Help → App lock: no email, no signing out", () => {
     ["th", "อย่าออกจากระบบ"],
   ])("%s", (language, warning) => {
     expect(readFileSync(`content/help/${language}/app-lock.md`, "utf8")).toContain(warning);
+    // Face ID or a fingerprint still opens it, so that comes before "we can't get you back in".
+    expect(readFileSync(`content/help/${language}/app-lock.md`, "utf8")).toContain("Face ID");
   });
 });

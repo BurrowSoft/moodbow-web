@@ -10,6 +10,6 @@ Tu PIN se queda en tu teléfono y nunca nos llega. Mientras la app está bloquea
 
 **¿Olvidaste tu PIN?** Si tu diario tiene un correo, toca **¿Olvidaste el PIN?** para cerrar sesión. Cuando vuelvas a iniciarla, el bloqueo se borra y puedes crear uno nuevo.
 
-Si tu diario no tiene correo, no cierres sesión: no podrías volver a abrirlo. Añade un correo en **Yo** mientras aún puedas abrir la app. Si olvidaste tu PIN y no tienes correo, no podemos devolverte el acceso.
+Si tu diario no tiene correo, no cierres sesión: no podrías volver a abrirlo. Añade un correo en **Yo** mientras aún puedas abrir la app. Si activaste Face ID o la huella, úsalos para abrir la app y luego añade un correo. De lo contrario, si olvidaste tu PIN y no tienes correo, no podemos devolverte el acceso.
 
 El bloqueo solo existe en la app, no en la web.{/pending}

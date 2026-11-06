@@ -10,6 +10,6 @@ Seu PIN fica no seu celular e nunca é enviado para nós. Enquanto o app está b
 
 **Esqueceu o PIN?** Se o seu diário tem um e-mail, toque em **Esqueceu o PIN?** para sair da conta. Quando você entrar de novo, o bloqueio é removido e você pode criar um novo.
 
-Se o seu diário não tem e-mail, não saia da conta: você não conseguiria abri-lo de novo. Adicione um e-mail em **Perfil** enquanto ainda consegue abrir o app. Se você esqueceu o PIN e não tem e-mail, não temos como devolver o seu acesso.
+Se o seu diário não tem e-mail, não saia da conta: você não conseguiria abri-lo de novo. Adicione um e-mail em **Perfil** enquanto ainda consegue abrir o app. Se você ativou o Face ID ou a impressão digital, use-os para abrir o app e depois adicione um e-mail. Caso contrário, se você esqueceu o PIN e não tem e-mail, não temos como devolver o seu acesso.
 
 O bloqueio existe só no app, não na web.{/pending}
