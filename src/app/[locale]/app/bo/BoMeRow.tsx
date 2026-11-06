@@ -33,7 +33,7 @@ export function BoMeRow({ hasConversation, readsJournal, consented, canTurnOn }:
     setReads(!next);
     setFailed(true);
   };
-  const useBo = async (next: boolean) => {
+  const chooseBo = async (next: boolean) => {
     if (next) return router.push("/app/bo");
     if (pending) return;
     setPending(true);
@@ -52,7 +52,7 @@ export function BoMeRow({ hasConversation, readsJournal, consented, canTurnOn }:
       {(on || canTurnOn) && (
         <label className="mt-4 flex min-h-11 items-center justify-between gap-4 text-text">
           <span className="min-w-0 [overflow-wrap:anywhere]">{t("useBo")}</span>
-          <input type="checkbox" role="switch" data-testid="me-bo-use" checked={on} onChange={(e) => void useBo(e.target.checked)} className="h-5 w-5 shrink-0 accent-[var(--accent)]" />
+          <input type="checkbox" role="switch" data-testid="me-bo-use" checked={on} onChange={(e) => void chooseBo(e.target.checked)} className="h-5 w-5 shrink-0 accent-[var(--accent)]" />
         </label>
       )}
       {on && (
