@@ -1177,7 +1177,11 @@ test("large text, set in the browser: Today after a mood, calendar, day, entry a
         // Me's reminder reads whole in a 12-hour browser (this one's en-US), with its PM: a
         // clipped one makes 21:00 read "09:00" (Web Tester, #206).
         await page.goto(`${route}/app/me`);
-        const time = await page.getByTestId("me-reminder-time").evaluate((input) => {
+        // Measured once it's laid out: read while the page is still arriving, it's 0 wide.
+        const field = page.getByTestId("me-reminder-time");
+        await expect(field).toBeVisible();
+        await expect.poll(() => field.evaluate((input) => input.clientWidth), { message: `${saved} Me's time at ${percent}%` }).toBeGreaterThan(0);
+        const time = await field.evaluate((input) => {
           const style = getComputedStyle(input);
           const ruler = document.createElement("canvas").getContext("2d")!;
           ruler.font = style.font;
