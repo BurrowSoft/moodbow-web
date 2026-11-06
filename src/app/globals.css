@@ -125,6 +125,11 @@ body {
   overflow-wrap: break-word;
 }
 
+/* Browsers size a fieldset to its content: its rows couldn't wrap at large text. */
+fieldset {
+  min-width: 0;
+}
+
 /* Every error message (role=alert) gets an error icon before its words:
    colour is never the only cue (decision 150). Decorative: a pseudo-element
    with no text, so screen readers read only the words. When the alert is

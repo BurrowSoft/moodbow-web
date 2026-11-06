@@ -74,7 +74,7 @@ export function Dialog({
   }, [onCancel, initialFocus]);
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-[16px] sm:items-center">
       <div
         ref={ref}
         role="dialog"
@@ -82,7 +82,7 @@ export function Dialog({
         aria-labelledby={titleId}
         aria-describedby={body ? bodyId : undefined}
         data-testid={testId}
-        className="w-full max-w-md rounded-3xl bg-surface p-6 shadow-xl"
+        className="max-h-full w-full max-w-md overflow-y-auto rounded-3xl bg-surface p-[24px] shadow-xl"
       >
         <h2 id={titleId} tabIndex={initialFocus === "title" ? -1 : undefined} className="text-lg font-medium text-text outline-none">
           {title}
@@ -101,6 +101,6 @@ export function Dialog({
 }
 
 export const dialogButton = (primary = false) =>
-  `inline-flex min-h-11 max-w-full items-center justify-center rounded-full px-5 text-center font-medium [overflow-wrap:anywhere] ${
+  `inline-flex min-h-11 max-w-full items-center justify-center rounded-full px-[20px] text-center font-medium [overflow-wrap:anywhere] ${
     primary ? "bg-accent text-on-accent hover:bg-accent-hover" : "border border-border text-text hover:bg-pill"
   }`;

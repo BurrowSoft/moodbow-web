@@ -125,7 +125,7 @@ export function YourData({ credits, uid, csv = false, ai = false }: { credits: n
         <p className="text-sm text-muted">{t("meExportBody")}</p>
         {!deleting && exportResult}
       </div>
-      <button type="button" data-testid="me-delete" onClick={() => setDeleting(true)} className="mt-6 font-medium text-accent underline underline-offset-4">
+      <button type="button" data-testid="me-delete" onClick={() => setDeleting(true)} className="mt-6 max-w-full font-medium text-accent underline underline-offset-4 [overflow-wrap:anywhere]">
         {t("meDelete")}
       </button>
 
@@ -144,7 +144,7 @@ export function YourData({ credits, uid, csv = false, ai = false }: { credits: n
                 {t("deleteCredits", { credits })}
               </p>
             )}
-            <button type="button" data-testid="delete-export-first" onClick={runExport} aria-disabled={exporting} className="font-medium text-accent underline underline-offset-4 aria-disabled:opacity-60">
+            <button type="button" data-testid="delete-export-first" onClick={runExport} aria-disabled={exporting} className="max-w-full font-medium text-accent underline underline-offset-4 [overflow-wrap:anywhere] aria-disabled:opacity-60">
               {t("deleteExportFirst")}
             </button>
             {exportResult}
