@@ -92,6 +92,20 @@ describe("BoConversation", () => {
     expect(document.documentElement.dataset.boScreen).toBeUndefined();
   });
 
+  it("a header past a quarter of the window stops being pinned, and help also sits by the box", async () => {
+    const height = vi.spyOn(HTMLElement.prototype, "offsetHeight", "get").mockReturnValue(500);
+    await open();
+    expect(screen.getByTestId("bo-header")).not.toHaveClass("sticky");
+    expect(screen.getByTestId("bo-get-help")).toBeInTheDocument();
+    expect(screen.getByTestId("bo-get-help-end")).toBeInTheDocument();
+    cleanup();
+    height.mockReturnValue(60);
+    await open();
+    expect(screen.getByTestId("bo-header")).toHaveClass("sticky");
+    expect(screen.queryByTestId("bo-get-help-end")).toBeNull();
+    height.mockRestore();
+  });
+
   it("a reply: both messages show, the box empties, and a reply's markup stays text", async () => {
     await open();
     answers.push(reply({ reply: "<b>bold</b> https://example.com" }));

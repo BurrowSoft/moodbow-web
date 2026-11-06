@@ -1176,3 +1176,73 @@ test("Me → Use Bo off: bo_off is set, the switch goes, the conversation row st
     await cleanup(email);
   }
 });
+
+// Bo's header must never cover a control, at the browser's own large text, on a phone. A
+// click fails if something else would take it, so each control is clicked or tried for
+// real. The function isn't on staging, so /api/bo is stubbed; the consent's yes is real.
+test("Bo's screen at large text: the header covers nothing, and help is reachable", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
+  test.setTimeout(240_000);
+  const email = newEmail();
+  const password = newPassword();
+  const cdp = await page.context().newCDPSession(page);
+  let failNext = false;
+  await page.route("**/api/bo", async (route) => {
+    const { action } = route.request().postDataJSON() as { action: string };
+    const reply = { status: "ok", reply: "A short reply, for the length of a line or two on a phone.", showHelp: false, openCard: false, showNotice: false, conversationFull: false };
+    const body = action === "status" ? { status: "ok", available: true, pictures: false, maxChars: 2000 } : failNext ? { status: "error", code: "bo_failed" } : reply;
+    failNext = false;
+    await route.fulfill({ contentType: "application/json", body: JSON.stringify(body) });
+  });
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    await page.setViewportSize({ width: 320, height: 640 });
+
+    for (const percent of [200, 300]) {
+      await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
+      await page.goto("/app/bo");
+      await expect(page.getByTestId("bo-header")).toBeVisible();
+      await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))));
+      // Not now, tried; then the real yes, the first time round.
+      if (percent === 200) {
+        await page.getByTestId("bo-consent-decline").click({ trial: true });
+        await page.getByTestId("bo-consent-accept").click();
+      }
+      await expect(page.getByTestId("bo-text")).toBeVisible();
+
+      // Enough of a conversation to scroll under the header.
+      for (let n = 0; n < 6; n++) {
+        await page.getByTestId("bo-text").fill(`Message ${n}`);
+        await page.getByTestId("bo-send").click();
+        await expect(page.getByTestId("bo-text")).toHaveValue("");
+      }
+      // Try again, and a report high up the conversation, and Send.
+      failNext = true;
+      await page.getByTestId("bo-text").fill("One that fails");
+      await page.getByTestId("bo-send").click();
+      await page.getByTestId("bo-retry").click();
+      await expect(page.getByTestId("bo-text")).toHaveValue("");
+      await page.getByTestId("bo-report").first().click({ trial: true });
+      await page.getByTestId("bo-text").fill("Another");
+      await page.getByTestId("bo-send").click({ trial: true });
+
+      // Help, from wherever the conversation has got to.
+      const pinned = (await page.getByTestId("bo-header").getAttribute("data-pinned")) !== null;
+      const help = page.getByTestId(pinned ? "bo-get-help" : "bo-get-help-end");
+      await help.click();
+      await expect(page.getByTestId("safety-card")).toBeVisible();
+      await page.getByTestId("safety-close").click();
+      console.log(`Bo's header at ${percent}%: ${pinned ? "pinned" : "scrolls away"}`);
+    }
+  } finally {
+    await cleanup(email);
+  }
+});
