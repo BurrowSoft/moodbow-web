@@ -14,7 +14,7 @@ Moodbow is a private journal made by Vitor Ribeiro Carvalho, trading as BurrowSo
 ### The short version
 - Only you can read your journal. BurrowSoft staff don't read journals; direct database access is limited to maintenance by Vitor Ribeiro Carvalho. We don't sell your data, show ads, or use your journal to train AI.
 {pending:ai_live}- AI features are optional. If you turn them on, the parts of your journal needed for a reflection or report are sent to our AI provider, Anthropic, in the USA.{/pending}
-- You can export everything, or delete your account and everything in it, at any time, from the app{pending:web_journal_live} or the website{/pending}.
+- You can export everything, or delete your account and everything in it, from the app{pending:web_journal_live} or the website{/pending}.
 
 ### 1. What we collect
 **Your account:** your email address, your password (stored only as a secure hash), and when you agreed to our Terms and this policy, and confirmed you're 18 or older.
@@ -65,7 +65,7 @@ When data goes outside your country (for example from the EU to the USA), we rel
 We never sell your data, and we never share it with advertisers.
 
 ### 4. How long we keep it
-- Everything is kept until you delete it or delete your account.
+- Everything is kept until you delete it or delete your account, except as this policy says.
 - **Deleting your account** removes your journal, check-ins, AI content, settings, credits history and login from our live database immediately.
 - Copies in our encrypted backups disappear automatically within {pending:backup_retention}8{/pending} days.
 - Error and crash reports are kept by our error-tracking provider for up to 90 days.
