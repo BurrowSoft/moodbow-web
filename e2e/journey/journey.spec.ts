@@ -794,16 +794,17 @@ test.describe("the tab bar in every language", () => {
             .poll(
               () =>
                 page.locator('a[data-testid^="tab-"]').evaluateAll((links) =>
-                  links.every((link) => {
+                  links.flatMap((link) => {
                     const label = link.querySelector("[data-tab-label]");
                     const range = document.createRange();
                     if (label) range.selectNodeContents(label);
-                    return new Set([...range.getClientRects()].map((r) => Math.round(r.top))).size === 1 && link.scrollWidth <= link.clientWidth;
+                    const lines = new Set([...range.getClientRects()].map((r) => Math.round(r.top))).size;
+                    return lines === 1 && link.scrollWidth <= link.clientWidth ? [] : [`${label?.textContent}: ${lines} lines, ${link.scrollWidth} in ${link.clientWidth}`];
                   }),
                 ),
               { message: `${route || "/en"} at 200%` },
             )
-            .toBe(true);
+            .toEqual([]);
         }
       } finally {
         await cleanup(email);

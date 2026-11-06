@@ -67,6 +67,9 @@ test.describe("narrow journal layout", () => {
       page,
       160,
       `<main class="${APP_MAIN_GUTTER}"><form class="${JOURNAL_CARD}"><button type="submit" id="save" class="mt-6 ${PRIMARY_SAVE}">${messages.today.checkinSave}</button></form></main><nav><ul class="grid grid-cols-4">${tabs}</ul></nav>`,
+      // A real 160 px viewport: icons only. Labels at other sizes are scaled by
+      // AppNav's script, which this static page doesn't run (the journey has it).
+      160,
     );
     const probe = await page.locator("#probe").evaluate((e) => ({ right: e.getBoundingClientRect().right, scroll: e.scrollWidth, client: e.clientWidth }));
     expect(probe.scroll).toBeLessThanOrEqual(probe.client);

@@ -47,11 +47,22 @@ export const TAB_LABEL = "whitespace-nowrap [font-size:var(--tab-label-size,inhe
 
 // The size that lets the four labels share the row: as they are if they fit, else
 // all scaled by the same amount, just under the exact fit so rounding can't wrap
-// or clip. null: nothing to change.
-export function tabLabelSize(room: number, labelWidths: number[], fontSize: number): number | null {
-  const total = labelWidths.reduce((sum, width) => sum + width, 0);
-  if (total <= room || room <= 0) return null;
-  return Math.floor((fontSize * room * 0.98 * 100) / total) / 100;
+// or clip. minWidth: a tab's narrowest (its icon), so a label narrower than that
+// takes that much of the row whatever its size. null: nothing to change.
+export function tabLabelSize(room: number, labelWidths: number[], fontSize: number, minWidth = 0): number | null {
+  if (room <= 0) return null;
+  let scaling = labelWidths;
+  let scale = 1;
+  for (;;) {
+    const held = (labelWidths.length - scaling.length) * minWidth;
+    scale = (room * 0.98 - held) / scaling.reduce((sum, width) => sum + width, 0);
+    const still = scaling.filter((width) => width * scale >= minWidth);
+    if (still.length === scaling.length || still.length === 0) break;
+    scaling = still;
+  }
+  const fits = labelWidths.reduce((sum, width) => sum + Math.max(width, minWidth), 0) <= room;
+  if (fits || !(scale > 0)) return null;
+  return Math.floor(Math.min(scale, 1) * fontSize * 100) / 100;
 }
 
 // A segmented choice (Timeline All days/Moments, Insights ranges, the share

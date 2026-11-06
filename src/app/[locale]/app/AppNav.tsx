@@ -21,8 +21,9 @@ const TABS = [
 
 // The phone bar's labels stay on one line: when the four don't fit, they scale
 // down together (see TAB_LABEL). Measured again when the row's width or the
-// browser's text size changes; after the frame, so changing the row's height
-// here can't re-enter the observer. The sidebar from md up has room.
+// browser's text size changes, or a web font arrives (labels change width);
+// after the frame, so changing the row's height here can't re-enter the
+// observer. The sidebar from md up has room.
 function useTabLabelsFit() {
   const row = useRef<HTMLUListElement>(null);
   useEffect(() => {
@@ -43,7 +44,9 @@ function useTabLabelsFit() {
         return sum + parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
       }, 0);
       const widths = labels.map((label) => label.getBoundingClientRect().width);
-      const size = tabLabelSize(ul.clientWidth - padding, widths, parseFloat(getComputedStyle(labels[0]).fontSize));
+      // A tab is never narrower than its icon, so a short label's tab takes that.
+      const icon = labels[0].previousElementSibling?.getBoundingClientRect().width ?? 0;
+      const size = tabLabelSize(ul.clientWidth - padding, widths, parseFloat(getComputedStyle(labels[0]).fontSize), icon);
       if (size !== null) ul.style.setProperty("--tab-label-size", `${size}px`);
     };
     fit();
@@ -52,9 +55,15 @@ function useTabLabelsFit() {
       frame = requestAnimationFrame(fit);
     });
     observer.observe(ul);
+    const fontArrived = () => {
+      measured = "";
+      fit();
+    };
+    document.fonts?.addEventListener("loadingdone", fontArrived);
     return () => {
       cancelAnimationFrame(frame);
       observer.disconnect();
+      document.fonts?.removeEventListener("loadingdone", fontArrived);
     };
   }, []);
   return row;
