@@ -109,13 +109,13 @@ export function Dialog({
           {title}
         </h2>
         {body && (
-          <p id={bodyId} className="mt-2 text-muted">
+          <p id={bodyId} className="mt-[8px] text-muted">
             {body}
           </p>
         )}
-        {details && <div className="mt-4">{details}</div>}
-        <div className="mt-6 flex flex-wrap justify-end gap-3">{children}</div>
-        {tall && <div aria-hidden="true" data-testid="dialog-more" className="pointer-events-none sticky -bottom-[24px] -mx-[24px] -mb-[24px] mt-2 h-10 bg-gradient-to-t from-surface to-transparent" />}
+        {details && <div className="mt-[16px]">{details}</div>}
+        <div className="mt-[24px] flex flex-wrap justify-end gap-[12px]">{children}</div>
+        {tall && <div aria-hidden="true" data-testid="dialog-more" className="pointer-events-none sticky -bottom-[24px] -mx-[24px] -mb-[24px] mt-[8px] h-[40px] bg-gradient-to-t from-surface to-transparent" />}
       </div>
     </div>,
     document.body,
