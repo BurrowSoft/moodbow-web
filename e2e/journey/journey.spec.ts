@@ -877,7 +877,8 @@ test.describe("the tab bar in every language", () => {
               .map((e) => `${e.tagName.toLowerCase()}${e.getAttribute("data-testid") ? `[${e.getAttribute("data-testid")}]` : ""} ${Math.round(e.getBoundingClientRect().right)}`);
           });
           const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
-          expect({ path, percent, overflow, sticksOut }).toEqual({ path, percent, overflow: 0, sticksOut: [] });
+          // Soft: one run lists every page that needs a look.
+          expect.soft({ path, percent, overflow, sticksOut }).toEqual({ path, percent, overflow: 0, sticksOut: [] });
         }
       }
     } finally {
