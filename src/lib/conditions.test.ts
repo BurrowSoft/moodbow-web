@@ -112,7 +112,7 @@ const LEGAL = conditionMet("privacy-text-approved") && conditionMet("terms-text-
 
 describe("sitemapPaths", () => {
   it("after the web launch: the ungated pages, Help, the legal pages once live, and account deletion", () => {
-    expect(sitemapPaths()).toEqual(["/", "/support", "/help", ...(LEGAL ? ["/privacy", "/terms"] : []), "/account-deletion"]);
+    expect(sitemapPaths()).toEqual(["/", "/support", "/help", ...(LEGAL ? ["/privacy", "/terms"] : []), "/consumer-health-data", "/account-deletion"]);
   });
 
   it("adds a gated page once its condition is met", () => {

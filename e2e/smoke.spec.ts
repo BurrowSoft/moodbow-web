@@ -314,7 +314,7 @@ test.describe("the live legal pages and account deletion (decision 164)", () => 
     await expect(footer.getByRole("link", { name: "Support" })).toBeVisible();
     await expect(footer.getByRole("link", { name: "Delete your account" })).toHaveAttribute("href", "/account-deletion");
     for (const name of ["Privacy", "Terms"]) {
-      await expect(footer.getByRole("link", { name })).toHaveCount(LEGAL ? 1 : 0);
+      await expect(footer.getByRole("link", { name, exact: true })).toHaveCount(LEGAL ? 1 : 0);
     }
   });
 
