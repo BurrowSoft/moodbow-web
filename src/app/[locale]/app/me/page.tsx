@@ -10,7 +10,6 @@ import { aiShown, FOCUS_AREAS, isTone } from "@/lib/journal/ai";
 import { getMe, hasCurrentConsent } from "@/lib/journal/me";
 import { SUPPORT_EMAIL } from "@/lib/site";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import packageJson from "../../../../../package.json";
 import { tabMetadata } from "../pageMeta";
 import { SignOutButton } from "./SignOutButton";
 import { GetHelpNow } from "@/components/SafetyCard";
@@ -38,9 +37,10 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/app/me">
 const hhmm = (time: string | null | undefined) => (time && /^\d{2}:\d{2}/.test(time) ? time.slice(0, 5) : "21:00");
 
 // Me (M7), in the spec's order. Here: AI (M9, only when AI is shown) ·
-// Reminder · Language & region · Appearance · Your data · Help · Sign out ·
-// version. Get help now (top) comes with the safety card (M8); App lock is
-// app-only; Appearance is per device (decision 133).
+// Reminder · Language & region · Appearance · Your data · Help · Sign out. No
+// version: there's only one web version at a time; the app keeps its own (UX &
+// PM 2026-11-06). Get help now (top) comes with the safety card (M8); App lock
+// is app-only; Appearance is per device (decision 133).
 export default async function MePage({ params }: PageProps<"/[locale]/app/me">) {
   const { locale } = await params;
   setRequestLocale(locale as Locale);
@@ -120,9 +120,6 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
       </section>
 
       <SignOutButton uid={user.id} />
-      <p className="text-sm text-muted" data-testid="me-version">
-        {tm("meVersion", { version: packageJson.version })}
-      </p>
     </section>
   );
 }
