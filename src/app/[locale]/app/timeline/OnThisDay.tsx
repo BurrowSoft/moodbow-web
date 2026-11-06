@@ -52,7 +52,7 @@ export function OnThisDay({ kind, entryId, dateLabel, preview, mood, uid, today 
   if (hidden) return null;
 
   return (
-    <section aria-labelledby="on-this-day-title" data-testid="on-this-day" className="mt-6 rounded-3xl border border-border bg-surface p-4">
+    <section aria-labelledby="on-this-day-title" data-testid="on-this-day" className="mt-6 rounded-3xl border border-border bg-surface p-[16px]">
       <div className="flex items-center justify-between gap-2">
         <h2 id="on-this-day-title" className="text-sm font-medium text-accent">
           {t(LABELS[kind])}

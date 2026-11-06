@@ -298,7 +298,7 @@ export function ShareMonth({
                   // is one), so no maxLength: it counts code units (decision 206).
                   onChange={(e) => setLine(preview(e.target.value, maxChars))}
                   aria-describedby="share-line-count"
-                  className="block w-full rounded-2xl border border-border bg-bg px-4 py-3 text-text"
+                  className="block w-full rounded-2xl border border-border bg-bg px-[16px] py-3 text-text"
                 />
                 {/* Shown always; announced only at 10 left and at 0, not on
                     every key (decision 143). */}

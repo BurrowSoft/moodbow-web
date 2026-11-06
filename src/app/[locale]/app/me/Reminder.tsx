@@ -55,7 +55,7 @@ export function Reminder({ on: initialOn, time: initialTime }: { on: boolean; ti
   };
 
   return (
-    <section {...untilLoaded} aria-labelledby="me-reminder" className="rounded-3xl border border-border bg-surface p-6">
+    <section {...untilLoaded} aria-labelledby="me-reminder" className="rounded-3xl border border-border bg-surface p-[24px]">
       <h2 id="me-reminder" className="text-lg font-medium text-text">
         {t("meReminder")}
       </h2>
@@ -83,7 +83,7 @@ export function Reminder({ on: initialOn, time: initialTime }: { on: boolean; ti
         disabled={!on || busy}
         onChange={(e) => setTime(e.target.value)}
         onBlur={(e) => e.target.value && e.target.value !== sentTime.current && save(on, e.target.value)}
-        className="mt-2 block max-w-full rounded-2xl border border-border bg-bg px-4 py-3 text-text disabled:opacity-50"
+        className="mt-2 block max-w-full rounded-2xl border border-border bg-bg px-[16px] py-3 text-text disabled:opacity-50"
       />
       <p className="mt-3 text-sm text-muted" data-testid="me-reminder-note">
         {t("webReminderNote")}

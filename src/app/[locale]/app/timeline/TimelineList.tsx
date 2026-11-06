@@ -142,7 +142,7 @@ export function TimelineList({ initial, initialDone, momentsOnly, dateLocaleTag,
             {monthDays.map((day) => {
               const c = day.check_in;
               return (
-                <li key={day.local_date} className="rounded-2xl border border-border bg-surface p-4">
+                <li key={day.local_date} className="rounded-2xl border border-border bg-surface p-[16px]">
                   <Link
                     href={`/app/timeline/${day.local_date}`}
                     data-testid={`timeline-day-${day.local_date}`}

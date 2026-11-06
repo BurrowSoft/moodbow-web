@@ -113,7 +113,7 @@ export function YourData({ credits, uid, csv = false, ai = false }: { credits: n
   }, []);
 
   return (
-    <section aria-labelledby="me-your-data" className="rounded-3xl border border-border bg-surface p-6">
+    <section aria-labelledby="me-your-data" className="rounded-3xl border border-border bg-surface p-[24px]">
       <h2 id="me-your-data" className="text-lg font-medium text-text">
         {t("meYourData")}
       </h2>
@@ -161,7 +161,7 @@ export function YourData({ credits, uid, csv = false, ai = false }: { credits: n
                 autoComplete="off"
                 autoCapitalize="characters"
                 spellCheck={false}
-                className="mt-2 block w-full rounded-2xl border border-border bg-bg px-4 py-3 text-text"
+                className="mt-2 block w-full rounded-2xl border border-border bg-bg px-[16px] py-3 text-text"
               />
             </div>
             {state.status === "error" && (

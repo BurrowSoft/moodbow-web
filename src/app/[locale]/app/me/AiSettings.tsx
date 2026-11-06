@@ -63,7 +63,7 @@ export function AiSettings({ initial, credits }: { initial: Values; credits: { b
     `inline-flex min-h-12 items-center rounded-full border px-4 text-sm font-medium aria-disabled:opacity-60 ${active ? "border-accent bg-pill text-accent" : "border-border text-muted hover:bg-pill"}`;
 
   return (
-    <section {...untilLoaded} aria-labelledby="me-ai" className="rounded-3xl border border-border bg-surface p-6">
+    <section {...untilLoaded} aria-labelledby="me-ai" className="rounded-3xl border border-border bg-surface p-[24px]">
       <h2 id="me-ai" className="text-lg font-medium text-text">
         {t("meAi")}
       </h2>
