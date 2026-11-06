@@ -38,7 +38,7 @@ export async function PageShell({ title, draft = false, article = false, after, 
           </Link>
         </div>
       </header>
-      <main id="main" className="flex-1 px-6 py-10">
+      <main id="main" className="flex-1 px-[24px] py-10 [overflow-wrap:anywhere]">
         {notice && (
           <p data-testid="page-notice" className="mx-auto mb-6 max-w-2xl rounded-2xl bg-pill px-5 py-3 text-sm font-medium text-text">
             {notice}

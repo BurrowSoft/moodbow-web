@@ -48,7 +48,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
   ];
 
   return (
-    <main id="main" className="flex flex-1 flex-col items-center px-4 min-[360px]:px-6 sm:px-8">
+    <main id="main" className="flex flex-1 flex-col items-center px-[16px] [overflow-wrap:anywhere] min-[360px]:px-[24px] sm:px-[32px]">
       {ld && <script type="application/ld+json" data-testid="home-jsonld" dangerouslySetInnerHTML={{ __html: jsonLdText(ld) }} />}
       <section className="flex w-full max-w-[600px] flex-col items-center pb-12 pt-8 text-center sm:pb-16 sm:pt-12">
         <div className="w-[104px] sm:w-[128px]">
@@ -116,7 +116,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
         </div>
       </section>
 
-      <ul className="grid w-full max-w-4xl gap-4 sm:grid-cols-3">
+      <ul className="grid w-full max-w-4xl grid-cols-[minmax(0,1fr)] gap-4 sm:grid-cols-3">
         {features.map(({ key, title, body, icon }) => (
           <li key={key} className="rounded-3xl border border-border bg-surface p-5 break-words sm:p-6" data-testid={`home-feature-${key}`}>
             <span className="block h-8 w-8 text-accent" aria-hidden="true">
