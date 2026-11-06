@@ -183,6 +183,11 @@ test.describe("language: Thai is a draft, not offered (thai-offered-live)", () =
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
       expect(overflow, path).toBeLessThanOrEqual(0);
     }
+    // 200% zoom on a phone: it wraps, and nothing scrolls sideways.
+    await page.setViewportSize({ width: 160, height: 640 });
+    await page.goto("/");
+    await expect(page.getByTestId("try-app")).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto("/");
     await expect(page.getByTestId("try-app")).toBeHidden();

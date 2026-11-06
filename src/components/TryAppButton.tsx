@@ -5,8 +5,12 @@ import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 import { isIos } from "@/lib/safety/helplines";
 import { APP_STORE_URL, type LiveStores } from "@/lib/stores";
-import { primaryButtonClass } from "./AuthField";
 import { PlayStoreLink } from "./PlayStoreLink";
+
+// As the primary button, without its 200 px minimum: at 200% zoom on a phone
+// the page is 160 px wide, and the button wraps instead of scrolling sideways.
+const BUTTON =
+  "mb-2 inline-flex min-h-12 max-w-full items-center justify-center rounded-full bg-accent px-6 py-3 text-center text-base font-medium text-on-accent [overflow-wrap:anywhere] hover:bg-accent-hover sm:hidden";
 
 const noSubscribe = () => () => {};
 const platform = () => (/Android/i.test(navigator.userAgent) ? "android" : isIos(navigator.userAgent, navigator.maxTouchPoints) ? "ios" : "other");
@@ -24,7 +28,7 @@ export function TryAppButton({ journal, stores }: { journal: boolean; stores: Li
   const path = usePathname();
   const phone = useSyncExternalStore(noSubscribe, platform, () => "other");
   if (staysHidden(path)) return null;
-  const className = `${primaryButtonClass} mb-2 sm:hidden`;
+  const className = BUTTON;
   if (phone === "android" && stores.play) {
     return (
       <PlayStoreLink className={className} testId="try-app">
