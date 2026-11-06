@@ -14,6 +14,9 @@ import { useKeyboardOpen } from "@/lib/ui/keyboardOpen";
 import { PRIMARY_SAVE } from "@/lib/ui/journalLayout";
 
 const BO_HEADER_MOST = 0.25;
+// Beside the box while a phone's keyboard is up, so the row, the box and Send all fit in what's
+// left of the window, at 300 % too: the text is capped and the height doesn't grow with it.
+const BO_TYPING_SEND = "inline-flex min-h-[48px] max-w-[45%] shrink-0 items-center justify-center rounded-full bg-accent px-[12px] text-center font-medium text-on-accent [font-size:min(1rem,max(8vw,16px))] [overflow-wrap:anywhere] hover:bg-accent-hover disabled:opacity-50";
 // The compact row's text, capped to the phone, and a help button that doesn't grow with it.
 const BO_END_TEXT = "[font-size:min(1rem,max(8vw,16px))]";
 const BO_END_HELP = `inline-flex min-h-[44px] max-w-full items-center justify-center rounded-full border border-border bg-bg px-[12px] text-center font-medium text-text hover:bg-pill ${BO_END_TEXT}`;
@@ -190,6 +193,8 @@ export function BoConversation({ initial, country, back, healthData = false, con
       answer = await callBo<BoSend>({ action: "send", client_key, text: sent });
     }
     setSending(false);
+    // Send was off while it went, which dropped focus; back to the box, where the text is.
+    requestAnimationFrame(() => box.current?.focus({ preventScroll: true }));
     if (answer.status === "ok") {
       if (answer.openCard) openCard();
       if (answer.showNotice) setNoticeShows((n) => n + 1);
@@ -285,14 +290,14 @@ export function BoConversation({ initial, country, back, healthData = false, con
       {needsConsent && !closed && <BoConsent onGiven={consentGiven} />}
       {!closed && !needsConsent && (
         <form
-          className="flex flex-col gap-2"
+          className={`flex gap-2 ${keyboard ? "flex-row flex-wrap items-end" : "flex-col"}`}
           onSubmit={(e) => {
             e.preventDefault();
             void send();
           }}
         >
           {keyboard && (
-            <div ref={typingRow} data-testid="bo-typing-row" className="flex flex-wrap items-center justify-between gap-x-[8px] gap-y-[2px]">
+            <div ref={typingRow} data-testid="bo-typing-row" className="flex w-full flex-wrap items-center justify-between gap-x-[8px] gap-y-[2px]">
               <p className={`min-w-0 font-medium leading-tight text-text [overflow-wrap:anywhere] ${BO_END_TEXT}`}>{t("screenLine")}</p>
               <GetHelpNow country={country} testId="bo-get-help-typing" className={BO_END_HELP} neutral />
             </div>
@@ -303,14 +308,14 @@ export function BoConversation({ initial, country, back, healthData = false, con
             aria-label={t("messageBox")}
             placeholder={t("messageBox")}
             value={text}
-            rows={3}
+            rows={keyboard ? 2 : 3}
             // At most this tall, and scrolling inside, at any text size: a phone's keyboard leaves
             // about half the window, and the line and help sit just above this.
             autoComplete="off"
             onChange={(e) => change(e.target.value)}
-            className="max-h-[160px] w-full resize-none overflow-y-auto rounded-2xl border border-border bg-surface p-[12px] text-text"
+            className={`w-full resize-none overflow-y-auto rounded-2xl border border-border bg-surface p-[12px] text-text ${keyboard ? "max-h-[96px] min-w-0 flex-1 basis-0" : "max-h-[160px]"}`}
           />
-          <button type="submit" data-testid="bo-send" disabled={!canSend} className={PRIMARY_SAVE}>
+          <button type="submit" data-testid="bo-send" disabled={!canSend} className={keyboard ? BO_TYPING_SEND : PRIMARY_SAVE}>
             {t("send")}
           </button>
         </form>
