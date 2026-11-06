@@ -24,8 +24,8 @@ export async function Footer() {
   ] as const;
 
   return (
-    // Px sides, and long words may break: rem would triple at 300 % text and push the
-    // links past a 320 px phone. overflow-wrap and hyphens reach everything inside.
+    // Px sides, and long words may break: rem sides triple at 300 % text and leave a
+    // narrow column of split words. overflow-wrap and hyphens reach everything inside.
     <footer className="px-[24px] pb-6 pt-10 text-sm text-muted hyphens-auto [overflow-wrap:anywhere] print:hidden">
       <div className="mx-auto flex max-w-3xl flex-col items-center gap-2">
         <TryAppButton journal={pageGate("web-journal-live") !== "hidden"} stores={liveStores()} />

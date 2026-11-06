@@ -250,6 +250,9 @@ input[type="date"]:focus-within {
 }
 
 /* Long-form legal text (content/legal/*.md rendered by marked). */
+/* Not the page's anywhere, which would split words in a table's narrow columns at
+   the normal size (Web Tester, #206). Tables scroll inside .table-scroll instead. */
+.legal-prose { overflow-wrap: break-word; }
 .legal-prose h2 { margin-top: 2rem; font-size: 1.25rem; font-weight: 500; color: var(--text); }
 .legal-prose h3 { margin-top: 1.5rem; font-size: 1.05rem; font-weight: 500; color: var(--text); }
 .legal-prose p,
