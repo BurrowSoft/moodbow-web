@@ -26,8 +26,9 @@ We don't sell your data. We don't share it with advertisers, other third parties
 - **Vercel, USA and global network:** hosts the website and web journal, which show your journal to you.
 - **Resend, USA:** sends account emails. It receives your email address, not your journal, though that address shows you use Moodbow.
 - **Sentry, USA:** receives error reports. Your written text and personal details are removed first.
+{pending:bo_live}- **Anthropic, USA:** only if you use Bo where it's available. It receives your messages to write Bo's replies.{/pending}
 
-AI features are off today, and no journal text goes to any AI provider. If that changes, we'll update this policy and ask you first.
+{pending:bo_off}AI features are off today, and no journal text goes to any AI provider. If that changes, we'll update this policy and ask you first.{/pending}{pending:bo_live}Bo, our optional AI, isn't available in the United States. Where it's available, and only if you agree separately, your messages go to Anthropic (USA), which writes Bo's replies for us. If you also turn on Bo's journal switch, your recent check-ins and entries go too. Our [Privacy Policy](https://www.moodbow.com/privacy) has the details, including how long Anthropic keeps them.{/pending}
 
 We may also disclose data if the law requires it.
 

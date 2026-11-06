@@ -1,4 +1,6 @@
 // @vitest-environment node
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { ALL_LOCALES, routing } from "@/i18n/routing";
 import messages from "@/messages/en.json";
@@ -82,6 +84,35 @@ describe("legal content files", () => {
     expect(renderLegal(source).html.includes(heading)).toBe(conditionMet("anon-start-live"));
   });
 
+  describe("Bo's text", () => {
+    const text = (slug: string) => readFileSync(path.join(process.cwd(), `content/legal/en/${slug}.md`), "utf8");
+    const live = (bo: boolean) => (id: string) => (id === "bo_live" ? bo : id === "bo_off" ? !bo : isPendingMet(id));
+    it("bo-live and bo-off are always opposite", () => {
+      expect(isPendingMet("bo_live")).toBe(!isPendingMet("bo_off"));
+    });
+    it.each(["privacy", "terms", "consumer-health-data"])("%s: nothing about Bo until the flip, and it says so after", (slug) => {
+      expect(renderLegal(text(slug), live(false)).html).not.toMatch(/\bBo\b/);
+      expect(renderLegal(text(slug), live(true)).html).toMatch(/\bBo\b/);
+    });
+    it("the age check's lines follow the age signal, not Bo", () => {
+      const age = (bo: boolean, signal: boolean) => (id: string) => (id === "age_signal_live" ? signal : live(bo)(id));
+      expect(renderLegal(text("privacy"), age(true, false)).html).not.toContain("store tells us");
+      expect(renderLegal(text("privacy"), age(false, true)).html).toContain("store tells us");
+      expect(renderLegal(text("privacy"), age(false, true)).html).not.toMatch(/\bBo\b/);
+    });
+    it("what's true of Reflect's usage isn't said of Bo", () => {
+      expect(renderLegal(text("privacy"), live(false)).html).toContain("AI usage");
+      expect(renderLegal(text("privacy"), live(true)).html).not.toContain("AI usage");
+    });
+    it("what Bo replaces goes when it comes", () => {
+      expect(renderLegal(text("privacy"), live(true)).html).not.toContain("Only you can read your journal");
+      expect(renderLegal(text("privacy"), live(true)).html).not.toContain("at most 30 days");
+      expect(renderLegal(text("privacy"), live(false)).html).toContain("Only you can read your journal");
+      expect(renderLegal(text("consumer-health-data"), live(true)).html).not.toContain("AI features are off today");
+      expect(renderLegal(text("terms"), live(true)).html).not.toContain("reflections are suggestions to think about");
+    });
+  });
+
   it("todos() finds every kind of to-confirm mark, but not in editor comments", () => {
     expect(todos("a ⏳(check X) b ⏳[90] c [VITOR] d ⏳ e")).toEqual(["⏳(check X)", "⏳[90]", "[VITOR]", "⏳"]);
     expect(todos("<!-- ⏳ and [VITOR] mark facts -->\nclean text")).toEqual([]);
@@ -126,8 +157,8 @@ describe("applyPending", () => {
   });
 });
 
-describe("renderLegal (the real privacy text, nothing met)", () => {
-  const page = renderLegal(legalSource("privacy", "en"), () => false);
+describe("renderLegal (the real privacy text, nothing met but bo-off, which holds today's lines)", () => {
+  const page = renderLegal(legalSource("privacy", "en"), (id) => id === "bo_off");
 
   it("takes the title from the first ## line and moves sections up a level", () => {
     expect(page.title).toBe("Moodbow Privacy Policy");
