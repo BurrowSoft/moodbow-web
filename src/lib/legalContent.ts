@@ -16,7 +16,7 @@ import conditions from "../../content/conditions.json";
 //   (legalContent.test.ts).
 // - A locale without its file fails the build loudly (never a silent
 //   fallback to English).
-export type LegalSlug = "privacy" | "terms";
+export type LegalSlug = "privacy" | "terms" | "consumer-health-data";
 export type HiddenBlock = { id: string; text: string };
 
 const LEGAL_DIR = path.join(process.cwd(), "content", "legal");

@@ -203,6 +203,14 @@
     "met": false,
     "what": "Italian is offered on the web: a native reader has read the UI, Help, dates and crisis list (it_reviewed, localization plan), with UX's go. Until then /it is a draft on test builds only."
   },
+  "region-live": {
+    "met": false,
+    "what": "/api/region answers on Production: the signed country token for functions that are only on in some countries (Bo first, specs/bo-design.md section 7). Before it's met, on Production: REGION_SECRET set by Vitor, and the Web Tester's forged-header row passed on Preview."
+  },
+  "consumer-health-data-approved": {
+    "met": true,
+    "what": "The Consumer Health Data Privacy Policy is approved by Vitor (6 November 2026, through UX & PM). Its link is in the footer of every page: Washington's RCW 19.373 counts any page collecting personal information as a homepage. Wording changes are his."
+  },
   "thai-offered-live": {
     "met": false,
     "what": "1.1 F: Thai is offered on the web: the native reader has read the Thai UI, Help and dates (thai_reviewed, decision 193), with UX's go. Until then /th is a draft on test builds only (Preview, dev, CI) and Production is English only; the switcher, Me → Language, hreflang and the sitemap offer Thai only once met. The legal pages keep their own gates in every language."

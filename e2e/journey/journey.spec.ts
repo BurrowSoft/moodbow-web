@@ -543,6 +543,31 @@ test.describe("importing the same file again", () => {
 // Inside the journal the saved language wins, if it's offered (row RT4). Each
 // one asserts Today's content and that the page has stopped moving: an address
 // alone was right on the blank page (#173).
+test("the Consumer Health Data link is in the footer inside the journal too", async ({ page }) => {
+  const email = newEmail();
+  const password = newPassword();
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+    const link = page.getByRole("contentinfo").locator('a[href$="/consumer-health-data"]');
+    await expect(link, "Setup").toBeVisible();
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    await expect(link, "Today").toBeVisible();
+    await page.goto("/app/write");
+    await expect(link, "writing").toBeVisible();
+    await page.goto("/app/me");
+    await expect(link, "Me").toBeVisible();
+  } finally {
+    await cleanup(email);
+  }
+});
+
 test.describe("the saved language in the journal", () => {
   test.skip(!conditions["fr-offered-live"].met, "needs French offered");
 

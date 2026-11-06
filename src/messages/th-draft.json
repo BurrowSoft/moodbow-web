@@ -953,5 +953,20 @@
     "key": "me.deleteBody",
     "en": "This deletes everything in your account, including your entries, check-ins and settings, right away. It can't be undone.",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "common.consumerHealthData",
+    "en": "Consumer Health Data Privacy Policy",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "consumerHealthData.title",
+    "en": "Consumer Health Data Privacy Policy",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "consumerHealthData.description",
+    "en": "How Moodbow handles data that may be consumer health data.",
+    "reason": "UX draft (native read pending)"
   }
 ]
