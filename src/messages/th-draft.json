@@ -266,7 +266,7 @@
   },
   {
     "key": "accountDeletion.what",
-    "en": "We delete your entries, check-ins, AI reflections and reports, what Moodbow remembers, your settings and your login.",
+    "en": "We delete everything in your account, including your entries, check-ins and settings, and your sign-in details.",
     "reason": "UX draft (native read pending)"
   },
   {

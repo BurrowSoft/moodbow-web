@@ -75,7 +75,7 @@
     "description": "Cómo eliminar tu cuenta de Moodbow y todo lo que contiene.",
     "intro": "Puedes eliminar tu cuenta y todo lo que contiene cuando quieras. Se elimina al instante y no se puede deshacer.",
     "steps": "En la app o en la web: abre Yo → Eliminar cuenta, escribe ELIMINAR y confirma.",
-    "what": "Eliminamos tus entradas, registros, reflexiones e informes de IA, lo que Moodbow recuerda, tus ajustes y tus datos de inicio de sesión.",
+    "what": "Eliminamos todo lo que hay en tu cuenta, incluidas tus entradas, registros y ajustes, y tus datos de inicio de sesión.",
     "backups": "Las copias en nuestras copias de seguridad cifradas se borran automáticamente en un plazo de {days} días.",
     "noAccess": "¿No puedes iniciar sesión? Escribe a <support>{email}</support> desde el correo con el que te registraste y la eliminaremos por ti."
   },

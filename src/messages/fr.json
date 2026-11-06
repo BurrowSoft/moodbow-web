@@ -75,7 +75,7 @@
     "description": "Comment supprimer votre compte Moodbow et tout son contenu.",
     "intro": "Vous pouvez supprimer votre compte et tout son contenu à tout moment. La suppression est immédiate et irréversible.",
     "steps": "Dans l'app ou sur le web : ouvrez Moi → Supprimer le compte, tapez SUPPRIMER, puis confirmez.",
-    "what": "Nous supprimons vos notes, vos bilans, vos réflexions et rapports IA, ce dont Moodbow se souvient, vos réglages et vos identifiants de connexion.",
+    "what": "Nous supprimons tout ce qui se trouve dans votre compte, dont vos notes, vos bilans et vos réglages, ainsi que vos identifiants de connexion.",
     "backups": "Les copies dans nos sauvegardes chiffrées sont effacées automatiquement sous {days} jours.",
     "noAccess": "Impossible de vous connecter ? Écrivez à <support>{email}</support> depuis l'adresse utilisée à l'inscription, et nous le supprimerons pour vous."
   },

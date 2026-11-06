@@ -75,7 +75,7 @@
     "description": "How to delete your Moodbow account and everything in it.",
     "intro": "You can delete your account and everything in it at any time. Deleting is immediate and can't be undone.",
     "steps": "In the app or on the web: open Me → Delete account, type DELETE, and confirm.",
-    "what": "We delete your entries, check-ins, AI reflections and reports, what Moodbow remembers, your settings and your sign-in details.",
+    "what": "We delete everything in your account, including your entries, check-ins and settings, and your sign-in details.",
     "backups": "Copies in our encrypted backups are removed automatically within {days} days.",
     "noAccess": "Can't sign in? Email <support>{email}</support> from the address you signed up with and we'll delete it for you."
   },

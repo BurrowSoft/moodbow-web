@@ -75,7 +75,7 @@
     "description": "Como apagar sua conta do Moodbow e tudo o que há nela.",
     "intro": "Você pode apagar sua conta e tudo o que há nela quando quiser. A exclusão é imediata e não dá para desfazer.",
     "steps": "No app ou na web: abra Perfil → Apagar conta, digite APAGAR e confirme.",
-    "what": "Apagamos suas anotações, check-ins, reflexões e relatórios com IA, o que o Moodbow lembra, suas configurações e seus dados de acesso.",
+    "what": "Apagamos tudo o que há na sua conta, incluindo suas anotações, check-ins e configurações, e seus dados de acesso.",
     "backups": "As cópias nos nossos backups criptografados são removidas automaticamente em até {days} dias.",
     "noAccess": "Não consegue entrar? Mande um e-mail para <support>{email}</support> do endereço que você usou no cadastro, e apagamos a conta para você."
   },
