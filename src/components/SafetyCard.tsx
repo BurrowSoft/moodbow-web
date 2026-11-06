@@ -23,6 +23,8 @@ export function SafetyCard({ country, onClose, neutral = false }: { country: str
   const lines = helplinesFor(country, useLocale());
   const ios = useSyncExternalStore(noSubscribe, () => isIos(navigator.userAgent, navigator.maxTouchPoints), () => false);
   const link = "font-medium text-accent underline underline-offset-4";
+  // text-sm under the card's cap (capText in Dialog): the same 7:8 as at the normal size.
+  const small = "text-muted [font-size:min(0.875rem,max(7vw,14px))]";
   return (
     <Dialog title={t("safetyTitle")} body={t(neutral ? "safetyBodyNeutral" : "safetyBody")} onCancel={onClose} testId="safety-card" initialFocus="title" capText>
       <div className="w-full space-y-[12px] text-left">
@@ -31,7 +33,7 @@ export function SafetyCard({ country, onClose, neutral = false }: { country: str
             <div>
               {/* iOS can't dial this from a link: the number, and what to do with it. */}
               <p className="font-medium text-text">{t("safetyCall", { name: lines.helpline.name, number: lines.helpline.display })}</p>
-              <p data-testid="safety-helpline-keypad" className="text-sm text-muted">
+              <p data-testid="safety-helpline-keypad" className={small}>
                 {t("safetyDialKeypad", { number: lines.helpline.display })}
               </p>
             </div>
@@ -43,7 +45,7 @@ export function SafetyCard({ country, onClose, neutral = false }: { country: str
             </p>
           ))}
         {lines.helpline?.hours && (
-          <p data-testid="safety-helpline-hours" className="text-sm text-muted">
+          <p data-testid="safety-helpline-hours" className={small}>
             {lines.helpline.hours}
           </p>
         )}
@@ -58,13 +60,13 @@ export function SafetyCard({ country, onClose, neutral = false }: { country: str
         )}
         {/* Always, as a quiet link under the numbers (decision 135). */}
         <p>
-          <a href={lines.directoryUrl} target="_blank" rel="noopener noreferrer" data-testid="safety-find-helpline" className="text-sm text-muted underline underline-offset-4">
+          <a href={lines.directoryUrl} target="_blank" rel="noopener noreferrer" data-testid="safety-find-helpline" className={`${small} underline underline-offset-4`}>
             {t("safetyFindHelpline")}
             {" "}
             <span className="sr-only">{tc("opensInNewTab")}</span>
           </a>
         </p>
-        <p className="text-sm text-muted">{t("safetyNotTherapy")}</p>
+        <p className={small}>{t("safetyNotTherapy")}</p>
       </div>
       {/* Close is secondary (outline): the help above is what stands out
           (decision 206, the same as the app). */}

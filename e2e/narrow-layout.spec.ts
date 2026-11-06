@@ -99,3 +99,32 @@ test.describe("narrow journal layout", () => {
     for (const k of TAB_KEYS) await expect(page.getByText(messages.app[k], { exact: true })).not.toHaveCSS("position", "absolute");
   });
 });
+
+// The browser's own text setting, on a 320 px phone: the footer is on every page,
+// so a footer wider than the phone scrolls all of them sideways. fr and de are the
+// longest. /support is a public page with little else on it.
+test("large text, set in the browser: the footer stays inside a 320 px phone in every language", async ({ page, browserName }, testInfo) => {
+  test.skip(browserName !== "chromium" || testInfo.project.name !== "desktop", "Page.setFontSizes is Chromium's; once is enough");
+  test.setTimeout(120_000);
+  const cdp = await page.context().newCDPSession(page);
+  await page.setViewportSize({ width: 320, height: 640 });
+  for (const percent of [200, 300]) {
+    await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
+    for (const route of ["", "/fr", "/es", "/pt-br", "/de", "/it", "/th"]) {
+      await page.goto(`${route}/support`);
+      await expect(page.getByRole("contentinfo")).toBeVisible();
+      await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))));
+      // The setting really is on, or all of this would pass at the normal size.
+      expect(await page.evaluate(() => getComputedStyle(document.documentElement).fontSize), `${route} at ${percent}%`).toBe(`${(16 * percent) / 100}px`);
+      const sticksOut = await page.evaluate(() =>
+        [...document.querySelectorAll("footer, footer *")]
+          .filter((e) => e.getBoundingClientRect().right > innerWidth + 0.5 && !e.classList.contains("sr-only"))
+          .slice(0, 6)
+          .map((e) => `${e.tagName.toLowerCase()} ${Math.round(e.getBoundingClientRect().right)}`),
+      );
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+      // Soft: one run lists every language that needs a look.
+      expect.soft({ route, percent, overflow, sticksOut }).toEqual({ route, percent, overflow: 0, sticksOut: [] });
+    }
+  }
+});

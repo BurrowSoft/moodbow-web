@@ -38,6 +38,17 @@ describe("Dialog taller than the window (large text; Web Tester, #198)", () => {
     expect(screen.getByTestId("dialog-more")).toBeInTheDocument();
   });
 
+  it("the fade goes at the end of the dialog and comes back on the way up", () => {
+    tall(1200);
+    renderIt();
+    const dialog = screen.getByRole("dialog");
+    expect(screen.getByTestId("dialog-more")).not.toHaveClass("opacity-0");
+    fireEvent.scroll(dialog, { target: { scrollTop: 600 } });
+    expect(screen.getByTestId("dialog-more")).toHaveClass("opacity-0");
+    fireEvent.scroll(dialog, { target: { scrollTop: 100 } });
+    expect(screen.getByTestId("dialog-more")).not.toHaveClass("opacity-0");
+  });
+
   it("the same with a last-button dialog", () => {
     tall(1200);
     renderIt("last");
