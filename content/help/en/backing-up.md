@@ -17,4 +17,4 @@ You can start Moodbow in the app without an email. Your journal is saved to an a
 
 **Journals without an email:** if you never add an email and don't open the app while connected to the internet for 12 months, we delete that journal. Moodbow reminds you a month before.
 
-Without an email there's no **Sign out**, because you couldn't sign back in. **Delete account** works as usual.
+Without an email there's no **Sign out** in **Me**, because you couldn't sign back in. **Delete account** works as usual.
