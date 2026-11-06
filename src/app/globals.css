@@ -125,6 +125,11 @@ body {
   overflow-wrap: break-word;
 }
 
+/* Signed in outside the journal: components/SignedInMark.tsx. */
+html[data-signed-in] [data-language-switcher] {
+  display: none;
+}
+
 /* Every error message (role=alert) gets an error icon before its words:
    colour is never the only cue (decision 150). Decorative: a pseudo-element
    with no text, so screen readers read only the words. When the alert is

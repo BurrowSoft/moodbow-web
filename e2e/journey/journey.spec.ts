@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import { expect, test, type Frame, type Page, type Request } from "@playwright/test";
 import conditions from "../../content/conditions.json";
 import messages from "../../src/messages/en.json";
+import fr from "../../src/messages/fr.json";
 import { aiAvailable, cleanup, configured, confirmEmail, createConfirmedUser, exists, newEmail, newPassword, notConfigured, profileLocale, revokeSessions, setProfileLocale, signedUpUnconfirmed, sweep } from "./staging";
 
 // The launch-critical journeys (1.0), end to end against staging with a
@@ -545,6 +546,68 @@ test.describe("importing the same file again", () => {
 test.describe("the saved language in the journal", () => {
   test.skip(!conditions["fr-offered-live"].met, "needs French offered");
 
+  // Vitor's French sign-up on www (2026-11-06): the mail was French, the pages
+  // after it English. The first page has no session, so only the link's own
+  // language can set it; from the next page on, the saved language does.
+  for (const [how, route] of [["a link with its language", "/fr"], ["a link without one, already sent", ""]]) {
+    test(`French sign-up from ${how}: French through to Today`, async ({ page }) => {
+      const email = newEmail();
+      const password = newPassword();
+      const french = () => expect(page.locator("html")).toHaveAttribute("lang", "fr");
+      try {
+        await page.goto(`${route}/auth/confirm?token_hash=${await signedUpUnconfirmed(email, password, { locale: "fr" })}&type=signup`);
+        if (route) {
+          await french();
+          await expect(page.getByRole("heading", { level: 1 })).toHaveText(fr.confirmLink.signupTitle);
+        }
+        await page.locator("main form button[type=submit]").click();
+        await expect(page).toHaveURL(/\/fr\/email-confirmed/, { timeout: 20_000 });
+        await french();
+        await expect(page.getByTestId("email-confirmed-continue")).toHaveText(fr.emailConfirmed.emailConfirmedContinue, { timeout: 20_000 });
+        await page.getByTestId("email-confirmed-continue").click();
+        await expect(page).toHaveURL(/\/fr\/setup$/, { timeout: 20_000 });
+        await french();
+        await expect(page.getByRole("heading", { level: 1 })).toHaveText(fr.onboarding.setupTitle);
+        await page.getByTestId("setup-done").click();
+        await expect(page).toHaveURL(/\/fr\/app$/, { timeout: 20_000 });
+        await french();
+        await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+      } finally {
+        await cleanup(email);
+      }
+    });
+  }
+
+  test("signed out, the language switcher is still there on the way in", async ({ page }) => {
+    await page.goto("/fr/consent");
+    await expect(page.locator("[data-language-switcher]")).toBeVisible();
+    await page.goto("/fr/sign-in");
+    await expect(page.locator("[data-language-switcher]")).toBeVisible();
+  });
+
+  test("signed in on /setup in another language: their saved one", async ({ page }) => {
+    const email = newEmail();
+    const password = newPassword();
+    try {
+      await signedUpUnconfirmed(email, password, { locale: "fr" });
+      await confirmEmail(email);
+      await page.goto("/fr/sign-in");
+      await page.locator("#email").fill(email);
+      await page.locator("#password").fill(password);
+      await page.locator("main form button[type=submit]").first().click();
+      await expect(page).toHaveURL(/\/fr\/setup$/, { timeout: 20_000 });
+      // Signed in, Me → Language is the one control: no switcher to bounce off.
+      await expect(page.locator("[data-language-switcher]")).toBeHidden();
+      // The English route for real: the proxy would answer the French cookie itself.
+      await page.context().addCookies([{ name: "NEXT_LOCALE", value: "en", url: page.url() }]);
+      await page.goto("/setup");
+      await expect(page).toHaveURL(/\/fr\/setup$/, { timeout: 20_000 });
+      await expect(page.getByRole("heading", { level: 1 })).toHaveText(fr.onboarding.setupTitle);
+    } finally {
+      await cleanup(email);
+    }
+  });
+
   // The labels are in the page's language, so by field, not by name.
   const signInForm = async (page: Page, email: string, password: string) => {
     await page.locator("#email").fill(email);
@@ -643,12 +706,13 @@ test.describe("the saved language in the journal", () => {
       await confirmEmail(email);
       await page.goto("/sign-in");
       await signInForm(page, email, password);
-      await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
-      await page.getByTestId("setup-done").click();
+      // Setup follows the saved language too, so that's where it stops now.
       await expect(page.getByTestId("saved-language-link")).toBeVisible({ timeout: 20_000 });
-      await settled(page, "/fr/app", "fr");
+      await settled(page, "/fr/setup", "fr");
       // The link gets them there: the server sets the cookie on that load.
       await page.getByTestId("saved-language-link").click();
+      await settled(page, "/setup", "en");
+      await page.getByTestId("setup-done").click();
       await settled(page, "/app", "en");
       await today(page);
     } finally {

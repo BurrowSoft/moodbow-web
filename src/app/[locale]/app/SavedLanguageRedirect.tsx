@@ -2,6 +2,8 @@
 
 import { useEffect } from "react";
 import { useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
+import { SignedInMark } from "@/components/SignedInMark";
 import { usePathname } from "@/i18n/navigation";
 import { goToLanguage, mayMoveTo } from "@/lib/savedLanguage";
 
@@ -13,15 +15,17 @@ import { goToLanguage, mayMoveTo } from "@/lib/savedLanguage";
 export function SavedLanguageRedirect({ locale }: { locale: string }) {
   const t = useTranslations("common");
   const pathname = usePathname();
+  const query = useSearchParams().toString();
   useEffect(() => {
     if (mayMoveTo(locale)) goToLanguage(locale, `${pathname}${window.location.search}`);
   }, [locale, pathname]);
   return (
     <main id="main" className="flex min-h-dvh items-center justify-center" data-testid="saved-language-redirect">
+      <SignedInMark />
       {/* A plain link, a full page load, always with the language in the
           address (/en/app too): the proxy then sets the cookie itself, which a
           script couldn't, and an unprefixed /app would be sent straight back. */}
-      <a href={`/${locale}${pathname}`} lang={locale} data-testid="saved-language-link" className="inline-flex min-h-12 items-center px-3 font-medium text-accent underline underline-offset-4">
+      <a href={`/${locale}${pathname}${query ? `?${query}` : ""}`} lang={locale} data-testid="saved-language-link" className="inline-flex min-h-12 items-center px-3 font-medium text-accent underline underline-offset-4">
         {t(`languageNames.${locale}` as "languageNames.en")}
       </a>
     </main>
