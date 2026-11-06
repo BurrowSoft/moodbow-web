@@ -10,6 +10,6 @@ Il PIN resta sul tuo telefono e non ci viene mai inviato. Mentre l'app è blocca
 
 **Hai dimenticato il PIN?** Se il tuo diario ha un'email, tocca **PIN dimenticato?** per uscire. Quando accedi di nuovo, il blocco viene rimosso e puoi impostarne uno nuovo.
 
-Se il tuo diario non ha un'email, non uscire: non potresti più aprirlo. Aggiungi un'email in **Profilo** finché puoi ancora aprire l'app. Se hai dimenticato il PIN e non hai un'email, non possiamo farti rientrare.
+Se il tuo diario non ha un'email, non uscire: non potresti più aprirlo. Aggiungi un'email in **Profilo** finché puoi ancora aprire l'app. Se hai attivato Face ID o l'impronta digitale, usali per aprire l'app, poi aggiungi un'email. Altrimenti, se hai dimenticato il PIN e non hai un'email, non possiamo farti rientrare.
 
 Il blocco app c'è solo nell'app, non sul web.{/pending}
