@@ -1113,5 +1113,30 @@
     "key": "bo.cancel",
     "en": "Cancel",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.consentTitle",
+    "en": "Before you talk to Bo",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.consentBody",
+    "en": "[Placeholder: Vitor's AI consent text goes here. It isn't final.]",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.consentAccept",
+    "en": "Agree and continue",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.consentDecline",
+    "en": "Not now",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.consentFailed",
+    "en": "That didn't save. Please try again.",
+    "reason": "UX draft (native read pending)"
   }
 ]

@@ -592,6 +592,11 @@
     "reportAction": "รายงานคำตอบนี้",
     "reportScreen": "ขอบคุณที่แจ้งให้เราทราบ ยังไม่มีใครอ่านในทันที",
     "offline": "คุณออฟไลน์อยู่ Bo ต้องใช้การเชื่อมต่อ",
-    "conversationFull": "การสนทนานี้เต็มแล้ว ส่งออกหากต้องการสำเนา แล้วล้างเพื่อเริ่มใหม่"
+    "conversationFull": "การสนทนานี้เต็มแล้ว ส่งออกหากต้องการสำเนา แล้วล้างเพื่อเริ่มใหม่",
+    "consentTitle": "ก่อนคุยกับ Bo",
+    "consentBody": "[Placeholder: Vitor's AI consent text goes here. It isn't final.]",
+    "consentAccept": "ยอมรับและดำเนินการต่อ",
+    "consentDecline": "ไม่ใช่ตอนนี้",
+    "consentFailed": "บันทึกไม่สำเร็จ โปรดลองอีกครั้ง"
   }
 }

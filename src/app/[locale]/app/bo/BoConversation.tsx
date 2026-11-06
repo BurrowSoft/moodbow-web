@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { GetHelpNow, SafetyCard } from "@/components/SafetyCard";
+import { BoConsent } from "./BoConsent";
 import { Link } from "@/i18n/navigation";
 import { BO_CLIENT_WAIT_MS, BO_DEFAULT_MAX_CHARS, BO_ERROR_TEXT, BO_WAIT_RETRY_MS, boCardMayOpen, type BoMessage, type BoProblem, type BoSend, type BoStatus } from "@/lib/journal/bo";
 import { flagsCrisis } from "@/lib/safety/crisis";
@@ -30,7 +31,7 @@ async function callBo<T>(body: object): Promise<T | { status: "no_answer" }> {
 // with a back link, on a wider one the tabs stay (UX), through the mark on the root
 // (globals.css), as SignedInMark does. The footer goes in both, so this page carries
 // the Consumer Health Data link itself: it collects personal information (Footer).
-export function BoConversation({ initial, country, back, healthData = false }: { initial: BoMessage[]; country: string | null | undefined; back?: ReactNode; healthData?: boolean }) {
+export function BoConversation({ initial, country, back, healthData = false, consented = true }: { initial: BoMessage[]; country: string | null | undefined; back?: ReactNode; healthData?: boolean; consented?: boolean }) {
   const t = useTranslations("bo");
   const tc = useTranslations("common");
   useLayoutEffect(() => {
@@ -47,6 +48,9 @@ export function BoConversation({ initial, country, back, healthData = false }: {
   const [full, setFull] = useState(false);
   const [maxChars, setMaxChars] = useState(BO_DEFAULT_MAX_CHARS);
   const [card, setCard] = useState(false);
+  // The page's read, and the function's answer on a send. The text stays, for after a yes.
+  const [needsConsent, setNeedsConsent] = useState(!consented);
+  const consentGiven = useCallback(() => setNeedsConsent(false), []);
   // A retry of the same message keeps its key, so it can't be answered or saved twice.
   const attempt = useRef<{ key: string; text: string } | null>(null);
   const cardOpenedAt = useRef<number | null>(null);
@@ -126,6 +130,8 @@ export function BoConversation({ initial, country, back, healthData = false }: {
     if (answer.status === "no_answer") return setProblem(navigator.onLine ? "no_answer" : "offline");
     // The session went: the layout sends them to sign in.
     if (answer.code === "not_authenticated") return window.location.reload();
+    // Nothing was sent or stored (bo.md).
+    if (answer.code === "ai_consent_required") return setNeedsConsent(true);
     setProblem(answer.code);
   };
 
@@ -182,7 +188,8 @@ export function BoConversation({ initial, country, back, healthData = false }: {
           )}
         </div>
       )}
-      {!closed && (
+      {needsConsent && !closed && <BoConsent onGiven={consentGiven} />}
+      {!closed && !needsConsent && (
         <form
           className="flex flex-col gap-2"
           onSubmit={(e) => {

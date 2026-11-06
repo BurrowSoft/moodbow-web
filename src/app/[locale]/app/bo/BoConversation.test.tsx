@@ -6,6 +6,16 @@ import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
 import { boCardMayOpen, type BoMessage } from "@/lib/journal/bo";
 import { BoConversation } from "./BoConversation";
 
+const give = vi.fn(async () => ({ ok: true }));
+vi.mock("./actions", () => ({ giveBoConsent: () => give() }));
+vi.mock("@/i18n/navigation", () => ({
+  Link: ({ href, children, ...rest }: { href: string; children: React.ReactNode }) => (
+    <a href={href} {...rest}>
+      {children}
+    </a>
+  ),
+}));
+
 // Bo's screen against a stubbed /api/bo: the function's real contract isn't deployed
 // yet (#182), so these prove the screen's side of supabase/contracts/bo.md only.
 const b = messages.bo;
@@ -38,10 +48,10 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-async function open(initial: BoMessage[] = []) {
+async function open(initial: BoMessage[] = [], consented = true) {
   render(
     <NextIntlClientProvider locale="en" messages={messages}>
-      <BoConversation initial={initial} country="NZ" healthData />
+      <BoConversation initial={initial} country="NZ" healthData consented={consented} />
     </NextIntlClientProvider>,
   );
   await waitFor(() => expect(calls.some((c) => c.action === "status")).toBe(true));
@@ -188,6 +198,38 @@ describe("BoConversation", () => {
     expect(screen.getByTestId("bo-full")).toHaveTextContent(b.conversationFull);
     expect(screen.getByTestId("safety-card")).toBeInTheDocument();
     expect(screen.getByTestId("bo-get-help")).toBeInTheDocument();
+  });
+
+  it("no consent yet: the consent instead of the box, with the line and help, and Not now goes back", async () => {
+    await open([], false);
+    expect(screen.getByTestId("bo-consent")).toBeInTheDocument();
+    expect(screen.queryByTestId("bo-text")).toBeNull();
+    expect(screen.getByTestId("bo-header")).toHaveTextContent(b.screenLine);
+    expect(screen.getByTestId("bo-get-help")).toBeInTheDocument();
+    expect(screen.getByTestId("bo-consent-decline")).toHaveAttribute("href", "/app");
+  });
+
+  it("a yes opens the box; a failed save says so and stays", async () => {
+    await open([], false);
+    give.mockResolvedValueOnce({ ok: false });
+    fireEvent.click(screen.getByTestId("bo-consent-accept"));
+    await act(async () => {});
+    expect(screen.getByTestId("bo-consent-failed")).toHaveTextContent(b.consentFailed);
+    fireEvent.click(screen.getByTestId("bo-consent-accept"));
+    await act(async () => {});
+    expect(screen.queryByTestId("bo-consent")).toBeNull();
+    expect(screen.getByTestId("bo-text")).toBeInTheDocument();
+  });
+
+  it("ai_consent_required on a send: the consent, and after a yes the text is still there", async () => {
+    await open();
+    answers.push({ status: "error", code: "ai_consent_required" });
+    type("Hello");
+    await send();
+    expect(screen.getByTestId("bo-consent")).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId("bo-consent-accept"));
+    await act(async () => {});
+    expect(screen.getByTestId("bo-text")).toHaveValue("Hello");
   });
 
   it("the card doesn't reopen within ten minutes, and does after", () => {

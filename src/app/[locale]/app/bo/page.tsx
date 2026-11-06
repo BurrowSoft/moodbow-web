@@ -11,7 +11,7 @@ import { backLabel } from "@/lib/journal/backLabel";
 import { dateLocale } from "@/lib/journal/today";
 import { BO_HISTORY_SHOWN, type BoMessage } from "@/lib/journal/bo";
 import { currentUser } from "@/lib/journal/currentUser";
-import { getMe } from "@/lib/journal/me";
+import { getMe, hasCurrentConsent } from "@/lib/journal/me";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { titledMetadata } from "../pageMeta";
 import { BoConversation } from "./BoConversation";
@@ -45,6 +45,7 @@ export default async function BoPage({ params }: PageProps<"/[locale]/app/bo">) 
       initial={((data ?? []) as BoMessage[]).toReversed()}
       country={me.profile?.country}
       healthData={conditionMet("consumer-health-data-approved")}
+      consented={hasCurrentConsent(me, "ai") && hasCurrentConsent(me, "age_18")}
       back={<BackLink href="/app" label={await backLabel("/app", tag)} testId="nav-back" />}
     />
   );

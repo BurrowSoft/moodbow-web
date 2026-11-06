@@ -592,6 +592,11 @@
     "offline": "Vous êtes hors ligne. Bo a besoin d'une connexion.",
     "conversationFull": "Cette conversation est pleine. Exportez-la si vous voulez en garder une copie, puis effacez-la pour recommencer.",
     "clearConfirm": "Effacer",
-    "cancel": "Annuler"
+    "cancel": "Annuler",
+    "consentTitle": "Avant de parler à Bo",
+    "consentBody": "[Placeholder: Vitor's AI consent text goes here. It isn't final.]",
+    "consentAccept": "Accepter et continuer",
+    "consentDecline": "Pas maintenant",
+    "consentFailed": "L'enregistrement a échoué. Veuillez réessayer."
   }
 }

@@ -592,6 +592,11 @@
     "offline": "Você está sem conexão. O Bo precisa de internet.",
     "conversationFull": "Esta conversa está cheia. Exporte se quiser uma cópia e depois apague para começar de novo.",
     "clearConfirm": "Apagar",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "consentTitle": "Antes de falar com o Bo",
+    "consentBody": "[Placeholder: Vitor's AI consent text goes here. It isn't final.]",
+    "consentAccept": "Aceitar e continuar",
+    "consentDecline": "Agora não",
+    "consentFailed": "Não foi salvo. Tente de novo."
   }
 }

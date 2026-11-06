@@ -592,6 +592,11 @@
     "offline": "You're offline. Bo needs a connection.",
     "conversationFull": "This conversation is full. Export it if you want a copy, then clear it to start again.",
     "clearConfirm": "Clear",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "consentTitle": "Before you talk to Bo",
+    "consentBody": "[Placeholder: Vitor's AI consent text goes here. It isn't final.]",
+    "consentAccept": "Agree and continue",
+    "consentDecline": "Not now",
+    "consentFailed": "That didn't save. Please try again."
   }
 }
