@@ -697,12 +697,13 @@ test.describe("the saved language in the journal", () => {
       await confirmEmail(email);
       await page.goto("/sign-in");
       await signInForm(page, email, password);
-      await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
-      await page.getByTestId("setup-done").click();
+      // Setup follows the saved language too, so that's where it stops now.
       await expect(page.getByTestId("saved-language-link")).toBeVisible({ timeout: 20_000 });
-      await settled(page, "/fr/app", "fr");
+      await settled(page, "/fr/setup", "fr");
       // The link gets them there: the server sets the cookie on that load.
       await page.getByTestId("saved-language-link").click();
+      await settled(page, "/setup", "en");
+      await page.getByTestId("setup-done").click();
       await settled(page, "/app", "en");
       await today(page);
     } finally {
