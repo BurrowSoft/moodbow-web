@@ -54,6 +54,9 @@ jobs:
       - run: npm run build
         env:
           NEXT_PUBLIC_SHOW_DRAFTS: "1"
+      # Ubuntu's mirror sometimes stalls on a single package for minutes (a browser
+      # install is 15 s on a good run, 10 minutes on a bad one): give up and retry.
+      - run: printf 'Acquire::http::Timeout "15";\nAcquire::https::Timeout "15";\nAcquire::Retries "3";\n' | sudo tee /etc/apt/apt.conf.d/99-ci-timeouts
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
       - if: failure()
@@ -80,8 +83,8 @@ jobs:
     if: github.event_name == 'pull_request'
     environment: staging
     runs-on: ubuntu-latest
-    # Installing the browser has taken 10 minutes on recent runs, leaving under 5
-    # for 4 minutes of journeys.
+    # Ubuntu's package mirror has made the install step take 10 minutes on some
+    # runs, leaving under 5 for 4 minutes of journeys.
     timeout-minutes: 20
     steps:
       - id: cfg
@@ -116,6 +119,9 @@ jobs:
           NEXT_PUBLIC_SHOW_DRAFTS: "1"
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_STAGING_URL }}
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_STAGING_PUBLISHABLE_KEY }}
+      # As in the smoke job: don't wait minutes on a stalled mirror.
+      - if: steps.cfg.outputs.ok == 'true'
+        run: printf 'Acquire::http::Timeout "15";\nAcquire::https::Timeout "15";\nAcquire::Retries "3";\n' | sudo tee /etc/apt/apt.conf.d/99-ci-timeouts
       - if: steps.cfg.outputs.ok == 'true'
         run: npx playwright install --with-deps chromium
       - if: steps.cfg.outputs.ok == 'true'
