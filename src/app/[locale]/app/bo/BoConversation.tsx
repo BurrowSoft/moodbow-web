@@ -13,6 +13,9 @@ import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
 import { PRIMARY_SAVE } from "@/lib/ui/journalLayout";
 
 const BO_HEADER_MOST = 0.25;
+// The compact row's text, capped to the phone, and a help button that doesn't grow with it.
+const BO_END_TEXT = "[font-size:min(1rem,max(6vw,14px))]";
+const BO_END_HELP = `inline-flex min-h-[44px] max-w-full items-center justify-center rounded-full border border-border bg-bg px-[12px] text-center font-medium text-text hover:bg-pill ${BO_END_TEXT}`;
 
 // These end the conversation for now: there's no sending from here.
 const CLOSED: BoProblem[] = ["region_off", "region_unknown", "bo_unavailable", "needs_email", "bo_resting"];
@@ -63,11 +66,13 @@ export function BoConversation({ initial, country, back, healthData = false, con
   const attempt = useRef<{ key: string; text: string } | null>(null);
   const cardOpenedAt = useRef<number | null>(null);
   const end = useRef<HTMLDivElement>(null);
-  // The line and help stay on screen while there's room for them. At large text the header
-  // can fill the window and cover what's under it, so past a quarter of it, it scrolls away
-  // and help also sits by the box. While it's pinned, focus and scrolling clear it.
+  // The line and help are always on screen (UX; the disclosures in specs/bo-risk-read.md).
+  // At large text the header can fill the window and cover what's under it, so past a
+  // quarter of it, it scrolls away and a compact row holds them at the bottom instead.
+  // Whichever is pinned, focus and scrolling clear it.
   const header = useRef<HTMLElement>(null);
   const [pinned, setPinned] = useState(true);
+  const endRow = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const bar = header.current;
     if (!bar) return;
@@ -76,17 +81,20 @@ export function BoConversation({ initial, country, back, healthData = false, con
       const fits = bar.offsetHeight <= window.innerHeight * BO_HEADER_MOST;
       setPinned(fits);
       root.style.scrollPaddingTop = fits ? `${bar.offsetHeight}px` : "";
+      root.style.scrollPaddingBottom = fits ? "" : `${endRow.current?.offsetHeight ?? 0}px`;
     };
     measure();
     window.addEventListener("resize", measure);
     const watcher = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(measure);
     watcher?.observe(bar);
+    if (endRow.current) watcher?.observe(endRow.current);
     return () => {
       window.removeEventListener("resize", measure);
       watcher?.disconnect();
       root.style.scrollPaddingTop = "";
+      root.style.scrollPaddingBottom = "";
     };
-  }, []);
+  }, [pinned]);
 
   const openCard = useCallback(() => {
     const now = Date.now();
@@ -285,7 +293,14 @@ export function BoConversation({ initial, country, back, healthData = false, con
           </button>
         </form>
       )}
-      {!pinned && <GetHelpNow country={country} testId="bo-get-help-end" neutral />}
+      {!pinned && (
+        <div ref={endRow} data-testid="bo-end-row" className="sticky bottom-0 z-10 flex flex-wrap items-center justify-between gap-x-[8px] gap-y-[2px] bg-bg py-[4px]">
+          <p data-testid="bo-end-line" className={`min-w-0 font-medium leading-tight text-text [overflow-wrap:anywhere] ${BO_END_TEXT}`}>
+            {t("screenLine")}
+          </p>
+          <GetHelpNow country={country} testId="bo-get-help-end" className={BO_END_HELP} neutral />
+        </div>
+      )}
       {card && <SafetyCard country={country} onClose={closeCard} />}
     </div>
   );
