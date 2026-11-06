@@ -62,6 +62,7 @@ export function AppNav() {
                 data-testid={tab.id}
                 aria-current={active ? "page" : undefined}
                 title={t(tab.key)}
+                data-stays={pathname === tab.href || undefined}
                 onClick={(e) => toTop(e, tab.href)}
                 className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-2xl ${TAB_LINK_NARROW} text-xs font-medium md:min-h-12 md:px-3 md:text-left md:flex-row md:justify-start md:gap-3 md:text-base ${
                   active ? "text-accent md:bg-pill" : "text-muted hover:text-text"

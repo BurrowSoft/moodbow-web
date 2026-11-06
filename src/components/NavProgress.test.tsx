@@ -40,6 +40,30 @@ afterEach(() => {
 });
 
 describe("NavProgress", () => {
+  it("the current tab with a filter in the address scrolls to the top, so no bar (data-stays; it ran the full 30 s)", () => {
+    search = "view=moments";
+    window.history.replaceState(null, "", "/app/timeline?view=moments");
+    pathname = "/app/timeline";
+    const { link } = setup();
+    fireEvent.click(link("/app/timeline", { "data-stays": "true" }));
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+    expect(screen.queryByTestId("nav-progress")).toBeNull();
+  });
+
+  it("the same address without data-stays is a real navigation: the bar", () => {
+    search = "view=moments";
+    window.history.replaceState(null, "", "/app/timeline?view=moments");
+    pathname = "/app/timeline";
+    const { link } = setup();
+    fireEvent.click(link("/app/timeline"));
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+    expect(screen.getByTestId("nav-progress")).toBeInTheDocument();
+  });
+
   it("nothing before 300 ms; then the bar (main never aria-busy); gone on arrival", () => {
     const { main, link, view } = setup();
     fireEvent.click(link("/app/timeline"));
