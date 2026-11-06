@@ -1,6 +1,7 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { tabLabelSize } from "@/lib/ui/journalLayout";
 import messages from "@/messages/en.json";
 
 // The journal nav highlights the parent tab (decision 152): an entry or New
@@ -32,6 +33,44 @@ const current = (path: string, query = "") => {
   );
   return ["tab-today", "tab-timeline", "tab-insights", "tab-me"].filter((id) => screen.getByTestId(id).getAttribute("aria-current") === "page");
 };
+
+describe("tabLabelSize: the four labels share the row", () => {
+  it("they fit: nothing to change", () => {
+    expect(tabLabelSize(300, [60, 60, 60, 60], 12)).toBeNull();
+    expect(tabLabelSize(240, [60, 60, 60, 60], 12)).toBeNull();
+  });
+
+  it("they don't: one size for all, just under the exact fit", () => {
+    const size = tabLabelSize(240, [120, 120, 120, 120], 24);
+    expect(size).toBeCloseTo(11.76, 1);
+    expect((480 * (size as number)) / 24).toBeLessThanOrEqual(240);
+  });
+
+  it("a label narrower than its icon: its tab takes the icon's width, and the others share what's left", () => {
+    // The row: 300. "Me" (20) sits under a 48 px icon, so the other three share 300 × 0.98 − 48 = 246 of their 360.
+    const size = tabLabelSize(300, [120, 120, 120, 20], 24, 48);
+    expect(size).toBeCloseTo(16.4, 1);
+    const scaled = [120, 120, 120, 20].map((width) => Math.max((width * (size as number)) / 24, 48));
+    expect(scaled.reduce((sum, width) => sum + width, 0)).toBeLessThanOrEqual(300);
+    // They fit once the icon's width is counted.
+    expect(tabLabelSize(408, [120, 120, 120, 20], 24, 48)).toBeNull();
+    // Summing the labels alone would see room to spare at 380; they don't fit.
+    expect(tabLabelSize(380, [120, 120, 120, 20], 24, 0)).toBeNull();
+    expect(tabLabelSize(380, [120, 120, 120, 20], 24, 48)).not.toBeNull();
+  });
+
+  it("the smallest size: 11 px is allowed; anything under means icons only, for the whole bar", () => {
+    const smallest = tabLabelSize(100, [105], 12);
+    expect(smallest).toBeGreaterThanOrEqual(11);
+    expect(smallest).toBeLessThan(12);
+    expect(tabLabelSize(100, [110], 12)).toBe("icons");
+    expect(tabLabelSize(177, [130, 50, 50, 30], 24, 48)).toBe("icons");
+  });
+
+  it("no room to measure (hidden): nothing to change", () => {
+    expect(tabLabelSize(0, [60], 12)).toBeNull();
+  });
+});
 
 describe("AppNav: the parent tab (decision 152)", () => {
   it("each tab and the pages under it", () => {

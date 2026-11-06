@@ -8,7 +8,7 @@ import { APP_MAIN_GUTTER, JOURNAL_CARD, MOOD_FACE, MOOD_LABEL, MOOD_ROW, PRIMARY
 // loads the app's full stylesheet. Decisions 105 and 119; Web Tester +
 // reviewer on #26.
 
-// A 320 px window (the min-[360px] gutters apply); the content box is set
+// A 320 px window unless a test says otherwise (the min-[360px] gutters apply); the content box is set
 // explicitly, so the result doesn't depend on the runner's scrollbars.
 async function mount(page: Page, width: number, html: string, viewport = 320) {
   await page.setViewportSize({ width: viewport, height: 640 });
@@ -67,10 +67,13 @@ test.describe("narrow journal layout", () => {
       page,
       160,
       `<main class="${APP_MAIN_GUTTER}"><form class="${JOURNAL_CARD}"><button type="submit" id="save" class="mt-6 ${PRIMARY_SAVE}">${messages.today.checkinSave}</button></form></main><nav><ul class="grid grid-cols-4">${tabs}</ul></nav>`,
+      // A real 160 px viewport: icons only. Labels at other sizes are scaled by
+      // AppNav's script, which this static page doesn't run (the journey has it).
+      160,
     );
     const probe = await page.locator("#probe").evaluate((e) => ({ right: e.getBoundingClientRect().right, scroll: e.scrollWidth, client: e.clientWidth }));
     expect(probe.scroll).toBeLessThanOrEqual(probe.client);
-    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(160);
     const save = await page.locator("#save").evaluate((e) => ({ right: e.getBoundingClientRect().right, scroll: e.scrollWidth, client: e.clientWidth }));
     expect(save.right).toBeLessThanOrEqual(probe.right);
     expect(save.scroll).toBeLessThanOrEqual(save.client);

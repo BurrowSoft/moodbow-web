@@ -7,7 +7,7 @@ import { LanguageSwitcher } from "./LanguageSwitcher";
 import { TryAppButton } from "./TryAppButton";
 
 const linkClass =
-  "inline-flex min-h-12 items-center rounded-full px-3 font-medium text-accent underline-offset-4 hover:underline";
+  "inline-flex min-h-12 max-w-full items-center rounded-full px-3 font-medium text-accent underline-offset-4 [overflow-wrap:anywhere] hover:underline";
 
 export async function Footer() {
   const t = await getTranslations("common");

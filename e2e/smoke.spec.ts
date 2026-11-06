@@ -47,6 +47,15 @@ test.describe("home", () => {
     expect(start!.x + start!.width).toBeLessThanOrEqual(160);
   });
 
+  test("200% zoom on a phone (a 160 px page): the other public pages and languages don't scroll sideways either", async ({ page }) => {
+    await page.setViewportSize({ width: 160, height: 640 });
+    for (const path of ["/help", "/help/getting-started", "/privacy", "/terms", "/support", "/account-deletion", "/de", "/it", "/fr", "/es", "/pt-br", "/th"]) {
+      await page.goto(path);
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+      expect(overflow, path).toBeLessThanOrEqual(0);
+    }
+  });
+
   test("security headers: an enforced per-request CSP nonce on every script, no violations, and Permissions-Policy (audit A1 + A2)", async ({ page, request }) => {
     // Enforced: anything the policy misses is blocked, so count violations.
     await page.addInitScript(() => {

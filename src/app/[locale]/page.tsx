@@ -60,7 +60,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
             {t("comingSoon")}
           </p>
         )}
-        <h1 className="mt-5 text-balance break-words text-[30px] font-medium leading-tight tracking-tight sm:text-[44px]">{t("heroTitle")}</h1>
+        <h1 className="mt-5 text-balance [overflow-wrap:anywhere] text-[30px] font-medium leading-tight tracking-tight sm:text-[44px]">{t("heroTitle")}</h1>
         <p className="mt-4 max-w-[480px] text-base leading-relaxed text-muted sm:text-[18px]">{t("heroSub")}</p>
         {live ? (
           <div className="mt-9 flex w-full flex-col items-center gap-4 sm:w-auto">
