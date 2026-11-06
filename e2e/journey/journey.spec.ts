@@ -539,7 +539,7 @@ test.describe("importing the same file again", () => {
   });
 });
 
-/ Inside the journal the saved language wins, if it's offered (row RT4). Each
+// Inside the journal the saved language wins, if it's offered (row RT4). Each
 // one asserts Today's content and that the page has stopped moving: an address
 // alone was right on the blank page (#173).
 test.describe("the saved language in the journal", () => {
