@@ -33,7 +33,7 @@
     },
     {
       "code": "BE",
-      "helpline": { "names": { "en": "the Suicide Prevention Centre", "fr": "le Centre de Prévention du Suicide" }, "display": "0800 32 123", "dial": "080032123", "sms": false },
+      "helpline": { "names": { "en": "the Suicide Prevention Centre", "fr": "le Centre de Prévention du Suicide", "es": "Centre de Prévention du Suicide", "pt": "o Centre de Prévention du Suicide" }, "display": "0800 32 123", "dial": "080032123", "sms": false },
       "emergency": { "display": "112", "dial": "112" },
       "status": "verified",
       "checked_on": "2026-11-05",
@@ -49,7 +49,7 @@
     },
     {
       "code": "CA",
-      "helpline": { "names": { "en": "the Suicide Crisis Helpline", "fr": "la Ligne d'aide en cas de crise de suicide" }, "display": "988", "dial": "988", "sms": true },
+      "helpline": { "names": { "en": "the Suicide Crisis Helpline", "fr": "la Ligne d'aide en cas de crise de suicide", "es": "la Suicide Crisis Helpline", "pt": "a Suicide Crisis Helpline" }, "display": "988", "dial": "988", "sms": true },
       "emergency": { "display": "911", "dial": "911" },
       "status": "verified",
       "checked_on": "2026-10-19",
@@ -65,7 +65,7 @@
     },
     {
       "code": "CL",
-      "helpline": { "names": { "en": "the Suicide Prevention Line", "es": "la Línea de Prevención del Suicidio" }, "display": "*4141", "dial": "*4141", "sms": false },
+      "helpline": { "names": { "en": "the Suicide Prevention Line", "es": "la Línea de Prevención del Suicidio", "fr": "la Línea de Prevención del Suicidio", "pt": "a Línea de Prevención del Suicidio" }, "display": "*4141", "dial": "*4141", "sms": false },
       "emergency": { "display": "131", "dial": "131" },
       "status": "verified",
       "checked_on": "2026-11-05",
@@ -89,7 +89,7 @@
     },
     {
       "code": "ES",
-      "helpline": { "names": { "en": "the Suicidal behaviour support line", "es": "la Línea de atención a la conducta suicida" }, "display": "024", "dial": "024", "sms": false },
+      "helpline": { "names": { "en": "the Suicidal behaviour support line", "es": "la Línea de atención a la conducta suicida", "fr": "la Línea de atención a la conducta suicida", "pt": "a Línea de atención a la conducta suicida" }, "display": "024", "dial": "024", "sms": false },
       "emergency": { "display": "112", "dial": "112" },
       "status": "verified",
       "checked_on": "2026-11-05",
@@ -97,7 +97,7 @@
     },
     {
       "code": "FR",
-      "helpline": { "names": { "en": "the National suicide prevention line", "fr": "le numéro national de prévention du suicide" }, "display": "3114", "dial": "3114", "sms": false },
+      "helpline": { "names": { "en": "the National suicide prevention line", "fr": "le numéro national de prévention du suicide", "es": "Numéro national de prévention du suicide", "pt": "o Numéro national de prévention du suicide" }, "display": "3114", "dial": "3114", "sms": false },
       "emergency": { "display": "112", "dial": "112" },
       "status": "verified",
       "checked_on": "2026-10-19",
@@ -145,7 +145,7 @@
     },
     {
       "code": "NZ",
-      "helpline": { "names": { "en": "the Need to Talk helpline" }, "display": "1737", "dial": "1737", "sms": true },
+      "helpline": { "names": { "en": "the Need to Talk helpline", "fr": "Need to Talk", "es": "Need to Talk", "pt": "Need to Talk" }, "display": "1737", "dial": "1737", "sms": true },
       "emergency": { "display": "111", "dial": "111" },
       "status": "verified",
       "checked_on": "2026-10-19",
@@ -153,7 +153,7 @@
     },
     {
       "code": "PE",
-      "helpline": { "names": { "en": "the Health line, option 5: mental health", "es": "la Línea de salud, opción 5: salud mental" }, "display": "113", "dial": "113", "sms": false },
+      "helpline": { "names": { "en": "the Health line, option 5: mental health", "es": "la Línea de salud, opción 5: salud mental", "fr": "la Línea de salud (option 5, santé mentale)", "pt": "a Línea de salud (opção 5, saúde mental)" }, "display": "113", "dial": "113", "sms": false },
       "emergency": { "display": "106", "dial": "106" },
       "status": "verified",
       "checked_on": "2026-11-05",
@@ -161,7 +161,7 @@
     },
     {
       "code": "PT",
-      "helpline": { "names": { "en": "the Suicide Prevention Line", "pt": "a Linha Nacional de Prevenção do Suicídio e Apoio Psicológico" }, "display": "1411", "dial": "1411", "sms": false },
+      "helpline": { "names": { "en": "the Suicide Prevention Line", "pt": "a Linha Nacional de Prevenção do Suicídio e Apoio Psicológico", "fr": "la Linha Nacional de Prevenção do Suicídio e Apoio Psicológico", "es": "la Linha Nacional de Prevenção do Suicídio e Apoio Psicológico" }, "display": "1411", "dial": "1411", "sms": false },
       "emergency": { "display": "112", "dial": "112" },
       "status": "verified",
       "checked_on": "2026-11-05",
@@ -169,7 +169,7 @@
     },
     {
       "code": "TH",
-      "helpline": { "names": { "en": "the Department of Mental Health hotline", "th": "สายด่วนสุขภาพจิต กรมสุขภาพจิต" }, "display": "1323", "dial": "1323", "sms": false },
+      "helpline": { "names": { "en": "the Department of Mental Health hotline", "th": "สายด่วนสุขภาพจิต กรมสุขภาพจิต", "fr": "la ligne du Département de la santé mentale", "es": "la línea del Departamento de Salud Mental", "pt": "a linha do Departamento de Saúde Mental" }, "display": "1323", "dial": "1323", "sms": false },
       "emergency": { "display": "1669", "dial": "1669" },
       "status": "verified",
       "checked_on": "2026-10-19",
@@ -177,7 +177,7 @@
     },
     {
       "code": "US",
-      "helpline": { "names": { "en": "the Suicide & Crisis Lifeline", "es": "la Línea de Prevención del Suicidio y Crisis" }, "display": "988", "dial": "988", "sms": true },
+      "helpline": { "names": { "en": "the Suicide & Crisis Lifeline", "es": "la Línea de Prevención del Suicidio y Crisis", "fr": "la Suicide & Crisis Lifeline", "pt": "a Suicide & Crisis Lifeline" }, "display": "988", "dial": "988", "sms": true },
       "emergency": { "display": "911", "dial": "911" },
       "status": "verified",
       "checked_on": "2026-10-19",
