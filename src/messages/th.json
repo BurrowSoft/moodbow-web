@@ -609,6 +609,7 @@
     "consentDecline": "ไม่ใช่ตอนนี้",
     "consentFailed": "บันทึกไม่สำเร็จ โปรดลองอีกครั้ง",
     "useBo": "ใช้ Bo",
-    "journalSwitchNote": "[Placeholder, not final: this text isn't approved yet.] When this is on, your check-ins and entries from the last 7 days go to Anthropic with each message."
+    "journalSwitchNote": "[Placeholder, not final: this text isn't approved yet.] When this is on, your check-ins and entries from the last 7 days go to Anthropic with each message.",
+    "helpLink": "Bo ทำงานอย่างไร"
   }
 }

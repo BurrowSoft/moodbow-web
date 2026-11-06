@@ -6,7 +6,7 @@ import { routing } from "@/i18n/routing";
 import { Link } from "@/i18n/navigation";
 import { PageShell } from "@/components/PageShell";
 import { pageGate } from "@/lib/conditions";
-import { findArticle, helpArticles, renderArticle } from "@/lib/helpContent";
+import { findArticle, helpArticles, helpPageMet, renderArticle } from "@/lib/helpContent";
 import { HELP_GATE } from "@/lib/helpGate";
 import { pageMetadata } from "@/lib/metadata";
 
@@ -29,7 +29,7 @@ export default async function HelpArticlePage({ params }: PageProps<"/[locale]/h
   const state = pageGate(HELP_GATE);
   if (state === "hidden") notFound();
   const article = findArticle(locale, slug);
-  const html = article ? renderArticle(article) : "";
+  const html = article ? renderArticle(article, helpPageMet) : "";
   if (!article || !html) notFound();
   const t = await getTranslations("help");
   // The link back to Help is chrome, so it sits after the article, outside

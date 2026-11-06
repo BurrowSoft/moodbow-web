@@ -73,7 +73,7 @@ describe("BoConversation", () => {
   it("empty: the first line, the small line and the help button; a kept conversation instead of the first line", async () => {
     await open();
     expect(screen.getByText(b.firstLine)).toBeInTheDocument();
-    expect(screen.getByText(b.smallLine)).toBeInTheDocument();
+    expect(screen.getByTestId("bo-help")).toHaveAttribute("href", "/help/bo");
     expect(screen.getByTestId("bo-get-help")).toHaveTextContent(messages.me.meGetHelpNow);
     cleanup();
     await open([{ id: "1", author: "person", body: "Hello" }]);

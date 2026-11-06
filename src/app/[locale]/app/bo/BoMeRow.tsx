@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { useUntilLoaded } from "@/lib/ui/untilLoaded";
 import { setBoReadsJournal, turnBoOff } from "./actions";
 import { ClearBo } from "./ClearBo";
@@ -49,6 +49,9 @@ export function BoMeRow({ hasConversation, readsJournal, consented, canTurnOn }:
       <h2 id="me-bo" className="text-lg font-medium text-text">
         {t("meRow")}
       </h2>
+      <Link href="/help/bo" data-testid="me-bo-help" className="mt-1 inline-flex min-h-11 items-center text-sm font-medium text-accent underline underline-offset-4">
+        {t("helpLink")}
+      </Link>
       {(on || canTurnOn) && (
         <label className="mt-4 flex min-h-11 items-center justify-between gap-4 text-text">
           <span className="min-w-0 [overflow-wrap:anywhere]">{t("useBo")}</span>

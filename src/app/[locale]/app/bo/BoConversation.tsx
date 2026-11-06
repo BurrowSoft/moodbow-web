@@ -171,6 +171,10 @@ export function BoConversation({ initial, country, back, healthData = false, con
       </header>
       <p className="text-sm text-muted">
         {t("smallLine")}
+        {" "}
+        <Link href="/help/bo" data-testid="bo-help" className="underline underline-offset-4">
+          {t("helpLink")}
+        </Link>
         {healthData && (
           <>
             {" "}

@@ -609,6 +609,7 @@
     "consentDecline": "Jetzt nicht",
     "consentFailed": "Das wurde nicht gespeichert. Bitte versuch es noch einmal.",
     "useBo": "Bo verwenden",
-    "journalSwitchNote": "[Placeholder, not final: this text isn't approved yet.] When this is on, your check-ins and entries from the last 7 days go to Anthropic with each message."
+    "journalSwitchNote": "[Placeholder, not final: this text isn't approved yet.] When this is on, your check-ins and entries from the last 7 days go to Anthropic with each message.",
+    "helpLink": "So funktioniert Bo"
   }
 }
