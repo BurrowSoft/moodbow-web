@@ -103,7 +103,7 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
         <ImportData uid={user.id} today={me.today} dateLocaleTag={dateLocale(locale, (await headers()).get("accept-language"), me.profile?.country ?? null)} country={me.profile?.country} />
       )}
 
-      <section aria-labelledby="me-help" className="rounded-3xl border border-border bg-surface p-6">
+      <section aria-labelledby="me-help" className="rounded-3xl border border-border bg-surface p-[24px]">
         <h2 id="me-help" className="text-lg font-medium text-text">
           {tm("meHelp")}
         </h2>

@@ -189,7 +189,7 @@ export function ReflectPanel({ entryId, initial, balance, country, onAnswer }: P
   const loading = phase.kind === "loading";
 
   return (
-    <section aria-labelledby="reflect-title" className="mt-8 rounded-3xl border border-border bg-surface p-6" data-testid="reflect-panel">
+    <section aria-labelledby="reflect-title" className="mt-8 rounded-3xl border border-border bg-surface p-[24px]" data-testid="reflect-panel">
       <h2 id="reflect-title" className="sr-only">
         {t("reflectButton")}
       </h2>
@@ -197,7 +197,7 @@ export function ReflectPanel({ entryId, initial, balance, country, onAnswer }: P
         // Moodbow's voice (decision 150): its own colour and surface, never a
         // mood colour and never the entry's mood. Focusable (-1): it takes
         // focus from Reflect, which goes with it (one-shot, reviewer #51).
-        <div ref={resultBox} tabIndex={-1} data-testid="reflect-result" className="rounded-2xl border-l-4 border-voice bg-voice-surface p-4 focus:outline-none">
+        <div ref={resultBox} tabIndex={-1} data-testid="reflect-result" className="rounded-2xl border-l-4 border-voice bg-voice-surface p-[16px] focus:outline-none">
           {/* Who's speaking (the mockups, decision 161), in the voice colour. */}
           <p className="mb-2 flex flex-wrap items-center gap-2 text-sm font-medium text-voice" data-testid="reflect-voice">
             <span>{ta("appName")}</span>
@@ -256,7 +256,7 @@ export function ReflectPanel({ entryId, initial, balance, country, onAnswer }: P
           moving bar (the mockups, decision 161). Visual only; the status
           below says it to screen readers. */}
       {!reflection && loading && (
-        <div aria-hidden="true" data-testid="reflect-loading-card" className="mb-4 rounded-2xl border-l-4 border-voice bg-voice-surface p-4">
+        <div aria-hidden="true" data-testid="reflect-loading-card" className="mb-4 rounded-2xl border-l-4 border-voice bg-voice-surface p-[16px]">
           <p className="text-sm font-medium text-voice">{ta("appName")}</p>
           <p className="mt-1 text-muted">{t("reflectLoading")}</p>
           <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-pill">

@@ -81,7 +81,7 @@ export function MilestoneCard({ n, colours, uid, month, dateLocaleTag, year = nu
           ref={card}
           aria-labelledby="milestone-title"
           data-testid="milestone-card"
-          className="milestone-in fixed inset-x-3 bottom-20 z-10 rounded-3xl border border-border bg-surface p-5 shadow-lg min-[360px]:inset-x-4 md:inset-x-auto md:bottom-6 md:right-6 md:w-96"
+          className="milestone-in fixed inset-x-3 bottom-20 z-10 rounded-3xl border border-border bg-surface p-[20px] shadow-lg min-[360px]:inset-x-4 md:inset-x-auto md:bottom-6 md:right-6 md:w-96"
         >
           <div className="flex items-start justify-between gap-2">
             <h2 id="milestone-title" className="text-lg font-medium text-text">
@@ -93,7 +93,7 @@ export function MilestoneCard({ n, colours, uid, month, dateLocaleTag, year = nu
               onClick={dismiss}
               aria-label={t("milestoneNotNow")}
               title={t("milestoneNotNow")}
-              className="-mr-2 -mt-2 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-muted hover:bg-pill"
+              className="-mr-[8px] -mt-[8px] inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-muted hover:bg-pill"
             >
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
                 <path d="M6 6l12 12M18 6L6 18" />

@@ -12,7 +12,7 @@ export function DayCheckIn({ initial, uid, date, dateLocaleTag }: { initial: Che
   const [adding, setAdding] = useState(false);
   if (initial || adding) return <CheckInCard initial={initial} uid={uid} date={date} dateLocaleTag={dateLocaleTag} autoFocus={adding} />;
   return (
-    <div className="rounded-3xl border border-dashed border-border p-6" data-testid="day-no-checkin">
+    <div className="rounded-3xl border border-dashed border-border p-[24px]" data-testid="day-no-checkin">
       <p className="text-muted">{t("dayNoCheckin")}</p>
       <button type="button" data-testid="day-add-checkin" onClick={() => setAdding(true)} className="mt-3 font-medium text-accent underline underline-offset-4">
         {t("dayAddCheckin")}

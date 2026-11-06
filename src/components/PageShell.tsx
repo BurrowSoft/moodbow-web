@@ -38,14 +38,16 @@ export async function PageShell({ title, draft = false, article = false, after, 
           </Link>
         </div>
       </header>
-      <main id="main" className="flex-1 px-6 py-10">
+      <main id="main" className="flex-1 px-[24px] py-10 [overflow-wrap:anywhere]">
         {notice && (
           <p data-testid="page-notice" className="mx-auto mb-6 max-w-2xl rounded-2xl bg-pill px-5 py-3 text-sm font-medium text-text">
             {notice}
           </p>
         )}
         <article lang={lang} className="mx-auto max-w-2xl">
-          <h1 className="text-balance text-3xl font-medium tracking-tight sm:text-4xl">{title}</h1>
+          {/* Capped on a narrow screen at large text, so a first-run page's ordinary words stay
+              whole at 200 %. The same size and line height as text-3xl and text-4xl otherwise. */}
+          <h1 className="text-balance font-medium leading-[1.2] tracking-tight [font-size:min(1.875rem,max(12vw,30px))] sm:text-4xl sm:leading-[2.5rem]">{title}</h1>
           <div data-content={article ? "article" : undefined} className="mt-6 space-y-5 text-base leading-relaxed text-muted sm:text-[17px]">{children}</div>
         </article>
         {after}

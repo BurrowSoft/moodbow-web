@@ -18,4 +18,4 @@ Vous pouvez commencer Moodbow dans l'app sans e-mail. Votre journal est enregist
 
 **Journaux sans e-mail :** si vous n'ajoutez jamais d'e-mail et n'ouvrez pas l'app avec une connexion Internet pendant 12 mois, nous supprimons ce journal. Moodbow vous prévient un mois avant.
 
-Sans e-mail, il n'y a pas de **Se déconnecter**, car vous ne pourriez pas vous reconnecter. **Supprimer le compte** fonctionne normalement.
+Sans e-mail, il n'y a pas de **Se déconnecter** dans **Moi**, car vous ne pourriez pas vous reconnecter. **Supprimer le compte** fonctionne normalement.

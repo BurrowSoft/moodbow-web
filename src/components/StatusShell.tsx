@@ -11,7 +11,7 @@ export { STATUS_BUTTON } from "./statusButton";
 export async function StatusShell({ title, body, children, testId }: { title: string; body?: React.ReactNode; children?: React.ReactNode; testId?: string }) {
   const tc = await getTranslations("common");
   return (
-    <main id="main" className="flex flex-1 flex-col items-center justify-center px-6 py-16">
+    <main id="main" className="flex flex-1 flex-col items-center justify-center px-[24px] py-16 [overflow-wrap:anywhere]">
       <div className="flex w-full max-w-[560px] flex-col items-center">
         <div className="mb-10 w-[120px]">
           <Logo variant="stacked" width={120} alt={tc("logoAlt")} />

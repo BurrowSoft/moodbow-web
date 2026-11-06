@@ -1082,12 +1082,65 @@ test.describe("the tab bar in every language", () => {
           const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
           // Soft: one run lists every page that needs a look.
           expect.soft({ path, percent, overflow, sticksOut }).toEqual({ path, percent, overflow: 0, sticksOut: [] });
+          // Gutters and card padding stay what they are at the normal size: rem would triple
+          // at 300 %, leaving 176 px of a 320 px phone for 48 px text (Web Tester, #201).
+          const tripled = await page.evaluate(() => {
+            const left = (e: Element) => parseFloat(getComputedStyle(e).paddingLeft);
+            const cards = [...document.querySelectorAll('#main, #main [class*="rounded-3xl"], #main [class*="rounded-2xl"][class*="border"]')];
+            return cards.filter((e) => left(e) > 24).slice(0, 6).map((e) => `${e.tagName.toLowerCase()} ${left(e)}`);
+          });
+          expect.soft({ path, percent, tripled }).toEqual({ path, percent, tripled: [] });
+          // A negative margin must match the px padding it pairs with.
+          const pulledOut = await page.evaluate(() => [...document.querySelectorAll("#main *")].filter((e) => Math.abs(parseFloat(getComputedStyle(e).marginLeft)) > 24 && parseFloat(getComputedStyle(e).marginLeft) < 0).slice(0, 6).map((e) => e.tagName.toLowerCase()));
+          expect.soft({ path, percent, pulledOut }).toEqual({ path, percent, pulledOut: [] });
         }
       }
     } finally {
       await cleanup(email);
     }
   });
+});
+
+// Every new account passes through Set up; its time field was 151 px past a 320 px
+// phone at 300 % (Web Tester, #206).
+test("large text, set in the browser: Set up stays inside a 320 px phone", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
+  const email = newEmail();
+  const password = newPassword();
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+    const cdp = await page.context().newCDPSession(page);
+    await page.setViewportSize({ width: 320, height: 800 });
+    for (const [route, saved] of [["", "en"], ["/fr", "fr"], ["/de", "de"]]) {
+      await setProfileLocale(email, password, saved);
+      for (const percent of [200, 300]) {
+        await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
+        await page.goto(`${route}/setup`);
+        await expect(page.getByTestId("setup-done")).toBeVisible();
+        const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+        expect.soft({ saved, percent, overflow }).toEqual({ saved, percent, overflow: 0 });
+        // The time reads whole in a 12-hour browser (this one's en-US): its text, sides and
+        // picker icon, measured. A clipped PM makes 21:00 read "09:00" (Web Tester, #206).
+        const time = await page.getByTestId("setup-reminder-time").evaluate((input) => {
+          const style = getComputedStyle(input);
+          const ruler = document.createElement("canvas").getContext("2d")!;
+          ruler.font = style.font;
+          const needs = ruler.measureText("09:00 PM").width + parseFloat(style.paddingLeft) + parseFloat(style.paddingRight) + parseFloat(style.fontSize) * 1.5;
+          return { needs: Math.ceil(needs), has: Math.floor(input.clientWidth), font: style.fontSize };
+        });
+        console.log(`Set up's time, ${saved} at ${percent}%: needs ${time.needs}, has ${time.has}, font ${time.font}`);
+        expect.soft(time.needs, `${saved} at ${percent}%`).toBeLessThanOrEqual(time.has);
+      }
+    }
+  } finally {
+    await cleanup(email);
+  }
 });
 
 // The first of Bo's web against the real database (app's migration 018 on staging). The
