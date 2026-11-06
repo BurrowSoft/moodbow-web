@@ -1,6 +1,6 @@
 // The one-time notice of a privacy change, before it applies (policy §8). The server says
-// which notice is current, so it goes out with no deploy; an account that's seen it, or was
-// created after it, doesn't get it. A policy version bump would stop everyone at Consent; this
+// which notice is current, so it goes out with no deploy, and an account sees it once, on
+// Today. A policy version bump would stop everyone at Consent; this
 // stops no one. An id starting with a date says when the change applies.
 export function policyNoticeToShow(me: { policy_notice_id?: string | null; settings?: { policy_notice_seen?: string | null } | null }): string | null {
   const id = me.policy_notice_id;

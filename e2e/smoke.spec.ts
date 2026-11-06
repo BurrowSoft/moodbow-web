@@ -220,6 +220,14 @@ test.describe("language: the offered ones, and Thai as a draft (thai-offered-liv
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("เริ่มต้นใช้ Moodbow");
   });
 
+  test("/privacy/next on a draft build: the coming text, a line about it, a way to today's, not indexed", async ({ page }) => {
+    const res = await page.goto("/privacy/next");
+    expect(res?.status()).toBe(200);
+    await expect(page.getByTestId("privacy-next-line")).toBeVisible();
+    await expect(page.getByTestId("privacy-next-current")).toHaveAttribute("href", "/privacy");
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
+  });
+
   test("/th/privacy: the English text under the Thai line, as /privacy is (draft or live)", async ({ page }) => {
     const res = await page.goto("/th/privacy");
     expect(res?.status()).toBe(200);

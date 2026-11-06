@@ -137,7 +137,10 @@
   },
   "legal": {
     "hiddenTitle": "Aún no se muestra: cada bloque aparece cuando su función está activa (solo versiones de prueba)",
-    "legalEnglishOnly": "Esta página está disponible en inglés."
+    "legalEnglishOnly": "Esta página está disponible en inglés.",
+    "nextApplies": "Estos cambios se aplican el {date}. Hasta entonces, se aplica nuestra política actual.",
+    "nextAppliesNoDate": "Estos cambios aún no se aplican. Hasta entonces, se aplica nuestra política actual.",
+    "nextCurrent": "Leer la política actual"
   },
   "auth": {
     "signinTitle": "Hola de nuevo",

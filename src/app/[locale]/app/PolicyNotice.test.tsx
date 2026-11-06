@@ -65,7 +65,7 @@ describe("PolicyNotice", () => {
     open();
     expect(screen.getByTestId("policy-notice")).toHaveTextContent(a.policyNoticeTitle);
     expect(screen.getByTestId("policy-notice")).toHaveTextContent("1 December 2026");
-    expect(screen.getByTestId("policy-notice-read")).toHaveAttribute("href", "/privacy");
+    expect(screen.getByTestId("policy-notice-read")).toHaveAttribute("href", "/privacy/next");
     expect(screen.queryByRole("dialog")).toBeNull();
   });
   it("without a date, leaves that sentence out", () => {

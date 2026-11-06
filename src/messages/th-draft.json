@@ -1043,5 +1043,20 @@
     "key": "app.policyNoticeDismiss",
     "en": "Got it",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "legal.nextApplies",
+    "en": "These changes apply on {date}. Until then, our current policy applies.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "legal.nextAppliesNoDate",
+    "en": "These changes aren't in effect yet. Until then, our current policy applies.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "legal.nextCurrent",
+    "en": "Read the current policy",
+    "reason": "UX draft (native read pending)"
   }
 ]

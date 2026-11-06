@@ -57,6 +57,11 @@ export function applyPending(source: string, met: (id: string) => boolean = isPe
   return { text, hidden };
 }
 
+// The legal text as it will read once a noticed change applies: Bo's blocks in, and what they
+// replace out. Everything else as it is today.
+export const comingPolicyMet = (id: string) => (id === "bo_live" ? true : id === "bo_off" ? false : pendingKnown(id) && isPendingMet(id));
+const pendingKnown = (id: string) => conditionForPending(id) in (conditions as Record<string, unknown>);
+
 // HTML comments (the file header) are notes for editors, never published.
 export function stripComments(source: string): string {
   return source.replace(/<!--[\s\S]*?-->\n?/g, "");

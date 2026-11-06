@@ -137,7 +137,10 @@
   },
   "legal": {
     "hiddenTitle": "Noch nicht sichtbar: Jeder Abschnitt erscheint, sobald seine Funktion live ist (nur Test-Builds)",
-    "legalEnglishOnly": "Diese Seite ist auf Englisch verfügbar."
+    "legalEnglishOnly": "Diese Seite ist auf Englisch verfügbar.",
+    "nextApplies": "Diese Änderungen gelten ab dem {date}. Bis dahin gilt unsere aktuelle Erklärung.",
+    "nextAppliesNoDate": "Diese Änderungen gelten noch nicht. Bis dahin gilt unsere aktuelle Erklärung.",
+    "nextCurrent": "Aktuelle Erklärung lesen"
   },
   "auth": {
     "signinTitle": "Willkommen zurück",

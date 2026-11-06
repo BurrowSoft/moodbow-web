@@ -137,7 +137,10 @@
   },
   "legal": {
     "hiddenTitle": "Not shown yet: each block appears once its feature is live (test builds only)",
-    "legalEnglishOnly": "This page is available in English."
+    "legalEnglishOnly": "This page is available in English.",
+    "nextApplies": "These changes apply on {date}. Until then, our current policy applies.",
+    "nextAppliesNoDate": "These changes aren't in effect yet. Until then, our current policy applies.",
+    "nextCurrent": "Read the current policy"
   },
   "auth": {
     "signinTitle": "Welcome back",
