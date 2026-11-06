@@ -41,15 +41,18 @@ export const TAB_LINK_NARROW = "px-1 min-[360px]:px-3 text-center leading-tight"
 // One line, never broken inside a word. When the four don't fit (a large browser
 // text size at 320 px), AppNav scales them down together through this variable,
 // as the app does (UX & PM 2026-11-06, replacing "never a smaller font" here).
-// Under 240 CSS px (200%+ zoom on a phone): icons only, each label kept as
-// screen-reader text (the link's name) and a title tooltip.
-export const TAB_LABEL = "whitespace-nowrap [font-size:var(--tab-label-size,inherit)] max-[240px]:sr-only";
+// Never under TAB_LABEL_MIN_PX: below that the whole bar goes icons only, as it
+// does under 240 CSS px (200%+ zoom on a phone), each label kept as screen-reader
+// text (the link's name) and a title tooltip.
+export const TAB_LABEL = "whitespace-nowrap [font-size:var(--tab-label-size,inherit)] max-[240px]:sr-only group-data-[tab-icons]/tabs:sr-only";
+export const TAB_LABEL_MIN_PX = 11;
 
 // The size that lets the four labels share the row: as they are if they fit, else
 // all scaled by the same amount, just under the exact fit so rounding can't wrap
 // or clip. minWidth: a tab's narrowest (its icon), so a label narrower than that
-// takes that much of the row whatever its size. null: nothing to change.
-export function tabLabelSize(room: number, labelWidths: number[], fontSize: number, minWidth = 0): number | null {
+// takes that much of the row whatever its size. null: nothing to change. "icons":
+// they'd have to go under the smallest size.
+export function tabLabelSize(room: number, labelWidths: number[], fontSize: number, minWidth = 0): number | "icons" | null {
   if (room <= 0) return null;
   let scaling = labelWidths;
   let scale = 1;
@@ -61,8 +64,9 @@ export function tabLabelSize(room: number, labelWidths: number[], fontSize: numb
     scaling = still;
   }
   const fits = labelWidths.reduce((sum, width) => sum + Math.max(width, minWidth), 0) <= room;
-  if (fits || !(scale > 0)) return null;
-  return Math.floor(Math.min(scale, 1) * fontSize * 100) / 100;
+  if (fits) return null;
+  const size = Math.floor(Math.min(scale, 1) * fontSize * 100) / 100;
+  return size >= TAB_LABEL_MIN_PX ? size : "icons";
 }
 
 // A segmented choice (Timeline All days/Moments, Insights ranges, the share

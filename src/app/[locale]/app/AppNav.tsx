@@ -36,6 +36,7 @@ function useTabLabelsFit() {
       if (now === measured) return;
       measured = now;
       ul.style.removeProperty("--tab-label-size");
+      delete ul.dataset.tabIcons;
       if (getComputedStyle(ul).display !== "grid") return;
       const labels = [...ul.querySelectorAll<HTMLElement>("[data-tab-label]")];
       if (!labels[0]) return;
@@ -47,7 +48,8 @@ function useTabLabelsFit() {
       // A tab is never narrower than its icon, so a short label's tab takes that.
       const icon = labels[0].previousElementSibling?.getBoundingClientRect().width ?? 0;
       const size = tabLabelSize(ul.clientWidth - padding, widths, parseFloat(getComputedStyle(labels[0]).fontSize), icon);
-      if (size !== null) ul.style.setProperty("--tab-label-size", `${size}px`);
+      if (size === "icons") ul.dataset.tabIcons = "";
+      else if (size !== null) ul.style.setProperty("--tab-label-size", `${size}px`);
     };
     fit();
     const observer = new ResizeObserver(() => {
@@ -104,7 +106,7 @@ export function AppNav() {
           <Logo variant="horizontal" width={130} alt="" />
         </Link>
       </div>
-      <ul ref={row} className={`grid ${TAB_COLUMNS} md:flex md:flex-col md:gap-1`}>
+      <ul ref={row} className={`group/tabs grid ${TAB_COLUMNS} md:flex md:flex-col md:gap-1`}>
         {TABS.map((tab) => {
           const active = isActive(tab.href);
           return (
@@ -120,7 +122,7 @@ export function AppNav() {
                   active ? "text-accent md:bg-pill" : "text-muted hover:text-text"
                 }`}
               >
-                <span className="h-6 w-6" aria-hidden="true">
+                <span className="h-6 w-6 max-w-full" aria-hidden="true">
                   {tab.icon}
                 </span>
                 <span data-tab-label className={TAB_LABEL}>

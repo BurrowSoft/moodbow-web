@@ -59,6 +59,14 @@ describe("tabLabelSize: the four labels share the row", () => {
     expect(tabLabelSize(380, [120, 120, 120, 20], 24, 48)).not.toBeNull();
   });
 
+  it("the smallest size: 11 px is allowed; anything under means icons only, for the whole bar", () => {
+    const smallest = tabLabelSize(100, [105], 12);
+    expect(smallest).toBeGreaterThanOrEqual(11);
+    expect(smallest).toBeLessThan(12);
+    expect(tabLabelSize(100, [110], 12)).toBe("icons");
+    expect(tabLabelSize(177, [130, 50, 50, 30], 24, 48)).toBe("icons");
+  });
+
   it("no room to measure (hidden): nothing to change", () => {
     expect(tabLabelSize(0, [60], 12)).toBeNull();
   });

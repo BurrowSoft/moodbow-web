@@ -788,23 +788,30 @@ test.describe("the tab bar in every language", () => {
           expect(labels, route).toHaveLength(4);
           for (const { text, lines } of labels) expect(lines, `${route || "/en"}: ${text}`).toBeLessThanOrEqual(text.trim().split(/\s+/).length);
           expect(await page.evaluate(() => document.documentElement.scrollWidth), route).toBeLessThanOrEqual(width);
-          // Browser text at 200%: still one line each, scaled to share the row.
-          await page.addStyleTag({ content: "html { font-size: 200% }" });
-          await expect
-            .poll(
-              () =>
-                page.locator('a[data-testid^="tab-"]').evaluateAll((links) =>
-                  links.flatMap((link) => {
-                    const label = link.querySelector("[data-tab-label]");
-                    const range = document.createRange();
-                    if (label) range.selectNodeContents(label);
-                    const lines = new Set([...range.getClientRects()].map((r) => Math.round(r.top))).size;
-                    return lines === 1 && link.scrollWidth <= link.clientWidth ? [] : [`${label?.textContent}: ${lines} lines, ${link.scrollWidth} in ${link.clientWidth}`];
-                  }),
-                ),
-              { message: `${route || "/en"} at 200%` },
-            )
-            .toEqual([]);
+          // Browser text at 200% and 300%: one line each, scaled to share the row
+          // and never under 11 px; or icons only, each tab still named.
+          for (const percent of [200, 300]) {
+            await page.addStyleTag({ content: `html { font-size: ${percent}% }` });
+            await expect
+              .poll(
+                () =>
+                  page.locator('a[data-testid^="tab-"]').evaluateAll((links) =>
+                    links.flatMap((link) => {
+                      const label = link.querySelector("[data-tab-label]");
+                      if (!label || !label.textContent?.trim()) return ["a tab with no name"];
+                      const style = getComputedStyle(label);
+                      if (style.position === "absolute") return [];
+                      const range = document.createRange();
+                      range.selectNodeContents(label);
+                      const lines = new Set([...range.getClientRects()].map((r) => Math.round(r.top))).size;
+                      const size = parseFloat(style.fontSize);
+                      return lines === 1 && size >= 11 && link.scrollWidth <= link.clientWidth ? [] : [`${label.textContent}: ${lines} lines, ${size} px, ${link.scrollWidth} in ${link.clientWidth}`];
+                    }),
+                  ),
+                { message: `${route || "/en"} at ${percent}%` },
+              )
+              .toEqual([]);
+          }
         }
       } finally {
         await cleanup(email);
