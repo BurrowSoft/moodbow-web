@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
@@ -10,6 +11,7 @@ import { dismissPolicyNotice } from "./actions";
 // dismissed: if saving that fails, it comes back next time, which is the honest result.
 export function PolicyNotice({ id, date }: { id: string; date: string | null }) {
   const t = useTranslations("app");
+  const router = useRouter();
   const [shown, setShown] = useState(true);
   if (!shown) return null;
   return (
@@ -30,7 +32,12 @@ export function PolicyNotice({ id, date }: { id: string; date: string | null }) 
           data-testid="policy-notice-dismiss"
           onClick={() => {
             setShown(false);
-            void dismissPolicyNotice(id).catch(() => {});
+            void dismissPolicyNotice(id)
+              .then(({ changed }) => {
+                // Once, on this click only: no error and no loop.
+                if (changed) router.refresh();
+              })
+              .catch(() => {});
           }}
           className="inline-flex min-h-11 items-center rounded-full border border-border px-[16px] font-medium text-text hover:bg-pill"
         >

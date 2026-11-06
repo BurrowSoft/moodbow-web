@@ -6,7 +6,9 @@ import { policyNoticeDate, policyNoticeToShow } from "@/lib/journal/policyNotice
 import { dateInSentence } from "@/lib/journal/today";
 import { PolicyNotice } from "./PolicyNotice";
 
-const dismiss = vi.fn(async (_id: string) => ({ ok: true }));
+const dismiss = vi.fn(async (_id: string): Promise<{ ok: boolean; changed?: boolean }> => ({ ok: true }));
+const refresh = vi.fn();
+vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh }) }));
 vi.mock("./actions", () => ({ dismissPolicyNotice: (id: string) => dismiss(id) }));
 vi.mock("@/i18n/navigation", () => ({
   Link: ({ href, children, ...rest }: { href: string; children: React.ReactNode }) => (
@@ -77,6 +79,21 @@ describe("PolicyNotice", () => {
     expect(screen.queryByTestId("policy-notice")).toBeNull();
     expect(dismiss).toHaveBeenCalledTimes(1);
     expect(dismiss).toHaveBeenCalledWith("2026-12-01-bo");
+  });
+  it("the notice changed underneath: the page reads it again, once, with no error", async () => {
+    dismiss.mockResolvedValueOnce({ ok: false, changed: true });
+    open();
+    fireEvent.click(screen.getByTestId("policy-notice-dismiss"));
+    await new Promise((done) => setTimeout(done));
+    expect(refresh).toHaveBeenCalledTimes(1);
+    expect(screen.queryByRole("alert")).toBeNull();
+  });
+  it("any other failure doesn't reload", async () => {
+    dismiss.mockResolvedValueOnce({ ok: false });
+    open();
+    fireEvent.click(screen.getByTestId("policy-notice-dismiss"));
+    await new Promise((done) => setTimeout(done));
+    expect(refresh).not.toHaveBeenCalled();
   });
   it("a failed save is quiet: nothing throws, and it comes back next time", async () => {
     dismiss.mockRejectedValueOnce(new Error("offline"));

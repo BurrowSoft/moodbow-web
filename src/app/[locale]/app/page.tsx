@@ -7,7 +7,9 @@ import { SessionEnded } from "@/components/SessionEnded";
 import { currentUser } from "@/lib/journal/currentUser";
 import type { CheckIn } from "@/lib/journal/checkIn";
 import { getMe } from "@/lib/journal/me";
-import { dateLine, dateLocale, greetingKey, localHour } from "@/lib/journal/today";
+import { policyNoticeDate, policyNoticeToShow } from "@/lib/journal/policyNotice";
+import { dateInSentence, dateLine, dateLocale, greetingKey, localHour } from "@/lib/journal/today";
+import { PolicyNotice } from "./PolicyNotice";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { CheckInCard } from "./CheckInCard";
 import { EntryPreviews, type EntrySummary } from "./EntryPreviews";
@@ -62,8 +64,14 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
   // A milestone reached (decision 169): offered once, where the 1.1 share cards are on.
   const milestone = pageGate("share-cards") !== "hidden" && pageGate("share-cards-more") !== "hidden" ? await loadMilestone(supabase) : null;
 
+  // The notice of a privacy change, here and not everywhere: Today comes after consent and
+  // setup, so it never meets someone on their first screen (UX, Reviewer).
+  const noticeId = policyNoticeToShow(me);
+  const noticeDate = noticeId && policyNoticeDate(noticeId);
+
   return (
     <section className="space-y-8">
+      {noticeId && <PolicyNotice key={noticeId} id={noticeId} date={noticeDate ? dateInSentence(noticeDate, dateLocaleTag) : null} />}
       <header>
         {/* Focusable from code only: where focus goes when the milestone card is dismissed. */}
         <h1 id="today-title" tabIndex={-1} className="text-3xl font-medium tracking-tight focus:outline-none" data-testid="today-greeting">
