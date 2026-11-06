@@ -1,4 +1,6 @@
 // @vitest-environment node
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import contract from "../../../content/your-week.json";
 import type { InsightRow } from "./insights";
@@ -7,7 +9,7 @@ import { YOUR_WEEK_RULES, yourWeek, type YourWeekMoment } from "./yourWeek";
 
 // content/your-week.json: the app runs these same cases when its side is built,
 // and takes the file over then (see its "about").
-type Case = { name: string; rows: InsightRow[]; moments: YourWeekMoment[]; expect: unknown };
+type Case = { name: string; today?: string; rows: InsightRow[]; moments: YourWeekMoment[]; expect: unknown };
 
 describe("Your week: the contract", () => {
   it("the rules are the contract's", () => {
@@ -16,13 +18,28 @@ describe("Your week: the contract", () => {
 
   for (const c of contract.cases as unknown as Case[]) {
     it(c.name, () => {
-      expect(yourWeek(c.rows, contract.today, c.moments)).toEqual(c.expect);
+      expect(yourWeek(c.rows, c.today ?? contract.today, c.moments)).toEqual(c.expect);
     });
   }
 
   it("the copy keeps to its rules: no causes, advice, scores or diagnosis words", () => {
     const words = /because|improv|should|try to|better|worse|score|streak|missed|depress|anxi|disorder|symptom/i;
     for (const [key, line] of Object.entries(contract.copy)) expect(line, key).not.toMatch(words);
+  });
+});
+
+// Each language's templates (messages' insights.yourWeek…, from PR 2 on) and the
+// contract's English: no diagnosis word, in that language. Until PR 2 adds the
+// strings, only the contract's English is really checked here.
+describe("Your week: no diagnosis words", () => {
+  const lists = contract.diagnosisWords as Record<string, string[]>;
+  it("the contract's English", () => {
+    for (const [key, line] of Object.entries(contract.copy)) for (const word of lists.en) expect(line.toLowerCase(), key).not.toContain(word);
+  });
+  it.each(Object.keys(lists))("%s", (locale) => {
+    const messages = JSON.parse(readFileSync(join(process.cwd(), "src", "messages", `${locale}.json`), "utf8")) as { insights: Record<string, string> };
+    const lines = Object.entries(messages.insights).filter(([key]) => key.startsWith("yourWeek"));
+    for (const [key, line] of lines) for (const word of lists[locale]) expect(line.toLowerCase(), key).not.toContain(word);
   });
 });
 

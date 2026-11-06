@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "about": "Your week in Insights (no AI; specs/your-week.md, UX 2026-11-06). TEMPORARY HOME: this landed in the web repo first, because the app's side comes after Bo. When the app starts, it moves to the app repo's supabase/contracts, which becomes the source of truth (decision 99), and the web syncs it from there like every other contract. Until then a change here must be repeated by the app. The week is the last complete Monday to Sunday before `today`. A check-in counts if it has a mood. Under minCheckIns: no card. A low mood on more than half: kind hard, nothing else. Otherwise at most 2 lines: first a pattern, else how the week looked; then the moment, else how the week looked if the first line was a pattern. No lines: no card. A pattern's sides are patterns.json's (sleep 7 hours or more / less; moved / didn't; stress 1-2 / 4-5, 3 left out; a missing value left out), each with at least minPerSide days. The gap is from the two rounded averages, the same steps as Patterns, and it must be at least minGap in the expected direction only (a on top). The largest gap wins; a tie goes sleep, movement, stress. lookMoreGood: more good days than low, and at least minGoodDays good. lookSteady: the steady mood on more than half. lookMixed: as many good as low, at least 1. Tried in that order. The moment is the latest in the week; two on one day, the larger id. Its query reads id and date only, never the body. caption: Patterns' footnote line shows, with a pattern only; it isn't one of the lines.",
+  "about": "Your week in Insights (no AI; specs/your-week.md, UX 2026-11-06). TEMPORARY HOME: this landed in the web repo first, because the app's side comes after Bo. When the app starts, it moves to the app repo's supabase/contracts, which becomes the source of truth (decision 99), and the web syncs it from there like every other contract. Until then a change here must be repeated by the app. The week is the last complete Monday to Sunday before `today`, and `today` is the date in the person's SAVED time zone on both clients, never the device's. Each check-in keeps the date it was saved under (`local_date`): it is never moved to another day, even if they travelled. A check-in counts if it has a mood. Under minCheckIns: no card. A low mood on more than half: kind hard, nothing else. A hard week shows no moment. Otherwise at most 2 lines, always in this order: first a pattern, else how the week looked; then the moment, else how the week looked if the first line was a pattern. So when all three qualify, the pattern and the moment show, and how the week looked does not. No lines: no card. A pattern's sides are patterns.json's (sleep 7 hours or more / less; moved / didn't; stress 1-2 / 4-5, 3 left out; a missing value left out), each with at least minPerSide days. The gap is from the two rounded averages, the same steps as Patterns, and it must be at least minGap in the expected direction only (a on top). The largest gap wins; a tie goes sleep, movement, stress. lookMoreGood: more good days than low, and at least minGoodDays good. lookSteady: the steady mood on more than half. lookMixed: as many good as low, at least 1. Tried in that order. The moment is the latest in the week; two on one day, the larger id. Its query reads id and date only, never the body. caption: Patterns' footnote line shows, with a pattern only; it isn't one of the lines.",
   "today": "2026-11-04",
   "rules": {
     "minCheckIns": 4,
@@ -22,7 +22,41 @@
     "moment": "A moment from this week: {date}",
     "hard": "This looked like a hard week."
   },
+  "diagnosisWords": {
+    "en": ["depress", "anxi", "disorder", "bipolar", "symptom"],
+    "fr": ["dépress", "anxi", "trouble", "bipolaire", "symptôme"],
+    "es": ["depresi", "ansi", "trastorno", "bipolar", "síntoma"],
+    "pt-br": ["depress", "ansi", "transtorno", "bipolar", "sintoma"],
+    "de": ["depress", "angststörung", "störung", "bipolar", "symptom"],
+    "it": ["depress", "ansi", "disturbo", "bipolare", "sintomo"],
+    "th": ["ซึมเศร้า", "วิตกกังวล", "ความผิดปกติ", "ไบโพลาร์", "อาการ"]
+  },
   "cases": [
+    {
+      "name": "a traveller: their saved zone says it's already Monday 2 November, so the week to 1 November is complete, whatever the device's clock says; each check-in stays on the date it was saved under, including the one saved abroad on the Sunday",
+      "today": "2026-11-02",
+      "rows": [
+        { "local_date": "2026-10-26", "mood": 5, "sleep_hours": null, "stress": null, "exercise_minutes": null },
+        { "local_date": "2026-10-28", "mood": 5, "sleep_hours": null, "stress": null, "exercise_minutes": null },
+        { "local_date": "2026-10-30", "mood": 3, "sleep_hours": null, "stress": null, "exercise_minutes": null },
+        { "local_date": "2026-11-01", "mood": 3, "sleep_hours": null, "stress": null, "exercise_minutes": null },
+        { "local_date": "2026-11-02", "mood": 1, "sleep_hours": null, "stress": null, "exercise_minutes": null }
+      ],
+      "moments": [],
+      "expect": { "start": "2026-10-26", "end": "2026-11-01", "kind": "lines", "lines": [{ "template": "lookMoreGood" }], "caption": false }
+    },
+    {
+      "name": "the same check-ins while their saved zone is still on Sunday 1 November: that week isn't complete, and the week before has none",
+      "today": "2026-11-01",
+      "rows": [
+        { "local_date": "2026-10-26", "mood": 5, "sleep_hours": null, "stress": null, "exercise_minutes": null },
+        { "local_date": "2026-10-28", "mood": 5, "sleep_hours": null, "stress": null, "exercise_minutes": null },
+        { "local_date": "2026-10-30", "mood": 3, "sleep_hours": null, "stress": null, "exercise_minutes": null },
+        { "local_date": "2026-11-01", "mood": 3, "sleep_hours": null, "stress": null, "exercise_minutes": null }
+      ],
+      "moments": [],
+      "expect": null
+    },
     {
       "name": "three check-ins: no card, and no message about it",
       "rows": [
