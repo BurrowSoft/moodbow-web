@@ -36,6 +36,14 @@ describe("colour roles", () => {
   });
 });
 
+describe("the saved language's fallback link", () => {
+  it("is held back 2 s, and no reduced-motion rule can leave it hidden", () => {
+    const css = readFileSync(join("src", "app", "globals.css"), "utf8");
+    expect(css).toContain("animation: after-wait 0s linear 2s forwards;");
+    for (const block of css.split("@media (prefers-reduced-motion").slice(1)) expect(block.slice(0, block.indexOf("}\n}"))).not.toContain("after-wait");
+  });
+});
+
 describe("errors aren't told by colour alone (decision 150)", () => {
   it("every role=alert gets a decorative error icon before its words (a text-free pseudo-element)", () => {
     const css = readFileSync(join("src", "app", "globals.css"), "utf8");

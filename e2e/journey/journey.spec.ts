@@ -709,6 +709,8 @@ test.describe("the saved language in the journal", () => {
       // Setup follows the saved language too, so that's where it stops now.
       await expect(page.getByTestId("saved-language-link")).toBeVisible({ timeout: 20_000 });
       await settled(page, "/fr/setup", "fr");
+      // Held back for 2 s on the way; here it must really show, reduced motion or not.
+      await expect(page.getByTestId("saved-language-link")).toHaveCSS("opacity", "1");
       // The link gets them there: the server sets the cookie on that load.
       await page.getByTestId("saved-language-link").click();
       await settled(page, "/setup", "en");
