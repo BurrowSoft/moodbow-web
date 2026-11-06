@@ -4,6 +4,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 import { redirect } from "@/i18n/navigation";
 import { PageShell } from "@/components/PageShell";
+import { SignedInMark } from "@/components/SignedInMark";
 import { pageGate } from "@/lib/conditions";
 import { canReflect } from "@/lib/journal/ai";
 import { getMe, onboardingStep } from "@/lib/journal/me";
@@ -51,6 +52,7 @@ export default async function SetupPage({ params }: PageProps<"/[locale]/setup">
   const t = await getTranslations("onboarding");
   return (
     <PageShell title={t("setupTitle")}>
+      <SignedInMark />
       {/* Focus and tone only when AI was turned on at Consent (and AI is
           shown here), as on the app (r1 §M3). */}
       <SetupForm askAi={canReflect(me)} />

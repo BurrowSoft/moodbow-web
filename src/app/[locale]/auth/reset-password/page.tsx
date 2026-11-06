@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
+import { SignedInMark } from "@/components/SignedInMark";
 import { StatusShell } from "@/components/StatusShell";
 import { pageMetadata } from "@/lib/metadata";
 import { isAuthOutage } from "@/lib/supabase/proxy";
@@ -84,6 +85,7 @@ export default async function ResetPasswordPage({ params, searchParams }: PagePr
   const t = await getTranslations("resetPassword");
   return (
     <StatusShell title={t("title")}>
+      <SignedInMark />
       <div className="w-full text-left">
         <ResetPasswordForm />
       </div>

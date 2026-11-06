@@ -4,6 +4,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 import { redirect } from "@/i18n/navigation";
 import { PageShell } from "@/components/PageShell";
+import { SignedInMark } from "@/components/SignedInMark";
 import { pageGate } from "@/lib/conditions";
 import { getMe, hasCurrentConsent, hasCurrentConsents } from "@/lib/journal/me";
 import { pageMetadata } from "@/lib/metadata";
@@ -52,6 +53,7 @@ export default async function ConsentPage({ params }: PageProps<"/[locale]/conse
   const ta = await getTranslations("auth");
   return (
     <PageShell title={t("consentTitle")}>
+      {user && <SignedInMark />}
       {outage && (
         <p role="alert" data-testid="consent-outage" className="font-medium text-accent">
           {ta("errGeneric")}

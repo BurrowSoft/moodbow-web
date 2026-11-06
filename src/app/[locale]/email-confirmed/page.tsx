@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 import { getPathname } from "@/i18n/navigation";
 import { Logo } from "@/components/Logo";
+import { SignedInMark } from "@/components/SignedInMark";
 import { conditionMet } from "@/lib/conditions";
 import { liveFeatures } from "@/lib/liveFeatures";
 import { liveStores } from "@/lib/stores";
@@ -35,6 +36,7 @@ export default async function EmailConfirmedPage({ params, searchParams }: PageP
   // to the journal if the confirm left a web session here, else to sign
   // in. Before that, no Continue at all (the page stays as it is).
   let continueTo: string | null = null;
+  let signedIn = false;
   if (liveFeatures.webJournal) {
     const supabase = await createSupabaseServerClient();
     const user = supabase ? (await supabase.auth.getUser()).data.user : null;
@@ -42,6 +44,7 @@ export default async function EmailConfirmedPage({ params, searchParams }: PageP
     // A link without a language (mail already sent, or a language not offered
     // when it was): now there's a session, their saved one.
     if (supabase && user) {
+      signedIn = true;
       const me = await getMe(supabase);
       const language = savedLanguageRoute(me?.profile?.locale, locale, offeredLocales());
       if (language) return <SavedLanguageRedirect locale={language} />;
@@ -60,6 +63,7 @@ export default async function EmailConfirmedPage({ params, searchParams }: PageP
 
   return (
     <main id="main" className="flex flex-1 flex-col items-center justify-center px-6 py-16">
+      {signedIn && <SignedInMark />}
       <div className="flex w-full max-w-[560px] flex-col items-center">
         <div className="mb-10 w-[120px]">
           <Logo variant="stacked" width={120} alt={tc("logoAlt")} />

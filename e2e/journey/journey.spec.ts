@@ -578,6 +578,13 @@ test.describe("the saved language in the journal", () => {
     });
   }
 
+  test("signed out, the language switcher is still there on the way in", async ({ page }) => {
+    await page.goto("/fr/consent");
+    await expect(page.locator("[data-language-switcher]")).toBeVisible();
+    await page.goto("/fr/sign-in");
+    await expect(page.locator("[data-language-switcher]")).toBeVisible();
+  });
+
   test("signed in on /setup in another language: their saved one", async ({ page }) => {
     const email = newEmail();
     const password = newPassword();
@@ -589,6 +596,8 @@ test.describe("the saved language in the journal", () => {
       await page.locator("#password").fill(password);
       await page.locator("main form button[type=submit]").first().click();
       await expect(page).toHaveURL(/\/fr\/setup$/, { timeout: 20_000 });
+      // Signed in, Me → Language is the one control: no switcher to bounce off.
+      await expect(page.locator("[data-language-switcher]")).toBeHidden();
       // The English route for real: the proxy would answer the French cookie itself.
       await page.context().addCookies([{ name: "NEXT_LOCALE", value: "en", url: page.url() }]);
       await page.goto("/setup");
