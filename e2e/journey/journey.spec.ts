@@ -1114,6 +1114,17 @@ test("large text, set in the browser: Set up stays inside a 320 px phone", async
         await expect(page.getByTestId("setup-done")).toBeVisible();
         const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
         expect.soft({ saved, percent, overflow }).toEqual({ saved, percent, overflow: 0 });
+        // The time reads whole in a 12-hour browser (this one's en-US): its text, sides and
+        // picker icon, measured. A clipped PM makes 21:00 read "09:00" (Web Tester, #206).
+        const time = await page.getByTestId("setup-reminder-time").evaluate((input) => {
+          const style = getComputedStyle(input);
+          const ruler = document.createElement("canvas").getContext("2d")!;
+          ruler.font = style.font;
+          const needs = ruler.measureText("09:00 PM").width + parseFloat(style.paddingLeft) + parseFloat(style.paddingRight) + parseFloat(style.fontSize) * 1.5;
+          return { needs: Math.ceil(needs), has: Math.floor(input.clientWidth), font: style.fontSize };
+        });
+        console.log(`Set up's time, ${saved} at ${percent}%: needs ${time.needs}, has ${time.has}, font ${time.font}`);
+        expect.soft(time.needs, `${saved} at ${percent}%`).toBeLessThanOrEqual(time.has);
       }
     }
   } finally {
