@@ -14,6 +14,41 @@
       "เฉยๆ",
       "ดี",
       "ดีมาก"
+    ],
+    "fr": [
+      "Très mal",
+      "Pas bien",
+      "Ça va",
+      "Bien",
+      "Super"
+    ],
+    "es": [
+      "Muy mal",
+      "Mal",
+      "Regular",
+      "Bien",
+      "Muy bien"
+    ],
+    "pt": [
+      "Muito mal",
+      "Mal",
+      "Normal",
+      "Bem",
+      "Muito bem"
+    ],
+    "de": [
+      "Furchtbar",
+      "Schlecht",
+      "Geht so",
+      "Gut",
+      "Super"
+    ],
+    "it": [
+      "Malissimo",
+      "Male",
+      "Così così",
+      "Bene",
+      "Benissimo"
     ]
   },
   "cases": [

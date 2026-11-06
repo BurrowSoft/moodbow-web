@@ -1,6 +1,6 @@
 "use client";
 
-import { startTransition, useActionState, useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { startTransition, useActionState, useCallback, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { promptFor, promptText } from "@/lib/journal/prompts";
 import { Dialog, dialogButton } from "@/components/Dialog";
@@ -9,6 +9,7 @@ import { Switch } from "@/components/Switch";
 import { useRouter } from "@/i18n/navigation";
 import { useAnnounce, useFocusTitleAfterLeaving } from "../Announcer";
 import { withQuestion } from "@/lib/journal/answer";
+import { readServerBox, withTyped } from "@/lib/journal/typedBeforeLoad";
 import { MAX_ENTRY_CHARS, sameEntry, type Entry } from "@/lib/journal/entry";
 import { localKey } from "@/lib/localData";
 import { flagsCrisis } from "@/lib/safety/crisis";
@@ -146,15 +147,29 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
   });
   const [id, setId] = useState(draft?.id ?? initial?.id ?? newId);
   const [base, setBase] = useState<string | null>(draft ? draft.base : (initial?.updated_at ?? null));
-  const [fields, setFields] = useState<Fields>(() => {
+  // Whatever was typed in the server's box before the page's code ran: it's
+  // still in the document during this first render, and it comes along.
+  const [arrival] = useState(() => {
     const f = draft ? { body: draft.body, date: draft.date, isMoment: draft.isMoment } : saved;
-    return start?.question ? { ...f, body: withQuestion(f.body, start.question) } : f;
+    const fresh = start?.question ? { ...f, body: withQuestion(f.body, start.question) } : f;
+    const box = restore ? readServerBox() : null;
+    const { body, start: from, end } = withTyped(fresh.body, box, !!draft);
+    return { fields: { ...fresh, body, date: box?.date ?? fresh.date }, focused: !!box?.focused, from, end };
   });
+  const [fields, setFields] = useState<Fields>(arrival.fields);
+  // Before anything can paint or a key can land: a letter on the bare page
+  // would be a keyboard shortcut (Web Tester, #100).
+  useLayoutEffect(() => {
+    if (!arrival.focused) return;
+    const el = document.getElementById("entry-text") as HTMLTextAreaElement | null;
+    el?.focus();
+    el?.setSelectionRange(arrival.from, arrival.end);
+  }, [arrival]);
   const [dialog, setDialog] = useState<null | "leave" | "delete" | { conflict: Entry | null }>(null);
-  // The safety card after a save the keyword check flagged (M8, decision
-  // 124): the entry is already saved; we stay on it, and closing the card
-  // puts focus back in the entry. The check runs here only; nothing about
-  // it is sent or kept (decision 125).
+  // The safety card after a save, or a failed save, the keyword check flagged
+  // (M8, decision 124): we stay on the entry, and closing the card puts focus
+  // back in it. The check runs here only; nothing about it is sent or kept
+  // (decision 125).
   const [safety, setSafety] = useState<"closed" | "open">("closed");
   const dirty = !same(fields, saved);
   // Whether there's anything to keep in this browser (see draft above).
@@ -224,6 +239,8 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
           setId(newId);
           setBase(null);
           setFields({ body: "", date: startDate ?? today, isMoment: false });
+          // The answer to that save never came, so neither did its card.
+          if (flagsCrisis(result.entry.body, CRISIS_KEYWORDS)) setSafety("open");
         } else {
           setDialog({ conflict: result.entry });
         }
@@ -331,13 +348,13 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
   // (a draft may be shorter: then its end), or at the end, ready to write.
   const startAt = start && (start.question || start.at === "end" ? "end" : start.at);
   useEffect(() => {
-    if (!restore || startAt === undefined) return;
+    if (!restore || startAt === undefined || arrival.focused) return;
     const el = document.getElementById("entry-text") as HTMLTextAreaElement | null;
     if (!el) return;
     const at = startAt === "end" ? el.value.length : Math.min(startAt, el.value.length);
     el.focus();
     el.setSelectionRange(at, at);
-  }, [restore, startAt]);
+  }, [restore, startAt, arrival]);
 
   // The last version saved from here: the view shows it even when leaving
   // later by Cancel (after a save the safety card kept us on the entry).
@@ -364,11 +381,30 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
       } else leave();
     }, 0);
   }, [leave]);
+  // Set when the card comes on the way out of a deleted entry: leaving first
+  // would take the card away with the editor.
+  const leaveAfterCard = useRef(false);
   const closeSafety = useCallback(() => {
     setSafety("closed");
+    if (leaveAfterCard.current) return router.push(backTo);
     // After the card's own focus restore (on its unmount): back into the entry.
     window.setTimeout(() => document.getElementById("entry-text")?.focus(), 0);
-  }, []);
+  }, [router, backTo]);
+
+  // The card comes once per Save press, whichever answers first: the 30 s
+  // wait, the failure itself, or a save that lands after the wait. Each press
+  // has its own form. Pressing Save again and failing again shows it again.
+  const carded = useRef(new WeakSet<FormData>());
+  const openCard = (form: FormData) => {
+    if (carded.current.has(form)) return;
+    carded.current.add(form);
+    setSafety("open");
+  };
+  // A save that fails, offline included: the text was still written, and the
+  // card needs no network (its numbers and words are bundled).
+  const failedSave = (form: FormData) => {
+    if (flagsCrisis(String(form.get("body") ?? ""), CRISIS_KEYWORDS)) openCard(form);
+  };
 
   const [state, action, pending] = useActionState<EntryState, FormData>(async (prev, form) => {
     let next: EntryState;
@@ -385,6 +421,7 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
     } catch (e) {
       if (isRedirect(e)) throw e;
       // offline or the request failed: the draft is still here
+      failedSave(form);
       return { status: "error", error: "generic" };
     }
     if (next.status === "saved") {
@@ -402,7 +439,7 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
         lastSaved.current = next.entry;
         setBase(next.entry.updated_at);
         setSaved(fromEntry(next.entry));
-        if (flagsCrisis(next.entry.body, CRISIS_KEYWORDS)) setSafety("open");
+        if (flagsCrisis(next.entry.body, CRISIS_KEYWORDS)) openCard(form);
         return next;
       }
       // Still here and showing what was sent: that's saved, so no draft is
@@ -418,10 +455,12 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
         // and further edits are a draft again (reviewer #35).
         finished.current = false;
         setBase(next.entry.updated_at);
-        setSafety("open");
+        openCard(form);
       } else leave();
     } else if (next.status === "error" && next.error === "stale") {
       setDialog({ conflict: next.latest });
+    } else if (next.status === "error") {
+      failedSave(form);
     }
     return next;
   }, { status: "idle" });
@@ -463,18 +502,21 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
   const busy = pending && !stuck;
 
   const send = (withBase: string | null) => {
-    window.clearTimeout(waitTimer.current);
-    setWaitedOut(false);
-    waitTimer.current = window.setTimeout(() => setWaitedOut(true), SAVE_WAIT_MS);
-    // Kept before the request: a redirect (session ended, consent) unmounts
-    // the editor before any answer comes back.
-    if (restore && !signedOut.current) writeDraft(draftKey, { ...fields, id, base: withBase });
     const form = new FormData();
     form.set("id", id);
     form.set("entry_date", fields.date);
     form.set("body", fields.body);
     form.set("is_moment", String(fields.isMoment));
     form.set("expected_updated_at", withBase ?? "");
+    window.clearTimeout(waitTimer.current);
+    setWaitedOut(false);
+    waitTimer.current = window.setTimeout(() => {
+      setWaitedOut(true);
+      failedSave(form);
+    }, SAVE_WAIT_MS);
+    // Kept before the request: a redirect (session ended, consent) unmounts
+    // the editor before any answer comes back.
+    if (restore && !signedOut.current) writeDraft(draftKey, { ...fields, id, base: withBase });
     startTransition(() => action(form));
   };
 
@@ -545,6 +587,8 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
           id="entry-date"
           data-testid="entry-date"
           type="date"
+          // As the text: a restored date would save the entry on the wrong day.
+          autoComplete="off"
           max={today}
           aria-invalid={future || undefined}
           aria-describedby={future ? "entry-error" : undefined}
@@ -570,6 +614,9 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
       <textarea
         id="entry-text"
         data-testid="entry-text"
+        // A browser's restored text on reload must not count as typed
+        // (lib/journal/typedBeforeLoad.ts): the draft is what's kept.
+        autoComplete="off"
         value={fields.body}
         onChange={(e) => setFields((f) => ({ ...f, body: e.target.value }))}
         placeholder={t("entryPlaceholder")}
@@ -688,6 +735,8 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
               lastSaved.current = conflict;
               setSaved(fromEntry(conflict));
               setFields(fromEntry(conflict));
+              // The text given up here was written all the same (the app, #171).
+              if (flagsCrisis(fields.body, CRISIS_KEYWORDS)) setSafety("open");
             }}
           >
             {t("entryConflictUseOther")}
@@ -720,6 +769,15 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
               finished.current = true;
               setDialog(null);
               removeDraft(draftKey);
+              // The text given up here was written all the same (the app, #171):
+              // the card first, and closing it leaves. The text goes now, so
+              // the autosave can't put the draft back behind the card.
+              if (flagsCrisis(fields.body, CRISIS_KEYWORDS)) {
+                leaveAfterCard.current = true;
+                setFields(saved);
+                setSafety("open");
+                return;
+              }
               // There's no entry left to view: back where it was opened from.
               router.push(backTo);
             }}

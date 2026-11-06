@@ -7,7 +7,7 @@
   (src/lib/legalContent.test.ts).
 -->
 ## Moodbow Privacy Policy
-Last updated: 2 October 2026
+Last updated: 6 November 2026
 
 Moodbow is a private journal made by Vitor Ribeiro Carvalho, trading as BurrowSoft (297 Moo 1, Baan Sanian, Mueang Nan, Nan 55000, Thailand), "we" in this policy. We wrote this to be read, not skimmed past. If anything is unclear, email support@moodbow.com.
 
@@ -18,6 +18,7 @@ Moodbow is a private journal made by Vitor Ribeiro Carvalho, trading as BurrowSo
 
 ### 1. What we collect
 **Your account:** your email address, your password (stored only as a secure hash), and when you agreed to our Terms and this policy, and confirmed you're 18 or older.
+**When you last connected:** the time your account last connected to our servers. We use it to keep you signed in and, for accounts without an email, to apply the 12-month rule below.
 {pending:anon_start_live}**Using Moodbow without an email:** you can start without giving us an email. We create an account for your phone that only it can use, and store your journal there like any other account. If you add an email later, your journal stays the same account. If you never add an email and don't open the app while connected to the internet for 12 months, we delete that account and its journal.{/pending}
 **Your journal:** the entries you write, your daily check-ins (mood, sleep, movement (active minutes), stress), the dates they belong to, and which entries you mark as moments.
 **Your settings:** language, country, time zone, reminder time, and your AI choices (on or off, tone, focus areas).

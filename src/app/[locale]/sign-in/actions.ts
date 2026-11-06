@@ -2,7 +2,7 @@
 
 import { getLocale } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
-import { isRateLimit } from "@/lib/authErrors";
+import { isRateLimit, logAuthFailure } from "@/lib/authErrors";
 import { isValidEmail, normalizeEmail } from "@/lib/email";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -25,11 +25,15 @@ export async function signIn(prev: SignInState, form: FormData): Promise<SignInS
   if (!password) return { status: "error", error: "badCredentials", email: typed };
 
   const supabase = await createSupabaseServerClient();
-  if (!supabase) return { status: "error", error: "generic", email: typed };
+  if (!supabase) {
+    logAuthFailure("sign-in", { name: "no_config" });
+    return { status: "error", error: "generic", email: typed };
+  }
   const { error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) {
     if (error.code === "invalid_credentials") return { status: "error", error: "badCredentials", email: typed };
     if (error.code === "email_not_confirmed") return { status: "notConfirmed", email };
+    logAuthFailure("sign-in", error);
     return { status: "error", error: "generic", email: typed };
   }
   redirect({ href: "/app", locale: await getLocale() });

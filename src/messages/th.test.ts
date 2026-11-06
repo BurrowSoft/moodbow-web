@@ -43,6 +43,25 @@ describe("th.json", () => {
     expect(Object.keys(T).sort()).toEqual(Object.keys(E).sort());
   });
 
+  // Counts that can pass 999 group by the UI language (app #140): en and th
+  // both say "1,200".
+  it("large counts are grouped, not raw", () => {
+    const say = (msg: string, values: Record<string, number | string>, locale: string) => new IntlMessageFormat(msg, locale).format(values) as string;
+    for (const [locale, M] of [["en", E], ["th", T]] as const) {
+      expect(say(M["me.importPreview"], { days: 1200, notes: 3400, first: "a", last: "b" }, locale), locale).toContain("1,200");
+      expect(say(M["me.importPreview"], { days: 1200, notes: 3400, first: "a", last: "b" }, locale), locale).toContain("3,400");
+      expect(say(M["me.importProgress"], { done: 1000, total: 5000 }, locale), locale).toContain("5,000");
+      expect(say(M["me.importDone"], { days: 2000 }, locale), locale).toContain("2,000");
+      for (const key of ["me.importSkipped", "me.importSkippedFuture", "me.importSkippedCap", "me.importSkippedTooLong", "timeline.timelineLoadedMore"]) {
+        expect(say(M[key], { count: 1200 }, locale), `${locale} ${key}`).toContain("1,200");
+      }
+      expect(say(M["timeline.searchResultsCount"], { n: 1200 }, locale), locale).toContain("1,200");
+      expect(say(M["share.shareDaysJournaled"], { n: 1200 }, locale), locale).toContain("1,200");
+    }
+    expect(say(E["timeline.searchResultsCount"], { n: 1 }, "en")).toBe("1 entry");
+    expect(say(E["timeline.searchResultsCount"], { n: 1200 }, "en")).toBe("1,200 entries");
+  });
+
   it("every Thai string uses the same placeholders as English", () => {
     for (const key of Object.keys(E)) expect(args(T[key]), key).toEqual(args(E[key]));
   });

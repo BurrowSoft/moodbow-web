@@ -11,6 +11,7 @@ import { IMPORT_BATCH_WAIT_MS, withTimeout } from "@/lib/ui/withTimeout";
 import { flagsCrisis } from "@/lib/safety/crisis";
 import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
 import { existingNoteCounts, importCheckIns, importEntries } from "./importActions";
+import { useUntilLoaded } from "@/lib/ui/untilLoaded";
 
 // Import from another journal (1.1 K, decision 189), in Me → Your data:
 // choose a file → it's read in this browser only → a preview (counts, what
@@ -43,6 +44,7 @@ const levelsOnly = (choices: Record<string, MoodChoice>) =>
   Object.fromEntries(Object.entries(choices).filter((e): e is [string, Mood] => e[1] !== "skip"));
 
 export function ImportData({ uid, today, dateLocaleTag, country }: { uid: string; today: string; dateLocaleTag: string; country?: string | null }) {
+  const untilLoaded = useUntilLoaded();
   const t = useTranslations("me");
   const tt = useTranslations("today");
   const ta = useTranslations("ai");
@@ -52,7 +54,6 @@ export function ImportData({ uid, today, dateLocaleTag, country }: { uid: string
   const text = useRef<string | null>(null);
   const [dateOrder, setDateOrder] = useState<DateOrder>("dmy");
   const [moodChoices, setMoodChoices] = useState<Record<string, MoodChoice>>({});
-  const input = useRef<HTMLInputElement>(null);
   // Set the moment Import is pressed, before any await (reviewer #92 B1).
   const running = useRef(false);
 
@@ -96,7 +97,6 @@ export function ImportData({ uid, today, dateLocaleTag, country }: { uid: string
   const reset = () => {
     text.current = null;
     setPhase({ kind: "idle" });
-    if (input.current) input.current.value = "";
   };
 
   const run = async (plan: ImportPlan) => {
@@ -187,7 +187,7 @@ export function ImportData({ uid, today, dateLocaleTag, country }: { uid: string
   const finished = phase.kind === "done" || phase.kind === "failed";
 
   return (
-    <section aria-labelledby="import-title" data-testid="import" className="mt-6">
+    <section {...untilLoaded} aria-labelledby="import-title" data-testid="import" className="mt-6">
       <h3 id="import-title" className="font-medium text-text">
         {t("importTitle")}
       </h3>
@@ -197,14 +197,20 @@ export function ImportData({ uid, today, dateLocaleTag, country }: { uid: string
           {t("importChooseFile")}
         </label>
         <input
-          ref={input}
           id={inputId}
           type="file"
           accept=".csv,text/csv"
           data-testid="import-file"
           disabled={importing}
           className="sr-only"
-          onChange={(e) => void choose(e.target.files?.[0])}
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            // The file is taken from here on, and the input lets go of it: a
+            // browser fires no change for the file an input still holds, so
+            // "import the same file again" would do nothing (Web Tester, #178).
+            e.target.value = "";
+            void choose(file);
+          }}
         />
       </div>
 
@@ -259,6 +265,13 @@ export function ImportData({ uid, today, dateLocaleTag, country }: { uid: string
           </div>
         )}
       </div>
+      {/* Outside the status above: that region is atomic, so this sentence would
+          be read again with every count. */}
+      {importing && (
+        <p data-testid="import-large" className="mt-2 text-sm text-muted">
+          {t("importLarge")}
+        </p>
+      )}
 
       {phase.kind === "preview" && (
         <div className="mt-4 flex flex-wrap gap-3">

@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import { expect, test, type Frame, type Page, type Request } from "@playwright/test";
 import conditions from "../../content/conditions.json";
 import messages from "../../src/messages/en.json";
-import { aiAvailable, cleanup, configured, confirmEmail, createConfirmedUser, exists, newEmail, newPassword, notConfigured, profileLocale, revokeSessions, signedUpUnconfirmed, sweep } from "./staging";
+import { aiAvailable, cleanup, configured, confirmEmail, createConfirmedUser, exists, newEmail, newPassword, notConfigured, profileLocale, revokeSessions, setProfileLocale, signedUpUnconfirmed, sweep } from "./staging";
 
 // The launch-critical journeys (1.0), end to end against staging with a
 // throwaway account each: sign-up → confirm → consent → setup → check-in →
@@ -472,6 +472,73 @@ test.describe("a first run reaches Today without a reload", () => {
   });
 });
 
+// Stopped partway, the screen says to import the same file again. A browser
+// fires no change for the file an input already holds, so the input has to let
+// go of it, or nothing happens (Web Tester, #178).
+test.describe("importing the same file again", () => {
+  const signedIn = async (page: Page, email: string, password: string) => {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.getByLabel("Email").fill(email);
+    await page.getByLabel("Password").fill(password);
+    await page.getByRole("button", { name: messages.auth.signinSubmit }).click();
+    await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    await page.getByTestId("tab-me").click();
+    await expect(page).toHaveURL(/\/app\/me$/);
+  };
+  // 150 days: two batches of check-ins.
+  const days = Array.from({ length: 150 }, (_, i) => new Date(Date.UTC(2025, 0, 1 + i)).toISOString().slice(0, 10));
+  const file = { name: "export.csv", mimeType: "text/csv", buffer: Buffer.from(`date,mood\n${days.map((d) => `${d},4`).join("\n")}\n`) };
+  const held = (page: Page) => page.getByTestId("import-file").evaluate((el) => (el as HTMLInputElement).files?.length ?? -1);
+
+  test("stopped partway: the same file can be chosen again, without a reload, and finishes", async ({ page }) => {
+    const email = newEmail();
+    const password = newPassword();
+    try {
+      await signedIn(page, email, password);
+      // The counts and the first batch go through; the second doesn't.
+      let posts = 0;
+      await page.route("**/app/me", async (route) => {
+        if (route.request().method() === "POST" && ++posts > 2) await route.abort();
+        else await route.continue();
+      });
+      await page.getByTestId("import-file").setInputFiles(file);
+      await page.getByTestId("import-confirm").click();
+      await expect(page.getByTestId("import-failed")).toContainText(messages.me.importStopped, { timeout: 60_000 });
+      await page.unroute("**/app/me");
+
+      // What makes a browser fire for the same file again.
+      expect(await held(page)).toBe(0);
+      await page.getByTestId("import-file").setInputFiles(file);
+      await page.getByTestId("import-confirm").click();
+      await expect(page.getByTestId("import-done")).toBeVisible({ timeout: 90_000 });
+      expect(await held(page)).toBe(0);
+    } finally {
+      await cleanup(email);
+    }
+  });
+
+  test("a file it couldn't read, and Cancel: the same file can be chosen again", async ({ page }) => {
+    const email = newEmail();
+    const password = newPassword();
+    try {
+      await signedIn(page, email, password);
+      await page.getByTestId("import-file").setInputFiles({ name: "bad.csv", mimeType: "text/csv", buffer: Buffer.from("not,a,journal\n") });
+      await expect(page.getByTestId("import-error")).toBeVisible();
+      expect(await held(page)).toBe(0);
+      await page.getByTestId("import-file").setInputFiles(file);
+      await expect(page.getByTestId("import-confirm")).toBeVisible();
+      await page.getByTestId("import-cancel").click();
+      expect(await held(page)).toBe(0);
+    } finally {
+      await cleanup(email);
+    }
+  });
+});
+
 // Inside the journal the saved language wins, if it's offered (row RT4). Each
 // one asserts Today's content and that the page has stopped moving: an address
 // alone was right on the blank page (#173).
@@ -685,4 +752,46 @@ test.describe("the saved language in the journal", () => {
       await cleanup(email);
     }
   });
+});
+
+// The longest words we have, at the narrowest phones: whole words in the tab
+// bar, in every language, with nothing scrolling sideways (Web Tester, #178).
+test.describe("the tab bar in every language", () => {
+  for (const width of [320, 390]) {
+    test(`${width} px: no label breaks inside a word`, async ({ page }) => {
+      const email = newEmail();
+      const password = newPassword();
+      try {
+        await signedUpUnconfirmed(email, password);
+        await confirmEmail(email);
+        await page.goto("/sign-in");
+        await page.getByLabel("Email").fill(email);
+        await page.getByLabel("Password").fill(password);
+        await page.getByRole("button", { name: messages.auth.signinSubmit }).click();
+        await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+        await page.getByTestId("setup-done").click();
+        await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+        await page.setViewportSize({ width, height: 800 });
+        for (const [route, saved] of [["", "en"], ["/th", "th"], ["/fr", "fr"], ["/es", "es"], ["/pt-br", "pt"], ["/de", "de"], ["/it", "it"]]) {
+          await setProfileLocale(email, password, saved);
+          await page.goto(`${route}/app`);
+          await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+          // A label's lines: one per word at most; a broken word adds one.
+          const labels = await page.locator('a[data-testid^="tab-"] > span:last-child').evaluateAll((spans) =>
+            spans.filter((span) => getComputedStyle(span).display !== "none").map((span) => {
+              const range = document.createRange();
+              range.selectNodeContents(span);
+              const tops = new Set([...range.getClientRects()].map((r) => Math.round(r.top)));
+              return { text: span.textContent ?? "", lines: tops.size };
+            }),
+          );
+          expect(labels, route).toHaveLength(4);
+          for (const { text, lines } of labels) expect(lines, `${route || "/en"}: ${text}`).toBeLessThanOrEqual(text.trim().split(/\s+/).length);
+          expect(await page.evaluate(() => document.documentElement.scrollWidth), route).toBeLessThanOrEqual(width);
+        }
+      } finally {
+        await cleanup(email);
+      }
+    });
+  }
 });

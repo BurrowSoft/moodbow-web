@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { goToLanguage } from "@/lib/savedLanguage";
 import { saveRegion, type AiSaveResult, type RegionField } from "./actions";
+import { useUntilLoaded } from "@/lib/ui/untilLoaded";
 
 type Values = Record<RegionField, string>;
 
@@ -18,6 +19,7 @@ type Values = Record<RegionField, string>;
 // Intl names, sort order and zone list can differ (Safari), which would
 // make the <option>s differ from the server HTML (reviewer #36).
 export function LanguageRegion({ initial, countries, zones, languages }: { initial: Values; countries: [string, string][]; zones: string[]; languages: [string, string][] }) {
+  const untilLoaded = useUntilLoaded();
   const t = useTranslations("me");
   const ta = useTranslations("app");
   const tt = useTranslations("today");
@@ -54,7 +56,7 @@ export function LanguageRegion({ initial, countries, zones, languages }: { initi
   const select = "mt-2 block w-full rounded-2xl border border-border bg-bg px-4 py-3 text-text disabled:opacity-50";
 
   return (
-    <section aria-labelledby="me-region" className="rounded-3xl border border-border bg-surface p-6" aria-busy={pending}>
+    <section {...untilLoaded} aria-labelledby="me-region" className="rounded-3xl border border-border bg-surface p-6" aria-busy={pending}>
       <h2 id="me-region" className="text-lg font-medium text-text">
         {t("meLanguageRegion")}
       </h2>

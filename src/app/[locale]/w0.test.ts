@@ -73,9 +73,21 @@ describe("signIn", () => {
     expect(auth.resend).not.toHaveBeenCalled();
   });
 
-  it("fails closed without Supabase config", async () => {
+  it("an Auth answer it can't name: the generic error, and its kind in the log, without the address or password", async () => {
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    auth.signInWithPassword.mockResolvedValueOnce({ error: { name: "AuthApiError", status: 401, message: "Invalid API key" } });
+    expect(await signIn(idle, form({ email: "a@b.co", password: "secret-123" }))).toMatchObject({ status: "error", error: "generic" });
+    expect(log).toHaveBeenCalledWith("auth failure: sign-in", { name: "AuthApiError", status: 401, code: undefined });
+    expect(JSON.stringify(log.mock.calls)).not.toMatch(/a@b\.co|secret-123/);
+    log.mockRestore();
+  });
+
+  it("fails closed without Supabase config, and the log says so", async () => {
     configured = false;
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
     expect(await signIn(idle, form({ email: "a@b.co", password: "x" }))).toMatchObject({ status: "error", error: "generic" });
+    expect(log).toHaveBeenCalledWith("auth failure: sign-in", { name: "no_config", status: undefined, code: undefined });
+    log.mockRestore();
   });
 });
 

@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { Link, usePathname } from "@/i18n/navigation";
 import { originOf, originTab } from "@/lib/journal/origin";
 import { Logo } from "@/components/Logo";
-import { TAB_ITEM, TAB_LABEL, TAB_LINK_NARROW } from "@/lib/ui/journalLayout";
+import { TAB_COLUMNS, TAB_ITEM, TAB_LABEL, TAB_LINK_NARROW } from "@/lib/ui/journalLayout";
 import { useKeyboardOpen } from "@/lib/ui/keyboardOpen";
 
 // The web journal's tabs, the same four as the app (Today · Timeline ·
@@ -52,7 +52,7 @@ export function AppNav() {
           <Logo variant="horizontal" width={130} alt="" />
         </Link>
       </div>
-      <ul className="grid grid-cols-4 md:flex md:flex-col md:gap-1">
+      <ul className={`grid ${TAB_COLUMNS} md:flex md:flex-col md:gap-1`}>
         {TABS.map((tab) => {
           const active = isActive(tab.href);
           return (

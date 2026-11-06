@@ -32,6 +32,11 @@ export const PRIMARY_SAVE =
 // A bottom-bar tab: a grid cell that may shrink below its label's width
 // (min-w-0), so at 200% zoom the four labels wrap instead of overlapping.
 export const TAB_ITEM = "min-w-0";
+// Each column as wide as its label wants, the rest shared out, and narrower only
+// when the row truly has no room: a long word ("Chronologie") stays whole next
+// to a short one ("Moi"), and four equal columns would break it. No string or
+// font changes for this (UX).
+export const TAB_COLUMNS = "grid-cols-[repeat(4,minmax(0,auto))]";
 export const TAB_LINK_NARROW = "px-1 min-[360px]:px-3 text-center leading-tight [overflow-wrap:anywhere]";
 // Under 240 CSS px (200%+ zoom on a phone) the labels can't fit without
 // breaking mid-word: icons only, each label kept as screen-reader text (the
