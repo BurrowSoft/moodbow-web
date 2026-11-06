@@ -79,8 +79,8 @@ describe("th.json", () => {
   });
 
   it("isn't offered yet: English only until a native speaker has read it (thai-offered-live)", () => {
-    expect(offeredLocales()).toEqual(["en"]);
+    expect(offeredLocales()).not.toContain("th");
     // This test build isn't a draft build either, so /th isn't served here.
-    expect(routing.locales).toEqual(["en"]);
+    expect(routing.locales).not.toContain("th");
   });
 });

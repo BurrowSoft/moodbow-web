@@ -116,27 +116,31 @@ test.describe("home", () => {
   });
 });
 
-// Thai (1.1 F) behind thai-offered-live, unmet: this CI build is a draft
-// build (NEXT_PUBLIC_SHOW_DRAFTS=1), so /th is served there to be read,
-// but it isn't offered (Production: a 404, see the unit tests).
-test.describe("language: Thai is a draft, not offered (thai-offered-live)", () => {
-  test("a Thai browser stays on English at /, and there is no language switcher", async ({ browser }) => {
-    const context = await browser.newContext({ locale: "th-TH" });
+// French, Spanish and Portuguese are offered. Thai, behind thai-offered-live,
+// is unmet: this CI build is a draft build (NEXT_PUBLIC_SHOW_DRAFTS=1), so /th
+// is served there to be read, but it isn't offered (Production: a 404, see the
+// unit tests).
+test.describe("language: the offered ones, and Thai as a draft (thai-offered-live)", () => {
+  test("a French browser lands on French; the switcher lists what's offered, not the drafts", async ({ browser }) => {
+    const context = await browser.newContext({ locale: "fr-FR" });
     const page = await context.newPage();
     await page.goto("/");
-    await expect(page).toHaveURL(/\/$/);
-    await expect(page.locator("html")).toHaveAttribute("lang", "en");
-    await expect(page.getByRole("navigation", { name: "Language" })).toHaveCount(0);
+    await expect(page).toHaveURL(/\/fr$/);
+    await expect(page.locator("html")).toHaveAttribute("lang", "fr");
+    const switcher = page.locator('footer nav [lang]');
+    await expect(switcher).toHaveCount(4);
+    await expect(page.locator('footer nav [lang="th"]')).toHaveCount(0);
     await context.close();
   });
 
-  test("/th: the home page in Thai, no switcher, no hreflang to it", async ({ page }) => {
+  test("/th: the home page in Thai, not in the switcher, no hreflang to it", async ({ page }) => {
     const res = await page.goto("/th");
     expect(res?.status()).toBe(200);
     await expect(page.locator("html")).toHaveAttribute("lang", "th");
-    await expect(page.getByRole("navigation", { name: "ภาษา" })).toHaveCount(0);
+    await expect(page.locator('footer nav [lang="th"]')).toHaveCount(0);
     await page.goto("/");
     await expect(page.locator('link[rel="alternate"][hreflang="th"]')).toHaveCount(0);
+    await expect(page.locator('link[rel="alternate"][hreflang="fr"]')).toHaveCount(1);
   });
 
   test("/help/backing-up: the steps keep their numbers (an ol in help or legal text)", async ({ page }) => {

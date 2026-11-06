@@ -26,7 +26,7 @@ const others = ALL_LOCALES.filter((l): l is Exclude<Locale, "en"> => l !== "en")
 // Which languages this build serves: each once its gate is met, or as a draft
 // on a test build (pageGate), so it can be read before the flip.
 export function servedLocales(build?: BuildEnv, met: (id: OfferGate) => boolean = conditionMet): Locale[] {
-  return ["en", ...others.filter((l) => met(OFFER_GATE[l]) || pageGate(OFFER_GATE[l], build) === "draft")];
+  return ["en", ...others.filter((l) => pageGate(OFFER_GATE[l], build, () => met(OFFER_GATE[l])) !== "hidden")];
 }
 
 // Which languages are offered: the switcher, Me → Language, hreflang and the
@@ -48,7 +48,7 @@ export const routing = defineRouting({
   defaultLocale: "en",
   localePrefix: "as-needed",
   // Matching a first visit to the browser's language only once a language is
-  // offered: a Thai browser on a Preview stays on English at / (a draft is
-  // reached by its address).
+  // offered. It matches what this build serves: on Production that's the offered
+  // languages; on a test build, a Thai browser also lands on the draft /th.
   localeDetection: offeredLocales().length > 1,
 });
