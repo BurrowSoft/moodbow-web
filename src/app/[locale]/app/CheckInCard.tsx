@@ -564,7 +564,7 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
       return { ...f, sleepHours: String(next) };
     });
   const chip = (active: boolean) =>
-    `inline-flex min-h-12 items-center justify-center gap-2 rounded-full border px-4 text-sm font-medium ${active ? "border-accent bg-pill text-accent" : "border-border text-text hover:bg-pill"}`;
+    `inline-flex min-h-12 max-w-full items-center justify-center gap-2 rounded-full border px-4 text-center text-sm font-medium [overflow-wrap:anywhere] ${active ? "border-accent bg-pill text-accent" : "border-border text-text hover:bg-pill"}`;
   const errorKey = storageFailed
     ? "errGeneric"
     : state.status === "error"
@@ -642,7 +642,7 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
         {/* The mockups (decision 161): the mood's face and its name, Edit on
             the right. The heading still says what it answers, for screen
             readers ("How are you today? Good"). */}
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <h2
             tabIndex={-1}
             aria-labelledby={`${moodTitle}-q ${moodTitle}-a`}
@@ -655,7 +655,7 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
             </span>
             <span id={`${moodTitle}-a`}>{t(`mood${mood}` as "mood1")}</span>
           </h2>
-          <button type="button" data-testid="checkin-edit" onClick={() => setEditing(true)} className="min-h-11 font-medium text-accent underline underline-offset-4">
+          <button type="button" data-testid="checkin-edit" onClick={() => setEditing(true)} className="min-h-11 max-w-full font-medium text-accent underline underline-offset-4 [overflow-wrap:anywhere]">
             {t("checkinEdit")}
           </button>
         </div>

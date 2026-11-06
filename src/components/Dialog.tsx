@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 // A small modal dialog: a title, a body and a row of actions. Client-only:
@@ -9,6 +9,9 @@ import { createPortal } from "react-dom";
 // into it when it opens (to the first action, or the last one: the safe
 // choice, never a destructive one), stays inside it (Tab wraps) and returns
 // to where it was when it closes; Escape is the same as the cancel action.
+// Taller than the window (large text): it opens at its top, with focus on the
+// title, not scrolled down to a button past the title and warning, and a fade at
+// the bottom shows there's more. Nothing here limits touch or keyboard scrolling.
 export function Dialog({
   title,
   body,
@@ -17,6 +20,7 @@ export function Dialog({
   children,
   testId,
   initialFocus = "first",
+  capText = false,
 }: {
   title: string;
   body?: string;
@@ -27,10 +31,24 @@ export function Dialog({
   testId?: string;
   // "title": focus the heading itself (the safety card, decision 124).
   initialFocus?: "first" | "last" | "title";
+  // Text capped to the screen's width, below the reader's own setting at large text
+  // on a narrow screen. The safety card only (UX & PM 2026-11-06): reaching help
+  // justifies it there, and other dialogs open at their top and scroll.
+  capText?: boolean;
 }) {
   const titleId = useId();
   const bodyId = useId();
   const ref = useRef<HTMLDivElement>(null);
+  const [tall, setTall] = useState(false);
+
+  useEffect(() => {
+    const dialog = ref.current;
+    if (!dialog) return;
+    const measure = () => setTall(dialog.scrollHeight > dialog.clientHeight);
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, []);
 
   useEffect(() => {
     const previous = document.activeElement as HTMLElement | null;
@@ -40,8 +58,11 @@ export function Dialog({
     const focusable = () =>
       Array.from(ref.current?.querySelectorAll<HTMLElement>("button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), a[href]") ?? []);
     const start = buttons();
-    if (initialFocus === "title") ref.current?.querySelector<HTMLElement>("h2")?.focus();
-    else (initialFocus === "last" ? start[start.length - 1] : start[0])?.focus();
+    const dialog = ref.current;
+    if (initialFocus === "title" || (dialog && dialog.scrollHeight > dialog.clientHeight)) {
+      dialog?.querySelector<HTMLElement>("h2")?.focus();
+      if (dialog) dialog.scrollTop = 0;
+    } else (initialFocus === "last" ? start[start.length - 1] : start[0])?.focus();
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") return onCancel();
       if (e.key !== "Tab") return;
@@ -74,7 +95,7 @@ export function Dialog({
   }, [onCancel, initialFocus]);
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-[16px] sm:items-center">
       <div
         ref={ref}
         role="dialog"
@@ -82,18 +103,19 @@ export function Dialog({
         aria-labelledby={titleId}
         aria-describedby={body ? bodyId : undefined}
         data-testid={testId}
-        className="w-full max-w-md rounded-3xl bg-surface p-6 shadow-xl"
+        className={`max-h-full w-full max-w-md overflow-y-auto overscroll-contain rounded-3xl bg-surface p-[24px] shadow-xl ${capText ? "leading-normal [font-size:min(1rem,max(8vw,16px))]" : ""}`}
       >
-        <h2 id={titleId} tabIndex={initialFocus === "title" ? -1 : undefined} className="text-lg font-medium text-text outline-none">
+        <h2 id={titleId} tabIndex={-1} className={`font-medium text-text outline-none ${capText ? "leading-tight [font-size:min(1.125rem,max(8vw,18px))]" : "text-lg"}`}>
           {title}
         </h2>
         {body && (
-          <p id={bodyId} className="mt-2 text-muted">
+          <p id={bodyId} className="mt-[8px] text-muted">
             {body}
           </p>
         )}
-        {details && <div className="mt-4">{details}</div>}
-        <div className="mt-6 flex flex-wrap justify-end gap-3">{children}</div>
+        {details && <div className="mt-[16px]">{details}</div>}
+        <div className="mt-[24px] flex flex-wrap justify-end gap-[12px]">{children}</div>
+        {tall && <div aria-hidden="true" data-testid="dialog-more" className="pointer-events-none sticky -bottom-[24px] -mx-[24px] -mb-[24px] mt-[8px] h-[40px] bg-gradient-to-t from-surface to-transparent" />}
       </div>
     </div>,
     document.body,
@@ -101,6 +123,6 @@ export function Dialog({
 }
 
 export const dialogButton = (primary = false) =>
-  `inline-flex min-h-11 max-w-full items-center justify-center rounded-full px-5 text-center font-medium [overflow-wrap:anywhere] ${
+  `inline-flex min-h-11 max-w-full items-center justify-center rounded-full px-[20px] text-center font-medium hyphens-auto [overflow-wrap:anywhere] ${
     primary ? "bg-accent text-on-accent hover:bg-accent-hover" : "border border-border text-text hover:bg-pill"
   }`;

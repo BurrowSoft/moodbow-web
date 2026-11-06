@@ -25,7 +25,7 @@ export function SavedLanguageRedirect({ locale }: { locale: string }) {
       {/* A plain link, a full page load, always with the language in the
           address (/en/app too): the proxy then sets the cookie itself, which a
           script couldn't, and an unprefixed /app would be sent straight back. */}
-      <a href={`/${locale}${pathname}${query ? `?${query}` : ""}`} lang={locale} data-testid="saved-language-link" className="inline-flex min-h-12 items-center px-3 font-medium text-accent underline underline-offset-4">
+      <a href={`/${locale}${pathname}${query ? `?${query}` : ""}`} lang={locale} data-testid="saved-language-link" data-after-wait className="inline-flex min-h-12 items-center px-3 font-medium text-accent underline underline-offset-4">
         {t(`languageNames.${locale}` as "languageNames.en")}
       </a>
     </main>

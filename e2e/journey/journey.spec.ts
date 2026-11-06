@@ -734,6 +734,8 @@ test.describe("the saved language in the journal", () => {
       // Setup follows the saved language too, so that's where it stops now.
       await expect(page.getByTestId("saved-language-link")).toBeVisible({ timeout: 20_000 });
       await settled(page, "/fr/setup", "fr");
+      // Held back for 2 s on the way; here it must really show, reduced motion or not.
+      await expect(page.getByTestId("saved-language-link")).toHaveCSS("opacity", "1");
       // The link gets them there: the server sets the cookie on that load.
       await page.getByTestId("saved-language-link").click();
       await settled(page, "/setup", "en");
@@ -950,6 +952,54 @@ test.describe("the tab bar in every language", () => {
 
       await setProfileLocale(email, password, "en");
       await page.setViewportSize({ width: 320, height: 800 });
+
+      // The safety card at the largest text: Close is a button to tap, not a
+      // column of letters, and it closes.
+      await textAt(300);
+      await page.setViewportSize({ width: 320, height: 640 });
+      for (const [route, saved] of [["", "en"], ["/fr", "fr"], ["/es", "es"], ["/pt-br", "pt"]]) {
+        await setProfileLocale(email, password, saved);
+        await page.goto(`${route}/app/me`);
+        await page.getByTestId("me-get-help").click();
+        // Taller than the window: it opens at its top, with a fade showing there's
+        // more, and the first help line starts on the first screen.
+        const card = page.getByTestId("safety-card");
+        await expect(card.getByRole("heading", { level: 2 })).toBeInViewport();
+        await expect(card.getByTestId("dialog-more")).toBeVisible();
+        expect(await card.evaluate((el) => el.scrollTop), "opens at its top").toBe(0);
+        const firstHelp = await card.locator("a").first().evaluate((a) => a.getBoundingClientRect().top);
+        expect(firstHelp, `the first help line starts on the first screen, ${route || "/en"}`).toBeLessThan(640);
+        const close = page.getByTestId("safety-close");
+        await close.scrollIntoViewIfNeeded();
+        await expect(close, route || "/en").toBeInViewport();
+        const lines = await close.evaluate((button) => {
+          const range = document.createRange();
+          range.selectNodeContents(button);
+          return new Set([...range.getClientRects()].map((r) => Math.round(r.top))).size;
+        });
+        expect(lines, `Close's lines, ${route || "/en"}`).toBe(1);
+        await close.click();
+        await expect(page.getByTestId("safety-card"), route || "/en").toHaveCount(0);
+      }
+      await setProfileLocale(email, password, "en");
+      await page.setViewportSize({ width: 320, height: 800 });
+
+      // The delete dialog: its title and warning first, not scrolled down to a button.
+      await page.goto("/app/me");
+      await page.getByTestId("me-delete").click();
+      const deleting = page.getByTestId("delete-dialog");
+      await expect(deleting.getByRole("heading", { level: 2 })).toBeInViewport();
+      expect(await deleting.evaluate((el) => el.scrollTop), "the delete dialog opens at its top").toBe(0);
+      await page.keyboard.press("Escape");
+      await expect(deleting).toHaveCount(0);
+
+      // Today's check-in once a mood is picked, where its details open.
+      await textAt(200);
+      await page.goto("/app");
+      await page.getByTestId("checkin-mood-3").click();
+      await expect(page.getByTestId("checkin-sleep-quality-good")).toBeVisible();
+      expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth), "Today's details at 200%").toBeLessThanOrEqual(0);
+
       for (const percent of [200, 300]) {
         await textAt(percent);
         for (const path of ["/app", "/app/timeline", "/app/insights", "/app/me", "/app/write"]) {
