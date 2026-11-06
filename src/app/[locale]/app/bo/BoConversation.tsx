@@ -14,6 +14,9 @@ import { useKeyboardOpen } from "@/lib/ui/keyboardOpen";
 import { PRIMARY_SAVE } from "@/lib/ui/journalLayout";
 
 const BO_HEADER_MOST = 0.25;
+// The usual save button, whose height doesn't grow with the text: at 300 % it took a quarter of
+// a phone's window, and pushed a failed send's line out of view.
+const BO_SEND = `${PRIMARY_SAVE} !min-h-[48px] !py-[8px] !px-[24px]`;
 // Beside the box while a phone's keyboard is up, so the row, the box and Send all fit in what's
 // left of the window, at 300 % too: the text is capped and the height doesn't grow with it.
 const BO_TYPING_SEND = "inline-flex min-h-[48px] max-w-[45%] shrink-0 items-center justify-center rounded-full bg-accent px-[12px] text-center font-medium text-on-accent [font-size:min(1rem,max(8vw,16px))] [overflow-wrap:anywhere] hover:bg-accent-hover disabled:opacity-50";
@@ -279,9 +282,9 @@ export function BoConversation({ initial, country, back, healthData = false, con
       )}
       {(problem || tooLong) && (
         <div role="alert" data-testid="bo-problem" className="flex flex-col items-start gap-2">
-          <p className="text-text">{t(tooLong ? "tooLong" : BO_ERROR_TEXT[problem as BoProblem])}</p>
+          <p className={`text-text ${BO_END_TEXT}`}>{t(tooLong ? "tooLong" : BO_ERROR_TEXT[problem as BoProblem])}</p>
           {problem && RETRY.includes(problem) && !tooLong && (
-            <button type="button" data-testid="bo-retry" disabled={sending} onClick={retry} className="inline-flex min-h-12 items-center rounded-full px-[12px] font-medium text-accent underline underline-offset-4">
+            <button type="button" data-testid="bo-retry" disabled={sending} onClick={retry} className={`inline-flex min-h-[44px] items-center rounded-full px-[12px] font-medium text-accent underline underline-offset-4 ${BO_END_TEXT}`}>
               {t("tryAgain")}
             </button>
           )}
@@ -315,7 +318,7 @@ export function BoConversation({ initial, country, back, healthData = false, con
             onChange={(e) => change(e.target.value)}
             className={`w-full resize-none overflow-y-auto rounded-2xl border border-border bg-surface p-[12px] text-text ${keyboard ? "max-h-[96px] min-w-0 flex-1 basis-0" : "max-h-[160px]"}`}
           />
-          <button type="submit" data-testid="bo-send" disabled={!canSend} className={keyboard ? BO_TYPING_SEND : PRIMARY_SAVE}>
+          <button type="submit" data-testid="bo-send" disabled={!canSend} className={keyboard ? BO_TYPING_SEND : BO_SEND}>
             {t("send")}
           </button>
         </form>
