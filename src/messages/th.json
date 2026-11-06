@@ -557,5 +557,8 @@
     "safetyCallEmergency": "โทรหมายเลขฉุกเฉิน {number}",
     "safetyClose": "ปิด",
     "safetyNotTherapy": "Moodbow ไม่สามารถทดแทนความช่วยเหลือจากผู้เชี่ยวชาญได้"
+  },
+  "bo": {
+    "boButton": "คุยกับ Bo"
   }
 }

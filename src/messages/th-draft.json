@@ -953,5 +953,10 @@
     "key": "me.deleteBody",
     "en": "This deletes everything in your account, including your entries, check-ins and settings, right away. It can't be undone.",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.boButton",
+    "en": "Talk to Bo",
+    "reason": "UX draft (native read pending)"
   }
 ]

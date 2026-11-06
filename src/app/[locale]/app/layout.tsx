@@ -13,7 +13,9 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { JournalUnavailable } from "@/components/JournalUnavailable";
 import { isAuthOutage } from "@/lib/supabase/proxy";
 import { AnnouncerProvider } from "./Announcer";
+import { headers } from "next/headers";
 import { AppNav } from "./AppNav";
+import { BoButton } from "./BoButton";
 import { CheckInDraftProvider } from "./CheckInDraft";
 import { KeyboardShortcuts } from "./KeyboardShortcuts";
 import { NavProgress } from "@/components/NavProgress";
@@ -50,12 +52,22 @@ export default async function AppLayout({ children, params }: LayoutProps<"/[loc
   const language = savedLanguageRoute(me.profile?.locale, locale, offeredLocales());
   if (language) return <SavedLanguageRedirect locale={language} />;
 
+  // Bo's button: where bo-live is on, and the country is on Bo's list or this person
+  // is exempt. It only decides whether the button shows; the function decides
+  // whether Bo opens, from a signed token. A failed read: no button.
+  let boVisible = false;
+  if (pageGate("bo-live") !== "hidden") {
+    const { data: visible } = await supabase.rpc("bo_visible", { p_country: (await headers()).get("x-vercel-ip-country") });
+    boVisible = visible === true;
+  }
+
   // The journal's client components get every message (the root layout sends
   // only the public namespaces, perf fix 3).
   return (
     <NextIntlClientProvider messages={await getMessages()}>
       <div className="flex flex-1 flex-col md:flex-row">
         {/* It reads the search params: its own Suspense boundary. */}
+        {boVisible && <BoButton />}
         <Suspense fallback={null}>
           <NavProgress />
         </Suspense>

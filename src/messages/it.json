@@ -557,5 +557,8 @@
     "safetyCallEmergency": "Chiama il numero di emergenza {number}",
     "safetyClose": "Chiudi",
     "safetyNotTherapy": "Moodbow non sostituisce l'aiuto di un professionista."
+  },
+  "bo": {
+    "boButton": "Parla con Bo"
   }
 }
