@@ -102,6 +102,26 @@ export async function setProfileLocale(email: string, password: string, locale: 
   if (error) throw new Error(`saving the language failed: ${error.message}`);
 }
 
+// Bo's switch, as the account has it: a granted AI consent (which clears bo_off), and
+// what get_me says.
+async function signedInAs(email: string, password: string): Promise<SupabaseClient> {
+  const user = createClient(URL_, PUBLISHABLE, { auth: { persistSession: false, autoRefreshToken: false } });
+  const { error } = await user.auth.signInWithPassword({ email, password });
+  if (error) throw new Error(`sign-in failed: ${error.message}`);
+  return user;
+}
+
+export async function grantAiConsent(email: string, password: string): Promise<void> {
+  const { error } = await (await signedInAs(email, password)).rpc("record_consents", { p_items: [consentItem("ai", true)] });
+  if (error) throw new Error(`granting the AI consent failed: ${error.message}`);
+}
+
+export async function boOff(email: string, password: string): Promise<boolean> {
+  const { data, error } = await (await signedInAs(email, password)).rpc("get_me");
+  if (error) throw new Error(`get_me failed: ${error.message}`);
+  return (data as { settings?: { bo_off?: boolean } }).settings?.bo_off === true;
+}
+
 // The Monday of the person's last complete week, in their saved time zone, and a
 // week's check-ins for it (Your week): the form would take a week of real days.
 // offsets: days after that Monday. Replaces any on those days.

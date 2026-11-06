@@ -3,7 +3,7 @@ import { expect, test, type Frame, type Page, type Request } from "@playwright/t
 import conditions from "../../content/conditions.json";
 import messages from "../../src/messages/en.json";
 import fr from "../../src/messages/fr.json";
-import { aiAvailable, cleanup, configured, confirmEmail, createConfirmedUser, exists, lastWeekMonday, seedCheckIns, newEmail, newPassword, notConfigured, profileLocale, revokeSessions, setProfileLocale, signedUpUnconfirmed, sweep } from "./staging";
+import { aiAvailable, boOff, cleanup, grantAiConsent, configured, confirmEmail, createConfirmedUser, exists, lastWeekMonday, seedCheckIns, newEmail, newPassword, notConfigured, profileLocale, revokeSessions, setProfileLocale, signedUpUnconfirmed, sweep } from "./staging";
 
 // The launch-critical journeys (1.0), end to end against staging with a
 // throwaway account each: sign-up → confirm → consent → setup → check-in →
@@ -1088,4 +1088,38 @@ test.describe("the tab bar in every language", () => {
       await cleanup(email);
     }
   });
+});
+
+// The first of Bo's web against the real database (app's migration 018 on staging). The
+// function isn't there yet, so this stops at Me.
+test("Me → Use Bo off: bo_off is set, the switch goes, the conversation row stays; a granted consent clears it", async ({ page }) => {
+  const email = newEmail();
+  const password = newPassword();
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await grantAiConsent(email, password);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    await page.goto("/app/me");
+    const use = page.getByTestId("me-bo-use");
+    await expect(use).toBeChecked();
+    await expect(page.getByTestId("me-bo-journal-note")).toBeVisible();
+    expect(await boOff(email, password)).toBe(false);
+    await use.click();
+    await expect(page.getByTestId("me-bo-journal")).toHaveCount(0);
+    expect(await boOff(email, password)).toBe(true);
+    await page.reload();
+    await expect(page.getByTestId("me-bo")).toBeVisible();
+    await expect(page.getByTestId("me-bo-journal")).toHaveCount(0);
+    await grantAiConsent(email, password);
+    expect(await boOff(email, password)).toBe(false);
+  } finally {
+    await cleanup(email);
+  }
 });
