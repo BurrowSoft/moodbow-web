@@ -19,10 +19,10 @@ export function LanguageSwitcher() {
   if (pathname === "/app" || pathname.startsWith("/app/")) return null;
 
   return (
-    <nav data-language-switcher aria-label={t("language")} className="flex flex-wrap items-center justify-center gap-1">
+    <nav data-language-switcher aria-label={t("language")} className="flex max-w-full flex-wrap items-center justify-center gap-1">
       {locales.map((l) =>
         l === locale ? (
-          <span key={l} aria-current="true" lang={l} className="inline-flex min-h-12 items-center px-3 font-medium text-text">
+          <span key={l} aria-current="true" lang={l} className="inline-flex min-h-12 max-w-full items-center px-[12px] font-medium text-text">
             {t(`languageNames.${l}`)}
           </span>
         ) : (
@@ -32,7 +32,7 @@ export function LanguageSwitcher() {
             locale={l}
             lang={l}
             hrefLang={l}
-            className="inline-flex min-h-12 items-center rounded-full px-3 font-medium text-accent underline-offset-4 hover:underline"
+            className="inline-flex min-h-12 max-w-full items-center rounded-full px-[12px] font-medium text-accent underline-offset-4 hover:underline"
           >
             {t(`languageNames.${l}`)}
           </Link>

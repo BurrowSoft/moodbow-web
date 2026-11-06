@@ -7,7 +7,7 @@ import { LanguageSwitcher } from "./LanguageSwitcher";
 import { TryAppButton } from "./TryAppButton";
 
 const linkClass =
-  "inline-flex min-h-12 max-w-full items-center rounded-full px-3 font-medium text-accent underline-offset-4 [overflow-wrap:anywhere] hover:underline";
+  "inline-flex min-h-12 max-w-full items-center rounded-full px-[12px] font-medium text-accent underline-offset-4 hover:underline";
 
 export async function Footer() {
   const t = await getTranslations("common");
@@ -24,10 +24,12 @@ export async function Footer() {
   ] as const;
 
   return (
-    <footer className="px-6 pb-6 pt-10 text-sm text-muted print:hidden">
+    // Px sides, and long words may break: rem would triple at 300 % text and push the
+    // links past a 320 px phone. overflow-wrap and hyphens reach everything inside.
+    <footer className="px-[24px] pb-6 pt-10 text-sm text-muted hyphens-auto [overflow-wrap:anywhere] print:hidden">
       <div className="mx-auto flex max-w-3xl flex-col items-center gap-2">
         <TryAppButton journal={pageGate("web-journal-live") !== "hidden"} stores={liveStores()} />
-        <nav aria-label={t("siteLinks")} className="flex flex-wrap items-center justify-center gap-x-1">
+        <nav aria-label={t("siteLinks")} className="flex max-w-full flex-wrap items-center justify-center gap-x-1">
           {links
             .filter((l) => l.show)
             .map((l) => (
@@ -37,12 +39,12 @@ export async function Footer() {
             ))}
         </nav>
         <LanguageSwitcher />
-        <p className="flex flex-wrap items-center justify-center gap-x-1">
+        <p className="flex max-w-full flex-wrap items-center justify-center gap-x-1">
           <a href={BURROWSOFT_URL} aria-label={t("burrowsoftAria")} className={linkClass}>
             {t("burrowsoftProduct")}
           </a>
           <span aria-hidden="true" className="hidden sm:inline">·</span>
-          <span className="px-3">{t("copyright")}</span>
+          <span className="max-w-full px-[12px]">{t("copyright")}</span>
         </p>
       </div>
     </footer>
