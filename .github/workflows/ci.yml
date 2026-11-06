@@ -80,7 +80,9 @@ jobs:
     if: github.event_name == 'pull_request'
     environment: staging
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # Installing the browser has taken 10 minutes on recent runs, leaving under 5
+    # for 4 minutes of journeys.
+    timeout-minutes: 20
     steps:
       - id: cfg
         env:

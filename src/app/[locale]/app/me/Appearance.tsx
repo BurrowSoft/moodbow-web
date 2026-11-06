@@ -47,7 +47,7 @@ export function Appearance({ shortcuts = false }: { shortcuts?: boolean }) {
   };
   return (
     <section {...untilLoaded} aria-labelledby="me-appearance" className="rounded-3xl border border-border bg-surface p-6">
-      <fieldset>
+      <fieldset className="min-w-0">
         <legend id="me-appearance" className="text-lg font-medium text-text">
           {t("meAppearance")}
         </legend>

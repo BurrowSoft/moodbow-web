@@ -92,7 +92,7 @@ export function InsightsView({
 
       {week}
 
-      <div className="mt-8 grid gap-6 sm:grid-cols-2">
+      <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2">
         {METRICS.map((metric) => {
           const chart = CHARTS[metric];
           const s = summarize(rows, today, range, metric);
