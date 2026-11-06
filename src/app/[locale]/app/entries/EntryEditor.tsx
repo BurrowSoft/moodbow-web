@@ -560,6 +560,8 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
           id="entry-date"
           data-testid="entry-date"
           type="date"
+          // As the text: a restored date would save the entry on the wrong day.
+          autoComplete="off"
           max={today}
           aria-invalid={future || undefined}
           aria-describedby={future ? "entry-error" : undefined}
@@ -585,6 +587,9 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
       <textarea
         id="entry-text"
         data-testid="entry-text"
+        // A browser's restored text on reload must not count as typed
+        // (lib/journal/typedBeforeLoad.ts): the draft is what's kept.
+        autoComplete="off"
         value={fields.body}
         onChange={(e) => setFields((f) => ({ ...f, body: e.target.value }))}
         placeholder={t("entryPlaceholder")}

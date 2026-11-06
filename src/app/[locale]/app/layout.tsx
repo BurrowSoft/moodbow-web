@@ -5,6 +5,8 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 import { redirect } from "@/i18n/navigation";
+import { offeredLocales } from "@/i18n/routing";
+import { savedLanguageRoute } from "@/lib/savedLanguage";
 import { pageGate } from "@/lib/conditions";
 import { getMe, onboardingStep } from "@/lib/journal/me";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -15,6 +17,7 @@ import { AppNav } from "./AppNav";
 import { CheckInDraftProvider } from "./CheckInDraft";
 import { KeyboardShortcuts } from "./KeyboardShortcuts";
 import { NavProgress } from "@/components/NavProgress";
+import { SavedLanguageRedirect } from "./SavedLanguageRedirect";
 import { APP_MAIN_GUTTER } from "@/lib/ui/journalLayout";
 
 // The signed-in web journal. Behind web-journal-live: the proxy 404s /app on
@@ -43,6 +46,9 @@ export default async function AppLayout({ children, params }: LayoutProps<"/[loc
   const step = onboardingStep(me);
   if (step === "consent") redirect({ href: "/consent", locale });
   if (step === "setup") redirect({ href: "/setup", locale });
+  // Their saved language wins in the journal, if it's offered (row RT4).
+  const language = savedLanguageRoute(me.profile?.locale, locale, offeredLocales());
+  if (language) return <SavedLanguageRedirect locale={language} />;
 
   // The journal's client components get every message (the root layout sends
   // only the public namespaces, perf fix 3).

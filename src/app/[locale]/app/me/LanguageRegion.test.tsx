@@ -7,14 +7,16 @@ const saveRegion = vi.fn();
 vi.mock("./actions", () => ({ saveRegion: (...a: unknown[]) => saveRegion(...a) }));
 const refresh = vi.fn();
 const replace = vi.fn();
+const goToLanguage = vi.fn();
+vi.mock("@/lib/savedLanguage", () => ({ goToLanguage: (...a: unknown[]) => goToLanguage(...a) }));
 vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ refresh, replace }), usePathname: () => "/app/me" }));
 const { LanguageRegion } = await import("./LanguageRegion");
-const { countryOptions, languageOptions, timeZoneOptions } = await import("@/lib/region/countries");
+const { countryOptions, timeZoneOptions } = await import("@/lib/region/countries");
 
 const renderIt = (initial = { locale: "en", country: "TH", time_zone: "Asia/Bangkok" }) =>
   render(
     <NextIntlClientProvider locale="en" messages={messages}>
-      <LanguageRegion initial={initial} countries={countryOptions("en")} zones={timeZoneOptions(initial.time_zone)} languages={languageOptions(["en"])} />
+      <LanguageRegion initial={initial} countries={countryOptions("en")} zones={timeZoneOptions(initial.time_zone)} languages={[["en", "English"]]} />
     </NextIntlClientProvider>,
   );
 
@@ -22,6 +24,7 @@ beforeEach(() => {
   saveRegion.mockReset().mockResolvedValue({ ok: true });
   refresh.mockReset();
   replace.mockReset();
+  goToLanguage.mockReset();
 });
 afterEach(cleanup);
 

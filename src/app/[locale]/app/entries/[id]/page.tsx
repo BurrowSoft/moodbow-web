@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 import { JournalUnavailable } from "@/components/JournalUnavailable";
+import { SessionEnded } from "@/components/SessionEnded";
+import { currentUser } from "@/lib/journal/currentUser";
 import type { CheckIn } from "@/lib/journal/checkIn";
 import { ENTRY_COLUMNS, isEntryId, type Entry } from "@/lib/journal/entry";
 import { canReflect } from "@/lib/journal/ai";
@@ -34,7 +36,8 @@ export default async function EntryPage({ params, searchParams }: PageProps<"/[l
   setRequestLocale(locale as Locale);
   if (!isEntryId(id)) notFound();
   const supabase = await createSupabaseServerClient();
-  const user = supabase ? (await supabase.auth.getUser()).data.user : null;
+  const { user, ended } = await currentUser(supabase);
+  if (ended) return <SessionEnded />;
   if (!supabase || !user) return <JournalUnavailable />;
   const me = await getMe(supabase);
   if (!me) return <JournalUnavailable />;

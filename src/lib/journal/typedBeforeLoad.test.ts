@@ -6,9 +6,14 @@ const box = (over: Partial<ServerBox>): ServerBox => ({ body: null, serverBody: 
 
 describe("withTyped", () => {
   it("nothing typed: the text as it was, with the caret kept inside it", () => {
-    expect(withTyped("A draft", box({ start: 0, end: 0 }), true)).toEqual({ body: "A draft", start: 0, end: 0 });
+    expect(withTyped("A draft", box({ focused: false }), true)).toEqual({ body: "A draft", start: 0, end: 0 });
     expect(withTyped("Hi", box({ start: 9, end: 9 }), false)).toEqual({ body: "Hi", start: 2, end: 2 });
     expect(withTyped("Hi", null, false)).toEqual({ body: "Hi", start: 0, end: 0 });
+  });
+  it("clicked in with nothing typed, and a draft: the caret goes after it, on a new line", () => {
+    expect(withTyped("A draft\n", box({ start: 0, end: 0 }), true)).toEqual({ body: "A draft\n\n", start: 9, end: 9 });
+    // No draft to go after.
+    expect(withTyped("", box({ start: 0, end: 0 }), false)).toEqual({ body: "", start: 0, end: 0 });
   });
   it("no draft: exactly what was typed, caret and all", () => {
     expect(withTyped("", box({ body: "abc", start: 1, end: 2 }), false)).toEqual({ body: "abc", start: 1, end: 2 });
