@@ -11,7 +11,7 @@ import { createPortal } from "react-dom";
 // to where it was when it closes; Escape is the same as the cancel action.
 // Taller than the window (large text): it opens at its top, with focus on the
 // title, not scrolled down to a button past the title and warning, and a fade at
-// the bottom shows there's more. Nothing here limits touch or keyboard scrolling.
+// the bottom shows there's more, until the end is reached. Nothing here limits touch or keyboard scrolling.
 export function Dialog({
   title,
   body,
@@ -40,14 +40,22 @@ export function Dialog({
   const bodyId = useId();
   const ref = useRef<HTMLDivElement>(null);
   const [tall, setTall] = useState(false);
+  const [atEnd, setAtEnd] = useState(false);
 
   useEffect(() => {
     const dialog = ref.current;
     if (!dialog) return;
-    const measure = () => setTall(dialog.scrollHeight > dialog.clientHeight);
+    const measure = () => {
+      setTall(dialog.scrollHeight > dialog.clientHeight);
+      setAtEnd(dialog.scrollTop + dialog.clientHeight >= dialog.scrollHeight - 1);
+    };
     measure();
     window.addEventListener("resize", measure);
-    return () => window.removeEventListener("resize", measure);
+    dialog.addEventListener("scroll", measure, { passive: true });
+    return () => {
+      window.removeEventListener("resize", measure);
+      dialog.removeEventListener("scroll", measure);
+    };
   }, []);
 
   useEffect(() => {
@@ -115,7 +123,7 @@ export function Dialog({
         )}
         {details && <div className="mt-[16px]">{details}</div>}
         <div className="mt-[24px] flex flex-wrap justify-end gap-[12px]">{children}</div>
-        {tall && <div aria-hidden="true" data-testid="dialog-more" className="pointer-events-none sticky -bottom-[24px] -mx-[24px] -mb-[24px] mt-[8px] h-[40px] bg-gradient-to-t from-surface to-transparent" />}
+        {tall && <div aria-hidden="true" data-testid="dialog-more" className={`pointer-events-none sticky -bottom-[24px] -mx-[24px] -mb-[24px] mt-[8px] h-[40px] bg-gradient-to-t from-surface to-transparent ${atEnd ? "opacity-0" : ""}`} />}
       </div>
     </div>,
     document.body,
