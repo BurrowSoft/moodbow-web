@@ -1,0 +1,222 @@
+{
+  "version": 1,
+  "about": "Your week in Insights (no AI; specs/your-week.md, UX 2026-11-06). TEMPORARY HOME: this landed in the web repo first, because the app's side comes after Bo. When the app starts, it moves to the app repo's supabase/contracts, which becomes the source of truth (decision 99), and the web syncs it from there like every other contract. Until then a change here must be repeated by the app. The week is the last complete Monday to Sunday before `today`. A check-in counts if it has a mood. Under minCheckIns: no card. A low mood on more than half: kind hard, nothing else. Otherwise at most 2 lines: first a pattern, else how the week looked; then the moment, else how the week looked if the first line was a pattern. No lines: no card. A pattern's sides are patterns.json's (sleep 7 hours or more / less; moved / didn't; stress 1-2 / 4-5, 3 left out; a missing value left out), each with at least minPerSide days. The gap is from the two rounded averages, the same steps as Patterns, and it must be at least minGap in the expected direction only (a on top). The largest gap wins; a tie goes sleep, movement, stress. lookMoreGood: more good days than low, and at least minGoodDays good. lookSteady: the steady mood on more than half. lookMixed: as many good as low, at least 1. Tried in that order. The moment is the latest in the week; two on one day, the larger id. Its query reads id and date only, never the body. caption: Patterns' footnote line shows, with a pattern only; it isn't one of the lines.",
+  "today": "2026-11-04",
+  "rules": {
+    "minCheckIns": 4,
+    "lowMoods": [1, 2],
+    "goodMoods": [4, 5],
+    "steadyMood": 3,
+    "minPerSide": 2,
+    "minGap": 1,
+    "minGoodDays": 2
+  },
+  "copy": {
+    "title": "Your week",
+    "patternSleep": "On days you slept more, your mood was higher.",
+    "patternMovement": "On more active days, your mood was higher.",
+    "patternStress": "On lower-stress days, your mood was higher.",
+    "lookMoreGood": "Your week had more good days than low ones.",
+    "lookSteady": "Your week was mostly steady.",
+    "lookMixed": "Your week had good days and low ones.",
+    "moment": "A moment from this week: {date}",
+    "hard": "This looked like a hard week."
+  },
+  "cases": [
+    {
+      "name": "three check-ins: no card, and no message about it",
+      "rows": [
+        { "local_date": "2026-10-26", "mood": 5, "sleep_hours": null, "stress": null, "exercise_minutes": null },
+        { "local_date": "2026-10-27", "mood": 5, "sleep_hours": null, "stress": null, "exercise_minutes": null },
+        { "local_date": "2026-10-28", "mood": 5, "sleep_hours": null, "stress": null, "exercise_minutes": null }
+      ],
+      "moments": [{ "id": "a", "entry_date": "2026-10-27" }],
+      "expect": null
+    },
+    {
+      "name": "a row with no mood doesn't count as a check-in",
+      "rows": [
+        { "local_date": "2026-10-26", "mood": 5, "sleep_hours": null, "stress": null, "exercise_minutes": null },
+        { "local_date": "2026-10-27", "mood": 5, "sleep_hours": null, "stress": null, "exercise_minutes": null },
+        { "local_date": "2026-10-28", "mood": 5, "sleep_hours": null, "stress": null, "exercise_minutes": null },
+        { "local_date": "2026-10-29", "mood": null, "sleep_hours": 8, "stress": 1, "exercise_minutes": 30 }
+      ],
+      "moments": [],
+      "expect": null
+    },
+    {
+      "name": "days outside the last complete week don't count (this week's, and the week before)",
+      "rows": [
+        { "local_date": "2026-10-25", "mood": 5, "sleep_hours": null, "stress": null, "exercise_minutes": null },
+        { "local_date": "2026-10-26", "mood": 5, "sleep_hours": null, "stress": null, "exercise_minutes": null },
+        { "local_date": "2026-11-01", "mood": 5, "sleep_hours": null, "stress": null, "exercise_minutes": null },
+        { "local_date": "2026-11-02", "mood": 5, "sleep_hours": null, "stress": null, "exercise_minutes": null },
+        { "local_date": "2026-11-03", "mood": 5, "sleep_hours": null, "stress": null, "exercise_minutes": null }
+      ],
+      "moments": [],
+      "expect": null
+    },
+    {
+      "name": "hard week, 3 of 4 low: only that, even with a pattern's numbers and a moment",
+      "rows": [
+        { "local_date": "2026-10-26", "mood": 1, "sleep_hours": 5, "stress": 5, "exercise_minutes": 0 },
+        { "local_date": "2026-10-27", "mood": 2, "sleep_hours": 5, "stress": 5, "exercise_minutes": 0 },
+        { "local_date": "2026-10-28", "mood": 1, "sleep_hours": 8, "stress": 1, "exercise_minutes": 30 },
+        { "local_date": "2026-10-29", "mood": 4, "sleep_hours": 8, "stress": 1, "exercise_minutes": 30 }
+      ],
+      "moments": [{ "id": "a", "entry_date": "2026-10-29" }],
+      "expect": { "start": "2026-10-26", "end": "2026-11-01", "kind": "hard" }
+    },
+    {
+      "name": "exactly half low isn't hard; nothing true to say: no card",
+      "rows": [
+        { "local_date": "2026-10-26", "mood": 1, "sleep_hours": null, "stress": null, "exercise_minutes": null },
+        { "local_date": "2026-10-27", "mood": 2, "sleep_hours": null, "stress": null, "exercise_minutes": null },
+        { "local_date": "2026-10-28", "mood": 3, "sleep_hours": null, "stress": null, "exercise_minutes": null },
+        { "local_date": "2026-10-29", "mood": 4, "sleep_hours": null, "stress": null, "exercise_minutes": null }
+      ],
+      "moments": [],
+      "expect": null
+    },
+    {
+      "name": "the same week with a moment: the moment alone",
+      "rows": [
+        { "local_date": "2026-10-26", "mood": 1, "sleep_hours": null, "stress": null, "exercise_minutes": null },
+        { "local_date": "2026-10-27", "mood": 2, "sleep_hours": null, "stress": null, "exercise_minutes": null },
+        { "local_date": "2026-10-28", "mood": 3, "sleep_hours": null, "stress": null, "exercise_minutes": null },
+        { "local_date": "2026-10-29", "mood": 4, "sleep_hours": null, "stress": null, "exercise_minutes": null }
+      ],
+      "moments": [{ "id": "a", "entry_date": "2026-10-28" }],
+      "expect": { "start": "2026-10-26", "end": "2026-11-01", "kind": "lines", "lines": [{ "template": "moment", "id": "a", "date": "2026-10-28" }], "caption": false }
+    },
+    {
+      "name": "a pattern, then how the week looked (4.7 and 2.5)",
+      "rows": [
+        { "local_date": "2026-10-26", "mood": 5, "sleep_hours": 8, "stress": null, "exercise_minutes": null },
+        { "local_date": "2026-10-27", "mood": 5, "sleep_hours": 8, "stress": null, "exercise_minutes": null },
+        { "local_date": "2026-10-28", "mood": 4, "sleep_hours": 7, "stress": null, "exercise_minutes": null },
+        { "local_date": "2026-10-29", "mood": 2, "sleep_hours": 5, "stress": null, "exercise_minutes": null },
+        { "local_date": "2026-10-30", "mood": 3, "sleep_hours": 6, "stress": null, "exercise_minutes": null }
+      ],
+      "moments": [],
+      "expect": { "start": "2026-10-26", "end": "2026-11-01", "kind": "lines", "lines": [{ "template": "patternSleep" }, { "template": "lookMoreGood" }], "caption": true }
+    },
+    {
+      "name": "a pattern, then the moment rather than how the week looked; the latest of three moments, the larger id on a shared day, one from outside the week ignored",
+      "rows": [
+        { "local_date": "2026-10-26", "mood": 5, "sleep_hours": 8, "stress": null, "exercise_minutes": null },
+        { "local_date": "2026-10-27", "mood": 5, "sleep_hours": 8, "stress": null, "exercise_minutes": null },
+        { "local_date": "2026-10-28", "mood": 4, "sleep_hours": 7, "stress": null, "exercise_minutes": null },
+        { "local_date": "2026-10-29", "mood": 2, "sleep_hours": 5, "stress": null, "exercise_minutes": null },
+        { "local_date": "2026-10-30", "mood": 3, "sleep_hours": 6, "stress": null, "exercise_minutes": null }
+      ],
+      "moments": [
+        { "id": "m", "entry_date": "2026-10-26" },
+        { "id": "b", "entry_date": "2026-10-30" },
+        { "id": "c", "entry_date": "2026-10-30" },
+        { "id": "z", "entry_date": "2026-11-03" }
+      ],
+      "expect": { "start": "2026-10-26", "end": "2026-11-01", "kind": "lines", "lines": [{ "template": "patternSleep" }, { "template": "moment", "id": "c", "date": "2026-10-30" }], "caption": true }
+    },
+    {
+      "name": "the largest gap wins: stress 2.0 over sleep 1.0; stress 3 would be left out",
+      "rows": [
+        { "local_date": "2026-10-26", "mood": 5, "sleep_hours": 8, "stress": 1, "exercise_minutes": null },
+        { "local_date": "2026-10-27", "mood": 4, "sleep_hours": 5, "stress": 2, "exercise_minutes": null },
+        { "local_date": "2026-10-28", "mood": 3, "sleep_hours": 8, "stress": 4, "exercise_minutes": null },
+        { "local_date": "2026-10-29", "mood": 2, "sleep_hours": 5, "stress": 5, "exercise_minutes": null }
+      ],
+      "moments": [],
+      "expect": { "start": "2026-10-26", "end": "2026-11-01", "kind": "lines", "lines": [{ "template": "patternStress" }, { "template": "lookMoreGood" }], "caption": true }
+    },
+    {
+      "name": "a tie goes to the earlier: sleep over movement",
+      "rows": [
+        { "local_date": "2026-10-26", "mood": 5, "sleep_hours": 8, "stress": null, "exercise_minutes": 30 },
+        { "local_date": "2026-10-27", "mood": 5, "sleep_hours": 8, "stress": null, "exercise_minutes": 30 },
+        { "local_date": "2026-10-28", "mood": 3, "sleep_hours": 5, "stress": null, "exercise_minutes": 0 },
+        { "local_date": "2026-10-29", "mood": 3, "sleep_hours": 5, "stress": null, "exercise_minutes": 0 }
+      ],
+      "moments": [],
+      "expect": { "start": "2026-10-26", "end": "2026-11-01", "kind": "lines", "lines": [{ "template": "patternSleep" }, { "template": "lookMoreGood" }], "caption": true }
+    },
+    {
+      "name": "movement alone",
+      "rows": [
+        { "local_date": "2026-10-26", "mood": 5, "sleep_hours": null, "stress": null, "exercise_minutes": 30 },
+        { "local_date": "2026-10-27", "mood": 5, "sleep_hours": null, "stress": null, "exercise_minutes": 10 },
+        { "local_date": "2026-10-28", "mood": 3, "sleep_hours": null, "stress": null, "exercise_minutes": 0 },
+        { "local_date": "2026-10-29", "mood": 3, "sleep_hours": null, "stress": null, "exercise_minutes": 0 }
+      ],
+      "moments": [],
+      "expect": { "start": "2026-10-26", "end": "2026-11-01", "kind": "lines", "lines": [{ "template": "patternMovement" }, { "template": "lookMoreGood" }], "caption": true }
+    },
+    {
+      "name": "a gap of exactly 1.0 is enough",
+      "rows": [
+        { "local_date": "2026-10-26", "mood": 4, "sleep_hours": 8, "stress": null, "exercise_minutes": null },
+        { "local_date": "2026-10-27", "mood": 4, "sleep_hours": 8, "stress": null, "exercise_minutes": null },
+        { "local_date": "2026-10-28", "mood": 3, "sleep_hours": 5, "stress": null, "exercise_minutes": null },
+        { "local_date": "2026-10-29", "mood": 3, "sleep_hours": 5, "stress": null, "exercise_minutes": null }
+      ],
+      "moments": [],
+      "expect": { "start": "2026-10-26", "end": "2026-11-01", "kind": "lines", "lines": [{ "template": "patternSleep" }, { "template": "lookMoreGood" }], "caption": true }
+    },
+    {
+      "name": "a gap under 1.0 (3.7 and 3.0): no pattern, no caption",
+      "rows": [
+        { "local_date": "2026-10-26", "mood": 4, "sleep_hours": 8, "stress": null, "exercise_minutes": null },
+        { "local_date": "2026-10-27", "mood": 4, "sleep_hours": 8, "stress": null, "exercise_minutes": null },
+        { "local_date": "2026-10-28", "mood": 3, "sleep_hours": 8, "stress": null, "exercise_minutes": null },
+        { "local_date": "2026-10-29", "mood": 3, "sleep_hours": 5, "stress": null, "exercise_minutes": null },
+        { "local_date": "2026-10-30", "mood": 3, "sleep_hours": 5, "stress": null, "exercise_minutes": null }
+      ],
+      "moments": [],
+      "expect": { "start": "2026-10-26", "end": "2026-11-01", "kind": "lines", "lines": [{ "template": "lookMoreGood" }], "caption": false }
+    },
+    {
+      "name": "the other direction is never said: less sleep, higher mood",
+      "rows": [
+        { "local_date": "2026-10-26", "mood": 3, "sleep_hours": 8, "stress": null, "exercise_minutes": null },
+        { "local_date": "2026-10-27", "mood": 3, "sleep_hours": 8, "stress": null, "exercise_minutes": null },
+        { "local_date": "2026-10-28", "mood": 5, "sleep_hours": 5, "stress": null, "exercise_minutes": null },
+        { "local_date": "2026-10-29", "mood": 5, "sleep_hours": 5, "stress": null, "exercise_minutes": null }
+      ],
+      "moments": [],
+      "expect": { "start": "2026-10-26", "end": "2026-11-01", "kind": "lines", "lines": [{ "template": "lookMoreGood" }], "caption": false }
+    },
+    {
+      "name": "one day on a side isn't enough",
+      "rows": [
+        { "local_date": "2026-10-26", "mood": 5, "sleep_hours": 8, "stress": null, "exercise_minutes": null },
+        { "local_date": "2026-10-27", "mood": 5, "sleep_hours": 8, "stress": null, "exercise_minutes": null },
+        { "local_date": "2026-10-28", "mood": 5, "sleep_hours": 8, "stress": null, "exercise_minutes": null },
+        { "local_date": "2026-10-29", "mood": 2, "sleep_hours": 5, "stress": null, "exercise_minutes": null }
+      ],
+      "moments": [],
+      "expect": { "start": "2026-10-26", "end": "2026-11-01", "kind": "lines", "lines": [{ "template": "lookMoreGood" }], "caption": false }
+    },
+    {
+      "name": "steady: mood 3 on more than half; one good day isn't enough for more good days",
+      "rows": [
+        { "local_date": "2026-10-26", "mood": 3, "sleep_hours": null, "stress": null, "exercise_minutes": null },
+        { "local_date": "2026-10-27", "mood": 3, "sleep_hours": null, "stress": null, "exercise_minutes": null },
+        { "local_date": "2026-10-28", "mood": 3, "sleep_hours": null, "stress": null, "exercise_minutes": null },
+        { "local_date": "2026-10-29", "mood": 4, "sleep_hours": null, "stress": null, "exercise_minutes": null }
+      ],
+      "moments": [],
+      "expect": { "start": "2026-10-26", "end": "2026-11-01", "kind": "lines", "lines": [{ "template": "lookSteady" }], "caption": false }
+    },
+    {
+      "name": "mixed: as many good as low",
+      "rows": [
+        { "local_date": "2026-10-26", "mood": 5, "sleep_hours": null, "stress": null, "exercise_minutes": null },
+        { "local_date": "2026-10-27", "mood": 3, "sleep_hours": null, "stress": null, "exercise_minutes": null },
+        { "local_date": "2026-10-28", "mood": 3, "sleep_hours": null, "stress": null, "exercise_minutes": null },
+        { "local_date": "2026-10-29", "mood": 1, "sleep_hours": null, "stress": null, "exercise_minutes": null }
+      ],
+      "moments": [],
+      "expect": { "start": "2026-10-26", "end": "2026-11-01", "kind": "lines", "lines": [{ "template": "lookMixed" }], "caption": false }
+    }
+  ]
+}
