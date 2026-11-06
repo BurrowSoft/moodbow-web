@@ -70,8 +70,7 @@ export function BoConversation({ initial, country, back, healthData = false, con
   }, []);
   const closeCard = useCallback(() => setCard(false), []);
 
-  const readStatus = useCallback(async () => {
-    const status = await callBo<BoStatus>({ action: "status" });
+  const showStatus = useCallback((status: BoStatus | { status: "no_answer" }) => {
     if (status.status === "ok") {
       setMaxChars(status.maxChars);
       setProblem(status.available ? null : "region_unknown");
@@ -82,8 +81,14 @@ export function BoConversation({ initial, country, back, healthData = false, con
   }, []);
 
   useEffect(() => {
-    void readStatus();
-  }, [readStatus]);
+    let current = true;
+    void callBo<BoStatus>({ action: "status" }).then((status) => {
+      if (current) showStatus(status);
+    });
+    return () => {
+      current = false;
+    };
+  }, [showStatus]);
 
   // Only once it's really on screen, or the three-hour timer resets (bo.md). A long
   // conversation can have it out of view, so it waits to be seen.
@@ -155,7 +160,7 @@ export function BoConversation({ initial, country, back, healthData = false, con
     setProblem(answer.code);
   };
 
-  const retry = () => void (closed || text.trim() === "" ? readStatus() : send());
+  const retry = () => void (closed || text.trim() === "" ? callBo<BoStatus>({ action: "status" }).then(showStatus) : send());
 
   return (
     <div data-testid="bo-conversation" className="flex flex-col gap-4">
