@@ -82,7 +82,7 @@ Wherever you live, you can:
 You can also complain to a data-protection authority: in Thailand, the Personal Data Protection Committee (PDPC); in the EU or UK, your local authority.
 
 ### 6. Security
-Your data is encrypted in transit (HTTPS) and at rest. Database rules make sure each account can only ever read its own rows. {pending:app_lock}You can add an app lock (PIN or fingerprint/face) on your phone.{/pending} No system is perfectly secure; if a breach ever affects your data, we'll tell you and the authorities as the law requires.
+Your data is encrypted in transit (HTTPS) and at rest. Database rules make sure each account can only ever read its own rows. {pending:app_app_lock}You can add an app lock (PIN or fingerprint/face) on your phone.{/pending} No system is perfectly secure; if a breach ever affects your data, we'll tell you and the authorities as the law requires.
 
 ### 7. Age
 Moodbow is for people aged 18 and older. We don't knowingly collect data from anyone younger. If you believe a child has an account, email us and we'll delete it.
