@@ -1090,6 +1090,9 @@ test.describe("the tab bar in every language", () => {
             return cards.filter((e) => left(e) > 24).slice(0, 6).map((e) => `${e.tagName.toLowerCase()} ${left(e)}`);
           });
           expect.soft({ path, percent, tripled }).toEqual({ path, percent, tripled: [] });
+          // A negative margin must match the px padding it pairs with.
+          const pulledOut = await page.evaluate(() => [...document.querySelectorAll("#main *")].filter((e) => Math.abs(parseFloat(getComputedStyle(e).marginLeft)) > 24 && parseFloat(getComputedStyle(e).marginLeft) < 0).slice(0, 6).map((e) => e.tagName.toLowerCase()));
+          expect.soft({ path, percent, pulledOut }).toEqual({ path, percent, pulledOut: [] });
         }
       }
     } finally {
