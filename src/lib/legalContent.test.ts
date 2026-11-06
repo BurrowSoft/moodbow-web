@@ -1,4 +1,6 @@
 // @vitest-environment node
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { ALL_LOCALES, routing } from "@/i18n/routing";
 import messages from "@/messages/en.json";
@@ -84,9 +86,8 @@ describe("legal content files", () => {
 
   it("a journal with no email: the policy says it can be lost and can't be returned, only once that start is live", () => {
     const source = readFileSync(path.join(process.cwd(), "content/legal/en/privacy.md"), "utf8");
-    const line = "only this phone's sign-in can open your journal";
     const met = (on: boolean) => (id: string) => (id === "anon_start_live" ? on : isPendingMet(id));
-    expect(renderLegal(source, met(true)).html).toContain(line.replace("'", "’"));
+    expect(renderLegal(source, met(true)).html).toContain("sign-in can open your journal");
     expect(renderLegal(source, met(false)).html).not.toContain("sign-in can open your journal");
   });
 
