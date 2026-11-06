@@ -1246,6 +1246,14 @@ test("Bo's screen at large text: the header covers nothing, and help is reachabl
         await expect(atHand, `help, ${position}, ${percent}%`).toBeInViewport({ ratio: 1 });
       }
 
+      // A long message scrolls inside the box, which stays at most 160 px tall at any size.
+      await page.getByTestId("bo-text").fill(Array.from({ length: 60 }, () => "a few more words").join(" "));
+      const box = await page.getByTestId("bo-text").evaluate((b) => ({ height: b.getBoundingClientRect().height, scrolls: b.scrollHeight > b.clientHeight, resize: getComputedStyle(b).resize }));
+      expect(box.height, `the box at ${percent}%`).toBeLessThanOrEqual(160);
+      expect(box.scrolls, `the box scrolls at ${percent}%`).toBe(true);
+      expect(box.resize, "the box can't be dragged taller").toBe("none");
+      await page.getByTestId("bo-text").fill("");
+
       // Help, from wherever the conversation has got to.
       const pinned = (await page.getByTestId("bo-header").getAttribute("data-pinned")) !== null;
       // Pinned at the normal size; on this phone, not at large text.

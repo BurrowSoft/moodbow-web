@@ -298,9 +298,11 @@ export function BoConversation({ initial, country, back, healthData = false, con
             placeholder={t("messageBox")}
             value={text}
             rows={3}
+            // At most this tall, and scrolling inside, at any text size: a phone's keyboard leaves
+            // about half the window, and the line and help sit just above this.
             autoComplete="off"
             onChange={(e) => change(e.target.value)}
-            className="w-full rounded-2xl border border-border bg-surface p-[12px] text-text"
+            className="max-h-[160px] w-full resize-none overflow-y-auto rounded-2xl border border-border bg-surface p-[12px] text-text"
           />
           <button type="submit" data-testid="bo-send" disabled={!canSend} className={PRIMARY_SAVE}>
             {t("send")}
