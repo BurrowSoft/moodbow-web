@@ -460,9 +460,9 @@
     "yourWeekPatternSleep": "Nos dias em que você dormiu mais, seu humor estava melhor.",
     "yourWeekPatternMovement": "Nos dias mais ativos, seu humor estava melhor.",
     "yourWeekPatternStress": "Nos dias com menos estresse, seu humor estava melhor.",
-    "yourWeekLookMoreGood": "Sua semana teve mais dias bons do que baixos.",
+    "yourWeekLookMoreGood": "Sua semana teve mais dias bons do que dias mais para baixo.",
     "yourWeekLookSteady": "Sua semana foi bem estável.",
-    "yourWeekLookMixed": "Sua semana teve dias bons e dias baixos.",
+    "yourWeekLookMixed": "Sua semana teve dias bons e dias mais para baixo.",
     "yourWeekMoment": "Um momento desta semana: {date}",
     "yourWeekHard": "Esta semana pareceu difícil.",
     "yourWeekCaption": "Isso pode mostrar o que costuma andar junto, não o que causa o quê."
