@@ -3,8 +3,8 @@
 import { pageGate } from "@/lib/conditions";
 import { isUuid } from "@/lib/journal/reflect";
 import { gateChanged } from "@/lib/journal/gateChanged";
-import { consentItem } from "@/lib/legalVersions";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { setAiEnabled } from "../me/actions";
 
 // The first open's yes: the AI consent, which also turns AI on (the database's rule,
 // migration 001). The 18+ row is /consent's, and this never ticks or implies it. The
@@ -13,10 +13,23 @@ export async function giveBoConsent(): Promise<{ ok: boolean }> {
   if (pageGate("bo-live") === "hidden") return { ok: false };
   const supabase = await createSupabaseServerClient();
   if (!supabase) return { ok: false };
-  const { error } = await supabase.rpc("record_consents", { p_items: [consentItem("ai")] });
+  const { ok } = await setAiEnabled(true);
+  if (ok) gateChanged();
+  return { ok };
+}
+
+// Me → Use Bo, off: the journal switch first, so a failure part-way never leaves Bo
+// reading the journal; then AI off and the withdrawal, which the button goes with. The
+// conversation stays, to read, export and clear. On again goes through the consent.
+export async function turnBoOff(): Promise<{ ok: boolean }> {
+  if (pageGate("bo-live") === "hidden") return { ok: false };
+  const supabase = await createSupabaseServerClient();
+  if (!supabase) return { ok: false };
+  const { error } = await supabase.rpc("set_bo_reads_journal", { p_on: false });
   if (error) return { ok: false };
-  gateChanged();
-  return { ok: true };
+  const { ok } = await setAiEnabled(false);
+  if (ok) gateChanged();
+  return { ok };
 }
 
 // Clear conversation. RLS keeps it to their own messages, and replies go with them.

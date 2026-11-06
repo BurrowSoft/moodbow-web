@@ -59,8 +59,14 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
   // Clear reachable, and the switch off: off is the default, and what the function reads.
   let boHas = false;
   let boReads = false;
+  let boCanTurnOn = false;
   if (pageGate("bo-live") !== "hidden") {
-    const [kept, settings] = await Promise.all([supabase.from("bo_messages").select("id").limit(1), supabase.from("user_settings").select("bo_reads_journal").maybeSingle()]);
+    const [kept, settings, visible] = await Promise.all([
+      supabase.from("bo_messages").select("id").limit(1),
+      supabase.from("user_settings").select("bo_reads_journal").maybeSingle(),
+      supabase.rpc("bo_visible", { p_country: (await headers()).get("x-vercel-ip-country") }),
+    ]);
+    boCanTurnOn = visible.data === true;
     boHas = kept.error ? true : (kept.data ?? []).length > 0;
     boReads = (settings.data as { bo_reads_journal?: boolean } | null)?.bo_reads_journal === true;
   }
@@ -82,7 +88,7 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
           credits={{ balance: me.credits?.balance ?? 0 }}
         />
       )}
-      {pageGate("bo-live") !== "hidden" && <BoMeRow hasConversation={boHas} readsJournal={boReads} consented={hasCurrentConsent(me, "ai")} />}
+      {pageGate("bo-live") !== "hidden" && <BoMeRow hasConversation={boHas} readsJournal={boReads} consented={hasCurrentConsent(me, "ai")} canTurnOn={boCanTurnOn} />}
       <Reminder on={me.settings?.reminder_on ?? true} time={hhmm(me.settings?.reminder_time)} />
       <LanguageRegion
         initial={{ locale: routeLocale(me.profile?.locale ?? locale), country: me.profile?.country ?? "", time_zone: me.profile?.time_zone ?? "UTC" }}

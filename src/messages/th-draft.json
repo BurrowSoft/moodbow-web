@@ -1188,5 +1188,15 @@
     "key": "bo.consentFailed",
     "en": "That didn't save. Please try again.",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.useBo",
+    "en": "Use Bo",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.journalSwitchNote",
+    "en": "[Placeholder, not final: this text isn't approved yet.] When this is on, your check-ins and entries from the last 7 days go to Anthropic with each message.",
+    "reason": "UX draft (native read pending)"
   }
 ]

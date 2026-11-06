@@ -6,7 +6,10 @@ import { BoMeRow } from "./BoMeRow";
 
 const reads = vi.fn(async (_on: boolean) => ({ ok: true }));
 const clear = vi.fn(async () => ({ ok: true }));
-vi.mock("./actions", () => ({ setBoReadsJournal: (on: boolean) => reads(on), clearBoConversation: () => clear() }));
+const off = vi.fn(async () => ({ ok: true }));
+const push = vi.fn();
+vi.mock("./actions", () => ({ setBoReadsJournal: (on: boolean) => reads(on), clearBoConversation: () => clear(), turnBoOff: () => off() }));
+vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push }) }));
 afterEach(() => {
   cleanup();
   vi.clearAllMocks();
@@ -16,7 +19,7 @@ const b = messages.bo;
 const open = (props: Partial<React.ComponentProps<typeof BoMeRow>> = {}) =>
   render(
     <NextIntlClientProvider locale="en" messages={messages}>
-      <BoMeRow hasConversation readsJournal={false} consented {...props} />
+      <BoMeRow hasConversation readsJournal={false} consented canTurnOn {...props} />
     </NextIntlClientProvider>,
   );
 
@@ -48,6 +51,48 @@ describe("BoMeRow", () => {
     cleanup();
     open({ consented: false });
     expect(screen.queryByTestId("me-bo-journal")).toBeNull();
+  });
+
+  it("the journal switch never shows without its line", () => {
+    open();
+    expect(screen.getByTestId("me-bo-journal-note")).toHaveTextContent(b.journalSwitchNote);
+  });
+
+  it("Use Bo off: withdraws, and the journal switch goes too; the conversation stays, with Export and Clear", async () => {
+    open({ readsJournal: true });
+    expect(screen.getByTestId("me-bo-use")).toBeChecked();
+    fireEvent.click(screen.getByTestId("me-bo-use"));
+    await act(async () => {});
+    expect(off).toHaveBeenCalled();
+    expect(screen.getByTestId("me-bo-use")).not.toBeChecked();
+    expect(screen.queryByTestId("me-bo-journal")).toBeNull();
+    expect(screen.getByTestId("me-bo-export")).toBeInTheDocument();
+    expect(screen.getByTestId("me-bo-clear")).toBeInTheDocument();
+  });
+
+  it("a failed off stays on and says so", async () => {
+    off.mockResolvedValueOnce({ ok: false });
+    open();
+    fireEvent.click(screen.getByTestId("me-bo-use"));
+    await act(async () => {});
+    expect(screen.getByTestId("me-bo-use")).toBeChecked();
+    expect(screen.getByTestId("me-bo-failed")).toBeInTheDocument();
+  });
+
+  it("Use Bo on goes to the consent on Bo's screen, recording nothing here", () => {
+    open({ consented: false });
+    fireEvent.click(screen.getByTestId("me-bo-use"));
+    expect(push).toHaveBeenCalledWith("/app/bo");
+    expect(off).not.toHaveBeenCalled();
+  });
+
+  it("where Bo is off: no way to turn it on, but a conversation can still be exported and cleared; on can still be turned off", () => {
+    open({ consented: false, canTurnOn: false });
+    expect(screen.queryByTestId("me-bo-use")).toBeNull();
+    expect(screen.getByTestId("me-bo-clear")).toBeInTheDocument();
+    cleanup();
+    open({ consented: true, canTurnOn: false });
+    expect(screen.getByTestId("me-bo-use")).toBeChecked();
   });
 
   it("Clear asks first, opens on Cancel, and Cancel clears nothing", () => {
