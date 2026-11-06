@@ -68,7 +68,7 @@ const EXIF = (orientation: number, marker: string) => `new Uint8Array([
   ...text("${marker}")])`;
 
 test.describe("Bo's pictures: the bytes that would leave the browser", () => {
-  test.skip(({ browserName }, testInfo) => browserName !== "chromium" || testInfo.project.name !== "desktop", "once is enough; other browsers are the Web Tester's");
+  test.skip(({ browserName }) => browserName !== "chromium", "other browsers are the Web Tester's");
   test.beforeEach(async ({ page }) => load(page));
 
   test("EXIF with GPS, XMP, IPTC and a comment: none of it comes out, and the result is a clean JPEG", async ({ page }) => {
