@@ -590,8 +590,8 @@
     "reportAction": "Signaler cette réponse",
     "reportScreen": "Merci de nous l'avoir signalé. Personne ne lit ceci tout de suite.",
     "offline": "Vous êtes hors ligne. Bo a besoin d'une connexion.",
+    "conversationFull": "Cette conversation est pleine. Exportez-la si vous voulez en garder une copie, puis effacez-la pour recommencer.",
     "clearConfirm": "Effacer",
-    "cancel": "Annuler",
-    "conversationFull": "Cette conversation est pleine : les nouveaux messages ne sont plus conservés. Exportez-la si vous voulez en garder une copie, puis effacez-la dans Moi."
+    "cancel": "Annuler"
   }
 }

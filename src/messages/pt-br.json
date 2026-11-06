@@ -590,8 +590,8 @@
     "reportAction": "Reportar esta resposta",
     "reportScreen": "Obrigado por avisar. Ninguém lê isto na hora.",
     "offline": "Você está sem conexão. O Bo precisa de internet.",
+    "conversationFull": "Esta conversa está cheia. Exporte se quiser uma cópia e depois apague para começar de novo.",
     "clearConfirm": "Apagar",
-    "cancel": "Cancelar",
-    "conversationFull": "Esta conversa está cheia, então as mensagens novas não ficam salvas. Exporte se quiser uma cópia e depois apague em Eu."
+    "cancel": "Cancelar"
   }
 }

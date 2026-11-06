@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { GetHelpNow, SafetyCard } from "@/components/SafetyCard";
+import { Link } from "@/i18n/navigation";
 import { BO_CLIENT_WAIT_MS, BO_DEFAULT_MAX_CHARS, BO_ERROR_TEXT, BO_WAIT_RETRY_MS, boCardMayOpen, type BoMessage, type BoProblem, type BoSend, type BoStatus } from "@/lib/journal/bo";
 import { flagsCrisis } from "@/lib/safety/crisis";
 import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
@@ -25,9 +26,19 @@ async function callBo<T>(body: object): Promise<T | { status: "no_answer" }> {
 // The conversation. Replies are plain text, never links or markup. The unsent text
 // lives only here, in memory: never a draft, gone on leaving or signing out. Whether
 // a turn was flagged is used and dropped, never kept (rule 6). The help button is
-// always on screen, so every limit and error has it.
-export function BoConversation({ initial, country }: { initial: BoMessage[]; country: string | null | undefined }) {
+// always on screen, so every limit and error has it. On a phone it's a full screen
+// with a back link, on a wider one the tabs stay (UX), through the mark on the root
+// (globals.css), as SignedInMark does. The footer goes in both, so this page carries
+// the Consumer Health Data link itself: it collects personal information (Footer).
+export function BoConversation({ initial, country, back, healthData = false }: { initial: BoMessage[]; country: string | null | undefined; back?: ReactNode; healthData?: boolean }) {
   const t = useTranslations("bo");
+  const tc = useTranslations("common");
+  useLayoutEffect(() => {
+    document.documentElement.dataset.boScreen = "";
+    return () => {
+      delete document.documentElement.dataset.boScreen;
+    };
+  }, []);
   const [messages, setMessages] = useState(initial);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
@@ -120,10 +131,22 @@ export function BoConversation({ initial, country }: { initial: BoMessage[]; cou
 
   return (
     <div data-testid="bo-conversation" className="flex flex-col gap-4">
-      <header>
-        <h1 className="text-2xl font-medium text-text">{t("screenLine")}</h1>
-        <p className="mt-1 text-sm text-muted">{t("smallLine")}</p>
+      <header data-testid="bo-header" className="sticky top-0 z-10 flex flex-wrap items-center gap-x-[8px] gap-y-[4px] bg-bg py-[8px]">
+        {back && <div className="md:hidden">{back}</div>}
+        <h1 className="min-w-0 flex-1 text-2xl font-medium text-text [overflow-wrap:anywhere]">{t("screenLine")}</h1>
+        <GetHelpNow country={country} testId="bo-get-help" neutral />
       </header>
+      <p className="text-sm text-muted">
+        {t("smallLine")}
+        {healthData && (
+          <>
+            {" "}
+            <Link href="/consumer-health-data" data-testid="bo-health-data" className="underline underline-offset-4">
+              {tc("consumerHealthData")}
+            </Link>
+          </>
+        )}
+      </p>
       {notice && (
         <p data-testid="bo-notice" className="rounded-2xl border border-border bg-surface p-[16px] text-sm text-text">
           {t("notice")}
@@ -182,7 +205,6 @@ export function BoConversation({ initial, country }: { initial: BoMessage[]; cou
           </button>
         </form>
       )}
-      <GetHelpNow country={country} testId="bo-get-help" neutral />
       {card && <SafetyCard country={country} onClose={closeCard} />}
     </div>
   );

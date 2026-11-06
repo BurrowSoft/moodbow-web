@@ -590,8 +590,8 @@
     "reportAction": "Reportar esta respuesta",
     "reportScreen": "Gracias por avisarnos. Nadie lee esto de inmediato.",
     "offline": "Estás sin conexión. Bo necesita conexión.",
+    "conversationFull": "Esta conversación está llena. Expórtala si quieres una copia y luego bórrala para empezar de nuevo.",
     "clearConfirm": "Borrar",
-    "cancel": "Cancelar",
-    "conversationFull": "Esta conversación está llena, así que los mensajes nuevos no se guardan. Expórtala si quieres una copia y luego bórrala en Yo."
+    "cancel": "Cancelar"
   }
 }

@@ -592,6 +592,6 @@
     "reportAction": "Diese Antwort melden",
     "reportScreen": "Danke für den Hinweis. Niemand liest das sofort.",
     "offline": "Du bist offline. Bo braucht eine Verbindung.",
-    "conversationFull": "Diese Unterhaltung ist voll, neue Nachrichten werden nicht gespeichert. Exportiere sie, wenn du eine Kopie möchtest, und lösche sie dann unter Ich."
+    "conversationFull": "Diese Unterhaltung ist voll. Exportiere sie, wenn du eine Kopie möchtest, und lösche sie dann, um neu anzufangen."
   }
 }

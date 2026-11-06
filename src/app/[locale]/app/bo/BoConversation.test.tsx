@@ -41,7 +41,7 @@ afterEach(() => {
 async function open(initial: BoMessage[] = []) {
   render(
     <NextIntlClientProvider locale="en" messages={messages}>
-      <BoConversation initial={initial} country="NZ" />
+      <BoConversation initial={initial} country="NZ" healthData />
     </NextIntlClientProvider>,
   );
   await waitFor(() => expect(calls.some((c) => c.action === "status")).toBe(true));
@@ -65,6 +65,17 @@ describe("BoConversation", () => {
     await open([{ id: "1", author: "person", body: "Hello" }]);
     expect(screen.queryByText(b.firstLine)).toBeNull();
     expect(screen.getByText("Hello")).toBeInTheDocument();
+  });
+
+  it("the line and help stay in the header; the page marks itself and carries the health data link, as the footer goes", async () => {
+    await open();
+    const header = screen.getByTestId("bo-header");
+    expect(header).toHaveTextContent(b.screenLine);
+    expect(header).toContainElement(screen.getByTestId("bo-get-help"));
+    expect(document.documentElement.dataset.boScreen).toBe("");
+    expect(screen.getByTestId("bo-health-data")).toHaveTextContent(messages.common.consumerHealthData);
+    cleanup();
+    expect(document.documentElement.dataset.boScreen).toBeUndefined();
   });
 
   it("a reply: both messages show, the box empties, and a reply's markup stays text", async () => {
@@ -167,6 +178,16 @@ describe("BoConversation", () => {
     await send();
     expect(screen.getByTestId("safety-card")).toBeInTheDocument();
     expect(sends()).toHaveLength(1);
+  });
+
+  it("a full conversation says so, with help, and crisis words still open the card", async () => {
+    await open();
+    answers.push(reply({ conversationFull: true }));
+    type(flagged);
+    await send();
+    expect(screen.getByTestId("bo-full")).toHaveTextContent(b.conversationFull);
+    expect(screen.getByTestId("safety-card")).toBeInTheDocument();
+    expect(screen.getByTestId("bo-get-help")).toBeInTheDocument();
   });
 
   it("the card doesn't reopen within ten minutes, and does after", () => {

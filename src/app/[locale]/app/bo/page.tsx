@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { headers } from "next/headers";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 import { JournalUnavailable } from "@/components/JournalUnavailable";
+import { BackLink } from "@/components/BackLink";
 import { SessionEnded } from "@/components/SessionEnded";
-import { pageGate } from "@/lib/conditions";
+import { conditionMet, pageGate } from "@/lib/conditions";
+import { backLabel } from "@/lib/journal/backLabel";
+import { dateLocale } from "@/lib/journal/today";
 import { BO_HISTORY_SHOWN, type BoMessage } from "@/lib/journal/bo";
 import { currentUser } from "@/lib/journal/currentUser";
 import { getMe } from "@/lib/journal/me";
@@ -34,5 +38,14 @@ export default async function BoPage({ params }: PageProps<"/[locale]/app/bo">) 
   if (!me) return <JournalUnavailable />;
   const { data, error } = await supabase.from("bo_messages").select("id, author, body").order("created_at", { ascending: false }).limit(BO_HISTORY_SHOWN);
   if (error) return <JournalUnavailable />;
-  return <BoConversation key={user.id} initial={((data ?? []) as BoMessage[]).toReversed()} country={me.profile?.country} />;
+  const tag = dateLocale(locale, (await headers()).get("accept-language"), me.profile?.country ?? null);
+  return (
+    <BoConversation
+      key={user.id}
+      initial={((data ?? []) as BoMessage[]).toReversed()}
+      country={me.profile?.country}
+      healthData={conditionMet("consumer-health-data-approved")}
+      back={<BackLink href="/app" label={await backLabel("/app", tag)} testId="nav-back" />}
+    />
+  );
 }

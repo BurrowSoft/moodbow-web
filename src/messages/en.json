@@ -590,8 +590,8 @@
     "reportAction": "Report this reply",
     "reportScreen": "Thanks for telling us. No one reads this right away.",
     "offline": "You're offline. Bo needs a connection.",
+    "conversationFull": "This conversation is full. Export it if you want a copy, then clear it to start again.",
     "clearConfirm": "Clear",
-    "cancel": "Cancel",
-    "conversationFull": "This conversation is full, so new messages aren't kept. Export it if you want a copy, then clear it in Me."
+    "cancel": "Cancel"
   }
 }

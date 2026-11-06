@@ -1100,6 +1100,11 @@
     "reason": "UX draft (native read pending)"
   },
   {
+    "key": "bo.conversationFull",
+    "en": "This conversation is full. Export it if you want a copy, then clear it to start again.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
     "key": "bo.clearConfirm",
     "en": "Clear",
     "reason": "UX draft (native read pending)"
@@ -1107,11 +1112,6 @@
   {
     "key": "bo.cancel",
     "en": "Cancel",
-    "reason": "UX draft (native read pending)"
-  },
-  {
-    "key": "bo.conversationFull",
-    "en": "This conversation is full, so new messages aren't kept. Export it if you want a copy, then clear it in Me.",
     "reason": "UX draft (native read pending)"
   }
 ]

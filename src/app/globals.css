@@ -296,3 +296,18 @@ input[type="date"]:focus-within {
     margin: 16mm 16mm 20mm;
   }
 }
+
+/* Bo's conversation (BoConversation sets the mark): no footer, and on a phone a full
+   screen, with no tab bar and so no room kept for it. */
+html[data-bo-screen] footer {
+  display: none;
+}
+@media (width < 48rem) {
+  html[data-bo-screen] [data-app-nav] {
+    display: none;
+  }
+  html[data-bo-screen] #main {
+    padding-top: 0;
+    padding-bottom: 16px;
+  }
+}
