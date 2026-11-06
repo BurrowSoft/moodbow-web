@@ -1198,5 +1198,60 @@
     "key": "bo.journalSwitchNote",
     "en": "[Placeholder, not final: this text isn't approved yet.] When this is on, your check-ins and entries from the last 7 days go to Anthropic with each message.",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.pictureAdd",
+    "en": "Add a picture",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.pictureRemove",
+    "en": "Remove the picture",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.pictureAlt",
+    "en": "Your picture",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.pictureStored",
+    "en": "(photo)",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.pictureUnreadable",
+    "en": "That picture can't be used. Try another one.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.pictureReading",
+    "en": "Getting the picture ready",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.picturesOff",
+    "en": "Pictures aren't available right now. You can still write to Bo.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.pictureLimit",
+    "en": "That's all of today's pictures. You can still write to Bo.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.pictureConsentTitle",
+    "en": "Before your first picture",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.pictureConsentBody",
+    "en": "[Placeholder, not final: this text isn't approved yet.]\n\nYour picture goes to Anthropic so Bo can reply. We don't store it. Pictures are automatically checked against lists of known child sexual abuse material, and Anthropic reports matches to the authorities.\n\nPlease don't send pictures of other people without their agreement, or anything medical.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.pictureConsentAccept",
+    "en": "Continue",
+    "reason": "UX draft (native read pending)"
   }
 ]

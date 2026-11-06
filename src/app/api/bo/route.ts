@@ -1,5 +1,5 @@
 import { FunctionsHttpError } from "@supabase/supabase-js";
-import { BO_SERVER_WAIT_MS, boErrorOutcome, parseBoSend, parseBoStatus } from "@/lib/journal/bo";
+import { BO_SERVER_WAIT_MS, boErrorOutcome, boPictureField, parseBoSend, parseBoStatus } from "@/lib/journal/bo";
 import { isUuid } from "@/lib/journal/reflect";
 import { pageGate } from "@/lib/conditions";
 import { regionTokenFor } from "@/lib/regionToken";
@@ -29,7 +29,7 @@ const json = (body: unknown, status = 200) => Response.json(body, { status, head
 export async function POST(req: Request): Promise<Response> {
   if (pageGate("bo-live") === "hidden") return new Response(null, { status: 404 });
   if (!sameOrigin(req)) return json({ status: "error", code: "invalid_value" }, 403);
-  let input: { action?: unknown; client_key?: unknown; text?: unknown };
+  let input: { action?: unknown; client_key?: unknown; text?: unknown; picture?: unknown };
   try {
     input = (await req.json()) as typeof input;
   } catch {
@@ -51,11 +51,16 @@ export async function POST(req: Request): Promise<Response> {
   if (send && (!isUuid(input.client_key) || typeof input.text !== "string")) return json({ status: "error", code: "invalid_value" }, 400);
   if (!send && input.action !== "status") return json({ status: "error", code: "invalid_value" }, 400);
 
+  // A picture only where its flag allows, and only as the browser's re-encoded JPEG. The
+  // function checks it again, and it goes no further than that call: never logged.
+  const picture = send && input.picture !== undefined ? boPictureField(input.picture) : undefined;
+  if (send && input.picture !== undefined && (!picture || pageGate("bo-pictures-live") === "hidden")) return json({ status: "error", code: "invalid_value" }, 400);
+
   const region_token = regionTokenFor(req.headers);
   let answer: Awaited<ReturnType<typeof supabase.functions.invoke>>;
   try {
     answer = await supabase.functions.invoke("bo", {
-      body: send ? { action: "send", client_key: input.client_key, region_token, text: input.text } : { action: "status", region_token },
+      body: send ? { action: "send", client_key: input.client_key, region_token, text: input.text, ...(picture ? { picture } : {}) } : { action: "status", region_token },
       headers: { Authorization: `Bearer ${token}` },
       timeout: BO_SERVER_WAIT_MS,
     });

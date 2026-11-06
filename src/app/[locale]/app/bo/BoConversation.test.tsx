@@ -6,6 +6,9 @@ import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
 import { boCardMayOpen, type BoMessage } from "@/lib/journal/bo";
 import { BoConversation } from "./BoConversation";
 
+const prepare = vi.fn(async (_file: File): Promise<unknown> => ({ ok: true, blob: new Blob(["jpeg"]), base64: "QUJD", width: 10, height: 10 }));
+vi.mock("@/lib/journal/boPicture", () => ({ BO_PICTURE_ACCEPT: "image/jpeg", preparePicture: (file: File) => prepare(file) }));
+
 const give = vi.fn(async () => ({ ok: true }));
 const report = vi.fn(async (_reply: object) => ({ ok: true }));
 const clear = vi.fn(async () => ({ ok: true }));
@@ -52,10 +55,10 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-async function open(initial: BoMessage[] = [], consented = true) {
+async function open(initial: BoMessage[] = [], consented = true, picturesAllowed = false) {
   render(
     <NextIntlClientProvider locale="en" messages={messages}>
-      <BoConversation initial={initial} country="NZ" healthData consented={consented} />
+      <BoConversation initial={initial} country="NZ" healthData consented={consented} picturesAllowed={picturesAllowed} />
     </NextIntlClientProvider>,
   );
   await waitFor(() => expect(calls.some((c) => c.action === "status")).toBe(true));
@@ -341,6 +344,121 @@ describe("BoConversation", () => {
     expect(screen.queryByTestId("bo-full")).toBeNull();
     expect(screen.queryByText("Earlier")).toBeNull();
     expect(screen.getByText(b.firstLine)).toBeInTheDocument();
+  });
+
+  describe("pictures", () => {
+    const offered = { ...ok, pictures: true };
+    const fileIn = (name = "x.jpg") => fireEvent.change(screen.getByTestId("bo-picture-input"), { target: { files: [new File(["x"], name, { type: "image/jpeg" })] } });
+    const choose = async () => {
+      fireEvent.click(screen.getByTestId("bo-picture-add"));
+      fireEvent.click(screen.getByTestId("bo-picture-consent-accept"));
+      fileIn();
+      await act(async () => {});
+    };
+    beforeEach(() => {
+      statusAnswer = offered;
+      URL.createObjectURL = vi.fn(() => "blob:made-here");
+      URL.revokeObjectURL = vi.fn();
+    });
+
+    it("not offered unless both the flag and the function say so", async () => {
+      await open([], true, true);
+      expect(screen.getByTestId("bo-picture-add")).toBeInTheDocument();
+      cleanup();
+      await open([], true, false);
+      expect(screen.queryByTestId("bo-picture-add")).toBeNull();
+      cleanup();
+      statusAnswer = ok;
+      await open([], true, true);
+      expect(screen.queryByTestId("bo-picture-add")).toBeNull();
+    });
+
+    it("a file input with no capture, so no camera", async () => {
+      await open([], true, true);
+      expect(screen.getByTestId("bo-picture-input")).not.toHaveAttribute("capture");
+      expect(screen.getByTestId("bo-picture-input")).toHaveAttribute("type", "file");
+    });
+
+    it("the first picture has its own moment; declining sends nothing, and text still works", async () => {
+      await open([], true, true);
+      fireEvent.click(screen.getByTestId("bo-picture-add"));
+      expect(screen.getByTestId("bo-picture-consent-body")).toHaveTextContent("Anthropic");
+      fireEvent.click(screen.getByTestId("bo-picture-consent-decline"));
+      expect(screen.queryByTestId("bo-picture-consent")).toBeNull();
+      expect(screen.queryByTestId("bo-picture-preview")).toBeNull();
+      expect(sends()).toHaveLength(0);
+      answers.push(reply());
+      type("Hello");
+      await send();
+      expect(sends()[0]).not.toHaveProperty("picture");
+    });
+
+    it("sends only the re-encoded bytes, with no file name; shown for the visit; text is optional", async () => {
+      await open([], true, true);
+      await choose();
+      expect(screen.getByTestId("bo-picture-preview")).toHaveAttribute("src", "blob:made-here");
+      answers.push(reply());
+      await send();
+      expect(sends()[0]).toMatchObject({ text: "", picture: { media_type: "image/jpeg", data: "QUJD" } });
+      expect(JSON.stringify(sends()[0])).not.toContain("x.jpg");
+      expect(screen.getByTestId("bo-message-picture")).toHaveAttribute("src", "blob:made-here");
+      expect(screen.queryByTestId("bo-picture-preview")).toBeNull();
+    });
+
+    it("what can't be decoded gets the kind line, and nothing goes out", async () => {
+      prepare.mockResolvedValueOnce({ ok: false });
+      await open([], true, true);
+      await choose();
+      expect(screen.getByTestId("bo-picture-unreadable")).toHaveTextContent(b.pictureUnreadable);
+      expect(screen.getByTestId("bo-send")).toBeDisabled();
+      expect(sends()).toHaveLength(0);
+    });
+
+    it("a retry sends the same key and the picture again", async () => {
+      await open([], true, true);
+      await choose();
+      answers.push({ status: "error", code: "bo_failed" }, reply());
+      await send();
+      fireEvent.click(screen.getByTestId("bo-retry"));
+      await act(async () => {});
+      expect(sends()[1].client_key).toBe(sends()[0].client_key);
+      expect(sends()[1]).toHaveProperty("picture");
+    });
+
+    it("the day's pictures used, or pictures off: the line, help, and the text can still go", async () => {
+      await open([], true, true);
+      await choose();
+      answers.push({ status: "error", code: "picture_limit" });
+      type("Hello");
+      await send();
+      expect(screen.getByTestId("bo-problem")).toHaveTextContent(b.pictureLimit);
+      expect(screen.queryByTestId("bo-picture-preview")).toBeNull();
+      expect(screen.getByTestId("bo-text")).toHaveValue("Hello");
+      expect(screen.getByTestId("bo-get-help")).toBeInTheDocument();
+    });
+
+    it("crisis words with a picture still open the card", async () => {
+      await open([], true, true);
+      await choose();
+      answers.push(reply());
+      type(flagged);
+      await send();
+      expect(screen.getByTestId("safety-card")).toBeInTheDocument();
+    });
+
+    it("after a reload: the placeholder, never a picture", async () => {
+      await open([{ id: "1", author: "person", body: "", hasPicture: true }], true, true);
+      expect(screen.getByTestId("bo-message-photo")).toHaveTextContent(b.pictureStored);
+      expect(screen.queryByTestId("bo-message-picture")).toBeNull();
+    });
+
+    it("the object URLs go with the screen, and nothing reaches browser storage", async () => {
+      await open([], true, true);
+      await choose();
+      expect(localStorage.length + sessionStorage.length).toBe(0);
+      cleanup();
+      expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:made-here");
+    });
   });
 
   it("the card doesn't reopen within ten minutes, and does after", () => {

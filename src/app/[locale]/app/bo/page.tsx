@@ -37,16 +37,17 @@ export default async function BoPage({ params }: PageProps<"/[locale]/app/bo">) 
   if (!supabase || !user) return <JournalUnavailable />;
   const me = await getMe(supabase);
   if (!me) return <BoUnavailable country={null} />;
-  const { data, error } = await supabase.from("bo_messages").select("id, author, body").order("created_at", { ascending: false }).limit(BO_HISTORY_SHOWN);
+  const { data, error } = await supabase.from("bo_messages").select("id, author, body, has_picture").order("created_at", { ascending: false }).limit(BO_HISTORY_SHOWN);
   if (error) return <BoUnavailable country={me.profile?.country} />;
   const tag = dateLocale(locale, (await headers()).get("accept-language"), me.profile?.country ?? null);
   return (
     <BoConversation
       key={user.id}
-      initial={((data ?? []) as BoMessage[]).toReversed()}
+      initial={((data ?? []) as (BoMessage & { has_picture?: boolean })[]).toReversed().map(({ has_picture, ...m }) => ({ ...m, hasPicture: has_picture === true }))}
       country={me.profile?.country}
       healthData={conditionMet("consumer-health-data-approved")}
       consented={hasCurrentConsent(me, "ai") && hasCurrentConsent(me, "age_18")}
+      picturesAllowed={pageGate("bo-pictures-live") !== "hidden"}
       back={<BackLink href="/app" label={await backLabel("/app", tag)} testId="nav-back" />}
     />
   );

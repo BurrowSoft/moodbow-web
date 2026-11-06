@@ -609,6 +609,17 @@
     "consentDecline": "Ahora no",
     "consentFailed": "No se guardó. Inténtalo de nuevo.",
     "useBo": "Usar Bo",
-    "journalSwitchNote": "[Placeholder, not final: this text isn't approved yet.] When this is on, your check-ins and entries from the last 7 days go to Anthropic with each message."
+    "journalSwitchNote": "[Placeholder, not final: this text isn't approved yet.] When this is on, your check-ins and entries from the last 7 days go to Anthropic with each message.",
+    "pictureAdd": "Add a picture",
+    "pictureRemove": "Remove the picture",
+    "pictureAlt": "Your picture",
+    "pictureStored": "(photo)",
+    "pictureUnreadable": "That picture can't be used. Try another one.",
+    "pictureReading": "Getting the picture ready",
+    "picturesOff": "Pictures aren't available right now. You can still write to Bo.",
+    "pictureLimit": "That's all of today's pictures. You can still write to Bo.",
+    "pictureConsentTitle": "Before your first picture",
+    "pictureConsentBody": "[Placeholder, not final: this text isn't approved yet.]\n\nYour picture goes to Anthropic so Bo can reply. We don't store it. Pictures are automatically checked against lists of known child sexual abuse material, and Anthropic reports matches to the authorities.\n\nPlease don't send pictures of other people without their agreement, or anything medical.",
+    "pictureConsentAccept": "Continue"
   }
 }

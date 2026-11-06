@@ -4,10 +4,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { BO_CLIENT_WAIT_MS, BO_ERRORS, BO_SERVER_WAIT_MS } from "@/lib/journal/bo";
 
 let gate = "draft";
+let pictureGate = "draft";
 const invoke = vi.fn();
 const rpc = vi.fn();
 let session: { access_token: string } | null = { access_token: "the-session" };
-vi.mock("@/lib/conditions", () => ({ pageGate: () => gate }));
+vi.mock("@/lib/conditions", () => ({ pageGate: (id: string) => (id === "bo-pictures-live" ? pictureGate : gate) }));
 vi.mock("@/lib/supabase/server", () => ({
   createSupabaseServerClient: async () => ({ auth: { getSession: async () => ({ data: { session } }) }, functions: { invoke: (...a: unknown[]) => invoke(...a) }, rpc: (...a: unknown[]) => rpc(...a) }),
 }));
@@ -20,6 +21,7 @@ const httpError = (status: number, body: unknown) => new FunctionsHttpError(new 
 
 beforeEach(() => {
   gate = "draft";
+  pictureGate = "draft";
   session = { access_token: "the-session" };
   invoke.mockReset();
   rpc.mockReset();
@@ -27,6 +29,36 @@ beforeEach(() => {
 });
 afterEach(() => {
   vi.unstubAllEnvs();
+});
+
+describe("POST /api/bo: a picture", () => {
+  const picture = { media_type: "image/jpeg", data: "QUJD" };
+  const send = (extra: object) => post({ action: "send", client_key: KEY, text: "", ...extra });
+
+  it("goes through as the function expects, and only that", async () => {
+    invoke.mockResolvedValue({ data: { reply: "ok" }, error: null });
+    await send({ picture: { ...picture, name: "secret.jpg", exif: "x" } });
+    expect(invoke.mock.calls[0][1].body.picture).toEqual(picture);
+  });
+
+  it("no picture field unless one was sent", async () => {
+    invoke.mockResolvedValue({ data: { reply: "ok" }, error: null });
+    await send({});
+    expect(invoke.mock.calls[0][1].body).not.toHaveProperty("picture");
+  });
+
+  it("anything but a JPEG, an empty one, or too large: invalid_value, and calls nothing", async () => {
+    for (const bad of [{ media_type: "image/png", data: "QUJD" }, { media_type: "image/jpeg", data: "" }, { media_type: "image/jpeg", data: "x".repeat(1_400_001) }, "text"]) {
+      expect((await send({ picture: bad })).status).toBe(400);
+    }
+    expect(invoke).not.toHaveBeenCalled();
+  });
+
+  it("behind its own flag, even with Bo on", async () => {
+    pictureGate = "hidden";
+    expect((await send({ picture })).status).toBe(400);
+    expect(invoke).not.toHaveBeenCalled();
+  });
 });
 
 describe("POST /api/bo: who may call", () => {

@@ -2,12 +2,14 @@
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
+import { Dialog, dialogButton } from "@/components/Dialog";
 import { GetHelpNow, SafetyCard } from "@/components/SafetyCard";
 import { BoConsent } from "./BoConsent";
 import { BoReply } from "./BoReply";
 import { ClearBo } from "./ClearBo";
 import { Link } from "@/i18n/navigation";
 import { BO_CLIENT_WAIT_MS, BO_DEFAULT_MAX_CHARS, BO_ERROR_TEXT, BO_WAIT_RETRY_MS, boCardMayOpen, type BoMessage, type BoProblem, type BoSend, type BoStatus } from "@/lib/journal/bo";
+import { BO_PICTURE_ACCEPT, preparePicture } from "@/lib/journal/boPicture";
 import { flagsCrisis } from "@/lib/safety/crisis";
 import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
 import { PRIMARY_SAVE } from "@/lib/ui/journalLayout";
@@ -34,7 +36,7 @@ async function callBo<T>(body: object): Promise<T | { status: "no_answer" }> {
 // with a back link, on a wider one the tabs stay (UX), through the mark on the root
 // (globals.css), as SignedInMark does. The footer goes in both, so this page carries
 // the Consumer Health Data link itself: it collects personal information (Footer).
-export function BoConversation({ initial, country, back, healthData = false, consented = true }: { initial: BoMessage[]; country: string | null | undefined; back?: ReactNode; healthData?: boolean; consented?: boolean }) {
+export function BoConversation({ initial, country, back, healthData = false, consented = true, picturesAllowed = false }: { initial: BoMessage[]; country: string | null | undefined; back?: ReactNode; healthData?: boolean; consented?: boolean; picturesAllowed?: boolean }) {
   const t = useTranslations("bo");
   const tc = useTranslations("common");
   const tm = useTranslations("me");
@@ -57,8 +59,23 @@ export function BoConversation({ initial, country, back, healthData = false, con
   // The page's read, and the function's answer on a send. The text stays, for after a yes.
   const [needsConsent, setNeedsConsent] = useState(!consented);
   const consentGiven = useCallback(() => setNeedsConsent(false), []);
+  // Pictures: offered only when the flag allows and the function says so. One per message,
+  // in memory only, shown for this visit; the object URLs go with the screen.
+  const [picturesOffered, setPicturesOffered] = useState(false);
+  const [picture, setPicture] = useState<{ url: string; base64: string } | null>(null);
+  const [pictureState, setPictureState] = useState<"idle" | "reading" | "unreadable">("idle");
+  const [pictureConsent, setPictureConsent] = useState<"not-yet" | "asking" | "given">("not-yet");
+  const closePictureConsent = useCallback(() => setPictureConsent("not-yet"), []);
+  const pictureInput = useRef<HTMLInputElement>(null);
+  const objectUrls = useRef<string[]>([]);
+  useEffect(() => {
+    const urls = objectUrls.current;
+    return () => {
+      for (const url of urls) URL.revokeObjectURL(url);
+    };
+  }, []);
   // A retry of the same message keeps its key, so it can't be answered or saved twice.
-  const attempt = useRef<{ key: string; text: string } | null>(null);
+  const attempt = useRef<{ key: string; text: string; picture?: string } | null>(null);
   const cardOpenedAt = useRef<number | null>(null);
   const end = useRef<HTMLDivElement>(null);
 
@@ -73,6 +90,7 @@ export function BoConversation({ initial, country, back, healthData = false, con
   const showStatus = useCallback((status: BoStatus | { status: "no_answer" }) => {
     if (status.status === "ok") {
       setMaxChars(status.maxChars);
+      setPicturesOffered(status.pictures);
       setProblem(status.available ? null : "region_unknown");
     } else if (status.status === "error") {
       if (status.code === "not_authenticated") window.location.reload();
@@ -112,7 +130,7 @@ export function BoConversation({ initial, country, back, healthData = false, con
 
   const tooLong = [...text].length > maxChars;
   const closed = problem !== null && CLOSED.includes(problem);
-  const canSend = text.trim() !== "" && !tooLong && !sending && !closed;
+  const canSend = (text.trim() !== "" || picture !== null) && !tooLong && !sending && !closed && pictureState !== "reading";
 
   // Over the limit the server stops before its crisis check, and Send is off, so
   // this is the only check that text gets: once, when it crosses (Mobile Dev, H10).
@@ -128,18 +146,21 @@ export function BoConversation({ initial, country, back, healthData = false, con
     const sent = text;
     // Before any request: the card needs no network (as for entries, #190).
     if (flagsCrisis(sent, CRISIS_KEYWORDS)) openCard();
-    if (attempt.current?.text !== sent) attempt.current = { key: crypto.randomUUID(), text: sent };
+    if (attempt.current?.text !== sent || attempt.current.picture !== picture?.base64) attempt.current = { key: crypto.randomUUID(), text: sent, picture: picture?.base64 };
     // Known to be offline: no request. navigator.onLine can also say online with no
     // connection, and that ends as no_answer.
     if (!navigator.onLine) return setProblem("offline");
     const client_key = attempt.current.key;
     setSending(true);
     setProblem(null);
-    let answer = await callBo<BoSend>({ action: "send", client_key, text: sent });
+    // A retry sends the picture again: the function checks the key first, and ignores it
+    // on a turn it already has (bo.md).
+    const body = { action: "send", client_key, text: sent, ...(picture ? { picture: { media_type: "image/jpeg", data: picture.base64 } } : {}) };
+    let answer = await callBo<BoSend>(body);
     // Another send of this key is running: wait, and retry once (bo.md).
     if (answer.status === "error" && answer.code === "in_progress") {
       await new Promise((done) => setTimeout(done, BO_WAIT_RETRY_MS));
-      answer = await callBo<BoSend>({ action: "send", client_key, text: sent });
+      answer = await callBo<BoSend>(body);
     }
     setSending(false);
     if (answer.status === "ok") {
@@ -147,7 +168,9 @@ export function BoConversation({ initial, country, back, healthData = false, con
       if (answer.showNotice) setNoticeShows((n) => n + 1);
       setFull(answer.conversationFull);
       const { reply, conversationFull } = answer;
-      setMessages((list) => [...list, { id: client_key, author: "person", body: sent }, { id: `${client_key}-reply`, author: "ai", body: reply, sentWith: client_key, unkept: conversationFull }]);
+      const pictureUrl = picture?.url;
+      setPicture(null);
+      setMessages((list) => [...list, { id: client_key, author: "person", body: sent, pictureUrl }, { id: `${client_key}-reply`, author: "ai", body: reply, sentWith: client_key, unkept: conversationFull }]);
       setText("");
       attempt.current = null;
       return;
@@ -157,7 +180,33 @@ export function BoConversation({ initial, country, back, healthData = false, con
     if (answer.code === "not_authenticated") return window.location.reload();
     // Nothing was sent or stored (bo.md).
     if (answer.code === "ai_consent_required") return setNeedsConsent(true);
+    // The text can still go, without the picture.
+    if (answer.code === "pictures_off" || answer.code === "pictures_need_email" || answer.code === "picture_limit") {
+      setPicture(null);
+      if (answer.code !== "picture_limit") setPicturesOffered(false);
+    }
     setProblem(answer.code);
+  };
+
+  const choosePicture = async (file: File | undefined) => {
+    if (!file) return;
+    setPictureState("reading");
+    const made = await preparePicture(file);
+    if (!made.ok) {
+      setPicture(null);
+      return setPictureState("unreadable");
+    }
+    const url = URL.createObjectURL(made.blob);
+    objectUrls.current.push(url);
+    setPicture({ url, base64: made.base64 });
+    setPictureState("idle");
+  };
+
+  // Its own moment, before the first picture of a visit. Declining sends nothing, and
+  // text still works.
+  const addPicture = () => {
+    if (pictureConsent === "given") pictureInput.current?.click();
+    else setPictureConsent("asking");
   };
 
   const retry = () => void (closed || text.trim() === "" ? callBo<BoStatus>({ action: "status" }).then(showStatus) : send());
@@ -186,9 +235,16 @@ export function BoConversation({ initial, country, back, healthData = false, con
           m.author === "ai" ? (
             <BoReply key={m.id} message={m} className={bubble("ai")} />
           ) : (
-            <p key={m.id} data-testid="bo-message-person" className={bubble("person")}>
+            <div key={m.id} data-testid="bo-message-person" className={bubble("person")}>
+              {m.pictureUrl ? (
+                // A blob of this visit's, which an image optimiser can't take.
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={m.pictureUrl} alt={t("pictureAlt")} data-testid="bo-message-picture" className="mb-[8px] max-h-[240px] max-w-full rounded-xl" />
+              ) : (
+                m.hasPicture && <p data-testid="bo-message-photo" className="text-sm text-muted">{t("pictureStored")}</p>
+              )}
               {m.body}
-            </p>
+            </div>
           ),
         )}
         {sending && (
@@ -250,10 +306,52 @@ export function BoConversation({ initial, country, back, healthData = false, con
             onChange={(e) => change(e.target.value)}
             className="w-full rounded-2xl border border-border bg-surface p-[12px] text-text"
           />
+          {picturesAllowed && picturesOffered && (
+            <div className="flex flex-wrap items-center gap-[12px]">
+              {/* No capture, so no camera; nothing asks for a browser permission. */}
+              <input ref={pictureInput} type="file" accept={BO_PICTURE_ACCEPT} data-testid="bo-picture-input" className="hidden" aria-hidden="true" tabIndex={-1} onChange={(e) => {
+                void choosePicture(e.target.files?.[0]);
+                e.target.value = "";
+              }} />
+              {picture ? (
+                <>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={picture.url} alt={t("pictureAlt")} data-testid="bo-picture-preview" className="max-h-[96px] max-w-full rounded-xl" />
+                  <button type="button" data-testid="bo-picture-remove" onClick={() => setPicture(null)} className={dialogButton()}>
+                    {t("pictureRemove")}
+                  </button>
+                </>
+              ) : (
+                <button type="button" data-testid="bo-picture-add" disabled={pictureState === "reading"} onClick={addPicture} className={dialogButton()}>
+                  {t("pictureAdd")}
+                </button>
+              )}
+              {pictureState === "reading" && <p role="status" className="text-sm text-muted">{t("pictureReading")}</p>}
+              {pictureState === "unreadable" && <p role="alert" data-testid="bo-picture-unreadable" className="text-sm text-text">{t("pictureUnreadable")}</p>}
+            </div>
+          )}
           <button type="submit" data-testid="bo-send" disabled={!canSend} className={PRIMARY_SAVE}>
             {t("send")}
           </button>
         </form>
+      )}
+      {pictureConsent === "asking" && (
+        <Dialog title={t("pictureConsentTitle")} details={<p data-testid="bo-picture-consent-body" className="whitespace-pre-line text-text">{t("pictureConsentBody")}</p>} onCancel={closePictureConsent} testId="bo-picture-consent">
+          <button type="button" data-testid="bo-picture-consent-decline" onClick={closePictureConsent} className={dialogButton()}>
+            {t("consentDecline")}
+          </button>
+          <button
+            type="button"
+            data-testid="bo-picture-consent-accept"
+            onClick={() => {
+              setPictureConsent("given");
+              pictureInput.current?.click();
+            }}
+            className={dialogButton(true)}
+          >
+            {t("pictureConsentAccept")}
+          </button>
+        </Dialog>
       )}
       {card && <SafetyCard country={country} onClose={closeCard} />}
     </div>

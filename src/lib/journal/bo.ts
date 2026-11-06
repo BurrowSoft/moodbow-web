@@ -56,7 +56,9 @@ export function parseBoStatus(data: unknown): BoStatus {
 
 // What this screen needs of a conversation: kept messages only, as plain text.
 // sentWith: a reply from this visit, found by its send's key; unkept: past the row cap.
-export type BoMessage = { id: string; author: "person" | "ai"; body: string; sentWith?: string; unkept?: boolean };
+// hasPicture: a kept message that came with a picture, which isn't stored or returned.
+// pictureUrl: this visit's own copy, in memory, gone with the screen.
+export type BoMessage = { id: string; author: "person" | "ai"; body: string; sentWith?: string; unkept?: boolean; hasPicture?: boolean; pictureUrl?: string };
 export type BoProblem = BoError | "no_answer" | "offline";
 
 export const BO_HISTORY_SHOWN = 200;
@@ -68,7 +70,7 @@ const BO_CARD_QUIET_MS = 10 * 60_000;
 export const boCardMayOpen = (openedAt: number | null, now: number) => openedAt === null || now - openedAt >= BO_CARD_QUIET_MS;
 
 // The line for each stop. The web has no anonymous sessions, so needs_email is
-// neutral here, and pictures aren't sent yet, so those are only a failed send.
+// neutral here, and pictures_need_email only reads as pictures being off.
 export const BO_ERROR_TEXT = {
   invalid_value: "tooLong",
   not_authenticated: "failed",
@@ -76,15 +78,24 @@ export const BO_ERROR_TEXT = {
   region_off: "regionOff",
   bo_unavailable: "unavailable",
   needs_email: "unavailable",
-  pictures_off: "failed",
-  pictures_need_email: "failed",
+  pictures_off: "picturesOff",
+  pictures_need_email: "picturesOff",
   in_progress: "wait",
   rate_limited: "wait",
   daily_limit: "dailyLimit",
-  picture_limit: "failed",
+  picture_limit: "pictureLimit",
   region_unknown: "regionUnknown",
   bo_resting: "resting",
   bo_failed: "failed",
   no_answer: "failed",
   offline: "offline",
 } as const satisfies Record<BoProblem, string>;
+
+// The picture field as the function expects it, or nothing. The function caps a whole
+// request at 1,500,000 bytes (bo.md), and the browser's is under that with room to spare.
+const BO_PICTURE_MAX_BASE64 = 1_400_000;
+export function boPictureField(value: unknown): { media_type: "image/jpeg"; data: string } | null {
+  const v = (value ?? {}) as { media_type?: unknown; data?: unknown };
+  if (v.media_type !== "image/jpeg" || typeof v.data !== "string" || v.data === "" || v.data.length > BO_PICTURE_MAX_BASE64) return null;
+  return { media_type: "image/jpeg", data: v.data };
+}
