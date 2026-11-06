@@ -15,8 +15,10 @@ const BUTTON =
 const noSubscribe = () => () => {};
 const platform = () => (/Android/i.test(navigator.userAgent) ? "android" : isIos(navigator.userAgent, navigator.maxTouchPoints) ? "ios" : "other");
 
-// Already in, on the way in, or where the button itself leads.
-const staysHidden = (path: string) => path === "/welcome" || path === "/setup" || path === "/app" || path.startsWith("/app/");
+// Already in, or mid sign-up, sign-in or a reset, where it's a link away from
+// what the person is doing (UX & PM, Reviewer #192).
+const MID_FLOW = ["/welcome", "/consent", "/sign-up", "/sign-in", "/forgot-password", "/email-confirmed", "/setup"];
+const staysHidden = (path: string) => MID_FLOW.includes(path) || path === "/app" || path.startsWith("/app/") || path.startsWith("/auth/");
 
 // "Try the app" in the footer, on phone widths only (Vitor, UX & PM 2026-11-06).
 // The web journal's start for now; each phone goes to its own store once that

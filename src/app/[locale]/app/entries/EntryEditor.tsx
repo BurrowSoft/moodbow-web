@@ -408,8 +408,9 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
 
   // A save that lands after the wait (Web Tester, #190 R6): its error would
   // say it failed, so it goes, and this is the version edits start from. The
-  // editor stays: the person may have moved on to something else by now. Only
-  // the latest press counts; a newer one has its own answer coming.
+  // editor stays: the person may have moved on to something else by now, and a
+  // screen reader hears "Saved" (UX). Only the latest press counts; a newer one
+  // has its own answer coming.
   const [landedLate, setLandedLate] = useState(false);
   const latestForm = useRef<FormData | null>(null);
   const hearLateAnswer = (call: Promise<EntryState>, form: FormData) => {
@@ -423,6 +424,7 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
         setBase(late.entry.updated_at);
         setSaved(fromEntry(late.entry));
         setLandedLate(true);
+        announce?.(tt("checkinSaved"));
         if (same(current.current, sent)) removeDraft(draftKey);
         else if (!signedOut.current && !finished.current) writeDraft(draftKey, { ...current.current, base: late.entry.updated_at });
       })

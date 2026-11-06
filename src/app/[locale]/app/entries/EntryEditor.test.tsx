@@ -182,6 +182,22 @@ describe("EntryEditor: a new entry", () => {
       expect(sent(1)).toMatchObject({ body: "Slow, and more", expected_updated_at: "2026-10-02T11:00:00Z" });
     });
 
+    it("screen readers hear Saved, once", async () => {
+      const announce = vi.fn();
+      render(
+        <NextIntlClientProvider locale="en" messages={messages}>
+          <AnnounceContext.Provider value={announce}>
+            <EntryEditor initial={null} newId={NEW_ID} uid="u1" today="2026-10-02" />
+          </AnnounceContext.Provider>
+        </NextIntlClientProvider>,
+      );
+      const { answer } = await waitOut("Slow");
+      expect(announce).not.toHaveBeenCalled();
+      await act(async () => answer(late("Slow")));
+      await waitFor(() => expect(announce).toHaveBeenCalledWith(messages.today.checkinSaved));
+      expect(announce).toHaveBeenCalledTimes(1);
+    });
+
     it("typed since: the newer text stays as a draft on top of that version", async () => {
       renderEditor();
       const { answer } = await waitOut("Slow");

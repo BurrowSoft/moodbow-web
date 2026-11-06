@@ -72,12 +72,12 @@ describe("TryAppButton", () => {
     expect(setup(ANDROID, ON)?.getAttribute("href")).not.toMatch(/^intent:/);
   });
 
-  it.each(["/app", "/app/me", "/app/entries/x", "/setup", "/welcome"])("%s: not shown", (p) => {
+  it.each(["/app", "/app/me", "/app/entries/x", "/setup", "/welcome", "/consent", "/sign-up", "/sign-in", "/forgot-password", "/email-confirmed", "/auth/reset-password", "/auth/confirm"])("%s: not shown", (p) => {
     path = p;
     expect(setup(ANDROID, ON)).toBeNull();
   });
 
-  it.each(["/", "/help", "/privacy", "/terms", "/sign-in", "/sign-up", "/appstore"])("%s: shown", (p) => {
+  it.each(["/", "/help", "/help/widget", "/privacy", "/terms", "/support", "/account-deletion", "/appstore"])("%s: shown", (p) => {
     path = p;
     expect(setup(ANDROID)).not.toBeNull();
   });
