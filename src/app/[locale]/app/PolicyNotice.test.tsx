@@ -3,6 +3,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import messages from "@/messages/en.json";
 import { policyNoticeDate, policyNoticeToShow } from "@/lib/journal/policyNotice";
+import { dateInSentence } from "@/lib/journal/today";
 import { PolicyNotice } from "./PolicyNotice";
 
 const dismiss = vi.fn(async (_id: string) => ({ ok: true }));
@@ -45,6 +46,15 @@ describe("policyNoticeDate", () => {
     expect(policyNoticeDate("2026-12-01-bo")).toBe("2026-12-01");
     expect(policyNoticeDate("bo-privacy")).toBeNull();
     expect(policyNoticeDate("2026-13-45-bo")).toBeNull();
+  });
+});
+
+describe("the date in the sentence", () => {
+  it("has no weekday, and each language's first of the month", () => {
+    expect(dateInSentence("2026-12-01", "en-NZ")).toBe("1 December 2026");
+    expect(dateInSentence("2026-12-01", "fr-FR")).toBe("1er décembre 2026");
+    expect(dateInSentence("2026-12-01", "es-MX")).toBe("1 de diciembre de 2026");
+    expect(dateInSentence("2026-12-01", "pt-BR")).toBe("1º de dezembro de 2026");
   });
 });
 

@@ -13,7 +13,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { JournalUnavailable } from "@/components/JournalUnavailable";
 import { isAuthOutage } from "@/lib/supabase/proxy";
 import { policyNoticeDate, policyNoticeToShow } from "@/lib/journal/policyNotice";
-import { dateLine, dateLocale } from "@/lib/journal/today";
+import { dateInSentence, dateLocale } from "@/lib/journal/today";
 import { headers } from "next/headers";
 import { AnnouncerProvider } from "./Announcer";
 import { PolicyNotice } from "./PolicyNotice";
@@ -56,7 +56,7 @@ export default async function AppLayout({ children, params }: LayoutProps<"/[loc
 
   const noticeId = policyNoticeToShow(me);
   const noticeDate = noticeId && policyNoticeDate(noticeId);
-  const noticeDateLine = noticeDate ? dateLine(noticeDate, dateLocale(locale, (await headers()).get("accept-language"), me.profile?.country ?? null)) : null;
+  const noticeDateLine = noticeDate ? dateInSentence(noticeDate, dateLocale(locale, (await headers()).get("accept-language"), me.profile?.country ?? null)) : null;
 
   // The journal's client components get every message (the root layout sends
   // only the public namespaces, perf fix 3).

@@ -216,10 +216,10 @@
     "tryAgain": "Reintentar",
     "slowLoading": "Está tardando más de lo normal…",
     "navBackTo": "Volver a {screen}",
-    "policyNoticeTitle": "Estamos actualizando nuestra política de privacidad",
+    "policyNoticeTitle": "Estamos actualizando nuestra Política de privacidad",
     "policyNoticeBody": "Incluirá a Bo, nuestra IA opcional, y será más clara sobre quién puede leer tu diario y qué pasa si pierdes el acceso.",
     "policyNoticeApplies": "Los cambios se aplican el {date}.",
-    "policyNoticeRead": "Leer la política",
+    "policyNoticeRead": "Leer la Política de privacidad",
     "policyNoticeDismiss": "Entendido"
   },
   "today": {

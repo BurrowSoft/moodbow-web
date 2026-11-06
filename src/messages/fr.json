@@ -216,10 +216,10 @@
     "tryAgain": "Réessayer",
     "slowLoading": "Cela prend plus de temps que d'habitude…",
     "navBackTo": "Retour à {screen}",
-    "policyNoticeTitle": "Nous mettons à jour notre politique de confidentialité",
+    "policyNoticeTitle": "Nous mettons à jour notre Politique de confidentialité",
     "policyNoticeBody": "Elle couvrira Bo, notre IA facultative, et sera plus claire sur qui peut lire votre journal et ce qui se passe si vous n'y avez plus accès.",
     "policyNoticeApplies": "Les changements s'appliquent le {date}.",
-    "policyNoticeRead": "Lire la politique",
+    "policyNoticeRead": "Lire la Politique de confidentialité",
     "policyNoticeDismiss": "Compris"
   },
   "today": {
