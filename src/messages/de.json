@@ -35,7 +35,8 @@
     "privacy": "Datenschutz",
     "terms": "Nutzungsbedingungen",
     "draftBanner": "Entwurf, nicht in Kraft. Diese Seite ist nur in Test-Builds sichtbar.",
-    "opensInNewTab": "(öffnet in einem neuen Tab)"
+    "opensInNewTab": "(öffnet in einem neuen Tab)",
+    "consumerHealthData": "Datenschutzrichtlinie für Verbrauchergesundheitsdaten"
   },
   "home": {
     "comingSoon": "Bald verfügbar",
@@ -129,6 +130,10 @@
   "terms": {
     "title": "Nutzungsbedingungen",
     "description": "Die Bedingungen für die Nutzung von Moodbow."
+  },
+  "consumerHealthData": {
+    "title": "Datenschutzrichtlinie für Verbrauchergesundheitsdaten",
+    "description": "Wie Moodbow mit deinen Daten umgeht."
   },
   "legal": {
     "hiddenTitle": "Noch nicht sichtbar: Jeder Abschnitt erscheint, sobald seine Funktion live ist (nur Test-Builds)",

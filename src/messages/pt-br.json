@@ -35,7 +35,8 @@
     "privacy": "Privacidade",
     "terms": "Termos",
     "draftBanner": "Rascunho, sem validade. Esta página só aparece em versões de teste.",
-    "opensInNewTab": "(abre em uma nova aba)"
+    "opensInNewTab": "(abre em uma nova aba)",
+    "consumerHealthData": "Política de privacidade de dados de saúde do consumidor"
   },
   "home": {
     "comingSoon": "Em breve",
@@ -129,6 +130,10 @@
   "terms": {
     "title": "Termos de Uso",
     "description": "Os termos para usar o Moodbow."
+  },
+  "consumerHealthData": {
+    "title": "Política de privacidade de dados de saúde do consumidor",
+    "description": "Como o Moodbow cuida dos seus dados."
   },
   "legal": {
     "hiddenTitle": "Ainda não exibido: cada bloco aparece quando o recurso estiver no ar (só em versões de teste)",

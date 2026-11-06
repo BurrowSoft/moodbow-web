@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import conditions from "../content/conditions.json";
+import fr from "../src/messages/fr.json";
 
 // Smoke tests for the public site. They expect a test build, where gated
 // pages render as drafts: a Vercel Preview, or a local/CI build made with
@@ -289,6 +290,22 @@ test.describe("the live legal pages and account deletion (decision 164)", () => 
     await expect(article.getByTestId("legal-hidden")).toHaveCount(0);
     await page.goto("/terms");
     await expect(page.locator('[data-content="article"]')).not.toContainText("AI credits");
+  });
+
+  // RCW 19.373: the link must be on the homepage, and that means any page where
+  // personal information is collected.
+  test("the Consumer Health Data policy: its page, and its link on every page that collects anything", async ({ page }) => {
+    for (const path of ["/", "/welcome", "/consent", "/sign-in", "/forgot-password", "/help", "/support", "/privacy", "/terms", "/fr", "/fr/consent", "/es/sign-in"]) {
+      await page.goto(path);
+      await expect(page.getByRole("contentinfo").locator('a[href$="/consumer-health-data"]'), path).toBeVisible();
+    }
+    // Sign-up is reached through Consent.
+    await page.goto("/consumer-health-data");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Moodbow: Consumer Health Data Privacy Policy");
+    await expect(page.locator('[data-content="article"]')).toContainText("We answer within 45 days");
+    await page.goto("/fr/consumer-health-data");
+    await expect(page.getByTestId("page-notice")).toHaveText(fr.legal.legalEnglishOnly);
+    await expect(page.locator('[data-content="article"]')).toContainText("We answer within 45 days");
   });
 
   test("the footer links only live pages: account deletion, and the legal pages once live", async ({ page }) => {
@@ -605,6 +622,7 @@ test.describe("onboarding (signed out)", () => {
     await cont.click();
     await expect(page).toHaveURL(/\/sign-up$/);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Create your account");
+    await expect(page.getByRole("contentinfo").locator('a[href$="/consumer-health-data"]'), "sign-up has the health data link").toBeVisible();
   });
 
   // Decision 73: the whole way to an account works before JavaScript loads
