@@ -460,7 +460,17 @@
     "patternsStressShown": "An Tagen mit wenig Stress lag deine Stimmung im Schnitt bei {a} von 5. An Tagen mit viel Stress bei {b}.",
     "patternsStressSame": "An Tagen mit wenig und mit viel Stress war deine Stimmung etwa gleich ({a} und {b} von 5).",
     "patternsFootnote": "Das sind deine eigenen Check-ins nebeneinander. Sie zeigen vielleicht, was oft zusammen auftritt, aber nicht, was was auslöst.",
-    "patternsNone": "Muster erscheinen hier, sobald du mehr Check-ins mit Schlaf, Bewegung oder Stress hast."
+    "patternsNone": "Muster erscheinen hier, sobald du mehr Check-ins mit Schlaf, Bewegung oder Stress hast.",
+    "yourWeekTitle": "Deine Woche",
+    "yourWeekPatternSleep": "An Tagen mit mehr Schlaf war deine Stimmung besser.",
+    "yourWeekPatternMovement": "An aktiveren Tagen war deine Stimmung besser.",
+    "yourWeekPatternStress": "An stressärmeren Tagen war deine Stimmung besser.",
+    "yourWeekLookMoreGood": "Deine Woche hatte mehr gute als schlechte Tage.",
+    "yourWeekLookSteady": "Deine Woche war meist ausgeglichen.",
+    "yourWeekLookMixed": "Deine Woche hatte gute und schlechte Tage.",
+    "yourWeekMoment": "Ein Moment aus dieser Woche: {date}",
+    "yourWeekHard": "Das sah nach einer schweren Woche aus.",
+    "yourWeekCaption": "Das zeigt vielleicht, was oft zusammen auftritt, aber nicht, was was auslöst."
   },
   "share": {
     "shareButton": "Teilen",

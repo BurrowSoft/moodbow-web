@@ -1,6 +1,7 @@
 import { randomBytes } from "node:crypto";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { consentItem } from "../../src/lib/legalVersions";
+import { lastWeekStart } from "../../src/lib/journal/report";
 import { grantedAtConsent } from "../../src/lib/onboardingConsent";
 
 // Staging-only helpers for the launch journeys. Rules (UX & PM, 1.0):
@@ -32,6 +33,7 @@ export const newEmail = () => `${PREFIX}${RUN}-${++n}@example.invalid`;
 export const newPassword = () => `${randomBytes(18).toString("base64url")}aA1!`;
 
 let client: SupabaseClient | null = null;
+const database = () => createClient(URL_, SECRET, { auth: { persistSession: false, autoRefreshToken: false } });
 const admin = () => (client ??= createClient(URL_, SECRET, { auth: { persistSession: false, autoRefreshToken: false } })).auth.admin;
 
 // Only ever touches users this helper's naming made.
@@ -98,6 +100,41 @@ export async function setProfileLocale(email: string, password: string, locale: 
   if (signInError) throw new Error(`sign-in to save a language failed: ${signInError.message}`);
   const { error } = await user.rpc("update_profile", { p_locale: locale });
   if (error) throw new Error(`saving the language failed: ${error.message}`);
+}
+
+// The Monday of the person's last complete week, in their saved time zone, and a
+// week's check-ins for it (Your week): the form would take a week of real days.
+// offsets: days after that Monday. Replaces any on those days.
+export async function lastWeekMonday(email: string): Promise<string> {
+  const id = await userId(email);
+  const { data, error } = await database().from("profiles").select("time_zone").eq("user_id", id).maybeSingle();
+  if (error) throw new Error(`reading the time zone failed: ${error.message}`);
+  const today = new Intl.DateTimeFormat("en-CA", { timeZone: data?.time_zone ?? "UTC" }).format(new Date());
+  return lastWeekStart(today);
+}
+
+export async function seedCheckIns(email: string, password: string, monday: string, days: { offset: number; mood: number; sleep_hours?: number }[]): Promise<void> {
+  if (!ours(email)) throw new Error("seedCheckIns only touches this helper's own users");
+  // Through the app's own RPC, signed in as them: the service role has no write on
+  // check_ins (staging, #201).
+  const user = createClient(URL_, PUBLISHABLE, { auth: { persistSession: false, autoRefreshToken: false } });
+  const { error: signInError } = await user.auth.signInWithPassword({ email, password });
+  if (signInError) throw new Error(`sign-in to seed check-ins failed: ${signInError.message}`);
+  for (const { offset, mood, sleep_hours } of days) {
+    const d = new Date(`${monday}T00:00:00Z`);
+    d.setUTCDate(d.getUTCDate() + offset);
+    const { error } = await user.rpc("upsert_check_in", {
+      p_date: d.toISOString().slice(0, 10),
+      p_mood: mood,
+      p_sleep_hours: sleep_hours ?? null,
+      p_sleep_quality: null,
+      p_exercise_minutes: null,
+      p_stress: null,
+      p_expected_updated_at: null,
+      p_insert_only: false,
+    });
+    if (error) throw new Error(`seeding check-ins failed: ${error.message}`);
+  }
 }
 
 // The token a password reset email would carry.
