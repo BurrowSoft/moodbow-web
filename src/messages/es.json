@@ -460,7 +460,17 @@
     "patternsStressShown": "Los días de estrés bajo, tu ánimo promedió {a} de 5. Los días de estrés alto, {b}.",
     "patternsStressSame": "Los días de estrés bajo y los de estrés alto, tu ánimo fue más o menos igual ({a} y {b} de 5).",
     "patternsFootnote": "Son tus propios registros, uno al lado del otro. Pueden mostrar qué suele ir junto, no qué causa qué.",
-    "patternsNone": "Los patrones aparecerán aquí cuando tengas más registros con sueño, movimiento o estrés."
+    "patternsNone": "Los patrones aparecerán aquí cuando tengas más registros con sueño, movimiento o estrés.",
+    "yourWeekTitle": "Tu semana",
+    "yourWeekPatternSleep": "Los días que dormiste más, tu ánimo fue mejor.",
+    "yourWeekPatternMovement": "Los días más activos, tu ánimo fue mejor.",
+    "yourWeekPatternStress": "Los días con menos estrés, tu ánimo fue mejor.",
+    "yourWeekLookMoreGood": "Tu semana tuvo más días buenos que bajos.",
+    "yourWeekLookSteady": "Tu semana fue bastante estable.",
+    "yourWeekLookMixed": "Tu semana tuvo días buenos y días bajos.",
+    "yourWeekMoment": "Un momento de esa semana: {date}",
+    "yourWeekHard": "Esta semana pareció difícil.",
+    "yourWeekCaption": "Esto puede mostrar qué suele ir junto, no qué causa qué."
   },
   "share": {
     "shareButton": "Compartir",

@@ -14,7 +14,9 @@ import { aiShown, canReflect } from "@/lib/journal/ai";
 import { lastWeekStart, parseReportBody, type WeeklyReport as Report } from "@/lib/journal/report";
 import { getMe } from "@/lib/journal/me";
 import { patterns, patternsWindowStart } from "@/lib/journal/patterns";
+import { sixDaysAfter, yourWeek, type YourWeekMoment } from "@/lib/journal/yourWeek";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { YourWeekCard } from "./YourWeekCard";
 import { tabMetadata } from "../pageMeta";
 import { InsightsView } from "./InsightsView";
 import { ShareMonth } from "./ShareMonth";
@@ -47,12 +49,13 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
   // Patterns (no AI) use a fixed 90 days on every tab: where they're on,
   // the one read starts early enough for them too (still one request).
   const withPatterns = pageGate("patterns-live") !== "hidden";
+  const withYourWeek = pageGate("your-week-live") !== "hidden";
   const chartsStart = previousRangeStart(me.today, range);
   const patternsStart = patternsWindowStart(me.today);
   const { data, error } = await supabase
     .from("check_ins")
     .select("local_date, mood, sleep_hours, stress, exercise_minutes")
-    .gte("local_date", withPatterns && patternsStart < chartsStart ? patternsStart : chartsStart)
+    .gte("local_date", [chartsStart, ...(withPatterns ? [patternsStart] : []), ...(withYourWeek ? [lastWeekStart(me.today)] : [])].sort()[0])
     .lte("local_date", me.today);
   if (error) return <JournalUnavailable />;
   // Share: the current month's moodbow (M10), where share cards are on; and,
@@ -93,5 +96,14 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
     const initial: Report | null = row && body ? { id: row.id, week_start: row.period_start, body, tier: row.tier === "lite" ? "lite" : "full", created_at: row.created_at } : null;
     week = <WeeklyReport initial={initial} weekStart={weekStart} dateLocaleTag={dateLocaleTag} balance={me.credits?.balance ?? 0} country={me.profile?.country ?? null} />;
   }
-  return <InsightsView rows={rows} today={me.today} range={range} share={share} week={week} patterns={withPatterns ? patterns(rows, me.today) : undefined} />;
+  // Your week (specs/your-week.md), no AI: today is the saved time zone's, from
+  // get_me. Moments: id and date only, never the body. A failed read: no moment.
+  let summary: React.ReactNode = null;
+  if (withYourWeek) {
+    const start = lastWeekStart(me.today);
+    const { data: moments } = await supabase.from("entries").select("id, entry_date").eq("is_moment", true).gte("entry_date", start).lte("entry_date", sixDaysAfter(start));
+    const result = yourWeek(rows, me.today, (moments ?? []) as YourWeekMoment[]);
+    if (result) summary = <YourWeekCard week={result} country={me.profile?.country} dateLocaleTag={dateLocaleTag} />;
+  }
+  return <InsightsView rows={rows} today={me.today} range={range} share={share} summary={summary} week={week} patterns={withPatterns ? patterns(rows, me.today) : undefined} />;
 }

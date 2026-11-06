@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import contract from "../../../content/your-week.json";
+import en from "@/messages/en.json";
 import type { InsightRow } from "./insights";
 import { PATTERN_RULES } from "./patterns";
 import { YOUR_WEEK_RULES, yourWeek, type YourWeekMoment } from "./yourWeek";
@@ -22,15 +23,20 @@ describe("Your week: the contract", () => {
     });
   }
 
+  it("the web's English is the contract's, word for word", () => {
+    const name = (key: string) => `yourWeek${key[0].toUpperCase()}${key.slice(1)}`;
+    const messages = en.insights as Record<string, string>;
+    for (const [key, line] of Object.entries(contract.copy)) expect(messages[name(key)], key).toBe(line);
+  });
+
   it("the copy keeps to its rules: no causes, advice, scores or diagnosis words", () => {
     const words = /because|improv|should|try to|better|worse|score|streak|missed|depress|anxi|disorder|symptom/i;
     for (const [key, line] of Object.entries(contract.copy)) expect(line, key).not.toMatch(words);
   });
 });
 
-// Each language's templates (messages' insights.yourWeek…, from PR 2 on) and the
-// contract's English: no diagnosis word, in that language. Until PR 2 adds the
-// strings, only the contract's English is really checked here.
+// Each language's templates (messages' insights.yourWeek…) and the contract's
+// English: no diagnosis word, in that language.
 describe("Your week: no diagnosis words", () => {
   const lists = contract.diagnosisWords as Record<string, string[]>;
   it("the contract's English", () => {
@@ -39,6 +45,7 @@ describe("Your week: no diagnosis words", () => {
   it.each(Object.keys(lists))("%s", (locale) => {
     const messages = JSON.parse(readFileSync(join(process.cwd(), "src", "messages", `${locale}.json`), "utf8")) as { insights: Record<string, string> };
     const lines = Object.entries(messages.insights).filter(([key]) => key.startsWith("yourWeek"));
+    expect(lines.length, "the strings are there to check").toBe(Object.keys(contract.copy).length);
     for (const [key, line] of lines) for (const word of lists[locale]) expect(line.toLowerCase(), key).not.toContain(word);
   });
 });

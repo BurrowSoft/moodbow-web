@@ -3,7 +3,7 @@ import { expect, test, type Frame, type Page, type Request } from "@playwright/t
 import conditions from "../../content/conditions.json";
 import messages from "../../src/messages/en.json";
 import fr from "../../src/messages/fr.json";
-import { aiAvailable, cleanup, configured, confirmEmail, createConfirmedUser, exists, newEmail, newPassword, notConfigured, profileLocale, revokeSessions, setProfileLocale, signedUpUnconfirmed, sweep } from "./staging";
+import { aiAvailable, cleanup, configured, confirmEmail, createConfirmedUser, exists, lastWeekMonday, seedCheckIns, newEmail, newPassword, notConfigured, profileLocale, revokeSessions, setProfileLocale, signedUpUnconfirmed, sweep } from "./staging";
 
 // The launch-critical journeys (1.0), end to end against staging with a
 // throwaway account each: sign-up → confirm → consent → setup → check-in →
@@ -540,9 +540,61 @@ test.describe("importing the same file again", () => {
   });
 });
 
-// Inside the journal the saved language wins, if it's offered (row RT4). Each
-// one asserts Today's content and that the page has stopped moving: an address
-// alone was right on the blank page (#173).
+test.describe("Your week on Insights", () => {
+  test("under 4 check-ins no card; a pattern and how it looked; a hard week, only that and the way to help", async ({ page }) => {
+    const email = newEmail();
+    const password = newPassword();
+    try {
+      await signedUpUnconfirmed(email, password);
+      await confirmEmail(email);
+      await page.goto("/sign-in");
+      await page.locator("#email").fill(email);
+      await page.locator("#password").fill(password);
+      await page.locator("main form button[type=submit]").first().click();
+      await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+      await page.getByTestId("setup-done").click();
+      await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+      const monday = await lastWeekMonday(email);
+
+      // Three check-ins: nothing, not even a message about too few days.
+      await seedCheckIns(email, password, monday, [0, 1, 2].map((offset) => ({ offset, mood: 5 })));
+      await page.goto("/app/insights");
+      await expect(page.getByTestId("insights-range-week")).toBeVisible({ timeout: 15_000 });
+      await expect(page.getByTestId("your-week")).toHaveCount(0);
+
+      // A pattern (sleep), then how it looked, with the quiet line.
+      await seedCheckIns(email, password, monday, [
+        { offset: 0, mood: 5, sleep_hours: 8 },
+        { offset: 1, mood: 5, sleep_hours: 8 },
+        { offset: 2, mood: 4, sleep_hours: 7 },
+        { offset: 3, mood: 2, sleep_hours: 5 },
+        { offset: 4, mood: 3, sleep_hours: 6 },
+      ]);
+      await page.reload();
+      const card = page.getByTestId("your-week");
+      await expect(card.getByTestId("your-week-patternSleep")).toHaveText(messages.insights.yourWeekPatternSleep);
+      await expect(card.getByTestId("your-week-lookMoreGood")).toHaveText(messages.insights.yourWeekLookMoreGood);
+      await expect(card.getByTestId("your-week-caption")).toHaveText(messages.insights.yourWeekCaption);
+
+      // A hard week: only that, and the help opens the card.
+      await seedCheckIns(email, password, monday, [
+        { offset: 0, mood: 1, sleep_hours: 8 },
+        { offset: 1, mood: 2, sleep_hours: 8 },
+        { offset: 2, mood: 1, sleep_hours: 5 },
+        { offset: 3, mood: 2, sleep_hours: 5 },
+        { offset: 4, mood: 4, sleep_hours: 6 },
+      ]);
+      await page.reload();
+      await expect(card.getByTestId("your-week-hard")).toHaveText(messages.insights.yourWeekHard);
+      await expect(card.locator('[data-testid^="your-week-pattern"], [data-testid^="your-week-look"], [data-testid="your-week-caption"], [data-testid="your-week-moment"]')).toHaveCount(0);
+      await card.getByTestId("your-week-help").click();
+      await expect(page.getByTestId("safety-card")).toBeVisible();
+    } finally {
+      await cleanup(email);
+    }
+  });
+});
+
 test("the Consumer Health Data link is in the footer inside the journal too", async ({ page }) => {
   const email = newEmail();
   const password = newPassword();
@@ -568,6 +620,9 @@ test("the Consumer Health Data link is in the footer inside the journal too", as
   }
 });
 
+// Inside the journal the saved language wins, if it's offered (row RT4). Each
+// one asserts Today's content and that the page has stopped moving: an address
+// alone was right on the blank page (#173).
 test.describe("the saved language in the journal", () => {
   test.skip(!conditions["fr-offered-live"].met, "needs French offered");
 
@@ -969,6 +1024,9 @@ test.describe("the tab bar in every language", () => {
         expect(await card.evaluate((el) => el.scrollTop), "opens at its top").toBe(0);
         const firstHelp = await card.locator("a").first().evaluate((a) => a.getBoundingClientRect().top);
         expect(firstHelp, `the first help line starts on the first screen, ${route || "/en"}`).toBeLessThan(640);
+        // "Find a helpline" stays under the card's cap, not three times its size.
+        const size = (el: Element) => parseFloat(getComputedStyle(el).fontSize);
+        expect(await card.getByTestId("safety-find-helpline").evaluate(size), `the helpline link's size, ${route || "/en"}`).toBeLessThan(await card.evaluate(size));
         const close = page.getByTestId("safety-close");
         await close.scrollIntoViewIfNeeded();
         await expect(close, route || "/en").toBeInViewport();

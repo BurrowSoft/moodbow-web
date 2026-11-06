@@ -1,7 +1,11 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
-import { NextIntlClientProvider } from "next-intl";
+import { createTranslator, NextIntlClientProvider } from "next-intl";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import registry from "../../content/contracts/countries.json";
 import messages from "@/messages/en.json";
+import es from "@/messages/es.json";
+import fr from "@/messages/fr.json";
+import ptBr from "@/messages/pt-br.json";
 import { helplinesFor, isIos, telHref } from "@/lib/safety/helplines";
 import { GetHelpNow, SafetyCard } from "./SafetyCard";
 
@@ -28,6 +32,18 @@ describe("helplinesFor", () => {
     expect(helplinesFor("FR", "fr").helpline?.name).toBe("le numéro national de prévention du suicide");
     expect(helplinesFor("BR", "pt-br").helpline?.name).toBe("o CVV");
     expect(helplinesFor("BR", "de").helpline?.name).toBe("CVV");
+  });
+  // The web has its own "Call {name}" template: the whole label, for every country.
+  it.each([["fr", fr], ["es", es], ["pt-br", ptBr]] as const)("%s: every country's call label reads, with no stray English article and no \"a el\"", (language, translated) => {
+    const t = createTranslator({ locale: language, messages: translated, namespace: "safety" });
+    const lines = registry.countries.map((c) => helplinesFor(c.code, language).helpline).filter((line) => line !== null);
+    expect(lines.length).toBeGreaterThan(0);
+    for (const line of lines) {
+      const label = t("safetyCall", { name: line.name, number: line.display });
+      expect(label).toContain(line.display);
+      expect(label).not.toMatch(/\bthe\b/i);
+      expect(label).not.toMatch(/\ba el\b/i);
+    }
   });
   it("hours only for a line that isn't always open, in the UI language, else English", () => {
     expect(helplinesFor("AR", "es").helpline?.hours).toBe("Todos los días, de 8:00 a 24:00");

@@ -36,6 +36,7 @@ const PATTERN_TEXT: Record<PatternId, Record<"shown" | "same", `patterns${"Sleep
 // neutral on purpose (decision 98): "stress ↑" isn't good, "mood ↓" isn't a
 // failure, so it gets the same muted ink either way.
 // share: the "My month's moodbow" button, where share cards are on (M10).
+// summary: Your week's card (no AI), above the range tabs.
 // week: "Your week" (1.1 D), between the range tabs and the charts, where AI
 // and the weekly report are on.
 // patterns: Patterns (no AI), after the charts, where patterns-live is on;
@@ -45,6 +46,7 @@ export function InsightsView({
   today,
   range,
   share,
+  summary,
   week,
   patterns,
 }: {
@@ -52,6 +54,7 @@ export function InsightsView({
   today: string;
   range: Range;
   share?: React.ReactNode;
+  summary?: React.ReactNode;
   week?: React.ReactNode;
   patterns?: Pattern[];
 }) {
@@ -76,6 +79,7 @@ export function InsightsView({
         <h1 className="min-w-0 text-3xl font-medium tracking-tight [overflow-wrap:anywhere]">{t("insightsTitle")}</h1>
         {share}
       </div>
+      {summary}
       <nav aria-label={t("insightsTitle")} className="mt-4 flex flex-wrap gap-2">
         {RANGE_TABS.map(({ range: r, key }) => (
           <Link
