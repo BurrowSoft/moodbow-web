@@ -1198,7 +1198,9 @@ test("large text, set in the browser: Today after a mood, calendar, day, entry a
             const style = getComputedStyle(h);
             const ruler = document.createElement("canvas").getContext("2d")!;
             ruler.font = style.font;
-            return { widest: Math.max(...(h.textContent ?? "").split(" ").map((w) => ruler.measureText(w).width)), room: h.clientWidth, font: parseFloat(style.fontSize), body: parseFloat(getComputedStyle(document.documentElement).fontSize) };
+            // The heading's own tracking, and the room it has: Insights' sizes to its text.
+            ruler.letterSpacing = style.letterSpacing;
+            return { widest: Math.max(...(h.textContent ?? "").split(" ").map((w) => ruler.measureText(w).width)), room: h.parentElement!.clientWidth, font: parseFloat(style.fontSize), body: parseFloat(getComputedStyle(document.documentElement).fontSize) };
           });
           expect.soft(size.font, `${saved} ${path} heading at ${percent}%`).toBeGreaterThanOrEqual(size.body);
           if (percent === 200) expect.soft(size.widest, `${saved} ${path} heading's words at 200%`).toBeLessThanOrEqual(size.room);
