@@ -10,6 +10,7 @@ import { BACKUP_RETENTION_DAYS } from "./site";
 const PAGES: { slug: LegalSlug; gate: ConditionId }[] = [
   { slug: "privacy", gate: "privacy-text-approved" },
   { slug: "terms", gate: "terms-text-approved" },
+  { slug: "consumer-health-data", gate: "consumer-health-data-approved" },
 ];
 
 describe("legal content files", () => {

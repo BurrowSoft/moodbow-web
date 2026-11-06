@@ -21,6 +21,38 @@ const renderIt = (initialFocus?: "first" | "last" | "title") =>
     </>,
   );
 
+describe("Dialog taller than the window (large text; Web Tester, #198)", () => {
+  const tall = (height: number) => {
+    Object.defineProperty(HTMLElement.prototype, "scrollHeight", { configurable: true, get: () => height });
+    Object.defineProperty(HTMLElement.prototype, "clientHeight", { configurable: true, get: () => 600 });
+  };
+  afterEach(() => {
+    delete (HTMLElement.prototype as { scrollHeight?: number }).scrollHeight;
+    delete (HTMLElement.prototype as { clientHeight?: number }).clientHeight;
+  });
+
+  it("opens on its title, not on a button past it, and shows there's more", () => {
+    tall(1200);
+    renderIt();
+    expect(screen.getByRole("heading", { name: "Title" })).toHaveFocus();
+    expect(screen.getByTestId("dialog-more")).toBeInTheDocument();
+  });
+
+  it("the same with a last-button dialog", () => {
+    tall(1200);
+    renderIt("last");
+    expect(screen.getByRole("heading", { name: "Title" })).toHaveFocus();
+  });
+
+  it("when it fits: the first action as before, and no fade", () => {
+    tall(500);
+    renderIt();
+    expect(screen.getByRole("link", { name: "link" })).not.toHaveFocus();
+    expect(screen.getByRole("button", { name: "one" })).toHaveFocus();
+    expect(screen.queryByTestId("dialog-more")).toBeNull();
+  });
+});
+
 describe("Dialog focus trap", () => {
   it("from the focused title: Shift+Tab goes to the last control, Tab to the first; never behind", () => {
     renderIt("title");

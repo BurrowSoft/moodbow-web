@@ -12,6 +12,7 @@ const PAGES: PageEntry[] = [
   { path: "/help", gate: HELP_GATE, prefix: true },
   { path: "/privacy", gate: "privacy-text-approved" },
   { path: "/terms", gate: "terms-text-approved" },
+  { path: "/consumer-health-data", gate: "consumer-health-data-approved" },
   { path: "/account-deletion", gate: "delete-account-live" },
   { path: "/app", gate: "web-journal-live", prefix: true, sitemap: false },
   { path: "/sign-in", gate: "web-journal-live", sitemap: false },
