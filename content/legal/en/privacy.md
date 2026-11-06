@@ -23,8 +23,8 @@ Moodbow is a private journal made by Vitor Ribeiro Carvalho, trading as BurrowSo
 **When you last connected:** the time your account last connected to our servers. We use it to keep you signed in and, for accounts without an email, to apply the 12-month rule below.
 {pending:anon_start_live}**Using Moodbow without an email:** you can start without giving us an email. We create an account for your phone that only it can use, and store your journal there like any other account. If you add an email later, your journal stays the same account. If you never add an email and don't open the app while connected to the internet for 12 months, we delete that account and its journal.{/pending}
 **Your journal:** the entries you write, your daily check-ins (mood, sleep, movement (active minutes), stress), the dates they belong to, and which entries you mark as moments.
-**Your settings:** language, country, time zone, reminder time, and your AI choices (on or off, tone, focus areas).
-**AI content (only if AI is on):** the reflections and reports the AI writes for you{pending:ai_memory}, and the short facts Moodbow remembers about you, which you can see, edit and delete in Me → What Moodbow remembers{/pending}.
+**Your settings:** language, country, time zone, reminder time, and your AI choices ({pending:ai_live|bo_off}on or off, tone, focus areas{/pending}{pending:bo_live}Use Bo and its journal switch{/pending}).
+{pending:ai_live|bo_off}**AI content (only if AI is on):** the reflections and reports the AI writes for you{pending:ai_memory}, and the short facts Moodbow remembers about you, which you can see, edit and delete in Me → What Moodbow remembers{/pending}.{/pending}
 {pending:ai_live|bo_off}**AI usage:** for each AI request, the feature, the model, the number of tokens, the cost and the credits used. Not the text of your entries or of the AI's answer.{/pending}
 {pending:purchases}**Purchases:** if you buy AI credits, Google Play or the App Store handles the payment. We receive a purchase reference and the number of credits, never your card details.{/pending}
 {pending:bo_live}**Your conversation with Bo:** your messages and Bo's replies, stored in your account until you clear them or delete your account. A conversation can hold up to 20,000 messages; past that, Bo tells you nothing more is being saved.{/pending}
@@ -36,7 +36,7 @@ Moodbow is a private journal made by Vitor Ribeiro Carvalho, trading as BurrowSo
 
 **Cookies and storage on your device:** the website uses only the cookies it needs to work: one that keeps you signed in, and one that remembers whether you view your Timeline as a list or a calendar. It also keeps a few display choices in your browser, such as light or dark appearance and the cards you've already closed. None of them track you across sites or are used for advertising or analytics.
 
-**What stays only on your device:** unsent drafts{pending:app_app_lock}, your app-lock PIN{/pending}{pending:app_share_cards}, and the share cards you create. Share cards are made on your device and only leave it if you share them yourself{/pending}.{pending:bo_live} So does what you've typed to Bo but not yet sent.{/pending}{pending:age_signal_live} If your app store gives an age check's result, it stays there too, and we don't receive your birthdate.{/pending}
+**What stays only on your device:** unsent drafts{pending:app_app_lock}, your app-lock PIN{/pending}{pending:app_share_cards}, and the share cards you create. Share cards are made on your device and only leave it if you share them yourself{/pending}.{pending:bo_live} What you've typed to Bo but not yet sent stays on your device too.{/pending}{pending:age_signal_live} So does the result of your app store's age check, if it gives one. We don't receive your birthdate.{/pending}
 
 **Technical logs:** like almost every online service, our hosting providers record IP addresses and device or browser information when you connect, for security and to fix problems. They keep these logs for a limited time (see §4). We also keep daily totals of AI use ({pending:bo_off}how many reflections were made that day{/pending}{pending:bo_live}how many AI requests were made that day{/pending} and what they cost us), with no link to any person, so we can keep costs under control.
 **Emails you send us:** if you write to support@moodbow.com, we keep the conversation so we can answer you, and delete it when it's no longer needed.
@@ -51,7 +51,7 @@ We don't collect your name, contacts, precise location, or advertising identifie
 | Running your account and your journal | Our contract with you (the Terms) |
 | Processing your journal, which can reveal health and wellbeing information | Your explicit consent, given separately when you create your account (you can withdraw it by deleting your account) |
 {pending:ai_live}| AI reflections and reports | Your separate, explicit AI consent. You can withdraw it at any time in Me → AI |{/pending}
-{pending:bo_live}| Bo, and its journal switch if you turn it on | Your separate, explicit consent. You can withdraw it at any time in Me → AI |{/pending}
+{pending:bo_live}| Bo, and its journal switch if you turn it on | Your separate, explicit consent. You can withdraw it at any time in Me |{/pending}
 | Keeping the service secure and fixing crashes and errors | Our legitimate interest in a working, safe service |
 | Answering your emails | Our legitimate interest, or our contract with you |
 
@@ -76,7 +76,7 @@ We never sell your data, and we never share it with advertisers.
 
 ### 4. How long we keep it
 - Everything is kept until you delete it or delete your account.
-- **Deleting your account** removes your journal, check-ins, AI content, settings, credits history and login from our live database immediately.
+- **Deleting your account** removes your journal, check-ins, {pending:ai_live|bo_off}AI content, {/pending}settings, {pending:ai_live|bo_off}credits history {/pending}and login from our live database immediately.
 {pending:bo_live}- Clearing your conversation with Bo deletes it from our live database right away. If you delete your account, we also ask Anthropic to delete the ID we gave it, but Anthropic may keep its safety records.{/pending}
 - Copies in our encrypted backups disappear automatically within {pending:backup_retention}8{/pending} days.
 - Error and crash reports are kept by our error-tracking provider for up to 90 days.
@@ -89,7 +89,7 @@ Wherever you live, you can:
 - **correct** it: edit any entry, check-in or setting;
 - **delete** it: delete any item, or your whole account in Me → Delete account;
 {pending:ai_live}- **withdraw your AI consent** at any time in Me → AI. This stops new AI requests; past reflections stay until you delete them;{/pending}
-{pending:bo_live}- **withdraw your consent to Bo** at any time in Me → AI. This stops new messages; your past conversation stays until you clear it. Export includes your conversation and your reports;{/pending}
+{pending:bo_live}- **withdraw your consent to Bo** at any time in Me. This stops new messages; your past conversation stays until you clear it. Export includes your conversation and your reports;{/pending}
 - **object or ask questions**: email support@moodbow.com. We answer within 30 days.
 You can also complain to a data-protection authority: in Thailand, the Personal Data Protection Committee (PDPC); in the EU or UK, your local authority.
 
