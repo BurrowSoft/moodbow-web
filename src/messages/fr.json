@@ -35,7 +35,8 @@
     "privacy": "Confidentialité",
     "terms": "Conditions",
     "draftBanner": "Brouillon, non en vigueur. Cette page n'est visible que sur les versions de test.",
-    "opensInNewTab": "(s'ouvre dans un nouvel onglet)"
+    "opensInNewTab": "(s'ouvre dans un nouvel onglet)",
+    "consumerHealthData": "Politique relative aux données de santé"
   },
   "home": {
     "comingSoon": "Bientôt disponible",
@@ -129,6 +130,10 @@
   "terms": {
     "title": "Conditions d'utilisation",
     "description": "Les conditions d'utilisation de Moodbow."
+  },
+  "consumerHealthData": {
+    "title": "Politique relative aux données de santé",
+    "description": "Comment Moodbow traite vos données."
   },
   "legal": {
     "hiddenTitle": "Pas encore affiché : chaque bloc apparaît quand sa fonction est en ligne (versions de test uniquement)",

@@ -24,8 +24,8 @@ export function SafetyCard({ country, onClose, neutral = false }: { country: str
   const ios = useSyncExternalStore(noSubscribe, () => isIos(navigator.userAgent, navigator.maxTouchPoints), () => false);
   const link = "font-medium text-accent underline underline-offset-4";
   return (
-    <Dialog title={t("safetyTitle")} body={t(neutral ? "safetyBodyNeutral" : "safetyBody")} onCancel={onClose} testId="safety-card" initialFocus="title">
-      <div className="w-full space-y-3 text-left">
+    <Dialog title={t("safetyTitle")} body={t(neutral ? "safetyBodyNeutral" : "safetyBody")} onCancel={onClose} testId="safety-card" initialFocus="title" capText>
+      <div className="w-full space-y-[12px] text-left">
         {lines.helpline &&
           (ios && isShortCode(lines.helpline.dial) ? (
             <div>

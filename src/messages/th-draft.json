@@ -1003,5 +1003,20 @@
     "key": "insights.yourWeekCaption",
     "en": "This may show what tends to go together, not what causes what.",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "common.consumerHealthData",
+    "en": "Consumer Health Data Privacy Policy",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "consumerHealthData.title",
+    "en": "Consumer Health Data Privacy Policy",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "consumerHealthData.description",
+    "en": "How Moodbow handles data that may be consumer health data.",
+    "reason": "UX draft (native read pending)"
   }
 ]

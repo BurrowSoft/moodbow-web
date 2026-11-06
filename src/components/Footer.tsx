@@ -17,6 +17,9 @@ export async function Footer() {
     { href: "/support", label: t("support"), show: true },
     { href: "/privacy", label: t("privacy"), show: conditionMet("privacy-text-approved") },
     { href: "/terms", label: t("terms"), show: conditionMet("terms-text-approved") },
+    // On every page, the journal too (RCW 19.373: any page collecting personal
+    // information is a "homepage"). Never hide this footer on a page that asks for any.
+    { href: "/consumer-health-data", label: t("consumerHealthData"), show: conditionMet("consumer-health-data-approved") },
     { href: "/account-deletion", label: t("accountDeletion"), show: conditionMet("delete-account-live") },
   ] as const;
 

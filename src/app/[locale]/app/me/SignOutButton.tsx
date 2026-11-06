@@ -120,7 +120,7 @@ export function SignOutButton({ uid }: { uid: string }) {
         onClick={start}
         aria-disabled={busy || undefined}
         aria-busy={busy || undefined}
-        className="inline-flex min-h-12 items-center rounded-full border border-border px-6 font-medium text-accent hover:bg-pill aria-disabled:opacity-50"
+        className="inline-flex min-h-12 max-w-full items-center rounded-full border border-border px-6 text-center font-medium text-accent [overflow-wrap:anywhere] hover:bg-pill aria-disabled:opacity-50"
       >
         {t("meSignOut")}
       </button>

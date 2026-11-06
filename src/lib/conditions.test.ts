@@ -112,7 +112,7 @@ const LEGAL = conditionMet("privacy-text-approved") && conditionMet("terms-text-
 
 describe("sitemapPaths", () => {
   it("after the web launch: the ungated pages, Help, the legal pages once live, and account deletion", () => {
-    expect(sitemapPaths()).toEqual(["/", "/support", "/help", ...(LEGAL ? ["/privacy", "/terms"] : []), "/account-deletion"]);
+    expect(sitemapPaths()).toEqual(["/", "/support", "/help", ...(LEGAL ? ["/privacy", "/terms"] : []), "/consumer-health-data", "/account-deletion"]);
   });
 
   it("adds a gated page once its condition is met", () => {
@@ -220,7 +220,7 @@ describe("the web journal gate (W0)", () => {
   });
 
   it("never lists the signed-in area in the sitemap, even when live", () => {
-    expect(sitemapPaths(() => true)).toEqual(["/", "/support", "/help", "/privacy", "/terms", "/account-deletion"]);
+    expect(sitemapPaths(() => true)).toEqual(["/", "/support", "/help", "/privacy", "/terms", "/consumer-health-data", "/account-deletion"]);
   });
 });
 
