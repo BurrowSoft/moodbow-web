@@ -149,6 +149,70 @@ describe("EntryEditor: a new entry", () => {
     }
   });
 
+  describe("a save that lands after the wait (#190 R6)", () => {
+    const late = (body: string) => ({ status: "saved", entry: { ...ENTRY, id: NEW_ID, entry_date: "2026-10-02", body, updated_at: "2026-10-02T11:00:00Z" } });
+    const waitOut = async (text: string) => {
+      let answer: (state: unknown) => void = () => {};
+      let fail: (reason: unknown) => void = () => {};
+      saveEntry.mockReturnValueOnce(
+        new Promise((resolve, reject) => {
+          answer = resolve;
+          fail = reject;
+        }),
+      );
+      type(text);
+      fireEvent.click(screen.getByTestId("entry-save"));
+      expect(await screen.findByTestId("entry-error", {}, { timeout: 2000 })).toHaveTextContent(messages.today.errGeneric);
+      await waitFor(() => expect(screen.getByTestId("entry-save")).not.toHaveAttribute("aria-disabled"));
+      return { answer, fail };
+    };
+
+    it("the error goes and the draft with it; the editor stays, and the next Save updates that version", async () => {
+      renderEditor();
+      const { answer } = await waitOut("Slow");
+      await act(async () => answer(late("Slow")));
+      await waitFor(() => expect(screen.queryByTestId("entry-error")).toBeNull());
+      expect(window.localStorage.getItem(NEW_KEY)).toBeNull();
+      expect(push).not.toHaveBeenCalled();
+      expect(screen.getByTestId("entry-text")).toHaveValue("Slow");
+      saveEntry.mockResolvedValueOnce(late("Slow, and more"));
+      type("Slow, and more");
+      fireEvent.click(screen.getByTestId("entry-save"));
+      await waitFor(() => expect(saveEntry).toHaveBeenCalledTimes(2));
+      expect(sent(1)).toMatchObject({ body: "Slow, and more", expected_updated_at: "2026-10-02T11:00:00Z" });
+    });
+
+    it("typed since: the newer text stays as a draft on top of that version", async () => {
+      renderEditor();
+      const { answer } = await waitOut("Slow");
+      type("Slow, typed on");
+      await act(async () => answer(late("Slow")));
+      await waitFor(() => expect(screen.queryByTestId("entry-error")).toBeNull());
+      expect(screen.getByTestId("entry-text")).toHaveValue("Slow, typed on");
+      expect(stored(NEW_KEY)).toMatchObject({ body: "Slow, typed on", base: "2026-10-02T11:00:00Z" });
+    });
+
+    it("it fails after all, or answers an error: the error stays, and so does the draft", async () => {
+      renderEditor();
+      const { fail } = await waitOut("Slow");
+      await act(async () => fail(new TypeError("Failed to fetch")));
+      expect(screen.getByTestId("entry-error")).toHaveTextContent(messages.today.errGeneric);
+      expect(stored(NEW_KEY)).toMatchObject({ body: "Slow" });
+    });
+
+    it("a newer press is under way: the old answer leaves its error and its base alone", async () => {
+      renderEditor();
+      const { answer } = await waitOut("Slow");
+      saveEntry.mockReturnValueOnce(new Promise(() => {}));
+      type("Newer");
+      fireEvent.click(screen.getByTestId("entry-save"));
+      await waitFor(() => expect(saveEntry).toHaveBeenCalledTimes(2));
+      await act(async () => answer(late("Slow")));
+      expect(await screen.findByTestId("entry-error", {}, { timeout: 2000 })).toBeInTheDocument();
+      expect(screen.getByTestId("entry-text")).toHaveValue("Newer");
+    });
+  });
+
   it("while a save is out: Save says so (aria-disabled) but isn't disabled, so focus stays on it; a second press sends nothing", async () => {
     let answer: (state: unknown) => void = () => {};
     saveEntry.mockReturnValue(new Promise((resolve) => (answer = resolve)));
