@@ -110,7 +110,13 @@ export function BoConversation({ initial, country, back, healthData = false, con
     cardOpenedAt.current = now;
     setCard(true);
   }, []);
-  const closeCard = useCallback(() => setCard(false), []);
+  const box = useRef<HTMLTextAreaElement>(null);
+  // Back to the box, rather than to nothing: Send is off while a message goes, so it can't
+  // take the focus back itself.
+  const closeCard = useCallback(() => {
+    setCard(false);
+    requestAnimationFrame(() => box.current?.focus());
+  }, []);
 
   const showStatus = useCallback((status: BoStatus | { status: "no_answer" }) => {
     if (status.status === "ok") {
@@ -150,7 +156,7 @@ export function BoConversation({ initial, country, back, healthData = false, con
 
   useEffect(() => {
     end.current?.scrollIntoView?.({ block: "end" });
-  }, [messages, sending]);
+  }, [messages, sending, problem]);
 
   const tooLong = [...text].length > maxChars;
   const closed = problem !== null && CLOSED.includes(problem);
@@ -205,7 +211,7 @@ export function BoConversation({ initial, country, back, healthData = false, con
   const retry = () => void (closed || text.trim() === "" ? callBo<BoStatus>({ action: "status" }).then(showStatus) : send());
 
   return (
-    <div data-testid="bo-conversation" className="flex flex-col gap-4">
+    <div data-testid="bo-conversation" className="flex flex-col gap-4 [overflow-wrap:anywhere]">
       <header ref={header} data-testid="bo-header" data-pinned={pinned ? "" : undefined} className={`flex flex-wrap items-center gap-x-[8px] gap-y-[4px] bg-bg py-[8px] ${pinned && !keyboard ? "sticky top-0 z-10" : ""}`}>
         {back && <div className="md:hidden">{back}</div>}
         <h1 className="min-w-0 flex-1 font-medium leading-[1.33] text-text [font-size:min(1.5rem,max(10vw,24px,1rem))] [overflow-wrap:anywhere]">{t("screenLine")}</h1>
@@ -249,7 +255,6 @@ export function BoConversation({ initial, country, back, healthData = false, con
           {t("notice")}
         </p>
       )}
-      <div ref={end} />
       {full && (
         <div data-testid="bo-full" className="flex flex-col items-start gap-2 text-sm text-text">
           <p>{t("conversationFull")}</p>
@@ -293,6 +298,7 @@ export function BoConversation({ initial, country, back, healthData = false, con
             </div>
           )}
           <textarea
+            ref={box}
             data-testid="bo-text"
             aria-label={t("messageBox")}
             placeholder={t("messageBox")}
@@ -318,6 +324,7 @@ export function BoConversation({ initial, country, back, healthData = false, con
         </div>
       )}
       {card && <SafetyCard country={country} onClose={closeCard} />}
+      <div ref={end} />
     </div>
   );
 }

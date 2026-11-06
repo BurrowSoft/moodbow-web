@@ -376,6 +376,17 @@ describe("BoConversation", () => {
     expect(screen.getByText(b.firstLine)).toBeInTheDocument();
   });
 
+  it("closing the card puts focus back in the box", async () => {
+    await open();
+    answers.push(reply({ openCard: true }));
+    type("Hello");
+    await send();
+    fireEvent.click(screen.getByTestId("safety-close"));
+    await new Promise((done) => requestAnimationFrame(done));
+    await act(async () => {});
+    expect(screen.getByTestId("bo-text")).toHaveFocus();
+  });
+
   it("the card doesn't reopen within ten minutes, and does after", () => {
     expect(boCardMayOpen(null, 1000)).toBe(true);
     expect(boCardMayOpen(0, 10 * 60_000 - 1)).toBe(false);
