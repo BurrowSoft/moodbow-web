@@ -45,7 +45,7 @@ export function BoMeRow({ hasConversation, readsJournal, consented, canTurnOn }:
     setReads(false);
   };
   return (
-    <section {...untilLoaded} aria-labelledby="me-bo" data-testid="me-bo" className="rounded-3xl border border-border bg-surface p-6">
+    <section {...untilLoaded} aria-labelledby="me-bo" data-testid="me-bo" className="rounded-3xl border border-border bg-surface p-[24px]">
       <h2 id="me-bo" className="text-lg font-medium text-text">
         {t("meRow")}
       </h2>

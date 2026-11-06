@@ -1,31 +1,31 @@
 ---
-title: Talking with Bo
-summary: What Bo is, how your conversation is handled, and how to stop.
+title: คุยกับ Bo
+summary: Bo คืออะไร การจัดการการสนทนา และวิธีหยุด
 topic: AI
 th-draft: true
 ---
-{pending:bo_live}Bo is Moodbow's AI. You can talk to it about your day or whatever is on your mind. Tap "Talk to Bo" on Today, Timeline, Insights or Me. Bo is available in selected countries.
+{pending:bo_live}Bo คือ AI ของ Moodbow คุณคุยกับ Bo เรื่องวันของคุณหรือสิ่งที่อยู่ในใจได้ แตะ "คุยกับ Bo" ในหน้าวันนี้ ไทม์ไลน์ ข้อมูลเชิงลึก หรือฉัน Bo ใช้ได้ในบางประเทศ
 
-**What Bo is, and isn't**
-Bo is an AI, not a person or a therapist. It isn't there to diagnose anything or give medical advice, and it can't call anyone for you. It can be wrong. Nobody at Moodbow reads your conversation. If you report a reply, we read that reply and any note you add. Moodbow is for people aged 18 and older, and so is Bo.
+**Bo คืออะไร และไม่ใช่อะไร**
+Bo เป็น AI ไม่ใช่คนหรือนักบำบัด Bo ไม่ได้มีไว้เพื่อวินิจฉัยหรือให้คำแนะนำทางการแพทย์ และโทรหาใครแทนคุณไม่ได้ Bo อาจผิดพลาดได้ ไม่มีใครที่ Moodbow อ่านการสนทนาของคุณ ถ้าคุณรายงานคำตอบ เราจะอ่านคำตอบนั้นและหมายเหตุที่คุณเพิ่ม Moodbow สำหรับผู้ที่มีอายุ 18 ปีขึ้นไป และ Bo ก็เช่นกัน
 
-**If you need someone now**
-Tap "Want to talk to someone?". It's always on Bo's screen, and it shows helplines and emergency numbers where we have them. If you're in danger right now, call your local emergency number.
+**ถ้าคุณต้องการใครสักคนตอนนี้**
+แตะ"อยากคุยกับใครสักคนไหม?"บนหน้าจอของ Bo ซึ่งอยู่ตรงนั้นเสมอ และแสดงสายด่วนและหมายเลขฉุกเฉินเท่าที่เรามี ถ้าคุณกำลังตกอยู่ในอันตราย โปรดโทรหมายเลขฉุกเฉินในพื้นที่ของคุณ
 
-**How your conversation is handled**
-- Your messages go to Anthropic, the company whose AI writes Bo's replies, with an ID we create for you, not your name or email. Anthropic normally deletes them within 30 days and may keep them longer if its safety systems flag them. Those systems may report illegal material to the authorities.
-- Your conversation is stored in your account so you can come back to it, until you clear it or delete your account.
-- Bo checks your messages and its replies for signs of crisis, on your device and on our servers, so it can point you to help. We don't keep a record of those checks, and nobody at Moodbow is told.
-- Your conversation isn't used to train AI models.
+**การจัดการการสนทนาของคุณ**
+- ข้อความของคุณจะส่งไปยัง Anthropic บริษัทที่ AI ของบริษัทเขียนคำตอบของ Bo พร้อมรหัสที่เราสร้างให้คุณ ไม่ใช่ชื่อหรืออีเมลของคุณ โดยปกติ Anthropic จะลบภายใน 30 วัน และอาจเก็บนานกว่านั้นหากระบบความปลอดภัยตรวจพบ ระบบเหล่านั้นอาจรายงานเนื้อหาผิดกฎหมายต่อเจ้าหน้าที่
+- การสนทนาของคุณจะเก็บไว้ในบัญชีเพื่อให้คุณกลับมาดูได้ จนกว่าคุณจะล้างหรือลบบัญชี
+- Bo ตรวจข้อความของคุณและคำตอบของ Bo เพื่อหาสัญญาณวิกฤต ทั้งบนอุปกรณ์ของคุณและบนเซิร์ฟเวอร์ของเรา เพื่อแนะนำความช่วยเหลือ เราไม่เก็บบันทึกการตรวจเหล่านี้ และไม่มีใครที่ Moodbow ได้รับแจ้ง
+- การสนทนาของคุณไม่ได้ใช้ฝึกโมเดล AI
 
-**Your journal**
-Bo doesn't read your journal unless you turn on "Let Bo read my recent check-ins and entries" in Me. If you do, your check-ins and entries from the last 7 days go to Anthropic with each message. You can turn it off at any time.
+**ไดอารี่ของคุณ**
+Bo จะไม่อ่านไดอารี่ของคุณ เว้นแต่คุณเปิด "ให้ Bo อ่านเช็กอินและบันทึกล่าสุดของฉัน" ในหน้าฉัน หากเปิด เช็กอินและบันทึก 7 วันล่าสุดจะส่งไปยัง Anthropic พร้อมทุกข้อความ คุณปิดได้ตลอดเวลา
 
-**Clear, export or stop**
-In Me, under "Your conversation with Bo", you can export it, clear it, or turn off "Use Bo". Clearing deletes it from Moodbow and can't be undone; what Anthropic already received follows its own deletion times, above. Turning off "Use Bo" stops new messages and turns off the journal switch; your conversation stays until you clear it.
+**ล้าง ส่งออก หรือหยุด**
+ในหน้าฉัน ที่ "การสนทนาของคุณกับ Bo" คุณส่งออก ล้าง หรือปิด "ใช้ Bo" ได้ การล้างจะลบออกจาก Moodbow และเรียกคืนไม่ได้ ส่วนที่ Anthropic ได้รับแล้วเป็นไปตามระยะเวลาการลบข้างต้น การปิด "ใช้ Bo" จะหยุดข้อความใหม่และปิดการอ่านไดอารี่ การสนทนาจะยังอยู่จนกว่าคุณจะล้าง
 
-**Limits**
-There's a daily limit on messages. Accounts with an email get more. If Bo is resting or you've reached the limit, the rest of Moodbow works as usual, and help is still there.
+**ขีดจำกัด**
+มีขีดจำกัดข้อความต่อวัน บัญชีที่มีอีเมลจะได้มากกว่า ถ้า Bo กำลังพักหรือคุณถึงขีดจำกัดแล้ว ส่วนอื่นของ Moodbow ยังทำงานตามปกติ และความช่วยเหลือยังอยู่
 
-**Reporting a reply**
-If a reply seems wrong or harmful, tap "Report this reply". No one reads reports right away, so if you need someone now, use "Want to talk to someone?". We delete reports after 90 days, unless we need one longer to deal with illegal material.{/pending}
+**การรายงานคำตอบ**
+ถ้าคำตอบดูผิดหรือเป็นอันตราย แตะ "รายงานคำตอบนี้" ยังไม่มีใครอ่านรายงานในทันที ถ้าคุณต้องการใครสักคนตอนนี้ ให้ใช้"อยากคุยกับใครสักคนไหม?" เราลบรายงานหลังจาก 90 วัน เว้นแต่ต้องเก็บนานกว่านั้นเพื่อจัดการเนื้อหาผิดกฎหมาย{/pending}
