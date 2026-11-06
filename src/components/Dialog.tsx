@@ -11,9 +11,7 @@ import { createPortal } from "react-dom";
 // to where it was when it closes; Escape is the same as the cancel action.
 // Taller than the window (large text): it opens at its top, with focus on the
 // title, not scrolled down to a button past the title and warning, and a fade at
-// the bottom shows there's more. Its text is capped to the screen's width there,
-// so a heading can't fill the first screen; it still follows the reader's setting
-// up to that cap. Nothing here limits touch or keyboard scrolling.
+// the bottom shows there's more. Nothing here limits touch or keyboard scrolling.
 export function Dialog({
   title,
   body,
@@ -22,6 +20,7 @@ export function Dialog({
   children,
   testId,
   initialFocus = "first",
+  capText = false,
 }: {
   title: string;
   body?: string;
@@ -32,6 +31,10 @@ export function Dialog({
   testId?: string;
   // "title": focus the heading itself (the safety card, decision 124).
   initialFocus?: "first" | "last" | "title";
+  // Text capped to the screen's width, below the reader's own setting at large text
+  // on a narrow screen. The safety card only (UX & PM 2026-11-06): reaching help
+  // justifies it there, and other dialogs open at their top and scroll.
+  capText?: boolean;
 }) {
   const titleId = useId();
   const bodyId = useId();
@@ -100,9 +103,9 @@ export function Dialog({
         aria-labelledby={titleId}
         aria-describedby={body ? bodyId : undefined}
         data-testid={testId}
-        className="max-h-full w-full max-w-md overflow-y-auto overscroll-contain rounded-3xl bg-surface p-[24px] leading-normal shadow-xl [font-size:min(1rem,max(8vw,16px))]"
+        className={`max-h-full w-full max-w-md overflow-y-auto overscroll-contain rounded-3xl bg-surface p-[24px] shadow-xl ${capText ? "leading-normal [font-size:min(1rem,max(8vw,16px))]" : ""}`}
       >
-        <h2 id={titleId} tabIndex={-1} className="font-medium leading-tight text-text outline-none [font-size:min(1.125rem,max(8vw,18px))]">
+        <h2 id={titleId} tabIndex={-1} className={`font-medium text-text outline-none ${capText ? "leading-tight [font-size:min(1.125rem,max(8vw,18px))]" : "text-lg"}`}>
           {title}
         </h2>
         {body && (
@@ -120,6 +123,6 @@ export function Dialog({
 }
 
 export const dialogButton = (primary = false) =>
-  `inline-flex min-h-11 max-w-full items-center justify-center rounded-full px-[20px] text-center font-medium [overflow-wrap:anywhere] ${
+  `inline-flex min-h-11 max-w-full items-center justify-center rounded-full px-[20px] text-center font-medium hyphens-auto [overflow-wrap:anywhere] ${
     primary ? "bg-accent text-on-accent hover:bg-accent-hover" : "border border-border text-text hover:bg-pill"
   }`;
