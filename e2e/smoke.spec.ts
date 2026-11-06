@@ -230,7 +230,7 @@ test.describe("the live legal pages and account deletion (decision 164)", () => 
     await page.goto("/privacy");
     const article = page.locator('[data-content="article"]');
     await expect(article.getByRole("heading", { level: 2, name: "The short version" })).toBeVisible();
-    await expect(article.getByText("Last updated: 2 October 2026")).toBeVisible();
+    await expect(article.getByText("Last updated: 6 November 2026")).toBeVisible();
     await expect(article).not.toContainText("Google Play, Apple App Store");
     await expect(article).toContainText("disappear automatically within 8 days");
     // AI is off: no line may point at a Me → AI screen (decision 69).
