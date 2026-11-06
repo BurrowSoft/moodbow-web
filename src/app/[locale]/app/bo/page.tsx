@@ -15,6 +15,7 @@ import { getMe, hasCurrentConsent } from "@/lib/journal/me";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { titledMetadata } from "../pageMeta";
 import { BoConversation } from "./BoConversation";
+import { BoUnavailable } from "./BoUnavailable";
 
 export const maxDuration = 30;
 
@@ -35,9 +36,9 @@ export default async function BoPage({ params }: PageProps<"/[locale]/app/bo">) 
   if (ended) return <SessionEnded />;
   if (!supabase || !user) return <JournalUnavailable />;
   const me = await getMe(supabase);
-  if (!me) return <JournalUnavailable />;
+  if (!me) return <BoUnavailable country={null} />;
   const { data, error } = await supabase.from("bo_messages").select("id, author, body").order("created_at", { ascending: false }).limit(BO_HISTORY_SHOWN);
-  if (error) return <JournalUnavailable />;
+  if (error) return <BoUnavailable country={me.profile?.country} />;
   const tag = dateLocale(locale, (await headers()).get("accept-language"), me.profile?.country ?? null);
   return (
     <BoConversation
