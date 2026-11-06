@@ -166,10 +166,10 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
     el?.setSelectionRange(arrival.from, arrival.end);
   }, [arrival]);
   const [dialog, setDialog] = useState<null | "leave" | "delete" | { conflict: Entry | null }>(null);
-  // The safety card after a save the keyword check flagged (M8, decision
-  // 124): the entry is already saved; we stay on it, and closing the card
-  // puts focus back in the entry. The check runs here only; nothing about
-  // it is sent or kept (decision 125).
+  // The safety card after a save, or a failed save, the keyword check flagged
+  // (M8, decision 124): we stay on the entry, and closing the card puts focus
+  // back in it. The check runs here only; nothing about it is sent or kept
+  // (decision 125).
   const [safety, setSafety] = useState<"closed" | "open">("closed");
   const dirty = !same(fields, saved);
   // Whether there's anything to keep in this browser (see draft above).
@@ -239,6 +239,8 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
           setId(newId);
           setBase(null);
           setFields({ body: "", date: startDate ?? today, isMoment: false });
+          // The answer to that save never came, so neither did its card.
+          if (flagsCrisis(result.entry.body, CRISIS_KEYWORDS)) setSafety("open");
         } else {
           setDialog({ conflict: result.entry });
         }
@@ -379,11 +381,30 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
       } else leave();
     }, 0);
   }, [leave]);
+  // Set when the card comes on the way out of a deleted entry: leaving first
+  // would take the card away with the editor.
+  const leaveAfterCard = useRef(false);
   const closeSafety = useCallback(() => {
     setSafety("closed");
+    if (leaveAfterCard.current) return router.push(backTo);
     // After the card's own focus restore (on its unmount): back into the entry.
     window.setTimeout(() => document.getElementById("entry-text")?.focus(), 0);
-  }, []);
+  }, [router, backTo]);
+
+  // The card comes once per Save press, whichever answers first: the 30 s
+  // wait, the failure itself, or a save that lands after the wait. Each press
+  // has its own form. Pressing Save again and failing again shows it again.
+  const carded = useRef(new WeakSet<FormData>());
+  const openCard = (form: FormData) => {
+    if (carded.current.has(form)) return;
+    carded.current.add(form);
+    setSafety("open");
+  };
+  // A save that fails, offline included: the text was still written, and the
+  // card needs no network (its numbers and words are bundled).
+  const failedSave = (form: FormData) => {
+    if (flagsCrisis(String(form.get("body") ?? ""), CRISIS_KEYWORDS)) openCard(form);
+  };
 
   const [state, action, pending] = useActionState<EntryState, FormData>(async (prev, form) => {
     let next: EntryState;
@@ -400,6 +421,7 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
     } catch (e) {
       if (isRedirect(e)) throw e;
       // offline or the request failed: the draft is still here
+      failedSave(form);
       return { status: "error", error: "generic" };
     }
     if (next.status === "saved") {
@@ -417,7 +439,7 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
         lastSaved.current = next.entry;
         setBase(next.entry.updated_at);
         setSaved(fromEntry(next.entry));
-        if (flagsCrisis(next.entry.body, CRISIS_KEYWORDS)) setSafety("open");
+        if (flagsCrisis(next.entry.body, CRISIS_KEYWORDS)) openCard(form);
         return next;
       }
       // Still here and showing what was sent: that's saved, so no draft is
@@ -433,10 +455,12 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
         // and further edits are a draft again (reviewer #35).
         finished.current = false;
         setBase(next.entry.updated_at);
-        setSafety("open");
+        openCard(form);
       } else leave();
     } else if (next.status === "error" && next.error === "stale") {
       setDialog({ conflict: next.latest });
+    } else if (next.status === "error") {
+      failedSave(form);
     }
     return next;
   }, { status: "idle" });
@@ -478,18 +502,21 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
   const busy = pending && !stuck;
 
   const send = (withBase: string | null) => {
-    window.clearTimeout(waitTimer.current);
-    setWaitedOut(false);
-    waitTimer.current = window.setTimeout(() => setWaitedOut(true), SAVE_WAIT_MS);
-    // Kept before the request: a redirect (session ended, consent) unmounts
-    // the editor before any answer comes back.
-    if (restore && !signedOut.current) writeDraft(draftKey, { ...fields, id, base: withBase });
     const form = new FormData();
     form.set("id", id);
     form.set("entry_date", fields.date);
     form.set("body", fields.body);
     form.set("is_moment", String(fields.isMoment));
     form.set("expected_updated_at", withBase ?? "");
+    window.clearTimeout(waitTimer.current);
+    setWaitedOut(false);
+    waitTimer.current = window.setTimeout(() => {
+      setWaitedOut(true);
+      failedSave(form);
+    }, SAVE_WAIT_MS);
+    // Kept before the request: a redirect (session ended, consent) unmounts
+    // the editor before any answer comes back.
+    if (restore && !signedOut.current) writeDraft(draftKey, { ...fields, id, base: withBase });
     startTransition(() => action(form));
   };
 
@@ -708,6 +735,8 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
               lastSaved.current = conflict;
               setSaved(fromEntry(conflict));
               setFields(fromEntry(conflict));
+              // The text given up here was written all the same (the app, #171).
+              if (flagsCrisis(fields.body, CRISIS_KEYWORDS)) setSafety("open");
             }}
           >
             {t("entryConflictUseOther")}
@@ -740,6 +769,15 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
               finished.current = true;
               setDialog(null);
               removeDraft(draftKey);
+              // The text given up here was written all the same (the app, #171):
+              // the card first, and closing it leaves. The text goes now, so
+              // the autosave can't put the draft back behind the card.
+              if (flagsCrisis(fields.body, CRISIS_KEYWORDS)) {
+                leaveAfterCard.current = true;
+                setFields(saved);
+                setSafety("open");
+                return;
+              }
               // There's no entry left to view: back where it was opened from.
               router.push(backTo);
             }}
