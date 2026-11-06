@@ -3,7 +3,8 @@ import { expect, test, type Frame, type Page, type Request } from "@playwright/t
 import conditions from "../../content/conditions.json";
 import messages from "../../src/messages/en.json";
 import fr from "../../src/messages/fr.json";
-import { aiAvailable, cleanup, configured, confirmEmail, createConfirmedUser, exists, lastWeekMonday, seedCheckIns, newEmail, newPassword, notConfigured, profileLocale, revokeSessions, setProfileLocale, signedUpUnconfirmed, sweep } from "./staging";
+import { monthsBefore } from "../../src/lib/journal/onThisDay";
+import { journalToday, aiAvailable, cleanup, configured, confirmEmail, createConfirmedUser, exists, lastWeekMonday, seedCheckIns, newEmail, newPassword, notConfigured, profileLocale, revokeSessions, setProfileLocale, signedUpUnconfirmed, sweep } from "./staging";
 
 // The launch-critical journeys (1.0), end to end against staging with a
 // throwaway account each: sign-up → confirm → consent → setup → check-in →
@@ -1133,6 +1134,18 @@ test("large text, set in the browser: Today after a mood, calendar, day, entry a
     await expect(page).toHaveURL(/\/app\/entries\/[0-9a-f-]{36}$/);
     const entry = new URL(page.url()).pathname;
 
+    // A moment a month ago, with a check-in, so On this day shows with its mood in words.
+    // Not every day has one (the 31st, in a shorter month): then this part says so.
+    const aMonthAgo = monthsBefore(await journalToday(email, password), 1);
+    if (aMonthAgo) {
+      await seedCheckIns(email, password, aMonthAgo, [{ offset: 0, mood: 3, sleep_hours: 7 }]);
+      await page.goto(`/app/write?date=${aMonthAgo}`);
+      await page.getByTestId("entry-text").fill("A moment worth seeing again, in a few ordinary words.");
+      await page.getByTestId("entry-moment").click();
+      await page.getByTestId("entry-save").click();
+      await expect(page).not.toHaveURL(/\/app\/write/, { timeout: 15_000 });
+    } else console.log("No day a month ago today: On this day isn't measured in this run.");
+
     await page.setViewportSize({ width: 320, height: 800 });
     const measure = async (screen: string, percent: number) => {
       await page.waitForLoadState("networkidle");
@@ -1165,6 +1178,8 @@ test("large text, set in the browser: Today after a mood, calendar, day, entry a
         await page.goto(`${route}/app/timeline`);
         await page.getByTestId("timeline-view-calendar").click();
         await expect(page.getByTestId("month-calendar")).toBeVisible();
+        // On this day sits above the calendar, so this measures it too.
+        if (aMonthAgo) await expect(page.getByTestId("on-this-day-mood")).toBeVisible();
         await measure(`${saved} calendar`, percent);
         await page.goto(`${route}/app/timeline/${day}`);
         await measure(`${saved} day page`, percent);

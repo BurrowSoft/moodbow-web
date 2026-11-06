@@ -102,6 +102,16 @@ export async function setProfileLocale(email: string, password: string, locale: 
   if (error) throw new Error(`saving the language failed: ${error.message}`);
 }
 
+// The person's today, as the journal has it.
+export async function journalToday(email: string, password: string): Promise<string> {
+  const user = createClient(URL_, PUBLISHABLE, { auth: { persistSession: false, autoRefreshToken: false } });
+  const { error: signInError } = await user.auth.signInWithPassword({ email, password });
+  if (signInError) throw new Error(`sign-in failed: ${signInError.message}`);
+  const { data, error } = await user.rpc("get_me");
+  if (error) throw new Error(`get_me failed: ${error.message}`);
+  return (data as { today: string }).today;
+}
+
 // The Monday of the person's last complete week, in their saved time zone, and a
 // week's check-ins for it (Your week): the form would take a week of real days.
 // offsets: days after that Monday. Replaces any on those days.
