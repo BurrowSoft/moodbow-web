@@ -48,6 +48,8 @@ const SIDE: Record<PatternId, (row: InsightRow) => "a" | "b" | null> = {
 const notEnough = (id: PatternId): Pattern => ({ id, state: "not_enough", a: null, b: null, diff: null });
 // Sum then divide (no running mean), then round: the same steps as the app.
 const side = (moods: number[]): PatternSide => ({ days: moods.length, mood: roundFor("mood", moods.reduce((s, m) => s + m, 0) / moods.length) });
+// Your week splits a week's check-ins the same way.
+export { SIDE as PATTERN_SIDE, side as patternSide };
 
 export function patterns(rows: InsightRow[], today: string): Pattern[] {
   const window = new Set(rangeDays(today, "3months"));
