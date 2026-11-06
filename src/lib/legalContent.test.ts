@@ -82,6 +82,14 @@ describe("legal content files", () => {
     expect(renderLegal(source).html.includes(heading)).toBe(conditionMet("anon-start-live"));
   });
 
+  it("a journal with no email: the policy says it can be lost and can't be returned, only once that start is live", () => {
+    const source = readFileSync(path.join(process.cwd(), "content/legal/en/privacy.md"), "utf8");
+    const line = "only this phone's sign-in can open your journal";
+    const met = (on: boolean) => (id: string) => (id === "anon_start_live" ? on : isPendingMet(id));
+    expect(renderLegal(source, met(true)).html).toContain(line.replace("'", "’"));
+    expect(renderLegal(source, met(false)).html).not.toContain("sign-in can open your journal");
+  });
+
   it("todos() finds every kind of to-confirm mark, but not in editor comments", () => {
     expect(todos("a ⏳(check X) b ⏳[90] c [VITOR] d ⏳ e")).toEqual(["⏳(check X)", "⏳[90]", "[VITOR]", "⏳"]);
     expect(todos("<!-- ⏳ and [VITOR] mark facts -->\nclean text")).toEqual([]);
