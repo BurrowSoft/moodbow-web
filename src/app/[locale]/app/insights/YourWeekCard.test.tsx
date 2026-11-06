@@ -31,17 +31,20 @@ describe("YourWeekCard", () => {
   });
 });
 
-describe("the first of a month in French", () => {
+describe("the first of a month in French and Brazilian Portuguese", () => {
   it("reads 1er in a range, at either end, and in a date line", () => {
     expect(dateRangeLine("2026-10-26", "2026-11-01", "fr-FR")).toContain("1er novembre");
     expect(dateRangeLine("2026-06-01", "2026-06-07", "fr-FR")).toContain("1er");
     expect(dateLine("2026-11-01", "fr-FR")).toContain("1er novembre");
+    expect(dateRangeLine("2026-10-26", "2026-11-01", "pt-BR")).toContain("1º de novembro");
+    expect(dateLine("2026-11-01", "pt-BR")).toContain("1º de novembro");
   });
-  it("only the first, and only in French", () => {
+  it("only the first, and only those two", () => {
     expect(dateRangeLine("2026-11-09", "2026-11-15", "fr-FR")).not.toContain("er");
     expect(dateRangeLine("2026-11-11", "2026-11-17", "fr-FR")).not.toContain("1er");
     expect(dateLine("2026-11-21", "fr-FR")).not.toContain("1er");
     expect(dateLine("2026-11-01", "en-NZ")).not.toContain("1er");
-    expect(dateLine("2026-11-01", "pt-BR")).not.toContain("1er");
+    expect(dateLine("2026-11-21", "pt-BR")).not.toContain("1º");
+    expect(dateLine("2026-11-01", "es-MX")).toContain("1 de noviembre");
   });
 });

@@ -70,9 +70,13 @@ export function dateLocale(uiLocale: string, acceptLanguage: string | null, coun
 // The date line for a YYYY-MM-DD local date in the locale's own long form,
 // never assembled by hand (decision 34). Formatted at noon UTC so no zone
 // can shift the date itself to another day.
-// French writes the first of a month "1er"; Intl leaves it "1" (Web Tester, #201).
-const withFirst = (parts: Intl.DateTimeFormatPart[], dateLocaleTag: string) =>
-  parts.map((p) => (p.type === "day" && p.value === "1" && dateLocaleTag.toLowerCase().startsWith("fr") ? "1er" : p.value)).join("");
+// French writes the first of a month "1er" and Brazilian Portuguese "1º"; Intl leaves
+// it "1" (Web Tester, UX, #201).
+const firstOfMonth = (dateLocaleTag: string) => {
+  const tag = dateLocaleTag.toLowerCase();
+  return tag.startsWith("fr") ? "1er" : tag.startsWith("pt-br") ? "1º" : "1";
+};
+const withFirst = (parts: Intl.DateTimeFormatPart[], dateLocaleTag: string) => parts.map((p) => (p.type === "day" && p.value === "1" ? firstOfMonth(dateLocaleTag) : p.value)).join("");
 
 export function dateLine(localDate: string, dateLocaleTag: string): string {
   const date = new Date(`${localDate}T12:00:00Z`);
