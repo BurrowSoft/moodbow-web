@@ -821,4 +821,74 @@ test.describe("the tab bar in every language", () => {
       }
     });
   }
+
+  // The browser's real text setting: rem-based breakpoints move with it, which an
+  // injected style doesn't do, and that hid both of these (Web Tester, #193).
+  test("large text, set in the browser: tabs keep their words on a wider phone; nothing scrolls sideways", async ({ page, browserName }) => {
+    test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
+    test.setTimeout(180_000);
+    const email = newEmail();
+    const password = newPassword();
+    const cdp = await page.context().newCDPSession(page);
+    const textAt = (percent: number) => cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
+    try {
+      await signedUpUnconfirmed(email, password);
+      await confirmEmail(email);
+      await page.goto("/sign-in");
+      await page.getByLabel("Email").fill(email);
+      await page.getByLabel("Password").fill(password);
+      await page.getByRole("button", { name: messages.auth.signinSubmit }).click();
+      await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+      await page.getByTestId("setup-done").click();
+      await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+
+      const labelSize = async () => {
+        await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))));
+        return page.evaluate(() => (document.querySelector("ul[data-tab-icons]") ? "icons" : parseFloat(getComputedStyle(document.querySelector("[data-tab-label]")!).fontSize)));
+      };
+      await textAt(200);
+      for (const [route, saved] of [["", "en"], ["/th", "th"], ["/fr", "fr"], ["/es", "es"], ["/pt-br", "pt"], ["/de", "de"], ["/it", "it"]]) {
+        await setProfileLocale(email, password, saved);
+        await page.setViewportSize({ width: 320, height: 800 });
+        await page.goto(`${route}/app`);
+        await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+        expect(await page.evaluate(() => getComputedStyle(document.documentElement).fontSize), route || "/en").toBe("32px");
+        await expect.poll(labelSize, { message: `${route || "/en"} at 320` }).toBeGreaterThanOrEqual(11);
+        const narrow = (await labelSize()) as number;
+        await page.setViewportSize({ width: 390, height: 800 });
+        await expect.poll(labelSize, { message: `${route || "/en"} at 390` }).toBeGreaterThanOrEqual(narrow);
+      }
+
+      await setProfileLocale(email, password, "en");
+      await page.setViewportSize({ width: 320, height: 800 });
+      for (const percent of [200, 300]) {
+        await textAt(percent);
+        for (const path of ["/app", "/app/timeline", "/app/insights", "/app/me", "/app/write"]) {
+          await page.goto(path);
+          // The page itself, not its loading state, which is narrow and would pass.
+          await page.waitForLoadState("networkidle");
+          await expect(page.getByTestId("app-loading")).toHaveCount(0);
+          await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))));
+          // The setting really is on, or all of this would pass at the normal size.
+          expect(await page.evaluate(() => getComputedStyle(document.documentElement).fontSize), `${path} at ${percent}%`).toBe(`${(16 * percent) / 100}px`);
+          // What sticks out, named, so a failure says where to look.
+          const sticksOut = await page.evaluate(() => {
+            const inScroller = (e: Element) => {
+              for (let p = e.parentElement; p; p = p.parentElement) if (["auto", "scroll", "hidden"].includes(getComputedStyle(p).overflowX) || getComputedStyle(p).position === "fixed") return true;
+              return false;
+            };
+            return [...document.querySelectorAll("body *")]
+              .filter((e) => e.getBoundingClientRect().right > innerWidth + 0.5 && getComputedStyle(e).position !== "fixed" && e.getBoundingClientRect().width > 1 && !inScroller(e))
+              .slice(0, 6)
+              .map((e) => `${e.tagName.toLowerCase()}${e.getAttribute("data-testid") ? `[${e.getAttribute("data-testid")}]` : ""} ${Math.round(e.getBoundingClientRect().right)}`);
+          });
+          const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+          // Soft: one run lists every page that needs a look.
+          expect.soft({ path, percent, overflow, sticksOut }).toEqual({ path, percent, overflow: 0, sticksOut: [] });
+        }
+      }
+    } finally {
+      await cleanup(email);
+    }
+  });
 });

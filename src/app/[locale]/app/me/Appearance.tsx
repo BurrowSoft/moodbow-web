@@ -47,8 +47,8 @@ export function Appearance({ shortcuts = false }: { shortcuts?: boolean }) {
   };
   return (
     <section {...untilLoaded} aria-labelledby="me-appearance" className="rounded-3xl border border-border bg-surface p-6">
-      <fieldset>
-        <legend id="me-appearance" className="text-lg font-medium text-text">
+      <fieldset className="min-w-0">
+        <legend id="me-appearance" className="max-w-full text-lg font-medium text-text [overflow-wrap:anywhere]">
           {t("meAppearance")}
         </legend>
         <div className="mt-4 space-y-2">
@@ -62,7 +62,7 @@ export function Appearance({ shortcuts = false }: { shortcuts?: boolean }) {
                 onChange={() => choose(option)}
                 className="h-5 w-5 accent-[var(--color-accent)]"
               />
-              <span>{t(LABELS[option])}</span>
+              <span className="min-w-0 [overflow-wrap:anywhere]">{t(LABELS[option])}</span>
             </label>
           ))}
         </div>
@@ -79,7 +79,7 @@ export function Appearance({ shortcuts = false }: { shortcuts?: boolean }) {
             onClick={toggleShortcuts}
             className="flex min-h-11 w-full items-center justify-between gap-4 rounded-xl text-left text-text"
           >
-            <span>{t("shortcutsEnabled")}</span>
+            <span className="min-w-0 [overflow-wrap:anywhere]">{t("shortcutsEnabled")}</span>
             <span
               aria-hidden="true"
               className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full border border-border transition-colors ${shortcutsOn ? "bg-accent" : "bg-pill"}`}

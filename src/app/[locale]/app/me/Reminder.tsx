@@ -83,7 +83,7 @@ export function Reminder({ on: initialOn, time: initialTime }: { on: boolean; ti
         disabled={!on || busy}
         onChange={(e) => setTime(e.target.value)}
         onBlur={(e) => e.target.value && e.target.value !== sentTime.current && save(on, e.target.value)}
-        className="mt-2 block rounded-2xl border border-border bg-bg px-4 py-3 text-text disabled:opacity-50"
+        className="mt-2 block max-w-full rounded-2xl border border-border bg-bg px-4 py-3 text-text disabled:opacity-50"
       />
       <p className="mt-3 text-sm text-muted" data-testid="me-reminder-note">
         {t("webReminderNote")}

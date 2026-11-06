@@ -97,7 +97,7 @@ export type EditorStart = { at: number | "end"; question?: string };
 // Save in the top row (narrow screens only): the primary button, sized for
 // a bar.
 const TOP_SAVE =
-  "ml-auto inline-flex min-h-11 items-center justify-center rounded-full bg-accent px-6 font-medium text-on-accent hover:bg-accent-hover disabled:opacity-50 aria-disabled:opacity-50 sm:hidden";
+  "ml-auto inline-flex min-h-11 max-w-full items-center justify-center rounded-full bg-accent px-6 text-center font-medium [overflow-wrap:anywhere] text-on-accent hover:bg-accent-hover disabled:opacity-50 aria-disabled:opacity-50 sm:hidden";
 
 type Props = {
   promptDate?: string | null;
@@ -597,7 +597,7 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
           N2). From sm the wrapper is display: contents, and the error goes
           just above Save at the bottom (sm:order-last, as the buttons). */}
       <div className="sticky top-0 z-10 flex flex-col gap-2 bg-bg pb-2 sm:contents">
-        <div className="flex min-h-11 items-center justify-between gap-3" data-testid="entry-top-row">
+        <div className="flex min-h-11 flex-wrap items-center justify-between gap-3" data-testid="entry-top-row">
           {back}
           <button type="submit" data-testid="entry-save-top" disabled={cantSave} aria-disabled={busy || undefined} className={TOP_SAVE}>
             {t("entrySave")}
@@ -625,7 +625,7 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
           aria-describedby={future ? "entry-error" : undefined}
           value={fields.date}
           onChange={(e) => e.target.value && setFields((f) => ({ ...f, date: e.target.value }))}
-          className="min-h-11 w-fit rounded-full border border-border bg-bg px-4 text-text"
+          className="min-h-11 w-fit min-w-0 max-w-full rounded-full border border-border bg-bg px-4 text-text"
         />
       </div>
       {/* A quiet invitation, never inserted: only while the entry is empty. */}

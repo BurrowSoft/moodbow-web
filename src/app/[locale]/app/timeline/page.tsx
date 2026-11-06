@@ -95,7 +95,7 @@ export default async function TimelinePage({ params, searchParams }: PageProps<"
   const list = (
     <>
       {momentsReady && (
-        <nav aria-label={t("timelineTitle")} className="mt-4 flex gap-2">
+        <nav aria-label={t("timelineTitle")} className="mt-4 flex flex-wrap gap-2">
           <Link href="/app/timeline" data-testid="timeline-filter-all" aria-current={!momentsOnly ? "page" : undefined} className={filter(!momentsOnly)}>
             {t("timelineAll")}
           </Link>

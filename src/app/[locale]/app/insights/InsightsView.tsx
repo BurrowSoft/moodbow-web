@@ -73,7 +73,7 @@ export function InsightsView({
   return (
     <section>
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-3xl font-medium tracking-tight">{t("insightsTitle")}</h1>
+        <h1 className="min-w-0 text-3xl font-medium tracking-tight [overflow-wrap:anywhere]">{t("insightsTitle")}</h1>
         {share}
       </div>
       <nav aria-label={t("insightsTitle")} className="mt-4 flex flex-wrap gap-2">
@@ -92,7 +92,7 @@ export function InsightsView({
 
       {week}
 
-      <div className="mt-8 grid gap-6 sm:grid-cols-2">
+      <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2">
         {METRICS.map((metric) => {
           const chart = CHARTS[metric];
           const s = summarize(rows, today, range, metric);
