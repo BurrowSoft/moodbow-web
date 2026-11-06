@@ -597,6 +597,6 @@
     "consentBody": "[Placeholder: Vitor's AI consent text goes here. It isn't final.]",
     "consentAccept": "Accepter et continuer",
     "consentDecline": "Pas maintenant",
-    "consentFailed": "L'enregistrement a échoué. Veuillez réessayer."
+    "consentFailed": "Cela n'a pas été enregistré. Veuillez réessayer."
   }
 }

@@ -7,7 +7,9 @@ import { boCardMayOpen, type BoMessage } from "@/lib/journal/bo";
 import { BoConversation } from "./BoConversation";
 
 const give = vi.fn(async () => ({ ok: true }));
-vi.mock("./actions", () => ({ giveBoConsent: () => give() }));
+const report = vi.fn(async (_reply: object) => ({ ok: true }));
+const clear = vi.fn(async () => ({ ok: true }));
+vi.mock("./actions", () => ({ giveBoConsent: () => give(), reportBoReply: (reply: object) => report(reply), clearBoConversation: () => clear() }));
 vi.mock("@/i18n/navigation", () => ({
   Link: ({ href, children, ...rest }: { href: string; children: React.ReactNode }) => (
     <a href={href} {...rest}>
@@ -230,6 +232,47 @@ describe("BoConversation", () => {
     fireEvent.click(screen.getByTestId("bo-consent-accept"));
     await act(async () => {});
     expect(screen.getByTestId("bo-text")).toHaveValue("Hello");
+  });
+
+  it("Report on a kept reply sends its id, on this visit's reply its send's key, and says no one reads it right away", async () => {
+    await open([{ id: "11111111-1111-4111-8111-111111111111", author: "ai", body: "Kept" }]);
+    fireEvent.click(screen.getByTestId("bo-report"));
+    await act(async () => {});
+    expect(report).toHaveBeenLastCalledWith({ id: "11111111-1111-4111-8111-111111111111" });
+    expect(screen.getByTestId("bo-report-done")).toHaveTextContent(b.reportScreen);
+    expect(screen.getByTestId("bo-get-help")).toBeInTheDocument();
+    answers.push(reply());
+    type("Hello");
+    await send();
+    fireEvent.click(screen.getByTestId("bo-report"));
+    await act(async () => {});
+    expect(report).toHaveBeenLastCalledWith({ clientKey: sends()[0].client_key });
+  });
+
+  it("a failed report says so and can be tried again", async () => {
+    await open([{ id: "1", author: "ai", body: "Kept" }]);
+    report.mockResolvedValueOnce({ ok: false });
+    fireEvent.click(screen.getByTestId("bo-report"));
+    await act(async () => {});
+    expect(screen.getByTestId("bo-report-failed")).toBeInTheDocument();
+    expect(screen.getByTestId("bo-report")).toBeEnabled();
+  });
+
+  it("full: the reply shows, with no Report as it wasn't kept, then Export and Clear; Clear starts again", async () => {
+    await open([{ id: "1", author: "person", body: "Earlier" }]);
+    answers.push(reply({ conversationFull: true }));
+    type("Hello");
+    await send();
+    expect(screen.getByTestId("bo-message-ai")).toHaveTextContent("A reply");
+    expect(screen.queryByTestId("bo-report")).toBeNull();
+    expect(screen.getByTestId("bo-full-export")).toHaveAttribute("href", "/app/me#me-your-data");
+    fireEvent.click(screen.getByTestId("bo-full-clear"));
+    fireEvent.click(screen.getByTestId("bo-clear-confirm"));
+    await act(async () => {});
+    expect(clear).toHaveBeenCalled();
+    expect(screen.queryByTestId("bo-full")).toBeNull();
+    expect(screen.queryByText("Earlier")).toBeNull();
+    expect(screen.getByText(b.firstLine)).toBeInTheDocument();
   });
 
   it("the card doesn't reopen within ten minutes, and does after", () => {

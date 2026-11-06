@@ -55,7 +55,8 @@ export function parseBoStatus(data: unknown): BoStatus {
 }
 
 // What this screen needs of a conversation: kept messages only, as plain text.
-export type BoMessage = { id: string; author: "person" | "ai"; body: string };
+// sentWith: a reply from this visit, found by its send's key; unkept: past the row cap.
+export type BoMessage = { id: string; author: "person" | "ai"; body: string; sentWith?: string; unkept?: boolean };
 export type BoProblem = BoError | "no_answer" | "offline";
 
 export const BO_HISTORY_SHOWN = 200;

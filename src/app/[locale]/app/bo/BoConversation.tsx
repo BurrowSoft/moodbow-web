@@ -4,6 +4,8 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNo
 import { useTranslations } from "next-intl";
 import { GetHelpNow, SafetyCard } from "@/components/SafetyCard";
 import { BoConsent } from "./BoConsent";
+import { BoReply } from "./BoReply";
+import { ClearBo } from "./ClearBo";
 import { Link } from "@/i18n/navigation";
 import { BO_CLIENT_WAIT_MS, BO_DEFAULT_MAX_CHARS, BO_ERROR_TEXT, BO_WAIT_RETRY_MS, boCardMayOpen, type BoMessage, type BoProblem, type BoSend, type BoStatus } from "@/lib/journal/bo";
 import { flagsCrisis } from "@/lib/safety/crisis";
@@ -34,6 +36,7 @@ async function callBo<T>(body: object): Promise<T | { status: "no_answer" }> {
 export function BoConversation({ initial, country, back, healthData = false, consented = true }: { initial: BoMessage[]; country: string | null | undefined; back?: ReactNode; healthData?: boolean; consented?: boolean }) {
   const t = useTranslations("bo");
   const tc = useTranslations("common");
+  const tm = useTranslations("me");
   useLayoutEffect(() => {
     document.documentElement.dataset.boScreen = "";
     return () => {
@@ -121,8 +124,8 @@ export function BoConversation({ initial, country, back, healthData = false, con
       if (answer.openCard) openCard();
       if (answer.showNotice) setNotice(true);
       setFull(answer.conversationFull);
-      const { reply } = answer;
-      setMessages((list) => [...list, { id: client_key, author: "person", body: sent }, { id: `${client_key}-reply`, author: "ai", body: reply }]);
+      const { reply, conversationFull } = answer;
+      setMessages((list) => [...list, { id: client_key, author: "person", body: sent }, { id: `${client_key}-reply`, author: "ai", body: reply, sentWith: client_key, unkept: conversationFull }]);
       setText("");
       attempt.current = null;
       return;
@@ -160,11 +163,15 @@ export function BoConversation({ initial, country, back, healthData = false, con
       )}
       <div role="log" aria-label={t("screenLine")} className="flex flex-col gap-3">
         {messages.length === 0 && <p className={bubble("ai")}>{t("firstLine")}</p>}
-        {messages.map((m) => (
-          <p key={m.id} data-testid={`bo-message-${m.author}`} className={bubble(m.author)}>
-            {m.body}
-          </p>
-        ))}
+        {messages.map((m) =>
+          m.author === "ai" ? (
+            <BoReply key={m.id} message={m} className={bubble("ai")} />
+          ) : (
+            <p key={m.id} data-testid="bo-message-person" className={bubble("person")}>
+              {m.body}
+            </p>
+          ),
+        )}
         {sending && (
           <p data-testid="bo-typing" className={bubble("ai")}>
             <span aria-hidden="true" className="inline-block h-[8px] w-[24px] rounded-full bg-border motion-safe:animate-pulse" />
@@ -174,9 +181,21 @@ export function BoConversation({ initial, country, back, healthData = false, con
       </div>
       <div ref={end} />
       {full && (
-        <p data-testid="bo-full" className="text-sm text-text">
-          {t("conversationFull")}
-        </p>
+        <div data-testid="bo-full" className="flex flex-col items-start gap-2 text-sm text-text">
+          <p>{t("conversationFull")}</p>
+          <div className="flex flex-wrap items-center gap-[12px]">
+            <Link href="/app/me#me-your-data" data-testid="bo-full-export" className="inline-flex min-h-11 items-center font-medium text-accent underline underline-offset-4">
+              {tm("meExport")}
+            </Link>
+            <ClearBo
+              testId="bo-full-clear"
+              onCleared={() => {
+                setMessages([]);
+                setFull(false);
+              }}
+            />
+          </div>
+        </div>
       )}
       {(problem || tooLong) && (
         <div role="alert" data-testid="bo-problem" className="flex flex-col items-start gap-2">
