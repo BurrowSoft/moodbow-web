@@ -36,7 +36,7 @@
     "terms": "Termini",
     "draftBanner": "Bozza, non in vigore. Questa pagina è visibile solo nelle versioni di prova.",
     "opensInNewTab": "(si apre in una nuova scheda)",
-    "consumerHealthData": "Informativa sulla privacy dei dati sanitari dei consumatori"
+    "consumerHealthData": "Informativa sui dati sanitari"
   },
   "home": {
     "comingSoon": "In arrivo",
@@ -132,7 +132,7 @@
     "description": "I termini per usare Moodbow."
   },
   "consumerHealthData": {
-    "title": "Informativa sulla privacy dei dati sanitari dei consumatori",
+    "title": "Informativa sui dati sanitari",
     "description": "Come Moodbow tratta i tuoi dati."
   },
   "legal": {

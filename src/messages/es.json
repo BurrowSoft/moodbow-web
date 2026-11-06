@@ -36,7 +36,7 @@
     "terms": "Términos",
     "draftBanner": "Borrador, no está en vigor. Esta página solo se ve en versiones de prueba.",
     "opensInNewTab": "(se abre en una pestaña nueva)",
-    "consumerHealthData": "Política de privacidad de datos de salud del consumidor"
+    "consumerHealthData": "Política de datos de salud"
   },
   "home": {
     "comingSoon": "Muy pronto",
@@ -132,7 +132,7 @@
     "description": "Las condiciones para usar Moodbow."
   },
   "consumerHealthData": {
-    "title": "Política de privacidad de datos de salud del consumidor",
+    "title": "Política de datos de salud",
     "description": "Cómo trata Moodbow tus datos."
   },
   "legal": {
