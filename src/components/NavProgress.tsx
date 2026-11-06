@@ -29,7 +29,9 @@ let clicks = 0;
 function internalTarget(e: MouseEvent): string | null {
   if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return null;
   const a = (e.target as Element | null)?.closest?.("a[href]") as HTMLAnchorElement | null;
-  if (!a || a.target === "_blank" || a.hasAttribute("download")) return null;
+  // data-stays: a link that won't navigate, like the current tab (AppNav's
+  // back to the top), even with a filter in the address that it doesn't have.
+  if (!a || a.target === "_blank" || a.hasAttribute("download") || a.hasAttribute("data-stays")) return null;
   const url = new URL(a.href, location.href);
   if (url.origin !== location.origin) return null;
   const to = url.pathname + url.search;

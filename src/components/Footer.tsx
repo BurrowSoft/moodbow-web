@@ -1,8 +1,10 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { conditionMet } from "@/lib/conditions";
+import { conditionMet, pageGate } from "@/lib/conditions";
 import { BURROWSOFT_URL } from "@/lib/site";
+import { liveStores } from "@/lib/stores";
 import { LanguageSwitcher } from "./LanguageSwitcher";
+import { TryAppButton } from "./TryAppButton";
 
 const linkClass =
   "inline-flex min-h-12 items-center rounded-full px-3 font-medium text-accent underline-offset-4 hover:underline";
@@ -21,6 +23,7 @@ export async function Footer() {
   return (
     <footer className="px-6 pb-6 pt-10 text-sm text-muted print:hidden">
       <div className="mx-auto flex max-w-3xl flex-col items-center gap-2">
+        <TryAppButton journal={pageGate("web-journal-live") !== "hidden"} stores={liveStores()} />
         <nav aria-label={t("siteLinks")} className="flex flex-wrap items-center justify-center gap-x-1">
           {links
             .filter((l) => l.show)

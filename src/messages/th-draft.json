@@ -266,7 +266,7 @@
   },
   {
     "key": "accountDeletion.what",
-    "en": "We delete your entries, check-ins, AI reflections and reports, what Moodbow remembers, your settings and your login.",
+    "en": "We delete everything in your account, including your entries, check-ins and settings, and your sign-in details.",
     "reason": "UX draft (native read pending)"
   },
   {
@@ -943,5 +943,15 @@
     "key": "me.signOutOfflineWriting",
     "en": "You're offline. Connect to the internet to sign out. Your writing is safe on this device.",
     "reason": "UX draft (native read pending): sign-out while offline"
+  },
+  {
+    "key": "common.tryApp",
+    "en": "Try the app",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "me.deleteBody",
+    "en": "This deletes everything in your account, including your entries, check-ins and settings, right away. It can't be undone.",
+    "reason": "UX draft (native read pending)"
   }
 ]

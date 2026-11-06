@@ -1,3 +1,4 @@
+// DON'T RE-RUN until the specs catch up: they're behind th.json, and a run puts English back over Thai strings.
 // The Thai message scaffold (1.1 F prep): src/messages/th.json with the same
 // keys as en.json, filled from the Thai column of the copy spec
 // (r1-screens-and-copy.md) wherever r1's English for that key still equals
