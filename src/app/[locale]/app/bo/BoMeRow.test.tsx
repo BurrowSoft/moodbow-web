@@ -9,7 +9,14 @@ const clear = vi.fn(async () => ({ ok: true }));
 const off = vi.fn(async () => ({ ok: true }));
 const push = vi.fn();
 vi.mock("./actions", () => ({ setBoReadsJournal: (on: boolean) => reads(on), clearBoConversation: () => clear(), turnBoOff: () => off() }));
-vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push }) }));
+vi.mock("@/i18n/navigation", () => ({
+  useRouter: () => ({ push }),
+  Link: ({ href, children, ...rest }: { href: string; children: React.ReactNode }) => (
+    <a href={href} {...rest}>
+      {children}
+    </a>
+  ),
+}));
 afterEach(() => {
   cleanup();
   vi.clearAllMocks();
@@ -51,6 +58,11 @@ describe("BoMeRow", () => {
     cleanup();
     open({ consented: false });
     expect(screen.queryByTestId("me-bo-journal")).toBeNull();
+  });
+
+  it("links to Bo's Help article", () => {
+    open();
+    expect(screen.getByTestId("me-bo-help")).toHaveAttribute("href", "/help/bo");
   });
 
   it("the journal switch never shows without its line", () => {

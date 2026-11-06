@@ -169,7 +169,7 @@
     "welcome2Title": "เห็นรูปแบบของตัวเอง",
     "welcome2Body": "ไทม์ไลน์และกราฟช่วยให้เห็นว่าอะไรทำให้วันดีๆ ดีขึ้น และอะไรมักเกิดขึ้นก่อนวันที่ยาก",
     "welcome3Title": "เป็นส่วนตัว และเป็นของคุณ",
-    "welcome3BodyNoAi": "มีเพียงคุณที่อ่านไดอารี่ของคุณได้ และคุณลบทุกอย่างได้ตลอดเวลา",
+    "welcome3BodyNoAi": "มีเพียงคุณที่อ่านไดอารี่ของคุณได้ และคุณลบทุกอย่างได้ตลอดเวลาในหน้าฉัน",
     "welcomeNext": "ถัดไป",
     "welcomeSkip": "ข้าม",
     "welcomeStart": "เริ่มต้นใช้งาน",
@@ -620,6 +620,7 @@
     "pictureLimit": "รูปภาพของวันนี้หมดแล้ว คุณยังเขียนถึง Bo ได้",
     "pictureConsentTitle": "ก่อนส่งรูปภาพแรก",
     "pictureConsentBody": "[Placeholder, not final: this text isn't approved yet.]\n\nYour picture goes to Anthropic so Bo can reply. We don't store it. Pictures are automatically checked against lists of known child sexual abuse material, and Anthropic reports matches to the authorities.\n\nPlease don't send pictures of other people without their agreement, or anything medical.",
-    "pictureConsentAccept": "ดำเนินการต่อ"
+    "pictureConsentAccept": "ดำเนินการต่อ",
+    "helpLink": "Bo ทำงานอย่างไร"
   }
 }

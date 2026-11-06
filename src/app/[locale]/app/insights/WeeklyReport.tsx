@@ -172,7 +172,7 @@ export function WeeklyReport({ initial, weekStart, dateLocaleTag, balance, count
   if (hidden) return null;
   if (aiOff)
     return (
-      <section aria-labelledby="week-title" data-testid="weekly-report" className="mt-8 rounded-3xl border border-border bg-surface p-5">
+      <section aria-labelledby="week-title" data-testid="weekly-report" className="mt-8 rounded-3xl border border-border bg-surface p-[20px]">
         <h2 id="week-title" className="text-lg font-medium text-text">
           {t("reportWeekly")}
         </h2>
@@ -188,7 +188,7 @@ export function WeeklyReport({ initial, weekStart, dateLocaleTag, balance, count
   const notEnough = phase.kind === "error" && phase.message === "reportNotEnough";
 
   return (
-    <section aria-labelledby="week-title" data-testid="weekly-report" className="mt-8 rounded-3xl border border-border bg-surface p-5">
+    <section aria-labelledby="week-title" data-testid="weekly-report" className="mt-8 rounded-3xl border border-border bg-surface p-[20px]">
       <h2 id="week-title" className="text-lg font-medium text-text">
         {t("reportWeekly")}
       </h2>
@@ -197,7 +197,7 @@ export function WeeklyReport({ initial, weekStart, dateLocaleTag, balance, count
       </p>
 
       {report && (
-        <div ref={resultBox} tabIndex={-1} data-testid="weekly-report-result" className="mt-4 rounded-2xl border-l-4 border-voice bg-voice-surface p-4 focus:outline-none">
+        <div ref={resultBox} tabIndex={-1} data-testid="weekly-report-result" className="mt-4 rounded-2xl border-l-4 border-voice bg-voice-surface p-[16px] focus:outline-none">
           <p className="mb-2 flex flex-wrap items-center gap-2 text-sm font-medium text-voice">
             <span>{ta("appName")}</span>
             {report.tier === "lite" && (
@@ -251,7 +251,7 @@ export function WeeklyReport({ initial, weekStart, dateLocaleTag, balance, count
       )}
 
       {!report && loading && (
-        <div aria-hidden="true" data-testid="weekly-report-loading" className="mt-4 rounded-2xl border-l-4 border-voice bg-voice-surface p-4">
+        <div aria-hidden="true" data-testid="weekly-report-loading" className="mt-4 rounded-2xl border-l-4 border-voice bg-voice-surface p-[16px]">
           <p className="text-sm font-medium text-voice">{ta("appName")}</p>
           <p className="mt-1 text-muted">{t("reportLoading")}</p>
           <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-pill">

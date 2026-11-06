@@ -14,6 +14,8 @@ import { flagsCrisis } from "@/lib/safety/crisis";
 import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
 import { PRIMARY_SAVE } from "@/lib/ui/journalLayout";
 
+const BO_HEADER_MOST = 0.25;
+
 // These end the conversation for now: there's no sending from here.
 const CLOSED: BoProblem[] = ["region_off", "region_unknown", "bo_unavailable", "needs_email", "bo_resting"];
 // The same message may simply go again, or (region_unknown: the route may have failed)
@@ -78,6 +80,30 @@ export function BoConversation({ initial, country, back, healthData = false, con
   const attempt = useRef<{ key: string; text: string; picture?: string } | null>(null);
   const cardOpenedAt = useRef<number | null>(null);
   const end = useRef<HTMLDivElement>(null);
+  // The line and help stay on screen while there's room for them. At large text the header
+  // can fill the window and cover what's under it, so past a quarter of it, it scrolls away
+  // and help also sits by the box. While it's pinned, focus and scrolling clear it.
+  const header = useRef<HTMLElement>(null);
+  const [pinned, setPinned] = useState(true);
+  useEffect(() => {
+    const bar = header.current;
+    if (!bar) return;
+    const root = document.documentElement;
+    const measure = () => {
+      const fits = bar.offsetHeight <= window.innerHeight * BO_HEADER_MOST;
+      setPinned(fits);
+      root.style.scrollPaddingTop = fits ? `${bar.offsetHeight}px` : "";
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    const watcher = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(measure);
+    watcher?.observe(bar);
+    return () => {
+      window.removeEventListener("resize", measure);
+      watcher?.disconnect();
+      root.style.scrollPaddingTop = "";
+    };
+  }, []);
 
   const openCard = useCallback(() => {
     const now = Date.now();
@@ -213,13 +239,17 @@ export function BoConversation({ initial, country, back, healthData = false, con
 
   return (
     <div data-testid="bo-conversation" className="flex flex-col gap-4">
-      <header data-testid="bo-header" className="sticky top-0 z-10 flex flex-wrap items-center gap-x-[8px] gap-y-[4px] bg-bg py-[8px]">
+      <header ref={header} data-testid="bo-header" data-pinned={pinned ? "" : undefined} className={`flex flex-wrap items-center gap-x-[8px] gap-y-[4px] bg-bg py-[8px] ${pinned ? "sticky top-0 z-10" : ""}`}>
         {back && <div className="md:hidden">{back}</div>}
-        <h1 className="min-w-0 flex-1 text-2xl font-medium text-text [overflow-wrap:anywhere]">{t("screenLine")}</h1>
+        <h1 className="min-w-0 flex-1 font-medium leading-[1.33] text-text [font-size:min(1.5rem,max(10vw,24px,1rem))] [overflow-wrap:anywhere]">{t("screenLine")}</h1>
         <GetHelpNow country={country} testId="bo-get-help" neutral />
       </header>
       <p className="text-sm text-muted">
         {t("smallLine")}
+        {" "}
+        <Link href="/help/bo" data-testid="bo-help" className="underline underline-offset-4">
+          {t("helpLink")}
+        </Link>
         {healthData && (
           <>
             {" "}
@@ -353,6 +383,7 @@ export function BoConversation({ initial, country, back, healthData = false, con
           </button>
         </Dialog>
       )}
+      {!pinned && <GetHelpNow country={country} testId="bo-get-help-end" neutral />}
       {card && <SafetyCard country={country} onClose={closeCard} />}
     </div>
   );

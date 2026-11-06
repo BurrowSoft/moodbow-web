@@ -9,10 +9,11 @@
 // still wraps, but only at zoom or large text.
 
 // The /app layout's main region.
-export const APP_MAIN_GUTTER = "px-3 min-[360px]:px-4 sm:px-6";
+// In px, like the cards: rem would triple at 300 % text, leaving 176 px of a 320 px phone.
+export const APP_MAIN_GUTTER = "px-[12px] min-[360px]:px-[16px] sm:px-[24px]";
 
 // A journal card (Today's check-in and its summary).
-export const JOURNAL_CARD = "rounded-3xl border border-border bg-surface p-3 min-[360px]:p-4 sm:p-6";
+export const JOURNAL_CARD = "rounded-3xl border border-border bg-surface p-[12px] min-[360px]:p-[16px] sm:p-[24px]";
 
 // The mood picker: a radio row inside an @container, and each face.
 export const MOOD_ROW = "flex flex-wrap justify-between gap-0.5 @min-[22rem]:gap-2";

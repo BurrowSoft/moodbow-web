@@ -169,7 +169,7 @@
     "welcome2Title": "Veja seus padrões",
     "welcome2Body": "Sua linha do tempo e seus gráficos mostram o que deixa os dias bons ainda melhores, e o que costuma vir antes dos dias difíceis.",
     "welcome3Title": "Privado, e só seu",
-    "welcome3BodyNoAi": "Só você pode ler o seu diário, e pode apagar tudo quando quiser.",
+    "welcome3BodyNoAi": "Só você pode ler o seu diário, e pode apagar tudo quando quiser em Perfil.",
     "welcomeNext": "Próximo",
     "welcomeSkip": "Pular",
     "welcomeStart": "Começar",
@@ -575,7 +575,7 @@
   },
   "bo": {
     "boButton": "Falar com o Bo",
-    "screenLine": "Bo, a IA da Moodbow",
+    "screenLine": "Bo, a IA do Moodbow",
     "smallLine": "O Bo é uma IA, não um terapeuta.",
     "notice": "Você está falando com o Bo, uma IA. Ele não é uma pessoa nem um terapeuta, e não pode ligar para ninguém.",
     "firstLine": "Como está sendo o seu dia?",
@@ -620,6 +620,7 @@
     "pictureLimit": "Por hoje é só de imagens. Você ainda pode escrever para o Bo.",
     "pictureConsentTitle": "Antes da sua primeira imagem",
     "pictureConsentBody": "[Placeholder, not final: this text isn't approved yet.]\n\nYour picture goes to Anthropic so Bo can reply. We don't store it. Pictures are automatically checked against lists of known child sexual abuse material, and Anthropic reports matches to the authorities.\n\nPlease don't send pictures of other people without their agreement, or anything medical.",
-    "pictureConsentAccept": "Continuar"
+    "pictureConsentAccept": "Continuar",
+    "helpLink": "Como o Bo funciona"
   }
 }

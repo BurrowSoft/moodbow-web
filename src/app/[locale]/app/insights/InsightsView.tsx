@@ -103,7 +103,7 @@ export function InsightsView({
           const titleId = `chart-${metric}-title`;
           const summaryId = `chart-${metric}-summary`;
           return (
-            <section key={metric} data-testid={`insights-chart-${metric}`} className="rounded-3xl border border-border bg-surface p-5" aria-labelledby={titleId}>
+            <section key={metric} data-testid={`insights-chart-${metric}`} className="rounded-3xl border border-border bg-surface p-[20px]" aria-labelledby={titleId}>
               <h2 id={titleId} className="text-lg font-medium text-text">
                 {t(chart.title)}
               </h2>
@@ -150,7 +150,7 @@ function Patterns({ patterns, format }: { patterns: Pattern[]; format: (v: numbe
   const t = useTranslations("insights");
   const visible = patterns.filter((p) => p.state !== "not_enough");
   return (
-    <section data-testid="insights-patterns" aria-labelledby="patterns-title" className="mt-6 rounded-3xl border border-border bg-surface p-5">
+    <section data-testid="insights-patterns" aria-labelledby="patterns-title" className="mt-6 rounded-3xl border border-border bg-surface p-[20px]">
       <h2 id="patterns-title" className="text-lg font-medium text-text">
         {t("patternsTitle")}
       </h2>

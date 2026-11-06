@@ -169,7 +169,7 @@
     "welcome2Title": "Voyez vos tendances",
     "welcome2Body": "Votre chronologie et vos graphiques montrent ce qui rend les bonnes journées meilleures, et ce qui précède souvent les plus difficiles.",
     "welcome3Title": "Privé, et rien qu'à vous",
-    "welcome3BodyNoAi": "Votre journal n'est lisible que par vous, et vous pouvez tout supprimer à tout moment.",
+    "welcome3BodyNoAi": "Votre journal n'est lisible que par vous, et vous pouvez tout supprimer à tout moment dans Moi.",
     "welcomeNext": "Suivant",
     "welcomeSkip": "Passer",
     "welcomeStart": "Commencer",
@@ -620,6 +620,7 @@
     "pictureLimit": "C'est tout pour les images aujourd'hui. Vous pouvez toujours écrire à Bo.",
     "pictureConsentTitle": "Avant votre première image",
     "pictureConsentBody": "[Placeholder, not final: this text isn't approved yet.]\n\nYour picture goes to Anthropic so Bo can reply. We don't store it. Pictures are automatically checked against lists of known child sexual abuse material, and Anthropic reports matches to the authorities.\n\nPlease don't send pictures of other people without their agreement, or anything medical.",
-    "pictureConsentAccept": "Continuer"
+    "pictureConsentAccept": "Continuer",
+    "helpLink": "Comment fonctionne Bo"
   }
 }

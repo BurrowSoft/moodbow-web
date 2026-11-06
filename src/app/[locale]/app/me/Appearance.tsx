@@ -46,7 +46,7 @@ export function Appearance({ shortcuts = false }: { shortcuts?: boolean }) {
     listeners.forEach((cb) => cb());
   };
   return (
-    <section {...untilLoaded} aria-labelledby="me-appearance" className="rounded-3xl border border-border bg-surface p-6">
+    <section {...untilLoaded} aria-labelledby="me-appearance" className="rounded-3xl border border-border bg-surface p-[24px]">
       <fieldset className="min-w-0">
         <legend id="me-appearance" className="max-w-full text-lg font-medium text-text [overflow-wrap:anywhere]">
           {t("meAppearance")}

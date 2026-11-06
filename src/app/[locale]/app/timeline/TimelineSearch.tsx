@@ -173,7 +173,7 @@ export function TimelineSearch({ dateLocaleTag, children }: { dateLocaleTag: str
           <ul className="mt-2 space-y-3" data-testid="timeline-search-results">
             {state.hits.map((h) => (
               <li key={h.id}>
-                <Link href={withOrigin(`/app/entries/${h.id}`, "/app/timeline")} data-testid={`timeline-search-hit-${h.id}`} className="block rounded-2xl border border-border bg-surface p-4 hover:border-accent">
+                <Link href={withOrigin(`/app/entries/${h.id}`, "/app/timeline")} data-testid={`timeline-search-hit-${h.id}`} className="block rounded-2xl border border-border bg-surface p-[16px] hover:border-accent">
                   <span className="flex flex-wrap items-center gap-x-2 font-medium text-text">
                     {h.mood !== null && <span className={`h-3.5 w-3.5 shrink-0 rounded-full ${MOOD_COLOURS[h.mood - 1]} ${MOOD_DOT_OUTLINE}`} aria-hidden="true" />}
                     <span>{dayLabel(h.date, dateLocaleTag)}</span>

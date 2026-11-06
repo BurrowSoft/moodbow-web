@@ -37,7 +37,9 @@ export function AuthField({ id, label, type, autoComplete, hint, defaultValue, e
   );
 }
 
+// Px sides and a minimum that gives way: at 300 % text, rem sides and a 200 px floor
+// pushed this past a 320 px phone (up to 194 px sideways, Web Tester #203).
 export const primaryButtonClass =
-  "inline-flex min-h-[52px] min-w-[200px] items-center justify-center rounded-full bg-accent px-8 py-3.5 text-base font-medium text-on-accent hover:bg-accent-hover disabled:opacity-60";
+  "inline-flex min-h-[52px] min-w-[min(200px,100%)] max-w-full items-center justify-center rounded-full bg-accent px-[32px] py-3.5 text-center text-base font-medium text-on-accent [overflow-wrap:anywhere] hover:bg-accent-hover disabled:opacity-60";
 
 export const textLinkClass = "font-medium text-accent underline underline-offset-4";
