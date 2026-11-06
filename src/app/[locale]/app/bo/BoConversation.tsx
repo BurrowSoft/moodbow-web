@@ -10,11 +10,12 @@ import { Link } from "@/i18n/navigation";
 import { BO_CLIENT_WAIT_MS, BO_DEFAULT_MAX_CHARS, BO_ERROR_TEXT, BO_WAIT_RETRY_MS, boCardMayOpen, type BoMessage, type BoProblem, type BoSend, type BoStatus } from "@/lib/journal/bo";
 import { flagsCrisis } from "@/lib/safety/crisis";
 import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
+import { useKeyboardOpen } from "@/lib/ui/keyboardOpen";
 import { PRIMARY_SAVE } from "@/lib/ui/journalLayout";
 
 const BO_HEADER_MOST = 0.25;
 // The compact row's text, capped to the phone, and a help button that doesn't grow with it.
-const BO_END_TEXT = "[font-size:min(1rem,max(6vw,14px))]";
+const BO_END_TEXT = "[font-size:min(1rem,max(8vw,16px))]";
 const BO_END_HELP = `inline-flex min-h-[44px] max-w-full items-center justify-center rounded-full border border-border bg-bg px-[12px] text-center font-medium text-text hover:bg-pill ${BO_END_TEXT}`;
 
 // These end the conversation for now: there's no sending from here.
@@ -69,7 +70,14 @@ export function BoConversation({ initial, country, back, healthData = false, con
   // The line and help are always on screen (UX; the disclosures in specs/bo-risk-read.md).
   // At large text the header can fill the window and cover what's under it, so past a
   // quarter of it, it scrolls away and a compact row holds them at the bottom instead.
-  // Whichever is pinned, focus and scrolling clear it.
+  // Whichever is pinned, focus and scrolling clear it. A phone's keyboard shrinks only what's
+  // visible, leaving anything sticky out of sight (Reviewer), so while it's up they sit just
+  // above the box, which is what the browser keeps in view.
+  const keyboard = useKeyboardOpen();
+  const typingRow = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (keyboard) typingRow.current?.scrollIntoView?.({ block: "nearest" });
+  }, [keyboard]);
   const header = useRef<HTMLElement>(null);
   const [pinned, setPinned] = useState(true);
   const endRow = useRef<HTMLDivElement>(null);
@@ -198,7 +206,7 @@ export function BoConversation({ initial, country, back, healthData = false, con
 
   return (
     <div data-testid="bo-conversation" className="flex flex-col gap-4">
-      <header ref={header} data-testid="bo-header" data-pinned={pinned ? "" : undefined} className={`flex flex-wrap items-center gap-x-[8px] gap-y-[4px] bg-bg py-[8px] ${pinned ? "sticky top-0 z-10" : ""}`}>
+      <header ref={header} data-testid="bo-header" data-pinned={pinned ? "" : undefined} className={`flex flex-wrap items-center gap-x-[8px] gap-y-[4px] bg-bg py-[8px] ${pinned && !keyboard ? "sticky top-0 z-10" : ""}`}>
         {back && <div className="md:hidden">{back}</div>}
         <h1 className="min-w-0 flex-1 font-medium leading-[1.33] text-text [font-size:min(1.5rem,max(10vw,24px,1rem))] [overflow-wrap:anywhere]">{t("screenLine")}</h1>
         <GetHelpNow country={country} testId="bo-get-help" neutral />
@@ -278,6 +286,12 @@ export function BoConversation({ initial, country, back, healthData = false, con
             void send();
           }}
         >
+          {keyboard && (
+            <div ref={typingRow} data-testid="bo-typing-row" className="flex flex-wrap items-center justify-between gap-x-[8px] gap-y-[2px]">
+              <p className={`min-w-0 font-medium leading-tight text-text [overflow-wrap:anywhere] ${BO_END_TEXT}`}>{t("screenLine")}</p>
+              <GetHelpNow country={country} testId="bo-get-help-typing" className={BO_END_HELP} neutral />
+            </div>
+          )}
           <textarea
             data-testid="bo-text"
             aria-label={t("messageBox")}
@@ -293,7 +307,7 @@ export function BoConversation({ initial, country, back, healthData = false, con
           </button>
         </form>
       )}
-      {!pinned && (
+      {!pinned && !keyboard && (
         <div ref={endRow} data-testid="bo-end-row" className="sticky bottom-0 z-10 flex flex-wrap items-center justify-between gap-x-[8px] gap-y-[2px] bg-bg py-[4px]">
           <p data-testid="bo-end-line" className={`min-w-0 font-medium leading-tight text-text [overflow-wrap:anywhere] ${BO_END_TEXT}`}>
             {t("screenLine")}

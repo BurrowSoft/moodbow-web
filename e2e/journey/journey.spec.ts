@@ -1206,13 +1206,13 @@ test("Bo's screen at large text: the header covers nothing, and help is reachabl
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     await page.setViewportSize({ width: 320, height: 640 });
 
-    for (const percent of [200, 300]) {
+    for (const percent of [100, 200, 300]) {
       await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
       await page.goto("/app/bo");
       await expect(page.getByTestId("bo-header")).toBeVisible();
       await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))));
       // Not now, tried; then the real yes, the first time round.
-      if (percent === 200) {
+      if (percent === 100) {
         await page.getByTestId("bo-consent-decline").click({ trial: true });
         await page.getByTestId("bo-consent-accept").click();
       }
@@ -1248,6 +1248,8 @@ test("Bo's screen at large text: the header covers nothing, and help is reachabl
 
       // Help, from wherever the conversation has got to.
       const pinned = (await page.getByTestId("bo-header").getAttribute("data-pinned")) !== null;
+      // Pinned at the normal size; on this phone, not at large text.
+      expect(pinned, `pinned at ${percent}%`).toBe(percent === 100);
       const help = page.getByTestId(pinned ? "bo-get-help" : "bo-get-help-end");
       await help.click();
       await expect(page.getByTestId("safety-card")).toBeVisible();
