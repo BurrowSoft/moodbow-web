@@ -68,7 +68,7 @@ export function AiSettings({ initial, credits }: { initial: Values; credits: { b
         {t("meAi")}
       </h2>
       <label className="mt-4 flex min-h-11 items-center justify-between gap-4 text-text">
-        <span>{t("meAiOn")}</span>
+        <span className="min-w-0 [overflow-wrap:anywhere]">{t("meAiOn")}</span>
         <input
           type="checkbox"
           role="switch"

@@ -75,4 +75,4 @@ export function tabLabelSize(room: number, labelWidths: number[], fontSize: numb
 // card's format and theme): the selected one in the rose accent with
 // on-accent text (colour-roles §3, UX), the others muted.
 export const segment = (active: boolean) =>
-  `inline-flex min-h-11 items-center rounded-full px-4 text-sm font-medium ${active ? "bg-accent text-on-accent" : "text-muted hover:bg-pill"}`;
+  `inline-flex min-h-11 max-w-full items-center rounded-full px-4 text-sm font-medium [overflow-wrap:anywhere] ${active ? "bg-accent text-on-accent" : "text-muted hover:bg-pill"}`;

@@ -864,11 +864,14 @@ test.describe("the tab bar in every language", () => {
         await textAt(percent);
         for (const path of ["/app", "/app/timeline", "/app/insights", "/app/me", "/app/write"]) {
           await page.goto(path);
-          await expect(page.locator("main")).toBeVisible();
+          // The page itself, not its loading state, which is narrow and would pass.
+          await page.waitForLoadState("networkidle");
+          await expect(page.getByTestId("app-loading")).toHaveCount(0);
+          await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))));
           // What sticks out, named, so a failure says where to look.
           const sticksOut = await page.evaluate(() => {
             const inScroller = (e: Element) => {
-              for (let p = e.parentElement; p; p = p.parentElement) if (["auto", "scroll", "hidden"].includes(getComputedStyle(p).overflowX)) return true;
+              for (let p = e.parentElement; p; p = p.parentElement) if (["auto", "scroll", "hidden"].includes(getComputedStyle(p).overflowX) || getComputedStyle(p).position === "fixed") return true;
               return false;
             };
             return [...document.querySelectorAll("body *")]

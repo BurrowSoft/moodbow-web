@@ -35,7 +35,7 @@ export function Switch({
         }}
         className="flex min-h-11 w-full items-center justify-between gap-4 rounded-xl text-left font-medium text-text aria-disabled:opacity-60"
       >
-        <span>{label}</span>
+        <span className="min-w-0 [overflow-wrap:anywhere]">{label}</span>
         <span
           aria-hidden="true"
           className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full border border-border transition-colors ${checked ? "bg-accent" : "bg-pill"}`}
