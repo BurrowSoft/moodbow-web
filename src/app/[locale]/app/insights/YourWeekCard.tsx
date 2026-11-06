@@ -1,7 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { GetHelpNow } from "@/components/SafetyCard";
-import { dateLine } from "@/lib/journal/today";
+import { dateLine, dateRangeLine } from "@/lib/journal/today";
 import { JOURNAL_CARD } from "@/lib/ui/journalLayout";
 import type { YourWeek, YourWeekLine } from "@/lib/journal/yourWeek";
 
@@ -20,7 +20,7 @@ const TEXT = {
 // line and the way to the safety card, opened neutrally: this isn't a crisis check.
 export async function YourWeekCard({ week, country, dateLocaleTag }: { week: YourWeek; country: string | null | undefined; dateLocaleTag: string }) {
   const t = await getTranslations("insights");
-  const range = new Intl.DateTimeFormat(dateLocaleTag, { day: "numeric", month: "long", timeZone: "UTC" }).formatRange(new Date(`${week.start}T00:00:00Z`), new Date(`${week.end}T00:00:00Z`));
+  const range = dateRangeLine(week.start, week.end, dateLocaleTag);
   const line = (l: YourWeekLine) =>
     l.template === "moment" ? (
       <p key="moment">
@@ -34,7 +34,7 @@ export async function YourWeekCard({ week, country, dateLocaleTag }: { week: You
       </p>
     );
   return (
-    <section aria-labelledby="your-week-title" data-testid="your-week" className={`mt-6 ${JOURNAL_CARD}`}>
+    <section aria-labelledby="your-week-title" data-testid="your-week" className={`mt-6 hyphens-auto ${JOURNAL_CARD}`}>
       <h2 id="your-week-title" className="text-lg font-medium text-text">
         {t("yourWeekTitle")}
       </h2>
@@ -48,12 +48,14 @@ export async function YourWeekCard({ week, country, dateLocaleTag }: { week: You
         </div>
       ) : (
         <div className="mt-3 space-y-2 text-text">
-          {week.lines.map(line)}
+          {/* The caption qualifies the pattern, so it comes before the moment's link (UX). */}
+          {week.lines.filter((l) => l.template !== "moment").map(line)}
           {week.caption && (
             <p data-testid="your-week-caption" className="text-sm text-muted">
               {t("yourWeekCaption")}
             </p>
           )}
+          {week.lines.filter((l) => l.template === "moment").map(line)}
         </div>
       )}
     </section>
