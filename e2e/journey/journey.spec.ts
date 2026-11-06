@@ -929,18 +929,22 @@ test.describe("the tab bar in every language", () => {
       // The safety card at the largest text: Close is a button to tap, not a
       // column of letters, and it closes.
       await textAt(300);
-      await page.goto("/app/me");
-      await page.getByTestId("me-get-help").click();
-      const close = page.getByTestId("safety-close");
-      await expect(close).toBeInViewport();
-      const lines = await close.evaluate((button) => {
-        const range = document.createRange();
-        range.selectNodeContents(button);
-        return new Set([...range.getClientRects()].map((r) => Math.round(r.top))).size;
-      });
-      expect(lines, "Close's lines").toBe(1);
-      await close.click();
-      await expect(page.getByTestId("safety-card")).toHaveCount(0);
+      for (const [route, saved] of [["", "en"], ["/fr", "fr"], ["/es", "es"], ["/pt-br", "pt"]]) {
+        await setProfileLocale(email, password, saved);
+        await page.goto(`${route}/app/me`);
+        await page.getByTestId("me-get-help").click();
+        const close = page.getByTestId("safety-close");
+        await expect(close, route || "/en").toBeInViewport();
+        const lines = await close.evaluate((button) => {
+          const range = document.createRange();
+          range.selectNodeContents(button);
+          return new Set([...range.getClientRects()].map((r) => Math.round(r.top))).size;
+        });
+        expect(lines, `Close's lines, ${route || "/en"}`).toBe(1);
+        await close.click();
+        await expect(page.getByTestId("safety-card"), route || "/en").toHaveCount(0);
+      }
+      await setProfileLocale(email, password, "en");
 
       // Today's check-in once a mood is picked, where its details open.
       await textAt(200);
