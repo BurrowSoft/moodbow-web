@@ -10,6 +10,9 @@ import { pageMetadata } from "@/lib/metadata";
 import { isAuthOutage } from "@/lib/supabase/proxy";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { askAiConsent } from "@/lib/journal/ai";
+import { offeredLocales } from "@/i18n/routing";
+import { savedLanguageRoute } from "@/lib/savedLanguage";
+import { SavedLanguageRedirect } from "../app/SavedLanguageRedirect";
 import { ConsentForm } from "./ConsentForm";
 
 // Consent (M3): before Create account for new people; for signed-in people
@@ -40,6 +43,8 @@ export default async function ConsentPage({ params }: PageProps<"/[locale]/conse
     const me = await getMe(supabase);
     // Consents already current (the versions this build ships) → nothing to ask.
     if (me && hasCurrentConsents(me)) redirect({ href: "/app", locale });
+    const language = savedLanguageRoute(me?.profile?.locale, locale, offeredLocales());
+    if (language) return <SavedLanguageRedirect locale={language} />;
     askAge = !me || !hasCurrentConsent(me, "age_18");
   }
 

@@ -4,7 +4,11 @@ import type { Locale } from "@/i18n/routing";
 import { StatusShell } from "@/components/StatusShell";
 import { pageMetadata } from "@/lib/metadata";
 import { isAuthOutage } from "@/lib/supabase/proxy";
+import { getMe } from "@/lib/journal/me";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { offeredLocales } from "@/i18n/routing";
+import { savedLanguageRoute } from "@/lib/savedLanguage";
+import { SavedLanguageRedirect } from "../../app/SavedLanguageRedirect";
 import { ResetPasswordForm } from "./ResetPasswordForm";
 
 // Reached from /auth/confirm?type=recovery, which leaves a short-lived
@@ -41,6 +45,12 @@ export default async function ResetPasswordPage({ params, searchParams }: PagePr
   const supabase = await createSupabaseServerClient();
   const { data, error } = supabase ? await supabase.auth.getUser() : { data: { user: null }, error: null };
   const user = data.user;
+
+  if (supabase && user) {
+    const me = await getMe(supabase);
+    const language = savedLanguageRoute(me?.profile?.locale, locale, offeredLocales());
+    if (language) return <SavedLanguageRedirect locale={language} />;
+  }
 
   // Auth didn't answer: the link may still be good, so not "expired". The
   // form, with the generic error above it; saving works once Auth is back

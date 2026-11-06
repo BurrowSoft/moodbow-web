@@ -11,6 +11,9 @@ import { pageMetadata } from "@/lib/metadata";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { JournalUnavailable } from "@/components/JournalUnavailable";
 import { isAuthOutage } from "@/lib/supabase/proxy";
+import { offeredLocales } from "@/i18n/routing";
+import { savedLanguageRoute } from "@/lib/savedLanguage";
+import { SavedLanguageRedirect } from "../app/SavedLanguageRedirect";
 import { SetupForm } from "./SetupForm";
 
 // Set up (M3): signed in, consents current, not onboarded yet. Behind
@@ -40,6 +43,10 @@ export default async function SetupPage({ params }: PageProps<"/[locale]/setup">
   const step = onboardingStep(me);
   if (step === "consent") redirect({ href: "/consent", locale });
   if (step === "journal") redirect({ href: "/app", locale });
+  // Their saved language, as in the journal: an email link may have brought them
+  // here in another one (Vitor's French sign-up, 2026-11-06).
+  const language = savedLanguageRoute(me.profile?.locale, locale, offeredLocales());
+  if (language) return <SavedLanguageRedirect locale={language} />;
 
   const t = await getTranslations("onboarding");
   return (
