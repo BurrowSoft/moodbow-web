@@ -936,6 +936,9 @@ test.describe("the tab bar in every language", () => {
         await page.goto(`${route}/app/me`);
         await page.getByTestId("me-get-help").click();
         const close = page.getByTestId("safety-close");
+        // At this size the card is taller than the window: it opens at its top, with
+        // the help, and scrolls inside itself to Close.
+        await close.scrollIntoViewIfNeeded();
         await expect(close, route || "/en").toBeInViewport();
         const lines = await close.evaluate((button) => {
           const range = document.createRange();
