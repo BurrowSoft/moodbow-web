@@ -18,7 +18,7 @@ export function TimelineViews({ initialView, list, calendar }: { initialView: Ti
   };
   return (
     <>
-      <div role="group" aria-label={t("timelineTitle")} className="mt-4 flex gap-2">
+      <div role="group" aria-label={t("timelineTitle")} className="mt-4 flex flex-wrap gap-2">
         {(["list", "calendar"] as const).map((v) => (
           <button key={v} type="button" data-testid={`timeline-view-${v}`} aria-pressed={view === v} onClick={() => choose(v)} className={segment(view === v)}>
             {t(v === "list" ? "timelineViewList" : "timelineViewCalendar")}

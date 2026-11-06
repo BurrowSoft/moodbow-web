@@ -37,7 +37,9 @@ export const TAB_ITEM = "min-w-0";
 // to a short one ("Moi"), and four equal columns would break it. No string or
 // font changes for this (UX).
 export const TAB_COLUMNS = "grid-cols-[repeat(4,minmax(0,auto))]";
-export const TAB_LINK_NARROW = "px-1 min-[360px]:px-3 text-center leading-tight";
+// In px, not rem: padding that grew with the text took the labels' room, and a
+// wider phone showed less than a narrower one (Web Tester, #193).
+export const TAB_LINK_NARROW = "px-[4px] min-[360px]:px-[12px] text-center leading-tight";
 // One line, never broken inside a word. When the four don't fit (a large browser
 // text size at 320 px), AppNav scales them down together through this variable,
 // as the app does (UX & PM 2026-11-06, replacing "never a smaller font" here).
