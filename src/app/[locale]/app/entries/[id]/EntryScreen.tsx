@@ -294,7 +294,7 @@ function Screen({ entry: initial, checkIn, from, backLabel, dateLocaleTag, uid, 
       <div
         data-testid="entry-body"
         onClick={openAt}
-        className="-mx-3 cursor-text whitespace-pre-wrap rounded-2xl px-[12px] py-2 text-lg leading-relaxed text-text [overflow-wrap:anywhere] hover:bg-pill"
+        className="-mx-[12px] cursor-text whitespace-pre-wrap rounded-2xl px-[12px] py-2 text-lg leading-relaxed text-text [overflow-wrap:anywhere] hover:bg-pill"
       >
         {entry.body}
       </div>

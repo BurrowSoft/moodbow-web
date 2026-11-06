@@ -63,7 +63,7 @@ export function OnThisDay({ kind, entryId, dateLabel, preview, mood, uid, today 
           onClick={hide}
           aria-label={t("onThisDayDismiss")}
           title={t("onThisDayDismiss")}
-          className="-mr-2 -mt-2 inline-flex h-11 w-11 items-center justify-center rounded-full text-muted hover:bg-pill"
+          className="-mr-[8px] -mt-[8px] inline-flex h-11 w-11 items-center justify-center rounded-full text-muted hover:bg-pill"
         >
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
             <path d="M6 6l12 12M18 6L6 18" />
