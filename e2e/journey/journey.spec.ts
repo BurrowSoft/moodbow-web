@@ -1097,3 +1097,87 @@ test.describe("the tab bar in every language", () => {
     }
   });
 });
+
+// The journal's other screens on a 320 px phone at the browser's own large text, in
+// English and the longest two languages. Soft: one run lists everything that needs a
+// look, named.
+test("large text, set in the browser: Today after a mood, calendar, day, entry and writing stay inside a 320 px phone", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
+  test.setTimeout(300_000);
+  const email = newEmail();
+  const password = newPassword();
+  const cdp = await page.context().newCDPSession(page);
+  const textAt = (percent: number) => cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+
+    // A past day with a check-in, and an entry, at the normal size.
+    const day = await lastWeekMonday(email);
+    await seedCheckIns(email, password, day, [{ offset: 0, mood: 3, sleep_hours: 7 }]);
+    await page.goto("/app/write");
+    await page.getByTestId("entry-text").fill("A few ordinary words about the day, to fill a line or two.");
+    await page.getByTestId("entry-save").click();
+    await expect(page).toHaveURL(/\/app$/);
+    await page.locator('[data-testid^="today-entry-"]').first().click();
+    await expect(page).toHaveURL(/\/app\/entries\/[0-9a-f-]{36}$/);
+    const entry = new URL(page.url()).pathname;
+
+    await page.setViewportSize({ width: 320, height: 800 });
+    const measure = async (screen: string, percent: number) => {
+      await page.waitForLoadState("networkidle");
+      await expect(page.getByTestId("app-loading")).toHaveCount(0);
+      await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))));
+      // The setting really is on, or all of this would pass at the normal size.
+      expect(await page.evaluate(() => getComputedStyle(document.documentElement).fontSize), screen).toBe(`${(16 * percent) / 100}px`);
+      const sticksOut = await page.evaluate(() => {
+        const inScroller = (e: Element) => {
+          for (let p = e.parentElement; p; p = p.parentElement) if (["auto", "scroll", "hidden"].includes(getComputedStyle(p).overflowX) || getComputedStyle(p).position === "fixed") return true;
+          return false;
+        };
+        return [...document.querySelectorAll("body *")]
+          .filter((e) => e.getBoundingClientRect().right > innerWidth + 0.5 && getComputedStyle(e).position !== "fixed" && e.getBoundingClientRect().width > 1 && !inScroller(e))
+          .slice(0, 6)
+          .map((e) => `${e.tagName.toLowerCase()}${e.getAttribute("data-testid") ? `[${e.getAttribute("data-testid")}]` : ""} ${Math.round(e.getBoundingClientRect().right)}`);
+      });
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+      expect.soft({ screen, percent, overflow, sticksOut }).toEqual({ screen, percent, overflow: 0, sticksOut: [] });
+    };
+
+    for (const [route, saved] of [["", "en"], ["/fr", "fr"], ["/de", "de"]]) {
+      await setProfileLocale(email, password, saved);
+      for (const percent of [200, 300]) {
+        await textAt(percent);
+        await page.goto(`${route}/app`);
+        await page.getByTestId("checkin-mood-3").click();
+        await expect(page.getByTestId("checkin-sleep-quality-good")).toBeVisible();
+        await measure(`${saved} Today after a mood`, percent);
+        await page.goto(`${route}/app/timeline`);
+        await page.getByTestId("timeline-view-calendar").click();
+        await expect(page.getByTestId("month-calendar")).toBeVisible();
+        await measure(`${saved} calendar`, percent);
+        await page.goto(`${route}/app/timeline/${day}`);
+        await measure(`${saved} day page`, percent);
+        await page.goto(`${route}${entry}`);
+        await expect(page.getByTestId("entry-body")).toBeVisible();
+        await measure(`${saved} entry`, percent);
+        await page.goto(`${route}/app/write`);
+        await expect(page.getByTestId("entry-text")).toBeVisible();
+        await measure(`${saved} writing`, percent);
+      }
+      // List, for the next person and the next language.
+      await textAt(100);
+      await page.goto(`${route}/app/timeline`);
+      await page.getByTestId("timeline-view-list").click();
+    }
+  } finally {
+    await cleanup(email);
+  }
+});
