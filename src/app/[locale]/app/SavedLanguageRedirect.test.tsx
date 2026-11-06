@@ -36,6 +36,8 @@ describe("SavedLanguageRedirect: the link when the move can't happen", () => {
 
   it("the footer's language switcher steps aside while it's up", () => {
     link();
-    expect(document.querySelector("[data-signed-in]")).not.toBeNull();
+    expect(document.documentElement).toHaveAttribute("data-signed-in");
+    cleanup();
+    expect(document.documentElement).not.toHaveAttribute("data-signed-in");
   });
 });

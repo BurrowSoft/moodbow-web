@@ -126,7 +126,7 @@ body {
 }
 
 /* Signed in outside the journal: components/SignedInMark.tsx. */
-body:has([data-signed-in]) [data-language-switcher] {
+html[data-signed-in] [data-language-switcher] {
   display: none;
 }
 
