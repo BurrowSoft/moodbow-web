@@ -215,7 +215,12 @@
     "retry": "Wiederholen",
     "tryAgain": "Wiederholen",
     "slowLoading": "Dauert länger als sonst …",
-    "navBackTo": "Zurück zu {screen}"
+    "navBackTo": "Zurück zu {screen}",
+    "policyNoticeTitle": "Wir aktualisieren unsere Datenschutzerklärung",
+    "policyNoticeBody": "Sie wird Bo, unsere optionale KI, abdecken und klarer sagen, wer dein Tagebuch lesen kann und was passiert, wenn du den Zugang verlierst.",
+    "policyNoticeApplies": "Die Änderungen gelten ab dem {date}.",
+    "policyNoticeRead": "Erklärung lesen",
+    "policyNoticeDismiss": "Verstanden"
   },
   "today": {
     "greetMorning": "Guten Morgen",

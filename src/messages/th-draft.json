@@ -1018,5 +1018,30 @@
     "key": "consumerHealthData.description",
     "en": "How Moodbow handles data that may be consumer health data.",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "app.policyNoticeTitle",
+    "en": "We're updating our Privacy Policy",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "app.policyNoticeBody",
+    "en": "It will cover Bo, our optional AI, and be clearer about who can read your journal and what happens if you lose access to it.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "app.policyNoticeApplies",
+    "en": "The changes apply on {date}.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "app.policyNoticeRead",
+    "en": "Read the policy",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "app.policyNoticeDismiss",
+    "en": "Got it",
+    "reason": "UX draft (native read pending)"
   }
 ]

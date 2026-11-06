@@ -215,7 +215,12 @@
     "retry": "Réessayer",
     "tryAgain": "Réessayer",
     "slowLoading": "Cela prend plus de temps que d'habitude…",
-    "navBackTo": "Retour à {screen}"
+    "navBackTo": "Retour à {screen}",
+    "policyNoticeTitle": "Nous mettons à jour notre politique de confidentialité",
+    "policyNoticeBody": "Elle couvrira Bo, notre IA facultative, et sera plus claire sur qui peut lire votre journal et ce qui se passe si vous n'y avez plus accès.",
+    "policyNoticeApplies": "Les changements s'appliquent le {date}.",
+    "policyNoticeRead": "Lire la politique",
+    "policyNoticeDismiss": "Compris"
   },
   "today": {
     "greetMorning": "Bonjour",

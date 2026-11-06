@@ -215,7 +215,12 @@
     "retry": "Riprova",
     "tryAgain": "Riprova",
     "slowLoading": "Ci vuole più del solito…",
-    "navBackTo": "Torna a {screen}"
+    "navBackTo": "Torna a {screen}",
+    "policyNoticeTitle": "Stiamo aggiornando la nostra informativa sulla privacy",
+    "policyNoticeBody": "Includerà Bo, la nostra AI facoltativa, e dirà più chiaramente chi può leggere il tuo diario e cosa succede se perdi l'accesso.",
+    "policyNoticeApplies": "Le modifiche si applicano dal {date}.",
+    "policyNoticeRead": "Leggi l'informativa",
+    "policyNoticeDismiss": "Ho capito"
   },
   "today": {
     "greetMorning": "Buongiorno",

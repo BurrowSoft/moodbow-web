@@ -215,7 +215,12 @@
     "retry": "Try again",
     "tryAgain": "Try again",
     "slowLoading": "Taking longer than usual…",
-    "navBackTo": "Back to {screen}"
+    "navBackTo": "Back to {screen}",
+    "policyNoticeTitle": "We're updating our Privacy Policy",
+    "policyNoticeBody": "It will cover Bo, our optional AI, and be clearer about who can read your journal and what happens if you lose access to it.",
+    "policyNoticeApplies": "The changes apply on {date}.",
+    "policyNoticeRead": "Read the policy",
+    "policyNoticeDismiss": "Got it"
   },
   "today": {
     "greetMorning": "Good morning",

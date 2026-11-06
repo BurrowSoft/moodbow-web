@@ -215,7 +215,12 @@
     "retry": "Tentar de novo",
     "tryAgain": "Tentar de novo",
     "slowLoading": "Está demorando mais que o normal…",
-    "navBackTo": "Voltar para {screen}"
+    "navBackTo": "Voltar para {screen}",
+    "policyNoticeTitle": "Estamos atualizando nossa Política de Privacidade",
+    "policyNoticeBody": "Ela vai incluir o Bo, nossa IA opcional, e deixar mais claro quem pode ler o seu diário e o que acontece se você perder o acesso.",
+    "policyNoticeApplies": "As mudanças valem a partir de {date}.",
+    "policyNoticeRead": "Ler a política",
+    "policyNoticeDismiss": "Entendi"
   },
   "today": {
     "greetMorning": "Bom dia",

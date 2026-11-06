@@ -67,3 +67,13 @@ export async function saveCheckIn(_prev: CheckInState, form: FormData): Promise<
   }
   return { status: "saved", checkIn: data as CheckIn };
 }
+
+// The privacy notice was seen, once, across devices. A failure blocks nothing: it just comes
+// back next time. The function checks the id is the current one.
+export async function dismissPolicyNotice(id: string): Promise<{ ok: boolean }> {
+  if (typeof id !== "string" || id === "") return { ok: false };
+  const supabase = await createSupabaseServerClient();
+  if (!supabase) return { ok: false };
+  const { error } = await supabase.rpc("policy_notice_seen", { p_id: id });
+  return { ok: !error };
+}
