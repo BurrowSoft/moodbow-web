@@ -34,7 +34,7 @@ export async function YourWeekCard({ week, country, dateLocaleTag }: { week: You
       </p>
     );
   return (
-    <section aria-labelledby="your-week-title" data-testid="your-week" className={`mt-6 hyphens-auto ${JOURNAL_CARD}`}>
+    <section aria-labelledby="your-week-title" data-testid="your-week" className={`mt-6 ${JOURNAL_CARD}`}>
       <h2 id="your-week-title" className="text-lg font-medium text-text">
         {t("yourWeekTitle")}
       </h2>

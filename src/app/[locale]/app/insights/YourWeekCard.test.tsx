@@ -1,6 +1,6 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { dateLine, dateRangeLine } from "@/lib/journal/today";
+import { dateLine, dateLocale, dateRangeLine } from "@/lib/journal/today";
 import { YourWeekCard } from "./YourWeekCard";
 
 vi.mock("next-intl/server", () => ({ getTranslations: async () => (key: string) => key }));
@@ -38,6 +38,14 @@ describe("the first of a month in French and Brazilian Portuguese", () => {
     expect(dateLine("2026-11-01", "fr-FR")).toContain("1er novembre");
     expect(dateRangeLine("2026-10-26", "2026-11-01", "pt-BR")).toContain("1º de novembro");
     expect(dateLine("2026-11-01", "pt-BR")).toContain("1º de novembro");
+  });
+  it("follows the language alone, not the country", () => {
+    const brazilianInFrance = dateLocale("pt-br", null, "FR");
+    expect(dateLine("2026-11-01", brazilianInFrance)).toContain("1º de novembro");
+    expect(dateRangeLine("2026-10-26", "2026-11-01", brazilianInFrance)).toContain("1º de novembro");
+    expect(dateLine("2026-11-01", dateLocale("pt-br", null, null))).toContain("1º de novembro");
+    expect(dateLine("2026-11-01", dateLocale("fr", null, "CA"))).toContain("1er novembre");
+    expect(dateLine("2026-11-01", dateLocale("en", null, "FR"))).not.toContain("1er");
   });
   it("only the first, and only those two", () => {
     expect(dateRangeLine("2026-11-09", "2026-11-15", "fr-FR")).not.toContain("er");
