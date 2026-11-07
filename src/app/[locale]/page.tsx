@@ -81,7 +81,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
             >
               {t("start")}
             </Link>
-            <Link href="/sign-in" data-testid="home-sign-in" className="min-h-11 content-center [font-size:min(0.875rem,max(8.75vw,28px))] font-medium text-accent underline underline-offset-4">
+            <Link href="/sign-in" data-testid="home-sign-in" className="min-h-11 content-center leading-[1.429] [font-size:min(0.875rem,max(8.75vw,28px))] font-medium text-accent underline underline-offset-4">
               {to("welcomeHaveAccount")}
             </Link>
           </div>
@@ -101,7 +101,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
         {/* Per store, once its listing is live (decision 185): neutral text
             links (the badge art waits for the listings), the other store's
             "coming soon"; neither live, the joint line. */}
-        <div className="mt-6 [font-size:min(0.875rem,max(8.75vw,28px))] text-muted" data-testid="home-stores">
+        <div className="mt-6 leading-[1.429] [font-size:min(0.875rem,max(8.75vw,28px))] text-muted" data-testid="home-stores">
           {stores.play || stores.appStore ? (
             <>
               <p>
@@ -142,7 +142,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
         <span className="block h-8 w-8 text-accent" aria-hidden="true">
           <LockIcon />
         </span>
-        <h2 id="home-private" className="[font-size:min(1.5rem,max(11vw,35px))] font-medium tracking-tight">
+        <h2 id="home-private" className="leading-[1.333] [font-size:min(1.5rem,max(11vw,35px))] font-medium tracking-tight">
           {t("privateTitle")}
         </h2>
         <p className="max-w-[27.5rem] [font-size:min(0.9375rem,max(9.375vw,30px))] leading-relaxed text-text">{t("privateBody")}</p>
