@@ -57,7 +57,7 @@ export default async function ConsentPage({ params }: PageProps<"/[locale]/conse
   const t = await getTranslations("onboarding");
   const ta = await getTranslations("auth");
   return (
-    <PageShell title={t("consentTitle")}>
+    <PageShell title={t("consentTitle")} capTitle>
       {user && <SignedInMark />}
       {outage && (
         <p role="alert" data-testid="consent-outage" className="font-medium text-accent">

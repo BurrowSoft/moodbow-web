@@ -35,8 +35,12 @@ test.describe("home", () => {
     // No AI claim while AI isn't live; store badges are text only.
     await expect(page.getByText("Moodbow writes back")).toHaveCount(0);
     await expect(page.getByText(/\bAI\b/)).toHaveCount(0);
-    await expect(page.getByTestId("home-stores")).toHaveText("Coming soon to Google Play and the App Store");
-    await expect(page.getByTestId("home-stores").getByRole("link")).toHaveCount(0);
+    // Follows each store's flag, so a launch-day flip passes on its own.
+    const play = conditions["play-live"].met;
+    const appStore = conditions["appstore-live"].met;
+    const storeLine = page.getByTestId("home-stores");
+    await expect(storeLine).toContainText(play && appStore ? "Get the app:" : play ? "Coming soon to the App Store" : appStore ? "Coming soon to Google Play" : "Coming soon to Google Play and the App Store");
+    await expect(storeLine.getByRole("link")).toHaveCount(Number(play) + Number(appStore));
   });
 
   test("200% zoom on a phone (a 160 px page): nothing scrolls sideways (Web Tester, #65)", async ({ page }) => {
@@ -589,6 +593,12 @@ test.describe("onboarding (signed out)", () => {
       await expect(page.getByTestId("safety-card")).toHaveCount(0);
     });
   }
+
+  test("/security: a 404 with no update out, in any language, and Home doesn't link to it", async ({ page }) => {
+    for (const path of ["/security", "/es/security"]) expect((await page.goto(path))?.status(), path).toBe(404);
+    await page.goto("/");
+    await expect(page.getByTestId("home-security")).toHaveCount(0);
+  });
 
   test("Consent: help is there before anything's agreed, and it opens the card", async ({ page }) => {
     await page.goto("/consent");

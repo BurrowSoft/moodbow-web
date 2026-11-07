@@ -34,6 +34,12 @@ const renderCard = (initial: CheckIn | null) =>
       <CheckInCard initial={initial} uid="u1" date="2026-10-02" dateLocaleTag="en-US" />
     </NextIntlClientProvider>,
   );
+// Up and listening: it takes focus in the same effect that adds its Escape key, which can run
+// just after the dialog first appears.
+const conflictDialogReady = async () => {
+  const dialog = await screen.findByTestId("checkin-conflict-dialog");
+  await waitFor(() => expect(dialog.contains(document.activeElement)).toBe(true));
+};
 const sent = (call = 0) => Object.fromEntries((saveCheckIn.mock.calls[call][1] as FormData).entries());
 const setOnline = (online: boolean) => Object.defineProperty(navigator, "onLine", { configurable: true, get: () => online });
 // A synced copy goes through fetch (/api/check-in-sync), never the server
@@ -158,7 +164,7 @@ describe("CheckInCard", () => {
     // As in a browser: Save goes off while the save runs, so nothing has focus.
     (document.activeElement as HTMLElement | null)?.blur();
     fireEvent.click(screen.getByTestId("checkin-save"));
-    await screen.findByTestId("checkin-conflict-dialog");
+    await conflictDialogReady();
     fireEvent.keyDown(document, { key: "Escape" });
     await waitFor(() => expect(screen.queryByTestId("checkin-conflict-dialog")).toBeNull());
     await waitFor(() => expect(screen.getByTestId("checkin-save")).toHaveFocus());
@@ -173,7 +179,7 @@ describe("CheckInCard", () => {
     fireEvent.click(mood);
     mood.focus();
     fireEvent.click(screen.getByTestId("checkin-save"));
-    await screen.findByTestId("checkin-conflict-dialog");
+    await conflictDialogReady();
     fireEvent.keyDown(document, { key: "Escape" });
     await waitFor(() => expect(screen.queryByTestId("checkin-conflict-dialog")).toBeNull());
     await act(async () => new Promise((done) => requestAnimationFrame(() => done(undefined))));

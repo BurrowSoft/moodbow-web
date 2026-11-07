@@ -69,7 +69,11 @@ async function signUp(form: FormData): Promise<SignUpState> {
     if (error.code === "weak_password") return fail("passwordShort");
     if (error.code === "email_address_invalid") return fail("emailInvalid");
     // Too many tries (429 / over_*): said plainly, as Send it again does (UX).
-    if (isRateLimit(error)) return fail("rateLimited");
+    // Logged too, its kind only: which limit it was.
+    if (isRateLimit(error)) {
+      logAuthFailure("sign-up", error);
+      return fail("rateLimited");
+    }
     logAuthFailure("sign-up", error);
     return fail("generic");
   }
