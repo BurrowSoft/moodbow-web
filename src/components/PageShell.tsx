@@ -18,6 +18,9 @@ type Props = {
   notice?: React.ReactNode;
   // Directly under the heading, above the body.
   underTitle?: React.ReactNode;
+  // The space above the heading in px, so at large text it doesn't push what's under the heading off
+  // the first screen (help's numbers: 72 and 120 px at 300 %). The same at the normal size.
+  tightTop?: boolean;
   lang?: string;
   // A page whose type stops growing at about 200 % on narrow screens (decision 231): the title, the
   // notice and the body, below the rem-based wide layout.
@@ -27,7 +30,7 @@ type Props = {
 
 // Layout for the inner pages: the horizontal logo linking home, an optional
 // draft banner, and a readable text column.
-export async function PageShell({ title, draft = false, article = false, after, notice, underTitle, lang, capTitle = false, children }: Props) {
+export async function PageShell({ title, draft = false, article = false, after, notice, underTitle, tightTop = false, lang, capTitle = false, children }: Props) {
   const t = await getTranslations("common");
   return (
     <>
@@ -36,14 +39,14 @@ export async function PageShell({ title, draft = false, article = false, after, 
           {t("draftBanner")}
         </p>
       )}
-      <header className="px-6 pt-6">
+      <header className={`px-6 ${tightTop ? "pt-[24px]" : "pt-6"}`}>
         <div className="mx-auto max-w-2xl">
           <Link href="/" aria-label={t("homeAria")} className="inline-block rounded-md">
             <Logo variant="horizontal" width={140} alt="" />
           </Link>
         </div>
       </header>
-      <main id="main" className="flex-1 px-[24px] py-10 [overflow-wrap:anywhere]">
+      <main id="main" className={`flex-1 px-[24px] [overflow-wrap:anywhere] ${tightTop ? "pt-[40px] pb-10" : "py-10"}`}>
         {notice && (
           <p data-testid="page-notice" className={`mx-auto mb-6 max-w-2xl rounded-2xl bg-pill px-5 py-3 font-medium text-text ${capTitle ? "leading-[1.429] [font-size:min(0.875rem,max(8.75vw,28px))]" : "text-sm"}`}>
             {notice}

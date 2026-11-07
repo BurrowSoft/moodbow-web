@@ -619,6 +619,7 @@ test.describe("the help page's numbers, with no script at all", () => {
   test("another Help article doesn't show them", async ({ page }) => {
     await page.goto("/help/backing-up?country=TH");
     await expect(page.getByTestId("help-now-lines")).toHaveCount(0);
+    await expect(page.getByTestId("help-now-numbers")).toHaveCount(0);
   });
 });
 

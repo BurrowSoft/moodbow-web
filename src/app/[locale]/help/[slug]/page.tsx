@@ -5,6 +5,7 @@ import type { Locale } from "@/i18n/routing";
 import { routing } from "@/i18n/routing";
 import { Link } from "@/i18n/navigation";
 import { HelpNowLines, HelpNowNumbers } from "@/components/HelpNowLines";
+import { helplinesFor } from "@/lib/safety/helplines";
 import { PageShell } from "@/components/PageShell";
 import { pageGate } from "@/lib/conditions";
 import { findArticle, helpArticles, renderArticle } from "@/lib/helpContent";
@@ -34,6 +35,8 @@ export default async function HelpArticlePage({ params, searchParams }: PageProp
   const html = article ? renderArticle(article) : "";
   if (!article || !html) notFound();
   const t = await getTranslations("help");
+  const lines = slug === "get-help-now" && typeof country === "string" ? helplinesFor(country) : null;
+  const numbers = !!(lines?.helpline || lines?.emergency);
   // The link back to Help is chrome, so it sits after the article, outside
   // [data-content=article] (Web Tester, #23).
   return (
@@ -42,7 +45,8 @@ export default async function HelpArticlePage({ params, searchParams }: PageProp
       article
       draft={state === "draft"}
       // Where the help button leads with no script running (#248), so the help is here too.
-      underTitle={slug === "get-help-now" ? <HelpNowNumbers country={typeof country === "string" ? country : undefined} /> : undefined}
+      underTitle={numbers ? <HelpNowNumbers country={country as string} /> : undefined}
+      tightTop={numbers}
       after={
         <>
         {slug === "get-help-now" && <HelpNowLines />}
