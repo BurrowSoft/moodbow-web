@@ -81,7 +81,7 @@ export function MilestoneCard({ n, colours, uid, month, dateLocaleTag, year = nu
           ref={card}
           aria-labelledby="milestone-title"
           data-testid="milestone-card"
-          className="milestone-in fixed inset-x-3 bottom-20 z-10 rounded-3xl border border-border bg-surface p-[20px] shadow-lg min-[360px]:inset-x-4 md:inset-x-auto md:bottom-6 md:right-6 md:w-96"
+          className="milestone-in fixed inset-x-3 bottom-20 z-10 max-h-[calc(100dvh-5rem-8px)] overflow-y-auto overscroll-contain rounded-3xl border border-border bg-surface p-[20px] shadow-lg min-[360px]:inset-x-4 md:inset-x-auto md:bottom-6 md:right-6 md:w-96"
         >
           <div className="flex items-start justify-between gap-2">
             <h2 id="milestone-title" className="text-lg font-medium text-text">

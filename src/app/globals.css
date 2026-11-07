@@ -224,6 +224,20 @@ input[type="date"]:focus-within {
   }
 }
 
+/* Room at the page's very end for Bo's button (BoButton.tsx: its bottom, one capped
+   line and its 8 px padding, then a 16 px gap), so nothing ends under it, the footer's
+   account-deletion link included. As the milestone's below, which is taller and comes
+   later, so it wins; the card's room isn't the button's, so the button waits for it. */
+.has-bo-button {
+  --bo-bottom: calc(3.5rem + 16px);
+  --bo-room: calc(var(--bo-bottom) + min(1rem, max(8vw, 16px)) * 1.5 + 32px);
+  padding-bottom: var(--bo-room);
+  min-height: calc(100dvh + var(--bo-room));
+}
+@media (min-width: 48rem) {
+  .has-bo-button { --bo-bottom: 24px; }
+}
+
 /* Room at the page's very end while the milestone card floats: its height
    above the tab bar on phones (to ~15rem), above the corner on wide screens.
    The body is a min-h-dvh flex column with border-box sizing: on a short page
@@ -233,6 +247,7 @@ input[type="date"]:focus-within {
 @media (min-width: 48rem) {
   .has-floating-card { padding-bottom: 12rem; min-height: calc(100dvh + 12rem); }
 }
+.has-floating-card .bo-button { display: none; }
 
 /* Today's milestone offer (decision 186): slides up from below; it's fixed,
    and a transform, so it moves nothing else. Reduced motion: just appears. */

@@ -12,6 +12,10 @@
 // In px, like the cards: rem would triple at 300 % text, leaving 176 px of a 320 px phone.
 export const APP_MAIN_GUTTER = "px-[12px] min-[360px]:px-[16px] sm:px-[24px]";
 
+// A journal page's heading: text-3xl's size and line height, capped on a narrow screen at
+// large text so its words stay whole at 200 %, and never smaller than the body under it.
+export const JOURNAL_HEADING = "font-medium leading-[1.2] tracking-tight [font-size:min(1.875rem,max(12vw,30px,1rem))] [overflow-wrap:anywhere]";
+
 // A journal card (Today's check-in and its summary).
 export const JOURNAL_CARD = "rounded-3xl border border-border bg-surface p-[12px] min-[360px]:p-[16px] sm:p-[24px]";
 

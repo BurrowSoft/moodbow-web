@@ -13,7 +13,7 @@ import { dateLocale } from "@/lib/journal/today";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { tabMetadata } from "../pageMeta";
 import { loadTimeline } from "./actions";
-import { segment } from "@/lib/ui/journalLayout";
+import { JOURNAL_HEADING, segment } from "@/lib/ui/journalLayout";
 import { TimelineList } from "./TimelineList";
 import { OnThisDay } from "./OnThisDay";
 import { TimelineSearch } from "./TimelineSearch";
@@ -142,7 +142,7 @@ export default async function TimelinePage({ params, searchParams }: PageProps<"
   return (
     <section>
       {/* Focusable from code only: where focus goes when On this day is hidden. */}
-      <h1 id="timeline-title" tabIndex={-1} className="text-3xl font-medium tracking-tight focus:outline-none">
+      <h1 id="timeline-title" tabIndex={-1} className={`${JOURNAL_HEADING} focus:outline-none`}>
         {t("timelineTitle")}
       </h1>
       {/* Search (1.1 L), when shown: while it's open its results replace

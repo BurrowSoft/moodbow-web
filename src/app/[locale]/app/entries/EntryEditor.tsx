@@ -631,7 +631,7 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
       {/* A quiet invitation, never inserted: only while the entry is empty. */}
       {showPrompt && (
         <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-muted" data-testid="entry-prompt">
-          <span id="entry-prompt-text" data-testid="entry-prompt-text">
+          <span id="entry-prompt-text" data-testid="entry-prompt-text" className="min-w-0 [overflow-wrap:anywhere]">
             {promptText(promptFor(promptDate!, promptStep), language)}
           </span>
           <button type="button" data-testid="entry-prompt-another" onClick={() => setPromptStep((n) => n + 1)} className="min-h-11 font-medium text-accent underline underline-offset-4">
