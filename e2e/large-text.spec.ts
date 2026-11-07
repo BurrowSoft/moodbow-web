@@ -67,3 +67,37 @@ test("large text at 300 %: a page's heading is never smaller than the body under
   const sizes = await page.evaluate(() => ({ heading: parseFloat(getComputedStyle(document.querySelector("h1")!).fontSize), body: parseFloat(getComputedStyle(document.documentElement).fontSize) }));
   expect(sizes.heading).toBeGreaterThanOrEqual(sizes.body);
 });
+
+// "J'a / cc / ep / te", and French's heading "commence / r" (Web Tester, on #233): this is the page
+// people have to be able to read. Word by word: a line may end between words, never inside one.
+test("large text: Consent's heading and boxes keep their words whole on a 320 px phone", async ({ page, browserName }, testInfo) => {
+  test.skip(browserName !== "chromium" || testInfo.project.name !== "desktop", "Page.setFontSizes is Chromium's; once is enough");
+  test.setTimeout(120_000);
+  const cdp = await page.context().newCDPSession(page);
+  await page.setViewportSize({ width: 320, height: 640 });
+  for (const percent of [100, 200, 300]) {
+    await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
+    for (const language of LANGUAGES.filter((l) => l !== "/th")) {
+      await page.goto(`${language}/consent`);
+      const split = await page.evaluate(() => {
+        const out: string[] = [];
+        const roots = [document.querySelector("h1"), ...document.querySelectorAll("form label span")];
+        for (const root of roots) {
+          if (!root) continue;
+          const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+          for (let node = walker.nextNode() as Text | null; node; node = walker.nextNode() as Text | null) {
+            for (const m of node.data.matchAll(/[^\s-]+/g)) {
+              const range = document.createRange();
+              range.setStart(node, m.index);
+              range.setEnd(node, m.index + m[0].length);
+              if (range.getClientRects().length > 1) out.push(m[0]);
+            }
+          }
+        }
+        return out;
+      });
+      expect.soft(split, `${language || "/en"} at ${percent} %`).toEqual([]);
+      expect.soft(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth), `${language || "/en"} at ${percent} %`).toBe(0);
+    }
+  }
+});
