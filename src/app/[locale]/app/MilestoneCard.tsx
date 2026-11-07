@@ -71,7 +71,9 @@ export function MilestoneCard({ n, colours, uid, month, dateLocaleTag, year = nu
   // Fixed just above the bottom tab bar (bottom-right on wide screens), out
   // of the page's flow: appearing after hydration moves nothing (decision
   // 186, Today's CLS). The body's bottom room (above) keeps the page's end,
-  // footer included, reachable above it.
+  // footer included, reachable above it. Px and the safety card's cap, so at 300 % the title
+  // keeps its width and the X and Not now stay in view; only the tab bar's height is rem, as
+  // the card has to clear the bar. The same as ever at normal size.
   // The live region keeps its place in the tree either way (a remounted one
   // may not be announced).
   return (
@@ -81,10 +83,10 @@ export function MilestoneCard({ n, colours, uid, month, dateLocaleTag, year = nu
           ref={card}
           aria-labelledby="milestone-title"
           data-testid="milestone-card"
-          className="milestone-in fixed inset-x-3 bottom-20 z-10 rounded-3xl border border-border bg-surface p-[20px] shadow-lg min-[360px]:inset-x-4 md:inset-x-auto md:bottom-6 md:right-6 md:w-96"
+          className="milestone-in fixed inset-x-[12px] bottom-[calc(3.5rem+24px)] z-10 max-h-[calc(100dvh-3.5rem-32px)] overflow-y-auto overflow-x-hidden overscroll-contain rounded-3xl [overflow-wrap:anywhere] border border-border bg-surface p-[20px] shadow-lg [font-size:min(1rem,max(8vw,16px))] min-[360px]:inset-x-[16px] md:inset-x-auto md:bottom-6 md:right-6 md:w-96"
         >
-          <div className="flex items-start justify-between gap-2">
-            <h2 id="milestone-title" className="text-lg font-medium text-text">
+          <div className="flex items-start justify-between gap-[8px]">
+            <h2 id="milestone-title" className="min-w-0 flex-1 font-medium leading-[1.556] text-text [font-size:min(1.125rem,max(9vw,18px))]">
               {t("milestoneReachedTitle", { n })}
             </h2>
             <button
@@ -93,14 +95,14 @@ export function MilestoneCard({ n, colours, uid, month, dateLocaleTag, year = nu
               onClick={dismiss}
               aria-label={t("milestoneNotNow")}
               title={t("milestoneNotNow")}
-              className="-mr-[8px] -mt-[8px] inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-muted hover:bg-pill"
+              className="-mr-[8px] -mt-[8px] inline-flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-full text-muted hover:bg-pill"
             >
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
                 <path d="M6 6l12 12M18 6L6 18" />
               </svg>
             </button>
           </div>
-          <div className="mt-4 flex flex-wrap gap-3">
+          <div className="mt-[16px] flex flex-wrap gap-[12px] [&_button]:min-h-[44px]">
             {/* Opening the sheet counts as seen; the card stays until the sheet closes. */}
             <ShareMonth month={month} dateLocaleTag={dateLocaleTag} label={SHARE_LABEL} testId="milestone-share" milestone={{ n, colours }} year={year} initialType="milestone" onOpen={markSeen} />
             <button type="button" data-testid="milestone-not-now" onClick={dismiss} className={dialogButton()}>

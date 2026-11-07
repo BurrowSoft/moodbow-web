@@ -1,15 +1,15 @@
 {
   "meta": {
     "siteName": "Moodbow",
-    "title": "Moodbow – Ein Tagebuch, das deine Geschichte kennenlernt",
+    "title": "Moodbow – Ein privates Tagebuch für deine Tage",
     "pageTitle": "{title} · Moodbow",
     "description": "Moodbow ist ein privates Tagebuch, das dir hilft, mit der Zeit Muster in deiner Stimmung, deinem Schlaf und deinen Gewohnheiten zu erkennen. Bald verfügbar, von BurrowSoft.",
     "ogDescription": "Ein privates Tagebuch, das dir hilft, mit der Zeit Muster in Stimmung, Schlaf und Gewohnheiten zu erkennen. Bald verfügbar.",
     "ogImageAlt": "Moodbow-Logo mit dem Text: Bald verfügbar. Ein Tagebuch, das deine Geschichte kennenlernt.",
-    "descriptionLaunch": "Ein privates Tagebuch, das deine Geschichte kennenlernt und zeigt, was deine Tage prägt.",
-    "ogDescriptionLaunch": "Ein privates Tagebuch, das deine Geschichte kennenlernt und zeigt, was deine Tage prägt.",
+    "descriptionLaunch": "Ein privates Tagebuch, das dir zeigt, was in deinen Tagen zusammengehört.",
+    "ogDescriptionLaunch": "Ein privates Tagebuch, das dir zeigt, was in deinen Tagen zusammengehört.",
     "ogImageAltLaunch": "Moodbow: dein Monat als Regenbogen",
-    "manifestDescription": "Ein Tagebuch, das deine Geschichte kennenlernt."
+    "manifestDescription": "Ein privates Tagebuch für deine Tage."
   },
   "common": {
     "logoAlt": "Moodbow",
@@ -41,7 +41,7 @@
   "home": {
     "comingSoon": "Bald verfügbar",
     "heroTitle": "Dein Monat als Regenbogen",
-    "heroSub": "Ein privates Tagebuch, das deine Geschichte kennenlernt und zeigt, was deine Tage prägt.",
+    "heroSub": "Ein privates Tagebuch, das dir zeigt, was in deinen Tagen zusammengehört.",
     "notify": "Benachrichtige mich",
     "notifyAria": "Per E-Mail benachrichtigt werden, wenn Moodbow startet",
     "notifySubject": "Bitte benachrichtigt mich über Moodbow",
@@ -59,7 +59,7 @@
     "featureWriteBody": "Eine freundliche Reflexion, wenn du eine möchtest.",
     "featureWriteNoAiTitle": "Über deinen Tag schreiben",
     "featureWriteNoAiBody": "In deinen eigenen Worten, wann immer dir danach ist.",
-    "featureInsightsTitle": "Sieh, was deine Tage prägt",
+    "featureInsightsTitle": "Sieh, was in deinen Tagen zusammengehört",
     "featureInsightsBody": "Diagramme für Woche, Monat und 3 Monate.",
     "privateTitle": "Privat von Grund auf",
     "privateBody": "Nur du kannst dein Tagebuch lesen. Exportiere oder lösche alles, jederzeit."
@@ -164,7 +164,7 @@
     "signinNoAccount": "Neu hier? Konto erstellen"
   },
   "onboarding": {
-    "welcome1Title": "Ein Tagebuch, das deine Geschichte kennenlernt",
+    "welcome1Title": "Ein privates Tagebuch für deine Tage",
     "welcome1Body": "Halte Stimmung, Schlaf und Bewegung in Sekunden fest und schreib über deinen Tag, wann immer dir danach ist.",
     "welcome2Title": "Erkenne deine Muster",
     "welcome2Body": "Dein Verlauf und deine Diagramme zeigen, was gute Tage noch besser macht und was oft vor schweren Tagen kommt.",
@@ -250,13 +250,13 @@
     "checkinEdit": "Bearbeiten",
     "optional": "Optional",
     "errDateInFuture": "Du kannst keinen Tag eintragen, der noch nicht war.",
-    "errStaleWrite": "Das wurde auf einem anderen Gerät geändert. Wir haben die neueste Version geladen. Bitte versuch es noch einmal.",
+    "errStaleWrite": "Diesen Check-in gibt es nicht mehr. Du kannst einen neuen speichern.",
     "errGeneric": "Etwas ist schiefgelaufen. Bitte versuch es noch einmal.",
     "offlineCheckinRejected": "Ein Check-in, den du offline für den {date} gespeichert hast, konnte nicht gespeichert werden. Bitte trag ihn noch einmal ein.",
     "checkInConflictTitle": "Für diesen Tag gibt es schon einen Check-in",
-    "checkInConflictBody": "Er wurde auf einem anderen Gerät gespeichert. Welchen möchtest du behalten?",
-    "checkInConflictMine": "Deiner (dieses Gerät)",
-    "checkInConflictOther": "Anderswo gespeichert",
+    "checkInConflictBody": "Welchen möchtest du behalten?",
+    "checkInConflictMine": "Deiner",
+    "checkInConflictOther": "Schon gespeichert",
     "checkInConflictKeepMine": "Meinen behalten",
     "checkInConflictUseOther": "Den anderen nehmen"
   },
@@ -278,11 +278,11 @@
     "cancel": "Abbrechen",
     "todayEntriesTitle": "Heutige Einträge",
     "entryTooLong": "Einträge können bis zu 20.000 Zeichen lang sein.",
-    "entryConflictTitle": "Dieser Eintrag wurde auf einem anderen Gerät geändert",
+    "entryConflictTitle": "Dieser Eintrag wurde geändert, seit du ihn geöffnet hast",
     "entryConflictBody": "Deine Version ist noch da. Welche möchtest du behalten?",
     "entryConflictKeepMine": "Meine behalten",
     "entryConflictUseOther": "Die andere nehmen",
-    "entryDeletedTitle": "Dieser Eintrag wurde auf einem anderen Gerät gelöscht",
+    "entryDeletedTitle": "Dieser Eintrag wurde gelöscht, seit du ihn geöffnet hast",
     "entryDeletedBody": "Deine Version ist noch da. Möchtest du sie behalten?",
     "entryDeletedKeep": "Behalten",
     "entryDeletedDiscard": "Löschen",

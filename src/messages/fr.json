@@ -1,15 +1,15 @@
 {
   "meta": {
     "siteName": "Moodbow",
-    "title": "Moodbow — Un journal qui apprend votre histoire",
+    "title": "Moodbow — Un journal privé pour vos journées",
     "pageTitle": "{title} · Moodbow",
     "description": "Moodbow est un journal privé qui vous aide à repérer, au fil du temps, des tendances dans votre humeur, votre sommeil et vos habitudes. Bientôt disponible, par BurrowSoft.",
     "ogDescription": "Un journal privé qui vous aide à repérer, au fil du temps, des tendances dans votre humeur, votre sommeil et vos habitudes. Bientôt disponible.",
     "ogImageAlt": "Logo Moodbow avec le texte : Bientôt disponible. Un journal qui apprend votre histoire.",
-    "descriptionLaunch": "Un journal privé qui apprend votre histoire et montre ce qui façonne vos journées.",
-    "ogDescriptionLaunch": "Un journal privé qui apprend votre histoire et montre ce qui façonne vos journées.",
+    "descriptionLaunch": "Un journal privé qui vous montre ce qui va de pair dans vos journées.",
+    "ogDescriptionLaunch": "Un journal privé qui vous montre ce qui va de pair dans vos journées.",
     "ogImageAltLaunch": "Moodbow : votre mois, en arc-en-ciel",
-    "manifestDescription": "Un journal qui apprend votre histoire."
+    "manifestDescription": "Un journal privé pour vos journées."
   },
   "common": {
     "logoAlt": "Moodbow",
@@ -41,7 +41,7 @@
   "home": {
     "comingSoon": "Bientôt disponible",
     "heroTitle": "Votre mois, en arc-en-ciel",
-    "heroSub": "Un journal privé qui apprend votre histoire et montre ce qui façonne vos journées.",
+    "heroSub": "Un journal privé qui vous montre ce qui va de pair dans vos journées.",
     "notify": "Être prévenu",
     "notifyAria": "Être prévenu par e-mail du lancement de Moodbow",
     "notifySubject": "Prévenez-moi pour Moodbow",
@@ -59,7 +59,7 @@
     "featureWriteBody": "Une réflexion bienveillante, quand vous en voulez une.",
     "featureWriteNoAiTitle": "Racontez votre journée",
     "featureWriteNoAiBody": "Avec vos propres mots, quand vous en avez envie.",
-    "featureInsightsTitle": "Voyez ce qui façonne vos journées",
+    "featureInsightsTitle": "Voyez ce qui va de pair dans vos journées",
     "featureInsightsBody": "Graphiques sur une semaine, un mois et 3 mois.",
     "privateTitle": "Privé dès la conception",
     "privateBody": "Votre journal n'est lisible que par vous. Exportez ou supprimez tout, à tout moment."
@@ -164,7 +164,7 @@
     "signinNoAccount": "Pas encore de compte ? Créer un compte"
   },
   "onboarding": {
-    "welcome1Title": "Un journal qui apprend votre histoire",
+    "welcome1Title": "Un journal privé pour vos journées",
     "welcome1Body": "Notez votre humeur, votre sommeil et votre activité en quelques secondes, et racontez votre journée quand vous en avez envie.",
     "welcome2Title": "Voyez vos tendances",
     "welcome2Body": "Votre chronologie et vos graphiques montrent ce qui rend les bonnes journées meilleures, et ce qui précède souvent les plus difficiles.",
@@ -250,13 +250,13 @@
     "checkinEdit": "Modifier",
     "optional": "Facultatif",
     "errDateInFuture": "Vous ne pouvez pas noter un jour qui n'est pas encore arrivé.",
-    "errStaleWrite": "Ceci a été modifié sur un autre appareil. Nous avons chargé la dernière version. Veuillez réessayer.",
+    "errStaleWrite": "Ce bilan n'existe plus. Vous pouvez en enregistrer un nouveau.",
     "errGeneric": "Un problème est survenu. Veuillez réessayer.",
     "offlineCheckinRejected": "Le bilan du {date}, enregistré hors ligne, n'a pas pu être sauvegardé. Veuillez l'ajouter à nouveau.",
     "checkInConflictTitle": "Ce jour a déjà un bilan",
-    "checkInConflictBody": "Il a été enregistré sur un autre appareil. Lequel voulez-vous garder ?",
-    "checkInConflictMine": "Le vôtre (cet appareil)",
-    "checkInConflictOther": "Enregistré ailleurs",
+    "checkInConflictBody": "Lequel voulez-vous garder ?",
+    "checkInConflictMine": "Le vôtre",
+    "checkInConflictOther": "Déjà enregistré",
     "checkInConflictKeepMine": "Garder le mien",
     "checkInConflictUseOther": "Prendre l'autre"
   },
@@ -278,11 +278,11 @@
     "cancel": "Annuler",
     "todayEntriesTitle": "Notes du jour",
     "entryTooLong": "Une note peut contenir jusqu'à 20 000 caractères.",
-    "entryConflictTitle": "Cette note a changé sur un autre appareil",
+    "entryConflictTitle": "Cette note a changé depuis que vous l'avez ouverte",
     "entryConflictBody": "Votre version est toujours là. Laquelle voulez-vous garder ?",
     "entryConflictKeepMine": "Garder la mienne",
     "entryConflictUseOther": "Prendre l'autre",
-    "entryDeletedTitle": "Cette note a été supprimée sur un autre appareil",
+    "entryDeletedTitle": "Cette note a été supprimée depuis que vous l'avez ouverte",
     "entryDeletedBody": "Votre version est toujours là. Voulez-vous la garder ?",
     "entryDeletedKeep": "La garder",
     "entryDeletedDiscard": "La supprimer",

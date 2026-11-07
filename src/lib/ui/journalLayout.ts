@@ -12,6 +12,10 @@
 // In px, like the cards: rem would triple at 300 % text, leaving 176 px of a 320 px phone.
 export const APP_MAIN_GUTTER = "px-[12px] min-[360px]:px-[16px] sm:px-[24px]";
 
+// A journal page's heading: text-3xl's size and line height, capped on a narrow screen at
+// large text so its words stay whole at 200 %, and never smaller than the body under it.
+export const JOURNAL_HEADING = "font-medium leading-[1.2] tracking-tight [font-size:min(1.875rem,max(12vw,30px,1rem))] [overflow-wrap:anywhere]";
+
 // A journal card (Today's check-in and its summary).
 export const JOURNAL_CARD = "rounded-3xl border border-border bg-surface p-[12px] min-[360px]:p-[16px] sm:p-[24px]";
 
@@ -22,8 +26,9 @@ export const MOOD_ROW = "flex flex-wrap justify-between gap-0.5 @min-[22rem]:gap
 export const MOOD_FACE = "flex min-h-12 min-w-min flex-1 basis-12 flex-col items-center justify-center gap-1 rounded-2xl p-1 font-medium @min-[22rem]:p-2";
 // The label under each face: always shown (UX, superseding decision 105);
 // 12 px (0.75rem, UX) at the default text size: in rem, so it follows the
-// reader's setting. "Awful" and "Great" stay on one line under 48 px faces.
-export const MOOD_LABEL = "min-w-10 text-center text-xs leading-tight";
+// reader's setting, up to a cap on a narrow screen, so a long word stays whole at 300 %.
+// "Awful" and "Great" stay on one line under 48 px faces.
+export const MOOD_LABEL = "min-w-10 text-center leading-tight [font-size:min(0.75rem,max(6vw,12px))]";
 
 // The primary Save button (check-in, entry): full width on phones, so at
 // 200% zoom (a 160 px-wide page) it never overflows; the label wraps.
@@ -76,4 +81,4 @@ export function tabLabelSize(room: number, labelWidths: number[], fontSize: numb
 // card's format and theme): the selected one in the rose accent with
 // on-accent text (colour-roles §3, UX), the others muted.
 export const segment = (active: boolean) =>
-  `inline-flex min-h-11 max-w-full items-center rounded-full px-4 text-sm font-medium [overflow-wrap:anywhere] ${active ? "bg-accent text-on-accent" : "text-muted hover:bg-pill"}`;
+  `inline-flex min-h-[44px] max-w-full items-center rounded-full px-[16px] font-medium leading-[1.429] [font-size:min(0.875rem,max(7vw,14px))] [overflow-wrap:anywhere] ${active ? "bg-accent text-on-accent" : "text-muted hover:bg-pill"}`;

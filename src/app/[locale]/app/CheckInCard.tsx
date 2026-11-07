@@ -1,6 +1,7 @@
 "use client";
 
-import { startTransition, useActionState, useCallback, useEffect, useId, useRef, useState } from "react";
+import { startTransition, useActionState, useCallback, useEffect, useId, useRef, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { EXERCISE_MINUTES, MOODS, SLEEP_HOURS, SLEEP_QUALITIES, SLEEP_START, STRESS_LEVELS, type CheckIn, type SleepQuality } from "@/lib/journal/checkIn";
 import { dateLine } from "@/lib/journal/today";
@@ -8,6 +9,7 @@ import { valueHex } from "@/lib/journal/valueColours";
 import { localKey } from "@/lib/localData";
 import { onSignOut } from "@/lib/signOutSignal";
 import { SAVE_WAIT_MS, TimedOut, withTimeout } from "@/lib/ui/withTimeout";
+import { SlowLoading } from "@/components/SlowLoading";
 import { ValueDot } from "@/components/ValueDot";
 import { Dialog, dialogButton } from "@/components/Dialog";
 import { checkInChips, formatHours } from "./checkInChips";
@@ -139,7 +141,9 @@ function toFormData(fields: Fields, expectedUpdatedAt: string, date: string, fro
 // autoFocus: focus the first mood when the card opens ("Add a check-in").
 // keepDraft: Today's card; its unsaved choices survive leaving Today
 // (CheckInDraft, in memory only, #9765 M-01).
-type Props = { initial: CheckIn | null; uid: string; date: string; dateLocaleTag: string; autoFocus?: boolean; keepDraft?: boolean };
+// loadFailed: today's check-in couldn't be read, so the empty card comes with
+// its error and Try again, until this card holds a real row.
+type Props = { initial: CheckIn | null; uid: string; date: string; dateLocaleTag: string; autoFocus?: boolean; keepDraft?: boolean; loadFailed?: boolean };
 
 // An offline copy the server refused ("rejected": e.g. a day that is in the
 // future for the account's zone). Never silent (decision 72): one notice per
@@ -164,7 +168,7 @@ const valuesOf = (f: Fields) => ({
 type Notify = (notice: Notice) => void;
 
 // The sleep stepper's − and +: round icon buttons, ≥ 44 px targets.
-const STEP_BUTTON = "inline-flex h-11 w-11 items-center justify-center rounded-full text-accent hover:bg-pill";
+const STEP_BUTTON = "shrink-0 inline-flex h-[44px] w-[44px] items-center justify-center rounded-full text-accent hover:bg-pill";
 function StepIcon({ plus }: { plus: boolean }) {
   return (
     <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
@@ -200,6 +204,32 @@ function ConflictVersion({ label, values, testId }: { label: string; values: Pic
           </li>
         ))}
       </ul>
+    </div>
+  );
+}
+
+// Its own component: only this needs the router, and only when the read failed.
+function CheckInLoadFailed() {
+  const t = useTranslations("today");
+  const ta = useTranslations("app");
+  const router = useRouter();
+  const [retrying, startRetry] = useTransition();
+  return (
+    <div className="mb-[16px]">
+      <p role="alert" data-testid="today-checkin-error" className="font-medium text-accent">
+        {t("errGeneric")}
+      </p>
+      <button
+        type="button"
+        data-testid="today-checkin-retry"
+        // Focusable while it retries, as on JournalUnavailable.
+        aria-disabled={retrying}
+        onClick={() => !retrying && startRetry(() => router.refresh())}
+        className="mt-[8px] inline-flex min-h-[48px] max-w-full items-center rounded-full border border-border px-[24px] font-medium text-accent hover:bg-pill aria-disabled:opacity-60"
+      >
+        {ta("tryAgain")}
+      </button>
+      <SlowLoading active={retrying} />
     </div>
   );
 }
@@ -251,10 +281,10 @@ export function CheckInCard(props: Props) {
   );
 }
 
-function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, autoFocus, keepDraft }: Props & { notify: Notify; announce: (text: string) => void }) {
+function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, autoFocus, keepDraft, loadFailed }: Props & { notify: Notify; announce: (text: string) => void }) {
   const t = useTranslations("today");
   const locale = useLocale();
-  const slot = useCheckInDraft<Fields>();
+  const slot = useCheckInDraft<{ fields: Fields; basedOn: string }>();
   const drafts = keepDraft ? slot : null;
   const [draft] = useState(() => drafts?.get(cardDate) ?? null);
   // Waiting for the person's choice, oldest first; the dialog shows the first.
@@ -265,13 +295,18 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
   // not ask again (reviewer).
   const resolving = useRef(new Map<string, FormData>());
   const [row, setRow] = useState<CheckIn | null>(initial);
-  const [fields, setFields] = useState<Fields>(draft ?? fromRow(initial));
+  const [fields, setFields] = useState<Fields>(draft?.fields ?? fromRow(initial));
+  // The lock is the version the person was looking at, not the one this card just read: a draft
+  // from an empty card stays insert-only, so a check-in they never saw opens the conflict dialog,
+  // and one from an older version gets "stale", which asks the same way. Gone once they've chosen.
+  const [draftBase, setDraftBase] = useState<string | null>(draft?.basedOn ?? null);
+  const expected = draftBase ?? row?.updated_at ?? "";
   const [editing, setEditing] = useState(initial === null || draft !== null);
   // Unsaved choices go to the draft; anything else (saved, cancelled, a
   // new day's empty card) clears it.
   useEffect(() => {
-    drafts?.set(cardDate, editing && !sameFields(fields, fromRow(row)) ? fields : null);
-  }, [drafts, cardDate, editing, fields, row]);
+    drafts?.set(cardDate, editing && !sameFields(fields, fromRow(row)) ? { fields, basedOn: expected } : null);
+  }, [drafts, cardDate, editing, fields, row, expected]);
   const [offline, setOffline] = useState(false);
   const [storageFailed, setStorageFailed] = useState(false);
   // The pending copies being sent right now (by key), so none goes twice.
@@ -410,10 +445,11 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
       }
       // A copy for another day doesn't change this card.
       if (date !== cardDate) return prev;
-    } else if (next.status === "error" && next.error === "conflict" && next.checkIn) {
-      // A first check-in from this card met one saved elsewhere: kept as a
-      // pending copy (so nothing is lost before the person chooses), and
-      // both versions shown. The form stays as it was, with no error line.
+    } else if (next.status === "error" && (next.error === "conflict" || next.error === "stale") && next.checkIn) {
+      // A check-in from this card met one saved elsewhere, first or newer: kept
+      // as a pending copy (so nothing is lost before the person chooses), and
+      // both versions shown (UX: picks don't vanish behind a message). The form
+      // stays as it was, with no error line.
       const mine = pendingFromForm(form);
       const key = pendingKey(uid, mine.date);
       let kept = true;
@@ -429,12 +465,15 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
     }
     if (next.status === "saved") {
       setRow(next.checkIn);
+      setDraftBase(null);
       setFields(fromRow(next.checkIn));
       setEditing(false);
       setOffline(false);
-    } else if (next.status === "error" && next.error === "stale" && next.checkIn) {
-      setRow(next.checkIn);
-      setFields(fromRow(next.checkIn));
+    } else if (next.status === "error" && next.error === "stale") {
+      // Only with no row left to show (with one, it's the dialog above): deleted elsewhere. The
+      // picks stay, and with no version to lock against, the next Save makes a new check-in.
+      setRow(null);
+      setDraftBase(null);
     }
     return next;
   }, { status: "idle" });
@@ -458,7 +497,6 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
   const submit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (fields.mood === null) return;
-    const expected = row?.updated_at ?? "";
     setStorageFailed(false);
     if (!navigator.onLine) {
       try {
@@ -512,6 +550,7 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
     if (c.key) removePending(c.key);
     if (c.date === cardDate) {
       setRow(c.theirs);
+      setDraftBase(null);
       setFields(fromRow(c.theirs));
       setEditing(false);
       setOffline(false);
@@ -642,18 +681,18 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
         {/* The mockups (decision 161): the mood's face and its name, Edit on
             the right. The heading still says what it answers, for screen
             readers ("How are you today? Good"). */}
-        <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-[12px]">
           <h2
             tabIndex={-1}
             aria-labelledby={`${moodTitle}-q ${moodTitle}-a`}
-            className="flex items-center gap-3 text-lg font-medium text-text outline-none"
+            className="flex min-w-0 max-w-full items-center gap-[12px] font-medium leading-[1.556] text-text outline-none [font-size:min(1.125rem,max(9vw,18px))] [overflow-wrap:anywhere]"
             data-testid="checkin-summary-mood"
           >
-            <MoodFace mood={mood} className="h-9 w-9" />
+            <MoodFace mood={mood} className="h-[36px] w-[36px] shrink-0" />
             <span id={`${moodTitle}-q`} className="sr-only">
               {t("checkinTitle")}
             </span>
-            <span id={`${moodTitle}-a`}>{t(`mood${mood}` as "mood1")}</span>
+            <span id={`${moodTitle}-a`} className="min-w-0">{t(`mood${mood}` as "mood1")}</span>
           </h2>
           <button type="button" data-testid="checkin-edit" onClick={() => setEditing(true)} className="min-h-11 max-w-full font-medium text-accent underline underline-offset-4 [overflow-wrap:anywhere]">
             {t("checkinEdit")}
@@ -680,6 +719,7 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
   return (
     <form ref={(el) => void (root.current = el)} onSubmit={submit} className={JOURNAL_CARD} data-testid="checkin-card">
       {conflictDialog}
+      {loadFailed && row === null && <CheckInLoadFailed />}
       {/* One group, named once (a fieldset + a radiogroup were read twice;
           a11y pass): the title labels the radiogroup. */}
       <div>
@@ -737,7 +777,7 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
               >
                 <StepIcon plus={false} />
               </button>
-              <span data-testid="checkin-sleep-hours" aria-live="polite" className="inline-flex min-w-20 items-center justify-center gap-2 text-text">
+              <span data-testid="checkin-sleep-hours" aria-live="polite" className="inline-flex min-w-[80px] items-center justify-center gap-2 text-center text-text [overflow-wrap:anywhere]">
                 {/* The chosen value's colour (decision 150): only once one is picked. */}
                 {fields.sleepHours !== "" && <ValueDot hex={valueHex("sleep_hours", fields.sleepHours)} testId="checkin-sleep-dot" />}
                 {fields.sleepHours === "" ? "–" : t("sleepHours", { hours: formatHours(fields.sleepHours, locale) })}

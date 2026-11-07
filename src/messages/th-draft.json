@@ -6,7 +6,7 @@
   },
   {
     "key": "meta.title",
-    "en": "Moodbow — A journal that learns your story",
+    "en": "Moodbow — A private journal for your days",
     "reason": "UX draft (native read pending)"
   },
   {
@@ -31,12 +31,12 @@
   },
   {
     "key": "meta.descriptionLaunch",
-    "en": "A private journal that learns your story and shows what shapes your days.",
+    "en": "A private journal that shows you what goes together in your days.",
     "reason": "UX draft (native read pending)"
   },
   {
     "key": "meta.ogDescriptionLaunch",
-    "en": "A private journal that learns your story and shows what shapes your days.",
+    "en": "A private journal that shows you what goes together in your days.",
     "reason": "UX draft (native read pending)"
   },
   {
@@ -46,7 +46,7 @@
   },
   {
     "key": "meta.manifestDescription",
-    "en": "A journal that learns your story.",
+    "en": "A private journal for your days.",
     "reason": "UX draft (native read pending)"
   },
   {
@@ -136,7 +136,7 @@
   },
   {
     "key": "home.heroSub",
-    "en": "A private journal that learns your story and shows what shapes your days.",
+    "en": "A private journal that shows you what goes together in your days.",
     "reason": "UX draft (native read pending)"
   },
   {
@@ -201,7 +201,7 @@
   },
   {
     "key": "home.featureInsightsTitle",
-    "en": "See what shapes your days",
+    "en": "See what goes together in your days",
     "reason": "UX draft (native read pending)"
   },
   {
@@ -506,7 +506,7 @@
   },
   {
     "key": "today.errStaleWrite",
-    "en": "This was changed on another device. We've loaded the latest version. Please try again.",
+    "en": "This check-in no longer exists. You can save a new one.",
     "reason": "UX draft (native read pending)"
   },
   {
@@ -521,17 +521,17 @@
   },
   {
     "key": "today.checkInConflictBody",
-    "en": "It was saved on another device. Which one do you want to keep?",
+    "en": "Which one do you want to keep?",
     "reason": "UX draft (native read pending)"
   },
   {
     "key": "today.checkInConflictMine",
-    "en": "Yours (this device)",
+    "en": "Yours",
     "reason": "UX draft (native read pending)"
   },
   {
     "key": "today.checkInConflictOther",
-    "en": "Saved elsewhere",
+    "en": "Already saved",
     "reason": "UX draft (native read pending)"
   },
   {
@@ -556,7 +556,7 @@
   },
   {
     "key": "entry.entryConflictTitle",
-    "en": "This entry changed on another device",
+    "en": "This entry changed since you opened it",
     "reason": "UX draft (native read pending)"
   },
   {
@@ -576,7 +576,7 @@
   },
   {
     "key": "entry.entryDeletedTitle",
-    "en": "This entry was deleted on another device",
+    "en": "This entry was deleted since you opened it",
     "reason": "UX draft (native read pending)"
   },
   {

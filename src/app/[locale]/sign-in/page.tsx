@@ -4,6 +4,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 import { redirect } from "@/i18n/navigation";
 import { PageShell } from "@/components/PageShell";
+import { SignedOutHelp } from "@/components/SignedOutHelp";
 import { pageGate } from "@/lib/conditions";
 import { pageMetadata } from "@/lib/metadata";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -52,6 +53,7 @@ export default async function SignInPage({ params, searchParams }: PageProps<"/[
         </p>
       )}
       <SignInForm />
+      <SignedOutHelp testId="sign-in-get-help" />
     </PageShell>
   );
 }

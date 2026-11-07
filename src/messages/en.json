@@ -1,15 +1,15 @@
 {
   "meta": {
     "siteName": "Moodbow",
-    "title": "Moodbow — A journal that learns your story",
+    "title": "Moodbow — A private journal for your days",
     "pageTitle": "{title} · Moodbow",
     "description": "Moodbow is a private journal that helps you notice patterns in your mood, sleep and habits over time. Coming soon from BurrowSoft.",
     "ogDescription": "A private journal that helps you notice patterns in your mood, sleep and habits over time. Coming soon.",
     "ogImageAlt": "Moodbow logo with the text: Coming soon. A journal that learns your story.",
-    "descriptionLaunch": "A private journal that learns your story and shows what shapes your days.",
-    "ogDescriptionLaunch": "A private journal that learns your story and shows what shapes your days.",
+    "descriptionLaunch": "A private journal that shows you what goes together in your days.",
+    "ogDescriptionLaunch": "A private journal that shows you what goes together in your days.",
     "ogImageAltLaunch": "Moodbow: your month, as a rainbow",
-    "manifestDescription": "A journal that learns your story."
+    "manifestDescription": "A private journal for your days."
   },
   "common": {
     "logoAlt": "Moodbow",
@@ -41,7 +41,7 @@
   "home": {
     "comingSoon": "Coming soon",
     "heroTitle": "Your month, as a rainbow",
-    "heroSub": "A private journal that learns your story and shows what shapes your days.",
+    "heroSub": "A private journal that shows you what goes together in your days.",
     "notify": "Get notified",
     "notifyAria": "Get notified by email when Moodbow launches",
     "notifySubject": "Notify me about Moodbow",
@@ -59,7 +59,7 @@
     "featureWriteBody": "A kind reflection when you want one.",
     "featureWriteNoAiTitle": "Write about your day",
     "featureWriteNoAiBody": "In your own words, whenever you feel like it.",
-    "featureInsightsTitle": "See what shapes your days",
+    "featureInsightsTitle": "See what goes together in your days",
     "featureInsightsBody": "Week, month and 3-month charts.",
     "privateTitle": "Private by design",
     "privateBody": "Only you can read your journal. Export or delete everything, any time."
@@ -164,7 +164,7 @@
     "signinNoAccount": "New here? Create an account"
   },
   "onboarding": {
-    "welcome1Title": "A journal that learns your story",
+    "welcome1Title": "A private journal for your days",
     "welcome1Body": "Log your mood, sleep and movement in seconds, and write about your day when you feel like it.",
     "welcome2Title": "See your patterns",
     "welcome2Body": "Your timeline and charts show what makes good days better, and what tends to come before hard ones.",
@@ -250,13 +250,13 @@
     "checkinEdit": "Edit",
     "optional": "Optional",
     "errDateInFuture": "You can't log a day that hasn't happened yet.",
-    "errStaleWrite": "This was changed on another device. We've loaded the latest version. Please try again.",
+    "errStaleWrite": "This check-in no longer exists. You can save a new one.",
     "errGeneric": "Something went wrong. Please try again.",
     "offlineCheckinRejected": "A check-in you saved offline for {date} couldn't be saved. Please add it again.",
     "checkInConflictTitle": "This day already has a check-in",
-    "checkInConflictBody": "It was saved on another device. Which one do you want to keep?",
-    "checkInConflictMine": "Yours (this device)",
-    "checkInConflictOther": "Saved elsewhere",
+    "checkInConflictBody": "Which one do you want to keep?",
+    "checkInConflictMine": "Yours",
+    "checkInConflictOther": "Already saved",
     "checkInConflictKeepMine": "Keep mine",
     "checkInConflictUseOther": "Use the other one"
   },
@@ -278,11 +278,11 @@
     "cancel": "Cancel",
     "todayEntriesTitle": "Today's entries",
     "entryTooLong": "Entries can be up to 20,000 characters.",
-    "entryConflictTitle": "This entry changed on another device",
+    "entryConflictTitle": "This entry changed since you opened it",
     "entryConflictBody": "Your version is still here. Which one do you want to keep?",
     "entryConflictKeepMine": "Keep mine",
     "entryConflictUseOther": "Use the other one",
-    "entryDeletedTitle": "This entry was deleted on another device",
+    "entryDeletedTitle": "This entry was deleted since you opened it",
     "entryDeletedBody": "Your version is still here. Do you want to keep it?",
     "entryDeletedKeep": "Keep it",
     "entryDeletedDiscard": "Delete it",

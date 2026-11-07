@@ -17,6 +17,8 @@ vi.mock("@/lib/ui/withTimeout", async (orig) => {
   const real = await orig<typeof import("@/lib/ui/withTimeout")>();
   return { ...real, SAVE_WAIT_MS: 300, withTimeout: <T,>(call: Promise<T>, ms: number) => (held ? call : real.withTimeout(call, ms)) };
 });
+const refresh = vi.fn();
+vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh }) }));
 const { CheckInCard } = await import("./CheckInCard");
 const { CheckInDraftProvider } = await import("./CheckInDraft");
 
@@ -121,14 +123,44 @@ describe("CheckInCard", () => {
     expect(sent()).toMatchObject({ mood: "2", expected_updated_at: ROW.updated_at });
   });
 
-  it("stale write: shows the error and loads the newer row", async () => {
+  it("stale write: the picks stay, and the person chooses between both versions (UX, #220)", async () => {
     saveCheckIn.mockResolvedValue({ status: "error", error: "stale", checkIn: { ...ROW, mood: 5 } });
     renderCard(ROW);
     fireEvent.click(screen.getByTestId("checkin-edit"));
     fireEvent.click(screen.getByTestId("checkin-mood-1"));
     fireEvent.click(screen.getByTestId("checkin-save"));
+    await screen.findByTestId("checkin-conflict-dialog");
+    expect(screen.queryByTestId("checkin-error")).toBeNull();
+    expect(screen.getByTestId("checkin-mood-1")).toHaveAttribute("aria-checked", "true");
+    expect(anyPending()).toBe(true);
+  });
+
+  it("stale write with no row left (deleted elsewhere): says so, the picks stay, and the next Save makes a new one", async () => {
+    saveCheckIn.mockResolvedValue({ status: "error", error: "stale" });
+    renderCard(ROW);
+    fireEvent.click(screen.getByTestId("checkin-edit"));
+    fireEvent.click(screen.getByTestId("checkin-mood-1"));
+    fireEvent.click(screen.getByTestId("checkin-save"));
     expect(await screen.findByTestId("checkin-error")).toHaveTextContent(messages.today.errStaleWrite);
-    expect(screen.getByTestId("checkin-mood-5")).toHaveAttribute("aria-checked", "true");
+    expect(screen.getByTestId("checkin-mood-1")).toHaveAttribute("aria-checked", "true");
+    expect(sent().expected_updated_at).toBe(ROW.updated_at);
+    saveCheckIn.mockResolvedValue({ status: "saved", checkIn: { ...ROW, mood: 1 } });
+    fireEvent.click(screen.getByTestId("checkin-save"));
+    await screen.findByTestId("checkin-summary");
+    expect(sent(1).expected_updated_at).toBe("");
+  });
+
+  it("stale write, Use the other one: the newer row loads and no copy stays", async () => {
+    saveCheckIn.mockResolvedValue({ status: "error", error: "stale", checkIn: { ...ROW, mood: 5 } });
+    renderCard(ROW);
+    fireEvent.click(screen.getByTestId("checkin-edit"));
+    fireEvent.click(screen.getByTestId("checkin-mood-1"));
+    fireEvent.click(screen.getByTestId("checkin-save"));
+    await screen.findByTestId("checkin-conflict-dialog");
+    fireEvent.click(screen.getByRole("button", { name: messages.today.checkInConflictUseOther }));
+    await screen.findByTestId("checkin-summary");
+    expect(saveCheckIn).toHaveBeenCalledTimes(1);
+    expect(anyPending()).toBe(false);
   });
 
   it("offline: keeps a pending copy, then sends it when the browser is back online", async () => {
@@ -491,14 +523,15 @@ describe("CheckInCard: a request lost at the network level (Web Tester, #11)", (
       expect(anyPending()).toBe(false);
     });
 
-    it("a late answer that another device changed the day: back to the form with the error, no copy left", async () => {
+    it("a late answer that another device changed the day: back to the form, both versions, the copy kept until they choose", async () => {
       renderCard(null);
       fireEvent.click(screen.getByTestId("checkin-mood-3"));
       fireEvent.click(screen.getByTestId("checkin-save"));
       expect(await screen.findByTestId("checkin-status", {}, { timeout: 2000 })).toHaveTextContent(messages.today.checkinSavedOfflineWeb);
       await act(async () => answer({ status: "error", error: "stale", checkIn: { ...ROW, mood: 1 } }));
-      expect(await screen.findByTestId("checkin-error")).toHaveTextContent(messages.today.errStaleWrite);
-      expect(anyPending()).toBe(false);
+      await screen.findByTestId("checkin-conflict-dialog");
+      expect(screen.getByTestId("checkin-mood-3")).toHaveAttribute("aria-checked", "true");
+      expect(anyPending()).toBe(true);
     });
   });
 
@@ -649,6 +682,37 @@ describe("CheckInCard: signed out in another tab (UX & PM 2026-11-03, option C; 
     } finally {
       setOnline(true);
     }
+  });
+});
+
+describe("CheckInCard: today's check-in couldn't be read (decision 218; Reviewer, #220)", () => {
+  const renderFailed = () =>
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <CheckInCard initial={null} uid="u1" date="2026-10-02" dateLocaleTag="en-US" loadFailed />
+      </NextIntlClientProvider>,
+    );
+  it("the empty card, with the error and a Try again that reads again", () => {
+    refresh.mockClear();
+    renderFailed();
+    expect(screen.getByTestId("checkin-card")).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent(messages.today.errGeneric);
+    fireEvent.click(screen.getByTestId("today-checkin-retry"));
+    expect(refresh).toHaveBeenCalledTimes(1);
+  });
+  it("a save that lands clears them: the error doesn't stay above a saved check-in", async () => {
+    saveCheckIn.mockResolvedValue({ status: "saved", checkIn: ROW });
+    renderFailed();
+    fireEvent.click(screen.getByTestId("checkin-mood-4"));
+    fireEvent.click(screen.getByTestId("checkin-save"));
+    await screen.findByTestId("checkin-summary");
+    expect(screen.queryByTestId("today-checkin-error")).toBeNull();
+    expect(screen.queryByTestId("today-checkin-retry")).toBeNull();
+  });
+  it("a read that worked: neither", () => {
+    renderCard(null);
+    expect(screen.queryByTestId("today-checkin-error")).toBeNull();
+    expect(screen.queryByTestId("today-checkin-retry")).toBeNull();
   });
 });
 
@@ -884,6 +948,36 @@ describe("CheckInCard: the in-memory draft", () => {
     rerender(withDraft(null));
     rerender(withDraft(<Today />));
     expect(screen.getByTestId("checkin-mood-2")).toHaveAttribute("aria-checked", "false");
+  });
+
+  const V2: CheckIn = { ...ROW, mood: 5, updated_at: "2026-10-03T09:00:00.000Z" };
+
+  it("picks on an empty card, then the real row arrives: insert-only, and the conflict dialog shows both (Reviewer, #220)", async () => {
+    saveCheckIn.mockResolvedValue({ status: "error", error: "conflict", checkIn: ROW });
+    const { rerender } = render(withDraft(<Today />));
+    choose();
+    rerender(withDraft(null));
+    rerender(withDraft(<Today initial={ROW} />));
+    expect(screen.getByTestId("checkin-mood-2")).toHaveAttribute("aria-checked", "true");
+    fireEvent.click(screen.getByTestId("checkin-save"));
+    await screen.findByTestId("checkin-conflict-dialog");
+    expect(sent().expected_updated_at).toBe("");
+  });
+
+  it("a draft from one version, mounted on a newer one, sends the version it was based on", async () => {
+    saveCheckIn.mockResolvedValue({ status: "error", error: "stale", checkIn: V2 });
+    const { rerender } = render(withDraft(<Today initial={ROW} />));
+    fireEvent.click(screen.getByTestId("checkin-edit"));
+    fireEvent.click(screen.getByTestId("checkin-mood-1"));
+    rerender(withDraft(null));
+    rerender(withDraft(<Today initial={V2} />));
+    fireEvent.click(screen.getByTestId("checkin-save"));
+    await screen.findByTestId("checkin-conflict-dialog");
+    expect(sent().expected_updated_at).toBe(ROW.updated_at);
+    // Shown the newer one now: Keep mine's lock is that one.
+    fireEvent.click(screen.getByRole("button", { name: messages.today.checkInConflictKeepMine }));
+    await waitFor(() => expect(saveCheckIn).toHaveBeenCalledTimes(2));
+    expect(sent(1).expected_updated_at).toBe(V2.updated_at);
   });
 
   it("the day changed: a new empty card, and yesterday's draft is dropped", () => {

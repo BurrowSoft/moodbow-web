@@ -17,6 +17,7 @@ import { pageGate } from "@/lib/conditions";
 import { loadMilestone } from "@/lib/share/milestoneData";
 import { yearOnOffer } from "@/lib/share/year";
 import { MilestoneCard } from "./MilestoneCard";
+import { JOURNAL_HEADING } from "@/lib/ui/journalLayout";
 
 // A stuck request ends here at the latest (UX, the timeout audit); each
 // data call gives up after 15 s on its own (lib/supabase/deadline).
@@ -46,9 +47,12 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
     .select("local_date, mood, sleep_hours, sleep_quality, exercise_minutes, stress, updated_at")
     .eq("local_date", me.today)
     .maybeSingle();
-  // A failed read must not look like "no check-in yet": the empty card would
-  // then save over the real one without a lock.
-  if (checkInError) return <JournalUnavailable />;
+  // Today always keeps check-in and Write, with errors beside them (specs/next-release.md).
+  // A failed read shows the empty card with its error: saving it can't overwrite anything,
+  // as a save with no known version is insert-only, and a check-in already there opens the
+  // conflict dialog. Not reachable here: no session, or no get_me, as that spec says.
+  // The key: the card reads `initial` only when it mounts, so a Try again that brings the real
+  // row needs a new card. Unsaved choices stay, in CheckInDraft.
   // Today's entries, newest first (previews only; the editor loads the rest).
   const { data: entries, error: entriesError } = await supabase
     .from("entries")
@@ -66,14 +70,14 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
     <section className="space-y-8">
       <header>
         {/* Focusable from code only: where focus goes when the milestone card is dismissed. */}
-        <h1 id="today-title" tabIndex={-1} className="text-3xl font-medium tracking-tight focus:outline-none" data-testid="today-greeting">
+        <h1 id="today-title" tabIndex={-1} className={`${JOURNAL_HEADING} focus:outline-none`} data-testid="today-greeting">
           {t(greetingKey(localHour(timeZone)))}
         </h1>
         <p className="mt-1 text-muted" data-testid="today-date">
           {dateLine(me.today, dateLocaleTag)}
         </p>
       </header>
-      <CheckInCard initial={(data as CheckIn | null) ?? null} uid={user.id} date={me.today} dateLocaleTag={dateLocaleTag} keepDraft />
+      <CheckInCard key={checkInError ? "unread" : "read"} initial={(data as CheckIn | null) ?? null} uid={user.id} date={me.today} dateLocaleTag={dateLocaleTag} keepDraft loadFailed={Boolean(checkInError)} />
       <Link
         href="/app/write"
         data-testid="today-write"

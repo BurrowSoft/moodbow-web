@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import messages from "@/messages/en.json";
@@ -28,5 +28,15 @@ describe("JournalUnavailable landmarks (Web Tester's a11y note)", () => {
     expect(root.tagName).toBe("MAIN");
     expect(root.id).toBe("main");
     expect(screen.getByRole("alert")).toHaveTextContent(messages.auth.errGeneric);
+  });
+});
+
+describe("JournalUnavailable: help is there whatever failed (decision 218)", () => {
+  it.each([false, true])("standalone %s: the real button, and the card opens with its words", (standalone) => {
+    renderIt(standalone);
+    const help = screen.getByTestId("journal-unavailable-help");
+    expect(help).toHaveTextContent(messages.me.meGetHelpNow);
+    fireEvent.click(help);
+    expect(screen.getByText(messages.safety.safetyTitle)).toBeInTheDocument();
   });
 });

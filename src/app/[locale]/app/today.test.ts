@@ -131,6 +131,15 @@ describe("saveCheckIn", () => {
     expect(eq).toHaveBeenLastCalledWith("local_date", "2026-10-02");
   });
 
+  it("stale_write whose row can't be read: generic, or unreachable on a deadline, never \"we've loaded the latest\" (Reviewer, #220)", async () => {
+    const stale = () => form({ mood: "2", expected_updated_at: "2026-10-02T08:00:00Z" });
+    rpcAnswers({ data: null, error: { message: "stale_write" } });
+    maybeSingle.mockResolvedValue({ data: null, error: { message: "boom" } });
+    expect(await saveCheckIn(idle, stale())).toEqual({ status: "error", error: "generic" });
+    maybeSingle.mockResolvedValue({ data: null, error: { message: "AbortError: Supabase didn't answer in time" } });
+    expect(await saveCheckIn(idle, stale())).toEqual({ status: "error", error: "unreachable" });
+  });
+
   it("stale_write, but the day already holds these exact values (an earlier answer was lost): saved", async () => {
     rpcAnswers({ data: null, error: { message: "stale_write" } });
     maybeSingle.mockResolvedValue({ data: ROW });

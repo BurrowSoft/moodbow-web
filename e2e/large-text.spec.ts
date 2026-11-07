@@ -57,3 +57,13 @@ test("a legal table's words aren't split at the normal size", async ({ page }) =
   const cell = page.locator(".legal-prose td").first();
   await expect(cell).toHaveCSS("overflow-wrap", "break-word");
 });
+
+test("large text at 300 %: a page's heading is never smaller than the body under it", async ({ page, browserName }, testInfo) => {
+  test.skip(browserName !== "chromium" || testInfo.project.name !== "desktop", "Page.setFontSizes is Chromium's; once is enough");
+  const cdp = await page.context().newCDPSession(page);
+  await page.setViewportSize({ width: 320, height: 640 });
+  await cdp.send("Page.setFontSizes", { fontSizes: { standard: 48, fixed: 39 } });
+  await page.goto("/consent");
+  const sizes = await page.evaluate(() => ({ heading: parseFloat(getComputedStyle(document.querySelector("h1")!).fontSize), body: parseFloat(getComputedStyle(document.documentElement).fontSize) }));
+  expect(sizes.heading).toBeGreaterThanOrEqual(sizes.body);
+});

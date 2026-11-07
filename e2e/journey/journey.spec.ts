@@ -3,7 +3,8 @@ import { expect, test, type Frame, type Page, type Request } from "@playwright/t
 import conditions from "../../content/conditions.json";
 import messages from "../../src/messages/en.json";
 import fr from "../../src/messages/fr.json";
-import { aiAvailable, cleanup, configured, confirmEmail, createConfirmedUser, exists, lastWeekMonday, seedCheckIns, newEmail, newPassword, notConfigured, profileLocale, revokeSessions, setProfileLocale, signedUpUnconfirmed, sweep } from "./staging";
+import { monthsBefore } from "../../src/lib/journal/onThisDay";
+import { journalToday, aiAvailable, cleanup, configured, confirmEmail, createConfirmedUser, exists, lastWeekMonday, seedCheckIns, newEmail, newPassword, notConfigured, profileLocale, revokeSessions, setProfileLocale, signedUpUnconfirmed, sweep } from "./staging";
 
 // The launch-critical journeys (1.0), end to end against staging with a
 // throwaway account each: sign-up → confirm → consent → setup → check-in →
@@ -1099,6 +1100,185 @@ test.describe("the tab bar in every language", () => {
       await cleanup(email);
     }
   });
+});
+
+// The journal's other screens on a 320 px phone at the browser's own large text, in
+// English and the longest two languages. Soft: one run lists everything that needs a
+// look, named.
+test("large text, set in the browser: Today after a mood, calendar, day, entry and writing stay inside a 320 px phone", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
+  test.setTimeout(300_000);
+  const email = newEmail();
+  const password = newPassword();
+  const cdp = await page.context().newCDPSession(page);
+  const textAt = (percent: number) => cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+
+    // A past day with a check-in, and an entry, at the normal size.
+    const day = await lastWeekMonday(email);
+    await seedCheckIns(email, password, day, [{ offset: 0, mood: 3, sleep_hours: 7 }]);
+    await page.goto("/app/write");
+    await page.getByTestId("entry-text").fill("A few ordinary words about the day, to fill a line or two.");
+    await page.getByTestId("entry-save").click();
+    await expect(page).toHaveURL(/\/app$/);
+    await page.locator('[data-testid^="today-entry-"]').first().click();
+    await expect(page).toHaveURL(/\/app\/entries\/[0-9a-f-]{36}$/);
+    const entry = new URL(page.url()).pathname;
+
+    // A moment a month ago, with a check-in, so On this day shows with its mood in words.
+    // Not every day has one (the 31st, in a shorter month): then this part says so.
+    const aMonthAgo = monthsBefore(await journalToday(email, password), 1);
+    if (aMonthAgo) {
+      await seedCheckIns(email, password, aMonthAgo, [{ offset: 0, mood: 3, sleep_hours: 7 }]);
+      await page.goto(`/app/write?date=${aMonthAgo}`);
+      await page.getByTestId("entry-text").fill("A moment worth seeing again, in a few ordinary words.");
+      await page.getByTestId("entry-moment").click();
+      await page.getByTestId("entry-save").click();
+      await expect(page).not.toHaveURL(/\/app\/write/, { timeout: 15_000 });
+    } else console.log("No day a month ago today: On this day isn't measured in this run.");
+
+    await page.setViewportSize({ width: 320, height: 800 });
+    const measure = async (screen: string, percent: number) => {
+      await page.waitForLoadState("networkidle");
+      await expect(page.getByTestId("app-loading")).toHaveCount(0);
+      await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))));
+      // The setting really is on, or all of this would pass at the normal size.
+      expect(await page.evaluate(() => getComputedStyle(document.documentElement).fontSize), screen).toBe(`${(16 * percent) / 100}px`);
+      const sticksOut = await page.evaluate(() => {
+        const inScroller = (e: Element) => {
+          for (let p = e.parentElement; p; p = p.parentElement) if (["auto", "scroll", "hidden"].includes(getComputedStyle(p).overflowX) || getComputedStyle(p).position === "fixed") return true;
+          return false;
+        };
+        return [...document.querySelectorAll("body *")]
+          .filter((e) => e.getBoundingClientRect().right > innerWidth + 0.5 && getComputedStyle(e).position !== "fixed" && e.getBoundingClientRect().width > 1 && !inScroller(e))
+          .slice(0, 6)
+          .map((e) => `${e.tagName.toLowerCase()}${e.getAttribute("data-testid") ? `[${e.getAttribute("data-testid")}]` : ""} ${Math.round(e.getBoundingClientRect().right)}`);
+      });
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+      expect.soft({ screen, percent, overflow, sticksOut }).toEqual({ screen, percent, overflow: 0, sticksOut: [] });
+    };
+
+    for (const [route, saved] of [["", "en"], ["/fr", "fr"], ["/de", "de"]]) {
+      await setProfileLocale(email, password, saved);
+      for (const percent of [200, 300]) {
+        await textAt(percent);
+        await page.goto(`${route}/app`);
+        await page.getByTestId("checkin-mood-3").click();
+        await expect(page.getByTestId("checkin-sleep-quality-good")).toBeVisible();
+        await measure(`${saved} Today after a mood`, percent);
+        await page.goto(`${route}/app/timeline`);
+        await page.getByTestId("timeline-view-calendar").click();
+        await expect(page.getByTestId("month-calendar")).toBeVisible();
+        // On this day sits above the calendar, so this measures it too.
+        if (aMonthAgo) await expect(page.getByTestId("on-this-day-mood")).toBeVisible();
+        await measure(`${saved} calendar`, percent);
+        await page.goto(`${route}/app/timeline/${day}`);
+        await measure(`${saved} day page`, percent);
+        await page.goto(`${route}${entry}`);
+        await expect(page.getByTestId("entry-body")).toBeVisible();
+        await measure(`${saved} entry`, percent);
+        await page.goto(`${route}/app/write`);
+        await expect(page.getByTestId("entry-text")).toBeVisible();
+        await measure(`${saved} writing`, percent);
+        // A page's heading keeps its words whole at 200 %, and isn't smaller than the body.
+        for (const path of ["/app/timeline", "/app/insights", "/app/me"]) {
+          await page.goto(`${route}${path}`);
+          const heading = page.getByRole("heading", { level: 1 });
+          await expect(heading).toBeVisible();
+          const size = await heading.evaluate((h) => {
+            const style = getComputedStyle(h);
+            const ruler = document.createElement("canvas").getContext("2d")!;
+            ruler.font = style.font;
+            // The heading's own tracking, and the room it has: Insights' sizes to its text.
+            ruler.letterSpacing = style.letterSpacing;
+            return { widest: Math.max(...(h.textContent ?? "").split(" ").map((w) => ruler.measureText(w).width)), room: h.parentElement!.clientWidth, font: parseFloat(style.fontSize), body: parseFloat(getComputedStyle(document.documentElement).fontSize) };
+          });
+          expect.soft(size.font, `${saved} ${path} heading at ${percent}%`).toBeGreaterThanOrEqual(size.body);
+          if (percent === 200) expect.soft(size.widest, `${saved} ${path} heading's words at 200%`).toBeLessThanOrEqual(size.room);
+        }
+        // Me's reminder reads whole in a 12-hour browser (this one's en-US), with its PM: a
+        // clipped one makes 21:00 read "09:00" (Web Tester, #206).
+        await page.goto(`${route}/app/me`);
+        // Measured once it's laid out: read while the page is still arriving, it's 0 wide.
+        const field = page.getByTestId("me-reminder-time");
+        await expect(field).toBeVisible();
+        await expect.poll(() => field.evaluate((input) => input.clientWidth), { message: `${saved} Me's time at ${percent}%` }).toBeGreaterThan(0);
+        const time = await field.evaluate((input) => {
+          const style = getComputedStyle(input);
+          const ruler = document.createElement("canvas").getContext("2d")!;
+          ruler.font = style.font;
+          const needs = ruler.measureText("09:00 PM").width + parseFloat(style.paddingLeft) + parseFloat(style.paddingRight) + parseFloat(style.fontSize) * 1.5;
+          return { needs: Math.ceil(needs), has: Math.floor(input.clientWidth) };
+        });
+        console.log(`Me's time, ${saved} at ${percent}%: needs ${time.needs}, has ${time.has}`);
+        expect.soft(time.needs, `${saved} Me's time at ${percent}%`).toBeLessThanOrEqual(time.has);
+      }
+      // List, for the next person and the next language.
+      await textAt(100);
+      await page.goto(`${route}/app/timeline`);
+      await page.getByTestId("timeline-view-list").click();
+    }
+  } finally {
+    await cleanup(email);
+  }
+});
+
+// A column of letters under an X above the window, and Not now 1,660 px down (Web Tester, #218).
+test("large text, set in the browser: the milestone's title, X and Not now stay usable on a 320 px phone", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
+  test.setTimeout(240_000);
+  const email = newEmail();
+  const password = newPassword();
+  const cdp = await page.context().newCDPSession(page);
+  const textAt = (percent: number) => cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    // 30 days journaled, all in the past: the first milestone.
+    const day = await lastWeekMonday(email);
+    await seedCheckIns(email, password, day, Array.from({ length: 30 }, (_, i) => ({ offset: -i, mood: 3 })));
+    await page.setViewportSize({ width: 320, height: 640 });
+    await page.emulateMedia({ reducedMotion: "reduce" });
+
+    for (const percent of [100, 200, 300]) {
+      await textAt(percent);
+      await page.goto("/app");
+      const card = page.getByTestId("milestone-card");
+      await expect(card, `${percent} %`).toBeVisible({ timeout: 15_000 });
+      const box = async (id: string) => (await page.getByTestId(id).boundingBox())!;
+      const shape = await box("milestone-card");
+      expect(shape.y, `${percent} %: the card's top is in the window`).toBeGreaterThanOrEqual(0);
+      const close = await box("milestone-close");
+      expect(close.y, `${percent} %: the X is in the window`).toBeGreaterThanOrEqual(0);
+      expect(close.x + close.width, `${percent} %: the X is in the card`).toBeLessThanOrEqual(shape.x + shape.width);
+      expect(close.width, `${percent} %: the X stays its size`).toBe(44);
+      const title = (await page.locator("#milestone-title").boundingBox())!;
+      expect(title.width, `${percent} %: the title keeps its width`).toBeGreaterThanOrEqual(150);
+      const notNow = await box("milestone-not-now");
+      expect(notNow.y + notNow.height, `${percent} %: Not now is in view on opening`).toBeLessThanOrEqual(shape.y + shape.height);
+      expect(await card.evaluate((el) => el.scrollWidth - el.clientWidth), `${percent} %: no sideways scroll in the card`).toBe(0);
+    }
+    await page.getByTestId("milestone-close").click();
+    await expect(page.getByTestId("milestone-card")).toBeHidden();
+  } finally {
+    await cleanup(email);
+  }
 });
 
 // Every new account passes through Set up; its time field was 151 px past a 320 px
