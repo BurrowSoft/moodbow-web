@@ -181,7 +181,7 @@
   },
   "consent-language-live": {
     "met": false,
-    "what": "Each consent records its language, in the app build people have, and on the web, with the column on prod (decision 224). Then the privacy policy's §1 says so."
+    "what": "The consents column is on prod, and any client sends the language (decision 224). Flip it with the first of those to go out, so the language is never stored before the privacy policy's §1 says so."
   },
   "play-live": {
     "met": false,
