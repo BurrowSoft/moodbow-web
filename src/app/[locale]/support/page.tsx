@@ -19,7 +19,7 @@ export default async function SupportPage({ params }: PageProps<"/[locale]/suppo
   const t = await getTranslations("support");
 
   return (
-    <PageShell title={t("title")}>
+    <PageShell capTitle title={t("title")}>
       <p>{t("body")}</p>
       <p>
         {t.rich("emailLine", {

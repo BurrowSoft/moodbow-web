@@ -39,7 +39,7 @@ export async function LegalArticle({ slug, locale, gate }: Props) {
     ) : null;
 
   return (
-    <PageShell title={title} draft={state === "draft"} article after={panel} notice={english ? t("legalEnglishOnly") : undefined} lang={english ? textLocale : undefined}>
+    <PageShell capTitle title={title} draft={state === "draft"} article after={panel} notice={english ? t("legalEnglishOnly") : undefined} lang={english ? textLocale : undefined}>
       <div className="legal-prose" dangerouslySetInnerHTML={{ __html: html }} />
     </PageShell>
   );

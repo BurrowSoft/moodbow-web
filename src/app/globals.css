@@ -276,6 +276,17 @@ input[type="date"]:focus-within {
 .legal-prose th { color: var(--text); font-weight: 500; background: var(--surface); }
 /* Facts still to confirm (⏳, [VITOR]): visible on drafts only (a page can't go live with any). */
 .legal-prose mark.legal-todo { background: var(--draft-bg); color: var(--draft-text); padding: 0 0.2em; border-radius: 0.25rem; }
+/* Below the wide layout (rem-based, so large text counts as narrow), type stops growing at about
+   200 % (decision 231): at 300 % on a phone, 48 px left about seven letters a line, and Spanish split
+   98 words on one page. Long words may still split. Nothing is cut off, and pinch zoom stays on.
+   The same sizes as above at normal size. */
+@media (width < 40rem) {
+  .legal-prose { font-size: min(1rem, max(10vw, 32px)); }
+  .legal-prose h2 { font-size: min(1.25rem, max(11vw, 35px)); }
+  .legal-prose h3 { font-size: min(1.05rem, max(10vw, 32px)); }
+  .legal-prose ul,
+  .legal-prose ol { padding-left: min(1.25rem, 24px); }
+}
 /* The in-app navigation bar (components/NavProgress.tsx): a segment sliding across. */
 @keyframes nav-progress { from { transform: translateX(-100%); } to { transform: translateX(300%); } }
 
