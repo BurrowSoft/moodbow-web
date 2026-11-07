@@ -138,8 +138,9 @@ test("large text on a wide screen: Consent's boxes grow with the browser's setti
   }
 });
 
-// #246: the help card stops growing at about 200 % on narrow screens, like the page behind it
-// (decision 231), and its numbers and Close stay usable. Journeys cover a known country's numbers.
+// #246: the help in the card stops growing at about 200 % on narrow screens, like the page behind it
+// (decision 231); its title and intro stay smaller, so help starts on the first screen (journeys pin
+// that, and a known country's numbers).
 test("large text: the help card keeps up, and its number and Close stay whole", async ({ page, browserName }, testInfo) => {
   test.skip(browserName !== "chromium" || testInfo.project.name !== "desktop", "Page.setFontSizes is Chromium's; once is enough");
   test.setTimeout(120_000);
@@ -163,9 +164,9 @@ test("large text: the help card keeps up, and its number and Close stay whole", 
           range.setEnd(text, m.index + m[0].length);
           return range.getClientRects().length > 1;
         }).map(({ m }) => m[0]);
-        return { body: size(el), title: size(el.querySelector("h2")), small: size(el.querySelector("[data-testid=safety-find-helpline]")), split, sideways: el.scrollWidth - el.clientWidth };
+        return { intro: size(el), title: size(el.querySelector("h2")), close: size(el.querySelector("[data-testid=safety-close]")), small: size(el.querySelector("[data-testid=safety-find-helpline]")), split, sideways: el.scrollWidth - el.clientWidth };
       });
-      expect.soft(measured, at).toEqual(percent === 100 ? { body: "16px", title: "18px", small: "14px", split: [], sideways: 0 } : { body: "32px", title: "36px", small: "28px", split: [], sideways: 0 });
+      expect.soft(measured, at).toEqual(percent === 100 ? { intro: "16px", title: "18px", close: "16px", small: "14px", split: [], sideways: 0 } : { intro: "25.6px", title: "25.6px", close: "32px", small: "28px", split: [], sideways: 0 });
       const close = page.getByTestId("safety-close");
       await close.scrollIntoViewIfNeeded();
       await expect(close, at).toBeInViewport();

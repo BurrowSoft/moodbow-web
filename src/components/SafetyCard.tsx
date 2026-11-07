@@ -23,11 +23,14 @@ export function SafetyCard({ country, onClose, neutral = false }: { country: str
   const lines = helplinesFor(country, useLocale());
   const ios = useSyncExternalStore(noSubscribe, () => isIos(navigator.userAgent, navigator.maxTouchPoints), () => false);
   const link = "font-medium text-accent underline underline-offset-4";
-  // text-sm under the card's cap (capText in Dialog): the same 7:8 as at the normal size.
+  // The help itself stops growing at about 200 % on narrow screens (decision 231). The title and
+  // intro stay under the card's own cap (capText in Dialog): at 32 px they pushed the first help
+  // line to 939 px, off a 640 px screen (#246). text-sm here: the same 7:8 as at the normal size.
+  const help = "[font-size:min(1rem,max(10vw,32px))]";
   const small = "text-muted [font-size:min(0.875rem,max(8.75vw,28px))]";
   return (
     <Dialog title={t("safetyTitle")} body={t(neutral ? "safetyBodyNeutral" : "safetyBody")} onCancel={onClose} testId="safety-card" initialFocus="title" capText>
-      <div className="w-full space-y-[12px] text-left">
+      <div className={`w-full space-y-[12px] text-left ${help}`}>
         {lines.helpline &&
           (ios && isShortCode(lines.helpline.dial) ? (
             <div>
@@ -70,7 +73,7 @@ export function SafetyCard({ country, onClose, neutral = false }: { country: str
       </div>
       {/* Close is secondary (outline): the help above is what stands out
           (decision 206, the same as the app). */}
-      <button type="button" data-testid="safety-close" className={dialogButton()} onClick={onClose}>
+      <button type="button" data-testid="safety-close" className={`${dialogButton()} ${help}`} onClick={onClose}>
         {t("safetyClose")}
       </button>
     </Dialog>

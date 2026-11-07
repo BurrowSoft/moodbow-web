@@ -1043,9 +1043,9 @@ test.describe("the tab bar in every language", () => {
         expect(await card.evaluate((el) => el.scrollTop), "opens at its top").toBe(0);
         const firstHelp = await card.locator("a").first().evaluate((a) => a.getBoundingClientRect().top);
         expect(firstHelp, `the first help line starts on the first screen, ${route || "/en"}`).toBeLessThan(640);
-        // "Find a helpline" stays under the card's cap, not three times its size.
+        // "Find a helpline" stays under the help's cap, not three times its size.
         const size = (el: Element) => parseFloat(getComputedStyle(el).fontSize);
-        expect(await card.getByTestId("safety-find-helpline").evaluate(size), `the helpline link's size, ${route || "/en"}`).toBeLessThan(await card.evaluate(size));
+        expect(await card.getByTestId("safety-find-helpline").evaluate(size), `the helpline link's size, ${route || "/en"}`).toBeLessThan(await page.getByTestId("safety-close").evaluate(size));
         const close = page.getByTestId("safety-close");
         await close.scrollIntoViewIfNeeded();
         await expect(close, route || "/en").toBeInViewport();
