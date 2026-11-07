@@ -4,7 +4,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 import { routing } from "@/i18n/routing";
 import { Link } from "@/i18n/navigation";
-import { HelpNowLines } from "@/components/HelpNowLines";
+import { HelpNowLines, HelpNowNumbers } from "@/components/HelpNowLines";
 import { PageShell } from "@/components/PageShell";
 import { pageGate } from "@/lib/conditions";
 import { findArticle, helpArticles, renderArticle } from "@/lib/helpContent";
@@ -41,10 +41,11 @@ export default async function HelpArticlePage({ params, searchParams }: PageProp
       title={article.title}
       article
       draft={state === "draft"}
+      // Where the help button leads with no script running (#248), so the help is here too.
+      underTitle={slug === "get-help-now" ? <HelpNowNumbers country={typeof country === "string" ? country : undefined} /> : undefined}
       after={
         <>
-        {/* Where the help button leads with no script running (#248), so the help is here too. */}
-        {slug === "get-help-now" && <HelpNowLines country={typeof country === "string" ? country : undefined} />}
+        {slug === "get-help-now" && <HelpNowLines />}
         <p className="mx-auto mt-6 max-w-2xl">
           <Link href="/help" data-testid="help-back" className="font-medium text-accent underline underline-offset-4">
             {t("helpTitle")}

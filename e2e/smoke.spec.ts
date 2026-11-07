@@ -603,6 +603,10 @@ test.describe("the help page's numbers, with no script at all", () => {
     await expect(page.getByTestId("help-now-call-helpline")).toHaveAttribute("href", "tel:1323");
     await expect(page.getByTestId("help-now-call-emergency")).toHaveAttribute("href", "tel:1669");
     await expect(page.getByTestId("help-now-find-helpline")).toBeVisible();
+    // Directly under the heading, above the article.
+    const y = async (css: string) => (await page.locator(css).boundingBox())!.y;
+    expect(await y("h1")).toBeLessThan(await y("[data-testid=help-now-numbers]"));
+    expect(await y("[data-testid=help-now-numbers]")).toBeLessThan(await y("[data-content=article]"));
   });
   for (const query of ["", "?country=XX", "?country=%3Cscript%3E", "?country=TH&country=GB"]) {
     test(`/help/get-help-now${query}: no numbers, and the directory`, async ({ page }) => {

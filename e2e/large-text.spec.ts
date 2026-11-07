@@ -307,17 +307,23 @@ test("large text: every number on the help page stays whole on a phone", async (
       await page.goto(`${language}/help/get-help-now?country=${code}`);
       for (const [id, display] of [["help-now-call-helpline", helpline?.display], ["help-now-call-emergency", emergency?.display]]) {
         if (!display) continue;
-        const lines = await page.getByTestId(id!).evaluate((el, number) => {
-          const text = el.firstChild as Text;
-          const at = text.data.indexOf(number);
-          if (at < 0) return -1;
+        const lines = await page.getByTestId(id!).evaluate((el, plain) => {
+          const number = el.querySelector("[data-help-number]");
+          if (number?.textContent !== plain) return -1;
+          const before = number.previousSibling as Text | null;
+          const after = number.nextSibling as Text | null;
           const range = document.createRange();
-          range.setStart(text, text.data[at - 1] === "(" ? at - 1 : at);
-          range.setEnd(text, text.data[at + number.length] === ")" ? at + number.length + 1 : at + number.length);
+          if (before?.data.endsWith("(")) range.setStart(before, before.data.length - 1);
+          else range.setStartBefore(number);
+          if (after?.data.startsWith(")")) range.setEnd(after, 1);
+          else range.setEndAfter(number);
           return new Set([...range.getClientRects()].map((rect) => Math.round(rect.top))).size;
-        }, display.replaceAll(" ", String.fromCharCode(160)));
+        }, display);
         expect.soft(lines, `${code} ${id} ${language || "/en"}`).toBe(1);
       }
+      // The first number is whole on the first screen (UX).
+      const first = (await page.getByTestId(helpline ? "help-now-call-helpline" : "help-now-call-emergency").evaluate((el) => el.getBoundingClientRect().bottom));
+      expect.soft(first, `${code} ${language || "/en"}: the first number's bottom edge`).toBeLessThanOrEqual(640);
       expect.soft(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth), `${code} ${language || "/en"}`).toBe(0);
     }
   }
