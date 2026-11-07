@@ -210,6 +210,8 @@ test("the viewport never stops someone zooming", async ({ page, browserName }, t
     const viewport = await page.locator("meta[name=viewport]").getAttribute("content");
     expect(viewport, route).toBeTruthy();
     expect(viewport, route).not.toMatch(/maximum-scale|user-scalable/i);
+  }
+});
 
 // #242: px sizes that ignored the setting. The same at normal size; home stops growing at about 200 %
 // on narrow screens (decision 231), and elsewhere a heading keeps up with the body under it.
