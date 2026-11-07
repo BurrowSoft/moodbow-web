@@ -191,7 +191,7 @@ describe("saveReminder", () => {
 });
 
 describe("Me → AI actions (M9; reflect.md, Me → AI)", () => {
-  const AI = { kind: "ai", version: "2026-10-02" };
+  const AI = { kind: "ai", version: "2026-10-02", locale: "en" };
 
   it("on: the consent first, then the setting", async () => {
     rpc.mockResolvedValue({ data: null, error: null });

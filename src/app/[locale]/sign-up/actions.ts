@@ -6,7 +6,7 @@ import { redirect } from "@/i18n/navigation";
 import { dataLocale } from "@/i18n/routing";
 import { isRateLimit, logAuthFailure } from "@/lib/authErrors";
 import { isValidEmail, normalizeEmail } from "@/lib/email";
-import { consentItem } from "@/lib/legalVersions";
+import { consentItem, withLanguage } from "@/lib/legalVersions";
 import { CONSENT_COOKIE, parseConsentCookie } from "@/lib/onboardingConsent";
 import { PASSWORD_MIN_LENGTH } from "@/lib/password";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -62,7 +62,7 @@ async function signUp(form: FormData): Promise<SignUpState> {
     password,
     // Read by the auth trigger (moodbow-app migration 001): profile + consents.
     // No country: the web doesn't know it (the registry default applies).
-    options: { data: { locale: dataLocale(locale), time_zone: TIME_ZONE.test(tz) ? tz : null, consents: [...consents, consentItem("age_18")] } },
+    options: { data: { locale: dataLocale(locale), time_zone: TIME_ZONE.test(tz) ? tz : null, consents: withLanguage([...consents, consentItem("age_18")], dataLocale(locale)) } },
   });
   if (error) {
     if (error.code === "user_already_exists" || error.code === "email_exists") return fail("emailTaken");

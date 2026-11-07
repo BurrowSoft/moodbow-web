@@ -6,7 +6,8 @@ import { redirect } from "@/i18n/navigation";
 import { askAiConsent } from "@/lib/journal/ai";
 import { gateChanged } from "@/lib/journal/gateChanged";
 import { getMe, hasCurrentConsent } from "@/lib/journal/me";
-import { consentItem, type ConsentItem } from "@/lib/legalVersions";
+import { dataLocale } from "@/i18n/routing";
+import { consentItem, withLanguage, type ConsentItem } from "@/lib/legalVersions";
 import { CONSENT_COOKIE, CONSENT_COOKIE_MAX_AGE, grantedAtConsent, serializeConsent } from "@/lib/onboardingConsent";
 import { isAuthOutage } from "@/lib/supabase/proxy";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -49,7 +50,7 @@ export async function giveConsent(_prev: ConsentState, form: FormData): Promise<
   const needsAge = !me || !hasCurrentConsent(me, "age_18");
   if (needsAge && form.get("age") !== "on") return { status: "error", error: "age" };
   const items: ConsentItem[] = [...grantedAtConsent(ai), ...(needsAge ? [consentItem("age_18")] : [])];
-  const { error } = await supabase.rpc("record_consents", { p_items: items });
+  const { error } = await supabase.rpc("record_consents", { p_items: withLanguage(items, dataLocale(locale)) });
   if (error) return { status: "error", error: "generic" };
   gateChanged();
   return redirect({ href: "/app", locale });

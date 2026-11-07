@@ -175,6 +175,7 @@
     "welcomeStart": "Começar",
     "welcomeHaveAccount": "Já tenho uma conta",
     "consentTitle": "Antes de começar",
+    "consentNotice": "O Moodbow é administrado por Vitor Ribeiro Carvalho, que atua como BurrowSoft, na Tailândia. Guardamos o seu diário, incluindo dados sensíveis como o seu humor e a sua saúde, para fazer a sua conta funcionar e mostrá-lo a você. Não o vendemos nem o usamos para anúncios. Você pode alterá-lo ou apagá-lo em Perfil. A Política de Privacidade tem os detalhes.",
     "consentPrivacy": "Aceito os Termos e a Política de Privacidade",
     "consentHealth": "Aceito que o Moodbow armazene e trate meu diário, que pode incluir informações sobre minha saúde e bem-estar, para prestar o serviço.",
     "consentReadTerms": "Ler os Termos",
