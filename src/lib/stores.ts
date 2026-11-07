@@ -6,11 +6,13 @@ import { conditionMet } from "@/lib/conditions";
 // badge art waits for the live listings (UX): neutral text links until then.
 export const PLAY_PACKAGE = "com.burrowsoft.moodbow";
 export const PLAY_URL = `https://play.google.com/store/apps/details?id=${PLAY_PACKAGE}`;
-// TODO(appstore-live): the App Store listing's URL and numeric app id, once
-// the app exists in App Store Connect (Vitor). Until then the App Store never
-// counts as live, whatever its condition says.
-export const APP_STORE_URL: string | null = null;
+// TODO(appstore-live): the numeric app id, once the app exists in App Store
+// Connect (Vitor): the one value launch needs here. Until then the App Store
+// never counts as live, and a test fails if its condition is met without it.
 export const APP_STORE_ID: string | null = null;
+// No country in the path, so Apple sends each person to their own store.
+export const appStoreUrl = (id: string) => `https://apps.apple.com/app/id${id}`;
+export const APP_STORE_URL: string | null = APP_STORE_ID === null ? null : appStoreUrl(APP_STORE_ID);
 
 // The app's backup screen, from a browser on Android (decision 216; the
 // Mobile Dev's contract for app PR C): moodbow://app/me/backup as an intent
@@ -33,6 +35,6 @@ export function openAppFallback(playLive: boolean, pageUrl: string): string {
 
 export type LiveStores = { play: boolean; appStore: boolean };
 
-export function liveStores(met: (id: "play-live" | "appstore-live") => boolean = conditionMet): LiveStores {
-  return { play: met("play-live"), appStore: met("appstore-live") && APP_STORE_URL !== null && APP_STORE_ID !== null };
+export function liveStores(met: (id: "play-live" | "appstore-live") => boolean = conditionMet, appStoreId: string | null = APP_STORE_ID): LiveStores {
+  return { play: met("play-live"), appStore: met("appstore-live") && appStoreId !== null };
 }
