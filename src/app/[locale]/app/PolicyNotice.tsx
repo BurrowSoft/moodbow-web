@@ -24,7 +24,7 @@ export function PolicyNotice({ id, date }: { id: string; date: string | null }) 
         {date && ` ${t("policyNoticeApplies", { date })}`}
       </p>
       <div className="mt-[12px] flex flex-wrap items-center gap-[12px]">
-        <Link href="/privacy/next" data-testid="policy-notice-read" className="inline-flex min-h-11 items-center font-medium text-accent underline underline-offset-4">
+        <Link href="/privacy/next" data-testid="policy-notice-read" className="inline-flex min-h-11 max-w-full items-center font-medium text-accent underline underline-offset-4 [overflow-wrap:anywhere]">
           {t("policyNoticeRead")}
         </Link>
         <button
