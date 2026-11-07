@@ -8,15 +8,15 @@ import { useKeyboardOpen } from "@/lib/ui/keyboardOpen";
 // Only at the top level of the four tabs (UX & PM 2026-11-06): hidden in the
 // editor, a day, an entry, and Bo itself.
 const TOP_LEVEL = ["/app", "/app/timeline", "/app/insights", "/app/me"];
-// Its sides and the window's margins, as in the classes below.
-const SIDES_PX = 40 + 32;
+// Its sides, as in the classes below.
+const SIDES_PX = 40;
 
 // The way to Bo, one tap away. Above the phone's tab bar, and out of the way while
 // the on-screen keyboard is up. The layout decides whether it's shown at all, and
 // the function still decides whether Bo opens: this never opens anything itself.
 // One line under the safety card's cap, so it stays a small part of the window: the
-// tab bar's height is its only rem, as it has to clear the bar. Where the words still
-// don't fit, the icon alone, with the words as its name (UX, #205). It never covers the
+// tab bar's height is its only rem, as it has to clear the bar. Past half the window's
+// width, the icon alone, with the words as its name (UX, #205; the app's rule). It never covers the
 // page: has-bo-button (globals.css) gives the page's end room for it, with the same sums.
 export function BoButton() {
   const t = useTranslations("bo");
@@ -34,7 +34,7 @@ export function BoButton() {
   useEffect(() => {
     const words = label.current;
     if (!shown || !words || typeof ResizeObserver === "undefined") return;
-    const fit = () => setIconOnly(words.offsetWidth + SIDES_PX > window.innerWidth);
+    const fit = () => setIconOnly(words.offsetWidth + SIDES_PX > window.innerWidth / 2);
     const observer = new ResizeObserver(fit);
     observer.observe(words);
     window.addEventListener("resize", fit);

@@ -225,7 +225,8 @@ input[type="date"]:focus-within {
 }
 
 /* Room at the page's very end for Bo's button (BoButton.tsx: its bottom, one capped
-   line and its 8 px padding, then a 16 px gap), so nothing ends under it, the footer's
+   line and its 8 px padding, then a gap: 16 px, or 8 where its 48 px minimum sets the
+   height, as at normal size), so nothing ends under it, the footer's
    account-deletion link included. As the milestone's below, which is taller and comes
    later, so it wins; the card's room isn't the button's, so the button waits for it. */
 .has-bo-button {
