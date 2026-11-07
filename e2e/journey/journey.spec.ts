@@ -23,7 +23,7 @@ const ENTRY = "A calm walk by the river after work, then tea with a friend.";
 // Welcome → Consent (AI as asked) → Sign-up → confirmed → Setup.
 // The real form sends a real email, and staging limits those: heavy days failed CI on "Please wait a
 // minute". So the journeys that test the form are tagged @real-email and run on PRs that touch
-// sign-up (ci.yml); the rest start from accountAtSetup, which sends none.
+// sign-up, and daily on master (ci.yml); the rest start from accountAtSetup, which sends none.
 async function signUp(page: Page, email: string, { ai }: { ai: boolean }): Promise<string> {
   const password = newPassword();
   await page.goto("/welcome?slide=3");
@@ -162,10 +162,10 @@ test.describe("launch journeys", () => {
     }
   });
 
-  test("AI on: consent → setup's focus and tone → Today", async ({ page }) => {
+  test("AI on: consent → setup's focus and tone → Today", { tag: "@real-email" }, async ({ page }) => {
     const email = newEmail();
     try {
-      const password = await accountAtSetup(page, email, { aiAtConsent: true });
+      const password = await signUp(page, email, { ai: true });
 
       // Focus and tone also need staging's global AI switch, which is off
       // outside AI windows (decision 123): read it as the app does, and skip
@@ -205,24 +205,15 @@ async function signIn(page: Page, email: string, password: string): Promise<void
   await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
 }
 
-// An account at Setup, without the form's email: confirmed, signed in through the page. aiAtConsent:
-// it still owes Consent, as an asked-again account does, and turns AI on there.
-async function accountAtSetup(page: Page, email: string, { aiAtConsent = false } = {}): Promise<string> {
+// An account at Setup, without the form's email: confirmed, signed in through the page.
+async function accountAtSetup(page: Page, email: string): Promise<string> {
   const password = newPassword();
-  await signedUpUnconfirmed(email, password, { consents: !aiAtConsent });
+  await signedUpUnconfirmed(email, password);
   await confirmEmail(email);
   await page.goto("/sign-in");
   await page.getByLabel("Email").fill(email);
   await page.getByLabel("Password").fill(password);
   await page.getByRole("button", { name: messages.auth.signinSubmit }).click();
-  if (aiAtConsent) {
-    await expect(page).toHaveURL(/\/consent$/, { timeout: 20_000 });
-    await page.getByTestId("consent-privacy").check();
-    await page.getByTestId("consent-health").check();
-    await page.getByTestId("consent-age").check();
-    await page.getByTestId("consent-ai").check();
-    await page.getByTestId("consent-continue").click();
-  }
   await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
   return password;
 }

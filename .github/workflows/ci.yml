@@ -4,6 +4,10 @@ on:
   pull_request:
   push:
     branches: [master]
+  # The journeys that use the real sign-up form, on master, at a quiet hour, so a break there isn't
+  # left for the next PR that touches sign-up. A red run shows in the Actions list.
+  schedule:
+    - cron: "17 19 * * *"
 
 permissions:
   contents: read
@@ -80,7 +84,7 @@ jobs:
   # when it names that environment.
   journeys:
     name: Staging journeys
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' || github.event_name == 'schedule'
     environment: staging
     permissions:
       contents: read
@@ -129,13 +133,18 @@ jobs:
         run: npx playwright install --with-deps chromium
       # The journeys that send a real email (@real-email) run only where sign-up changes: staging
       # limits those emails, and a heavy day failed every PR. If the list can't be read, all run.
+      # The daily run is those journeys alone.
       - id: scope
         if: steps.cfg.outputs.ok == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          if [ "${{ github.event_name }}" = schedule ]; then
+            echo "args=--grep @real-email" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           files=$(gh api "repos/${{ github.repository }}/pulls/${{ github.event.number }}/files" --paginate --jq '.[].filename') || files=
-          if [ -z "$files" ] || echo "$files" | grep -qE '^(src/app/\[locale\]/(sign-up|consent|welcome|email-confirmed|auth)/|src/lib/(legalVersions|onboardingConsent|authErrors)|src/lib/supabase/|src/i18n/|e2e/journey/|\.github/workflows/)'; then
+          if [ -z "$files" ] || echo "$files" | grep -qE '^(src/app/\[locale\]/(sign-up|consent|welcome|email-confirmed|auth)/|src/lib/(legalVersions|onboardingConsent|authErrors)|src/lib/supabase/|src/lib/(email|password)|src/components/AuthField|src/proxy\.ts|src/i18n/|src/messages/|content/conditions\.json|next\.config\.ts|package(-lock)?\.json|e2e/journey/|\.github/workflows/)'; then
             echo "args=" >> "$GITHUB_OUTPUT"
           else
             echo "args=--grep-invert @real-email" >> "$GITHUB_OUTPUT"
