@@ -560,7 +560,7 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
   // goes back to Save: it was off while the save went, so the dialog has nothing to return to.
   const later = useCallback(() => {
     setConflicts((all) => all.slice(1));
-    requestAnimationFrame(() => root.current?.querySelector<HTMLElement>("[data-testid=checkin-save]")?.focus());
+    requestAnimationFrame(() => document.querySelector<HTMLElement>("[data-testid=checkin-save]")?.focus());
   }, []);
   const conflictDialog = conflict && (
     <Dialog
