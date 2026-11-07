@@ -46,4 +46,51 @@ describe("BoButton", () => {
     keyboard = true;
     expect(button()).toBeNull();
   });
+
+  it("gives the page's end room for it on the tabs, and takes it back", () => {
+    button();
+    expect(document.body).toHaveClass("has-bo-button");
+    cleanup();
+    expect(document.body).not.toHaveClass("has-bo-button");
+    path = "/app/write";
+    button();
+    expect(document.body).not.toHaveClass("has-bo-button");
+  });
+
+  describe("words or icon (UX, #205)", () => {
+    const width = Object.getOwnPropertyDescriptor(HTMLElement.prototype, "offsetWidth")!;
+    const wordsAre = (px: number) => Object.defineProperty(HTMLElement.prototype, "offsetWidth", { configurable: true, get: () => px });
+    beforeEach(() => {
+      vi.stubGlobal(
+        "ResizeObserver",
+        class {
+          constructor(private fit: () => void) {}
+          observe() {
+            this.fit();
+          }
+          disconnect() {}
+        },
+      );
+    });
+    afterEach(() => {
+      Object.defineProperty(HTMLElement.prototype, "offsetWidth", width);
+      vi.unstubAllGlobals();
+    });
+
+    it("the words fit: the words, on one line, and no icon", () => {
+      wordsAre(100);
+      button();
+      expect(screen.queryByTestId("bo-button-icon")).toBeNull();
+      expect(screen.getByText(messages.bo.boButton)).toHaveClass("whitespace-nowrap");
+      expect(screen.getByText(messages.bo.boButton)).not.toHaveClass("invisible");
+    });
+
+    it("they don't: the icon alone, with the words as its name", () => {
+      wordsAre(window.innerWidth);
+      button();
+      expect(screen.getByTestId("bo-button-icon")).toBeInTheDocument();
+      expect(screen.getByText(messages.bo.boButton)).toHaveClass("invisible");
+      expect(screen.getByRole("link", { name: messages.bo.boButton })).toHaveAttribute("href", "/app/bo");
+    });
+  });
 });
