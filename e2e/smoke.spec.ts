@@ -579,6 +579,23 @@ test.describe("web journal (signed out)", () => {
   });
 });
 
+// #248: help is on the safety path, so it can't wait for the page's scripts, or need them at all.
+test.describe("help with no script at all", () => {
+  test.use({ javaScriptEnabled: false });
+  for (const [path, id] of [["/sign-in", "sign-in-get-help"], ["/forgot-password", "forgot-get-help"], ["/consent", "consent-get-help"]]) {
+    for (const language of ["", "/fr", "/es", "/pt-br"]) {
+      test(`${language}${path}: the help button leads to a page with the way to a helpline`, async ({ page }) => {
+        await page.goto(`${language}${path}`);
+        await page.getByTestId(id).click();
+        await expect(page).toHaveURL(new RegExp(`${language}/help/get-help-now$`));
+        await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+        await expect(page.locator("[data-content=article]")).not.toBeEmpty();
+        await expect(page.getByTestId("help-now-find-helpline")).toHaveAttribute("href", /^https:/);
+      });
+    }
+  }
+});
+
 // Onboarding (W0 part 2), signed out, no Supabase env. The account-creating
 // and signed-in rows run on the Preview against staging.
 test.describe("onboarding (signed out)", () => {
