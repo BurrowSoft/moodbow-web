@@ -40,7 +40,7 @@ We don't collect your name, contacts, precise location, or advertising identifie
 
 {pending:web_analytics}**Visit counts (public website only):** we count visits to our public pages with a cookie-free tool from our host, Vercel: which page was opened, from what kind of device and country, and which of our campaign links brought you there, if any. It uses no cookies or identifiers, never runs in the web journal, never sees what you write, and can't tell who you are. The mobile app sends no analytics.{/pending}
 
-{pending:play_live}**Campaign links to Google Play:** if you came from one of our campaign links and follow our link to Google Play, the link tells Google Play which campaign it was. We don't receive this with your account or store it.{/pending}
+{pending:play_live}**Campaign links to Google Play:** if you came from one of our campaign links and follow our link to Google Play, the link tells Google Play which campaign it was, and Google sees that with your install. We only see totals for each campaign, never who.{/pending}
 
 ### 2. Why we use it, and on what legal basis
 | Purpose | Legal basis |
