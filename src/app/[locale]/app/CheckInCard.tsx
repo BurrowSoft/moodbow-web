@@ -469,6 +469,11 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
       setFields(fromRow(next.checkIn));
       setEditing(false);
       setOffline(false);
+    } else if (next.status === "error" && next.error === "stale") {
+      // Only with no row left to show (with one, it's the dialog above): deleted elsewhere. The
+      // picks stay, and with no version to lock against, the next Save makes a new check-in.
+      setRow(null);
+      setDraftBase(null);
     }
     return next;
   }, { status: "idle" });

@@ -506,7 +506,7 @@
   },
   {
     "key": "today.errStaleWrite",
-    "en": "This was changed on another device. We've loaded the latest version. Please try again.",
+    "en": "This check-in no longer exists. You can save a new one.",
     "reason": "UX draft (native read pending)"
   },
   {
@@ -556,7 +556,7 @@
   },
   {
     "key": "entry.entryConflictTitle",
-    "en": "This entry changed on another device",
+    "en": "This entry changed since you opened it",
     "reason": "UX draft (native read pending)"
   },
   {
@@ -576,7 +576,7 @@
   },
   {
     "key": "entry.entryDeletedTitle",
-    "en": "This entry was deleted on another device",
+    "en": "This entry was deleted since you opened it",
     "reason": "UX draft (native read pending)"
   },
   {

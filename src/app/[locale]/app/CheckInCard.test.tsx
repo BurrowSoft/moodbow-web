@@ -135,6 +135,21 @@ describe("CheckInCard", () => {
     expect(anyPending()).toBe(true);
   });
 
+  it("stale write with no row left (deleted elsewhere): says so, the picks stay, and the next Save makes a new one", async () => {
+    saveCheckIn.mockResolvedValue({ status: "error", error: "stale" });
+    renderCard(ROW);
+    fireEvent.click(screen.getByTestId("checkin-edit"));
+    fireEvent.click(screen.getByTestId("checkin-mood-1"));
+    fireEvent.click(screen.getByTestId("checkin-save"));
+    expect(await screen.findByTestId("checkin-error")).toHaveTextContent(messages.today.errStaleWrite);
+    expect(screen.getByTestId("checkin-mood-1")).toHaveAttribute("aria-checked", "true");
+    expect(sent().expected_updated_at).toBe(ROW.updated_at);
+    saveCheckIn.mockResolvedValue({ status: "saved", checkIn: { ...ROW, mood: 1 } });
+    fireEvent.click(screen.getByTestId("checkin-save"));
+    await screen.findByTestId("checkin-summary");
+    expect(sent(1).expected_updated_at).toBe("");
+  });
+
   it("stale write, Use the other one: the newer row loads and no copy stays", async () => {
     saveCheckIn.mockResolvedValue({ status: "error", error: "stale", checkIn: { ...ROW, mood: 5 } });
     renderCard(ROW);
