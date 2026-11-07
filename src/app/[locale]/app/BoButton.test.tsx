@@ -77,16 +77,16 @@ describe("BoButton", () => {
       vi.unstubAllGlobals();
     });
 
-    it("the words fit: the words, on one line, and no icon", () => {
-      wordsAre(100);
+    it("up to half the window: the words, on one line, and no icon", () => {
+      wordsAre(window.innerWidth / 2 - 40);
       button();
       expect(screen.queryByTestId("bo-button-icon")).toBeNull();
       expect(screen.getByText(messages.bo.boButton)).toHaveClass("whitespace-nowrap");
       expect(screen.getByText(messages.bo.boButton)).not.toHaveClass("invisible");
     });
 
-    it("they don't: the icon alone, with the words as its name", () => {
-      wordsAre(window.innerWidth);
+    it("past half the window: the icon alone, with the words as its name", () => {
+      wordsAre(window.innerWidth / 2 - 39);
       button();
       expect(screen.getByTestId("bo-button-icon")).toBeInTheDocument();
       expect(screen.getByText(messages.bo.boButton)).toHaveClass("invisible");
