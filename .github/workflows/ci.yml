@@ -4,8 +4,8 @@ on:
   pull_request:
   push:
     branches: [master]
-  # The journeys that use the real sign-up form, on master, at a quiet hour, so a break there isn't
-  # left for the next PR that touches sign-up. A red run shows in the Actions list.
+  # All the journeys, on master, at a quiet hour, so a break in the real sign-up form isn't left for
+  # the next PR that touches it. A red run shows in the Actions list.
   schedule:
     - cron: "17 19 * * *"
 
@@ -133,14 +133,14 @@ jobs:
         run: npx playwright install --with-deps chromium
       # The journeys that send a real email (@real-email) run only where sign-up changes: staging
       # limits those emails, and a heavy day failed every PR. If the list can't be read, all run.
-      # The daily run is those journeys alone.
+      # The daily run is everything.
       - id: scope
         if: steps.cfg.outputs.ok == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           if [ "${{ github.event_name }}" = schedule ]; then
-            echo "args=--grep @real-email" >> "$GITHUB_OUTPUT"
+            echo "args=" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           files=$(gh api "repos/${{ github.repository }}/pulls/${{ github.event.number }}/files" --paginate --jq '.[].filename') || files=

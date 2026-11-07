@@ -23,7 +23,7 @@ const ENTRY = "A calm walk by the river after work, then tea with a friend.";
 // Welcome → Consent (AI as asked) → Sign-up → confirmed → Setup.
 // The real form sends a real email, and staging limits those: heavy days failed CI on "Please wait a
 // minute". So the journeys that test the form are tagged @real-email and run on PRs that touch
-// sign-up, and daily on master (ci.yml); the rest start from accountAtSetup, which sends none.
+// sign-up, and in the daily run of everything on master (ci.yml); the rest start from accountAtSetup, which sends none.
 async function signUp(page: Page, email: string, { ai }: { ai: boolean }): Promise<string> {
   const password = newPassword();
   await page.goto("/welcome?slide=3");
