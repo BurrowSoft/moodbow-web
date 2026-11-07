@@ -1381,6 +1381,7 @@ test("large text, set in the browser: the check-in conflict dialog shows the who
     // On a phone the entry's visible Save is the top one: the bottom one is hidden (Web Tester, #253).
     // Its words stay whole: "Enregistr / er" was French's at 32 px, with too much padding.
     const splitWords = (el: Element) => {
+      if (!el.isConnected) return null;
       const text = el.firstChild!;
       return [...(text.textContent ?? "").matchAll(/\S+/g)].filter((word) => {
         const range = document.createRange();
@@ -1400,8 +1401,9 @@ test("large text, set in the browser: the check-in conflict dialog shows the who
         await expect(page.getByTestId("entry-save")).toBeHidden();
         const size = percent === 100 ? "16px" : "32px";
         for (const button of [top, page.getByTestId("entry-cancel")]) {
-          expect(await button.evaluate((el) => getComputedStyle(el).fontSize), where).toBe(size);
-          expect.soft(await button.evaluate(splitWords), where).toEqual([]);
+          // Both retry: the page can swap the button out as it settles, and a detached one reads as "".
+          await expect(button, where).toHaveCSS("font-size", size);
+          await expect.poll(() => button.evaluate(splitWords), where).toEqual([]);
         }
       }
     }
