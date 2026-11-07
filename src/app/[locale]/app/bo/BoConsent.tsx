@@ -38,7 +38,7 @@ export function BoConsent({ onGiven }: { onGiven: () => void }) {
       <button type="button" data-testid="bo-consent-accept" disabled={pending} onClick={() => void give()} className={PRIMARY_SAVE}>
         {t("consentAccept")}
       </button>
-      <Link href="/app" data-testid="bo-consent-decline" className="inline-flex min-h-12 items-center self-start rounded-full px-[12px] font-medium text-accent underline underline-offset-4">
+      <Link href="/app" data-testid="bo-consent-decline" className="inline-flex min-h-12 max-w-full items-center self-start rounded-full px-[12px] font-medium text-accent underline underline-offset-4 [overflow-wrap:anywhere]">
         {t("consentDecline")}
       </Link>
     </section>

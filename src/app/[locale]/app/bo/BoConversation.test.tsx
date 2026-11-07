@@ -127,6 +127,27 @@ describe("BoConversation", () => {
     expect(screen.getByTestId("safety-card")).toBeInTheDocument();
   });
 
+  it("with the keyboard up: two rows, a shorter box, and Send beside it", async () => {
+    keyboard = true;
+    await open();
+    const box = screen.getByTestId("bo-text");
+    expect(box).toHaveAttribute("rows", "2");
+    expect(box).toHaveClass("max-h-[96px]");
+    expect(box.closest("form")).toHaveClass("flex-row");
+  });
+
+  it("a failed send: the line is announced, the text stays, and focus returns to the box", async () => {
+    await open();
+    answers.push({ status: "error", code: "bo_failed" });
+    type("Hello");
+    await send();
+    await new Promise((done) => requestAnimationFrame(done));
+    await act(async () => {});
+    expect(screen.getByRole("alert")).toHaveTextContent(b.failed);
+    expect(screen.getByTestId("bo-text")).toHaveValue("Hello");
+    expect(screen.getByTestId("bo-text")).toHaveFocus();
+  });
+
   it("a reply: both messages show, the box empties, and a reply's markup stays text", async () => {
     await open();
     answers.push(reply({ reply: "<b>bold</b> https://example.com" }));
@@ -491,6 +512,15 @@ describe("BoConversation", () => {
       cleanup();
       expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:made-here");
     });
+  it("closing the card puts focus back in the box", async () => {
+    await open();
+    answers.push(reply({ openCard: true }));
+    type("Hello");
+    await send();
+    fireEvent.click(screen.getByTestId("safety-close"));
+    await new Promise((done) => requestAnimationFrame(done));
+    await act(async () => {});
+    expect(screen.getByTestId("bo-text")).toHaveFocus();
   });
 
   it("the card doesn't reopen within ten minutes, and does after", () => {

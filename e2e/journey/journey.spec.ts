@@ -1218,6 +1218,10 @@ test("Bo's screen at large text: the header covers nothing, and help is reachabl
       }
       await expect(page.getByTestId("bo-text")).toBeVisible();
 
+      // The box is in view on arriving, without anyone scrolling to it: a click would scroll.
+      await page.goto("/app/bo");
+      await expect(page.getByTestId("bo-send")).toBeInViewport({ ratio: 1 });
+
       // Enough of a conversation to scroll under the header.
       for (let n = 0; n < 6; n++) {
         await page.getByTestId("bo-text").fill(`Message ${n}`);
@@ -1228,6 +1232,8 @@ test("Bo's screen at large text: the header covers nothing, and help is reachabl
       failNext = true;
       await page.getByTestId("bo-text").fill("One that fails");
       await page.getByTestId("bo-send").click();
+      // The line about it, and Try again, without scrolling to them.
+      await expect(page.getByTestId("bo-retry")).toBeInViewport({ ratio: 1 });
       await page.getByTestId("bo-retry").click();
       await expect(page.getByTestId("bo-text")).toHaveValue("");
       await page.getByTestId("bo-report").first().click({ trial: true });

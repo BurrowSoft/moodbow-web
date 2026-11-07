@@ -16,6 +16,12 @@ import { useKeyboardOpen } from "@/lib/ui/keyboardOpen";
 import { PRIMARY_SAVE } from "@/lib/ui/journalLayout";
 
 const BO_HEADER_MOST = 0.25;
+// The usual save button, whose height doesn't grow with the text: at 300 % it took a quarter of
+// a phone's window, and pushed a failed send's line out of view.
+const BO_SEND = `${PRIMARY_SAVE} !min-h-[48px] !py-[8px] !px-[24px]`;
+// Beside the box while a phone's keyboard is up, so the row, the box and Send all fit in what's
+// left of the window, at 300 % too: the text is capped and the height doesn't grow with it.
+const BO_TYPING_SEND = "inline-flex min-h-[48px] max-w-[45%] shrink-0 items-center justify-center rounded-full bg-accent px-[12px] text-center font-medium text-on-accent [font-size:min(1rem,max(8vw,16px))] [overflow-wrap:anywhere] hover:bg-accent-hover disabled:opacity-50";
 // The compact row's text, capped to the phone, and a help button that doesn't grow with it.
 const BO_END_TEXT = "[font-size:min(1rem,max(8vw,16px))]";
 const BO_END_HELP = `inline-flex min-h-[44px] max-w-full items-center justify-center rounded-full border border-border bg-bg px-[12px] text-center font-medium text-text hover:bg-pill ${BO_END_TEXT}`;
@@ -127,7 +133,13 @@ export function BoConversation({ initial, country, back, healthData = false, con
     cardOpenedAt.current = now;
     setCard(true);
   }, []);
-  const closeCard = useCallback(() => setCard(false), []);
+  const box = useRef<HTMLTextAreaElement>(null);
+  // Back to the box, rather than to nothing: Send is off while a message goes, so it can't
+  // take the focus back itself.
+  const closeCard = useCallback(() => {
+    setCard(false);
+    requestAnimationFrame(() => box.current?.focus());
+  }, []);
 
   const showStatus = useCallback((status: BoStatus | { status: "no_answer" }) => {
     if (status.status === "ok") {
@@ -168,7 +180,7 @@ export function BoConversation({ initial, country, back, healthData = false, con
 
   useEffect(() => {
     end.current?.scrollIntoView?.({ block: "end" });
-  }, [messages, sending]);
+  }, [messages, sending, problem]);
 
   const tooLong = [...text].length > maxChars;
   const closed = problem !== null && CLOSED.includes(problem);
@@ -205,6 +217,8 @@ export function BoConversation({ initial, country, back, healthData = false, con
       answer = await callBo<BoSend>(body);
     }
     setSending(false);
+    // Send was off while it went, which dropped focus; back to the box, where the text is.
+    requestAnimationFrame(() => box.current?.focus({ preventScroll: true }));
     if (answer.status === "ok") {
       if (answer.openCard) openCard();
       if (answer.showNotice) setNoticeShows((n) => n + 1);
@@ -254,7 +268,7 @@ export function BoConversation({ initial, country, back, healthData = false, con
   const retry = () => void (closed || (text.trim() === "" && !picture) ? callBo<BoStatus>({ action: "status" }).then(showStatus) : send());
 
   return (
-    <div data-testid="bo-conversation" className="flex flex-col gap-4">
+    <div data-testid="bo-conversation" className="flex flex-col gap-4 [overflow-wrap:anywhere]">
       <header ref={header} data-testid="bo-header" data-pinned={pinned ? "" : undefined} className={`flex flex-wrap items-center gap-x-[8px] gap-y-[4px] bg-bg py-[8px] ${pinned && !keyboard ? "sticky top-0 z-10" : ""}`}>
         {back && <div className="md:hidden">{back}</div>}
         <h1 className="min-w-0 flex-1 font-medium leading-[1.33] text-text [font-size:min(1.5rem,max(10vw,24px,1rem))] [overflow-wrap:anywhere]">{t("screenLine")}</h1>
@@ -305,7 +319,6 @@ export function BoConversation({ initial, country, back, healthData = false, con
           {t("notice")}
         </p>
       )}
-      <div ref={end} />
       {full && (
         <div data-testid="bo-full" className="flex flex-col items-start gap-2 text-sm text-text">
           <p>{t("conversationFull")}</p>
@@ -325,9 +338,9 @@ export function BoConversation({ initial, country, back, healthData = false, con
       )}
       {(problem || tooLong) && (
         <div role="alert" data-testid="bo-problem" className="flex flex-col items-start gap-2">
-          <p className="text-text">{t(tooLong ? "tooLong" : BO_ERROR_TEXT[problem as BoProblem])}</p>
+          <p className={`text-text ${BO_END_TEXT}`}>{t(tooLong ? "tooLong" : BO_ERROR_TEXT[problem as BoProblem])}</p>
           {problem && RETRY.includes(problem) && !tooLong && (
-            <button type="button" data-testid="bo-retry" disabled={sending} onClick={retry} className="inline-flex min-h-12 items-center rounded-full px-[12px] font-medium text-accent underline underline-offset-4">
+            <button type="button" data-testid="bo-retry" disabled={sending} onClick={retry} className={`inline-flex min-h-[44px] items-center rounded-full px-[12px] font-medium text-accent underline underline-offset-4 ${BO_END_TEXT}`}>
               {t("tryAgain")}
             </button>
           )}
@@ -336,32 +349,33 @@ export function BoConversation({ initial, country, back, healthData = false, con
       {needsConsent && !closed && <BoConsent onGiven={consentGiven} />}
       {!closed && !needsConsent && (
         <form
-          className="flex flex-col gap-2"
+          className={`flex gap-2 ${keyboard ? "flex-row flex-wrap items-end" : "flex-col"}`}
           onSubmit={(e) => {
             e.preventDefault();
             void send();
           }}
         >
           {keyboard && (
-            <div ref={typingRow} data-testid="bo-typing-row" className="flex flex-wrap items-center justify-between gap-x-[8px] gap-y-[2px]">
+            <div ref={typingRow} data-testid="bo-typing-row" className="flex w-full flex-wrap items-center justify-between gap-x-[8px] gap-y-[2px]">
               <p className={`min-w-0 font-medium leading-tight text-text [overflow-wrap:anywhere] ${BO_END_TEXT}`}>{t("screenLine")}</p>
               <GetHelpNow country={country} testId="bo-get-help-typing" className={BO_END_HELP} neutral />
             </div>
           )}
           <textarea
+            ref={box}
             data-testid="bo-text"
             aria-label={t("messageBox")}
             placeholder={t("messageBox")}
             value={text}
-            rows={3}
+            rows={keyboard ? 2 : 3}
             // At most this tall, and scrolling inside, at any text size: a phone's keyboard leaves
             // about half the window, and the line and help sit just above this.
             autoComplete="off"
             onChange={(e) => change(e.target.value)}
-            className="max-h-[160px] w-full resize-none overflow-y-auto rounded-2xl border border-border bg-surface p-[12px] text-text"
+            className={`w-full resize-none overflow-y-auto rounded-2xl border border-border bg-surface p-[12px] text-text ${keyboard ? "max-h-[96px] min-w-0 flex-1 basis-0" : "max-h-[160px]"}`}
           />
           {picturesAllowed && picturesOffered && (
-            <div className="flex flex-wrap items-center gap-[12px]">
+            <div className="flex w-full flex-wrap items-center gap-[12px]">
               {/* No capture, so no camera; nothing asks for a browser permission. */}
               <input ref={pictureInput} type="file" accept={BO_PICTURE_ACCEPT} data-testid="bo-picture-input" className="hidden" aria-hidden="true" tabIndex={-1} onChange={(e) => {
                 void choosePicture(e.target.files?.[0]);
@@ -384,7 +398,7 @@ export function BoConversation({ initial, country, back, healthData = false, con
               {pictureState === "unreadable" && <p role="alert" data-testid="bo-picture-unreadable" className="text-sm text-text">{t("pictureUnreadable")}</p>}
             </div>
           )}
-          <button type="submit" data-testid="bo-send" disabled={!canSend} className={PRIMARY_SAVE}>
+          <button type="submit" data-testid="bo-send" disabled={!canSend} className={keyboard ? BO_TYPING_SEND : BO_SEND}>
             {t("send")}
           </button>
         </form>
@@ -416,6 +430,7 @@ export function BoConversation({ initial, country, back, healthData = false, con
         </div>
       )}
       {card && <SafetyCard country={country} onClose={closeCard} />}
+      <div ref={end} />
     </div>
   );
 }
