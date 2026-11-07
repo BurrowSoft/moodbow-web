@@ -95,20 +95,24 @@ test("large text: Consent's heading and boxes keep their words whole on a 320 px
       await page.goto(`${language}/consent`);
       const split = await page.evaluate(() => {
         const out: string[] = [];
-        const ruler = document.createElement("canvas").getContext("2d")!;
         const roots = [document.querySelector("h1"), document.querySelector("[data-testid=consent-notice]"), ...document.querySelectorAll("form label span"), document.querySelector("form button[type=submit]")];
         for (const root of roots) {
           if (!root) continue;
-          const style = getComputedStyle(root);
-          ruler.font = style.font;
-          ruler.letterSpacing = style.letterSpacing;
           const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
           for (let node = walker.nextNode() as Text | null; node; node = walker.nextNode() as Text | null) {
             for (const m of node.data.matchAll(/[^\s-]+/g)) {
               const range = document.createRange();
               range.setStart(node, m.index);
               range.setEnd(node, m.index + m[0].length);
-              if (range.getClientRects().length > 1 && ruler.measureText(m[0]).width <= root.getBoundingClientRect().width) out.push(m[0]);
+              if (range.getClientRects().length < 2) continue;
+              // The word on one line, laid out in the page's own font, against the room it has.
+              const probe = document.createElement("span");
+              probe.style.cssText = "position:absolute;white-space:nowrap";
+              probe.textContent = m[0];
+              root.append(probe);
+              const wide = probe.getBoundingClientRect().width;
+              probe.remove();
+              if (wide <= root.getBoundingClientRect().width) out.push(m[0]);
             }
           }
         }
