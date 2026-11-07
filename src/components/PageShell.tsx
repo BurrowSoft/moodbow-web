@@ -42,7 +42,7 @@ export async function PageShell({ title, draft = false, article = false, after, 
       </header>
       <main id="main" className="flex-1 px-[24px] py-10 [overflow-wrap:anywhere]">
         {notice && (
-          <p data-testid="page-notice" className="mx-auto mb-6 max-w-2xl rounded-2xl bg-pill px-5 py-3 text-sm font-medium text-text">
+          <p data-testid="page-notice" className={`mx-auto mb-6 max-w-2xl rounded-2xl bg-pill px-5 py-3 font-medium text-text ${capTitle ? "leading-[1.429] [font-size:min(0.875rem,max(8.75vw,28px))]" : "text-sm"}`}>
             {notice}
           </p>
         )}

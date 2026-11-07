@@ -156,7 +156,7 @@ test("large text: a legal page's words stay whole on a 320 px phone, and normal 
       await page.evaluate(() => document.fonts.ready);
       const measured = await page.evaluate(() => {
         const out: string[] = [];
-        const roots = [document.querySelector("h1"), ...document.querySelectorAll(".legal-prose :is(p, li, h2, h3)")];
+        const roots = [document.querySelector("h1"), document.querySelector("[data-testid=page-notice]"), ...document.querySelectorAll(".legal-prose :is(p, li, h2, h3)")];
         for (const root of roots) {
           if (!root) continue;
           const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
@@ -184,6 +184,12 @@ test("large text: a legal page's words stay whole on a 320 px phone, and normal 
       if (percent === 100) expect.soft([measured.body, measured.section], route).toEqual(["16px", "20px"]);
       if (percent !== 100) expect.soft(measured.body, route).toBe("32px");
     }
+    // The "available in English" line above the article, and the way into Help.
+    await page.goto("/fr/privacy");
+    expect.soft(await page.evaluate(() => getComputedStyle(document.querySelector("[data-testid=page-notice]")!).fontSize)).toBe(percent === 100 ? "14px" : "28px");
+    await page.goto("/help");
+    const help = await page.evaluate(() => ({ intro: getComputedStyle(document.querySelector("article h1 + div p")!).fontSize, topic: getComputedStyle(document.querySelector("article section h2")!).fontSize, summary: getComputedStyle(document.querySelector("article section li p")!).fontSize, overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth }));
+    expect.soft(help).toEqual(percent === 100 ? { intro: "16px", topic: "18px", summary: "14px", overflow: 0 } : { intro: "32px", topic: "35.2px", summary: "28px", overflow: 0 });
   }
   // From the wide layout up, at normal size, as #241 left it.
   await cdp.send("Page.setFontSizes", { fontSizes: { standard: 16, fixed: 13 } });
