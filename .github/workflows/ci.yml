@@ -124,8 +124,21 @@ jobs:
         run: printf 'Acquire::http::Timeout "15";\nAcquire::https::Timeout "15";\nAcquire::Retries "3";\n' | sudo tee /etc/apt/apt.conf.d/99-ci-timeouts
       - if: steps.cfg.outputs.ok == 'true'
         run: npx playwright install --with-deps chromium
+      # The journeys that send a real email (@real-email) run only where sign-up changes: staging
+      # limits those emails, and a heavy day failed every PR. If the list can't be read, all run.
+      - id: scope
+        if: steps.cfg.outputs.ok == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          files=$(gh api "repos/${{ github.repository }}/pulls/${{ github.event.number }}/files" --paginate --jq '.[].filename') || files=
+          if [ -z "$files" ] || echo "$files" | grep -qE '^(src/app/\[locale\]/(sign-up|consent|welcome|email-confirmed|auth)/|src/lib/(legalVersions|onboardingConsent|authErrors)|src/lib/supabase/|src/i18n/|e2e/journey/|\.github/workflows/)'; then
+            echo "args=" >> "$GITHUB_OUTPUT"
+          else
+            echo "args=--grep-invert @real-email" >> "$GITHUB_OUTPUT"
+          fi
       - if: steps.cfg.outputs.ok == 'true'
-        run: npm run test:journeys
+        run: npm run test:journeys -- ${{ steps.scope.outputs.args }}
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_STAGING_URL }}
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_STAGING_PUBLISHABLE_KEY }}
