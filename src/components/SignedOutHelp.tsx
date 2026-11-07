@@ -9,7 +9,7 @@ import { GetHelpNow } from "./SafetyCard";
 export async function SignedOutHelp({ testId }: { testId: string }) {
   return (
     <NextIntlClientProvider messages={pickMessages(await getMessages(), ["me", "safety", "common"])}>
-      <div className="mt-[24px] [font-size:min(1rem,max(8vw,16px))] [&_button]:min-h-[44px]">
+      <div className="mt-[24px] [font-size:min(1rem,max(8vw,16px))] [&_a]:min-h-[44px] [&_button]:min-h-[44px]">
         <GetHelpNow country={null} testId={testId} neutral />
       </div>
     </NextIntlClientProvider>

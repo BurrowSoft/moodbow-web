@@ -161,6 +161,25 @@ describe("SafetyCard", () => {
   });
 });
 
+describe("Get help now with or without the page's scripts (#248)", () => {
+  it("is a link, so it works with none; once running, a click opens the card and stays on the page", () => {
+    wrap(<GetHelpNow country="GB" testId="me-get-help" />);
+    const link = screen.getByTestId("me-get-help");
+    expect(link.tagName).toBe("A");
+    expect(link.getAttribute("href")).toMatch(/\/help\/get-help-now$/);
+    expect(fireEvent.click(link)).toBe(false);
+    expect(screen.getByTestId("safety-card")).toBeInTheDocument();
+  });
+
+  it("a click asking for a new tab is left to the browser", () => {
+    wrap(<GetHelpNow country="GB" testId="me-get-help" />);
+    const link = screen.getByTestId("me-get-help");
+    link.addEventListener("click", (e) => e.preventDefault());
+    fireEvent.click(link, { ctrlKey: true });
+    expect(screen.queryByTestId("safety-card")).toBeNull();
+  });
+});
+
 describe("Get help now's style (decision 128)", () => {
   it("a calm secondary button, not the accent fill", () => {
     wrap(<GetHelpNow country="GB" testId="me-get-help" />);
