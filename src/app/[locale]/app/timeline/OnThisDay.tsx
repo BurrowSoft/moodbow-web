@@ -71,7 +71,7 @@ export function OnThisDay({ kind, entryId, dateLabel, preview, mood, uid, today 
         </button>
       </div>
       <Link href={withOrigin(`/app/entries/${entryId}`, "/app/timeline")} data-testid="on-this-day-entry" className="mt-1 block rounded-lg text-text hover:text-accent">
-        <span className="flex items-center gap-2 text-sm text-muted">
+        <span className="flex flex-wrap items-center gap-x-2 text-sm text-muted [overflow-wrap:anywhere]">
           {mood !== null && <span className={`h-3 w-3 shrink-0 rounded-full ${MOOD_COLOURS[mood - 1]} ${MOOD_DOT_OUTLINE}`} aria-hidden="true" />}
           {dateLabel}
           {/* The mood in words beside its dot, as on the Timeline rows (decision 161). */}

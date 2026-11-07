@@ -114,13 +114,13 @@ export function MonthCalendar({
           onClick={() => go(addMonths(month, -1))}
           aria-label={t("calPrevMonth")}
           title={t("calPrevMonth")}
-          className="inline-flex h-11 w-11 items-center justify-center rounded-full text-text hover:bg-pill"
+          className="inline-flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-full text-text hover:bg-pill"
         >
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M15 5l-7 7 7 7" />
           </svg>
         </button>
-        <h2 id={titleId} className="text-lg font-medium text-text" aria-live="polite" data-testid="calendar-title">
+        <h2 id={titleId} className="min-w-0 flex-1 text-center text-lg font-medium text-text [overflow-wrap:anywhere]" aria-live="polite" data-testid="calendar-title">
           {formatMonth(month, dateLocaleTag)}
         </h2>
         {/* No months after this one. */}
@@ -131,7 +131,7 @@ export function MonthCalendar({
           disabled={month >= thisMonth}
           aria-label={t("calNextMonth")}
           title={t("calNextMonth")}
-          className="inline-flex h-11 w-11 items-center justify-center rounded-full text-text hover:bg-pill disabled:opacity-30 disabled:hover:bg-transparent"
+          className="inline-flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-full text-text hover:bg-pill disabled:opacity-30 disabled:hover:bg-transparent"
         >
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M9 5l7 7-7 7" />

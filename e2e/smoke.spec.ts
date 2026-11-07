@@ -578,6 +578,16 @@ test.describe("web journal (signed out)", () => {
 // Onboarding (W0 part 2), signed out, no Supabase env. The account-creating
 // and signed-in rows run on the Preview against staging.
 test.describe("onboarding (signed out)", () => {
+  test("Consent: help is there before anything's agreed, and it opens the card", async ({ page }) => {
+    await page.goto("/consent");
+    await page.getByTestId("consent-get-help").click();
+    await expect(page.getByTestId("safety-card")).toBeVisible();
+    await expect(page.getByTestId("safety-find-helpline")).toBeVisible();
+    await page.getByTestId("safety-close").click();
+    await expect(page.getByTestId("safety-card")).toHaveCount(0);
+    await expect(page.getByTestId("consent-privacy")).toBeVisible();
+  });
+
   test("welcome: Next, Skip to slide 3, Get started → Consent; Back from Consent → slide 3", async ({ page }) => {
     await page.goto("/welcome");
     await expect(page.getByTestId("welcome-slide-1")).toBeVisible();
