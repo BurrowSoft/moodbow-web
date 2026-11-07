@@ -1,9 +1,11 @@
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
+import { hydrateRoot, type Root } from "react-dom/client";
+import { renderToString } from "react-dom/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import messages from "@/messages/en.json";
 import moodFaces from "../../../../content/contracts/mood-faces.json";
-import type { CheckIn } from "@/lib/journal/checkIn";
+import { MOODS, type CheckIn } from "@/lib/journal/checkIn";
 
 // The check-in card against a mocked save action. CI has no Supabase to sign
 // in to, so this is where the card's flows are covered.
@@ -23,6 +25,7 @@ const { CheckInCard } = await import("./CheckInCard");
 const { CheckInDraftProvider } = await import("./CheckInDraft");
 
 const ROW: CheckIn = { local_date: "2026-10-02", mood: 4, sleep_hours: 7.5, sleep_quality: "good", exercise_minutes: 30, stress: 2, updated_at: "2026-10-02T10:00:00Z" };
+const MOODS_FIRST = MOODS[0];
 const KEY = "mb:pending-checkin:u1";
 // Per-day copies (UX): mb:pending-checkin:<uid>:<date>.
 const dayKey = (date: string) => `${KEY}:${date}`;
@@ -68,6 +71,58 @@ beforeEach(() => {
 afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
+});
+
+// A slow phone (#238): the server's card is on screen, and the page's code hasn't run.
+describe("CheckInCard before the page's code has run", () => {
+  let container: HTMLDivElement;
+  let root: Root | undefined;
+  const serverCard = (initial: CheckIn | null, autoFocus = false) => {
+    const tree = (
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <CheckInCard initial={initial} uid="u1" date="2026-10-02" dateLocaleTag="en-US" autoFocus={autoFocus} />
+      </NextIntlClientProvider>
+    );
+    container = document.createElement("div");
+    document.body.append(container);
+    container.innerHTML = renderToString(tree);
+    return async () => {
+      await act(async () => {
+        root = hydrateRoot(container, tree);
+      });
+    };
+  };
+  afterEach(() => {
+    act(() => root?.unmount());
+    root = undefined;
+    container.remove();
+  });
+
+  it("the card takes no input and says so; once loaded it does, and a tap counts", async () => {
+    const hydrate = serverCard(null);
+    const card = container.querySelector("[data-testid=checkin-card]")!;
+    expect(card).toHaveAttribute("inert");
+    expect(card).toHaveAttribute("data-until-loaded");
+    await hydrate();
+    const loaded = screen.getByTestId("checkin-card");
+    expect(loaded).not.toHaveAttribute("inert");
+    expect(loaded).not.toHaveAttribute("data-until-loaded");
+    fireEvent.click(screen.getByTestId("checkin-mood-4"));
+    expect(screen.getByTestId("checkin-mood-4")).toHaveAttribute("aria-checked", "true");
+  });
+
+  it("the summary's Edit waits the same way", async () => {
+    const hydrate = serverCard(ROW);
+    expect(container.querySelector("[data-testid=checkin-summary]")).toHaveAttribute("inert");
+    await hydrate();
+    expect(screen.getByTestId("checkin-summary")).not.toHaveAttribute("inert");
+  });
+
+  it("Add a check-in, opened by a page load: the first mood still gets the focus", async () => {
+    const hydrate = serverCard(null, true);
+    await hydrate();
+    await waitFor(() => expect(screen.getByTestId(`checkin-mood-${MOODS_FIRST}`)).toHaveFocus());
+  });
 });
 
 describe("CheckInCard", () => {

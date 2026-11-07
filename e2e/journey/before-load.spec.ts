@@ -286,6 +286,26 @@ test.describe("typing before the page has loaded", () => {
     }
   });
 
+  test("Today: the check-in takes no tap until it has loaded, and the rest of the page isn't held", async ({ page }) => {
+    const email = newEmail();
+    const password = newPassword();
+    try {
+      await onboarded(page, email, password);
+      await beforeLoad(page, "/app", async () => {
+        await expect(page.getByTestId("checkin-mood-4")).toBeVisible();
+        await expect(page.getByTestId("checkin-card")).toHaveAttribute("inert", "");
+        await expect(page.getByTestId("tab-today").locator("xpath=ancestor-or-self::*[@inert]")).toHaveCount(0);
+        await page.getByTestId("checkin-mood-4").click({ force: true });
+      });
+      await expect(page.locator("[data-until-loaded]")).toHaveCount(0);
+      await expect(page.getByTestId("checkin-mood-4")).toHaveAttribute("aria-checked", "false");
+      await page.getByTestId("checkin-mood-4").click();
+      await expect(page.getByTestId("checkin-mood-4")).toHaveAttribute("aria-checked", "true");
+    } finally {
+      await cleanup(email);
+    }
+  });
+
   test("Me: nothing can be changed until it has loaded, so nothing looks saved that isn't", async ({ page }) => {
     const email = newEmail();
     const password = newPassword();
