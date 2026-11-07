@@ -111,9 +111,9 @@ export function Dialog({
         aria-labelledby={titleId}
         aria-describedby={body ? bodyId : undefined}
         data-testid={testId}
-        className={`max-h-full w-full max-w-md overflow-y-auto overscroll-contain rounded-3xl bg-surface p-[24px] shadow-xl ${capText ? "leading-normal [font-size:min(1rem,max(8vw,16px))]" : ""}`}
+        className={`max-h-full w-full max-w-md overflow-y-auto overscroll-contain rounded-3xl bg-surface p-[24px] shadow-xl ${capText ? "leading-normal [font-size:min(1rem,max(10vw,32px))]" : ""}`}
       >
-        <h2 id={titleId} tabIndex={-1} className={`font-medium text-text outline-none ${capText ? "leading-tight [font-size:min(1.125rem,max(8vw,18px))]" : "text-lg"}`}>
+        <h2 id={titleId} tabIndex={-1} className={`font-medium text-text outline-none ${capText ? "leading-tight [font-size:min(1.125rem,max(11.25vw,36px))]" : "text-lg"}`}>
           {title}
         </h2>
         {body && (

@@ -24,7 +24,7 @@ export function SafetyCard({ country, onClose, neutral = false }: { country: str
   const ios = useSyncExternalStore(noSubscribe, () => isIos(navigator.userAgent, navigator.maxTouchPoints), () => false);
   const link = "font-medium text-accent underline underline-offset-4";
   // text-sm under the card's cap (capText in Dialog): the same 7:8 as at the normal size.
-  const small = "text-muted [font-size:min(0.875rem,max(7vw,14px))]";
+  const small = "text-muted [font-size:min(0.875rem,max(8.75vw,28px))]";
   return (
     <Dialog title={t("safetyTitle")} body={t(neutral ? "safetyBodyNeutral" : "safetyBody")} onCancel={onClose} testId="safety-card" initialFocus="title" capText>
       <div className="w-full space-y-[12px] text-left">
