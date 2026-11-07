@@ -1303,7 +1303,7 @@ test("large text, set in the browser: the check-in conflict dialog shows the who
     await seedCheckIns(email, password, today, [{ offset: 0, mood: 4 }]);
     await page.setViewportSize({ width: 320, height: 640 });
 
-    for (const [route, saved] of [["", "en"], ["/fr", "fr"], ["/es", "es"], ["/pt-br", "pt-br"]]) {
+    for (const [route, saved] of [["", "en"], ["/fr", "fr"], ["/es", "es"], ["/pt-br", "pt"]]) {
       await setProfileLocale(email, password, saved);
       for (const percent of [100, 200, 300]) {
         await textAt(percent);
