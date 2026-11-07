@@ -87,7 +87,8 @@ export function SafetyCard({ country, onClose, neutral = false }: { country: str
 // of Me on its own and under a reflection that names it. A calm secondary
 // button, never red or alarming (decision 128). neutral: on Me, where
 // nothing flagged led to it. A real link to the public help page, so help never depends on the
-// page's scripts (#248); once they're running it opens the card instead. Its words stay whole: browser
+// page's scripts (#248); once they're running it opens the card instead. The link carries the
+// country, so that page can show its numbers without reading the account. Its words stay whole: browser
 // hyphens split "par-ler" with room to spare (Web Tester). It stops growing at about 200 % on a narrow
 // screen, in em, so at the normal size it's the size of the text around it.
 export function GetHelpNow({ country, testId, className, neutral }: { country: string | null | undefined; testId: string; className?: string; neutral?: boolean }) {
@@ -102,7 +103,7 @@ export function GetHelpNow({ country, testId, className, neutral }: { country: s
   };
   return (
     <>
-      <Link href="/help/get-help-now" prefetch={false} data-testid={testId} onClick={openCard} className={className ?? `${dialogButton(false, false)} [font-size:min(1em,max(10vw,32px))]`}>
+      <Link href={country ? `/help/get-help-now?country=${encodeURIComponent(country)}` : "/help/get-help-now"} prefetch={false} data-testid={testId} onClick={openCard} className={className ?? `${dialogButton(false, false)} [font-size:min(1em,max(10vw,32px))]`}>
         {t("meGetHelpNow")}
       </Link>
       {open && <SafetyCard country={country} onClose={close} neutral={neutral} />}
