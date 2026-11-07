@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import messages from "../../src/messages/en.json";
-import { cleanup, configured, confirmEmail, newEmail, newPassword, notConfigured, recoveryLinkHash, signedUpUnconfirmed } from "./staging";
+import { profileSaver, cleanup, configured, confirmEmail, newEmail, newPassword, notConfigured, recoveryLinkHash, signedUpUnconfirmed } from "./staging";
 
 // A slow phone: the page has drawn, its code hasn't run, and the person is
 // already typing. The page's scripts are held back so this is the same every
@@ -298,12 +298,14 @@ test.describe("typing before the page has loaded", () => {
     const password = newPassword();
     try {
       await onboarded(page, email, password);
+      await (await profileSaver(email, password))({ p_country: "TH" });
       await expect(page.getByTestId("app-noscript-help")).toHaveCount(0);
       const off = await browser.newContext({ baseURL, javaScriptEnabled: false, storageState: await page.context().storageState() });
       const noScript = await off.newPage();
       await noScript.goto("/app/me");
       await noScript.getByTestId("app-noscript-help").click();
-      await expect(noScript).toHaveURL(/\/help\/get-help-now$/);
+      await expect(noScript).toHaveURL(/\/help\/get-help-now\?country=TH$/);
+      await expect(noScript.getByTestId("help-now-call-helpline")).toHaveAttribute("href", "tel:1323");
       await expect(noScript.getByTestId("help-now-find-helpline")).toBeVisible();
       await off.close();
     } finally {

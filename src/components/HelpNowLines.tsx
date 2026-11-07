@@ -1,5 +1,5 @@
 import { getLocale, getTranslations } from "next-intl/server";
-import { helplinesFor, isShortCode, telHref } from "@/lib/safety/helplines";
+import { helpLineSize, helplinesFor, isShortCode, telHref } from "@/lib/safety/helplines";
 
 const link = "font-medium text-accent underline underline-offset-4";
 
@@ -16,7 +16,7 @@ export async function HelpNowLines({ country }: { country: string | undefined })
     <div data-testid="help-now-lines" className="mx-auto mt-6 max-w-2xl space-y-[12px] [font-size:min(1rem,max(10vw,32px))]">
       {helpline && (
         <p>
-          <a href={telHref(helpline.dial)} data-testid="help-now-call-helpline" className={link}>
+          <a href={telHref(helpline.dial)} data-testid="help-now-call-helpline" className={`${link} ${helpLineSize(helpline.display)}`}>
             {t("safetyCall", { name: helpline.name, number: helpline.display })}
           </a>
         </p>
@@ -25,7 +25,7 @@ export async function HelpNowLines({ country }: { country: string | undefined })
       {helpline?.hours && <p data-testid="help-now-hours">{helpline.hours}</p>}
       {emergency && (
         <p>
-          <a href={telHref(emergency.dial)} data-testid="help-now-call-emergency" className={link}>
+          <a href={telHref(emergency.dial)} data-testid="help-now-call-emergency" className={`${link} ${helpLineSize(emergency.display)}`}>
             {t("safetyCallEmergency", { number: emergency.display })}
           </a>
         </p>

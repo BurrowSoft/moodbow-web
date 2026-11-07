@@ -72,7 +72,7 @@ export default async function AppLayout({ children, params }: LayoutProps<"/[loc
           {/* With scripts off a page's content never appears here, as it's streamed: help still does (#249). */}
           <noscript>
             <p className="mx-auto mb-6 max-w-3xl">
-              <Link href="/help/get-help-now" prefetch={false} data-testid="app-noscript-help" className="font-medium text-accent underline underline-offset-4">
+              <Link href={me.profile?.country ? `/help/get-help-now?country=${encodeURIComponent(me.profile.country)}` : "/help/get-help-now"} prefetch={false} data-testid="app-noscript-help" className="font-medium text-accent underline underline-offset-4">
                 {t("meGetHelpNow")}
               </Link>
             </p>
