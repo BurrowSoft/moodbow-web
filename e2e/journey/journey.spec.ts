@@ -4,7 +4,7 @@ import conditions from "../../content/conditions.json";
 import messages from "../../src/messages/en.json";
 import fr from "../../src/messages/fr.json";
 import { monthsBefore } from "../../src/lib/journal/onThisDay";
-import { journalToday, aiAvailable, cleanup, configured, confirmEmail, createConfirmedUser, exists, lastWeekMonday, seedCheckIns, newEmail, newPassword, notConfigured, profileLocale, revokeSessions, setProfileLocale, signedUpUnconfirmed, sweep } from "./staging";
+import { boOff, grantAiConsent, journalToday, aiAvailable, cleanup, configured, confirmEmail, createConfirmedUser, exists, lastWeekMonday, seedCheckIns, newEmail, newPassword, notConfigured, profileLocale, revokeSessions, setProfileLocale, signedUpUnconfirmed, sweep } from "./staging";
 
 // The launch-critical journeys (1.0), end to end against staging with a
 // throwaway account each: sign-up → confirm → consent → setup → check-in →
@@ -1268,6 +1268,138 @@ test("large text, set in the browser: Set up stays inside a 320 px phone", async
         console.log(`Set up's time, ${saved} at ${percent}%: needs ${time.needs}, has ${time.has}, font ${time.font}`);
         expect.soft(time.needs, `${saved} at ${percent}%`).toBeLessThanOrEqual(time.has);
       }
+    }
+  } finally {
+    await cleanup(email);
+  }
+});
+
+// The first of Bo's web against the real database (app's migration 018 on staging). The
+// function isn't there yet, so this stops at Me.
+test("Me → Use Bo off: bo_off is set, the switch goes, the conversation row stays; a granted consent clears it", async ({ page }) => {
+  const email = newEmail();
+  const password = newPassword();
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await grantAiConsent(email, password);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    await page.goto("/app/me");
+    const use = page.getByTestId("me-bo-use");
+    await expect(use).toBeChecked();
+    await expect(page.getByTestId("me-bo-journal-note")).toBeVisible();
+    expect(await boOff(email, password)).toBe(false);
+    await use.click();
+    await expect(page.getByTestId("me-bo-journal")).toHaveCount(0);
+    expect(await boOff(email, password)).toBe(true);
+    await page.reload();
+    await expect(page.getByTestId("me-bo")).toBeVisible();
+    await expect(page.getByTestId("me-bo-journal")).toHaveCount(0);
+    await grantAiConsent(email, password);
+    expect(await boOff(email, password)).toBe(false);
+  } finally {
+    await cleanup(email);
+  }
+});
+
+// Bo's header must never cover a control, at the browser's own large text, on a phone. A
+// click fails if something else would take it, so each control is clicked or tried for
+// real. The function isn't on staging, so /api/bo is stubbed; the consent's yes is real.
+test("Bo's screen at large text: the header covers nothing, and help is reachable", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
+  test.setTimeout(240_000);
+  const email = newEmail();
+  const password = newPassword();
+  const cdp = await page.context().newCDPSession(page);
+  let failNext = false;
+  await page.route("**/api/bo", async (route) => {
+    const { action } = route.request().postDataJSON() as { action: string };
+    const reply = { status: "ok", reply: "A short reply, for the length of a line or two on a phone.", showHelp: false, openCard: false, showNotice: false, conversationFull: false };
+    const body = action === "status" ? { status: "ok", available: true, pictures: false, maxChars: 2000 } : failNext ? { status: "error", code: "bo_failed" } : reply;
+    failNext = false;
+    await route.fulfill({ contentType: "application/json", body: JSON.stringify(body) });
+  });
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    await page.setViewportSize({ width: 320, height: 640 });
+
+    for (const percent of [100, 200, 300]) {
+      await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
+      await page.goto("/app/bo");
+      await expect(page.getByTestId("bo-header")).toBeVisible();
+      await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))));
+      // Not now, tried; then the real yes, the first time round.
+      if (percent === 100) {
+        await page.getByTestId("bo-consent-decline").click({ trial: true });
+        await page.getByTestId("bo-consent-accept").click();
+      }
+      await expect(page.getByTestId("bo-text")).toBeVisible();
+
+      // The box is in view on arriving, without anyone scrolling to it: a click would scroll.
+      await page.goto("/app/bo");
+      await expect(page.getByTestId("bo-send")).toBeInViewport({ ratio: 1 });
+
+      // Enough of a conversation to scroll under the header.
+      for (let n = 0; n < 6; n++) {
+        await page.getByTestId("bo-text").fill(`Message ${n}`);
+        await page.getByTestId("bo-send").click();
+        await expect(page.getByTestId("bo-text")).toHaveValue("");
+      }
+      // Try again, and a report high up the conversation, and Send.
+      failNext = true;
+      await page.getByTestId("bo-text").fill("One that fails");
+      await page.getByTestId("bo-send").click();
+      // The line about it, and Try again, without scrolling to them.
+      await expect(page.getByTestId("bo-retry")).toBeInViewport({ ratio: 1 });
+      await page.getByTestId("bo-retry").click();
+      await expect(page.getByTestId("bo-text")).toHaveValue("");
+      await page.getByTestId("bo-report").first().click({ trial: true });
+      await page.getByTestId("bo-text").fill("Another");
+      await page.getByTestId("bo-send").click({ trial: true });
+
+      // The line and help are on screen wherever the conversation has got to, at the top
+      // and at the end, whichever holds them at this size.
+      for (const position of ["top", "end"]) {
+        await page.evaluate((to) => window.scrollTo(0, to === "top" ? 0 : document.documentElement.scrollHeight), position);
+        await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))));
+        const pinnedHere = (await page.getByTestId("bo-header").getAttribute("data-pinned")) !== null;
+        const line = pinnedHere ? page.getByRole("heading", { level: 1 }) : page.getByTestId("bo-end-line");
+        const atHand = page.getByTestId(pinnedHere ? "bo-get-help" : "bo-get-help-end");
+        await expect(line, `the line, ${position}, ${percent}%`).toBeInViewport({ ratio: 1 });
+        await expect(atHand, `help, ${position}, ${percent}%`).toBeInViewport({ ratio: 1 });
+      }
+
+      // A long message scrolls inside the box, which stays at most 160 px tall at any size.
+      await page.getByTestId("bo-text").fill(Array.from({ length: 60 }, () => "a few more words").join(" "));
+      const box = await page.getByTestId("bo-text").evaluate((b) => ({ height: b.getBoundingClientRect().height, scrolls: b.scrollHeight > b.clientHeight, resize: getComputedStyle(b).resize }));
+      expect(box.height, `the box at ${percent}%`).toBeLessThanOrEqual(160);
+      expect(box.scrolls, `the box scrolls at ${percent}%`).toBe(true);
+      expect(box.resize, "the box can't be dragged taller").toBe("none");
+      await page.getByTestId("bo-text").fill("");
+
+      // Help, from wherever the conversation has got to.
+      const pinned = (await page.getByTestId("bo-header").getAttribute("data-pinned")) !== null;
+      // Pinned at the normal size; on this phone, not at large text.
+      expect(pinned, `pinned at ${percent}%`).toBe(percent === 100);
+      const help = page.getByTestId(pinned ? "bo-get-help" : "bo-get-help-end");
+      await help.click();
+      await expect(page.getByTestId("safety-card")).toBeVisible();
+      await page.getByTestId("safety-close").click();
+      console.log(`Bo's header at ${percent}%: ${pinned ? "pinned" : "scrolls away"}`);
     }
   } finally {
     await cleanup(email);

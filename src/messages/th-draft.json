@@ -1018,5 +1018,245 @@
     "key": "consumerHealthData.description",
     "en": "How Moodbow handles data that may be consumer health data.",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.boButton",
+    "en": "Talk to Bo",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.screenLine",
+    "en": "Bo, Moodbow's AI",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.smallLine",
+    "en": "Bo is an AI, not a therapist.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.notice",
+    "en": "You're talking with Bo, an AI. It isn't a person or a therapist, and it can't call anyone.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.firstLine",
+    "en": "How's your day going?",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.journalSwitch",
+    "en": "Let Bo read my recent check-ins and entries",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.clearAction",
+    "en": "Clear conversation",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.meRow",
+    "en": "Your conversation with Bo",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.meRowEmpty",
+    "en": "No conversation yet",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.regionOff",
+    "en": "Bo is available in selected countries.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.regionUnknown",
+    "en": "Bo isn't available right now.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.resting",
+    "en": "Bo is resting. Try again later.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.messageBox",
+    "en": "Message Bo",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.send",
+    "en": "Send",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.typing",
+    "en": "Bo is writing",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.failed",
+    "en": "That didn't send. Your message is still here.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.tryAgain",
+    "en": "Try again",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.wait",
+    "en": "One moment, then try again.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.dailyLimit",
+    "en": "That's all of today's messages with Bo. You can write again tomorrow.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.unavailable",
+    "en": "Bo isn't available for this account.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.tooLong",
+    "en": "That's too long for one message.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.clearTitle",
+    "en": "Clear this conversation?",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.clearBody",
+    "en": "This deletes your conversation with Bo. It can't be undone.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.reportAction",
+    "en": "Report this reply",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.reportScreen",
+    "en": "Thanks for telling us. No one reads this right away.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.offline",
+    "en": "You're offline. Bo needs a connection.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.conversationFull",
+    "en": "This conversation is full. Export it if you want a copy, then clear it to start again.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.clearConfirm",
+    "en": "Clear",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.cancel",
+    "en": "Cancel",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.consentTitle",
+    "en": "Before you talk to Bo",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.consentBody",
+    "en": "[Placeholder, not final: this text isn't approved yet.]\n\nBo is an AI. It isn't a person or a therapist, and it can't call anyone.\n\nTo reply, Moodbow sends your messages to Anthropic (USA), the company that makes the AI, with an ID we create for you, not your name or email. Your messages aren't used to train AI models. Anthropic's automated systems check them for safety and may report illegal material to the authorities. Anthropic normally deletes them within 30 days and may keep flagged content longer.\n\nBo also checks your messages for signs of crisis, so it can point you to help. We don't keep a record of these checks. Nobody at Moodbow reads your conversation unless you report a reply.\n\nYou can turn this off at any time in Me → AI. The rest of Moodbow works without it.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.consentAccept",
+    "en": "Agree and continue",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.consentDecline",
+    "en": "Not now",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.consentFailed",
+    "en": "That didn't save. Please try again.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.useBo",
+    "en": "Use Bo",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.journalSwitchNote",
+    "en": "[Placeholder, not final: this text isn't approved yet.] When this is on, your check-ins and entries from the last 7 days go to Anthropic with each message.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.pictureAdd",
+    "en": "Add a picture",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.pictureRemove",
+    "en": "Remove the picture",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.pictureAlt",
+    "en": "Your picture",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.pictureStored",
+    "en": "(photo)",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.pictureUnreadable",
+    "en": "That picture can't be used. Try another one.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.pictureReading",
+    "en": "Getting the picture ready",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.picturesOff",
+    "en": "Pictures aren't available right now. You can still write to Bo.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.pictureLimit",
+    "en": "That's all of today's pictures. You can still write to Bo.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.pictureConsentTitle",
+    "en": "Before your first picture",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.pictureConsentBody",
+    "en": "[Placeholder, not final: this text isn't approved yet.]\n\nYour picture goes to Anthropic so Bo can reply. We don't store it. Pictures are automatically checked against lists of known child sexual abuse material, and Anthropic reports matches to the authorities.\n\nPlease don't send pictures of other people without their agreement, or anything medical.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.pictureConsentAccept",
+    "en": "Continue",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.helpLink",
+    "en": "How Bo works",
+    "reason": "UX draft (native read pending)"
   }
 ]
