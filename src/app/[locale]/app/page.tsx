@@ -17,6 +17,7 @@ import { pageGate } from "@/lib/conditions";
 import { loadMilestone } from "@/lib/share/milestoneData";
 import { yearOnOffer } from "@/lib/share/year";
 import { MilestoneCard } from "./MilestoneCard";
+import { SecurityNotice } from "./SecurityNotice";
 import { JOURNAL_HEADING } from "@/lib/ui/journalLayout";
 
 // A stuck request ends here at the latest (UX, the timeout audit); each
@@ -59,6 +60,8 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
     .select("id, body, is_moment, entry_date, created_at")
     .eq("entry_date", me.today)
     .order("created_at", { ascending: false });
+  // A failed read shows no card and stops nothing.
+  const { data: securityId } = await supabase.rpc("security_notice_current");
   const t = await getTranslations("today");
   const te = await getTranslations("entry");
   const timeZone = me.profile?.time_zone ?? "UTC";
@@ -68,6 +71,7 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
 
   return (
     <section className="space-y-8">
+      {typeof securityId === "string" && securityId !== "" && <SecurityNotice id={securityId} uid={user.id} />}
       <header>
         {/* Focusable from code only: where focus goes when the milestone card is dismissed. */}
         <h1 id="today-title" tabIndex={-1} className={`${JOURNAL_HEADING} focus:outline-none`} data-testid="today-greeting">
