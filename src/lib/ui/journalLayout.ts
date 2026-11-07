@@ -31,9 +31,10 @@ export const MOOD_FACE = "flex min-h-12 min-w-min flex-1 basis-12 flex-col items
 export const MOOD_LABEL = "min-w-10 text-center leading-tight [font-size:min(0.75rem,max(6vw,12px))]";
 
 // The primary Save button (check-in, entry): full width on phones, so at
-// 200% zoom (a 160 px-wide page) it never overflows; the label wraps.
+// 200% zoom (a 160 px-wide page) it never overflows; the label wraps. Below the wide layout its
+// type stops growing at about 200 % (decision 231).
 export const PRIMARY_SAVE =
-  "inline-flex min-h-12 w-full items-center justify-center rounded-full bg-accent px-6 py-2 text-center font-medium text-on-accent hover:bg-accent-hover disabled:opacity-50 sm:w-auto sm:min-w-[160px] sm:px-8";
+  "inline-flex min-h-12 w-full items-center justify-center rounded-full bg-accent px-[24px] py-2 text-center font-medium text-on-accent hover:bg-accent-hover disabled:opacity-50 max-sm:[font-size:min(1rem,max(10vw,32px))] sm:w-auto sm:min-w-[160px] sm:px-8";
 
 // A bottom-bar tab: a grid cell that may shrink below its label's width
 // (min-w-0), so the four stay inside the row.

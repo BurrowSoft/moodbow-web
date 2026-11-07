@@ -22,7 +22,7 @@ export default async function SecurityPage({ params }: PageProps<"/[locale]/secu
   if (!update) notFound();
   const t = await getTranslations("legal");
   return (
-    <PageShell title={update.title} article notice={update.english && locale !== "en" ? t("legalEnglishOnly") : undefined} lang={update.english && locale !== "en" ? "en" : undefined}>
+    <PageShell capTitle title={update.title} article notice={update.english && locale !== "en" ? t("legalEnglishOnly") : undefined} lang={update.english && locale !== "en" ? "en" : undefined}>
       <div className="legal-prose" data-testid="security-update" dangerouslySetInnerHTML={{ __html: update.html }} />
     </PageShell>
   );

@@ -69,7 +69,7 @@ export function EmailConfirmedMessage({ fromQuery, continueTo, openApp = null, a
   const copy = COPY[result];
   return (
     <div data-testid={`email-confirmed-${result}`} className="flex flex-col items-center text-center">
-      <h1 className="text-balance text-[28px] font-medium leading-tight tracking-tight sm:text-4xl">{t(copy.title)}</h1>
+      <h1 className="text-balance [font-size:min(1.75rem,max(11.2vw,28px,1rem))] font-medium leading-tight tracking-tight sm:text-4xl">{t(copy.title)}</h1>
       {/* With the countdown, "Open Moodbow to continue." would contradict it:
           the web line instead (decision 134). */}
       <p className="mt-4 text-base leading-relaxed text-muted sm:text-[1.0625rem]">{result === "ok" && continueTo ? t("emailConfirmedWebBody") : t(copy.body)}</p>

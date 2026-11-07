@@ -31,7 +31,7 @@ export function SecurityNotice({ id, uid }: { id: string; uid: string }) {
   const [read, setRead] = useState(false);
   if (stored || read) return null;
   return (
-    <section data-testid="security-notice" className={`${JOURNAL_CARD} [font-size:min(1rem,max(8vw,16px))] print:hidden`}>
+    <section data-testid="security-notice" className={`${JOURNAL_CARD} [font-size:min(1rem,max(10vw,32px))] print:hidden`}>
       <p role="status" className="font-medium text-text">
         {t("securityNotice")}
       </p>

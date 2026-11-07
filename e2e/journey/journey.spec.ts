@@ -1,10 +1,11 @@
 import { readFile } from "node:fs/promises";
 import { expect, test, type Frame, type Page, type Request } from "@playwright/test";
 import conditions from "../../content/conditions.json";
+import countries from "../../content/contracts/countries.json";
 import messages from "../../src/messages/en.json";
 import fr from "../../src/messages/fr.json";
 import { monthsBefore } from "../../src/lib/journal/onThisDay";
-import { aiConsentGranted, journalToday, aiAvailable, cleanup, configured, confirmEmail, createConfirmedUser, exists, lastWeekMonday, seedCheckIns, newEmail, newPassword, notConfigured, profileLocale, revokeSessions, setProfileLocale, signedUpUnconfirmed, sweep } from "./staging";
+import { aiConsentGranted, journalToday, aiAvailable, cleanup, configured, confirmEmail, createConfirmedUser, exists, lastWeekMonday, seedCheckIns, newEmail, newPassword, notConfigured, profileLocale, profileSaver, revokeSessions, setProfileLocale, signedUpUnconfirmed, sweep } from "./staging";
 
 // The launch-critical journeys (1.0), end to end against staging with a
 // throwaway account each: sign-up → confirm → consent → setup → check-in →
@@ -1043,9 +1044,9 @@ test.describe("the tab bar in every language", () => {
         expect(await card.evaluate((el) => el.scrollTop), "opens at its top").toBe(0);
         const firstHelp = await card.locator("a").first().evaluate((a) => a.getBoundingClientRect().top);
         expect(firstHelp, `the first help line starts on the first screen, ${route || "/en"}`).toBeLessThan(640);
-        // "Find a helpline" stays under the card's cap, not three times its size.
+        // "Find a helpline" stays under the help's cap, not three times its size.
         const size = (el: Element) => parseFloat(getComputedStyle(el).fontSize);
-        expect(await card.getByTestId("safety-find-helpline").evaluate(size), `the helpline link's size, ${route || "/en"}`).toBeLessThan(await card.evaluate(size));
+        expect(await card.getByTestId("safety-find-helpline").evaluate(size), `the helpline link's size, ${route || "/en"}`).toBeLessThan(await page.getByTestId("safety-close").evaluate(size));
         const close = page.getByTestId("safety-close");
         await close.scrollIntoViewIfNeeded();
         await expect(close, route || "/en").toBeInViewport();
@@ -1330,12 +1331,23 @@ test("large text, set in the browser: the check-in conflict dialog shows the who
         await page.getByTestId("checkin-mood-2").click();
         // Changed elsewhere while this copy was open: the save asks, with both versions.
         await seedCheckIns(email, password, today, [{ offset: 0, mood: percent === 200 ? 3 : 5 }]);
+        const fontSize = (el: Element) => getComputedStyle(el).fontSize;
+        expect(await page.getByTestId("checkin-save").evaluate(fontSize), `Save, ${route} ${percent} %`).toBe(percent === 100 ? "16px" : "32px");
         await page.getByTestId("checkin-save").click();
         await expect(page.getByTestId("checkin-conflict-dialog"), `${route} ${percent} %`).toBeVisible({ timeout: 15_000 });
+        // Stops growing like the page behind it, nothing's cut off, and both choices can be reached.
+        const dialog = page.getByTestId("checkin-conflict-dialog");
+        expect(await dialog.evaluate((el) => [getComputedStyle(el).fontSize, getComputedStyle(el.querySelector("h2")!).fontSize, getComputedStyle(el.querySelector("[data-testid=checkin-conflict-date]")!).fontSize, el.scrollWidth - el.clientWidth]), `the dialog, ${route} ${percent} %`).toEqual(percent === 100 ? ["16px", "18px", "14px", 0] : ["32px", "35.2px", "28px", 0]);
+        for (const id of ["checkin-conflict-use-other", "checkin-conflict-keep-mine"]) {
+          await page.getByTestId(id).scrollIntoViewIfNeeded();
+          await expect(page.getByTestId(id), `${id}, ${route} ${percent} %`).toBeInViewport();
+        }
         for (const side of ["mine", "other"]) {
           const where = `${route || "/"} ${percent} %, ${side}`;
           const card = page.getByTestId(`checkin-conflict-${side}`);
           const word = page.getByTestId(`checkin-conflict-${side}-mood`);
+          // Stops growing at about 200 % (decision 231), and the same at normal size.
+          expect(await card.evaluate((el) => [getComputedStyle(el).fontSize, getComputedStyle(el.querySelector("p")!).fontSize]), where).toEqual(percent === 100 ? ["16px", "14px"] : ["32px", "28px"]);
           await expect(word, where).toHaveText(/\S/);
           const fit = await word.evaluate((el, cardId) => {
             // Word by word: "Pas bien" may wrap between its words, never inside one.
@@ -1365,6 +1377,35 @@ test("large text, set in the browser: the check-in conflict dialog shows the who
         expect.soft(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth), `${route || "/"} ${percent} %`).toBe(0);
         await page.getByTestId("checkin-conflict-use-other").click();
         await expect(page.getByTestId("checkin-conflict-dialog")).toHaveCount(0);
+      }
+    }
+    // On a phone the entry's visible Save is the top one: the bottom one is hidden (Web Tester, #253).
+    // Its words stay whole: "Enregistr / er" was French's at 32 px, with too much padding.
+    const splitWords = (el: Element) => {
+      if (!el.isConnected) return null;
+      const text = el.firstChild!;
+      return [...(text.textContent ?? "").matchAll(/\S+/g)].filter((word) => {
+        const range = document.createRange();
+        range.setStart(text, word.index);
+        range.setEnd(text, word.index + word[0].length);
+        return new Set([...range.getClientRects()].map((rect) => rect.top)).size > 1;
+      }).map((word) => word[0]);
+    };
+    for (const [route, saved] of [["", "en"], ["/fr", "fr"], ["/es", "es"], ["/pt-br", "pt"]]) {
+      await setProfileLocale(email, password, saved);
+      for (const percent of [100, 300]) {
+        const where = `${route || "/"} ${percent} %`;
+        await textAt(percent);
+        await page.goto(`${route}/app/write`);
+        const top = page.getByTestId("entry-save-top");
+        await expect(top).toBeVisible();
+        await expect(page.getByTestId("entry-save")).toBeHidden();
+        const size = percent === 100 ? "16px" : "32px";
+        for (const button of [top, page.getByTestId("entry-cancel")]) {
+          // Both retry: the page can swap the button out as it settles, and a detached one reads as "".
+          await expect(button, where).toHaveCSS("font-size", size);
+          await expect.poll(() => button.evaluate(splitWords), where).toEqual([]);
+        }
       }
     }
   } finally {
@@ -1407,6 +1448,59 @@ test("large text, set in the browser: Set up stays inside a 320 px phone", async
         });
         console.log(`Set up's time, ${saved} at ${percent}%: needs ${time.needs}, has ${time.has}, font ${time.font}`);
         expect.soft(time.needs, `${saved} at ${percent}%`).toBeLessThanOrEqual(time.has);
+      }
+    }
+  } finally {
+    await cleanup(email);
+  }
+});
+
+// Someone has to dial it: a number never breaks across lines, and its line stays at 28 px or more (#247, UX).
+// Tagged: ci.yml runs it where the numbers or the card change, and daily.
+test("large text: every help number on the list stays whole on a phone", { tag: "@help-numbers" }, async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
+  test.setTimeout(300_000);
+  const email = newEmail();
+  const cdp = await page.context().newCDPSession(page);
+  try {
+    const password = await accountAtSetup(page, email);
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    const saveProfile = await profileSaver(email, password);
+    await cdp.send("Page.setFontSizes", { fontSizes: { standard: 48, fixed: 39 } });
+    for (const { code, helpline, emergency } of countries.countries) {
+      await saveProfile({ p_country: code });
+      // /en, not /: from /pt-br the cookie sends / back there, and the saved-language page won't
+      // move to the same language twice in a row, so it stays on its link (#179).
+      for (const [route, saved] of [["/en", "en"], ["/fr", "fr"], ["/es", "es"], ["/pt-br", "pt"]]) {
+        await saveProfile({ p_locale: saved });
+        await page.goto(`${route}/app/me`);
+        await page.getByTestId("me-get-help").click({ timeout: 15_000 });
+        await expect(page.getByTestId("safety-card"), `${code} ${route}`).toBeVisible();
+        for (const width of [320, 390]) {
+          await page.setViewportSize({ width, height: 640 });
+          for (const [id, display] of [["safety-call-helpline", helpline?.display], ["safety-call-emergency", emergency?.display]]) {
+            if (!display) continue;
+            const fit = await page.getByTestId(id!).evaluate((el, number) => {
+              const text = el.firstChild as Text;
+              const at = text.data.indexOf(number);
+              if (at < 0) return { found: false };
+              // The brackets stay with it.
+              const range = document.createRange();
+              range.setStart(text, text.data[at - 1] === "(" ? at - 1 : at);
+              range.setEnd(text, text.data[at + number.length] === ")" ? at + number.length + 1 : at + number.length);
+              const rects = [...range.getClientRects()];
+              const card = el.closest("[data-testid=safety-card]")!.getBoundingClientRect();
+              return {
+                found: true,
+                lines: new Set(rects.map((rect) => Math.round(rect.top))).size,
+                inside: rects.every((rect) => rect.right <= card.right - 23),
+                readable: parseFloat(getComputedStyle(el).fontSize) >= 28,
+              };
+            }, display.replaceAll(" ", String.fromCharCode(160)));
+            expect.soft(fit, `${code} ${id} ${route} at ${width} px`).toEqual({ found: true, lines: 1, inside: true, readable: true });
+          }
+        }
       }
     }
   } finally {

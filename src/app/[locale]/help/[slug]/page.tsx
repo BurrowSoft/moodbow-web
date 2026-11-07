@@ -37,7 +37,7 @@ export default async function HelpArticlePage({ params, searchParams }: PageProp
   // The link back to Help is chrome, so it sits after the article, outside
   // [data-content=article] (Web Tester, #23).
   return (
-    <PageShell
+    <PageShell capTitle
       title={article.title}
       article
       draft={state === "draft"}
