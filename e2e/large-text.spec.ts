@@ -129,7 +129,7 @@ test("large text on a wide screen: Consent's boxes grow with the browser's setti
   const cdp = await page.context().newCDPSession(page);
   for (const [width, percent] of [[1280, 150], [1280, 200], [1920, 200], [1920, 300], [2560, 300]]) {
     await page.setViewportSize({ width, height: 800 });
-    await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
+    await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: Math.round((13 * percent) / 100) } });
     for (const language of LANGUAGES) {
       await page.goto(`${language}/consent`);
       const box = await page.evaluate(() => parseFloat(getComputedStyle(document.querySelector("form label span")!).fontSize));
