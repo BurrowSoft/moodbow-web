@@ -9,14 +9,15 @@ import { dismissPolicyNotice } from "./actions";
 
 // Once, for a privacy change that's coming. It blocks nothing, and it goes as soon as it's
 // dismissed: if saving that fails, it comes back next time, which is the honest result.
+// Under the safety card's cap (UX): nobody gets 3 to 4 screens of a notice at 300 %.
 export function PolicyNotice({ id, date }: { id: string; date: string | null }) {
   const t = useTranslations("app");
   const router = useRouter();
   const [shown, setShown] = useState(true);
   if (!shown) return null;
   return (
-    <section aria-labelledby="policy-notice-title" data-testid="policy-notice" className={`mb-6 ${JOURNAL_CARD} print:hidden`}>
-      <h2 id="policy-notice-title" className="text-lg font-medium text-text">
+    <section aria-labelledby="policy-notice-title" data-testid="policy-notice" className={`mb-6 ${JOURNAL_CARD} [font-size:min(1rem,max(8vw,16px))] print:hidden`}>
+      <h2 id="policy-notice-title" className="font-medium text-text [font-size:min(1.125rem,max(9vw,18px))]">
         {t("policyNoticeTitle")}
       </h2>
       <p className="mt-1 text-text">
