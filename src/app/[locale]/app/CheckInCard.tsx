@@ -16,6 +16,7 @@ import { checkInChips, formatHours } from "./checkInChips";
 import { JOURNAL_CARD, MOOD_FACE, MOOD_LABEL, MOOD_ROW, PRIMARY_SAVE } from "@/lib/ui/journalLayout";
 import { MoodFace } from "@/components/MoodFace";
 import { onArrival } from "@/lib/ui/arrival";
+import { useUntilLoaded } from "@/lib/ui/untilLoaded";
 import { saveCheckIn, type CheckInState } from "./actions";
 import { useCheckInDraft } from "./CheckInDraft";
 
@@ -643,6 +644,8 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
   const seen = useRef(false);
   const showsSummary = !editing && fields.mood !== null;
   const moodTitle = useId();
+  // A tap before the page's code has run does nothing (#238), so the card says so if that takes a while.
+  const untilLoaded = useUntilLoaded();
   // The "c" shortcut (1.1 O): focus the mood (the chosen face, else the
   // first) or, once checked in, the summary's heading.
   useEffect(
@@ -653,10 +656,15 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
       }),
     [],
   );
+  // Once it takes input: focus can't land on an inert card, on a page load.
+  useEffect(() => {
+    if (!untilLoaded.inert && autoFocus && !showsSummary) root.current?.querySelector<HTMLElement>("[role=radio]")?.focus();
+    // Only when the card opens.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [untilLoaded.inert]);
   useEffect(() => {
     if (!seen.current) {
       seen.current = true;
-      if (autoFocus && !showsSummary) root.current?.querySelector<HTMLElement>("[role=radio]")?.focus();
       return;
     }
     if (showsSummary) {
@@ -687,7 +695,7 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
       fields.stress !== "" ? { label: t("stressChip", { level: Number(fields.stress) }), hex: valueHex("stress", fields.stress) } : null,
     ].filter((c): c is { label: string; hex: string | null } => c !== null);
     return (
-      <section ref={root} className={JOURNAL_CARD} data-testid="checkin-summary">
+      <section {...untilLoaded} ref={root} className={JOURNAL_CARD} data-testid="checkin-summary">
         {conflictDialog}
         {/* The mockups (decision 161): the mood's face and its name, Edit on
             the right. The heading still says what it answers, for screen
@@ -728,7 +736,7 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
   }
 
   return (
-    <form ref={(el) => void (root.current = el)} onSubmit={submit} className={JOURNAL_CARD} data-testid="checkin-card">
+    <form {...untilLoaded} ref={(el) => void (root.current = el)} onSubmit={submit} className={JOURNAL_CARD} data-testid="checkin-card">
       {conflictDialog}
       {loadFailed && row === null && <CheckInLoadFailed />}
       {/* One group, named once (a fieldset + a radiogroup were read twice;
