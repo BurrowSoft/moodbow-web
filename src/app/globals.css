@@ -276,6 +276,16 @@ input[type="date"]:focus-within {
 .legal-prose th { color: var(--text); font-weight: 500; background: var(--surface); }
 /* Facts still to confirm (⏳, [VITOR]): visible on drafts only (a page can't go live with any). */
 .legal-prose mark.legal-todo { background: var(--draft-bg); color: var(--draft-text); padding: 0 0.2em; border-radius: 0.25rem; }
+/* Below the wide layout (rem-based, so large text counts as narrow), the same cap as Consent's: at
+   300 % on a phone, 48 px left about seven letters a line, and Spanish split 98 words on one page.
+   Type stops growing; nothing is cut off. The same sizes as above at normal size. */
+@media (width < 40rem) {
+  .legal-prose { font-size: min(1rem, max(8vw, 16px)); }
+  .legal-prose h2 { font-size: 1.25em; }
+  .legal-prose h3 { font-size: 1.05em; }
+  .legal-prose ul,
+  .legal-prose ol { padding-left: 1.25em; }
+}
 /* The in-app navigation bar (components/NavProgress.tsx): a segment sliding across. */
 @keyframes nav-progress { from { transform: translateX(-100%); } to { transform: translateX(300%); } }
 

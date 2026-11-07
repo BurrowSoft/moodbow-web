@@ -137,3 +137,53 @@ test("large text on a wide screen: Consent's boxes grow with the browser's setti
     }
   }
 });
+
+// The legal pages and Help share this. 48 px on a 320 px phone split ordinary words (Web Tester's
+// numbers, 7 Nov): under the cap only a word wider than its line may, like an email address.
+test("large text: a legal page's words stay whole on a 320 px phone, and normal size stays as it was", async ({ page, browserName }, testInfo) => {
+  test.skip(browserName !== "chromium" || testInfo.project.name !== "desktop", "Page.setFontSizes is Chromium's; once is enough");
+  test.setTimeout(120_000);
+  const cdp = await page.context().newCDPSession(page);
+  await page.setViewportSize({ width: 320, height: 640 });
+  for (const percent of [100, 200, 300]) {
+    await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
+    for (const route of ["/privacy", "/terms", "/es/privacy", "/es/terms", "/fr/privacy", "/pt-br/privacy"]) {
+      await page.goto(route);
+      await page.evaluate(() => document.fonts.ready);
+      const measured = await page.evaluate(() => {
+        const out: string[] = [];
+        const roots = [document.querySelector("h1"), ...document.querySelectorAll(".legal-prose :is(p, li, h2, h3)")];
+        for (const root of roots) {
+          if (!root) continue;
+          const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+          for (let node = walker.nextNode() as Text | null; node; node = walker.nextNode() as Text | null) {
+            for (const m of node.data.matchAll(/[^\s-]+/g)) {
+              const range = document.createRange();
+              range.setStart(node, m.index);
+              range.setEnd(node, m.index + m[0].length);
+              if (range.getClientRects().length < 2) continue;
+              const probe = document.createElement("span");
+              probe.style.cssText = "position:absolute;white-space:nowrap";
+              probe.textContent = m[0];
+              root.append(probe);
+              const wide = probe.getBoundingClientRect().width;
+              probe.remove();
+              if (wide <= root.getBoundingClientRect().width) out.push(m[0]);
+            }
+          }
+        }
+        const size = (css: string) => getComputedStyle(document.querySelector(css)!).fontSize;
+        return { split: out, body: size(".legal-prose p"), section: size(".legal-prose h2"), overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth };
+      });
+      expect.soft(measured.split, `${route} at ${percent} %`).toEqual([]);
+      expect.soft(measured.overflow, `${route} at ${percent} %`).toBe(0);
+      if (percent === 100) expect.soft([measured.body, measured.section], route).toEqual(["16px", "20px"]);
+      if (percent === 300) expect.soft(measured.body, route).toBe("25.6px");
+    }
+  }
+  // From the wide layout up, at normal size, as #241 left it.
+  await cdp.send("Page.setFontSizes", { fontSizes: { standard: 16, fixed: 13 } });
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto("/privacy");
+  expect(await page.evaluate(() => getComputedStyle(document.querySelector(".legal-prose p")!).fontSize)).toBe("17px");
+});
