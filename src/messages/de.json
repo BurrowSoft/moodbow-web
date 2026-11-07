@@ -62,7 +62,7 @@
     "featureInsightsTitle": "Sieh, was in deinen Tagen zusammengehört",
     "featureInsightsBody": "Diagramme für Woche, Monat und 3 Monate.",
     "privateTitle": "Privat von Grund auf",
-    "privateBody": "Nur du kannst dein Tagebuch lesen. Exportiere oder lösche alles, jederzeit."
+    "privateBody": "Dein Tagebuch ist privat und an dein Konto gebunden. Exportiere oder lösche alles unter Ich."
   },
   "support": {
     "title": "Support",
@@ -169,7 +169,7 @@
     "welcome2Title": "Erkenne deine Muster",
     "welcome2Body": "Dein Verlauf und deine Diagramme zeigen, was gute Tage noch besser macht und was oft vor schweren Tagen kommt.",
     "welcome3Title": "Privat und nur für dich",
-    "welcome3BodyNoAi": "Nur du kannst dein Tagebuch lesen, und du kannst unter Ich jederzeit alles löschen.",
+    "welcome3BodyNoAi": "Dein Tagebuch ist privat und an dein Konto gebunden, und du kannst unter Ich alles löschen.",
     "welcomeNext": "Weiter",
     "welcomeSkip": "Überspringen",
     "welcomeStart": "Los geht’s",

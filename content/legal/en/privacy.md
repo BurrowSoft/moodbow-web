@@ -12,7 +12,7 @@ Last updated: 6 November 2026
 Moodbow is a private journal made by Vitor Ribeiro Carvalho, trading as BurrowSoft (297 Moo 1, Baan Sanian, Mueang Nan, Nan 55000, Thailand), "we" in this policy. We wrote this to be read, not skimmed past. If anything is unclear, email support@moodbow.com.
 
 ### The short version
-- Only you can read your journal. BurrowSoft staff don't read journals; direct database access is limited to maintenance by Vitor Ribeiro Carvalho. We don't sell your data, show ads, or use your journal to train AI.
+- Your journal is private to your account. BurrowSoft staff don't read journals; direct database access is limited to maintenance by Vitor Ribeiro Carvalho. We don't sell your data, show ads, or use your journal to train AI.
 {pending:ai_live}- AI features are optional. If you turn them on, the parts of your journal needed for a reflection or report are sent to our AI provider, Anthropic, in the USA.{/pending}
 - You can export everything, or delete your account and everything in it, from the app{pending:web_journal_live} or the website{/pending}.
 
@@ -23,6 +23,7 @@ Moodbow is a private journal made by Vitor Ribeiro Carvalho, trading as BurrowSo
 
 **Without an email, only this phone's sign-in can open your journal.** If that sign-in is lost, for example because you delete the app, clear its data, restore or change your phone, or because of a technical fault, you can't get back in, and we can't return your journal or delete it on request, because we have no way to confirm it's yours. It stays on our servers until the 12-month rule deletes it. Adding an email protects you against this, and Export gives you your own copy.{/pending}
 **Your journal:** the entries you write, your daily check-ins (mood, sleep, movement (active minutes), stress), the dates they belong to, and which entries you mark as moments.
+**Sensitive data:** what you write and log can include sensitive data, such as your health, your mood or your private life. We process it only with the consent you give when you create your account.
 **Your settings:** language, country, time zone, reminder time, and your AI choices (on or off, tone, focus areas).
 **AI content (only if AI is on):** the reflections and reports the AI writes for you{pending:ai_memory}, and the short facts Moodbow remembers about you, which you can see, edit and delete in Me → What Moodbow remembers{/pending}.
 **AI usage:** for each AI request, the feature, the model, the number of tokens, the cost and the credits used. Not the text of your entries or of the AI's answer.
@@ -80,11 +81,15 @@ Wherever you live, you can:
 - **correct** it: edit any entry, check-in or setting;
 - **delete** it: delete any item, or your whole account in Me → Delete account{pending:anon_start_live} (without an email, this needs access to the app on your phone){/pending};
 {pending:ai_live}- **withdraw your AI consent** at any time in Me → AI. This stops new AI requests; past reflections stay until you delete them;{/pending}
-- **object or ask questions**: email support@moodbow.com. We answer within 30 days.
-You can also complain to a data-protection authority: in Thailand, the Personal Data Protection Committee (PDPC); in the EU or UK, your local authority.
+- **limit how we use it:** we use your journal only to run the service. You choose what you write, and you can edit or delete any of it. To limit anything else, write to us;
+- **object or ask questions**: email support@moodbow.com. We answer within 10 days.
+
+**How to make a request:** most of this is in Me, with no need to ask. Otherwise, email support@moodbow.com and say what you'd like done. Vitor Ribeiro Carvalho handles requests. We may ask you to write from your account's email so we know it's yours. Without an email on the account we can't confirm that, so use Me in the app.
+
+You can also complain to a data-protection authority: in Thailand, the Personal Data Protection Committee (PDPC); in Mexico, the Secretaría Anticorrupción y Buen Gobierno; in Argentina, the Agencia de Acceso a la Información Pública (AAIP); in Chile, the Agencia de Protección de Datos Personales, once it has begun work; in the EU or UK, your local authority; elsewhere, your country's authority.
 
 ### 6. Security
-Your data is encrypted in transit (HTTPS) and at rest. Database rules make sure each account can only ever read its own rows. {pending:app_app_lock}You can add an app lock (PIN or fingerprint/face) on your phone.{/pending} No system is perfectly secure; if a breach ever affects your data, we'll tell you and the authorities as the law requires.
+Your data is encrypted in transit (HTTPS) and at rest. Database rules make sure each account can only ever read its own rows. {pending:app_app_lock}You can add an app lock (PIN or fingerprint/face) on your phone.{/pending} No system is perfectly secure; if a breach ever affects your data, we'll tell you and the authorities as the law requires{pending:security_notice_live}: by email if your account has one, and in the app and on moodbow.com otherwise{/pending}.
 
 ### 7. Age
 Moodbow is for people aged 18 and older. We don't knowingly collect data from anyone younger. If you believe a child has an account, email us and we'll delete it.

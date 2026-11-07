@@ -3,7 +3,7 @@ title: Privacy and your data
 summary: Who can read your journal, and how to download it.
 topic: Privacy & account
 ---
-Only you can read your journal. We don't sell your data or show ads.
+Your journal is private to your account. We don't sell your data or show ads.
 
 **Download everything:** go to **Me → Export my data**. You get a file with everything you've written and logged. {pending:app_export_csv}You can also choose **Spreadsheet (.csv)** to get your days as a spreadsheet, which opens in Excel or Google Sheets{pending:import_live}, and which Moodbow can import again on the web{/pending}.{/pending}
 

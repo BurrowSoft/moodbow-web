@@ -62,7 +62,7 @@
     "featureInsightsTitle": "Descubre qué suele ir de la mano en tus días",
     "featureInsightsBody": "Gráficos de la semana, el mes y 3 meses.",
     "privateTitle": "Privado desde el diseño",
-    "privateBody": "Solo tú puedes leer tu diario. Exporta o borra todo cuando quieras."
+    "privateBody": "Tu diario es privado y está vinculado a tu cuenta. Exporta o elimina todo en Yo."
   },
   "support": {
     "title": "Soporte",
@@ -169,7 +169,7 @@
     "welcome2Title": "Descubre tus patrones",
     "welcome2Body": "Tu cronología y tus gráficos muestran qué mejora los días buenos y qué suele venir antes de los difíciles.",
     "welcome3Title": "Privado y tuyo",
-    "welcome3BodyNoAi": "Solo tú puedes leer tu diario, y puedes borrarlo todo cuando quieras en Yo.",
+    "welcome3BodyNoAi": "Tu diario es privado y está vinculado a tu cuenta, y puedes borrarlo todo en Yo.",
     "welcomeNext": "Siguiente",
     "welcomeSkip": "Omitir",
     "welcomeStart": "Empezar",
