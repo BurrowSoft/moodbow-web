@@ -287,7 +287,7 @@ export function ShareMonth({
                   </button>
                 </div>
                 </div>
-                <label htmlFor="share-line" className="block text-sm font-medium text-text">
+                <label htmlFor="share-line" className="block leading-[1.429] [font-size:min(0.875rem,max(8.75vw,28px))] font-medium text-text">
                   {t("shareAddLine")}
                 </label>
                 <input
@@ -302,13 +302,13 @@ export function ShareMonth({
                 />
                 {/* Shown always; announced only at 10 left and at 0, not on
                     every key (decision 143). */}
-                <p id="share-line-count" data-testid="share-line-count" className="text-sm text-muted">
+                <p id="share-line-count" data-testid="share-line-count" className="leading-[1.429] [font-size:min(0.875rem,max(8.75vw,28px))] text-muted">
                   {t("shareLineCount", { count: left })}
                 </p>
                 <p role="status" className="sr-only" data-testid="share-line-count-announce">
                   {left === 10 || left === 0 ? t("shareLineCount", { count: left }) : null}
                 </p>
-                <p className="text-sm text-muted">{t("sharePrivacyNote")}</p>
+                <p className="leading-[1.429] [font-size:min(0.875rem,max(8.75vw,28px))] text-muted">{t("sharePrivacyNote")}</p>
                 {encodeFailed && (
                   <p role="alert" data-testid="share-encode-failed" className="font-medium text-accent">
                     {tt("errGeneric")}

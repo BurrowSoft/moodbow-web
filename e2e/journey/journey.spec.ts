@@ -1330,12 +1330,23 @@ test("large text, set in the browser: the check-in conflict dialog shows the who
         await page.getByTestId("checkin-mood-2").click();
         // Changed elsewhere while this copy was open: the save asks, with both versions.
         await seedCheckIns(email, password, today, [{ offset: 0, mood: percent === 200 ? 3 : 5 }]);
+        const fontSize = (el: Element) => getComputedStyle(el).fontSize;
+        expect(await page.getByTestId("checkin-save").evaluate(fontSize), `Save, ${route} ${percent} %`).toBe(percent === 100 ? "16px" : "32px");
         await page.getByTestId("checkin-save").click();
         await expect(page.getByTestId("checkin-conflict-dialog"), `${route} ${percent} %`).toBeVisible({ timeout: 15_000 });
+        // Stops growing like the page behind it, nothing's cut off, and both choices can be reached.
+        const dialog = page.getByTestId("checkin-conflict-dialog");
+        expect(await dialog.evaluate((el) => [getComputedStyle(el).fontSize, getComputedStyle(el.querySelector("h2")!).fontSize, getComputedStyle(el.querySelector("[data-testid=checkin-conflict-date]")!).fontSize, el.scrollWidth - el.clientWidth]), `the dialog, ${route} ${percent} %`).toEqual(percent === 100 ? ["16px", "18px", "14px", 0] : ["32px", "35.2px", "28px", 0]);
+        for (const id of ["checkin-conflict-use-other", "checkin-conflict-keep-mine"]) {
+          await page.getByTestId(id).scrollIntoViewIfNeeded();
+          await expect(page.getByTestId(id), `${id}, ${route} ${percent} %`).toBeInViewport();
+        }
         for (const side of ["mine", "other"]) {
           const where = `${route || "/"} ${percent} %, ${side}`;
           const card = page.getByTestId(`checkin-conflict-${side}`);
           const word = page.getByTestId(`checkin-conflict-${side}-mood`);
+          // Stops growing at about 200 % (decision 231), and the same at normal size.
+          expect(await card.evaluate((el) => [getComputedStyle(el).fontSize, getComputedStyle(el.querySelector("p")!).fontSize]), where).toEqual(percent === 100 ? ["16px", "14px"] : ["32px", "28px"]);
           await expect(word, where).toHaveText(/\S/);
           const fit = await word.evaluate((el, cardId) => {
             // Word by word: "Pas bien" may wrap between its words, never inside one.
@@ -1365,6 +1376,35 @@ test("large text, set in the browser: the check-in conflict dialog shows the who
         expect.soft(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth), `${route || "/"} ${percent} %`).toBe(0);
         await page.getByTestId("checkin-conflict-use-other").click();
         await expect(page.getByTestId("checkin-conflict-dialog")).toHaveCount(0);
+      }
+    }
+    // On a phone the entry's visible Save is the top one: the bottom one is hidden (Web Tester, #253).
+    // Its words stay whole: "Enregistr / er" was French's at 32 px, with too much padding.
+    const splitWords = (el: Element) => {
+      if (!el.isConnected) return null;
+      const text = el.firstChild!;
+      return [...(text.textContent ?? "").matchAll(/\S+/g)].filter((word) => {
+        const range = document.createRange();
+        range.setStart(text, word.index);
+        range.setEnd(text, word.index + word[0].length);
+        return new Set([...range.getClientRects()].map((rect) => rect.top)).size > 1;
+      }).map((word) => word[0]);
+    };
+    for (const [route, saved] of [["", "en"], ["/fr", "fr"], ["/es", "es"], ["/pt-br", "pt"]]) {
+      await setProfileLocale(email, password, saved);
+      for (const percent of [100, 300]) {
+        const where = `${route || "/"} ${percent} %`;
+        await textAt(percent);
+        await page.goto(`${route}/app/write`);
+        const top = page.getByTestId("entry-save-top");
+        await expect(top).toBeVisible();
+        await expect(page.getByTestId("entry-save")).toBeHidden();
+        const size = percent === 100 ? "16px" : "32px";
+        for (const button of [top, page.getByTestId("entry-cancel")]) {
+          // Both retry: the page can swap the button out as it settles, and a detached one reads as "".
+          await expect(button, where).toHaveCSS("font-size", size);
+          await expect.poll(() => button.evaluate(splitWords), where).toEqual([]);
+        }
       }
     }
   } finally {
