@@ -1,15 +1,15 @@
 {
   "meta": {
     "siteName": "Moodbow",
-    "title": "Moodbow — Un diario che impara la tua storia",
+    "title": "Moodbow — Un diario privato per le tue giornate",
     "pageTitle": "{title} · Moodbow",
     "description": "Moodbow è un diario privato che ti aiuta a notare, nel tempo, le tendenze del tuo umore, del sonno e delle abitudini. In arrivo da BurrowSoft.",
     "ogDescription": "Un diario privato che ti aiuta a notare, nel tempo, le tendenze del tuo umore, del sonno e delle abitudini. In arrivo.",
     "ogImageAlt": "Logo di Moodbow con il testo: In arrivo. Un diario che impara la tua storia.",
-    "descriptionLaunch": "Un diario privato che impara la tua storia e mostra cosa dà forma alle tue giornate.",
-    "ogDescriptionLaunch": "Un diario privato che impara la tua storia e mostra cosa dà forma alle tue giornate.",
+    "descriptionLaunch": "Un diario privato che ti mostra cosa va insieme nelle tue giornate.",
+    "ogDescriptionLaunch": "Un diario privato che ti mostra cosa va insieme nelle tue giornate.",
     "ogImageAltLaunch": "Moodbow: il tuo mese, come un arcobaleno",
-    "manifestDescription": "Un diario che impara la tua storia."
+    "manifestDescription": "Un diario privato per le tue giornate."
   },
   "common": {
     "logoAlt": "Moodbow",
@@ -41,7 +41,7 @@
   "home": {
     "comingSoon": "In arrivo",
     "heroTitle": "Il tuo mese, come un arcobaleno",
-    "heroSub": "Un diario privato che impara la tua storia e mostra cosa dà forma alle tue giornate.",
+    "heroSub": "Un diario privato che ti mostra cosa va insieme nelle tue giornate.",
     "notify": "Avvisami",
     "notifyAria": "Ricevi un'email quando Moodbow sarà disponibile",
     "notifySubject": "Avvisatemi quando esce Moodbow",
@@ -59,7 +59,7 @@
     "featureWriteBody": "Una riflessione gentile, quando la vuoi.",
     "featureWriteNoAiTitle": "Scrivi della tua giornata",
     "featureWriteNoAiBody": "Con parole tue, quando ne hai voglia.",
-    "featureInsightsTitle": "Scopri cosa dà forma alle tue giornate",
+    "featureInsightsTitle": "Scopri cosa va insieme nelle tue giornate",
     "featureInsightsBody": "Grafici di una settimana, un mese e 3 mesi.",
     "privateTitle": "Privato per scelta",
     "privateBody": "Solo tu puoi leggere il tuo diario. Esporta o elimina tutto, quando vuoi."
@@ -164,7 +164,7 @@
     "signinNoAccount": "Prima volta qui? Crea un account"
   },
   "onboarding": {
-    "welcome1Title": "Un diario che impara la tua storia",
+    "welcome1Title": "Un diario privato per le tue giornate",
     "welcome1Body": "Registra umore, sonno e movimento in pochi secondi, e scrivi della tua giornata quando ne hai voglia.",
     "welcome2Title": "Scopri le tue tendenze",
     "welcome2Body": "La cronologia e i grafici mostrano cosa rende migliori le giornate buone e cosa tende a precedere quelle difficili.",
