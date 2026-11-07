@@ -1378,6 +1378,17 @@ test("large text, set in the browser: the check-in conflict dialog shows the who
         await expect(page.getByTestId("checkin-conflict-dialog")).toHaveCount(0);
       }
     }
+    // On a phone the entry's visible Save is the top one: the bottom one is hidden (Web Tester, #253).
+    for (const percent of [100, 300]) {
+      await textAt(percent);
+      await page.goto("/app/write");
+      const top = page.getByTestId("entry-save-top");
+      await expect(top).toBeVisible();
+      await expect(page.getByTestId("entry-save")).toBeHidden();
+      const size = percent === 100 ? "16px" : "32px";
+      expect(await top.evaluate((el) => getComputedStyle(el).fontSize), `Save, ${percent} %`).toBe(size);
+      expect(await page.getByTestId("entry-cancel").evaluate((el) => getComputedStyle(el).fontSize), `Cancel, ${percent} %`).toBe(size);
+    }
   } finally {
     await cleanup(email);
   }

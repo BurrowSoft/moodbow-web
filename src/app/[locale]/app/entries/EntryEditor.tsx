@@ -94,10 +94,12 @@ export const hasDraft = (uid: string, entryId: string) => readDraft(localKey("dr
 // nothing earlier that day was crisis-flagged (the page decides); shown only
 // while the text is empty and the entry is still on that day (reviewer #83).
 export type EditorStart = { at: number | "end"; question?: string };
+// Stops growing at about 200 % on a narrow screen (decision 231), like PRIMARY_SAVE.
+const CAPPED = "max-sm:[font-size:min(1rem,max(10vw,32px))]";
 // Save in the top row (narrow screens only): the primary button, sized for
 // a bar.
 const TOP_SAVE =
-  "ml-auto inline-flex min-h-11 max-w-full items-center justify-center rounded-full bg-accent px-6 text-center font-medium [overflow-wrap:anywhere] text-on-accent hover:bg-accent-hover disabled:opacity-50 aria-disabled:opacity-50 sm:hidden";
+  `ml-auto inline-flex min-h-11 max-w-full items-center justify-center rounded-full bg-accent px-6 text-center font-medium [overflow-wrap:anywhere] text-on-accent hover:bg-accent-hover disabled:opacity-50 aria-disabled:opacity-50 sm:hidden ${CAPPED}`;
 
 type Props = {
   promptDate?: string | null;
@@ -630,7 +632,7 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
       </div>
       {/* A quiet invitation, never inserted: only while the entry is empty. */}
       {showPrompt && (
-        <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-muted" data-testid="entry-prompt">
+        <p className={`flex flex-wrap items-baseline gap-x-3 gap-y-1 text-muted ${CAPPED}`} data-testid="entry-prompt">
           <span id="entry-prompt-text" data-testid="entry-prompt-text" className="min-w-0 [overflow-wrap:anywhere]">
             {promptText(promptFor(promptDate!, promptStep), language)}
           </span>
@@ -675,7 +677,7 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
             {t("entrySave")}
           </button>
         </span>
-        <button type="button" data-testid="entry-cancel" onClick={() => (keep ? setDialog("leave") : leave())} className={dialogButton()}>
+        <button type="button" data-testid="entry-cancel" onClick={() => (keep ? setDialog("leave") : leave())} className={`${dialogButton()} ${CAPPED}`}>
           {t("cancel")}
         </button>
         {initial && (
@@ -683,7 +685,7 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
             type="button"
             data-testid="entry-delete"
             onClick={() => setDialog("delete")}
-            className="ml-auto font-medium text-accent underline underline-offset-4"
+            className={`ml-auto font-medium text-accent underline underline-offset-4 ${CAPPED}`}
           >
             {t("entryDelete")}
           </button>
