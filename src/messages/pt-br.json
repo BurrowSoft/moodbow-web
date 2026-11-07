@@ -62,7 +62,7 @@
     "featureInsightsTitle": "Veja o que costuma andar junto nos seus dias",
     "featureInsightsBody": "Gráficos da semana, do mês e de 3 meses.",
     "privateTitle": "Privado desde o início",
-    "privateBody": "Seu diário é privado na sua conta. Exporte ou apague tudo em Perfil."
+    "privateBody": "Seu diário é privado e vinculado à sua conta. Exporte ou apague tudo em Perfil."
   },
   "support": {
     "title": "Suporte",
@@ -169,7 +169,7 @@
     "welcome2Title": "Veja seus padrões",
     "welcome2Body": "Sua linha do tempo e seus gráficos mostram o que deixa os dias bons ainda melhores, e o que costuma vir antes dos dias difíceis.",
     "welcome3Title": "Privado, e só seu",
-    "welcome3BodyNoAi": "Seu diário é privado na sua conta, e você pode apagar tudo em Perfil.",
+    "welcome3BodyNoAi": "Seu diário é privado e vinculado à sua conta, e você pode apagar tudo em Perfil.",
     "welcomeNext": "Próximo",
     "welcomeSkip": "Pular",
     "welcomeStart": "Começar",

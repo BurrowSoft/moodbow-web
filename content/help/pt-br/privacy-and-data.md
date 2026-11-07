@@ -4,7 +4,7 @@ summary: Quem pode ler seu diário e como baixá-lo.
 topic: Privacy & account
 pt-BR-draft: true
 ---
-Seu diário é privado na sua conta. Não vendemos seus dados nem mostramos anúncios.
+Seu diário é privado e vinculado à sua conta. Não vendemos seus dados nem mostramos anúncios.
 
 **Baixe tudo:** vá em **Perfil → Exportar meus dados**. Você recebe um arquivo com tudo o que escreveu e registrou. {pending:app_export_csv}Você também pode escolher **Planilha (.csv)** para receber seus dias em uma planilha, que abre no Excel ou no Google Planilhas{pending:import_live}, e que o Moodbow consegue importar de novo na web{/pending}.{/pending}
 
