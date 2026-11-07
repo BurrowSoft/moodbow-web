@@ -17,6 +17,7 @@ import { askAiConsent } from "@/lib/journal/ai";
 import { offeredLocales } from "@/i18n/routing";
 import { savedLanguageRoute } from "@/lib/savedLanguage";
 import { SavedLanguageRedirect } from "../app/SavedLanguageRedirect";
+import { legalLocale } from "@/lib/legalContent";
 import { ConsentForm } from "./ConsentForm";
 
 // Consent (M3): before Create account for new people; for signed-in people
@@ -64,14 +65,20 @@ export default async function ConsentPage({ params }: PageProps<"/[locale]/conse
           {ta("errGeneric")}
         </p>
       )}
-      <ConsentForm askAge={askAge} askAi={askAiConsent()} showBack={!user && !outage} />
-      {/* Help is never behind a consent, new or asked again: the card and its words only
-          come to this page, which the root layout doesn't send them to. */}
+      {/* Help first (UX): it's never behind a consent, new or asked again. The card and its
+          words only come to this page, which the root layout doesn't send them to. */}
       <NextIntlClientProvider messages={pickMessages(await getMessages(), ["me", "safety", "common"])}>
-        <div className="mt-[24px] [font-size:min(1rem,max(10vw,32px))] [&_a]:min-h-[44px] [&_button]:min-h-[44px]">
+        <div className="[font-size:min(1rem,max(10vw,32px))] [&_a]:min-h-[44px] [&_button]:min-h-[44px]">
           <GetHelpNow country={country} testId="consent-get-help" neutral />
         </div>
       </NextIntlClientProvider>
+      {/* Who keeps what, above the boxes and never collapsed, so nobody consents with it off screen
+          (decisions 224, 226). Under the safety card's cap, so at large text the boxes stay close:
+          the type stops growing, and nothing is cut off. */}
+      <p data-testid="consent-notice" className="text-text max-sm:[font-size:min(1rem,max(10vw,32px))] [overflow-wrap:anywhere]">
+        {t("consentNotice")}
+      </p>
+      <ConsentForm askAge={askAge} askAi={askAiConsent()} showBack={!user && !outage} legalInEnglish={legalLocale(locale, "privacy") !== locale} />
     </PageShell>
   );
 }

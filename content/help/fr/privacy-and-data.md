@@ -4,7 +4,7 @@ summary: Qui peut lire votre journal, et comment le télécharger.
 topic: Privacy & account
 fr-draft: true
 ---
-Votre journal n'est lisible que par vous. Nous ne vendons pas vos données et n'affichons pas de publicité.
+Votre journal est privé et lié à votre compte. Nous ne vendons pas vos données et n'affichons pas de publicité.
 
 **Tout télécharger :** allez dans **Moi → Exporter mes données**. Vous obtenez un fichier avec tout ce que vous avez écrit et noté. {pending:app_export_csv}Vous pouvez aussi choisir **Tableur (.csv)** pour obtenir vos jours sous forme de tableau, qui s'ouvre dans Excel ou Google Sheets{pending:import_live}, et que Moodbow peut réimporter sur le web{/pending}.{/pending}
 

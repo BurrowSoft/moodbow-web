@@ -64,7 +64,7 @@
     "featureInsightsTitle": "Sieh, was in deinen Tagen zusammengehört",
     "featureInsightsBody": "Diagramme für Woche, Monat und 3 Monate.",
     "privateTitle": "Privat von Grund auf",
-    "privateBody": "Nur du kannst dein Tagebuch lesen. Exportiere oder lösche alles, jederzeit."
+    "privateBody": "Dein Tagebuch ist privat und an dein Konto gebunden. Exportiere oder lösche alles unter Ich."
   },
   "support": {
     "title": "Support",
@@ -171,12 +171,13 @@
     "welcome2Title": "Erkenne deine Muster",
     "welcome2Body": "Dein Verlauf und deine Diagramme zeigen, was oft mit deinen guten und deinen schweren Tagen zusammenhängt.",
     "welcome3Title": "Privat und nur für dich",
-    "welcome3BodyNoAi": "Nur du kannst dein Tagebuch lesen, und du kannst unter Ich jederzeit alles löschen.",
+    "welcome3BodyNoAi": "Dein Tagebuch ist privat und an dein Konto gebunden, und du kannst unter Ich alles löschen.",
     "welcomeNext": "Weiter",
     "welcomeSkip": "Überspringen",
     "welcomeStart": "Los geht’s",
     "welcomeHaveAccount": "Ich habe schon ein Konto",
     "consentTitle": "Bevor du startest",
+    "consentNotice": "Moodbow wird von Vitor Ribeiro Carvalho betrieben, tätig als BurrowSoft, in Thailand. Wir bewahren dein Tagebuch auf, einschließlich sensibler Daten wie deiner Stimmung und Gesundheit, um dein Konto zu betreiben und es dir anzuzeigen. Wir verkaufen es nicht und nutzen es nicht für Werbung. Du kannst es unter Ich ändern oder löschen. Die Datenschutzerklärung enthält die Details.",
     "consentPrivacy": "Ich stimme den Nutzungsbedingungen und der Datenschutzerklärung zu",
     "consentHealth": "Ich stimme zu, dass Moodbow mein Tagebuch, das Angaben zu meiner Gesundheit und meinem Wohlbefinden enthalten kann, speichert und verarbeitet, um den Dienst bereitzustellen.",
     "consentReadTerms": "Nutzungsbedingungen lesen",

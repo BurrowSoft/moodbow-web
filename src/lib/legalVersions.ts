@@ -11,7 +11,7 @@ export const POLICY_VERSIONS = {
 } as const;
 
 export type ConsentKind = keyof typeof POLICY_VERSIONS;
-export type ConsentItem = { kind: ConsentKind; version: string; granted: boolean };
+export type ConsentItem = { kind: ConsentKind; version: string; granted: boolean; locale?: string };
 
 // Required before any journal write (the DB's consent_required): privacy,
 // terms, 18+ and health data. AI is optional and separate.
@@ -20,3 +20,9 @@ export const REQUIRED_KINDS = ["privacy", "terms", "age_18", "health_data"] as c
 export function consentItem(kind: ConsentKind, granted = true): ConsentItem {
   return { kind, version: POLICY_VERSIONS[kind], granted };
 }
+
+// The language someone consented in: the UI's, on every kind, as stored (dataLocale, so "pt" for
+// /pt-br), on both clients (decision 224, UX). The decisions log has the date Spanish went live,
+// so "es" before it means they read the legal pages in English. A database without the column
+// ignores the key.
+export const withLanguage = (items: ConsentItem[], language: string): ConsentItem[] => items.map((item) => ({ ...item, locale: language }));

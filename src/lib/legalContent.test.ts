@@ -1,4 +1,6 @@
 // @vitest-environment node
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { ALL_LOCALES, routing } from "@/i18n/routing";
 import messages from "@/messages/en.json";
@@ -13,17 +15,36 @@ const PAGES: { slug: LegalSlug; gate: ConditionId }[] = [
   { slug: "consumer-health-data", gate: "consumer-health-data-approved" },
 ];
 
+describe("Spanish, page by page, behind its approval", () => {
+  it("privacy and terms: Spanish once approved, or as a draft on a test build; English on Production until then", () => {
+    for (const slug of ["privacy", "terms"] as const) {
+      expect(legalLocale("es", slug, () => "live")).toBe("es");
+      expect(legalLocale("es", slug, () => "draft")).toBe("es");
+      expect(legalLocale("es", slug, () => "hidden")).toBe("en");
+    }
+  });
+  it("Consumer Health Data stays English, approved or not", () => {
+    expect(legalLocale("es", "consumer-health-data", () => "live")).toBe("en");
+  });
+  it("other languages aren't touched by it", () => {
+    for (const locale of ["fr", "pt-br", "de", "it", "th"]) expect(legalLocale(locale, "privacy", () => "live")).toBe("en");
+  });
+  it("still off on Production: Vitor approves, and his word flips it", () => {
+    expect(conditionMet("legal-es-approved")).toBe(false);
+  });
+});
+
 describe("legal content files", () => {
   it("exist for every locale's text language; never a silent fallback", () => {
     for (const locale of [...routing.locales, ...ALL_LOCALES]) {
-      for (const { slug } of PAGES) expect(() => legalSource(slug, legalLocale(locale)), `${locale}/${slug}`).not.toThrow();
+      for (const { slug } of PAGES) expect(() => legalSource(slug, legalLocale(locale, slug)), `${locale}/${slug}`).not.toThrow();
     }
     expect(() => legalSource("privacy", "xx")).toThrow("Missing legal text: content/legal/xx/privacy.md");
   });
 
   it("Thai pages show the English text, said so on the page (legalEnglishOnly, 1.1 F)", () => {
-    expect(legalLocale("en")).toBe("en");
-    expect(legalLocale("th")).toBe("en");
+    expect(legalLocale("en", "privacy")).toBe("en");
+    expect(legalLocale("th", "privacy")).toBe("en");
     expect(messages.legal.legalEnglishOnly).toBe("This page is available in English.");
     expect(thMessages.legal.legalEnglishOnly).toBe("หน้านี้มีให้อ่านเป็นภาษาอังกฤษ");
   });
@@ -31,7 +52,7 @@ describe("legal content files", () => {
   it("every {pending:id} maps to a condition", () => {
     for (const locale of routing.locales) {
       for (const { slug } of PAGES) {
-        for (const id of pendingIds(legalSource(slug, legalLocale(locale)))) expect(() => isPendingMet(id), `${slug}: ${id}`).not.toThrow();
+        for (const id of pendingIds(legalSource(slug, legalLocale(locale, slug)))) expect(() => isPendingMet(id), `${slug}: ${id}`).not.toThrow();
       }
     }
   });
@@ -41,7 +62,7 @@ describe("legal content files", () => {
     for (const locale of routing.locales) {
       for (const { slug, gate } of PAGES) {
         if (!conditionMet(gate)) continue;
-        const source = legalSource(slug, legalLocale(locale));
+        const source = legalSource(slug, legalLocale(locale, slug));
         expect(todos(source), `${locale}/${slug}`).toEqual([]);
         if (slug === "privacy") expect(conditionMet("backup-retention"), "backup-retention must be met first").toBe(true);
       }
@@ -66,7 +87,7 @@ describe("legal content files", () => {
   // number the account-deletion page uses.
   it("the privacy policy's backup days match BACKUP_RETENTION_DAYS", () => {
     for (const locale of routing.locales) {
-      const days = legalSource("privacy", legalLocale(locale)).match(/\{pending:backup_retention\}(\d+)\{\/pending\}/)?.[1];
+      const days = legalSource("privacy", legalLocale(locale, "privacy")).match(/\{pending:backup_retention\}(\d+)\{\/pending\}/)?.[1];
       expect(Number(days), locale).toBe(BACKUP_RETENTION_DAYS);
     }
   });
@@ -80,6 +101,13 @@ describe("legal content files", () => {
     expect(renderLegal(source, met(false)).html).not.toContain(heading);
     expect(renderLegal(source, met(true)).html.split(heading)).toHaveLength(2);
     expect(renderLegal(source).html.includes(heading)).toBe(conditionMet("anon-start-live"));
+  });
+
+  it("a journal with no email: the policy says it can be lost and can't be returned, only once that start is live", () => {
+    const source = readFileSync(path.join(process.cwd(), "content/legal/en/privacy.md"), "utf8");
+    const met = (on: boolean) => (id: string) => (id === "anon_start_live" ? on : isPendingMet(id));
+    expect(renderLegal(source, met(true)).html).toContain("sign-in can open your journal");
+    expect(renderLegal(source, met(false)).html).not.toContain("sign-in can open your journal");
   });
 
   it("todos() finds every kind of to-confirm mark, but not in editor comments", () => {
