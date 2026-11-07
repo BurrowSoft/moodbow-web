@@ -1232,6 +1232,55 @@ test("large text, set in the browser: Today after a mood, calendar, day, entry a
   }
 });
 
+// A column of letters under an X above the window, and Not now 1,660 px down (Web Tester, #218).
+test("large text, set in the browser: the milestone's title, X and Not now stay usable on a 320 px phone", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
+  test.setTimeout(240_000);
+  const email = newEmail();
+  const password = newPassword();
+  const cdp = await page.context().newCDPSession(page);
+  const textAt = (percent: number) => cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    // 30 days journaled, all in the past: the first milestone.
+    const day = await lastWeekMonday(email);
+    await seedCheckIns(email, password, day, Array.from({ length: 30 }, (_, i) => ({ offset: -i, mood: 3 })));
+    await page.setViewportSize({ width: 320, height: 640 });
+    await page.emulateMedia({ reducedMotion: "reduce" });
+
+    for (const percent of [100, 200, 300]) {
+      await textAt(percent);
+      await page.goto("/app");
+      const card = page.getByTestId("milestone-card");
+      await expect(card, `${percent} %`).toBeVisible({ timeout: 15_000 });
+      const box = async (id: string) => (await page.getByTestId(id).boundingBox())!;
+      const shape = await box("milestone-card");
+      expect(shape.y, `${percent} %: the card's top is in the window`).toBeGreaterThanOrEqual(0);
+      const close = await box("milestone-close");
+      expect(close.y, `${percent} %: the X is in the window`).toBeGreaterThanOrEqual(0);
+      expect(close.x + close.width, `${percent} %: the X is in the card`).toBeLessThanOrEqual(shape.x + shape.width);
+      expect(close.width, `${percent} %: the X stays its size`).toBe(44);
+      const title = (await page.locator("#milestone-title").boundingBox())!;
+      expect(title.width, `${percent} %: the title keeps its width`).toBeGreaterThanOrEqual(150);
+      const notNow = await box("milestone-not-now");
+      expect(notNow.y + notNow.height, `${percent} %: Not now is in view on opening`).toBeLessThanOrEqual(shape.y + shape.height);
+      expect(await card.evaluate((el) => el.scrollWidth - el.clientWidth), `${percent} %: no sideways scroll in the card`).toBe(0);
+    }
+    await page.getByTestId("milestone-close").click();
+    await expect(page.getByTestId("milestone-card")).toBeHidden();
+  } finally {
+    await cleanup(email);
+  }
+});
+
 // Every new account passes through Set up; its time field was 151 px past a 320 px
 // phone at 300 % (Web Tester, #206).
 test("large text, set in the browser: Set up stays inside a 320 px phone", async ({ page, browserName }) => {
