@@ -1330,12 +1330,16 @@ test("large text, set in the browser: the check-in conflict dialog shows the who
         await page.getByTestId("checkin-mood-2").click();
         // Changed elsewhere while this copy was open: the save asks, with both versions.
         await seedCheckIns(email, password, today, [{ offset: 0, mood: percent === 200 ? 3 : 5 }]);
+        const fontSize = (el: Element) => getComputedStyle(el).fontSize;
+        expect(await page.getByTestId("checkin-save").evaluate(fontSize), `Save, ${route} ${percent} %`).toBe(percent === 100 ? "16px" : "32px");
         await page.getByTestId("checkin-save").click();
         await expect(page.getByTestId("checkin-conflict-dialog"), `${route} ${percent} %`).toBeVisible({ timeout: 15_000 });
         for (const side of ["mine", "other"]) {
           const where = `${route || "/"} ${percent} %, ${side}`;
           const card = page.getByTestId(`checkin-conflict-${side}`);
           const word = page.getByTestId(`checkin-conflict-${side}-mood`);
+          // Stops growing at about 200 % (decision 231), and the same at normal size.
+          expect(await card.evaluate((el) => [getComputedStyle(el).fontSize, getComputedStyle(el.querySelector("p")!).fontSize]), where).toEqual(percent === 100 ? ["16px", "14px"] : ["32px", "28px"]);
           await expect(word, where).toHaveText(/\S/);
           const fit = await word.evaluate((el, cardId) => {
             // Word by word: "Pas bien" may wrap between its words, never inside one.

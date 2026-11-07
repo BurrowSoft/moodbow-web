@@ -191,15 +191,15 @@ function ConflictVersion({ label, values, testId }: { label: string; values: Pic
     chips.splice(values.sleep_hours != null ? 1 : 0, 0, { label: t(`sleep${q[0].toUpperCase()}${q.slice(1)}` as "sleepPoor"), hex: null });
   }
   return (
-    <div className="min-w-0 rounded-2xl bg-pill p-[12px] [overflow-wrap:anywhere] [font-size:min(1rem,max(8vw,16px))]" data-testid={testId}>
-      <p className="leading-[1.429] text-muted [font-size:min(0.875rem,max(7vw,14px))]">{label}</p>
+    <div className="min-w-0 rounded-2xl bg-pill p-[12px] [overflow-wrap:anywhere] [font-size:min(1rem,max(10vw,32px))]" data-testid={testId}>
+      <p className="leading-[1.429] text-muted [font-size:min(0.875rem,max(8.75vw,28px))]">{label}</p>
       <p className="mt-[8px] flex items-center gap-[8px] font-medium text-text">
         <MoodFace mood={values.mood} className="h-[28px] w-[28px] shrink-0" />
         <span className="min-w-0" data-testid={`${testId}-mood`}>
           {t(`mood${values.mood}` as "mood1")}
         </span>
       </p>
-      <ul className="mt-[8px] space-y-[4px] leading-[1.429] text-text [font-size:min(0.875rem,max(7vw,14px))]">
+      <ul className="mt-[8px] space-y-[4px] leading-[1.429] text-text [font-size:min(0.875rem,max(8.75vw,28px))]">
         {chips.map(({ label: chip, hex }) => (
           <li key={chip} className="flex items-center gap-[8px]">
             <ValueDot hex={hex} />
