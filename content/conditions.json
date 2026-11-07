@@ -171,6 +171,14 @@
     "met": true,
     "what": "1.1 J \"My year's moodbow\" (decision 184): the Year card in the share sheet (December and January, ≥ 3 coloured months) is tested on the app and the web (needs share-cards too)."
   },
+  "security-notice-live": {
+    "met": false,
+    "what": "The security notice is live in the app build people have, and on the web (specs/breach-procedure-draft.md). Then the privacy policy's §6 says how we'd tell people of a breach (decision 222)."
+  },
+  "consent-language-live": {
+    "met": false,
+    "what": "The consents column is on prod, and any client sends the language (decision 224). Flip it with the first of those to go out, so the language is never stored before the privacy policy's §1 says so."
+  },
   "play-live": {
     "met": false,
     "what": "The Play listing is public (Vitor). Then the web shows the Google Play link (decision 185) and the manifest names the app (related_applications)."
