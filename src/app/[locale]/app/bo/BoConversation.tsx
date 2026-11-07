@@ -178,9 +178,23 @@ export function BoConversation({ initial, country, back, healthData = false, con
     return () => seen.disconnect();
   }, [noticeShows]);
 
+  // To the end, unless that leaves the start of a line about this send above the window, as
+  // at large text: then to its start, as the start is what says what happened (UX, #205). A
+  // notice or a full conversation from an earlier send doesn't pull the page back.
+  const problemLine = useRef<HTMLDivElement>(null);
+  const fullLine = useRef<HTMLDivElement>(null);
+  const placed = useRef({ noticeShows: 0, full: false });
   useEffect(() => {
     end.current?.scrollIntoView?.({ block: "end" });
-  }, [messages, sending, problem]);
+    const newNotice = noticeShows !== placed.current.noticeShows;
+    const newFull = full && !placed.current.full;
+    placed.current = { noticeShows, full };
+    const line = problemLine.current ?? (newNotice ? noticeLine.current : newFull ? fullLine.current : null);
+    if (!line) return;
+    // The pinned header, when there is one, is this much of the window's top.
+    const top = parseFloat(document.documentElement.style.scrollPaddingTop) || 0;
+    if (line.getBoundingClientRect().top < top) line.scrollIntoView?.({ block: "start" });
+  }, [messages, sending, problem, noticeShows, full]);
 
   const tooLong = [...text].length > maxChars;
   const closed = problem !== null && CLOSED.includes(problem);
@@ -320,7 +334,7 @@ export function BoConversation({ initial, country, back, healthData = false, con
         </p>
       )}
       {full && (
-        <div data-testid="bo-full" className="flex flex-col items-start gap-2 text-sm text-text">
+        <div ref={fullLine} data-testid="bo-full" className="flex flex-col items-start gap-2 text-sm text-text">
           <p>{t("conversationFull")}</p>
           <div className="flex flex-wrap items-center gap-[12px]">
             <Link href="/app/me#me-your-data" data-testid="bo-full-export" className="inline-flex min-h-11 items-center font-medium text-accent underline underline-offset-4">
@@ -337,7 +351,7 @@ export function BoConversation({ initial, country, back, healthData = false, con
         </div>
       )}
       {(problem || tooLong) && (
-        <div role="alert" data-testid="bo-problem" className="flex flex-col items-start gap-2">
+        <div ref={problemLine} role="alert" data-testid="bo-problem" className="flex flex-col items-start gap-2">
           <p className={`text-text ${BO_END_TEXT}`}>{t(tooLong ? "tooLong" : BO_ERROR_TEXT[problem as BoProblem])}</p>
           {problem && RETRY.includes(problem) && !tooLong && (
             <button type="button" data-testid="bo-retry" disabled={sending} onClick={retry} className={`inline-flex min-h-[44px] items-center rounded-full px-[12px] font-medium text-accent underline underline-offset-4 ${BO_END_TEXT}`}>

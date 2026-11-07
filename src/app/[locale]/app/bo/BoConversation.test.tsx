@@ -577,3 +577,59 @@ describe("BoConversation", () => {
     expect(localStorage.length + sessionStorage.length).toBe(0);
   });
 });
+
+describe("BoConversation: where a send leaves the page (UX, #205)", () => {
+  let moves: { to: string | undefined; block: ScrollLogicalPosition | undefined }[];
+  let above: string[];
+  const realRect = Element.prototype.getBoundingClientRect;
+  beforeEach(() => {
+    moves = [];
+    above = [];
+    Element.prototype.scrollIntoView = function (this: Element, options?: boolean | ScrollIntoViewOptions) {
+      moves.push({ to: (this as HTMLElement).dataset.testid, block: (options as ScrollIntoViewOptions)?.block });
+    };
+    Element.prototype.getBoundingClientRect = function (this: Element) {
+      return { top: above.includes((this as HTMLElement).dataset.testid ?? "") ? -139 : 200 } as DOMRect;
+    };
+  });
+  afterEach(() => {
+    delete (Element.prototype as Partial<Element>).scrollIntoView;
+    Element.prototype.getBoundingClientRect = realRect;
+  });
+  const startOf = (id: string) => moves.filter((m) => m.block === "start" && m.to === id);
+
+  it.each([
+    ["a failed Send", "bo-problem", { status: "error", code: "bo_failed" }],
+    ["the notice", "bo-notice", reply({ showNotice: true })],
+    ["a full conversation", "bo-full", reply({ conversationFull: true })],
+  ])("%s starting above the window: the page goes to its start", async (_name, id, answer) => {
+    above = [id];
+    await open();
+    answers.push(answer);
+    type("Hello");
+    await send();
+    expect(startOf(id).length).toBeGreaterThan(0);
+    expect(moves.at(-1)).toMatchObject({ to: id, block: "start" });
+  });
+
+  it("all of it in view: the page stays at its end", async () => {
+    await open();
+    answers.push({ status: "error", code: "bo_failed" });
+    type("Hello");
+    await send();
+    expect(screen.getByTestId("bo-problem")).toBeInTheDocument();
+    expect(moves.filter((m) => m.block === "start")).toEqual([]);
+  });
+
+  it("an earlier send's notice doesn't pull the page back", async () => {
+    above = ["bo-notice"];
+    await open();
+    answers.push(reply({ showNotice: true }), reply());
+    type("Hello");
+    await send();
+    moves = [];
+    type("Hello again");
+    await send();
+    expect(startOf("bo-notice")).toEqual([]);
+  });
+});
