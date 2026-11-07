@@ -19,6 +19,8 @@ const SHAPES: Record<string, (text: string) => string[]> = {
   "bold runs": (s) => s.match(/\*\*/g) ?? [],
   lines: (s) => s.trim().split("\n").map((l) => (l.trim() === "" ? "blank" : "text")),
   numbers: (s) => (s.match(/\d+/g) ?? []).sort(),
+  // In order: markdown link targets, bare addresses and emails, none of which translate.
+  links: (s) => s.match(/\]\([^)]*\)|https?:\/\/[^\s)|]+|[\w.-]+@[\w.-]+\.[a-z]+/g) ?? [],
 };
 const count = (text: string, name: string) => text.split(name).length - 1;
 
