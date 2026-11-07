@@ -11,7 +11,7 @@ const noSubscribe = () => () => {};
 
 function Checkbox({ name, label, checked, onChange, testId }: { name: string; label: string; checked: boolean; onChange: (v: boolean) => void; testId: string }) {
   return (
-    <label className="flex items-start gap-3 rounded-2xl border border-border bg-surface px-4 py-4 text-text">
+    <label className="flex items-start gap-[12px] rounded-2xl border border-border bg-surface p-[16px] text-text">
       <input
         type="checkbox"
         name={name}
@@ -19,9 +19,9 @@ function Checkbox({ name, label, checked, onChange, testId }: { name: string; la
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
         required
-        className="mt-1 h-5 w-5 shrink-0 accent-[var(--accent)]"
+        className="mt-[4px] h-[20px] w-[20px] shrink-0 accent-[var(--accent)]"
       />
-      <span>{label}</span>
+      <span className="min-w-0">{label}</span>
     </label>
   );
 }
@@ -46,9 +46,12 @@ export function ConsentForm({ askAge, askAi = false, showBack }: { askAge: boole
   const hydrated = useSyncExternalStore(noSubscribe, () => true, () => false);
 
   return (
-    <form action={action} className="space-y-4">
+    // Below the wide layout (rem-based, so large text counts as narrow), under the safety card's cap, in px, so the words this page asks someone to agree to stay whole
+    // at large text: at 300 % they were 48 px, with "J'accepte" over four lines (Web Tester). It's
+    // the type that stops growing, and nothing is cut off: the page still scrolls.
+    <form action={action} className="space-y-[16px] max-sm:[font-size:min(1rem,max(8vw,16px))]">
       <Checkbox name="privacy" testId="consent-privacy" label={t("consentPrivacy")} checked={privacy} onChange={setPrivacy} />
-      <p className="flex flex-wrap gap-x-6 gap-y-1 px-1 text-sm">
+      <p className="flex flex-wrap gap-x-[24px] gap-y-[4px] px-[4px] leading-[1.429] [font-size:min(0.875rem,max(7vw,14px))]">
         <Link href="/terms" target="_blank" rel="noopener" data-testid="consent-read-terms" className={textLinkClass}>
           {t("consentReadTerms")}
           {" "}
@@ -62,18 +65,18 @@ export function ConsentForm({ askAge, askAi = false, showBack }: { askAge: boole
       </p>
       {/* The legal pages are in English for now, as on the app (UX 2026-11-05). */}
       {locale !== "en" && (
-        <p data-testid="consent-legal-english" className="px-1 text-sm text-muted">
+        <p data-testid="consent-legal-english" className="px-[4px] text-muted leading-[1.429] [font-size:min(0.875rem,max(7vw,14px))]">
           {t("consentLegalEnglish")}
         </p>
       )}
       <Checkbox name="health" testId="consent-health" label={t("consentHealth")} checked={health} onChange={setHealth} />
       {askAge && <Checkbox name="age" testId="consent-age" label={t("ageConfirm")} checked={age} onChange={setAge} />}
       {askAi && (
-        <label className="flex items-start gap-3 rounded-2xl border border-border bg-surface px-4 py-4 text-text">
-          <input type="checkbox" name="ai" data-testid="consent-ai" aria-describedby="consent-ai-body" className="mt-1 h-5 w-5 shrink-0 accent-[var(--accent)]" />
-          <span className="flex flex-col gap-1">
+        <label className="flex items-start gap-[12px] rounded-2xl border border-border bg-surface p-[16px] text-text">
+          <input type="checkbox" name="ai" data-testid="consent-ai" aria-describedby="consent-ai-body" className="mt-[4px] h-[20px] w-[20px] shrink-0 accent-[var(--accent)]" />
+          <span className="flex min-w-0 flex-col gap-[4px]">
             <span className="font-medium">{tai("consentAiTitle")}</span>
-            <span id="consent-ai-body" aria-hidden="true" className="text-sm text-muted">
+            <span id="consent-ai-body" aria-hidden="true" className="text-muted leading-[1.429] [font-size:min(0.875rem,max(7vw,14px))]">
               {tai("consentAiBody")}
             </span>
           </span>
@@ -84,8 +87,8 @@ export function ConsentForm({ askAge, askAi = false, showBack }: { askAge: boole
           {state.error === "age" ? t("errAgeRequired") : ta("errGeneric")}
         </p>
       )}
-      <div className="flex flex-wrap items-center gap-6 pt-2">
-        <button type="submit" data-testid="consent-continue" disabled={(hydrated && !ready) || pending} className={primaryButtonClass}>
+      <div className="flex flex-wrap items-center gap-[24px] pt-[8px]">
+        <button type="submit" data-testid="consent-continue" disabled={(hydrated && !ready) || pending} className={`${primaryButtonClass} max-sm:[font-size:min(1rem,max(8vw,16px))]`}>
           {t("consentContinue")}
         </button>
         {showBack && <BackLink href="/welcome?slide=3" label={t("back")} testId="consent-back" />}
