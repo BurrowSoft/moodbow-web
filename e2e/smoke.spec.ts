@@ -596,6 +596,28 @@ test.describe("help with no script at all", () => {
   }
 });
 
+test.describe("the help page's numbers, with no script at all", () => {
+  test.use({ javaScriptEnabled: false });
+  test("a country on the list gets its numbers and the directory, in the page's language", async ({ page }) => {
+    await page.goto("/fr/help/get-help-now?country=TH");
+    await expect(page.getByTestId("help-now-call-helpline")).toHaveAttribute("href", "tel:1323");
+    await expect(page.getByTestId("help-now-call-emergency")).toHaveAttribute("href", "tel:1669");
+    await expect(page.getByTestId("help-now-find-helpline")).toBeVisible();
+  });
+  for (const query of ["", "?country=XX", "?country=%3Cscript%3E", "?country=TH&country=GB"]) {
+    test(`/help/get-help-now${query}: no numbers, and the directory`, async ({ page }) => {
+      await page.goto(`/help/get-help-now${query}`);
+      await expect(page.getByTestId("help-now-call-helpline")).toHaveCount(0);
+      await expect(page.getByTestId("help-now-call-emergency")).toHaveCount(0);
+      await expect(page.getByTestId("help-now-find-helpline")).toBeVisible();
+    });
+  }
+  test("another Help article doesn't show them", async ({ page }) => {
+    await page.goto("/help/backing-up?country=TH");
+    await expect(page.getByTestId("help-now-lines")).toHaveCount(0);
+  });
+});
+
 // Onboarding (W0 part 2), signed out, no Supabase env. The account-creating
 // and signed-in rows run on the Preview against staging.
 test.describe("onboarding (signed out)", () => {

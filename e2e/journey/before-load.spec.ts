@@ -302,7 +302,7 @@ test.describe("typing before the page has loaded", () => {
       // Help doesn't wait for any of it (#248).
       await beforeLoad(page, "/app/me", async () => {
         await page.getByTestId("me-get-help").click();
-        await expect(page).toHaveURL(/\/help\/get-help-now$/);
+        await expect(page).toHaveURL(/\/help\/get-help-now(\?country=[A-Z]+)?$/);
         await expect(page.getByTestId("help-now-find-helpline")).toBeVisible();
       });
       await beforeLoad(page, "/app/me", async () => {
