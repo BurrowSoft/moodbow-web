@@ -4,7 +4,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 // Today always keeps check-in and Write, with errors beside them (specs/next-release.md).
 let checkInError: unknown = null;
 let entriesError: unknown = null;
-let securityAnswer: { data: unknown; error: unknown } = { data: null, error: null };
 const query = (result: () => unknown) => {
   const chain: Record<string, unknown> = {};
   for (const step of ["select", "eq", "order"]) chain[step] = () => chain;
@@ -13,7 +12,8 @@ const query = (result: () => unknown) => {
   return chain;
 };
 const client = {
-  rpc: async () => securityAnswer,
+  // A read that never answers: the page must not wait for it.
+  rpc: vi.fn(() => new Promise(() => {})),
   from: (table: string) => (table === "check_ins" ? query(() => ({ data: null, error: checkInError })) : query(() => ({ data: entriesError ? null : [], error: entriesError }))),
 };
 vi.mock("@/lib/supabase/server", () => ({ createSupabaseServerClient: async () => client }));
@@ -38,7 +38,7 @@ vi.mock("./CheckInCard", async () => {
   };
   return { CheckInCard };
 });
-vi.mock("./SecurityNotice", () => ({ SecurityNotice: ({ id, uid }: { id: string; uid: string }) => <div data-testid="security-notice" data-id={id} data-uid={uid} /> }));
+vi.mock("./SecurityNoticeRead", () => ({ SecurityNoticeRead: ({ uid }: { uid: string }) => <div data-testid="security-read" data-uid={uid} /> }));
 vi.mock("./EntryPreviews", () => ({ EntryPreviews: () => null }));
 vi.mock("./MilestoneCard", () => ({ MilestoneCard: () => null }));
 vi.mock("@/components/JournalUnavailable", () => ({ JournalUnavailable: () => <div data-testid="journal-unavailable" /> }));
@@ -51,7 +51,6 @@ const open = async () => render(await page());
 beforeEach(() => {
   checkInError = null;
   entriesError = null;
-  securityAnswer = { data: null, error: null };
 });
 afterEach(cleanup);
 
@@ -74,20 +73,11 @@ describe("Today, whatever failed", () => {
     await open();
     expect(screen.getByTestId("checkin-card")).toHaveAttribute("data-load-failed", "false");
   });
-  it("a security update out: its card, for this person and update", async () => {
-    securityAnswer = { data: "2026-12-01-a", error: null };
+  it("a security update's read never holds Today: the page doesn't wait for it, and leaves it to its own part", async () => {
     await open();
-    expect(screen.getByTestId("security-notice")).toHaveAttribute("data-id", "2026-12-01-a");
-    expect(screen.getByTestId("security-notice")).toHaveAttribute("data-uid", "u1");
-  });
-  it("none out, or the read failed: no card, and Today is whole", async () => {
-    await open();
-    expect(screen.queryByTestId("security-notice")).toBeNull();
-    cleanup();
-    securityAnswer = { data: null, error: { message: "boom" } };
-    await open();
-    expect(screen.queryByTestId("security-notice")).toBeNull();
+    expect(client.rpc).not.toHaveBeenCalled();
     expect(screen.getByTestId("checkin-card")).toBeInTheDocument();
+    expect(screen.getByTestId("security-read")).toHaveAttribute("data-uid", "u1");
   });
   it("Try again brings the real row: a new card, as the old one only read its first", async () => {
     checkInError = { message: "boom" };
