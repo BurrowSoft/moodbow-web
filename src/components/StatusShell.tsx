@@ -17,7 +17,7 @@ export async function StatusShell({ title, body, children, testId }: { title: st
           <Logo variant="stacked" width={120} alt={tc("logoAlt")} />
         </div>
         <div data-testid={testId} className="flex w-full flex-col items-center text-center">
-          <h1 className="text-balance text-[28px] font-medium leading-tight tracking-tight sm:text-4xl">{title}</h1>
+          <h1 className="text-balance [font-size:min(1.75rem,max(11.2vw,28px,1rem))] font-medium leading-tight tracking-tight sm:text-4xl">{title}</h1>
           {body !== undefined && <div className="mt-4 text-base leading-relaxed text-muted sm:text-[1.0625rem]">{body}</div>}
           {children !== undefined && <div className="mt-9 flex w-full flex-col items-center gap-4">{children}</div>}
         </div>
