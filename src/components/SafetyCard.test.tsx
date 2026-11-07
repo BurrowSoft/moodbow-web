@@ -242,3 +242,17 @@ describe("a number never breaks across lines (#247)", () => {
     for (const code of ["BE", "FR", "GB"]) expect(helpLineSize(helplinesFor(code).helpline!.display), code).toContain("32px");
   });
 });
+
+describe("a line's hours are in the live languages", () => {
+  it("every line with hours has them in en, fr, es and pt, and the card's lookup finds them", () => {
+    const withHours = registry.countries.filter((c) => c.helpline?.hours);
+    expect(withHours.map((c) => c.code)).toEqual(["AR", "LU"]);
+    for (const { code, helpline } of withHours) {
+      const hours = helpline!.hours as Record<string, string>;
+      for (const [locale, data] of [["en", "en"], ["fr", "fr"], ["es", "es"], ["pt-br", "pt"]]) {
+        expect(hours[data], `${code} ${data}`).toBeTruthy();
+        expect(helplinesFor(code, locale).helpline?.hours, `${code} ${locale}`).toBe(hours[data]);
+      }
+    }
+  });
+});
