@@ -284,7 +284,7 @@ export function CheckInCard(props: Props) {
 function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, autoFocus, keepDraft, loadFailed }: Props & { notify: Notify; announce: (text: string) => void }) {
   const t = useTranslations("today");
   const locale = useLocale();
-  const slot = useCheckInDraft<Fields>();
+  const slot = useCheckInDraft<{ fields: Fields; basedOn: string }>();
   const drafts = keepDraft ? slot : null;
   const [draft] = useState(() => drafts?.get(cardDate) ?? null);
   // Waiting for the person's choice, oldest first; the dialog shows the first.
@@ -295,13 +295,18 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
   // not ask again (reviewer).
   const resolving = useRef(new Map<string, FormData>());
   const [row, setRow] = useState<CheckIn | null>(initial);
-  const [fields, setFields] = useState<Fields>(draft ?? fromRow(initial));
+  const [fields, setFields] = useState<Fields>(draft?.fields ?? fromRow(initial));
+  // The lock is the version the person was looking at, not the one this card just read: a draft
+  // from an empty card stays insert-only, so a check-in they never saw opens the conflict dialog,
+  // and one from an older version gets "stale". Gone once they've been shown the row.
+  const [draftBase, setDraftBase] = useState<string | null>(draft?.basedOn ?? null);
+  const expected = draftBase ?? row?.updated_at ?? "";
   const [editing, setEditing] = useState(initial === null || draft !== null);
   // Unsaved choices go to the draft; anything else (saved, cancelled, a
   // new day's empty card) clears it.
   useEffect(() => {
-    drafts?.set(cardDate, editing && !sameFields(fields, fromRow(row)) ? fields : null);
-  }, [drafts, cardDate, editing, fields, row]);
+    drafts?.set(cardDate, editing && !sameFields(fields, fromRow(row)) ? { fields, basedOn: expected } : null);
+  }, [drafts, cardDate, editing, fields, row, expected]);
   const [offline, setOffline] = useState(false);
   const [storageFailed, setStorageFailed] = useState(false);
   // The pending copies being sent right now (by key), so none goes twice.
@@ -459,11 +464,13 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
     }
     if (next.status === "saved") {
       setRow(next.checkIn);
+      setDraftBase(null);
       setFields(fromRow(next.checkIn));
       setEditing(false);
       setOffline(false);
     } else if (next.status === "error" && next.error === "stale" && next.checkIn) {
       setRow(next.checkIn);
+      setDraftBase(null);
       setFields(fromRow(next.checkIn));
     }
     return next;
@@ -488,7 +495,6 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
   const submit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (fields.mood === null) return;
-    const expected = row?.updated_at ?? "";
     setStorageFailed(false);
     if (!navigator.onLine) {
       try {
@@ -542,6 +548,7 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
     if (c.key) removePending(c.key);
     if (c.date === cardDate) {
       setRow(c.theirs);
+      setDraftBase(null);
       setFields(fromRow(c.theirs));
       setEditing(false);
       setOffline(false);

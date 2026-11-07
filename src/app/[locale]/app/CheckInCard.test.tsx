@@ -919,6 +919,38 @@ describe("CheckInCard: the in-memory draft", () => {
     expect(screen.getByTestId("checkin-mood-2")).toHaveAttribute("aria-checked", "false");
   });
 
+  const V2: CheckIn = { ...ROW, mood: 5, updated_at: "2026-10-03T09:00:00.000Z" };
+
+  it("picks on an empty card, then the real row arrives: insert-only, and the conflict dialog shows both (Reviewer, #220)", async () => {
+    saveCheckIn.mockResolvedValue({ status: "error", error: "conflict", checkIn: ROW });
+    const { rerender } = render(withDraft(<Today />));
+    choose();
+    rerender(withDraft(null));
+    rerender(withDraft(<Today initial={ROW} />));
+    expect(screen.getByTestId("checkin-mood-2")).toHaveAttribute("aria-checked", "true");
+    fireEvent.click(screen.getByTestId("checkin-save"));
+    await screen.findByTestId("checkin-conflict-dialog");
+    expect(sent().expected_updated_at).toBe("");
+  });
+
+  it("a draft from one version, mounted on a newer one, sends the version it was based on", async () => {
+    saveCheckIn.mockResolvedValue({ status: "error", error: "stale", checkIn: V2 });
+    const { rerender } = render(withDraft(<Today initial={ROW} />));
+    fireEvent.click(screen.getByTestId("checkin-edit"));
+    fireEvent.click(screen.getByTestId("checkin-mood-1"));
+    rerender(withDraft(null));
+    rerender(withDraft(<Today initial={V2} />));
+    fireEvent.click(screen.getByTestId("checkin-save"));
+    await waitFor(() => expect(screen.getByTestId("checkin-mood-5")).toHaveAttribute("aria-checked", "true"));
+    expect(sent().expected_updated_at).toBe(ROW.updated_at);
+    // Shown the newer one now: the lock moves to it.
+    fireEvent.click(screen.getByTestId("checkin-mood-2"));
+    await waitFor(() => expect(screen.getByTestId("checkin-save")).toBeEnabled());
+    fireEvent.click(screen.getByTestId("checkin-save"));
+    await waitFor(() => expect(saveCheckIn).toHaveBeenCalledTimes(2));
+    expect(sent(1).expected_updated_at).toBe(V2.updated_at);
+  });
+
   it("the day changed: a new empty card, and yesterday's draft is dropped", () => {
     const { rerender } = render(withDraft(<Today />));
     choose();
