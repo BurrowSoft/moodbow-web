@@ -254,9 +254,9 @@
     "errGeneric": "Un problème est survenu. Veuillez réessayer.",
     "offlineCheckinRejected": "Le bilan du {date}, enregistré hors ligne, n'a pas pu être sauvegardé. Veuillez l'ajouter à nouveau.",
     "checkInConflictTitle": "Ce jour a déjà un bilan",
-    "checkInConflictBody": "Un bilan a déjà été enregistré pour ce jour. Lequel voulez-vous garder ?",
-    "checkInConflictMine": "Le vôtre (cet appareil)",
-    "checkInConflictOther": "Enregistré ailleurs",
+    "checkInConflictBody": "Lequel voulez-vous garder ?",
+    "checkInConflictMine": "Votre version",
+    "checkInConflictOther": "Déjà enregistrée",
     "checkInConflictKeepMine": "Garder le mien",
     "checkInConflictUseOther": "Prendre l'autre"
   },

@@ -254,9 +254,9 @@
     "errGeneric": "Algo deu errado. Tente de novo.",
     "offlineCheckinRejected": "Não foi possível salvar um check-in que você fez sem conexão em {date}. Adicione de novo.",
     "checkInConflictTitle": "Este dia já tem um check-in",
-    "checkInConflictBody": "Já foi salvo um check-in para este dia. Qual você quer manter?",
-    "checkInConflictMine": "O seu (este aparelho)",
-    "checkInConflictOther": "Salvo em outro lugar",
+    "checkInConflictBody": "Qual você quer manter?",
+    "checkInConflictMine": "Sua versão",
+    "checkInConflictOther": "Já salva",
     "checkInConflictKeepMine": "Manter o meu",
     "checkInConflictUseOther": "Usar o outro"
   },

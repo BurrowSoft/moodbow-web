@@ -254,9 +254,9 @@
     "errGeneric": "Etwas ist schiefgelaufen. Bitte versuch es noch einmal.",
     "offlineCheckinRejected": "Ein Check-in, den du offline für den {date} gespeichert hast, konnte nicht gespeichert werden. Bitte trag ihn noch einmal ein.",
     "checkInConflictTitle": "Für diesen Tag gibt es schon einen Check-in",
-    "checkInConflictBody": "Für diesen Tag wurde schon ein Check-in gespeichert. Welchen möchtest du behalten?",
-    "checkInConflictMine": "Deiner (dieses Gerät)",
-    "checkInConflictOther": "Anderswo gespeichert",
+    "checkInConflictBody": "Welchen möchtest du behalten?",
+    "checkInConflictMine": "Deiner",
+    "checkInConflictOther": "Schon gespeichert",
     "checkInConflictKeepMine": "Meinen behalten",
     "checkInConflictUseOther": "Den anderen nehmen"
   },
