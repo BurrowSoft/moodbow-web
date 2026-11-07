@@ -147,6 +147,16 @@ export async function seedCheckIns(email: string, password: string, monday: stri
   }
 }
 
+// Whether the account holds a granted AI consent, as get_me says.
+export async function aiConsentGranted(email: string, password: string): Promise<boolean> {
+  const user = createClient(URL_, PUBLISHABLE, { auth: { persistSession: false, autoRefreshToken: false } });
+  const { error: signInError } = await user.auth.signInWithPassword({ email, password });
+  if (signInError) throw new Error(`sign-in failed: ${signInError.message}`);
+  const { data, error } = await user.rpc("get_me");
+  if (error) throw new Error(`get_me failed: ${error.message}`);
+  return (data as { consents?: { ai?: { granted?: boolean } } }).consents?.ai?.granted === true;
+}
+
 // The token a password reset email would carry.
 export async function recoveryLinkHash(email: string): Promise<string> {
   const { data, error } = await admin().generateLink({ type: "recovery", email });

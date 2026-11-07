@@ -17,12 +17,14 @@ type Props = {
   // differs from the page's.
   notice?: React.ReactNode;
   lang?: string;
+  // A page whose body is under the cap too, so the heading can stay within it.
+  capTitle?: boolean;
   children: React.ReactNode;
 };
 
 // Layout for the inner pages: the horizontal logo linking home, an optional
 // draft banner, and a readable text column.
-export async function PageShell({ title, draft = false, article = false, after, notice, lang, children }: Props) {
+export async function PageShell({ title, draft = false, article = false, after, notice, lang, capTitle = false, children }: Props) {
   const t = await getTranslations("common");
   return (
     <>
@@ -48,8 +50,8 @@ export async function PageShell({ title, draft = false, article = false, after, 
           {/* Capped on a narrow screen at large text, so a first-run page's ordinary words stay
               whole at 200 %, and never smaller than the body under it. The same size and line
               height as text-3xl and text-4xl otherwise. */}
-          <h1 className="text-balance font-medium leading-[1.2] tracking-tight [font-size:min(1.875rem,max(12vw,30px,1rem))] sm:text-4xl sm:leading-[2.5rem]">{title}</h1>
-          <div data-content={article ? "article" : undefined} className="mt-6 space-y-5 text-base leading-relaxed text-muted sm:text-[17px]">{children}</div>
+          <h1 className={`text-balance font-medium leading-[1.2] tracking-tight sm:text-4xl sm:leading-[2.5rem] ${capTitle ? "[font-size:min(1.875rem,max(12vw,30px))]" : "[font-size:min(1.875rem,max(12vw,30px,1rem))]"}`}>{title}</h1>
+          <div data-content={article ? "article" : undefined} className="mt-6 space-y-5 text-base leading-relaxed text-muted sm:text-[1.0625rem]">{children}</div>
         </article>
         {after}
       </main>

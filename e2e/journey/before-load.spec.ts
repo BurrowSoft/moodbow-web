@@ -270,9 +270,16 @@ test.describe("typing before the page has loaded", () => {
     try {
       await onboarded(page, email, password);
       await beforeLoad(page, "/app", async () => {
-        await page.getByTestId("checkin-mood-4").click();
+        await expect(page.getByTestId("checkin-mood-4")).toBeVisible();
+        // The card says it isn't ready (#238); the page around it isn't held.
+        await expect(page.getByTestId("checkin-card")).toHaveAttribute("inert", "");
+        await expect(page.getByTestId("tab-today").locator("xpath=ancestor-or-self::*[@inert]")).toHaveCount(0);
+        // A forced click: a normal one would wait for the card to take it.
+        await page.getByTestId("checkin-mood-4").click({ force: true });
       });
       await expect(page).toHaveURL(/\/app$/);
+      await expect(page.locator("[data-until-loaded]")).toHaveCount(0);
+      await expect(page.getByTestId("checkin-mood-4")).toHaveAttribute("aria-checked", "false");
       await expect(page.getByTestId("checkin-save")).toBeDisabled();
       // Works from here on.
       await page.getByTestId("checkin-mood-4").click();
