@@ -8,6 +8,13 @@ import fr from "@/messages/fr.json";
 import ptBr from "@/messages/pt-br.json";
 import { helplinesFor, isIos, telHref } from "@/lib/safety/helplines";
 import { GetHelpNow, SafetyCard } from "./SafetyCard";
+vi.mock("@/i18n/navigation", () => ({
+  Link: ({ href, prefetch, children, ...rest }: { href: string; prefetch?: boolean; children: React.ReactNode }) => (
+    <a href={href} data-prefetch={String(prefetch)} {...rest}>
+      {children}
+    </a>
+  ),
+}));
 
 // The safety card (M8, decision 124) and its numbers from countries.json.
 const s = messages.safety;
