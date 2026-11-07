@@ -1,5 +1,6 @@
 "use client";
 
+import { JOURNAL_HEADING } from "@/lib/ui/journalLayout";
 import { startTransition, useActionState, useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { BackLink } from "@/components/BackLink";
@@ -268,7 +269,7 @@ function Screen({ entry: initial, checkIn, from, backLabel, dateLocaleTag, uid, 
         </p>
       )}
 
-      <h1 ref={heading} tabIndex={-1} data-testid="entry-date" className="text-3xl font-medium tracking-tight focus:outline-none">
+      <h1 ref={heading} tabIndex={-1} data-testid="entry-date" className={`${JOURNAL_HEADING} focus:outline-none`}>
         {dateLine(entry.entry_date, dateLocaleTag)}
       </h1>
 
