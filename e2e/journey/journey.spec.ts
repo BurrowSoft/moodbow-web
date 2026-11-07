@@ -209,10 +209,10 @@ async function signIn(page: Page, email: string, password: string): Promise<void
 }
 
 // An account at Setup, without the form's email: confirmed, signed in through the page.
-// The card's first link on its first screen, above the fade. Known limit at 320x640 at 300 % (UX, #255):
-// its last line runs under the fade by 17 px with no country in fr and pt-BR, and for Colombia by 35 px in
-// fr and pt-BR and 3 px in es. So: its top is on screen and tappable, and it's never further over than that.
-const FIRST_LINK_KNOWN_OVER = 35;
+// The card's first link, whole on its first screen, above the fade, at 320x640 at 300 %. The cases that
+// don't fit, one by one (UX, #255), as the most px each may run under the fade. Colombia has no helpline,
+// so its first link is the emergency number, and the sentence above it already says to call one.
+const FIRST_LINK_OVER: Record<string, number> = { "CO /fr": 35, "CO /pt-br": 35 };
 const firstLinkOnScreen = (card: Element) => {
   const fade = card.querySelector("[data-testid=dialog-more]");
   const shown = Math.min(innerHeight, (fade ?? card).getBoundingClientRect()[fade ? "top" : "bottom"]);
@@ -1056,7 +1056,7 @@ test.describe("the tab bar in every language", () => {
         expect(await card.evaluate((el) => el.scrollTop), "opens at its top").toBe(0);
         const first = await card.evaluate(firstLinkOnScreen);
         expect.soft(first.tappable, `the first help line can be tapped on the first screen, ${route || "/en"}`).toBe(true);
-        expect.soft(first.over, `px of the first help line past the first screen, ${route || "/en"}`).toBeLessThanOrEqual(FIRST_LINK_KNOWN_OVER);
+        expect.soft(first.over, `px of the first help line past the first screen, ${route || "/en"}`).toBeLessThanOrEqual(0);
         // "Find a helpline" stays under the help's cap, not three times its size.
         const size = (el: Element) => parseFloat(getComputedStyle(el).fontSize);
         expect(await card.getByTestId("safety-find-helpline").evaluate(size), `the helpline link's size, ${route || "/en"}`).toBeLessThan(await page.getByTestId("safety-close").evaluate(size));
@@ -1517,7 +1517,8 @@ test("large text: every help number on the list stays whole on a phone", { tag: 
           if (width === 320) {
             const first = await page.getByTestId("safety-card").evaluate(firstLinkOnScreen);
             expect.soft(first.tappable, `${code}'s first help line can be tapped on the first screen, ${route}`).toBe(true);
-            expect.soft(first.over, `px of ${code}'s first help line past the first screen, ${route}`).toBeLessThanOrEqual(FIRST_LINK_KNOWN_OVER);
+            expect.soft(first.over, `px of ${code}'s first help line past the first screen, ${route}`).toBeLessThanOrEqual(FIRST_LINK_OVER[`${code} ${route}`] ?? 0);
+            if (first.over > 0) console.log(`${code} ${route}: first help line ${first.over} px under the fade`);
           }
         }
       }

@@ -105,7 +105,7 @@ export function Dialog({
   // capText (the help card): the spacing gives way as the text grows, the same at the normal size, so
   // the first help fits the first screen at large text (UX, #247). No smaller text, no new order.
   return createPortal(
-    <div className={`fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center ${capText ? "p-[max(8px,calc(32px-1rem))]" : "p-[16px]"}`}>
+    <div className={`fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center ${capText ? "p-[max(4px,calc(32px-1rem))]" : "p-[16px]"}`}>
       <div
         ref={ref}
         role="dialog"
@@ -113,7 +113,7 @@ export function Dialog({
         aria-labelledby={titleId}
         aria-describedby={body ? bodyId : undefined}
         data-testid={testId}
-        className={`max-h-full w-full max-w-md overflow-y-auto overscroll-contain rounded-3xl bg-surface p-[var(--pad)] shadow-xl ${capText ? "[--pad:max(12px,calc(40px-1rem))] leading-normal [font-size:min(1rem,max(8vw,16px))]" : "[--pad:24px] max-sm:[font-size:min(1rem,max(10vw,32px))]"}`}
+        className={`max-h-full w-full max-w-md overflow-y-auto overscroll-contain rounded-3xl bg-surface p-[var(--pad)] shadow-xl ${capText ? "[--pad:max(8px,calc(40px-1rem))] [--fade:max(24px,calc(56px-1rem))] leading-normal [font-size:min(1rem,max(8vw,16px))]" : "[--pad:24px] [--fade:40px] max-sm:[font-size:min(1rem,max(10vw,32px))]"}`}
       >
         <h2 id={titleId} tabIndex={-1} className={`font-medium text-text outline-none ${capText ? "leading-tight [font-size:min(1.125rem,max(8vw,18px))]" : "leading-[1.556] [font-size:min(1.125rem,max(11vw,35px))]"}`}>
           {title}
@@ -125,7 +125,7 @@ export function Dialog({
         )}
         {details && <div className="mt-[16px]">{details}</div>}
         <div className="mt-[var(--pad)] flex flex-wrap justify-end gap-[12px]">{children}</div>
-        {tall && <div aria-hidden="true" data-testid="dialog-more" className={`pointer-events-none sticky bottom-[calc(var(--pad)*-1)] mx-[calc(var(--pad)*-1)] mb-[calc(var(--pad)*-1)] mt-[8px] h-[40px] bg-gradient-to-t from-surface to-transparent ${atEnd ? "opacity-0" : ""}`} />}
+        {tall && <div aria-hidden="true" data-testid="dialog-more" className={`pointer-events-none sticky bottom-[calc(var(--pad)*-1)] mx-[calc(var(--pad)*-1)] mb-[calc(var(--pad)*-1)] mt-[8px] h-[var(--fade)] bg-gradient-to-t from-surface to-transparent ${atEnd ? "opacity-0" : ""}`} />}
       </div>
     </div>,
     document.body,
