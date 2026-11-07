@@ -480,11 +480,12 @@ describe("BoConversation: where a send leaves the page (UX, #205)", () => {
     Element.prototype.getBoundingClientRect = realRect;
   });
   const startOf = (id: string) => moves.filter((m) => m.block === "start" && m.to === id);
-  // A reply whose reading runs this, as it comes, once Send has moved the page.
-  const whileItComes = (act: () => void) => ({
+  // A reply whose reading runs this, as it comes, once Send has moved the page. Plain events:
+  // fireEvent's act here ends the send's own act early, before the reply has landed.
+  const whileItComes = (event: () => void) => ({
     ...reply(),
     get status() {
-      act();
+      event();
       moves = [];
       return "ok";
     },
@@ -533,7 +534,7 @@ describe("BoConversation: where a send leaves the page (UX, #205)", () => {
   it("scrolled away while the reply came: the page stays where they went", async () => {
     above = ["bo-message-ai"];
     await open();
-    answers.push(whileItComes(() => fireEvent.wheel(window)));
+    answers.push(whileItComes(() => window.dispatchEvent(new Event("wheel"))));
     type("Hello");
     await send();
     expect(screen.getByTestId("bo-message-ai")).toBeInTheDocument();
@@ -541,21 +542,22 @@ describe("BoConversation: where a send leaves the page (UX, #205)", () => {
   });
 
   it.each([
-    ["a finger", () => fireEvent.touchMove(window)],
-    ["a key", () => fireEvent.keyDown(window, { key: "PageUp" })],
+    ["a finger", () => window.dispatchEvent(new Event("touchmove"))],
+    ["a key", () => window.dispatchEvent(new KeyboardEvent("keydown", { key: "PageUp" }))],
   ])("scrolled away by %s: the same", async (_name, scroll) => {
     above = ["bo-message-ai"];
     await open();
     answers.push(whileItComes(scroll));
     type("Hello");
     await send();
+    expect(screen.getByTestId("bo-message-ai")).toBeInTheDocument();
     expect(moves).toEqual([]);
   });
 
   it("the page moving by itself, as when a phone's keyboard closes, isn't the person: it goes to the reply", async () => {
     above = ["bo-message-ai"];
     await open();
-    answers.push(whileItComes(() => fireEvent.scroll(window)));
+    answers.push(whileItComes(() => window.dispatchEvent(new Event("scroll"))));
     type("Hello");
     await send();
     expect(moves.at(-1)).toMatchObject({ to: "bo-message-ai", block: "start" });
@@ -564,13 +566,14 @@ describe("BoConversation: where a send leaves the page (UX, #205)", () => {
   it("an arrow key in the box isn't scrolling, and the next send starts afresh", async () => {
     above = ["bo-message-ai"];
     await open();
-    answers.push(whileItComes(() => fireEvent.keyDown(screen.getByTestId("bo-text"), { key: "ArrowUp" })));
+    answers.push(whileItComes(() => screen.getByTestId("bo-text").dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", bubbles: true }))));
     type("Hello");
     await send();
     expect(moves.at(-1)).toMatchObject({ to: "bo-message-ai", block: "start" });
-    answers.push(whileItComes(() => fireEvent.wheel(window)), reply());
+    answers.push(whileItComes(() => window.dispatchEvent(new Event("wheel"))), reply());
     type("Again");
     await send();
+    expect(screen.getAllByTestId("bo-message-ai")).toHaveLength(2);
     expect(moves).toEqual([]);
     type("Once more");
     await send();
