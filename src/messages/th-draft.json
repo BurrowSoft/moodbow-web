@@ -1033,5 +1033,10 @@
     "key": "common.securityNoticeRead",
     "en": "Read it",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "me.meNoScript",
+    "en": "The journal needs JavaScript. Turn it on in your browser to see your entries.",
+    "reason": "UX draft (native read pending)"
   }
 ]

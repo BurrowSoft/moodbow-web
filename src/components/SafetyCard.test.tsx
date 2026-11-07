@@ -6,8 +6,15 @@ import messages from "@/messages/en.json";
 import es from "@/messages/es.json";
 import fr from "@/messages/fr.json";
 import ptBr from "@/messages/pt-br.json";
-import { helplinesFor, isIos, telHref } from "@/lib/safety/helplines";
+import { helpLineSize, helplinesFor, isIos, telHref } from "@/lib/safety/helplines";
 import { GetHelpNow, SafetyCard } from "./SafetyCard";
+vi.mock("@/i18n/navigation", () => ({
+  Link: ({ href, prefetch, children, ...rest }: { href: string; prefetch?: boolean; children: React.ReactNode }) => (
+    <a href={href} data-prefetch={String(prefetch)} {...rest}>
+      {children}
+    </a>
+  ),
+}));
 
 // The safety card (M8, decision 124) and its numbers from countries.json.
 const s = messages.safety;
@@ -161,6 +168,25 @@ describe("SafetyCard", () => {
   });
 });
 
+describe("Get help now with or without the page's scripts (#248)", () => {
+  it("is a link, so it works with none; once running, a click opens the card and stays on the page", () => {
+    wrap(<GetHelpNow country="GB" testId="me-get-help" />);
+    const link = screen.getByTestId("me-get-help");
+    expect(link.tagName).toBe("A");
+    expect(link.getAttribute("href")).toMatch(/\/help\/get-help-now$/);
+    expect(fireEvent.click(link)).toBe(false);
+    expect(screen.getByTestId("safety-card")).toBeInTheDocument();
+  });
+
+  it("a click asking for a new tab is left to the browser", () => {
+    wrap(<GetHelpNow country="GB" testId="me-get-help" />);
+    const link = screen.getByTestId("me-get-help");
+    link.addEventListener("click", (e) => e.preventDefault());
+    fireEvent.click(link, { ctrlKey: true });
+    expect(screen.queryByTestId("safety-card")).toBeNull();
+  });
+});
+
 describe("Get help now's style (decision 128)", () => {
   it("a calm secondary button, not the accent fill", () => {
     wrap(<GetHelpNow country="GB" testId="me-get-help" />);
@@ -195,5 +221,37 @@ describe("SafetyCard: the opener (#9765 S-03)", () => {
     fireEvent.click(screen.getByTestId("reflect-get-help"));
     expect(screen.getByTestId("safety-card")).toHaveTextContent(s.safetyBody);
     expect(screen.getByTestId("safety-card")).not.toHaveTextContent(s.safetyBodyNeutral);
+  });
+});
+
+describe("a number never breaks across lines (#247)", () => {
+  it("stays on one line by CSS, so what's copied has plain spaces, and it still dials", () => {
+    render(<NextIntlClientProvider locale="en" messages={messages}><SafetyCard country="DE" onClose={() => {}} /></NextIntlClientProvider>);
+    const link = screen.getByTestId("safety-call-helpline");
+    const number = link.querySelector("[data-help-number]")!;
+    expect(number).toHaveClass("whitespace-nowrap");
+    expect(number.textContent).toBe("0800 111 0 111");
+    expect(link.textContent).toContain("(0800 111 0 111)");
+    expect(link.textContent).not.toContain(String.fromCharCode(160));
+    expect(link).toHaveAttribute("href", "tel:08001110111");
+  });
+
+  it("the longest ones stop growing a size earlier", () => {
+    for (const code of ["AR", "DE", "IT", "MX"]) expect(helpLineSize(helplinesFor(code).helpline!.display), code).toContain("28px");
+    for (const code of ["BE", "FR", "GB"]) expect(helpLineSize(helplinesFor(code).helpline!.display), code).toContain("32px");
+  });
+});
+
+describe("a line's hours are in the live languages", () => {
+  it("every line with hours has them in en, fr, es and pt, and the card's lookup finds them", () => {
+    const withHours = registry.countries.filter((c) => c.helpline?.hours);
+    expect(withHours.map((c) => c.code)).toEqual(["AR", "LU"]);
+    for (const { code, helpline } of withHours) {
+      const hours = helpline!.hours as Record<string, string>;
+      for (const [locale, data] of [["en", "en"], ["fr", "fr"], ["es", "es"], ["pt-br", "pt"]]) {
+        expect(hours[data], `${code} ${data}`).toBeTruthy();
+        expect(helplinesFor(code, locale).helpline?.hours, `${code} ${locale}`).toBe(hours[data]);
+      }
+    }
   });
 });

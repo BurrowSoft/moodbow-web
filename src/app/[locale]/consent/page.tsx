@@ -67,14 +67,14 @@ export default async function ConsentPage({ params }: PageProps<"/[locale]/conse
       {/* Help first (UX): it's never behind a consent, new or asked again. The card and its
           words only come to this page, which the root layout doesn't send them to. */}
       <NextIntlClientProvider messages={pickMessages(await getMessages(), ["me", "safety", "common"])}>
-        <div className="[font-size:min(1rem,max(8vw,16px))] [&_button]:min-h-[44px]">
+        <div className="[font-size:min(1rem,max(10vw,32px))] [&_a]:min-h-[44px] [&_button]:min-h-[44px]">
           <GetHelpNow country={country} testId="consent-get-help" neutral />
         </div>
       </NextIntlClientProvider>
       {/* Who keeps what, above the boxes and never collapsed, so nobody consents with it off screen
           (decisions 224, 226). Under the safety card's cap, so at large text the boxes stay close:
           the type stops growing, and nothing is cut off. */}
-      <p data-testid="consent-notice" className="text-text max-sm:[font-size:min(1rem,max(8vw,16px))] [overflow-wrap:anywhere]">
+      <p data-testid="consent-notice" className="text-text max-sm:[font-size:min(1rem,max(10vw,32px))] [overflow-wrap:anywhere]">
         {t("consentNotice")}
       </p>
       <ConsentForm askAge={askAge} askAi={askAiConsent()} showBack={!user && !outage} />

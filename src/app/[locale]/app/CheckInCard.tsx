@@ -16,6 +16,7 @@ import { checkInChips, formatHours } from "./checkInChips";
 import { JOURNAL_CARD, MOOD_FACE, MOOD_LABEL, MOOD_ROW, PRIMARY_SAVE } from "@/lib/ui/journalLayout";
 import { MoodFace } from "@/components/MoodFace";
 import { onArrival } from "@/lib/ui/arrival";
+import { useUntilLoaded } from "@/lib/ui/untilLoaded";
 import { saveCheckIn, type CheckInState } from "./actions";
 import { useCheckInDraft } from "./CheckInDraft";
 
@@ -190,15 +191,15 @@ function ConflictVersion({ label, values, testId }: { label: string; values: Pic
     chips.splice(values.sleep_hours != null ? 1 : 0, 0, { label: t(`sleep${q[0].toUpperCase()}${q.slice(1)}` as "sleepPoor"), hex: null });
   }
   return (
-    <div className="min-w-0 rounded-2xl bg-pill p-[12px] [overflow-wrap:anywhere] [font-size:min(1rem,max(8vw,16px))]" data-testid={testId}>
-      <p className="leading-[1.429] text-muted [font-size:min(0.875rem,max(7vw,14px))]">{label}</p>
+    <div className="min-w-0 rounded-2xl bg-pill p-[12px] [overflow-wrap:anywhere] [font-size:min(1rem,max(10vw,32px))]" data-testid={testId}>
+      <p className="leading-[1.429] text-muted [font-size:min(0.875rem,max(8.75vw,28px))]">{label}</p>
       <p className="mt-[8px] flex items-center gap-[8px] font-medium text-text">
         <MoodFace mood={values.mood} className="h-[28px] w-[28px] shrink-0" />
         <span className="min-w-0" data-testid={`${testId}-mood`}>
           {t(`mood${values.mood}` as "mood1")}
         </span>
       </p>
-      <ul className="mt-[8px] space-y-[4px] leading-[1.429] text-text [font-size:min(0.875rem,max(7vw,14px))]">
+      <ul className="mt-[8px] space-y-[4px] leading-[1.429] text-text [font-size:min(0.875rem,max(8.75vw,28px))]">
         {chips.map(({ label: chip, hex }) => (
           <li key={chip} className="flex items-center gap-[8px]">
             <ValueDot hex={hex} />
@@ -576,7 +577,7 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
       initialFocus="title"
       details={
         <>
-          <p className="text-sm font-medium text-text" data-testid="checkin-conflict-date">
+          <p className="leading-[1.429] [font-size:min(0.875rem,max(8.75vw,28px))] font-medium text-text" data-testid="checkin-conflict-date">
             {dateLine(conflict.date, dateLocaleTag)}
           </p>
           {/* Side by side while both fit; the rem minimum stacks them at large text on a narrow
@@ -643,6 +644,8 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
   const seen = useRef(false);
   const showsSummary = !editing && fields.mood !== null;
   const moodTitle = useId();
+  // A tap before the page's code has run does nothing (#238), so the card says so if that takes a while.
+  const untilLoaded = useUntilLoaded();
   // The "c" shortcut (1.1 O): focus the mood (the chosen face, else the
   // first) or, once checked in, the summary's heading.
   useEffect(
@@ -653,10 +656,15 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
       }),
     [],
   );
+  // Once it takes input: focus can't land on an inert card, on a page load.
+  useEffect(() => {
+    if (!untilLoaded.inert && autoFocus && !showsSummary) root.current?.querySelector<HTMLElement>("[role=radio]")?.focus();
+    // Only when the card opens.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [untilLoaded.inert]);
   useEffect(() => {
     if (!seen.current) {
       seen.current = true;
-      if (autoFocus && !showsSummary) root.current?.querySelector<HTMLElement>("[role=radio]")?.focus();
       return;
     }
     if (showsSummary) {
@@ -687,7 +695,7 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
       fields.stress !== "" ? { label: t("stressChip", { level: Number(fields.stress) }), hex: valueHex("stress", fields.stress) } : null,
     ].filter((c): c is { label: string; hex: string | null } => c !== null);
     return (
-      <section ref={root} className={JOURNAL_CARD} data-testid="checkin-summary">
+      <section {...untilLoaded} ref={root} className={JOURNAL_CARD} data-testid="checkin-summary">
         {conflictDialog}
         {/* The mockups (decision 161): the mood's face and its name, Edit on
             the right. The heading still says what it answers, for screen
@@ -728,7 +736,7 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
   }
 
   return (
-    <form ref={(el) => void (root.current = el)} onSubmit={submit} className={JOURNAL_CARD} data-testid="checkin-card">
+    <form {...untilLoaded} ref={(el) => void (root.current = el)} onSubmit={submit} className={JOURNAL_CARD} data-testid="checkin-card">
       {conflictDialog}
       {loadFailed && row === null && <CheckInLoadFailed />}
       {/* One group, named once (a fieldset + a radiogroup were read twice;
