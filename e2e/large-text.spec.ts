@@ -139,7 +139,7 @@ test("large text on a wide screen: Consent's boxes grow with the browser's setti
 });
 
 // The legal pages and Help share this. 48 px on a 320 px phone split ordinary words (Web Tester's
-// numbers, 7 Nov): under the cap only a word wider than its line may, like an email address.
+// numbers, 7 Nov): at 32 px only a word wider than its line may, like an email address.
 test("large text: a legal page's words stay whole on a 320 px phone, and normal size stays as it was", async ({ page, browserName }, testInfo) => {
   test.skip(browserName !== "chromium" || testInfo.project.name !== "desktop", "Page.setFontSizes is Chromium's; once is enough");
   test.setTimeout(120_000);
@@ -178,7 +178,7 @@ test("large text: a legal page's words stay whole on a 320 px phone, and normal 
       expect.soft(measured.split, `${route} at ${percent} %`).toEqual([]);
       expect.soft(measured.overflow, `${route} at ${percent} %`).toBe(0);
       if (percent === 100) expect.soft([measured.body, measured.section], route).toEqual(["16px", "20px"]);
-      if (percent === 300) expect.soft(measured.body, route).toBe("25.6px");
+      if (percent !== 100) expect.soft(measured.body, route).toBe("32px");
     }
   }
   // From the wide layout up, at normal size, as #241 left it.
@@ -186,4 +186,15 @@ test("large text: a legal page's words stay whole on a 320 px phone, and normal 
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto("/privacy");
   expect(await page.evaluate(() => getComputedStyle(document.querySelector(".legal-prose p")!).fontSize)).toBe("17px");
+});
+
+// Type stops growing at about 200 % on narrow screens, so pinch zoom has to cover anyone who needs more.
+test("the viewport never stops someone zooming", async ({ page, browserName }, testInfo) => {
+  test.skip(browserName !== "chromium" || testInfo.project.name !== "desktop", "once is enough");
+  for (const route of ["/", "/consent", "/privacy", "/terms", "/help", "/sign-in"]) {
+    await page.goto(route);
+    const viewport = await page.locator("meta[name=viewport]").getAttribute("content");
+    expect(viewport, route).toBeTruthy();
+    expect(viewport, route).not.toMatch(/maximum-scale|user-scalable/i);
+  }
 });
