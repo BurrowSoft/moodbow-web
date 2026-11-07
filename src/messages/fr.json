@@ -137,7 +137,10 @@
   },
   "legal": {
     "hiddenTitle": "Pas encore affiché : chaque bloc apparaît quand sa fonction est en ligne (versions de test uniquement)",
-    "legalEnglishOnly": "Cette page est disponible en anglais."
+    "legalEnglishOnly": "Cette page est disponible en anglais.",
+    "nextApplies": "Ces changements s'appliquent le {date}. D'ici là, notre politique actuelle s'applique.",
+    "nextAppliesNoDate": "Ces changements ne s'appliquent pas encore. D'ici là, notre politique actuelle s'applique.",
+    "nextCurrent": "Lire la politique actuelle"
   },
   "auth": {
     "signinTitle": "Bon retour",
@@ -215,7 +218,12 @@
     "retry": "Réessayer",
     "tryAgain": "Réessayer",
     "slowLoading": "Cela prend plus de temps que d'habitude…",
-    "navBackTo": "Retour à {screen}"
+    "navBackTo": "Retour à {screen}",
+    "policyNoticeTitle": "Nous mettons à jour notre Politique de confidentialité",
+    "policyNoticeBody": "Elle couvrira Bo, notre IA facultative, et sera plus claire sur qui peut lire votre journal et ce qui se passe si vous n'y avez plus accès.",
+    "policyNoticeApplies": "Les changements s'appliquent le {date}.",
+    "policyNoticeRead": "Lire la Politique de confidentialité",
+    "policyNoticeDismiss": "Compris"
   },
   "today": {
     "greetMorning": "Bonjour",

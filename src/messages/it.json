@@ -137,7 +137,10 @@
   },
   "legal": {
     "hiddenTitle": "Non ancora visibile: ogni sezione appare quando la sua funzione è attiva (solo versioni di prova)",
-    "legalEnglishOnly": "Questa pagina è disponibile in inglese."
+    "legalEnglishOnly": "Questa pagina è disponibile in inglese.",
+    "nextApplies": "Queste modifiche si applicano dal {date}. Fino ad allora vale la nostra informativa attuale.",
+    "nextAppliesNoDate": "Queste modifiche non si applicano ancora. Fino ad allora vale la nostra informativa attuale.",
+    "nextCurrent": "Leggi l'informativa attuale"
   },
   "auth": {
     "signinTitle": "Che bello rivederti",
@@ -215,7 +218,12 @@
     "retry": "Riprova",
     "tryAgain": "Riprova",
     "slowLoading": "Ci vuole più del solito…",
-    "navBackTo": "Torna a {screen}"
+    "navBackTo": "Torna a {screen}",
+    "policyNoticeTitle": "Stiamo aggiornando la nostra informativa sulla privacy",
+    "policyNoticeBody": "Includerà Bo, la nostra AI facoltativa, e dirà più chiaramente chi può leggere il tuo diario e cosa succede se perdi l'accesso.",
+    "policyNoticeApplies": "Le modifiche si applicano dal {date}.",
+    "policyNoticeRead": "Leggi l'informativa",
+    "policyNoticeDismiss": "Ho capito"
   },
   "today": {
     "greetMorning": "Buongiorno",

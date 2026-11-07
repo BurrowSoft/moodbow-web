@@ -137,7 +137,10 @@
   },
   "legal": {
     "hiddenTitle": "Not shown yet: each block appears once its feature is live (test builds only)",
-    "legalEnglishOnly": "This page is available in English."
+    "legalEnglishOnly": "This page is available in English.",
+    "nextApplies": "These changes apply on {date}. Until then, our current policy applies.",
+    "nextAppliesNoDate": "These changes aren't in effect yet. Until then, our current policy applies.",
+    "nextCurrent": "Read the current policy"
   },
   "auth": {
     "signinTitle": "Welcome back",
@@ -215,7 +218,12 @@
     "retry": "Try again",
     "tryAgain": "Try again",
     "slowLoading": "Taking longer than usual…",
-    "navBackTo": "Back to {screen}"
+    "navBackTo": "Back to {screen}",
+    "policyNoticeTitle": "We're updating our Privacy Policy",
+    "policyNoticeBody": "It will cover Bo, our optional AI, and be clearer about who can read your journal and what happens if you lose access to it.",
+    "policyNoticeApplies": "The changes apply on {date}.",
+    "policyNoticeRead": "Read the policy",
+    "policyNoticeDismiss": "Got it"
   },
   "today": {
     "greetMorning": "Good morning",
