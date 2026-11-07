@@ -254,9 +254,9 @@
     "errGeneric": "Qualcosa è andato storto. Riprova.",
     "offlineCheckinRejected": "Un check-in salvato offline per il {date} non è stato salvato. Aggiungilo di nuovo.",
     "checkInConflictTitle": "Questo giorno ha già un check-in",
-    "checkInConflictBody": "È stato salvato su un altro dispositivo. Quale vuoi tenere?",
-    "checkInConflictMine": "Il tuo (questo dispositivo)",
-    "checkInConflictOther": "Salvato altrove",
+    "checkInConflictBody": "Quale vuoi tenere?",
+    "checkInConflictMine": "Il tuo",
+    "checkInConflictOther": "Già salvato",
     "checkInConflictKeepMine": "Tieni il mio",
     "checkInConflictUseOther": "Usa l'altro"
   },

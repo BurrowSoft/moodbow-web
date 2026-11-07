@@ -254,9 +254,9 @@
     "errGeneric": "Something went wrong. Please try again.",
     "offlineCheckinRejected": "A check-in you saved offline for {date} couldn't be saved. Please add it again.",
     "checkInConflictTitle": "This day already has a check-in",
-    "checkInConflictBody": "It was saved on another device. Which one do you want to keep?",
-    "checkInConflictMine": "Yours (this device)",
-    "checkInConflictOther": "Saved elsewhere",
+    "checkInConflictBody": "Which one do you want to keep?",
+    "checkInConflictMine": "Yours",
+    "checkInConflictOther": "Already saved",
     "checkInConflictKeepMine": "Keep mine",
     "checkInConflictUseOther": "Use the other one"
   },

@@ -521,17 +521,17 @@
   },
   {
     "key": "today.checkInConflictBody",
-    "en": "It was saved on another device. Which one do you want to keep?",
+    "en": "Which one do you want to keep?",
     "reason": "UX draft (native read pending)"
   },
   {
     "key": "today.checkInConflictMine",
-    "en": "Yours (this device)",
+    "en": "Yours",
     "reason": "UX draft (native read pending)"
   },
   {
     "key": "today.checkInConflictOther",
-    "en": "Saved elsewhere",
+    "en": "Already saved",
     "reason": "UX draft (native read pending)"
   },
   {

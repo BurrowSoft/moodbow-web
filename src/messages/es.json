@@ -254,9 +254,9 @@
     "errGeneric": "Algo salió mal. Inténtalo de nuevo.",
     "offlineCheckinRejected": "No se pudo guardar un registro que hiciste sin conexión para el {date}. Vuelve a añadirlo.",
     "checkInConflictTitle": "Este día ya tiene un registro",
-    "checkInConflictBody": "Se guardó en otro dispositivo. ¿Cuál quieres conservar?",
-    "checkInConflictMine": "El tuyo (este dispositivo)",
-    "checkInConflictOther": "Guardado en otro lugar",
+    "checkInConflictBody": "¿Cuál quieres conservar?",
+    "checkInConflictMine": "El tuyo",
+    "checkInConflictOther": "Ya guardado",
     "checkInConflictKeepMine": "Conservar el mío",
     "checkInConflictUseOther": "Usar el otro"
   },
