@@ -173,7 +173,7 @@
   },
   "security-notice-live": {
     "met": false,
-    "what": "The security notice is built on both clients (specs/breach-procedure-draft.md). Then the privacy policy's §6 says how we'd tell people of a breach (decision 222)."
+    "what": "The security notice is live in the app build people have, and on the web (specs/breach-procedure-draft.md). Then the privacy policy's §6 says how we'd tell people of a breach (decision 222)."
   },
   "play-live": {
     "met": false,
