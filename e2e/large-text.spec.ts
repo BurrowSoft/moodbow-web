@@ -190,6 +190,10 @@ test("large text: a legal page's words stay whole on a 320 px phone, and normal 
     await page.goto("/help");
     const help = await page.evaluate(() => ({ intro: getComputedStyle(document.querySelector("article h1 + div p")!).fontSize, topic: getComputedStyle(document.querySelector("article section h2")!).fontSize, summary: getComputedStyle(document.querySelector("article section li p")!).fontSize, overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth }));
     expect.soft(help).toEqual(percent === 100 ? { intro: "16px", topic: "18px", summary: "14px", overflow: 0 } : { intro: "32px", topic: "35.2px", summary: "28px", overflow: 0 });
+    for (const route of ["/support", "/account-deletion"]) {
+      await page.goto(route);
+      expect.soft(await page.evaluate(() => getComputedStyle(document.querySelector("article h1 + div p")!).fontSize), `${route} at ${percent} %`).toBe(percent === 100 ? "16px" : "32px");
+    }
   }
   // From the wide layout up, at normal size, as #241 left it.
   await cdp.send("Page.setFontSizes", { fontSizes: { standard: 16, fixed: 13 } });

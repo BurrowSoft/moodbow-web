@@ -29,8 +29,6 @@ export default async function HelpPage({ params }: PageProps<"/[locale]/help">) 
   const t = await getTranslations("help");
   return (
     <PageShell capTitle title={t("helpTitle")} draft={state === "draft"}>
-      {/* The way into every article: type stops growing as theirs does (decision 231). */}
-      <div className="space-y-5 max-sm:[font-size:min(1rem,max(10vw,32px))]">
       <p>{t("helpIntro", { email: SUPPORT_EMAIL })}</p>
       {helpIndex(locale).map(({ topic, articles }) => (
         <section key={topic} aria-labelledby={topicId(topic)} className="pt-4">
@@ -49,7 +47,6 @@ export default async function HelpPage({ params }: PageProps<"/[locale]/help">) 
           </ul>
         </section>
       ))}
-      </div>
     </PageShell>
   );
 }
