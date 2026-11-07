@@ -41,7 +41,8 @@ describe("the messages sent outside the journal", () => {
   it("the journal-only shared components are imported only from inside /app", () => {
     // Consent sends the card's words itself, in its own provider: help is never behind a consent.
     // Help on the journal's own error pages, which are rendered inside its messages.
-    const allowed = new Set(["SafetyCard:app/[locale]/consent/page.tsx", "SafetyCard:components/JournalUnavailable.tsx", "SafetyCard:components/SessionEnded.tsx"]);
+    // The signed-out account pages' help sends its own too.
+    const allowed = new Set(["SafetyCard:app/[locale]/consent/page.tsx", "SafetyCard:components/JournalUnavailable.tsx", "SafetyCard:components/SessionEnded.tsx", "SafetyCard:components/SignedOutHelp.tsx"]);
     for (const c of JOURNAL_ONLY_COMPONENTS) {
       const importers = all.filter((f) => !f.endsWith(`${sep}${c}.tsx`) && new RegExp(`from ["']@/components/${c}["']`).test(readFileSync(f, "utf8")));
       expect(importers.length, c).toBeGreaterThan(0);
