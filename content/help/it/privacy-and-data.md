@@ -4,7 +4,7 @@ summary: Chi può leggere il tuo diario e come scaricarlo.
 topic: Privacy & account
 it-draft: true
 ---
-Solo tu puoi leggere il tuo diario. Non vendiamo i tuoi dati e non mostriamo pubblicità.
+Il tuo diario è privato e legato al tuo account. Non vendiamo i tuoi dati e non mostriamo pubblicità.
 
 **Scarica tutto:** vai su **Profilo → Esporta i miei dati**. Ricevi un file con tutto quello che hai scritto e registrato. {pending:app_export_csv}Puoi anche scegliere **Foglio di calcolo (.csv)** per avere i tuoi giorni in un foglio di calcolo, che si apre in Excel o Fogli Google{pending:import_live}, e che Moodbow può importare di nuovo sul web{/pending}.{/pending}
 

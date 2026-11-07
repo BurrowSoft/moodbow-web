@@ -64,7 +64,7 @@
     "featureInsightsTitle": "Voyez ce qui va de pair dans vos journées",
     "featureInsightsBody": "Graphiques sur une semaine, un mois et 3 mois.",
     "privateTitle": "Privé dès la conception",
-    "privateBody": "Votre journal n'est lisible que par vous. Exportez ou supprimez tout, à tout moment."
+    "privateBody": "Votre journal est privé et lié à votre compte. Exportez ou supprimez tout dans Moi."
   },
   "support": {
     "title": "Assistance",
@@ -171,7 +171,7 @@
     "welcome2Title": "Voyez vos tendances",
     "welcome2Body": "Votre chronologie et vos graphiques montrent ce qui va souvent de pair avec vos bonnes journées et vos journées difficiles.",
     "welcome3Title": "Privé, et rien qu'à vous",
-    "welcome3BodyNoAi": "Votre journal n'est lisible que par vous, et vous pouvez tout supprimer à tout moment dans Moi.",
+    "welcome3BodyNoAi": "Votre journal est privé et lié à votre compte, et vous pouvez tout supprimer dans Moi.",
     "welcomeNext": "Suivant",
     "welcomeSkip": "Passer",
     "welcomeStart": "Commencer",
