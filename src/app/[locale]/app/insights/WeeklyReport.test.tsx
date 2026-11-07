@@ -2,6 +2,13 @@ import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { NextIntlClientProvider } from "next-intl";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import messages from "@/messages/en.json";
+vi.mock("@/i18n/navigation", () => ({
+  Link: ({ href, prefetch, children, ...rest }: { href: string; prefetch?: boolean; children: React.ReactNode }) => (
+    <a href={href} data-prefetch={String(prefetch)} {...rest}>
+      {children}
+    </a>
+  ),
+}));
 
 const requestWeeklyReport = vi.fn();
 const deleteWeeklyReport = vi.fn();
