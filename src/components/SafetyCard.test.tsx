@@ -229,10 +229,10 @@ describe("a number never breaks across lines (#247)", () => {
     for (const { code, helpline, emergency } of registry.countries) {
       const lines = helplinesFor(code);
       if (helpline) {
-        expect(lines.helpline?.display, code).toBe(helpline.display.replaceAll(" ", " "));
+        expect(lines.helpline?.display, code).toBe(helpline.display.replaceAll(" ", String.fromCharCode(160)));
         expect(lines.helpline?.dial, code).toBe(helpline.dial);
       }
-      expect(lines.emergency?.display, code).toBe(emergency?.display.replaceAll(" ", " "));
+      expect(lines.emergency?.display, code).toBe(emergency?.display.replaceAll(" ", String.fromCharCode(160)));
     }
     expect(telHref(helplinesFor("DE").helpline!.dial)).toBe("tel:08001110111");
   });

@@ -32,7 +32,7 @@ export const isIos = (userAgent: string, touchPoints: number) => /iPad|iPhone|iP
 // A number never breaks across lines, as someone has to dial it (Web Tester, #247; UX): no-break
 // spaces here, and "(" and ")" don't break from what they touch. The longest ones don't fit a 320 px
 // card at 32 px, so their line stops growing a size earlier. A test checks every number on this list.
-const whole = (display: string) => display.replaceAll(" ", " ");
+const whole = (display: string) => display.replaceAll(" ", String.fromCharCode(160));
 export const helpLineSize = (display: string) => (display.length >= 12 ? "[font-size:min(1rem,max(8.75vw,28px))]" : "[font-size:min(1rem,max(10vw,32px))]");
 
 export function helplinesFor(country: string | null | undefined, language = "en"): Helplines {
