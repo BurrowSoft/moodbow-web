@@ -27,14 +27,23 @@ vi.mock("@/i18n/navigation", () => ({
   ),
 }));
 vi.mock("@/lib/share/milestoneData", () => ({ loadMilestone: async () => null }));
-vi.mock("./CheckInCard", () => ({ CheckInCard: () => <div data-testid="checkin-card" /> }));
+// first: what the card had when it mounted, as the real card only reads `initial` then.
+vi.mock("./CheckInCard", async () => {
+  const { useState } = await import("react");
+  const CheckInCard = ({ loadFailed }: { loadFailed?: boolean }) => {
+    const [first] = useState(loadFailed);
+    return <div data-testid="checkin-card" data-load-failed={String(loadFailed)} data-first={String(first)} />;
+  };
+  return { CheckInCard };
+});
 vi.mock("./EntryPreviews", () => ({ EntryPreviews: () => null }));
 vi.mock("./MilestoneCard", () => ({ MilestoneCard: () => null }));
 vi.mock("@/components/JournalUnavailable", () => ({ JournalUnavailable: () => <div data-testid="journal-unavailable" /> }));
 vi.mock("@/components/SessionEnded", () => ({ SessionEnded: () => null }));
 const { default: TodayPage } = await import("./page");
 
-const open = async () => render(await TodayPage({ params: Promise.resolve({ locale: "en" }) } as never));
+const page = () => TodayPage({ params: Promise.resolve({ locale: "en" }) } as never);
+const open = async () => render(await page());
 
 beforeEach(() => {
   checkInError = null;
@@ -46,8 +55,7 @@ describe("Today, whatever failed", () => {
   it("today's check-in couldn't be read: the card and Write stay, with the error beside them", async () => {
     checkInError = { message: "boom" };
     await open();
-    expect(screen.getByTestId("today-checkin-error")).toBeInTheDocument();
-    expect(screen.getByTestId("checkin-card")).toBeInTheDocument();
+    expect(screen.getByTestId("checkin-card")).toHaveAttribute("data-load-failed", "true");
     expect(screen.getByTestId("today-write")).toHaveAttribute("href", "/app/write");
     expect(screen.queryByTestId("journal-unavailable")).toBeNull();
   });
@@ -60,6 +68,13 @@ describe("Today, whatever failed", () => {
   });
   it("nothing failed: no error", async () => {
     await open();
-    expect(screen.queryByTestId("today-checkin-error")).toBeNull();
+    expect(screen.getByTestId("checkin-card")).toHaveAttribute("data-load-failed", "false");
+  });
+  it("Try again brings the real row: a new card, as the old one only read its first", async () => {
+    checkInError = { message: "boom" };
+    const { rerender } = await open();
+    checkInError = null;
+    rerender(await page());
+    expect(screen.getByTestId("checkin-card")).toHaveAttribute("data-first", "false");
   });
 });

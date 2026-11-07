@@ -17,6 +17,8 @@ vi.mock("@/lib/ui/withTimeout", async (orig) => {
   const real = await orig<typeof import("@/lib/ui/withTimeout")>();
   return { ...real, SAVE_WAIT_MS: 300, withTimeout: <T,>(call: Promise<T>, ms: number) => (held ? call : real.withTimeout(call, ms)) };
 });
+const refresh = vi.fn();
+vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh }) }));
 const { CheckInCard } = await import("./CheckInCard");
 const { CheckInDraftProvider } = await import("./CheckInDraft");
 
@@ -649,6 +651,37 @@ describe("CheckInCard: signed out in another tab (UX & PM 2026-11-03, option C; 
     } finally {
       setOnline(true);
     }
+  });
+});
+
+describe("CheckInCard: today's check-in couldn't be read (decision 218; Reviewer, #220)", () => {
+  const renderFailed = () =>
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <CheckInCard initial={null} uid="u1" date="2026-10-02" dateLocaleTag="en-US" loadFailed />
+      </NextIntlClientProvider>,
+    );
+  it("the empty card, with the error and a Try again that reads again", () => {
+    refresh.mockClear();
+    renderFailed();
+    expect(screen.getByTestId("checkin-card")).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent(messages.today.errGeneric);
+    fireEvent.click(screen.getByTestId("today-checkin-retry"));
+    expect(refresh).toHaveBeenCalledTimes(1);
+  });
+  it("a save that lands clears them: the error doesn't stay above a saved check-in", async () => {
+    saveCheckIn.mockResolvedValue({ status: "saved", checkIn: ROW });
+    renderFailed();
+    fireEvent.click(screen.getByTestId("checkin-mood-4"));
+    fireEvent.click(screen.getByTestId("checkin-save"));
+    await screen.findByTestId("checkin-summary");
+    expect(screen.queryByTestId("today-checkin-error")).toBeNull();
+    expect(screen.queryByTestId("today-checkin-retry")).toBeNull();
+  });
+  it("a read that worked: neither", () => {
+    renderCard(null);
+    expect(screen.queryByTestId("today-checkin-error")).toBeNull();
+    expect(screen.queryByTestId("today-checkin-retry")).toBeNull();
   });
 });
 

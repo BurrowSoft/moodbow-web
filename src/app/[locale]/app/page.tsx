@@ -50,6 +50,8 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
   // A failed read shows the empty card with its error: saving it can't overwrite anything,
   // as a save with no known version is insert-only, and a check-in already there opens the
   // conflict dialog. Not reachable here: no session, or no get_me, as that spec says.
+  // The key: the card reads `initial` only when it mounts, so a Try again that brings the real
+  // row needs a new card. Unsaved choices stay, in CheckInDraft.
   // Today's entries, newest first (previews only; the editor loads the rest).
   const { data: entries, error: entriesError } = await supabase
     .from("entries")
@@ -74,12 +76,7 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
           {dateLine(me.today, dateLocaleTag)}
         </p>
       </header>
-      {checkInError && (
-        <p role="alert" data-testid="today-checkin-error" className="font-medium text-accent">
-          {t("errGeneric")}
-        </p>
-      )}
-      <CheckInCard initial={(data as CheckIn | null) ?? null} uid={user.id} date={me.today} dateLocaleTag={dateLocaleTag} keepDraft />
+      <CheckInCard key={checkInError ? "unread" : "read"} initial={(data as CheckIn | null) ?? null} uid={user.id} date={me.today} dateLocaleTag={dateLocaleTag} keepDraft loadFailed={Boolean(checkInError)} />
       <Link
         href="/app/write"
         data-testid="today-write"

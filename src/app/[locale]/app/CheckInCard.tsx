@@ -1,6 +1,7 @@
 "use client";
 
-import { startTransition, useActionState, useCallback, useEffect, useId, useRef, useState } from "react";
+import { startTransition, useActionState, useCallback, useEffect, useId, useRef, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { EXERCISE_MINUTES, MOODS, SLEEP_HOURS, SLEEP_QUALITIES, SLEEP_START, STRESS_LEVELS, type CheckIn, type SleepQuality } from "@/lib/journal/checkIn";
 import { dateLine } from "@/lib/journal/today";
@@ -8,6 +9,7 @@ import { valueHex } from "@/lib/journal/valueColours";
 import { localKey } from "@/lib/localData";
 import { onSignOut } from "@/lib/signOutSignal";
 import { SAVE_WAIT_MS, TimedOut, withTimeout } from "@/lib/ui/withTimeout";
+import { SlowLoading } from "@/components/SlowLoading";
 import { ValueDot } from "@/components/ValueDot";
 import { Dialog, dialogButton } from "@/components/Dialog";
 import { checkInChips, formatHours } from "./checkInChips";
@@ -139,7 +141,9 @@ function toFormData(fields: Fields, expectedUpdatedAt: string, date: string, fro
 // autoFocus: focus the first mood when the card opens ("Add a check-in").
 // keepDraft: Today's card; its unsaved choices survive leaving Today
 // (CheckInDraft, in memory only, #9765 M-01).
-type Props = { initial: CheckIn | null; uid: string; date: string; dateLocaleTag: string; autoFocus?: boolean; keepDraft?: boolean };
+// loadFailed: today's check-in couldn't be read, so the empty card comes with
+// its error and Try again, until this card holds a real row.
+type Props = { initial: CheckIn | null; uid: string; date: string; dateLocaleTag: string; autoFocus?: boolean; keepDraft?: boolean; loadFailed?: boolean };
 
 // An offline copy the server refused ("rejected": e.g. a day that is in the
 // future for the account's zone). Never silent (decision 72): one notice per
@@ -204,6 +208,32 @@ function ConflictVersion({ label, values, testId }: { label: string; values: Pic
   );
 }
 
+// Its own component: only this needs the router, and only when the read failed.
+function CheckInLoadFailed() {
+  const t = useTranslations("today");
+  const ta = useTranslations("app");
+  const router = useRouter();
+  const [retrying, startRetry] = useTransition();
+  return (
+    <div className="mb-[16px]">
+      <p role="alert" data-testid="today-checkin-error" className="font-medium text-accent">
+        {t("errGeneric")}
+      </p>
+      <button
+        type="button"
+        data-testid="today-checkin-retry"
+        // Focusable while it retries, as on JournalUnavailable.
+        aria-disabled={retrying}
+        onClick={() => !retrying && startRetry(() => router.refresh())}
+        className="mt-[8px] inline-flex min-h-[48px] max-w-full items-center rounded-full border border-border px-[24px] font-medium text-accent hover:bg-pill aria-disabled:opacity-60"
+      >
+        {ta("tryAgain")}
+      </button>
+      <SlowLoading active={retrying} />
+    </div>
+  );
+}
+
 export function CheckInCard(props: Props) {
   const t = useTranslations("today");
   const [notices, setNotices] = useState<Notice[]>([]);
@@ -251,7 +281,7 @@ export function CheckInCard(props: Props) {
   );
 }
 
-function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, autoFocus, keepDraft }: Props & { notify: Notify; announce: (text: string) => void }) {
+function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, autoFocus, keepDraft, loadFailed }: Props & { notify: Notify; announce: (text: string) => void }) {
   const t = useTranslations("today");
   const locale = useLocale();
   const slot = useCheckInDraft<Fields>();
@@ -680,6 +710,7 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
   return (
     <form ref={(el) => void (root.current = el)} onSubmit={submit} className={JOURNAL_CARD} data-testid="checkin-card">
       {conflictDialog}
+      {loadFailed && row === null && <CheckInLoadFailed />}
       {/* One group, named once (a fieldset + a radiogroup were read twice;
           a11y pass): the title labels the radiogroup. */}
       <div>
