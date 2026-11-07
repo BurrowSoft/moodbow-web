@@ -73,23 +73,24 @@ test("large text at 300 %: a page's heading is never smaller than the body under
   expect(signIn.heading).toBeGreaterThanOrEqual(signIn.body);
 });
 
-// "J'a / cc / ep / te", and French's heading "commence / r" (Web Tester, on #233): this is the page
-// people have to be able to read. Word by word: a line may end between words, and inside one only
-// if the word alone is wider than its line, as German's "Datenschutzerklärung" is at 320 px.
 test("Consent's boxes keep the page's own size on a wide screen: the cap is only for narrow or large text", async ({ page, browserName }, testInfo) => {
   test.skip(browserName !== "chromium" || testInfo.project.name !== "desktop", "once is enough");
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto("/consent");
   const sizes = await page.evaluate(() => ({ box: getComputedStyle(document.querySelector("form label span")!).fontSize, page: getComputedStyle(document.querySelector("form")!.parentElement!).fontSize }));
   expect(sizes.box).toBe(sizes.page);
+  expect(sizes.box).toBe("17px");
 });
 
-test("large text: Consent's heading and boxes keep their words whole on a 320 px phone", async ({ page, browserName }, testInfo) => {
+// "J'a / cc / ep / te", and French's heading "commence / r" (Web Tester, on #233): this is the page
+// people have to be able to read. Word by word: a line may end between words, and inside one only
+// if the word alone is wider than its line, as German's "Datenschutzerklärung" is at 320 px.
+test("large text: Consent's heading and boxes keep their words whole, on a 320 px phone and on a wide screen", async ({ page, browserName }, testInfo) => {
   test.skip(browserName !== "chromium" || testInfo.project.name !== "desktop", "Page.setFontSizes is Chromium's; once is enough");
-  test.setTimeout(120_000);
+  test.setTimeout(180_000);
   const cdp = await page.context().newCDPSession(page);
-  await page.setViewportSize({ width: 320, height: 640 });
-  for (const percent of [100, 200, 300]) {
+  for (const [width, percent] of [[320, 100], [320, 200], [320, 300], [1280, 200], [1920, 300]]) {
+    await page.setViewportSize({ width, height: 640 });
     await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
     for (const language of LANGUAGES.filter((l) => l !== "/th")) {
       await page.goto(`${language}/consent`);
@@ -118,8 +119,25 @@ test("large text: Consent's heading and boxes keep their words whole on a 320 px
         }
         return out;
       });
-      expect.soft(split, `${language || "/en"} at ${percent} %`).toEqual([]);
-      expect.soft(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth), `${language || "/en"} at ${percent} %`).toBe(0);
+      expect.soft(split, `${language || "/en"} at ${width} px, ${percent} %`).toEqual([]);
+      expect.soft(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth), `${language || "/en"} at ${width} px, ${percent} %`).toBe(0);
+    }
+  }
+});
+
+// #240: from the rem-based wide layout up, the words people agree to stayed at a fixed 17 px while
+// Continue grew to 48 px. Every language, Thai too: this is about size, not where lines end.
+test("large text on a wide screen: Consent's boxes grow with the browser's setting", async ({ page, browserName }, testInfo) => {
+  test.skip(browserName !== "chromium" || testInfo.project.name !== "desktop", "Page.setFontSizes is Chromium's; once is enough");
+  test.setTimeout(120_000);
+  const cdp = await page.context().newCDPSession(page);
+  for (const [width, percent] of [[1280, 150], [1280, 200], [1920, 200], [1920, 300], [2560, 300]]) {
+    await page.setViewportSize({ width, height: 800 });
+    await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: Math.round((13 * percent) / 100) } });
+    for (const language of LANGUAGES) {
+      await page.goto(`${language}/consent`);
+      const box = await page.evaluate(() => parseFloat(getComputedStyle(document.querySelector("form label span")!).fontSize));
+      expect.soft(box, `${language || "/en"} at ${width} px, ${percent} %`).toBeCloseTo((17 * percent) / 100, 1);
     }
   }
 });
