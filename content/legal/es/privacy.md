@@ -1,7 +1,7 @@
 <!--
   Spanish of content/legal/en/privacy.md. Wording is Vitor's, as in English. AI translation, checked
   by back-translation, a script and the Code Reviewer; no native lawyer has read it.
-  en-sha256: a5641e2860b04f26ad44e02d1b9589cab98a2c6cf3a5f5d753eea36bd8d5d633
+  en-sha256: 7b9a9b047973987843da195e4bc5aa72946e1d3077ae78d1ced63b5bf5fd1df3
   It's the English this translates: legalSpanish.test.ts fails if the English changes, until the
   Spanish follows and this is updated. Shows on Production only once legal-es-approved is met.
 -->
@@ -34,6 +34,7 @@ Moodbow es un diario privado creado por Vitor Ribeiro Carvalho, que opera como B
 **Lo que se queda solo en tu dispositivo:** los borradores sin enviar{pending:app_app_lock}, el PIN de bloqueo de tu app{/pending}{pending:app_share_cards} y las tarjetas para compartir que creas. Las tarjetas para compartir se crean en tu dispositivo y solo salen de él si tú las compartes{/pending}.
 
 **Registros técnicos:** como casi todos los servicios en línea, nuestros proveedores de alojamiento registran direcciones IP, la página solicitada e información del dispositivo o del navegador cuando te conectas, por seguridad y para solucionar problemas. Conservan estos registros técnicos durante un tiempo limitado (consulta el §4). También guardamos totales diarios de uso de la IA (cuántas reflexiones se hicieron ese día y cuánto nos costaron), sin ningún vínculo con ninguna persona, para mantener los costos bajo control.
+
 **Correos que nos envías:** si escribes a support@moodbow.com, conservamos la conversación para poder responderte y la eliminamos cuando ya no sea necesaria.
 
 No recopilamos tu nombre, tus contactos, tu ubicación precisa ni identificadores publicitarios, y no usamos rastreadores publicitarios.
