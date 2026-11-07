@@ -1,7 +1,7 @@
 <!--
   Spanish of content/legal/en/privacy.md. Wording is Vitor's, as in English. AI translation, checked
   by back-translation, a script and the Code Reviewer; no native lawyer has read it.
-  en-sha256: 3b4adb89576cac7858ea3fbb36be7105aee15399fa6a13ea0b841fea7080466b
+  en-sha256: 363ebded1c50287edfdfb8917c723e377e8eb6cb0a9f0de975fb53fff31b81f5
   It's the English this translates: legalSpanish.test.ts fails if the English changes, until the
   Spanish follows and this is updated. Shows on Production only once legal-es-approved is met.
 -->
@@ -16,7 +16,7 @@ Moodbow es un diario privado creado por Vitor Ribeiro Carvalho, que opera como B
 - Puedes exportar todo, o eliminar tu cuenta y todo lo que contiene, desde la app{pending:web_journal_live} o el sitio web{/pending}.
 
 ### 1. Qué recopilamos
-**Tu cuenta:** tu dirección de correo, tu contraseña (guardada solo como un hash seguro) y cuándo aceptaste nuestros Términos y esta política y confirmaste que tienes 18 años o más.
+**Tu cuenta:** tu dirección de correo, tu contraseña (guardada solo como un hash seguro) y cuándo aceptaste nuestros Términos y esta política{pending:consent_language_live}, y en qué idioma{/pending}, y confirmaste que tienes 18 años o más.
 **Cuándo te conectaste por última vez:** el momento en que tu cuenta se conectó por última vez a nuestros servidores. Lo usamos para mantener tu sesión iniciada y, en las cuentas sin correo, para aplicar la regla de los 12 meses que se explica abajo.
 {pending:anon_start_live}**Usar Moodbow sin correo:** puedes empezar sin darnos un correo. Creamos una cuenta para tu teléfono que solo él puede usar, y guardamos ahí tu diario como en cualquier otra cuenta. Si más adelante añades un correo, tu diario sigue en la misma cuenta. Si nunca añades un correo y no abres la app con conexión a internet durante 12 meses, eliminamos esa cuenta y su diario. Esto puede ocurrir antes si cierras sesión, porque entonces ya no podemos saber cuándo abriste la app por última vez.
 
