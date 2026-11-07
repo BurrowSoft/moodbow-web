@@ -298,7 +298,7 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
   const [fields, setFields] = useState<Fields>(draft?.fields ?? fromRow(initial));
   // The lock is the version the person was looking at, not the one this card just read: a draft
   // from an empty card stays insert-only, so a check-in they never saw opens the conflict dialog,
-  // and one from an older version gets "stale". Gone once they've been shown the row.
+  // and one from an older version gets "stale", which asks the same way. Gone once they've chosen.
   const [draftBase, setDraftBase] = useState<string | null>(draft?.basedOn ?? null);
   const expected = draftBase ?? row?.updated_at ?? "";
   const [editing, setEditing] = useState(initial === null || draft !== null);
@@ -445,10 +445,11 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
       }
       // A copy for another day doesn't change this card.
       if (date !== cardDate) return prev;
-    } else if (next.status === "error" && next.error === "conflict" && next.checkIn) {
-      // A first check-in from this card met one saved elsewhere: kept as a
-      // pending copy (so nothing is lost before the person chooses), and
-      // both versions shown. The form stays as it was, with no error line.
+    } else if (next.status === "error" && (next.error === "conflict" || next.error === "stale") && next.checkIn) {
+      // A check-in from this card met one saved elsewhere, first or newer: kept
+      // as a pending copy (so nothing is lost before the person chooses), and
+      // both versions shown (UX: picks don't vanish behind a message). The form
+      // stays as it was, with no error line.
       const mine = pendingFromForm(form);
       const key = pendingKey(uid, mine.date);
       let kept = true;
@@ -468,10 +469,6 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
       setFields(fromRow(next.checkIn));
       setEditing(false);
       setOffline(false);
-    } else if (next.status === "error" && next.error === "stale" && next.checkIn) {
-      setRow(next.checkIn);
-      setDraftBase(null);
-      setFields(fromRow(next.checkIn));
     }
     return next;
   }, { status: "idle" });

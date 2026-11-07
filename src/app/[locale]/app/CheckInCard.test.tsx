@@ -123,14 +123,29 @@ describe("CheckInCard", () => {
     expect(sent()).toMatchObject({ mood: "2", expected_updated_at: ROW.updated_at });
   });
 
-  it("stale write: shows the error and loads the newer row", async () => {
+  it("stale write: the picks stay, and the person chooses between both versions (UX, #220)", async () => {
     saveCheckIn.mockResolvedValue({ status: "error", error: "stale", checkIn: { ...ROW, mood: 5 } });
     renderCard(ROW);
     fireEvent.click(screen.getByTestId("checkin-edit"));
     fireEvent.click(screen.getByTestId("checkin-mood-1"));
     fireEvent.click(screen.getByTestId("checkin-save"));
-    expect(await screen.findByTestId("checkin-error")).toHaveTextContent(messages.today.errStaleWrite);
-    expect(screen.getByTestId("checkin-mood-5")).toHaveAttribute("aria-checked", "true");
+    await screen.findByTestId("checkin-conflict-dialog");
+    expect(screen.queryByTestId("checkin-error")).toBeNull();
+    expect(screen.getByTestId("checkin-mood-1")).toHaveAttribute("aria-checked", "true");
+    expect(anyPending()).toBe(true);
+  });
+
+  it("stale write, Use the other one: the newer row loads and no copy stays", async () => {
+    saveCheckIn.mockResolvedValue({ status: "error", error: "stale", checkIn: { ...ROW, mood: 5 } });
+    renderCard(ROW);
+    fireEvent.click(screen.getByTestId("checkin-edit"));
+    fireEvent.click(screen.getByTestId("checkin-mood-1"));
+    fireEvent.click(screen.getByTestId("checkin-save"));
+    await screen.findByTestId("checkin-conflict-dialog");
+    fireEvent.click(screen.getByRole("button", { name: messages.today.checkInConflictUseOther }));
+    await screen.findByTestId("checkin-summary");
+    expect(saveCheckIn).toHaveBeenCalledTimes(1);
+    expect(anyPending()).toBe(false);
   });
 
   it("offline: keeps a pending copy, then sends it when the browser is back online", async () => {
@@ -493,14 +508,15 @@ describe("CheckInCard: a request lost at the network level (Web Tester, #11)", (
       expect(anyPending()).toBe(false);
     });
 
-    it("a late answer that another device changed the day: back to the form with the error, no copy left", async () => {
+    it("a late answer that another device changed the day: back to the form, both versions, the copy kept until they choose", async () => {
       renderCard(null);
       fireEvent.click(screen.getByTestId("checkin-mood-3"));
       fireEvent.click(screen.getByTestId("checkin-save"));
       expect(await screen.findByTestId("checkin-status", {}, { timeout: 2000 })).toHaveTextContent(messages.today.checkinSavedOfflineWeb);
       await act(async () => answer({ status: "error", error: "stale", checkIn: { ...ROW, mood: 1 } }));
-      expect(await screen.findByTestId("checkin-error")).toHaveTextContent(messages.today.errStaleWrite);
-      expect(anyPending()).toBe(false);
+      await screen.findByTestId("checkin-conflict-dialog");
+      expect(screen.getByTestId("checkin-mood-3")).toHaveAttribute("aria-checked", "true");
+      expect(anyPending()).toBe(true);
     });
   });
 
@@ -941,12 +957,10 @@ describe("CheckInCard: the in-memory draft", () => {
     rerender(withDraft(null));
     rerender(withDraft(<Today initial={V2} />));
     fireEvent.click(screen.getByTestId("checkin-save"));
-    await waitFor(() => expect(screen.getByTestId("checkin-mood-5")).toHaveAttribute("aria-checked", "true"));
+    await screen.findByTestId("checkin-conflict-dialog");
     expect(sent().expected_updated_at).toBe(ROW.updated_at);
-    // Shown the newer one now: the lock moves to it.
-    fireEvent.click(screen.getByTestId("checkin-mood-2"));
-    await waitFor(() => expect(screen.getByTestId("checkin-save")).toBeEnabled());
-    fireEvent.click(screen.getByTestId("checkin-save"));
+    // Shown the newer one now: Keep mine's lock is that one.
+    fireEvent.click(screen.getByRole("button", { name: messages.today.checkInConflictKeepMine }));
     await waitFor(() => expect(saveCheckIn).toHaveBeenCalledTimes(2));
     expect(sent(1).expected_updated_at).toBe(V2.updated_at);
   });
