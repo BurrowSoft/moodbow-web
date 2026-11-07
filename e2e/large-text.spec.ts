@@ -283,6 +283,8 @@ test("large text: the help card keeps up, and its number and Close stay whole", 
         return { intro: size(el), title: size(el.querySelector("h2")), close: size(el.querySelector("[data-testid=safety-close]")), small: size(el.querySelector("[data-testid=safety-find-helpline]")), split, sideways: el.scrollWidth - el.clientWidth };
       });
       expect.soft(measured, at).toEqual(percent === 100 ? { intro: "16px", title: "18px", close: "16px", small: "14px", split: [], sideways: 0 } : { intro: "25.6px", title: "25.6px", close: "32px", small: "28px", split: [], sideways: 0 });
+      // In px: in rem the corner cut off the title's first letter (Web Tester, #256).
+      await expect.soft(card, at).toHaveCSS("border-top-left-radius", "24px");
       const close = page.getByTestId("safety-close");
       await close.scrollIntoViewIfNeeded();
       await expect(close, at).toBeInViewport();

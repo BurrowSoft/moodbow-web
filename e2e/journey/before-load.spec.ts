@@ -306,6 +306,15 @@ test.describe("typing before the page has loaded", () => {
       const help = (await noScript.getByTestId("app-noscript-help").boundingBox())!;
       const why = (await noScript.getByTestId("app-noscript-journal").boundingBox())!;
       expect(why.y).toBeGreaterThan(help.y);
+      // It can be read: at large text on a phone, it scrolls clear of the fixed tab bar.
+      await noScript.setViewportSize({ width: 320, height: 640 });
+      await (await off.newCDPSession(noScript)).send("Page.setFontSizes", { fontSizes: { standard: 48, fixed: 39 } });
+      await noScript.mouse.wheel(0, 3000);
+      await expect.poll(async () => {
+        const line = (await noScript.getByTestId("app-noscript-journal").boundingBox())!;
+        const bar = (await noScript.locator("nav.fixed").boundingBox())!;
+        return line.y + line.height <= bar.y;
+      }).toBe(true);
       await noScript.getByTestId("app-noscript-help").click();
       await expect(noScript).toHaveURL(/\/help\/get-help-now$/);
       await expect(noScript.getByTestId("help-now-find-helpline")).toBeVisible();

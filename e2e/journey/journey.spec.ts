@@ -212,7 +212,7 @@ async function signIn(page: Page, email: string, password: string): Promise<void
 // The card's first link, whole on its first screen, above the fade, at 320x640 at 300 %. The cases that
 // don't fit, one by one (UX, #255), as the most px each may run under the fade. Colombia has no helpline,
 // so its first link is the emergency number, and the sentence above it already says to call one.
-const FIRST_LINK_OVER: Record<string, number> = { "CO /fr": 35, "CO /pt-br": 35 };
+const FIRST_LINK_OVER: Record<string, number> = { "CO /pt-br": 1 };
 const firstLinkOnScreen = (card: Element) => {
   const fade = card.querySelector("[data-testid=dialog-more]");
   const shown = Math.min(innerHeight, (fade ?? card).getBoundingClientRect()[fade ? "top" : "bottom"]);

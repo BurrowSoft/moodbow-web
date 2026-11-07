@@ -103,7 +103,8 @@ export function Dialog({
   }, [onCancel, initialFocus]);
 
   // capText (the help card): the spacing gives way as the text grows, the same at the normal size, so
-  // the first help fits the first screen at large text (UX, #247). No smaller text, no new order.
+  // the first help fits the first screen at large text (UX, #247). No smaller text, no new order. Its
+  // corner is in px there: in rem it's 72 px at 300 %, and cut off the title's first letter (Web Tester).
   return createPortal(
     <div className={`fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center ${capText ? "p-[max(4px,calc(32px-1rem))]" : "p-[16px]"}`}>
       <div
@@ -113,7 +114,7 @@ export function Dialog({
         aria-labelledby={titleId}
         aria-describedby={body ? bodyId : undefined}
         data-testid={testId}
-        className={`max-h-full w-full max-w-md overflow-y-auto overscroll-contain rounded-3xl bg-surface p-[var(--pad)] shadow-xl ${capText ? "[--pad:max(8px,calc(40px-1rem))] [--fade:max(24px,calc(56px-1rem))] leading-normal [font-size:min(1rem,max(8vw,16px))]" : "[--pad:24px] [--fade:40px] max-sm:[font-size:min(1rem,max(10vw,32px))]"}`}
+        className={`max-h-full w-full max-w-md overflow-y-auto overscroll-contain rounded-3xl bg-surface p-[var(--pad)] shadow-xl ${capText ? "[--pad:max(8px,calc(40px-1rem))] [--fade:max(24px,calc(56px-1rem))] max-sm:rounded-[24px] leading-normal [font-size:min(1rem,max(8vw,16px))]" : "[--pad:24px] [--fade:40px] max-sm:[font-size:min(1rem,max(10vw,32px))]"}`}
       >
         <h2 id={titleId} tabIndex={-1} className={`font-medium text-text outline-none ${capText ? "leading-tight [font-size:min(1.125rem,max(8vw,18px))]" : "leading-[1.556] [font-size:min(1.125rem,max(11vw,35px))]"}`}>
           {title}

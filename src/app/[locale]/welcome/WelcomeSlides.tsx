@@ -90,7 +90,7 @@ export function WelcomeSlides() {
             {t("back")}
           </a>
         )}
-        <Link href="/sign-in" data-testid="welcome-have-account" className={`${textLinkClass} mt-4 text-sm`}>
+        <Link href="/sign-in" data-testid="welcome-have-account" className={`${textLinkClass} mt-4 text-sm max-sm:[font-size:min(0.875rem,max(8.75vw,28px))]`}>
           {t("welcomeHaveAccount")}
         </Link>
       </div>
