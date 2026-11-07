@@ -621,6 +621,48 @@ describe("BoConversation: where a send leaves the page (UX, #205)", () => {
     expect(moves.filter((m) => m.block === "start")).toEqual([]);
   });
 
+  it("a new reply that doesn't fit: the page goes to its start", async () => {
+    above = ["bo-message-ai"];
+    await open();
+    answers.push(reply());
+    type("Hello");
+    await send();
+    expect(moves.at(-1)).toMatchObject({ to: "bo-message-ai", block: "start" });
+  });
+
+  it("a reply that fits: the page stays at its end", async () => {
+    await open();
+    answers.push(reply());
+    type("Hello");
+    await send();
+    expect(moves.filter((m) => m.block === "start")).toEqual([]);
+  });
+
+  it("scrolled away while the reply came: the page stays where they went", async () => {
+    above = ["bo-message-ai"];
+    await open();
+    const scrolled = {
+      ...reply(),
+      get status() {
+        Object.defineProperty(window, "scrollY", { configurable: true, value: 500 });
+        moves = [];
+        return "ok";
+      },
+    };
+    answers.push(scrolled);
+    type("Hello");
+    await send();
+    Object.defineProperty(window, "scrollY", { configurable: true, value: 0 });
+    expect(screen.getByTestId("bo-message-ai")).toBeInTheDocument();
+    expect(moves).toEqual([]);
+  });
+
+  it("a kept conversation on opening isn't a new reply", async () => {
+    above = ["bo-message-ai"];
+    await open([{ id: "1", author: "ai", body: "Hello" }]);
+    expect(startOf("bo-message-ai")).toEqual([]);
+  });
+
   it("an earlier send's notice doesn't pull the page back", async () => {
     above = ["bo-notice"];
     await open();

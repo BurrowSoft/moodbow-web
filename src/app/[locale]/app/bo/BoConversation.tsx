@@ -48,6 +48,9 @@ async function callBo<T>(body: object): Promise<T | { status: "no_answer" }> {
 // with a back link, on a wider one the tabs stay (UX), through the mark on the root
 // (globals.css), as SignedInMark does. The footer goes in both, so this page carries
 // the Consumer Health Data link itself: it collects personal information (Footer).
+// How far from where a send left the page counts as the person having scrolled.
+const BO_SCROLLED_AWAY_PX = 8;
+
 export function BoConversation({ initial, country, back, healthData = false, consented = true, picturesAllowed = false }: { initial: BoMessage[]; country: string | null | undefined; back?: ReactNode; healthData?: boolean; consented?: boolean; picturesAllowed?: boolean }) {
   const t = useTranslations("bo");
   const tc = useTranslations("common");
@@ -180,20 +183,27 @@ export function BoConversation({ initial, country, back, healthData = false, con
 
   // To the end, unless that leaves the start of a line about this send above the window, as
   // at large text: then to its start, as the start is what says what happened (UX, #205). A
-  // notice or a full conversation from an earlier send doesn't pull the page back.
+  // notice or a full conversation from an earlier send doesn't pull the page back. A new reply
+  // that doesn't fit shows its start too, on arrival only, and a person who scrolled away while
+  // it came stays where they went. Bo's line and help stay in the window: they're sticky.
   const problemLine = useRef<HTMLDivElement>(null);
   const fullLine = useRef<HTMLDivElement>(null);
-  const placed = useRef({ noticeShows: 0, full: false });
+  const placed = useRef({ noticeShows: 0, full: false, reply: initial.at(-1)?.id, y: 0 });
   useEffect(() => {
-    end.current?.scrollIntoView?.({ block: "end" });
     const newNotice = noticeShows !== placed.current.noticeShows;
     const newFull = full && !placed.current.full;
-    placed.current = { noticeShows, full };
-    const line = problemLine.current ?? (newNotice ? noticeLine.current : newFull ? fullLine.current : null);
-    if (!line) return;
-    // The pinned header, when there is one, is this much of the window's top.
-    const top = parseFloat(document.documentElement.style.scrollPaddingTop) || 0;
-    if (line.getBoundingClientRect().top < top) line.scrollIntoView?.({ block: "start" });
+    const last = messages.at(-1);
+    const newReply = last?.author === "ai" && last.id !== placed.current.reply;
+    const scrolledAway = newReply && Math.abs(window.scrollY - placed.current.y) > BO_SCROLLED_AWAY_PX;
+    if (!scrolledAway) {
+      end.current?.scrollIntoView?.({ block: "end" });
+      const replies = document.querySelectorAll<HTMLElement>('[data-testid="bo-message-ai"]');
+      const line = problemLine.current ?? (newNotice ? noticeLine.current : newFull ? fullLine.current : newReply ? replies[replies.length - 1] : null);
+      // The pinned header, when there is one, is this much of the window's top.
+      const top = parseFloat(document.documentElement.style.scrollPaddingTop) || 0;
+      if (line && line.getBoundingClientRect().top < top) line.scrollIntoView?.({ block: "start" });
+    }
+    placed.current = { noticeShows, full, reply: last?.id, y: window.scrollY };
   }, [messages, sending, problem, noticeShows, full]);
 
   const tooLong = [...text].length > maxChars;
