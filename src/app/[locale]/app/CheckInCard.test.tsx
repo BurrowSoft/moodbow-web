@@ -150,6 +150,36 @@ describe("CheckInCard", () => {
     expect(sent(1).expected_updated_at).toBe("");
   });
 
+  it("stale write, Escape: no choice yet, the picks stay, and focus is back on Save (Web Tester)", async () => {
+    saveCheckIn.mockResolvedValue({ status: "error", error: "stale", checkIn: { ...ROW, mood: 5 } });
+    renderCard(ROW);
+    fireEvent.click(screen.getByTestId("checkin-edit"));
+    fireEvent.click(screen.getByTestId("checkin-mood-1"));
+    // As in a browser: Save goes off while the save runs, so nothing has focus.
+    (document.activeElement as HTMLElement | null)?.blur();
+    fireEvent.click(screen.getByTestId("checkin-save"));
+    await screen.findByTestId("checkin-conflict-dialog");
+    fireEvent.keyDown(document, { key: "Escape" });
+    await waitFor(() => expect(screen.queryByTestId("checkin-conflict-dialog")).toBeNull());
+    await waitFor(() => expect(screen.getByTestId("checkin-save")).toHaveFocus());
+    expect(screen.getByTestId("checkin-mood-1")).toHaveAttribute("aria-checked", "true");
+  });
+
+  it("the same with focus somewhere else, as from a background sync: it stays there (Reviewer)", async () => {
+    saveCheckIn.mockResolvedValue({ status: "error", error: "stale", checkIn: { ...ROW, mood: 5 } });
+    renderCard(ROW);
+    fireEvent.click(screen.getByTestId("checkin-edit"));
+    const mood = screen.getByTestId("checkin-mood-1");
+    fireEvent.click(mood);
+    mood.focus();
+    fireEvent.click(screen.getByTestId("checkin-save"));
+    await screen.findByTestId("checkin-conflict-dialog");
+    fireEvent.keyDown(document, { key: "Escape" });
+    await waitFor(() => expect(screen.queryByTestId("checkin-conflict-dialog")).toBeNull());
+    await act(async () => new Promise((done) => requestAnimationFrame(() => done(undefined))));
+    expect(mood).toHaveFocus();
+  });
+
   it("stale write, Use the other one: the newer row loads and no copy stays", async () => {
     saveCheckIn.mockResolvedValue({ status: "error", error: "stale", checkIn: { ...ROW, mood: 5 } });
     renderCard(ROW);
