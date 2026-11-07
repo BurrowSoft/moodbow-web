@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 import { PageShell } from "@/components/PageShell";
+import { SignedOutHelp } from "@/components/SignedOutHelp";
 import { pageGate } from "@/lib/conditions";
 import { pageMetadata } from "@/lib/metadata";
 import { ForgotPasswordForm } from "./ForgotPasswordForm";
@@ -22,6 +23,7 @@ export default async function ForgotPasswordPage({ params }: PageProps<"/[locale
   return (
     <PageShell title={t("resetTitle")}>
       <ForgotPasswordForm />
+      <SignedOutHelp testId="forgot-get-help" />
     </PageShell>
   );
 }
