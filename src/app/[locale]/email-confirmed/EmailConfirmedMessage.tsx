@@ -72,7 +72,7 @@ export function EmailConfirmedMessage({ fromQuery, continueTo, openApp = null, a
       <h1 className="text-balance text-[28px] font-medium leading-tight tracking-tight sm:text-4xl">{t(copy.title)}</h1>
       {/* With the countdown, "Open Moodbow to continue." would contradict it:
           the web line instead (decision 134). */}
-      <p className="mt-4 text-base leading-relaxed text-muted sm:text-[17px]">{result === "ok" && continueTo ? t("emailConfirmedWebBody") : t(copy.body)}</p>
+      <p className="mt-4 text-base leading-relaxed text-muted sm:text-[1.0625rem]">{result === "ok" && continueTo ? t("emailConfirmedWebBody") : t(copy.body)}</p>
       {moveOn && continueTo && <ContinueCountdown href={continueTo} />}
       {/* Back to the app: a button that opens it on Android once the app
           build handles the link; everywhere else (and until then) the line. */}
@@ -83,7 +83,7 @@ export function EmailConfirmedMessage({ fromQuery, continueTo, openApp = null, a
             {t("emailConfirmedOpenApp")}
           </a>
         ) : (
-          <p data-testid="email-confirmed-app-line" className="mt-4 text-base font-medium leading-relaxed text-text sm:text-[17px]">
+          <p data-testid="email-confirmed-app-line" className="mt-4 text-base font-medium leading-relaxed text-text sm:text-[1.0625rem]">
             {t("emailConfirmedDesktopLine")}
           </p>
         ))}

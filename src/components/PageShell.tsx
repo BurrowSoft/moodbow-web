@@ -51,7 +51,7 @@ export async function PageShell({ title, draft = false, article = false, after, 
               whole at 200 %, and never smaller than the body under it. The same size and line
               height as text-3xl and text-4xl otherwise. */}
           <h1 className={`text-balance font-medium leading-[1.2] tracking-tight sm:text-4xl sm:leading-[2.5rem] ${capTitle ? "[font-size:min(1.875rem,max(12vw,30px))]" : "[font-size:min(1.875rem,max(12vw,30px,1rem))]"}`}>{title}</h1>
-          <div data-content={article ? "article" : undefined} className="mt-6 space-y-5 text-base leading-relaxed text-muted sm:text-[17px]">{children}</div>
+          <div data-content={article ? "article" : undefined} className="mt-6 space-y-5 text-base leading-relaxed text-muted sm:text-[1.0625rem]">{children}</div>
         </article>
         {after}
       </main>
