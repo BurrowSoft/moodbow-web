@@ -293,6 +293,24 @@ test.describe("typing before the page has loaded", () => {
     }
   });
 
+  test("signed in with scripts off: help is still on the page, and leads to the help page", async ({ page, browser, baseURL }) => {
+    const email = newEmail();
+    const password = newPassword();
+    try {
+      await onboarded(page, email, password);
+      await expect(page.getByTestId("app-noscript-help")).toHaveCount(0);
+      const off = await browser.newContext({ baseURL, javaScriptEnabled: false, storageState: await page.context().storageState() });
+      const noScript = await off.newPage();
+      await noScript.goto("/app/me");
+      await noScript.getByTestId("app-noscript-help").click();
+      await expect(noScript).toHaveURL(/\/help\/get-help-now$/);
+      await expect(noScript.getByTestId("help-now-find-helpline")).toBeVisible();
+      await off.close();
+    } finally {
+      await cleanup(email);
+    }
+  });
+
   test("Me: nothing can be changed until it has loaded, so nothing looks saved that isn't", async ({ page }) => {
     const email = newEmail();
     const password = newPassword();
