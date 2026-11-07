@@ -1303,7 +1303,7 @@ test("large text, set in the browser: the check-in conflict dialog shows the who
     await seedCheckIns(email, password, today, [{ offset: 0, mood: 4 }]);
     await page.setViewportSize({ width: 320, height: 640 });
 
-    for (const [route, saved] of [["", "en"], ["/fr", "fr"], ["/es", "es"], ["/pt-br", "pt-BR"]]) {
+    for (const [route, saved] of [["", "en"], ["/fr", "fr"], ["/es", "es"], ["/pt-br", "pt-br"]]) {
       await setProfileLocale(email, password, saved);
       for (const percent of [100, 200, 300]) {
         await textAt(percent);
@@ -1320,17 +1320,23 @@ test("large text, set in the browser: the check-in conflict dialog shows the who
           const word = page.getByTestId(`checkin-conflict-${side}-mood`);
           await expect(word, where).toHaveText(/\S/);
           const fit = await word.evaluate((el, cardId) => {
-            const range = document.createRange();
-            range.selectNodeContents(el);
-            const rects = [...range.getClientRects()];
+            // Word by word: "Pas bien" may wrap between its words, never inside one.
+            const text = el.firstChild as Text;
+            const rects = [...text.data.matchAll(/\S+/g)].map((m) => {
+              const range = document.createRange();
+              range.setStart(text, m.index);
+              range.setEnd(text, m.index + m[0].length);
+              return [...range.getClientRects()];
+            });
             const box = document.querySelector(`[data-testid="${cardId}"]`)!.getBoundingClientRect();
+            const all = rects.flat();
             return {
-              lines: rects.length,
-              inside: rects.every((r) => r.left >= box.left - 0.5 && r.right <= box.right + 0.5),
-              inWindow: rects.every((r) => r.right <= innerWidth + 0.5),
+              wordsSplit: rects.filter((r) => r.length !== 1).length,
+              inside: all.every((r) => r.left >= box.left - 0.5 && r.right <= box.right + 0.5),
+              inWindow: all.every((r) => r.right <= innerWidth + 0.5),
             };
           }, `checkin-conflict-${side}`);
-          expect.soft(fit, where).toEqual({ lines: 1, inside: true, inWindow: true });
+          expect.soft(fit, where).toEqual({ wordsSplit: 0, inside: true, inWindow: true });
           await expect(card, where).toBeVisible();
         }
         if (percent > 100) {
