@@ -63,9 +63,14 @@ test("large text at 300 %: a page's heading is never smaller than the body under
   const cdp = await page.context().newCDPSession(page);
   await page.setViewportSize({ width: 320, height: 640 });
   await cdp.send("Page.setFontSizes", { fontSizes: { standard: 48, fixed: 39 } });
+  // Consent's body and heading are both capped, so it compares with what's under the heading.
   await page.goto("/consent");
-  const sizes = await page.evaluate(() => ({ heading: parseFloat(getComputedStyle(document.querySelector("h1")!).fontSize), body: parseFloat(getComputedStyle(document.querySelector("form label span")!).fontSize) }));
-  expect(sizes.heading).toBeGreaterThanOrEqual(sizes.body);
+  const consent = await page.evaluate(() => ({ heading: parseFloat(getComputedStyle(document.querySelector("h1")!).fontSize), body: parseFloat(getComputedStyle(document.querySelector("form label span")!).fontSize) }));
+  expect(consent.heading).toBeGreaterThanOrEqual(consent.body);
+  // Everywhere else the body follows the setting, and the heading's 1rem floor keeps up with it.
+  await page.goto("/sign-in");
+  const signIn = await page.evaluate(() => ({ heading: parseFloat(getComputedStyle(document.querySelector("h1")!).fontSize), body: parseFloat(getComputedStyle(document.documentElement).fontSize) }));
+  expect(signIn.heading).toBeGreaterThanOrEqual(signIn.body);
 });
 
 // "J'a / cc / ep / te", and French's heading "commence / r" (Web Tester, on #233): this is the page
