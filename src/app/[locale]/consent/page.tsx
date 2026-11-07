@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getTranslations, setRequestLocale } from "next-intl/server";
+import { NextIntlClientProvider } from "next-intl";
+import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 import { redirect } from "@/i18n/navigation";
+import { pickMessages } from "@/i18n/clientMessages";
 import { PageShell } from "@/components/PageShell";
+import { GetHelpNow } from "@/components/SafetyCard";
 import { SignedInMark } from "@/components/SignedInMark";
 import { pageGate } from "@/lib/conditions";
 import { getMe, hasCurrentConsent, hasCurrentConsents } from "@/lib/journal/me";
@@ -40,6 +43,7 @@ export default async function ConsentPage({ params }: PageProps<"/[locale]/conse
   // back), never the new-account flow's Back to Welcome.
   const outage = !user && isAuthOutage(error);
   let askAge = false;
+  let country: string | null | undefined = null;
   if (supabase && user) {
     const me = await getMe(supabase);
     // Consents already current (the versions this build ships) → nothing to ask.
@@ -47,6 +51,7 @@ export default async function ConsentPage({ params }: PageProps<"/[locale]/conse
     const language = savedLanguageRoute(me?.profile?.locale, locale, offeredLocales());
     if (language) return <SavedLanguageRedirect locale={language} />;
     askAge = !me || !hasCurrentConsent(me, "age_18");
+    country = me?.profile?.country;
   }
 
   const t = await getTranslations("onboarding");
@@ -60,6 +65,13 @@ export default async function ConsentPage({ params }: PageProps<"/[locale]/conse
         </p>
       )}
       <ConsentForm askAge={askAge} askAi={askAiConsent()} showBack={!user && !outage} />
+      {/* Help is never behind a consent, new or asked again: the card and its words only
+          come to this page, which the root layout doesn't send them to. */}
+      <NextIntlClientProvider messages={pickMessages(await getMessages(), ["me", "safety", "common"])}>
+        <div className="mt-[24px]">
+          <GetHelpNow country={country} testId="consent-get-help" neutral />
+        </div>
+      </NextIntlClientProvider>
     </PageShell>
   );
 }
