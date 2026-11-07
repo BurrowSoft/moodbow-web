@@ -521,7 +521,7 @@
   },
   {
     "key": "today.checkInConflictBody",
-    "en": "It was saved on another device. Which one do you want to keep?",
+    "en": "A check-in for this day was already saved. Which one do you want to keep?",
     "reason": "UX draft (native read pending)"
   },
   {
