@@ -17,7 +17,7 @@ export function PolicyNotice({ id, date }: { id: string; date: string | null }) 
   if (!shown) return null;
   return (
     <section aria-labelledby="policy-notice-title" data-testid="policy-notice" className={`mb-6 ${JOURNAL_CARD} [font-size:min(1rem,max(8vw,16px))] print:hidden`}>
-      <h2 id="policy-notice-title" className="font-medium text-text [font-size:min(1.125rem,max(9vw,18px))]">
+      <h2 id="policy-notice-title" className="font-medium leading-[1.556] text-text [font-size:min(1.125rem,max(9vw,18px))]">
         {t("policyNoticeTitle")}
       </h2>
       <p className="mt-1 text-text">
