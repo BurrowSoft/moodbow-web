@@ -6,7 +6,6 @@ import type { Locale } from "@/i18n/routing";
 import { redirect } from "@/i18n/navigation";
 import { pickMessages } from "@/i18n/clientMessages";
 import { PageShell } from "@/components/PageShell";
-import { dialogButton } from "@/components/Dialog";
 import { GetHelpNow } from "@/components/SafetyCard";
 import { SignedInMark } from "@/components/SignedInMark";
 import { pageGate } from "@/lib/conditions";
@@ -69,8 +68,8 @@ export default async function ConsentPage({ params }: PageProps<"/[locale]/conse
       {/* Help is never behind a consent, new or asked again: the card and its words only
           come to this page, which the root layout doesn't send them to. */}
       <NextIntlClientProvider messages={pickMessages(await getMessages(), ["me", "safety", "common"])}>
-        <div className="mt-[24px]">
-          <GetHelpNow country={country} testId="consent-get-help" neutral className={`${dialogButton()} !min-h-[44px] [font-size:min(1rem,max(8vw,16px))]`} />
+        <div className="mt-[24px] [font-size:min(1rem,max(8vw,16px))] [&_button]:min-h-[44px]">
+          <GetHelpNow country={country} testId="consent-get-help" neutral />
         </div>
       </NextIntlClientProvider>
     </PageShell>
