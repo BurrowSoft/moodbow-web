@@ -209,6 +209,13 @@ async function signIn(page: Page, email: string, password: string): Promise<void
 }
 
 // An account at Setup, without the form's email: confirmed, signed in through the page.
+// How far the card's first link runs past what shows on its first screen, above the fade.
+const firstLinkOver = (card: Element) => {
+  const fade = card.querySelector("[data-testid=dialog-more]");
+  const shown = Math.min(innerHeight, (fade ?? card).getBoundingClientRect()[fade ? "top" : "bottom"]);
+  return Math.round(card.querySelector("a")!.getBoundingClientRect().bottom - shown);
+};
+
 async function accountAtSetup(page: Page, email: string): Promise<string> {
   const password = newPassword();
   await signedUpUnconfirmed(email, password);
@@ -1037,13 +1044,12 @@ test.describe("the tab bar in every language", () => {
         await page.goto(`${route}/app/me`);
         await page.getByTestId("me-get-help").click();
         // Taller than the window: it opens at its top, with a fade showing there's
-        // more, and the first help line starts on the first screen.
+        // more, and the first help line is whole on the first screen.
         const card = page.getByTestId("safety-card");
         await expect(card.getByRole("heading", { level: 2 })).toBeInViewport();
         await expect(card.getByTestId("dialog-more")).toBeVisible();
         expect(await card.evaluate((el) => el.scrollTop), "opens at its top").toBe(0);
-        const firstHelp = await card.locator("a").first().evaluate((a) => a.getBoundingClientRect().top);
-        expect(firstHelp, `the first help line starts on the first screen, ${route || "/en"}`).toBeLessThan(640);
+        expect.soft(await card.evaluate(firstLinkOver), `px of the first help line past the first screen, ${route || "/en"}`).toBeLessThanOrEqual(0);
         // "Find a helpline" stays under the help's cap, not three times its size.
         const size = (el: Element) => parseFloat(getComputedStyle(el).fontSize);
         expect(await card.getByTestId("safety-find-helpline").evaluate(size), `the helpline link's size, ${route || "/en"}`).toBeLessThan(await page.getByTestId("safety-close").evaluate(size));
@@ -1500,6 +1506,7 @@ test("large text: every help number on the list stays whole on a phone", { tag: 
             }, display.replaceAll(" ", String.fromCharCode(160)));
             expect.soft(fit, `${code} ${id} ${route} at ${width} px`).toEqual({ found: true, lines: 1, inside: true, readable: true });
           }
+          if (width === 320) expect.soft(await page.getByTestId("safety-card").evaluate(firstLinkOver), `px of ${code}'s first help line past the first screen, ${route}`).toBeLessThanOrEqual(0);
         }
       }
     }

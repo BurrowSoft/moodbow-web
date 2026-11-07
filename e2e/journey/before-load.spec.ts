@@ -302,6 +302,10 @@ test.describe("typing before the page has loaded", () => {
       const off = await browser.newContext({ baseURL, javaScriptEnabled: false, storageState: await page.context().storageState() });
       const noScript = await off.newPage();
       await noScript.goto("/app/me");
+      // Why the page is empty, under the help and not above it.
+      const help = (await noScript.getByTestId("app-noscript-help").boundingBox())!;
+      const why = (await noScript.getByTestId("app-noscript-journal").boundingBox())!;
+      expect(why.y).toBeGreaterThan(help.y);
       await noScript.getByTestId("app-noscript-help").click();
       await expect(noScript).toHaveURL(/\/help\/get-help-now$/);
       await expect(noScript.getByTestId("help-now-find-helpline")).toBeVisible();

@@ -324,6 +324,7 @@
     "webReminderNote": "Reminders arrive on your phone. Install the Moodbow app to get them.",
     "meHelp": "Help",
     "meGetHelpNow": "Want to talk to someone?",
+    "meNoScript": "The journal needs JavaScript. Turn it on in your browser to see your entries.",
     "signOutKeepTitle": "Keep your unsaved writing on this browser?",
     "signOutKeepBody": "Something you wrote hasn't been saved to your journal yet. Keep it here for next time, or delete it if other people use this computer.",
     "signOutKeep": "Keep it",

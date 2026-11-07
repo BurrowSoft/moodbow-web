@@ -241,14 +241,17 @@ test("home and the plain pages' headings follow the browser's setting", async ({
     }
   }
   await page.setViewportSize({ width: 320, height: 640 });
-  for (const [route, normal] of [["/welcome", "28px"], ["/no-such-page", "30px"]]) {
+  for (const [route, normal, large, body] of [["/welcome", "28px", "36px", "[data-testid=welcome-slide-1] p:not(.sr-only)"], ["/no-such-page", "30px", "38.4px", "main article p"]]) {
     await setting(100);
     await page.goto(route);
     expect.soft(await size("h1"), route).toBe(normal);
+    expect.soft(await size(body), route).toBe("16px");
     await setting(300);
     await page.goto(route);
-    expect.soft(await size("h1"), `${route} at 300 %`).toBe("48px");
+    expect.soft(await size("h1"), `${route} at 300 %`).toBe(large);
+    expect.soft(await size(body), `${route} at 300 %`).toBe("32px");
   }
+  expect.soft(await page.goto("/welcome").then(() => size("[data-testid=welcome-next]")), "Next at 300 %").toBe("32px");
 });
 
 // #246: the help in the card stops growing at about 200 % on narrow screens, like the page behind it

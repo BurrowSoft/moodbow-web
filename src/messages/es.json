@@ -324,6 +324,7 @@
     "webReminderNote": "Los recordatorios llegan a tu teléfono. Instala la app de Moodbow para recibirlos.",
     "meHelp": "Ayuda",
     "meGetHelpNow": "¿Quieres hablar con alguien?",
+    "meNoScript": "El diario necesita JavaScript. Actívalo en tu navegador para ver tus entradas.",
     "signOutKeepTitle": "¿Guardar en este navegador lo que no se ha guardado?",
     "signOutKeepBody": "Algo que escribiste aún no se guardó en tu diario. Consérvalo aquí para la próxima vez, o bórralo si otras personas usan este dispositivo.",
     "signOutKeep": "Conservarlo",
