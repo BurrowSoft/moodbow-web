@@ -190,15 +190,17 @@ function ConflictVersion({ label, values, testId }: { label: string; values: Pic
     chips.splice(values.sleep_hours != null ? 1 : 0, 0, { label: t(`sleep${q[0].toUpperCase()}${q.slice(1)}` as "sleepPoor"), hex: null });
   }
   return (
-    <div className="rounded-2xl bg-pill p-[12px]" data-testid={testId}>
-      <p className="text-sm text-muted">{label}</p>
-      <p className="mt-2 flex items-center gap-2 font-medium text-text">
-        <MoodFace mood={values.mood} className="h-7 w-7" />
-        {t(`mood${values.mood}` as "mood1")}
+    <div className="min-w-0 rounded-2xl bg-pill p-[12px] [overflow-wrap:anywhere] [font-size:min(1rem,max(8vw,16px))]" data-testid={testId}>
+      <p className="leading-[1.429] text-muted [font-size:min(0.875rem,max(7vw,14px))]">{label}</p>
+      <p className="mt-[8px] flex items-center gap-[8px] font-medium text-text">
+        <MoodFace mood={values.mood} className="h-[28px] w-[28px] shrink-0" />
+        <span className="min-w-0" data-testid={`${testId}-mood`}>
+          {t(`mood${values.mood}` as "mood1")}
+        </span>
       </p>
-      <ul className="mt-2 space-y-1 text-sm text-text">
+      <ul className="mt-[8px] space-y-[4px] leading-[1.429] text-text [font-size:min(0.875rem,max(7vw,14px))]">
         {chips.map(({ label: chip, hex }) => (
-          <li key={chip} className="flex items-center gap-2">
+          <li key={chip} className="flex items-center gap-[8px]">
             <ValueDot hex={hex} />
             {chip}
           </li>
@@ -556,8 +558,15 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
       setOffline(false);
     }
   };
-  // Escape: no choice yet, so nothing is dropped; a kept copy asks again on the next sync.
-  const later = useCallback(() => setConflicts((all) => all.slice(1)), []);
+  // Escape: no choice yet, so nothing is dropped; a kept copy asks again on the next sync. Focus
+  // goes back to Save: it was off while the save went, so the dialog has nothing to return to.
+  // Only if nothing has it: a dialog opened by a background sync returns it to where it was.
+  const later = useCallback(() => {
+    setConflicts((all) => all.slice(1));
+    requestAnimationFrame(() => {
+      if (document.activeElement === document.body) document.querySelector<HTMLElement>("[data-testid=checkin-save]")?.focus();
+    });
+  }, []);
   const conflictDialog = conflict && (
     <Dialog
       title={t("checkInConflictTitle")}
@@ -570,7 +579,9 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
           <p className="text-sm font-medium text-text" data-testid="checkin-conflict-date">
             {dateLine(conflict.date, dateLocaleTag)}
           </p>
-          <div className="mt-3 grid grid-cols-2 gap-3">
+          {/* Side by side while both fit; the rem minimum stacks them at large text on a narrow
+              screen, where a column cut off the mood (Web Tester). */}
+          <div className="mt-[12px] grid grid-cols-[repeat(auto-fit,minmax(min(100%,7rem),1fr))] gap-[12px]">
             <ConflictVersion label={t("checkInConflictMine")} values={valuesOf(conflict.mine)} testId="checkin-conflict-mine" />
             <ConflictVersion label={t("checkInConflictOther")} values={conflict.theirs} testId="checkin-conflict-other" />
           </div>

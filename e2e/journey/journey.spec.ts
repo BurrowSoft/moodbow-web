@@ -1281,6 +1281,79 @@ test("large text, set in the browser: the milestone's title, X and Not now stay 
   }
 });
 
+// Two columns cut the mood off: "Bad" read "Bac" at 200 %, and it was gone at 300 % (Web Tester).
+test("large text, set in the browser: the check-in conflict dialog shows the whole mood on a 320 px phone", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
+  test.setTimeout(300_000);
+  const email = newEmail();
+  const password = newPassword();
+  const cdp = await page.context().newCDPSession(page);
+  const textAt = (percent: number) => cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    const today = await journalToday(email, password);
+    await seedCheckIns(email, password, today, [{ offset: 0, mood: 4 }]);
+    await page.setViewportSize({ width: 320, height: 640 });
+
+    for (const [route, saved] of [["", "en"], ["/fr", "fr"], ["/es", "es"], ["/pt-br", "pt"]]) {
+      await setProfileLocale(email, password, saved);
+      for (const percent of [100, 200, 300]) {
+        await textAt(percent);
+        await page.goto(`${route}/app`);
+        await page.getByTestId("checkin-edit").click();
+        await page.getByTestId("checkin-mood-2").click();
+        // Changed elsewhere while this copy was open: the save asks, with both versions.
+        await seedCheckIns(email, password, today, [{ offset: 0, mood: percent === 200 ? 3 : 5 }]);
+        await page.getByTestId("checkin-save").click();
+        await expect(page.getByTestId("checkin-conflict-dialog"), `${route} ${percent} %`).toBeVisible({ timeout: 15_000 });
+        for (const side of ["mine", "other"]) {
+          const where = `${route || "/"} ${percent} %, ${side}`;
+          const card = page.getByTestId(`checkin-conflict-${side}`);
+          const word = page.getByTestId(`checkin-conflict-${side}-mood`);
+          await expect(word, where).toHaveText(/\S/);
+          const fit = await word.evaluate((el, cardId) => {
+            // Word by word: "Pas bien" may wrap between its words, never inside one.
+            const text = el.firstChild as Text;
+            const rects = [...text.data.matchAll(/\S+/g)].map((m) => {
+              const range = document.createRange();
+              range.setStart(text, m.index);
+              range.setEnd(text, m.index + m[0].length);
+              return [...range.getClientRects()];
+            });
+            const box = document.querySelector(`[data-testid="${cardId}"]`)!.getBoundingClientRect();
+            const all = rects.flat();
+            return {
+              wordsSplit: rects.filter((r) => r.length !== 1).length,
+              inside: all.every((r) => r.left >= box.left - 0.5 && r.right <= box.right + 0.5),
+              inWindow: all.every((r) => r.right <= innerWidth + 0.5),
+            };
+          }, `checkin-conflict-${side}`);
+          expect.soft(fit, where).toEqual({ wordsSplit: 0, inside: true, inWindow: true });
+          await expect(card, where).toBeVisible();
+        }
+        if (percent > 100) {
+          const mine = (await page.getByTestId("checkin-conflict-mine").boundingBox())!;
+          const other = (await page.getByTestId("checkin-conflict-other").boundingBox())!;
+          expect.soft(other.y, `${route || "/"} ${percent} %: stacked`).toBeGreaterThan(mine.y + mine.height - 1);
+        }
+        expect.soft(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth), `${route || "/"} ${percent} %`).toBe(0);
+        await page.getByTestId("checkin-conflict-use-other").click();
+        await expect(page.getByTestId("checkin-conflict-dialog")).toHaveCount(0);
+      }
+    }
+  } finally {
+    await cleanup(email);
+  }
+});
+
 // Every new account passes through Set up; its time field was 151 px past a 320 px
 // phone at 300 % (Web Tester, #206).
 test("large text, set in the browser: Set up stays inside a 320 px phone", async ({ page, browserName }) => {
