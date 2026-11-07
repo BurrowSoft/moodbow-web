@@ -1494,14 +1494,18 @@ test("large text: every help number on the list stays whole on a phone", { tag: 
           await page.setViewportSize({ width, height: 640 });
           for (const [id, display] of [["safety-call-helpline", helpline?.display], ["safety-call-emergency", emergency?.display]]) {
             if (!display) continue;
-            const fit = await page.getByTestId(id!).evaluate((el, number) => {
-              const text = el.firstChild as Text;
-              const at = text.data.indexOf(number);
-              if (at < 0) return { found: false };
+            const fit = await page.getByTestId(id!).evaluate((el, plain) => {
+              // With plain spaces, as they're copied.
+              const number = el.querySelector("[data-help-number]");
+              if (number?.textContent !== plain) return { found: false };
               // The brackets stay with it.
+              const before = number.previousSibling as Text | null;
+              const after = number.nextSibling as Text | null;
               const range = document.createRange();
-              range.setStart(text, text.data[at - 1] === "(" ? at - 1 : at);
-              range.setEnd(text, text.data[at + number.length] === ")" ? at + number.length + 1 : at + number.length);
+              if (before?.data.endsWith("(")) range.setStart(before, before.data.length - 1);
+              else range.setStartBefore(number);
+              if (after?.data.startsWith(")")) range.setEnd(after, 1);
+              else range.setEndAfter(number);
               const rects = [...range.getClientRects()];
               const box = el.closest("[data-testid=safety-card]")!;
               const inner = box.getBoundingClientRect().right - parseFloat(getComputedStyle(box).paddingRight);
@@ -1511,7 +1515,7 @@ test("large text: every help number on the list stays whole on a phone", { tag: 
                 inside: rects.every((rect) => rect.right <= inner + 1),
                 readable: parseFloat(getComputedStyle(el).fontSize) >= 28,
               };
-            }, display.replaceAll(" ", String.fromCharCode(160)));
+            }, display);
             expect.soft(fit, `${code} ${id} ${route} at ${width} px`).toEqual({ found: true, lines: 1, inside: true, readable: true });
           }
           if (width === 320) {

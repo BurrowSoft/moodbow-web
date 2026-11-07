@@ -225,16 +225,15 @@ describe("SafetyCard: the opener (#9765 S-03)", () => {
 });
 
 describe("a number never breaks across lines (#247)", () => {
-  it("every number on the list is shown with no-break spaces, and still dials", () => {
-    for (const { code, helpline, emergency } of registry.countries) {
-      const lines = helplinesFor(code);
-      if (helpline) {
-        expect(lines.helpline?.display, code).toBe(helpline.display.replaceAll(" ", String.fromCharCode(160)));
-        expect(lines.helpline?.dial, code).toBe(helpline.dial);
-      }
-      expect(lines.emergency?.display, code).toBe(emergency?.display.replaceAll(" ", String.fromCharCode(160)));
-    }
-    expect(telHref(helplinesFor("DE").helpline!.dial)).toBe("tel:08001110111");
+  it("stays on one line by CSS, so what's copied has plain spaces, and it still dials", () => {
+    render(<NextIntlClientProvider locale="en" messages={messages}><SafetyCard country="DE" onClose={() => {}} /></NextIntlClientProvider>);
+    const link = screen.getByTestId("safety-call-helpline");
+    const number = link.querySelector("[data-help-number]")!;
+    expect(number).toHaveClass("whitespace-nowrap");
+    expect(number.textContent).toBe("0800 111 0 111");
+    expect(link.textContent).toContain("(0800 111 0 111)");
+    expect(link.textContent).not.toContain(String.fromCharCode(160));
+    expect(link).toHaveAttribute("href", "tel:08001110111");
   });
 
   it("the longest ones stop growing a size earlier", () => {
