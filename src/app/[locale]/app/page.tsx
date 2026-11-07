@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -17,6 +18,7 @@ import { pageGate } from "@/lib/conditions";
 import { loadMilestone } from "@/lib/share/milestoneData";
 import { yearOnOffer } from "@/lib/share/year";
 import { MilestoneCard } from "./MilestoneCard";
+import { SecurityNoticeRead } from "./SecurityNoticeRead";
 import { JOURNAL_HEADING } from "@/lib/ui/journalLayout";
 
 // A stuck request ends here at the latest (UX, the timeout audit); each
@@ -68,6 +70,9 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
 
   return (
     <section className="space-y-8">
+      <Suspense fallback={null}>
+        <SecurityNoticeRead supabase={supabase} uid={user.id} />
+      </Suspense>
       <header>
         {/* Focusable from code only: where focus goes when the milestone card is dismissed. */}
         <h1 id="today-title" tabIndex={-1} className={`${JOURNAL_HEADING} focus:outline-none`} data-testid="today-greeting">

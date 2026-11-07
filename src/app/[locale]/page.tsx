@@ -9,6 +9,7 @@ import { pageMetadata } from "@/lib/metadata";
 import { notifyMailto } from "@/lib/site";
 import { APP_STORE_URL, liveStores } from "@/lib/stores";
 import { PlayStoreLink } from "@/components/PlayStoreLink";
+import { hasSecurityUpdate } from "@/lib/securityUpdate";
 import { jsonLdText, softwareApplication } from "@/lib/jsonLd";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]">): Promise<Metadata> {
@@ -54,6 +55,14 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
         <div className="w-[104px] sm:w-[128px]">
           <Logo variant="stacked" width={128} alt={tc("logoAlt")} priority />
         </div>
+        {hasSecurityUpdate() && (
+          <p className="mt-6 max-w-full rounded-2xl border border-border bg-surface p-[16px] text-center text-text [font-size:min(1rem,max(8vw,16px))] [overflow-wrap:anywhere]" data-testid="home-security">
+            {tc("securityNotice")}{" "}
+            <Link href="/security" data-testid="home-security-link" className={storeLink}>
+              {tc("securityNoticeRead")}
+            </Link>
+          </p>
+        )}
         <MoodbowArc className="mt-8 w-full max-w-[360px]" />
         {!live && (
           <p className="mt-6 rounded-full bg-pill px-3.5 py-1.5 text-[13px] font-medium tracking-wide text-accent" data-testid="home-coming-soon">
