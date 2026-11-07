@@ -97,9 +97,9 @@ export type EditorStart = { at: number | "end"; question?: string };
 // Stops growing at about 200 % on a narrow screen (decision 231), like PRIMARY_SAVE.
 const CAPPED = "max-sm:[font-size:min(1rem,max(10vw,32px))]";
 // Save in the top row (narrow screens only): the primary button, sized for
-// a bar.
+// a bar. Its padding is in px, as at 300 % rem padding split French's "Enregistrer" (Web Tester).
 const TOP_SAVE =
-  `ml-auto inline-flex min-h-11 max-w-full items-center justify-center rounded-full bg-accent px-6 text-center font-medium [overflow-wrap:anywhere] text-on-accent hover:bg-accent-hover disabled:opacity-50 aria-disabled:opacity-50 sm:hidden ${CAPPED}`;
+  `ml-auto inline-flex min-h-11 max-w-full items-center justify-center rounded-full bg-accent px-[24px] text-center font-medium [overflow-wrap:anywhere] text-on-accent hover:bg-accent-hover disabled:opacity-50 aria-disabled:opacity-50 sm:hidden ${CAPPED}`;
 
 type Props = {
   promptDate?: string | null;

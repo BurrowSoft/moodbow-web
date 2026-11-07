@@ -1379,15 +1379,31 @@ test("large text, set in the browser: the check-in conflict dialog shows the who
       }
     }
     // On a phone the entry's visible Save is the top one: the bottom one is hidden (Web Tester, #253).
-    for (const percent of [100, 300]) {
-      await textAt(percent);
-      await page.goto("/app/write");
-      const top = page.getByTestId("entry-save-top");
-      await expect(top).toBeVisible();
-      await expect(page.getByTestId("entry-save")).toBeHidden();
-      const size = percent === 100 ? "16px" : "32px";
-      expect(await top.evaluate((el) => getComputedStyle(el).fontSize), `Save, ${percent} %`).toBe(size);
-      expect(await page.getByTestId("entry-cancel").evaluate((el) => getComputedStyle(el).fontSize), `Cancel, ${percent} %`).toBe(size);
+    // Its words stay whole: "Enregistr / er" was French's at 32 px, with too much padding.
+    const splitWords = (el: Element) => {
+      const text = el.firstChild!;
+      return [...(text.textContent ?? "").matchAll(/\S+/g)].filter((word) => {
+        const range = document.createRange();
+        range.setStart(text, word.index);
+        range.setEnd(text, word.index + word[0].length);
+        return new Set([...range.getClientRects()].map((rect) => rect.top)).size > 1;
+      }).map((word) => word[0]);
+    };
+    for (const [route, saved] of [["", "en"], ["/fr", "fr"], ["/es", "es"], ["/pt-br", "pt"]]) {
+      await setProfileLocale(email, password, saved);
+      for (const percent of [100, 300]) {
+        const where = `${route || "/"} ${percent} %`;
+        await textAt(percent);
+        await page.goto(`${route}/app/write`);
+        const top = page.getByTestId("entry-save-top");
+        await expect(top).toBeVisible();
+        await expect(page.getByTestId("entry-save")).toBeHidden();
+        const size = percent === 100 ? "16px" : "32px";
+        for (const button of [top, page.getByTestId("entry-cancel")]) {
+          expect(await button.evaluate((el) => getComputedStyle(el).fontSize), where).toBe(size);
+          expect.soft(await button.evaluate(splitWords), where).toEqual([]);
+        }
+      }
     }
   } finally {
     await cleanup(email);
