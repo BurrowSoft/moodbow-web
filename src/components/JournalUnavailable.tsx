@@ -3,6 +3,7 @@
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { GetHelpNow } from "./SafetyCard";
 import { SlowLoading } from "./SlowLoading";
 
 // Shown when a signed-in person's journal data can't be loaded (get_me
@@ -43,6 +44,10 @@ export function JournalUnavailable({ standalone = false }: { standalone?: boolea
       </button>
       <div className="mt-4 min-h-6">
         <SlowLoading active={retrying} />
+      </div>
+      {/* Help is there whatever failed; the country may be what couldn't be read. */}
+      <div className="mt-4">
+        <GetHelpNow country={null} testId="journal-unavailable-help" neutral />
       </div>
     </Root>
   );
