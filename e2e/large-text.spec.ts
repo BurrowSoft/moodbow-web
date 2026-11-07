@@ -96,20 +96,24 @@ test("large text: Consent's heading and boxes keep their words whole, on a 320 p
       await page.goto(`${language}/consent`);
       const split = await page.evaluate(() => {
         const out: string[] = [];
-        const ruler = document.createElement("canvas").getContext("2d")!;
         const roots = [document.querySelector("h1"), ...document.querySelectorAll("form label span"), document.querySelector("form button[type=submit]")];
         for (const root of roots) {
           if (!root) continue;
-          const style = getComputedStyle(root);
-          ruler.font = style.font;
-          ruler.letterSpacing = style.letterSpacing;
           const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
           for (let node = walker.nextNode() as Text | null; node; node = walker.nextNode() as Text | null) {
             for (const m of node.data.matchAll(/[^\s-]+/g)) {
               const range = document.createRange();
               range.setStart(node, m.index);
               range.setEnd(node, m.index + m[0].length);
-              if (range.getClientRects().length > 1 && ruler.measureText(m[0]).width <= root.getBoundingClientRect().width) out.push(m[0]);
+              if (range.getClientRects().length < 2) continue;
+              // The word on one line, laid out in the page's own font, against the room it has.
+              const probe = document.createElement("span");
+              probe.style.cssText = "position:absolute;white-space:nowrap";
+              probe.textContent = m[0];
+              root.append(probe);
+              const wide = probe.getBoundingClientRect().width;
+              probe.remove();
+              if (wide <= root.getBoundingClientRect().width) out.push(m[0]);
             }
           }
         }
@@ -138,16 +142,23 @@ test("large text on a wide screen: Consent's boxes grow with the browser's setti
   }
 });
 
+<<<<<<< HEAD
 // #246: the help in the card stops growing at about 200 % on narrow screens, like the page behind it
 // (decision 231); its title and intro stay smaller, so help starts on the first screen (journeys pin
 // that, and a known country's numbers).
 test("large text: the help card keeps up, and its number and Close stay whole", async ({ page, browserName }, testInfo) => {
+=======
+// The legal pages and Help share this. 48 px on a 320 px phone split ordinary words (Web Tester's
+// numbers, 7 Nov): at 32 px only a word wider than its line may, like an email address.
+test("large text: a legal page's words stay whole on a 320 px phone, and normal size stays as it was", async ({ page, browserName }, testInfo) => {
+>>>>>>> origin/master
   test.skip(browserName !== "chromium" || testInfo.project.name !== "desktop", "Page.setFontSizes is Chromium's; once is enough");
   test.setTimeout(120_000);
   const cdp = await page.context().newCDPSession(page);
   await page.setViewportSize({ width: 320, height: 640 });
   for (const percent of [100, 200, 300]) {
     await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
+<<<<<<< HEAD
     for (const language of ["", "/fr", "/es", "/pt-br"]) {
       const at = `${language || "/en"} at ${percent} %`;
       await page.goto(`${language}/sign-in`);
@@ -174,4 +185,66 @@ test("large text: the help card keeps up, and its number and Close stay whole", 
       await expect(card, at).toHaveCount(0);
     }
   }
+=======
+    for (const route of ["/privacy", "/terms", "/es/privacy", "/es/terms", "/fr/privacy", "/pt-br/privacy"]) {
+      await page.goto(route);
+      await page.evaluate(() => document.fonts.ready);
+      const measured = await page.evaluate(() => {
+        const out: string[] = [];
+        const roots = [document.querySelector("h1"), document.querySelector("[data-testid=page-notice]"), ...document.querySelectorAll(".legal-prose :is(p, li, h2, h3)")];
+        for (const root of roots) {
+          if (!root) continue;
+          const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+          for (let node = walker.nextNode() as Text | null; node; node = walker.nextNode() as Text | null) {
+            for (const m of node.data.matchAll(/[^\s-]+/g)) {
+              const range = document.createRange();
+              range.setStart(node, m.index);
+              range.setEnd(node, m.index + m[0].length);
+              if (range.getClientRects().length < 2) continue;
+              const probe = document.createElement("span");
+              probe.style.cssText = "position:absolute;white-space:nowrap";
+              probe.textContent = m[0];
+              root.append(probe);
+              const wide = probe.getBoundingClientRect().width;
+              probe.remove();
+              if (wide <= root.getBoundingClientRect().width) out.push(m[0]);
+            }
+          }
+        }
+        const size = (css: string) => getComputedStyle(document.querySelector(css)!).fontSize;
+        return { split: out, body: size(".legal-prose p"), section: size(".legal-prose h2"), overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth };
+      });
+      expect.soft(measured.split, `${route} at ${percent} %`).toEqual([]);
+      expect.soft(measured.overflow, `${route} at ${percent} %`).toBe(0);
+      if (percent === 100) expect.soft([measured.body, measured.section], route).toEqual(["16px", "20px"]);
+      if (percent !== 100) expect.soft(measured.body, route).toBe("32px");
+    }
+    // The "available in English" line above the article, and the way into Help.
+    await page.goto("/fr/privacy");
+    expect.soft(await page.evaluate(() => getComputedStyle(document.querySelector("[data-testid=page-notice]")!).fontSize)).toBe(percent === 100 ? "14px" : "28px");
+    await page.goto("/help");
+    const help = await page.evaluate(() => ({ intro: getComputedStyle(document.querySelector("article h1 + div p")!).fontSize, topic: getComputedStyle(document.querySelector("article section h2")!).fontSize, summary: getComputedStyle(document.querySelector("article section li p")!).fontSize, overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth }));
+    expect.soft(help).toEqual(percent === 100 ? { intro: "16px", topic: "18px", summary: "14px", overflow: 0 } : { intro: "32px", topic: "35.2px", summary: "28px", overflow: 0 });
+    for (const route of ["/support", "/account-deletion"]) {
+      await page.goto(route);
+      expect.soft(await page.evaluate(() => getComputedStyle(document.querySelector("article h1 + div p")!).fontSize), `${route} at ${percent} %`).toBe(percent === 100 ? "16px" : "32px");
+    }
+  }
+  // From the wide layout up, at normal size, as #241 left it.
+  await cdp.send("Page.setFontSizes", { fontSizes: { standard: 16, fixed: 13 } });
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto("/privacy");
+  expect(await page.evaluate(() => getComputedStyle(document.querySelector(".legal-prose p")!).fontSize)).toBe("17px");
+});
+
+// Type stops growing at about 200 % on narrow screens, so pinch zoom has to cover anyone who needs more.
+test("the viewport never stops someone zooming", async ({ page, browserName }, testInfo) => {
+  test.skip(browserName !== "chromium" || testInfo.project.name !== "desktop", "once is enough");
+  for (const route of ["/", "/consent", "/privacy", "/terms", "/help", "/sign-in"]) {
+    await page.goto(route);
+    const viewport = await page.locator("meta[name=viewport]").getAttribute("content");
+    expect(viewport, route).toBeTruthy();
+    expect(viewport, route).not.toMatch(/maximum-scale|user-scalable/i);
+  }
+>>>>>>> origin/master
 });

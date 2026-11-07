@@ -28,11 +28,11 @@ export default async function HelpPage({ params }: PageProps<"/[locale]/help">) 
   if (state === "hidden") notFound();
   const t = await getTranslations("help");
   return (
-    <PageShell title={t("helpTitle")} draft={state === "draft"}>
+    <PageShell capTitle title={t("helpTitle")} draft={state === "draft"}>
       <p>{t("helpIntro", { email: SUPPORT_EMAIL })}</p>
       {helpIndex(locale).map(({ topic, articles }) => (
         <section key={topic} aria-labelledby={topicId(topic)} className="pt-4">
-          <h2 id={topicId(topic)} className="text-lg font-medium text-text">
+          <h2 id={topicId(topic)} className="font-medium leading-[1.556] text-text [font-size:min(1.125rem,max(11vw,35px))]">
             {topic}
           </h2>
           <ul className="mt-3 space-y-3">
@@ -41,7 +41,7 @@ export default async function HelpPage({ params }: PageProps<"/[locale]/help">) 
                 <Link href={`/help/${a.slug}`} data-testid={`help-${a.slug}`} className="font-medium text-accent underline underline-offset-4">
                   {a.title}
                 </Link>
-                <p className="text-sm">{a.summary}</p>
+                <p className="leading-[1.429] [font-size:min(0.875rem,max(8.75vw,28px))]">{a.summary}</p>
               </li>
             ))}
           </ul>
