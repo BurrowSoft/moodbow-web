@@ -255,8 +255,8 @@
     "offlineCheckinRejected": "Le bilan du {date}, enregistré hors ligne, n'a pas pu être sauvegardé. Veuillez l'ajouter à nouveau.",
     "checkInConflictTitle": "Ce jour a déjà un bilan",
     "checkInConflictBody": "Lequel voulez-vous garder ?",
-    "checkInConflictMine": "Votre version",
-    "checkInConflictOther": "Déjà enregistrée",
+    "checkInConflictMine": "Le vôtre",
+    "checkInConflictOther": "Déjà enregistré",
     "checkInConflictKeepMine": "Garder le mien",
     "checkInConflictUseOther": "Prendre l'autre"
   },

@@ -255,8 +255,8 @@
     "offlineCheckinRejected": "Não foi possível salvar um check-in que você fez sem conexão em {date}. Adicione de novo.",
     "checkInConflictTitle": "Este dia já tem um check-in",
     "checkInConflictBody": "Qual você quer manter?",
-    "checkInConflictMine": "Sua versão",
-    "checkInConflictOther": "Já salva",
+    "checkInConflictMine": "O seu",
+    "checkInConflictOther": "Já salvo",
     "checkInConflictKeepMine": "Manter o meu",
     "checkInConflictUseOther": "Usar o outro"
   },

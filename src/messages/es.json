@@ -255,8 +255,8 @@
     "offlineCheckinRejected": "No se pudo guardar un registro que hiciste sin conexión para el {date}. Vuelve a añadirlo.",
     "checkInConflictTitle": "Este día ya tiene un registro",
     "checkInConflictBody": "¿Cuál quieres conservar?",
-    "checkInConflictMine": "Tu versión",
-    "checkInConflictOther": "Ya guardada",
+    "checkInConflictMine": "El tuyo",
+    "checkInConflictOther": "Ya guardado",
     "checkInConflictKeepMine": "Conservar el mío",
     "checkInConflictUseOther": "Usar el otro"
   },
