@@ -76,6 +76,14 @@ test("large text at 300 %: a page's heading is never smaller than the body under
 // "J'a / cc / ep / te", and French's heading "commence / r" (Web Tester, on #233): this is the page
 // people have to be able to read. Word by word: a line may end between words, and inside one only
 // if the word alone is wider than its line, as German's "Datenschutzerklärung" is at 320 px.
+test("Consent's boxes keep the page's own size on a wide screen: the cap is only for narrow or large text", async ({ page, browserName }, testInfo) => {
+  test.skip(browserName !== "chromium" || testInfo.project.name !== "desktop", "once is enough");
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto("/consent");
+  const sizes = await page.evaluate(() => ({ box: getComputedStyle(document.querySelector("form label span")!).fontSize, page: getComputedStyle(document.querySelector("form")!.parentElement!).fontSize }));
+  expect(sizes.box).toBe(sizes.page);
+});
+
 test("large text: Consent's heading and boxes keep their words whole on a 320 px phone", async ({ page, browserName }, testInfo) => {
   test.skip(browserName !== "chromium" || testInfo.project.name !== "desktop", "Page.setFontSizes is Chromium's; once is enough");
   test.setTimeout(120_000);
@@ -88,7 +96,7 @@ test("large text: Consent's heading and boxes keep their words whole on a 320 px
       const split = await page.evaluate(() => {
         const out: string[] = [];
         const ruler = document.createElement("canvas").getContext("2d")!;
-        const roots = [document.querySelector("h1"), ...document.querySelectorAll("form label span")];
+        const roots = [document.querySelector("h1"), ...document.querySelectorAll("form label span"), document.querySelector("form button[type=submit]")];
         for (const root of roots) {
           if (!root) continue;
           const style = getComputedStyle(root);

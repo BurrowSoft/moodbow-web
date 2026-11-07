@@ -46,10 +46,10 @@ export function ConsentForm({ askAge, askAi = false, showBack }: { askAge: boole
   const hydrated = useSyncExternalStore(noSubscribe, () => true, () => false);
 
   return (
-    // Under the safety card's cap, in px, so the words this page asks someone to agree to stay whole
+    // Below the wide layout (rem-based, so large text counts as narrow), under the safety card's cap, in px, so the words this page asks someone to agree to stay whole
     // at large text: at 300 % they were 48 px, with "J'accepte" over four lines (Web Tester). It's
     // the type that stops growing, and nothing is cut off: the page still scrolls.
-    <form action={action} className="space-y-[16px] [font-size:min(1rem,max(8vw,16px))]">
+    <form action={action} className="space-y-[16px] max-sm:[font-size:min(1rem,max(8vw,16px))]">
       <Checkbox name="privacy" testId="consent-privacy" label={t("consentPrivacy")} checked={privacy} onChange={setPrivacy} />
       <p className="flex flex-wrap gap-x-[24px] gap-y-[4px] px-[4px] leading-[1.429] [font-size:min(0.875rem,max(7vw,14px))]">
         <Link href="/terms" target="_blank" rel="noopener" data-testid="consent-read-terms" className={textLinkClass}>
@@ -88,7 +88,7 @@ export function ConsentForm({ askAge, askAi = false, showBack }: { askAge: boole
         </p>
       )}
       <div className="flex flex-wrap items-center gap-[24px] pt-[8px]">
-        <button type="submit" data-testid="consent-continue" disabled={(hydrated && !ready) || pending} className={primaryButtonClass}>
+        <button type="submit" data-testid="consent-continue" disabled={(hydrated && !ready) || pending} className={`${primaryButtonClass} max-sm:[font-size:min(1rem,max(8vw,16px))]`}>
           {t("consentContinue")}
         </button>
         {showBack && <BackLink href="/welcome?slide=3" label={t("back")} testId="consent-back" />}
