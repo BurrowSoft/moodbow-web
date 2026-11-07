@@ -16,7 +16,7 @@ const LEGAL = conditions["privacy-text-approved"].met && conditions["terms-text-
 test.describe("home", () => {
   test("English at /", async ({ page }) => {
     await page.goto("/");
-    await expect(page).toHaveTitle("Moodbow — A journal that learns your story");
+    await expect(page).toHaveTitle("Moodbow — A private journal for your days");
     await expect(page.locator("html")).toHaveAttribute("lang", "en");
     // The store frames' look (launch readiness): the arc, the headline, the
     // three blocks and Private by design.
@@ -29,7 +29,7 @@ test.describe("home", () => {
     await expect(page.getByTestId("home-sign-in")).toHaveAttribute("href", "/sign-in");
     await expect(page.getByTestId("home-coming-soon")).toHaveCount(0);
     await expect(page.getByTestId("home-notify")).toHaveCount(0);
-    for (const title of ["A 10-second check-in", "Write about your day", "See what shapes your days", "Private by design"]) {
+    for (const title of ["A 10-second check-in", "Write about your day", "See what goes together in your days", "Private by design"]) {
       await expect(page.getByRole("heading", { level: 2, name: title })).toBeVisible();
     }
     // No AI claim while AI isn't live; store badges are text only.
@@ -603,7 +603,7 @@ test.describe("onboarding (signed out)", () => {
   test("welcome: Next, Skip to slide 3, Get started → Consent; Back from Consent → slide 3", async ({ page }) => {
     await page.goto("/welcome");
     await expect(page.getByTestId("welcome-slide-1")).toBeVisible();
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("A journal that learns your story");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("A private journal for your days");
     await page.getByTestId("welcome-next").click();
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("See your patterns");
     await page.getByTestId("welcome-skip").click();
@@ -657,7 +657,7 @@ test.describe("onboarding (signed out)", () => {
       await page.getByTestId("welcome-next").click();
       await expect(page.getByRole("heading", { level: 1 })).toHaveText("See your patterns");
       await page.getByTestId("welcome-back").click();
-      await expect(page.getByRole("heading", { level: 1 })).toHaveText("A journal that learns your story");
+      await expect(page.getByRole("heading", { level: 1 })).toHaveText("A private journal for your days");
       await page.getByTestId("welcome-skip").click();
       await expect(page.getByRole("heading", { level: 1 })).toHaveText("Private, and yours");
       await page.getByTestId("welcome-start").click();

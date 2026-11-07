@@ -6,7 +6,7 @@
   },
   {
     "key": "meta.title",
-    "en": "Moodbow — A journal that learns your story",
+    "en": "Moodbow — A private journal for your days",
     "reason": "UX draft (native read pending)"
   },
   {
@@ -31,12 +31,12 @@
   },
   {
     "key": "meta.descriptionLaunch",
-    "en": "A private journal that learns your story and shows what shapes your days.",
+    "en": "A private journal that shows you what goes together in your days.",
     "reason": "UX draft (native read pending)"
   },
   {
     "key": "meta.ogDescriptionLaunch",
-    "en": "A private journal that learns your story and shows what shapes your days.",
+    "en": "A private journal that shows you what goes together in your days.",
     "reason": "UX draft (native read pending)"
   },
   {
@@ -46,7 +46,7 @@
   },
   {
     "key": "meta.manifestDescription",
-    "en": "A journal that learns your story.",
+    "en": "A private journal for your days.",
     "reason": "UX draft (native read pending)"
   },
   {
@@ -136,7 +136,7 @@
   },
   {
     "key": "home.heroSub",
-    "en": "A private journal that learns your story and shows what shapes your days.",
+    "en": "A private journal that shows you what goes together in your days.",
     "reason": "UX draft (native read pending)"
   },
   {
@@ -201,7 +201,7 @@
   },
   {
     "key": "home.featureInsightsTitle",
-    "en": "See what shapes your days",
+    "en": "See what goes together in your days",
     "reason": "UX draft (native read pending)"
   },
   {

@@ -1,15 +1,15 @@
 {
   "meta": {
     "siteName": "Moodbow",
-    "title": "Moodbow — Um diário que aprende a sua história",
+    "title": "Moodbow — Um diário privado para os seus dias",
     "pageTitle": "{title} · Moodbow",
     "description": "O Moodbow é um diário privado que ajuda você a perceber padrões no seu humor, sono e hábitos com o tempo. Em breve, da BurrowSoft.",
     "ogDescription": "Um diário privado que ajuda você a perceber padrões no seu humor, sono e hábitos com o tempo. Em breve.",
     "ogImageAlt": "Logo do Moodbow com o texto: Em breve. Um diário que aprende a sua história.",
-    "descriptionLaunch": "Um diário privado que aprende a sua história e mostra o que influencia os seus dias.",
-    "ogDescriptionLaunch": "Um diário privado que aprende a sua história e mostra o que influencia os seus dias.",
+    "descriptionLaunch": "Um diário privado que mostra o que costuma andar junto nos seus dias.",
+    "ogDescriptionLaunch": "Um diário privado que mostra o que costuma andar junto nos seus dias.",
     "ogImageAltLaunch": "Moodbow: o seu mês, como um arco-íris",
-    "manifestDescription": "Um diário que aprende a sua história."
+    "manifestDescription": "Um diário privado para os seus dias."
   },
   "common": {
     "logoAlt": "Moodbow",
@@ -41,7 +41,7 @@
   "home": {
     "comingSoon": "Em breve",
     "heroTitle": "O seu mês, como um arco-íris",
-    "heroSub": "Um diário privado que aprende a sua história e mostra o que influencia os seus dias.",
+    "heroSub": "Um diário privado que mostra o que costuma andar junto nos seus dias.",
     "notify": "Receber aviso",
     "notifyAria": "Receba um aviso por e-mail quando o Moodbow for lançado",
     "notifySubject": "Quero saber quando o Moodbow for lançado",
@@ -59,7 +59,7 @@
     "featureWriteBody": "Uma reflexão gentil quando você quiser.",
     "featureWriteNoAiTitle": "Escreva sobre o seu dia",
     "featureWriteNoAiBody": "Com as suas palavras, quando tiver vontade.",
-    "featureInsightsTitle": "Veja o que influencia os seus dias",
+    "featureInsightsTitle": "Veja o que costuma andar junto nos seus dias",
     "featureInsightsBody": "Gráficos da semana, do mês e de 3 meses.",
     "privateTitle": "Privado desde o início",
     "privateBody": "Só você pode ler o seu diário. Exporte ou apague tudo quando quiser."
@@ -164,7 +164,7 @@
     "signinNoAccount": "Primeira vez aqui? Crie uma conta"
   },
   "onboarding": {
-    "welcome1Title": "Um diário que aprende a sua história",
+    "welcome1Title": "Um diário privado para os seus dias",
     "welcome1Body": "Registre seu humor, sono e movimento em segundos, e escreva sobre o seu dia quando tiver vontade.",
     "welcome2Title": "Veja seus padrões",
     "welcome2Body": "Sua linha do tempo e seus gráficos mostram o que deixa os dias bons ainda melhores, e o que costuma vir antes dos dias difíceis.",

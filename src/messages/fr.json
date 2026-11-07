@@ -1,15 +1,15 @@
 {
   "meta": {
     "siteName": "Moodbow",
-    "title": "Moodbow — Un journal qui apprend votre histoire",
+    "title": "Moodbow — Un journal privé pour vos journées",
     "pageTitle": "{title} · Moodbow",
     "description": "Moodbow est un journal privé qui vous aide à repérer, au fil du temps, des tendances dans votre humeur, votre sommeil et vos habitudes. Bientôt disponible, par BurrowSoft.",
     "ogDescription": "Un journal privé qui vous aide à repérer, au fil du temps, des tendances dans votre humeur, votre sommeil et vos habitudes. Bientôt disponible.",
     "ogImageAlt": "Logo Moodbow avec le texte : Bientôt disponible. Un journal qui apprend votre histoire.",
-    "descriptionLaunch": "Un journal privé qui apprend votre histoire et montre ce qui façonne vos journées.",
-    "ogDescriptionLaunch": "Un journal privé qui apprend votre histoire et montre ce qui façonne vos journées.",
+    "descriptionLaunch": "Un journal privé qui vous montre ce qui va de pair dans vos journées.",
+    "ogDescriptionLaunch": "Un journal privé qui vous montre ce qui va de pair dans vos journées.",
     "ogImageAltLaunch": "Moodbow : votre mois, en arc-en-ciel",
-    "manifestDescription": "Un journal qui apprend votre histoire."
+    "manifestDescription": "Un journal privé pour vos journées."
   },
   "common": {
     "logoAlt": "Moodbow",
@@ -41,7 +41,7 @@
   "home": {
     "comingSoon": "Bientôt disponible",
     "heroTitle": "Votre mois, en arc-en-ciel",
-    "heroSub": "Un journal privé qui apprend votre histoire et montre ce qui façonne vos journées.",
+    "heroSub": "Un journal privé qui vous montre ce qui va de pair dans vos journées.",
     "notify": "Être prévenu",
     "notifyAria": "Être prévenu par e-mail du lancement de Moodbow",
     "notifySubject": "Prévenez-moi pour Moodbow",
@@ -59,7 +59,7 @@
     "featureWriteBody": "Une réflexion bienveillante, quand vous en voulez une.",
     "featureWriteNoAiTitle": "Racontez votre journée",
     "featureWriteNoAiBody": "Avec vos propres mots, quand vous en avez envie.",
-    "featureInsightsTitle": "Voyez ce qui façonne vos journées",
+    "featureInsightsTitle": "Voyez ce qui va de pair dans vos journées",
     "featureInsightsBody": "Graphiques sur une semaine, un mois et 3 mois.",
     "privateTitle": "Privé dès la conception",
     "privateBody": "Votre journal n'est lisible que par vous. Exportez ou supprimez tout, à tout moment."
@@ -164,7 +164,7 @@
     "signinNoAccount": "Pas encore de compte ? Créer un compte"
   },
   "onboarding": {
-    "welcome1Title": "Un journal qui apprend votre histoire",
+    "welcome1Title": "Un journal privé pour vos journées",
     "welcome1Body": "Notez votre humeur, votre sommeil et votre activité en quelques secondes, et racontez votre journée quand vous en avez envie.",
     "welcome2Title": "Voyez vos tendances",
     "welcome2Body": "Votre chronologie et vos graphiques montrent ce qui rend les bonnes journées meilleures, et ce qui précède souvent les plus difficiles.",
