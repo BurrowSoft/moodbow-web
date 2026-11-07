@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { Dialog, dialogButton } from "@/components/Dialog";
 import { GetHelpNow, SafetyCard } from "@/components/SafetyCard";
@@ -67,6 +67,8 @@ export function BoConversation({ initial, country, back, healthData = false, con
   const [problem, setProblem] = useState<BoProblem | null>(null);
   // How many times the function has asked for the notice: each one says it was shown.
   const [noticeShows, setNoticeShows] = useState(0);
+  // The reply it came with: it sits above that one, so reading it leads into the reply (UX).
+  const [noticeBefore, setNoticeBefore] = useState<string | null>(null);
   const noticeLine = useRef<HTMLParagraphElement>(null);
   const [full, setFull] = useState(false);
   const [maxChars, setMaxChars] = useState(BO_DEFAULT_MAX_CHARS);
@@ -265,7 +267,10 @@ export function BoConversation({ initial, country, back, healthData = false, con
     requestAnimationFrame(() => box.current?.focus({ preventScroll: true }));
     if (answer.status === "ok") {
       if (answer.openCard) openCard();
-      if (answer.showNotice) setNoticeShows((n) => n + 1);
+      if (answer.showNotice) {
+        setNoticeShows((n) => n + 1);
+        setNoticeBefore(`${client_key}-reply`);
+      }
       setFull(answer.conversationFull);
       const { reply, conversationFull } = answer;
       const pictureUrl = picture?.url;
@@ -337,7 +342,14 @@ export function BoConversation({ initial, country, back, healthData = false, con
         {messages.length === 0 && <p className={bubble("ai")}>{t("firstLine")}</p>}
         {messages.map((m) =>
           m.author === "ai" ? (
-            <BoReply key={m.id} message={m} className={bubble("ai")} />
+            <Fragment key={m.id}>
+              {m.id === noticeBefore && (
+                <p ref={noticeLine} data-testid="bo-notice" className="rounded-2xl border border-border bg-surface p-[16px] text-sm text-text">
+                  {t("notice")}
+                </p>
+              )}
+              <BoReply message={m} className={bubble("ai")} />
+            </Fragment>
           ) : (
             <div key={m.id} data-testid="bo-message-person" className={bubble("person")}>
               {m.pictureUrl ? (
@@ -358,11 +370,6 @@ export function BoConversation({ initial, country, back, healthData = false, con
           </p>
         )}
       </div>
-      {noticeShows > 0 && (
-        <p ref={noticeLine} data-testid="bo-notice" className="rounded-2xl border border-border bg-surface p-[16px] text-sm text-text">
-          {t("notice")}
-        </p>
-      )}
       {full && (
         <div ref={fullLine} data-testid="bo-full" className="flex flex-col items-start gap-2 text-sm text-text">
           <p>{t("conversationFull")}</p>
