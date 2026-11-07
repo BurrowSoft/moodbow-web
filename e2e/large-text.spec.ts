@@ -96,7 +96,7 @@ test("large text: Consent's heading and boxes keep their words whole on a 320 px
       const split = await page.evaluate(() => {
         const out: string[] = [];
         const ruler = document.createElement("canvas").getContext("2d")!;
-        const roots = [document.querySelector("h1"), ...document.querySelectorAll("form label span"), document.querySelector("form button[type=submit]")];
+        const roots = [document.querySelector("h1"), document.querySelector("[data-testid=consent-notice]"), ...document.querySelectorAll("form label span"), document.querySelector("form button[type=submit]")];
         for (const root of roots) {
           if (!root) continue;
           const style = getComputedStyle(root);
