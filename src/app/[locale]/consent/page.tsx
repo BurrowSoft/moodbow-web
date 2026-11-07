@@ -71,8 +71,10 @@ export default async function ConsentPage({ params }: PageProps<"/[locale]/conse
           <GetHelpNow country={country} testId="consent-get-help" neutral />
         </div>
       </NextIntlClientProvider>
-      {/* Who keeps what, before the boxes (decisions 222, 224). */}
-      <p data-testid="consent-notice" className="text-text [overflow-wrap:anywhere]">
+      {/* Who keeps what, above the boxes and never collapsed, so nobody consents with it off screen
+          (decisions 224, 226). Under the safety card's cap, so at large text the boxes stay close:
+          the type stops growing, and nothing is cut off. */}
+      <p data-testid="consent-notice" className="text-text max-sm:[font-size:min(1rem,max(8vw,16px))] [overflow-wrap:anywhere]">
         {t("consentNotice")}
       </p>
       <ConsentForm askAge={askAge} askAi={askAiConsent()} showBack={!user && !outage} />
