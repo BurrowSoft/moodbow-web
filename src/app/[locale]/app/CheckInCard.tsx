@@ -164,7 +164,7 @@ const valuesOf = (f: Fields) => ({
 type Notify = (notice: Notice) => void;
 
 // The sleep stepper's − and +: round icon buttons, ≥ 44 px targets.
-const STEP_BUTTON = "inline-flex h-11 w-11 items-center justify-center rounded-full text-accent hover:bg-pill";
+const STEP_BUTTON = "shrink-0 inline-flex h-[44px] w-[44px] items-center justify-center rounded-full text-accent hover:bg-pill";
 function StepIcon({ plus }: { plus: boolean }) {
   return (
     <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
@@ -737,7 +737,7 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
               >
                 <StepIcon plus={false} />
               </button>
-              <span data-testid="checkin-sleep-hours" aria-live="polite" className="inline-flex min-w-20 items-center justify-center gap-2 text-text">
+              <span data-testid="checkin-sleep-hours" aria-live="polite" className="inline-flex min-w-[80px] items-center justify-center gap-2 text-center text-text [overflow-wrap:anywhere]">
                 {/* The chosen value's colour (decision 150): only once one is picked. */}
                 {fields.sleepHours !== "" && <ValueDot hex={valueHex("sleep_hours", fields.sleepHours)} testId="checkin-sleep-dot" />}
                 {fields.sleepHours === "" ? "–" : t("sleepHours", { hours: formatHours(fields.sleepHours, locale) })}
