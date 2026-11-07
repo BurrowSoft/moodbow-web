@@ -31,7 +31,7 @@ export function SafetyCard({ country, onClose, neutral = false }: { country: str
   const small = "text-muted [font-size:min(0.875rem,max(8.75vw,28px))]";
   return (
     <Dialog title={t("safetyTitle")} body={t(neutral ? "safetyBodyNeutral" : "safetyBody")} onCancel={onClose} testId="safety-card" initialFocus="title" capText>
-      <div className="w-full space-y-[12px] text-left">
+      <div className="w-full space-y-[max(6px,calc(28px-1rem))] text-left">
         {lines.helpline &&
           (ios && isShortCode(lines.helpline.dial) ? (
             <div>

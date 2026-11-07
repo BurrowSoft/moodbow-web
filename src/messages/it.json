@@ -324,6 +324,7 @@
     "webReminderNote": "I promemoria arrivano sul telefono. Installa l'app Moodbow per riceverli.",
     "meHelp": "Aiuto",
     "meGetHelpNow": "Vuoi parlare con qualcuno?",
+    "meNoScript": "Il diario ha bisogno di JavaScript. Attivalo nel browser per vedere le tue pagine.",
     "signOutKeepTitle": "Tenere in questo browser quello che non hai salvato?",
     "signOutKeepBody": "Qualcosa che hai scritto non è ancora salvato nel diario. Tienilo qui per la prossima volta, oppure eliminalo se altre persone usano questo computer.",
     "signOutKeep": "Tienila",

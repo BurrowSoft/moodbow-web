@@ -30,8 +30,8 @@ export default async function RootNotFound() {
         </header>
         <main id="main" className="flex-1 px-6 py-10">
           <article className="mx-auto max-w-2xl">
-            <h1 className="text-balance font-medium leading-[1.2] tracking-tight [font-size:min(1.875rem,max(12vw,30px,1rem))] sm:text-4xl sm:leading-[2.5rem]">{t("title")}</h1>
-            <div className="mt-6 space-y-5 text-base leading-relaxed text-muted sm:text-[1.0625rem]">
+            <h1 className="text-balance font-medium leading-[1.2] tracking-tight [font-size:min(1.875rem,max(12vw,32px))] sm:text-4xl sm:leading-[2.5rem]">{t("title")}</h1>
+            <div className="mt-6 space-y-5 [font-size:min(1rem,max(10vw,32px))] leading-relaxed text-muted sm:text-[1.0625rem]">
               <p>{t("body")}</p>
               <p className="flex flex-wrap gap-x-6 gap-y-2">
                 <Link href="/" className={link}>
