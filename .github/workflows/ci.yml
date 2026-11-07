@@ -134,8 +134,9 @@ jobs:
       - if: steps.cfg.outputs.ok == 'true'
         run: npx playwright install --with-deps chromium
       # The journeys that send a real email (@real-email) run only where sign-up changes: staging
-      # limits those emails, and a heavy day failed every PR. If the list can't be read, all run.
-      # The daily run is everything.
+      # limits those emails, and a heavy day failed every PR. The help numbers (@help-numbers, minutes
+      # of page loads) run only where the numbers or the card change. If the list can't be read, all
+      # run. The daily run is everything.
       - id: scope
         if: steps.cfg.outputs.ok == 'true'
         env:
@@ -147,9 +148,17 @@ jobs:
           fi
           files=$(gh api "repos/${{ github.repository }}/pulls/${{ github.event.number }}/files" --paginate --jq '.[].filename') || files=
           if [ -z "$files" ] || echo "$files" | grep -qE '^(src/app/\[locale\]/(sign-up|consent|welcome|email-confirmed|auth)/|src/lib/(legalVersions|onboardingConsent|authErrors)|src/lib/supabase/|src/lib/(email|password)|src/components/AuthField|src/proxy\.ts|src/i18n/|src/messages/|content/conditions\.json|next\.config\.ts|package(-lock)?\.json|e2e/journey/|\.github/workflows/)'; then
-            echo "args=" >> "$GITHUB_OUTPUT"
+            skip=
           else
-            echo "args=--grep-invert @real-email" >> "$GITHUB_OUTPUT"
+            skip=@real-email
+          fi
+          if [ -n "$files" ] && ! echo "$files" | grep -qE '^(content/contracts/countries\.json|src/lib/safety/helplines|src/components/(SafetyCard|Dialog)|src/messages/|e2e/journey/|\.github/workflows/)'; then
+            skip="${skip:+$skip|}@help-numbers"
+          fi
+          if [ -n "$skip" ]; then
+            echo "args=--grep-invert '$skip'" >> "$GITHUB_OUTPUT"
+          else
+            echo "args=" >> "$GITHUB_OUTPUT"
           fi
       - if: steps.cfg.outputs.ok == 'true'
         run: npm run test:journeys -- ${{ steps.scope.outputs.args }}
