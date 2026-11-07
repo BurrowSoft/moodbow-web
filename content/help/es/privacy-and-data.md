@@ -4,7 +4,7 @@ summary: Quién puede leer tu diario y cómo descargarlo.
 topic: Privacy & account
 es-draft: true
 ---
-Solo tú puedes leer tu diario. No vendemos tus datos ni mostramos anuncios.
+Tu diario es privado y está vinculado a tu cuenta. No vendemos tus datos ni mostramos anuncios.
 
 **Descarga todo:** ve a **Yo → Exportar mis datos**. Recibes un archivo con todo lo que has escrito y registrado. {pending:app_export_csv}También puedes elegir **Hoja de cálculo (.csv)** para tener tus días en una hoja de cálculo, que se abre en Excel o Google Sheets{pending:import_live}, y que Moodbow puede volver a importar en la web{/pending}.{/pending}
 

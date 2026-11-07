@@ -216,7 +216,7 @@
   },
   {
     "key": "home.privateBody",
-    "en": "Only you can read your journal. Export or delete everything, anytime.",
+    "en": "Your journal is private to your account. Export or delete everything in Me.",
     "reason": "UX draft (native read pending)"
   },
   {
@@ -466,7 +466,7 @@
   },
   {
     "key": "onboarding.welcome3BodyNoAi",
-    "en": "Only you can read your journal, and you can delete everything at any time in Me.",
+    "en": "Your journal is private to your account, and you can delete everything in Me.",
     "reason": "UX draft (native read pending)"
   },
   {
@@ -1017,6 +1017,11 @@
   {
     "key": "consumerHealthData.description",
     "en": "How Moodbow handles data that may be consumer health data.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "onboarding.consentNotice",
+    "en": "Moodbow is run by Vitor Ribeiro Carvalho, trading as BurrowSoft, Thailand. We keep your journal, including sensitive data such as your mood and health, to run your account and show it back to you. We don't sell it or use it for ads. You can change or delete it in Me. The Privacy Policy has the details.",
     "reason": "UX draft (native read pending)"
   },
   {
