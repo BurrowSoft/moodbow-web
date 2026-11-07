@@ -17,6 +17,7 @@ import { pageGate } from "@/lib/conditions";
 import { loadMilestone } from "@/lib/share/milestoneData";
 import { yearOnOffer } from "@/lib/share/year";
 import { MilestoneCard } from "./MilestoneCard";
+import { JOURNAL_HEADING } from "@/lib/ui/journalLayout";
 
 // A stuck request ends here at the latest (UX, the timeout audit); each
 // data call gives up after 15 s on its own (lib/supabase/deadline).
@@ -69,7 +70,7 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
     <section className="space-y-8">
       <header>
         {/* Focusable from code only: where focus goes when the milestone card is dismissed. */}
-        <h1 id="today-title" tabIndex={-1} className="text-3xl font-medium tracking-tight focus:outline-none" data-testid="today-greeting">
+        <h1 id="today-title" tabIndex={-1} className={`${JOURNAL_HEADING} focus:outline-none`} data-testid="today-greeting">
           {t(greetingKey(localHour(timeZone)))}
         </h1>
         <p className="mt-1 text-muted" data-testid="today-date">

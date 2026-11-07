@@ -681,18 +681,18 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
         {/* The mockups (decision 161): the mood's face and its name, Edit on
             the right. The heading still says what it answers, for screen
             readers ("How are you today? Good"). */}
-        <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-[12px]">
           <h2
             tabIndex={-1}
             aria-labelledby={`${moodTitle}-q ${moodTitle}-a`}
-            className="flex items-center gap-3 text-lg font-medium text-text outline-none"
+            className="flex min-w-0 max-w-full items-center gap-[12px] font-medium leading-[1.556] text-text outline-none [font-size:min(1.125rem,max(9vw,18px))] [overflow-wrap:anywhere]"
             data-testid="checkin-summary-mood"
           >
-            <MoodFace mood={mood} className="h-9 w-9" />
+            <MoodFace mood={mood} className="h-[36px] w-[36px] shrink-0" />
             <span id={`${moodTitle}-q`} className="sr-only">
               {t("checkinTitle")}
             </span>
-            <span id={`${moodTitle}-a`}>{t(`mood${mood}` as "mood1")}</span>
+            <span id={`${moodTitle}-a`} className="min-w-0">{t(`mood${mood}` as "mood1")}</span>
           </h2>
           <button type="button" data-testid="checkin-edit" onClick={() => setEditing(true)} className="min-h-11 max-w-full font-medium text-accent underline underline-offset-4 [overflow-wrap:anywhere]">
             {t("checkinEdit")}
