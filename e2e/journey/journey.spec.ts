@@ -4,7 +4,7 @@ import conditions from "../../content/conditions.json";
 import messages from "../../src/messages/en.json";
 import fr from "../../src/messages/fr.json";
 import { monthsBefore } from "../../src/lib/journal/onThisDay";
-import { journalToday, aiAvailable, cleanup, configured, confirmEmail, createConfirmedUser, exists, lastWeekMonday, seedCheckIns, newEmail, newPassword, notConfigured, profileLocale, revokeSessions, setProfileLocale, signedUpUnconfirmed, sweep } from "./staging";
+import { aiConsentGranted, journalToday, aiAvailable, cleanup, configured, confirmEmail, createConfirmedUser, exists, lastWeekMonday, seedCheckIns, newEmail, newPassword, notConfigured, profileLocale, revokeSessions, setProfileLocale, signedUpUnconfirmed, sweep } from "./staging";
 
 // The launch-critical journeys (1.0), end to end against staging with a
 // throwaway account each: sign-up → confirm → consent → setup → check-in →
@@ -166,6 +166,8 @@ test.describe("launch journeys", () => {
     const email = newEmail();
     try {
       const password = await signUp(page, email, { ai: true });
+      // What the form's box is for, whether or not staging's AI switch is on.
+      expect(await aiConsentGranted(email, password)).toBe(true);
 
       // Focus and tone also need staging's global AI switch, which is off
       // outside AI windows (decision 123): read it as the app does, and skip
