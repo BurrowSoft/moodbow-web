@@ -17,6 +17,7 @@ import { askAiConsent } from "@/lib/journal/ai";
 import { offeredLocales } from "@/i18n/routing";
 import { savedLanguageRoute } from "@/lib/savedLanguage";
 import { SavedLanguageRedirect } from "../app/SavedLanguageRedirect";
+import { legalLocale } from "@/lib/legalContent";
 import { ConsentForm } from "./ConsentForm";
 
 // Consent (M3): before Create account for new people; for signed-in people
@@ -64,7 +65,7 @@ export default async function ConsentPage({ params }: PageProps<"/[locale]/conse
           {ta("errGeneric")}
         </p>
       )}
-      <ConsentForm askAge={askAge} askAi={askAiConsent()} showBack={!user && !outage} />
+      <ConsentForm askAge={askAge} askAi={askAiConsent()} showBack={!user && !outage} legalInEnglish={legalLocale(locale, "privacy") !== locale} />
       {/* Help is never behind a consent, new or asked again: the card and its words only
           come to this page, which the root layout doesn't send them to. */}
       <NextIntlClientProvider messages={pickMessages(await getMessages(), ["me", "safety", "common"])}>
