@@ -619,6 +619,13 @@ test.describe("onboarding (signed out)", () => {
 
   test("Consent: help is there before anything's agreed, and it opens the card", async ({ page }) => {
     await page.goto("/consent");
+    // Help first, then who keeps what, then the boxes (UX).
+    const help = (await page.getByTestId("consent-get-help").boundingBox())!;
+    const notice = (await page.getByTestId("consent-notice").boundingBox())!;
+    const form = (await page.getByTestId("consent-privacy").boundingBox())!;
+    expect(help.y).toBeLessThan(notice.y);
+    expect(notice.y).toBeLessThan(form.y);
+    await expect(page.getByTestId("consent-notice")).toContainText("Moodbow is run by Vitor Ribeiro Carvalho");
     await page.getByTestId("consent-get-help").click();
     await expect(page.getByTestId("safety-card")).toBeVisible();
     await expect(page.getByTestId("safety-find-helpline")).toBeVisible();

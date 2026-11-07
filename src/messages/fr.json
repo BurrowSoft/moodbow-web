@@ -177,6 +177,7 @@
     "welcomeStart": "Commencer",
     "welcomeHaveAccount": "J'ai déjà un compte",
     "consentTitle": "Avant de commencer",
+    "consentNotice": "Moodbow est géré par Vitor Ribeiro Carvalho, exerçant sous le nom de BurrowSoft, en Thaïlande. Nous conservons votre journal, y compris des données sensibles comme votre humeur et votre santé, pour faire fonctionner votre compte et vous le montrer. Nous ne le vendons pas et ne l'utilisons pas pour la publicité. Vous pouvez le modifier ou le supprimer dans Moi. La Politique de confidentialité donne tous les détails.",
     "consentPrivacy": "J'accepte les Conditions et la Politique de confidentialité",
     "consentHealth": "J'accepte que Moodbow conserve et traite mon journal, qui peut contenir des informations sur ma santé et mon bien-être, afin de fournir le service.",
     "consentReadTerms": "Lire les Conditions",

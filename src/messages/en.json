@@ -177,6 +177,7 @@
     "welcomeStart": "Get started",
     "welcomeHaveAccount": "I already have an account",
     "consentTitle": "Before you start",
+    "consentNotice": "Moodbow is run by Vitor Ribeiro Carvalho, trading as BurrowSoft, Thailand. We keep your journal, including sensitive data such as your mood and health, to run your account and show it back to you. We don't sell it or use it for ads. You can change or delete it in Me. The Privacy Policy has the details.",
     "consentPrivacy": "I agree to the Terms and the Privacy Policy",
     "consentHealth": "I agree that Moodbow stores and processes my journal, which can include information about my health and wellbeing, to provide the service.",
     "consentReadTerms": "Read the Terms",
