@@ -12,6 +12,8 @@ const query = (result: () => unknown) => {
   return chain;
 };
 const client = {
+  // A read that never answers: the page must not wait for it.
+  rpc: vi.fn(() => new Promise(() => {})),
   from: (table: string) => (table === "check_ins" ? query(() => ({ data: null, error: checkInError })) : query(() => ({ data: entriesError ? null : [], error: entriesError }))),
 };
 vi.mock("@/lib/supabase/server", () => ({ createSupabaseServerClient: async () => client }));
@@ -36,6 +38,7 @@ vi.mock("./CheckInCard", async () => {
   };
   return { CheckInCard };
 });
+vi.mock("./SecurityNoticeRead", () => ({ SecurityNoticeRead: ({ uid }: { uid: string }) => <div data-testid="security-read" data-uid={uid} /> }));
 vi.mock("./EntryPreviews", () => ({ EntryPreviews: () => null }));
 vi.mock("./MilestoneCard", () => ({ MilestoneCard: () => null }));
 vi.mock("@/components/JournalUnavailable", () => ({ JournalUnavailable: () => <div data-testid="journal-unavailable" /> }));
@@ -69,6 +72,12 @@ describe("Today, whatever failed", () => {
   it("nothing failed: no error", async () => {
     await open();
     expect(screen.getByTestId("checkin-card")).toHaveAttribute("data-load-failed", "false");
+  });
+  it("a security update's read never holds Today: the page doesn't wait for it, and leaves it to its own part", async () => {
+    await open();
+    expect(client.rpc).not.toHaveBeenCalled();
+    expect(screen.getByTestId("checkin-card")).toBeInTheDocument();
+    expect(screen.getByTestId("security-read")).toHaveAttribute("data-uid", "u1");
   });
   it("Try again brings the real row: a new card, as the old one only read its first", async () => {
     checkInError = { message: "boom" };

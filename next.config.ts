@@ -10,6 +10,8 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/[locale]/privacy": ["./content/legal/**"],
     "/[locale]/terms": ["./content/legal/**"],
+    "/[locale]": ["./content/security/**"],
+    "/[locale]/security": ["./content/security/**", "./content/legal/**"],
     "/[locale]/help": ["./content/help/**"],
     "/[locale]/help/[slug]": ["./content/help/**"],
     "/sitemap.xml": ["./content/help/**"],

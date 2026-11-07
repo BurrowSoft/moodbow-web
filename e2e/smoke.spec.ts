@@ -594,6 +594,12 @@ test.describe("onboarding (signed out)", () => {
     });
   }
 
+  test("/security: a 404 with no update out, in any language, and Home doesn't link to it", async ({ page }) => {
+    for (const path of ["/security", "/es/security"]) expect((await page.goto(path))?.status(), path).toBe(404);
+    await page.goto("/");
+    await expect(page.getByTestId("home-security")).toHaveCount(0);
+  });
+
   test("Consent: help is there before anything's agreed, and it opens the card", async ({ page }) => {
     await page.goto("/consent");
     await page.getByTestId("consent-get-help").click();
