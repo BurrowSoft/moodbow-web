@@ -577,7 +577,7 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
       initialFocus="title"
       details={
         <>
-          <p className="text-sm font-medium text-text" data-testid="checkin-conflict-date">
+          <p className="leading-[1.429] [font-size:min(0.875rem,max(8.75vw,28px))] font-medium text-text" data-testid="checkin-conflict-date">
             {dateLine(conflict.date, dateLocaleTag)}
           </p>
           {/* Side by side while both fit; the rem minimum stacks them at large text on a narrow
