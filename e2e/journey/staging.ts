@@ -102,6 +102,17 @@ export async function setProfileLocale(email: string, password: string, locale: 
   if (error) throw new Error(`saving the language failed: ${error.message}`);
 }
 
+// The same, signed in once, for a test that saves many times.
+export async function profileSaver(email: string, password: string): Promise<(fields: { p_locale: string } | { p_country: string }) => Promise<void>> {
+  const user = createClient(URL_, PUBLISHABLE, { auth: { persistSession: false, autoRefreshToken: false } });
+  const { error: signInError } = await user.auth.signInWithPassword({ email, password });
+  if (signInError) throw new Error(`sign-in to save a profile failed: ${signInError.message}`);
+  return async (fields) => {
+    const { error } = await user.rpc("update_profile", fields);
+    if (error) throw new Error(`saving the profile failed: ${error.message}`);
+  };
+}
+
 // The person's today, as the journal has it.
 export async function journalToday(email: string, password: string): Promise<string> {
   const user = createClient(URL_, PUBLISHABLE, { auth: { persistSession: false, autoRefreshToken: false } });

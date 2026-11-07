@@ -6,7 +6,7 @@ import messages from "@/messages/en.json";
 import es from "@/messages/es.json";
 import fr from "@/messages/fr.json";
 import ptBr from "@/messages/pt-br.json";
-import { helplinesFor, isIos, telHref } from "@/lib/safety/helplines";
+import { helpLineSize, helplinesFor, isIos, telHref } from "@/lib/safety/helplines";
 import { GetHelpNow, SafetyCard } from "./SafetyCard";
 vi.mock("@/i18n/navigation", () => ({
   Link: ({ href, prefetch, children, ...rest }: { href: string; prefetch?: boolean; children: React.ReactNode }) => (
@@ -221,5 +221,24 @@ describe("SafetyCard: the opener (#9765 S-03)", () => {
     fireEvent.click(screen.getByTestId("reflect-get-help"));
     expect(screen.getByTestId("safety-card")).toHaveTextContent(s.safetyBody);
     expect(screen.getByTestId("safety-card")).not.toHaveTextContent(s.safetyBodyNeutral);
+  });
+});
+
+describe("a number never breaks across lines (#247)", () => {
+  it("every number on the list is shown with no-break spaces, and still dials", () => {
+    for (const { code, helpline, emergency } of registry.countries) {
+      const lines = helplinesFor(code);
+      if (helpline) {
+        expect(lines.helpline?.display, code).toBe(helpline.display.replaceAll(" ", " "));
+        expect(lines.helpline?.dial, code).toBe(helpline.dial);
+      }
+      expect(lines.emergency?.display, code).toBe(emergency?.display.replaceAll(" ", " "));
+    }
+    expect(telHref(helplinesFor("DE").helpline!.dial)).toBe("tel:08001110111");
+  });
+
+  it("the longest ones stop growing a size earlier", () => {
+    for (const code of ["AR", "DE", "IT", "MX"]) expect(helpLineSize(helplinesFor(code).helpline!.display), code).toContain("28px");
+    for (const code of ["BE", "FR", "GB"]) expect(helpLineSize(helplinesFor(code).helpline!.display), code).toContain("32px");
   });
 });
