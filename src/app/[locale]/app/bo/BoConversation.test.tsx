@@ -586,6 +586,32 @@ describe("BoConversation: where a send leaves the page (UX, #205)", () => {
     expect(startOf("bo-message-ai")).toEqual([]);
   });
 
+  it("a notice with a reply: above that reply, and the page goes to the notice's start (UX)", async () => {
+    above = ["bo-notice", "bo-message-ai"];
+    await open();
+    answers.push(reply({ showNotice: true }));
+    type("Hello");
+    await send();
+    const notice = screen.getByTestId("bo-notice");
+    expect(screen.getByTestId("bo-message-person").compareDocumentPosition(notice) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(notice.compareDocumentPosition(screen.getByTestId("bo-message-ai")) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(moves.at(-1)).toMatchObject({ to: "bo-notice", block: "start" });
+  });
+
+  it("a later notice moves to its own reply: one notice, above the newest", async () => {
+    await open();
+    answers.push(reply({ showNotice: true }), reply({ showNotice: true }));
+    type("Hello");
+    await send();
+    type("Hello again");
+    await send();
+    const replies = screen.getAllByTestId("bo-message-ai");
+    expect(replies).toHaveLength(2);
+    const notice = screen.getByTestId("bo-notice");
+    expect(replies[0].compareDocumentPosition(notice) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(notice.compareDocumentPosition(replies[1]) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
   it("an earlier send's notice doesn't pull the page back", async () => {
     above = ["bo-notice"];
     await open();
