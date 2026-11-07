@@ -56,7 +56,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
           <Logo variant="stacked" width={128} alt={tc("logoAlt")} priority />
         </div>
         {hasSecurityUpdate() && (
-          <p className="mt-6 max-w-full rounded-2xl border border-border bg-surface p-[16px] text-center text-text [overflow-wrap:anywhere]" data-testid="home-security">
+          <p className="mt-6 max-w-full rounded-2xl border border-border bg-surface p-[16px] text-center text-text [font-size:min(1rem,max(8vw,16px))] [overflow-wrap:anywhere]" data-testid="home-security">
             {tc("securityNotice")}{" "}
             <Link href="/security" data-testid="home-security-link" className={storeLink}>
               {tc("securityNoticeRead")}
