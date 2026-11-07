@@ -64,12 +64,13 @@ test("large text at 300 %: a page's heading is never smaller than the body under
   await page.setViewportSize({ width: 320, height: 640 });
   await cdp.send("Page.setFontSizes", { fontSizes: { standard: 48, fixed: 39 } });
   await page.goto("/consent");
-  const sizes = await page.evaluate(() => ({ heading: parseFloat(getComputedStyle(document.querySelector("h1")!).fontSize), body: parseFloat(getComputedStyle(document.documentElement).fontSize) }));
+  const sizes = await page.evaluate(() => ({ heading: parseFloat(getComputedStyle(document.querySelector("h1")!).fontSize), body: parseFloat(getComputedStyle(document.querySelector("form label span")!).fontSize) }));
   expect(sizes.heading).toBeGreaterThanOrEqual(sizes.body);
 });
 
 // "J'a / cc / ep / te", and French's heading "commence / r" (Web Tester, on #233): this is the page
-// people have to be able to read. Word by word: a line may end between words, never inside one.
+// people have to be able to read. Word by word: a line may end between words, and inside one only
+// if the word alone is wider than its line, as German's "Datenschutzerklärung" is at 320 px.
 test("large text: Consent's heading and boxes keep their words whole on a 320 px phone", async ({ page, browserName }, testInfo) => {
   test.skip(browserName !== "chromium" || testInfo.project.name !== "desktop", "Page.setFontSizes is Chromium's; once is enough");
   test.setTimeout(120_000);
@@ -81,16 +82,20 @@ test("large text: Consent's heading and boxes keep their words whole on a 320 px
       await page.goto(`${language}/consent`);
       const split = await page.evaluate(() => {
         const out: string[] = [];
+        const ruler = document.createElement("canvas").getContext("2d")!;
         const roots = [document.querySelector("h1"), ...document.querySelectorAll("form label span")];
         for (const root of roots) {
           if (!root) continue;
+          const style = getComputedStyle(root);
+          ruler.font = style.font;
+          ruler.letterSpacing = style.letterSpacing;
           const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
           for (let node = walker.nextNode() as Text | null; node; node = walker.nextNode() as Text | null) {
             for (const m of node.data.matchAll(/[^\s-]+/g)) {
               const range = document.createRange();
               range.setStart(node, m.index);
               range.setEnd(node, m.index + m[0].length);
-              if (range.getClientRects().length > 1) out.push(m[0]);
+              if (range.getClientRects().length > 1 && ruler.measureText(m[0]).width <= root.getBoundingClientRect().width) out.push(m[0]);
             }
           }
         }
