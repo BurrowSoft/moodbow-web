@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import countries from "../content/contracts/countries.json";
 
 // The browser's own text setting on a 320 px phone, on the pages someone with large
 // text needs first. Sign in's button scrolled /sign-in sideways by up to 194 px (Web
@@ -290,6 +291,40 @@ test("large text: the help card keeps up, and its number and Close stay whole", 
       await expect(close, at).toBeInViewport();
       await close.click();
       await expect(card, at).toHaveCount(0);
+    }
+  }
+});
+
+// #250: the help page's numbers stay whole, as on the card (the journey pins those): someone has to dial them.
+test("large text: every number on the help page stays whole on a phone", async ({ page, browserName }, testInfo) => {
+  test.skip(browserName !== "chromium" || testInfo.project.name !== "desktop", "Page.setFontSizes is Chromium's; once is enough");
+  test.setTimeout(240_000);
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send("Page.setFontSizes", { fontSizes: { standard: 48, fixed: 39 } });
+  await page.setViewportSize({ width: 320, height: 640 });
+  for (const { code, helpline, emergency } of countries.countries) {
+    for (const language of ["", "/fr", "/es", "/pt-br"]) {
+      await page.goto(`${language}/help/get-help-now?country=${code}`);
+      for (const [id, display] of [["help-now-call-helpline", helpline?.display], ["help-now-call-emergency", emergency?.display]]) {
+        if (!display) continue;
+        const lines = await page.getByTestId(id!).evaluate((el, plain) => {
+          const number = el.querySelector("[data-help-number]");
+          if (number?.textContent !== plain) return -1;
+          const before = number.previousSibling as Text | null;
+          const after = number.nextSibling as Text | null;
+          const range = document.createRange();
+          if (before?.data.endsWith("(")) range.setStart(before, before.data.length - 1);
+          else range.setStartBefore(number);
+          if (after?.data.startsWith(")")) range.setEnd(after, 1);
+          else range.setEndAfter(number);
+          return new Set([...range.getClientRects()].map((rect) => Math.round(rect.top))).size;
+        }, display);
+        expect.soft(lines, `${code} ${id} ${language || "/en"}`).toBe(1);
+      }
+      // The first number is whole on the first screen (UX).
+      const first = (await page.getByTestId(helpline ? "help-now-call-helpline" : "help-now-call-emergency").evaluate((el) => el.getBoundingClientRect().bottom));
+      expect.soft(first, `${code} ${language || "/en"}: the first number's bottom edge`).toBeLessThanOrEqual(640);
+      expect.soft(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth), `${code} ${language || "/en"}`).toBe(0);
     }
   }
 });

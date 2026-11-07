@@ -173,9 +173,14 @@ describe("Get help now with or without the page's scripts (#248)", () => {
     wrap(<GetHelpNow country="GB" testId="me-get-help" />);
     const link = screen.getByTestId("me-get-help");
     expect(link.tagName).toBe("A");
-    expect(link.getAttribute("href")).toMatch(/\/help\/get-help-now$/);
+    expect(link.getAttribute("href")).toMatch(/\/help\/get-help-now\?country=GB$/);
     expect(fireEvent.click(link)).toBe(false);
     expect(screen.getByTestId("safety-card")).toBeInTheDocument();
+  });
+
+  it("with no country known, the link carries none", () => {
+    wrap(<GetHelpNow country={null} testId="me-get-help" />);
+    expect(screen.getByTestId("me-get-help").getAttribute("href")).toMatch(/\/help\/get-help-now$/);
   });
 
   it("a click asking for a new tab is left to the browser", () => {
