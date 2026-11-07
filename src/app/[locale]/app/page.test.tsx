@@ -26,6 +26,7 @@ vi.mock("@/i18n/navigation", () => ({
     </a>
   ),
 }));
+vi.mock("@/lib/share/milestoneData", () => ({ loadMilestone: async () => null }));
 vi.mock("./CheckInCard", () => ({ CheckInCard: () => <div data-testid="checkin-card" /> }));
 vi.mock("./EntryPreviews", () => ({ EntryPreviews: () => null }));
 vi.mock("./MilestoneCard", () => ({ MilestoneCard: () => null }));
