@@ -137,3 +137,41 @@ test("large text on a wide screen: Consent's boxes grow with the browser's setti
     }
   }
 });
+
+// #242: px sizes that ignored the setting. The same at normal size; home stops growing at about 200 %
+// on narrow screens (decision 231), and elsewhere a heading keeps up with the body under it.
+test("home and the plain pages' headings follow the browser's setting", async ({ page, browserName }, testInfo) => {
+  test.skip(browserName !== "chromium" || testInfo.project.name !== "desktop", "Page.setFontSizes is Chromium's; once is enough");
+  test.setTimeout(120_000);
+  const cdp = await page.context().newCDPSession(page);
+  const setting = (percent: number) => cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: Math.round((13 * percent) / 100) } });
+  const size = (css: string) => page.evaluate((c) => getComputedStyle(document.querySelector(c)!).fontSize, css);
+  const home = [
+    { width: 320, percent: 100, heading: "30px", sub: "16px", feature: "15px" },
+    { width: 320, percent: 200, heading: "38.4px", sub: "32px", feature: "30px" },
+    { width: 320, percent: 300, heading: "38.4px", sub: "32px", feature: "30px" },
+    { width: 1280, percent: 100, heading: "44px", sub: "18px", feature: "15px" },
+    { width: 1280, percent: 200, heading: "88px", sub: "36px", feature: "30px" },
+  ];
+  for (const { width, percent, heading, sub, feature } of home) {
+    await page.setViewportSize({ width, height: 800 });
+    await setting(percent);
+    for (const language of ["/", "/fr", "/es", "/pt-br"]) {
+      await page.goto(language);
+      const at = `${language} at ${width} px, ${percent} %`;
+      expect.soft(await size("h1"), at).toBe(heading);
+      expect.soft(await size("h1 + p"), at).toBe(sub);
+      expect.soft(await size("[data-testid^=home-feature-] p"), at).toBe(feature);
+      expect.soft(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth), at).toBe(0);
+    }
+  }
+  await page.setViewportSize({ width: 320, height: 640 });
+  for (const [route, normal] of [["/welcome", "28px"], ["/no-such-page", "30px"]]) {
+    await setting(100);
+    await page.goto(route);
+    expect.soft(await size("h1"), route).toBe(normal);
+    await setting(300);
+    await page.goto(route);
+    expect.soft(await size("h1"), `${route} at 300 %`).toBe("48px");
+  }
+});

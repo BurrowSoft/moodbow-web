@@ -49,14 +49,15 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
   ];
 
   return (
+    // Type stops growing at about 200 % on narrow screens (decision 231); the same sizes at normal size.
     <main id="main" className="flex flex-1 flex-col items-center px-[16px] [overflow-wrap:anywhere] min-[360px]:px-[24px] sm:px-[32px]">
       {ld && <script type="application/ld+json" data-testid="home-jsonld" dangerouslySetInnerHTML={{ __html: jsonLdText(ld) }} />}
-      <section className="flex w-full max-w-[600px] flex-col items-center pb-12 pt-8 text-center sm:pb-16 sm:pt-12">
+      <section className="flex w-full max-w-[37.5rem] flex-col items-center pb-12 pt-8 text-center sm:pb-16 sm:pt-12">
         <div className="w-[104px] sm:w-[128px]">
           <Logo variant="stacked" width={128} alt={tc("logoAlt")} priority />
         </div>
         {hasSecurityUpdate() && (
-          <p className="mt-6 max-w-full rounded-2xl border border-border bg-surface p-[16px] text-center text-text [font-size:min(1rem,max(8vw,16px))] [overflow-wrap:anywhere]" data-testid="home-security">
+          <p className="mt-6 max-w-full rounded-2xl border border-border bg-surface p-[16px] text-center text-text [font-size:min(1rem,max(10vw,32px))] [overflow-wrap:anywhere]" data-testid="home-security">
             {tc("securityNotice")}{" "}
             <Link href="/security" data-testid="home-security-link" className={storeLink}>
               {tc("securityNoticeRead")}
@@ -65,22 +66,22 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
         )}
         <MoodbowArc className="mt-8 w-full max-w-[360px]" />
         {!live && (
-          <p className="mt-6 rounded-full bg-pill px-3.5 py-1.5 text-[13px] font-medium tracking-wide text-accent" data-testid="home-coming-soon">
+          <p className="mt-6 rounded-full bg-pill px-3.5 py-1.5 [font-size:min(0.8125rem,max(8.125vw,26px))] font-medium tracking-wide text-accent" data-testid="home-coming-soon">
             {t("comingSoon")}
           </p>
         )}
-        <h1 className="mt-5 text-balance [overflow-wrap:anywhere] text-[30px] font-medium leading-tight tracking-tight sm:text-[44px]">{t("heroTitle")}</h1>
-        <p className="mt-4 max-w-[480px] text-base leading-relaxed text-muted sm:text-[18px]">{t("heroSub")}</p>
+        <h1 className="mt-5 text-balance [overflow-wrap:anywhere] [font-size:min(1.875rem,max(12vw,32px))] font-medium leading-tight tracking-tight sm:text-[2.75rem]">{t("heroTitle")}</h1>
+        <p className="mt-4 max-w-[30rem] [font-size:min(1rem,max(10vw,32px))] leading-relaxed text-muted sm:text-[1.125rem]">{t("heroSub")}</p>
         {live ? (
           <div className="mt-9 flex w-full flex-col items-center gap-4 sm:w-auto">
             <Link
               href="/welcome"
               data-testid="home-start"
-              className="inline-flex min-h-[52px] w-full items-center justify-center rounded-full text-center sm:w-auto sm:min-w-[220px] bg-accent px-5 py-3.5 sm:px-8 text-base font-medium text-on-accent transition-opacity hover:bg-accent-hover"
+              className="inline-flex min-h-[52px] w-full items-center justify-center rounded-full text-center sm:w-auto sm:min-w-[220px] bg-accent px-5 py-3.5 sm:px-8 [font-size:min(1rem,max(10vw,32px))] font-medium text-on-accent transition-opacity hover:bg-accent-hover"
             >
               {t("start")}
             </Link>
-            <Link href="/sign-in" data-testid="home-sign-in" className="min-h-11 content-center text-sm font-medium text-accent underline underline-offset-4">
+            <Link href="/sign-in" data-testid="home-sign-in" className="min-h-11 content-center [font-size:min(0.875rem,max(8.75vw,28px))] font-medium text-accent underline underline-offset-4">
               {to("welcomeHaveAccount")}
             </Link>
           </div>
@@ -90,17 +91,17 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
               href={notifyMailto(t("notifySubject"))}
               aria-label={t("notifyAria")}
               data-testid="home-notify"
-              className="mt-9 inline-flex min-h-[52px] w-full items-center justify-center rounded-full text-center sm:w-auto sm:min-w-[200px] bg-accent px-5 py-3.5 sm:px-8 text-base font-medium text-on-accent transition-opacity hover:bg-accent-hover"
+              className="mt-9 inline-flex min-h-[52px] w-full items-center justify-center rounded-full text-center sm:w-auto sm:min-w-[200px] bg-accent px-5 py-3.5 sm:px-8 [font-size:min(1rem,max(10vw,32px))] font-medium text-on-accent transition-opacity hover:bg-accent-hover"
             >
               {t("notify")}
             </a>
-            <p className="mt-3 text-[13px] text-muted">{t("notifyNote")}</p>
+            <p className="mt-3 [font-size:min(0.8125rem,max(8.125vw,26px))] text-muted">{t("notifyNote")}</p>
           </>
         )}
         {/* Per store, once its listing is live (decision 185): neutral text
             links (the badge art waits for the listings), the other store's
             "coming soon"; neither live, the joint line. */}
-        <div className="mt-6 text-sm text-muted" data-testid="home-stores">
+        <div className="mt-6 [font-size:min(0.875rem,max(8.75vw,28px))] text-muted" data-testid="home-stores">
           {stores.play || stores.appStore ? (
             <>
               <p>
@@ -131,8 +132,8 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
             <span className="block h-8 w-8 text-accent" aria-hidden="true">
               {icon}
             </span>
-            <h2 className="mt-4 text-lg font-medium leading-snug">{title}</h2>
-            <p className="mt-2 text-[15px] leading-relaxed text-muted">{body}</p>
+            <h2 className="mt-4 [font-size:min(1.125rem,max(11.25vw,36px))] font-medium leading-snug">{title}</h2>
+            <p className="mt-2 [font-size:min(0.9375rem,max(9.375vw,30px))] leading-relaxed text-muted">{body}</p>
           </li>
         ))}
       </ul>
@@ -141,10 +142,10 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
         <span className="block h-8 w-8 text-accent" aria-hidden="true">
           <LockIcon />
         </span>
-        <h2 id="home-private" className="text-2xl font-medium tracking-tight">
+        <h2 id="home-private" className="[font-size:min(1.5rem,max(11vw,35px))] font-medium tracking-tight">
           {t("privateTitle")}
         </h2>
-        <p className="max-w-[440px] text-[15px] leading-relaxed text-text">{t("privateBody")}</p>
+        <p className="max-w-[27.5rem] [font-size:min(0.9375rem,max(9.375vw,30px))] leading-relaxed text-text">{t("privateBody")}</p>
       </section>
     </main>
   );
