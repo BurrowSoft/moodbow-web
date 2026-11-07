@@ -46,8 +46,8 @@ async function callBo<T>(body: object): Promise<T | { status: "no_answer" }> {
 // with a back link, on a wider one the tabs stay (UX), through the mark on the root
 // (globals.css), as SignedInMark does. The footer goes in both, so this page carries
 // the Consumer Health Data link itself: it collects personal information (Footer).
-// How far from where a send left the page counts as the person having scrolled.
-const BO_SCROLLED_AWAY_PX = 8;
+// The keys that scroll a page, outside a field.
+const BO_SCROLL_KEYS = ["PageUp", "PageDown", "ArrowUp", "ArrowDown", "Home", "End", " "];
 
 export function BoConversation({ initial, country, back, healthData = false, consented = true }: { initial: BoMessage[]; country: string | null | undefined; back?: ReactNode; healthData?: boolean; consented?: boolean }) {
   const t = useTranslations("bo");
@@ -170,14 +170,34 @@ export function BoConversation({ initial, country, back, healthData = false, con
   // it came stays where they went. Bo's line and help stay in the window: they're sticky.
   const problemLine = useRef<HTMLDivElement>(null);
   const fullLine = useRef<HTMLDivElement>(null);
-  const placed = useRef({ noticeShows: 0, full: false, reply: initial.at(-1)?.id, y: 0 });
+  const placed = useRef({ noticeShows: 0, full: false, reply: initial.at(-1)?.id });
+  // What the person did, not how far the page moved: a phone's keyboard closing as Send goes
+  // off moves it too (Reviewer). A scrollbar drag isn't seen, and just goes to the reply.
+  const scrolledAway = useRef(false);
+  useEffect(() => {
+    if (!sending) return;
+    scrolledAway.current = false;
+    const scrolled = () => {
+      scrolledAway.current = true;
+    };
+    const key = (e: KeyboardEvent) => {
+      if (BO_SCROLL_KEYS.includes(e.key) && !(e.target as Element | null)?.closest?.("textarea, input, select")) scrolled();
+    };
+    window.addEventListener("wheel", scrolled, { passive: true });
+    window.addEventListener("touchmove", scrolled, { passive: true });
+    window.addEventListener("keydown", key);
+    return () => {
+      window.removeEventListener("wheel", scrolled);
+      window.removeEventListener("touchmove", scrolled);
+      window.removeEventListener("keydown", key);
+    };
+  }, [sending]);
   useEffect(() => {
     const newNotice = noticeShows !== placed.current.noticeShows;
     const newFull = full && !placed.current.full;
     const last = messages.at(-1);
     const newReply = last?.author === "ai" && last.id !== placed.current.reply;
-    const scrolledAway = newReply && Math.abs(window.scrollY - placed.current.y) > BO_SCROLLED_AWAY_PX;
-    if (!scrolledAway) {
+    if (!(newReply && scrolledAway.current)) {
       end.current?.scrollIntoView?.({ block: "end" });
       const replies = document.querySelectorAll<HTMLElement>('[data-testid="bo-message-ai"]');
       const line = problemLine.current ?? (newNotice ? noticeLine.current : newFull ? fullLine.current : newReply ? replies[replies.length - 1] : null);
@@ -185,7 +205,7 @@ export function BoConversation({ initial, country, back, healthData = false, con
       const top = parseFloat(document.documentElement.style.scrollPaddingTop) || 0;
       if (line && line.getBoundingClientRect().top < top) line.scrollIntoView?.({ block: "start" });
     }
-    placed.current = { noticeShows, full, reply: last?.id, y: window.scrollY };
+    placed.current = { noticeShows, full, reply: last?.id };
   }, [messages, sending, problem, noticeShows, full]);
 
   const tooLong = [...text].length > maxChars;
