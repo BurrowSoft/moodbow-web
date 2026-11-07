@@ -22,20 +22,20 @@ export function SafetyCard({ country, onClose, neutral = false }: { country: str
   const tc = useTranslations("common");
   const lines = helplinesFor(country, useLocale());
   const ios = useSyncExternalStore(noSubscribe, () => isIos(navigator.userAgent, navigator.maxTouchPoints), () => false);
-  const link = "font-medium text-accent underline underline-offset-4";
-  // The help itself stops growing at about 200 % on narrow screens (decision 231). The title and
-  // intro stay under the card's own cap (capText in Dialog): at 32 px they pushed the first help
+  // The numbers and links stop growing at about 200 % on narrow screens (decision 231). What comes
+  // before them stays under the card's own cap (capText in Dialog): at 32 px it pushed the first help
   // line to 939 px, off a 640 px screen (#246). text-sm here: the same 7:8 as at the normal size.
   const help = "[font-size:min(1rem,max(10vw,32px))]";
+  const link = `font-medium text-accent underline underline-offset-4 ${help}`;
   const small = "text-muted [font-size:min(0.875rem,max(8.75vw,28px))]";
   return (
     <Dialog title={t("safetyTitle")} body={t(neutral ? "safetyBodyNeutral" : "safetyBody")} onCancel={onClose} testId="safety-card" initialFocus="title" capText>
-      <div className={`w-full space-y-[12px] text-left ${help}`}>
+      <div className="w-full space-y-[12px] text-left">
         {lines.helpline &&
           (ios && isShortCode(lines.helpline.dial) ? (
             <div>
               {/* iOS can't dial this from a link: the number, and what to do with it. */}
-              <p className="font-medium text-text">{t("safetyCall", { name: lines.helpline.name, number: lines.helpline.display })}</p>
+              <p className={`font-medium text-text ${help}`}>{t("safetyCall", { name: lines.helpline.name, number: lines.helpline.display })}</p>
               <p data-testid="safety-helpline-keypad" className={small}>
                 {t("safetyDialKeypad", { number: lines.helpline.display })}
               </p>
