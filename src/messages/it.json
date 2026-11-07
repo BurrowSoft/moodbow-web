@@ -64,7 +64,7 @@
     "featureInsightsTitle": "Scopri cosa va insieme nelle tue giornate",
     "featureInsightsBody": "Grafici di una settimana, un mese e 3 mesi.",
     "privateTitle": "Privato per scelta",
-    "privateBody": "Solo tu puoi leggere il tuo diario. Esporta o elimina tutto, quando vuoi."
+    "privateBody": "Il tuo diario è privato e legato al tuo account. Esporta o elimina tutto in Profilo."
   },
   "support": {
     "title": "Assistenza",
@@ -171,7 +171,7 @@
     "welcome2Title": "Scopri le tue tendenze",
     "welcome2Body": "La cronologia e i grafici mostrano cosa tende ad andare di pari passo con le tue giornate buone e quelle difficili.",
     "welcome3Title": "Privato, e solo tuo",
-    "welcome3BodyNoAi": "Solo tu puoi leggere il tuo diario, e puoi eliminare tutto quando vuoi in Profilo.",
+    "welcome3BodyNoAi": "Il tuo diario è privato e legato al tuo account, e puoi eliminare tutto in Profilo.",
     "welcomeNext": "Avanti",
     "welcomeSkip": "Salta",
     "welcomeStart": "Inizia",
