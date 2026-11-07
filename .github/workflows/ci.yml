@@ -82,6 +82,9 @@ jobs:
     name: Staging journeys
     if: github.event_name == 'pull_request'
     environment: staging
+    permissions:
+      contents: read
+      pull-requests: read
     runs-on: ubuntu-latest
     # Ubuntu's package mirror has made the install step take 10 minutes on some
     # runs, leaving under 5 for 4 minutes of journeys.
