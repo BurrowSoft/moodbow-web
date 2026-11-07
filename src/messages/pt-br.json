@@ -6,8 +6,8 @@
     "description": "O Moodbow é um diário privado que ajuda você a perceber padrões no seu humor, sono e hábitos com o tempo. Em breve, da BurrowSoft.",
     "ogDescription": "Um diário privado que ajuda você a perceber padrões no seu humor, sono e hábitos com o tempo. Em breve.",
     "ogImageAlt": "Logo do Moodbow com o texto: Em breve. Um diário que aprende a sua história.",
-    "descriptionLaunch": "Um diário privado que mostra o que anda junto nos seus dias.",
-    "ogDescriptionLaunch": "Um diário privado que mostra o que anda junto nos seus dias.",
+    "descriptionLaunch": "Um diário privado que mostra o que costuma andar junto nos seus dias.",
+    "ogDescriptionLaunch": "Um diário privado que mostra o que costuma andar junto nos seus dias.",
     "ogImageAltLaunch": "Moodbow: o seu mês, como um arco-íris",
     "manifestDescription": "Um diário privado para os seus dias."
   },
@@ -41,7 +41,7 @@
   "home": {
     "comingSoon": "Em breve",
     "heroTitle": "O seu mês, como um arco-íris",
-    "heroSub": "Um diário privado que mostra o que anda junto nos seus dias.",
+    "heroSub": "Um diário privado que mostra o que costuma andar junto nos seus dias.",
     "notify": "Receber aviso",
     "notifyAria": "Receba um aviso por e-mail quando o Moodbow for lançado",
     "notifySubject": "Quero saber quando o Moodbow for lançado",
@@ -59,7 +59,7 @@
     "featureWriteBody": "Uma reflexão gentil quando você quiser.",
     "featureWriteNoAiTitle": "Escreva sobre o seu dia",
     "featureWriteNoAiBody": "Com as suas palavras, quando tiver vontade.",
-    "featureInsightsTitle": "Veja o que anda junto nos seus dias",
+    "featureInsightsTitle": "Veja o que costuma andar junto nos seus dias",
     "featureInsightsBody": "Gráficos da semana, do mês e de 3 meses.",
     "privateTitle": "Privado desde o início",
     "privateBody": "Só você pode ler o seu diário. Exporte ou apague tudo quando quiser."
