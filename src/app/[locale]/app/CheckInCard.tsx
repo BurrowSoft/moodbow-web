@@ -556,8 +556,12 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
       setOffline(false);
     }
   };
-  // Escape: no choice yet, so nothing is dropped; a kept copy asks again on the next sync.
-  const later = useCallback(() => setConflicts((all) => all.slice(1)), []);
+  // Escape: no choice yet, so nothing is dropped; a kept copy asks again on the next sync. Focus
+  // goes back to Save: it was off while the save went, so the dialog has nothing to return to.
+  const later = useCallback(() => {
+    setConflicts((all) => all.slice(1));
+    requestAnimationFrame(() => root.current?.querySelector<HTMLElement>("[data-testid=checkin-save]")?.focus());
+  }, []);
   const conflictDialog = conflict && (
     <Dialog
       title={t("checkInConflictTitle")}
