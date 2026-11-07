@@ -1334,6 +1334,13 @@ test("large text, set in the browser: the check-in conflict dialog shows the who
         expect(await page.getByTestId("checkin-save").evaluate(fontSize), `Save, ${route} ${percent} %`).toBe(percent === 100 ? "16px" : "32px");
         await page.getByTestId("checkin-save").click();
         await expect(page.getByTestId("checkin-conflict-dialog"), `${route} ${percent} %`).toBeVisible({ timeout: 15_000 });
+        // Stops growing like the page behind it, nothing's cut off, and both choices can be reached.
+        const dialog = page.getByTestId("checkin-conflict-dialog");
+        expect(await dialog.evaluate((el) => [getComputedStyle(el).fontSize, getComputedStyle(el.querySelector("h2")!).fontSize, el.scrollWidth - el.clientWidth]), `the dialog, ${route} ${percent} %`).toEqual(percent === 100 ? ["16px", "18px", 0] : ["32px", "35.2px", 0]);
+        for (const id of ["checkin-conflict-use-other", "checkin-conflict-keep-mine"]) {
+          await page.getByTestId(id).scrollIntoViewIfNeeded();
+          await expect(page.getByTestId(id), `${id}, ${route} ${percent} %`).toBeInViewport();
+        }
         for (const side of ["mine", "other"]) {
           const where = `${route || "/"} ${percent} %, ${side}`;
           const card = page.getByTestId(`checkin-conflict-${side}`);
