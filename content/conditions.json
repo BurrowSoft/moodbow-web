@@ -179,6 +179,10 @@
     "met": false,
     "what": "Vitor has approved the Spanish privacy policy and Terms (decisions 220, 221). Then /es/privacy and /es/terms show them; until then, English under its line, as for other languages. Drafts show on Preview."
   },
+  "consent-language-live": {
+    "met": false,
+    "what": "Each consent records its language, in the app build people have, and on the web, with the column on prod (decision 224). Then the privacy policy's §1 says so."
+  },
   "play-live": {
     "met": false,
     "what": "The Play listing is public (Vitor). Then the web shows the Google Play link (decision 185) and the manifest names the app (related_applications)."

@@ -17,7 +17,7 @@ Moodbow is a private journal made by Vitor Ribeiro Carvalho, trading as BurrowSo
 - You can export everything, or delete your account and everything in it, from the app{pending:web_journal_live} or the website{/pending}.
 
 ### 1. What we collect
-**Your account:** your email address, your password (stored only as a secure hash), and when you agreed to our Terms and this policy, and confirmed you're 18 or older.
+**Your account:** your email address, your password (stored only as a secure hash), and when you agreed to our Terms and this policy{pending:consent_language_live}, and in which language{/pending}, and confirmed you're 18 or older.
 **When you last connected:** the time your account last connected to our servers. We use it to keep you signed in and, for accounts without an email, to apply the 12-month rule below.
 {pending:anon_start_live}**Using Moodbow without an email:** you can start without giving us an email. We create an account for your phone that only it can use, and store your journal there like any other account. If you add an email later, your journal stays the same account. If you never add an email and don't open the app while connected to the internet for 12 months, we delete that account and its journal. This can happen sooner if you sign out, because we can then no longer tell when you last opened the app.
 
