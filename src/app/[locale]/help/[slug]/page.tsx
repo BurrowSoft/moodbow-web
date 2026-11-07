@@ -7,6 +7,7 @@ import { Link } from "@/i18n/navigation";
 import { PageShell } from "@/components/PageShell";
 import { pageGate } from "@/lib/conditions";
 import { findArticle, helpArticles, renderArticle } from "@/lib/helpContent";
+import { helplinesFor } from "@/lib/safety/helplines";
 import { HELP_GATE } from "@/lib/helpGate";
 import { pageMetadata } from "@/lib/metadata";
 
@@ -32,6 +33,8 @@ export default async function HelpArticlePage({ params }: PageProps<"/[locale]/h
   const html = article ? renderArticle(article) : "";
   if (!article || !html) notFound();
   const t = await getTranslations("help");
+  const ts = await getTranslations("safety");
+  const tc = await getTranslations("common");
   // The link back to Help is chrome, so it sits after the article, outside
   // [data-content=article] (Web Tester, #23).
   return (
@@ -40,11 +43,23 @@ export default async function HelpArticlePage({ params }: PageProps<"/[locale]/h
       article
       draft={state === "draft"}
       after={
+        <>
+        {/* Where the help button leads with no script running (#248), so the way to a helpline is here too. */}
+        {slug === "get-help-now" && (
+          <p className="mx-auto mt-6 max-w-2xl">
+            <a href={helplinesFor(null, locale).directoryUrl} target="_blank" rel="noopener noreferrer" data-testid="help-now-find-helpline" className="font-medium text-accent underline underline-offset-4">
+              {ts("safetyFindHelpline")}
+              {" "}
+              <span className="sr-only">{tc("opensInNewTab")}</span>
+            </a>
+          </p>
+        )}
         <p className="mx-auto mt-6 max-w-2xl">
           <Link href="/help" data-testid="help-back" className="font-medium text-accent underline underline-offset-4">
             {t("helpTitle")}
           </Link>
         </p>
+        </>
       }
     >
       <div className="legal-prose" dangerouslySetInnerHTML={{ __html: html }} />

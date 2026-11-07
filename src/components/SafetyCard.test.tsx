@@ -8,6 +8,13 @@ import fr from "@/messages/fr.json";
 import ptBr from "@/messages/pt-br.json";
 import { helplinesFor, isIos, telHref } from "@/lib/safety/helplines";
 import { GetHelpNow, SafetyCard } from "./SafetyCard";
+vi.mock("@/i18n/navigation", () => ({
+  Link: ({ href, prefetch, children, ...rest }: { href: string; prefetch?: boolean; children: React.ReactNode }) => (
+    <a href={href} data-prefetch={String(prefetch)} {...rest}>
+      {children}
+    </a>
+  ),
+}));
 
 // The safety card (M8, decision 124) and its numbers from countries.json.
 const s = messages.safety;
@@ -158,6 +165,25 @@ describe("SafetyCard", () => {
     fireEvent.click(screen.getByTestId("safety-close"));
     expect(screen.queryByTestId("safety-card")).toBeNull();
     expect(button).toHaveFocus();
+  });
+});
+
+describe("Get help now with or without the page's scripts (#248)", () => {
+  it("is a link, so it works with none; once running, a click opens the card and stays on the page", () => {
+    wrap(<GetHelpNow country="GB" testId="me-get-help" />);
+    const link = screen.getByTestId("me-get-help");
+    expect(link.tagName).toBe("A");
+    expect(link.getAttribute("href")).toMatch(/\/help\/get-help-now$/);
+    expect(fireEvent.click(link)).toBe(false);
+    expect(screen.getByTestId("safety-card")).toBeInTheDocument();
+  });
+
+  it("a click asking for a new tab is left to the browser", () => {
+    wrap(<GetHelpNow country="GB" testId="me-get-help" />);
+    const link = screen.getByTestId("me-get-help");
+    link.addEventListener("click", (e) => e.preventDefault());
+    fireEvent.click(link, { ctrlKey: true });
+    expect(screen.queryByTestId("safety-card")).toBeNull();
   });
 });
 

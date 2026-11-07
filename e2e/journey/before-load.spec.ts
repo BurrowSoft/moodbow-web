@@ -299,6 +299,12 @@ test.describe("typing before the page has loaded", () => {
     const sections = ["me-country", "me-reminder-time", "me-theme-dark", "import-file"];
     try {
       await onboarded(page, email, password);
+      // Help doesn't wait for any of it (#248).
+      await beforeLoad(page, "/app/me", async () => {
+        await page.getByTestId("me-get-help").click();
+        await expect(page).toHaveURL(/\/help\/get-help-now$/);
+        await expect(page.getByTestId("help-now-find-helpline")).toBeVisible();
+      });
       await beforeLoad(page, "/app/me", async () => {
         for (const id of sections) {
           await expect(page.getByTestId(id).locator("xpath=ancestor::*[@inert]"), id).toHaveCount(1);

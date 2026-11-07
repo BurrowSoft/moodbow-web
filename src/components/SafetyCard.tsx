@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback, useState, useSyncExternalStore } from "react";
+import { useCallback, useState, useSyncExternalStore, type MouseEvent } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Dialog, dialogButton } from "@/components/Dialog";
+import { Link } from "@/i18n/navigation";
 import { helplinesFor, isIos, isShortCode, telHref } from "@/lib/safety/helplines";
 
 const noSubscribe = () => () => {};
@@ -81,16 +82,23 @@ export function SafetyCard({ country, onClose, neutral = false }: { country: str
 // opens the card, at the top
 // of Me on its own and under a reflection that names it. A calm secondary
 // button, never red or alarming (decision 128). neutral: on Me, where
-// nothing flagged led to it.
+// nothing flagged led to it. A real link to the public help page, so help never depends on the
+// page's scripts (#248); once they're running it opens the card instead.
 export function GetHelpNow({ country, testId, className, neutral }: { country: string | null | undefined; testId: string; className?: string; neutral?: boolean }) {
   const t = useTranslations("me");
   const [open, setOpen] = useState(false);
   const close = useCallback(() => setOpen(false), []);
+  const openCard = (e: MouseEvent) => {
+    // A new tab or window is still theirs to ask for.
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+    setOpen(true);
+  };
   return (
     <>
-      <button type="button" data-testid={testId} onClick={() => setOpen(true)} className={className ?? dialogButton()}>
+      <Link href="/help/get-help-now" prefetch={false} data-testid={testId} onClick={openCard} className={className ?? dialogButton()}>
         {t("meGetHelpNow")}
-      </button>
+      </Link>
       {open && <SafetyCard country={country} onClose={close} neutral={neutral} />}
     </>
   );
