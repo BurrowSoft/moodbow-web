@@ -1416,12 +1416,10 @@ test("large text, set in the browser: Set up stays inside a 320 px phone", async
 });
 
 // Someone has to dial it: a number never breaks across lines, and its line stays at 28 px or more (#247, UX).
-// A whole number's width doesn't depend on the language around it, and every language on every number
-// outran the job's limit, so: every number in English, and the longest in all four. Tagged: ci.yml runs it
-// where the numbers or the card change, and daily.
+// Tagged: ci.yml runs it where the numbers or the card change, and daily.
 test("large text: every help number on the list stays whole on a phone", { tag: "@help-numbers" }, async ({ page, browserName }) => {
   test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
-  test.setTimeout(600_000);
+  test.setTimeout(300_000);
   const email = newEmail();
   const cdp = await page.context().newCDPSession(page);
   try {
@@ -1432,11 +1430,12 @@ test("large text: every help number on the list stays whole on a phone", { tag: 
     await cdp.send("Page.setFontSizes", { fontSizes: { standard: 48, fixed: 39 } });
     for (const { code, helpline, emergency } of countries.countries) {
       await saveProfile({ p_country: code });
-      const languages = (helpline?.display.length ?? 0) >= 11 ? [["", "en"], ["/fr", "fr"], ["/es", "es"], ["/pt-br", "pt"]] : [["", "en"]];
-      for (const [route, saved] of languages) {
+      // /en, not /: from /pt-br the cookie sends / back there, and the saved-language page won't
+      // move to the same language twice in a row, so it stays on its link (#179).
+      for (const [route, saved] of [["/en", "en"], ["/fr", "fr"], ["/es", "es"], ["/pt-br", "pt"]]) {
         await saveProfile({ p_locale: saved });
         await page.goto(`${route}/app/me`);
-        await page.getByTestId("me-get-help").click();
+        await page.getByTestId("me-get-help").click({ timeout: 15_000 });
         await expect(page.getByTestId("safety-card"), `${code} ${route}`).toBeVisible();
         for (const width of [320, 390]) {
           await page.setViewportSize({ width, height: 640 });
@@ -1459,7 +1458,7 @@ test("large text: every help number on the list stays whole on a phone", { tag: 
                 readable: parseFloat(getComputedStyle(el).fontSize) >= 28,
               };
             }, display.replaceAll(" ", String.fromCharCode(160)));
-            expect.soft(fit, `${code} ${id} ${route || "/"} at ${width} px`).toEqual({ found: true, lines: 1, inside: true, readable: true });
+            expect.soft(fit, `${code} ${id} ${route} at ${width} px`).toEqual({ found: true, lines: 1, inside: true, readable: true });
           }
         }
       }
