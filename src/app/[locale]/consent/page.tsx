@@ -17,6 +17,7 @@ import { askAiConsent } from "@/lib/journal/ai";
 import { offeredLocales } from "@/i18n/routing";
 import { savedLanguageRoute } from "@/lib/savedLanguage";
 import { SavedLanguageRedirect } from "../app/SavedLanguageRedirect";
+import { legalLocale } from "@/lib/legalContent";
 import { ConsentForm } from "./ConsentForm";
 
 // Consent (M3): before Create account for new people; for signed-in people
@@ -77,7 +78,7 @@ export default async function ConsentPage({ params }: PageProps<"/[locale]/conse
       <p data-testid="consent-notice" className="text-text max-sm:[font-size:min(1rem,max(10vw,32px))] [overflow-wrap:anywhere]">
         {t("consentNotice")}
       </p>
-      <ConsentForm askAge={askAge} askAi={askAiConsent()} showBack={!user && !outage} />
+      <ConsentForm askAge={askAge} askAi={askAiConsent()} showBack={!user && !outage} legalInEnglish={legalLocale(locale, "privacy") !== locale} />
     </PageShell>
   );
 }
