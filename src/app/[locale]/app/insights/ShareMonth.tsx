@@ -262,7 +262,7 @@ export function ShareMonth({
                   aria-label={card.label}
                   aria-describedby="share-preview-desc"
                   data-testid="share-preview"
-                  className={`mx-auto block rounded-xl border border-border ${format === "story" ? "h-80 w-[180px]" : "h-60 w-60"}`}
+                  className={`mx-auto block rounded-xl border border-border ${format === "story" ? "h-[320px] w-[180px]" : "h-[240px] w-[240px]"}`}
                 />
                 {/* What the image says, for screen readers (the title, the count and the line). */}
                 <p id="share-preview-desc" className="sr-only">

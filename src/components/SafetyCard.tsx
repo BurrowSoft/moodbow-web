@@ -3,6 +3,7 @@
 import { useCallback, useState, useSyncExternalStore, type MouseEvent } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Dialog, dialogButton } from "@/components/Dialog";
+import { HelpNumberText } from "@/components/HelpNumberText";
 import { Link } from "@/i18n/navigation";
 import { helpLineSize, helplinesFor, isIos, isShortCode, telHref } from "@/lib/safety/helplines";
 
@@ -31,20 +32,20 @@ export function SafetyCard({ country, onClose, neutral = false }: { country: str
   const small = "text-muted [font-size:min(0.875rem,max(8.75vw,28px))]";
   return (
     <Dialog title={t("safetyTitle")} body={t(neutral ? "safetyBodyNeutral" : "safetyBody")} onCancel={onClose} testId="safety-card" initialFocus="title" capText>
-      <div className="w-full space-y-[12px] text-left">
+      <div className="w-full space-y-[max(6px,calc(28px-1rem))] text-left">
         {lines.helpline &&
           (ios && isShortCode(lines.helpline.dial) ? (
             <div>
               {/* iOS can't dial this from a link: the number, and what to do with it. */}
-              <p className={`font-medium text-text ${helpLineSize(lines.helpline.display)}`}>{t("safetyCall", { name: lines.helpline.name, number: lines.helpline.display })}</p>
+              <p className={`font-medium text-text ${helpLineSize(lines.helpline.display)}`}><HelpNumberText text={t("safetyCall", { name: lines.helpline.name, number: lines.helpline.display })} number={lines.helpline.display} /></p>
               <p data-testid="safety-helpline-keypad" className={small}>
-                {t("safetyDialKeypad", { number: lines.helpline.display })}
+                <HelpNumberText text={t("safetyDialKeypad", { number: lines.helpline.display })} number={lines.helpline.display} />
               </p>
             </div>
           ) : (
             <p>
               <a href={telHref(lines.helpline.dial)} data-testid="safety-call-helpline" className={`${link} ${helpLineSize(lines.helpline.display)}`}>
-                {t("safetyCall", { name: lines.helpline.name, number: lines.helpline.display })}
+                <HelpNumberText text={t("safetyCall", { name: lines.helpline.name, number: lines.helpline.display })} number={lines.helpline.display} />
               </a>
             </p>
           ))}
@@ -58,7 +59,7 @@ export function SafetyCard({ country, onClose, neutral = false }: { country: str
         {lines.emergency && (
           <p>
             <a href={telHref(lines.emergency.dial)} data-testid="safety-call-emergency" className={`${link} ${helpLineSize(lines.emergency.display)}`}>
-              {t("safetyCallEmergency", { number: lines.emergency.display })}
+              <HelpNumberText text={t("safetyCallEmergency", { number: lines.emergency.display })} number={lines.emergency.display} />
             </a>
           </p>
         )}
