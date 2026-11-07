@@ -250,3 +250,41 @@ test("home and the plain pages' headings follow the browser's setting", async ({
     expect.soft(await size("h1"), `${route} at 300 %`).toBe("48px");
   }
 });
+
+// #246: the help in the card stops growing at about 200 % on narrow screens, like the page behind it
+// (decision 231); its title and intro stay smaller, so help starts on the first screen (journeys pin
+// that, and a known country's numbers).
+test("large text: the help card keeps up, and its number and Close stay whole", async ({ page, browserName }, testInfo) => {
+  test.skip(browserName !== "chromium" || testInfo.project.name !== "desktop", "Page.setFontSizes is Chromium's; once is enough");
+  test.setTimeout(120_000);
+  const cdp = await page.context().newCDPSession(page);
+  await page.setViewportSize({ width: 320, height: 640 });
+  for (const percent of [100, 200, 300]) {
+    await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
+    for (const language of ["", "/fr", "/es", "/pt-br"]) {
+      const at = `${language || "/en"} at ${percent} %`;
+      await page.goto(`${language}/sign-in`);
+      await page.getByTestId("sign-in-get-help").click();
+      const card = page.getByTestId("safety-card");
+      await expect(card, at).toBeVisible();
+      const measured = await card.evaluate((el) => {
+        const size = (e: Element | null) => getComputedStyle(e!).fontSize;
+        const number = [...el.querySelectorAll("a[href^='tel:']")].flatMap((a) => [...a.textContent!.matchAll(/[0-9][0-9 ()+-]*[0-9]/g)].map((m) => ({ a, m })));
+        const split = number.filter(({ a, m }) => {
+          const text = a.firstChild as Text;
+          const range = document.createRange();
+          range.setStart(text, m.index);
+          range.setEnd(text, m.index + m[0].length);
+          return range.getClientRects().length > 1;
+        }).map(({ m }) => m[0]);
+        return { intro: size(el), title: size(el.querySelector("h2")), close: size(el.querySelector("[data-testid=safety-close]")), small: size(el.querySelector("[data-testid=safety-find-helpline]")), split, sideways: el.scrollWidth - el.clientWidth };
+      });
+      expect.soft(measured, at).toEqual(percent === 100 ? { intro: "16px", title: "18px", close: "16px", small: "14px", split: [], sideways: 0 } : { intro: "25.6px", title: "25.6px", close: "32px", small: "28px", split: [], sideways: 0 });
+      const close = page.getByTestId("safety-close");
+      await close.scrollIntoViewIfNeeded();
+      await expect(close, at).toBeInViewport();
+      await close.click();
+      await expect(card, at).toHaveCount(0);
+    }
+  }
+});

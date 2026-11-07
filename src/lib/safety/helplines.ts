@@ -29,13 +29,19 @@ export const telHref = (dial: string) => `tel:${dial.replace(/[^\d+*#]/g, "").re
 export const isShortCode = (dial: string) => /[*#]/.test(dial);
 export const isIos = (userAgent: string, touchPoints: number) => /iPad|iPhone|iPod/.test(userAgent) || (userAgent.includes("Macintosh") && touchPoints > 1);
 
+// A number never breaks across lines, as someone has to dial it (Web Tester, #247; UX): no-break
+// spaces here, and "(" and ")" don't break from what they touch. The longest ones don't fit a 320 px
+// card at 32 px, so their line stops growing a size earlier. A test checks every number on this list.
+const whole = (display: string) => display.replaceAll(" ", String.fromCharCode(160));
+export const helpLineSize = (display: string) => (display.length >= 12 ? "[font-size:min(1rem,max(8.75vw,28px))]" : "[font-size:min(1rem,max(10vw,32px))]");
+
 export function helplinesFor(country: string | null | undefined, language = "en"): Helplines {
   const directoryUrl = registry.default.directory_url;
   const entry = country ? (registry.countries as Country[]).find((c) => c.code === country.toUpperCase()) : undefined;
   const data = dataLocale(language);
   return {
-    helpline: entry?.helpline ? { name: entry.helpline.names[data] ?? entry.helpline.names.en, hours: entry.helpline.hours ? (entry.helpline.hours[data] ?? entry.helpline.hours.en) : null, display: entry.helpline.display, dial: entry.helpline.dial } : null,
-    emergency: entry?.emergency ? { display: entry.emergency.display, dial: entry.emergency.dial } : null,
+    helpline: entry?.helpline ? { name: entry.helpline.names[data] ?? entry.helpline.names.en, hours: entry.helpline.hours ? (entry.helpline.hours[data] ?? entry.helpline.hours.en) : null, display: whole(entry.helpline.display), dial: entry.helpline.dial } : null,
+    emergency: entry?.emergency ? { display: whole(entry.emergency.display), dial: entry.emergency.dial } : null,
     directoryUrl,
   };
 }
