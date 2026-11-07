@@ -5,7 +5,7 @@ import { PageShell } from "@/components/PageShell";
 export default async function LocaleNotFound() {
   const t = await getTranslations("notFound");
   return (
-    <PageShell title={t("title")}>
+    <PageShell title={t("title")} capTitle>
       {/* Tells the visit counts to send nothing for this page (lib/analytics.ts). */}
       <p data-not-found="">{t("body")}</p>
       <p>

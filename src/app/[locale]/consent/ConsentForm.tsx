@@ -45,12 +45,12 @@ export function ConsentForm({ askAge, askAi = false, showBack, legalInEnglish = 
   const hydrated = useSyncExternalStore(noSubscribe, () => true, () => false);
 
   return (
-    // Below the wide layout (rem-based, so large text counts as narrow), under the safety card's cap, in px, so the words this page asks someone to agree to stay whole
-    // at large text: at 300 % they were 48 px, with "J'accepte" over four lines (Web Tester). It's
-    // the type that stops growing, and nothing is cut off: the page still scrolls.
-    <form action={action} className="space-y-[16px] max-sm:[font-size:min(1rem,max(8vw,16px))]">
+    // Below the wide layout (rem-based, so large text counts as narrow), type stops growing at about
+    // 200 % (decision 231): at 300 % it was 48 px, with "J'accepte" over four lines (Web Tester). A long
+    // word may still split. Nothing is cut off: the page still scrolls, and pinch zoom stays on.
+    <form action={action} className="space-y-[16px] max-sm:[font-size:min(1rem,max(10vw,32px))]">
       <Checkbox name="privacy" testId="consent-privacy" label={t("consentPrivacy")} checked={privacy} onChange={setPrivacy} />
-      <p className="flex flex-wrap gap-x-[24px] gap-y-[4px] px-[4px] leading-[1.429] [font-size:min(0.875rem,max(7vw,14px))]">
+      <p className="flex flex-wrap gap-x-[24px] gap-y-[4px] px-[4px] leading-[1.429] [font-size:min(0.875rem,max(8.75vw,28px))]">
         <Link href="/terms" target="_blank" rel="noopener" data-testid="consent-read-terms" className={textLinkClass}>
           {t("consentReadTerms")}
           {" "}
@@ -64,7 +64,7 @@ export function ConsentForm({ askAge, askAi = false, showBack, legalInEnglish = 
       </p>
       {/* Said only where the Terms and Privacy Policy really are in English here. */}
       {legalInEnglish && (
-        <p data-testid="consent-legal-english" className="px-[4px] text-muted leading-[1.429] [font-size:min(0.875rem,max(7vw,14px))]">
+        <p data-testid="consent-legal-english" className="px-[4px] text-muted leading-[1.429] [font-size:min(0.875rem,max(8.75vw,28px))]">
           {t("consentLegalEnglish")}
         </p>
       )}
@@ -75,7 +75,7 @@ export function ConsentForm({ askAge, askAi = false, showBack, legalInEnglish = 
           <input type="checkbox" name="ai" data-testid="consent-ai" aria-describedby="consent-ai-body" className="mt-[4px] h-[20px] w-[20px] shrink-0 accent-[var(--accent)]" />
           <span className="flex min-w-0 flex-col gap-[4px]">
             <span className="font-medium">{tai("consentAiTitle")}</span>
-            <span id="consent-ai-body" aria-hidden="true" className="text-muted leading-[1.429] [font-size:min(0.875rem,max(7vw,14px))]">
+            <span id="consent-ai-body" aria-hidden="true" className="text-muted leading-[1.429] [font-size:min(0.875rem,max(8.75vw,28px))]">
               {tai("consentAiBody")}
             </span>
           </span>
@@ -87,7 +87,7 @@ export function ConsentForm({ askAge, askAi = false, showBack, legalInEnglish = 
         </p>
       )}
       <div className="flex flex-wrap items-center gap-[24px] pt-[8px]">
-        <button type="submit" data-testid="consent-continue" disabled={(hydrated && !ready) || pending} className={`${primaryButtonClass} max-sm:[font-size:min(1rem,max(8vw,16px))]`}>
+        <button type="submit" data-testid="consent-continue" disabled={(hydrated && !ready) || pending} className={`${primaryButtonClass} max-sm:[font-size:min(1rem,max(10vw,32px))]`}>
           {t("consentContinue")}
         </button>
         {showBack && <BackLink href="/welcome?slide=3" label={t("back")} testId="consent-back" />}

@@ -180,7 +180,7 @@
     "what": "Vitor has approved the Spanish privacy policy and Terms (decisions 220, 221). Then /es/privacy and /es/terms show them; until then, English under its line, as for other languages. Drafts show on Preview."
   },
   "consent-language-live": {
-    "met": false,
+    "met": true,
     "what": "The consents column is on prod, and any client sends the language (decision 224). Flip it with the first of those to go out, so the language is never stored before the privacy policy's §1 says so."
   },
   "play-live": {

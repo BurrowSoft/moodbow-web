@@ -91,7 +91,7 @@ export function SetupForm({ askAi }: { askAi: boolean }) {
           defaultValue="21:00"
           disabled={off}
           data-testid="setup-reminder-time"
-          className="mt-2 block min-w-0 max-w-full rounded-2xl border border-border bg-bg px-[16px] py-3 text-text [font-size:min(1rem,max(8vw,16px))] disabled:opacity-50"
+          className="mt-2 block min-w-0 max-w-full rounded-2xl border border-border bg-bg px-[16px] py-3 text-text [font-size:min(1rem,max(10vw,32px))] disabled:opacity-50"
         />
         <label className="mt-4 flex items-center gap-3 text-text">
           <input
