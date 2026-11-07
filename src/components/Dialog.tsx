@@ -133,7 +133,7 @@ export function Dialog({
   );
 }
 
-export const dialogButton = (primary = false) =>
-  `inline-flex min-h-11 max-w-full items-center justify-center rounded-full px-[20px] text-center font-medium hyphens-auto [overflow-wrap:anywhere] ${
+export const dialogButton = (primary = false, hyphens = true) =>
+  `inline-flex min-h-11 max-w-full items-center justify-center rounded-full px-[20px] text-center font-medium ${hyphens ? "hyphens-auto" : ""} [overflow-wrap:anywhere] ${
     primary ? "bg-accent text-on-accent hover:bg-accent-hover" : "border border-border text-text hover:bg-pill"
   }`;
