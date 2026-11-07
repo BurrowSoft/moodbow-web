@@ -512,6 +512,8 @@ describe("BoConversation", () => {
       cleanup();
       expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:made-here");
     });
+  });
+
   it("closing the card puts focus back in the box", async () => {
     await open();
     answers.push(reply({ openCard: true }));
