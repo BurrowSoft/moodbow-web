@@ -295,6 +295,31 @@ test("large text: the help card keeps up, and its number and Close stay whole", 
   }
 });
 
+// The help button's words stay whole, signed out (the journey has Me's): browser hyphens split "par-ler"
+// with room to spare (Web Tester). It's the way to help.
+test("large text: the help button's words stay whole on a phone", async ({ page, browserName }, testInfo) => {
+  test.skip(browserName !== "chromium" || testInfo.project.name !== "desktop", "Page.setFontSizes is Chromium's; once is enough");
+  test.setTimeout(120_000);
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send("Page.setFontSizes", { fontSizes: { standard: 48, fixed: 39 } });
+  for (const width of [320, 390]) {
+    await page.setViewportSize({ width, height: 640 });
+    for (const language of ["", "/fr", "/es", "/pt-br"]) {
+      await page.goto(`${language}/sign-in`);
+      const split = await page.getByTestId("sign-in-get-help").evaluate((el) => {
+        const text = el.firstChild as Text;
+        return [...text.data.matchAll(/\S+/g)].filter((word) => {
+          const range = document.createRange();
+          range.setStart(text, word.index);
+          range.setEnd(text, word.index + word[0].length);
+          return new Set([...range.getClientRects()].map((rect) => Math.round(rect.top))).size > 1;
+        }).map((word) => word[0]);
+      });
+      expect.soft(split, `${language || "/en"} at ${width} px`).toEqual([]);
+    }
+  }
+});
+
 // #250: the help page's numbers stay whole, as on the card (the journey pins those): someone has to dial them.
 test("large text: every number on the help page stays whole on a phone", async ({ page, browserName }, testInfo) => {
   test.skip(browserName !== "chromium" || testInfo.project.name !== "desktop", "Page.setFontSizes is Chromium's; once is enough");

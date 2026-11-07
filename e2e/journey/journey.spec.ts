@@ -1481,6 +1481,25 @@ test("large text: every help number on the list stays whole on a phone", { tag: 
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     const saveProfile = await profileSaver(email, password);
     await cdp.send("Page.setFontSizes", { fontSizes: { standard: 48, fixed: 39 } });
+    // The help button on Me: its words whole, at the capped size, and on the first screen.
+    for (const width of [320, 390]) {
+      await page.setViewportSize({ width, height: 640 });
+      for (const [route, saved] of [["/en", "en"], ["/fr", "fr"], ["/es", "es"], ["/pt-br", "pt"]]) {
+        await saveProfile({ p_locale: saved });
+        await page.goto(`${route}/app/me`);
+        const button = await page.getByTestId("me-get-help").evaluate((el) => {
+          const text = el.firstChild as Text;
+          const split = [...text.data.matchAll(/\S+/g)].filter((word) => {
+            const range = document.createRange();
+            range.setStart(text, word.index);
+            range.setEnd(text, word.index + word[0].length);
+            return new Set([...range.getClientRects()].map((rect) => Math.round(rect.top))).size > 1;
+          }).map((word) => word[0]);
+          return { split, size: parseFloat(getComputedStyle(el).fontSize) <= Math.max(innerWidth / 10, 32), onScreen: el.getBoundingClientRect().bottom <= innerHeight };
+        });
+        expect.soft(button, `Me's help button, ${route} at ${width} px`).toEqual({ split: [], size: true, onScreen: true });
+      }
+    }
     for (const { code, helpline, emergency } of countries.countries) {
       await saveProfile({ p_country: code });
       // /en, not /: from /pt-br the cookie sends / back there, and the saved-language page won't
