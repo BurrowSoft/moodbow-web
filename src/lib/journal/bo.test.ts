@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { BO_ERROR_TEXT, BO_ERRORS, boSpeaks } from "./bo";
+import { BO_ERROR_TEXT, BO_ERRORS, BO_REASONS, boButtonShows, boCanTurnOn, boReasonProblem, boSpeaks, type BoStatus } from "./bo";
 import conditions from "../../../content/conditions.json";
 import messages from "@/messages/en.json";
 
@@ -26,5 +26,29 @@ describe("Bo's languages (decision 239)", () => {
   it("speaks en, es, fr and pt-BR, and nothing else until it's evaluated", () => {
     for (const route of ["en", "es", "fr", "pt-br"]) expect(boSpeaks(route), route).toBe(true);
     for (const route of ["de", "it", "th", "pt", "xx"]) expect(boSpeaks(route), route).toBe(route === "pt");
+  });
+});
+
+describe("what each of the status's reasons shows (bo.md, Client column; decision 240)", () => {
+  const no = (reason: (typeof BO_REASONS)[number]): BoStatus => ({ status: "ok", available: false, reason, pictures: false, maxChars: 2000 });
+  it("the button: available, the budget's spent (its line), or consent (it opens consent); never otherwise", () => {
+    expect(boButtonShows({ status: "ok", available: true, reason: null, pictures: false, maxChars: 2000 })).toBe(true);
+    for (const reason of BO_REASONS) expect(boButtonShows(no(reason)), reason).toBe(reason === "budget" || reason === "consent");
+    expect(boButtonShows({ status: "no_answer" })).toBe(false);
+  });
+  it("Me offers Bo back only where the person's own switch, consent or the budget is all that's in the way", () => {
+    for (const reason of BO_REASONS) expect(boCanTurnOn(no(reason)), reason).toBe(reason === "budget" || reason === "bo_off" || reason === "consent");
+  });
+  it("on Bo's screen a reason is its send error, which closes the box with help", () => {
+    expect(boReasonProblem(null)).toBe(null);
+    expect(boReasonProblem("consent")).toBe(null);
+    expect(boReasonProblem("off")).toBe("bo_not_available");
+    expect(boReasonProblem("budget")).toBe("bo_not_available");
+    expect(boReasonProblem("age")).toBe("age_off");
+    for (const reason of ["region_off", "region_unknown", "language_off", "bo_off"] as const) expect(boReasonProblem(reason)).toBe(reason);
+    for (const reason of BO_REASONS) {
+      const problem = boReasonProblem(reason);
+      if (problem) expect(BO_ERRORS, reason).toContain(problem);
+    }
   });
 });

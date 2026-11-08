@@ -63,7 +63,7 @@ describe("POST /api/bo: what it sends", () => {
     await post({ action: "send", client_key: KEY, text: "Hi", history: ["no"] }, { origin: "https://www.moodbow.com", "x-vercel-ip-country": "MX" });
     const [name, options] = invoke.mock.calls[0] as [string, { body: Record<string, unknown>; headers: Record<string, string>; timeout: number }];
     expect(name).toBe("bo");
-    expect(Object.keys(options.body).sort()).toEqual(["action", "client_key", "region_token", "text"]);
+    expect(Object.keys(options.body).sort()).toEqual(["action", "age", "client_key", "region_token", "text"]);
     expect(options.body).toMatchObject({ action: "send", client_key: KEY, text: "Hi" });
     expect(String(options.body.region_token)).toMatch(/^[\w-]+\.[\w-]+$/);
     expect(options.headers.Authorization).toBe("Bearer the-session");
@@ -73,7 +73,17 @@ describe("POST /api/bo: what it sends", () => {
   it("no country: a null token, and the function decides it's unknown", async () => {
     invoke.mockResolvedValue({ data: { available: false }, error: null });
     await post({ action: "status" });
-    expect((invoke.mock.calls[0][1] as { body: unknown }).body).toEqual({ action: "status", region_token: null });
+    expect((invoke.mock.calls[0][1] as { body: unknown }).body).toEqual({ action: "status", region_token: null, age: "not_applicable" });
+  });
+
+  it("the page's language goes with each call, pt for pt-BR; anything that isn't a language code is left out", async () => {
+    invoke.mockResolvedValue({ data: { available: true }, error: null });
+    await post({ action: "status", language: "pt-br" });
+    await post({ action: "send", client_key: KEY, text: "Hi", language: "fr" });
+    await post({ action: "status", language: "<script>" });
+    const bodies = invoke.mock.calls.map((c) => (c[1] as { body: Record<string, unknown> }).body);
+    expect(bodies.map((b) => b.language)).toEqual(["pt", "fr", undefined]);
+    expect(bodies.every((b) => b.age === "not_applicable")).toBe(true);
   });
 
   it("the waits line up with the contract's 60 s: the server's ends first, the route's limit is above both", () => {
@@ -98,7 +108,12 @@ describe("POST /api/bo: what it answers", () => {
 
   it("the status", async () => {
     invoke.mockResolvedValue({ data: { available: true, pictures: false, limits: { max_chars: 2000 } }, error: null });
-    expect(await (await post({ action: "status" })).json()).toEqual({ status: "ok", available: true, pictures: false, maxChars: 2000 });
+    expect(await (await post({ action: "status" })).json()).toEqual({ status: "ok", available: true, reason: null, pictures: false, maxChars: 2000 });
+  });
+
+  it.each([["budget", "budget"], ["language_off", "language_off"], [undefined, "off"], ["something_new", "off"]])("a no with reason %s reads as %s", async (given, reason) => {
+    invoke.mockResolvedValue({ data: { available: false, reason: given }, error: null });
+    expect(await (await post({ action: "status" })).json()).toMatchObject({ status: "ok", available: false, reason });
   });
 
   it.each(BO_ERRORS)("the function's %s comes through as that code", async (code) => {

@@ -189,7 +189,8 @@ describe("BoConversation", () => {
 
   it.each([
     ["region_off", b.regionOff],
-    ["bo_resting", b.notAvailableNow],
+    ["bo_not_available", b.notAvailableNow],
+    ["language_off", b.notAvailableNow],
     ["bo_unavailable", b.unavailable],
   ])("%s closes the box and keeps help", async (code, line) => {
     await open();

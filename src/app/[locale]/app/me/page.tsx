@@ -14,6 +14,8 @@ import { tabMetadata } from "../pageMeta";
 import { SignOutButton } from "./SignOutButton";
 import { GetHelpNow } from "@/components/SafetyCard";
 import { BoMeRow } from "../bo/BoMeRow";
+import { boCanTurnOn as boCanTurnOnFor } from "@/lib/journal/bo";
+import { boStatusForPage } from "@/lib/journal/boServer";
 import { JOURNAL_HEADING } from "@/lib/ui/journalLayout";
 import { AiSettings } from "./AiSettings";
 import { Appearance } from "./Appearance";
@@ -65,9 +67,9 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
     const [kept, settings, visible] = await Promise.all([
       supabase.from("bo_messages").select("id").limit(1),
       supabase.from("user_settings").select("bo_reads_journal").maybeSingle(),
-      supabase.rpc("bo_visible", { p_country: (await headers()).get("x-vercel-ip-country") }),
+      boStatusForPage(supabase, await headers(), locale),
     ]);
-    boCanTurnOn = visible.data === true;
+    boCanTurnOn = boCanTurnOnFor(visible);
     boHas = kept.error ? true : (kept.data ?? []).length > 0;
     boReads = (settings.data as { bo_reads_journal?: boolean } | null)?.bo_reads_journal === true;
   }
