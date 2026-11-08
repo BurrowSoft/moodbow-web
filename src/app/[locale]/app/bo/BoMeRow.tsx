@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { boCanTurnOn } from "@/lib/journal/bo";
+import { useBoStatus } from "./useBoStatus";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useUntilLoaded } from "@/lib/ui/untilLoaded";
 import { setBoReadsJournal, turnBoOff } from "./actions";
@@ -88,4 +90,11 @@ export function BoMeRow({ hasConversation, readsJournal, consented, canTurnOn }:
       )}
     </section>
   );
+}
+
+// Me's row with whether Bo can be turned on from the function's status, asked once Me is on
+// screen, so Me never waits on Bo. Until it answers, or if it doesn't, the row offers nothing new.
+export function BoMeRowLive({ uid, ...row }: Omit<Parameters<typeof BoMeRow>[0], "canTurnOn"> & { uid: string }) {
+  const status = useBoStatus(uid);
+  return <BoMeRow {...row} canTurnOn={status !== null && boCanTurnOn(status)} />;
 }

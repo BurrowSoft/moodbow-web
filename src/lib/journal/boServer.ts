@@ -38,10 +38,3 @@ export async function callBoFunction(
   }
   return body.action === "send" ? parseBoSend(data) : parseBoStatus(data);
 }
-
-// For the journal's pages: whether the button shows, and whether Me can offer Bo back. A short
-// wait, as every journal page asks: no answer in time means no button, and Today never waits on Bo.
-export const BO_PAGE_WAIT_MS = 2500;
-export async function boStatusForPage(supabase: SupabaseClient, headers: Headers, route: string): Promise<BoStatus> {
-  return (await callBoFunction(supabase, headers, route, { action: "status" }, BO_PAGE_WAIT_MS)) as BoStatus;
-}

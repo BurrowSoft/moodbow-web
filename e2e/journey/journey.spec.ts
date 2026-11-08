@@ -1682,3 +1682,24 @@ test("large text: every help number on the list stays whole on a phone", { tag: 
     await cleanup(email);
   }
 });
+
+// No page waits on Bo (UX, Reviewer): with the function hanging, Today's check-in and Me's help
+// are on the page, and the button never comes. A real account; /api/bo held, never answered.
+test("Bo's status never holds a page: check-in and help first, with the function hanging", async ({ page }) => {
+  const email = newEmail();
+  try {
+    await accountAtSetup(page, email);
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    await page.route("**/api/bo", () => {});
+    for (const [path, id] of [["/app", "checkin-card"], ["/app/me", "me-get-help"]]) {
+      const started = Date.now();
+      await page.goto(path);
+      await expect(page.getByTestId(id), path).toBeVisible();
+      expect(Date.now() - started, `${path}: on the page without waiting on Bo`).toBeLessThan(10_000);
+      await expect(page.getByTestId("bo-button"), path).toHaveCount(0);
+    }
+  } finally {
+    await cleanup(email);
+  }
+});

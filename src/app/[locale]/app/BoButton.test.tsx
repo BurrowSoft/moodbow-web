@@ -14,12 +14,15 @@ vi.mock("@/i18n/navigation", () => ({
   ),
 }));
 vi.mock("@/lib/ui/keyboardOpen", () => ({ useKeyboardOpen: () => keyboard }));
+const yes = { status: "ok", available: true, reason: null, pictures: false, maxChars: 2000 };
+let status: unknown = yes;
+vi.mock("./bo/useBoStatus", () => ({ useBoStatus: () => status }));
 const { BoButton } = await import("./BoButton");
 
 const button = () => {
   render(
     <NextIntlClientProvider locale="en" messages={messages}>
-      <BoButton />
+      <BoButton uid="u1" />
     </NextIntlClientProvider>,
   );
   return screen.queryByTestId("bo-button");
@@ -28,6 +31,7 @@ const button = () => {
 beforeEach(() => {
   path = "/app";
   keyboard = false;
+  status = yes;
 });
 afterEach(cleanup);
 
@@ -40,6 +44,27 @@ describe("BoButton", () => {
   it.each(["/app/write", "/app/bo", "/app/entries/x", "/app/timeline/2026-11-06", "/app/print/2026-11"])("%s: not at the top level, so not shown", (p) => {
     path = p;
     expect(button()).toBeNull();
+  });
+
+  it("only on the status's word: until it answers, with no answer, or on a no, nothing; the budget's line and consent keep it", () => {
+    for (const [given, shown] of [
+      [null, false],
+      [{ status: "no_answer" }, false],
+      [{ ...yes, available: false, reason: "off" }, false],
+      [{ ...yes, available: false, reason: "region_off" }, false],
+      [{ ...yes, available: false, reason: "budget" }, true],
+      [{ ...yes, available: false, reason: "consent" }, true],
+    ] as const) {
+      status = given;
+      expect(button() !== null, JSON.stringify(given)).toBe(shown);
+      cleanup();
+    }
+  });
+
+  it("keeps its room at the page's end before the status answers, so nothing moves when it does", () => {
+    status = null;
+    expect(button()).toBeNull();
+    expect(document.body).toHaveClass("has-bo-button");
   });
 
   it("out of the way while the on-screen keyboard is up", () => {

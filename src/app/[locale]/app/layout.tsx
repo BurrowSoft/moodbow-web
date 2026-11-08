@@ -16,8 +16,7 @@ import { AnnouncerProvider } from "./Announcer";
 import { headers } from "next/headers";
 import { AppNav } from "./AppNav";
 import { BoButton } from "./BoButton";
-import { boButtonShows, boSpeaks } from "@/lib/journal/bo";
-import { boStatusForPage } from "@/lib/journal/boServer";
+import { boSpeaks } from "@/lib/journal/bo";
 import { CheckInDraftProvider } from "./CheckInDraft";
 import { KeyboardShortcuts } from "./KeyboardShortcuts";
 import { NavProgress } from "@/components/NavProgress";
@@ -54,14 +53,10 @@ export default async function AppLayout({ children, params }: LayoutProps<"/[loc
   const language = savedLanguageRoute(me.profile?.locale, locale, offeredLocales());
   if (language) return <SavedLanguageRedirect locale={language} />;
 
-  // Bo's button: where the function's status says yes, or the budget's spent (its line, with
-  // help), or it needs consent (the button opens it). Every switch is the server's (decision 240);
-  // this only decides whether the button shows, and the function refuses whatever a client shows.
-  // No answer in time: no button. Only in Bo's languages here too (decision 239).
-  let boVisible = false;
-  if (pageGate("bo-live") !== "hidden" && boSpeaks(locale) && me.settings?.bo_off !== true) {
-    boVisible = boButtonShows(await boStatusForPage(supabase, await headers(), locale));
-  }
+  // Bo's button, where it could be: the flag, Bo's languages (decision 239) and the person's own
+  // switch. Whether it shows is the function's status (decision 240), asked by the button once the
+  // page is on screen, so no page waits on Bo. The function refuses whatever a client shows.
+  const boMayShow = pageGate("bo-live") !== "hidden" && boSpeaks(locale) && me.settings?.bo_off !== true;
 
   const t = await getTranslations("me");
   // The journal's client components get every message (the root layout sends
@@ -70,7 +65,7 @@ export default async function AppLayout({ children, params }: LayoutProps<"/[loc
     <NextIntlClientProvider messages={await getMessages()}>
       <div className="flex flex-1 flex-col md:flex-row">
         {/* It reads the search params: its own Suspense boundary. */}
-        {boVisible && <BoButton />}
+        {boMayShow && <BoButton uid={user.id} />}
         <Suspense fallback={null}>
           <NavProgress />
         </Suspense>
