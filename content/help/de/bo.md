@@ -24,7 +24,7 @@ Bo liest dein Tagebuch nur, wenn du unter Ich „Bo meine letzten Check-ins und 
 Unter Ich kannst du bei „Deine Unterhaltung mit Bo“ sie exportieren, löschen oder „Bo verwenden“ ausschalten. Das Löschen entfernt sie aus Moodbow und lässt sich nicht rückgängig machen; was Anthropic schon erhalten hat, folgt den oben genannten Löschfristen. „Bo verwenden“ auszuschalten stoppt neue Nachrichten und schaltet das Lesen deines Tagebuchs aus; deine Unterhaltung bleibt, bis du sie löschst.
 
 **Grenzen**
-Es gibt ein tägliches Limit für Nachrichten. Konten mit E-Mail haben mehr. Wenn Bo sich ausruht oder du das Limit erreicht hast, funktioniert der Rest von Moodbow wie gewohnt, und Hilfe bleibt da.
+Es gibt ein tägliches Limit für Nachrichten. Konten mit E-Mail haben mehr. Wenn Bo gerade nicht verfügbar ist oder du das Limit erreicht hast, funktioniert der Rest von Moodbow wie gewohnt, und Hilfe bleibt da.
 
 **Eine Antwort melden**
 Wenn eine Antwort falsch oder schädlich wirkt, tippe auf „Diese Antwort melden“. Niemand liest Meldungen sofort. Wenn du jetzt jemanden brauchst, nutze "Möchtest du mit jemandem reden?". Wir löschen Meldungen nach 90 Tagen, außer wir müssen eine wegen illegaler Inhalte länger behalten.{/pending}

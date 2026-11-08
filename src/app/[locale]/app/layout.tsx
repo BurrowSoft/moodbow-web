@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";
-import { getMessages, setRequestLocale } from "next-intl/server";
+import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
-import { redirect } from "@/i18n/navigation";
+import { Link, redirect } from "@/i18n/navigation";
 import { offeredLocales } from "@/i18n/routing";
 import { savedLanguageRoute } from "@/lib/savedLanguage";
 import { pageGate } from "@/lib/conditions";
@@ -16,6 +16,8 @@ import { AnnouncerProvider } from "./Announcer";
 import { headers } from "next/headers";
 import { AppNav } from "./AppNav";
 import { BoButton } from "./BoButton";
+import { boButtonShows, boSpeaks } from "@/lib/journal/bo";
+import { boStatusForPage } from "@/lib/journal/boServer";
 import { CheckInDraftProvider } from "./CheckInDraft";
 import { KeyboardShortcuts } from "./KeyboardShortcuts";
 import { NavProgress } from "@/components/NavProgress";
@@ -38,13 +40,13 @@ export default async function AppLayout({ children, params }: LayoutProps<"/[loc
   const supabase = await createSupabaseServerClient();
   const { data, error } = supabase ? await supabase.auth.getUser() : { data: { user: null }, error: null };
   // Supabase Auth unreachable: the session may be fine, so no sign-out look.
-  if (!data.user && isAuthOutage(error)) return <JournalUnavailable standalone />;
+  if (!data.user && isAuthOutage(error)) return <NextIntlClientProvider messages={await getMessages()}><JournalUnavailable standalone /></NextIntlClientProvider>;
   const user = data.user;
   if (!supabase || !user) return redirect({ href: "/sign-in", locale });
 
   const me = await getMe(supabase);
   // Signed in but the data didn't load: an error state, not a redirect loop.
-  if (!me) return <JournalUnavailable standalone />;
+  if (!me) return <NextIntlClientProvider messages={await getMessages()}><JournalUnavailable standalone /></NextIntlClientProvider>;
   const step = onboardingStep(me);
   if (step === "consent") redirect({ href: "/consent", locale });
   if (step === "setup") redirect({ href: "/setup", locale });
@@ -52,17 +54,16 @@ export default async function AppLayout({ children, params }: LayoutProps<"/[loc
   const language = savedLanguageRoute(me.profile?.locale, locale, offeredLocales());
   if (language) return <SavedLanguageRedirect locale={language} />;
 
-  // Bo's button: where bo-live is on, and the country is on Bo's list or this person
-  // is exempt. It only decides whether the button shows; the function decides
-  // whether Bo opens, from a signed token. A failed read: no button. Nor once Me → Use
-  // Bo has turned it off (bo_off). Someone who declined AI at sign-up keeps it, and is
-  // asked for consent on opening (UX).
+  // Bo's button: where the function's status says yes, or the budget's spent (its line, with
+  // help), or it needs consent (the button opens it). Every switch is the server's (decision 240);
+  // this only decides whether the button shows, and the function refuses whatever a client shows.
+  // No answer in time: no button. Only in Bo's languages here too (decision 239).
   let boVisible = false;
-  if (pageGate("bo-live") !== "hidden" && me.settings?.bo_off !== true) {
-    const { data: visible } = await supabase.rpc("bo_visible", { p_country: (await headers()).get("x-vercel-ip-country") });
-    boVisible = visible === true;
+  if (pageGate("bo-live") !== "hidden" && boSpeaks(locale) && me.settings?.bo_off !== true) {
+    boVisible = boButtonShows(await boStatusForPage(supabase, await headers(), locale));
   }
 
+  const t = await getTranslations("me");
   // The journal's client components get every message (the root layout sends
   // only the public namespaces, perf fix 3).
   return (
@@ -82,6 +83,17 @@ export default async function AppLayout({ children, params }: LayoutProps<"/[loc
             nothing visible moves (Today CLS 0.13, Web Tester #82 isolation).
             On paper neither applies (no trailing blank page; 1.1 N). */}
         <main id="main" className={`min-h-dvh min-w-0 flex-1 ${APP_MAIN_GUTTER} pb-28 pt-10 md:pb-10 print:min-h-0 print:p-0`}>
+          {/* With scripts off a page's content never appears here, as it's streamed: help still does (#249). */}
+          <noscript>
+            <div className="mx-auto mb-6 max-w-3xl space-y-3 max-sm:[font-size:min(1rem,max(10vw,32px))]">
+              <p>
+                <Link href="/help/get-help-now" prefetch={false} data-testid="app-noscript-help" className="font-medium text-accent underline underline-offset-4">
+                  {t("meGetHelpNow")}
+                </Link>
+              </p>
+              <p data-testid="app-noscript-journal" className="text-muted">{t("meNoScript")}</p>
+            </div>
+          </noscript>
           {/* Per user: another account signing in starts empty (#9765 M-01). */}
           <div className="mx-auto max-w-3xl">
             <AnnouncerProvider>

@@ -55,10 +55,10 @@ export function WelcomeSlides() {
   return (
     <div className="flex flex-col items-center text-center">
       <div className="min-h-48" data-testid={`welcome-slide-${slide + 1}`}>
-        <h1 id="welcome-title" tabIndex={-1} className="outline-none text-balance text-[28px] font-medium leading-tight tracking-tight sm:text-4xl">{t(SLIDES[slide].title)}</h1>
+        <h1 id="welcome-title" tabIndex={-1} className="outline-none text-balance [font-size:min(1.75rem,max(11.2vw,36px))] font-medium leading-tight tracking-tight sm:text-4xl">{t(SLIDES[slide].title)}</h1>
         {/* The dots below are decoration; this says where you are. */}
         <p className="sr-only">{t("welcomeStep", { n: slide + 1, total: SLIDES.length })}</p>
-        <p className="mt-4 text-base leading-relaxed text-muted sm:text-[17px]">{t(SLIDES[slide].body)}</p>
+        <p className="mt-4 [font-size:min(1rem,max(10vw,32px))] leading-relaxed text-muted sm:text-[1.0625rem]">{t(SLIDES[slide].body)}</p>
       </div>
       <div className="mt-6 flex gap-2" aria-hidden="true">
         {SLIDES.map((s, i) => (
@@ -67,15 +67,15 @@ export function WelcomeSlides() {
       </div>
       <div className="mt-10 flex w-full flex-col items-center gap-4">
         {last ? (
-          <Link href="/consent" data-testid="welcome-start" className={primaryButtonClass}>
+          <Link href="/consent" data-testid="welcome-start" className={`${primaryButtonClass} max-sm:[font-size:min(1rem,max(10vw,32px))]`}>
             {t("welcomeStart")}
           </Link>
         ) : (
           <>
-            <a data-testid="welcome-next" {...slideLink(slide + 1)} className={primaryButtonClass}>
+            <a data-testid="welcome-next" {...slideLink(slide + 1)} className={`${primaryButtonClass} max-sm:[font-size:min(1rem,max(10vw,32px))]`}>
               {t("welcomeNext")}
             </a>
-            <a data-testid="welcome-skip" {...slideLink(SLIDES.length - 1)} className={textLinkClass}>
+            <a data-testid="welcome-skip" {...slideLink(SLIDES.length - 1)} className={`${textLinkClass} max-sm:[font-size:min(1rem,max(10vw,32px))]`}>
               {t("welcomeSkip")}
             </a>
           </>
@@ -84,13 +84,13 @@ export function WelcomeSlides() {
           <a
             data-testid="welcome-back"
             {...slideLink(slide - 1)}
-            className="inline-flex min-h-12 items-center gap-2 text-sm font-medium text-muted hover:text-text"
+            className="inline-flex min-h-12 items-center gap-2 text-sm font-medium text-muted hover:text-text max-sm:[font-size:min(0.875rem,max(8.75vw,28px))]"
           >
             <ArrowLeft />
             {t("back")}
           </a>
         )}
-        <Link href="/sign-in" data-testid="welcome-have-account" className={`${textLinkClass} mt-4 text-sm`}>
+        <Link href="/sign-in" data-testid="welcome-have-account" className={`${textLinkClass} mt-4 text-sm max-sm:[font-size:min(0.875rem,max(8.75vw,28px))]`}>
           {t("welcomeHaveAccount")}
         </Link>
       </div>

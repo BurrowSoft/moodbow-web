@@ -9,7 +9,7 @@
   "countries": [
     {
       "code": "AR",
-      "helpline": { "names": { "en": "Centro de Asistencia al Suicida", "es": "la línea del Centro de Asistencia al Suicida" }, "display": "0800 345 1435", "dial": "08003451435", "sms": false, "hours": { "en": "8 am to midnight, every day", "es": "Todos los días, de 8:00 a 24:00" } },
+      "helpline": { "names": { "en": "Centro de Asistencia al Suicida", "es": "la línea del Centro de Asistencia al Suicida" }, "display": "0800 345 1435", "dial": "08003451435", "sms": false, "hours": { "en": "8 am to midnight, every day", "es": "Todos los días, de 8:00 a 24:00", "fr": "Tous les jours, de 8 h à minuit", "pt": "Todos os dias, das 8h à meia-noite" } },
       "emergency": { "display": "911", "dial": "911" },
       "status": "verified",
       "checked_on": "2026-11-05",
@@ -129,7 +129,7 @@
     },
     {
       "code": "LU",
-      "helpline": { "names": { "en": "SOS Détresse", "fr": "SOS Détresse" }, "display": "45 45 45", "dial": "454545", "sms": false, "hours": { "en": "Every day 11 am to 11 pm; Fri and Sat until 3 am", "fr": "Tous les jours de 11 h à 23 h ; vendredi et samedi jusqu'à 3 h" } },
+      "helpline": { "names": { "en": "SOS Détresse", "fr": "SOS Détresse" }, "display": "45 45 45", "dial": "454545", "sms": false, "hours": { "en": "Every day 11 am to 11 pm; Fri and Sat until 3 am", "fr": "Tous les jours de 11 h à 23 h ; vendredi et samedi jusqu'à 3 h", "es": "Todos los días de 11:00 a 23:00; viernes y sábado hasta las 3:00", "pt": "Todos os dias das 11h às 23h; sexta e sábado até as 3h" } },
       "emergency": { "display": "112", "dial": "112" },
       "status": "verified",
       "checked_on": "2026-11-05",

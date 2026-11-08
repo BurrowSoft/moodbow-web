@@ -29,6 +29,10 @@ export const telHref = (dial: string) => `tel:${dial.replace(/[^\d+*#]/g, "").re
 export const isShortCode = (dial: string) => /[*#]/.test(dial);
 export const isIos = (userAgent: string, touchPoints: number) => /iPad|iPhone|iPod/.test(userAgent) || (userAgent.includes("Macintosh") && touchPoints > 1);
 
+// A number stays on one line (HelpNumberText). The longest ones don't fit a 320 px card at 32 px, so
+// their line stops growing a size earlier. A journey checks every number on this list.
+export const helpLineSize = (display: string) => (display.length >= 12 ? "[font-size:min(1rem,max(8.75vw,28px))]" : "[font-size:min(1rem,max(10vw,32px))]");
+
 export function helplinesFor(country: string | null | undefined, language = "en"): Helplines {
   const directoryUrl = registry.default.directory_url;
   const entry = country ? (registry.countries as Country[]).find((c) => c.code === country.toUpperCase()) : undefined;

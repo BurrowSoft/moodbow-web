@@ -1,5 +1,12 @@
 import { render } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+vi.mock("@/i18n/navigation", () => ({
+  Link: ({ href, prefetch, children, ...rest }: { href: string; prefetch?: boolean; children: React.ReactNode }) => (
+    <a href={href} data-prefetch={String(prefetch)} {...rest}>
+      {children}
+    </a>
+  ),
+}));
 
 // The write page's writing prompt (1.1 I, reviewer #83 B1): the prompt and
 // its crisis check are for the day the entry starts on (?date= included).

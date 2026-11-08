@@ -8,6 +8,12 @@
 // The contract's worst case is about 56 s, and clients wait 60. The server's own
 // wait ends a moment before the browser's, and the route's maxDuration above both.
 export const BO_CLIENT_WAIT_MS = 60_000;
+
+// Bo's languages, until others are evaluated (decision 239): checked on both clients and the
+// server, so offering a new language can't turn on an unevaluated Bo. Data locales (pt for pt-BR).
+export const BO_LANGUAGES = ["en", "es", "fr", "pt"] as const;
+export const boLanguage = (route: string) => (route === "pt-br" ? "pt" : route);
+export const boSpeaks = (route: string) => (BO_LANGUAGES as readonly string[]).includes(boLanguage(route));
 export const BO_SERVER_WAIT_MS = 58_000;
 
 export const BO_ERRORS = [
@@ -24,7 +30,10 @@ export const BO_ERRORS = [
   "daily_limit",
   "picture_limit",
   "region_unknown",
-  "bo_resting",
+  "bo_not_available",
+  "language_off",
+  "age_off",
+  "bo_off",
   "bo_failed",
 ] as const;
 export type BoError = (typeof BO_ERRORS)[number];
@@ -33,7 +42,19 @@ export type BoError = (typeof BO_ERRORS)[number];
 // or a timeout, so the client's fixed text, with help and Retry; the same client_key
 // is resent, and the function replays the stored answer if it had finished.
 export type BoSend = { status: "ok"; reply: string; showHelp: boolean; openCard: boolean; showNotice: boolean; conversationFull: boolean } | { status: "error"; code: BoError } | { status: "no_answer" };
-export type BoStatus = { status: "ok"; available: boolean; pictures: boolean; maxChars: number } | { status: "error"; code: BoError } | { status: "no_answer" };
+// Why Bo isn't available: the first switch that says no, in the contract's order (bo.md).
+export const BO_REASONS = ["off", "region_off", "region_unknown", "language_off", "age", "budget", "bo_off", "consent"] as const;
+export type BoReason = (typeof BO_REASONS)[number];
+export type BoStatus = { status: "ok"; available: boolean; reason: BoReason | null; pictures: boolean; maxChars: number } | { status: "error"; code: BoError } | { status: "no_answer" };
+
+// What each reason shows (bo.md's Client column): the button only where Bo is available, its
+// budget is spent (the line, with help) or it needs consent (the button opens consent).
+export const boButtonShows = (s: BoStatus) => s.status === "ok" && (s.available || s.reason === "budget" || s.reason === "consent");
+// Me can offer Bo back where the only no is the person's own, or one Bo's screen explains.
+export const boCanTurnOn = (s: BoStatus) => s.status === "ok" && (s.available || s.reason === "budget" || s.reason === "bo_off" || s.reason === "consent");
+// On Bo's screen, a reason is the same stop as its error on send. Consent is the page's own step.
+export const boReasonProblem = (reason: BoReason | null): BoError | null =>
+  reason === null || reason === "consent" ? null : reason === "off" || reason === "budget" ? "bo_not_available" : reason === "age" ? "age_off" : reason;
 
 export const isBoError = (code: unknown): code is BoError => typeof code === "string" && (BO_ERRORS as readonly string[]).includes(code);
 
@@ -49,9 +70,11 @@ export function parseBoSend(data: unknown): BoSend {
 }
 
 export function parseBoStatus(data: unknown): BoStatus {
-  const d = (data ?? {}) as { available?: unknown; pictures?: unknown; limits?: { max_chars?: unknown } };
+  const d = (data ?? {}) as { available?: unknown; reason?: unknown; pictures?: unknown; limits?: { max_chars?: unknown } };
   if (typeof d.available !== "boolean") return { status: "no_answer" };
-  return { status: "ok", available: d.available, pictures: d.pictures === true, maxChars: typeof d.limits?.max_chars === "number" ? d.limits.max_chars : 2000 };
+  // A no without a reason this client knows is read as off: never more than the function said.
+  const reason = d.available ? null : (BO_REASONS as readonly unknown[]).includes(d.reason) ? (d.reason as BoReason) : "off";
+  return { status: "ok", available: d.available, reason, pictures: d.pictures === true, maxChars: typeof d.limits?.max_chars === "number" ? d.limits.max_chars : 2000 };
 }
 
 // What this screen needs of a conversation: kept messages only, as plain text.
@@ -85,7 +108,10 @@ export const BO_ERROR_TEXT = {
   daily_limit: "dailyLimit",
   picture_limit: "pictureLimit",
   region_unknown: "regionUnknown",
-  bo_resting: "resting",
+  bo_not_available: "notAvailableNow",
+  language_off: "languageOff",
+  age_off: "ageOff",
+  bo_off: "boOff",
   bo_failed: "failed",
   no_answer: "failed",
   offline: "offline",

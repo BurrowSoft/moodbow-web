@@ -16,7 +16,7 @@ const LEGAL = conditions["privacy-text-approved"].met && conditions["terms-text-
 test.describe("home", () => {
   test("English at /", async ({ page }) => {
     await page.goto("/");
-    await expect(page).toHaveTitle("Moodbow — A journal that learns your story");
+    await expect(page).toHaveTitle("Moodbow — A private journal for your days");
     await expect(page.locator("html")).toHaveAttribute("lang", "en");
     // The store frames' look (launch readiness): the arc, the headline, the
     // three blocks and Private by design.
@@ -29,14 +29,18 @@ test.describe("home", () => {
     await expect(page.getByTestId("home-sign-in")).toHaveAttribute("href", "/sign-in");
     await expect(page.getByTestId("home-coming-soon")).toHaveCount(0);
     await expect(page.getByTestId("home-notify")).toHaveCount(0);
-    for (const title of ["A 10-second check-in", "Write about your day", "See what shapes your days", "Private by design"]) {
+    for (const title of ["A 10-second check-in", "Write about your day", "See what goes together in your days", "Private by design"]) {
       await expect(page.getByRole("heading", { level: 2, name: title })).toBeVisible();
     }
     // No AI claim while AI isn't live; store badges are text only.
     await expect(page.getByText("Moodbow writes back")).toHaveCount(0);
     await expect(page.getByText(/\bAI\b/)).toHaveCount(0);
-    await expect(page.getByTestId("home-stores")).toHaveText("Coming soon to Google Play and the App Store");
-    await expect(page.getByTestId("home-stores").getByRole("link")).toHaveCount(0);
+    // Follows each store's flag, so a launch-day flip passes on its own.
+    const play = conditions["play-live"].met;
+    const appStore = conditions["appstore-live"].met;
+    const storeLine = page.getByTestId("home-stores");
+    await expect(storeLine).toContainText(play && appStore ? "Get the app:" : play ? "Coming soon to the App Store" : appStore ? "Coming soon to Google Play" : "Coming soon to Google Play and the App Store");
+    await expect(storeLine.getByRole("link")).toHaveCount(Number(play) + Number(appStore));
   });
 
   test("200% zoom on a phone (a 160 px page): nothing scrolls sideways (Web Tester, #65)", async ({ page }) => {
@@ -575,9 +579,44 @@ test.describe("web journal (signed out)", () => {
   });
 });
 
+// #248: help is on the safety path, so it can't wait for the page's scripts, or need them at all.
+test.describe("help with no script at all", () => {
+  test.use({ javaScriptEnabled: false });
+  for (const [path, id] of [["/sign-in", "sign-in-get-help"], ["/forgot-password", "forgot-get-help"], ["/consent", "consent-get-help"]]) {
+    for (const language of ["", "/fr", "/es", "/pt-br"]) {
+      test(`${language}${path}: the help button leads to a page with the way to a helpline`, async ({ page }) => {
+        await page.goto(`${language}${path}`);
+        await page.getByTestId(id).click();
+        await expect(page).toHaveURL(new RegExp(`${language}/help/get-help-now$`));
+        await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+        await expect(page.locator("[data-content=article]")).not.toBeEmpty();
+        await expect(page.getByTestId("help-now-find-helpline")).toHaveAttribute("href", /^https:/);
+      });
+    }
+  }
+});
+
 // Onboarding (W0 part 2), signed out, no Supabase env. The account-creating
 // and signed-in rows run on the Preview against staging.
 test.describe("onboarding (signed out)", () => {
+  for (const [path, id] of [["/sign-in", "sign-in-get-help"], ["/forgot-password", "forgot-get-help"]]) {
+    test(`${path}: help is there signed out, and it opens the card with the directory`, async ({ page }) => {
+      await page.goto(path);
+      await expect(page.getByTestId(id)).toHaveText("Want to talk to someone?");
+      await page.getByTestId(id).click();
+      await expect(page.getByTestId("safety-card")).toBeVisible();
+      await expect(page.getByTestId("safety-find-helpline")).toBeVisible();
+      await page.getByTestId("safety-close").click();
+      await expect(page.getByTestId("safety-card")).toHaveCount(0);
+    });
+  }
+
+  test("/security: a 404 with no update out, in any language, and Home doesn't link to it", async ({ page }) => {
+    for (const path of ["/security", "/es/security"]) expect((await page.goto(path))?.status(), path).toBe(404);
+    await page.goto("/");
+    await expect(page.getByTestId("home-security")).toHaveCount(0);
+  });
+
   test("Consent: help is there before anything's agreed, and it opens the card", async ({ page }) => {
     await page.goto("/consent");
     await page.getByTestId("consent-get-help").click();
@@ -591,7 +630,7 @@ test.describe("onboarding (signed out)", () => {
   test("welcome: Next, Skip to slide 3, Get started → Consent; Back from Consent → slide 3", async ({ page }) => {
     await page.goto("/welcome");
     await expect(page.getByTestId("welcome-slide-1")).toBeVisible();
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("A journal that learns your story");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("A private journal for your days");
     await page.getByTestId("welcome-next").click();
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("See your patterns");
     await page.getByTestId("welcome-skip").click();
@@ -645,7 +684,7 @@ test.describe("onboarding (signed out)", () => {
       await page.getByTestId("welcome-next").click();
       await expect(page.getByRole("heading", { level: 1 })).toHaveText("See your patterns");
       await page.getByTestId("welcome-back").click();
-      await expect(page.getByRole("heading", { level: 1 })).toHaveText("A journal that learns your story");
+      await expect(page.getByRole("heading", { level: 1 })).toHaveText("A private journal for your days");
       await page.getByTestId("welcome-skip").click();
       await expect(page.getByRole("heading", { level: 1 })).toHaveText("Private, and yours");
       await page.getByTestId("welcome-start").click();

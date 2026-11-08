@@ -4,7 +4,9 @@
 // install attributed (the Play link's referrer). Held in this tab's memory
 // only: no cookie, no storage, never sent to our server. A reload loses it.
 // Values are labels we set ourselves: letters, digits, . _ - and at most 64
-// characters; anything else (an email, a long token) is dropped.
+// characters; anything else (an email, a long token) is dropped. Name them
+// neutrally, like pilot-en-1, never with a health word: Google Play receives them
+// (the Reviewer's ruling), as the privacy policy says under play_live.
 export const CAMPAIGN_KEYS = ["utm_source", "utm_medium", "utm_campaign"] as const;
 export type Campaign = Partial<Record<(typeof CAMPAIGN_KEYS)[number], string>>;
 

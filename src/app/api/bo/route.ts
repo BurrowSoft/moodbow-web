@@ -1,8 +1,7 @@
-import { FunctionsHttpError } from "@supabase/supabase-js";
-import { BO_SERVER_WAIT_MS, boErrorOutcome, boPictureField, parseBoSend, parseBoStatus } from "@/lib/journal/bo";
+import { boPictureField } from "@/lib/journal/bo";
+import { callBoFunction } from "@/lib/journal/boServer";
 import { isUuid } from "@/lib/journal/reflect";
 import { pageGate } from "@/lib/conditions";
-import { regionTokenFor } from "@/lib/regionToken";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 // The worst case is about 56 s (bo.md): above the server's and the browser's waits.
@@ -29,7 +28,7 @@ const json = (body: unknown, status = 200) => Response.json(body, { status, head
 export async function POST(req: Request): Promise<Response> {
   if (pageGate("bo-live") === "hidden") return new Response(null, { status: 404 });
   if (!sameOrigin(req)) return json({ status: "error", code: "invalid_value" }, 403);
-  let input: { action?: unknown; client_key?: unknown; text?: unknown; picture?: unknown };
+  let input: { action?: unknown; client_key?: unknown; text?: unknown; picture?: unknown; language?: unknown };
   try {
     input = (await req.json()) as typeof input;
   } catch {
@@ -38,8 +37,7 @@ export async function POST(req: Request): Promise<Response> {
   const supabase = await createSupabaseServerClient();
   if (!supabase) return json({ status: "no_answer" });
   const { data: auth } = await supabase.auth.getSession();
-  const token = auth.session?.access_token;
-  if (!token) return json({ status: "error", code: "not_authenticated" });
+  if (!auth.session?.access_token) return json({ status: "error", code: "not_authenticated" });
 
   // The notice really reached the screen (bo.md: only then, or the timer resets).
   if (input.action === "notice_shown") {
@@ -56,26 +54,10 @@ export async function POST(req: Request): Promise<Response> {
   const picture = send && input.picture !== undefined ? boPictureField(input.picture) : undefined;
   if (send && input.picture !== undefined && (!picture || pageGate("bo-pictures-live") === "hidden")) return json({ status: "error", code: "invalid_value" }, 400);
 
-  const region_token = regionTokenFor(req.headers);
-  let answer: Awaited<ReturnType<typeof supabase.functions.invoke>>;
-  try {
-    answer = await supabase.functions.invoke("bo", {
-      body: send ? { action: "send", client_key: input.client_key, region_token, text: input.text, ...(picture ? { picture } : {}) } : { action: "status", region_token },
-      headers: { Authorization: `Bearer ${token}` },
-      timeout: BO_SERVER_WAIT_MS,
-    });
-  } catch {
-    return json({ status: "no_answer" });
-  }
-  const { data, error } = answer;
-  if (error) {
-    // A gateway's own page isn't the function's answer; the same key is resent.
-    if (!(error instanceof FunctionsHttpError)) return json({ status: "no_answer" });
-    const code = await (error.context as Response)
-      .json()
-      .then((b: { error?: unknown }) => b?.error)
-      .catch(() => undefined);
-    return json(boErrorOutcome(code));
-  }
-  return json(send ? parseBoSend(data) : parseBoStatus(data));
+  // The page's own language, as the function falls back to the profile's (bo.md); anything
+  // that isn't a language code is left out rather than guessed.
+  const route = typeof input.language === "string" && /^[a-z]{2}(-[a-z]{2})?$/.test(input.language) ? input.language : "";
+  const body = send ? { action: "send" as const, client_key: input.client_key as string, text: input.text as string, ...(picture ? { picture } : {}) } : { action: "status" as const };
+  const answer = await callBoFunction(supabase, req.headers, route, body);
+  return json(answer);
 }

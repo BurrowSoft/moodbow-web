@@ -1,14 +1,14 @@
 "use client";
 
 import { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Dialog, dialogButton } from "@/components/Dialog";
 import { GetHelpNow, SafetyCard } from "@/components/SafetyCard";
 import { BoConsent } from "./BoConsent";
 import { BoReply } from "./BoReply";
 import { ClearBo } from "./ClearBo";
 import { Link } from "@/i18n/navigation";
-import { BO_CLIENT_WAIT_MS, BO_DEFAULT_MAX_CHARS, BO_ERROR_TEXT, BO_WAIT_RETRY_MS, boCardMayOpen, type BoMessage, type BoProblem, type BoSend, type BoStatus } from "@/lib/journal/bo";
+import { BO_CLIENT_WAIT_MS, BO_DEFAULT_MAX_CHARS, BO_ERROR_TEXT, BO_WAIT_RETRY_MS, boCardMayOpen, boReasonProblem, type BoMessage, type BoProblem, type BoSend, type BoStatus } from "@/lib/journal/bo";
 import { BO_PICTURE_ACCEPT, preparePicture } from "@/lib/journal/boPicture";
 import { flagsCrisis } from "@/lib/safety/crisis";
 import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
@@ -27,7 +27,7 @@ const BO_END_TEXT = "[font-size:min(1rem,max(8vw,16px))]";
 const BO_END_HELP = `inline-flex min-h-[44px] max-w-full items-center justify-center rounded-full border border-border bg-bg px-[12px] text-center font-medium text-text hover:bg-pill ${BO_END_TEXT}`;
 
 // These end the conversation for now: there's no sending from here.
-const CLOSED: BoProblem[] = ["region_off", "region_unknown", "bo_unavailable", "needs_email", "bo_resting"];
+const CLOSED: BoProblem[] = ["region_off", "region_unknown", "bo_unavailable", "needs_email", "bo_not_available", "language_off", "age_off", "bo_off"];
 // The same message may simply go again, or (region_unknown: the route may have failed)
 // Bo may answer on a second look.
 const RETRY: BoProblem[] = ["bo_failed", "no_answer", "offline", "in_progress", "rate_limited", "region_unknown"];
@@ -53,6 +53,8 @@ const BO_SCROLL_KEYS = ["PageUp", "PageDown", "ArrowUp", "ArrowDown", "Home", "E
 
 export function BoConversation({ initial, country, back, healthData = false, consented = true, picturesAllowed = false }: { initial: BoMessage[]; country: string | null | undefined; back?: ReactNode; healthData?: boolean; consented?: boolean; picturesAllowed?: boolean }) {
   const t = useTranslations("bo");
+  // Bo is asked in the page's language, which the function checks against its own list.
+  const language = useLocale();
   const tc = useTranslations("common");
   const tm = useTranslations("me");
   useLayoutEffect(() => {
@@ -150,7 +152,7 @@ export function BoConversation({ initial, country, back, healthData = false, con
     if (status.status === "ok") {
       setMaxChars(status.maxChars);
       setPicturesOffered(status.pictures);
-      setProblem(status.available ? null : "region_unknown");
+      setProblem(status.available ? null : boReasonProblem(status.reason));
     } else if (status.status === "error") {
       if (status.code === "not_authenticated") window.location.reload();
       else setProblem(status.code);
@@ -159,7 +161,7 @@ export function BoConversation({ initial, country, back, healthData = false, con
 
   useEffect(() => {
     let current = true;
-    void callBo<BoStatus>({ action: "status" }).then((status) => {
+    void callBo<BoStatus>({ action: "status", language }).then((status) => {
       if (current) showStatus(status);
     });
     return () => {
@@ -255,7 +257,7 @@ export function BoConversation({ initial, country, back, healthData = false, con
     setProblem(null);
     // A retry sends the picture again: the function checks the key first, and ignores it
     // on a turn it already has (bo.md).
-    const body = { action: "send", client_key, text: sent, ...(picture ? { picture: { media_type: "image/jpeg", data: picture.base64 } } : {}) };
+    const body = { action: "send", client_key, text: sent, language, ...(picture ? { picture: { media_type: "image/jpeg", data: picture.base64 } } : {}) };
     let answer = await callBo<BoSend>(body);
     // Another send of this key is running: wait, and retry once (bo.md).
     if (answer.status === "error" && answer.code === "in_progress") {
@@ -314,7 +316,7 @@ export function BoConversation({ initial, country, back, healthData = false, con
     else setPictureConsent("asking");
   };
 
-  const retry = () => void (closed || (text.trim() === "" && !picture) ? callBo<BoStatus>({ action: "status" }).then(showStatus) : send());
+  const retry = () => void (closed || (text.trim() === "" && !picture) ? callBo<BoStatus>({ action: "status", language }).then(showStatus) : send());
 
   return (
     <div data-testid="bo-conversation" className="flex flex-col gap-4 [overflow-wrap:anywhere]">

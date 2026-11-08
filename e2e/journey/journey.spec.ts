@@ -1,10 +1,11 @@
 import { readFile } from "node:fs/promises";
 import { expect, test, type Frame, type Page, type Request } from "@playwright/test";
 import conditions from "../../content/conditions.json";
+import countries from "../../content/contracts/countries.json";
 import messages from "../../src/messages/en.json";
 import fr from "../../src/messages/fr.json";
 import { monthsBefore } from "../../src/lib/journal/onThisDay";
-import { boOff, grantAiConsent, journalToday, aiAvailable, cleanup, configured, confirmEmail, createConfirmedUser, exists, lastWeekMonday, seedCheckIns, newEmail, newPassword, notConfigured, profileLocale, revokeSessions, setProfileLocale, signedUpUnconfirmed, sweep } from "./staging";
+import { aiConsentGranted, journalToday, aiAvailable, cleanup, configured, confirmEmail, createConfirmedUser, exists, lastWeekMonday, seedCheckIns, newEmail, newPassword, notConfigured, profileLocale, profileSaver, revokeSessions, setProfileLocale, signedUpUnconfirmed, sweep, boOff, grantAiConsent } from "./staging";
 
 // The launch-critical journeys (1.0), end to end against staging with a
 // throwaway account each: sign-up → confirm → consent → setup → check-in →
@@ -21,6 +22,9 @@ test.beforeAll(async () => {
 const ENTRY = "A calm walk by the river after work, then tea with a friend.";
 
 // Welcome → Consent (AI as asked) → Sign-up → confirmed → Setup.
+// The real form sends a real email, and staging limits those: heavy days failed CI on "Please wait a
+// minute". So the journeys that test the form are tagged @real-email and run on PRs that touch
+// sign-up, and in the daily run of everything on master (ci.yml); the rest start from accountAtSetup, which sends none.
 async function signUp(page: Page, email: string, { ai }: { ai: boolean }): Promise<string> {
   const password = newPassword();
   await page.goto("/welcome?slide=3");
@@ -51,7 +55,7 @@ async function signUp(page: Page, email: string, { ai }: { ai: boolean }): Promi
 }
 
 test.describe("launch journeys", () => {
-  test("AI off: sign-up to delete account, through every tab and the export", async ({ page }) => {
+  test("AI off: sign-up to delete account, through every tab and the export", { tag: "@real-email" }, async ({ page }) => {
     const email = newEmail();
     try {
       await signUp(page, email, { ai: false });
@@ -128,7 +132,7 @@ test.describe("launch journeys", () => {
     test.setTimeout(120_000);
     const email = newEmail();
     try {
-      await signUp(page, email, { ai: false });
+      await accountAtSetup(page, email);
       await page.getByTestId("setup-done").click();
       await expect(page).toHaveURL(/\/app$/);
       await page.getByTestId("today-write").click();
@@ -159,10 +163,12 @@ test.describe("launch journeys", () => {
     }
   });
 
-  test("AI on: consent → setup's focus and tone → Today", async ({ page }) => {
+  test("AI on: consent → setup's focus and tone → Today", { tag: "@real-email" }, async ({ page }) => {
     const email = newEmail();
     try {
       const password = await signUp(page, email, { ai: true });
+      // What the form's box is for, whether or not staging's AI switch is on.
+      expect(await aiConsentGranted(email, password)).toBe(true);
 
       // Focus and tone also need staging's global AI switch, which is off
       // outside AI windows (decision 123): read it as the app does, and skip
@@ -202,6 +208,31 @@ async function signIn(page: Page, email: string, password: string): Promise<void
   await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
 }
 
+// An account at Setup, without the form's email: confirmed, signed in through the page.
+// The card's first link, whole on its first screen, above the fade, at 320x640 at 300 %. The cases that
+// don't fit, one by one (UX, #255), as the most px each may run under the fade. Colombia has no helpline,
+// so its first link is the emergency number, and the sentence above it already says to call one.
+const FIRST_LINK_OVER: Record<string, number> = { "CO /pt-br": 1 };
+const firstLinkOnScreen = (card: Element) => {
+  const fade = card.querySelector("[data-testid=dialog-more]");
+  const shown = Math.min(innerHeight, (fade ?? card).getBoundingClientRect()[fade ? "top" : "bottom"]);
+  const link = card.querySelector("a")!;
+  const top = link.getClientRects()[0];
+  return { over: Math.round(link.getBoundingClientRect().bottom - shown), tappable: top.top < shown && link.contains(document.elementFromPoint(top.left + 4, top.top + top.height / 2)) };
+};
+
+async function accountAtSetup(page: Page, email: string): Promise<string> {
+  const password = newPassword();
+  await signedUpUnconfirmed(email, password);
+  await confirmEmail(email);
+  await page.goto("/sign-in");
+  await page.getByLabel("Email").fill(email);
+  await page.getByLabel("Password").fill(password);
+  await page.getByRole("button", { name: messages.auth.signinSubmit }).click();
+  await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+  return password;
+}
+
 // The draft keys this browser holds (mb:draft-entry:<uid>:…).
 const draftKeys = (page: Page) => page.evaluate(() => Object.keys(window.localStorage).filter((k) => k.startsWith("mb:draft-entry:")));
 
@@ -217,7 +248,7 @@ test.describe("tonight's flows", () => {
     test.skip(!LANDED.hiddenDraft, "#142 isn't on master yet");
     const email = newEmail();
     try {
-      await signUp(page, email, { ai: false });
+      await accountAtSetup(page, email);
       await page.getByTestId("setup-done").click();
       await expect(page).toHaveURL(/\/app$/);
       await page.getByTestId("today-write").click();
@@ -243,7 +274,7 @@ test.describe("tonight's flows", () => {
     test.skip(!LANDED.signOutChoice, "#147 isn't on master yet");
     const email = newEmail();
     try {
-      const password = await signUp(page, email, { ai: false });
+      const password = await accountAtSetup(page, email);
       await page.getByTestId("setup-done").click();
       await expect(page).toHaveURL(/\/app$/);
 
@@ -280,7 +311,7 @@ test.describe("tonight's flows", () => {
     test.skip(!LANDED.deleteAnnounce, "#145 and #146 aren't on master yet");
     const email = newEmail();
     try {
-      await signUp(page, email, { ai: false });
+      await accountAtSetup(page, email);
       await page.getByTestId("setup-done").click();
       await expect(page).toHaveURL(/\/app$/);
       await page.getByTestId("today-write").click();
@@ -869,7 +900,7 @@ test.describe("the saved language in the journal", () => {
     }
   });
 
-  test("a first sign-up on /pt-br: saved as pt, Today in Portuguese, no bounce", async ({ page }) => {
+  test("a first sign-up on /pt-br: saved as pt, Today in Portuguese, no bounce", { tag: "@real-email" }, async ({ page }) => {
     const email = newEmail();
     const password = newPassword();
     try {
@@ -1018,16 +1049,17 @@ test.describe("the tab bar in every language", () => {
         await page.goto(`${route}/app/me`);
         await page.getByTestId("me-get-help").click();
         // Taller than the window: it opens at its top, with a fade showing there's
-        // more, and the first help line starts on the first screen.
+        // more, and the first help line is on the first screen (firstLinkOnScreen has the known limit).
         const card = page.getByTestId("safety-card");
         await expect(card.getByRole("heading", { level: 2 })).toBeInViewport();
         await expect(card.getByTestId("dialog-more")).toBeVisible();
         expect(await card.evaluate((el) => el.scrollTop), "opens at its top").toBe(0);
-        const firstHelp = await card.locator("a").first().evaluate((a) => a.getBoundingClientRect().top);
-        expect(firstHelp, `the first help line starts on the first screen, ${route || "/en"}`).toBeLessThan(640);
-        // "Find a helpline" stays under the card's cap, not three times its size.
+        const first = await card.evaluate(firstLinkOnScreen);
+        expect.soft(first.tappable, `the first help line can be tapped on the first screen, ${route || "/en"}`).toBe(true);
+        expect.soft(first.over, `px of the first help line past the first screen, ${route || "/en"}`).toBeLessThanOrEqual(0);
+        // "Find a helpline" stays under the help's cap, not three times its size.
         const size = (el: Element) => parseFloat(getComputedStyle(el).fontSize);
-        expect(await card.getByTestId("safety-find-helpline").evaluate(size), `the helpline link's size, ${route || "/en"}`).toBeLessThan(await card.evaluate(size));
+        expect(await card.getByTestId("safety-find-helpline").evaluate(size), `the helpline link's size, ${route || "/en"}`).toBeLessThan(await page.getByTestId("safety-close").evaluate(size));
         const close = page.getByTestId("safety-close");
         await close.scrollIntoViewIfNeeded();
         await expect(close, route || "/en").toBeInViewport();
@@ -1232,6 +1264,168 @@ test("large text, set in the browser: Today after a mood, calendar, day, entry a
   }
 });
 
+// A column of letters under an X above the window, and Not now 1,660 px down (Web Tester, #218).
+test("large text, set in the browser: the milestone's title, X and Not now stay usable on a 320 px phone", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
+  test.setTimeout(240_000);
+  const email = newEmail();
+  const password = newPassword();
+  const cdp = await page.context().newCDPSession(page);
+  const textAt = (percent: number) => cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    // 30 days journaled, all in the past: the first milestone.
+    const day = await lastWeekMonday(email);
+    await seedCheckIns(email, password, day, Array.from({ length: 30 }, (_, i) => ({ offset: -i, mood: 3 })));
+    await page.setViewportSize({ width: 320, height: 640 });
+    await page.emulateMedia({ reducedMotion: "reduce" });
+
+    for (const percent of [100, 200, 300]) {
+      await textAt(percent);
+      await page.goto("/app");
+      const card = page.getByTestId("milestone-card");
+      await expect(card, `${percent} %`).toBeVisible({ timeout: 15_000 });
+      const box = async (id: string) => (await page.getByTestId(id).boundingBox())!;
+      const shape = await box("milestone-card");
+      expect(shape.y, `${percent} %: the card's top is in the window`).toBeGreaterThanOrEqual(0);
+      const close = await box("milestone-close");
+      expect(close.y, `${percent} %: the X is in the window`).toBeGreaterThanOrEqual(0);
+      expect(close.x + close.width, `${percent} %: the X is in the card`).toBeLessThanOrEqual(shape.x + shape.width);
+      expect(close.width, `${percent} %: the X stays its size`).toBe(44);
+      const title = (await page.locator("#milestone-title").boundingBox())!;
+      expect(title.width, `${percent} %: the title keeps its width`).toBeGreaterThanOrEqual(150);
+      const notNow = await box("milestone-not-now");
+      expect(notNow.y + notNow.height, `${percent} %: Not now is in view on opening`).toBeLessThanOrEqual(shape.y + shape.height);
+      expect(await card.evaluate((el) => el.scrollWidth - el.clientWidth), `${percent} %: no sideways scroll in the card`).toBe(0);
+    }
+    await page.getByTestId("milestone-close").click();
+    await expect(page.getByTestId("milestone-card")).toBeHidden();
+  } finally {
+    await cleanup(email);
+  }
+});
+
+// Two columns cut the mood off: "Bad" read "Bac" at 200 %, and it was gone at 300 % (Web Tester).
+test("large text, set in the browser: the check-in conflict dialog shows the whole mood on a 320 px phone", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
+  test.setTimeout(300_000);
+  const email = newEmail();
+  const password = newPassword();
+  const cdp = await page.context().newCDPSession(page);
+  const textAt = (percent: number) => cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    const today = await journalToday(email, password);
+    await seedCheckIns(email, password, today, [{ offset: 0, mood: 4 }]);
+    await page.setViewportSize({ width: 320, height: 640 });
+
+    for (const [route, saved] of [["", "en"], ["/fr", "fr"], ["/es", "es"], ["/pt-br", "pt"]]) {
+      await setProfileLocale(email, password, saved);
+      for (const percent of [100, 200, 300]) {
+        await textAt(percent);
+        await page.goto(`${route}/app`);
+        await page.getByTestId("checkin-edit").click();
+        await page.getByTestId("checkin-mood-2").click();
+        // Changed elsewhere while this copy was open: the save asks, with both versions.
+        await seedCheckIns(email, password, today, [{ offset: 0, mood: percent === 200 ? 3 : 5 }]);
+        const fontSize = (el: Element) => getComputedStyle(el).fontSize;
+        expect(await page.getByTestId("checkin-save").evaluate(fontSize), `Save, ${route} ${percent} %`).toBe(percent === 100 ? "16px" : "32px");
+        await page.getByTestId("checkin-save").click();
+        await expect(page.getByTestId("checkin-conflict-dialog"), `${route} ${percent} %`).toBeVisible({ timeout: 15_000 });
+        // Stops growing like the page behind it, nothing's cut off, and both choices can be reached.
+        const dialog = page.getByTestId("checkin-conflict-dialog");
+        expect(await dialog.evaluate((el) => [getComputedStyle(el).fontSize, getComputedStyle(el.querySelector("h2")!).fontSize, getComputedStyle(el.querySelector("[data-testid=checkin-conflict-date]")!).fontSize, el.scrollWidth - el.clientWidth]), `the dialog, ${route} ${percent} %`).toEqual(percent === 100 ? ["16px", "18px", "14px", 0] : ["32px", "35.2px", "28px", 0]);
+        for (const id of ["checkin-conflict-use-other", "checkin-conflict-keep-mine"]) {
+          await page.getByTestId(id).scrollIntoViewIfNeeded();
+          await expect(page.getByTestId(id), `${id}, ${route} ${percent} %`).toBeInViewport();
+        }
+        for (const side of ["mine", "other"]) {
+          const where = `${route || "/"} ${percent} %, ${side}`;
+          const card = page.getByTestId(`checkin-conflict-${side}`);
+          const word = page.getByTestId(`checkin-conflict-${side}-mood`);
+          // Stops growing at about 200 % (decision 231), and the same at normal size.
+          expect(await card.evaluate((el) => [getComputedStyle(el).fontSize, getComputedStyle(el.querySelector("p")!).fontSize]), where).toEqual(percent === 100 ? ["16px", "14px"] : ["32px", "28px"]);
+          await expect(word, where).toHaveText(/\S/);
+          const fit = await word.evaluate((el, cardId) => {
+            // Word by word: "Pas bien" may wrap between its words, never inside one.
+            const text = el.firstChild as Text;
+            const rects = [...text.data.matchAll(/\S+/g)].map((m) => {
+              const range = document.createRange();
+              range.setStart(text, m.index);
+              range.setEnd(text, m.index + m[0].length);
+              return [...range.getClientRects()];
+            });
+            const box = document.querySelector(`[data-testid="${cardId}"]`)!.getBoundingClientRect();
+            const all = rects.flat();
+            return {
+              wordsSplit: rects.filter((r) => r.length !== 1).length,
+              inside: all.every((r) => r.left >= box.left - 0.5 && r.right <= box.right + 0.5),
+              inWindow: all.every((r) => r.right <= innerWidth + 0.5),
+            };
+          }, `checkin-conflict-${side}`);
+          expect.soft(fit, where).toEqual({ wordsSplit: 0, inside: true, inWindow: true });
+          await expect(card, where).toBeVisible();
+        }
+        if (percent > 100) {
+          const mine = (await page.getByTestId("checkin-conflict-mine").boundingBox())!;
+          const other = (await page.getByTestId("checkin-conflict-other").boundingBox())!;
+          expect.soft(other.y, `${route || "/"} ${percent} %: stacked`).toBeGreaterThan(mine.y + mine.height - 1);
+        }
+        expect.soft(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth), `${route || "/"} ${percent} %`).toBe(0);
+        await page.getByTestId("checkin-conflict-use-other").click();
+        await expect(page.getByTestId("checkin-conflict-dialog")).toHaveCount(0);
+      }
+    }
+    // On a phone the entry's visible Save is the top one: the bottom one is hidden (Web Tester, #253).
+    // Its words stay whole: "Enregistr / er" was French's at 32 px, with too much padding.
+    const splitWords = (el: Element) => {
+      if (!el.isConnected) return null;
+      const text = el.firstChild!;
+      return [...(text.textContent ?? "").matchAll(/\S+/g)].filter((word) => {
+        const range = document.createRange();
+        range.setStart(text, word.index);
+        range.setEnd(text, word.index + word[0].length);
+        return new Set([...range.getClientRects()].map((rect) => rect.top)).size > 1;
+      }).map((word) => word[0]);
+    };
+    for (const [route, saved] of [["", "en"], ["/fr", "fr"], ["/es", "es"], ["/pt-br", "pt"]]) {
+      await setProfileLocale(email, password, saved);
+      for (const percent of [100, 300]) {
+        const where = `${route || "/"} ${percent} %`;
+        await textAt(percent);
+        await page.goto(`${route}/app/write`);
+        const top = page.getByTestId("entry-save-top");
+        await expect(top).toBeVisible();
+        await expect(page.getByTestId("entry-save")).toBeHidden();
+        const size = percent === 100 ? "16px" : "32px";
+        for (const button of [top, page.getByTestId("entry-cancel")]) {
+          // Both retry: the page can swap the button out as it settles, and a detached one reads as "".
+          await expect(button, where).toHaveCSS("font-size", size);
+          await expect.poll(() => button.evaluate(splitWords), where).toEqual([]);
+        }
+      }
+    }
+  } finally {
+    await cleanup(email);
+  }
+});
+
 // Every new account passes through Set up; its time field was 151 px past a 320 px
 // phone at 300 % (Web Tester, #206).
 test("large text, set in the browser: Set up stays inside a 320 px phone", async ({ page, browserName }) => {
@@ -1400,6 +1594,89 @@ test("Bo's screen at large text: the header covers nothing, and help is reachabl
       await expect(page.getByTestId("safety-card")).toBeVisible();
       await page.getByTestId("safety-close").click();
       console.log(`Bo's header at ${percent}%: ${pinned ? "pinned" : "scrolls away"}`);
+    }
+  } finally {
+    await cleanup(email);
+  }
+});
+
+// Someone has to dial it: a number never breaks across lines, and its line stays at 28 px or more (#247, UX).
+// Tagged: ci.yml runs it where the numbers or the card change, and daily.
+test("large text: every help number on the list stays whole on a phone", { tag: "@help-numbers" }, async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
+  test.setTimeout(300_000);
+  const email = newEmail();
+  const cdp = await page.context().newCDPSession(page);
+  try {
+    const password = await accountAtSetup(page, email);
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    const saveProfile = await profileSaver(email, password);
+    await cdp.send("Page.setFontSizes", { fontSizes: { standard: 48, fixed: 39 } });
+    // The help button on Me: its words whole, at the capped size, and on the first screen.
+    for (const width of [320, 390]) {
+      await page.setViewportSize({ width, height: 640 });
+      for (const [route, saved] of [["/en", "en"], ["/fr", "fr"], ["/es", "es"], ["/pt-br", "pt"]]) {
+        await saveProfile({ p_locale: saved });
+        await page.goto(`${route}/app/me`);
+        const button = await page.getByTestId("me-get-help").evaluate((el) => {
+          const text = el.firstChild as Text;
+          const split = [...text.data.matchAll(/\S+/g)].filter((word) => {
+            const range = document.createRange();
+            range.setStart(text, word.index);
+            range.setEnd(text, word.index + word[0].length);
+            return new Set([...range.getClientRects()].map((rect) => Math.round(rect.top))).size > 1;
+          }).map((word) => word[0]);
+          return { split, size: parseFloat(getComputedStyle(el).fontSize) <= Math.max(innerWidth / 10, 32), onScreen: el.getBoundingClientRect().bottom <= innerHeight };
+        });
+        expect.soft(button, `Me's help button, ${route} at ${width} px`).toEqual({ split: [], size: true, onScreen: true });
+      }
+    }
+    for (const { code, helpline, emergency } of countries.countries) {
+      await saveProfile({ p_country: code });
+      // /en, not /: from /pt-br the cookie sends / back there, and the saved-language page won't
+      // move to the same language twice in a row, so it stays on its link (#179).
+      for (const [route, saved] of [["/en", "en"], ["/fr", "fr"], ["/es", "es"], ["/pt-br", "pt"]]) {
+        await saveProfile({ p_locale: saved });
+        await page.goto(`${route}/app/me`);
+        await page.getByTestId("me-get-help").click({ timeout: 15_000 });
+        await expect(page.getByTestId("safety-card"), `${code} ${route}`).toBeVisible();
+        for (const width of [320, 390]) {
+          await page.setViewportSize({ width, height: 640 });
+          for (const [id, display] of [["safety-call-helpline", helpline?.display], ["safety-call-emergency", emergency?.display]]) {
+            if (!display) continue;
+            const fit = await page.getByTestId(id!).evaluate((el, plain) => {
+              // With plain spaces, as they're copied.
+              const number = el.querySelector("[data-help-number]");
+              if (number?.textContent !== plain) return { found: false };
+              // The brackets stay with it.
+              const before = number.previousSibling as Text | null;
+              const after = number.nextSibling as Text | null;
+              const range = document.createRange();
+              if (before?.data.endsWith("(")) range.setStart(before, before.data.length - 1);
+              else range.setStartBefore(number);
+              if (after?.data.startsWith(")")) range.setEnd(after, 1);
+              else range.setEndAfter(number);
+              const rects = [...range.getClientRects()];
+              const box = el.closest("[data-testid=safety-card]")!;
+              const inner = box.getBoundingClientRect().right - parseFloat(getComputedStyle(box).paddingRight);
+              return {
+                found: true,
+                lines: new Set(rects.map((rect) => Math.round(rect.top))).size,
+                inside: rects.every((rect) => rect.right <= inner + 1),
+                readable: parseFloat(getComputedStyle(el).fontSize) >= 28,
+              };
+            }, display);
+            expect.soft(fit, `${code} ${id} ${route} at ${width} px`).toEqual({ found: true, lines: 1, inside: true, readable: true });
+          }
+          if (width === 320) {
+            const first = await page.getByTestId("safety-card").evaluate(firstLinkOnScreen);
+            expect.soft(first.tappable, `${code}'s first help line can be tapped on the first screen, ${route}`).toBe(true);
+            expect.soft(first.over, `px of ${code}'s first help line past the first screen, ${route}`).toBeLessThanOrEqual(FIRST_LINK_OVER[`${code} ${route}`] ?? 0);
+            if (first.over > 0) console.log(`${code} ${route}: first help line ${first.over} px under the fade`);
+          }
+        }
+      }
     }
   } finally {
     await cleanup(email);

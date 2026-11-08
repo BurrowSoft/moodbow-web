@@ -41,7 +41,7 @@ export default async function AccountDeletionPage({ params }: PageProps<"/[local
   const backupDays = conditionMet("backup-retention") ? BACKUP_RETENTION_DAYS : null;
 
   return (
-    <PageShell
+    <PageShell capTitle
       title={t("title")}
       draft={gate === "draft"}
       article

@@ -24,7 +24,7 @@ Bo no lee tu diario, salvo que actives «Dejar que Bo lea mis registros y entrad
 En Yo, en «Tu conversación con Bo», puedes exportarla, borrarla o desactivar «Usar Bo». Borrarla la elimina de Moodbow y no se puede deshacer; lo que Anthropic ya recibió sigue sus propios plazos de eliminación, indicados arriba. Desactivar «Usar Bo» detiene los mensajes nuevos y desactiva la lectura de tu diario; tu conversación se queda hasta que la borres.
 
 **Límites**
-Hay un límite diario de mensajes. Las cuentas con correo tienen más. Si Bo está descansando o llegaste al límite, el resto de Moodbow funciona como siempre, y la ayuda sigue ahí.
+Hay un límite diario de mensajes. Las cuentas con correo tienen más. Si Bo no está disponible en este momento o llegaste al límite, el resto de Moodbow funciona como siempre, y la ayuda sigue ahí.
 
 **Reportar una respuesta**
 Si una respuesta parece incorrecta o dañina, toca «Reportar esta respuesta». Nadie lee los reportes de inmediato: si necesitas a alguien ahora, usa «¿Quieres hablar con alguien?». Eliminamos los reportes después de 90 días, salvo que necesitemos conservar alguno más tiempo por material ilegal.{/pending}

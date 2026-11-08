@@ -24,7 +24,7 @@ Bo doesn't read your journal unless you turn on "Let Bo read my recent check-ins
 In Me, under "Your conversation with Bo", you can export it, clear it, or turn off "Use Bo". Clearing deletes it from Moodbow and can't be undone; what Anthropic already received follows its own deletion times, above. Turning off "Use Bo" stops new messages and turns off the journal switch; your conversation stays until you clear it.
 
 **Limits**
-There's a daily limit on messages. Accounts with an email get more. If Bo is resting or you've reached the limit, the rest of Moodbow works as usual, and help is still there.
+There's a daily limit on messages. Accounts with an email get more. If Bo isn't available right now or you've reached the limit, the rest of Moodbow works as usual, and help is still there.
 
 **Reporting a reply**
 If a reply seems wrong or harmful, tap "Report this reply". No one reads reports right away, so if you need someone now, use "Want to talk to someone?". We delete reports after 90 days, unless we need one longer to deal with illegal material.{/pending}
