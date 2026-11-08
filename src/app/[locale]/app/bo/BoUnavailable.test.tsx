@@ -5,6 +5,14 @@ import messages from "@/messages/en.json";
 import { BoUnavailable } from "./BoUnavailable";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: () => {} }) }));
+// The help button is a locale link (#249).
+vi.mock("@/i18n/navigation", () => ({
+  Link: ({ href, children, ...rest }: { href: string; children: React.ReactNode }) => (
+    <a href={href} {...rest}>
+      {children}
+    </a>
+  ),
+}));
 afterEach(cleanup);
 
 describe("BoUnavailable", () => {
