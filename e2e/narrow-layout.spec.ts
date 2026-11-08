@@ -1,5 +1,8 @@
 import { expect, test, type Page } from "@playwright/test";
 import messages from "../src/messages/en.json";
+import es from "../src/messages/es.json";
+import fr from "../src/messages/fr.json";
+import pt from "../src/messages/pt-br.json";
 import { APP_MAIN_GUTTER, JOURNAL_CARD, MOOD_FACE, MOOD_LABEL, MOOD_ROW, PRIMARY_SAVE, TAB_ITEM, TAB_LABEL, TAB_LINK_NARROW } from "../src/lib/ui/journalLayout";
 
 // The web journal's narrow layout in a real browser (jsdom can't lay out).
@@ -21,8 +24,10 @@ async function mount(page: Page, width: number, html: string, viewport = 320) {
   );
 }
 
-const faces = Array.from({ length: 5 }, (_, i) => `<button type="button" role="radio" class="${MOOD_FACE}"><span class="h-9 w-9 shrink-0 rounded-full bg-accent"></span><span class="${MOOD_LABEL}">${messages.today[`mood${i + 1}` as "mood1"]}</span></button>`).join("");
-const moodRow = `<div class="@container" id="row-box"><div class="${MOOD_ROW}" role="radiogroup">${faces}</div></div>`;
+const facesIn = (today: typeof messages.today) =>
+  Array.from({ length: 5 }, (_, i) => `<button type="button" role="radio" class="${MOOD_FACE}"><span class="h-9 w-9 shrink-0 rounded-full bg-accent"></span><span class="${MOOD_LABEL}">${today[`mood${i + 1}` as "mood1"]}</span></button>`).join("");
+const rowIn = (today: typeof messages.today) => `<div class="@container" id="row-box"><div class="${MOOD_ROW}" role="radiogroup">${facesIn(today)}</div></div>`;
+const moodRow = rowIn(messages.today);
 
 async function oneRow(page: Page) {
   const boxes = await page.getByRole("radio").evaluateAll((els) => els.map((e) => ({ top: (e as HTMLElement).offsetTop, w: e.getBoundingClientRect().width, h: e.getBoundingClientRect().height })));
@@ -98,6 +103,22 @@ test.describe("narrow journal layout", () => {
     await mount(page, 240, `<nav><ul class="grid grid-cols-4">${tabs}</ul></nav>`, 241);
     for (const k of TAB_KEYS) await expect(page.getByText(messages.app[k], { exact: true })).not.toHaveCSS("position", "absolute");
   });
+
+  // "Muito bem" went to a second row on the app at normal text (app #214). The web's faces grow to their
+  // label's longest word, so the row should hold in every live language: 255 px is the narrowest card,
+  // and 360 and 411 px are common phones, with the real gutters and card.
+  for (const [language, today] of [["en", messages.today], ["fr", fr.today], ["es", es.today], ["pt-BR", pt.today]] as const) {
+    test(`${language}: five faces on one row at 255 px`, async ({ page }) => {
+      await mount(page, 255, rowIn(today));
+      await oneRow(page);
+    });
+    for (const viewport of [360, 411]) {
+      test(`${language}: five faces on one row on a ${viewport} px phone`, async ({ page }) => {
+        await mount(page, viewport, `<main class="${APP_MAIN_GUTTER}"><form class="${JOURNAL_CARD}">${rowIn(today)}</form></main>`, viewport);
+        await oneRow(page);
+      });
+    }
+  }
 });
 
 // The browser's own text setting, on a 320 px phone: the footer is on every page,
