@@ -13,7 +13,6 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { JournalUnavailable } from "@/components/JournalUnavailable";
 import { isAuthOutage } from "@/lib/supabase/proxy";
 import { AnnouncerProvider } from "./Announcer";
-import { headers } from "next/headers";
 import { AppNav } from "./AppNav";
 import { BoButton } from "./BoButton";
 import { boSpeaks } from "@/lib/journal/bo";
