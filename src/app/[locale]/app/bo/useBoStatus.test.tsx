@@ -2,7 +2,7 @@ import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import messages from "@/messages/en.json";
-import { BO_STATUS_FRESH_MS, useBoStatus } from "./useBoStatus";
+import { BO_STATUS_FRESH_MS, forgetBoStatus, useBoStatus } from "./useBoStatus";
 
 let answer: unknown;
 const calls: Record<string, unknown>[] = [];
@@ -91,6 +91,29 @@ describe("useBoStatus: asked once the page is on screen, kept for a few minutes"
     });
     show();
     await waitFor(() => expect(screen.getByTestId("probe")).toHaveTextContent("true:null"));
+    vi.restoreAllMocks();
+  });
+});
+
+describe("forgetBoStatus (Reviewer, #205)", () => {
+  it("a kept bo_off doesn't outlive turning Bo back on: forgotten, the next page asks again and shows it", async () => {
+    answer = { status: "ok", available: false, reason: "bo_off", pictures: false, maxChars: 2000 };
+    show();
+    await waitFor(() => expect(screen.getByTestId("probe")).toHaveTextContent("false:bo_off"));
+    cleanup();
+    // Me's switch, or a consent, turns Bo back on.
+    forgetBoStatus();
+    answer = { status: "ok", available: true, reason: null, pictures: false, maxChars: 2000 };
+    show();
+    await waitFor(() => expect(screen.getByTestId("probe")).toHaveTextContent("true:null"));
+    expect(calls).toHaveLength(2);
+  });
+
+  it("storage that throws: nothing breaks", () => {
+    vi.spyOn(Storage.prototype, "removeItem").mockImplementation(() => {
+      throw new Error("blocked");
+    });
+    expect(() => forgetBoStatus()).not.toThrow();
     vi.restoreAllMocks();
   });
 });

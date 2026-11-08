@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { PRIMARY_SAVE } from "@/lib/ui/journalLayout";
 import { giveBoConsent } from "./actions";
+import { forgetBoStatus } from "./useBoStatus";
 
 // Bo's first open, for anyone without a current AI consent. The body is the English
 // draft (specs/bo-legal-drafts.md), marked as a placeholder in every language until
@@ -19,7 +20,11 @@ export function BoConsent({ onGiven }: { onGiven: () => void }) {
     setFailed(false);
     const { ok } = await giveBoConsent().catch(() => ({ ok: false }));
     setPending(false);
-    if (ok) onGiven();
+    if (ok) {
+      // A consent clears bo_off: the button's kept answer may say otherwise.
+      forgetBoStatus();
+      onGiven();
+    }
     else setFailed(true);
   };
   return (

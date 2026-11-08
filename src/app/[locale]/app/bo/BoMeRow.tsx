@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { boCanTurnOn } from "@/lib/journal/bo";
-import { useBoStatus } from "./useBoStatus";
+import { forgetBoStatus, useBoStatus } from "./useBoStatus";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useUntilLoaded } from "@/lib/ui/untilLoaded";
 import { setBoReadsJournal, turnBoOff } from "./actions";
@@ -36,6 +36,7 @@ export function BoMeRow({ hasConversation, readsJournal, consented, canTurnOn }:
     setFailed(true);
   };
   const chooseBo = async (next: boolean) => {
+    forgetBoStatus();
     if (next) return router.push("/app/bo");
     if (pending) return;
     setPending(true);
@@ -43,6 +44,7 @@ export function BoMeRow({ hasConversation, readsJournal, consented, canTurnOn }:
     const { ok } = await turnBoOff().catch(() => ({ ok: false }));
     setPending(false);
     if (!ok) return setFailed(true);
+    forgetBoStatus();
     setOn(false);
     setReads(false);
   };

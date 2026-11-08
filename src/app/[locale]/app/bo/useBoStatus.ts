@@ -22,6 +22,14 @@ function read(uid: string, language: string, now: number): BoStatus | null {
   return null;
 }
 
+// The person changed what the answer depends on (Me's switch, a consent): ask again next time,
+// or a kept "bo_off" would hide the button for minutes after turning Bo back on (Reviewer).
+export function forgetBoStatus() {
+  try {
+    sessionStorage.removeItem(KEY);
+  } catch {}
+}
+
 function keep(uid: string, language: string, status: BoStatus) {
   try {
     sessionStorage.setItem(KEY, JSON.stringify({ uid, language, at: Date.now(), status } satisfies Kept));
