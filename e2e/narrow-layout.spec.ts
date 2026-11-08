@@ -37,15 +37,15 @@ async function oneRow(page: Page) {
     expect(b.w).toBeGreaterThanOrEqual(48);
     expect(b.h).toBeGreaterThanOrEqual(48);
   }
-  // All five labels shown (UX, superseding decision 105), each on one line
-  // under its face at the default text size, as in the mockup.
+  // All five labels shown (UX, superseding decision 105), under their own face. A two-word label may
+  // take two lines, "Muito / bem", but no word splits or spills (UX, the same rule as app #214).
   const labels = await page.locator(`#row-box button > span:last-child`).evaluateAll((els) =>
     els.map((e) => ({ h: e.getBoundingClientRect().height, line: parseFloat(getComputedStyle(e).lineHeight), scroll: e.scrollWidth, client: e.clientWidth })),
   );
   expect(labels).toHaveLength(5);
   for (const l of labels) {
-    expect(l.h, JSON.stringify(l)).toBeLessThanOrEqual(l.line + 1);
-    expect(l.scroll).toBeLessThanOrEqual(l.client);
+    expect(l.h, JSON.stringify(l)).toBeLessThanOrEqual(2 * l.line + 1);
+    expect(l.scroll, JSON.stringify(l)).toBeLessThanOrEqual(l.client);
   }
 }
 
