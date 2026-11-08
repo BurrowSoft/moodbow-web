@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { BO_ERROR_TEXT, BO_ERRORS } from "./bo";
+import { BO_ERROR_TEXT, BO_ERRORS, boSpeaks } from "./bo";
 import conditions from "../../../content/conditions.json";
 import messages from "@/messages/en.json";
 
@@ -19,5 +19,12 @@ describe("the bo contract (content/contracts/bo.md, pinned)", () => {
   });
   it("every one has its line", () => {
     for (const code of codes) expect(BO_ERROR_TEXT[code as keyof typeof BO_ERROR_TEXT], code).toBeTruthy();
+  });
+});
+
+describe("Bo's languages (decision 239)", () => {
+  it("speaks en, es, fr and pt-BR, and nothing else until it's evaluated", () => {
+    for (const route of ["en", "es", "fr", "pt-br"]) expect(boSpeaks(route), route).toBe(true);
+    for (const route of ["de", "it", "th", "pt", "xx"]) expect(boSpeaks(route), route).toBe(route === "pt");
   });
 });

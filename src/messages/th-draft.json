@@ -1090,8 +1090,8 @@
     "reason": "UX draft (native read pending)"
   },
   {
-    "key": "bo.resting",
-    "en": "Bo is resting. Try again later.",
+    "key": "bo.notAvailableNow",
+    "en": "Bo isn't available right now.",
     "reason": "UX draft (native read pending)"
   },
   {

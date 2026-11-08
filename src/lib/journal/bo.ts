@@ -8,6 +8,11 @@
 // The contract's worst case is about 56 s, and clients wait 60. The server's own
 // wait ends a moment before the browser's, and the route's maxDuration above both.
 export const BO_CLIENT_WAIT_MS = 60_000;
+
+// Bo's languages, until others are evaluated (decision 239): checked on both clients and the
+// server, so offering a new language can't turn on an unevaluated Bo. Data locales (pt for pt-BR).
+export const BO_LANGUAGES = ["en", "es", "fr", "pt"] as const;
+export const boSpeaks = (route: string) => (BO_LANGUAGES as readonly string[]).includes(route === "pt-br" ? "pt" : route);
 export const BO_SERVER_WAIT_MS = 58_000;
 
 export const BO_ERRORS = [
@@ -83,7 +88,7 @@ export const BO_ERROR_TEXT = {
   daily_limit: "dailyLimit",
   picture_limit: "failed",
   region_unknown: "regionUnknown",
-  bo_resting: "resting",
+  bo_resting: "notAvailableNow",
   bo_failed: "failed",
   no_answer: "failed",
   offline: "offline",

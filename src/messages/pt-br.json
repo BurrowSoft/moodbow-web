@@ -588,7 +588,7 @@
     "meRowEmpty": "Nenhuma conversa ainda",
     "regionOff": "O Bo está disponível em alguns países.",
     "regionUnknown": "O Bo não está disponível no momento.",
-    "resting": "O Bo está descansando. Tente de novo mais tarde.",
+    "notAvailableNow": "O Bo não está disponível no momento.",
     "messageBox": "Escreva para o Bo",
     "send": "Enviar",
     "typing": "O Bo está escrevendo",

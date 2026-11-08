@@ -16,6 +16,7 @@ import { AnnouncerProvider } from "./Announcer";
 import { headers } from "next/headers";
 import { AppNav } from "./AppNav";
 import { BoButton } from "./BoButton";
+import { boSpeaks } from "@/lib/journal/bo";
 import { CheckInDraftProvider } from "./CheckInDraft";
 import { KeyboardShortcuts } from "./KeyboardShortcuts";
 import { NavProgress } from "@/components/NavProgress";
@@ -56,9 +57,9 @@ export default async function AppLayout({ children, params }: LayoutProps<"/[loc
   // is exempt. It only decides whether the button shows; the function decides
   // whether Bo opens, from a signed token. A failed read: no button. Nor once Me → Use
   // Bo has turned it off (bo_off). Someone who declined AI at sign-up keeps it, and is
-  // asked for consent on opening (UX).
+  // asked for consent on opening (UX). Only in Bo's languages (decision 239).
   let boVisible = false;
-  if (pageGate("bo-live") !== "hidden" && me.settings?.bo_off !== true) {
+  if (pageGate("bo-live") !== "hidden" && boSpeaks(locale) && me.settings?.bo_off !== true) {
     const { data: visible } = await supabase.rpc("bo_visible", { p_country: (await headers()).get("x-vercel-ip-country") });
     boVisible = visible === true;
   }

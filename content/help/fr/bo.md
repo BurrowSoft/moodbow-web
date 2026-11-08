@@ -24,7 +24,7 @@ Bo ne lit pas votre journal, sauf si vous activez « Laisser Bo lire mes dernie
 Dans Moi, sous « Votre conversation avec Bo », vous pouvez l'exporter, l'effacer ou désactiver « Utiliser Bo ». L'effacer la supprime de Moodbow et c'est définitif ; ce qu'Anthropic a déjà reçu suit ses propres délais de suppression, indiqués plus haut. Désactiver « Utiliser Bo » arrête les nouveaux messages et désactive la lecture de votre journal ; votre conversation reste jusqu'à ce que vous l'effaciez.
 
 **Limites**
-Le nombre de messages par jour est limité. Les comptes avec un e-mail en ont davantage. Si Bo se repose ou si vous avez atteint la limite, le reste de Moodbow fonctionne normalement, et l'aide reste disponible.
+Le nombre de messages par jour est limité. Les comptes avec un e-mail en ont davantage. Si Bo n'est pas disponible pour le moment ou si vous avez atteint la limite, le reste de Moodbow fonctionne normalement, et l'aide reste disponible.
 
 **Signaler une réponse**
 Si une réponse semble fausse ou nuisible, appuyez sur « Signaler cette réponse ». Personne ne lit les signalements tout de suite : si vous avez besoin de quelqu'un maintenant, utilisez « Envie de parler à quelqu'un ? ». Nous supprimons les signalements après 90 jours, sauf si nous devons en garder un plus longtemps pour traiter des contenus illégaux.{/pending}

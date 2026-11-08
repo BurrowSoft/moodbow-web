@@ -24,7 +24,7 @@ Bo non legge il tuo diario, a meno che tu non attivi «Lascia che Bo legga i mie
 In Profilo, in «La tua conversazione con Bo», puoi esportarla, cancellarla o disattivare «Usa Bo». Cancellarla la rimuove da Moodbow e non si può annullare; ciò che Anthropic ha già ricevuto segue i suoi tempi di eliminazione, indicati sopra. Disattivare «Usa Bo» ferma i nuovi messaggi e disattiva la lettura del tuo diario; la conversazione resta finché non la cancelli.
 
 **Limiti**
-C'è un limite giornaliero di messaggi. Gli account con email ne hanno di più. Se Bo sta riposando o hai raggiunto il limite, il resto di Moodbow funziona come sempre, e l'aiuto resta disponibile.
+C'è un limite giornaliero di messaggi. Gli account con email ne hanno di più. Se Bo non è disponibile al momento o hai raggiunto il limite, il resto di Moodbow funziona come sempre, e l'aiuto resta disponibile.
 
 **Segnalare una risposta**
 Se una risposta sembra sbagliata o dannosa, tocca «Segnala questa risposta». Nessuno legge subito le segnalazioni: se hai bisogno di qualcuno adesso, usa "Vuoi parlare con qualcuno?". Eliminiamo le segnalazioni dopo 90 giorni, salvo che dobbiamo conservarne una più a lungo per materiale illegale.{/pending}

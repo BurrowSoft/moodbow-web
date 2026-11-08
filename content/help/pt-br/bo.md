@@ -24,7 +24,7 @@ O Bo não lê o seu diário, a menos que você ative "Deixar o Bo ler meus check
 Em Perfil, em "Sua conversa com o Bo", você pode exportar, apagar ou desativar "Usar o Bo". Apagar remove a conversa do Moodbow e não dá para desfazer; o que a Anthropic já recebeu segue os prazos de exclusão dela, indicados acima. Desativar "Usar o Bo" interrompe as mensagens novas e desativa a leitura do seu diário; sua conversa fica até você apagá-la.
 
 **Limites**
-Há um limite diário de mensagens. Contas com e-mail têm mais. Se o Bo estiver descansando ou você tiver chegado ao limite, o resto do Moodbow funciona normalmente, e a ajuda continua ali.
+Há um limite diário de mensagens. Contas com e-mail têm mais. Se o Bo não estiver disponível no momento ou você tiver chegado ao limite, o resto do Moodbow funciona normalmente, e a ajuda continua ali.
 
 **Reportar uma resposta**
 Se uma resposta parecer errada ou prejudicial, toque em "Reportar esta resposta". Ninguém lê os reportes na hora: se você precisa de alguém agora, use "Quer conversar com alguém?". Apagamos os reportes após 90 dias, a menos que precisemos manter algum por mais tempo por causa de material ilegal.{/pending}

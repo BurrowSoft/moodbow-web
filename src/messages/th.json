@@ -588,7 +588,7 @@
     "meRowEmpty": "ยังไม่มีการสนทนา",
     "regionOff": "Bo ใช้ได้ในบางประเทศ",
     "regionUnknown": "Bo ไม่พร้อมใช้งานในขณะนี้",
-    "resting": "Bo กำลังพัก โปรดลองอีกครั้งภายหลัง",
+    "notAvailableNow": "ตอนนี้ Bo ยังไม่พร้อมใช้งาน",
     "messageBox": "เขียนถึง Bo",
     "send": "ส่ง",
     "typing": "Bo กำลังเขียน",

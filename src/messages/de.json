@@ -588,7 +588,7 @@
     "meRowEmpty": "Noch keine Unterhaltung",
     "regionOff": "Bo ist in ausgewählten Ländern verfügbar.",
     "regionUnknown": "Bo ist gerade nicht verfügbar.",
-    "resting": "Bo ruht sich aus. Versuch es später noch einmal.",
+    "notAvailableNow": "Bo ist gerade nicht verfügbar.",
     "messageBox": "Schreib Bo",
     "send": "Senden",
     "typing": "Bo schreibt",
