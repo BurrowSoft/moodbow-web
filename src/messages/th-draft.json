@@ -1218,5 +1218,20 @@
     "key": "bo.helpLink",
     "en": "How Bo works",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.languageOff",
+    "en": "Bo isn't available in this language yet.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.ageOff",
+    "en": "Bo is for adults.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "bo.boOff",
+    "en": "Bo is turned off. You can turn it back on in Me.",
+    "reason": "UX draft (native read pending)"
   }
 ]

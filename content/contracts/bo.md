@@ -10,7 +10,7 @@ One server path for app and web: the Supabase edge function `bo`, called with th
 { "action": "status", "region_token": "<token or null>", "language": "en", "age": "not_applicable" }
 ```
 - `language`: the page's language (`pt` for pt-BR). Missing or malformed: the profile's locale, never a fallback to English.
-- `age`: the client's claim about the store's age answer: `adult`, `minor`, `unknown` (only where the store signal applies) or `not_applicable` (the web, and anywhere the signal doesn't apply). Missing: `not_applicable`. **A claim, not proof:** the store's answer stays on the device, which blocks the app itself. The server's own age fact is the self-declared `age_18` consent row.
+- `age`: the client's claim about the store's age answer: `adult`, `minor`, `unknown` (only where the store signal applies) or `not_applicable` (the web, and anywhere the signal doesn't apply). Missing or malformed: `unknown`, which fails closed, so send it every time. **A claim, not proof:** the store's answer stays on the device, which blocks the app itself. The server's own age fact is the self-declared `age_18` consent row.
 
 → `200 { "available": false, "reason": "off", "pictures": false, "limits": { "max_chars": 2000 } }`
 
@@ -79,7 +79,7 @@ From the web's `GET /api/region`: `{ "token": "<payload>.<sig>" }` or `{ "token"
 
 ## What the server does on a send
 1. The crisis matcher on the text, in memory.
-2. The switches (`bo_available`, 021), from the token's country, the language and the age claim. **A refusal on a match gets the fixed reply and the card, kept,** with no model call, except the person's own `consent` and `bo_off`, which keep nothing.
+2. The switches (`bo_available`, 021), from the token's country, the language and the age claim. **A refusal on a match gets the fixed reply and the card,** with no model call and **nothing kept**, since a switch may be the person's own choice or a claimed age. The person's own `consent` and `bo_off` get their own code instead.
 3. The same key, then length.
 4. `bo_begin`. A `{stop}` with a match gets the fixed reply, kept, with no model call, except `ai_consent_required`.
 5. History from the database, the window plus up to 5 flagged messages, and the journal if the person's switch is on.
