@@ -32,12 +32,15 @@ export function useBoStatus(uid: string): BoStatus | null {
   const language = useLocale();
   const [status, setStatus] = useState<BoStatus | null>(null);
   useEffect(() => {
+    let current = true;
     const kept = read(uid, language, Date.now());
     if (kept) {
-      setStatus(kept);
-      return;
+      // After the first render, as the server rendered no answer: the same first paint on both.
+      void Promise.resolve().then(() => current && setStatus(kept));
+      return () => {
+        current = false;
+      };
     }
-    let current = true;
     fetch("/api/bo", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "status", language }), signal: AbortSignal.timeout(BO_STATUS_WAIT_MS) })
       .then((r) => r.json())
       .then((body: unknown) => {
