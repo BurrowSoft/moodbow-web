@@ -149,7 +149,7 @@ export function YourData({ credits, uid, csv = false, ai = false }: { credits: n
             </button>
             {exportResult}
             <div>
-              <label htmlFor="delete-confirm" className="block text-sm font-medium text-text">
+              <label htmlFor="delete-confirm" className="block leading-[1.429] [font-size:min(0.875rem,max(8.75vw,28px))] font-medium text-text">
                 {t("deleteTypeConfirm", { word: t("deleteWord") })}
               </label>
               <input

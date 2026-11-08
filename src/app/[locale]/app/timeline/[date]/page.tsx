@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { JOURNAL_HEADING } from "@/lib/ui/journalLayout";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -67,7 +68,7 @@ export default async function DayPage({ params }: PageProps<"/[locale]/app/timel
     <section className="space-y-8">
       {/* Opened from the Timeline (decision 152). */}
       <BackLink href="/app/timeline" label={await backLabel("/app/timeline", dateLocaleTag)} testId="nav-back" />
-      <h1 className="text-3xl font-medium tracking-tight" data-testid="day-date">
+      <h1 className={JOURNAL_HEADING} data-testid="day-date">
         {dateLine(date, dateLocaleTag)}
       </h1>
       <DayCheckIn initial={(checkIn as CheckIn | null) ?? null} uid={user.id} date={date} dateLocaleTag={dateLocaleTag} />

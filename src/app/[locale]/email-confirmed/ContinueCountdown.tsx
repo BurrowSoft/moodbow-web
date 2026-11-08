@@ -50,7 +50,7 @@ export function ContinueCountdown({ href }: { href: string }) {
           <p role="status" className="sr-only">
             {t(line, { seconds: COUNTDOWN_SECONDS })}
           </p>
-          <p aria-hidden="true" data-testid="email-confirmed-seconds" className="text-sm text-muted">
+          <p aria-hidden="true" data-testid="email-confirmed-seconds" className="text-sm text-muted max-sm:[font-size:min(0.875rem,max(8.75vw,28px))]">
             {t(line, { seconds: left })}
           </p>
         </>
@@ -59,7 +59,7 @@ export function ContinueCountdown({ href }: { href: string }) {
         {t("emailConfirmedContinue")}
       </Link>
       {!stopped && (
-        <button type="button" data-testid="email-confirmed-stay" onClick={() => setStopped(true)} className="min-h-11 text-sm font-medium text-accent underline underline-offset-4">
+        <button type="button" data-testid="email-confirmed-stay" onClick={() => setStopped(true)} className="min-h-11 text-sm max-sm:[font-size:min(0.875rem,max(8.75vw,28px))] font-medium text-accent underline underline-offset-4">
           {t("emailConfirmedStay")}
         </button>
       )}

@@ -4,6 +4,10 @@ on:
   pull_request:
   push:
     branches: [master]
+  # All the journeys, on master, at a quiet hour, so a break in the real sign-up form isn't left for
+  # the next PR that touches it. A red run shows in the Actions list.
+  schedule:
+    - cron: "17 19 * * *"
 
 permissions:
   contents: read
@@ -17,6 +21,7 @@ concurrency:
 jobs:
   check:
     name: Typecheck, lint and unit tests
+    if: github.event_name != 'schedule'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -37,6 +42,7 @@ jobs:
 
   e2e:
     name: Build and Playwright smoke
+    if: github.event_name != 'schedule'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -80,8 +86,11 @@ jobs:
   # when it names that environment.
   journeys:
     name: Staging journeys
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' || github.event_name == 'schedule'
     environment: staging
+    permissions:
+      contents: read
+      pull-requests: read
     runs-on: ubuntu-latest
     # Ubuntu's package mirror has made the install step take 10 minutes on some
     # runs, leaving under 5 for 4 minutes of journeys.
@@ -124,8 +133,35 @@ jobs:
         run: printf 'Acquire::http::Timeout "15";\nAcquire::https::Timeout "15";\nAcquire::Retries "3";\n' | sudo tee /etc/apt/apt.conf.d/99-ci-timeouts
       - if: steps.cfg.outputs.ok == 'true'
         run: npx playwright install --with-deps chromium
+      # The journeys that send a real email (@real-email) run only where sign-up changes: staging
+      # limits those emails, and a heavy day failed every PR. The help numbers (@help-numbers, minutes
+      # of page loads) run only where the numbers or the card change. If the list can't be read, all
+      # run. The daily run is everything.
+      - id: scope
+        if: steps.cfg.outputs.ok == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "${{ github.event_name }}" = schedule ]; then
+            echo "args=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          files=$(gh api "repos/${{ github.repository }}/pulls/${{ github.event.number }}/files" --paginate --jq '.[].filename') || files=
+          if [ -z "$files" ] || echo "$files" | grep -qE '^(src/app/\[locale\]/(sign-up|consent|welcome|email-confirmed|auth)/|src/lib/(legalVersions|onboardingConsent|authErrors)|src/lib/supabase/|src/lib/(email|password)|src/components/AuthField|src/proxy\.ts|src/i18n/|src/messages/|content/conditions\.json|next\.config\.ts|package(-lock)?\.json|e2e/journey/|\.github/workflows/)'; then
+            skip=
+          else
+            skip=@real-email
+          fi
+          if [ -n "$files" ] && ! echo "$files" | grep -qE '^(content/contracts/countries\.json|src/lib/safety/helplines|src/components/(SafetyCard|Dialog)|src/messages/|e2e/journey/|\.github/workflows/)'; then
+            skip="${skip:+$skip|}@help-numbers"
+          fi
+          if [ -n "$skip" ]; then
+            echo "args=--grep-invert '$skip'" >> "$GITHUB_OUTPUT"
+          else
+            echo "args=" >> "$GITHUB_OUTPUT"
+          fi
       - if: steps.cfg.outputs.ok == 'true'
-        run: npm run test:journeys
+        run: npm run test:journeys -- ${{ steps.scope.outputs.args }}
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_STAGING_URL }}
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_STAGING_PUBLISHABLE_KEY }}

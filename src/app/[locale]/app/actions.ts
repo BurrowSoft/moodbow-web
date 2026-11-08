@@ -59,8 +59,10 @@ export async function saveCheckIn(_prev: CheckInState, form: FormData): Promise<
       // through before and only its answer was lost. Saved, not a conflict.
       if (row && sameCheckIn(row, input)) return { status: "saved", checkIn: row };
       // conflict: the day has another check-in. Without it to show, the
-      // person can't choose (the dialog shows both): kept for a retry.
-      if (action.error === "conflict" && !row) return { status: "error", error: isDeadlineError(readError) ? "unreachable" : "generic" };
+      // person can't choose (the dialog shows both): kept for a retry. The
+      // same for stale when the read failed. stale with a read that found
+      // nothing: deleted elsewhere.
+      if (!row && (action.error === "conflict" || readError)) return { status: "error", error: isDeadlineError(readError) ? "unreachable" : "generic" };
       return { status: "error", error: action.error, checkIn: row };
     }
     return { status: "error", error: action.error };
