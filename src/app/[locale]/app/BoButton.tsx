@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 import { useKeyboardOpen } from "@/lib/ui/keyboardOpen";
+import { boButtonShows } from "@/lib/journal/bo";
+import { useBoStatus } from "./bo/useBoStatus";
 
 // Only at the top level of the four tabs (UX & PM 2026-11-06): hidden in the
 // editor, a day, an entry, and Bo itself.
@@ -13,12 +15,15 @@ const SIDES_PX = 40;
 
 // The way to Bo, one tap away. Above the phone's tab bar, and out of the way while
 // the on-screen keyboard is up. The layout decides whether it's shown at all, and
-// the function still decides whether Bo opens: this never opens anything itself.
+// the function still decides whether Bo opens: this never opens anything itself. It appears when the
+// status answers (useBoStatus), never holding up the page; its room at the page's end is kept from
+// the start, so nothing moves when it does.
 // One line under the safety card's cap, so it stays a small part of the window: the
 // tab bar's height is its only rem, as it has to clear the bar. Past half the window's
 // width, the icon alone, with the words as its name (UX, #205; the app's rule). It never covers the
 // page: has-bo-button (globals.css) gives the page's end room for it, with the same sums.
-export function BoButton() {
+export function BoButton({ uid }: { uid: string }) {
+  const status = useBoStatus(uid);
   const t = useTranslations("bo");
   const path = usePathname();
   const keyboard = useKeyboardOpen();
@@ -43,7 +48,7 @@ export function BoButton() {
       window.removeEventListener("resize", fit);
     };
   }, [shown]);
-  if (!shown) return null;
+  if (!shown || !status || !boButtonShows(status)) return null;
   return (
     <Link
       href="/app/bo"
