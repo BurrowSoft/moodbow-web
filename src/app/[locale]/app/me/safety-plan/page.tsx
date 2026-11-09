@@ -47,11 +47,10 @@ export default async function SafetyPlanPage({ params }: PageProps<"/[locale]/ap
       <h1 className={JOURNAL_HEADING} data-testid="plan-title">
         {t("title")}
       </h1>
+      {/* Help first, always there, whatever the plan holds or whether it loaded. */}
+      <GetHelpNow country={me?.profile?.country} testId="plan-get-help" neutral />
       {unread ? (
-        <>
-          <JournalUnavailable />
-          <GetHelpNow country={me?.profile?.country} testId="plan-get-help" neutral />
-        </>
+        <JournalUnavailable />
       ) : (
         <SafetyPlanEditor initial={parsePlan(row.data, people.data)} toolbox={parseToolboxItems(toolbox.data)} country={me.profile?.country} />
       )}

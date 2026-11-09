@@ -62,6 +62,9 @@ export function SafetyPlanEditor({ initial, toolbox, country }: { initial: Safet
       if (!a || a.target === "_blank" || a.href.startsWith("tel:")) return;
       const url = new URL(a.href, location.href);
       if (url.origin !== location.origin || url.pathname === location.pathname) return;
+      // Help is never held up by a question (the Reviewer's read): the help button opens its
+      // card, and any help page is left to open as usual. Unsaved text stays in the box.
+      if (/\/help(\/|$)/.test(url.pathname)) return;
       e.preventDefault();
       e.stopPropagation();
       setLeaving(url.pathname + url.search);

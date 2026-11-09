@@ -9,6 +9,7 @@ const addPerson = vi.fn();
 const updatePerson = vi.fn();
 const deletePerson = vi.fn();
 vi.mock("./actions", () => ({
+  safetyPlanHasContent: () => Promise.resolve(false),
   saveSafetyPlanText: (...a: unknown[]) => saveText(...a),
   addSafetyPlanPerson: (...a: unknown[]) => addPerson(...a),
   updateSafetyPlanPerson: (...a: unknown[]) => updatePerson(...a),
@@ -17,6 +18,14 @@ vi.mock("./actions", () => ({
 vi.mock("../toolbox/actions", () => ({ addToolboxItem: vi.fn(), updateToolboxItem: vi.fn(), deleteToolboxItem: vi.fn(), moveToolboxItem: vi.fn() }));
 const push = vi.fn();
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
+vi.mock("@/i18n/navigation", () => ({
+  Link: ({ href, prefetch, children, ...rest }: { href: string; prefetch?: boolean; children: React.ReactNode }) => (
+    <a href={href} data-prefetch={String(prefetch)} {...rest}>
+      {children}
+    </a>
+  ),
+}));
+const { GetHelpNow } = await import("@/components/SafetyCard");
 const { SafetyPlanEditor } = await import("./SafetyPlanEditor");
 
 const p = messages.safetyPlan;
@@ -141,5 +150,33 @@ describe("SafetyPlanEditor", () => {
     await act(async () => fireEvent.click(screen.getByTestId("plan-distractions-save")));
     expect(screen.getByTestId("plan-failed")).toHaveTextContent(messages.today.errGeneric);
     expect(screen.getByTestId("plan-distractions-text")).toHaveValue("The park");
+  });
+});
+
+describe("SafetyPlanEditor: help is never held up (the Reviewer's read)", () => {
+  it("unsaved text, then the help button: the card opens at once, with no question first", () => {
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <GetHelpNow country="NZ" testId="plan-get-help" neutral />
+        <SafetyPlanEditor initial={EMPTY_PLAN} toolbox={[]} country="NZ" />
+      </NextIntlClientProvider>,
+    );
+    fireEvent.change(screen.getByTestId("plan-warning_signs-text"), { target: { value: "Not sleeping" } });
+    fireEvent.click(screen.getByTestId("plan-get-help"));
+    expect(screen.getByTestId("safety-card")).toBeInTheDocument();
+    expect(screen.queryByTestId("plan-leave")).toBeNull();
+    expect(push).not.toHaveBeenCalled();
+    expect(screen.getByTestId("plan-warning_signs-text")).toHaveValue("Not sleeping");
+  });
+
+  it("unsaved text, then a help page link: it goes, with no question", () => {
+    open();
+    const help = document.createElement("a");
+    help.href = "/help/get-help-now";
+    document.body.append(help);
+    fireEvent.change(screen.getByTestId("plan-surroundings-text"), { target: { value: "Ask Sam" } });
+    fireEvent.click(help);
+    expect(screen.queryByTestId("plan-leave")).toBeNull();
+    help.remove();
   });
 });
