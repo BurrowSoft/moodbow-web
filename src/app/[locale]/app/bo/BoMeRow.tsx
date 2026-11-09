@@ -13,7 +13,10 @@ import { ClearBo } from "./ClearBo";
 // person's to export and clear. Use Bo is the AI consent: off withdraws it, on goes
 // through the consent on Bo's screen, and can't be turned on where Bo isn't available
 // (canTurnOn). The journal switch needs it on, and never shows without its line.
-export function BoMeRow({ hasConversation, readsJournal, consented, canTurnOn }: { hasConversation: boolean; readsJournal: boolean; consented: boolean; canTurnOn: boolean }) {
+// turnedOff: the person turned Bo off themselves (their saved bo_off). Then the switch is
+// always here, whatever the status says or how late it answers, so there's always a way back;
+// if Bo isn't available, Bo's screen says why, with help (UX, 2026-11-09).
+export function BoMeRow({ hasConversation, readsJournal, consented, canTurnOn, turnedOff }: { hasConversation: boolean; readsJournal: boolean; consented: boolean; canTurnOn: boolean; turnedOff: boolean }) {
   const untilLoaded = useUntilLoaded();
   const router = useRouter();
   const t = useTranslations("bo");
@@ -21,6 +24,7 @@ export function BoMeRow({ hasConversation, readsJournal, consented, canTurnOn }:
   const [has, setHas] = useState(hasConversation);
   const [on, setOn] = useState(consented);
   const [reads, setReads] = useState(readsJournal);
+  const [offByThem, setOffByThem] = useState(turnedOff);
   const [pending, setPending] = useState(false);
   const [failed, setFailed] = useState(false);
   const toggle = async (next: boolean) => {
@@ -46,6 +50,7 @@ export function BoMeRow({ hasConversation, readsJournal, consented, canTurnOn }:
     if (!ok) return setFailed(true);
     forgetBoStatus();
     setOn(false);
+    setOffByThem(true);
     setReads(false);
   };
   return (
@@ -56,7 +61,7 @@ export function BoMeRow({ hasConversation, readsJournal, consented, canTurnOn }:
       <Link href="/help/bo" data-testid="me-bo-help" className="mt-1 inline-flex min-h-11 items-center text-sm font-medium text-accent underline underline-offset-4">
         {t("helpLink")}
       </Link>
-      {(on || canTurnOn) && (
+      {(on || canTurnOn || offByThem) && (
         <label className="mt-4 flex min-h-11 items-center justify-between gap-4 text-text">
           <span className="min-w-0 [overflow-wrap:anywhere]">{t("useBo")}</span>
           <input type="checkbox" role="switch" data-testid="me-bo-use" checked={on} onChange={(e) => void chooseBo(e.target.checked)} className="h-5 w-5 shrink-0 accent-[var(--accent)]" />
@@ -95,7 +100,8 @@ export function BoMeRow({ hasConversation, readsJournal, consented, canTurnOn }:
 }
 
 // Me's row with whether Bo can be turned on from the function's status, asked once Me is on
-// screen, so Me never waits on Bo. Until it answers, or if it doesn't, the row offers nothing new.
+// screen, so Me never waits on Bo. Until it answers, or if it doesn't, the row offers nothing new,
+// except to someone who turned Bo off themselves: their way back never waits on it.
 export function BoMeRowLive({ uid, ...row }: Omit<Parameters<typeof BoMeRow>[0], "canTurnOn"> & { uid: string }) {
   const status = useBoStatus(uid);
   return <BoMeRow {...row} canTurnOn={status !== null && boCanTurnOn(status)} />;

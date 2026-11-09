@@ -86,7 +86,7 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
           credits={{ balance: me.credits?.balance ?? 0 }}
         />
       )}
-      {pageGate("bo-live") !== "hidden" && <BoMeRowLive uid={user.id} hasConversation={boHas} readsJournal={boReads} consented={hasCurrentConsent(me, "ai")} />}
+      {pageGate("bo-live") !== "hidden" && <BoMeRowLive uid={user.id} hasConversation={boHas} readsJournal={boReads} consented={hasCurrentConsent(me, "ai")} turnedOff={me.settings?.bo_off === true} />}
       <Reminder on={me.settings?.reminder_on ?? true} time={hhmm(me.settings?.reminder_time)} />
       <LanguageRegion
         initial={{ locale: routeLocale(me.profile?.locale ?? locale), country: me.profile?.country ?? "", time_zone: me.profile?.time_zone ?? "UTC" }}
