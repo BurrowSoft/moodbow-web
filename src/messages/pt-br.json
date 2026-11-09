@@ -651,5 +651,22 @@
     "deleteBody": "Ela será apagada para sempre.",
     "delete": "Excluir",
     "keep": "Manter"
+  },
+  "appointment": {
+    "meRow": "Para a minha consulta",
+    "intro": "Um resumo para imprimir ou mostrar em uma consulta. Nada aqui é salvo ou enviado.",
+    "show": "Mostrar",
+    "range2": "Últimas 2 semanas",
+    "range4": "Últimas 4 semanas",
+    "range12": "Últimas 12 semanas",
+    "count": "{n, plural, one {# check-in} other {# check-ins}}",
+    "averages": "Médias",
+    "starred": "Momentos",
+    "fullText": "Incluir o texto completo",
+    "talk": "Sobre o que quero falar",
+    "talkHint": "Isto não é salvo.",
+    "print": "Imprimir",
+    "empty": "Ainda não há check-ins neste período.",
+    "footer": "Feito por você a partir das suas próprias anotações no Moodbow. Não é uma avaliação médica."
   }
 }
