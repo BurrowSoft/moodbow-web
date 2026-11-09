@@ -263,7 +263,9 @@ export function BoConversation({ initial, country, back, healthData = false, con
       setFull(answer.conversationFull);
       const { reply, conversationFull } = answer;
       setMessages((list) => [...list, { id: client_key, author: "person", body: sent }, { id: `${client_key}-reply`, author: "ai", body: reply, sentWith: client_key, unkept: conversationFull }]);
-      setText("");
+      // Typed while it went (the box stays open for up to a minute): kept, and only what went
+      // is taken out of it (B5, on paper).
+      setText((now) => (now === sent ? "" : now.startsWith(sent) ? now.slice(sent.length).replace(/^\s+/, "") : now));
       attempt.current = null;
       return;
     }

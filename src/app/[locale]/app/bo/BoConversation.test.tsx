@@ -644,3 +644,40 @@ describe("BoConversation: focus from Bo's button (UX, from A4)", () => {
     expect(screen.getByRole("heading", { level: 1, name: b.screenLine })).not.toHaveFocus();
   });
 });
+
+describe("BoConversation: what's typed while a send waits is kept (B5, on paper)", () => {
+  const held = () => {
+    let answer: (value: unknown) => void = () => {};
+    answers.push(new Promise((done) => (answer = done)));
+    return (value: unknown) => answer(value);
+  };
+
+  it("more typed after what went: only what went leaves the box", async () => {
+    await open();
+    const answer = held();
+    type("Hello");
+    fireEvent.click(screen.getByTestId("bo-send"));
+    type("Hello and one more thing");
+    await act(async () => answer(reply()));
+    expect(screen.getByTestId("bo-text")).toHaveValue("and one more thing");
+  });
+
+  it("something else typed instead: it's all kept", async () => {
+    await open();
+    const answer = held();
+    type("Hello");
+    fireEvent.click(screen.getByTestId("bo-send"));
+    type("Something else");
+    await act(async () => answer(reply()));
+    expect(screen.getByTestId("bo-text")).toHaveValue("Something else");
+  });
+
+  it("nothing typed meanwhile: the box empties, as before", async () => {
+    await open();
+    const answer = held();
+    type("Hello");
+    fireEvent.click(screen.getByTestId("bo-send"));
+    await act(async () => answer(reply()));
+    expect(screen.getByTestId("bo-text")).toHaveValue("");
+  });
+});
