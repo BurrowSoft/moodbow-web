@@ -195,7 +195,8 @@ describe("BoConversation", () => {
     ["language_off", b.languageOff],
     ["age_off", b.ageOff],
     ["bo_off", b.boOff],
-    ["bo_unavailable", b.unavailable],
+    ["bo_unavailable", b.notAvailableNow],
+    ["needs_email", b.notAvailableNow],
   ])("%s closes the box and keeps help", async (code, line) => {
     await open();
     answers.push({ status: "error", code });

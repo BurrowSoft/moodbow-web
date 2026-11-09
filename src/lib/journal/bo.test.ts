@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { BO_ERROR_TEXT, BO_ERRORS, BO_REASONS, boButtonShows, boCanTurnOn, boReasonProblem, boSpeaks, type BoStatus } from "./bo";
+import { BO_ERROR_TEXT, BO_ERRORS, BO_PICTURE_MAX_BASE64, BO_REASONS, boButtonShows, boCanTurnOn, boPictureField, boReasonProblem, boSpeaks, type BoStatus } from "./bo";
+import { BO_PICTURE_MAX_BYTES } from "./boPicture";
 import conditions from "../../../content/conditions.json";
 import messages from "@/messages/en.json";
 
@@ -51,5 +52,19 @@ describe("what each of the status's reasons shows (bo.md, Client column; decisio
       const problem = boReasonProblem(reason);
       if (problem) expect(BO_ERRORS, reason).toContain(problem);
     }
+  });
+});
+
+describe("boPictureField: the contract's 1 MB, decoded (bo.md, app b67431e)", () => {
+  it("the biggest picture the browser makes passes; one character more doesn't", () => {
+    expect(BO_PICTURE_MAX_BASE64).toBe(Math.ceil(BO_PICTURE_MAX_BYTES / 3) * 4);
+    expect(boPictureField({ media_type: "image/jpeg", data: "A".repeat(BO_PICTURE_MAX_BASE64) })).not.toBeNull();
+    expect(boPictureField({ media_type: "image/jpeg", data: "A".repeat(BO_PICTURE_MAX_BASE64 + 1) })).toBeNull();
+  });
+
+  it("only a JPEG with data, as the browser sends it", () => {
+    expect(boPictureField({ media_type: "image/png", data: "AAAA" })).toBeNull();
+    expect(boPictureField({ media_type: "image/jpeg", data: "" })).toBeNull();
+    expect(boPictureField(null)).toBeNull();
   });
 });

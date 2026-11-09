@@ -99,8 +99,9 @@ export const BO_ERROR_TEXT = {
   not_authenticated: "failed",
   ai_consent_required: "failed",
   region_off: "regionOff",
-  bo_unavailable: "unavailable",
-  needs_email: "unavailable",
+  // "Right now", never "this account", which read as blame (UX, 2026-11-08).
+  bo_unavailable: "notAvailableNow",
+  needs_email: "notAvailableNow",
   pictures_off: "picturesOff",
   pictures_need_email: "picturesOff",
   in_progress: "wait",
@@ -117,9 +118,10 @@ export const BO_ERROR_TEXT = {
   offline: "offline",
 } as const satisfies Record<BoProblem, string>;
 
-// The picture field as the function expects it, or nothing. The function caps a whole
-// request at 1,500,000 bytes (bo.md), and the browser's is under that with room to spare.
-const BO_PICTURE_MAX_BASE64 = 1_400_000;
+// The picture field as the function expects it, or nothing. bo.md takes at most 1 MB
+// decoded (app b67431e); the browser makes at most 1,000,000 bytes (boPicture.ts), which
+// is this many base64 characters, so nothing bigger is passed on to be refused there.
+export const BO_PICTURE_MAX_BASE64 = Math.ceil(1_000_000 / 3) * 4;
 export function boPictureField(value: unknown): { media_type: "image/jpeg"; data: string } | null {
   const v = (value ?? {}) as { media_type?: unknown; data?: unknown };
   if (v.media_type !== "image/jpeg" || typeof v.data !== "string" || v.data === "" || v.data.length > BO_PICTURE_MAX_BASE64) return null;
