@@ -49,12 +49,12 @@ describe("JournalUnavailable: help is there whatever failed (decision 218)", () 
 });
 
 describe("JournalUnavailable: help first (UX, Web Tester at 320 px and 300 %)", () => {
-  it.each([false, true])("standalone %s: help comes right after the heading, before Try again", (standalone) => {
+  it.each([false, true])("standalone %s: help first, then the heading, then Try again", (standalone) => {
     renderIt(standalone);
     const heading = screen.getByRole("heading", { name: messages.auth.errGeneric });
     const help = screen.getByTestId("journal-unavailable-help");
     const retry = screen.getByTestId("try-again");
-    expect(heading.compareDocumentPosition(help) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-    expect(help.compareDocumentPosition(retry) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(help.compareDocumentPosition(heading) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(heading.compareDocumentPosition(retry) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 });

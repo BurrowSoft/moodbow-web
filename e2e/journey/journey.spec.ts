@@ -1291,8 +1291,10 @@ test("large text, set in the browser: the couldn't-load state's help is in the f
         await page.goto(`${route}/app/test/unavailable`);
         await expect(page.getByTestId("journal-unavailable"), `${saved} at ${percent} %`).toBeVisible();
         const box = (await page.getByTestId("journal-unavailable-help").boundingBox())!;
+        // Above the fixed tab bar, which covers the window's foot on a phone.
+        const bar = (await page.locator("nav.fixed").first().boundingBox())?.y ?? 640;
         expect(box.y, `${saved} at ${percent} %: help's top in the first view`).toBeGreaterThanOrEqual(0);
-        expect(box.y + box.height, `${saved} at ${percent} %: help's bottom in the first view`).toBeLessThanOrEqual(640);
+        expect(box.y + box.height, `${saved} at ${percent} %: help's bottom above the tab bar (${Math.round(bar)} px)`).toBeLessThanOrEqual(Math.min(640, bar));
         expect(box.x + box.width, `${saved} at ${percent} %: help inside the width`).toBeLessThanOrEqual(320.5);
       }
     }
