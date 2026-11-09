@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import messages from "@/messages/en.json";
@@ -18,6 +18,7 @@ const yes = { status: "ok", available: true, reason: null, pictures: false, maxC
 let status: unknown = yes;
 vi.mock("./bo/useBoStatus", () => ({ useBoStatus: () => status }));
 const { BoButton } = await import("./BoButton");
+const boFocus = await import("./bo/boFocus");
 
 const button = () => {
   render(
@@ -117,5 +118,32 @@ describe("BoButton", () => {
       expect(screen.getByText(messages.bo.boButton)).toHaveClass("invisible");
       expect(screen.getByRole("link", { name: messages.bo.boButton })).toHaveAttribute("href", "/app/bo");
     });
+  });
+});
+
+describe("BoButton: focus on the way back from Bo (UX, from A4)", () => {
+  it("back from Bo with focus nowhere: the button takes it", () => {
+    boFocus.markLeftBo();
+    expect(button()).toHaveFocus();
+  });
+
+  it("back from Bo with focus already taken: it stays where it was", () => {
+    const elsewhere = document.createElement("button");
+    document.body.append(elsewhere);
+    elsewhere.focus();
+    boFocus.markLeftBo();
+    button();
+    expect(elsewhere).toHaveFocus();
+    elsewhere.remove();
+  });
+
+  it("not coming back from Bo: the button never takes focus", () => {
+    expect(button()).not.toHaveFocus();
+  });
+
+  it("opening Bo by the button (click or Enter) marks it, once", () => {
+    fireEvent.click(button()!);
+    expect(boFocus.takeOpenedByButton()).toBe(true);
+    expect(boFocus.takeOpenedByButton()).toBe(false);
   });
 });

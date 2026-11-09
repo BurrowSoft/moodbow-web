@@ -68,3 +68,15 @@ describe("boPictureField: the contract's 1 MB, decoded (bo.md, app b67431e)", ()
     expect(boPictureField(null)).toBeNull();
   });
 });
+
+// Me's journal-switch line showed "[Placeholder," on a Preview (Web Tester, #205): expected there,
+// with the flag forced on, never live. Every language is held to it, not only English.
+describe("Bo's placeholders, in every language", () => {
+  const met = (id: string) => (conditions as Record<string, { met?: boolean } | undefined>)[id]?.met === true;
+  it.each(["en", "fr", "es", "pt-br", "de", "it", "th"])("%s: none left while its flag could be on", (l) => {
+    const bo = (JSON.parse(readFileSync(`src/messages/${l}.json`, "utf8")) as { bo: Record<string, string> }).bo;
+    const held = Object.entries(bo).filter(([, v]) => v.includes("[Placeholder")).map(([k]) => k);
+    if (met("bo-live")) expect(held.filter((k) => !k.startsWith("picture"))).toEqual([]);
+    if (met("bo-pictures-live")) expect(held.filter((k) => k.startsWith("picture"))).toEqual([]);
+  });
+});

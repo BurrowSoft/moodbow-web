@@ -6,6 +6,7 @@ import { Link, usePathname } from "@/i18n/navigation";
 import { useKeyboardOpen } from "@/lib/ui/keyboardOpen";
 import { boButtonShows } from "@/lib/journal/bo";
 import { useBoStatus } from "./bo/useBoStatus";
+import { focusUnclaimed, markOpenedByButton, takeLeftBo } from "./bo/boFocus";
 
 // Only at the top level of the four tabs (UX & PM 2026-11-06): hidden in the
 // editor, a day, an entry, and Bo itself.
@@ -30,6 +31,7 @@ export function BoButton({ uid }: { uid: string }) {
   const onTab = TOP_LEVEL.includes(path);
   const shown = onTab && !keyboard;
   const label = useRef<HTMLSpanElement>(null);
+  const self = useRef<HTMLAnchorElement>(null);
   const [iconOnly, setIconOnly] = useState(false);
   useEffect(() => {
     if (!onTab) return;
@@ -48,10 +50,17 @@ export function BoButton({ uid }: { uid: string }) {
       window.removeEventListener("resize", fit);
     };
   }, [shown]);
-  if (!shown || !status || !boButtonShows(status)) return null;
+  const visible = shown && status !== null && boButtonShows(status);
+  // Back from Bo: focus comes back here, unless it was already put somewhere.
+  useEffect(() => {
+    if (visible && takeLeftBo() && focusUnclaimed()) self.current?.focus();
+  }, [visible]);
+  if (!visible) return null;
   return (
     <Link
+      ref={self}
       href="/app/bo"
+      onClick={markOpenedByButton}
       aria-label={t("boButton")}
       data-testid="bo-button"
       className={`bo-button fixed bottom-[calc(3.5rem+16px)] right-[16px] z-20 inline-flex min-h-[48px] min-w-[48px] items-center justify-center rounded-full bg-accent py-[8px] text-center font-medium leading-[1.5] text-on-accent shadow-lg [font-size:min(1rem,max(8vw,16px))] hover:bg-accent-hover print:hidden md:bottom-[24px] md:right-[24px] ${iconOnly ? "" : "px-[20px]"}`}
