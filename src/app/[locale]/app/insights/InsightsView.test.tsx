@@ -64,8 +64,8 @@ describe("InsightsView", () => {
 
   it("the change vs the previous range: 'Up'/'Down' in words (decision 137); none without previous data", () => {
     renderView([...thisWeek, ...lastWeek]);
-    expect(screen.getByTestId("insights-change-mood")).toHaveTextContent("Up 0.6 vs the previous week");
-    expect(screen.getByTestId("insights-change-stress")).toHaveTextContent("Same as the previous week");
+    expect(screen.getByTestId("insights-change-mood")).toHaveTextContent("Up 0.6 vs the previous 7 days");
+    expect(screen.getByTestId("insights-change-stress")).toHaveTextContent("Same as the previous 7 days");
     expect(screen.queryByTestId("insights-change-sleep")).toBeNull();
   });
 
@@ -73,7 +73,7 @@ describe("InsightsView", () => {
     const better = [row("2026-09-20", 5), row("2026-09-22", 5), row("2026-09-24", 5)];
     renderView([...thisWeek, ...better]);
     const change = screen.getByTestId("insights-change-mood");
-    expect(change).toHaveTextContent("Down 0.7 vs the previous week");
+    expect(change).toHaveTextContent("Down 0.7 vs the previous 7 days");
     expect(change.className).toBe("text-muted");
   });
 
