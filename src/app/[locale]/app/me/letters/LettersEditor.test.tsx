@@ -109,3 +109,25 @@ describe("LettersEditor", () => {
     expect(save).toHaveBeenCalledWith(`Dear me, ${phrase}`, 1);
   });
 });
+
+describe("LettersEditor: a letter opened from Me is matched too (the Reviewer, #267)", () => {
+  it("its text matches: the help card opens, and help sits above the letter", async () => {
+    const phrase = CRISIS_KEYWORDS?.languages.en.phrases[0] as string;
+    open.mockReturnValueOnce(Promise.resolve({ status: "ok", body: `Dear me, ${phrase}` }));
+    page([locked]);
+    fireEvent.click(screen.getByTestId("letter-open"));
+    await act(async () => fireEvent.click(screen.getByTestId("letter-open-now")));
+    expect(screen.getByTestId("safety-card")).toBeInTheDocument();
+    const help = screen.getByTestId("letter-open-help");
+    expect(help.compareDocumentPosition(screen.getByTestId("letter-body")) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it("no match: no card, no help added", async () => {
+    open.mockReturnValueOnce(Promise.resolve({ status: "ok", body: "Dear me, the garden grew." }));
+    page([locked]);
+    fireEvent.click(screen.getByTestId("letter-open"));
+    await act(async () => fireEvent.click(screen.getByTestId("letter-open-now")));
+    expect(screen.queryByTestId("safety-card")).toBeNull();
+    expect(screen.queryByTestId("letter-open-help")).toBeNull();
+  });
+});

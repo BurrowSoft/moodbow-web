@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Dialog, dialogButton } from "@/components/Dialog";
-import { SafetyCard } from "@/components/SafetyCard";
+import { GetHelpNow, SafetyCard } from "@/components/SafetyCard";
 import { LETTER_RULES, type Letter, type LetterMonths } from "@/lib/journal/letters";
 import { dateLine } from "@/lib/journal/today";
 import { flagsCrisis } from "@/lib/safety/crisis";
@@ -28,6 +28,9 @@ export function LettersEditor({ initial, dateLocaleTag, country }: { initial: Le
   const [saved, setSaved] = useState<string | null>(null);
   const [card, setCard] = useState(false);
   const [confirm, setConfirm] = useState<{ kind: "open" | "delete"; letter: Letter } | null>(null);
+  // Letters opened here whose text the matcher matched: help above them (the Reviewer's read).
+  // In this visit only; nothing about it is stored.
+  const [helpFor, setHelpFor] = useState<Set<string>>(() => new Set());
   const date = (iso: string) => dateLine(iso, dateLocaleTag);
 
   const run = async <T,>(call: Promise<T>): Promise<T | null> => {
@@ -54,6 +57,11 @@ export function LettersEditor({ initial, dateLocaleTag, country }: { initial: Le
     setConfirm(null);
     if (result?.status !== "ok") return setFailed(true);
     setLetters((list) => list.map((l) => (l.id === letter.id ? { ...l, body: result.body, opened: true } : l)));
+    // Opened outside Today's card (which the server matched first): matched here, as at saving.
+    if (flagsCrisis(result.body, CRISIS_KEYWORDS)) {
+      setHelpFor((now) => new Set(now).add(letter.id));
+      setCard(true);
+    }
   };
   const remove = async (letter: Letter) => {
     const result = await run(deleteLetter(letter.id));
@@ -119,6 +127,11 @@ export function LettersEditor({ initial, dateLocaleTag, country }: { initial: Le
             <li key={letter.id} data-testid="letter" data-locked={letter.opened ? undefined : ""} className="rounded-2xl border border-border bg-surface p-[16px]">
               {letter.opened ? (
                 <>
+                  {helpFor.has(letter.id) && (
+                    <div className="mb-3">
+                      <GetHelpNow country={country} testId="letter-open-help" neutral />
+                    </div>
+                  )}
                   <p className="font-medium text-text">{t("cardLine", { date: date(letter.writtenOn) })}</p>
                   <p data-testid="letter-body" className="mt-2 whitespace-pre-wrap text-text [overflow-wrap:break-word]">
                     {letter.body}
