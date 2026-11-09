@@ -1130,11 +1130,6 @@
     "reason": "UX draft (native read pending)"
   },
   {
-    "key": "bo.unavailable",
-    "en": "Bo isn't available for this account.",
-    "reason": "UX draft (native read pending)"
-  },
-  {
     "key": "bo.tooLong",
     "en": "That's too long for one message.",
     "reason": "UX draft (native read pending)"
