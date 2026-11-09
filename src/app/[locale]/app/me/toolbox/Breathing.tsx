@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Dialog, dialogButton } from "@/components/Dialog";
 import { BREATHING, breathingAt } from "@/lib/journal/toolbox";
@@ -22,11 +22,15 @@ export function Breathing({ onClose }: { onClose: () => void }) {
     const frame = requestAnimationFrame(() => setStarted(true));
     return () => cancelAnimationFrame(frame);
   }, []);
+  // Seconds since it opened, from the clock rather than counted ticks: a busy or
+  // backgrounded tab delays timers, and a minute should still be a minute.
+  const startedAt = useRef<number | null>(null);
   useEffect(() => {
     if (done) return;
-    const timer = window.setTimeout(() => setSecond((s) => s + 1), 1000);
-    return () => window.clearTimeout(timer);
-  }, [second, done]);
+    startedAt.current ??= Date.now();
+    const tick = window.setInterval(() => setSecond(Math.floor((Date.now() - startedAt.current!) / 1000)), 250);
+    return () => window.clearInterval(tick);
+  }, [done]);
   const { phase, left } = breathingAt(Math.min(second, BREATHING.totalSeconds - 1));
   const word = phase === "in" ? t("breatheIn") : t("breatheOut");
   const grown = started && phase === "in";

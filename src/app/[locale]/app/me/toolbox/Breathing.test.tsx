@@ -54,10 +54,11 @@ describe("Breathing", () => {
 
   it("Stop is there the whole minute, and stops it", async () => {
     const onClose = open();
-    for (let s = 0; s < 59; s += 10) {
+    for (let s = 0; s < 59; s += 9) {
       expect(screen.getByTestId("breathing-stop"), `${s} s`).toHaveTextContent(m.stop);
-      await seconds(10);
+      await seconds(9);
     }
+    // 54 s in: still breathing, Stop still there.
     fireEvent.click(screen.getByTestId("breathing-stop"));
     expect(onClose).toHaveBeenCalledTimes(1);
   });
