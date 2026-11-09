@@ -54,8 +54,10 @@ export function BoMeRow({ hasConversation, readsJournal, consented, canTurnOn, t
     setReads(false);
   };
   return (
-    <section {...untilLoaded} aria-labelledby="me-bo" data-testid="me-bo" className="rounded-3xl border border-border bg-surface p-[24px]">
-      <h2 id="me-bo" className="text-lg font-medium text-text">
+    <section {...untilLoaded} aria-labelledby="me-bo" data-testid="me-bo" className="rounded-3xl border border-border bg-surface p-[24px] max-sm:px-[max(12px,calc(40px-1rem))]">
+      {/* Words whole at large text on a phone (Web Tester, #205): 24 px sides at the normal
+          size, 12 px from 175 %, and the heading at 2x (decision 231). */}
+      <h2 id="me-bo" className="text-lg font-medium text-text max-sm:[font-size:min(1.125rem,max(11.25vw,36px))]">
         {t("meRow")}
       </h2>
       <Link href="/help/bo" data-testid="me-bo-help" className="mt-1 inline-flex min-h-11 items-center text-sm font-medium text-accent underline underline-offset-4">
