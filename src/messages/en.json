@@ -469,6 +469,7 @@
     "yourWeekPatternMovement": "On more active days, your mood was higher.",
     "yourWeekPatternStress": "On lower-stress days, your mood was higher.",
     "yourWeekLookMoreGood": "Your week had more good days than low ones.",
+    "yourWeekLookGoodNoLow": "Your week had good days and no low ones.",
     "yourWeekLookSteady": "Your week was mostly steady.",
     "yourWeekLookMixed": "Your week had good days and low ones.",
     "yourWeekMoment": "A moment from that week: {date}",

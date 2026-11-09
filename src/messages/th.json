@@ -469,6 +469,7 @@
     "yourWeekPatternMovement": "วันที่คุณกระฉับกระเฉงมากขึ้น อารมณ์ของคุณดีกว่า",
     "yourWeekPatternStress": "วันที่เครียดน้อยลง อารมณ์ของคุณดีกว่า",
     "yourWeekLookMoreGood": "สัปดาห์นี้คุณมีวันดีๆ มากกว่าวันที่แย่",
+    "yourWeekLookGoodNoLow": "สัปดาห์นี้มีวันดีๆ และไม่มีวันที่แย่เลย",
     "yourWeekLookSteady": "สัปดาห์นี้คุณค่อนข้างทรงตัว",
     "yourWeekLookMixed": "สัปดาห์นี้มีทั้งวันดีและวันที่แย่",
     "yourWeekMoment": "ช่วงเวลาหนึ่งจากสัปดาห์นั้น: {date}",

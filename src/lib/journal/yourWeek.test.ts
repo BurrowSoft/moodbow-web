@@ -81,6 +81,6 @@ describe("Your week: Patterns' sides", () => {
       { local_date: "2026-10-28", mood: 3, sleep_hours: "6.5", stress: null, exercise_minutes: null },
       { local_date: "2026-10-29", mood: 3, sleep_hours: "6.5", stress: null, exercise_minutes: null },
     ];
-    expect(yourWeek(rows, "2026-11-04", [])).toMatchObject({ lines: [{ template: "patternSleep" }, { template: "lookMoreGood" }], caption: true });
+    expect(yourWeek(rows, "2026-11-04", [])).toMatchObject({ lines: [{ template: "patternSleep" }, { template: "lookGoodNoLow" }], caption: true });
   });
 });

@@ -10,6 +10,7 @@ const TEXT = {
   patternMovement: "yourWeekPatternMovement",
   patternStress: "yourWeekPatternStress",
   lookMoreGood: "yourWeekLookMoreGood",
+  lookGoodNoLow: "yourWeekLookGoodNoLow",
   lookSteady: "yourWeekLookSteady",
   lookMixed: "yourWeekLookMixed",
 } as const;

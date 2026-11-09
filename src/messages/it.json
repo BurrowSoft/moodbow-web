@@ -469,6 +469,7 @@
     "yourWeekPatternMovement": "Nei giorni più attivi, il tuo umore era migliore.",
     "yourWeekPatternStress": "Nei giorni con meno stress, il tuo umore era migliore.",
     "yourWeekLookMoreGood": "La tua settimana ha avuto più giorni buoni che bassi.",
+    "yourWeekLookGoodNoLow": "La tua settimana ha avuto giorni buoni e nessun giorno basso.",
     "yourWeekLookSteady": "La tua settimana è stata per lo più stabile.",
     "yourWeekLookMixed": "La tua settimana ha avuto giorni buoni e giorni bassi.",
     "yourWeekMoment": "Un momento di quella settimana: {date}",

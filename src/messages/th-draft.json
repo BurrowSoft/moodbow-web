@@ -980,6 +980,11 @@
     "reason": "UX draft (native read pending)"
   },
   {
+    "key": "insights.yourWeekLookGoodNoLow",
+    "en": "Your week had good days and no low ones.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
     "key": "insights.yourWeekLookSteady",
     "en": "Your week was mostly steady.",
     "reason": "UX draft (native read pending)"

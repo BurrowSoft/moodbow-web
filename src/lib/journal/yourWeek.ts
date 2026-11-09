@@ -27,7 +27,7 @@ export const YOUR_WEEK_RULES = {
 
 export type YourWeekMoment = { id: string; entry_date: string };
 export type YourWeekLine =
-  | { template: "patternSleep" | "patternMovement" | "patternStress" | "lookMoreGood" | "lookSteady" | "lookMixed" }
+  | { template: "patternSleep" | "patternMovement" | "patternStress" | "lookMoreGood" | "lookGoodNoLow" | "lookSteady" | "lookMixed" }
   | { template: "moment"; id: string; date: string };
 export type YourWeek =
   | { start: string; end: string; kind: "hard" }
@@ -65,7 +65,8 @@ function howItLooked(rows: InsightRow[]): YourWeekLine | null {
   const low = count(YOUR_WEEK_RULES.lowMoods);
   // Steady first (version 2, after Vitor's look): 4, 4, 3, 3, 3 is a steady week, not a good one.
   if (count([YOUR_WEEK_RULES.steadyMood]) * 2 > rows.length) return { template: "lookSteady" };
-  if (good > low && good >= YOUR_WEEK_RULES.minGoodDays) return { template: "lookMoreGood" };
+  // "More good days than low ones" read oddly with none low (v3, UX): 3, 3, 5, 5 says so.
+  if (good > low && good >= YOUR_WEEK_RULES.minGoodDays) return { template: low === 0 ? "lookGoodNoLow" : "lookMoreGood" };
   if (good === low && good >= 1) return { template: "lookMixed" };
   return null;
 }
