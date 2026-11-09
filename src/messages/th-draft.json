@@ -746,7 +746,7 @@
   },
   {
     "key": "insights.chartNoChange",
-    "en": "Same as the previous {range, select, week {week} month {month} other {3 months}}",
+    "en": "Same as the previous {range, select, week {7 days} month {month} other {3 months}}",
     "reason": "UX draft (native read pending)"
   },
   {
@@ -1037,6 +1037,16 @@
   {
     "key": "insights.rangeWeek",
     "en": "Last 7 days",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.chartChangeUp",
+    "en": "Up {value} vs the previous {range, select, week {7 days} month {month} other {3 months}}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.chartChangeDown",
+    "en": "Down {value} vs the previous {range, select, week {7 days} month {month} other {3 months}}",
     "reason": "UX draft (native read pending)"
   }
 ]
