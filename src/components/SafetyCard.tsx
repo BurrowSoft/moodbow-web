@@ -1,11 +1,12 @@
 "use client";
 
-import { useCallback, useState, useSyncExternalStore, type MouseEvent } from "react";
+import { useCallback, useEffect, useState, useSyncExternalStore, type MouseEvent } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Dialog, dialogButton } from "@/components/Dialog";
 import { HelpNumberText } from "@/components/HelpNumberText";
 import { Link } from "@/i18n/navigation";
 import { helpLineSize, helplinesFor, isIos, isShortCode, telHref } from "@/lib/safety/helplines";
+import { requestCountry } from "@/lib/safety/requestCountry";
 
 const noSubscribe = () => () => {};
 
@@ -22,7 +23,21 @@ const noSubscribe = () => () => {};
 export function SafetyCard({ country, onClose, neutral = false }: { country: string | null | undefined; onClose: () => void; neutral?: boolean }) {
   const t = useTranslations("safety");
   const tc = useTranslations("common");
-  const lines = helplinesFor(country, useLocale());
+  // No profile country (a page that couldn't read it, or none set): the country this request
+  // came from, asked once the card is open, so a number to tap is there whenever one can be.
+  // Until it answers, or with none, the card as before: the sentence and Find a helpline.
+  const [requested, setRequested] = useState<string | null>(null);
+  useEffect(() => {
+    if (country) return;
+    let open = true;
+    requestCountry()
+      .then((c) => open && setRequested(c))
+      .catch(() => {});
+    return () => {
+      open = false;
+    };
+  }, [country]);
+  const lines = helplinesFor(country || requested, useLocale());
   const ios = useSyncExternalStore(noSubscribe, () => isIos(navigator.userAgent, navigator.maxTouchPoints), () => false);
   // The numbers and links stop growing at about 200 % on narrow screens (decision 231). What comes
   // before them stays under the card's own cap (capText in Dialog): at 32 px it pushed the first help

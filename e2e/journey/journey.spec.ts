@@ -1284,11 +1284,15 @@ test("large text, set in the browser: the couldn't-load state's help is in the f
     await page.getByTestId("setup-done").click();
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     await page.setViewportSize({ width: 320, height: 640 });
-    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+    // fr and es too: their Try again pushed the page sideways at 300 % (Web Tester, #269).
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"], ["/fr", "fr"], ["/es", "es"]] as const) {
       await setProfileLocale(email, password, saved);
       for (const percent of [100, 300]) {
         await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
         await page.goto(`${route}/app/test/unavailable`);
+        expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth), `${saved} at ${percent} %: nothing sideways`).toBe(0);
+        const retry = (await page.getByTestId("try-again").boundingBox())!;
+        expect(retry.x + retry.width, `${saved} at ${percent} %: Try again inside the width`).toBeLessThanOrEqual(320.5);
         await expect(page.getByTestId("journal-unavailable"), `${saved} at ${percent} %`).toBeVisible();
         const box = (await page.getByTestId("journal-unavailable-help").boundingBox())!;
         // Above the fixed tab bar, which covers the window's foot on a phone.

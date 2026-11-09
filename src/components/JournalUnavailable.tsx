@@ -27,7 +27,7 @@ export function JournalUnavailable({ standalone = false }: { standalone?: boolea
   return (
     <Root
       id={standalone ? "main" : undefined}
-      className="flex flex-1 flex-col items-center justify-center px-6 py-[max(16px,calc(80px-1rem))] text-center"
+      className="flex flex-1 flex-col items-center justify-center px-[max(8px,calc(40px-1rem))] py-[max(16px,calc(80px-1rem))] text-center"
       data-testid="journal-unavailable"
     >
       {/* Help is there whatever failed, and first; the country may be what couldn't be read. */}
@@ -43,7 +43,7 @@ export function JournalUnavailable({ standalone = false }: { standalone?: boolea
         // Focusable while it retries (disabling it dropped focus).
         aria-disabled={retrying}
         onClick={() => !retrying && startRetry(() => router.refresh())}
-        className="mt-[max(8px,calc(40px-1rem))] inline-flex min-h-12 items-center rounded-full border border-border px-6 font-medium text-accent hover:bg-pill aria-disabled:opacity-60"
+        className="mt-[max(8px,calc(40px-1rem))] inline-flex min-h-12 max-w-full items-center justify-center rounded-full border border-border px-[max(12px,calc(40px-1rem))] text-center font-medium text-accent hover:bg-pill aria-disabled:opacity-60 max-sm:[font-size:min(1rem,max(10vw,32px))]"
       >
         {ta("tryAgain")}
       </button>

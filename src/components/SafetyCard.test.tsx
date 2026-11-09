@@ -8,6 +8,15 @@ import fr from "@/messages/fr.json";
 import ptBr from "@/messages/pt-br.json";
 import { helpLineSize, helplinesFor, isIos, telHref } from "@/lib/safety/helplines";
 import { GetHelpNow, SafetyCard } from "./SafetyCard";
+// The request's country, for the card with no profile country (Web Tester, #269).
+let requested: string | null = null;
+const asked = vi.fn();
+vi.mock("@/lib/safety/requestCountry", () => ({
+  requestCountry: () => {
+    asked();
+    return Promise.resolve(requested);
+  },
+}));
 vi.mock("@/i18n/navigation", () => ({
   Link: ({ href, prefetch, children, ...rest }: { href: string; prefetch?: boolean; children: React.ReactNode }) => (
     <a href={href} data-prefetch={String(prefetch)} {...rest}>
@@ -253,5 +262,30 @@ describe("a line's hours are in the live languages", () => {
         expect(helplinesFor(code, locale).helpline?.hours, `${code} ${locale}`).toBe(hours[data]);
       }
     }
+  });
+});
+
+describe("SafetyCard: a number to tap even with no profile country (UX, #269)", () => {
+  it("the profile's country: its numbers, and the request's country isn't asked", () => {
+    asked.mockClear();
+    wrap(<SafetyCard country="TH" onClose={() => {}} />);
+    expect(screen.getByTestId("safety-call-helpline")).toHaveAttribute("href", "tel:1323");
+    expect(asked).not.toHaveBeenCalled();
+  });
+
+  it("none: the request's country, its helpline and emergency number", async () => {
+    requested = "TH";
+    wrap(<SafetyCard country={null} onClose={() => {}} />);
+    expect(await screen.findByTestId("safety-call-helpline")).toHaveAttribute("href", "tel:1323");
+    expect(screen.getByTestId("safety-call-emergency")).toHaveAttribute("href", "tel:1669");
+    requested = null;
+  });
+
+  it("neither: the sentence and Find a helpline, as before", async () => {
+    requested = null;
+    wrap(<SafetyCard country={null} onClose={() => {}} />);
+    await Promise.resolve();
+    expect(screen.queryByTestId("safety-call-helpline")).toBeNull();
+    expect(screen.getByTestId("safety-find-helpline")).toBeInTheDocument();
   });
 });
