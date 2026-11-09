@@ -1,12 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useState, useSyncExternalStore, type MouseEvent } from "react";
+import { useCallback, useState, useSyncExternalStore, type MouseEvent } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Dialog, dialogButton } from "@/components/Dialog";
 import { HelpNumberText } from "@/components/HelpNumberText";
 import { Link } from "@/i18n/navigation";
 import { helpLineSize, helplinesFor, isIos, isShortCode, telHref } from "@/lib/safety/helplines";
-import { requestCountry } from "@/lib/safety/requestCountry";
+import { useRequestCountry } from "@/components/RequestCountry";
 import { countryName } from "@/lib/region/countries";
 
 const noSubscribe = () => () => {};
@@ -25,19 +25,10 @@ export function SafetyCard({ country, onClose, neutral = false }: { country: str
   const t = useTranslations("safety");
   const tc = useTranslations("common");
   // No profile country (a page that couldn't read it, or none set): the country this request
-  // came from, asked once the card is open, so a number to tap is there whenever one can be.
-  // Until it answers, or with none, the card as before: the sentence and Find a helpline.
-  const [requested, setRequested] = useState<string | null>(null);
-  useEffect(() => {
-    if (country) return;
-    let open = true;
-    requestCountry()
-      .then((c) => open && setRequested(c))
-      .catch(() => {});
-    return () => {
-      open = false;
-    };
-  }, [country]);
+  // came from (the root layout's), so a number to tap is there whenever one can be. With none,
+  // the card as before: the sentence and Find a helpline.
+  const requestCountry = useRequestCountry();
+  const requested = country ? null : requestCountry;
   const locale = useLocale();
   const lines = helplinesFor(country || requested, locale);
   // Numbers from where the request came from, not the person's own country: say whose they

@@ -8,15 +8,7 @@ import fr from "@/messages/fr.json";
 import ptBr from "@/messages/pt-br.json";
 import { helpLineSize, helplinesFor, isIos, telHref } from "@/lib/safety/helplines";
 import { GetHelpNow, SafetyCard } from "./SafetyCard";
-// The request's country, for the card with no profile country (Web Tester, #269).
-let requested: string | null = null;
-const asked = vi.fn();
-vi.mock("@/lib/safety/requestCountry", () => ({
-  requestCountry: () => {
-    asked();
-    return Promise.resolve(requested);
-  },
-}));
+import { RequestCountryProvider, usableCountry } from "./RequestCountry";
 vi.mock("@/i18n/navigation", () => ({
   Link: ({ href, prefetch, children, ...rest }: { href: string; prefetch?: boolean; children: React.ReactNode }) => (
     <a href={href} data-prefetch={String(prefetch)} {...rest}>
@@ -266,34 +258,30 @@ describe("a line's hours are in the live languages", () => {
 });
 
 describe("SafetyCard: a number to tap even with no profile country (UX, #269)", () => {
-  it("the profile's country: its numbers, and the request's country isn't asked", () => {
-    asked.mockClear();
-    wrap(<SafetyCard country="TH" onClose={() => {}} />);
+  const withRequest = (country: string | null, ui: React.ReactNode) => wrap(<RequestCountryProvider country={country}>{ui}</RequestCountryProvider>);
+
+  it("the profile's country wins over the request's, and isn't named: it's theirs", () => {
+    withRequest("NZ", <SafetyCard country="TH" onClose={() => {}} />);
     expect(screen.getByTestId("safety-call-helpline")).toHaveAttribute("href", "tel:1323");
-    expect(asked).not.toHaveBeenCalled();
+    expect(screen.queryByTestId("safety-request-country")).toBeNull();
   });
 
-  it("none: the request's country, named above its helpline and emergency number", async () => {
-    requested = "TH";
-    wrap(<SafetyCard country={null} onClose={() => {}} />);
-    expect(await screen.findByTestId("safety-call-helpline")).toHaveAttribute("href", "tel:1323");
+  it("none: the request's country, named above its helpline and emergency number, at once", () => {
+    withRequest("TH", <SafetyCard country={null} onClose={() => {}} />);
+    expect(screen.getByTestId("safety-call-helpline")).toHaveAttribute("href", "tel:1323");
     expect(screen.getByTestId("safety-call-emergency")).toHaveAttribute("href", "tel:1669");
     const name = screen.getByTestId("safety-request-country");
     expect(name).toHaveTextContent("Thailand");
     expect(name.compareDocumentPosition(screen.getByTestId("safety-call-helpline")) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-    requested = null;
   });
 
-  it("the profile's own country isn't named: it's theirs", () => {
-    wrap(<SafetyCard country="TH" onClose={() => {}} />);
-    expect(screen.queryByTestId("safety-request-country")).toBeNull();
-  });
-
-  it("neither: the sentence and Find a helpline, as before", async () => {
-    requested = null;
-    wrap(<SafetyCard country={null} onClose={() => {}} />);
-    await Promise.resolve();
+  it("neither: the sentence and Find a helpline, as before", () => {
+    withRequest(null, <SafetyCard country={null} onClose={() => {}} />);
     expect(screen.queryByTestId("safety-call-helpline")).toBeNull();
     expect(screen.getByTestId("safety-find-helpline")).toBeInTheDocument();
+  });
+
+  it("the header is used only as two letters", () => {
+    expect([null, "", "th", "TH", "T1", "THA", "XX"].map(usableCountry)).toEqual([null, null, "TH", "TH", null, null, "XX"]);
   });
 });
