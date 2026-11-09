@@ -73,6 +73,10 @@ const MEANS: Record<(typeof LANGUAGES)[number], string[]> = {
 };
 
 describe("safety plan words, in every language", () => {
+  it("the people limit's line says the contract's number", () => {
+    for (const l of LANGUAGES) expect(messages(l).safetyPlan.peopleFull, l).toContain(String(SAFETY_PLAN_RULES.maxPeoplePerSection));
+  });
+
   it("the headings are the table's, exactly; section 2 is the toolbox's own name", () => {
     for (const l of LANGUAGES) {
       const p = messages(l).safetyPlan;

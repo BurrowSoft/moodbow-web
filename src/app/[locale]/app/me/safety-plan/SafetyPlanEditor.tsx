@@ -283,12 +283,14 @@ function PeopleSection({ section, heading, prompt, people, apply, children }: { 
             }}
           />
         </div>
+      ) : full ? (
+        <p data-testid={`plan-${section}-full`} className="mt-3 text-sm text-muted">
+          {t("peopleFull")}
+        </p>
       ) : (
-        !full && (
-          <button ref={addButton} type="button" data-testid={`plan-${section}-add`} onClick={() => setAdding(true)} className={`mt-3 ${dialogButton()}`}>
-            {t("addPerson")}
-          </button>
-        )
+        <button ref={addButton} type="button" data-testid={`plan-${section}-add`} onClick={() => setAdding(true)} className={`mt-3 ${dialogButton()}`}>
+          {t("addPerson")}
+        </button>
       )}
     </section>
   );

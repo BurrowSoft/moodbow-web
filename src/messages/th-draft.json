@@ -1263,5 +1263,10 @@
     "key": "safety.safetyPlanButton",
     "en": "My safety plan",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "safetyPlan.peopleFull",
+    "en": "You can add up to 10 people here.",
+    "reason": "UX draft (native read pending)"
   }
 ]

@@ -111,9 +111,11 @@ describe("SafetyPlanEditor", () => {
     expect(addPerson).toHaveBeenCalledWith("people", "Sam", "+64 21 555 0100", 0);
   });
 
-  it("10 in a section: no more to add there", () => {
+  it("10 in a section: the limit said where Add a person was; the other section still adds", () => {
     open({ ...EMPTY_PLAN, people: Array.from({ length: 10 }, (_, i) => ({ id: `p${i}`, section: "people" as const, name: `P${i}`, phone: null, position: i })) });
     expect(screen.queryByTestId("plan-people-add")).toBeNull();
+    expect(screen.getByTestId("plan-people-full")).toHaveTextContent(p.peopleFull);
+    expect(screen.queryByTestId("plan-professionals-full")).toBeNull();
     expect(screen.getByTestId("plan-professionals-add")).toBeInTheDocument();
   });
 

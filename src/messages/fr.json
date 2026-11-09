@@ -621,6 +621,7 @@
     "phone": "Numéro de téléphone (facultatif)",
     "call": "Appeler",
     "addPerson": "Ajouter une personne",
+    "peopleFull": "Vous pouvez ajouter jusqu'à 10 personnes ici.",
     "saved": "Enregistré.",
     "leaveTitle": "Quitter sans enregistrer ?",
     "leave": "Quitter",

@@ -621,6 +621,7 @@
     "phone": "Phone number (optional)",
     "call": "Call",
     "addPerson": "Add a person",
+    "peopleFull": "You can add up to 10 people here.",
     "saved": "Saved.",
     "leaveTitle": "Leave without saving?",
     "leave": "Leave",
