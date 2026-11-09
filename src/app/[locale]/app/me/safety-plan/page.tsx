@@ -43,12 +43,16 @@ export default async function SafetyPlanPage({ params }: PageProps<"/[locale]/ap
   const unread = !me || row.error || people.error || toolbox.error;
   return (
     <section className="space-y-6">
-      <BackLink href="/app/me" label={ta("navBackTo", { screen: ta("tabMe") })} testId="nav-back" />
-      <h1 className={JOURNAL_HEADING} data-testid="plan-title">
+      {/* Help in the first view at every size (UX, Web Tester at 320 px and 300 %): beside Back,
+          above the title, whatever the plan holds or whether it loaded. Back is its icon alone. */}
+      <div className="flex flex-wrap items-center gap-x-[12px] gap-y-[8px]">
+        <BackLink href="/app/me" label={ta("navBackTo", { screen: ta("tabMe") })} testId="nav-back" />
+        <GetHelpNow country={me?.profile?.country} testId="plan-get-help" neutral />
+      </div>
+      {/* At most 36 px on a phone (decision 231), so the plan's start isn't pushed down either. */}
+      <h1 className={`${JOURNAL_HEADING} max-sm:[font-size:min(1.875rem,max(11.25vw,36px))]`} data-testid="plan-title">
         {t("title")}
       </h1>
-      {/* Help first, always there, whatever the plan holds or whether it loaded. */}
-      <GetHelpNow country={me?.profile?.country} testId="plan-get-help" neutral />
       {unread ? (
         <JournalUnavailable />
       ) : (
