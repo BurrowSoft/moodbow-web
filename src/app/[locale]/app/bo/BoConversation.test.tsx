@@ -628,3 +628,19 @@ describe("BoConversation: where a send leaves the page (UX, #205)", () => {
     expect(startOf("bo-notice")).toEqual([]);
   });
 });
+
+describe("BoConversation: focus from Bo's button (UX, from A4)", () => {
+  it("opened by the button: the heading has focus; leaving marks the way back", async () => {
+    const boFocus = await import("./boFocus");
+    boFocus.markOpenedByButton();
+    await open();
+    expect(screen.getByRole("heading", { level: 1, name: b.screenLine })).toHaveFocus();
+    cleanup();
+    expect(boFocus.takeLeftBo()).toBe(true);
+  });
+
+  it("opened any other way: focus isn't moved", async () => {
+    await open();
+    expect(screen.getByRole("heading", { level: 1, name: b.screenLine })).not.toHaveFocus();
+  });
+});

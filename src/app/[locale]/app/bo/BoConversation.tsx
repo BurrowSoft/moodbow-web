@@ -11,6 +11,7 @@ import { BO_CLIENT_WAIT_MS, BO_DEFAULT_MAX_CHARS, BO_ERROR_TEXT, BO_WAIT_RETRY_M
 import { flagsCrisis } from "@/lib/safety/crisis";
 import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
 import { useKeyboardOpen } from "@/lib/ui/keyboardOpen";
+import { focusUnclaimed, markLeftBo, takeOpenedByButton } from "./boFocus";
 import { PRIMARY_SAVE } from "@/lib/ui/journalLayout";
 
 const BO_HEADER_MOST = 0.25;
@@ -92,6 +93,13 @@ export function BoConversation({ initial, country, back, healthData = false, con
     if (keyboard) typingRow.current?.scrollIntoView?.({ block: "nearest" });
   }, [keyboard]);
   const header = useRef<HTMLElement>(null);
+  const heading = useRef<HTMLHeadingElement>(null);
+  // Opened by Bo's button: focus on the heading, not the page's body. Leaving: the button
+  // takes it back when its page shows it (boFocus.ts).
+  useEffect(() => {
+    if (takeOpenedByButton() && focusUnclaimed()) heading.current?.focus();
+    return markLeftBo;
+  }, []);
   const [pinned, setPinned] = useState(true);
   const endRow = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -273,7 +281,7 @@ export function BoConversation({ initial, country, back, healthData = false, con
     <div data-testid="bo-conversation" className="flex flex-col gap-4 [overflow-wrap:anywhere]">
       <header ref={header} data-testid="bo-header" data-pinned={pinned ? "" : undefined} className={`flex flex-wrap items-center gap-x-[8px] gap-y-[4px] bg-bg py-[8px] ${pinned && !keyboard ? "sticky top-0 z-10" : ""}`}>
         {back && <div className="md:hidden">{back}</div>}
-        <h1 className="min-w-0 flex-1 font-medium leading-[1.33] text-text [font-size:min(1.5rem,max(10vw,24px,1rem))] [overflow-wrap:anywhere]">{t("screenLine")}</h1>
+        <h1 ref={heading} tabIndex={-1} className="min-w-0 flex-1 font-medium leading-[1.33] text-text outline-none [font-size:min(1.5rem,max(10vw,24px,1rem))] [overflow-wrap:anywhere]">{t("screenLine")}</h1>
         <GetHelpNow country={country} testId="bo-get-help" neutral />
       </header>
       <p className="text-sm text-muted">
