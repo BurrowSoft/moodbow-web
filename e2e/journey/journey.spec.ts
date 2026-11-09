@@ -1264,6 +1264,43 @@ test("large text, set in the browser: Today after a mood, calendar, day, entry a
   }
 });
 
+// The journal's couldn't-load state had its help below the first screen at 320 px and 300 %
+// (Web Tester, #267): it's right under the heading now. Measured on the test-only page, the
+// component alone inside the journal layout, as every journal page shows it.
+test("large text, set in the browser: the couldn't-load state's help is in the first view on a 320 px phone", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
+  test.setTimeout(120_000);
+  const email = newEmail();
+  const password = newPassword();
+  const cdp = await page.context().newCDPSession(page);
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    await page.setViewportSize({ width: 320, height: 640 });
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+      await setProfileLocale(email, password, saved);
+      for (const percent of [100, 300]) {
+        await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
+        await page.goto(`${route}/app/test/unavailable`);
+        await expect(page.getByTestId("journal-unavailable"), `${saved} at ${percent} %`).toBeVisible();
+        const box = (await page.getByTestId("journal-unavailable-help").boundingBox())!;
+        expect(box.y, `${saved} at ${percent} %: help's top in the first view`).toBeGreaterThanOrEqual(0);
+        expect(box.y + box.height, `${saved} at ${percent} %: help's bottom in the first view`).toBeLessThanOrEqual(640);
+        expect(box.x + box.width, `${saved} at ${percent} %: help inside the width`).toBeLessThanOrEqual(320.5);
+      }
+    }
+  } finally {
+    await cleanup(email);
+  }
+});
+
 // A column of letters under an X above the window, and Not now 1,660 px down (Web Tester, #218).
 test("large text, set in the browser: the milestone's title, X and Not now stay usable on a 320 px phone", async ({ page, browserName }) => {
   test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");

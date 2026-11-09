@@ -14,6 +14,8 @@ const PAGES: PageEntry[] = [
   { path: "/terms", gate: "terms-text-approved" },
   { path: "/consumer-health-data", gate: "consumer-health-data-approved" },
   { path: "/account-deletion", gate: "delete-account-live" },
+  // Test only, never met: a 404 on Production before the signed-in area's own checks.
+  { path: "/app/test", gate: "test-only-unavailable-page", prefix: true, sitemap: false },
   { path: "/app", gate: "web-journal-live", prefix: true, sitemap: false },
   { path: "/sign-in", gate: "web-journal-live", sitemap: false },
   { path: "/forgot-password", gate: "web-journal-live", sitemap: false },
