@@ -1264,6 +1264,46 @@ test("large text, set in the browser: Today after a mood, calendar, day, entry a
   }
 });
 
+// Breathing's Stop fell below the card at 320 px and 300 % (Web Tester, #265): it's in view the
+// whole minute, at the normal size and at large text, with the circle's words still readable.
+test("large text, set in the browser: breathing's Stop stays in view on a 320 px phone", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
+  test.setTimeout(120_000);
+  const email = newEmail();
+  const password = newPassword();
+  const cdp = await page.context().newCDPSession(page);
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    await page.setViewportSize({ width: 320, height: 640 });
+    for (const percent of [100, 300]) {
+      await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
+      // The list may not be readable yet on staging: breathing is offered either way (UX).
+      await page.goto("/app/me/toolbox");
+      await page.getByTestId("toolbox-breathe").click();
+      const stop = page.getByTestId("breathing-stop");
+      for (const moment of ["opening", "breathing out"]) {
+        if (moment === "breathing out") await expect(page.getByTestId("breathing-phase")).toHaveText(messages.toolbox.breatheOut, { timeout: 8_000 });
+        const box = (await stop.boundingBox())!;
+        expect(box.y, `${percent} %, ${moment}: Stop's top in the window`).toBeGreaterThanOrEqual(0);
+        expect(box.y + box.height, `${percent} %, ${moment}: Stop's bottom in the window`).toBeLessThanOrEqual(640);
+        expect(box.x + box.width, `${percent} %, ${moment}: Stop inside the width`).toBeLessThanOrEqual(320);
+      }
+      await stop.click();
+      await expect(page.getByTestId("breathing")).toHaveCount(0);
+    }
+  } finally {
+    await cleanup(email);
+  }
+});
+
 // A column of letters under an X above the window, and Not now 1,660 px down (Web Tester, #218).
 test("large text, set in the browser: the milestone's title, X and Not now stay usable on a 320 px phone", async ({ page, browserName }) => {
   test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
