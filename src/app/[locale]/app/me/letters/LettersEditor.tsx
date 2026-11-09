@@ -15,9 +15,10 @@ const SECTION = "rounded-3xl border border-border bg-surface p-[24px] max-sm:px-
 
 // Me → Letters to future me (1.2; content/letters.json). Write one and choose when it opens;
 // a locked one shows only its dates (its text isn't even here until it's opened); open early
-// with a confirm; delete with a confirm; no edit. The matcher runs on the text at saving and
-// opens the help card on a match, as entries do. Nothing about that is stored.
-export function LettersEditor({ initial, dateLocaleTag, country }: { initial: Letter[]; dateLocaleTag: string; country: string | null | undefined }) {
+// with a confirm (only before opens_on; on or after its day, Open just opens); delete with a
+// confirm; no edit. The matcher runs on the text at saving and opens the help card on a
+// match, as entries do. Nothing about that is stored.
+export function LettersEditor({ initial, dateLocaleTag, country, today }: { initial: Letter[]; dateLocaleTag: string; country: string | null | undefined; today: string }) {
   const t = useTranslations("letters");
   const tt = useTranslations("today");
   const [letters, setLetters] = useState(initial);
@@ -28,9 +29,6 @@ export function LettersEditor({ initial, dateLocaleTag, country }: { initial: Le
   const [saved, setSaved] = useState<string | null>(null);
   const [card, setCard] = useState(false);
   const [confirm, setConfirm] = useState<{ kind: "open" | "delete"; letter: Letter } | null>(null);
-  // Letters opened here whose text the matcher matched: help above them (the Reviewer's read).
-  // In this visit only; nothing about it is stored.
-  const [helpFor, setHelpFor] = useState<Set<string>>(() => new Set());
   const date = (iso: string) => dateLine(iso, dateLocaleTag);
 
   const run = async <T,>(call: Promise<T>): Promise<T | null> => {
@@ -58,10 +56,7 @@ export function LettersEditor({ initial, dateLocaleTag, country }: { initial: Le
     if (result?.status !== "ok") return setFailed(true);
     setLetters((list) => list.map((l) => (l.id === letter.id ? { ...l, body: result.body, opened: true } : l)));
     // Opened outside Today's card (which the server matched first): matched here, as at saving.
-    if (flagsCrisis(result.body, CRISIS_KEYWORDS)) {
-      setHelpFor((now) => new Set(now).add(letter.id));
-      setCard(true);
-    }
+    if (flagsCrisis(result.body, CRISIS_KEYWORDS)) setCard(true);
   };
   const remove = async (letter: Letter) => {
     const result = await run(deleteLetter(letter.id));
@@ -127,7 +122,8 @@ export function LettersEditor({ initial, dateLocaleTag, country }: { initial: Le
             <li key={letter.id} data-testid="letter" data-locked={letter.opened ? undefined : ""} className="rounded-2xl border border-border bg-surface p-[16px]">
               {letter.opened ? (
                 <>
-                  {helpFor.has(letter.id) && (
+                  {/* Matched each time it's shown, not only on the visit it was opened (the Reviewer's read, L1). */}
+                  {flagsCrisis(letter.body ?? "", CRISIS_KEYWORDS) && (
                     <div className="mb-3">
                       <GetHelpNow country={country} testId="letter-open-help" neutral />
                     </div>
@@ -142,7 +138,7 @@ export function LettersEditor({ initial, dateLocaleTag, country }: { initial: Le
               )}
               <div className="mt-2 flex flex-wrap gap-2">
                 {!letter.opened && (
-                  <button type="button" data-testid="letter-open" disabled={busy} onClick={() => setConfirm({ kind: "open", letter })} className={dialogButton()}>
+                  <button type="button" data-testid="letter-open" disabled={busy} onClick={() => (letter.opensOn > today ? setConfirm({ kind: "open", letter }) : void open(letter))} className={dialogButton()}>
                     {t("open")}
                   </button>
                 )}
