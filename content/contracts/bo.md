@@ -14,6 +14,8 @@ One server path for app and web: the Supabase edge function `bo`, called with th
 
 → `200 { "available": false, "reason": "off", "pictures": false, "limits": { "max_chars": 2000 } }`
 
+`pictures` is true only when Bo is available and a picture would be taken now (022, `bo_pictures_available`): a confirmed email address, `bo_pictures_enabled` on, no pictures stop for the person, the month's spend under `bo_pictures_budget_fraction` of the budget, and the day's pictures under `bo_pictures_per_day` (5). Show the attach button only then. `send` checks all of it again.
+
 `reason` is `null` when Bo is available, else the first switch that says no, in this order:
 
 | `reason` | Switch (021 and earlier) | Client |
@@ -38,7 +40,10 @@ Stops such as the daily limit come back on `send`.
 - `client_key`: a new uuid per send, re-sent unchanged on a retry of that send. The same key returns the stored answer, with nothing re-run. On a replay, `show_help` and `open_card` are true if the stored reply carries the fixed help line, since flags aren't stored. So a replay of a refused turn may open the card too.
 - A retry while the first is still running answers `in_progress`: show "wait" and retry once. With a match it gets the fixed reply instead, and only the first to finish is saved.
 - The client never sends history. The server reads it.
-- `picture` isn't accepted yet: it answers `pictures_off`.
+- `picture` (optional): `{ "media_type": "image/jpeg" | "image/png" | "image/webp", "data": "<standard base64>" }`, one per message, at most 1 MB decoded. The client resizes to about 1024 px on the long side and re-encodes, dropping all metadata, before sending (specs/moodpal-1.0.md). `text` may be empty with a picture.
+  - The server checks the type against the bytes. Unreadable, another type, or too big: `invalid_value`, except that a caption the matcher finds still gets the fixed reply and the card.
+  - The picture goes to the model for that reply only, with the picture rule. It's never stored or logged: the person's row keeps the text and `has_picture`, and history shows "(photo)". The reply check never gets the picture, only that there was one.
+  - Its stops come from `send` like any other: `pictures_need_email`, `pictures_off` (switch, a pictures stop, or the budget share) and `picture_limit`. A matched caption gets help at each of them.
 - Worst case about 56 s: the 45 s model budget, plus up to 3 s for the status read and 8 s to create a profile on a first send. **Clients wait 60 s**.
 
 → `200`
@@ -83,7 +88,7 @@ From the web's `GET /api/region`: `{ "token": "<payload>.<sig>" }` or `{ "token"
 3. The same key, then length.
 4. `bo_begin`. A `{stop}` with a match gets the fixed reply, kept, with no model call, except `ai_consent_required`.
 5. History from the database, the window plus up to 5 flagged messages, and the journal if the person's switch is on.
-6. The model, then the reply check, on every turn. **Never an unchecked reply.**
+6. The model, then the reply check, on every turn. **Never an unchecked reply.** The check says why it holds a reply. If an ordinary turn's reply (no match, no signal from the model) is held only for a promise of presence, a claim of having told someone, or a claimed feeling, the model is asked once more and its reply is checked again. If it's held again, or there's no time left in the 45 s, a plain line in the person's language is sent and kept: `show_help` and `open_card` false (UX, 2026-11-08). Clients see an ordinary reply, with nothing new to handle. On a match or the model's signal, the held reply gets the fixed reply and the card, as before.
 7. On a match or the model's signal, the fixed help line is added in code.
 8. `bo_finish`: messages saved, request closed, real cost in `ai_spend_daily`.
 

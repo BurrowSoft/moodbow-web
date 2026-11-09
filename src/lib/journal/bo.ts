@@ -97,8 +97,9 @@ export const BO_ERROR_TEXT = {
   not_authenticated: "failed",
   ai_consent_required: "failed",
   region_off: "regionOff",
-  bo_unavailable: "unavailable",
-  needs_email: "unavailable",
+  // "Right now", never "this account", which read as blame (UX, 2026-11-08).
+  bo_unavailable: "notAvailableNow",
+  needs_email: "notAvailableNow",
   pictures_off: "failed",
   pictures_need_email: "failed",
   in_progress: "wait",
