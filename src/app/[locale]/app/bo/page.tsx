@@ -9,7 +9,7 @@ import { SessionEnded } from "@/components/SessionEnded";
 import { conditionMet, pageGate } from "@/lib/conditions";
 import { backLabel } from "@/lib/journal/backLabel";
 import { dateLocale } from "@/lib/journal/today";
-import { BO_HISTORY_SHOWN, type BoMessage } from "@/lib/journal/bo";
+import { BO_HISTORY_SHOWN, historyFromRows } from "@/lib/journal/bo";
 import { currentUser } from "@/lib/journal/currentUser";
 import { getMe, hasCurrentConsent } from "@/lib/journal/me";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -43,7 +43,7 @@ export default async function BoPage({ params }: PageProps<"/[locale]/app/bo">) 
   return (
     <BoConversation
       key={user.id}
-      initial={((data ?? []) as (BoMessage & { has_picture?: boolean })[]).toReversed().map(({ has_picture, ...m }) => ({ ...m, hasPicture: has_picture === true }))}
+      initial={historyFromRows(data)}
       country={me.profile?.country}
       healthData={conditionMet("consumer-health-data-approved")}
       consented={hasCurrentConsent(me, "ai") && hasCurrentConsent(me, "age_18")}

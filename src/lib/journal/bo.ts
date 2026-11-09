@@ -127,3 +127,12 @@ export function boPictureField(value: unknown): { media_type: "image/jpeg"; data
   if (v.media_type !== "image/jpeg" || typeof v.data !== "string" || v.data === "" || v.data.length > BO_PICTURE_MAX_BASE64) return null;
   return { media_type: "image/jpeg", data: v.data };
 }
+
+// The kept conversation from bo_messages (newest first, as read), oldest first for the screen.
+// A message that came with a picture keeps only that fact (has_picture): it shows "(photo)".
+export function historyFromRows(rows: unknown): BoMessage[] {
+  return (Array.isArray(rows) ? rows : [])
+    .filter((r): r is { id: string; author: "person" | "ai"; body: string; has_picture?: unknown } => typeof r?.id === "string" && (r?.author === "person" || r?.author === "ai") && typeof r?.body === "string")
+    .map(({ id, author, body, has_picture }) => ({ id, author, body, hasPicture: has_picture === true }))
+    .reverse();
+}

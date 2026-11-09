@@ -363,7 +363,7 @@ export function BoConversation({ initial, country, back, healthData = false, con
               <BoReply message={m} className={bubble("ai")} />
             </Fragment>
           ) : (
-            <div key={m.id} data-testid="bo-message-person" className={bubble("person")}>
+            <div key={m.id} data-testid="bo-message-person" data-message-id={m.id} data-picture={m.pictureUrl ? "here" : m.hasPicture ? "kept" : undefined} className={bubble("person")}>
               {m.pictureUrl ? (
                 // A blob of this visit's, which an image optimiser can't take.
                 // eslint-disable-next-line @next/next/no-img-element

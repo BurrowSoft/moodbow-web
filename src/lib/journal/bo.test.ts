@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { BO_ERROR_TEXT, BO_ERRORS, BO_PICTURE_MAX_BASE64, BO_REASONS, boButtonShows, boCanTurnOn, boPictureField, boReasonProblem, boSpeaks, type BoStatus } from "./bo";
+import { BO_ERROR_TEXT, BO_ERRORS, BO_PICTURE_MAX_BASE64, BO_REASONS, boButtonShows, boCanTurnOn, boPictureField, boReasonProblem, boSpeaks, historyFromRows, type BoStatus } from "./bo";
 import { BO_PICTURE_MAX_BYTES } from "./boPicture";
 import conditions from "../../../content/conditions.json";
 import messages from "@/messages/en.json";
@@ -78,5 +78,24 @@ describe("Bo's placeholders, in every language", () => {
     const held = Object.entries(bo).filter(([, v]) => v.includes("[Placeholder")).map(([k]) => k);
     if (met("bo-live")) expect(held.filter((k) => !k.startsWith("picture"))).toEqual([]);
     if (met("bo-pictures-live")) expect(held.filter((k) => k.startsWith("picture"))).toEqual([]);
+  });
+});
+
+describe("historyFromRows: the page's history (P8, #210)", () => {
+  it("oldest first; a picture's message keeps the fact, even with no words", () => {
+    const rows = [
+      { id: "r2", author: "ai", body: "A reply", has_picture: false },
+      { id: "r1", author: "person", body: "", has_picture: true },
+      { id: "r0", author: "person", body: "Earlier", has_picture: null },
+    ];
+    expect(historyFromRows(rows)).toEqual([
+      { id: "r0", author: "person", body: "Earlier", hasPicture: false },
+      { id: "r1", author: "person", body: "", hasPicture: true },
+      { id: "r2", author: "ai", body: "A reply", hasPicture: false },
+    ]);
+  });
+  it("anything malformed is left out; no rows, no history", () => {
+    expect(historyFromRows([{ id: "x", author: "someone", body: "?" }, null])).toEqual([]);
+    expect(historyFromRows(null)).toEqual([]);
   });
 });
