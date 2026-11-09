@@ -13,9 +13,3 @@ export function RequestCountryProvider({ country, children }: { country: string 
 }
 
 export const useRequestCountry = () => useContext(RequestCountryContext);
-
-// Two capital letters, or nothing.
-export const usableCountry = (header: string | null | undefined): string | null => {
-  const c = header?.toUpperCase() ?? null;
-  return c && /^[A-Z]{2}$/.test(c) ? c : null;
-};

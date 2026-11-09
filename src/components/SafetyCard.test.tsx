@@ -8,7 +8,8 @@ import fr from "@/messages/fr.json";
 import ptBr from "@/messages/pt-br.json";
 import { helpLineSize, helplinesFor, isIos, telHref } from "@/lib/safety/helplines";
 import { GetHelpNow, SafetyCard } from "./SafetyCard";
-import { RequestCountryProvider, usableCountry } from "./RequestCountry";
+import { RequestCountryProvider } from "./RequestCountry";
+import { usableCountry } from "@/lib/region/requestCountry";
 vi.mock("@/i18n/navigation", () => ({
   Link: ({ href, prefetch, children, ...rest }: { href: string; prefetch?: boolean; children: React.ReactNode }) => (
     <a href={href} data-prefetch={String(prefetch)} {...rest}>

@@ -14,7 +14,8 @@ import { VisitCounts } from "@/components/VisitCounts";
 import { THEME_PRE_PAINT } from "@/lib/appearance";
 import { conditionMet } from "@/lib/conditions";
 import { NONCE_HEADER } from "@/lib/csp";
-import { RequestCountryProvider, usableCountry } from "@/components/RequestCountry";
+import { RequestCountryProvider } from "@/components/RequestCountry";
+import { usableCountry } from "@/lib/region/requestCountry";
 import { APP_STORE_ID, liveStores } from "@/lib/stores";
 
 export function generateStaticParams() {
