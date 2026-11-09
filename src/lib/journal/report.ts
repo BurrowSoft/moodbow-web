@@ -73,3 +73,11 @@ export function reportOutcome(code: unknown): Exclude<ReportResult, { status: "o
       return { status: "error", message: "reportError" };
   }
 }
+
+// Monday–Sunday as one range in the region's format ("12–18 Oct"), no copy key (decision 180).
+// Called on the server for the page's week: the card shows that string as is (#418).
+export function weekRange(weekStart: string, dateLocaleTag: string): string {
+  const start = new Date(`${weekStart}T12:00:00Z`);
+  const end = new Date(start.getTime() + 6 * 86_400_000);
+  return new Intl.DateTimeFormat(dateLocaleTag, { day: "numeric", month: "short", timeZone: "UTC" }).formatRange(start, end);
+}

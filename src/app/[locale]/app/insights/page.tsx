@@ -11,7 +11,7 @@ import { isRange, previousRangeStart, rangeDays, series, type InsightRow, type R
 import { loadMilestone } from "@/lib/share/milestoneData";
 import { yearOnOffer } from "@/lib/share/year";
 import { aiShown, canReflect } from "@/lib/journal/ai";
-import { lastWeekStart, parseReportBody, type WeeklyReport as Report } from "@/lib/journal/report";
+import { lastWeekStart, parseReportBody, weekRange, type WeeklyReport as Report } from "@/lib/journal/report";
 import { getMe } from "@/lib/journal/me";
 import { patterns, patternsWindowStart } from "@/lib/journal/patterns";
 import { sixDaysAfter, yourWeek, type YourWeekMoment } from "@/lib/journal/yourWeek";
@@ -82,7 +82,7 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
   let week: React.ReactNode = null;
   const weekly = pageGate("weekly-report-live") !== "hidden";
   if (weekly && aiShown(me) && !canReflect(me)) {
-    week = <WeeklyReport initial={null} weekStart={lastWeekStart(me.today)} dateLocaleTag={dateLocaleTag} balance={0} aiOff />;
+    week = <WeeklyReport initial={null} weekStart={lastWeekStart(me.today)} weekLabel={weekRange(lastWeekStart(me.today), dateLocaleTag)} dateLocaleTag={dateLocaleTag} balance={0} aiOff />;
   } else if (weekly && canReflect(me)) {
     const weekStart = lastWeekStart(me.today);
     const { data: stored } = await supabase
@@ -94,7 +94,7 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
     const row = stored as { id: string; period_start: string; body: unknown; tier: string; created_at: string } | null;
     const body = row ? parseReportBody(row.body) : null;
     const initial: Report | null = row && body ? { id: row.id, week_start: row.period_start, body, tier: row.tier === "lite" ? "lite" : "full", created_at: row.created_at } : null;
-    week = <WeeklyReport initial={initial} weekStart={weekStart} dateLocaleTag={dateLocaleTag} balance={me.credits?.balance ?? 0} country={me.profile?.country ?? null} />;
+    week = <WeeklyReport initial={initial} weekStart={weekStart} weekLabel={weekRange(weekStart, dateLocaleTag)} dateLocaleTag={dateLocaleTag} balance={me.credits?.balance ?? 0} country={me.profile?.country ?? null} />;
   }
   // Your week (specs/your-week.md), no AI: today is the saved time zone's, from
   // get_me. Moments: id and date only, never the body. A failed read: no moment.
