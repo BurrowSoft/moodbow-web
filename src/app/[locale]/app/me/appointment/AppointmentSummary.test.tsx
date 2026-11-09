@@ -57,7 +57,8 @@ describe("AppointmentSummary", () => {
     const local = vi.spyOn(Storage.prototype, "setItem");
     summary();
     expect(screen.getByText(a.talkHint)).toBeInTheDocument();
-    fireEvent.change(screen.getByLabelText(a.talk), { target: { value: "Sleep since the move" } });
+    // The box by its role: the section is named by the same words (the Reviewer).
+    fireEvent.change(screen.getByRole("textbox", { name: a.talk }), { target: { value: "Sleep since the move" } });
     fireEvent.click(screen.getByTestId("appointment-full"));
     expect(local).not.toHaveBeenCalled();
     expect(screen.getByTestId("appointment-talk-print")).toHaveTextContent("Sleep since the move");

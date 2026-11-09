@@ -68,7 +68,14 @@ describe("what the summary reads: check-ins and starred entries, nothing else (t
 });
 
 describe("appointment words, in every language", () => {
-  const SCORING = ["symptom", "severity", "score", "episode", "disorder", "diagnos"];
+  // Scoring and clinical words, beyond the diagnosis lists (the Reviewer's read; fr, es, pt-BR
+  // too, UX). de, it and th are drafts: their lists come with their native read.
+  const SCORING: Partial<Record<(typeof LANGUAGES)[number], string[]>> = {
+    en: ["symptom", "severity", "score", "episode", "disorder", "diagnos"],
+    fr: ["symptôme", "sévérité", "gravité", "score", "épisode", "trouble", "diagnost"],
+    es: ["síntoma", "severidad", "gravedad", "puntuación", "episodio", "trastorno", "diagnóst"],
+    "pt-br": ["sintoma", "severidade", "gravidade", "pontuação", "episódio", "transtorno", "diagnóst"],
+  };
   it("every language has en's keys, none empty", () => {
     const en = messages("en").appointment;
     for (const l of LANGUAGES) {
@@ -82,7 +89,7 @@ describe("appointment words, in every language", () => {
     for (const l of LANGUAGES) {
       const m = messages(l);
       const shown = { ...m.appointment, chartMood: m.insights.chartMood, chartSleep: m.insights.chartSleep, chartStress: m.insights.chartStress, chartExercise: m.insights.chartExercise, chartAverage: m.insights.chartAverage, chartAverageOfFive: m.insights.chartAverageOfFive };
-      const words = [...(yourWeek.diagnosisWords as Record<string, string[]>)[l], ...(l === "en" ? SCORING : [])];
+      const words = [...(yourWeek.diagnosisWords as Record<string, string[]>)[l], ...(SCORING[l] ?? [])];
       for (const [k, v] of Object.entries(shown)) {
         const text = v.toLocaleLowerCase(l);
         for (const w of words) expect(text.includes(w), `${l} ${k}: "${w}"`).toBe(false);
