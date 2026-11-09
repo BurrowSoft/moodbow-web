@@ -70,8 +70,10 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
   // A milestone reached (decision 169): offered once, where the 1.1 share cards are on.
   const milestone = pageGate("share-cards") !== "hidden" && pageGate("share-cards-more") !== "hidden" ? await loadMilestone(supabase) : null;
   // Things that help (1.2): read whenever it's on, as a save here can make today low. A failed
-  // read is an empty list: the card still offers a minute to breathe.
-  const toolbox = pageGate("toolbox-live") !== "hidden" ? parseToolboxItems((await supabase.from("toolbox_items").select("id, text, position").order("position")).data) : null;
+  // read is no list at all: the card still offers a minute to breathe (UX), and nothing else.
+  const toolboxOn = pageGate("toolbox-live") !== "hidden";
+  const toolboxRead = toolboxOn ? await supabase.from("toolbox_items").select("id, text, position").order("position") : null;
+  const toolbox = toolboxRead && !toolboxRead.error ? parseToolboxItems(toolboxRead.data) : null;
 
   return (
     <section className="space-y-8">
@@ -88,7 +90,7 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
         </p>
       </header>
       <CheckInCard key={checkInError ? "unread" : "read"} initial={(data as CheckIn | null) ?? null} uid={user.id} date={me.today} dateLocaleTag={dateLocaleTag} keepDraft loadFailed={Boolean(checkInError)} />
-      {toolbox && <ToolboxCard uid={user.id} today={me.today} todayMood={(data as CheckIn | null)?.mood ?? null} items={toolbox} />}
+      {toolboxOn && <ToolboxCard uid={user.id} today={me.today} todayMood={(data as CheckIn | null)?.mood ?? null} items={toolbox} />}
       <Link
         href="/app/write"
         data-testid="today-write"

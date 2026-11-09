@@ -11,7 +11,7 @@ import { parseToolboxItems } from "@/lib/journal/toolbox";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { JOURNAL_HEADING } from "@/lib/ui/journalLayout";
 import { titledMetadata } from "../../pageMeta";
-import { ToolboxEditor } from "./ToolboxEditor";
+import { ToolboxBreatheOnly, ToolboxEditor } from "./ToolboxEditor";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/app/me/toolbox">): Promise<Metadata> {
   const { locale } = await params;
@@ -19,7 +19,8 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/app/me/t
 }
 
 // Me → Things that help me (1.2, toolbox-live): the person's list, and a minute to breathe.
-// A failed read says so and offers nothing to change, so nothing can look saved that isn't.
+// A failed read says so and offers nothing to change, so nothing can look saved that isn't;
+// breathing needs no data, so it's still there (UX).
 export default async function ToolboxPage({ params }: PageProps<"/[locale]/app/me/toolbox">) {
   const { locale } = await params;
   setRequestLocale(locale as Locale);
@@ -37,7 +38,14 @@ export default async function ToolboxPage({ params }: PageProps<"/[locale]/app/m
       <h1 className={JOURNAL_HEADING} data-testid="toolbox-title">
         {t("meRow")}
       </h1>
-      {error ? <JournalUnavailable /> : <ToolboxEditor initial={parseToolboxItems(data)} />}
+      {error ? (
+        <>
+          <JournalUnavailable />
+          <ToolboxBreatheOnly />
+        </>
+      ) : (
+        <ToolboxEditor initial={parseToolboxItems(data)} />
+      )}
     </section>
   );
 }

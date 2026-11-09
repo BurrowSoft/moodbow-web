@@ -13,6 +13,29 @@ const SMALL = "inline-flex min-h-11 min-w-11 items-center justify-center rounded
 // Me → Things that help me (1.2): the person's own list, in their order. Every change
 // goes to the server and the list it sends back is what shows, so two tabs can't drift
 // far. Delete says "Deleted." with Undo, which puts it back where it was.
+// Up or down, as an icon: its name is the button's (Move up, Move down).
+function Arrow({ up }: { up: boolean }) {
+  return (
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d={up ? "M12 19V5M5 12l7-7 7 7" : "M12 5v14M19 12l-7 7-7-7"} />
+    </svg>
+  );
+}
+
+// The list couldn't be read: nothing to change, but a minute to breathe needs no data (UX).
+export function ToolboxBreatheOnly() {
+  const t = useTranslations("toolbox");
+  const [breathing, setBreathing] = useState(false);
+  return (
+    <>
+      <button type="button" data-testid="toolbox-breathe" onClick={() => setBreathing(true)} className={dialogButton()}>
+        {t("breathe")}
+      </button>
+      {breathing && <Breathing onClose={() => setBreathing(false)} />}
+    </>
+  );
+}
+
 export function ToolboxEditor({ initial }: { initial: ToolboxItem[] }) {
   const t = useTranslations("toolbox");
   const tt = useTranslations("today");
@@ -122,12 +145,12 @@ export function ToolboxEditor({ initial }: { initial: ToolboxItem[] }) {
                     </button>
                     {i > 0 && (
                       <button type="button" data-testid="toolbox-up" aria-label={t("moveUp")} aria-describedby={`toolbox-item-${item.id}`} disabled={busy} onClick={() => move(item, -1)} className={SMALL}>
-                        <span aria-hidden="true">↑</span>
+                        <Arrow up />
                       </button>
                     )}
                     {i < items.length - 1 && (
                       <button type="button" data-testid="toolbox-down" aria-label={t("moveDown")} aria-describedby={`toolbox-item-${item.id}`} disabled={busy} onClick={() => move(item, 1)} className={SMALL}>
-                        <span aria-hidden="true">↓</span>
+                        <Arrow up={false} />
                       </button>
                     )}
                   </div>

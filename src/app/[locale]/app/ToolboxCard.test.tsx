@@ -86,3 +86,18 @@ describe("ToolboxCard", () => {
     heading.remove();
   });
 });
+
+describe("ToolboxCard: the list couldn't be read (UX)", () => {
+  it("a minute to breathe still, with no items and no offer to add", () => {
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <ToolboxCard uid="u1" today={TODAY} todayMood={1} items={null} />
+      </NextIntlClientProvider>,
+    );
+    expect(screen.getByTestId("toolbox-card-breathe")).toHaveTextContent(m.breathe);
+    expect(screen.queryByTestId("toolbox-card-items")).toBeNull();
+    expect(screen.queryByTestId("toolbox-card-add")).toBeNull();
+    fireEvent.click(screen.getByTestId("toolbox-card-breathe"));
+    expect(screen.getByTestId("breathing")).toBeInTheDocument();
+  });
+});

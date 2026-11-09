@@ -27,8 +27,9 @@ const hiddenFor = (key: string) => {
 // Things that help you (1.2): a gentle card on Today when the latest check-in saved today
 // is low (content/toolbox.json). It follows the check-in card, so it never comes before
 // a help offer (the Reviewer's read). Not now hides it for today, in this browser only.
-// The person's own items, and a minute to breathe; with none yet, a way to add one.
-export function ToolboxCard({ uid, today, todayMood, items }: { uid: string; today: string; todayMood: number | null; items: ToolboxItem[] }) {
+// The person's own items, and a minute to breathe; with none yet, a way to add one. items null:
+// the list couldn't be read, so only breathing, which needs no data (UX).
+export function ToolboxCard({ uid, today, todayMood, items }: { uid: string; today: string; todayMood: number | null; items: ToolboxItem[] | null }) {
   const t = useTranslations("toolbox");
   const key = localKey("toolbox-card-hidden", uid, today);
   const mood = useSyncExternalStore(subscribeTodayMood, () => todayMoodFor(today, todayMood), () => todayMood);
@@ -51,7 +52,7 @@ export function ToolboxCard({ uid, today, todayMood, items }: { uid: string; tod
       <h2 id="toolbox-card-title" className="text-lg font-medium text-text">
         {t("cardTitle")}
       </h2>
-      {items.length > 0 ? (
+      {items === null ? null : items.length > 0 ? (
         <ul data-testid="toolbox-card-items" className="mt-3 list-disc space-y-1 ps-[20px] text-text [overflow-wrap:break-word]">
           {items.map((item) => (
             <li key={item.id}>{item.text}</li>

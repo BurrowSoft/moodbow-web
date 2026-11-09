@@ -14,7 +14,7 @@ vi.mock("./actions", () => ({
   deleteToolboxItem: (...a: unknown[]) => remove(...a),
   moveToolboxItem: (...a: unknown[]) => move(...a),
 }));
-const { ToolboxEditor } = await import("./ToolboxEditor");
+const { ToolboxBreatheOnly, ToolboxEditor } = await import("./ToolboxEditor");
 
 const m = messages.toolbox;
 const items = (...texts: string[]): ToolboxItem[] => texts.map((text, position) => ({ id: `i${position}`, text, position }));
@@ -122,6 +122,19 @@ describe("ToolboxEditor", () => {
 
   it("a minute to breathe opens from here too", () => {
     open([]);
+    fireEvent.click(screen.getByTestId("toolbox-breathe"));
+    expect(screen.getByTestId("breathing")).toBeInTheDocument();
+  });
+});
+
+describe("ToolboxBreatheOnly: the page when the list can't be read (UX)", () => {
+  it("only breathing, which needs no data", () => {
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <ToolboxBreatheOnly />
+      </NextIntlClientProvider>,
+    );
+    expect(screen.queryByTestId("toolbox-new")).toBeNull();
     fireEvent.click(screen.getByTestId("toolbox-breathe"));
     expect(screen.getByTestId("breathing")).toBeInTheDocument();
   });
