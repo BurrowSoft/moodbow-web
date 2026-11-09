@@ -7,6 +7,7 @@ import { HelpNumberText } from "@/components/HelpNumberText";
 import { Link } from "@/i18n/navigation";
 import { helpLineSize, helplinesFor, isIos, isShortCode, telHref } from "@/lib/safety/helplines";
 import { requestCountry } from "@/lib/safety/requestCountry";
+import { countryName } from "@/lib/region/countries";
 
 const noSubscribe = () => () => {};
 
@@ -37,7 +38,11 @@ export function SafetyCard({ country, onClose, neutral = false }: { country: str
       open = false;
     };
   }, [country]);
-  const lines = helplinesFor(country || requested, useLocale());
+  const locale = useLocale();
+  const lines = helplinesFor(country || requested, locale);
+  // Numbers from where the request came from, not the person's own country: say whose they
+  // are, so someone travelling or on a VPN can tell (UX). The browser's own country name.
+  const fromRequest = !country && requested && (lines.helpline || lines.emergency) ? countryName(requested, locale) : null;
   const ios = useSyncExternalStore(noSubscribe, () => isIos(navigator.userAgent, navigator.maxTouchPoints), () => false);
   // The numbers and links stop growing at about 200 % on narrow screens (decision 231). What comes
   // before them stays under the card's own cap (capText in Dialog): at 32 px it pushed the first help
@@ -48,6 +53,11 @@ export function SafetyCard({ country, onClose, neutral = false }: { country: str
   return (
     <Dialog title={t("safetyTitle")} body={t(neutral ? "safetyBodyNeutral" : "safetyBody")} onCancel={onClose} testId="safety-card" initialFocus="title" capText>
       <div className="w-full space-y-[max(6px,calc(28px-1rem))] text-left">
+        {fromRequest && (
+          <p data-testid="safety-request-country" className="font-medium text-text">
+            {fromRequest}
+          </p>
+        )}
         {lines.helpline &&
           (ios && isShortCode(lines.helpline.dial) ? (
             <div>

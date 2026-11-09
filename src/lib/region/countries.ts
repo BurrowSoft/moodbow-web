@@ -14,6 +14,15 @@ export const ISO_COUNTRIES = (
 
 export const isCountry = (v: unknown): v is string => typeof v === "string" && ISO_COUNTRIES.includes(v);
 
+// One country's name in the UI language, as the picker shows it; its code if there's none.
+export function countryName(code: string, locale: string): string {
+  try {
+    return new Intl.DisplayNames([locale], { type: "region" }).of(code) ?? code;
+  } catch {
+    return code;
+  }
+}
+
 // The countries as [code, name], sorted by name in the UI language.
 export function countryOptions(locale: string): [string, string][] {
   let names: Intl.DisplayNames | null = null;

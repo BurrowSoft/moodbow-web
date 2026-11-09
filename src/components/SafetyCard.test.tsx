@@ -273,12 +273,20 @@ describe("SafetyCard: a number to tap even with no profile country (UX, #269)", 
     expect(asked).not.toHaveBeenCalled();
   });
 
-  it("none: the request's country, its helpline and emergency number", async () => {
+  it("none: the request's country, named above its helpline and emergency number", async () => {
     requested = "TH";
     wrap(<SafetyCard country={null} onClose={() => {}} />);
     expect(await screen.findByTestId("safety-call-helpline")).toHaveAttribute("href", "tel:1323");
     expect(screen.getByTestId("safety-call-emergency")).toHaveAttribute("href", "tel:1669");
+    const name = screen.getByTestId("safety-request-country");
+    expect(name).toHaveTextContent("Thailand");
+    expect(name.compareDocumentPosition(screen.getByTestId("safety-call-helpline")) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     requested = null;
+  });
+
+  it("the profile's own country isn't named: it's theirs", () => {
+    wrap(<SafetyCard country="TH" onClose={() => {}} />);
+    expect(screen.queryByTestId("safety-request-country")).toBeNull();
   });
 
   it("neither: the sentence and Find a helpline, as before", async () => {
