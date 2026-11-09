@@ -19,6 +19,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { YourWeekCard } from "./YourWeekCard";
 import { tabMetadata } from "../pageMeta";
 import { InsightsView } from "./InsightsView";
+import { safetyPlanHasContent } from "../me/safety-plan/actions";
 import { ShareMonth } from "./ShareMonth";
 import { WeeklyReport } from "./WeeklyReport";
 
@@ -103,7 +104,9 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
     const start = lastWeekStart(me.today);
     const { data: moments } = await supabase.from("entries").select("id, entry_date").eq("is_moment", true).gte("entry_date", start).lte("entry_date", sixDaysAfter(start));
     const result = yourWeek(rows, me.today, (moments ?? []) as YourWeekMoment[]);
-    if (result) summary = <YourWeekCard week={result} country={me.profile?.country} dateLocaleTag={dateLocaleTag} />;
+    // A hard week offers the safety plan too, where it has content (1.2): a yes or no, read only then.
+    const planLink = result?.kind === "hard" && pageGate("safety-plan-live") !== "hidden" ? await safetyPlanHasContent() : false;
+    if (result) summary = <YourWeekCard week={result} country={me.profile?.country} dateLocaleTag={dateLocaleTag} planLink={planLink} />;
   }
   return <InsightsView rows={rows} today={me.today} range={range} share={share} summary={summary} week={week} patterns={withPatterns ? patterns(rows, me.today) : undefined} />;
 }
