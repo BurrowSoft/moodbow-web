@@ -575,5 +575,33 @@
     "safetyCallEmergency": "Notruf {number} anrufen",
     "safetyClose": "Schließen",
     "safetyNotTherapy": "Moodbow ersetzt keine professionelle Hilfe."
+  },
+  "toolbox": {
+    "meRow": "Was mir hilft",
+    "empty": "Füge kleine Dinge hinzu, die an schweren Tagen helfen. Nur du kannst diese Liste sehen.",
+    "placeholder": "Etwas, das hilft",
+    "add": "Hinzufügen",
+    "edit": "Bearbeiten",
+    "delete": "Löschen",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "moveUp": "Nach oben",
+    "moveDown": "Nach unten",
+    "deleted": "Gelöscht.",
+    "undo": "Rückgängig",
+    "limitCount": "Du kannst hier bis zu 20 Dinge behalten.",
+    "limitLength": "Höchstens 120 Zeichen.",
+    "cardTitle": "Was dir hilft",
+    "breathe": "Eine Minute atmen",
+    "notNow": "Nicht jetzt",
+    "cardEmpty": "Etwas hinzufügen, das hilft",
+    "breathTitle": "Eine Minute zum Atmen",
+    "breatheIn": "Einatmen",
+    "breatheOut": "Ausatmen",
+    "breatheInCount": "Einatmen · {n}",
+    "breatheOutCount": "Ausatmen · {n}",
+    "stop": "Stopp",
+    "breathEnd": "Das war eine Minute. Lass dir Zeit.",
+    "done": "Fertig"
   }
 }

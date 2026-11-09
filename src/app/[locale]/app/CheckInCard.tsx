@@ -18,6 +18,7 @@ import { MoodFace } from "@/components/MoodFace";
 import { onArrival } from "@/lib/ui/arrival";
 import { useUntilLoaded } from "@/lib/ui/untilLoaded";
 import { saveCheckIn, type CheckInState } from "./actions";
+import { publishTodayMood } from "@/lib/journal/todayMood";
 import { useCheckInDraft } from "./CheckInDraft";
 
 // The daily check-in (M4): mood required (5 labelled circles), then the
@@ -468,6 +469,7 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
     }
     if (next.status === "saved") {
       setRow(next.checkIn);
+      publishTodayMood(next.checkIn.local_date, next.checkIn.mood);
       setDraftBase(null);
       setFields(fromRow(next.checkIn));
       setEditing(false);
