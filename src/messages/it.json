@@ -626,5 +626,30 @@
     "leaveTitle": "Uscire senza salvare?",
     "leave": "Esci",
     "keepEditing": "Continua a modificare"
+  },
+  "letters": {
+    "meRow": "Lettere al me del futuro",
+    "empty": "Scrivi a te stesso e scegli quando leggerla.",
+    "editorTitle": "Una lettera al me del futuro",
+    "placeholder": "Caro me,",
+    "openLabel": "Aprila",
+    "in1": "Tra 1 mese",
+    "in3": "Tra 3 mesi",
+    "in6": "Tra 6 mesi",
+    "in12": "Tra un anno",
+    "save": "Salva lettera",
+    "savedLine": "Salvata. Si apre il {date}.",
+    "timelineLine": "Una lettera da te · si apre il {date}",
+    "cardLine": "Una lettera da te, scritta il {date}",
+    "open": "Apri",
+    "notNow": "Non ora",
+    "earlyTitle": "Aprire questa lettera ora?",
+    "earlyBody": "Era per il {date}. È tua: aprila quando vuoi.",
+    "openNow": "Apri ora",
+    "keepForLater": "Tienila per dopo",
+    "deleteTitle": "Eliminare questa lettera?",
+    "deleteBody": "Sparirà per sempre.",
+    "delete": "Elimina",
+    "keep": "Tieni"
   }
 }

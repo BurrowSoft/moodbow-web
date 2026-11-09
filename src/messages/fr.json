@@ -626,5 +626,30 @@
     "leaveTitle": "Quitter sans enregistrer ?",
     "leave": "Quitter",
     "keepEditing": "Continuer à modifier"
+  },
+  "letters": {
+    "meRow": "Lettres à mon futur moi",
+    "empty": "Écrivez-vous et choisissez quand la lire.",
+    "editorTitle": "Une lettre à mon futur moi",
+    "placeholder": "Cher moi,",
+    "openLabel": "L'ouvrir",
+    "in1": "Dans 1 mois",
+    "in3": "Dans 3 mois",
+    "in6": "Dans 6 mois",
+    "in12": "Dans un an",
+    "save": "Enregistrer la lettre",
+    "savedLine": "Enregistrée. Elle s'ouvrira le {date}.",
+    "timelineLine": "Une lettre de vous · s'ouvre le {date}",
+    "cardLine": "Une lettre de vous, écrite le {date}",
+    "open": "Ouvrir",
+    "notNow": "Pas maintenant",
+    "earlyTitle": "Ouvrir cette lettre maintenant ?",
+    "earlyBody": "Elle était prévue pour le {date}. Elle est à vous, ouvrez-la quand vous voulez.",
+    "openNow": "L'ouvrir maintenant",
+    "keepForLater": "La garder pour plus tard",
+    "deleteTitle": "Supprimer cette lettre ?",
+    "deleteBody": "Elle disparaîtra définitivement.",
+    "delete": "Supprimer",
+    "keep": "La garder"
   }
 }

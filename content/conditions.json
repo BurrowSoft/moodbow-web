@@ -215,6 +215,10 @@
     "met": false,
     "what": "1.2: My safety plan (specs/1.2-features.md §2, content/safety-plan.json): Me's plan, its button on the help card below the helplines and on a hard Your week. Needs the clinician's read of every string (Vitor), the privacy policy's text on other people's details (Vitor), migration 026 on Production (Vitor), the Reviewer's read, the tester rows and Vitor's look."
   },
+  "letters-live": {
+    "met": false,
+    "what": "1.2: Letters to future me (specs/1.2-features.md §3, content/letters.json): Me's letters, Today's card on the day, and the Timeline's locked line. Needs migration 027 on Production (Vitor), the Reviewer's read, the tester rows and Vitor's look."
+  },
   "region-live": {
     "met": false,
     "what": "/api/region answers on Production: the signed country token for functions that are only on in some countries (Bo first, specs/bo-design.md section 7). Before it's met, on Production: REGION_SECRET set by Vitor, and the Web Tester's forged-header row passed on Preview."

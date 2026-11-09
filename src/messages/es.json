@@ -626,5 +626,30 @@
     "leaveTitle": "¿Salir sin guardar?",
     "leave": "Salir",
     "keepEditing": "Seguir editando"
+  },
+  "letters": {
+    "meRow": "Cartas para mi yo del futuro",
+    "empty": "Escríbete y elige cuándo leerla.",
+    "editorTitle": "Una carta para mi yo del futuro",
+    "placeholder": "Querido yo:",
+    "openLabel": "Abrirla",
+    "in1": "En 1 mes",
+    "in3": "En 3 meses",
+    "in6": "En 6 meses",
+    "in12": "En un año",
+    "save": "Guardar carta",
+    "savedLine": "Guardada. Se abre el {date}.",
+    "timelineLine": "Una carta tuya · se abre el {date}",
+    "cardLine": "Una carta tuya, escrita el {date}",
+    "open": "Abrir",
+    "notNow": "Ahora no",
+    "earlyTitle": "¿Abrir esta carta ahora?",
+    "earlyBody": "Era para el {date}. Es tuya: ábrela cuando quieras.",
+    "openNow": "Abrir ahora",
+    "keepForLater": "Guardarla para después",
+    "deleteTitle": "¿Eliminar esta carta?",
+    "deleteBody": "Desaparecerá para siempre.",
+    "delete": "Eliminar",
+    "keep": "Conservar"
   }
 }
