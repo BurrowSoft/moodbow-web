@@ -63,8 +63,9 @@ function howItLooked(rows: InsightRow[]): YourWeekLine | null {
   const count = (moods: readonly number[]) => rows.filter((r) => moods.includes(r.mood)).length;
   const good = count(YOUR_WEEK_RULES.goodMoods);
   const low = count(YOUR_WEEK_RULES.lowMoods);
-  if (good > low && good >= YOUR_WEEK_RULES.minGoodDays) return { template: "lookMoreGood" };
+  // Steady first (version 2, after Vitor's look): 4, 4, 3, 3, 3 is a steady week, not a good one.
   if (count([YOUR_WEEK_RULES.steadyMood]) * 2 > rows.length) return { template: "lookSteady" };
+  if (good > low && good >= YOUR_WEEK_RULES.minGoodDays) return { template: "lookMoreGood" };
   if (good === low && good >= 1) return { template: "lookMixed" };
   return null;
 }

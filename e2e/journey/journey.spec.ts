@@ -1237,6 +1237,22 @@ test("large text, set in the browser: Today after a mood, calendar, day, entry a
           expect.soft(size.font, `${saved} ${path} heading at ${percent}%`).toBeGreaterThanOrEqual(size.body);
           if (percent === 200) expect.soft(size.widest, `${saved} ${path} heading's words at 200%`).toBeLessThanOrEqual(size.room);
         }
+        // "Last 7 days" is longer than "Week" was (UX, 2026-11-09): no word split, nothing sideways.
+        await page.goto(`${route}/app/insights`);
+        const last7 = await page.getByTestId("insights-range-week").evaluate((tab) => {
+          const text = tab.firstChild!;
+          const split = [...(text.textContent ?? "").matchAll(/\S+/g)].filter((w) => {
+            const r = document.createRange();
+            r.setStart(text, w.index!);
+            r.setEnd(text, w.index! + w[0].length);
+            return new Set([...r.getClientRects()].map((x) => Math.round(x.top))).size > 1;
+          });
+          const all = document.createRange();
+          all.selectNodeContents(tab);
+          return { split: split.map((w) => w[0]), lines: new Set([...all.getClientRects()].map((x) => Math.round(x.top))).size, right: Math.round(tab.getBoundingClientRect().right) };
+        });
+        console.log(`Last 7 days, ${saved} at ${percent}%: ${last7.lines} line(s), right edge ${last7.right}`);
+        expect.soft({ split: last7.split, inside: last7.right <= 320 }, `${saved} Last 7 days at ${percent}%`).toEqual({ split: [], inside: true });
         // Me's reminder reads whole in a 12-hour browser (this one's en-US), with its PM: a
         // clipped one makes 21:00 read "09:00" (Web Tester, #206).
         await page.goto(`${route}/app/me`);

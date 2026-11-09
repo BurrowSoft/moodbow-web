@@ -437,7 +437,7 @@
   },
   "insights": {
     "insightsTitle": "Andamento",
-    "rangeWeek": "Settimana",
+    "rangeWeek": "Ultimi 7 giorni",
     "rangeMonth": "Mese",
     "range3Months": "3 mesi",
     "chartMood": "Umore",

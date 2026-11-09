@@ -1033,5 +1033,10 @@
     "key": "me.meNoScript",
     "en": "The journal needs JavaScript. Turn it on in your browser to see your entries.",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.rangeWeek",
+    "en": "Last 7 days",
+    "reason": "UX draft (native read pending)"
   }
 ]

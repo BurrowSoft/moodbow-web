@@ -437,7 +437,7 @@
   },
   "insights": {
     "insightsTitle": "Insights",
-    "rangeWeek": "Semana",
+    "rangeWeek": "Últimos 7 dias",
     "rangeMonth": "Mês",
     "range3Months": "3 meses",
     "chartMood": "Humor",

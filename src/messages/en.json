@@ -437,7 +437,7 @@
   },
   "insights": {
     "insightsTitle": "Insights",
-    "rangeWeek": "Week",
+    "rangeWeek": "Last 7 days",
     "rangeMonth": "Month",
     "range3Months": "3 months",
     "chartMood": "Mood",

@@ -437,7 +437,7 @@
   },
   "insights": {
     "insightsTitle": "ข้อมูลเชิงลึก",
-    "rangeWeek": "สัปดาห์",
+    "rangeWeek": "7 วันที่ผ่านมา",
     "rangeMonth": "เดือน",
     "range3Months": "3 เดือน",
     "chartMood": "อารมณ์",

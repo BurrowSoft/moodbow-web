@@ -437,7 +437,7 @@
   },
   "insights": {
     "insightsTitle": "Einblicke",
-    "rangeWeek": "Woche",
+    "rangeWeek": "Letzte 7 Tage",
     "rangeMonth": "Monat",
     "range3Months": "3 Monate",
     "chartMood": "Stimmung",
