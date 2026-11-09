@@ -135,12 +135,23 @@ describe("BoMeRow", () => {
 });
 
 describe("BoMeRow: someone who turned Bo off always has the way back (UX, 2026-11-09)", () => {
-  const live = (turnedOff: boolean) =>
+  const live = (turnedOff: boolean, consented = false) =>
     render(
       <NextIntlClientProvider locale="en" messages={messages}>
-        <BoMeRowLive uid="u1" hasConversation={false} readsJournal={false} consented={false} turnedOff={turnedOff} />
+        <BoMeRowLive uid="u1" hasConversation={false} readsJournal={false} consented={consented} turnedOff={turnedOff} />
       </NextIntlClientProvider>,
     );
+
+  it("Bo on, and then their country goes off: the switch stays, on, so turning Bo off is never taken away", async () => {
+    status = { status: "ok", available: false, reason: "region_off", pictures: false, maxChars: 2000 };
+    live(false, true);
+    const use = screen.getByTestId("me-bo-use");
+    expect(use).toBeChecked();
+    fireEvent.click(use);
+    await act(async () => {});
+    expect(off).toHaveBeenCalled();
+    expect(screen.getByTestId("me-bo-use")).not.toBeChecked();
+  });
 
   it("status still unanswered, past its wait: their switch is there, off, and on goes to Bo's screen", () => {
     status = null;
