@@ -211,6 +211,10 @@
     "met": false,
     "what": "1.2: Things that help me (specs/1.2-features.md, content/toolbox.json): Me's list, the Today card after a low check-in, and a minute to breathe. Needs migration 025 on Production (Vitor), the Reviewer's read, the tester rows and Vitor's look."
   },
+  "test-only-unavailable-page": {
+    "met": false,
+    "what": "TEST ONLY, NEVER MET: /app/test/unavailable, a page that renders nothing but the journal's couldn't-load state (JournalUnavailable) inside the journal layout, so a journey can measure where its help sits at large text (the real pages fail only when Supabase does). No journal data on it. A 404 on Production at the routing level (lib/sitemapPages.ts), before any sign-in; a test and the publish-day checklist check that."
+  },
   "region-live": {
     "met": false,
     "what": "/api/region answers on Production: the signed country token for functions that are only on in some countries (Bo first, specs/bo-design.md section 7). Before it's met, on Production: REGION_SECRET set by Vitor, and the Web Tester's forged-header row passed on Preview."
