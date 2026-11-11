@@ -83,6 +83,8 @@ describe("ToolboxEditor", () => {
     expect(add).toHaveBeenCalledWith("Walk", 0);
     expect(screen.queryByTestId("toolbox-deleted")).toBeNull();
     expect(screen.getAllByTestId("toolbox-item")).toHaveLength(2);
+    // Undo went with its line: focus is on the field to add, never the page (Web Tester, #265 M5).
+    expect(screen.getByTestId("toolbox-new")).toHaveFocus();
   });
 
   it("Move up and Move down, by name; none past either end", async () => {
