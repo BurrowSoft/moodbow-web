@@ -78,7 +78,6 @@ export function BoConversation({ initial, country, back, healthData = false, con
   const [card, setCard] = useState(false);
   // The page's read, and the function's answer on a send. The text stays, for after a yes.
   const [needsConsent, setNeedsConsent] = useState(!consented);
-  const consentGiven = useCallback(() => setNeedsConsent(false), []);
   // Pictures: offered only when the flag allows and the function says so. One per message,
   // in memory only, shown for this visit; the object URLs go with the screen.
   const [picturesOffered, setPicturesOffered] = useState(false);
@@ -166,6 +165,12 @@ export function BoConversation({ initial, country, back, healthData = false, con
       else setProblem(status.code);
     } else setProblem(navigator.onLine ? "region_unknown" : "offline");
   }, []);
+  // The status read before consent can say less than after it (pictures: app #228, Bo window
+  // 2026-11-09), so the function is asked again once it's given.
+  const consentGiven = useCallback(() => {
+    setNeedsConsent(false);
+    void callBo<BoStatus>({ action: "status", language }).then(showStatus);
+  }, [language, showStatus]);
 
   useEffect(() => {
     let current = true;

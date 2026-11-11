@@ -351,6 +351,19 @@ describe("BoConversation", () => {
     expect(screen.getByTestId("bo-text")).toBeInTheDocument();
   });
 
+  it("a yes asks the function for status again, as the status before consent can say less (app #228); a failed save doesn't", async () => {
+    await open([], false);
+    const statuses = () => calls.filter((c) => c.action === "status").length;
+    expect(statuses()).toBe(1);
+    give.mockResolvedValueOnce({ ok: false });
+    fireEvent.click(screen.getByTestId("bo-consent-accept"));
+    await act(async () => {});
+    expect(statuses()).toBe(1);
+    fireEvent.click(screen.getByTestId("bo-consent-accept"));
+    await act(async () => {});
+    await waitFor(() => expect(statuses()).toBe(2));
+  });
+
   it("ai_consent_required on a send: the consent, and after a yes the text is still there", async () => {
     await open();
     answers.push({ status: "error", code: "ai_consent_required" });

@@ -8,6 +8,9 @@ on:
   # the next PR that touches it. A red run shows in the Actions list.
   schedule:
     - cron: "17 19 * * *"
+  # The same daily run, started by hand (publish day's morning, UX): GitHub started the cron
+  # 3.5 h late on 8 Nov. Master only; it runs exactly what the schedule runs.
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -21,7 +24,7 @@ concurrency:
 jobs:
   check:
     name: Typecheck, lint and unit tests
-    if: github.event_name != 'schedule'
+    if: github.event_name != 'schedule' && github.event_name != 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -42,8 +45,16 @@ jobs:
 
   e2e:
     name: Build and Playwright smoke
-    if: github.event_name != 'schedule'
+    if: github.event_name != 'schedule' && github.event_name != 'workflow_dispatch'
     runs-on: ubuntu-latest
+    # Playwright's own image, the exact version in package-lock.json: Chromium and its
+    # system packages are already in it, so no apt step can stall or fail (security.ubuntu.com
+    # didn't resolve on any runner for hours on 11 Nov). Bump it with @playwright/test.
+    # As the runner's own user (1001), Playwright's advice: as root, Next's SWC refused
+    # its cache in /github/home, which that user owns.
+    container:
+      image: mcr.microsoft.com/playwright:v1.63.0-noble@sha256:eff16c30e6f3f4af0a03fa4b706120d5e9b0891c344a27d64559aff5900a4a27
+      options: --user 1001
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -60,10 +71,6 @@ jobs:
       - run: npm run build
         env:
           NEXT_PUBLIC_SHOW_DRAFTS: "1"
-      # Ubuntu's mirror sometimes stalls on a single package for minutes (a browser
-      # install is 15 s on a good run, 10 minutes on a bad one): give up and retry.
-      - run: printf 'Acquire::http::Timeout "15";\nAcquire::https::Timeout "15";\nAcquire::Retries "3";\n' | sudo tee /etc/apt/apt.conf.d/99-ci-timeouts
-      - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
       - if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -86,14 +93,16 @@ jobs:
   # when it names that environment.
   journeys:
     name: Staging journeys
-    if: github.event_name == 'pull_request' || github.event_name == 'schedule'
+    if: github.event_name == 'pull_request' || github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/master')
     environment: staging
     permissions:
       contents: read
       pull-requests: read
     runs-on: ubuntu-latest
-    # Ubuntu's package mirror has made the install step take 10 minutes on some
-    # runs, leaving under 5 for 4 minutes of journeys.
+    # As the smoke job: Playwright's own image, so there's no browser install at all.
+    container:
+      image: mcr.microsoft.com/playwright:v1.63.0-noble@sha256:eff16c30e6f3f4af0a03fa4b706120d5e9b0891c344a27d64559aff5900a4a27
+      options: --user 1001
     timeout-minutes: 20
     steps:
       - id: cfg
@@ -128,25 +137,36 @@ jobs:
           NEXT_PUBLIC_SHOW_DRAFTS: "1"
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_STAGING_URL }}
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_STAGING_PUBLISHABLE_KEY }}
-      # As in the smoke job: don't wait minutes on a stalled mirror.
-      - if: steps.cfg.outputs.ok == 'true'
-        run: printf 'Acquire::http::Timeout "15";\nAcquire::https::Timeout "15";\nAcquire::Retries "3";\n' | sudo tee /etc/apt/apt.conf.d/99-ci-timeouts
-      - if: steps.cfg.outputs.ok == 'true'
-        run: npx playwright install --with-deps chromium
       # The journeys that send a real email (@real-email) run only where sign-up changes: staging
       # limits those emails, and a heavy day failed every PR. The help numbers (@help-numbers, minutes
       # of page loads) run only where the numbers or the card change. If the list can't be read, all
-      # run. The daily run is everything.
+      # run. The daily run, by schedule or by hand, is everything.
       - id: scope
         if: steps.cfg.outputs.ok == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if [ "${{ github.event_name }}" = schedule ]; then
+          if [ "${{ github.event_name }}" = schedule ] || [ "${{ github.event_name }}" = workflow_dispatch ]; then
             echo "args=" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          files=$(gh api "repos/${{ github.repository }}/pulls/${{ github.event.number }}/files" --paginate --jq '.[].filename') || files=
+          # The PR's files from the API with Node (the Playwright image has no gh), every page of 100.
+          files=$(node -e '
+            const [repo, pr] = process.argv.slice(1);
+            (async () => {
+              const names = [];
+              for (let page = 1; ; page++) {
+                const res = await fetch(`https://api.github.com/repos/${repo}/pulls/${pr}/files?per_page=100&page=${page}`, {
+                  headers: { authorization: `Bearer ${process.env.GH_TOKEN}`, accept: "application/vnd.github+json" },
+                });
+                if (!res.ok) process.exit(1);
+                const batch = await res.json();
+                names.push(...batch.map((f) => f.filename));
+                if (batch.length < 100) break;
+              }
+              console.log(names.join("\n"));
+            })().catch(() => process.exit(1));
+          ' "${{ github.repository }}" "${{ github.event.number }}") || files=
           if [ -z "$files" ] || echo "$files" | grep -qE '^(src/app/\[locale\]/(sign-up|consent|welcome|email-confirmed|auth)/|src/lib/(legalVersions|onboardingConsent|authErrors)|src/lib/supabase/|src/lib/(email|password)|src/components/AuthField|src/proxy\.ts|src/i18n/|src/messages/|content/conditions\.json|next\.config\.ts|package(-lock)?\.json|e2e/journey/|\.github/workflows/)'; then
             skip=
           else

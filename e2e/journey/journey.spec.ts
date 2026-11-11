@@ -1264,6 +1264,49 @@ test("large text, set in the browser: Today after a mood, calendar, day, entry a
   }
 });
 
+// The journal's couldn't-load state had its help below the first screen at 320 px and 300 %
+// (Web Tester, #267): it's right under the heading now. Measured on the test-only page, the
+// component alone inside the journal layout, as every journal page shows it.
+test("large text, set in the browser: the couldn't-load state's help is in the first view on a 320 px phone", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
+  test.setTimeout(120_000);
+  const email = newEmail();
+  const password = newPassword();
+  const cdp = await page.context().newCDPSession(page);
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    await page.setViewportSize({ width: 320, height: 640 });
+    // fr and es too: their Try again pushed the page sideways at 300 % (Web Tester, #269).
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"], ["/fr", "fr"], ["/es", "es"]] as const) {
+      await setProfileLocale(email, password, saved);
+      for (const percent of [100, 300]) {
+        await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
+        await page.goto(`${route}/app/test/unavailable`);
+        expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth), `${saved} at ${percent} %: nothing sideways`).toBe(0);
+        const retry = (await page.getByTestId("try-again").boundingBox())!;
+        expect(retry.x + retry.width, `${saved} at ${percent} %: Try again inside the width`).toBeLessThanOrEqual(320.5);
+        await expect(page.getByTestId("journal-unavailable"), `${saved} at ${percent} %`).toBeVisible();
+        const box = (await page.getByTestId("journal-unavailable-help").boundingBox())!;
+        // Above the fixed tab bar, which covers the window's foot on a phone.
+        const bar = (await page.locator("nav.fixed").first().boundingBox())?.y ?? 640;
+        expect(box.y, `${saved} at ${percent} %: help's top in the first view`).toBeGreaterThanOrEqual(0);
+        expect(box.y + box.height, `${saved} at ${percent} %: help's bottom above the tab bar (${Math.round(bar)} px)`).toBeLessThanOrEqual(Math.min(640, bar));
+        expect(box.x + box.width, `${saved} at ${percent} %: help inside the width`).toBeLessThanOrEqual(320.5);
+      }
+    }
+  } finally {
+    await cleanup(email);
+  }
+});
+
 // A column of letters under an X above the window, and Not now 1,660 px down (Web Tester, #218).
 test("large text, set in the browser: the milestone's title, X and Not now stay usable on a 320 px phone", async ({ page, browserName }) => {
   test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
@@ -1698,6 +1741,48 @@ test("Bo's status never holds a page: check-in and help first, with the function
       await expect(page.getByTestId(id), path).toBeVisible();
       expect(Date.now() - started, `${path}: on the page without waiting on Bo`).toBeLessThan(10_000);
       await expect(page.getByTestId("bo-button"), path).toHaveCount(0);
+    }
+  } finally {
+    await cleanup(email);
+  }
+});
+
+// Print this month at 320 px and 300 % (Web Tester, #274): the help button and the month's title
+// stay inside the page (an automatic layout table grew to the title's longest word and carried
+// the button 43 px past it), help in the first view, nothing to scroll sideways.
+test("large text, set in the browser: Print this month stays inside a 320 px phone, help first", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
+  test.setTimeout(120_000);
+  const email = newEmail();
+  const password = newPassword();
+  const cdp = await page.context().newCDPSession(page);
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    const month = (await journalToday(email, password)).slice(0, 7);
+    await page.setViewportSize({ width: 320, height: 640 });
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+      await setProfileLocale(email, password, saved);
+      for (const percent of [100, 300]) {
+        const where = `${saved} at ${percent} %`;
+        await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
+        await page.goto(`${route}/app/print/${month}`);
+        const help = page.getByTestId("print-get-help");
+        await expect(help, where).toBeVisible();
+        const box = (await help.boundingBox())!;
+        expect(box.x + box.width, `${where}: help inside the width`).toBeLessThanOrEqual(320.5);
+        expect(box.y + box.height, `${where}: help in the first view`).toBeLessThanOrEqual(640);
+        const title = (await page.locator("h1").first().boundingBox())!;
+        expect(title.x + title.width, `${where}: the title inside the width`).toBeLessThanOrEqual(320.5);
+        expect(await page.evaluate(() => document.documentElement.scrollWidth), `${where}: no sideways scroll`).toBeLessThanOrEqual(320);
+      }
     }
   } finally {
     await cleanup(email);
