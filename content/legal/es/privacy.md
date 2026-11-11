@@ -6,7 +6,7 @@
   Spanish follows and this is updated. Shows on Production only once legal-es-approved is met.
 -->
 ## Política de privacidad de Moodbow
-Última actualización: 6 de noviembre de 2026
+Última actualización: 11 de noviembre de 2026
 
 Moodbow es un diario privado creado por Vitor Ribeiro Carvalho, que opera como BurrowSoft (297 Moo 1, Baan Sanian, Mueang Nan, Nan 55000, Tailandia), «nosotros» en esta política. La escribimos para que se lea, no para que se pase por alto. Si algo no queda claro, escribe a support@moodbow.com.
 
@@ -38,6 +38,8 @@ Moodbow es un diario privado creado por Vitor Ribeiro Carvalho, que opera como B
 **Correos que nos envías:** si escribes a support@moodbow.com, conservamos la conversación para poder responderte y la eliminamos cuando ya no sea necesaria.
 
 No recopilamos tu nombre, tus contactos, tu ubicación precisa ni identificadores publicitarios, y no usamos rastreadores publicitarios.
+
+Para mostrarte líneas de ayuda cerca de ti cuando no sabemos tu país, usamos el país del que proviene tu conexión, solo en ese momento; no se guarda.
 
 {pending:web_analytics}**Recuento de visitas (solo en el sitio web público):** contamos las visitas a nuestras páginas públicas con una herramienta sin cookies de nuestro proveedor de alojamiento, Vercel: qué página se abrió, desde qué tipo de dispositivo y país, y cuál de nuestros enlaces de campaña te llevó ahí, si es el caso. No usa cookies ni identificadores, nunca se ejecuta en el diario web, nunca ve lo que escribes y no puede saber quién eres. La app para teléfonos no envía analítica.{/pending}
 
