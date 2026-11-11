@@ -13,13 +13,23 @@ const ALLOWED = [/^src\/app\/api\/webhooks\/stripe\/route\.ts$/, /^src\/app\/api
 const TEST = /\.test\.(ts|tsx)$/;
 
 describe("the service role on the web", () => {
-  it("only the Stripe webhook and the crons import lib/plus/serviceRole (a type-only import is no client)", () => {
+  // A static import, a dynamic import() or a require(), by alias or relative path.
+  const REACHES = /(from\s+|import\s*\(\s*|require\s*\(\s*)["'](@\/lib\/plus|\.{1,2}(\/[^"']*)?)\/serviceRole(\.ts)?["']/;
+  const reaches = (text: string) => text.split("\n").some((line) => REACHES.test(line) && !/^\s*import\s+type\s/.test(line));
+
+  it("the guard sees every way in: import, import() and require(); a type-only import is no client", () => {
+    expect(reaches('import { readEntitlement } from "@/lib/plus/serviceRole";')).toBe(true);
+    expect(reaches('const m = await import("@/lib/plus/serviceRole");')).toBe(true);
+    expect(reaches('const m = await import( "../plus/serviceRole" );')).toBe(true);
+    expect(reaches('const m = require("./serviceRole");')).toBe(true);
+    expect(reaches('import type { EntitlementWrite } from "./serviceRole";')).toBe(false);
+    expect(reaches('import { x } from "@/lib/plus/serviceRoleNotes";')).toBe(false);
+  });
+
+  it("only the Stripe webhook and the crons import lib/plus/serviceRole", () => {
     const importers = files(SRC)
       .filter((f) => !TEST.test(f) && !f.endsWith(`${path.sep}serviceRole.ts`))
-      .filter((f) => {
-        const text = readFileSync(f, "utf8");
-        return text.split("\n").some((line) => /from\s+["'](@\/lib\/plus|\.{1,2}(\/[^"']*)?)\/serviceRole["']/.test(line) && !/^\s*import\s+type\s/.test(line));
-      })
+      .filter((f) => reaches(readFileSync(f, "utf8")))
       .map(rel);
     expect(importers.length).toBeGreaterThan(0);
     expect(importers.filter((f) => !ALLOWED.some((a) => a.test(f)))).toEqual([]);
