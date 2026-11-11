@@ -6,6 +6,7 @@ import { redirect } from "@/i18n/navigation";
 import { deleteWordTyped, localDay } from "@/lib/journal/account";
 import { isFocusArea, isTone } from "@/lib/journal/ai";
 import { consentItem } from "@/lib/legalVersions";
+import { cancelStripeBeforeDelete } from "@/lib/plus/cancelOnDelete";
 import { isCountry, isTimeZoneName } from "@/lib/region/countries";
 import { dataLocale, offeredLocales } from "@/i18n/routing";
 import { WIPE_COOKIE, WIPE_COOKIE_OPTIONS } from "@/lib/supabase/proxy";
@@ -56,6 +57,8 @@ export async function deleteMyAccount(_prev: DeleteAccountState, form: FormData)
   const uid = data.user?.id;
   if (!uid) return userError?.name === "AuthRetryableFetchError" ? { status: "error", error: "generic" } : redirect({ href: "/sign-in", locale });
 
+  // Plus bought on the web stops being charged first (never blocks the delete).
+  await cancelStripeBeforeDelete(supabase, uid);
   const { error } = await supabase.rpc("delete_my_account");
   if (error) return { status: "error", error: "generic" };
 
