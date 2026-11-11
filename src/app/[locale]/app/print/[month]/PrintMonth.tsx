@@ -85,8 +85,9 @@ export function PrintMonth({ month, title, days, dateLocaleTag, country }: { mon
                     </p>
                   )}
                 </div>
+                {/* A long word or link wraps rather than running off the page (Reviewer, #274). */}
                 {d.entries.map((e) => (
-                  <p key={e.id} className="mt-3 whitespace-pre-line" data-testid="print-entry">
+                  <p key={e.id} className="mt-3 whitespace-pre-line [overflow-wrap:anywhere]" data-testid="print-entry">
                     {e.body}
                   </p>
                 ))}

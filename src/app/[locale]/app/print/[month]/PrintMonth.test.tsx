@@ -77,6 +77,8 @@ describe("PrintMonth (1.1 N)", () => {
     const third = screen.getByTestId("print-day-2026-10-03");
     expect(third.querySelector("[data-testid=moment-star]")).not.toBeNull();
     expect(screen.getAllByTestId("print-entry").map((p) => p.textContent)).toEqual(["A long walk.\nThen tea.", "Evening."]);
+    // A long word or link wraps rather than running off the page (Reviewer, #274).
+    expect(screen.getAllByTestId("print-entry").every((p) => p.className.includes("[overflow-wrap:anywhere]"))).toBe(true);
   });
 
   it("a long day may run over a page break; its date, mood and values stay together, with its text (Web Tester P2)", () => {
