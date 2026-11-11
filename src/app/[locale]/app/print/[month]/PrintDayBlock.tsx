@@ -11,7 +11,8 @@ import { checkInChips } from "../../checkInChips";
 // mood word carries the mood (no colours needed on paper). A long day may run
 // over a page break (a whole day moved to the next page left page 1 almost
 // blank: Web Tester P2); its date, mood and values stay together and with
-// the start of its text.
+// the start of its text. A long word or link wraps rather than running off
+// the page (Reviewer, #274).
 export function PrintDayBlock({ day, dateLocaleTag }: { day: PrintDay; dateLocaleTag: string }) {
   const tt = useTranslations("today");
   const te = useTranslations("entry");
@@ -38,7 +39,7 @@ export function PrintDayBlock({ day, dateLocaleTag }: { day: PrintDay; dateLocal
         )}
       </div>
       {day.entries.map((e) => (
-        <p key={e.id} className="mt-3 whitespace-pre-line" data-testid="print-entry">
+        <p key={e.id} className="mt-3 whitespace-pre-line [overflow-wrap:anywhere]" data-testid="print-entry">
           {e.body}
         </p>
       ))}
