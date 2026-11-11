@@ -4,7 +4,15 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import messages from "@/messages/en.json";
 import type { PrintDay } from "@/lib/journal/printMonth";
 import { askToPrint } from "@/lib/journal/printOnce";
-import { PrintMonth } from "./PrintMonth";
+
+vi.mock("@/i18n/navigation", () => ({
+  Link: ({ href, children, prefetch, ...rest }: { href: string; prefetch?: boolean; children: React.ReactNode }) => (
+    <a href={href} data-prefetch={String(prefetch)} {...rest}>
+      {children}
+    </a>
+  ),
+}));
+const { PrintMonth } = await import("./PrintMonth");
 
 const t = messages.timeline;
 const TITLE = "October 2026";
@@ -90,5 +98,15 @@ describe("PrintMonth (1.1 N)", () => {
   it("nothing this month: the empty line", () => {
     renderIt([]);
     expect(screen.getByTestId("print-empty")).toHaveTextContent(t.printEmpty);
+  });
+});
+
+describe("PrintMonth: help on screen", () => {
+  it("first, above the title and every day; hidden on paper", () => {
+    renderIt();
+    const help = screen.getByTestId("print-get-help");
+    expect(help.compareDocumentPosition(screen.getByTestId("print-day-2026-10-01")) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(help.compareDocumentPosition(screen.getByTestId("print-button")) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(help.closest('[class~="print:hidden"]')).not.toBeNull();
   });
 });
