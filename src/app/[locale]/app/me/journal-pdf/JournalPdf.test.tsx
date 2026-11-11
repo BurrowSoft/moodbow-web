@@ -5,7 +5,14 @@ import messages from "@/messages/en.json";
 import type { PrintDay } from "@/lib/journal/printMonth";
 
 const push = vi.fn();
-vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push }) }));
+vi.mock("@/i18n/navigation", () => ({
+  useRouter: () => ({ push }),
+  Link: ({ href, children, prefetch, ...rest }: { href: string; prefetch?: boolean; children: React.ReactNode }) => (
+    <a href={href} data-prefetch={String(prefetch)} {...rest}>
+      {children}
+    </a>
+  ),
+}));
 const { JournalPdf } = await import("./JournalPdf");
 const m = messages.plus;
 
@@ -17,7 +24,7 @@ const day = (date: string, mood: number | null, bodies: string[] = [], moment = 
 const show = (props: Partial<React.ComponentProps<typeof JournalPdf>>) =>
   render(
     <NextIntlClientProvider locale="en" messages={messages}>
-      <JournalPdf period={null} title={null} days={[]} months={["2026-10", "2026-09"]} years={["2026"]} dateLocaleTag="en-GB" {...props} />
+      <JournalPdf period={null} title={null} days={[]} months={["2026-10", "2026-09"]} years={["2026"]} dateLocaleTag="en-GB" country="NZ" backLabel="Back to Me" {...props} />
     </NextIntlClientProvider>,
   );
 afterEach(() => {
@@ -65,6 +72,14 @@ describe("JournalPdf: the journal", () => {
     expect(print).toHaveBeenCalled();
     print.mockRestore();
   });
+  it("help is on screen first, beside Back, before the first day; hidden on paper", () => {
+    show({ period: { kind: "month", key: "2026-10" }, title: "October 2026", days: [day("2026-10-03", 4, ["A walk."])] });
+    const help = screen.getByTestId("pdf-get-help");
+    expect(help.compareDocumentPosition(screen.getByTestId("print-day-2026-10-03")) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(help.compareDocumentPosition(screen.getByTestId("pdf-cover")) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(help.closest('[class~="print:hidden"]')).not.toBeNull();
+  });
+
   it("a year: a heading per month, each after the first on a new page", () => {
     show({ period: { kind: "year", key: "2026" }, title: "2026", days: [day("2026-01-05", 3), day("2026-03-01", 4)] });
     expect(screen.getByTestId("pdf-month-2026-01")).not.toHaveClass("break-before-page");

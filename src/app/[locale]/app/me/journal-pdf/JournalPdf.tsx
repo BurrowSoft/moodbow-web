@@ -1,7 +1,9 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { BackLink } from "@/components/BackLink";
 import { dialogButton } from "@/components/Dialog";
+import { GetHelpNow } from "@/components/SafetyCard";
 import { useRouter } from "@/i18n/navigation";
 import type { PrintDay } from "@/lib/journal/printMonth";
 import { byMonth, pdfCounts, type PdfPeriod } from "@/lib/plus/journalPdf";
@@ -21,6 +23,8 @@ export function JournalPdf({
   months,
   years,
   dateLocaleTag,
+  country,
+  backLabel,
 }: {
   period: PdfPeriod | null;
   title: string | null;
@@ -28,6 +32,8 @@ export function JournalPdf({
   months: string[];
   years: string[];
   dateLocaleTag: string;
+  country: string | null | undefined;
+  backLabel: string;
 }) {
   const t = useTranslations("plus");
   const tm = useTranslations("meta");
@@ -40,6 +46,12 @@ export function JournalPdf({
 
   const picker = (
     <div className="space-y-4 print:hidden" data-testid="pdf-picker">
+      {/* Help on screen first, beside Back, above up to a year of entries
+          (the Reviewer, #273); the printed copy keeps its last line. */}
+      <div className="flex flex-wrap items-center gap-x-[12px] gap-y-[8px]">
+        <BackLink href="/app/me" label={backLabel} testId="nav-back" />
+        <GetHelpNow country={country} testId="pdf-get-help" neutral />
+      </div>
       <h1 className="text-2xl font-medium tracking-tight">{t("rowPdf")}</h1>
       <p className="text-text">{t("pdfIntro")}</p>
       <fieldset className="space-y-3">

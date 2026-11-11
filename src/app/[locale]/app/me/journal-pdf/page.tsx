@@ -4,7 +4,6 @@ import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
-import { BackLink } from "@/components/BackLink";
 import { JournalUnavailable } from "@/components/JournalUnavailable";
 import { SessionEnded } from "@/components/SessionEnded";
 import { pageGate } from "@/lib/conditions";
@@ -62,11 +61,17 @@ export default async function JournalPdfPage({ params, searchParams }: PageProps
   }
   const ta = await getTranslations("app");
   return (
-    <section className="space-y-4">
-      <div className="print:hidden">
-        <BackLink href="/app/me" label={ta("navBackTo", { screen: ta("tabMe") })} testId="nav-back" />
-      </div>
-      <JournalPdf period={period} title={period ? periodTitle(period, tag) : null} days={days} months={months} years={years} dateLocaleTag={tag} />
+    <section>
+      <JournalPdf
+        period={period}
+        title={period ? periodTitle(period, tag) : null}
+        days={days}
+        months={months}
+        years={years}
+        dateLocaleTag={tag}
+        country={me.profile?.country}
+        backLabel={ta("navBackTo", { screen: ta("tabMe") })}
+      />
     </section>
   );
 }
