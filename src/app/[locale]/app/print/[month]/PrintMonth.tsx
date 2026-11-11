@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
+import { GetHelpNow } from "@/components/SafetyCard";
 import type { PrintDay } from "@/lib/journal/printMonth";
 import { takePrintRequest } from "@/lib/journal/printOnce";
 import { PrintDayBlock } from "./PrintDayBlock";
@@ -10,7 +11,7 @@ import { PrintDayBlock } from "./PrintDayBlock";
 // ("Save as PDF" is built in). Nothing is uploaded or made on a server; the
 // page prints locally. The mood word carries the mood (no colours needed on
 // paper); entries print as written.
-export function PrintMonth({ month, title, days, dateLocaleTag }: { month: string; title: string; days: PrintDay[]; dateLocaleTag: string }) {
+export function PrintMonth({ month, title, days, dateLocaleTag, country }: { month: string; title: string; days: PrintDay[]; dateLocaleTag: string; country?: string | null }) {
   const t = useTranslations("timeline");
 
   // Only when arriving from "Print this month", once the page has drawn
@@ -30,8 +31,14 @@ export function PrintMonth({ month, title, days, dateLocaleTag }: { month: strin
 
   const content = (
     <>
+      {/* Help on screen first, above a month of entries (the Reviewer, #273; UX):
+          hidden on paper. */}
+      <div className="mb-4 print:hidden">
+        <GetHelpNow country={country} testId="print-get-help" neutral />
+      </div>
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-3xl font-medium tracking-tight">{title}</h1>
+        {/* At most 36 px on a phone (decision 231) and never wider than the page (Web Tester, #274). */}
+        <h1 className="min-w-0 text-3xl font-medium tracking-tight [overflow-wrap:anywhere] max-sm:[font-size:min(1.875rem,max(11.25vw,36px))]">{title}</h1>
         <button
           type="button"
           data-testid="print-button"
@@ -60,7 +67,9 @@ export function PrintMonth({ month, title, days, dateLocaleTag }: { month: strin
   // printed page in space of its own, so "Moodbow · {month}" never covers a
   // page's last lines (a fixed footer would; reviewer #96). Not on screen.
   return (
-    <table role="presentation" data-testid="print-month" className="w-full border-collapse print:text-[11pt]">
+    // table-fixed: an automatic table grows to its widest word, which at 300 % on a 320 px
+    // phone carried the help button 43 px past the screen (Web Tester, #274).
+    <table role="presentation" data-testid="print-month" className="w-full table-fixed border-collapse print:text-[11pt]">
       <tfoot className="hidden print:table-footer-group">
         <tr>
           <td className="pt-6 text-center text-[9pt]" data-testid="print-footer">
