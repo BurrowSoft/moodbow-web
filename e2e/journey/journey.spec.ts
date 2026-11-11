@@ -1347,6 +1347,46 @@ test("large text, set in the browser: the couldn't-load state's help is in the f
   }
 });
 
+// The safety plan's help was below the first view at 320 px and 300 % (Web Tester, #266): it's
+// beside Back now, above the title, in every language; checked in en and pt-BR, the longest.
+test("large text, set in the browser: the safety plan's help is in the first view on a 320 px phone", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
+  test.setTimeout(120_000);
+  const email = newEmail();
+  const password = newPassword();
+  const cdp = await page.context().newCDPSession(page);
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    await page.setViewportSize({ width: 320, height: 640 });
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+      await setProfileLocale(email, password, saved);
+      for (const percent of [100, 300]) {
+        await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
+        await page.goto(`${route}/app/me/safety-plan`);
+        const help = page.getByTestId("plan-get-help");
+        await expect(help, `${saved} at ${percent} %`).toBeVisible();
+        const box = (await help.boundingBox())!;
+        expect(box.y, `${saved} at ${percent} %: help's top in the first view`).toBeGreaterThanOrEqual(0);
+        expect(box.y + box.height, `${saved} at ${percent} %: help's bottom in the first view`).toBeLessThanOrEqual(640);
+        expect(box.x + box.width, `${saved} at ${percent} %: help inside the width`).toBeLessThanOrEqual(320.5);
+        // Back keeps its name, as an icon alone, and a full target.
+        const back = (await page.getByTestId("nav-back").boundingBox())!;
+        expect(Math.min(back.width, back.height), `${saved} at ${percent} %: Back's target`).toBeGreaterThanOrEqual(44);
+      }
+    }
+  } finally {
+    await cleanup(email);
+  }
+});
+
 // A column of letters under an X above the window, and Not now 1,660 px down (Web Tester, #218).
 test("large text, set in the browser: the milestone's title, X and Not now stay usable on a 320 px phone", async ({ page, browserName }) => {
   test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
@@ -1682,6 +1722,55 @@ test("large text, set in the browser: the appointment summary's title keeps its 
         const box = (await title.boundingBox())!;
         expect(box.x + box.width, `${where}: the title inside the width`).toBeLessThanOrEqual(320.5);
         expect(await page.evaluate(() => document.documentElement.scrollWidth), `${where}: no sideways scroll`).toBeLessThanOrEqual(320);
+      }
+    }
+  } finally {
+    await cleanup(email);
+  }
+});
+
+// UX's rule (11 Nov): every page with journal content has Get help now first, beside Back (the
+// Web Tester found the appointment page without it, #268). The toolbox, letters and appointment
+// pages, in en and pt-BR (the longest), at 320 px, 100 % and 300 %: help in the first view, inside
+// the width, above the page's title.
+test("large text, set in the browser: the 1.2 pages' help is in the first view on a 320 px phone", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
+  test.setTimeout(180_000);
+  const email = newEmail();
+  const password = newPassword();
+  const cdp = await page.context().newCDPSession(page);
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    await page.setViewportSize({ width: 320, height: 640 });
+    const pages = [
+      ["toolbox", "toolbox-get-help", "toolbox-title"],
+      ["letters", "letters-get-help", "letters-title"],
+      ["appointment", "appointment-get-help", "appointment-title"],
+    ] as const;
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+      await setProfileLocale(email, password, saved);
+      for (const percent of [100, 300]) {
+        await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
+        for (const [path, helpId, titleId] of pages) {
+          const where = `${path}, ${saved} at ${percent} %`;
+          await page.goto(`${route}/app/me/${path}`);
+          const help = page.getByTestId(helpId);
+          await expect(help, where).toBeVisible();
+          const box = (await help.boundingBox())!;
+          expect(box.y, `${where}: help's top in the first view`).toBeGreaterThanOrEqual(0);
+          expect(box.y + box.height, `${where}: help's bottom in the first view`).toBeLessThanOrEqual(640);
+          expect(box.x + box.width, `${where}: help inside the width`).toBeLessThanOrEqual(320.5);
+          const title = (await page.getByTestId(titleId).boundingBox())!;
+          expect(box.y, `${where}: help above the title`).toBeLessThan(title.y);
+        }
       }
     }
   } finally {

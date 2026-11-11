@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 import { BackLink } from "@/components/BackLink";
+import { GetHelpNow } from "@/components/SafetyCard";
 import { JournalUnavailable } from "@/components/JournalUnavailable";
 import { SessionEnded } from "@/components/SessionEnded";
 import { pageGate } from "@/lib/conditions";
@@ -48,8 +49,10 @@ export default async function AppointmentPage({ params }: PageProps<"/[locale]/a
   const dateLabels = Object.fromEntries(starred.map((e) => [e.entry_date, dateLine(e.entry_date, tag)]));
   return (
     <section className="space-y-[max(8px,calc(24px-1rem))]">
-      <div className="print:hidden">
+      {/* Help first, beside Back (UX's rule: every page with journal content), hidden on paper. */}
+      <div className="flex flex-wrap items-center gap-x-[12px] gap-y-[8px] print:hidden">
         <BackLink href="/app/me" label={ta("navBackTo", { screen: ta("tabMe") })} testId="nav-back" />
+        <GetHelpNow country={me?.profile?.country} testId="appointment-get-help" neutral />
       </div>
       {/* At most 36 px on a phone (decision 231): its words stay whole at large text. */}
       <h1 className={`${JOURNAL_HEADING} max-sm:[font-size:min(1.875rem,max(11.25vw,36px))]`} data-testid="appointment-title">

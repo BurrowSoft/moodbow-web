@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 import { BackLink } from "@/components/BackLink";
+import { GetHelpNow } from "@/components/SafetyCard";
 import { JournalUnavailable } from "@/components/JournalUnavailable";
 import { SessionEnded } from "@/components/SessionEnded";
 import { pageGate } from "@/lib/conditions";
@@ -37,7 +38,11 @@ export default async function LettersPage({ params }: PageProps<"/[locale]/app/m
   const tag = dateLocale(locale, (await headers()).get("accept-language"), me?.profile?.country ?? null);
   return (
     <section className="space-y-6">
-      <BackLink href="/app/me" label={ta("navBackTo", { screen: ta("tabMe") })} testId="nav-back" />
+      {/* Help first, beside Back (UX's rule: every page with journal content), hidden on paper. */}
+      <div className="flex flex-wrap items-center gap-x-[12px] gap-y-[8px] print:hidden">
+        <BackLink href="/app/me" label={ta("navBackTo", { screen: ta("tabMe") })} testId="nav-back" />
+        <GetHelpNow country={me?.profile?.country} testId="letters-get-help" neutral />
+      </div>
       <h1 className={JOURNAL_HEADING} data-testid="letters-title">
         {t("meRow")}
       </h1>
