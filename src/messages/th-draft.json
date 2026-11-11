@@ -1578,5 +1578,140 @@
     "key": "plus.sheetThemes",
     "en": "More themes are part of Plus",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.meRow",
+    "en": "Things that help me",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.empty",
+    "en": "Add small things that help on hard days. Only you can see this list.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.placeholder",
+    "en": "Something that helps",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.add",
+    "en": "Add",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.edit",
+    "en": "Edit",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.delete",
+    "en": "Delete",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.save",
+    "en": "Save",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.cancel",
+    "en": "Cancel",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.moveUp",
+    "en": "Move up",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.moveDown",
+    "en": "Move down",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.deleted",
+    "en": "Deleted.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.undo",
+    "en": "Undo",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.limitCount",
+    "en": "You can keep up to 20 things here.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.limitLength",
+    "en": "Up to 120 characters.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.cardTitle",
+    "en": "Things that help you",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.breathe",
+    "en": "Breathe for a minute",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.notNow",
+    "en": "Not now",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.cardEmpty",
+    "en": "Add something that helps",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.breathTitle",
+    "en": "A minute to breathe",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.breatheIn",
+    "en": "Breathe in",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.breatheOut",
+    "en": "Breathe out",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.breatheInCount",
+    "en": "Breathe in · {n}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.breatheOutCount",
+    "en": "Breathe out · {n}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.stop",
+    "en": "Stop",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.breathEnd",
+    "en": "That was a minute. Take your time.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.done",
+    "en": "Done",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.breathSafety",
+    "en": "If you feel dizzy, stop and breathe normally.",
+    "reason": "UX draft (native read pending)"
   }
 ]
