@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { dialogButton } from "@/components/Dialog";
@@ -80,9 +80,135 @@ export function PlusScreen({ view, price, aiShown, started }: { view: PlusView; 
   const rows = [...FREE_ROWS, ...(aiShown ? (["rowAiFree"] as const) : [])].map((k) => ({ k, free: true }));
   const plusRows = [...PLUS_ROWS, ...(aiShown ? (["rowAiPlus"] as const) : [])].map((k) => ({ k, free: false }));
 
+  // Large text (UX, 12 Nov, the Web Tester's long-language pass): when the whole footer would take
+  // more than 40 % of the screen's height, the table was left a slit. Then the page scrolls as a
+  // whole, the phone bar steps aside (a one-task page off Me, with Back), and only the price, the
+  // renewal line and the main button stay pinned at the bottom; Not now and Manage go to the end
+  // of the content. Measured with the full footer; measured again when the screen or the text size
+  // changes. The same rule is the app's.
+  const screen = useRef<HTMLDivElement>(null);
+  const footer = useRef<HTMLDivElement>(null);
+  const scroll = useRef<HTMLDivElement>(null);
+  const [large, setLarge] = useState(false);
+  const sizeKey = () => `${window.innerWidth}x${window.innerHeight}:${getComputedStyle(document.documentElement).fontSize}`;
+  useLayoutEffect(() => {
+    const root = screen.current;
+    if (!root || typeof ResizeObserver === "undefined") return;
+    if (!large) {
+      // The footer over 40 % of the screen, or the table left under a third of it (a member's
+      // footer is one button, but at 300 % the box itself is small).
+      const check = () => {
+        const height = footer.current?.getBoundingClientRect().height ?? 0;
+        const table = scroll.current?.getBoundingClientRect().height ?? 0;
+        // Nothing laid out yet (or no layout at all): nothing to judge.
+        if (table === 0 && height === 0) return;
+        if (height > 0.4 * window.innerHeight || table < window.innerHeight / 3) setLarge(true);
+      };
+      check();
+      const observer = new ResizeObserver(check);
+      observer.observe(root);
+      window.addEventListener("resize", check);
+      return () => {
+        observer.disconnect();
+        window.removeEventListener("resize", check);
+      };
+    }
+    // In large mode: back to measuring the full footer when the screen or text size changes.
+    const entered = sizeKey();
+    const changed = () => {
+      if (sizeKey() !== entered) setLarge(false);
+    };
+    const observer = new ResizeObserver(changed);
+    observer.observe(root);
+    window.addEventListener("resize", changed);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", changed);
+    };
+  }, [large]);
+  useEffect(() => {
+    if (!large) return;
+    const html = document.documentElement;
+    html.dataset.tabsAside = "";
+    return () => {
+      delete html.dataset.tabsAside;
+    };
+  }, [large]);
+
+  // The main action: what stays pinned at any size.
+  const action = waiting ? (
+    <p role="status" data-testid="plus-waiting" className="font-medium">
+      {waitedLong ? t("onItsWay") : t("starting")}
+    </p>
+  ) : has ? null : view.kind === "past_due" ? (
+    <>
+      <p className="text-[0.875em]">{t("pastDue")}</p>
+      <button type="button" data-testid="plus-update-card" disabled={busy} onClick={() => void go("/api/billing/portal")} className={dialogButton(true)}>
+        {t("updateCard")}
+      </button>
+    </>
+  ) : (
+    <>
+      {/* At large text the short price, one line: the button already names the free week. */}
+      <p data-testid="plus-price" className="font-medium">
+        {view.trial && !large ? t("footerTrial", { price }) : t("priceYear", { price })}
+      </p>
+      {/* In em, so it follows the footer's cap at large text (the same size as before otherwise). */}
+      <p data-testid="plus-renews" className="text-[0.875em] text-muted">
+        {t("renews")}
+      </p>
+      <button type="button" data-testid="plus-start" disabled={busy} onClick={() => void go("/api/checkout/stripe")} className={dialogButton(true)}>
+        {view.trial ? t("startTrial") : t("start")}
+      </button>
+    </>
+  );
+  // Manage (or where to manage it) and Not now: in the footer, or at the end of the content.
+  const rest = (
+    <>
+      {has && !waiting ? (
+        view.source === "stripe" ? (
+          <button type="button" data-testid="plus-manage" disabled={busy} onClick={() => void go("/api/billing/portal")} className={dialogButton(true)}>
+            {t("manage")}
+          </button>
+        ) : (
+          <p data-testid="plus-manage-store" className="font-medium">
+            {view.source === "play" ? t("managePlay") : t("manageApple")}
+          </p>
+        )
+      ) : null}
+      {!has && (
+        <Link href="/app/me" data-testid="plus-not-now" className="inline-flex min-h-11 items-center justify-center text-sm font-medium text-accent underline underline-offset-4">
+          {t("notNow")}
+        </Link>
+      )}
+    </>
+  );
+  const errorLine = error && (
+    <p role="alert" data-testid="plus-error" className="text-sm">
+      {error}
+    </p>
+  );
+  const pinned = large ? action !== null || error : true;
+
   return (
-    <div data-testid="plus-screen" className="flex h-[calc(100dvh-7rem-max(16px,calc(56px-1rem)))] min-h-0 flex-col md:h-[calc(100dvh-5rem)]">
-      <div data-testid="plus-scroll" tabIndex={0} aria-label={t("tableCaption")} className="min-h-0 flex-1 space-y-3 overflow-y-scroll pb-3 [scrollbar-width:thin]">
+    <div
+      ref={screen}
+      data-testid="plus-screen"
+      data-large={large || undefined}
+      className={
+        large
+          ? "flex flex-col"
+          : "flex h-[calc(100dvh-var(--tab-bar-h,5.5rem)-1.5rem-max(16px,calc(56px-1rem)))] min-h-0 flex-col md:h-[calc(100dvh-5rem)]"
+      }
+    >
+      <div
+        ref={scroll}
+        data-testid="plus-scroll"
+        // Its own scroll area (a Tab stop, named) only while the footer splits the screen.
+        tabIndex={large ? undefined : 0}
+        aria-label={large ? undefined : t("tableCaption")}
+        className={large ? "space-y-3 pb-3" : "min-h-0 flex-1 space-y-3 overflow-y-scroll pb-3 [scrollbar-width:thin]"}
+      >
         <div className="space-y-1">
           <p className="text-sm font-medium tracking-wide text-accent uppercase">{t("label")}</p>
           <h1 data-testid="plus-title" className="font-medium leading-tight [font-size:min(1.375rem,max(11.25vw,36px))] [overflow-wrap:anywhere] sm:text-2xl">
@@ -119,52 +245,28 @@ export function PlusScreen({ view, price, aiShown, started }: { view: PlusView; 
             ))}
           </tbody>
         </table>
+        {large && (
+          <div data-testid="plus-rest" className="flex flex-col items-center gap-2 pt-2 text-center">
+            {rest}
+          </div>
+        )}
       </div>
 
-      <div data-testid="plus-footer" className="flex shrink-0 flex-col gap-2 border-t border-border bg-surface px-[12px] pt-3 pb-2 text-center">
-        {waiting ? (
-          <p role="status" data-testid="plus-waiting" className="font-medium">
-            {waitedLong ? t("onItsWay") : t("starting")}
-          </p>
-        ) : has ? (
-          view.source === "stripe" ? (
-            <button type="button" data-testid="plus-manage" disabled={busy} onClick={() => void go("/api/billing/portal")} className={dialogButton(true)}>
-              {t("manage")}
-            </button>
-          ) : (
-            <p data-testid="plus-manage-store" className="font-medium">
-              {view.source === "play" ? t("managePlay") : t("manageApple")}
-            </p>
-          )
-        ) : view.kind === "past_due" ? (
-          <>
-            <p className="text-sm">{t("pastDue")}</p>
-            <button type="button" data-testid="plus-update-card" disabled={busy} onClick={() => void go("/api/billing/portal")} className={dialogButton(true)}>
-              {t("updateCard")}
-            </button>
-          </>
-        ) : (
-          <>
-            <p data-testid="plus-price" className="font-medium">
-              {view.trial ? t("footerTrial", { price }) : t("priceYear", { price })}
-            </p>
-            <p className="text-sm text-muted">{t("renews")}</p>
-            <button type="button" data-testid="plus-start" disabled={busy} onClick={() => void go("/api/checkout/stripe")} className={dialogButton(true)}>
-              {view.trial ? t("startTrial") : t("start")}
-            </button>
-          </>
-        )}
-        {error && (
-          <p role="alert" data-testid="plus-error" className="text-sm">
-            {error}
-          </p>
-        )}
-        {!has && (
-          <Link href="/app/me" data-testid="plus-not-now" className="inline-flex min-h-11 items-center justify-center text-sm font-medium text-accent underline underline-offset-4">
-            {t("notNow")}
-          </Link>
-        )}
-      </div>
+      {pinned && (
+        <div
+          ref={footer}
+          data-testid="plus-footer"
+          // At large text: pinned, its text capped at 32 px (the 2x target, decision 231) and
+          // its spacing in px, so it takes as little of the screen as it can.
+          className={`flex shrink-0 flex-col border-t border-border bg-surface px-[12px] text-center ${
+            large ? "sticky bottom-0 z-10 gap-[8px] pt-[12px] pb-[8px] [font-size:min(1rem,max(10vw,32px))]" : "gap-2 pt-3 pb-2"
+          }`}
+        >
+          {action}
+          {errorLine}
+          {!large && rest}
+        </div>
+      )}
     </div>
   );
 }
