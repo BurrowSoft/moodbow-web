@@ -124,6 +124,17 @@ describe("isHiddenPage (the proxy's routing-level 404)", () => {
   const prod = { vercelEnv: "production" };
   const preview = { vercelEnv: "preview" };
 
+  // TEST ONLY page (UX): a 404 on Production at the routing level, before any sign-in, so a
+  // signed-out GET of www's /app/test/unavailable is a 404; a draft on test builds.
+  it("the test-only couldn't-load page: never met, a 404 on Production, in every language's path", () => {
+    expect(conditions["test-only-unavailable-page"].met).toBe(false);
+    for (const path of ["/app/test/unavailable", "/app/test/unavailable/", "/app/test"]) {
+      expect(isHiddenPage(path, prod), path).toBe(true);
+      expect(isHiddenPage(path, preview), path).toBe(false);
+    }
+    expect(isHiddenPage(pagePath("/fr/app/test/unavailable", ["en", "fr"]), prod)).toBe(true);
+  });
+
   it("hides the legal pages on Production until they're live, with or without a trailing slash", () => {
     for (const path of ["/privacy", "/terms", "/privacy/"]) {
       expect(isHiddenPage(path, prod), path).toBe(!LEGAL);

@@ -8,6 +8,9 @@ on:
   # the next PR that touches it. A red run shows in the Actions list.
   schedule:
     - cron: "17 19 * * *"
+  # The same daily run, started by hand (publish day's morning, UX): GitHub started the cron
+  # 3.5 h late on 8 Nov. Master only; it runs exactly what the schedule runs.
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -21,7 +24,7 @@ concurrency:
 jobs:
   check:
     name: Typecheck, lint and unit tests
-    if: github.event_name != 'schedule'
+    if: github.event_name != 'schedule' && github.event_name != 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -42,7 +45,7 @@ jobs:
 
   e2e:
     name: Build and Playwright smoke
-    if: github.event_name != 'schedule'
+    if: github.event_name != 'schedule' && github.event_name != 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -86,7 +89,7 @@ jobs:
   # when it names that environment.
   journeys:
     name: Staging journeys
-    if: github.event_name == 'pull_request' || github.event_name == 'schedule'
+    if: github.event_name == 'pull_request' || github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/master')
     environment: staging
     permissions:
       contents: read
@@ -136,13 +139,13 @@ jobs:
       # The journeys that send a real email (@real-email) run only where sign-up changes: staging
       # limits those emails, and a heavy day failed every PR. The help numbers (@help-numbers, minutes
       # of page loads) run only where the numbers or the card change. If the list can't be read, all
-      # run. The daily run is everything.
+      # run. The daily run, by schedule or by hand, is everything.
       - id: scope
         if: steps.cfg.outputs.ok == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if [ "${{ github.event_name }}" = schedule ]; then
+          if [ "${{ github.event_name }}" = schedule ] || [ "${{ github.event_name }}" = workflow_dispatch ]; then
             echo "args=" >> "$GITHUB_OUTPUT"
             exit 0
           fi
