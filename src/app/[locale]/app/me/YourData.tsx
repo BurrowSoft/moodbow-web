@@ -174,7 +174,7 @@ export function YourData({ credits, uid, csv = false, ai = false, plusSource = n
             </div>
             {state.status === "error" && (
               <p role="alert" data-testid="delete-error" className="font-medium text-accent">
-                {tt("errGeneric")}
+                {state.error === "plus_cancelled" ? tp("deleteCancelledKept") : tt("errGeneric")}
               </p>
             )}
             <div className="flex flex-wrap justify-end gap-3">

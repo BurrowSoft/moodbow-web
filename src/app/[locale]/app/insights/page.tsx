@@ -20,7 +20,7 @@ import { YourWeekCard } from "./YourWeekCard";
 import { tabMetadata } from "../pageMeta";
 import { InsightsView } from "./InsightsView";
 import { MorePatternsRow, WeekLine, YearTab } from "./PlusInsights";
-import { plusPriceLabel, readPlusView } from "@/lib/plus/view";
+import { insightsOffer, plusPriceLabel, readPlusView } from "@/lib/plus/view";
 import { ShareMonth } from "./ShareMonth";
 import { WeeklyReport } from "./WeeklyReport";
 
@@ -111,9 +111,8 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
     hardWeek = result?.kind === "hard";
   }
   // Moodbow Plus (decision 246): its locked items only for someone without
-  // Plus, and nothing at all when the row can't be read.
-  const plus = pageGate("plus") !== "hidden" ? await readPlusView(supabase, user.id) : null;
-  const offer = plus && plus.kind !== "plus" ? { trial: plus.kind === "free" && plus.trial, price: plusPriceLabel(locale) } : null;
+  // Plus, none on a hard week, and nothing at all when the row can't be read.
+  const offer = insightsOffer(pageGate("plus") !== "hidden" ? await readPlusView(supabase, user.id) : null, hardWeek, plusPriceLabel(locale));
   return (
     <InsightsView
       rows={rows}
@@ -121,7 +120,7 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
       range={range}
       share={share}
       summary={
-        offer && summary && !hardWeek ? (
+        offer && summary ? (
           <>
             {summary}
             <WeekLine offer={offer} />

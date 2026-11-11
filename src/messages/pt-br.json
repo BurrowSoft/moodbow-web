@@ -631,6 +631,7 @@
     "onItsWay": "Seu Plus está a caminho. Pode levar um minuto.",
     "needsEmail": "Primeiro adicione um e-mail à sua conta, para podermos enviar seus recibos.",
     "deleteStripe": "Sua assinatura do Moodbow Plus será cancelada agora. Você não será cobrado de novo.",
-    "deleteStore": "Se você tem o Moodbow Plus pelo Google Play ou pela App Store, cancele lá também. Apagar sua conta não interrompe a assinatura da loja."
+    "deleteStore": "Se você tem o Moodbow Plus pelo Google Play ou pela App Store, cancele lá também. Apagar sua conta não interrompe a assinatura da loja.",
+    "deleteCancelledKept": "Sua assinatura do Moodbow Plus foi cancelada, mas sua conta não foi apagada. Tente de novo."
   }
 }

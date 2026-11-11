@@ -631,6 +631,7 @@
     "onItsWay": "Il tuo Plus sta arrivando. Può volerci un minuto.",
     "needsEmail": "Aggiungi prima un'email al tuo account, così possiamo inviarti le ricevute.",
     "deleteStripe": "Il tuo abbonamento a Moodbow Plus verrà annullato ora. Non ti verrà addebitato più nulla.",
-    "deleteStore": "Se hai Moodbow Plus tramite Google Play o l'App Store, annullalo anche lì. Eliminare l'account non interrompe l'abbonamento dello store."
+    "deleteStore": "Se hai Moodbow Plus tramite Google Play o l'App Store, annullalo anche lì. Eliminare l'account non interrompe l'abbonamento dello store.",
+    "deleteCancelledKept": "Il tuo abbonamento a Moodbow Plus è stato annullato, ma il tuo account non è stato eliminato. Riprova."
   }
 }

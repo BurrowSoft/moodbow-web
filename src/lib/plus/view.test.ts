@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { EntitlementRow } from "./entitlements";
-import { plusPriceLabel, plusView } from "./view";
+import { insightsOffer, plusAiRows, plusPriceLabel, plusView } from "./view";
 
 const NOW = Date.parse("2026-11-11T12:00:00Z");
 const DAY = 86_400_000;
@@ -33,6 +33,32 @@ describe("plusView: what a page shows about Plus", () => {
   it("ended, with the free week used: free, without the trial", () => {
     expect(plusView(row({ status: "canceled" }), NOW)).toEqual({ kind: "free", trial: false });
     expect(plusView(row({ current_period_end: at(NOW - 1) }), NOW)).toEqual({ kind: "free", trial: false });
+  });
+});
+
+describe("plusAiRows: the table's AI rows only once AI is live (decision 69)", () => {
+  it("ai-live unmet: no AI rows, wherever AI would be available", () => {
+    expect(plusAiRows({ ai_available: true }, () => false)).toBe(false);
+  });
+  it("ai-live met: only where AI is available", () => {
+    expect(plusAiRows({ ai_available: true }, () => true)).toBe(true);
+    expect(plusAiRows({ ai_available: false }, () => true)).toBe(false);
+    expect(plusAiRows({}, () => true)).toBe(false);
+  });
+});
+
+describe("insightsOffer: Insights' locked items", () => {
+  it("without Plus: offered, with or without the free week", () => {
+    expect(insightsOffer({ kind: "free", trial: true }, false, "US$59.99")).toEqual({ trial: true, price: "US$59.99" });
+    expect(insightsOffer({ kind: "free", trial: false }, false, "US$59.99")).toEqual({ trial: false, price: "US$59.99" });
+    expect(insightsOffer({ kind: "past_due" }, false, "US$59.99")).toEqual({ trial: false, price: "US$59.99" });
+  });
+  it("a hard week: nothing about Plus beside the help offer (UX, #271)", () => {
+    expect(insightsOffer({ kind: "free", trial: true }, true, "US$59.99")).toBeNull();
+  });
+  it("has Plus, or the row can't be read: nothing", () => {
+    expect(insightsOffer({ kind: "plus", source: "stripe", daysLeft: null }, false, "US$59.99")).toBeNull();
+    expect(insightsOffer(null, false, "US$59.99")).toBeNull();
   });
 });
 

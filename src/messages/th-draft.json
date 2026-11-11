@@ -1308,5 +1308,10 @@
     "key": "plus.deleteStore",
     "en": "If you have Moodbow Plus through Google Play or the App Store, cancel it there too. Deleting your account doesn't stop the store's subscription.",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.deleteCancelledKept",
+    "en": "Your Moodbow Plus subscription was cancelled, but your account wasn't deleted. Please try again.",
+    "reason": "UX draft (native read pending)"
   }
 ]
