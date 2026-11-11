@@ -10,6 +10,8 @@ it-draft: true
 
 **Plus aggiunge:** il tuo anno e tutto lo storico in Andamento, più andamenti, l'anno in sintesi, più temi, un PDF curato del tuo diario, una raccolta di domande per scrivere e più modi di respirare in **Cose che mi aiutano**. Le domande di «Giornate difficili» sono gratis per tutti.
 
+**Più andamenti** può includere i tuoi tag, quando inizi a usarli.
+
 **La settimana gratis:** Plus inizia con 7 giorni gratis, una volta per persona. Dopo i 7 giorni diventa un abbonamento annuale che si rinnova ogni anno finché non lo annulli. Lo avvii solo tu, da **Profilo → Moodbow Plus**. Durante la settimana gratis, Profilo mostra quanti giorni mancano.
 
 **Annullare:** puoi annullare quando vuoi e tieni Plus fino alla fine del periodo pagato. Se annulli durante la settimana gratis, non ti verrà addebitato nulla.

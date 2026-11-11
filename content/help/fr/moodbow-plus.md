@@ -10,6 +10,8 @@ fr-draft: true
 
 **Plus ajoute :** votre année et tout l'historique dans Statistiques, plus de tendances, le bilan de l'année, plus de thèmes, un PDF soigné de votre journal, une bibliothèque de questions pour écrire et plus de façons de respirer dans **Ce qui m'aide**. Ses questions « Jours difficiles » sont gratuites pour tous.
 
+**Plus de tendances** peut inclure vos propres étiquettes, dès que vous les utilisez.
+
 **La semaine gratuite :** Plus commence par 7 jours gratuits, une seule fois par personne. Après ces 7 jours, il devient un abonnement annuel qui se renouvelle chaque année jusqu'à ce que vous l'annuliez. C'est vous seul qui le lancez, depuis **Moi → Moodbow Plus**. Pendant la semaine gratuite, Moi indique combien de jours il reste.
 
 **Annuler :** vous pouvez annuler à tout moment, et vous gardez Plus jusqu'à la fin de la période payée. Si vous annulez pendant la semaine gratuite, vous ne serez pas débité.

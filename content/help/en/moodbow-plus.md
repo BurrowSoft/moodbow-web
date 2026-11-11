@@ -9,6 +9,8 @@ topic: Privacy & account
 
 **Plus adds:** your year and all time in Insights, more patterns, Year in review, more themes, a designed PDF of your journal, a prompt library to write from, and more ways to breathe in **Things that help me**. Its Hard days prompts are free for everyone.
 
+**More patterns** can include your own tags, once you use them.
+
 **The free week:** Plus starts with 7 days free, once per person. After the 7 days it becomes a yearly subscription and renews each year until you cancel. You only start it yourself, from **Me → Moodbow Plus**. During the free week, Me shows how many days are left.
 
 **Cancel:** you can cancel at any time, and you keep Plus until the end of the time you've paid for. If you cancel during the free week, you won't be charged.

@@ -10,6 +10,8 @@ es-draft: true
 
 **Plus añade:** tu año y todo el historial en Resumen, más patrones, el resumen del año, más temas, un PDF cuidado de tu diario, una biblioteca de preguntas para escribir y más formas de respirar en **Lo que me ayuda**. Sus preguntas de «Días difíciles» son gratis para todos.
 
+**Más patrones** puede incluir tus propias etiquetas, cuando empieces a usarlas.
+
 **La semana gratis:** Plus empieza con 7 días gratis, una vez por persona. Después de los 7 días se convierte en una suscripción anual que se renueva cada año hasta que la canceles. Solo la empiezas tú, desde **Yo → Moodbow Plus**. Durante la semana gratis, Yo muestra cuántos días quedan.
 
 **Cancelar:** puedes cancelar cuando quieras, y conservas Plus hasta el final del periodo pagado. Si cancelas durante la semana gratis, no se te cobrará.

@@ -10,6 +10,8 @@ de-draft: true
 
 **Plus gibt dazu:** dein Jahr und alles bisher in Einblicke, mehr Muster, den Jahresrückblick, mehr Themes, ein gestaltetes PDF deines Tagebuchs, eine Fragensammlung zum Schreiben und mehr Arten zu atmen in **Was mir hilft**. Ihre Fragen für „Schwere Tage“ sind für alle kostenlos.
 
+**Mehr Muster** kann auch deine eigenen Tags einbeziehen, sobald du sie nutzt.
+
 **Die kostenlose Woche:** Plus beginnt mit 7 kostenlosen Tagen, einmal pro Person. Danach wird es ein Jahresabo, das sich jedes Jahr verlängert, bis du kündigst. Du startest es nur selbst, unter **Ich → Moodbow Plus**. Während der kostenlosen Woche zeigt Ich, wie viele Tage noch übrig sind.
 
 **Kündigen:** du kannst jederzeit kündigen und behältst Plus bis zum Ende des bezahlten Zeitraums. Wenn du in der kostenlosen Woche kündigst, wird nichts abgebucht.
