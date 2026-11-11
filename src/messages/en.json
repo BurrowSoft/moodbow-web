@@ -672,7 +672,7 @@
     "reviewMoodCaption": "Your average mood, by month",
     "reviewFactorsTitle": "Sleep, movement and stress",
     "reviewSleep": "Sleep averaged {hours} h a night.",
-    "reviewMovement": "On days you logged movement, it averaged {minutes} min.",
+    "reviewMovement": "Movement averaged {minutes} min a day, on the days you logged it.",
     "reviewStress": "Stress averaged {stress} of 5.",
     "reviewNotEnough": "Not logged often enough in {year} to show.",
     "reviewWritingTitle": "Writing",

@@ -672,7 +672,7 @@
     "reviewMoodCaption": "Il tuo umore medio, per mese",
     "reviewFactorsTitle": "Sonno, movimento e stress",
     "reviewSleep": "Hai dormito in media {hours} h a notte.",
-    "reviewMovement": "Nei giorni in cui hai segnato movimento, la media è stata di {minutes} min.",
+    "reviewMovement": "Il movimento è stato in media di {minutes} min al giorno, nei giorni in cui l'hai segnato.",
     "reviewStress": "Il tuo stress è stato in media {stress} su 5.",
     "reviewNotEnough": "Non segnato abbastanza nel {year} per mostrarlo.",
     "reviewWritingTitle": "Scrittura",

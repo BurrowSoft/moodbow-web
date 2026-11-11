@@ -672,7 +672,7 @@
     "reviewMoodCaption": "Seu humor médio, por mês",
     "reviewFactorsTitle": "Sono, movimento e estresse",
     "reviewSleep": "Seu sono ficou em média em {hours} h por noite.",
-    "reviewMovement": "Nos dias em que você registrou movimento, a média foi de {minutes} min.",
+    "reviewMovement": "O movimento ficou em média em {minutes} min por dia, nos dias em que você registrou.",
     "reviewStress": "Seu estresse ficou em média em {stress} de 5.",
     "reviewNotEnough": "Não foi registrado o suficiente em {year} para mostrar.",
     "reviewWritingTitle": "Escrita",

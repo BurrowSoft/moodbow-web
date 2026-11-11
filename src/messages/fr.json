@@ -672,7 +672,7 @@
     "reviewMoodCaption": "Votre humeur moyenne, par mois",
     "reviewFactorsTitle": "Sommeil, mouvement et stress",
     "reviewSleep": "Votre sommeil a été en moyenne de {hours} h par nuit.",
-    "reviewMovement": "Les jours où vous avez noté du mouvement, la moyenne était de {minutes} min.",
+    "reviewMovement": "Le mouvement a été en moyenne de {minutes} min par jour, les jours où vous l'avez noté.",
     "reviewStress": "Votre stress a été en moyenne de {stress} sur 5.",
     "reviewNotEnough": "Pas assez noté en {year} pour l'afficher.",
     "reviewWritingTitle": "Écriture",
