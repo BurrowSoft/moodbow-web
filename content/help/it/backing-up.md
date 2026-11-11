@@ -16,6 +16,6 @@ Puoi iniziare a usare Moodbow nell'app senza un'email. Il tuo diario viene salva
 
 **Se l'email ha già un account Moodbow:** puoi usare un'altra email oppure accedere a quell'account. Il diario su questo telefono non può essere spostato lì: **Accedi invece** elimina per sempre il diario su questo telefono (Moodbow te lo chiede prima). Tocca **Prima esporta** se vuoi tenerne una copia.
 
-**Diari senza email:** se non aggiungi mai un'email e non apri l'app con una connessione a internet per 12 mesi, eliminiamo quel diario. Moodbow te lo ricorda un mese prima.
+**Diari senza email:** se non aggiungi mai un'email e non apri l'app con una connessione a internet per 12 mesi, eliminiamo quel diario. Se le notifiche di Moodbow sono attive, te lo ricorda un mese prima.
 
 Senza email non c'è **Esci** in **Profilo**, perché non potresti più accedere. **Elimina account** funziona come sempre.
