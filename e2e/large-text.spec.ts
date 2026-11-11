@@ -402,3 +402,40 @@ test("large text at 300 %: a call link with a long name stays inside a 320 px ph
   expect(result.overflow).toBe(0);
   expect(result.right).toBeLessThanOrEqual(320);
 });
+
+// The number itself (UX, 12 Nov): "TelefonSeelsorge anrufen (0800 111 0 111)" at 300 % on a 320 px
+// phone, as the safety plan lays it out (an inline link in a padded box), with HelpNumberText's
+// markup: the bracketed number is one block that wraps only between its digit groups. It stays
+// inside 320 px, no group splits, and "(" and ")" stay with the number.
+test("large text at 300 %: a help number wider than the line wraps between its digit groups, never inside one", async ({ page, browserName }, testInfo) => {
+  test.skip(browserName !== "chromium" || testInfo.project.name !== "desktop", "Page.setFontSizes is Chromium's; once is enough");
+  const cdp = await page.context().newCDPSession(page);
+  await page.setViewportSize({ width: 320, height: 640 });
+  await cdp.send("Page.setFontSizes", { fontSizes: { standard: 48, fixed: 39 } });
+  await page.goto("/de/consent");
+  const result = await page.evaluate(() => {
+    const box = document.createElement("div");
+    box.style.cssText = "margin-top:12px;border-radius:16px;padding:12px";
+    box.innerHTML =
+      '<a href="tel:08001110111" style="font-weight:500;text-decoration:underline">TelefonSeelsorge anrufen ' +
+      '<span class="inline-block max-w-full [text-decoration:inherit]">(<span data-help-number="">' +
+      '<span class="whitespace-nowrap">0800</span> <span class="whitespace-nowrap">111</span> <span class="whitespace-nowrap">0</span> <span class="whitespace-nowrap">111</span>' +
+      "</span>)</span></a>";
+    document.querySelector("main")!.prepend(box);
+    const lines = (el: Element) => new Set([...el.getClientRects()].map((r) => Math.round(r.top))).size;
+    const groups = [...box.querySelectorAll("[data-help-number] > span")];
+    const block = box.querySelector("[data-help-number]")!.parentElement!;
+    return {
+      overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      right: Math.round(Math.max(...[...box.querySelectorAll("a, a *")].map((e) => e.getBoundingClientRect().right))),
+      groupLines: groups.map(lines),
+      groupsOnOneLine: new Set(groups.map((g) => Math.round(g.getBoundingClientRect().top))).size === 1,
+      bracketsWithNumber: block.firstChild?.textContent === "(" && block.lastChild?.textContent === ")",
+    };
+  });
+  console.log(`0800 111 0 111 at 300 %: ${JSON.stringify(result)}`);
+  expect(result.overflow).toBe(0);
+  expect(result.right).toBeLessThanOrEqual(320);
+  expect(result.groupLines).toEqual([1, 1, 1, 1]);
+  expect(result.bracketsWithNumber).toBe(true);
+});
