@@ -1718,7 +1718,8 @@ test("axe: Plus's Year, All time and More patterns, at 320 and 1280 px", async (
       });
       await axeAtWidths(page, `More patterns (${saved})`, async () => {
         await page.goto(`${route}/app/insights?range=year`);
-        await expect(page.getByTestId("insights-more-patterns-card").or(page.getByTestId("insights-more-patterns-none"))).toBeVisible({ timeout: 15_000 });
+        // The card is always there; its "none yet" line sits inside it, so an .or() of the two matches both.
+        await expect(page.getByTestId("insights-more-patterns-card")).toBeVisible({ timeout: 15_000 });
       });
     }
   } finally {
