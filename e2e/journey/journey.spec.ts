@@ -1674,13 +1674,13 @@ test("large text, set in the browser: Write is in Today's first view at 320 px, 
       await expect(top, where).toHaveText(messages.entry.writeButton);
       const box = (await top.boundingBox())!;
       const bar = (await page.getByRole("navigation", { name: messages.app.appName }).boundingBox())!;
-      expect(box.y + box.height, `${where}: Write above the tab bar, in the first view`).toBeLessThanOrEqual(bar.y);
-      expect(box.x + box.width, `${where}: Write inside the width`).toBeLessThanOrEqual(320.5);
-      expect(box.height, `${where}: a big enough target`).toBeGreaterThanOrEqual(44);
-      // Where it is before the card, measured so the log says what changed.
+      // Measured first, so the log says what changed even when a check below fails.
       const card = (await page.getByTestId("checkin-card").boundingBox())!;
       const below = (await page.getByTestId("today-write").boundingBox())!;
       console.log(`Today ${where}: Write at the top ${Math.round(box.y)}–${Math.round(box.y + box.height)} px; the card ${Math.round(card.y)}–${Math.round(card.y + card.height)} px; the Write below it at ${Math.round(below.y)} px; first view ends at ${Math.round(bar.y)} px`);
+      expect(box.y + box.height, `${where}: Write above the tab bar, in the first view`).toBeLessThanOrEqual(bar.y);
+      expect(box.x + box.width, `${where}: Write inside the width`).toBeLessThanOrEqual(320.5);
+      expect(box.height, `${where}: a big enough target`).toBeGreaterThanOrEqual(44);
       expect(await page.evaluate(() => document.documentElement.scrollWidth), `${where}: no sideways scroll`).toBeLessThanOrEqual(320);
     }
     // It opens the editor, as the other one does.

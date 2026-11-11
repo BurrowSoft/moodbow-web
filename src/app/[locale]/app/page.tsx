@@ -78,7 +78,9 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
         <h1 id="today-title" tabIndex={-1} className={`${JOURNAL_HEADING} focus:outline-none`} data-testid="today-greeting">
           {t(greetingKey(localHour(timeZone)))}
         </h1>
-        <p className="mt-1 text-muted" data-testid="today-date">
+        {/* Large text on a narrow screen: the date stops growing at about 200 %, as the help
+            buttons do (decision 231), so Write below it is in the first view (Web Tester, #282). */}
+        <p className="mt-1 text-muted max-[16em]:[font-size:min(1rem,max(10vw,32px))]" data-testid="today-date">
           {dateLine(me.today, dateLocaleTag)}
         </p>
         {/* Large text on a narrow screen (UX, 2026-11-12): the check-in card runs to ~1,400 px at
@@ -88,7 +90,7 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
         <Link
           href="/app/write"
           data-testid="today-write-top"
-          className="mt-3 hidden min-h-[44px] max-w-full items-center font-medium text-accent underline underline-offset-4 [font-size:min(1rem,max(10vw,32px))] [overflow-wrap:anywhere] max-[16em]:inline-flex"
+          className="mt-[8px] hidden min-h-[44px] max-w-full items-center font-medium text-accent underline underline-offset-4 [font-size:min(1rem,max(10vw,32px))] [overflow-wrap:anywhere] max-[16em]:inline-flex"
         >
           {te("writeButton")}
         </Link>
