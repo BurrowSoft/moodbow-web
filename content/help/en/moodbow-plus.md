@@ -7,7 +7,7 @@ topic: Privacy & account
 
 **Free:** check-ins and your journal with no limit, the Timeline, the calendar and search, help and your safety plan, things that help you, letters to future you, the appointment summary, Your week, Week, Month and 3 months in Insights, patterns over the last 3 months, export, import and delete.
 
-**Plus adds:** your year and all time in Insights, more patterns, Year in review, more themes, a designed PDF of your journal, a prompt library to write from, and more ways to breathe in **Things that help me**. Its Hard days prompts are free for everyone.
+**Plus adds:** your year and all time in Insights, more patterns, Year in review, more themes, a designed PDF of your journal, a prompt library to write from, and more ways to breathe in **Things that help me**. The prompt library's Hard days prompts are free for everyone.
 
 **More patterns** can include your own tags, once you use them.
 

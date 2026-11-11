@@ -8,7 +8,7 @@ fr-draft: true
 
 **Gratuit :** les bilans et votre journal sans limite, la Chronologie, le calendrier et la recherche, l'aide et votre plan de sécurité, ce qui vous aide, les lettres à vous-même, le résumé pour un rendez-vous, Votre semaine, Semaine, Mois et 3 mois dans Statistiques, les tendances sur les 3 derniers mois, l'export, l'import et la suppression.
 
-**Plus ajoute :** votre année et tout l'historique dans Statistiques, plus de tendances, le bilan de l'année, plus de thèmes, un PDF soigné de votre journal, une bibliothèque de questions pour écrire et plus de façons de respirer dans **Ce qui m'aide**. Ses questions « Jours difficiles » sont gratuites pour tous.
+**Plus ajoute :** votre année et tout l'historique dans Statistiques, plus de tendances, le bilan de l'année, plus de thèmes, un PDF soigné de votre journal, une bibliothèque de questions pour écrire et plus de façons de respirer dans **Ce qui m'aide**. Les questions « Jours difficiles » de la bibliothèque de questions sont gratuites pour tous.
 
 **Plus de tendances** peut inclure vos propres étiquettes, dès que vous les utilisez.
 

@@ -8,7 +8,7 @@ it-draft: true
 
 **Gratis:** check-in e il tuo diario senza limiti, la Cronologia, il calendario e la ricerca, l'aiuto e il tuo piano di sicurezza, ciò che ti aiuta, le lettere al te futuro, il riepilogo per l'appuntamento, La tua settimana, Settimana, Mese e 3 mesi in Andamento, gli andamenti degli ultimi 3 mesi, esportare, importare ed eliminare.
 
-**Plus aggiunge:** il tuo anno e tutto lo storico in Andamento, più andamenti, l'anno in sintesi, più temi, un PDF curato del tuo diario, una raccolta di domande per scrivere e più modi di respirare in **Cose che mi aiutano**. Le domande di «Giornate difficili» sono gratis per tutti.
+**Plus aggiunge:** il tuo anno e tutto lo storico in Andamento, più andamenti, l'anno in sintesi, più temi, un PDF curato del tuo diario, una raccolta di domande per scrivere e più modi di respirare in **Cose che mi aiutano**. Le domande di «Giornate difficili» della raccolta di domande sono gratis per tutti.
 
 **Più andamenti** può includere i tuoi tag, quando inizi a usarli.
 

@@ -8,7 +8,7 @@ es-draft: true
 
 **Gratis:** registros y tu diario sin límite, la Cronología, el calendario y la búsqueda, la ayuda y tu plan de seguridad, lo que te ayuda, las cartas a tu yo futuro, el resumen para tu cita, Tu semana, Semana, Mes y 3 meses en Resumen, los patrones de los últimos 3 meses, exportar, importar y eliminar.
 
-**Plus añade:** tu año y todo el historial en Resumen, más patrones, el resumen del año, más temas, un PDF cuidado de tu diario, una biblioteca de preguntas para escribir y más formas de respirar en **Lo que me ayuda**. Sus preguntas de «Días difíciles» son gratis para todos.
+**Plus añade:** tu año y todo el historial en Resumen, más patrones, el resumen del año, más temas, un PDF cuidado de tu diario, una biblioteca de preguntas para escribir y más formas de respirar en **Lo que me ayuda**. Las preguntas de «Días difíciles» de la biblioteca de preguntas son gratis para todos.
 
 **Más patrones** puede incluir tus propias etiquetas, cuando empieces a usarlas.
 
