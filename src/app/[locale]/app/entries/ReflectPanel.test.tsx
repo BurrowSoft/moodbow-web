@@ -3,6 +3,13 @@ import { NextIntlClientProvider } from "next-intl";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import getHelpLabel from "../../../../../content/contracts/get-help-label.json";
 import messages from "@/messages/en.json";
+vi.mock("@/i18n/navigation", () => ({
+  Link: ({ href, prefetch, children, ...rest }: { href: string; prefetch?: boolean; children: React.ReactNode }) => (
+    <a href={href} data-prefetch={String(prefetch)} {...rest}>
+      {children}
+    </a>
+  ),
+}));
 
 const reflectOnEntry = vi.fn();
 const deleteReflection = vi.fn();

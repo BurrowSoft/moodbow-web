@@ -35,8 +35,12 @@ test.describe("home", () => {
     // No AI claim while AI isn't live; store badges are text only.
     await expect(page.getByText("Moodbow writes back")).toHaveCount(0);
     await expect(page.getByText(/\bAI\b/)).toHaveCount(0);
-    await expect(page.getByTestId("home-stores")).toHaveText("Coming soon to Google Play and the App Store");
-    await expect(page.getByTestId("home-stores").getByRole("link")).toHaveCount(0);
+    // Follows each store's flag, so a launch-day flip passes on its own.
+    const play = conditions["play-live"].met;
+    const appStore = conditions["appstore-live"].met;
+    const storeLine = page.getByTestId("home-stores");
+    await expect(storeLine).toContainText(play && appStore ? "Get the app:" : play ? "Coming soon to the App Store" : appStore ? "Coming soon to Google Play" : "Coming soon to Google Play and the App Store");
+    await expect(storeLine.getByRole("link")).toHaveCount(Number(play) + Number(appStore));
   });
 
   test("200% zoom on a phone (a 160 px page): nothing scrolls sideways (Web Tester, #65)", async ({ page }) => {
@@ -273,7 +277,9 @@ test.describe("the live legal pages and account deletion (decision 164)", () => 
     await page.goto("/privacy");
     const article = page.locator('[data-content="article"]');
     await expect(article.getByRole("heading", { level: 2, name: "The short version" })).toBeVisible();
-    await expect(article.getByText("Last updated: 6 November 2026")).toBeVisible();
+    await expect(article.getByText("Last updated: 11 November 2026")).toBeVisible();
+    // The help card's country fallback, as the policy says it (decision 245, #269).
+    await expect(article).toContainText("To show helplines near you when we don't know your country, we use the country your connection comes from, at that moment only; it isn't stored.");
     await expect(article).not.toContainText("Google Play, Apple App Store");
     await expect(article).toContainText("disappear automatically within 8 days");
     // AI is off: no line may point at a Me → AI screen (decision 69).
@@ -575,6 +581,23 @@ test.describe("web journal (signed out)", () => {
   });
 });
 
+// #248: help is on the safety path, so it can't wait for the page's scripts, or need them at all.
+test.describe("help with no script at all", () => {
+  test.use({ javaScriptEnabled: false });
+  for (const [path, id] of [["/sign-in", "sign-in-get-help"], ["/forgot-password", "forgot-get-help"], ["/consent", "consent-get-help"]]) {
+    for (const language of ["", "/fr", "/es", "/pt-br"]) {
+      test(`${language}${path}: the help button leads to a page with the way to a helpline`, async ({ page }) => {
+        await page.goto(`${language}${path}`);
+        await page.getByTestId(id).click();
+        await expect(page).toHaveURL(new RegExp(`${language}/help/get-help-now$`));
+        await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+        await expect(page.locator("[data-content=article]")).not.toBeEmpty();
+        await expect(page.getByTestId("help-now-find-helpline")).toHaveAttribute("href", /^https:/);
+      });
+    }
+  }
+});
+
 // Onboarding (W0 part 2), signed out, no Supabase env. The account-creating
 // and signed-in rows run on the Preview against staging.
 test.describe("onboarding (signed out)", () => {
@@ -589,6 +612,12 @@ test.describe("onboarding (signed out)", () => {
       await expect(page.getByTestId("safety-card")).toHaveCount(0);
     });
   }
+
+  test("/security: a 404 with no update out, in any language, and Home doesn't link to it", async ({ page }) => {
+    for (const path of ["/security", "/es/security"]) expect((await page.goto(path))?.status(), path).toBe(404);
+    await page.goto("/");
+    await expect(page.getByTestId("home-security")).toHaveCount(0);
+  });
 
   test("Consent: help is there before anything's agreed, and it opens the card", async ({ page }) => {
     await page.goto("/consent");

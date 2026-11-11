@@ -102,6 +102,17 @@ export async function setProfileLocale(email: string, password: string, locale: 
   if (error) throw new Error(`saving the language failed: ${error.message}`);
 }
 
+// The same, signed in once, for a test that saves many times.
+export async function profileSaver(email: string, password: string): Promise<(fields: { p_locale: string } | { p_country: string }) => Promise<void>> {
+  const user = createClient(URL_, PUBLISHABLE, { auth: { persistSession: false, autoRefreshToken: false } });
+  const { error: signInError } = await user.auth.signInWithPassword({ email, password });
+  if (signInError) throw new Error(`sign-in to save a profile failed: ${signInError.message}`);
+  return async (fields) => {
+    const { error } = await user.rpc("update_profile", fields);
+    if (error) throw new Error(`saving the profile failed: ${error.message}`);
+  };
+}
+
 // The person's today, as the journal has it.
 export async function journalToday(email: string, password: string): Promise<string> {
   const user = createClient(URL_, PUBLISHABLE, { auth: { persistSession: false, autoRefreshToken: false } });
@@ -145,6 +156,16 @@ export async function seedCheckIns(email: string, password: string, monday: stri
     });
     if (error) throw new Error(`seeding check-ins failed: ${error.message}`);
   }
+}
+
+// Whether the account holds a granted AI consent, as get_me says.
+export async function aiConsentGranted(email: string, password: string): Promise<boolean> {
+  const user = createClient(URL_, PUBLISHABLE, { auth: { persistSession: false, autoRefreshToken: false } });
+  const { error: signInError } = await user.auth.signInWithPassword({ email, password });
+  if (signInError) throw new Error(`sign-in failed: ${signInError.message}`);
+  const { data, error } = await user.rpc("get_me");
+  if (error) throw new Error(`get_me failed: ${error.message}`);
+  return (data as { consents?: { ai?: { granted?: boolean } } }).consents?.ai?.granted === true;
 }
 
 // The token a password reset email would carry.

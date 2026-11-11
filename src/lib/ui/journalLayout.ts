@@ -31,9 +31,10 @@ export const MOOD_FACE = "flex min-h-12 min-w-min flex-1 basis-12 flex-col items
 export const MOOD_LABEL = "min-w-10 text-center leading-tight [font-size:min(0.75rem,max(6vw,12px))]";
 
 // The primary Save button (check-in, entry): full width on phones, so at
-// 200% zoom (a 160 px-wide page) it never overflows; the label wraps.
+// 200% zoom (a 160 px-wide page) it never overflows; the label wraps. Below the wide layout its
+// type stops growing at about 200 % (decision 231).
 export const PRIMARY_SAVE =
-  "inline-flex min-h-12 w-full items-center justify-center rounded-full bg-accent px-6 py-2 text-center font-medium text-on-accent hover:bg-accent-hover disabled:opacity-50 sm:w-auto sm:min-w-[160px] sm:px-8";
+  "inline-flex min-h-12 w-full items-center justify-center rounded-full bg-accent px-[24px] py-2 text-center font-medium text-on-accent hover:bg-accent-hover disabled:opacity-50 max-sm:[font-size:min(1rem,max(10vw,32px))] sm:w-auto sm:min-w-[160px] sm:px-8";
 
 // A bottom-bar tab: a grid cell that may shrink below its label's width
 // (min-w-0), so the four stay inside the row.
@@ -81,4 +82,4 @@ export function tabLabelSize(room: number, labelWidths: number[], fontSize: numb
 // card's format and theme): the selected one in the rose accent with
 // on-accent text (colour-roles §3, UX), the others muted.
 export const segment = (active: boolean) =>
-  `inline-flex min-h-[44px] max-w-full items-center rounded-full px-[16px] font-medium leading-[1.429] [font-size:min(0.875rem,max(7vw,14px))] [overflow-wrap:anywhere] ${active ? "bg-accent text-on-accent" : "text-muted hover:bg-pill"}`;
+  `inline-flex min-h-[44px] max-w-full items-center rounded-full px-[16px] font-medium leading-[1.429] [font-size:min(0.875rem,max(8.75vw,28px))] [overflow-wrap:anywhere] ${active ? "bg-accent text-on-accent" : "text-muted hover:bg-pill"}`;

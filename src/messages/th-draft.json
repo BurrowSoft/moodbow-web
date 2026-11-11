@@ -26,7 +26,7 @@
   },
   {
     "key": "meta.ogImageAlt",
-    "en": "Moodbow logo with the text: Coming soon. A journal that learns your story.",
+    "en": "Moodbow logo with the text: Coming soon. A private journal for your days.",
     "reason": "UX draft (native read pending)"
   },
   {
@@ -1017,6 +1017,21 @@
   {
     "key": "consumerHealthData.description",
     "en": "How Moodbow handles data that may be consumer health data.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "common.securityNotice",
+    "en": "There's an important security update about Moodbow.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "common.securityNoticeRead",
+    "en": "Read it",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "me.meNoScript",
+    "en": "The journal needs JavaScript. Turn it on in your browser to see your entries.",
     "reason": "UX draft (native read pending)"
   }
 ]

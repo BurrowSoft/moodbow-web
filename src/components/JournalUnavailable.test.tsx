@@ -2,6 +2,13 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import messages from "@/messages/en.json";
+vi.mock("@/i18n/navigation", () => ({
+  Link: ({ href, prefetch, children, ...rest }: { href: string; prefetch?: boolean; children: React.ReactNode }) => (
+    <a href={href} data-prefetch={String(prefetch)} {...rest}>
+      {children}
+    </a>
+  ),
+}));
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
 const { JournalUnavailable } = await import("./JournalUnavailable");
@@ -38,5 +45,16 @@ describe("JournalUnavailable: help is there whatever failed (decision 218)", () 
     expect(help).toHaveTextContent(messages.me.meGetHelpNow);
     fireEvent.click(help);
     expect(screen.getByText(messages.safety.safetyTitle)).toBeInTheDocument();
+  });
+});
+
+describe("JournalUnavailable: help first (UX, Web Tester at 320 px and 300 %)", () => {
+  it.each([false, true])("standalone %s: help first, then the heading, then Try again", (standalone) => {
+    renderIt(standalone);
+    const heading = screen.getByRole("heading", { name: messages.auth.errGeneric });
+    const help = screen.getByTestId("journal-unavailable-help");
+    const retry = screen.getByTestId("try-again");
+    expect(help.compareDocumentPosition(heading) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(heading.compareDocumentPosition(retry) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 });

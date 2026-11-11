@@ -270,9 +270,16 @@ test.describe("typing before the page has loaded", () => {
     try {
       await onboarded(page, email, password);
       await beforeLoad(page, "/app", async () => {
-        await page.getByTestId("checkin-mood-4").click();
+        await expect(page.getByTestId("checkin-mood-4")).toBeVisible();
+        // The card says it isn't ready (#238); the page around it isn't held.
+        await expect(page.getByTestId("checkin-card")).toHaveAttribute("inert", "");
+        await expect(page.getByTestId("tab-today").locator("xpath=ancestor-or-self::*[@inert]")).toHaveCount(0);
+        // A forced click: a normal one would wait for the card to take it.
+        await page.getByTestId("checkin-mood-4").click({ force: true });
       });
       await expect(page).toHaveURL(/\/app$/);
+      await expect(page.locator("[data-until-loaded]")).toHaveCount(0);
+      await expect(page.getByTestId("checkin-mood-4")).toHaveAttribute("aria-checked", "false");
       await expect(page.getByTestId("checkin-save")).toBeDisabled();
       // Works from here on.
       await page.getByTestId("checkin-mood-4").click();
@@ -286,12 +293,49 @@ test.describe("typing before the page has loaded", () => {
     }
   });
 
+  test("signed in with scripts off: help is still on the page, and leads to the help page", async ({ page, browser, baseURL }) => {
+    const email = newEmail();
+    const password = newPassword();
+    try {
+      await onboarded(page, email, password);
+      await expect(page.getByTestId("app-noscript-help")).toHaveCount(0);
+      const off = await browser.newContext({ baseURL, javaScriptEnabled: false, storageState: await page.context().storageState() });
+      const noScript = await off.newPage();
+      await noScript.goto("/app/me");
+      // Why the page is empty, under the help and not above it.
+      const help = (await noScript.getByTestId("app-noscript-help").boundingBox())!;
+      const why = (await noScript.getByTestId("app-noscript-journal").boundingBox())!;
+      expect(why.y).toBeGreaterThan(help.y);
+      // It can be read: at large text on a phone, it scrolls clear of the fixed tab bar.
+      await noScript.setViewportSize({ width: 320, height: 640 });
+      await (await off.newCDPSession(noScript)).send("Page.setFontSizes", { fontSizes: { standard: 48, fixed: 39 } });
+      await noScript.mouse.wheel(0, 3000);
+      await expect.poll(async () => {
+        const line = (await noScript.getByTestId("app-noscript-journal").boundingBox())!;
+        const bar = (await noScript.locator("nav.fixed").boundingBox())!;
+        return line.y + line.height <= bar.y;
+      }).toBe(true);
+      await noScript.getByTestId("app-noscript-help").click();
+      await expect(noScript).toHaveURL(/\/help\/get-help-now$/);
+      await expect(noScript.getByTestId("help-now-find-helpline")).toBeVisible();
+      await off.close();
+    } finally {
+      await cleanup(email);
+    }
+  });
+
   test("Me: nothing can be changed until it has loaded, so nothing looks saved that isn't", async ({ page }) => {
     const email = newEmail();
     const password = newPassword();
     const sections = ["me-country", "me-reminder-time", "me-theme-dark", "import-file"];
     try {
       await onboarded(page, email, password);
+      // Help doesn't wait for any of it (#248).
+      await beforeLoad(page, "/app/me", async () => {
+        await page.getByTestId("me-get-help").click();
+        await expect(page).toHaveURL(/\/help\/get-help-now$/);
+        await expect(page.getByTestId("help-now-find-helpline")).toBeVisible();
+      });
       await beforeLoad(page, "/app/me", async () => {
         for (const id of sections) {
           await expect(page.getByTestId(id).locator("xpath=ancestor::*[@inert]"), id).toHaveCount(1);

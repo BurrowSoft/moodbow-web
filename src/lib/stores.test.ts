@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
 import conditions from "../../content/conditions.json";
-import { APP_STORE_ID, APP_STORE_URL, liveStores, openAppFallback, openAppIntent, PLAY_URL } from "./stores";
+import { APP_STORE_ID, APP_STORE_URL, appStoreUrl, liveStores, openAppFallback, openAppIntent, PLAY_URL } from "./stores";
 
 describe("openAppIntent (decision 216, app PR C's moodbow://app/me/backup)", () => {
   it("the prod app on Production, the staging app elsewhere; the fallback encoded", () => {
@@ -25,9 +25,25 @@ describe("liveStores (decision 185)", () => {
     expect(liveStores((id) => id === "play-live")).toEqual({ play: true, appStore: false });
   });
 
-  it("the App Store never counts as live without its link and id (no dead links)", () => {
-    if (APP_STORE_URL === null || APP_STORE_ID === null) expect(liveStores(() => true).appStore).toBe(false);
-    else expect(liveStores(() => true).appStore).toBe(true);
+  it("the App Store never counts as live without its id (no dead links)", () => {
+    expect(liveStores(() => true, null).appStore).toBe(false);
+    expect(liveStores(() => true, "123").appStore).toBe(true);
+    expect(liveStores(() => false, "123").appStore).toBe(false);
+  });
+
+  it("the two go live separately", () => {
+    expect(liveStores((id) => id === "appstore-live", "123")).toEqual({ play: false, appStore: true });
+    expect(liveStores(() => true, "123")).toEqual({ play: true, appStore: true });
+  });
+
+  it("the link comes from the id alone, with no country and nothing added", () => {
+    expect(appStoreUrl("123")).toBe("https://apps.apple.com/app/id123");
+    expect(APP_STORE_URL).toBe(APP_STORE_ID === null ? null : appStoreUrl(APP_STORE_ID));
+  });
+
+  // Launch-day guard: otherwise the flag does nothing, and the site quietly says "coming soon".
+  it("appstore-live can't be met until APP_STORE_ID is set", () => {
+    if (conditions["appstore-live"].met) expect(APP_STORE_ID).not.toBeNull();
   });
 
   it("the Play link is the listing; both conditions exist and are unmet until launch", () => {

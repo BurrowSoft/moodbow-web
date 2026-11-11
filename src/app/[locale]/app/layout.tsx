@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";
-import { getMessages, setRequestLocale } from "next-intl/server";
+import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
-import { redirect } from "@/i18n/navigation";
+import { Link, redirect } from "@/i18n/navigation";
 import { offeredLocales } from "@/i18n/routing";
 import { savedLanguageRoute } from "@/lib/savedLanguage";
 import { pageGate } from "@/lib/conditions";
@@ -50,6 +50,7 @@ export default async function AppLayout({ children, params }: LayoutProps<"/[loc
   const language = savedLanguageRoute(me.profile?.locale, locale, offeredLocales());
   if (language) return <SavedLanguageRedirect locale={language} />;
 
+  const t = await getTranslations("me");
   // The journal's client components get every message (the root layout sends
   // only the public namespaces, perf fix 3).
   return (
@@ -67,7 +68,18 @@ export default async function AppLayout({ children, params }: LayoutProps<"/[loc
             footer under it would be pushed down in view. Kept below the fold,
             nothing visible moves (Today CLS 0.13, Web Tester #82 isolation).
             On paper neither applies (no trailing blank page; 1.1 N). */}
-        <main id="main" className={`min-h-dvh min-w-0 flex-1 ${APP_MAIN_GUTTER} pb-28 pt-10 md:pb-10 print:min-h-0 print:p-0`}>
+        <main id="main" className={`min-h-dvh min-w-0 flex-1 ${APP_MAIN_GUTTER} pb-28 pt-[max(16px,calc(56px-1rem))] md:pb-10 md:pt-10 print:min-h-0 print:p-0`}>
+          {/* With scripts off a page's content never appears here, as it's streamed: help still does (#249). */}
+          <noscript>
+            <div className="mx-auto mb-6 max-w-3xl space-y-3 max-sm:[font-size:min(1rem,max(10vw,32px))]">
+              <p>
+                <Link href="/help/get-help-now" prefetch={false} data-testid="app-noscript-help" className="font-medium text-accent underline underline-offset-4">
+                  {t("meGetHelpNow")}
+                </Link>
+              </p>
+              <p data-testid="app-noscript-journal" className="text-muted">{t("meNoScript")}</p>
+            </div>
+          </noscript>
           {/* Per user: another account signing in starts empty (#9765 M-01). */}
           <div className="mx-auto max-w-3xl">
             <AnnouncerProvider>
