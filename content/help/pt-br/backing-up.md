@@ -16,6 +16,6 @@ Você pode começar a usar o Moodbow no app sem e-mail. Seu diário fica salvo e
 
 **Se o e-mail já tiver uma conta do Moodbow:** você pode usar outro e-mail ou entrar nessa conta. O diário deste celular não pode ser transferido para ela: **Entrar nessa conta** apaga de vez o diário deste celular (o Moodbow pergunta antes). Toque em **Exportar antes** se quiser guardar uma cópia.
 
-**Diários sem e-mail:** se você nunca adicionar um e-mail e não abrir o app conectado à internet por 12 meses, apagamos esse diário. O Moodbow avisa um mês antes.
+**Diários sem e-mail:** se você nunca adicionar um e-mail e não abrir o app conectado à internet por 12 meses, apagamos esse diário. Se as notificações do Moodbow estiverem ativadas, ele avisa um mês antes.
 
 Sem e-mail não existe **Sair** em **Perfil**, porque você não conseguiria entrar de novo. **Apagar conta** funciona normalmente.

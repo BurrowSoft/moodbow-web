@@ -151,14 +151,15 @@ export function PlusScreen({ view, price, aiShown, started }: { view: PlusView; 
   ) : (
     <>
       {/* At large text the short price, one line: the button already names the free week. */}
-      <p data-testid="plus-price" className="font-medium">
+      <p data-testid="plus-price" className={`font-medium ${large ? "leading-tight" : ""}`}>
         {view.trial && !large ? t("footerTrial", { price }) : t("priceYear", { price })}
       </p>
       {/* In em, so it follows the footer's cap at large text (the same size as before otherwise). */}
-      <p data-testid="plus-renews" className="text-[0.875em] text-muted">
+      <p data-testid="plus-renews" className={`text-[0.875em] text-muted ${large ? "leading-snug" : ""}`}>
         {t("renews")}
       </p>
-      <button type="button" data-testid="plus-start" disabled={busy} onClick={() => void go("/api/checkout/stripe")} className={dialogButton(true)}>
+      {/* At large text its lines sit closer (de: three lines at 32 px), so the content keeps room. */}
+      <button type="button" data-testid="plus-start" disabled={busy} onClick={() => void go("/api/checkout/stripe")} className={`${dialogButton(true)} ${large ? "leading-tight" : ""}`}>
         {view.trial ? t("startTrial") : t("start")}
       </button>
     </>
@@ -224,10 +225,10 @@ export function PlusScreen({ view, price, aiShown, started }: { view: PlusView; 
               <th scope="col" className="px-[12px] py-2 text-left font-medium">
                 <span className="sr-only">{t("colFeature")}</span>
               </th>
-              <th scope="col" className="w-[3.5em] px-1 py-2 font-medium">
+              <th scope="col" className="w-[3.5em] px-1 py-2 font-medium hyphens-auto [overflow-wrap:anywhere]">
                 {t("colFree")}
               </th>
-              <th scope="col" className="w-[3.5em] px-1 py-2 font-medium text-accent">
+              <th scope="col" className="w-[3.5em] px-1 py-2 font-medium text-accent hyphens-auto [overflow-wrap:anywhere]">
                 {t("colPlus")}
               </th>
             </tr>
