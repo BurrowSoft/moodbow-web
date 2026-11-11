@@ -96,7 +96,9 @@ export function PromptLibrary({ uid, country, hasPlus, onUse }: { uid: string; c
             <GetHelpNow country={country} testId="entry-library-help" neutral />
           </>
         )}
-        <p id="entry-library-prompt" tabIndex={-1} data-testid="entry-library-prompt" data-prompt-id={prompt.id} className="text-text outline-none [overflow-wrap:anywhere]">
+        {/* The site's ring skips tabindex="-1" targets (#51), but here the prompt is where a keyboard
+            user lands after choosing a group, so it shows the same ring (UX, 12 Nov): keyboard only. */}
+        <p id="entry-library-prompt" tabIndex={-1} data-testid="entry-library-prompt" data-prompt-id={prompt.id} className="text-text outline-none focus-visible:[outline:2px_solid_var(--accent)] focus-visible:[outline-offset:3px] [overflow-wrap:anywhere]">
           {libraryText(prompt, language)}
         </p>
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1">

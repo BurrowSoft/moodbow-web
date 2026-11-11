@@ -1753,9 +1753,21 @@ test("the prompt library by keyboard: focus follows each step, and Escape closes
     await open.focus();
     await page.keyboard.press("Enter");
     await expect(group).toBeFocused();
-    // A group → its prompt, read first.
+    // A group → its prompt, read first, with the site's keyboard ring around it (UX, 12 Nov).
     await page.keyboard.press("Enter");
     await expect(prompt).toBeFocused();
+    const outline = (el: Element) => {
+      const s = getComputedStyle(el);
+      return [el.matches(":focus-visible"), s.outlineStyle, s.outlineWidth, s.outlineOffset, s.outlineColor].join(" ");
+    };
+    const promptRing = await prompt.evaluate(outline);
+    expect(promptRing).toMatch(/^true solid 2px 3px /);
+    // The same ring as every other keyboard target: Back's, in the same colour.
+    // Use this, Another, then Back: Tab three times from the prompt.
+    for (let i = 0; i < 3; i++) await page.keyboard.press("Tab");
+    const back = page.getByTestId("entry-library-back");
+    await expect(back).toBeFocused();
+    expect(await back.evaluate(outline)).toBe(promptRing);
     // Back → the group they came from.
     await page.getByTestId("entry-library-back").focus();
     await page.keyboard.press("Enter");
