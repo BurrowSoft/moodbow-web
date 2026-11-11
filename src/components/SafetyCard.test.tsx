@@ -298,8 +298,8 @@ describe("SafetyCard: the default colours under any palette (#277)", () => {
 
   it("another dialog doesn't: it takes the chosen palette", () => {
     wrap(
-      <Dialog title="Other" onCancel={() => {}} testId="other-dialog">
-        <button type="button">OK</button>
+      <Dialog title={messages.me.meAppearance} onCancel={() => {}} testId="other-dialog">
+        <button type="button">{messages.me.cancel}</button>
       </Dialog>,
     );
     expect(screen.getByTestId("other-dialog").closest("[data-default-colours]")).toBeNull();
