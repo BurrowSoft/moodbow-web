@@ -1163,5 +1163,10 @@
     "key": "toolbox.done",
     "en": "Done",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.breathSafety",
+    "en": "If you feel dizzy, stop and breathe normally.",
+    "reason": "UX draft (native read pending)"
   }
 ]

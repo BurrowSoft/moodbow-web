@@ -602,6 +602,7 @@
     "breatheOutCount": "Expirez · {n}",
     "stop": "Arrêter",
     "breathEnd": "C'était une minute. Prenez votre temps.",
-    "done": "Terminé"
+    "done": "Terminé",
+    "breathSafety": "Si vous avez la tête qui tourne, arrêtez et respirez normalement."
   }
 }

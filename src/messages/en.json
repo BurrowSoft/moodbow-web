@@ -602,6 +602,7 @@
     "breatheOutCount": "Breathe out · {n}",
     "stop": "Stop",
     "breathEnd": "That was a minute. Take your time.",
-    "done": "Done"
+    "done": "Done",
+    "breathSafety": "If you feel dizzy, stop and breathe normally."
   }
 }
