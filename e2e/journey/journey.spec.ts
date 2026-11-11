@@ -1907,18 +1907,7 @@ test("keyboard: a time field shows its ring at every stop inside it, the picker 
   const password = newPassword();
   const ringThroughout = async (testId: string, where: string) => {
     const field = page.getByTestId(testId);
-    const inside = () => field.evaluate((input) => document.activeElement === input);
     await field.focus();
-    // Does focus hold? Logged, so a red run says whether the page took it away (a re-render
-    // after load drops it with the old element: Plus stack's Me, #286).
-    await page.waitForTimeout(500);
-    console.log(`${where}: focus ${(await inside()) ? "held" : "LOST"} half a second after focusing`);
-    // Then the stops, from a focus that has held (the page settled).
-    await expect(async () => {
-      await field.focus();
-      await page.waitForTimeout(300);
-      expect(await inside()).toBe(true);
-    }).toPass({ timeout: 10_000 });
     let stops = 0;
     for (let i = 0; i < 8; i++) {
       const state = await field.evaluate((input) => ({ inside: document.activeElement === input, outline: getComputedStyle(input).outlineStyle }));
@@ -1945,6 +1934,9 @@ test("keyboard: a time field shows its ring at every stop inside it, the picker 
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     await page.goto("/app/me");
     await expect(page.getByTestId("me-reminder-time")).toBeEnabled({ timeout: 15_000 });
+    // The section takes no input until the page's code has run (useUntilLoaded: inert, which
+    // toBeEnabled doesn't see), so a focus before that never lands: wait for it (#266, #286).
+    await expect(page.locator('section[aria-labelledby="me-reminder"]')).not.toHaveAttribute("inert", { timeout: 15_000 });
     await ringThroughout("me-reminder-time", "Me's reminder time");
   } finally {
     await cleanup(email);
