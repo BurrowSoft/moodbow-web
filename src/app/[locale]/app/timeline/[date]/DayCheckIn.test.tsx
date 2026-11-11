@@ -4,6 +4,15 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import messages from "@/messages/en.json";
 
 vi.mock("../../actions", () => ({ saveCheckIn: vi.fn() }));
+// The card brings the help card (a Link) for tags the crisis list matches.
+vi.mock("@/i18n/navigation", () => ({
+  Link: ({ href, children, prefetch, ...rest }: { href: string; prefetch?: boolean; children: React.ReactNode }) => (
+    <a href={href} data-prefetch={String(prefetch)} {...rest}>
+      {children}
+    </a>
+  ),
+}));
+
 const { DayCheckIn } = await import("./DayCheckIn");
 
 const ROW = { local_date: "2026-09-28", mood: 2, sleep_hours: null, sleep_quality: null, exercise_minutes: null, stress: null, updated_at: "x" };

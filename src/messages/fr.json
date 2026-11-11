@@ -260,7 +260,13 @@
     "checkInConflictMine": "Le vôtre",
     "checkInConflictOther": "Déjà enregistré",
     "checkInConflictKeepMine": "Garder le mien",
-    "checkInConflictUseOther": "Prendre l'autre"
+    "checkInConflictUseOther": "Prendre l'autre",
+    "tagsLabel": "Étiquettes",
+    "tagsPlaceholder": "Ajouter une étiquette",
+    "tagsRecent": "Vos étiquettes",
+    "tagsRemove": "Retirer {tag}",
+    "tagsTooMany": "Jusqu'à 5 étiquettes par jour.",
+    "tagsTooLong": "Une étiquette peut faire jusqu'à 32 caractères."
   },
   "entry": {
     "writeButton": "Raconter votre journée",
@@ -397,7 +403,8 @@
     "exportExercise": "Activité",
     "exportStress": "Stress",
     "exportOfFive": "{value}/5",
-    "exportReflectionOn": "Sur votre note du {date}"
+    "exportReflectionOn": "Sur votre note du {date}",
+    "exportTags": "Étiquettes"
   },
   "help": {
     "helpTitle": "Aide et FAQ",

@@ -108,16 +108,16 @@ describe("renderExportCsv: the file", () => {
   it("UTF-8 BOM, the 9 columns, CRLF rows", () => {
     expect(csv.startsWith(BOM)).toBe(true);
     expect(table[0]).toEqual([...CSV_COLUMNS]);
-    expect(csv.slice(1).split("\r\n")[0]).toBe("date,mood,mood_word,sleep_hours,sleep_quality,movement_minutes,stress,moment,note");
+    expect(csv.slice(1).split("\r\n")[0]).toBe("date,mood,mood_word,sleep_hours,sleep_quality,movement_minutes,stress,moment,tags,note");
     expect(csv.endsWith("\r\n")).toBe(true);
   });
 
   it("one row per entry, oldest first, the day's check-in on each; a check-in alone is one row", () => {
     const rows = table.slice(1);
     expect(rows.map((r) => r[0])).toEqual(["2026-10-01", "2026-10-01", "2026-10-02", "2026-10-03", "2026-10-03", "2026-10-03", "2026-10-04", "2026-10-04", "2026-10-04", "2026-10-04", "2026-10-05"]);
-    expect(rows[0]).toEqual(["2026-10-01", "4", en.today.mood4, "7.5", "good", "30", "2", "yes", "Morning walk."]);
+    expect(rows[0]).toEqual(["2026-10-01", "4", en.today.mood4, "7.5", "good", "30", "2", "yes", "", "Morning walk."]);
     expect(rows[1].slice(0, 8)).toEqual(["2026-10-01", "4", en.today.mood4, "7.5", "good", "30", "2", ""]);
-    expect(rows[2]).toEqual(["2026-10-02", "1", en.today.mood1, "0", "", "0", "", "", ""]);
+    expect(rows[2]).toEqual(["2026-10-02", "1", en.today.mood1, "0", "", "0", "", "", "", ""]);
     expect(rows[3].slice(1, 7)).toEqual(["", "", "", "", "", ""]);
   });
 

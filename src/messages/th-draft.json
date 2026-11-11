@@ -1403,5 +1403,40 @@
     "key": "plus.moreNone",
     "en": "More patterns show up here once you have more check-ins in this period.",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "today.tagsLabel",
+    "en": "Tags",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "today.tagsPlaceholder",
+    "en": "Add a tag",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "today.tagsRecent",
+    "en": "Your tags",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "today.tagsRemove",
+    "en": "Remove {tag}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "today.tagsTooMany",
+    "en": "Up to 5 tags a day.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "today.tagsTooLong",
+    "en": "A tag can be up to 32 characters.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "export.exportTags",
+    "en": "Tags",
+    "reason": "UX draft (native read pending)"
   }
 ]
