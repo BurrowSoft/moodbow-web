@@ -23,6 +23,8 @@ import { MorePatternsCard, MorePatternsRow, PlusTabs, WeekLine, YearTab } from "
 import { insightsOffer, plusPriceLabel, readPlusView } from "@/lib/plus/view";
 import { isLongRange, longRangeStart, longSummary } from "@/lib/plus/longRange";
 import { morePatterns, moreWindowStart } from "@/lib/plus/morePatterns";
+import { tagPatterns, tagsByDayFrom, type TagPattern } from "@/lib/plus/tagPatterns";
+import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
 import { periodLine, readCheckInsSince, readWrittenDays } from "@/lib/plus/insightsData";
 import { ShareMonth } from "./ShareMonth";
 import { WeeklyReport } from "./WeeklyReport";
@@ -145,7 +147,17 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
   if (hasPlus && withPatterns) {
     const written = await readWrittenDays(supabase, moreWindowStart(moreWindow, me.today), me.today);
     // A failed read of the days written: the card without that line, never a guess.
-    plusMore = <MorePatternsCard window={moreWindow} patterns={morePatterns(rows, me.today, moreWindow, written ?? new Set()).filter((p) => written || p.id !== "writing")} />;
+    // More patterns by tag (UX, 12 Nov), where tags are on: the period's tags, the person's own
+    // (RLS). A failed read: no tag lines, never a guess.
+    let tagLines: TagPattern[] = [];
+    if (pageGate("tags-live") !== "hidden") {
+      const start = moreWindowStart(moreWindow, me.today);
+      let query = supabase.from("check_in_tags").select("local_date, tag").lte("local_date", me.today);
+      if (start) query = query.gte("local_date", start);
+      const { data: tagRows, error: tagError } = await query;
+      if (!tagError && tagRows) tagLines = tagPatterns(rows, me.today, moreWindow, tagsByDayFrom(tagRows as { local_date: string; tag: string }[]), CRISIS_KEYWORDS);
+    }
+    plusMore = <MorePatternsCard window={moreWindow} patterns={morePatterns(rows, me.today, moreWindow, written ?? new Set()).filter((p) => written || p.id !== "writing")} tags={tagLines} />;
   }
   return (
     <InsightsView

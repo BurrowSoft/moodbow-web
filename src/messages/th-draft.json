@@ -1111,7 +1111,7 @@
   },
   {
     "key": "plus.morePatternsBody",
-    "en": "Weekdays and weekends, writing days, and the last 12 months or all time",
+    "en": "Weekdays and weekends, writing days, your tags, and the last 12 months or all time",
     "reason": "UX draft (native read pending)"
   },
   {
@@ -1437,6 +1437,21 @@
   {
     "key": "export.exportTags",
     "en": "Tags",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.moreTagsTitle",
+    "en": "Your tags",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.moreTagShown",
+    "en": "On days tagged “{tag}”, your mood averaged {a} of 5. On other days, {b}.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.moreTagSame",
+    "en": "On days tagged “{tag}” and other days, your mood was about the same ({a} and {b} of 5).",
     "reason": "UX draft (native read pending)"
   }
 ]

@@ -599,7 +599,7 @@
     "weekLine": "Willst du weiter zurückblicken? Dein Jahr, mehr Muster und ein gestaltetes PDF deines Tagebuchs gibt es mit Plus.",
     "tabYear": "Jahr",
     "morePatterns": "Mehr Muster",
-    "morePatternsBody": "Wochentage und Wochenenden, Schreibtage und die letzten 12 Monate oder alles bisher",
+    "morePatternsBody": "Wochentage und Wochenenden, Schreibtage, deine Tags und die letzten 12 Monate oder alles bisher",
     "title": "Tiefer in dein Tagebuch",
     "titleHas": "Du hast Moodbow Plus",
     "lead": "Dein Tagebuch, Hilfe und deine Daten bleiben für alle kostenlos.",
@@ -657,6 +657,9 @@
     "moreWeekdaysSame": "An Wochentagen und am Wochenende war deine Stimmung etwa gleich ({a} und {b} von 5).",
     "moreWritingShown": "An Tagen, an denen du geschrieben hast, lag deine Stimmung im Schnitt bei {a} von 5. An den anderen bei {b}.",
     "moreWritingSame": "An Tagen mit und ohne Schreiben war deine Stimmung etwa gleich ({a} und {b} von 5).",
-    "moreNone": "Mehr Muster erscheinen hier, sobald du in diesem Zeitraum mehr Check-ins hast."
+    "moreNone": "Mehr Muster erscheinen hier, sobald du in diesem Zeitraum mehr Check-ins hast.",
+    "moreTagsTitle": "Deine Tags",
+    "moreTagShown": "An Tagen mit dem Tag „{tag}“ lag deine Stimmung im Schnitt bei {a} von 5. An den anderen bei {b}.",
+    "moreTagSame": "An Tagen mit und ohne den Tag „{tag}“ war deine Stimmung etwa gleich ({a} und {b} von 5)."
   }
 }

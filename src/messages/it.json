@@ -599,7 +599,7 @@
     "weekLine": "Vuoi guardare più indietro? Il tuo anno, più andamenti e un PDF curato del tuo diario arrivano con Plus.",
     "tabYear": "Anno",
     "morePatterns": "Più andamenti",
-    "morePatternsBody": "Giorni feriali e weekend, giorni in cui scrivi, e gli ultimi 12 mesi o tutto lo storico",
+    "morePatternsBody": "Giorni feriali e weekend, giorni in cui scrivi, i tuoi tag, e gli ultimi 12 mesi o tutto lo storico",
     "title": "Vai più a fondo nel tuo diario",
     "titleHas": "Hai Moodbow Plus",
     "lead": "Il tuo diario, l'aiuto e i tuoi dati restano gratis per tutti.",
@@ -657,6 +657,9 @@
     "moreWeekdaysSame": "Nei giorni feriali e nel weekend il tuo umore è stato più o meno lo stesso ({a} e {b} su 5).",
     "moreWritingShown": "Nei giorni in cui hai scritto il tuo umore è stato in media {a} su 5. Negli altri, {b}.",
     "moreWritingSame": "Nei giorni in cui hai scritto e negli altri il tuo umore è stato più o meno lo stesso ({a} e {b} su 5).",
-    "moreNone": "Altri andamenti appariranno qui quando avrai più check-in in questo periodo."
+    "moreNone": "Altri andamenti appariranno qui quando avrai più check-in in questo periodo.",
+    "moreTagsTitle": "I tuoi tag",
+    "moreTagShown": "Nei giorni con il tag «{tag}» il tuo umore è stato in media {a} su 5. Negli altri, {b}.",
+    "moreTagSame": "Nei giorni con il tag «{tag}» e negli altri il tuo umore è stato più o meno lo stesso ({a} e {b} su 5)."
   }
 }

@@ -599,7 +599,7 @@
     "weekLine": "Quer olhar mais para trás? Seu ano, mais padrões e um PDF caprichado do seu diário vêm com o Plus.",
     "tabYear": "Ano",
     "morePatterns": "Mais padrões",
-    "morePatternsBody": "Dias úteis e fins de semana, dias em que você escreve, e os últimos 12 meses ou todo o histórico",
+    "morePatternsBody": "Dias úteis e fins de semana, dias em que você escreve, suas tags, e os últimos 12 meses ou todo o histórico",
     "title": "Vá mais fundo no seu diário",
     "titleHas": "Você tem o Moodbow Plus",
     "lead": "Seu diário, a ajuda e seus dados continuam grátis para todos.",
@@ -657,6 +657,9 @@
     "moreWeekdaysSame": "Nos dias úteis e nos fins de semana, seu humor foi parecido ({a} e {b} de 5).",
     "moreWritingShown": "Nos dias em que você escreveu, seu humor ficou em média em {a} de 5. Nos outros dias, {b}.",
     "moreWritingSame": "Nos dias em que você escreveu e nos outros, seu humor foi parecido ({a} e {b} de 5).",
-    "moreNone": "Mais padrões aparecem aqui quando você tiver mais check-ins neste período."
+    "moreNone": "Mais padrões aparecem aqui quando você tiver mais check-ins neste período.",
+    "moreTagsTitle": "Suas tags",
+    "moreTagShown": "Nos dias com a tag \"{tag}\", seu humor ficou em média em {a} de 5. Nos outros dias, {b}.",
+    "moreTagSame": "Nos dias com a tag \"{tag}\" e nos outros, seu humor foi parecido ({a} e {b} de 5)."
   }
 }

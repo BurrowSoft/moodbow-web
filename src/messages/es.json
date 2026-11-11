@@ -599,7 +599,7 @@
     "weekLine": "¿Quieres mirar más atrás? Tu año, más patrones y un PDF cuidado de tu diario vienen con Plus.",
     "tabYear": "Año",
     "morePatterns": "Más patrones",
-    "morePatternsBody": "Entre semana y fines de semana, días en que escribes, y los últimos 12 meses o todo el historial",
+    "morePatternsBody": "Entre semana y fines de semana, días en que escribes, tus etiquetas, y los últimos 12 meses o todo el historial",
     "title": "Profundiza en tu diario",
     "titleHas": "Tienes Moodbow Plus",
     "lead": "Tu diario, la ayuda y tus datos siguen siendo gratis para todos.",
@@ -657,6 +657,9 @@
     "moreWeekdaysSame": "Entre semana y los fines de semana, tu estado de ánimo fue más o menos el mismo ({a} y {b} de 5).",
     "moreWritingShown": "Los días que escribiste, tu estado de ánimo fue de {a} de 5 de media. Los días que no, {b}.",
     "moreWritingSame": "Los días que escribiste y los que no, tu estado de ánimo fue más o menos el mismo ({a} y {b} de 5).",
-    "moreNone": "Más patrones aparecerán aquí cuando tengas más registros en este periodo."
+    "moreNone": "Más patrones aparecerán aquí cuando tengas más registros en este periodo.",
+    "moreTagsTitle": "Tus etiquetas",
+    "moreTagShown": "Los días con la etiqueta «{tag}», tu estado de ánimo fue de {a} de 5 de media. Los demás días, {b}.",
+    "moreTagSame": "Los días con la etiqueta «{tag}» y los demás, tu estado de ánimo fue más o menos el mismo ({a} y {b} de 5)."
   }
 }

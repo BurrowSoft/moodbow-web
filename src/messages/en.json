@@ -599,7 +599,7 @@
     "weekLine": "Want to look back further? Your year, more patterns and a designed PDF of your journal come with Plus.",
     "tabYear": "Year",
     "morePatterns": "More patterns",
-    "morePatternsBody": "Weekdays and weekends, writing days, and the last 12 months or all time",
+    "morePatternsBody": "Weekdays and weekends, writing days, your tags, and the last 12 months or all time",
     "title": "Go deeper with your journal",
     "titleHas": "You have Moodbow Plus",
     "lead": "Your journal, help and your data stay free for everyone.",
@@ -657,6 +657,9 @@
     "moreWeekdaysSame": "On weekdays and at weekends, your mood was about the same ({a} and {b} of 5).",
     "moreWritingShown": "On days you wrote, your mood averaged {a} of 5. On days you didn't, {b}.",
     "moreWritingSame": "On days you wrote and days you didn't, your mood was about the same ({a} and {b} of 5).",
-    "moreNone": "More patterns show up here once you have more check-ins in this period."
+    "moreNone": "More patterns show up here once you have more check-ins in this period.",
+    "moreTagsTitle": "Your tags",
+    "moreTagShown": "On days tagged “{tag}”, your mood averaged {a} of 5. On other days, {b}.",
+    "moreTagSame": "On days tagged “{tag}” and other days, your mood was about the same ({a} and {b} of 5)."
   }
 }
