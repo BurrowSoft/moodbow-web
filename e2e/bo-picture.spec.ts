@@ -158,6 +158,17 @@ test.describe("Bo's pictures: the bytes that would leave the browser", () => {
     }
   });
 
+  // A motion photo: a whole JPEG with a video appended, whose bytes can look like markers (the
+  // Reviewer, #210). Accepted, drawn from the image alone, and the video never leaves.
+  test("a motion photo: accepted, its own size, and nothing of the trailer in what would leave", async ({ page }) => {
+    const out = await prepare(page, `new Uint8Array([...(await jpeg(400, 300)), 0, 0, 0, 0x18, ...text("ftypmp42 MOTION-TRAILER"), 0xff, 0xda, 0, 9, 7, 0xff, 0xd9, 0xff, 0xda, 1, 2])`);
+    expect(out.ok).toBe(true);
+    expect(out.decoded).toEqual([400, 300]);
+    expect(out.segments).toEqual([]);
+    expect(out.text).not.toContain("MOTION-TRAILER");
+    expect(out.text).not.toContain("ftypmp42");
+  });
+
   // A cut-off file decodes in part, as a grey picture, so it's refused before any drawing
   // (app #228): "That picture couldn't be opened", and nothing is attached.
   test("a truncated JPEG with EXIF, a truncated one without, and a cut-off PNG: refused, never a grey picture", async ({ page }) => {

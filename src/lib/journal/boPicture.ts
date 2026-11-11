@@ -63,6 +63,59 @@ export function withoutMetadata(bytes: Uint8Array): Uint8Array<ArrayBuffer> | nu
 // grey picture, so the decoder alone never says it's unreadable (app #228, Bo window
 // 2026-11-09). JPEG needs its end marker after the last scan, PNG its whole IEND chunk,
 // WebP all the bytes its header counts. Other formats: the decoder decides.
+// Where a JPEG's image ends: just past its end-of-image marker, found by walking the file as a
+// decoder does, never by searching for bytes. Segments are skipped by their own lengths (so an
+// EXIF thumbnail's markers inside APP1 don't count), and each scan's compressed data up to the
+// next real marker (FF 00 is a stuffed byte, FF D0–D7 restarts). Progressive files have several
+// scans. Whatever follows the end, such as a motion photo's video, is a trailer, not the picture
+// (the Reviewer, #210; the same rule as the app's). null: cut off, or not a JPEG it can walk.
+export function jpegEnd(raw: Uint8Array): number | null {
+  if (raw.length < 4 || raw[0] !== 0xff || raw[1] !== 0xd8) return null;
+  let i = 2;
+  while (i + 1 < raw.length) {
+    if (raw[i] !== 0xff) return null;
+    const marker = raw[i + 1];
+    if (marker === 0xff) {
+      i += 1; // fill byte
+      continue;
+    }
+    if (marker === 0xd9) return i + 2;
+    if ((marker >= 0xd0 && marker <= 0xd7) || marker === 0x01) {
+      i += 2; // markers with no length
+      continue;
+    }
+    if (i + 3 >= raw.length) return null;
+    const length = (raw[i + 2] << 8) | raw[i + 3];
+    if (length < 2) return null;
+    const after = i + 2 + length;
+    if (after > raw.length) return null;
+    if (marker !== 0xda) {
+      i = after;
+      continue;
+    }
+    // A scan: its compressed data runs to the next marker that isn't stuffing or a restart.
+    let j = after;
+    for (;;) {
+      if (j + 1 >= raw.length) return null;
+      if (raw[j] === 0xff) {
+        const next = raw[j + 1];
+        if (next === 0x00 || (next >= 0xd0 && next <= 0xd7)) {
+          j += 2;
+          continue;
+        }
+        if (next === 0xff) {
+          j += 1;
+          continue;
+        }
+        break;
+      }
+      j += 1;
+    }
+    i = j;
+  }
+  return null;
+}
+
 export function pictureComplete(raw: Uint8Array): boolean {
   const at = (i: number, bytes: number[]) => i >= 0 && i + bytes.length <= raw.length && bytes.every((b, k) => raw[i + k] === b);
   const find = (bytes: number[], from = 0) => {
@@ -70,13 +123,8 @@ export function pictureComplete(raw: Uint8Array): boolean {
     return -1;
   };
   const ascii = (s: string) => [...s].map((c) => c.charCodeAt(0));
-  if (at(0, [0xff, 0xd8])) {
-    // The last scan: an EXIF thumbnail has its own scan and end marker early on, and
-    // scan data never holds FF DA (a 0xFF there is always stuffed).
-    let scan = -1;
-    for (let i = find([0xff, 0xda]); i >= 0; i = find([0xff, 0xda], i + 2)) scan = i;
-    return scan >= 0 && find([0xff, 0xd9], scan + 2) >= 0;
-  }
+  // A JPEG is whole when its image data ends properly, trailer or not (a motion photo).
+  if (at(0, [0xff, 0xd8])) return jpegEnd(raw) !== null;
   if (at(0, [0x89, 0x50, 0x4e, 0x47])) {
     // The IEND chunk whole: its type and the 4-byte CRC after it.
     const end = find(ascii("IEND"), 8);
@@ -104,9 +152,14 @@ export async function preparePicture(file: File): Promise<BoPicture> {
   let canvas: HTMLCanvasElement;
   try {
     // A cut-off file is never drawn: it would go as a grey picture.
-    if (!pictureComplete(new Uint8Array(await file.arrayBuffer()))) return { ok: false };
+    const raw = new Uint8Array(await file.arrayBuffer());
+    if (!pictureComplete(raw)) return { ok: false };
+    // A JPEG's trailer (a motion photo's video) is dropped before anything reads it: only the
+    // image goes on, with its own header (and so its orientation).
+    const end = jpegEnd(raw);
+    const image: Blob = end !== null && end < raw.length ? new Blob([raw.slice(0, end)], { type: "image/jpeg" }) : file;
     // Upright, by the file's own orientation, which goes with its metadata.
-    const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
+    const bitmap = await createImageBitmap(image, { imageOrientation: "from-image" });
     const scale = Math.min(1, BO_PICTURE_LONG_SIDE / Math.max(bitmap.width, bitmap.height));
     canvas = document.createElement("canvas");
     canvas.width = Math.max(1, Math.round(bitmap.width * scale));
