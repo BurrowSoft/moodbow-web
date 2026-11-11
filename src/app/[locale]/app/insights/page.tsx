@@ -7,7 +7,7 @@ import type { Locale } from "@/i18n/routing";
 import { JournalUnavailable } from "@/components/JournalUnavailable";
 import { SessionEnded } from "@/components/SessionEnded";
 import { currentUser } from "@/lib/journal/currentUser";
-import { isRange, previousRangeStart, rangeDays, series, type InsightRow, type Range } from "@/lib/journal/insights";
+import { isRange, METRICS, previousRangeStart, rangeDays, series, type InsightRow, type Range } from "@/lib/journal/insights";
 import { loadMilestone } from "@/lib/share/milestoneData";
 import { yearOnOffer } from "@/lib/share/year";
 import { aiShown, canReflect } from "@/lib/journal/ai";
@@ -19,8 +19,11 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { YourWeekCard } from "./YourWeekCard";
 import { tabMetadata } from "../pageMeta";
 import { InsightsView } from "./InsightsView";
-import { MorePatternsRow, WeekLine, YearTab } from "./PlusInsights";
+import { MorePatternsCard, MorePatternsRow, PlusTabs, WeekLine, YearTab } from "./PlusInsights";
 import { insightsOffer, plusPriceLabel, readPlusView } from "@/lib/plus/view";
+import { isLongRange, longRangeStart, longSummary } from "@/lib/plus/longRange";
+import { morePatterns, moreWindowStart } from "@/lib/plus/morePatterns";
+import { periodLine, readCheckInsSince, readWrittenDays } from "@/lib/plus/insightsData";
 import { ShareMonth } from "./ShareMonth";
 import { WeeklyReport } from "./WeeklyReport";
 
@@ -54,16 +57,33 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
   const withYourWeek = pageGate("your-week-live") !== "hidden";
   const chartsStart = previousRangeStart(me.today, range);
   const patternsStart = patternsWindowStart(me.today);
-  const { data, error } = await supabase
-    .from("check_ins")
-    .select("local_date, mood, sleep_hours, stress, exercise_minutes")
-    .gte("local_date", [chartsStart, ...(withPatterns ? [patternsStart] : []), ...(withYourWeek ? [lastWeekStart(me.today)] : [])].sort()[0])
-    .lte("local_date", me.today);
-  if (error) return <JournalUnavailable />;
+  const freeStart = [chartsStart, ...(withPatterns ? [patternsStart] : []), ...(withYourWeek ? [lastWeekStart(me.today)] : [])].sort()[0];
+  // Moodbow Plus (decision 246), read once: null when the row can't be read
+  // (then nothing about Plus at all). With Plus: Year and All time, and More
+  // patterns over the last 12 months (or all time on All time).
+  const plus = pageGate("plus") !== "hidden" ? await readPlusView(supabase, user.id) : null;
+  const hasPlus = plus?.kind === "plus";
+  const longRange = hasPlus && isLongRange(asked) ? asked : null;
+  const moreWindow = longRange === "all" ? "all" : "year";
+  let rows: InsightRow[];
+  if (hasPlus) {
+    // Year needs 24 months (its 12 and the 12 before); More patterns 12; All time everything.
+    const plusStart = longRange === "all" ? null : [freeStart, longRange ? longRangeStart(longRange, me.today)! : freeStart, moreWindowStart("year", me.today)!].sort()[0];
+    const read = await readCheckInsSince(supabase, plusStart, me.today);
+    if (!read) return <JournalUnavailable />;
+    rows = read;
+  } else {
+    const { data, error } = await supabase
+      .from("check_ins")
+      .select("local_date, mood, sleep_hours, stress, exercise_minutes")
+      .gte("local_date", freeStart)
+      .lte("local_date", me.today);
+    if (error) return <JournalUnavailable />;
+    rows = (data ?? []) as InsightRow[];
+  }
   // Share: the current month's moodbow (M10), where share cards are on; and,
   // where the 1.1 cards are on too (decision 169), this range's mood line
   // (the chart card) and the milestone reached, if any.
-  const rows = (data ?? []) as InsightRow[];
   const more = pageGate("share-cards-more") !== "hidden";
   const dateLocaleTag = dateLocale(locale, (await headers()).get("accept-language"), me.profile?.country ?? null);
   const share =
@@ -110,9 +130,23 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
     // Plus's quiet line goes under Your week, never under a hard week's help offer.
     hardWeek = result?.kind === "hard";
   }
-  // Moodbow Plus (decision 246): its locked items only for someone without
-  // Plus, none on a hard week, and nothing at all when the row can't be read.
-  const offer = insightsOffer(pageGate("plus") !== "hidden" ? await readPlusView(supabase, user.id) : null, hardWeek, plusPriceLabel(locale));
+  // Its locked items only for someone without Plus, none on a hard week. With
+  // Plus, the views are theirs and show on a hard week too, with no offer (UX).
+  const offer = insightsOffer(plus, hardWeek, plusPriceLabel(locale));
+  let long: React.ComponentProps<typeof InsightsView>["long"];
+  if (longRange) {
+    const firstCheckIn = rows.length > 0 ? rows[0].local_date : null;
+    const charts = {} as NonNullable<typeof long>["charts"];
+    for (const m of METRICS) charts[m] = longSummary(rows, me.today, longRange, m, firstCheckIn);
+    const { unit, periods } = longSummary(rows, me.today, longRange, "mood", firstCheckIn);
+    long = { range: longRange, unit, periodLine: periodLine(periods[0].start, periods[periods.length - 1].end, dateLocaleTag), charts };
+  }
+  let plusMore: React.ReactNode = null;
+  if (hasPlus && withPatterns) {
+    const written = await readWrittenDays(supabase, moreWindowStart(moreWindow, me.today), me.today);
+    // A failed read of the days written: the card without that line, never a guess.
+    plusMore = <MorePatternsCard window={moreWindow} patterns={morePatterns(rows, me.today, moreWindow, written ?? new Set()).filter((p) => written || p.id !== "writing")} />;
+  }
   return (
     <InsightsView
       rows={rows}
@@ -131,8 +165,9 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
       }
       week={week}
       patterns={withPatterns ? patterns(rows, me.today) : undefined}
-      plusTab={offer && <YearTab offer={offer} />}
-      plusPatterns={offer && withPatterns && <MorePatternsRow offer={offer} />}
+      plusTab={hasPlus ? <PlusTabs current={longRange} /> : offer && <YearTab offer={offer} />}
+      plusPatterns={hasPlus ? plusMore : offer && withPatterns && <MorePatternsRow offer={offer} />}
+      long={long}
     />
   );
 }
