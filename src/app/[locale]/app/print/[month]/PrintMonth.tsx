@@ -42,7 +42,8 @@ export function PrintMonth({ month, title, days, dateLocaleTag, country }: { mon
         <GetHelpNow country={country} testId="print-get-help" neutral />
       </div>
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-3xl font-medium tracking-tight">{title}</h1>
+        {/* At most 36 px on a phone (decision 231) and never wider than the page (Web Tester, #274). */}
+        <h1 className="min-w-0 text-3xl font-medium tracking-tight [overflow-wrap:anywhere] max-sm:[font-size:min(1.875rem,max(11.25vw,36px))]">{title}</h1>
         <button
           type="button"
           data-testid="print-button"
@@ -101,7 +102,9 @@ export function PrintMonth({ month, title, days, dateLocaleTag, country }: { mon
   // printed page in space of its own, so "Moodbow · {month}" never covers a
   // page's last lines (a fixed footer would; reviewer #96). Not on screen.
   return (
-    <table role="presentation" data-testid="print-month" className="w-full border-collapse print:text-[11pt]">
+    // table-fixed: an automatic table grows to its widest word, which at 300 % on a 320 px
+    // phone carried the help button 43 px past the screen (Web Tester, #274).
+    <table role="presentation" data-testid="print-month" className="w-full table-fixed border-collapse print:text-[11pt]">
       <tfoot className="hidden print:table-footer-group">
         <tr>
           <td className="pt-6 text-center text-[9pt]" data-testid="print-footer">
