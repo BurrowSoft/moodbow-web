@@ -48,9 +48,11 @@ describe("PlusScreen: the table scrolls, the footer never does", () => {
 
   it("today's free ranges and patterns are Free; what Plus adds is Plus only; the AI rows only with AI", () => {
     show({ kind: "free", trial: true });
-    expect(within(screen.getByTestId("plus-row-rowRanges")).getByRole("img", { name: m.included })).toBeInTheDocument();
-    expect(within(screen.getByTestId("plus-row-rowPatterns")).getByRole("img", { name: m.included })).toBeInTheDocument();
-    expect(within(screen.getByTestId("plus-row-rowYear")).getByRole("img", { name: m.plusOnly })).toBeInTheDocument();
+    // The Free column's cell, then Plus's: free rows are Included in both.
+    const free = (row: string) => within(within(screen.getByTestId(`plus-row-${row}`)).getAllByRole("cell")[0]);
+    expect(free("rowRanges").getByRole("img", { name: m.included })).toBeInTheDocument();
+    expect(free("rowPatterns").getByRole("img", { name: m.included })).toBeInTheDocument();
+    expect(free("rowYear").getByRole("img", { name: m.plusOnly })).toBeInTheDocument();
     expect(screen.queryByTestId("plus-row-rowAiFree")).toBeNull();
     cleanup();
     show({ kind: "free", trial: true }, { aiShown: true });

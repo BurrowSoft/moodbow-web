@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { LockedItem, PlusLock, PlusSheet, type PlusOffer } from "@/components/plus/PlusSheet";
+import { LockedItem, PlusLock, PlusSheet, type PlusOffer } from "../PlusSheet";
 import { segment } from "@/lib/ui/journalLayout";
 
 // What Plus adds on Insights (decision 246; UX 11 Nov): Week, Month, 3 months
