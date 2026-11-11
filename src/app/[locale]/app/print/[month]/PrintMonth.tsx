@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { MomentStar } from "@/components/MomentStar";
+import { GetHelpNow } from "@/components/SafetyCard";
 import { dateLine } from "@/lib/journal/today";
 import type { PrintDay } from "@/lib/journal/printMonth";
 import { takePrintRequest } from "@/lib/journal/printOnce";
@@ -12,7 +13,7 @@ import { checkInChips } from "../../checkInChips";
 // ("Save as PDF" is built in). Nothing is uploaded or made on a server; the
 // page prints locally. The mood word carries the mood (no colours needed on
 // paper); entries print as written.
-export function PrintMonth({ month, title, days, dateLocaleTag }: { month: string; title: string; days: PrintDay[]; dateLocaleTag: string }) {
+export function PrintMonth({ month, title, days, dateLocaleTag, country }: { month: string; title: string; days: PrintDay[]; dateLocaleTag: string; country?: string | null }) {
   const t = useTranslations("timeline");
   const tt = useTranslations("today");
   const te = useTranslations("entry");
@@ -35,6 +36,11 @@ export function PrintMonth({ month, title, days, dateLocaleTag }: { month: strin
 
   const content = (
     <>
+      {/* Help on screen first, above a month of entries (the Reviewer, #273; UX):
+          hidden on paper. */}
+      <div className="mb-4 print:hidden">
+        <GetHelpNow country={country} testId="print-get-help" neutral />
+      </div>
       <div className="flex flex-wrap items-center justify-between gap-4">
         <h1 className="text-3xl font-medium tracking-tight">{title}</h1>
         <button
