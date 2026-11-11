@@ -71,7 +71,34 @@ function useTabLabelsFit() {
   return row;
 }
 
+// The phone bar's real height, as --tab-bar-h on <html>, so the journal's bottom padding (and the
+// Plus screen's box) clears the bar it has rather than a guess in rem: 7rem was 336 px at 300 %
+// text for a bar of about 170 (the Web Tester's long-language pass, UX 12 Nov). Only while the bar
+// is shown on a phone: hidden (the keyboard, a page that sets it aside) or the md sidebar leaves
+// the last value, and the CSS handles those cases itself.
+function useTabBarHeight() {
+  const nav = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const el = nav.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    const root = document.documentElement;
+    const measure = () => {
+      const height = el.getBoundingClientRect().height;
+      if (height > 0 && getComputedStyle(el).position === "fixed") root.style.setProperty("--tab-bar-h", `${Math.ceil(height)}px`);
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    return () => {
+      observer.disconnect();
+      root.style.removeProperty("--tab-bar-h");
+    };
+  }, []);
+  return nav;
+}
+
 export function AppNav() {
+  const bar = useTabBarHeight();
   const t = useTranslations("app");
   const tc = useTranslations("common");
   const pathname = usePathname();
@@ -96,9 +123,13 @@ export function AppNav() {
 
   return (
     <nav
+      ref={bar}
       aria-label={t("appName")}
       data-keyboard={keyboard || undefined}
-      className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-bg data-[keyboard]:max-md:hidden print:hidden md:static md:w-60 md:shrink-0 md:border-t-0 md:border-r md:px-4 md:py-6"
+      data-testid="app-nav"
+      // in-data-[tabs-aside]: a one-task page (the Plus screen at large text) sets the phone bar
+      // aside with <html data-tabs-aside>; it has its own Back.
+      className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-bg data-[keyboard]:max-md:hidden in-data-[tabs-aside]:max-md:hidden print:hidden md:static md:w-60 md:shrink-0 md:border-t-0 md:border-r md:px-4 md:py-6"
     >
       <div className="hidden px-3 pb-8 md:block">
         {/* Not "Today": that's the first tab right after it (a11y pass). */}

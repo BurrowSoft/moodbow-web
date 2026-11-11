@@ -92,6 +92,48 @@ describe("PlusScreen: the table scrolls, the footer never does", () => {
     expect(screen.getByTestId("plus-manage-store")).toHaveTextContent(m.manageApple);
   });
 
+  it("large text (the footer over 40 % of the screen): the page scrolls, the bar steps aside, only the price, the renewal line and the button stay pinned", () => {
+    vi.stubGlobal("ResizeObserver", class { observe() {} disconnect() {} });
+    const heights: Record<string, number> = { "plus-footer": 400, "plus-scroll": 60 };
+    const rect = vi.spyOn(Element.prototype, "getBoundingClientRect").mockImplementation(function (this: Element) {
+      return { height: heights[this.getAttribute("data-testid") ?? ""] ?? 0 } as DOMRect;
+    });
+    vi.stubGlobal("innerHeight", 640);
+    const { unmount } = show({ kind: "free", trial: true });
+    const footer = screen.getByTestId("plus-footer");
+    expect(screen.getByTestId("plus-screen")).toHaveAttribute("data-large");
+    expect(within(footer).getByTestId("plus-price")).toBeTruthy();
+    expect(within(footer).getByTestId("plus-renews")).toHaveTextContent(m.renews);
+    expect(within(footer).getByTestId("plus-start")).toBeTruthy();
+    expect(within(footer).queryByTestId("plus-not-now")).toBeNull();
+    expect(within(screen.getByTestId("plus-rest")).getByTestId("plus-not-now")).toBeTruthy();
+    expect(footer.className).toContain("sticky");
+    // One scroll for the page: the table's box is no longer a scroll area of its own.
+    expect(screen.getByTestId("plus-scroll")).not.toHaveAttribute("tabindex");
+    expect(document.documentElement).toHaveAttribute("data-tabs-aside");
+    unmount();
+    expect(document.documentElement).not.toHaveAttribute("data-tabs-aside");
+    rect.mockRestore();
+    vi.unstubAllGlobals();
+    vi.stubGlobal("fetch", fetchMock);
+  });
+
+  it("large text with Plus: nothing pinned; Manage at the end of the content", () => {
+    vi.stubGlobal("ResizeObserver", class { observe() {} disconnect() {} });
+    const heights: Record<string, number> = { "plus-footer": 205, "plus-scroll": 83 };
+    const rect = vi.spyOn(Element.prototype, "getBoundingClientRect").mockImplementation(function (this: Element) {
+      return { height: heights[this.getAttribute("data-testid") ?? ""] ?? 0 } as DOMRect;
+    });
+    vi.stubGlobal("innerHeight", 640);
+    show({ kind: "plus", source: "stripe", daysLeft: 5 });
+    expect(screen.getByTestId("plus-screen")).toHaveAttribute("data-large");
+    expect(screen.queryByTestId("plus-footer")).toBeNull();
+    expect(within(screen.getByTestId("plus-rest")).getByTestId("plus-manage")).toHaveTextContent(m.manage);
+    rect.mockRestore();
+    vi.unstubAllGlobals();
+    vi.stubGlobal("fetch", fetchMock);
+  });
+
   it("a failed renewal: the state line and Update card", () => {
     show({ kind: "past_due" });
     expect(screen.getByTestId("plus-footer")).toHaveTextContent(m.pastDue);
