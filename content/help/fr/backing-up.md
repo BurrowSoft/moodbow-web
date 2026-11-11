@@ -16,6 +16,6 @@ Vous pouvez commencer Moodbow dans l'app sans e-mail. Votre journal est enregist
 
 **Si l'e-mail a déjà un compte Moodbow :** vous pouvez utiliser un autre e-mail, ou vous connecter à ce compte. Le journal de ce téléphone ne peut pas y être transféré : **Se connecter plutôt** supprime définitivement le journal de ce téléphone (Moodbow vous le demande d'abord). Appuyez sur **Exporter d'abord** si vous voulez en garder une copie.
 
-**Journaux sans e-mail :** si vous n'ajoutez jamais d'e-mail et n'ouvrez pas l'app avec une connexion Internet pendant 12 mois, nous supprimons ce journal. Moodbow vous prévient un mois avant.
+**Journaux sans e-mail :** si vous n'ajoutez jamais d'e-mail et n'ouvrez pas l'app avec une connexion Internet pendant 12 mois, nous supprimons ce journal. Si les notifications de Moodbow sont activées, il vous prévient un mois avant.
 
 Sans e-mail, il n'y a pas de **Se déconnecter** dans **Moi**, car vous ne pourriez pas vous reconnecter. **Supprimer le compte** fonctionne normalement.
