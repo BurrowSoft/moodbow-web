@@ -1659,7 +1659,8 @@ test("large text, set in the browser: Write is in Today's first view at 320 px, 
     await page.setViewportSize({ width: 320, height: 640 });
     for (const percent of [100, 150, 300]) {
       const where = `${percent} %`;
-      await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
+      // Whole pixels: CDP refuses 19.5 (13 px at 150 %).
+      await cdp.send("Page.setFontSizes", { fontSizes: { standard: Math.round((16 * percent) / 100), fixed: Math.round((13 * percent) / 100) } });
       await page.goto("/app");
       await expect(page.getByTestId("checkin-card"), where).toBeVisible();
       // The card's own Write is always there, after it.
