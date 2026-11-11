@@ -50,8 +50,11 @@ jobs:
     # Playwright's own image, the exact version in package-lock.json: Chromium and its
     # system packages are already in it, so no apt step can stall or fail (security.ubuntu.com
     # didn't resolve on any runner for hours on 11 Nov). Bump it with @playwright/test.
+    # As the runner's own user (1001), Playwright's advice: as root, Next's SWC refused
+    # its cache in /github/home, which that user owns.
     container:
       image: mcr.microsoft.com/playwright:v1.63.0-noble
+      options: --user 1001
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -99,6 +102,7 @@ jobs:
     # As the smoke job: Playwright's own image, so there's no browser install at all.
     container:
       image: mcr.microsoft.com/playwright:v1.63.0-noble
+      options: --user 1001
     timeout-minutes: 20
     steps:
       - id: cfg
