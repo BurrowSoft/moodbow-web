@@ -66,6 +66,11 @@ describe("YearReviewView", () => {
     expect(screen.getByTestId("review-empty")).toHaveTextContent("There are no check-ins or entries in 2026.");
     expect(screen.queryByTestId("review-days")).toBeNull();
   });
+  it("movement's average counts a logged 0, and says so (the Reviewer, #275)", () => {
+    show({ ...review, factors: { ...review.factors, movement: 12.4 } });
+    expect(screen.getByTestId("review-factor-movement")).toHaveTextContent("Movement averaged 12 min a day, on the days you logged it.");
+  });
+
   it("a year without enough months for the mood chart: today's line", () => {
     show({ ...review, moodEnough: false });
     expect(screen.getByTestId("review-mood-not-enough")).toHaveTextContent(m.longNotEnough);

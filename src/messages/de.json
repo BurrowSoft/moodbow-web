@@ -672,7 +672,7 @@
     "reviewMoodCaption": "Deine durchschnittliche Stimmung, nach Monat",
     "reviewFactorsTitle": "Schlaf, Bewegung und Stress",
     "reviewSleep": "Du hast im Schnitt {hours} h pro Nacht geschlafen.",
-    "reviewMovement": "An Tagen mit eingetragener Bewegung waren es im Schnitt {minutes} min.",
+    "reviewMovement": "Bewegung lag im Schnitt bei {minutes} min am Tag, an den Tagen, an denen du sie eingetragen hast.",
     "reviewStress": "Dein Stress lag im Schnitt bei {stress} von 5.",
     "reviewNotEnough": "{year} nicht oft genug eingetragen, um es zu zeigen.",
     "reviewWritingTitle": "Schreiben",

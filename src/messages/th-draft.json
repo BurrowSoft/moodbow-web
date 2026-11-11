@@ -1511,7 +1511,7 @@
   },
   {
     "key": "plus.reviewMovement",
-    "en": "On days you logged movement, it averaged {minutes} min.",
+    "en": "Movement averaged {minutes} min a day, on the days you logged it.",
     "reason": "UX draft (native read pending)"
   },
   {

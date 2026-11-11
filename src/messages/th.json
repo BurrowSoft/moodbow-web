@@ -672,7 +672,7 @@
     "reviewMoodCaption": "อารมณ์เฉลี่ยของคุณ รายเดือน",
     "reviewFactorsTitle": "การนอน การเคลื่อนไหว และความเครียด",
     "reviewSleep": "คุณนอนเฉลี่ย {hours} ชม. ต่อคืน",
-    "reviewMovement": "ในวันที่คุณบันทึกการเคลื่อนไหว เฉลี่ย {minutes} นาที",
+    "reviewMovement": "การเคลื่อนไหวเฉลี่ย {minutes} นาทีต่อวัน ในวันที่คุณบันทึก",
     "reviewStress": "ความเครียดเฉลี่ย {stress} จาก 5",
     "reviewNotEnough": "บันทึกในปี {year} ไม่บ่อยพอที่จะแสดง",
     "reviewWritingTitle": "การเขียน",

@@ -672,7 +672,7 @@
     "reviewMoodCaption": "Tu estado de ánimo medio, por mes",
     "reviewFactorsTitle": "Sueño, movimiento y estrés",
     "reviewSleep": "Dormiste una media de {hours} h por noche.",
-    "reviewMovement": "Los días que registraste movimiento, la media fue de {minutes} min.",
+    "reviewMovement": "El movimiento fue de {minutes} min al día de media, los días que lo registraste.",
     "reviewStress": "Tu estrés fue de {stress} de 5 de media.",
     "reviewNotEnough": "No se registró lo suficiente en {year} para mostrarlo.",
     "reviewWritingTitle": "Escritura",
