@@ -56,7 +56,8 @@ describe("JournalPdf: the journal", () => {
     expect(cover).toHaveTextContent("October 2026");
     expect(screen.getByTestId("pdf-counts")).toHaveTextContent("1 day with a check-in · 3 entries");
     expect(screen.getAllByTestId("print-entry").map((e) => e.textContent)).toEqual(["A walk.", "Rain.", "Tea."]);
-    expect(screen.getByTestId("print-day-2026-10-03")).toHaveTextContent(messages.entry.momentBadge);
+    // The star is an icon named "Moment" (MomentStar), not text.
+    expect(within(screen.getByTestId("print-day-2026-10-03")).getByRole("img", { name: messages.entry.momentBadge })).toBeInTheDocument();
     const help = screen.getByTestId("pdf-help");
     expect(help).toHaveTextContent(m.pdfHelp);
     expect(help.compareDocumentPosition(screen.getByTestId("print-day-2026-10-05")) & Node.DOCUMENT_POSITION_PRECEDING).toBeTruthy();
