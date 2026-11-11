@@ -12,9 +12,13 @@ One server path for app and web: the Supabase edge function `bo`, called with th
 - `language`: the page's language (`pt` for pt-BR). Missing or malformed: the profile's locale, never a fallback to English.
 - `age`: the client's claim about the store's age answer: `adult`, `minor`, `unknown` (only where the store signal applies) or `not_applicable` (the web, and anywhere the signal doesn't apply). Missing or malformed: `unknown`, which fails closed, so send it every time. **A claim, not proof:** the store's answer stays on the device, which blocks the app itself. The server's own age fact is the self-declared `age_18` consent row.
 
-→ `200 { "available": false, "reason": "off", "pictures": false, "limits": { "max_chars": 2000 } }`
+→ `200 { "available": false, "reason": "off", "pictures": false, "pictures_reason": null, "help_country": "NZ", "limits": { "max_chars": 2000 } }`
+
+`help_country` is the region token's country once the server has verified it, on every status answer whatever the `reason` (an unlisted country included), or `null` with no good token. Both clients' cards show its numbers first, and never read a country from the token themselves (UX, 2026-11-09).
 
 `pictures` is true only when Bo is available and a picture would be taken now (022, `bo_pictures_available`): a confirmed email address, `bo_pictures_enabled` on, no pictures stop for the person, the month's spend under `bo_pictures_budget_fraction` of the budget, and the day's pictures under `bo_pictures_per_day` (5). Show the attach button only then. `send` checks all of it again.
+
+`pictures_reason` (024, `bo_pictures_reason`, UX 2026-11-09) is `"picture_limit"` only when `pictures` is false because today's pictures are used up; every other reason (no confirmed email, the switch off, a pictures stop, the budget share, no daily allowance) and a failed read are `null`, and stay silent. On `"picture_limit"`, show the `picture_limit` line where the attach button would be ("That's all of today's pictures. You can still write to Bo."). Always `null` when Bo isn't available. A client that ignores it keeps today's behaviour.
 
 `reason` is `null` when Bo is available, else the first switch that says no, in this order:
 
@@ -48,10 +52,11 @@ Stops such as the daily limit come back on `send`.
 
 → `200`
 ```json
-{ "reply": "…", "show_help": false, "open_card": false, "show_notice": false, "conversation_full": false }
+{ "reply": "…", "show_help": false, "open_card": false, "show_notice": false, "conversation_full": false, "help_country": "NZ" }
 ```
 - `show_help` and `open_card`: this turn is flagged. Never persist or log them, and keep them out of Sentry (rule 6(e)).
 - `show_notice`: show the "Bo is an AI" notice, then call the RPC `bo_notice_shown()` once it's really on screen, and only then, or the timer resets.
+- `help_country`: as status's, for the token sent with this message. A card opened from this reply prefers it to the last status's, so the line and the card name the same country (Reviewer, 2026-11-09).
 - `conversation_full: true`: the person is past the row cap, so nothing more is kept. Say the conversation is full and offer Clear, with Export first.
 - Render `reply` as plain text, with no tappable links.
 
@@ -67,10 +72,10 @@ Stops such as the daily limit come back on `send`.
 | `language_off` | 403 | The language isn't one Bo is evaluated in | A neutral message |
 | `age_off` | 403 | The age switch (see `status`) | A neutral message |
 | `bo_off` | 403 | The person turned Bo off | Offer it back in Me |
-| `bo_unavailable` | 403 | This account is stopped, by us or by Anthropic | A neutral message that never mentions a report or a reason; help stays reachable |
+| `bo_unavailable` | 403 | This account is stopped, by us or by Anthropic | "Bo isn't available right now" (UX, 2026-11-09): never a report or a reason; help stays reachable |
 | `needs_email` | 403 | Anonymous accounts are switched off (`bo_anon_enabled`) | Offer Back up |
 | `pictures_off` | 403 | Pictures aren't available | Kind message |
-| `pictures_need_email` | 403 | Pictures need an email account | Offer Back up |
+| `pictures_need_email` | 403 | Pictures need an email account | As `pictures_off`: "aren't available right now", with no push to add an email (UX, 2026-11-09) |
 | `in_progress` | 409 | Another send is running | Wait |
 | `rate_limited` | 429 | Too fast | Wait |
 | `daily_limit` | 429 | The day's messages are used | Friendly limit message |
@@ -80,7 +85,11 @@ Stops such as the daily limit come back on `send`.
 | `bo_failed` | 502 | The call or a check failed | Retry; the message stays on screen |
 
 ## Region token
-From the web's `GET /api/region`: `{ "token": "<payload>.<sig>" }` or `{ "token": null }`. The app caches it until `exp`. Anything but a 200 with JSON is no token. An exempt account needs no token. See `specs/bo-design.md` §7.
+From the web's `GET /api/region`: `{ "token": "<payload>.<sig>" }` or `{ "token": null }`. The app keeps it until 60 s before `exp`, then fetches a new one (UX, 2026-11-09). `bo_regions` holds two capital letters per country (a constraint, 023), each with a helpline in `countries.json` (a test).
+
+**The fixed line and the card (UX, 2026-11-09):** the token's country first, where the person is. The server's line says "see who you can call" if that country has a helpline, else if Me's has one. The client's card shows `help_country`'s numbers first (from status), and Me's below under its name when the two differ. With no `help_country`, Me's alone.
+
+**A `bo_regions` write in config (no migration):** before it, each code in the new value is checked by hand for a helpline in `countries.json`; after it, the value is read back (UX, 2026-11-09). Anything but a 200 with JSON is no token. An exempt account needs no token. See `specs/bo-design.md` §7.
 
 ## What the server does on a send
 1. The crisis matcher on the text, in memory.
@@ -88,7 +97,7 @@ From the web's `GET /api/region`: `{ "token": "<payload>.<sig>" }` or `{ "token"
 3. The same key, then length.
 4. `bo_begin`. A `{stop}` with a match gets the fixed reply, kept, with no model call, except `ai_consent_required`.
 5. History from the database, the window plus up to 5 flagged messages, and the journal if the person's switch is on.
-6. The model, then the reply check, on every turn. **Never an unchecked reply.** The check says why it holds a reply. If an ordinary turn's reply (no match, no signal from the model) is held only for a promise of presence, a claim of having told someone, or a claimed feeling, the model is asked once more and its reply is checked again. If it's held again, or there's no time left in the 45 s, a plain line in the person's language is sent and kept: `show_help` and `open_card` false (UX, 2026-11-08). Clients see an ordinary reply, with nothing new to handle. On a match or the model's signal, the held reply gets the fixed reply and the card, as before.
+6. The model, then the reply check, on every turn. **Never an unchecked reply.** The check says why it holds a reply. If an ordinary turn's reply (no match, no signal from the model) is held only for a promise of presence, a claim of having told someone, or a claimed feeling, the model is asked once more and its reply is checked again. If it's held again, or there's no time left in the 45 s, a plain line in the person's language is sent and kept: `show_help` and `open_card` false (UX, 2026-11-08). Clients see an ordinary reply, with nothing new to handle. On a match or the model's signal, the held reply gets the fixed reply and the card, as before. The check says harm, medical or presence (S2, 2026-11-09). Harm always gets the fixed reply and the card. Presence now also covers a reply that raises danger, self-harm or emergencies when the person's message (and that a picture was sent) shows nothing of risk; with any hint of risk, even an indirect one, a help-pointing reply stays as written. Medical advice on an ordinary turn takes the same route with its own re-ask, and ends with thanks, the medical line and the question last ("Thanks for telling me. A doctor, nurse or pharmacist can help with this. Want to say more?", in Bo's four languages, in code). The presence re-ask also says not to raise danger, harm or emergencies the person hasn't raised. An unsafe check with no known kind is failed, never shown.
 7. On a match or the model's signal, the fixed help line is added in code.
 8. `bo_finish`: messages saved, request closed, real cost in `ai_spend_daily`.
 
