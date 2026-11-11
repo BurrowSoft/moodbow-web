@@ -125,6 +125,31 @@ body {
   overflow-wrap: break-word;
 }
 
+/* Headings, labels and buttons hyphenate in the page's language (<html lang>) instead of
+   splitting a long word with no hyphen at large text (the Web Tester's long-language pass,
+   UX 12 Nov: "environ-nement", "Dämme-rung"). Only words of 7 letters or more, with at
+   least 3 on each side, so short words such as "parler" stay whole (the help button's rule). */
+h1,
+h2,
+h3,
+h4,
+legend,
+label,
+button,
+summary {
+  hyphens: auto;
+  hyphenate-limit-chars: 7 3 3;
+}
+
+/* A call link's name may break anywhere rather than push the page sideways: a long name such
+   as "TelefonSeelsorge" in a narrow row (the safety plan, the help card, the help page). */
+a[href^="tel:"] {
+  overflow-wrap: anywhere;
+  /* Hyphenated first ("préven-tion"); anywhere is only for what can't be. */
+  hyphens: auto;
+  hyphenate-limit-chars: 7 3 3;
+}
+
 /* Browsers size a fieldset to its content: its rows couldn't wrap at large text. */
 fieldset {
   min-width: 0;
