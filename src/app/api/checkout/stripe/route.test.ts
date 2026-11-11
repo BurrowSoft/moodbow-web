@@ -2,7 +2,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 let gate = "draft";
-vi.mock("@/lib/conditions", () => ({ pageGate: () => gate }));
+vi.mock("@/lib/conditions", async (actual) => ({ ...(await actual<typeof import("@/lib/conditions")>()), pageGate: () => gate }));
 
 // The person's own entitlements row, as RLS lets them read it.
 let user: { id: string; email?: string } | null = { id: "u1", email: "a@example.com" };

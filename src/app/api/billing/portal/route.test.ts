@@ -2,7 +2,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 let gate = "draft";
-vi.mock("@/lib/conditions", () => ({ pageGate: () => gate }));
+vi.mock("@/lib/conditions", async (actual) => ({ ...(await actual<typeof import("@/lib/conditions")>()), pageGate: () => gate }));
 let user: { id: string } | null = { id: "u1" };
 let entitlement: { data: unknown; error: unknown } = { data: null, error: null };
 vi.mock("@/lib/supabase/server", () => ({
