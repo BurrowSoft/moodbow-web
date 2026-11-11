@@ -8,7 +8,7 @@ es-draft: true
 
 **Gratis:** registros y tu diario sin límite, la Cronología, el calendario y la búsqueda, la ayuda y tu plan de seguridad, lo que te ayuda, las cartas a tu yo futuro, el resumen para tu cita, Tu semana, Semana, Mes y 3 meses en Resumen, los patrones de los últimos 3 meses, exportar, importar y eliminar.
 
-**Plus añade:** tu año y todo el historial en Resumen, más patrones, el resumen del año, más temas y un PDF cuidado de tu diario.
+**Plus añade:** tu año y todo el historial en Resumen, más patrones, el resumen del año, más temas, un PDF cuidado de tu diario y una biblioteca de preguntas para escribir. Sus preguntas de «Días difíciles» son gratis para todos.
 
 **La semana gratis:** Plus empieza con 7 días gratis, una vez por persona. Después de los 7 días se convierte en una suscripción anual que se renueva cada año hasta que la canceles. Solo la empiezas tú, desde **Yo → Moodbow Plus**. Durante la semana gratis, Yo muestra cuántos días quedan.
 

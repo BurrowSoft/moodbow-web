@@ -8,7 +8,7 @@ fr-draft: true
 
 **Gratuit :** les bilans et votre journal sans limite, la Chronologie, le calendrier et la recherche, l'aide et votre plan de sécurité, ce qui vous aide, les lettres à vous-même, le résumé pour un rendez-vous, Votre semaine, Semaine, Mois et 3 mois dans Statistiques, les tendances sur les 3 derniers mois, l'export, l'import et la suppression.
 
-**Plus ajoute :** votre année et tout l'historique dans Statistiques, plus de tendances, le bilan de l'année, plus de thèmes et un PDF soigné de votre journal.
+**Plus ajoute :** votre année et tout l'historique dans Statistiques, plus de tendances, le bilan de l'année, plus de thèmes, un PDF soigné de votre journal et une bibliothèque de questions pour écrire. Ses questions « Jours difficiles » sont gratuites pour tous.
 
 **La semaine gratuite :** Plus commence par 7 jours gratuits, une seule fois par personne. Après ces 7 jours, il devient un abonnement annuel qui se renouvelle chaque année jusqu'à ce que vous l'annuliez. C'est vous seul qui le lancez, depuis **Moi → Moodbow Plus**. Pendant la semaine gratuite, Moi indique combien de jours il reste.
 

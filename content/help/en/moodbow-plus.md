@@ -7,7 +7,7 @@ topic: Privacy & account
 
 **Free:** check-ins and your journal with no limit, the Timeline, the calendar and search, help and your safety plan, things that help you, letters to future you, the appointment summary, Your week, Week, Month and 3 months in Insights, patterns over the last 3 months, export, import and delete.
 
-**Plus adds:** your year and all time in Insights, more patterns, Year in review, more themes, and a designed PDF of your journal.
+**Plus adds:** your year and all time in Insights, more patterns, Year in review, more themes, a designed PDF of your journal, and a prompt library to write from. Its Hard days prompts are free for everyone.
 
 **The free week:** Plus starts with 7 days free, once per person. After the 7 days it becomes a yearly subscription and renews each year until you cancel. You only start it yourself, from **Me → Moodbow Plus**. During the free week, Me shows how many days are left.
 

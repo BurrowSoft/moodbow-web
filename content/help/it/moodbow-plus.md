@@ -8,7 +8,7 @@ it-draft: true
 
 **Gratis:** check-in e il tuo diario senza limiti, la Cronologia, il calendario e la ricerca, l'aiuto e il tuo piano di sicurezza, ciò che ti aiuta, le lettere al te futuro, il riepilogo per l'appuntamento, La tua settimana, Settimana, Mese e 3 mesi in Andamento, gli andamenti degli ultimi 3 mesi, esportare, importare ed eliminare.
 
-**Plus aggiunge:** il tuo anno e tutto lo storico in Andamento, più andamenti, l'anno in sintesi, più temi e un PDF curato del tuo diario.
+**Plus aggiunge:** il tuo anno e tutto lo storico in Andamento, più andamenti, l'anno in sintesi, più temi, un PDF curato del tuo diario e una raccolta di domande per scrivere. Le domande di «Giornate difficili» sono gratis per tutti.
 
 **La settimana gratis:** Plus inizia con 7 giorni gratis, una volta per persona. Dopo i 7 giorni diventa un abbonamento annuale che si rinnova ogni anno finché non lo annulli. Lo avvii solo tu, da **Profilo → Moodbow Plus**. Durante la settimana gratis, Profilo mostra quanti giorni mancano.
 

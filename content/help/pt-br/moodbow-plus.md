@@ -8,7 +8,7 @@ pt-BR-draft: true
 
 **Grátis:** check-ins e seu diário sem limite, a Linha do tempo, o calendário e a busca, a ajuda e seu plano de segurança, o que ajuda você, as cartas para você no futuro, o resumo para a consulta, Sua semana, Semana, Mês e 3 meses em Insights, os padrões dos últimos 3 meses, exportar, importar e apagar.
 
-**O Plus acrescenta:** seu ano e todo o histórico em Insights, mais padrões, a retrospectiva do ano, mais temas e um PDF caprichado do seu diário.
+**O Plus acrescenta:** seu ano e todo o histórico em Insights, mais padrões, a retrospectiva do ano, mais temas, um PDF caprichado do seu diário e uma biblioteca de perguntas para escrever. As perguntas de "Dias difíceis" são grátis para todos.
 
 **A semana grátis:** o Plus começa com 7 dias grátis, uma vez por pessoa. Depois dos 7 dias, vira uma assinatura anual que renova todo ano até você cancelar. Só você começa, em **Perfil → Moodbow Plus**. Durante a semana grátis, o Perfil mostra quantos dias faltam.
 
