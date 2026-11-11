@@ -260,7 +260,13 @@
     "checkInConflictMine": "ของคุณ",
     "checkInConflictOther": "บันทึกไว้แล้ว",
     "checkInConflictKeepMine": "เก็บของฉัน",
-    "checkInConflictUseOther": "ใช้อันที่บันทึกไว้แล้ว"
+    "checkInConflictUseOther": "ใช้อันที่บันทึกไว้แล้ว",
+    "tagsLabel": "แท็ก",
+    "tagsPlaceholder": "เพิ่มแท็ก",
+    "tagsRecent": "แท็กของคุณ",
+    "tagsRemove": "ลบ {tag}",
+    "tagsTooMany": "สูงสุด 5 แท็กต่อวัน",
+    "tagsTooLong": "แท็กยาวได้สูงสุด 32 ตัวอักษร"
   },
   "entry": {
     "writeButton": "เขียนเล่าเรื่องราววันนี้",
@@ -397,7 +403,8 @@
     "exportExercise": "การเคลื่อนไหว",
     "exportStress": "ความเครียด",
     "exportOfFive": "{value}/5",
-    "exportReflectionOn": "สำหรับบันทึกวันที่ {date}"
+    "exportReflectionOn": "สำหรับบันทึกวันที่ {date}",
+    "exportTags": "แท็ก"
   },
   "help": {
     "helpTitle": "ความช่วยเหลือและคำถามที่พบบ่อย",

@@ -165,6 +165,15 @@ export function TimelineList({ initial, initialDone, momentsOnly, dateLocaleTag,
                       <span className="sr-only">{t("dayNoCheckin")}</span>
                     )}
                   </Link>
+                  {day.tags && day.tags.length > 0 && (
+                    <ul className="mt-2 flex flex-wrap gap-2" aria-label={tt("tagsLabel")} data-testid={`timeline-day-tags-${day.local_date}`}>
+                      {day.tags.map((tag) => (
+                        <li key={tag} className="inline-flex max-w-full items-center rounded-full border border-border px-3 py-0.5 text-sm text-text [overflow-wrap:anywhere]">
+                          {tag}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                   {day.entries.length > 0 && (
                     <ul className="mt-3 space-y-2">
                       {day.entries.map((entry) => (

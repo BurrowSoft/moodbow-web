@@ -260,7 +260,13 @@
     "checkInConflictMine": "Yours",
     "checkInConflictOther": "Already saved",
     "checkInConflictKeepMine": "Keep mine",
-    "checkInConflictUseOther": "Use the other one"
+    "checkInConflictUseOther": "Use the other one",
+    "tagsLabel": "Tags",
+    "tagsPlaceholder": "Add a tag",
+    "tagsRecent": "Your tags",
+    "tagsRemove": "Remove {tag}",
+    "tagsTooMany": "Up to 5 tags a day.",
+    "tagsTooLong": "A tag can be up to 32 characters."
   },
   "entry": {
     "writeButton": "Write about your day",
@@ -397,7 +403,8 @@
     "exportExercise": "Movement",
     "exportStress": "Stress",
     "exportOfFive": "{value}/5",
-    "exportReflectionOn": "On your entry of {date}"
+    "exportReflectionOn": "On your entry of {date}",
+    "exportTags": "Tags"
   },
   "help": {
     "helpTitle": "Help & FAQ",

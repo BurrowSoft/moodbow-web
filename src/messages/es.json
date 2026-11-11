@@ -260,7 +260,13 @@
     "checkInConflictMine": "El tuyo",
     "checkInConflictOther": "Ya guardado",
     "checkInConflictKeepMine": "Conservar el mío",
-    "checkInConflictUseOther": "Usar el otro"
+    "checkInConflictUseOther": "Usar el otro",
+    "tagsLabel": "Etiquetas",
+    "tagsPlaceholder": "Añade una etiqueta",
+    "tagsRecent": "Tus etiquetas",
+    "tagsRemove": "Quitar {tag}",
+    "tagsTooMany": "Hasta 5 etiquetas al día.",
+    "tagsTooLong": "Una etiqueta puede tener hasta 32 caracteres."
   },
   "entry": {
     "writeButton": "Escribe sobre tu día",
@@ -397,7 +403,8 @@
     "exportExercise": "Movimiento",
     "exportStress": "Estrés",
     "exportOfFive": "{value}/5",
-    "exportReflectionOn": "Sobre tu entrada del {date}"
+    "exportReflectionOn": "Sobre tu entrada del {date}",
+    "exportTags": "Etiquetas"
   },
   "help": {
     "helpTitle": "Ayuda y preguntas frecuentes",

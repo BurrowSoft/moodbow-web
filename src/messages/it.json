@@ -260,7 +260,13 @@
     "checkInConflictMine": "Il tuo",
     "checkInConflictOther": "Già salvato",
     "checkInConflictKeepMine": "Tieni il mio",
-    "checkInConflictUseOther": "Usa l'altro"
+    "checkInConflictUseOther": "Usa l'altro",
+    "tagsLabel": "Tag",
+    "tagsPlaceholder": "Aggiungi un tag",
+    "tagsRecent": "I tuoi tag",
+    "tagsRemove": "Rimuovi {tag}",
+    "tagsTooMany": "Fino a 5 tag al giorno.",
+    "tagsTooLong": "Un tag può avere fino a 32 caratteri."
   },
   "entry": {
     "writeButton": "Scrivi della tua giornata",
@@ -397,7 +403,8 @@
     "exportExercise": "Movimento",
     "exportStress": "Stress",
     "exportOfFive": "{value}/5",
-    "exportReflectionOn": "Sulla tua pagina del {date}"
+    "exportReflectionOn": "Sulla tua pagina del {date}",
+    "exportTags": "Tag"
   },
   "help": {
     "helpTitle": "Aiuto e domande frequenti",
