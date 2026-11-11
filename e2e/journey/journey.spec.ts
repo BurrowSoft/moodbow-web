@@ -1836,6 +1836,9 @@ test("keyboard: a time field shows its ring at every stop inside it, the picker 
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     await page.goto("/app/me");
     await expect(page.getByTestId("me-reminder-time")).toBeEnabled({ timeout: 15_000 });
+    // The section takes no input until the page's code has run (useUntilLoaded: inert, which
+    // toBeEnabled doesn't see), so a focus before that never lands: wait for it (#266, #286).
+    await expect(page.locator('section[aria-labelledby="me-reminder"]')).not.toHaveAttribute("inert", { timeout: 15_000 });
     await ringThroughout("me-reminder-time", "Me's reminder time");
   } finally {
     await cleanup(email);
