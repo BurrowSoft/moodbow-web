@@ -88,7 +88,12 @@ export function ToolboxEditor({ initial }: { initial: ToolboxItem[] }) {
   };
   const undo = async () => {
     if (!deleted || busy) return;
-    if (await apply(addToolboxItem(deleted.text, deleted.position))) setDeleted(null);
+    if (await apply(addToolboxItem(deleted.text, deleted.position))) {
+      setDeleted(null);
+      // Undo goes with the line it offered: the field to add takes focus, as after a delete
+      // (Web Tester, #265 M5), never the page.
+      addField.current?.focus();
+    }
   };
   const move = (item: ToolboxItem, step: -1 | 1) => !busy && void apply(moveToolboxItem(item.id, step));
 
