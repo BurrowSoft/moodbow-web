@@ -603,7 +603,8 @@
     "breatheOutCount": "Expire · {n}",
     "stop": "Parar",
     "breathEnd": "Foi um minuto. Vá no seu tempo.",
-    "done": "Concluído"
+    "done": "Concluído",
+    "breathSafety": "Se sentir tontura, pare e respire normalmente."
   },
   "safetyPlan": {
     "title": "Meu plano de segurança",

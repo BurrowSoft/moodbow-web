@@ -1268,5 +1268,10 @@
     "key": "safetyPlan.peopleFull",
     "en": "You can add up to 10 people here.",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.breathSafety",
+    "en": "If you feel dizzy, stop and breathe normally.",
+    "reason": "UX draft (native read pending)"
   }
 ]
