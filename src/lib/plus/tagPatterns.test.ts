@@ -60,6 +60,21 @@ describe("More patterns by tag (UX, 12 Nov)", () => {
     expect(tagPatterns(rows, TODAY, "all", byDay, CRISIS_KEYWORDS)[0]).toMatchObject({ a: { days: 10 }, b: { days: 10 } });
   });
 
+  it("one tag whatever its case, shown with its latest spelling (as my_recent_tags)", () => {
+    const { rows } = setup({});
+    const tagRows = [
+      ...range(0, 3).map((n) => ({ local_date: day(n + 3), tag: "work", created_at: `${day(n + 3)}T09:00:00Z` })),
+      ...range(0, 3).map((n) => ({ local_date: day(n), tag: "Work", created_at: `${day(n)}T09:00:00Z` })),
+    ];
+    const out = tagPatterns(rows, TODAY, "year", tagsByDayFrom(tagRows), CRISIS_KEYWORDS);
+    // 3 + 3 days: one tag with 6, which clears the 5 a side that neither spelling alone would.
+    expect(out).toHaveLength(1);
+    expect(out[0]).toMatchObject({ tag: "Work", a: { days: 6 } });
+    // The latest spelling wins whichever order the rows come in.
+    const reversed = tagPatterns(rows, TODAY, "year", tagsByDayFrom([...tagRows].reverse()), CRISIS_KEYWORDS);
+    expect(reversed[0].tag).toBe("Work");
+  });
+
   it("a day's tag counted once, even if it came twice", () => {
     const { rows } = setup({});
     const byDay = tagsByDayFrom([...range(0, 6), 0].map((n) => ({ local_date: day(n), tag: "walk" })));

@@ -38,9 +38,18 @@ export function tagPatterns(rows: InsightRow[], today: string, window: MoreWindo
   return out;
 }
 
-// The period's tags by day, from check_in_tags rows (the person's own, RLS).
-export function tagsByDayFrom(rows: readonly { local_date: string; tag: string }[]): Map<string, string[]> {
+// The period's tags by day, from check_in_tags rows (the person's own, RLS). One tag whatever its
+// case ("Work" and "work" are the same, as 029's unique index and my_recent_tags have it), shown
+// with its latest spelling: the most recently created row's (Reviewer, #285).
+export function tagsByDayFrom(rows: readonly { local_date: string; tag: string; created_at?: string | null }[]): Map<string, string[]> {
+  const latest = new Map<string, { tag: string; at: string }>();
+  for (const r of rows) {
+    const key = r.tag.toLowerCase();
+    const at = r.created_at ?? r.local_date;
+    const seen = latest.get(key);
+    if (!seen || at >= seen.at) latest.set(key, { tag: r.tag, at });
+  }
   const out = new Map<string, string[]>();
-  for (const r of rows) out.set(r.local_date, [...(out.get(r.local_date) ?? []), r.tag]);
+  for (const r of rows) out.set(r.local_date, [...(out.get(r.local_date) ?? []), latest.get(r.tag.toLowerCase())!.tag]);
   return out;
 }

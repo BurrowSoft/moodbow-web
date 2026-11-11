@@ -152,10 +152,10 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
     let tagLines: TagPattern[] = [];
     if (pageGate("tags-live") !== "hidden") {
       const start = moreWindowStart(moreWindow, me.today);
-      let query = supabase.from("check_in_tags").select("local_date, tag").lte("local_date", me.today);
+      let query = supabase.from("check_in_tags").select("local_date, tag, created_at").lte("local_date", me.today);
       if (start) query = query.gte("local_date", start);
       const { data: tagRows, error: tagError } = await query;
-      if (!tagError && tagRows) tagLines = tagPatterns(rows, me.today, moreWindow, tagsByDayFrom(tagRows as { local_date: string; tag: string }[]), CRISIS_KEYWORDS);
+      if (!tagError && tagRows) tagLines = tagPatterns(rows, me.today, moreWindow, tagsByDayFrom(tagRows as { local_date: string; tag: string; created_at: string | null }[]), CRISIS_KEYWORDS);
     }
     plusMore = <MorePatternsCard window={moreWindow} patterns={morePatterns(rows, me.today, moreWindow, written ?? new Set()).filter((p) => written || p.id !== "writing")} tags={tagLines} />;
   }
