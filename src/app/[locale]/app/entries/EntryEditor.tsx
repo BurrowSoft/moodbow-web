@@ -20,7 +20,6 @@ import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
 import { PRIMARY_SAVE } from "@/lib/ui/journalLayout";
 import { deleteEntry, getEntry, saveEntry, type DeleteState, type EntryState } from "./actions";
 import { PromptLibrary } from "./PromptLibrary";
-import type { PlusOffer } from "../PlusSheet";
 
 // The entry editor (M4): a full-page text area, a date (today or earlier)
 // and "Mark as a moment". A draft is autosaved in this browser, per user and
@@ -117,10 +116,10 @@ type Props = {
   // The screen's Back link: the editor's top row holds it, with Save beside
   // it on a narrow screen.
   back?: React.ReactNode;
-  // The prompt library (Plus wave 2), beside the day's prompt and only where it shows: { has }
-  // with Plus, { offer } without, null where Plus can't be read (its free group only); absent:
-  // not offered at all (the Plus flag).
-  library?: { has: true } | { offer: PlusOffer } | null;
+  // The prompt library (Plus wave 2), beside the day's prompt and only where it shows: true with
+  // Plus (all five groups), false without it or where Plus can't be read (the free group only;
+  // no lock or sheet while writing, UX); absent: not offered at all (the Plus flag).
+  library?: boolean;
 };
 
 const noSubscribe = () => () => {};
@@ -658,7 +657,7 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
           </button>
         </p>
       )}
-      {showPrompt && library !== undefined && <PromptLibrary uid={uid} country={country} plus={library} onUse={setChosenPrompt} />}
+      {showPrompt && library !== undefined && <PromptLibrary uid={uid} country={country} hasPlus={library} onUse={setChosenPrompt} />}
       <label className="sr-only" htmlFor="entry-text">
         {t("entryTextLabel")}
       </label>

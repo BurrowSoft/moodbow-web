@@ -1630,11 +1630,6 @@
     "reason": "UX draft (native read pending)"
   },
   {
-    "key": "plus.sheetPrompts",
-    "en": "The prompt library is part of Plus",
-    "reason": "UX draft (native read pending)"
-  },
-  {
     "key": "plus.rowPrompts",
     "en": "Prompt library",
     "reason": "UX draft (native read pending)"

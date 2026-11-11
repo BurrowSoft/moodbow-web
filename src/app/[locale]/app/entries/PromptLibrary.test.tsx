@@ -17,11 +17,10 @@ const { PromptLibrary } = await import("./PromptLibrary");
 const e = messages.entry;
 const hard = LIBRARY.find((g) => g.id === "hard-days")!;
 const noticing = LIBRARY.find((g) => g.id === "noticing")!;
-const OFFER = { offer: { trial: true, price: "US$59.99" } };
-const show = (plus: React.ComponentProps<typeof PromptLibrary>["plus"], onUse = vi.fn(), locale = "en", m: object = messages) => {
+const show = (hasPlus: boolean, onUse = vi.fn(), locale = "en", m: object = messages) => {
   render(
     <NextIntlClientProvider locale={locale} messages={m}>
-      <PromptLibrary uid="u1" country="NZ" plus={plus} onUse={onUse} />
+      <PromptLibrary uid="u1" country="NZ" hasPlus={hasPlus} onUse={onUse} />
     </NextIntlClientProvider>,
   );
   fireEvent.click(screen.getByTestId("entry-library-open"));
@@ -34,34 +33,40 @@ describe("the prompt library on Write (UX, 12 Nov)", () => {
   it("closed: one quiet link, Need a prompt?", () => {
     render(
       <NextIntlClientProvider locale="en" messages={messages}>
-        <PromptLibrary uid="u1" country="NZ" plus={OFFER} onUse={vi.fn()} />
+        <PromptLibrary uid="u1" country="NZ" hasPlus={false} onUse={vi.fn()} />
       </NextIntlClientProvider>,
     );
     expect(screen.getByTestId("entry-library-open")).toHaveTextContent(e.libraryOpen);
     expect(screen.queryByTestId("entry-library")).toBeNull();
   });
 
-  it("without Plus: the five groups in list order, Hard days open, the other four locked with the sheet", () => {
-    show(OFFER);
-    const groups = within(screen.getByTestId("entry-library")).getAllByRole("button");
-    expect(groups.map((b) => b.getAttribute("data-testid"))).toEqual(LIBRARY.map((g) => `entry-library-group-${g.id}`));
-    expect(screen.getByTestId("entry-library-group-hard-days")).not.toHaveAttribute("data-locked");
-    for (const id of ["noticing", "gratitude", "relationships", "ahead"]) expect(screen.getByTestId(`entry-library-group-${id}`)).toHaveAttribute("data-locked", "");
-    fireEvent.click(screen.getByTestId("entry-library-group-noticing"));
-    expect(screen.getByText(messages.plus.sheetPrompts)).toBeInTheDocument();
+  // Plus never appears while writing (UX, 12 Nov): no lock, no sheet, no Plus word on Write.
+  it("without Plus (or Plus unreadable): Hard days only, with no lock, no sheet and nothing about Plus", () => {
+    show(false);
+    const library = screen.getByTestId("entry-library");
+    expect(within(library).getAllByRole("button").map((b) => b.getAttribute("data-testid"))).toEqual(["entry-library-group-hard-days"]);
+    for (const id of ["noticing", "gratitude", "relationships", "ahead"]) expect(screen.queryByTestId(`entry-library-group-${id}`)).toBeNull();
+    expect(library.querySelector("[data-locked]")).toBeNull();
+    expect(screen.queryByTestId("plus-sheet")).toBeNull();
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(library).not.toHaveTextContent(messages.plus.lock);
+    fireEvent.click(screen.getByTestId("entry-library-group-hard-days"));
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(screen.getByTestId("entry-library")).not.toHaveTextContent(messages.plus.lock);
   });
 
   it("Hard days: its line and Get help now, then its first prompt", () => {
-    show(OFFER);
+    show(false);
     fireEvent.click(screen.getByTestId("entry-library-group-hard-days"));
     expect(screen.getByTestId("entry-library-intro")).toHaveTextContent(e.libraryHardDaysIntro);
     expect(screen.getByTestId("entry-library-help")).toHaveTextContent(messages.me.meGetHelpNow);
     expect(screen.getByTestId("entry-library-prompt")).toHaveTextContent(hard.prompts[0].en);
   });
 
-  it("with Plus: every group open; Another steps in list order and is remembered; Back goes to the groups", () => {
-    show({ has: true });
-    for (const g of LIBRARY) expect(screen.getByTestId(`entry-library-group-${g.id}`)).not.toHaveAttribute("data-locked");
+  it("with Plus: all five groups in list order; Another steps in list order and is remembered; Back goes to the groups", () => {
+    show(true);
+    const groups = within(screen.getByTestId("entry-library")).getAllByRole("button");
+    expect(groups.map((b) => b.getAttribute("data-testid"))).toEqual(LIBRARY.map((g) => `entry-library-group-${g.id}`));
     fireEvent.click(screen.getByTestId("entry-library-group-noticing"));
     expect(screen.queryByTestId("entry-library-help")).toBeNull();
     expect(screen.getByTestId("entry-library-prompt")).toHaveAttribute("data-prompt-id", "lib-noticing-1");
@@ -74,7 +79,7 @@ describe("the prompt library on Write (UX, 12 Nov)", () => {
   });
 
   it("Use this: the prompt goes above the box (the editor's), and the next one is where it starts next time", () => {
-    const onUse = show({ has: true });
+    const onUse = show(true);
     fireEvent.click(screen.getByTestId("entry-library-group-noticing"));
     fireEvent.click(screen.getByTestId("entry-library-use"));
     expect(onUse).toHaveBeenCalledWith(noticing.prompts[0].en);
@@ -82,14 +87,8 @@ describe("the prompt library on Write (UX, 12 Nov)", () => {
     expect(readPlace("u1", "noticing")).toBe(1);
   });
 
-  it("Plus unreadable: the free group only, never an offer", () => {
-    show(null);
-    const groups = within(screen.getByTestId("entry-library")).getAllByRole("button");
-    expect(groups.map((b) => b.getAttribute("data-testid"))).toEqual(["entry-library-group-hard-days"]);
-  });
-
   it("in the UI language: /pt-br reads pt", () => {
-    const onUse = show({ has: true }, vi.fn(), "pt-br", ptBr);
+    const onUse = show(true, vi.fn(), "pt-br", ptBr);
     expect(screen.getByTestId("entry-library-group-hard-days")).toHaveTextContent(ptBr.entry.libraryHardDays);
     fireEvent.click(screen.getByTestId("entry-library-group-hard-days"));
     expect(screen.getByTestId("entry-library-prompt")).toHaveTextContent(hard.prompts[0].pt!);
