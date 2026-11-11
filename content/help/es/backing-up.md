@@ -16,6 +16,6 @@ Puedes empezar a usar Moodbow en la app sin correo. Tu diario se guarda en una c
 
 **Si el correo ya tiene una cuenta de Moodbow:** puedes usar otro correo o iniciar sesión en esa cuenta. El diario de este teléfono no se puede pasar a ella: **Iniciar sesión** elimina para siempre el diario de este teléfono (Moodbow te pregunta antes). Toca **Exportar primero** si quieres conservar una copia.
 
-**Diarios sin correo:** si nunca añades un correo y no abres la app con conexión a internet durante 12 meses, eliminamos ese diario. Moodbow te avisa un mes antes.
+**Diarios sin correo:** si nunca añades un correo y no abres la app con conexión a internet durante 12 meses, eliminamos ese diario. Si las notificaciones de Moodbow están activadas, te avisa un mes antes.
 
 Sin correo no hay **Cerrar sesión** en **Yo**, porque no podrías volver a entrar. **Eliminar cuenta** funciona como siempre.
