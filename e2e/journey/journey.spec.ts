@@ -1832,6 +1832,11 @@ test("the prompt library by keyboard: focus follows each step, and Escape closes
     const group = page.getByTestId("entry-library-group-hard-days");
     const prompt = page.getByTestId("entry-library-prompt");
     await expect(open).toBeVisible({ timeout: 15_000 });
+    // Only once React has the button (it's server-rendered first): an Enter before hydration does
+    // nothing, which once failed this run on CI (#284 ce1e193), not the code.
+    await expect
+      .poll(() => open.evaluate((el) => Object.keys(el).some((key) => key.startsWith("__reactProps"))), { timeout: 15_000 })
+      .toBe(true);
     // Open → the first group.
     await open.focus();
     await page.keyboard.press("Enter");
