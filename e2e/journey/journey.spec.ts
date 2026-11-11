@@ -1685,3 +1685,37 @@ test("large text, set in the browser: Print this month stays inside a 320 px pho
     await cleanup(email);
   }
 });
+
+// Automated accessibility (UX, 2026-11-12): no serious or critical axe violation on the toolbox and breathing, at
+// 320 and 1280 px, in en and pt-BR (the longest). axe can't hear a screen reader: the rows stand.
+test("axe: the toolbox and breathing, at 320 and 1280 px", async ({ page }) => {
+  test.setTimeout(240_000);
+  const email = newEmail();
+  const password = newPassword();
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+      await setProfileLocale(email, password, saved);
+      await axeAtWidths(page, `toolbox (${saved})`, async () => {
+        await page.goto(`${route}/app/me/toolbox`);
+        await expect(page.getByTestId("toolbox-get-help")).toBeVisible();
+      });
+      await axeAtWidths(page, `breathing (${saved})`, async () => {
+        await page.goto(`${route}/app/me/toolbox`);
+        await expect(page.getByTestId("toolbox-get-help")).toBeVisible();
+          await page.getByTestId("toolbox-breathe").click();
+          await expect(page.getByTestId("breathing-stop")).toBeVisible();
+      });
+    }
+  } finally {
+    await cleanup(email);
+  }
+});
