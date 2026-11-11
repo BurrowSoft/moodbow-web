@@ -1688,3 +1688,58 @@ test("keyboard: a time field shows its ring at every stop inside it, the picker 
     await cleanup(email);
   }
 });
+
+// Write in the first view at large text (UX, 2026-11-12; the pilot checklist's known shortfall):
+// at 320 px / 300 % the check-in card runs to ~1,400 px, so Write is also offered under the date.
+// It shows only when the text is large for the screen (an em media query), never at 100 %; the
+// card and the Write button below it stay as they are.
+test("large text, set in the browser: Write is in Today's first view at 320 px, and only at large text", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
+  test.setTimeout(120_000);
+  const email = newEmail();
+  const password = newPassword();
+  const cdp = await page.context().newCDPSession(page);
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    await page.setViewportSize({ width: 320, height: 640 });
+    for (const percent of [100, 150, 300]) {
+      const where = `${percent} %`;
+      // Whole pixels: CDP refuses 19.5 (13 px at 150 %).
+      await cdp.send("Page.setFontSizes", { fontSizes: { standard: Math.round((16 * percent) / 100), fixed: Math.round((13 * percent) / 100) } });
+      await page.goto("/app");
+      await expect(page.getByTestId("checkin-card"), where).toBeVisible();
+      // The card's own Write is always there, after it.
+      await expect(page.getByTestId("today-write"), where).toHaveCount(1);
+      const top = page.getByTestId("today-write-top");
+      if (percent === 100) {
+        await expect(top, `${where}: no second Write`).toBeHidden();
+        continue;
+      }
+      await expect(top, where).toBeVisible();
+      await expect(top, where).toHaveText(messages.entry.writeButton);
+      const box = (await top.boundingBox())!;
+      const bar = (await page.getByRole("navigation", { name: messages.app.appName }).boundingBox())!;
+      // Measured first, so the log says what changed even when a check below fails.
+      const card = (await page.getByTestId("checkin-card").boundingBox())!;
+      const below = (await page.getByTestId("today-write").boundingBox())!;
+      console.log(`Today ${where}: Write at the top ${Math.round(box.y)}–${Math.round(box.y + box.height)} px; the card ${Math.round(card.y)}–${Math.round(card.y + card.height)} px; the Write below it at ${Math.round(below.y)} px; first view ends at ${Math.round(bar.y)} px`);
+      expect(box.y + box.height, `${where}: Write above the tab bar, in the first view`).toBeLessThanOrEqual(bar.y);
+      expect(box.x + box.width, `${where}: Write inside the width`).toBeLessThanOrEqual(320.5);
+      expect(box.height, `${where}: a big enough target`).toBeGreaterThanOrEqual(44);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth), `${where}: no sideways scroll`).toBeLessThanOrEqual(320);
+    }
+    // It opens the editor, as the other one does.
+    await page.getByTestId("today-write-top").click();
+    await expect(page.getByTestId("entry-text")).toBeVisible({ timeout: 15_000 });
+  } finally {
+    await cleanup(email);
+  }
+});
