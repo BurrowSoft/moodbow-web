@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { GetHelpNow } from "@/components/SafetyCard";
 import { groupOpen, LIBRARY, libraryPrompt, libraryText, readPlace, savePlace, type LibraryGroup } from "@/lib/journal/promptLibrary";
@@ -22,10 +22,39 @@ export function PromptLibrary({ uid, country, hasPlus, onUse }: { uid: string; c
   const [group, setGroup] = useState<LibraryGroup | null>(null);
   const [place, setPlace] = useState(0);
   const groups = LIBRARY.filter((g) => groupOpen(g, hasPlus));
+  // Each step unmounts the button that was pressed, so focus is put where the reader goes next
+  // (the Web Tester's keyboard walk, UX 12 Nov): opening → the first group; a group → its
+  // prompt; Back → the group they came from; Use this → the entry box; Escape → "Need a prompt?".
+  // An element id, focused after the render that shows it.
+  const focusNext = useRef<string | null>(null);
+  useEffect(() => {
+    if (!focusNext.current) return;
+    document.getElementById(focusNext.current)?.focus();
+    focusNext.current = null;
+  });
 
+  const openLibrary = () => {
+    focusNext.current = groups[0] ? `entry-library-group-${groups[0].id}` : null;
+    setOpen(true);
+  };
   const choose = (g: LibraryGroup) => {
+    focusNext.current = "entry-library-prompt";
     setGroup(g);
     setPlace(readPlace(uid, g.id));
+  };
+  const back = () => {
+    if (group) focusNext.current = `entry-library-group-${group.id}`;
+    setGroup(null);
+  };
+  // Not a dialog, but Escape closes it, as people expect.
+  const escape = (e: KeyboardEvent) => {
+    // Only from inside the library's own DOM: Get help now's card or dialog (a portal, whose
+    // events still bubble here through React) closes itself, not the library.
+    if (e.key !== "Escape" || e.defaultPrevented || !e.currentTarget.contains(e.target as Node)) return;
+    e.preventDefault();
+    focusNext.current = "entry-library-open";
+    setGroup(null);
+    setOpen(false);
   };
   const another = () => {
     if (!group) return;
@@ -38,13 +67,15 @@ export function PromptLibrary({ uid, country, hasPlus, onUse }: { uid: string; c
     onUse(libraryText(libraryPrompt(group, place), language));
     // The next one is where they'll start next time.
     savePlace(uid, group.id, (place + 1) % group.prompts.length);
+    // Where they'll write.
+    focusNext.current = "entry-text";
     setGroup(null);
     setOpen(false);
   };
 
   if (!open) {
     return (
-      <button type="button" data-testid="entry-library-open" onClick={() => setOpen(true)} className={`${LINK} ${CAPPED}`}>
+      <button type="button" id="entry-library-open" data-testid="entry-library-open" onClick={openLibrary} className={`${LINK} ${CAPPED}`}>
         {t("libraryOpen")}
       </button>
     );
@@ -53,7 +84,7 @@ export function PromptLibrary({ uid, country, hasPlus, onUse }: { uid: string; c
   if (group) {
     const prompt = libraryPrompt(group, place);
     return (
-      <section aria-labelledby="entry-library-group" data-testid="entry-library" data-group={group.id} className={`w-full space-y-2 rounded-2xl border border-border bg-surface p-[12px] ${CAPPED}`}>
+      <section aria-labelledby="entry-library-group" data-testid="entry-library" data-group={group.id} onKeyDown={escape} className={`w-full space-y-2 rounded-2xl border border-border bg-surface p-[12px] ${CAPPED}`}>
         <h2 id="entry-library-group" className="font-medium text-text">
           {t(GROUP_LABELS[group.id])}
         </h2>
@@ -65,7 +96,7 @@ export function PromptLibrary({ uid, country, hasPlus, onUse }: { uid: string; c
             <GetHelpNow country={country} testId="entry-library-help" neutral />
           </>
         )}
-        <p data-testid="entry-library-prompt" data-prompt-id={prompt.id} className="text-text [overflow-wrap:anywhere]">
+        <p id="entry-library-prompt" tabIndex={-1} data-testid="entry-library-prompt" data-prompt-id={prompt.id} className="text-text outline-none [overflow-wrap:anywhere]">
           {libraryText(prompt, language)}
         </p>
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
@@ -75,7 +106,7 @@ export function PromptLibrary({ uid, country, hasPlus, onUse }: { uid: string; c
           <button type="button" data-testid="entry-library-another" onClick={another} className={LINK}>
             {t("libraryAnother")}
           </button>
-          <button type="button" data-testid="entry-library-back" onClick={() => setGroup(null)} className={LINK}>
+          <button type="button" data-testid="entry-library-back" onClick={back} className={LINK}>
             {t("libraryBack")}
           </button>
         </div>
@@ -84,11 +115,11 @@ export function PromptLibrary({ uid, country, hasPlus, onUse }: { uid: string; c
   }
 
   return (
-    <section aria-label={t("libraryOpen")} data-testid="entry-library" className={`w-full rounded-2xl border border-border bg-surface p-[12px] ${CAPPED}`}>
+    <section aria-label={t("libraryOpen")} data-testid="entry-library" onKeyDown={escape} className={`w-full rounded-2xl border border-border bg-surface p-[12px] ${CAPPED}`}>
       <ul className="space-y-1">
         {groups.map((g) => (
           <li key={g.id}>
-            <button type="button" data-testid={`entry-library-group-${g.id}`} onClick={() => choose(g)} className={LINK}>
+            <button type="button" id={`entry-library-group-${g.id}`} data-testid={`entry-library-group-${g.id}`} onClick={() => choose(g)} className={LINK}>
               {t(GROUP_LABELS[g.id])}
             </button>
           </li>

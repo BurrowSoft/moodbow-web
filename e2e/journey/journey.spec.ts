@@ -1727,6 +1727,57 @@ test("axe: Plus's Year, All time and More patterns, at 320 and 1280 px", async (
   }
 });
 
+// The prompt library by keyboard (the Web Tester's walk, UX 12 Nov): each step unmounts the button
+// pressed, so focus goes where the reader goes next, never to <body>. Without Plus: Hard days only.
+test("the prompt library by keyboard: focus follows each step, and Escape closes it", async ({ page }) => {
+  test.setTimeout(120_000);
+  test.skip(!(await plusOnStaging()), "staging doesn't have 028's entitlements table yet: the library's Plus read can't run there");
+  const email = newEmail();
+  const password = newPassword();
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    await page.goto("/app/write");
+    const open = page.getByTestId("entry-library-open");
+    const group = page.getByTestId("entry-library-group-hard-days");
+    const prompt = page.getByTestId("entry-library-prompt");
+    await expect(open).toBeVisible({ timeout: 15_000 });
+    // Open → the first group.
+    await open.focus();
+    await page.keyboard.press("Enter");
+    await expect(group).toBeFocused();
+    // A group → its prompt, read first.
+    await page.keyboard.press("Enter");
+    await expect(prompt).toBeFocused();
+    // Back → the group they came from.
+    await page.getByTestId("entry-library-back").focus();
+    await page.keyboard.press("Enter");
+    await expect(group).toBeFocused();
+    // Escape, from the prompt → closed, on "Need a prompt?".
+    await page.keyboard.press("Enter");
+    await expect(prompt).toBeFocused();
+    await page.keyboard.press("Escape");
+    await expect(page.getByTestId("entry-library")).toHaveCount(0);
+    await expect(open).toBeFocused();
+    // Use this → the entry box, where they'll write.
+    await page.keyboard.press("Enter");
+    await page.keyboard.press("Enter");
+    await page.getByTestId("entry-library-use").focus();
+    await page.keyboard.press("Enter");
+    await expect(page.getByTestId("entry-library")).toHaveCount(0);
+    await expect(page.getByTestId("entry-text")).toBeFocused();
+  } finally {
+    await cleanup(email);
+  }
+});
+
 // Automated accessibility (UX, 2026-11-12): no serious or critical axe violation on the PDF journal page, at
 // 320 and 1280 px, in en and pt-BR. Skipped, saying so, until staging has 028's entitlements.
 test("axe: the PDF journal page, at 320 and 1280 px", async ({ page }) => {

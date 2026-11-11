@@ -87,6 +87,41 @@ describe("the prompt library on Write (UX, 12 Nov)", () => {
     expect(readPlace("u1", "noticing")).toBe(1);
   });
 
+  it("focus follows each step, never left on <body>; Escape closes it (the Web Tester's walk, UX 12 Nov)", () => {
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <textarea id="entry-text" data-testid="entry-text" />
+        <PromptLibrary uid="u1" country="NZ" hasPlus={true} onUse={vi.fn()} />
+      </NextIntlClientProvider>,
+    );
+    fireEvent.click(screen.getByTestId("entry-library-open"));
+    expect(document.activeElement).toBe(screen.getByTestId("entry-library-group-noticing"));
+    fireEvent.click(screen.getByTestId("entry-library-group-gratitude"));
+    expect(document.activeElement).toBe(screen.getByTestId("entry-library-prompt"));
+    fireEvent.click(screen.getByTestId("entry-library-back"));
+    expect(document.activeElement).toBe(screen.getByTestId("entry-library-group-gratitude"));
+    fireEvent.keyDown(screen.getByTestId("entry-library-group-gratitude"), { key: "Escape" });
+    expect(screen.queryByTestId("entry-library")).toBeNull();
+    expect(document.activeElement).toBe(screen.getByTestId("entry-library-open"));
+    fireEvent.click(screen.getByTestId("entry-library-open"));
+    fireEvent.click(screen.getByTestId("entry-library-group-noticing"));
+    fireEvent.keyDown(screen.getByTestId("entry-library-prompt"), { key: "Escape" });
+    expect(document.activeElement).toBe(screen.getByTestId("entry-library-open"));
+    fireEvent.click(screen.getByTestId("entry-library-open"));
+    fireEvent.click(screen.getByTestId("entry-library-group-noticing"));
+    fireEvent.click(screen.getByTestId("entry-library-use"));
+    expect(document.activeElement).toBe(screen.getByTestId("entry-text"));
+  });
+
+  it("Escape in Get help now's card (a portal) closes the card, not the library", () => {
+    show(false);
+    fireEvent.click(screen.getByTestId("entry-library-group-hard-days"));
+    fireEvent.click(screen.getByTestId("entry-library-help"));
+    const card = screen.getByTestId("safety-card");
+    fireEvent.keyDown(card, { key: "Escape" });
+    expect(screen.getByTestId("entry-library")).toHaveAttribute("data-group", "hard-days");
+  });
+
   it("in the UI language: /pt-br reads pt", () => {
     const onUse = show(true, vi.fn(), "pt-br", ptBr);
     expect(screen.getByTestId("entry-library-group-hard-days")).toHaveTextContent(ptBr.entry.libraryHardDays);
