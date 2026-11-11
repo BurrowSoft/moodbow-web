@@ -1643,10 +1643,12 @@ test("large text, set in the browser: the appointment summary's title keeps its 
   const email = newEmail();
   const password = newPassword();
   const cdp = await page.context().newCDPSession(page);
+  // A line may break after a hyphen ("rendez-" / "vous", as French does at any
+  // size), never inside a part.
   const splitWords = (el: Element) => {
     if (!el.isConnected) return null;
     const text = el.firstChild!;
-    return [...(text.textContent ?? "").matchAll(/\S+/g)]
+    return [...(text.textContent ?? "").matchAll(/[^\s-]+-?/g)]
       .filter((word) => {
         const range = document.createRange();
         range.setStart(text, word.index);
