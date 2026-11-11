@@ -41,11 +41,16 @@ export type BoError = (typeof BO_ERRORS)[number];
 // Every error renders with help on screen. no_answer: offline, a gateway's own page
 // or a timeout, so the client's fixed text, with help and Retry; the same client_key
 // is resent, and the function replays the stored answer if it had finished.
-export type BoSend = { status: "ok"; reply: string; showHelp: boolean; openCard: boolean; showNotice: boolean; conversationFull: boolean } | { status: "error"; code: BoError } | { status: "no_answer" };
+// helpCountry (status and send): the region token's country once the server verified it, two
+// capital letters, else absent. The card shows its numbers first (UX, 2026-11-09; bo.md).
+export type BoSend = { status: "ok"; reply: string; showHelp: boolean; openCard: boolean; showNotice: boolean; conversationFull: boolean; helpCountry?: string } | { status: "error"; code: BoError } | { status: "no_answer" };
 // Why Bo isn't available: the first switch that says no, in the contract's order (bo.md).
 export const BO_REASONS = ["off", "region_off", "region_unknown", "language_off", "age", "budget", "bo_off", "consent"] as const;
 export type BoReason = (typeof BO_REASONS)[number];
-export type BoStatus = { status: "ok"; available: boolean; reason: BoReason | null; pictures: boolean; maxChars: number } | { status: "error"; code: BoError } | { status: "no_answer" };
+export type BoStatus = { status: "ok"; available: boolean; reason: BoReason | null; pictures: boolean; maxChars: number; helpCountry?: string } | { status: "error"; code: BoError } | { status: "no_answer" };
+
+// Only ever a country the server verified, and only in the contract's shape.
+export const boHelpCountry = (c: unknown): { helpCountry?: string } => (typeof c === "string" && /^[A-Z]{2}$/.test(c) ? { helpCountry: c } : {});
 
 // What each reason shows (bo.md's Client column): the button only where Bo is available, its
 // budget is spent (the line, with help) or it needs consent (the button opens consent).
@@ -66,15 +71,15 @@ export function parseBoSend(data: unknown): BoSend {
   const d = (data ?? {}) as Record<string, unknown>;
   // Plain text only, as the contract says; a reply that isn't one is never shown.
   if (typeof d.reply !== "string" || d.reply === "") return { status: "no_answer" };
-  return { status: "ok", reply: d.reply, showHelp: d.show_help === true, openCard: d.open_card === true, showNotice: d.show_notice === true, conversationFull: d.conversation_full === true };
+  return { status: "ok", reply: d.reply, showHelp: d.show_help === true, openCard: d.open_card === true, showNotice: d.show_notice === true, conversationFull: d.conversation_full === true, ...boHelpCountry(d.help_country) };
 }
 
 export function parseBoStatus(data: unknown): BoStatus {
-  const d = (data ?? {}) as { available?: unknown; reason?: unknown; pictures?: unknown; limits?: { max_chars?: unknown } };
+  const d = (data ?? {}) as { available?: unknown; reason?: unknown; pictures?: unknown; help_country?: unknown; limits?: { max_chars?: unknown } };
   if (typeof d.available !== "boolean") return { status: "no_answer" };
   // A no without a reason this client knows is read as off: never more than the function said.
   const reason = d.available ? null : (BO_REASONS as readonly unknown[]).includes(d.reason) ? (d.reason as BoReason) : "off";
-  return { status: "ok", available: d.available, reason, pictures: d.pictures === true, maxChars: typeof d.limits?.max_chars === "number" ? d.limits.max_chars : 2000 };
+  return { status: "ok", available: d.available, reason, pictures: d.pictures === true, maxChars: typeof d.limits?.max_chars === "number" ? d.limits.max_chars : 2000, ...boHelpCountry(d.help_country) };
 }
 
 // What this screen needs of a conversation: kept messages only, as plain text.

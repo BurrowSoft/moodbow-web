@@ -76,6 +76,9 @@ export function BoConversation({ initial, country, back, healthData = false, con
   const [card, setCard] = useState(false);
   // The page's read, and the function's answer on a send. The text stays, for after a yes.
   const [needsConsent, setNeedsConsent] = useState(!consented);
+  // Status's or the last reply's help_country: the card's first numbers, only ever a country the
+  // server verified (UX, 2026-11-09).
+  const [helpCountry, setHelpCountry] = useState<string | null>(null);
   // A retry of the same message keeps its key, so it can't be answered or saved twice.
   const attempt = useRef<{ key: string; text: string } | null>(null);
   const cardOpenedAt = useRef<number | null>(null);
@@ -141,6 +144,8 @@ export function BoConversation({ initial, country, back, healthData = false, con
   const showStatus = useCallback((status: BoStatus | { status: "no_answer" }) => {
     if (status.status === "ok") {
       setMaxChars(status.maxChars);
+      // Kept even when a switch says no: help is on this screen too.
+      setHelpCountry(status.helpCountry ?? null);
       setProblem(status.available ? null : boReasonProblem(status.reason));
     } else if (status.status === "error") {
       if (status.code === "not_authenticated") window.location.reload();
@@ -260,6 +265,9 @@ export function BoConversation({ initial, country, back, healthData = false, con
     // Send was off while it went, which dropped focus; back to the box, where the text is.
     requestAnimationFrame(() => box.current?.focus({ preventScroll: true }));
     if (answer.status === "ok") {
+      // The country this message was checked with beats the last status's, none included: the
+      // server's line then used Me's, and so does the card (Reviewer, 2026-11-09).
+      setHelpCountry(answer.helpCountry ?? null);
       if (answer.openCard) openCard();
       if (answer.showNotice) {
         setNoticeShows((n) => n + 1);
@@ -289,7 +297,7 @@ export function BoConversation({ initial, country, back, healthData = false, con
       <header ref={header} data-testid="bo-header" data-pinned={pinned ? "" : undefined} className={`flex flex-wrap items-center gap-x-[8px] gap-y-[4px] bg-bg py-[8px] ${pinned && !keyboard ? "sticky top-0 z-10" : ""}`}>
         {back && <div className="md:hidden">{back}</div>}
         <h1 ref={heading} tabIndex={-1} className="min-w-0 flex-1 font-medium leading-[1.33] text-text outline-none [font-size:min(1.5rem,max(10vw,24px,1rem))] [overflow-wrap:anywhere]">{t("screenLine")}</h1>
-        <GetHelpNow country={country} testId="bo-get-help" neutral />
+        <GetHelpNow country={country} where={helpCountry} testId="bo-get-help" neutral />
       </header>
       <p className="text-sm text-muted">
         {t("smallLine")}
@@ -370,7 +378,7 @@ export function BoConversation({ initial, country, back, healthData = false, con
           {keyboard && (
             <div ref={typingRow} data-testid="bo-typing-row" className="flex w-full flex-wrap items-center justify-between gap-x-[8px] gap-y-[2px]">
               <p className={`min-w-0 font-medium leading-tight text-text [overflow-wrap:anywhere] ${BO_END_TEXT}`}>{t("screenLine")}</p>
-              <GetHelpNow country={country} testId="bo-get-help-typing" className={BO_END_HELP} neutral />
+              <GetHelpNow country={country} where={helpCountry} testId="bo-get-help-typing" className={BO_END_HELP} neutral />
             </div>
           )}
           <textarea
@@ -396,10 +404,10 @@ export function BoConversation({ initial, country, back, healthData = false, con
           <p data-testid="bo-end-line" className={`min-w-0 font-medium leading-tight text-text [overflow-wrap:anywhere] ${BO_END_TEXT}`}>
             {t("screenLine")}
           </p>
-          <GetHelpNow country={country} testId="bo-get-help-end" className={BO_END_HELP} neutral />
+          <GetHelpNow country={country} where={helpCountry} testId="bo-get-help-end" className={BO_END_HELP} neutral />
         </div>
       )}
-      {card && <SafetyCard country={country} onClose={closeCard} />}
+      {card && <SafetyCard country={country} where={helpCountry} onClose={closeCard} />}
       <div ref={end} />
     </div>
   );

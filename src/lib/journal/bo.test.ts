@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { BO_ERROR_TEXT, BO_ERRORS, BO_REASONS, boButtonShows, boCanTurnOn, boReasonProblem, boSpeaks, type BoStatus } from "./bo";
+import { BO_ERROR_TEXT, BO_ERRORS, BO_REASONS, boButtonShows, boCanTurnOn, boReasonProblem, boSpeaks, parseBoSend, parseBoStatus, type BoStatus } from "./bo";
 import conditions from "../../../content/conditions.json";
 import messages from "@/messages/en.json";
 
@@ -62,5 +62,17 @@ describe("Bo's placeholders, in every language", () => {
     const held = Object.entries(bo).filter(([, v]) => v.includes("[Placeholder")).map(([k]) => k);
     if (met("bo-live")) expect(held.filter((k) => !k.startsWith("picture"))).toEqual([]);
     if (met("bo-pictures-live")) expect(held.filter((k) => k.startsWith("picture"))).toEqual([]);
+  });
+});
+
+// help_country: only ever two capital letters the server verified, else nothing (bo.md).
+describe("help_country on status and send", () => {
+  it("two capital letters: kept; anything else: absent", () => {
+    expect(parseBoStatus({ available: true, help_country: "TH" })).toMatchObject({ helpCountry: "TH" });
+    expect(parseBoSend({ reply: "Hi", help_country: "NZ" })).toMatchObject({ helpCountry: "NZ" });
+    for (const bad of ["th", "THA", "T1", "", 5, null, undefined]) {
+      expect(parseBoStatus({ available: false, reason: "region_off", help_country: bad })).not.toHaveProperty("helpCountry");
+      expect(parseBoSend({ reply: "Hi", help_country: bad })).not.toHaveProperty("helpCountry");
+    }
   });
 });

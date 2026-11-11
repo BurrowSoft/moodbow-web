@@ -286,3 +286,57 @@ describe("SafetyCard: a number to tap even with no profile country (UX, #269)", 
     expect([null, "", "th", "TH", "T1", "THA", "XX"].map(usableCountry)).toEqual([null, null, "TH", "TH", null, null, "XX"]);
   });
 });
+
+// Bo's card (UX, 2026-11-09; app #228): the country the server verified first, where the person
+// is, and Me's numbers below when they differ, each set under its country's name.
+describe("SafetyCard: where the person is, then Me's (Bo's help_country)", () => {
+  const withRequest = (country: string | null, ui: React.ReactNode) => wrap(<RequestCountryProvider country={country}>{ui}</RequestCountryProvider>);
+  const before = (a: HTMLElement, b: HTMLElement) => Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
+
+  it("verified TH, Me's NZ: Thailand's numbers first, then New Zealand's, each named once", () => {
+    wrap(<SafetyCard country="NZ" where="TH" onClose={() => {}} />);
+    expect(screen.getByTestId("safety-country")).toHaveTextContent("Thailand");
+    expect(screen.getByTestId("safety-call-helpline")).toHaveAttribute("href", "tel:1323");
+    expect(screen.getByTestId("safety-call-emergency")).toHaveAttribute("href", "tel:1669");
+    expect(screen.getByTestId("safety-also-country")).toHaveTextContent("New Zealand");
+    expect(screen.getByTestId("safety-also-call-helpline")).toHaveAttribute("href", "tel:1737");
+    expect(screen.getByTestId("safety-also-call-emergency")).toHaveAttribute("href", "tel:111");
+    expect(before(screen.getByTestId("safety-call-emergency"), screen.getByTestId("safety-also-country"))).toBe(true);
+    expect(screen.getAllByRole("heading", { level: 3 })).toHaveLength(2);
+    expect(screen.queryByTestId("safety-request-country")).toBeNull();
+  });
+
+  it("the same country: one set, unnamed, as without Bo", () => {
+    wrap(<SafetyCard country="th" where="TH" onClose={() => {}} />);
+    expect(screen.getByTestId("safety-call-helpline")).toHaveAttribute("href", "tel:1323");
+    expect(screen.queryByTestId("safety-country")).toBeNull();
+    expect(screen.queryByTestId("safety-also")).toBeNull();
+  });
+
+  it("a verified country with no numbers at all: Me's alone, never an empty set", () => {
+    wrap(<SafetyCard country="NZ" where="ZZ" onClose={() => {}} />);
+    expect(screen.getByTestId("safety-call-helpline")).toHaveAttribute("href", "tel:1737");
+    expect(screen.queryByTestId("safety-country")).toBeNull();
+    expect(screen.queryByTestId("safety-also")).toBeNull();
+  });
+
+  it("no verified country: as before", () => {
+    wrap(<SafetyCard country="NZ" where={null} onClose={() => {}} />);
+    expect(screen.getByTestId("safety-call-helpline")).toHaveAttribute("href", "tel:1737");
+    expect(screen.queryByTestId("safety-also")).toBeNull();
+  });
+
+  it("no profile country: the request's stands in for Me's, below the verified one", () => {
+    withRequest("NZ", <SafetyCard country={null} where="TH" onClose={() => {}} />);
+    expect(screen.getByTestId("safety-call-helpline")).toHaveAttribute("href", "tel:1323");
+    expect(screen.getByTestId("safety-also-country")).toHaveTextContent("New Zealand");
+    expect(screen.queryByTestId("safety-request-country")).toBeNull();
+  });
+
+  it("verified, with no country of Me's at all: the verified set alone, unnamed", () => {
+    withRequest(null, <SafetyCard country={null} where="TH" onClose={() => {}} />);
+    expect(screen.getByTestId("safety-call-helpline")).toHaveAttribute("href", "tel:1323");
+    expect(screen.queryByTestId("safety-country")).toBeNull();
+    expect(screen.queryByTestId("safety-also")).toBeNull();
+  });
+});
