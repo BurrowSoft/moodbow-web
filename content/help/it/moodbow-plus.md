@@ -18,4 +18,4 @@ it-draft: true
 
 **Se Plus finisce:** tutto ciò che hai scritto resta e tutte le funzioni gratuite continuano a funzionare. Le viste Plus si bloccano di nuovo e il tuo tema torna a quello predefinito. Non viene eliminato nulla.
 
-**Eliminare il tuo account** annulla subito Plus acquistato sul web. Se l'hai acquistato in Google Play o nell'App Store, annullalo anche lì: eliminare l'account non interrompe l'abbonamento dello store.{/pending}
+**Eliminare il tuo account** annulla subito Plus acquistato sul web. Se hai Plus tramite Google Play o l'App Store, annullalo anche lì: eliminare l'account non interrompe l'abbonamento dello store.{/pending}

@@ -18,4 +18,4 @@ es-draft: true
 
 **Si Plus termina:** todo lo que escribiste se queda, y todas las funciones gratis siguen funcionando. Las vistas de Plus se bloquean de nuevo y tu tema vuelve al predeterminado. No se borra nada.
 
-**Eliminar tu cuenta** cancela al instante Plus comprado en la web. Si lo compraste en Google Play o la App Store, cancélalo también allí: eliminar tu cuenta no detiene la suscripción de la tienda.{/pending}
+**Eliminar tu cuenta** cancela al instante Plus comprado en la web. Si tienes Plus a través de Google Play o la App Store, cancélalo también allí: eliminar tu cuenta no detiene la suscripción de la tienda.{/pending}

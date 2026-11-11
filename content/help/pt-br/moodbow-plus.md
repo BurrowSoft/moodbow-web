@@ -18,4 +18,4 @@ pt-BR-draft: true
 
 **Se o Plus terminar:** tudo o que você escreveu continua, e todos os recursos grátis seguem funcionando. As telas do Plus ficam bloqueadas de novo e seu tema volta ao padrão. Nada é apagado.
 
-**Apagar sua conta** cancela na hora o Plus comprado na web. Se você comprou no Google Play ou na App Store, cancele lá também: apagar sua conta não interrompe a assinatura da loja.{/pending}
+**Apagar sua conta** cancela na hora o Plus comprado na web. Se você tem o Plus pelo Google Play ou pela App Store, cancele lá também: apagar sua conta não interrompe a assinatura da loja.{/pending}

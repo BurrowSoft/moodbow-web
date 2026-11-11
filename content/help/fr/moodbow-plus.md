@@ -18,4 +18,4 @@ fr-draft: true
 
 **Si Plus se termine :** tout ce que vous avez écrit reste, et toutes les fonctions gratuites continuent de marcher. Les vues Plus se verrouillent à nouveau, et votre thème revient à celui par défaut. Rien n'est supprimé.
 
-**Supprimer votre compte** annule tout de suite Plus acheté sur le web. Si vous l'avez acheté dans Google Play ou l'App Store, annulez-le aussi là-bas : supprimer votre compte n'arrête pas l'abonnement de la boutique.{/pending}
+**Supprimer votre compte** annule tout de suite Plus acheté sur le web. Si vous avez Plus via Google Play ou l'App Store, annulez-le aussi là-bas : supprimer votre compte n'arrête pas l'abonnement de la boutique.{/pending}

@@ -18,4 +18,4 @@ de-draft: true
 
 **Wenn Plus endet:** alles, was du geschrieben hast, bleibt, und alle kostenlosen Funktionen laufen weiter. Die Plus-Ansichten werden wieder gesperrt, und dein Theme geht auf den Standard zurück. Nichts wird gelöscht.
 
-**Dein Konto zu löschen** kündigt im Web gekauftes Plus sofort. Wenn du es in Google Play oder im App Store gekauft hast, kündige es auch dort: Das Löschen deines Kontos beendet das Abo im Store nicht.{/pending}
+**Dein Konto zu löschen** kündigt im Web gekauftes Plus sofort. Wenn du Plus über Google Play oder den App Store hast, kündige es auch dort: Das Löschen deines Kontos beendet das Abo im Store nicht.{/pending}

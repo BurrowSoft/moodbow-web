@@ -17,4 +17,4 @@ topic: Privacy & account
 
 **If Plus ends:** everything you wrote stays, and every free feature keeps working. The Plus views lock again, and your theme goes back to the default. Nothing is deleted.
 
-**Deleting your account** cancels Plus bought on the web straight away. If you bought it in Google Play or the App Store, cancel it there too: deleting your account doesn't stop the store's subscription.{/pending}
+**Deleting your account** cancels Plus bought on the web straight away. If you have Plus through Google Play or the App Store, cancel it there too: deleting your account doesn't stop the store's subscription.{/pending}
