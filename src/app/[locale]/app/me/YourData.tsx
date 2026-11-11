@@ -19,8 +19,9 @@ const LINK_LABELS = { txt: "exportReadable", json: "exportData", csv: "exportCsv
 // and there are some: text = enforcement, as the Help article's
 // {pending:ai_live} clause (UX, the Web Tester's forced pass). csv: the
 // spreadsheet link (1.1 P, export-csv-live).
-export function YourData({ credits, uid, csv = false, ai = false }: { credits: number; uid: string; csv?: boolean; ai?: boolean }) {
+export function YourData({ credits, uid, csv = false, ai = false, plusSource = null }: { credits: number; uid: string; csv?: boolean; ai?: boolean; plusSource?: "stripe" | "play" | "apple" | null }) {
   const t = useTranslations("me");
+  const tp = useTranslations("plus");
   const tt = useTranslations("today");
   const locale = useLocale();
   const [exporting, startExport] = useTransition();
@@ -142,6 +143,13 @@ export function YourData({ credits, uid, csv = false, ai = false }: { credits: n
             {ai && credits > 0 && (
               <p className="font-medium text-text" data-testid="delete-credits">
                 {t("deleteCredits", { credits })}
+              </p>
+            )}
+            {/* Moodbow Plus (UX, #270): only to someone with that source. On the web a
+                Stripe subscription is cancelled with the account; a store's isn't. */}
+            {plusSource && (
+              <p className="font-medium text-text" data-testid="delete-plus">
+                {plusSource === "stripe" ? tp("deleteStripe") : tp("deleteStore")}
               </p>
             )}
             <button type="button" data-testid="delete-export-first" onClick={runExport} aria-disabled={exporting} className="max-w-full font-medium text-accent underline underline-offset-4 [overflow-wrap:anywhere] aria-disabled:opacity-60">

@@ -49,6 +49,8 @@ export function InsightsView({
   summary,
   week,
   patterns,
+  plusTab,
+  plusPatterns,
 }: {
   rows: InsightRow[];
   today: string;
@@ -57,6 +59,9 @@ export function InsightsView({
   summary?: React.ReactNode;
   week?: React.ReactNode;
   patterns?: Pattern[];
+  // Moodbow Plus's locked Year tab and More patterns row, for someone without Plus.
+  plusTab?: React.ReactNode;
+  plusPatterns?: React.ReactNode;
 }) {
   const t = useTranslations("insights");
   const tt = useTranslations("today");
@@ -92,6 +97,7 @@ export function InsightsView({
             {t(key)}
           </Link>
         ))}
+        {plusTab}
       </nav>
 
       {week}
@@ -138,6 +144,7 @@ export function InsightsView({
       </div>
 
       {patterns && <Patterns patterns={patterns} format={(v) => number.format(v)} />}
+      {plusPatterns}
     </section>
   );
 }

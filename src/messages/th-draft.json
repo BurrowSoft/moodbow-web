@@ -1033,5 +1033,280 @@
     "key": "me.meNoScript",
     "en": "The journal needs JavaScript. Turn it on in your browser to see your entries.",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.label",
+    "en": "Moodbow Plus",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.lock",
+    "en": "Plus",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.bannerTitle",
+    "en": "See the bigger picture",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.bannerBody",
+    "en": "Your year, more patterns, themes and a designed PDF of your journal.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.bannerClose",
+    "en": "Close for today",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.tryFree",
+    "en": "Try 7 days free",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.seePlus",
+    "en": "See Plus",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.thenPrice",
+    "en": "Then {price} a year",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.priceYear",
+    "en": "{price} a year",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.notNow",
+    "en": "Not now",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.sheetYear",
+    "en": "Your year is part of Plus",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.sheetMorePatterns",
+    "en": "More patterns are part of Plus",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.weekLine",
+    "en": "Want to look back further? Your year, more patterns and a designed PDF of your journal come with Plus.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.tabYear",
+    "en": "Year",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.morePatterns",
+    "en": "More patterns",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.morePatternsBody",
+    "en": "Time of day, your tags and activities, over longer periods",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.title",
+    "en": "Go deeper with your journal",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.titleHas",
+    "en": "You have Moodbow Plus",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.lead",
+    "en": "Your journal, help and your data stay free for everyone.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.tableCaption",
+    "en": "What's free and what comes with Plus",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.colFeature",
+    "en": "Feature",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.colFree",
+    "en": "Free",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.colPlus",
+    "en": "Plus",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.included",
+    "en": "Included",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.plusOnly",
+    "en": "Plus only",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.rowJournal",
+    "en": "Check-ins and journal, no limit",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.rowHelp",
+    "en": "Help, safety plan, toolbox",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.rowOwn",
+    "en": "Letters, appointment summary",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.rowRanges",
+    "en": "Your week, month and 3 months",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.rowPatterns",
+    "en": "Patterns over the last 3 months",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.rowData",
+    "en": "Export, import and delete",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.rowAiFree",
+    "en": "AI reflections, 3 a week",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.rowYear",
+    "en": "Your year and all time",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.rowMorePatterns",
+    "en": "More patterns",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.rowReview",
+    "en": "Year in review",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.rowThemes",
+    "en": "More themes and your own moods",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.rowPdf",
+    "en": "Designed PDF of your journal",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.rowAiPlus",
+    "en": "More AI reflections and a weekly AI report",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.footerTrial",
+    "en": "7 days free, then {price} a year",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.renews",
+    "en": "Renews automatically. Cancel anytime.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.startTrial",
+    "en": "Start my 7-day free trial",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.start",
+    "en": "Start Plus",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.manage",
+    "en": "Manage Plus",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.managePlay",
+    "en": "Manage it in Google Play",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.manageApple",
+    "en": "Manage it in the App Store",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.trialTitle",
+    "en": "Plus trial",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.trialLeft",
+    "en": "{n, plural, one {# day left} other {# days left}}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.trialDay",
+    "en": "Day {day} of 7",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.pastDue",
+    "en": "Your last payment didn't go through. Update your card to keep Plus.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.updateCard",
+    "en": "Update card",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.starting",
+    "en": "Starting your Plus…",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.onItsWay",
+    "en": "Your Plus is on its way. It can take a minute.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.needsEmail",
+    "en": "Add an email to your account first, so we can send your receipts.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.deleteStripe",
+    "en": "Your Moodbow Plus subscription will be cancelled now. You won't be charged again.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.deleteStore",
+    "en": "If you have Moodbow Plus through Google Play or the App Store, cancel it there too. Deleting your account doesn't stop the store's subscription.",
+    "reason": "UX draft (native read pending)"
   }
 ]
