@@ -1,5 +1,5 @@
 ---
-title: Moodbow Plus
+title: Informazioni su Moodbow Plus
 summary: Cosa è gratis, cosa aggiunge Plus, la settimana gratis e come annullare.
 topic: Privacy & account
 it-draft: true

@@ -1,5 +1,5 @@
 ---
-title: Themes
+title: Themes und Farben
 summary: Ändere die Farben von Moodbow auf diesem Gerät.
 topic: Settings
 de-draft: true

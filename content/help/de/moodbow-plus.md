@@ -1,5 +1,5 @@
 ---
-title: Moodbow Plus
+title: Über Moodbow Plus
 summary: Was kostenlos ist, was Plus dazugibt, die kostenlose Woche und wie du kündigst.
 topic: Privacy & account
 de-draft: true

@@ -1,5 +1,5 @@
 ---
-title: Moodbow Plus
+title: เกี่ยวกับ Moodbow Plus
 summary: สิ่งที่ฟรี สิ่งที่ Plus เพิ่มให้ สัปดาห์ทดลองใช้ฟรี และวิธียกเลิก
 topic: Privacy & account
 th-draft: true
