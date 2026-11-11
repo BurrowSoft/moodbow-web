@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { Dialog, dialogButton } from "@/components/Dialog";
 import { GetHelpNow } from "@/components/SafetyCard";
 import { IN_PROGRESS_LIMIT_MS, IN_PROGRESS_RETRY_MS, REFLECT_CLIENT_DEADLINE_MS } from "@/lib/journal/reflect";
-import { isCrisis, type ReportErrorKey, type ReportResult, type WeeklyReport as Report } from "@/lib/journal/report";
+import { isCrisis, weekRange, type ReportErrorKey, type ReportResult, type WeeklyReport as Report } from "@/lib/journal/report";
 import { deleteWeeklyReport, requestWeeklyReport } from "./reportActions";
 
 type Phase = { kind: "idle" } | { kind: "loading" } | { kind: "error"; message: ReportErrorKey } | { kind: "offline" };
@@ -27,12 +27,6 @@ const withDeadline = (call: Promise<ReportResult>, ms: number): Promise<ReportRe
 const wait = (ms: number) => new Promise((done) => window.setTimeout(done, ms));
 const isRedirect = (e: unknown) => typeof (e as { digest?: unknown })?.digest === "string" && (e as { digest: string }).digest.startsWith("NEXT_REDIRECT");
 
-// Monday–Sunday as one range in the region's format ("12–18 Oct"), no copy key (decision 180).
-export function weekRange(weekStart: string, dateLocaleTag: string): string {
-  const start = new Date(`${weekStart}T12:00:00Z`);
-  const end = new Date(start.getTime() + 6 * 86_400_000);
-  return new Intl.DateTimeFormat(dateLocaleTag, { day: "numeric", month: "short", timeZone: "UTC" }).formatRange(start, end);
-}
 
 const SECTIONS = [
   ["changed", "reportChanged"],
@@ -50,8 +44,13 @@ const SECTIONS = [
 // 124, 157). Shown only where canReflect(me) (the page decides).
 // aiOff: AI is available but this person hasn't turned it on: the card
 // explains (meAiOffHint, as Me → AI does) and offers nothing to press.
-type Props = { initial: Report | null; weekStart: string; dateLocaleTag: string; balance: number; country?: string | null; aiOff?: boolean };
-export function WeeklyReport({ initial, weekStart, dateLocaleTag, balance, country, aiOff = false }: Props) {
+// weekLabel: weekStart's range, formatted on the server. Formatted here too, the browser's ICU
+// could space it differently ("2 – 8" with thin spaces or plain ones), and the page failed to
+// hydrate (#418, AI on only; Web Tester). Another week, after a new report: formatted here,
+// long after hydration.
+type Props = { initial: Report | null; weekStart: string; weekLabel: string; dateLocaleTag: string; balance: number; country?: string | null; aiOff?: boolean };
+export function WeeklyReport({ initial, weekStart, weekLabel, dateLocaleTag, balance, country, aiOff = false }: Props) {
+  const rangeOf = (start: string) => (start === weekStart ? weekLabel : weekRange(start, dateLocaleTag));
   const t = useTranslations("ai");
   const ta = useTranslations("app");
   const tt = useTranslations("today");
@@ -177,7 +176,7 @@ export function WeeklyReport({ initial, weekStart, dateLocaleTag, balance, count
           {t("reportWeekly")}
         </h2>
         <p data-testid="weekly-report-range" className="text-sm text-muted">
-          {weekRange(weekStart, dateLocaleTag)}
+          {weekLabel}
         </p>
         <p data-testid="weekly-report-ai-off" className="mt-4 text-muted">
           {t("meAiOffHint")}
@@ -193,7 +192,7 @@ export function WeeklyReport({ initial, weekStart, dateLocaleTag, balance, count
         {t("reportWeekly")}
       </h2>
       <p data-testid="weekly-report-range" className="text-sm text-muted">
-        {weekRange(report?.week_start ?? weekStart, dateLocaleTag)}
+        {rangeOf(report?.week_start ?? weekStart)}
       </p>
 
       {report && (
