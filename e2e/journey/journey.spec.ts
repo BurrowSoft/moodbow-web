@@ -1785,3 +1785,40 @@ test("axe: Year in review, at 320 and 1280 px", async ({ page }) => {
     await cleanup(email);
   }
 });
+
+// Automated accessibility (UX, 2026-11-12): no serious or critical axe violation on Appearance with themes, at
+// 320 and 1280 px, in en and pt-BR. Skipped, saying so, until staging has 028's entitlements.
+test("axe: Appearance with themes, at 320 and 1280 px", async ({ page }) => {
+  test.setTimeout(300_000);
+  test.skip(!(await plusOnStaging()), "staging doesn't have 028's entitlements table yet: the Plus pages can't be read there");
+  const email = newEmail();
+  const password = newPassword();
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+      await setProfileLocale(email, password, saved);
+      await axeAtWidths(page, `Appearance, free (the lock) (${saved})`, async () => {
+        await page.goto(`${route}/app/me`);
+        await expect(page.getByTestId("me-palettes")).toBeVisible({ timeout: 15_000 });
+      });
+    }
+    await grantPlusTrial(email);
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+      await setProfileLocale(email, password, saved);
+      await axeAtWidths(page, `Appearance, the themes (${saved})`, async () => {
+        await page.goto(`${route}/app/me`);
+        await expect(page.getByTestId("me-palettes")).toBeVisible({ timeout: 15_000 });
+      });
+    }
+  } finally {
+    await cleanup(email);
+  }
+});
