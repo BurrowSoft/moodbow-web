@@ -1687,3 +1687,41 @@ test("axe: Moodbow Plus, its screen and sheet, at 320 and 1280 px", async ({ pag
     await cleanup(email);
   }
 });
+
+// Automated accessibility (UX, 2026-11-12): no serious or critical axe violation on Plus's Year, All time and More patterns, at
+// 320 and 1280 px, in en and pt-BR. Skipped, saying so, until staging has 028's entitlements.
+test("axe: Plus's Year, All time and More patterns, at 320 and 1280 px", async ({ page }) => {
+  test.setTimeout(300_000);
+  test.skip(!(await plusOnStaging()), "staging doesn't have 028's entitlements table yet: the Plus pages can't be read there");
+  const email = newEmail();
+  const password = newPassword();
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    await grantPlusTrial(email);
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+      await setProfileLocale(email, password, saved);
+      await axeAtWidths(page, `Insights, Year (${saved})`, async () => {
+        await page.goto(`${route}/app/insights?range=year`);
+        await expect(page.getByTestId("insights-long-heading")).toBeVisible({ timeout: 15_000 });
+      });
+      await axeAtWidths(page, `Insights, All time (${saved})`, async () => {
+        await page.goto(`${route}/app/insights?range=all`);
+        await expect(page.getByTestId("insights-long-heading")).toBeVisible({ timeout: 15_000 });
+      });
+      await axeAtWidths(page, `More patterns (${saved})`, async () => {
+        await page.goto(`${route}/app/insights?range=year`);
+        await expect(page.getByTestId("insights-more-patterns-card").or(page.getByTestId("insights-more-patterns-none"))).toBeVisible({ timeout: 15_000 });
+      });
+    }
+  } finally {
+    await cleanup(email);
+  }
+});
