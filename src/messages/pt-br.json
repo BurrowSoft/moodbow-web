@@ -294,7 +294,17 @@
     "entryNewTitle": "Nova anotação",
     "entryEditTitle": "Editar anotação",
     "entryAddMore": "Continuar esta anotação…",
-    "entryMoreActions": "Mais opções"
+    "entryMoreActions": "Mais opções",
+    "libraryOpen": "Quer uma pergunta?",
+    "libraryNoticing": "Reparar",
+    "libraryGratitude": "Gratidão",
+    "libraryHardDays": "Dias difíceis",
+    "libraryRelationships": "Relações",
+    "libraryAhead": "Olhar adiante",
+    "libraryHardDaysIntro": "Para os dias pesados. Escreva o pouco que quiser.",
+    "libraryAnother": "Outra deste grupo",
+    "libraryBack": "Voltar aos grupos",
+    "libraryUse": "Usar esta"
   },
   "notFound": {
     "title": "Página não encontrada",
@@ -685,6 +695,8 @@
     "paletteDusk": "Entardecer",
     "paletteSunrise": "Amanhecer",
     "paletteSea": "Mar",
-    "sheetThemes": "Mais temas fazem parte do Plus"
+    "sheetThemes": "Mais temas fazem parte do Plus",
+    "sheetPrompts": "A biblioteca de perguntas faz parte do Plus",
+    "rowPrompts": "Biblioteca de perguntas"
   }
 }

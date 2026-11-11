@@ -17,6 +17,7 @@ import { pageGate } from "@/lib/conditions";
 import { flagsCrisis } from "@/lib/safety/crisis";
 import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
 import { titledMetadata } from "../pageMeta";
+import { plusPriceLabel, readPlusView } from "@/lib/plus/view";
 
 // A stuck request ends here at the latest (UX, the timeout audit); each
 // data call gives up after 15 s on its own (lib/supabase/deadline).
@@ -55,6 +56,13 @@ export default async function WritePage({ params, searchParams }: PageProps<"/[l
     const { data: sameDay, error } = await supabase.from("entries").select("body").eq("entry_date", startDate);
     if (!error && !(sameDay ?? []).some((e) => flagsCrisis((e as { body: string }).body, CRISIS_KEYWORDS))) promptDate = startDate;
   }
+  // The prompt library (Plus wave 2) only where the day's prompt is: Plus opens its four groups;
+  // without it, the lock; Plus unreadable, its free group only (Hard days, which is free).
+  let library: { has: true } | { offer: { trial: boolean; price: string } } | null | undefined;
+  if (promptDate && pageGate("plus") !== "hidden") {
+    const view = await readPlusView(supabase, user.id);
+    library = view === null ? null : view.kind === "plus" ? { has: true } : { offer: { trial: view.kind === "free" && view.trial, price: plusPriceLabel(locale) } };
+  }
   return (
     <EntryEditor
       initial={null}
@@ -65,6 +73,7 @@ export default async function WritePage({ params, searchParams }: PageProps<"/[l
       country={me.profile?.country}
       backTo={from}
       promptDate={promptDate}
+      library={library}
       back={<BackLink href={from} label={await backLabel(from, tag)} testId="nav-back" />}
     />
   );

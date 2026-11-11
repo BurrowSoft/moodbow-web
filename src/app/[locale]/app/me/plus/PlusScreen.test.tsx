@@ -53,6 +53,7 @@ describe("PlusScreen: the table scrolls, the footer never does", () => {
     expect(free("rowRanges").getByRole("img", { name: m.included })).toBeInTheDocument();
     expect(free("rowPatterns").getByRole("img", { name: m.included })).toBeInTheDocument();
     expect(free("rowYear").getByRole("img", { name: m.plusOnly })).toBeInTheDocument();
+    expect(free("rowPrompts").getByRole("img", { name: m.plusOnly })).toBeInTheDocument();
     expect(screen.queryByTestId("plus-row-rowAiFree")).toBeNull();
     cleanup();
     show({ kind: "free", trial: true }, { aiShown: true });

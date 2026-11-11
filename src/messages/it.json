@@ -294,7 +294,17 @@
     "entryNewTitle": "Nuova pagina",
     "entryEditTitle": "Modifica pagina",
     "entryAddMore": "Aggiungi a questa pagina…",
-    "entryMoreActions": "Altre opzioni"
+    "entryMoreActions": "Altre opzioni",
+    "libraryOpen": "Ti serve una domanda?",
+    "libraryNoticing": "Notare",
+    "libraryGratitude": "Gratitudine",
+    "libraryHardDays": "Giornate difficili",
+    "libraryRelationships": "Relazioni",
+    "libraryAhead": "Guardare avanti",
+    "libraryHardDaysIntro": "Per le giornate pesanti. Scrivi quanto poco vuoi.",
+    "libraryAnother": "Un'altra di questo gruppo",
+    "libraryBack": "Torna ai gruppi",
+    "libraryUse": "Usa questa"
   },
   "notFound": {
     "title": "Pagina non trovata",
@@ -685,6 +695,8 @@
     "paletteDusk": "Crepuscolo",
     "paletteSunrise": "Alba",
     "paletteSea": "Mare",
-    "sheetThemes": "Più temi fanno parte di Plus"
+    "sheetThemes": "Più temi fanno parte di Plus",
+    "sheetPrompts": "La raccolta di domande fa parte di Plus",
+    "rowPrompts": "Raccolta di domande"
   }
 }
