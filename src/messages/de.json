@@ -260,7 +260,13 @@
     "checkInConflictMine": "Deiner",
     "checkInConflictOther": "Schon gespeichert",
     "checkInConflictKeepMine": "Meinen behalten",
-    "checkInConflictUseOther": "Den anderen nehmen"
+    "checkInConflictUseOther": "Den anderen nehmen",
+    "tagsLabel": "Tags",
+    "tagsPlaceholder": "Tag hinzufügen",
+    "tagsRecent": "Deine Tags",
+    "tagsRemove": "{tag} entfernen",
+    "tagsTooMany": "Bis zu 5 Tags pro Tag.",
+    "tagsTooLong": "Ein Tag darf bis zu 32 Zeichen haben."
   },
   "entry": {
     "writeButton": "Über deinen Tag schreiben",

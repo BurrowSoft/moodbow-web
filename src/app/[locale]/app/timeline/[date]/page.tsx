@@ -19,6 +19,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { EntryPreviews, type EntrySummary } from "../../EntryPreviews";
 import { tabMetadata, titledMetadata } from "../../pageMeta";
 import { DayCheckIn } from "./DayCheckIn";
+import { readCardTags } from "@/lib/journal/tagsData";
 
 // A stuck request ends here at the latest (UX, the timeout audit); each
 // data call gives up after 15 s on its own (lib/supabase/deadline).
@@ -71,7 +72,7 @@ export default async function DayPage({ params }: PageProps<"/[locale]/app/timel
       <h1 className={JOURNAL_HEADING} data-testid="day-date">
         {dateLine(date, dateLocaleTag)}
       </h1>
-      <DayCheckIn initial={(checkIn as CheckIn | null) ?? null} uid={user.id} date={date} dateLocaleTag={dateLocaleTag} />
+      <DayCheckIn initial={(checkIn as CheckIn | null) ?? null} uid={user.id} date={date} dateLocaleTag={dateLocaleTag} {...(await readCardTags(supabase, date))} />
       {entriesError ? (
         <p role="alert" data-testid="day-entries-error" className="font-medium text-accent">
           {tt("errGeneric")}
