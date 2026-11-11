@@ -216,3 +216,25 @@ export async function aiAvailable(email: string, password: string): Promise<bool
   if (error) throw new Error(`get_me failed: ${error.message}`);
   return (data as { ai_available?: boolean } | null)?.ai_available === true;
 }
+
+// Moodbow Plus (decision 246): whether staging has 028's entitlements table yet. The Plus pages
+// can't read it before then, so their journeys skip, saying so.
+export async function plusOnStaging(): Promise<boolean> {
+  if (!configured) return false;
+  const { error } = await database().from("entitlements").select("user_id").limit(1);
+  return !error;
+}
+
+// One of ours in the free week, as Checkout's webhook would leave it: a Stripe trial running for
+// 7 days, with no store ids (so no cron or Stripe call ever touches it). It goes with the user.
+export async function grantPlusTrial(email: string): Promise<void> {
+  if (!ours(email)) throw new Error("only e2e-ci-* users get Plus");
+  const id = await userId(email);
+  if (!id) throw new Error("the signed-up user isn't on staging");
+  const now = Date.now();
+  const end = new Date(now + 7 * 86_400_000).toISOString();
+  const { error } = await database()
+    .from("entitlements")
+    .upsert({ user_id: id, source: "stripe", status: "trialing", trial_started_at: new Date(now).toISOString(), trial_ends_at: end, current_period_end: end });
+  if (error) throw new Error(`the trial row failed: ${error.message}`);
+}
