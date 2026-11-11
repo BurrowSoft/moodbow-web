@@ -37,7 +37,7 @@ afterEach(() => {
 const page = (initial: Letter[] = []) =>
   render(
     <NextIntlClientProvider locale="en" messages={messages}>
-      <LettersEditor initial={initial} dateLocaleTag={TAG} country="NZ" />
+      <LettersEditor initial={initial} dateLocaleTag={TAG} country="NZ" today="2026-11-10" />
     </NextIntlClientProvider>,
   );
 
@@ -110,6 +110,17 @@ describe("LettersEditor", () => {
   });
 });
 
+describe("LettersEditor: the open-early confirm only before its day (L2)", () => {
+  it.each(["2026-11-10", "2026-11-01"])("opens on %s, today 2026-11-10: Open opens, no confirm", async (opensOn) => {
+    open.mockReturnValueOnce(Promise.resolve({ status: "ok", body: "Dear me, the garden grew." }));
+    page([{ ...locked, opensOn }]);
+    await act(async () => fireEvent.click(screen.getByTestId("letter-open")));
+    expect(screen.queryByTestId("letter-open-early")).toBeNull();
+    expect(open).toHaveBeenCalledWith("a");
+    expect(screen.getByTestId("letter-body")).toHaveTextContent("the garden grew.");
+  });
+});
+
 describe("LettersEditor: a letter opened from Me is matched too (the Reviewer, #267)", () => {
   it("its text matches: the help card opens, and help sits above the letter", async () => {
     const phrase = CRISIS_KEYWORDS?.languages.en.phrases[0] as string;
@@ -120,6 +131,14 @@ describe("LettersEditor: a letter opened from Me is matched too (the Reviewer, #
     expect(screen.getByTestId("safety-card")).toBeInTheDocument();
     const help = screen.getByTestId("letter-open-help");
     expect(help.compareDocumentPosition(screen.getByTestId("letter-body")) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it("an opened letter whose text matches, shown again later: help above it every time, no card popped (L1)", () => {
+    const phrase = CRISIS_KEYWORDS?.languages.en.phrases[0] as string;
+    page([{ ...opened, body: `Dear me, ${phrase}` }]);
+    const help = screen.getByTestId("letter-open-help");
+    expect(help.compareDocumentPosition(screen.getByTestId("letter-body")) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(screen.queryByTestId("safety-card")).toBeNull();
   });
 
   it("no match: no card, no help added", async () => {

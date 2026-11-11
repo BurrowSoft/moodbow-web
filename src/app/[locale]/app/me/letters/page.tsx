@@ -41,7 +41,7 @@ export default async function LettersPage({ params }: PageProps<"/[locale]/app/m
       <h1 className={JOURNAL_HEADING} data-testid="letters-title">
         {t("meRow")}
       </h1>
-      {error || !me ? <JournalUnavailable /> : <LettersEditor initial={parseLetterRows(data).map(forClient)} dateLocaleTag={tag} country={me.profile?.country} />}
+      {error || !me ? <JournalUnavailable /> : <LettersEditor initial={parseLetterRows(data).map(forClient)} dateLocaleTag={tag} country={me.profile?.country} today={me.today} />}
     </section>
   );
 }
