@@ -6,7 +6,7 @@ import messages from "../../src/messages/en.json";
 import fr from "../../src/messages/fr.json";
 import { monthsBefore } from "../../src/lib/journal/onThisDay";
 import { axeAtWidths } from "../axe";
-import { aiConsentGranted, journalToday, aiAvailable, cleanup, configured, confirmEmail, createConfirmedUser, exists, lastWeekMonday, seedCheckIns, newEmail, newPassword, notConfigured, profileLocale, profileSaver, revokeSessions, setProfileLocale, signedUpUnconfirmed, sweep } from "./staging";
+import { aiConsentGranted, journalToday, aiAvailable, cleanup, configured, confirmEmail, createConfirmedUser, exists, lastWeekMonday, seedCheckIns, newEmail, newPassword, notConfigured, profileLocale, profileSaver, revokeSessions, setProfileLocale, signedUpUnconfirmed, sweep, grantPlusTrial, plusOnStaging } from "./staging";
 
 // The launch-critical journeys (1.0), end to end against staging with a
 // throwaway account each: sign-up → confirm → consent → setup → check-in →
@@ -1639,6 +1639,48 @@ test("large text, set in the browser: Print this month stays inside a 320 px pho
       await axeAtWidths(page, `Print this month (${saved})`, async () => {
         await page.goto(`${route}/app/print/${month}`);
         await expect(page.getByTestId("print-get-help")).toBeVisible();
+      });
+    }
+  } finally {
+    await cleanup(email);
+  }
+});
+
+// Automated accessibility (UX, 2026-11-12): no serious or critical axe violation on Moodbow Plus, its screen and sheet, at
+// 320 and 1280 px, in en and pt-BR. Skipped, saying so, until staging has 028's entitlements.
+test("axe: Moodbow Plus, its screen and sheet, at 320 and 1280 px", async ({ page }) => {
+  test.setTimeout(300_000);
+  test.skip(!(await plusOnStaging()), "staging doesn't have 028's entitlements table yet: the Plus pages can't be read there");
+  const email = newEmail();
+  const password = newPassword();
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+      await setProfileLocale(email, password, saved);
+      await axeAtWidths(page, `Plus screen, free (${saved})`, async () => {
+        await page.goto(`${route}/app/me/plus`);
+        await expect(page.getByTestId("plus-screen")).toBeVisible({ timeout: 15_000 });
+      });
+      await axeAtWidths(page, `Plus sheet, from Insights' Year (${saved})`, async () => {
+        await page.goto(`${route}/app/insights`);
+        await page.getByTestId("insights-range-year").click();
+        await expect(page.getByTestId("plus-sheet-go")).toBeVisible({ timeout: 15_000 });
+      });
+    }
+    await grantPlusTrial(email);
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+      await setProfileLocale(email, password, saved);
+      await axeAtWidths(page, `Plus screen, in the free week (${saved})`, async () => {
+        await page.goto(`${route}/app/me/plus`);
+        await expect(page.getByTestId("plus-screen")).toBeVisible({ timeout: 15_000 });
       });
     }
   } finally {
