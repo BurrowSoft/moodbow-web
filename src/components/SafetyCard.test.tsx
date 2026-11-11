@@ -8,6 +8,7 @@ import fr from "@/messages/fr.json";
 import ptBr from "@/messages/pt-br.json";
 import { helpLineSize, helplinesFor, isIos, telHref } from "@/lib/safety/helplines";
 import { GetHelpNow, SafetyCard } from "./SafetyCard";
+import { Dialog } from "@/components/Dialog";
 import { RequestCountryProvider } from "./RequestCountry";
 import { usableCountry } from "@/lib/region/requestCountry";
 vi.mock("@/i18n/navigation", () => ({
@@ -284,5 +285,23 @@ describe("SafetyCard: a number to tap even with no profile country (UX, #269)", 
 
   it("the header is used only as two letters", () => {
     expect([null, "", "th", "TH", "T1", "THA", "XX"].map(usableCountry)).toEqual([null, null, "TH", "TH", null, null, "XX"]);
+  });
+});
+
+// The help card keeps the default colours whatever Plus palette is on (UX, 11 Nov):
+// the palette CSS resets every token under [data-default-colours], so the overlay must carry it.
+describe("SafetyCard: the default colours under any palette (#277)", () => {
+  it("the help card's overlay carries data-default-colours", () => {
+    wrap(<SafetyCard country="TH" onClose={() => {}} />);
+    expect(screen.getByTestId("safety-card").closest("[data-default-colours]")).not.toBeNull();
+  });
+
+  it("another dialog doesn't: it takes the chosen palette", () => {
+    wrap(
+      <Dialog title="Other" onCancel={() => {}} testId="other-dialog">
+        <button type="button">OK</button>
+      </Dialog>,
+    );
+    expect(screen.getByTestId("other-dialog").closest("[data-default-colours]")).toBeNull();
   });
 });
