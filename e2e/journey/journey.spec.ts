@@ -5,6 +5,7 @@ import countries from "../../content/contracts/countries.json";
 import messages from "../../src/messages/en.json";
 import fr from "../../src/messages/fr.json";
 import { monthsBefore } from "../../src/lib/journal/onThisDay";
+import { axeAtWidths } from "../axe";
 import { aiConsentGranted, journalToday, aiAvailable, cleanup, configured, confirmEmail, createConfirmedUser, exists, lastWeekMonday, seedCheckIns, newEmail, newPassword, notConfigured, profileLocale, profileSaver, revokeSessions, setProfileLocale, signedUpUnconfirmed, sweep } from "./staging";
 
 // The launch-critical journeys (1.0), end to end against staging with a
@@ -1599,7 +1600,7 @@ test("large text: every help number on the list stays whole on a phone", { tag: 
 // the button 43 px past it), help in the first view, nothing to scroll sideways.
 test("large text, set in the browser: Print this month stays inside a 320 px phone, help first", async ({ page, browserName }) => {
   test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
-  test.setTimeout(120_000);
+  test.setTimeout(180_000);
   const email = newEmail();
   const password = newPassword();
   const cdp = await page.context().newCDPSession(page);
@@ -1630,6 +1631,15 @@ test("large text, set in the browser: Print this month stays inside a 320 px pho
         expect(title.x + title.width, `${where}: the title inside the width`).toBeLessThanOrEqual(320.5);
         expect(await page.evaluate(() => document.documentElement.scrollWidth), `${where}: no sideways scroll`).toBeLessThanOrEqual(320);
       }
+    }
+    // No serious or critical axe violation, at 320 and 1280 px, at the normal size (UX, 2026-11-12).
+    await cdp.send("Page.setFontSizes", { fontSizes: { standard: 16, fixed: 13 } });
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+      await setProfileLocale(email, password, saved);
+      await axeAtWidths(page, `Print this month (${saved})`, async () => {
+        await page.goto(`${route}/app/print/${month}`);
+        await expect(page.getByTestId("print-get-help")).toBeVisible();
+      });
     }
   } finally {
     await cleanup(email);
