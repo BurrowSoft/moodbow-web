@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { BO_ERROR_TEXT, BO_ERRORS, BO_PICTURE_MAX_BASE64, BO_REASONS, boButtonShows, boCanTurnOn, boPictureField, boReasonProblem, boSpeaks, historyFromRows, parseBoStatus, type BoStatus } from "./bo";
+import { BO_ERROR_TEXT, BO_ERRORS, BO_PICTURE_MAX_BASE64, BO_REASONS, boButtonShows, boCanTurnOn, boPictureField, boReasonProblem, boSpeaks, historyFromRows, parseBoSend, parseBoStatus, type BoStatus } from "./bo";
 import { BO_PICTURE_MAX_BYTES } from "./boPicture";
 import conditions from "../../../content/conditions.json";
 import messages from "@/messages/en.json";
@@ -106,6 +106,18 @@ describe("parseBoStatus: pictures_reason", () => {
     expect(parseBoStatus({ available: true, pictures: false, pictures_reason: "picture_limit" })).toMatchObject({ pictures: false, picturesLimit: true });
     for (const data of [{ available: true, pictures: true, pictures_reason: "picture_limit" }, { available: true, pictures: false, pictures_reason: null }, { available: true, pictures: false, pictures_reason: "budget" }, { available: true, pictures: false }]) {
       expect(parseBoStatus(data)).not.toHaveProperty("picturesLimit");
+    }
+  });
+});
+
+// help_country: only ever two capital letters the server verified, else nothing (bo.md).
+describe("help_country on status and send", () => {
+  it("two capital letters: kept; anything else: absent", () => {
+    expect(parseBoStatus({ available: true, help_country: "TH" })).toMatchObject({ helpCountry: "TH" });
+    expect(parseBoSend({ reply: "Hi", help_country: "NZ" })).toMatchObject({ helpCountry: "NZ" });
+    for (const bad of ["th", "THA", "T1", "", 5, null, undefined]) {
+      expect(parseBoStatus({ available: false, reason: "region_off", help_country: bad })).not.toHaveProperty("helpCountry");
+      expect(parseBoSend({ reply: "Hi", help_country: bad })).not.toHaveProperty("helpCountry");
     }
   });
 });

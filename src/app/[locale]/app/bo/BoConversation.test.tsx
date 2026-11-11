@@ -364,6 +364,33 @@ describe("BoConversation", () => {
     await waitFor(() => expect(statuses()).toBe(2));
   });
 
+  it("help_country: status's verified country first on the card, Me's below; a reply's, none included, wins (app #228)", async () => {
+    statusAnswer = { ...ok, helpCountry: "TH" };
+    await open();
+    fireEvent.click(screen.getByTestId("bo-get-help"));
+    expect(screen.getByTestId("safety-country")).toHaveTextContent("Thailand");
+    expect(screen.getByTestId("safety-call-helpline")).toHaveAttribute("href", "tel:1323");
+    expect(screen.getByTestId("safety-also-country")).toHaveTextContent("New Zealand");
+    fireEvent.click(screen.getByTestId("safety-close"));
+    // This message was checked with no verified country: the server's line used Me's, so the card does.
+    answers.push(reply());
+    type("Hello");
+    await send();
+    fireEvent.click(screen.getByTestId("bo-get-help"));
+    expect(screen.queryByTestId("safety-also")).toBeNull();
+    expect(screen.getByTestId("safety-call-helpline")).toHaveAttribute("href", "tel:1737");
+  });
+
+  it("a card opened by a reply names the reply's country first", async () => {
+    await open();
+    answers.push(reply({ openCard: true, helpCountry: "TH" }));
+    type("Hello");
+    await send();
+    expect(screen.getByTestId("safety-card")).toBeInTheDocument();
+    expect(screen.getByTestId("safety-country")).toHaveTextContent("Thailand");
+    expect(screen.getByTestId("safety-also-country")).toHaveTextContent("New Zealand");
+  });
+
   it("ai_consent_required on a send: the consent, and after a yes the text is still there", async () => {
     await open();
     answers.push({ status: "error", code: "ai_consent_required" });
