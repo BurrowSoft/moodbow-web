@@ -3,6 +3,8 @@
 import { startTransition, useActionState, useCallback, useEffect, useState, useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Dialog, dialogButton } from "@/components/Dialog";
+import { Link } from "@/i18n/navigation";
+import { LockedItem, type PlusOffer } from "../PlusSheet";
 import { canRenderText, renderExportText, type Translate } from "@/lib/exportText";
 import { renderExportCsv } from "@/lib/exportCsv";
 import { csvFileName, deleteWordTyped, exportFileName, journalFileName } from "@/lib/journal/account";
@@ -19,7 +21,7 @@ const LINK_LABELS = { txt: "exportReadable", json: "exportData", csv: "exportCsv
 // and there are some: text = enforcement, as the Help article's
 // {pending:ai_live} clause (UX, the Web Tester's forced pass). csv: the
 // spreadsheet link (1.1 P, export-csv-live).
-export function YourData({ credits, uid, csv = false, ai = false, plusSource = null }: { credits: number; uid: string; csv?: boolean; ai?: boolean; plusSource?: "stripe" | "play" | "apple" | null }) {
+export function YourData({ credits, uid, csv = false, ai = false, plusSource = null, pdf = null }: { credits: number; uid: string; csv?: boolean; ai?: boolean; plusSource?: "stripe" | "play" | "apple" | null; pdf?: "plus" | PlusOffer | null }) {
   const t = useTranslations("me");
   const tp = useTranslations("plus");
   const tt = useTranslations("today");
@@ -126,6 +128,14 @@ export function YourData({ credits, uid, csv = false, ai = false, plusSource = n
         <p className="text-sm text-muted">{t("meExportBody")}</p>
         {!deleting && exportResult}
       </div>
+      {/* Moodbow Plus: the designed PDF journal (decision 246). The CSV export stays free. */}
+      {pdf === "plus" ? (
+        <Link href="/app/me/journal-pdf" data-testid="me-journal-pdf" className="mt-4 inline-flex min-h-11 max-w-full items-center font-medium text-accent underline underline-offset-4 [overflow-wrap:anywhere]">
+          {tp("rowPdf")}
+        </Link>
+      ) : (
+        pdf && <LockedItem label={tp("rowPdf")} sheetTitle={tp("sheetPdf")} offer={pdf} testId="me-journal-pdf" className="mt-4 flex min-h-11 w-full max-w-full items-center justify-between gap-3 text-left font-medium text-text" />
+      )}
       <button type="button" data-testid="me-delete" onClick={() => setDeleting(true)} className="mt-6 max-w-full font-medium text-accent underline underline-offset-4 [overflow-wrap:anywhere]">
         {t("meDelete")}
       </button>

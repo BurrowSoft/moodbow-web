@@ -1,12 +1,10 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useLocale, useTranslations } from "next-intl";
-import { MomentStar } from "@/components/MomentStar";
-import { dateLine } from "@/lib/journal/today";
+import { useTranslations } from "next-intl";
 import type { PrintDay } from "@/lib/journal/printMonth";
 import { takePrintRequest } from "@/lib/journal/printOnce";
-import { checkInChips } from "../../checkInChips";
+import { PrintDayBlock } from "./PrintDayBlock";
 
 // Print a month (1.1 N): a clean layout and the browser's print dialog
 // ("Save as PDF" is built in). Nothing is uploaded or made on a server; the
@@ -14,9 +12,6 @@ import { checkInChips } from "../../checkInChips";
 // paper); entries print as written.
 export function PrintMonth({ month, title, days, dateLocaleTag }: { month: string; title: string; days: PrintDay[]; dateLocaleTag: string }) {
   const t = useTranslations("timeline");
-  const tt = useTranslations("today");
-  const te = useTranslations("entry");
-  const locale = useLocale();
 
   // Only when arriving from "Print this month", once the page has drawn
   // (never on a refresh, Back or a link opened elsewhere: the button is here).
@@ -53,39 +48,9 @@ export function PrintMonth({ month, title, days, dateLocaleTag }: { month: strin
         </p>
       ) : (
         <div className="mt-6 space-y-6">
-          {days.map((d) => {
-            const c = d.checkIn;
-            const moment = d.entries.some((e) => e.isMoment);
-            const values = c ? checkInChips(c, tt, locale).map((chip) => chip.label) : [];
-            return (
-              // A long day may run over a page break (a whole day moved to the
-              // next page left page 1 almost blank: Web Tester P2); its date,
-              // mood and values stay together and with the start of its text.
-              <section key={d.date} data-testid={`print-day-${d.date}`} className="border-t border-border pt-4">
-                <div className="break-inside-avoid-page break-after-avoid-page" data-testid="print-day-head">
-                  <h2 className="flex flex-wrap items-center gap-x-2 font-medium">
-                    <span>{dateLine(d.date, dateLocaleTag)}</span>
-                    {c && (
-                      <span>
-                        <span aria-hidden="true">·</span> {tt(`mood${c.mood}` as "mood1")}
-                      </span>
-                    )}
-                    {moment && <MomentStar label={te("momentBadge")} />}
-                  </h2>
-                  {values.length > 0 && (
-                    <p className="mt-1 text-sm text-muted" data-testid="print-values">
-                      {values.join(" · ")}
-                    </p>
-                  )}
-                </div>
-                {d.entries.map((e) => (
-                  <p key={e.id} className="mt-3 whitespace-pre-line" data-testid="print-entry">
-                    {e.body}
-                  </p>
-                ))}
-              </section>
-            );
-          })}
+          {days.map((d) => (
+            <PrintDayBlock key={d.date} day={d} dateLocaleTag={dateLocaleTag} />
+          ))}
         </div>
       )}
     </>

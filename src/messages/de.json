@@ -650,6 +650,16 @@
     "moreWeekdaysSame": "An Wochentagen und am Wochenende war deine Stimmung etwa gleich ({a} und {b} von 5).",
     "moreWritingShown": "An Tagen, an denen du geschrieben hast, lag deine Stimmung im Schnitt bei {a} von 5. An den anderen bei {b}.",
     "moreWritingSame": "An Tagen mit und ohne Schreiben war deine Stimmung etwa gleich ({a} und {b} von 5).",
-    "moreNone": "Mehr Muster erscheinen hier, sobald du in diesem Zeitraum mehr Check-ins hast."
+    "moreNone": "Mehr Muster erscheinen hier, sobald du in diesem Zeitraum mehr Check-ins hast.",
+    "pdfIntro": "Wähle einen Monat oder ein Jahr. Dein Tagebuch wird auf diesem Gerät als PDF gesetzt und nirgends gespeichert. Wer die Datei hat, kann sie lesen.",
+    "pdfMonth": "Ein Monat",
+    "pdfYear": "Ein Jahr",
+    "pdfButton": "Als PDF speichern oder drucken",
+    "pdfEmpty": "Im Zeitraum {period} gibt es keine Check-ins und keine Einträge.",
+    "sheetPdf": "Das gestaltete PDF gehört zu Plus",
+    "pdfCoverTitle": "Mein Tagebuch",
+    "pdfCoverCounts": "{days, plural, one {# Tag mit Check-in} other {# Tage mit Check-in}} · {entries, plural, one {# Eintrag} other {# Einträge}}",
+    "pdfHelp": "Wenn du mit jemandem reden möchtest, findest du Hilfe unter moodbow.com/help/get-help-now",
+    "pdfFileTitle": "Moodbow-Tagebuch – {period}"
   }
 }

@@ -650,6 +650,16 @@
     "moreWeekdaysSame": "Nos dias úteis e nos fins de semana, seu humor foi parecido ({a} e {b} de 5).",
     "moreWritingShown": "Nos dias em que você escreveu, seu humor ficou em média em {a} de 5. Nos outros dias, {b}.",
     "moreWritingSame": "Nos dias em que você escreveu e nos outros, seu humor foi parecido ({a} e {b} de 5).",
-    "moreNone": "Mais padrões aparecem aqui quando você tiver mais check-ins neste período."
+    "moreNone": "Mais padrões aparecem aqui quando você tiver mais check-ins neste período.",
+    "pdfIntro": "Escolha um mês ou um ano. Seu diário é montado como PDF neste aparelho e não fica salvo em lugar nenhum. Qualquer pessoa com o arquivo pode ler.",
+    "pdfMonth": "Um mês",
+    "pdfYear": "Um ano",
+    "pdfButton": "Salvar como PDF ou imprimir",
+    "pdfEmpty": "Não há check-ins nem anotações em {period}.",
+    "sheetPdf": "O PDF caprichado faz parte do Plus",
+    "pdfCoverTitle": "Meu diário",
+    "pdfCoverCounts": "{days, plural, one {# dia com check-in} other {# dias com check-in}} · {entries, plural, one {# anotação} other {# anotações}}",
+    "pdfHelp": "Se você precisar conversar com alguém, há ajuda em moodbow.com/help/get-help-now",
+    "pdfFileTitle": "Diário Moodbow – {period}"
   }
 }

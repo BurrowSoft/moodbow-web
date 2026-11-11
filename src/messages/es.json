@@ -650,6 +650,16 @@
     "moreWeekdaysSame": "Entre semana y los fines de semana, tu estado de ánimo fue más o menos el mismo ({a} y {b} de 5).",
     "moreWritingShown": "Los días que escribiste, tu estado de ánimo fue de {a} de 5 de media. Los días que no, {b}.",
     "moreWritingSame": "Los días que escribiste y los que no, tu estado de ánimo fue más o menos el mismo ({a} y {b} de 5).",
-    "moreNone": "Más patrones aparecerán aquí cuando tengas más registros en este periodo."
+    "moreNone": "Más patrones aparecerán aquí cuando tengas más registros en este periodo.",
+    "pdfIntro": "Elige un mes o un año. Tu diario se compone como PDF en este dispositivo y no se guarda en ningún sitio. Cualquiera que tenga el archivo puede leerlo.",
+    "pdfMonth": "Un mes",
+    "pdfYear": "Un año",
+    "pdfButton": "Guardar como PDF o imprimir",
+    "pdfEmpty": "No hay registros ni entradas en {period}.",
+    "sheetPdf": "El PDF cuidado es parte de Plus",
+    "pdfCoverTitle": "Mi diario",
+    "pdfCoverCounts": "{days, plural, one {# día con registro} other {# días con registro}} · {entries, plural, one {# entrada} other {# entradas}}",
+    "pdfHelp": "Si necesitas hablar con alguien, hay ayuda en moodbow.com/help/get-help-now",
+    "pdfFileTitle": "Diario Moodbow – {period}"
   }
 }
