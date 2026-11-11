@@ -1,5 +1,5 @@
 ---
-title: Tags
+title: Tags nutzen
 summary: Gib einem Tag ein paar eigene Wörter mit.
 topic: Your journal
 de-draft: true

@@ -1,5 +1,5 @@
 ---
-title: Tags
+title: Usar tags
 summary: Acrescente algumas palavras suas a um dia.
 topic: Your journal
 pt-BR-draft: true
