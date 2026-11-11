@@ -1,7 +1,7 @@
 <!--
   Spanish of content/legal/en/privacy.md. Wording is Vitor's, as in English. AI translation, checked
   by back-translation, a script and the Code Reviewer; no native lawyer has read it.
-  en-sha256: 7b9a9b047973987843da195e4bc5aa72946e1d3077ae78d1ced63b5bf5fd1df3
+  en-sha256: 573979f9e98dfac7575e09462be304a56031dddfe02296264677c6311d4a7544
   It's the English this translates: legalSpanish.test.ts fails if the English changes, until the
   Spanish follows and this is updated. Shows on Production only once legal-es-approved is met.
 -->
