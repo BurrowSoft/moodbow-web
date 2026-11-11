@@ -82,7 +82,7 @@ export default async function DayPage({ params }: PageProps<"/[locale]/app/timel
       <Link
         href={withOrigin(`/app/write?date=${date}`, `/app/timeline/${date}`)}
         data-testid="day-add-entry"
-        className="inline-flex min-h-12 max-w-full items-center justify-center rounded-full bg-pill px-8 text-center font-medium text-accent hyphens-auto [hyphenate-limit-chars:7_3_3] [overflow-wrap:anywhere] hover:brightness-95"
+        className="inline-flex min-h-12 max-w-full items-center justify-center rounded-full bg-pill px-8 text-center font-medium text-accent max-[9em]:hyphens-auto max-[9em]:[hyphenate-limit-chars:7_3_3] [overflow-wrap:anywhere] hover:brightness-95"
       >
         {t("dayAddEntry")}
       </Link>

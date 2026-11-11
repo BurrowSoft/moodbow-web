@@ -331,17 +331,38 @@ test("<html lang> is the page's language in every locale", async ({ page }) => {
 
 // Headings, labels and buttons hyphenate (only words of 7 letters or more, 3 on each side), so
 // a long word breaks with a hyphen at large text instead of mid-word with none.
-test("headings, labels and buttons hyphenate; short words stay whole", async ({ page }) => {
-  await page.goto("/fr/consent");
-  const styles = await page.evaluate(() =>
-    ["h1", "label", "button"].map((tag) => {
-      const el = document.querySelector(tag);
-      if (!el) return `${tag} missing`;
-      const s = getComputedStyle(el) as CSSStyleDeclaration & { hyphenateLimitChars?: string };
-      return `${tag} ${s.hyphens} ${s.hyphenateLimitChars}`;
-    }),
-  );
-  expect(styles).toEqual(["h1 auto 7 3 3", "label auto 7 3 3", "button auto 7 3 3"]);
+// Only in the journal (whose text isn't capped), and only at really large text: below it, and on
+// the public pages, words stay whole (decision 231), since a browser hyphenates at a line's end
+// even when the word would fit on the next line. The journal needs a session, so its markup is
+// put on a public page here; the Web Tester's pass reads the real pages.
+test("the journal's headings, labels and buttons hyphenate at 300 % on a 320 px phone; not at 100 % or 200 %, nor on public pages", async ({ page, browserName }, testInfo) => {
+  test.skip(browserName !== "chromium" || testInfo.project.name !== "desktop", "Page.setFontSizes is Chromium's; once is enough");
+  const cdp = await page.context().newCDPSession(page);
+  await page.setViewportSize({ width: 320, height: 640 });
+  const styles = async () =>
+    page.evaluate(() => {
+      const journal = document.createElement("div");
+      journal.setAttribute("data-journal", "");
+      journal.innerHTML = "<h2>Environnement</h2><label>Crépuscule</label><button>Rappel quotidien</button>";
+      document.querySelector("main")!.prepend(journal);
+      const read = (el: Element | null) => {
+        if (!el) return "missing";
+        const s = getComputedStyle(el) as CSSStyleDeclaration & { hyphenateLimitChars?: string };
+        return `${s.hyphens}${s.hyphens === "auto" ? ` ${s.hyphenateLimitChars}` : ""}`;
+      };
+      return { journal: ["h2", "label", "button"].map((tag) => `${tag} ${read(journal.querySelector(tag))}`), consentHeading: read(document.querySelector("main h1")) };
+    });
+  for (const [percent, expected] of [
+    [100, "manual"],
+    [200, "manual"],
+    [300, "auto 7 3 3"],
+  ] as const) {
+    await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
+    await page.goto("/fr/consent");
+    const got = await styles();
+    expect(got.journal, `${percent} %`).toEqual(["h2", "label", "button"].map((tag) => `${tag} ${expected}`));
+    expect(got.consentHeading, `Consent's heading at ${percent} %`).toBe("manual");
+  }
 });
 
 // A call link in a row, as the safety plan, the help card and the help page lay them out: at
