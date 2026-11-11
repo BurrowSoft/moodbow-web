@@ -12,7 +12,7 @@ Last updated: 2 October 2026
 These terms are an agreement between you and Vitor Ribeiro Carvalho, trading as BurrowSoft (297 Moo 1, Baan Sanian, Mueang Nan, Nan 55000, Thailand) about using Moodbow, the app and the website moodbow.com. By creating an account you agree to them.
 
 ### What Moodbow is, and isn't
-Moodbow is a private journal that helps you notice patterns in your mood, sleep and habits. It is **not** medical care, therapy or a diagnosis, and it isn't a crisis service. The AI's reflections are suggestions to think about, not professional advice. If you're in danger or thinking about harming yourself, contact your local emergency number or a crisis line right away; Moodbow lists some in Me → Want to talk to someone?.
+Moodbow is a private journal that helps you notice patterns in your mood, sleep and habits. It is **not** medical care, therapy or a diagnosis, and it isn't a crisis service. {pending:bo_off}The AI's reflections are suggestions to think about, not professional advice.{/pending}{pending:bo_live}Bo, Moodbow's AI, isn't a person or a therapist. What it says is something to think about, not professional advice. It can't call anyone or get you help, and nobody watches your conversation.{/pending} If you're in danger or thinking about harming yourself, contact your local emergency number or a crisis line right away; Moodbow lists some in Me → Want to talk to someone?.
 
 ### Who can use it
 You must be 18 or older and able to agree to these terms. One account per person. Keep your password private; you're responsible for what happens in your account.
@@ -37,6 +37,14 @@ Everything you write and log stays yours. You give us only the permission needed
 - When you run out of credits, Moodbow keeps working, with Moodbow AI Lite.
 {/pending}
 
+{pending:bo_live}
+### Bo
+- Bo is optional and needs your separate consent. It's available in selected countries, and that list can change.
+- Bo can be wrong, incomplete or unhelpful. Don't rely on it for medical, legal or financial decisions, or in an emergency.
+- There's a daily limit on messages, and Bo may be unavailable at times. The size of the limit may change.
+- Don't send Bo illegal images, sexual images of anyone under 18, or intimate images of anyone without their agreement. We may stop your access to Bo, and when we learn of illegal material, we report it to the authorities.
+
+{/pending}
 ### Fair use
 Don't misuse Moodbow: no attempts to access other people's data, break or overload the service, reverse-engineer it, or use it for anything illegal. We may limit or close accounts that do, and we'll tell you why unless the law prevents it.
 
