@@ -55,7 +55,8 @@ export default async function AppLayout({ children, params }: LayoutProps<"/[loc
   // only the public namespaces, perf fix 3).
   return (
     <NextIntlClientProvider messages={await getMessages()}>
-      <div className="flex flex-1 flex-col md:flex-row">
+      {/* data-journal: the journal's own rules in globals.css (hyphenation at large text). */}
+      <div data-journal="" className="flex flex-1 flex-col md:flex-row">
         {/* It reads the search params: its own Suspense boundary. */}
         <Suspense fallback={null}>
           <NavProgress />
