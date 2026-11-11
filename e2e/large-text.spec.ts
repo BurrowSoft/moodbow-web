@@ -353,3 +353,87 @@ test("large text: every number on the help page stays whole on a phone", async (
     }
   }
 });
+
+// <html lang> is the page's language on every locale: the browser hyphenates in it (the Web
+// Tester's long-language pass, UX 12 Nov), and screen readers read in it.
+test("<html lang> is the page's language in every locale", async ({ page }) => {
+  for (const language of LANGUAGES) {
+    await page.goto(`${language}/consent`);
+    const lang = await page.evaluate(() => document.documentElement.lang.toLowerCase());
+    expect.soft(lang, language || "/en").toBe(language ? language.slice(1) : "en");
+  }
+});
+
+// Headings, labels and buttons hyphenate (only words of 7 letters or more, 3 on each side), so
+// a long word breaks with a hyphen at large text instead of mid-word with none.
+// Only in the journal (whose text isn't capped), and only at really large text: below it, and on
+// the public pages, words stay whole (decision 231), since a browser hyphenates at a line's end
+// even when the word would fit on the next line. The journal needs a session, so its markup is
+// put on a public page here; the Web Tester's pass reads the real pages.
+test("the journal's headings, labels and buttons hyphenate at 300 % on a 320 px phone; not at 100 % or 200 %, nor on public pages", async ({ page, browserName }, testInfo) => {
+  test.skip(browserName !== "chromium" || testInfo.project.name !== "desktop", "Page.setFontSizes is Chromium's; once is enough");
+  const cdp = await page.context().newCDPSession(page);
+  await page.setViewportSize({ width: 320, height: 640 });
+  const styles = async () =>
+    page.evaluate(() => {
+      const journal = document.createElement("div");
+      journal.setAttribute("data-journal", "");
+      journal.innerHTML = "<h2>Environnement</h2><label>Crépuscule</label><button>Rappel quotidien</button>";
+      document.querySelector("main")!.prepend(journal);
+      const read = (el: Element | null) => {
+        if (!el) return "missing";
+        const s = getComputedStyle(el) as CSSStyleDeclaration & { hyphenateLimitChars?: string };
+        return `${s.hyphens}${s.hyphens === "auto" ? ` ${s.hyphenateLimitChars}` : ""}`;
+      };
+      return { journal: ["h2", "label", "button"].map((tag) => `${tag} ${read(journal.querySelector(tag))}`), consentHeading: read(document.querySelector("main h1")) };
+    });
+  for (const [percent, expected] of [
+    [100, "manual"],
+    [200, "manual"],
+    [300, "auto 7 3 3"],
+  ] as const) {
+    await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
+    await page.goto("/fr/consent");
+    const got = await styles();
+    expect(got.journal, `${percent} %`).toEqual(["h2", "label", "button"].map((tag) => `${tag} ${expected}`));
+    expect(got.consentHeading, `Consent's heading at ${percent} %`).toBe("manual");
+  }
+});
+
+// A call link in a row, as the safety plan, the help card and the help page lay them out: at
+// 300 % on a 320 px phone a long helpline name ("TelefonSeelsorge", de) pushed the page 9 px
+// sideways, because a flex item can't be narrower than its longest word unless it may break
+// anywhere. The link here is put on a real page, laid out the same way.
+test("large text at 300 %: a call link with a long name stays inside a 320 px phone", async ({ page, browserName }, testInfo) => {
+  test.skip(browserName !== "chromium" || testInfo.project.name !== "desktop", "Page.setFontSizes is Chromium's; once is enough");
+  const cdp = await page.context().newCDPSession(page);
+  await page.setViewportSize({ width: 320, height: 640 });
+  await cdp.send("Page.setFontSizes", { fontSizes: { standard: 48, fixed: 39 } });
+  await page.goto("/de/consent");
+  const result = await page.evaluate(() => {
+    const row = document.createElement("div");
+    row.style.cssText = "display:flex;flex-wrap:wrap;gap:12px;align-items:center";
+    const call = document.createElement("a");
+    call.href = "tel:08001110111";
+    call.style.cssText = "display:inline-flex;min-height:44px;align-items:center;font-weight:500";
+    call.textContent = "TelefonSeelsorge 0800 111 0 111";
+    row.append(call);
+    document.querySelector("main")!.prepend(row);
+    const right = call.getBoundingClientRect().right;
+    // Inside a heading too, which hyphenates: the call link still never takes a hyphen.
+    const heading = document.createElement("h2");
+    const inHeading = call.cloneNode(true) as HTMLAnchorElement;
+    heading.append(inHeading);
+    document.querySelector("main")!.prepend(heading);
+    return {
+      right: Math.round(right),
+      overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      wrap: getComputedStyle(call).overflowWrap,
+      hyphens: [getComputedStyle(call).hyphens, getComputedStyle(inHeading).hyphens],
+    };
+  });
+  expect(result.wrap).toBe("anywhere");
+  expect(result.hyphens).toEqual(["manual", "manual"]);
+  expect(result.overflow).toBe(0);
+  expect(result.right).toBeLessThanOrEqual(320);
+});
