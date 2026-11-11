@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { BO_ERROR_TEXT, BO_ERRORS, BO_PICTURE_MAX_BASE64, BO_REASONS, boButtonShows, boCanTurnOn, boPictureField, boReasonProblem, boSpeaks, historyFromRows, type BoStatus } from "./bo";
+import { BO_ERROR_TEXT, BO_ERRORS, BO_PICTURE_MAX_BASE64, BO_REASONS, boButtonShows, boCanTurnOn, boPictureField, boReasonProblem, boSpeaks, historyFromRows, parseBoStatus, type BoStatus } from "./bo";
 import { BO_PICTURE_MAX_BYTES } from "./boPicture";
 import conditions from "../../../content/conditions.json";
 import messages from "@/messages/en.json";
@@ -97,5 +97,15 @@ describe("historyFromRows: the page's history (P8, #210)", () => {
   it("anything malformed is left out; no rows, no history", () => {
     expect(historyFromRows([{ id: "x", author: "someone", body: "?" }, null])).toEqual([]);
     expect(historyFromRows(null)).toEqual([]);
+  });
+});
+
+// 024: only the day's limit has a line; every other reason for no pictures stays silent (UX).
+describe("parseBoStatus: pictures_reason", () => {
+  it("picture_limit with pictures off: picturesLimit; any other reason, or pictures on: none", () => {
+    expect(parseBoStatus({ available: true, pictures: false, pictures_reason: "picture_limit" })).toMatchObject({ pictures: false, picturesLimit: true });
+    for (const data of [{ available: true, pictures: true, pictures_reason: "picture_limit" }, { available: true, pictures: false, pictures_reason: null }, { available: true, pictures: false, pictures_reason: "budget" }, { available: true, pictures: false }]) {
+      expect(parseBoStatus(data)).not.toHaveProperty("picturesLimit");
+    }
   });
 });

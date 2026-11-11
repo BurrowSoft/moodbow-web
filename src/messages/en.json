@@ -619,7 +619,7 @@
     "pictureRemove": "Remove the picture",
     "pictureAlt": "Your picture",
     "pictureStored": "(photo)",
-    "pictureUnreadable": "That picture can't be used. Try another one.",
+    "pictureUnreadable": "That picture couldn't be opened. Try another one.",
     "pictureReading": "Getting the picture ready",
     "picturesOff": "Pictures aren't available right now. You can still write to Bo.",
     "pictureLimit": "That's all of today's pictures. You can still write to Bo.",

@@ -495,16 +495,55 @@ describe("BoConversation", () => {
       expect(sends()[1]).toHaveProperty("picture");
     });
 
-    it("the day's pictures used, or pictures off: the line, help, and the text can still go", async () => {
+    it("the day's pictures used on a send: the line where attach was, said once, nothing to tap; help, and the text can still go", async () => {
       await open([], true, true);
       await choose();
       answers.push({ status: "error", code: "picture_limit" });
       type("Hello");
       await send();
-      expect(screen.getByTestId("bo-problem")).toHaveTextContent(b.pictureLimit);
+      expect(screen.getByTestId("bo-picture-limit")).toHaveTextContent(b.pictureLimit);
+      expect(screen.getByTestId("bo-picture-limit").tagName).toBe("P");
+      expect(screen.queryByTestId("bo-problem")).toBeNull();
+      expect(screen.queryByTestId("bo-picture-add")).toBeNull();
       expect(screen.queryByTestId("bo-picture-preview")).toBeNull();
       expect(screen.getByTestId("bo-text")).toHaveValue("Hello");
+      expect(screen.getByTestId("bo-send")).toBeEnabled();
       expect(screen.getByTestId("bo-get-help")).toBeInTheDocument();
+    });
+
+    it("status says the day's pictures are used (024): the line instead of attach; any other no stays silent", async () => {
+      statusAnswer = { ...ok, pictures: false, picturesLimit: true };
+      await open([], true, true);
+      expect(screen.getByTestId("bo-picture-limit")).toHaveTextContent(b.pictureLimit);
+      expect(screen.queryByTestId("bo-picture-add")).toBeNull();
+      cleanup();
+      statusAnswer = { ...ok, pictures: false };
+      await open([], true, true);
+      expect(screen.queryByTestId("bo-picture-limit")).toBeNull();
+      expect(screen.queryByTestId("bo-picture-add")).toBeNull();
+    });
+
+    it("the line is the flag's too: with pictures not allowed here, nothing", async () => {
+      statusAnswer = { ...ok, pictures: false, picturesLimit: true };
+      await open([], true, false);
+      expect(screen.queryByTestId("bo-picture-limit")).toBeNull();
+    });
+
+    it("a picture added while a send waits stays attached when the reply comes (#210)", async () => {
+      await open([], true, true);
+      let answer: (value: unknown) => void = () => {};
+      answers.push(new Promise((done) => (answer = done)));
+      type("Hello");
+      await send();
+      expect(screen.getByTestId("bo-typing")).toBeInTheDocument();
+      await choose();
+      expect(screen.getByTestId("bo-picture-preview")).toBeInTheDocument();
+      await act(async () => answer(reply()));
+      await act(async () => {});
+      expect(screen.getByTestId("bo-picture-preview")).toBeInTheDocument();
+      const person = screen.getAllByTestId("bo-message-person");
+      expect(person.at(-1)).not.toHaveAttribute("data-picture");
+      expect(sends()[0]).not.toHaveProperty("picture");
     });
 
     it("crisis words with a picture still open the card", async () => {

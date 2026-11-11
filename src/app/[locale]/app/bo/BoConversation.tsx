@@ -81,6 +81,8 @@ export function BoConversation({ initial, country, back, healthData = false, con
   // Pictures: offered only when the flag allows and the function says so. One per message,
   // in memory only, shown for this visit; the object URLs go with the screen.
   const [picturesOffered, setPicturesOffered] = useState(false);
+  // Today's pictures used (024): a line where attach was, with nothing to tap (app #228).
+  const [picturesLimit, setPicturesLimit] = useState(false);
   const [picture, setPicture] = useState<{ url: string; base64: string } | null>(null);
   const [pictureState, setPictureState] = useState<"idle" | "reading" | "unreadable">("idle");
   const [pictureConsent, setPictureConsent] = useState<"not-yet" | "asking" | "given">("not-yet");
@@ -159,6 +161,7 @@ export function BoConversation({ initial, country, back, healthData = false, con
     if (status.status === "ok") {
       setMaxChars(status.maxChars);
       setPicturesOffered(status.pictures);
+      setPicturesLimit(status.picturesLimit === true);
       setProblem(status.available ? null : boReasonProblem(status.reason));
     } else if (status.status === "error") {
       if (status.code === "not_authenticated") window.location.reload();
@@ -259,9 +262,11 @@ export function BoConversation({ initial, country, back, healthData = false, con
   const send = async () => {
     if (!canSend) return;
     const sent = text;
+    // The picture that goes: one added while it waits stays for the next message (#210).
+    const sentPicture = picture;
     // Before any request: the card needs no network (as for entries, #190).
     if (flagsCrisis(sent, CRISIS_KEYWORDS)) openCard();
-    if (attempt.current?.text !== sent || attempt.current.picture !== picture?.base64) attempt.current = { key: crypto.randomUUID(), text: sent, picture: picture?.base64 };
+    if (attempt.current?.text !== sent || attempt.current.picture !== sentPicture?.base64) attempt.current = { key: crypto.randomUUID(), text: sent, picture: sentPicture?.base64 };
     // Known to be offline: no request. navigator.onLine can also say online with no
     // connection, and that ends as no_answer.
     if (!navigator.onLine) return setProblem("offline");
@@ -270,7 +275,7 @@ export function BoConversation({ initial, country, back, healthData = false, con
     setProblem(null);
     // A retry sends the picture again: the function checks the key first, and ignores it
     // on a turn it already has (bo.md).
-    const body = { action: "send", client_key, text: sent, language, ...(picture ? { picture: { media_type: "image/jpeg", data: picture.base64 } } : {}) };
+    const body = { action: "send", client_key, text: sent, language, ...(sentPicture ? { picture: { media_type: "image/jpeg", data: sentPicture.base64 } } : {}) };
     let answer = await callBo<BoSend>(body);
     // Another send of this key is running: wait, and retry once (bo.md).
     if (answer.status === "error" && answer.code === "in_progress") {
@@ -288,8 +293,9 @@ export function BoConversation({ initial, country, back, healthData = false, con
       }
       setFull(answer.conversationFull);
       const { reply, conversationFull } = answer;
-      const pictureUrl = picture?.url;
-      setPicture(null);
+      const pictureUrl = sentPicture?.url;
+      // Only the one that went: a picture added while it waited stays attached.
+      setPicture((now) => (now === sentPicture ? null : now));
       setMessages((list) => [...list, { id: client_key, author: "person", body: sent, pictureUrl }, { id: `${client_key}-reply`, author: "ai", body: reply, sentWith: client_key, unkept: conversationFull }]);
       // Typed while it went (the box stays open for up to a minute): kept, and only what went
       // is taken out of it (B5, on paper).
@@ -305,7 +311,9 @@ export function BoConversation({ initial, country, back, healthData = false, con
     // The text can still go, without the picture.
     if (answer.code === "pictures_off" || answer.code === "pictures_need_email" || answer.code === "picture_limit") {
       setPicture(null);
-      if (answer.code !== "picture_limit") setPicturesOffered(false);
+      setPicturesOffered(false);
+      // The day's limit: its line takes attach's place, said once, with nothing to tap.
+      if (answer.code === "picture_limit") return setPicturesLimit(true);
     }
     setProblem(answer.code);
   };
@@ -413,6 +421,13 @@ export function BoConversation({ initial, country, back, healthData = false, con
             </button>
           )}
         </div>
+      )}
+      {/* Today's pictures used: where attach was, plain text (no button, nothing to tap). In the
+          page's flow, above the box, so at large text it scrolls away; help never moves (UX, app #228). */}
+      {picturesAllowed && picturesLimit && !picturesOffered && !closed && !needsConsent && (
+        <p data-testid="bo-picture-limit" className="text-sm text-muted">
+          {t("pictureLimit")}
+        </p>
       )}
       {needsConsent && !closed && <BoConsent onGiven={consentGiven} />}
       {!closed && !needsConsent && (

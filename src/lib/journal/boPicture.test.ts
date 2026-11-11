@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { jpegMetadataSegments, withoutMetadata } from "./boPicture";
+import { jpegMetadataSegments, pictureComplete, withoutMetadata } from "./boPicture";
 
 // The check itself: it must see each kind of metadata, or a clean result proves nothing.
 // A hand-built JPEG's markers, so this can fail without a browser's encoder involved.
@@ -27,6 +27,37 @@ describe("jpegMetadataSegments", () => {
     for (const bad of [[], [0xff], [0x89, 0x50, 0x4e, 0x47], [...SOI, 0x00, 0x11, 0, 2], [...SOI, ...JFIF]]) {
       expect(jpegMetadataSegments(new Uint8Array(bad))).toBeNull();
     }
+  });
+});
+
+// A cut-off file decodes as a grey picture, so it's caught before any drawing (app #228).
+const ascii = (s: string) => [...s].map((c) => c.charCodeAt(0));
+const PNG = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
+const pngChunk = (type: string, data: number[]) => [0, 0, 0, data.length, ...ascii(type), ...data, 1, 2, 3, 4];
+const webp = (body: number[], counted = body.length + 4) => [...ascii("RIFF"), counted & 255, (counted >> 8) & 255, 0, 0, ...ascii("WEBP"), ...body];
+
+describe("pictureComplete", () => {
+  it("a whole JPEG, PNG or WebP is complete", () => {
+    expect(pictureComplete(jpeg())).toBe(true);
+    expect(pictureComplete(new Uint8Array([...PNG, ...pngChunk("IHDR", [1, 2]), ...pngChunk("IEND", [])]))).toBe(true);
+    expect(pictureComplete(new Uint8Array(webp([9, 9, 9, 9])))).toBe(true);
+  });
+  it("cut off: a JPEG with no end after its scan, a PNG short of IEND's CRC, a WebP short of its count", () => {
+    const whole = jpeg();
+    expect(pictureComplete(whole.subarray(0, whole.length - 2))).toBe(false);
+    const png = [...PNG, ...pngChunk("IHDR", [1, 2]), ...pngChunk("IEND", [])];
+    expect(pictureComplete(new Uint8Array(png.slice(0, png.length - 2)))).toBe(false);
+    expect(pictureComplete(new Uint8Array(png.slice(0, png.length - 12)))).toBe(false);
+    expect(pictureComplete(new Uint8Array(webp([9, 9], 20)))).toBe(false);
+  });
+  it("a JPEG's EXIF thumbnail ends early: only the end after the last scan counts", () => {
+    const thumbnailEnd = segment(0xe1, [0xff, 0xda, 1, 0xff, 0xd9]);
+    const cut = [...SOI, ...thumbnailEnd, ...TABLE, 0xff, 0xda, 0, 2, 9, 9];
+    expect(pictureComplete(new Uint8Array(cut))).toBe(false);
+    expect(pictureComplete(new Uint8Array([...cut, 0xff, 0xd9]))).toBe(true);
+  });
+  it("other formats: the decoder decides", () => {
+    expect(pictureComplete(new Uint8Array(ascii("GIF89a")))).toBe(true);
   });
 });
 

@@ -59,6 +59,36 @@ export function withoutMetadata(bytes: Uint8Array): Uint8Array<ArrayBuffer> | nu
   return null;
 }
 
+// Whether the file has its format's end. A cut-off file decodes in part, as a black or
+// grey picture, so the decoder alone never says it's unreadable (app #228, Bo window
+// 2026-11-09). JPEG needs its end marker after the last scan, PNG its whole IEND chunk,
+// WebP all the bytes its header counts. Other formats: the decoder decides.
+export function pictureComplete(raw: Uint8Array): boolean {
+  const at = (i: number, bytes: number[]) => i >= 0 && i + bytes.length <= raw.length && bytes.every((b, k) => raw[i + k] === b);
+  const find = (bytes: number[], from = 0) => {
+    for (let i = from; i + bytes.length <= raw.length; i++) if (at(i, bytes)) return i;
+    return -1;
+  };
+  const ascii = (s: string) => [...s].map((c) => c.charCodeAt(0));
+  if (at(0, [0xff, 0xd8])) {
+    // The last scan: an EXIF thumbnail has its own scan and end marker early on, and
+    // scan data never holds FF DA (a 0xFF there is always stuffed).
+    let scan = -1;
+    for (let i = find([0xff, 0xda]); i >= 0; i = find([0xff, 0xda], i + 2)) scan = i;
+    return scan >= 0 && find([0xff, 0xd9], scan + 2) >= 0;
+  }
+  if (at(0, [0x89, 0x50, 0x4e, 0x47])) {
+    // The IEND chunk whole: its type and the 4-byte CRC after it.
+    const end = find(ascii("IEND"), 8);
+    return end >= 0 && end + 8 <= raw.length;
+  }
+  if (at(0, ascii("RIFF")) && at(8, ascii("WEBP"))) {
+    const size = raw[4] | (raw[5] << 8) | (raw[6] << 16) | (raw[7] << 24);
+    return raw.length >= size + 8;
+  }
+  return true;
+}
+
 const encoded = (canvas: HTMLCanvasElement, quality: number) => new Promise<Blob | null>((done) => canvas.toBlob(done, "image/jpeg", quality));
 
 const asBase64 = (blob: Blob) =>
@@ -73,6 +103,8 @@ export async function preparePicture(file: File): Promise<BoPicture> {
   if (file.size === 0 || file.size > BO_PICTURE_MAX_INPUT_BYTES || file.type === "image/svg+xml") return { ok: false };
   let canvas: HTMLCanvasElement;
   try {
+    // A cut-off file is never drawn: it would go as a grey picture.
+    if (!pictureComplete(new Uint8Array(await file.arrayBuffer()))) return { ok: false };
     // Upright, by the file's own orientation, which goes with its metadata.
     const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
     const scale = Math.min(1, BO_PICTURE_LONG_SIDE / Math.max(bitmap.width, bitmap.height));

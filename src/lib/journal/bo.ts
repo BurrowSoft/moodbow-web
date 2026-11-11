@@ -45,7 +45,9 @@ export type BoSend = { status: "ok"; reply: string; showHelp: boolean; openCard:
 // Why Bo isn't available: the first switch that says no, in the contract's order (bo.md).
 export const BO_REASONS = ["off", "region_off", "region_unknown", "language_off", "age", "budget", "bo_off", "consent"] as const;
 export type BoReason = (typeof BO_REASONS)[number];
-export type BoStatus = { status: "ok"; available: boolean; reason: BoReason | null; pictures: boolean; maxChars: number } | { status: "error"; code: BoError } | { status: "no_answer" };
+// picturesLimit: no pictures now only because today's are used up (024, pictures_reason). The
+// screen says so where attach would be; every other no stays silent (UX, 2026-11-09).
+export type BoStatus = { status: "ok"; available: boolean; reason: BoReason | null; pictures: boolean; picturesLimit?: true; maxChars: number } | { status: "error"; code: BoError } | { status: "no_answer" };
 
 // What each reason shows (bo.md's Client column): the button only where Bo is available, its
 // budget is spent (the line, with help) or it needs consent (the button opens consent).
@@ -70,11 +72,12 @@ export function parseBoSend(data: unknown): BoSend {
 }
 
 export function parseBoStatus(data: unknown): BoStatus {
-  const d = (data ?? {}) as { available?: unknown; reason?: unknown; pictures?: unknown; limits?: { max_chars?: unknown } };
+  const d = (data ?? {}) as { available?: unknown; reason?: unknown; pictures?: unknown; pictures_reason?: unknown; limits?: { max_chars?: unknown } };
   if (typeof d.available !== "boolean") return { status: "no_answer" };
   // A no without a reason this client knows is read as off: never more than the function said.
   const reason = d.available ? null : (BO_REASONS as readonly unknown[]).includes(d.reason) ? (d.reason as BoReason) : "off";
-  return { status: "ok", available: d.available, reason, pictures: d.pictures === true, maxChars: typeof d.limits?.max_chars === "number" ? d.limits.max_chars : 2000 };
+  const picturesLimit = d.pictures !== true && d.pictures_reason === "picture_limit";
+  return { status: "ok", available: d.available, reason, pictures: d.pictures === true, ...(picturesLimit ? { picturesLimit: true as const } : {}), maxChars: typeof d.limits?.max_chars === "number" ? d.limits.max_chars : 2000 };
 }
 
 // What this screen needs of a conversation: kept messages only, as plain text.

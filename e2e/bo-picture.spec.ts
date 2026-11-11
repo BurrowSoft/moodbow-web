@@ -158,11 +158,21 @@ test.describe("Bo's pictures: the bytes that would leave the browser", () => {
     }
   });
 
-  test("a truncated JPEG with EXIF: refused, or re-encoded clean, and never the file as it was", async ({ page }) => {
-    const out = await prepare(page, `(await (async () => { const whole = withSegment(await jpeg(400, 300), 0xe1, ${EXIF(1, "TRUNCATED-MARKER")}); return whole.slice(0, Math.floor(whole.length / 2)); })())`);
-    if (out.ok) {
-      expect(out.segments).toEqual([]);
-      expect(out.text).not.toContain("TRUNCATED-MARKER");
-    }
+  // A cut-off file decodes in part, as a grey picture, so it's refused before any drawing
+  // (app #228): "That picture couldn't be opened", and nothing is attached.
+  test("a truncated JPEG with EXIF, a truncated one without, and a cut-off PNG: refused, never a grey picture", async ({ page }) => {
+    const half = (make: string) => `(await (async () => { const whole = ${make}; return whole.slice(0, Math.floor(whole.length / 2)); })())`;
+    expect((await prepare(page, half(`withSegment(await jpeg(400, 300), 0xe1, ${EXIF(1, "TRUNCATED-MARKER")})`))).ok, "with EXIF").toBe(false);
+    expect((await prepare(page, half("await jpeg(400, 300)"))).ok, "plain").toBe(false);
+    const cutPng = await page.evaluate(async () => {
+      const w = window as unknown as { bo: { preparePicture: (f: File) => Promise<{ ok: boolean }> } };
+      const c = document.createElement("canvas");
+      c.width = c.height = 100;
+      const png = new Uint8Array(await (await new Promise<Blob>((done) => c.toBlob((b) => done(b!), "image/png"))).arrayBuffer());
+      return (await w.bo.preparePicture(new File([png.slice(0, png.length - 6)], "cut.png", { type: "image/png" }))).ok;
+    });
+    expect(cutPng, "PNG short of IEND's CRC").toBe(false);
+    // The whole file still goes: the check refuses only what's cut off.
+    expect((await prepare(page, "await jpeg(400, 300)")).ok, "whole").toBe(true);
   });
 });
