@@ -20,10 +20,10 @@ vi.mock("@/i18n/navigation", () => ({
 const { CheckInCard } = await import("./CheckInCard");
 
 const ROW: CheckIn = { local_date: "2026-10-02", mood: 4, sleep_hours: null, sleep_quality: null, exercise_minutes: null, stress: null, updated_at: "2026-10-02T10:00:00Z" };
-const show = (initialTags: string[] | null, recentTags: string[] = []) =>
+const show = (initialTags: string[] | null, recentTags: string[] = [], country: string | null = null) =>
   render(
     <NextIntlClientProvider locale="en" messages={messages}>
-      <CheckInCard initial={ROW} uid="u1" date="2026-10-02" dateLocaleTag="en-US" initialTags={initialTags} recentTags={recentTags} />
+      <CheckInCard initial={ROW} uid="u1" date="2026-10-02" dateLocaleTag="en-US" initialTags={initialTags} recentTags={recentTags} country={country} />
     </NextIntlClientProvider>,
   );
 const sent = (call = 0) => Object.fromEntries((saveCheckIn.mock.calls[call][1] as FormData).entries());
@@ -92,6 +92,15 @@ describe("CheckInCard with tags", () => {
     await save();
     expect(screen.getByTestId("safety-card")).toBeInTheDocument();
     expect(saveCheckIn).toHaveBeenCalled();
+  });
+
+  it("the help card has the profile's country's numbers, as the editor's does (the Reviewer, #278)", async () => {
+    saveCheckIn.mockResolvedValue({ status: "saved", checkIn: ROW, tags: [] });
+    show([], [], "TH");
+    edit();
+    addTag(CRISIS_KEYWORDS!.languages.en.phrases[0].slice(0, 32));
+    await save();
+    expect(screen.getByTestId("safety-call-helpline")).toHaveAttribute("href", "tel:1323");
   });
 
   it("a near miss: no help card", async () => {

@@ -154,7 +154,7 @@ function toFormData(fields: Fields, expectedUpdatedAt: string, date: string, fro
 // loadFailed: today's check-in couldn't be read, so the empty card comes with
 // its error and Try again, until this card holds a real row.
 // initialTags: the day's tags where tags are on (null: off); recentTags: the person's, for the picker.
-type Props = { initial: CheckIn | null; uid: string; date: string; dateLocaleTag: string; autoFocus?: boolean; keepDraft?: boolean; loadFailed?: boolean; initialTags?: string[] | null; recentTags?: string[] };
+type Props = { initial: CheckIn | null; uid: string; date: string; dateLocaleTag: string; autoFocus?: boolean; keepDraft?: boolean; loadFailed?: boolean; initialTags?: string[] | null; recentTags?: string[]; country?: string | null };
 
 // An offline copy the server refused ("rejected": e.g. a day that is in the
 // future for the account's zone). Never silent (decision 72): one notice per
@@ -294,7 +294,7 @@ export function CheckInCard(props: Props) {
   );
 }
 
-function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, autoFocus, keepDraft, loadFailed, initialTags = null, recentTags = [] }: Props & { notify: Notify; announce: (text: string) => void }) {
+function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, autoFocus, keepDraft, loadFailed, initialTags = null, recentTags = [], country = null }: Props & { notify: Notify; announce: (text: string) => void }) {
   const t = useTranslations("today");
   // The day's tags: what's saved, and what the form holds now. Sent only when they differ.
   const tagsOn = initialTags !== null;
@@ -753,6 +753,8 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
             {t("errGeneric")}
           </p>
         )}
+        {/* Saved, the card turns into this summary: the help offer opened at Save stays open. */}
+        {helpOpen && <SafetyCard country={country} onClose={() => setHelpOpen(false)} />}
         {chips.length > 0 && (
           <ul className="mt-3 flex flex-wrap gap-2" data-testid="checkin-summary-chips">
             {chips.map(({ label, hex }) => (
@@ -928,7 +930,8 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
           {t("errGeneric")}
         </p>
       )}
-      {helpOpen && <SafetyCard country={null} onClose={() => setHelpOpen(false)} />}
+      {/* The profile's country, as the editor's card (the Reviewer, #278); none: the connection's. */}
+      {helpOpen && <SafetyCard country={country} onClose={() => setHelpOpen(false)} />}
       {errorKey && (
         <p role="alert" data-testid="checkin-error" className="mt-4 font-medium text-accent">
           {t(errorKey)}

@@ -1593,7 +1593,7 @@
     },
     {
       "name": "round trip: our own export of content/contracts/export_fixture.json (en)",
-      "csv": "﻿date,mood,mood_word,sleep_hours,sleep_quality,movement_minutes,stress,moment,tags,note\r\n2026-09-28,2,Bad,,,,,,,\r\n2026-09-29,3,Okay,7,,0,4,,,\r\n2026-09-30,5,Great,,poor,90,,,,\"Long day.\r\nBut a good talk with Mai at the end — ขอบคุณ.\r\n\r\n\"\r\n2026-10-02,4,Good,7.5,good,30,2,yes,,A walk by the river.\r\n2026-10-02,4,Good,7.5,good,30,2,,,\"\nGroceries  \n\n- rice\n- tea\n \t\n\t\n\"\r\n",
+      "csv": "﻿date,mood,mood_word,sleep_hours,sleep_quality,movement_minutes,stress,moment,tags,note\r\n2026-09-28,2,Bad,,,,,,Walk | Friends,\r\n2026-09-29,3,Okay,7,,0,4,,,\r\n2026-09-30,5,Great,,poor,90,,,,\"Long day.\r\nBut a good talk with Mai at the end — ขอบคุณ.\r\n\r\n\"\r\n2026-10-02,4,Good,7.5,good,30,2,yes,,A walk by the river.\r\n2026-10-02,4,Good,7.5,good,30,2,,,\"\nGroceries  \n\n- rice\n- tea\n \t\n\t\n\"\r\n",
       "result": {
         "status": "ok",
         "plan": {

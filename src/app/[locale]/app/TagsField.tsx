@@ -19,8 +19,8 @@ export function TagsField({ tags, recent, onChange }: { tags: string[]; recent: 
     if (!next.problem) onChange(next.tags);
     if (!next.problem || next.problem === "duplicate" || next.problem === "empty") setText("");
   };
-  const lower = new Set(tags.map((x) => x.toLocaleLowerCase()));
-  const picks = recent.filter((r) => !lower.has(r.toLocaleLowerCase())).slice(0, 12);
+  const lower = new Set(tags.map((x) => x.toLowerCase()));
+  const picks = recent.filter((r) => !lower.has(r.toLowerCase())).slice(0, 12);
 
   return (
     <div className="mt-6" data-testid="checkin-tags">

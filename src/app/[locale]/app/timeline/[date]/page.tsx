@@ -72,7 +72,7 @@ export default async function DayPage({ params }: PageProps<"/[locale]/app/timel
       <h1 className={JOURNAL_HEADING} data-testid="day-date">
         {dateLine(date, dateLocaleTag)}
       </h1>
-      <DayCheckIn initial={(checkIn as CheckIn | null) ?? null} uid={user.id} date={date} dateLocaleTag={dateLocaleTag} {...(await readCardTags(supabase, date))} />
+      <DayCheckIn initial={(checkIn as CheckIn | null) ?? null} uid={user.id} date={date} dateLocaleTag={dateLocaleTag} {...(await readCardTags(supabase, date))} country={me.profile?.country} />
       {entriesError ? (
         <p role="alert" data-testid="day-entries-error" className="font-medium text-accent">
           {tt("errGeneric")}

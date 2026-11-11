@@ -13,6 +13,15 @@ const answer = (status: string) => ({ ok: true, json: async () => ({ status }) }
 const broadcastSignOut = vi.fn();
 vi.mock("./actions", () => ({ signOut: (...a: unknown[]) => signOut(...a) }));
 vi.mock("../actions", () => ({ saveCheckIn: (...a: unknown[]) => saveCheckIn(...a) }));
+// The card brings the help card (a Link) for tags the crisis list matches.
+vi.mock("@/i18n/navigation", () => ({
+  Link: ({ href, children, prefetch, ...rest }: { href: string; prefetch?: boolean; children: React.ReactNode }) => (
+    <a href={href} data-prefetch={String(prefetch)} {...rest}>
+      {children}
+    </a>
+  ),
+}));
+
 vi.mock("@/lib/signOutSignal", () => ({ broadcastSignOut: (...a: unknown[]) => broadcastSignOut(...a) }));
 const { SignOutButton } = await import("./SignOutButton");
 

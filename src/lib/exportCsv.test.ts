@@ -115,9 +115,9 @@ describe("renderExportCsv: the file", () => {
   it("one row per entry, oldest first, the day's check-in on each; a check-in alone is one row", () => {
     const rows = table.slice(1);
     expect(rows.map((r) => r[0])).toEqual(["2026-10-01", "2026-10-01", "2026-10-02", "2026-10-03", "2026-10-03", "2026-10-03", "2026-10-04", "2026-10-04", "2026-10-04", "2026-10-04", "2026-10-05"]);
-    expect(rows[0]).toEqual(["2026-10-01", "4", en.today.mood4, "7.5", "good", "30", "2", "yes", "Morning walk."]);
+    expect(rows[0]).toEqual(["2026-10-01", "4", en.today.mood4, "7.5", "good", "30", "2", "yes", "", "Morning walk."]);
     expect(rows[1].slice(0, 8)).toEqual(["2026-10-01", "4", en.today.mood4, "7.5", "good", "30", "2", ""]);
-    expect(rows[2]).toEqual(["2026-10-02", "1", en.today.mood1, "0", "", "0", "", "", ""]);
+    expect(rows[2]).toEqual(["2026-10-02", "1", en.today.mood1, "0", "", "0", "", "", "", ""]);
     expect(rows[3].slice(1, 7)).toEqual(["", "", "", "", "", ""]);
   });
 

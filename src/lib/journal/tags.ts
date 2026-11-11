@@ -11,7 +11,7 @@ export type TagProblem = "empty" | "too_long" | "too_many" | "duplicate";
 // Trimmed, inner whitespace as one space: how a tag is stored.
 export const normalizeTag = (raw: string): string => raw.replace(/\s+/g, " ").trim();
 const length = (s: string) => [...s].length;
-const same = (a: string, b: string) => a.toLocaleLowerCase() === b.toLocaleLowerCase();
+const same = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
 
 // Adding one typed or picked tag to the day's list.
 export function addTag(tags: readonly string[], raw: string): { tags: string[]; problem: TagProblem | null } {
