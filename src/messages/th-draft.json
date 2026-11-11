@@ -1458,5 +1458,10 @@
     "key": "appointment.footer",
     "en": "Made by you from your own Moodbow entries. Not a medical assessment.",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.breathSafety",
+    "en": "If you feel dizzy, stop and breathe normally.",
+    "reason": "UX draft (native read pending)"
   }
 ]

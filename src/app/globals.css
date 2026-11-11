@@ -185,11 +185,12 @@ html[data-signed-in] [data-language-switcher] {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
 }
-/* A date field's calendar button sits inside the input (the browser's own
-   part): with focus on it the input isn't :focus-visible and the ring went
-   (WCAG 2.4.7, Web Tester). The field keeps the same ring while focus is
-   anywhere inside it. */
-input[type="date"]:focus-within {
+/* A date or time field's picker button sits inside the input (the browser's
+   own part): with focus on it the input isn't :focus-visible and the ring went
+   (WCAG 2.4.7, Web Tester: the editor's date, then Set up's and Me's reminder
+   time, 12 Nov). The field keeps the same ring while focus is anywhere inside
+   it, for every type with such a part. */
+input:is([type="date"], [type="time"], [type="datetime-local"], [type="month"], [type="week"]):focus-within {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
 }
