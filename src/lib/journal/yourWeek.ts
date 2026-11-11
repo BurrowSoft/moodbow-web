@@ -5,7 +5,7 @@ import { lastWeekStart } from "./report";
 // Your week (specs/your-week.md; UX 2026-11-06): a small card at the top of
 // Insights that says something back about the person's week, from fixed rules,
 // no AI. Check-in values and the star only, never entry text. The rules are in
-// content/your-week.json with worked cases, for the app to run the same ones:
+// content/contracts/your-week.json (synced from the app repo) with worked cases, which both run:
 // - the last complete Monday to Sunday; a check-in counts if it has a mood;
 // - under 4 check-ins: no card;
 // - mood 1 or 2 on more than half: only "hard", nothing else;
