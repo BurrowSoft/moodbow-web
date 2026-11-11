@@ -38,6 +38,31 @@ export function writePalette(palette: Palette | null, until: string | null): voi
   applyPalette(palette && until ? palette : null);
 }
 
+// The stored choice's name, whatever its date: kept through a renewal or a
+// failed payment, so it comes back once Plus runs again.
+export function storedPaletteName(): Palette | null {
+  try {
+    const name = (window.localStorage.getItem(PALETTE_KEY) ?? "").split("@")[0];
+    return isPalette(name) ? name : null;
+  } catch {
+    return null;
+  }
+}
+
+// With Plus on, the stored choice runs to the entitlement's current end, so a
+// yearly renewal never resets the theme (UX, #277). true: it changed.
+export function refreshPaletteUntil(until: string): boolean {
+  const name = storedPaletteName();
+  if (!name) return false;
+  try {
+    if (window.localStorage.getItem(PALETTE_KEY) === `${name}@${until}`) return false;
+  } catch {
+    return false;
+  }
+  writePalette(name, until);
+  return true;
+}
+
 export function applyPalette(palette: Palette | null): void {
   if (palette) document.documentElement.dataset.palette = palette;
   else delete document.documentElement.dataset.palette;

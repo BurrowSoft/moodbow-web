@@ -49,6 +49,41 @@ describe("Me → Appearance: Plus's extra themes", () => {
     expect(window.localStorage.getItem(PALETTE_KEY)).toBeNull();
     expect(document.documentElement.dataset.palette).toBeUndefined();
   });
+  it("a renewal: the stored choice moves on to the entitlement's new end, even past its old date", () => {
+    window.localStorage.setItem(PALETTE_KEY, "dusk@2020-01-01T00:00:00.000Z");
+    act(() => {
+      show({ until: LATER });
+    });
+    expect(window.localStorage.getItem(PALETTE_KEY)).toBe(`dusk@${LATER}`);
+    expect(document.documentElement.dataset.palette).toBe("dusk");
+    expect(screen.getByTestId("me-palette-dusk")).toBeChecked();
+  });
+  it("Plus on with a later end than stored: the date follows; no choice stored: nothing is written", () => {
+    window.localStorage.setItem(PALETTE_KEY, "sea@2998-01-01T00:00:00.000Z");
+    act(() => {
+      show({ until: LATER });
+    });
+    expect(window.localStorage.getItem(PALETTE_KEY)).toBe(`sea@${LATER}`);
+    cleanup();
+    window.localStorage.clear();
+    act(() => {
+      show({ until: LATER });
+    });
+    expect(window.localStorage.getItem(PALETTE_KEY)).toBeNull();
+    expect(screen.getByRole("radio", { name: p.paletteDefault })).toBeChecked();
+  });
+  it("a failed renewal: the payment line, not the lock, and the choice stays stored", () => {
+    window.localStorage.setItem(PALETTE_KEY, `sea@${LATER}`);
+    document.documentElement.dataset.palette = "sea";
+    act(() => {
+      show({ pastDue: true });
+    });
+    expect(screen.getByTestId("me-palettes-past-due")).toHaveTextContent(p.pastDue);
+    expect(screen.queryByTestId("me-palettes")).toBeNull();
+    expect(screen.queryByRole("group", { name: p.paletteLegend })).toBeNull();
+    expect(window.localStorage.getItem(PALETTE_KEY)).toBe(`sea@${LATER}`);
+    expect(document.documentElement.dataset.palette).toBe("sea");
+  });
   it("Plus unreadable: nothing shown, nothing changed", () => {
     window.localStorage.setItem(PALETTE_KEY, `sea@${LATER}`);
     show(null);

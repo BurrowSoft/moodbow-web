@@ -4,7 +4,7 @@ import { useEffect, useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
 import { applyTheme, readTheme, THEME_KEY, THEMES, writeTheme, type Theme } from "@/lib/appearance";
 import { readShortcutsOn, writeShortcutsOn } from "@/lib/shortcuts";
-import { applyPalette, PALETTES, PALETTE_KEY, readPalette, writePalette, type Palette } from "@/lib/plus/palettes";
+import { applyPalette, PALETTES, PALETTE_KEY, readPalette, refreshPaletteUntil, writePalette, type Palette } from "@/lib/plus/palettes";
 import { LockedItem, type PlusOffer } from "../PlusSheet";
 import { useUntilLoaded } from "@/lib/ui/untilLoaded";
 
@@ -35,9 +35,10 @@ const subscribe = (cb: () => void) => {
 // shortcuts: the keyboard shortcuts switch (1.1 O, WCAG 2.1.4), on by
 // default, also for this device only.
 // palette: Moodbow Plus's extra themes (decision 246): { until } with Plus (the date
-// it runs to, kept with the choice), the offer without (a lock), null when
+// it runs to, kept with the choice), { pastDue } while a renewal fails (the
+// payment line, and the choice kept), the offer without (a lock), null when
 // Plus can't be read (nothing shown, nothing changed).
-export function Appearance({ shortcuts = false, palette = null }: { shortcuts?: boolean; palette?: { until: string } | PlusOffer | null }) {
+export function Appearance({ shortcuts = false, palette = null }: { shortcuts?: boolean; palette?: { until: string } | { pastDue: true } | PlusOffer | null }) {
   const untilLoaded = useUntilLoaded();
   const t = useTranslations("me");
   const theme = useSyncExternalStore(subscribe, readTheme, () => "system" as Theme);
@@ -45,14 +46,20 @@ export function Appearance({ shortcuts = false, palette = null }: { shortcuts?: 
   const tp = useTranslations("plus");
   const chosenPalette = useSyncExternalStore(subscribe, () => readPalette(), () => null);
   const until = palette && "until" in palette ? palette.until : null;
+  // A renewal failed: not ended. The choice stays stored (UX, #277).
+  const pastDue = palette !== null && "pastDue" in palette;
   // Plus has ended (or never was): the default comes back, nothing is lost.
-  const ended = palette !== null && until === null;
+  const ended = palette !== null && until === null && !pastDue;
   useEffect(() => {
     if (ended && readPalette()) {
       writePalette(null, null);
       listeners.forEach((cb) => cb());
     }
   }, [ended]);
+  // Plus on: the stored choice follows the entitlement's end (a renewal moves it on).
+  useEffect(() => {
+    if (until && refreshPaletteUntil(until)) listeners.forEach((cb) => cb());
+  }, [until]);
   const choosePalette = (next: Palette | null) => {
     writePalette(next, until);
     listeners.forEach((cb) => cb());
@@ -109,7 +116,12 @@ export function Appearance({ shortcuts = false, palette = null }: { shortcuts?: 
           </div>
         </fieldset>
       )}
-      {palette && !until && (
+      {pastDue && (
+        <p data-testid="me-palettes-past-due" className="mt-6 border-t border-border pt-4 text-text [overflow-wrap:anywhere]">
+          {tp("pastDue")}
+        </p>
+      )}
+      {palette && !until && !pastDue && (
         <LockedItem label={tp("rowThemes")} sheetTitle={tp("sheetThemes")} offer={palette as PlusOffer} testId="me-palettes" className="mt-6 flex min-h-11 w-full items-center justify-between gap-3 border-t border-border pt-4 text-left font-medium text-text" />
       )}
       {shortcuts && (
