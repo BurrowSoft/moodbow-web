@@ -47,11 +47,12 @@ export default async function AppointmentPage({ params }: PageProps<"/[locale]/a
   const starred = starredIn(moments.data, days);
   const dateLabels = Object.fromEntries(starred.map((e) => [e.entry_date, dateLine(e.entry_date, tag)]));
   return (
-    <section className="space-y-6">
+    <section className="space-y-[max(8px,calc(24px-1rem))]">
       <div className="print:hidden">
         <BackLink href="/app/me" label={ta("navBackTo", { screen: ta("tabMe") })} testId="nav-back" />
       </div>
-      <h1 className={JOURNAL_HEADING} data-testid="appointment-title">
+      {/* At most 36 px on a phone (decision 231): its words stay whole at large text. */}
+      <h1 className={`${JOURNAL_HEADING} max-sm:[font-size:min(1.875rem,max(11.25vw,36px))]`} data-testid="appointment-title">
         {t("meRow")}
       </h1>
       {checkIns.error || moments.error ? <JournalUnavailable /> : <AppointmentSummary today={me.today} rows={(checkIns.data ?? []) as InsightRow[]} starred={starred} dateLabels={dateLabels} />}

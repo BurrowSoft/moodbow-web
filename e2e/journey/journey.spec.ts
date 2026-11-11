@@ -1633,3 +1633,56 @@ test("large text: every help number on the list stays whole on a phone", { tag: 
     await cleanup(email);
   }
 });
+
+// For my appointment's title at 320 px and 300 % (Web Tester, #268): at most 36 px on a phone
+// (decision 231), each word on one line, inside the width, and the summary's start not pushed far
+// down; in en and the languages with the longest title.
+test("large text, set in the browser: the appointment summary's title keeps its words whole on a 320 px phone", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
+  test.setTimeout(120_000);
+  const email = newEmail();
+  const password = newPassword();
+  const cdp = await page.context().newCDPSession(page);
+  const splitWords = (el: Element) => {
+    if (!el.isConnected) return null;
+    const text = el.firstChild!;
+    return [...(text.textContent ?? "").matchAll(/\S+/g)]
+      .filter((word) => {
+        const range = document.createRange();
+        range.setStart(text, word.index);
+        range.setEnd(text, word.index + word[0].length);
+        return new Set([...range.getClientRects()].map((rect) => Math.round(rect.top))).size > 1;
+      })
+      .map((word) => word[0]);
+  };
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    await page.setViewportSize({ width: 320, height: 640 });
+    for (const [route, saved] of [["", "en"], ["/fr", "fr"], ["/es", "es"], ["/pt-br", "pt"]] as const) {
+      await setProfileLocale(email, password, saved);
+      for (const percent of [100, 300]) {
+        const where = `${saved} at ${percent} %`;
+        await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
+        await page.goto(`${route}/app/me/appointment`);
+        const title = page.getByTestId("appointment-title");
+        await expect(title, where).toBeVisible();
+        const size = await title.evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
+        expect(size, `${where}: the title's size`).toBeLessThanOrEqual(36.5);
+        expect(await title.evaluate(splitWords), `${where}: no word split across lines`).toEqual([]);
+        const box = (await title.boundingBox())!;
+        expect(box.x + box.width, `${where}: the title inside the width`).toBeLessThanOrEqual(320.5);
+        expect(await page.evaluate(() => document.documentElement.scrollWidth), `${where}: no sideways scroll`).toBeLessThanOrEqual(320);
+      }
+    }
+  } finally {
+    await cleanup(email);
+  }
+});
