@@ -7,6 +7,8 @@ import { HelpNumberText } from "@/components/HelpNumberText";
 import { Link } from "@/i18n/navigation";
 import { helpLineSize, helplinesFor, isIos, isShortCode, telHref } from "@/lib/safety/helplines";
 import { safetyPlanHasContent } from "@/app/[locale]/app/me/safety-plan/actions";
+import { useRequestCountry } from "@/components/RequestCountry";
+import { countryName } from "@/lib/region/countries";
 
 const noSubscribe = () => () => {};
 
@@ -23,7 +25,16 @@ const noSubscribe = () => () => {};
 export function SafetyCard({ country, onClose, neutral = false }: { country: string | null | undefined; onClose: () => void; neutral?: boolean }) {
   const t = useTranslations("safety");
   const tc = useTranslations("common");
-  const lines = helplinesFor(country, useLocale());
+  // No profile country (a page that couldn't read it, or none set): the country this request
+  // came from (the root layout's), so a number to tap is there whenever one can be. With none,
+  // the card as before: the sentence and Find a helpline.
+  const requestCountry = useRequestCountry();
+  const requested = country ? null : requestCountry;
+  const locale = useLocale();
+  const lines = helplinesFor(country || requested, locale);
+  // Numbers from where the request came from, not the person's own country: say whose they
+  // are, so someone travelling or on a VPN can tell (UX). The browser's own country name.
+  const fromRequest = !country && requested && (lines.helpline || lines.emergency) ? countryName(requested, locale) : null;
   const ios = useSyncExternalStore(noSubscribe, () => isIos(navigator.userAgent, navigator.maxTouchPoints), () => false);
   // My safety plan (1.2), below the helplines, only where it has content (the Reviewer's read):
   // asked once the card is open, so help never waits on it; a yes or no, never the plan.
@@ -46,6 +57,11 @@ export function SafetyCard({ country, onClose, neutral = false }: { country: str
   return (
     <Dialog title={t("safetyTitle")} body={t(neutral ? "safetyBodyNeutral" : "safetyBody")} onCancel={onClose} testId="safety-card" initialFocus="title" capText>
       <div className="w-full space-y-[max(6px,calc(28px-1rem))] text-left">
+        {fromRequest && (
+          <p data-testid="safety-request-country" className="font-medium text-text">
+            {fromRequest}
+          </p>
+        )}
         {lines.helpline &&
           (ios && isShortCode(lines.helpline.dial) ? (
             <div>

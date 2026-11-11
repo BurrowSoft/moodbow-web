@@ -13,6 +13,8 @@ let planHas: boolean | "never" = false;
 vi.mock("@/app/[locale]/app/me/safety-plan/actions", () => ({
   safetyPlanHasContent: () => (planHas === "never" ? new Promise(() => {}) : Promise.resolve(planHas)),
 }));
+import { RequestCountryProvider } from "./RequestCountry";
+import { usableCountry } from "@/lib/region/requestCountry";
 vi.mock("@/i18n/navigation", () => ({
   Link: ({ href, prefetch, children, ...rest }: { href: string; prefetch?: boolean; children: React.ReactNode }) => (
     <a href={href} data-prefetch={String(prefetch)} {...rest}>
@@ -290,5 +292,34 @@ describe("SafetyCard: My safety plan (1.2, the Reviewer's read)", () => {
     expect(screen.getByTestId("safety-call-helpline")).toBeInTheDocument();
     expect(screen.queryByTestId("safety-plan-button")).toBeNull();
     planHas = false;
+  });
+});
+
+describe("SafetyCard: a number to tap even with no profile country (UX, #269)", () => {
+  const withRequest = (country: string | null, ui: React.ReactNode) => wrap(<RequestCountryProvider country={country}>{ui}</RequestCountryProvider>);
+
+  it("the profile's country wins over the request's, and isn't named: it's theirs", () => {
+    withRequest("NZ", <SafetyCard country="TH" onClose={() => {}} />);
+    expect(screen.getByTestId("safety-call-helpline")).toHaveAttribute("href", "tel:1323");
+    expect(screen.queryByTestId("safety-request-country")).toBeNull();
+  });
+
+  it("none: the request's country, named above its helpline and emergency number, at once", () => {
+    withRequest("TH", <SafetyCard country={null} onClose={() => {}} />);
+    expect(screen.getByTestId("safety-call-helpline")).toHaveAttribute("href", "tel:1323");
+    expect(screen.getByTestId("safety-call-emergency")).toHaveAttribute("href", "tel:1669");
+    const name = screen.getByTestId("safety-request-country");
+    expect(name).toHaveTextContent("Thailand");
+    expect(name.compareDocumentPosition(screen.getByTestId("safety-call-helpline")) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it("neither: the sentence and Find a helpline, as before", () => {
+    withRequest(null, <SafetyCard country={null} onClose={() => {}} />);
+    expect(screen.queryByTestId("safety-call-helpline")).toBeNull();
+    expect(screen.getByTestId("safety-find-helpline")).toBeInTheDocument();
+  });
+
+  it("the header is used only as two letters", () => {
+    expect([null, "", "th", "TH", "T1", "THA", "XX"].map(usableCountry)).toEqual([null, null, "TH", "TH", null, null, "XX"]);
   });
 });

@@ -223,6 +223,10 @@
     "met": false,
     "what": "1.2: For my appointment (specs/1.2-features.md §4, content/appointment.json): a printable summary of check-ins and starred entries, made in the browser, nothing stored or sent. Needs the Reviewer's read, the tester rows and Vitor's look."
   },
+  "test-only-unavailable-page": {
+    "met": false,
+    "what": "TEST ONLY, NEVER MET: /app/test/unavailable, a page that renders nothing but the journal's couldn't-load state (JournalUnavailable) inside the journal layout, so a journey can measure where its help sits at large text (the real pages fail only when Supabase does). No journal data on it. A 404 on Production at the routing level (lib/sitemapPages.ts), before any sign-in; a test and the publish-day checklist check that."
+  },
   "region-live": {
     "met": false,
     "what": "/api/region answers on Production: the signed country token for functions that are only on in some countries (Bo first, specs/bo-design.md section 7). Before it's met, on Production: REGION_SECRET set by Vitor, and the Web Tester's forged-header row passed on Preview."

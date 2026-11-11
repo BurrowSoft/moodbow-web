@@ -14,6 +14,8 @@ import { VisitCounts } from "@/components/VisitCounts";
 import { THEME_PRE_PAINT } from "@/lib/appearance";
 import { conditionMet } from "@/lib/conditions";
 import { NONCE_HEADER } from "@/lib/csp";
+import { RequestCountryProvider } from "@/components/RequestCountry";
+import { usableCountry } from "@/lib/region/requestCountry";
 import { APP_STORE_ID, liveStores } from "@/lib/stores";
 
 export function generateStaticParams() {
@@ -57,7 +59,10 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
   const t = await getTranslations({ locale, namespace: "common" });
   // The CSP nonce for this request (proxy.ts): the pre-paint script is inline.
   // Reading it renders every page per request, as a nonce requires.
-  const nonce = (await headers()).get(NONCE_HEADER) ?? undefined;
+  const requestHeaders = await headers();
+  const nonce = requestHeaders.get(NONCE_HEADER) ?? undefined;
+  // For the help card with no profile country (components/RequestCountry.tsx): display only.
+  const requestCountry = usableCountry(requestHeaders.get("x-vercel-ip-country"));
 
   return (
     // data-theme is set by the pre-paint script before React runs, so the
@@ -76,14 +81,16 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
         </a>
         {/* Only the namespaces client components use outside the journal reach
             the browser here (perf fix 3); /app's layout adds the rest. */}
-        <NextIntlClientProvider messages={pickMessages(await getMessages(), PUBLIC_CLIENT_NAMESPACES)}>
-          <LocalDataWipe />
-          <CampaignLanding />
-          <div className="flex flex-1 flex-col">
-            {children}
-            <Footer />
-          </div>
-        </NextIntlClientProvider>
+        <RequestCountryProvider country={requestCountry}>
+          <NextIntlClientProvider messages={pickMessages(await getMessages(), PUBLIC_CLIENT_NAMESPACES)}>
+            <LocalDataWipe />
+            <CampaignLanding />
+            <div className="flex flex-1 flex-col">
+              {children}
+              <Footer />
+            </div>
+          </NextIntlClientProvider>
+        </RequestCountryProvider>
         {/* Cookie-free visit counts (decision 79): only once the privacy
             policy says so, in the same deploy ("web-analytics"). */}
         {conditionMet("web-analytics") && <VisitCounts />}
