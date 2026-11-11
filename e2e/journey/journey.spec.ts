@@ -5,6 +5,7 @@ import countries from "../../content/contracts/countries.json";
 import messages from "../../src/messages/en.json";
 import fr from "../../src/messages/fr.json";
 import { monthsBefore } from "../../src/lib/journal/onThisDay";
+import { axeAtWidths } from "../axe";
 import { aiConsentGranted, journalToday, aiAvailable, cleanup, configured, confirmEmail, createConfirmedUser, exists, lastWeekMonday, seedCheckIns, newEmail, newPassword, notConfigured, profileLocale, profileSaver, revokeSessions, setProfileLocale, signedUpUnconfirmed, sweep } from "./staging";
 
 // The launch-critical journeys (1.0), end to end against staging with a
@@ -1588,6 +1589,57 @@ test("large text: every help number on the list stays whole on a phone", { tag: 
           }
         }
       }
+    }
+  } finally {
+    await cleanup(email);
+  }
+});
+
+// Print this month at 320 px and 300 % (Web Tester, #274): the help button and the month's title
+// stay inside the page (an automatic layout table grew to the title's longest word and carried
+// the button 43 px past it), help in the first view, nothing to scroll sideways.
+test("large text, set in the browser: Print this month stays inside a 320 px phone, help first", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
+  test.setTimeout(180_000);
+  const email = newEmail();
+  const password = newPassword();
+  const cdp = await page.context().newCDPSession(page);
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    const month = (await journalToday(email, password)).slice(0, 7);
+    await page.setViewportSize({ width: 320, height: 640 });
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+      await setProfileLocale(email, password, saved);
+      for (const percent of [100, 300]) {
+        const where = `${saved} at ${percent} %`;
+        await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
+        await page.goto(`${route}/app/print/${month}`);
+        const help = page.getByTestId("print-get-help");
+        await expect(help, where).toBeVisible();
+        const box = (await help.boundingBox())!;
+        expect(box.x + box.width, `${where}: help inside the width`).toBeLessThanOrEqual(320.5);
+        expect(box.y + box.height, `${where}: help in the first view`).toBeLessThanOrEqual(640);
+        const title = (await page.locator("h1").first().boundingBox())!;
+        expect(title.x + title.width, `${where}: the title inside the width`).toBeLessThanOrEqual(320.5);
+        expect(await page.evaluate(() => document.documentElement.scrollWidth), `${where}: no sideways scroll`).toBeLessThanOrEqual(320);
+      }
+    }
+    // No serious or critical axe violation, at 320 and 1280 px, at the normal size (UX, 2026-11-12).
+    await cdp.send("Page.setFontSizes", { fontSizes: { standard: 16, fixed: 13 } });
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+      await setProfileLocale(email, password, saved);
+      await axeAtWidths(page, `Print this month (${saved})`, async () => {
+        await page.goto(`${route}/app/print/${month}`);
+        await expect(page.getByTestId("print-get-help")).toBeVisible();
+      });
     }
   } finally {
     await cleanup(email);
