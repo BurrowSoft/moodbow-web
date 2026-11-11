@@ -14,4 +14,6 @@ fr-draft: true
 
 **Supprimer :** retirer le bilan d'une journée retire ses étiquettes. Supprimer votre compte les supprime avec tout le reste.
 
+{pending:plus}**Tendances :** avec Moodbow Plus, **Plus de tendances** dans **Statistiques** peut montrer votre humeur les jours avec vos étiquettes les plus utilisées.{/pending}
+
 Si ce que vous écrivez dans une étiquette laisse penser que vous pourriez avoir besoin de soutien, Moodbow vous propose de l'aide, comme lorsque vous écrivez une note.{/pending}

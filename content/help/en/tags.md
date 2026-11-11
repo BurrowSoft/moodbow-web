@@ -13,4 +13,6 @@ topic: Your journal
 
 **Delete:** removing a day's check-in removes its tags. Deleting your account deletes them with everything else.
 
+{pending:plus}**Patterns:** with Moodbow Plus, **More patterns** in **Insights** can show how your mood goes on days with your most-used tags.{/pending}
+
 If something you write in a tag sounds like you might need support, Moodbow offers help, just as it does when you write an entry.{/pending}

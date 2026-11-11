@@ -14,4 +14,6 @@ it-draft: true
 
 **Eliminare:** togliere il check-in di una giornata toglie i suoi tag. Eliminare l'account li elimina con tutto il resto.
 
+{pending:plus}**Andamenti:** con Moodbow Plus, **Più andamenti** in **Andamento** può mostrare il tuo umore nei giorni con i tag che usi di più.{/pending}
+
 Se qualcosa che scrivi in un tag fa pensare che potresti aver bisogno di supporto, Moodbow ti offre aiuto, come quando scrivi una pagina.{/pending}

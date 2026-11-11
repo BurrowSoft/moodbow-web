@@ -14,4 +14,6 @@ de-draft: true
 
 **Löschen:** den Check-in eines Tages zu entfernen, entfernt seine Tags. Dein Konto zu löschen, löscht sie mit allem anderen.
 
+{pending:plus}**Muster:** Mit Moodbow Plus kann **Mehr Muster** unter **Einblicke** zeigen, wie deine Stimmung an Tagen mit deinen meistgenutzten Tags ist.{/pending}
+
 Wenn etwas, das du in einen Tag schreibst, so klingt, als bräuchtest du Unterstützung, bietet Moodbow Hilfe an, genau wie beim Schreiben eines Eintrags.{/pending}

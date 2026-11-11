@@ -14,4 +14,6 @@ es-draft: true
 
 **Eliminar:** quitar el registro de un día quita sus etiquetas. Eliminar tu cuenta las elimina con todo lo demás.
 
+{pending:plus}**Patrones:** con Moodbow Plus, **Más patrones** en **Resumen** puede mostrar cómo va tu ánimo los días con tus etiquetas más usadas.{/pending}
+
 Si algo que escribes en una etiqueta suena a que podrías necesitar apoyo, Moodbow te ofrece ayuda, igual que cuando escribes una entrada.{/pending}

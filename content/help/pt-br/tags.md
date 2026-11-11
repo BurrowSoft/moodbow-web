@@ -14,4 +14,6 @@ pt-BR-draft: true
 
 **Apagar:** remover o check-in de um dia remove as tags dele. Apagar sua conta apaga as tags com todo o resto.
 
+{pending:plus}**Padrões:** com o Moodbow Plus, **Mais padrões** em **Insights** pode mostrar como fica seu humor nos dias com as tags que você mais usa.{/pending}
+
 Se algo que você escreve numa tag parecer que você pode precisar de apoio, o Moodbow oferece ajuda, como quando você escreve uma anotação.{/pending}
