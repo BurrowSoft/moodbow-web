@@ -52,6 +52,7 @@ export default async function PrintPage({ params }: PageProps<"/[locale]/app/pri
       title={formatMonth(month, dateLocaleTag)}
       days={printDays((checkIns.data ?? []) as PrintCheckIn[], (entries.data ?? []) as PrintEntryRow[])}
       dateLocaleTag={dateLocaleTag}
+      country={me.profile?.country}
     />
   );
 }
