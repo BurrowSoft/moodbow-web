@@ -679,6 +679,12 @@
     "reviewWriting": "{entries, plural, one {# entrada} other {# entradas}} y {moments, plural, one {# momento} other {# momentos}}",
     "reviewMomentsTitle": "Tus momentos",
     "reviewNoMoments": "No marcaste momentos en {year}.",
-    "reviewEmpty": "No hay registros ni entradas en {year}."
+    "reviewEmpty": "No hay registros ni entradas en {year}.",
+    "paletteLegend": "Colores",
+    "paletteDefault": "Predeterminado",
+    "paletteDusk": "Atardecer",
+    "paletteSunrise": "Amanecer",
+    "paletteSea": "Mar",
+    "sheetThemes": "Más temas son parte de Plus"
   }
 }

@@ -1,12 +1,15 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
 import { applyTheme, readTheme, THEME_KEY, THEMES, writeTheme, type Theme } from "@/lib/appearance";
 import { readShortcutsOn, writeShortcutsOn } from "@/lib/shortcuts";
+import { applyPalette, PALETTES, PALETTE_KEY, readPalette, writePalette, type Palette } from "@/lib/plus/palettes";
+import { LockedItem, type PlusOffer } from "../PlusSheet";
 import { useUntilLoaded } from "@/lib/ui/untilLoaded";
 
 const LABELS = { system: "themeSystem", light: "themeLight", dark: "themeDark" } as const;
+const PALETTE_LABELS = { dusk: "paletteDusk", sunrise: "paletteSunrise", sea: "paletteSea" } as const;
 
 // Changes made here (and in other tabs: the storage event) re-render.
 const listeners = new Set<() => void>();
@@ -15,6 +18,7 @@ const subscribe = (cb: () => void) => {
   // just the radios (reviewer #41).
   const onStorage = (e: StorageEvent) => {
     if (e.key === THEME_KEY || e.key === null) applyTheme(readTheme());
+    if (e.key === PALETTE_KEY || e.key === null) applyPalette(readPalette());
     cb();
   };
   listeners.add(cb);
@@ -30,11 +34,29 @@ const subscribe = (cb: () => void) => {
 // there's no save to fail (decision 111 doesn't apply).
 // shortcuts: the keyboard shortcuts switch (1.1 O, WCAG 2.1.4), on by
 // default, also for this device only.
-export function Appearance({ shortcuts = false }: { shortcuts?: boolean }) {
+// palette: Moodbow Plus's extra themes (decision 246): { until } with Plus (the date
+// it runs to, kept with the choice), the offer without (a lock), null when
+// Plus can't be read (nothing shown, nothing changed).
+export function Appearance({ shortcuts = false, palette = null }: { shortcuts?: boolean; palette?: { until: string } | PlusOffer | null }) {
   const untilLoaded = useUntilLoaded();
   const t = useTranslations("me");
   const theme = useSyncExternalStore(subscribe, readTheme, () => "system" as Theme);
   const shortcutsOn = useSyncExternalStore(subscribe, readShortcutsOn, () => true);
+  const tp = useTranslations("plus");
+  const chosenPalette = useSyncExternalStore(subscribe, () => readPalette(), () => null);
+  const until = palette && "until" in palette ? palette.until : null;
+  // Plus has ended (or never was): the default comes back, nothing is lost.
+  const ended = palette !== null && until === null;
+  useEffect(() => {
+    if (ended && readPalette()) {
+      writePalette(null, null);
+      listeners.forEach((cb) => cb());
+    }
+  }, [ended]);
+  const choosePalette = (next: Palette | null) => {
+    writePalette(next, until);
+    listeners.forEach((cb) => cb());
+  };
   const choose = (next: Theme) => {
     writeTheme(next);
     listeners.forEach((cb) => cb());
@@ -67,6 +89,29 @@ export function Appearance({ shortcuts = false }: { shortcuts?: boolean }) {
           ))}
         </div>
       </fieldset>
+      {until && (
+        <fieldset className="mt-6 min-w-0 border-t border-border pt-4" data-testid="me-palettes">
+          <legend className="max-w-full font-medium text-text [overflow-wrap:anywhere]">{tp("paletteLegend")}</legend>
+          <div className="mt-3 space-y-2">
+            {([null, ...PALETTES] as const).map((option) => (
+              <label key={option ?? "default"} className="flex min-h-11 items-center gap-3 text-text">
+                <input
+                  type="radio"
+                  name="me-palette"
+                  data-testid={`me-palette-${option ?? "default"}`}
+                  checked={chosenPalette === option}
+                  onChange={() => choosePalette(option)}
+                  className="h-5 w-5 accent-[var(--color-accent)]"
+                />
+                <span className="min-w-0 [overflow-wrap:anywhere]">{option ? tp(PALETTE_LABELS[option]) : tp("paletteDefault")}</span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      )}
+      {palette && !until && (
+        <LockedItem label={tp("rowThemes")} sheetTitle={tp("sheetThemes")} offer={palette as PlusOffer} testId="me-palettes" className="mt-6 flex min-h-11 w-full items-center justify-between gap-3 border-t border-border pt-4 text-left font-medium text-text" />
+      )}
       {shortcuts && (
         <div className="mt-6 border-t border-border pt-4">
           {/* The whole row is the switch (a big target; reviewer #97). */}

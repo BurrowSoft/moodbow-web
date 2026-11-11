@@ -1548,5 +1548,35 @@
     "key": "plus.reviewEmpty",
     "en": "There are no check-ins or entries in {year}.",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.paletteLegend",
+    "en": "Colours",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.paletteDefault",
+    "en": "Default",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.paletteDusk",
+    "en": "Dusk",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.paletteSunrise",
+    "en": "Sunrise",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.paletteSea",
+    "en": "Sea",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.sheetThemes",
+    "en": "More themes are part of Plus",
+    "reason": "UX draft (native read pending)"
   }
 ]

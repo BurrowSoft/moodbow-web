@@ -23,9 +23,9 @@ describe("plusView: what a page shows about Plus", () => {
     expect(plusView(null, NOW)).toEqual({ kind: "free", trial: true });
   });
   it("Plus from any store; the days left only during the free week", () => {
-    expect(plusView(row(), NOW)).toEqual({ kind: "plus", source: "stripe", daysLeft: null });
-    expect(plusView(row({ source: "apple" }), NOW)).toEqual({ kind: "plus", source: "apple", daysLeft: null });
-    expect(plusView(row({ status: "trialing", trial_ends_at: at(NOW + 5 * DAY), current_period_end: at(NOW + 5 * DAY) }), NOW)).toEqual({ kind: "plus", source: "stripe", daysLeft: 5 });
+    expect(plusView(row(), NOW)).toEqual({ kind: "plus", source: "stripe", daysLeft: null, until: at(NOW + 300 * DAY) });
+    expect(plusView(row({ source: "apple" }), NOW)).toMatchObject({ kind: "plus", source: "apple", daysLeft: null });
+    expect(plusView(row({ status: "trialing", trial_ends_at: at(NOW + 5 * DAY), current_period_end: at(NOW + 5 * DAY) }), NOW)).toEqual({ kind: "plus", source: "stripe", daysLeft: 5, until: at(NOW + 5 * DAY) });
   });
   it("a failed Stripe renewal: the card state, not an offer", () => {
     expect(plusView(row({ status: "past_due" }), NOW)).toEqual({ kind: "past_due" });
