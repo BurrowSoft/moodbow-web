@@ -603,7 +603,8 @@
     "breatheOutCount": "Ausatmen · {n}",
     "stop": "Stopp",
     "breathEnd": "Das war eine Minute. Lass dir Zeit.",
-    "done": "Fertig"
+    "done": "Fertig",
+    "breathSafety": "Wenn dir schwindlig wird, hör auf und atme normal weiter."
   },
   "safetyPlan": {
     "title": "Mein Sicherheitsplan",

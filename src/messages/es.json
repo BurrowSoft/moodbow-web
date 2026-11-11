@@ -603,7 +603,8 @@
     "breatheOutCount": "Exhala · {n}",
     "stop": "Parar",
     "breathEnd": "Fue un minuto. Tómate tu tiempo.",
-    "done": "Listo"
+    "done": "Listo",
+    "breathSafety": "Si te mareas, para y respira con normalidad."
   },
   "safetyPlan": {
     "title": "Mi plan de seguridad",

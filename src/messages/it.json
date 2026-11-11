@@ -603,7 +603,8 @@
     "breatheOutCount": "Espira · {n}",
     "stop": "Stop",
     "breathEnd": "È passato un minuto. Prenditi il tuo tempo.",
-    "done": "Fatto"
+    "done": "Fatto",
+    "breathSafety": "Se ti gira la testa, fermati e respira normalmente."
   },
   "safetyPlan": {
     "title": "Il mio piano di sicurezza",

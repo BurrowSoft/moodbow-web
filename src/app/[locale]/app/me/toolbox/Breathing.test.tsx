@@ -63,6 +63,17 @@ describe("Breathing", () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
+  // A plain safety line while it runs (UX, 12 Nov), in the free toolbox too.
+  it("the dizzy line is there while it runs, and goes at the end", async () => {
+    open();
+    expect(screen.getByTestId("breathing-safety")).toHaveTextContent(m.breathSafety);
+    await seconds(30);
+    expect(screen.getByTestId("breathing-safety")).toHaveTextContent(m.breathSafety);
+    await seconds(30);
+    expect(screen.getByTestId("breathing-end")).toBeInTheDocument();
+    expect(screen.queryByTestId("breathing-safety")).toBeNull();
+  });
+
   it("ends on its own after a minute, with its line and Done", async () => {
     const onClose = open();
     await seconds(59);

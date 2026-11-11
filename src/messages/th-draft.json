@@ -1383,5 +1383,10 @@
     "key": "letters.keep",
     "en": "Keep",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.breathSafety",
+    "en": "If you feel dizzy, stop and breathe normally.",
+    "reason": "UX draft (native read pending)"
   }
 ]

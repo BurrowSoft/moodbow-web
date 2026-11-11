@@ -81,6 +81,12 @@ export function Breathing({ onClose }: { onClose: () => void }) {
         <>
           <div className="flex flex-wrap gap-[12px]">{control}</div>
           <div className="mt-[16px]">{guide}</div>
+          {/* A plain safety line while it runs (UX, 12 Nov): never a claim about what it does. */}
+          {!done && (
+            <p data-testid="breathing-safety" className="mt-[12px] text-sm text-muted">
+              {t("breathSafety")}
+            </p>
+          )}
         </>
       }
       onCancel={onClose}
