@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { dialogButton } from "@/components/Dialog";
 import { Link } from "@/i18n/navigation";
@@ -18,6 +18,16 @@ const CLOSED_KEY = "moodbow.plusBannerClosed";
 const localDay = () => {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+};
+// Another tab closing it, or this one: read again.
+const CLOSED_EVENT = "moodbow:plus-banner-closed";
+const subscribeClosed = (onChange: () => void) => {
+  window.addEventListener("storage", onChange);
+  window.addEventListener(CLOSED_EVENT, onChange);
+  return () => {
+    window.removeEventListener("storage", onChange);
+    window.removeEventListener(CLOSED_EVENT, onChange);
+  };
 };
 const readClosed = (): string | null => {
   try {
@@ -41,10 +51,11 @@ export function PlusInMe({ view, price }: { view: PlusView; price: string }) {
   const t = useTranslations("plus");
   const tt = useTranslations("today");
   const locale = useLocale();
-  // Closed today on this device? Read after the first paint (server HTML has
-  // no storage), so it never flashes for someone who closed it.
-  const [closedToday, setClosedToday] = useState(true);
-  useEffect(() => setClosedToday(readClosed() === localDay()), []);
+  // Closed today on this device? The server's HTML has no storage, so it starts
+  // hidden there and never flashes for someone who closed it. closedHere: a
+  // browser with no storage still closes it for this visit.
+  const closedToday = useSyncExternalStore(subscribeClosed, () => readClosed() === localDay(), () => true);
+  const [closedHere, setClosedHere] = useState(false);
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
 
@@ -100,7 +111,7 @@ export function PlusInMe({ view, price }: { view: PlusView; price: string }) {
     );
   }
 
-  if (closedToday) return null;
+  if (closedToday || closedHere) return null;
   return (
     <section aria-labelledby="me-plus-banner" data-testid="me-plus-banner" className="relative space-y-2 rounded-3xl bg-pill p-[20px]">
       <button
@@ -113,7 +124,8 @@ export function PlusInMe({ view, price }: { view: PlusView; price: string }) {
           } catch {
             // no storage: closed for this visit only
           }
-          setClosedToday(true);
+          setClosedHere(true);
+          window.dispatchEvent(new Event(CLOSED_EVENT));
         }}
         className="absolute top-2 right-2 inline-flex h-11 w-11 items-center justify-center rounded-full text-muted"
       >
