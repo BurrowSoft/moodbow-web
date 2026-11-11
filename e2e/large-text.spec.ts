@@ -364,9 +364,20 @@ test("large text at 300 %: a call link with a long name stays inside a 320 px ph
     row.append(call);
     document.querySelector("main")!.prepend(row);
     const right = call.getBoundingClientRect().right;
-    return { right: Math.round(right), overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth, wrap: getComputedStyle(call).overflowWrap };
+    // Inside a heading too, which hyphenates: the call link still never takes a hyphen.
+    const heading = document.createElement("h2");
+    const inHeading = call.cloneNode(true) as HTMLAnchorElement;
+    heading.append(inHeading);
+    document.querySelector("main")!.prepend(heading);
+    return {
+      right: Math.round(right),
+      overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      wrap: getComputedStyle(call).overflowWrap,
+      hyphens: [getComputedStyle(call).hyphens, getComputedStyle(inHeading).hyphens],
+    };
   });
   expect(result.wrap).toBe("anywhere");
+  expect(result.hyphens).toEqual(["manual", "manual"]);
   expect(result.overflow).toBe(0);
   expect(result.right).toBeLessThanOrEqual(320);
 });

@@ -145,9 +145,9 @@ summary {
    as "TelefonSeelsorge" in a narrow row (the safety plan, the help card, the help page). */
 a[href^="tel:"] {
   overflow-wrap: anywhere;
-  /* Hyphenated first ("préven-tion"); anywhere is only for what can't be. */
-  hyphens: auto;
-  hyphenate-limit-chars: 7 3 3;
+  /* Never a hyphen in a number or a call line ("Appeler…"), even inside a label or heading
+     that hyphenates (UX and the Reviewer, 12 Nov): a hyphen could read as part of the number. */
+  hyphens: manual;
 }
 
 /* Browsers size a fieldset to its content: its rows couldn't wrap at large text. */
