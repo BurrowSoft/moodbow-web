@@ -81,6 +81,17 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
         <p className="mt-1 text-muted" data-testid="today-date">
           {dateLine(me.today, dateLocaleTag)}
         </p>
+        {/* Large text on a narrow screen (UX, 2026-11-12): the check-in card runs to ~1,400 px at
+            320 px / 300 %, so Write is also offered here, in the first view. CSS only: em in a media
+            query is the reader's own text size, so at 100 % this never shows, and nothing moves after
+            load or depends on scripts. The card and the Write button below stay as they are. */}
+        <Link
+          href="/app/write"
+          data-testid="today-write-top"
+          className="mt-3 hidden min-h-[44px] max-w-full items-center font-medium text-accent underline underline-offset-4 [font-size:min(1rem,max(10vw,32px))] [overflow-wrap:anywhere] max-[16em]:inline-flex"
+        >
+          {te("writeButton")}
+        </Link>
       </header>
       <CheckInCard key={checkInError ? "unread" : "read"} initial={(data as CheckIn | null) ?? null} uid={user.id} date={me.today} dateLocaleTag={dateLocaleTag} keepDraft loadFailed={Boolean(checkInError)} />
       <Link
