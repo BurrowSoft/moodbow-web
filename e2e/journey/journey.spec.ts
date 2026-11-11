@@ -1646,6 +1646,78 @@ test("large text, set in the browser: Print this month stays inside a 320 px pho
   }
 });
 
+// The Plus screen at 300 % on a 320 × 640 phone (the Web Tester's long-language pass, UX 12 Nov):
+// the table had a 36 px slit under a footer of 1,009 px. Now the page scrolls as a whole, the
+// phone bar steps aside, and only the price, the renewal line and the button stay pinned: the
+// content gets at least half the screen, and the button and the renewal line are in view on
+// landing. With Plus nothing is pinned, and Manage is at the end. Leaving gives the bar back.
+test("large text: the Plus screen at 300 % on a 320 px phone, free and in the free week, en and de", async ({ page, browserName }) => {
+  test.setTimeout(240_000);
+  test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
+  test.skip(!(await plusOnStaging()), "staging doesn't have 028's entitlements table yet: the Plus pages can't be read there");
+  const email = newEmail();
+  const password = newPassword();
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    await page.setViewportSize({ width: 320, height: 640 });
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send("Page.setFontSizes", { fontSizes: { standard: 48, fixed: 39 } });
+    const inView = (testId: string) =>
+      page.getByTestId(testId).evaluate((el) => {
+        const r = el.getBoundingClientRect();
+        return r.height > 0 && r.top >= 0 && r.bottom <= window.innerHeight + 0.5;
+      });
+    const open = async (route: string) => {
+      await page.goto(`${route}/app/me/plus`);
+      await expect(page.getByTestId("plus-title")).toBeVisible({ timeout: 15_000 });
+      await expect(page.getByTestId("plus-screen")).toHaveAttribute("data-large", "true");
+      await expect(page.getByTestId("app-nav")).toBeHidden();
+      expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBe(0);
+    };
+    for (const [route, saved] of [["", "en"], ["/de", "de"]] as const) {
+      await setProfileLocale(email, password, saved);
+      await open(route);
+      // Free: the pinned footer leaves the content at least half the screen.
+      const sizes = await page.evaluate(() => {
+        const h = (id: string) => Math.round(document.querySelector(`[data-testid="${id}"]`)?.getBoundingClientRect().height ?? -1);
+        return { footer: h("plus-footer"), price: h("plus-price"), renews: h("plus-renews"), button: h("plus-start"), viewport: window.innerHeight };
+      });
+      const top = await page.getByTestId("plus-footer").evaluate((el) => el.getBoundingClientRect().top / window.innerHeight);
+      console.log(`Plus screen at 300 %, ${saved}, free: content ${Math.round(top * 100)} % of the screen; ${JSON.stringify(sizes)}`);
+      expect.soft(top, `${saved}: the content takes ${Math.round(top * 100)} % of the screen`).toBeGreaterThanOrEqual(0.5);
+      expect.soft(await inView("plus-start"), `${saved}: the button on landing`).toBe(true);
+      expect.soft(await inView("plus-renews"), `${saved}: the renewal line on landing`).toBe(true);
+      await expect(page.getByTestId("plus-footer").getByTestId("plus-not-now")).toHaveCount(0);
+      await page.getByTestId("plus-rest").getByTestId("plus-not-now").scrollIntoViewIfNeeded();
+      await expect(page.getByTestId("plus-rest").getByTestId("plus-not-now")).toBeVisible();
+    }
+    await grantPlusTrial(email);
+    for (const [route, saved] of [["", "en"], ["/de", "de"]] as const) {
+      await setProfileLocale(email, password, saved);
+      await open(route);
+      // In the free week: nothing pinned, so the content has the whole screen; Manage at the end.
+      await expect(page.getByTestId("plus-footer")).toHaveCount(0);
+      await page.getByTestId("plus-rest").getByTestId("plus-manage").scrollIntoViewIfNeeded();
+      await expect(page.getByTestId("plus-manage")).toBeVisible();
+    }
+    // Leaving the Plus screen by its own Back (no reload) gives the phone bar back.
+    await page.getByTestId("nav-back").click();
+    await expect(page).toHaveURL(/\/app\/me$/, { timeout: 15_000 });
+    await expect(page.getByTestId("app-nav")).toBeVisible({ timeout: 15_000 });
+    expect(await page.evaluate(() => document.documentElement.hasAttribute("data-tabs-aside"))).toBe(false);
+  } finally {
+    await cleanup(email);
+  }
+});
+
 // Automated accessibility (UX, 2026-11-12): no serious or critical axe violation on Moodbow Plus, its screen and sheet, at
 // 320 and 1280 px, in en and pt-BR. Skipped, saying so, until staging has 028's entitlements.
 test("axe: Moodbow Plus, its screen and sheet, at 320 and 1280 px", async ({ page }) => {
