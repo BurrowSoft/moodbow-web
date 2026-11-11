@@ -685,7 +685,8 @@
     "paletteDusk": "Entardecer",
     "paletteSunrise": "Amanhecer",
     "paletteSea": "Mar",
-    "sheetThemes": "Mais temas fazem parte do Plus"
+    "sheetThemes": "Mais temas fazem parte do Plus",
+    "rowBreathing": "Mais formas de respirar"
   },
   "toolbox": {
     "meRow": "O que me ajuda",
@@ -714,6 +715,15 @@
     "stop": "Parar",
     "breathEnd": "Foi um minuto. Vá no seu tempo.",
     "done": "Concluído",
-    "breathSafety": "Se sentir tontura, pare e respire normalmente."
+    "breathSafety": "Se sentir tontura, pare e respire normalmente.",
+    "breathePatterns": "Formas de respirar",
+    "patternEven46": "Um minuto para respirar",
+    "patternEven46Steps": "Inspire 4, expire 6",
+    "patternBox": "Caixa",
+    "patternBoxSteps": "Inspire 4, segure 4, expire 4, segure 4",
+    "patternEven5": "Lento e uniforme",
+    "patternEven5Steps": "Inspire 5, expire 5",
+    "breatheHold": "Segure",
+    "breatheHoldCount": "Segure · {n}"
   }
 }

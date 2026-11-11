@@ -685,7 +685,8 @@
     "paletteDusk": "ยามสนธยา",
     "paletteSunrise": "รุ่งอรุณ",
     "paletteSea": "ทะเล",
-    "sheetThemes": "ธีมเพิ่มเติมเป็นส่วนหนึ่งของ Plus"
+    "sheetThemes": "ธีมเพิ่มเติมเป็นส่วนหนึ่งของ Plus",
+    "rowBreathing": "วิธีหายใจเพิ่มเติม"
   },
   "toolbox": {
     "meRow": "สิ่งที่ช่วยฉัน",
@@ -714,6 +715,15 @@
     "stop": "หยุด",
     "breathEnd": "ครบหนึ่งนาทีแล้ว ค่อยๆ ไม่ต้องรีบ",
     "done": "เสร็จ",
-    "breathSafety": "หากรู้สึกเวียนหัว ให้หยุดแล้วหายใจตามปกติ"
+    "breathSafety": "หากรู้สึกเวียนหัว ให้หยุดแล้วหายใจตามปกติ",
+    "breathePatterns": "วิธีหายใจ",
+    "patternEven46": "หนึ่งนาทีเพื่อหายใจ",
+    "patternEven46Steps": "หายใจเข้า 4 หายใจออก 6",
+    "patternBox": "แบบสี่เหลี่ยม",
+    "patternBoxSteps": "หายใจเข้า 4 กลั้น 4 หายใจออก 4 กลั้น 4",
+    "patternEven5": "ช้าและสม่ำเสมอ",
+    "patternEven5Steps": "หายใจเข้า 5 หายใจออก 5",
+    "breatheHold": "กลั้นไว้",
+    "breatheHoldCount": "กลั้นไว้ · {n}"
   }
 }

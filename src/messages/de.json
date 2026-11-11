@@ -685,7 +685,8 @@
     "paletteDusk": "Dämmerung",
     "paletteSunrise": "Sonnenaufgang",
     "paletteSea": "Meer",
-    "sheetThemes": "Mehr Themes gehören zu Plus"
+    "sheetThemes": "Mehr Themes gehören zu Plus",
+    "rowBreathing": "Mehr Arten zu atmen"
   },
   "toolbox": {
     "meRow": "Was mir hilft",
@@ -714,6 +715,15 @@
     "stop": "Stopp",
     "breathEnd": "Das war eine Minute. Lass dir Zeit.",
     "done": "Fertig",
-    "breathSafety": "Wenn dir schwindlig wird, hör auf und atme normal weiter."
+    "breathSafety": "Wenn dir schwindlig wird, hör auf und atme normal weiter.",
+    "breathePatterns": "Arten zu atmen",
+    "patternEven46": "Eine Minute zum Atmen",
+    "patternEven46Steps": "4 einatmen, 6 ausatmen",
+    "patternBox": "Quadrat",
+    "patternBoxSteps": "4 einatmen, 4 halten, 4 ausatmen, 4 halten",
+    "patternEven5": "Langsam und gleichmäßig",
+    "patternEven5Steps": "5 einatmen, 5 ausatmen",
+    "breatheHold": "Halten",
+    "breatheHoldCount": "Halten · {n}"
   }
 }

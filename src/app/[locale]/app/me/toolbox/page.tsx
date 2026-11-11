@@ -8,6 +8,7 @@ import { getMe } from "@/lib/journal/me";
 import { JournalUnavailable } from "@/components/JournalUnavailable";
 import { SessionEnded } from "@/components/SessionEnded";
 import { pageGate } from "@/lib/conditions";
+import { readPlusView } from "@/lib/plus/view";
 import { currentUser } from "@/lib/journal/currentUser";
 import { parseToolboxItems } from "@/lib/journal/toolbox";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -31,7 +32,14 @@ export default async function ToolboxPage({ params }: PageProps<"/[locale]/app/m
   const { user, ended } = await currentUser(supabase);
   if (ended) return <SessionEnded />;
   if (!supabase || !user) return <JournalUnavailable />;
-  const [me, { data, error }] = await Promise.all([getMe(supabase), supabase.from("toolbox_items").select("id, text, position").order("position")]);
+  const [me, { data, error }, plus] = await Promise.all([
+    getMe(supabase),
+    supabase.from("toolbox_items").select("id, text, position").order("position"),
+    // The other ways to breathe are Plus's; without it (or unreadable) it's today's only, and
+    // the toolbox, a help surface, never shows a lock (UX, 12 Nov).
+    pageGate("plus") !== "hidden" ? readPlusView(supabase, user.id) : Promise.resolve(null),
+  ]);
+  const hasPlus = plus?.kind === "plus";
   const t = await getTranslations("toolbox");
   const ta = await getTranslations("app");
   return (
@@ -47,10 +55,10 @@ export default async function ToolboxPage({ params }: PageProps<"/[locale]/app/m
       {error ? (
         <>
           <JournalUnavailable />
-          <ToolboxBreatheOnly />
+          <ToolboxBreatheOnly hasPlus={hasPlus} />
         </>
       ) : (
-        <ToolboxEditor initial={parseToolboxItems(data)} />
+        <ToolboxEditor initial={parseToolboxItems(data)} hasPlus={hasPlus} />
       )}
     </section>
   );

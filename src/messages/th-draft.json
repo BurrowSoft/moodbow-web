@@ -1713,5 +1713,55 @@
     "key": "toolbox.breathSafety",
     "en": "If you feel dizzy, stop and breathe normally.",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.breathePatterns",
+    "en": "Ways to breathe",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.patternEven46",
+    "en": "A minute to breathe",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.patternEven46Steps",
+    "en": "In for 4, out for 6",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.patternBox",
+    "en": "Box",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.patternBoxSteps",
+    "en": "In for 4, hold for 4, out for 4, hold for 4",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.patternEven5",
+    "en": "Slow and even",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.patternEven5Steps",
+    "en": "In for 5, out for 5",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.breatheHold",
+    "en": "Hold",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.breatheHoldCount",
+    "en": "Hold · {n}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.rowBreathing",
+    "en": "More ways to breathe",
+    "reason": "UX draft (native read pending)"
   }
 ]

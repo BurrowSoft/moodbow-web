@@ -685,7 +685,8 @@
     "paletteDusk": "Dusk",
     "paletteSunrise": "Sunrise",
     "paletteSea": "Sea",
-    "sheetThemes": "More themes are part of Plus"
+    "sheetThemes": "More themes are part of Plus",
+    "rowBreathing": "More ways to breathe"
   },
   "toolbox": {
     "meRow": "Things that help me",
@@ -714,6 +715,15 @@
     "stop": "Stop",
     "breathEnd": "That was a minute. Take your time.",
     "done": "Done",
-    "breathSafety": "If you feel dizzy, stop and breathe normally."
+    "breathSafety": "If you feel dizzy, stop and breathe normally.",
+    "breathePatterns": "Ways to breathe",
+    "patternEven46": "A minute to breathe",
+    "patternEven46Steps": "In for 4, out for 6",
+    "patternBox": "Box",
+    "patternBoxSteps": "In for 4, hold for 4, out for 4, hold for 4",
+    "patternEven5": "Slow and even",
+    "patternEven5Steps": "In for 5, out for 5",
+    "breatheHold": "Hold",
+    "breatheHoldCount": "Hold · {n}"
   }
 }
