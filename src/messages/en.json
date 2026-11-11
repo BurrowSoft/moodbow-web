@@ -660,6 +660,25 @@
     "pdfCoverTitle": "My journal",
     "pdfCoverCounts": "{days, plural, one {# day with a check-in} other {# days with a check-in}} · {entries, plural, one {# entry} other {# entries}}",
     "pdfHelp": "If you need to talk to someone, help is at moodbow.com/help/get-help-now",
-    "pdfFileTitle": "Moodbow journal – {period}"
+    "pdfFileTitle": "Moodbow journal – {period}",
+    "sheetReview": "Year in review is part of Plus",
+    "reviewTitle": "Your {year}",
+    "reviewTitleSoFar": "Your {year} so far",
+    "reviewYear": "Year",
+    "reviewDaysTitle": "Check-in days",
+    "reviewDays": "{days, plural, one {# day} other {# days}} with a check-in",
+    "reviewDaysCaption": "Days with a check-in, by month",
+    "reviewMoodTitle": "Mood by month",
+    "reviewMoodCaption": "Your average mood, by month",
+    "reviewFactorsTitle": "Sleep, movement and stress",
+    "reviewSleep": "Sleep averaged {hours} h a night.",
+    "reviewMovement": "On days you logged movement, it averaged {minutes} min.",
+    "reviewStress": "Stress averaged {stress} of 5.",
+    "reviewNotEnough": "Not logged often enough in {year} to show.",
+    "reviewWritingTitle": "Writing",
+    "reviewWriting": "{entries, plural, one {# entry} other {# entries}} and {moments, plural, one {# moment} other {# moments}}",
+    "reviewMomentsTitle": "Your moments",
+    "reviewNoMoments": "No moments marked in {year}.",
+    "reviewEmpty": "There are no check-ins or entries in {year}."
   }
 }

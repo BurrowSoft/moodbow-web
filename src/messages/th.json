@@ -660,6 +660,25 @@
     "pdfCoverTitle": "บันทึกของฉัน",
     "pdfCoverCounts": "{days, plural, other {# วันที่มีการเช็กอิน}} · {entries, plural, other {# บันทึก}}",
     "pdfHelp": "หากคุณต้องการคุยกับใคร ดูความช่วยเหลือได้ที่ moodbow.com/help/get-help-now",
-    "pdfFileTitle": "บันทึก Moodbow – {period}"
+    "pdfFileTitle": "บันทึก Moodbow – {period}",
+    "sheetReview": "สรุปประจำปีเป็นส่วนหนึ่งของ Plus",
+    "reviewTitle": "ปี {year} ของคุณ",
+    "reviewTitleSoFar": "ปี {year} ของคุณจนถึงตอนนี้",
+    "reviewYear": "ปี",
+    "reviewDaysTitle": "วันที่มีการเช็กอิน",
+    "reviewDays": "{days, plural, other {# วัน}}ที่มีการเช็กอิน",
+    "reviewDaysCaption": "วันที่มีการเช็กอิน รายเดือน",
+    "reviewMoodTitle": "อารมณ์รายเดือน",
+    "reviewMoodCaption": "อารมณ์เฉลี่ยของคุณ รายเดือน",
+    "reviewFactorsTitle": "การนอน การเคลื่อนไหว และความเครียด",
+    "reviewSleep": "คุณนอนเฉลี่ย {hours} ชม. ต่อคืน",
+    "reviewMovement": "ในวันที่คุณบันทึกการเคลื่อนไหว เฉลี่ย {minutes} นาที",
+    "reviewStress": "ความเครียดเฉลี่ย {stress} จาก 5",
+    "reviewNotEnough": "บันทึกในปี {year} ไม่บ่อยพอที่จะแสดง",
+    "reviewWritingTitle": "การเขียน",
+    "reviewWriting": "{entries, plural, other {# บันทึก}} และ {moments, plural, other {# ช่วงเวลา}}",
+    "reviewMomentsTitle": "ช่วงเวลาของคุณ",
+    "reviewNoMoments": "ไม่มีช่วงเวลาที่ทำเครื่องหมายไว้ในปี {year}",
+    "reviewEmpty": "ไม่มีการเช็กอินหรือบันทึกในปี {year}"
   }
 }
