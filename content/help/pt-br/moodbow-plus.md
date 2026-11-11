@@ -14,7 +14,7 @@ pt-BR-draft: true
 
 **Cancelar:** você pode cancelar quando quiser e fica com o Plus até o fim do período pago. Se você cancelar durante a semana grátis, não será cobrado.
 - Comprado na web: **Perfil → Moodbow Plus → Gerenciar o Plus**.
-- Comprado no app: no Google Play ou na App Store, nas suas assinaturas. Apagar o app não cancela.
+- Se você tem o Plus pelo Google Play ou pela App Store, cancele lá, nas suas assinaturas. Apagar o app não cancela.
 
 **Se o Plus terminar:** tudo o que você escreveu continua, e todos os recursos grátis seguem funcionando. As telas do Plus ficam bloqueadas de novo e seu tema volta ao padrão. Nada é apagado.
 

@@ -8,8 +8,6 @@ fr-draft: true
 
 Choisissez **Un mois** ou **Une année**, puis **Enregistrer en PDF ou imprimer**. La fenêtre d'impression de votre navigateur s'ouvre ; vous pouvez y choisir « Enregistrer au format PDF » ou l'imprimer.
 
-Dans l'app, choisissez **Partager en PDF** pour l'enregistrer ou l'envoyer.
-
 Le PDF est créé sur cet appareil et n'est enregistré nulle part par Moodbow. Toute personne qui a le fichier peut le lire, alors gardez-le en lieu sûr.
 
 Sur le web sans Plus, vous pouvez toujours imprimer un mois : ouvrez-le dans la **Chronologie** et choisissez **Imprimer ce mois**.{/pending}

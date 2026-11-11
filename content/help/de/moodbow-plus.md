@@ -14,7 +14,7 @@ de-draft: true
 
 **Kündigen:** du kannst jederzeit kündigen und behältst Plus bis zum Ende des bezahlten Zeitraums. Wenn du in der kostenlosen Woche kündigst, wird nichts abgebucht.
 - Im Web gekauft: **Ich → Moodbow Plus → Plus verwalten**.
-- In der App gekauft: in Google Play oder im App Store unter deinen Abos. Die App zu löschen kündigt es nicht.
+- Wenn du Plus über Google Play oder den App Store hast, kündige es dort unter deinen Abos. Die App zu löschen kündigt es nicht.
 
 **Wenn Plus endet:** alles, was du geschrieben hast, bleibt, und alle kostenlosen Funktionen laufen weiter. Die Plus-Ansichten werden wieder gesperrt, und dein Theme geht auf den Standard zurück. Nichts wird gelöscht.
 

@@ -13,7 +13,7 @@ topic: Privacy & account
 
 **Cancel:** you can cancel at any time, and you keep Plus until the end of the time you've paid for. If you cancel during the free week, you won't be charged.
 - Bought on the web: **Me → Moodbow Plus → Manage Plus**.
-- Bought in the app: in Google Play or the App Store, under your subscriptions. Deleting the app doesn't cancel it.
+- If you have Plus through Google Play or the App Store, cancel it there, under your subscriptions. Deleting the app doesn't cancel it.
 
 **If Plus ends:** everything you wrote stays, and every free feature keeps working. The Plus views lock again, and your theme goes back to the default. Nothing is deleted.
 

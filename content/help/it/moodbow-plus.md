@@ -14,7 +14,7 @@ it-draft: true
 
 **Annullare:** puoi annullare quando vuoi e tieni Plus fino alla fine del periodo pagato. Se annulli durante la settimana gratis, non ti verrà addebitato nulla.
 - Acquistato sul web: **Profilo → Moodbow Plus → Gestisci Plus**.
-- Acquistato nell'app: in Google Play o nell'App Store, tra i tuoi abbonamenti. Eliminare l'app non lo annulla.
+- Se hai Plus tramite Google Play o l'App Store, annullalo lì, tra i tuoi abbonamenti. Eliminare l'app non lo annulla.
 
 **Se Plus finisce:** tutto ciò che hai scritto resta e tutte le funzioni gratuite continuano a funzionare. Le viste Plus si bloccano di nuovo e il tuo tema torna a quello predefinito. Non viene eliminato nulla.
 
