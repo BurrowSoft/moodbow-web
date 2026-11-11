@@ -125,6 +125,31 @@ body {
   overflow-wrap: break-word;
 }
 
+/* Headings, labels and buttons hyphenate in the page's language (<html lang>) instead of
+   splitting a long word with no hyphen at large text (the Web Tester's long-language pass,
+   UX 12 Nov: "environ-nement", "Dämme-rung"). Only words of 7 letters or more, with at
+   least 3 on each side, so short words such as "parler" stay whole (the help button's rule).
+   Only in the journal ([data-journal], the app layout), whose text isn't capped, and only at
+   really large text (a page under 9em wide: a 320 px phone from about 220 %), because a browser
+   hyphenates at a line's end even when the word would fit whole on the next one. Elsewhere
+   words stay whole: the public pages cap their text at 32 px (decision 231; Consent's and the
+   legal pages' checks). */
+@media (max-width: 9em) {
+  [data-journal] :is(h1, h2, h3, h4, legend, label, button, summary) {
+    hyphens: auto;
+    hyphenate-limit-chars: 7 3 3;
+  }
+}
+
+/* A call link's name may break anywhere rather than push the page sideways: a long name such
+   as "TelefonSeelsorge" in a narrow row (the safety plan, the help card, the help page). */
+a[href^="tel:"] {
+  overflow-wrap: anywhere;
+  /* Never a hyphen in a number or a call line ("Appeler…"), even inside a label or heading
+     that hyphenates (UX and the Reviewer, 12 Nov): a hyphen could read as part of the number. */
+  hyphens: manual;
+}
+
 /* Browsers size a fieldset to its content: its rows couldn't wrap at large text. */
 fieldset {
   min-width: 0;
@@ -185,11 +210,12 @@ html[data-signed-in] [data-language-switcher] {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
 }
-/* A date field's calendar button sits inside the input (the browser's own
-   part): with focus on it the input isn't :focus-visible and the ring went
-   (WCAG 2.4.7, Web Tester). The field keeps the same ring while focus is
-   anywhere inside it. */
-input[type="date"]:focus-within {
+/* A date or time field's picker button sits inside the input (the browser's
+   own part): with focus on it the input isn't :focus-visible and the ring went
+   (WCAG 2.4.7, Web Tester: the editor's date, then Set up's and Me's reminder
+   time, 12 Nov). The field keeps the same ring while focus is anywhere inside
+   it, for every type with such a part. */
+input:is([type="date"], [type="time"], [type="datetime-local"], [type="month"], [type="week"]):focus-within {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
 }
