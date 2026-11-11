@@ -1645,3 +1645,46 @@ test("large text, set in the browser: Print this month stays inside a 320 px pho
     await cleanup(email);
   }
 });
+
+// The reminder time's picker button is the browser's own part inside the field: with focus on it
+// the field isn't :focus-visible, and its ring went (WCAG 2.4.7, Web Tester's keyboard pass,
+// 12 Nov). Tab through each time field's own stops (hours, minutes, AM/PM, the picker): the
+// ring is drawn at every one while focus is inside it. Set up's, then Me's.
+test("keyboard: a time field shows its ring at every stop inside it, the picker button too", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "the stops inside a time field are Chromium's");
+  const email = newEmail();
+  const password = newPassword();
+  const ringThroughout = async (testId: string, where: string) => {
+    const field = page.getByTestId(testId);
+    await field.focus();
+    let stops = 0;
+    for (let i = 0; i < 8; i++) {
+      const state = await field.evaluate((input) => ({ inside: document.activeElement === input, outline: getComputedStyle(input).outlineStyle }));
+      if (!state.inside) break;
+      stops++;
+      expect.soft(state.outline, `${where}, stop ${stops}: the ring`).toBe("solid");
+      await page.keyboard.press("Tab");
+    }
+    console.log(`${where}: ${stops} stops inside the field, each with the ring`);
+    // Hours, minutes and the picker at least (a 12-hour browser adds AM/PM).
+    expect(stops, `${where}: Tab went through the field's own stops`).toBeGreaterThanOrEqual(3);
+  };
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
+    await expect(page.getByTestId("setup-reminder-time")).toBeVisible();
+    await ringThroughout("setup-reminder-time", "Set up's reminder time");
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    await page.goto("/app/me");
+    await expect(page.getByTestId("me-reminder-time")).toBeEnabled({ timeout: 15_000 });
+    await ringThroughout("me-reminder-time", "Me's reminder time");
+  } finally {
+    await cleanup(email);
+  }
+});
