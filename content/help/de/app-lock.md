@@ -8,7 +8,7 @@ de-draft: true
 
 Deine PIN bleibt auf deinem Handy und wird nie an uns gesendet. Solange die App gesperrt ist, wird ihre Vorschau in der App-Übersicht deines Handys verdeckt{pending:widget_live}, und unter Android zeigt das Widget auf dem Startbildschirm nichts Persönliches{/pending}.
 
-**PIN vergessen?** Wenn dein Tagebuch eine E-Mail hat, tippe auf **PIN vergessen?**, um dich abzumelden. Wenn du dich wieder anmeldest, ist die Sperre aufgehoben, und du kannst eine neue einrichten.
+**PIN vergessen?** Wenn dein Tagebuch eine E-Mail hat, tippe auf **PIN vergessen? Abmelden und neu anmelden**. Wenn du dich wieder anmeldest, ist die Sperre aufgehoben, und du kannst eine neue einrichten.
 
 Wenn dein Tagebuch keine E-Mail hat, melde dich nicht ab: Du könntest es nicht wieder öffnen. Füge unter **Ich** eine E-Mail hinzu, solange du die App noch öffnen kannst. Wenn du Face ID oder den Fingerabdruck aktiviert hast, öffne damit die App und füge dann eine E-Mail hinzu. Andernfalls, wenn du deine PIN vergessen und keine E-Mail hast, können wir dir keinen Zugang mehr verschaffen.
 
