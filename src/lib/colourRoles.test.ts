@@ -17,7 +17,12 @@ const contrast = (a: string, b: string) => {
 
 describe("colour roles", () => {
   it("Moodbow's voice is the brand accent (one rose family) on a tint of it, ≥ 4.5:1 in both themes", () => {
-    const css = readFileSync(join("src", "app", "globals.css"), "utf8");
+    // The site's own rules: not Plus's generated palettes (palettes.test.ts checks those,
+    // including the help card's copy of these defaults).
+    const all = readFileSync(join("src", "app", "globals.css"), "utf8");
+    const plusStart = all.indexOf("/* Moodbow Plus palettes");
+    const plusEnd = all.indexOf("/* End of the Moodbow Plus palettes. */");
+    const css = plusStart < 0 ? all : all.slice(0, plusStart) + all.slice(plusEnd);
     const count = (needle: string) => css.split(needle).length - 1;
     expect(count("--voice: var(--accent);")).toBe(3);
     expect(css).toContain("--voice-surface: #fbeff3;");

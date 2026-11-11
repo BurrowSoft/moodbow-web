@@ -13,7 +13,7 @@ export const PALETTE_COLOURS: Record<Palette, { light: Tokens; dark: Tokens }> =
   },
   sunrise: {
     light: { bg: "#fdf5ec", surface: "#ffffff", border: "#f1e2cf", text: "#2b2438", muted: "#635546", accent: "#9c4519", onAccent: "#ffffff", pill: "#fbe9d6" },
-    dark: { bg: "#2a2019", surface: "#3a2c22", border: "#4d3b2d", text: "#fbf3ea", muted: "#d9c7b4", accent: "#f3c24f", onAccent: "#2a2019", pill: "#44331f" },
+    dark: { bg: "#2a2019", surface: "#3a2c22", border: "#4d3b2d", text: "#fbf3ea", muted: "#d9c7b4", accent: "#e9b949", onAccent: "#2a2019", pill: "#44331f" },
   },
   sea: {
     light: { bg: "#f1f4f7", surface: "#ffffff", border: "#dde4eb", text: "#1f2a36", muted: "#4f5d6b", accent: "#3c5a7a", onAccent: "#ffffff", pill: "#e3eaf1" },
