@@ -8,7 +8,7 @@ fr-draft: true
 
 Votre code PIN reste sur votre téléphone et ne nous est jamais envoyé. Quand l'app est verrouillée, son aperçu dans le sélecteur d'apps de votre téléphone est masqué{pending:widget_live}, et sur Android le widget de l'écran d'accueil n'affiche rien de personnel{/pending}.
 
-**Code PIN oublié ?** Si votre journal a un e-mail, appuyez sur **Code PIN oublié ?** pour vous déconnecter. Quand vous vous reconnectez, le verrouillage est supprimé et vous pouvez en choisir un nouveau.
+**Code PIN oublié ?** Si votre journal a un e-mail, appuyez sur **Code PIN oublié ? Déconnectez-vous et reconnectez-vous**. Quand vous vous reconnectez, le verrouillage est supprimé et vous pouvez en choisir un nouveau.
 
 Si votre journal n'a pas d'e-mail, ne vous déconnectez pas : vous ne pourriez plus l'ouvrir. Ajoutez un e-mail dans **Moi** tant que vous pouvez encore ouvrir l'app. Si vous avez activé Face ID ou l'empreinte digitale, utilisez-les pour ouvrir l'app, puis ajoutez un e-mail. Sinon, si vous avez oublié votre code PIN et que vous n'avez pas d'e-mail, nous ne pouvons pas vous redonner l'accès.
 
