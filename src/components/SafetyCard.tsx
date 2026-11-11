@@ -6,6 +6,8 @@ import { Dialog, dialogButton } from "@/components/Dialog";
 import { HelpNumberText } from "@/components/HelpNumberText";
 import { Link } from "@/i18n/navigation";
 import { helpLineSize, helplinesFor, isIos, isShortCode, telHref } from "@/lib/safety/helplines";
+import { useRequestCountry } from "@/components/RequestCountry";
+import { countryName } from "@/lib/region/countries";
 
 const noSubscribe = () => () => {};
 
@@ -22,7 +24,16 @@ const noSubscribe = () => () => {};
 export function SafetyCard({ country, onClose, neutral = false }: { country: string | null | undefined; onClose: () => void; neutral?: boolean }) {
   const t = useTranslations("safety");
   const tc = useTranslations("common");
-  const lines = helplinesFor(country, useLocale());
+  // No profile country (a page that couldn't read it, or none set): the country this request
+  // came from (the root layout's), so a number to tap is there whenever one can be. With none,
+  // the card as before: the sentence and Find a helpline.
+  const requestCountry = useRequestCountry();
+  const requested = country ? null : requestCountry;
+  const locale = useLocale();
+  const lines = helplinesFor(country || requested, locale);
+  // Numbers from where the request came from, not the person's own country: say whose they
+  // are, so someone travelling or on a VPN can tell (UX). The browser's own country name.
+  const fromRequest = !country && requested && (lines.helpline || lines.emergency) ? countryName(requested, locale) : null;
   const ios = useSyncExternalStore(noSubscribe, () => isIos(navigator.userAgent, navigator.maxTouchPoints), () => false);
   // The numbers and links stop growing at about 200 % on narrow screens (decision 231). What comes
   // before them stays under the card's own cap (capText in Dialog): at 32 px it pushed the first help
@@ -33,6 +44,11 @@ export function SafetyCard({ country, onClose, neutral = false }: { country: str
   return (
     <Dialog title={t("safetyTitle")} body={t(neutral ? "safetyBodyNeutral" : "safetyBody")} onCancel={onClose} testId="safety-card" initialFocus="title" capText>
       <div className="w-full space-y-[max(6px,calc(28px-1rem))] text-left">
+        {fromRequest && (
+          <p data-testid="safety-request-country" className="font-medium text-text">
+            {fromRequest}
+          </p>
+        )}
         {lines.helpline &&
           (ios && isShortCode(lines.helpline.dial) ? (
             <div>
@@ -87,7 +103,9 @@ export function SafetyCard({ country, onClose, neutral = false }: { country: str
 // of Me on its own and under a reflection that names it. A calm secondary
 // button, never red or alarming (decision 128). neutral: on Me, where
 // nothing flagged led to it. A real link to the public help page, so help never depends on the
-// page's scripts (#248); once they're running it opens the card instead.
+// page's scripts (#248); once they're running it opens the card instead. Its words stay whole: browser
+// hyphens split "par-ler" with room to spare (Web Tester). It stops growing at about 200 % on a narrow
+// screen, in em, so at the normal size it's the size of the text around it.
 export function GetHelpNow({ country, testId, className, neutral }: { country: string | null | undefined; testId: string; className?: string; neutral?: boolean }) {
   const t = useTranslations("me");
   const [open, setOpen] = useState(false);
@@ -100,7 +118,7 @@ export function GetHelpNow({ country, testId, className, neutral }: { country: s
   };
   return (
     <>
-      <Link href="/help/get-help-now" prefetch={false} data-testid={testId} onClick={openCard} className={className ?? dialogButton()}>
+      <Link href="/help/get-help-now" prefetch={false} data-testid={testId} onClick={openCard} className={className ?? `${dialogButton(false, false)} [font-size:min(1em,max(10vw,32px))]`}>
         {t("meGetHelpNow")}
       </Link>
       {open && <SafetyCard country={country} onClose={close} neutral={neutral} />}

@@ -7,7 +7,7 @@
   (src/lib/legalContent.test.ts).
 -->
 ## Moodbow Privacy Policy
-Last updated: 6 November 2026
+Last updated: 11 November 2026
 
 Moodbow is a private journal made by Vitor Ribeiro Carvalho, trading as BurrowSoft (297 Moo 1, Baan Sanian, Mueang Nan, Nan 55000, Thailand), "we" in this policy. We wrote this to be read, not skimmed past. If anything is unclear, email support@moodbow.com.
 
@@ -39,6 +39,8 @@ Moodbow is a private journal made by Vitor Ribeiro Carvalho, trading as BurrowSo
 **Emails you send us:** if you write to support@moodbow.com, we keep the conversation so we can answer you, and delete it when it's no longer needed.
 
 We don't collect your name, contacts, precise location, or advertising identifiers, and we don't use advertising trackers.
+
+To show helplines near you when we don't know your country, we use the country your connection comes from, at that moment only; it isn't stored.
 
 {pending:web_analytics}**Visit counts (public website only):** we count visits to our public pages with a cookie-free tool from our host, Vercel: which page was opened, from what kind of device and country, and which of our campaign links brought you there, if any. It uses no cookies or identifiers, never runs in the web journal, never sees what you write, and can't tell who you are. The mobile app sends no analytics.{/pending}
 

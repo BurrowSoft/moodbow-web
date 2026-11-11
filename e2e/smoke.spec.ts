@@ -277,7 +277,9 @@ test.describe("the live legal pages and account deletion (decision 164)", () => 
     await page.goto("/privacy");
     const article = page.locator('[data-content="article"]');
     await expect(article.getByRole("heading", { level: 2, name: "The short version" })).toBeVisible();
-    await expect(article.getByText("Last updated: 6 November 2026")).toBeVisible();
+    await expect(article.getByText("Last updated: 11 November 2026")).toBeVisible();
+    // The help card's country fallback, as the policy says it (decision 245, #269).
+    await expect(article).toContainText("To show helplines near you when we don't know your country, we use the country your connection comes from, at that moment only; it isn't stored.");
     await expect(article).not.toContainText("Google Play, Apple App Store");
     await expect(article).toContainText("disappear automatically within 8 days");
     // AI is off: no line may point at a Me → AI screen (decision 69).
