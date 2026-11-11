@@ -85,7 +85,8 @@ export async function POST(req: Request): Promise<Response> {
   // abandoned tab, a language switch), or both could be completed.
   const ownKey = (k: string | undefined) => k === key || !!k?.startsWith(`${key}-r`);
   try {
-    for await (const open of stripe.checkout.sessions.list({ status: "open", limit: 100 })) {
+    // By customer when it's known (Reviewer, #270), so it doesn't list everyone's.
+    for await (const open of stripe.checkout.sessions.list({ status: "open", limit: 100, ...(row?.store_customer_id ? { customer: row.store_customer_id } : {}) })) {
       if (open.client_reference_id === user.id && !ownKey(open.metadata?.checkout_key)) await stripe.checkout.sessions.expire(open.id);
     }
   } catch {

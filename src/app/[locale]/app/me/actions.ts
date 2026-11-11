@@ -42,7 +42,7 @@ export async function exportMyData(): Promise<ExportResult> {
   return { status: "ok", json: JSON.stringify(data), date: localDay(exportedAt, typeof zone === "string" ? zone : "UTC") };
 }
 
-export type DeleteAccountState = { status: "idle" } | { status: "error"; error: "confirm" | "generic" };
+export type DeleteAccountState = { status: "idle" } | { status: "error"; error: "confirm" | "generic" | "plus_cancelled" };
 
 // Me → Delete account: delete_my_account() removes the auth user and,
 // with it, every row, right away (M7). Then this browser forgets the
@@ -58,9 +58,10 @@ export async function deleteMyAccount(_prev: DeleteAccountState, form: FormData)
   if (!uid) return userError?.name === "AuthRetryableFetchError" ? { status: "error", error: "generic" } : redirect({ href: "/sign-in", locale });
 
   // Plus bought on the web stops being charged first (never blocks the delete).
-  await cancelStripeBeforeDelete(supabase, uid);
+  const plus = await cancelStripeBeforeDelete(supabase, uid);
   const { error } = await supabase.rpc("delete_my_account");
-  if (error) return { status: "error", error: "generic" };
+  // Cancelled, but the account is still there: the message says both (UX, #270).
+  if (error) return { status: "error", error: plus === "cancelled" ? "plus_cancelled" : "generic" };
 
   // The account is gone: the session's cookies go too (Auth may refuse the
   // sign-out itself now that the user doesn't exist; local scope clears the

@@ -83,6 +83,8 @@ describe("POST /api/checkout/stripe", () => {
     expect(p.subscription_data).toEqual({ metadata: { user_id: "u1" } });
     expect(p.customer).toBe("cus_9");
     expect(p.customer_email).toBeUndefined();
+    // The open-session sweep is this customer's only (Reviewer, #270).
+    expect(stripe.checkout.sessions.list).toHaveBeenCalledWith({ status: "open", limit: 100, customer: "cus_9" });
     expect(p.success_url).toBe(`${ORIGIN}/app/me/plus?started=1`);
   });
 

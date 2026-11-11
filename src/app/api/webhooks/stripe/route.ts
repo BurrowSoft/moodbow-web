@@ -1,6 +1,5 @@
 import * as Sentry from "@sentry/nextjs";
 import type Stripe from "stripe";
-import { pageGate } from "@/lib/conditions";
 import { getStripe, retrieveSubscriptionOrNull, stripeConfigured } from "@/lib/plus/stripe";
 import { insertEntitlement, readEntitlement, serviceRoleConfigured, updateEntitlement } from "@/lib/plus/serviceRole";
 import { subscriptionIdOf, syncSubscription, type SyncOutcome } from "@/lib/plus/stripeSync";
@@ -11,7 +10,10 @@ import { subscriptionIdOf, syncSubscription, type SyncOutcome } from "@/lib/plus
 // STRIPE_WEBHOOK_SECRET is its signing secret. Every event only names a
 // subscription: what's written is that subscription's live state
 // (lib/plus/stripeSync.ts). A 5xx makes Stripe retry; each one is reported to
-// Sentry with the event's type and id only, never its payload.
+// Sentry with the event's type and id only, never its payload. It runs
+// whatever the plus flag says (Reviewer, #270): once someone has paid,
+// cancellations and failed renewals must keep syncing even if Plus is
+// switched off. The signature is the gate.
 
 export const dynamic = "force-dynamic";
 
@@ -24,7 +26,6 @@ function report(reason: string, event?: { id: string; type: string }) {
 }
 
 export async function POST(req: Request): Promise<Response> {
-  if (pageGate("plus") === "hidden") return new Response(null, { status: 404 });
   const secret = process.env.STRIPE_WEBHOOK_SECRET?.trim();
   if (!secret || !stripeConfigured() || !serviceRoleConfigured()) {
     report("not_configured");

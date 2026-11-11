@@ -92,9 +92,10 @@ describe("POST /api/webhooks/stripe", () => {
     expect(constructEvent).not.toHaveBeenCalled();
   });
 
-  it("Plus off on Production: 404", async () => {
+  it("Plus switched off: still synced, so a cancellation after people paid is never lost (Reviewer, #270)", async () => {
     gate = "hidden";
-    expect((await post()).status).toBe(404);
-    expect(constructEvent).not.toHaveBeenCalled();
+    constructEvent.mockReturnValue(event("customer.subscription.deleted", { id: "sub_1" }));
+    expect((await post()).status).toBe(200);
+    expect(sync.mock.calls[0][0]).toBe("sub_1");
   });
 });
