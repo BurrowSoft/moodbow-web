@@ -102,6 +102,12 @@ const CASES: Case[] = [
   { name: "ours: spaces and blank lines kept, CRLF → LF, all-blank is no note", csv: `date,mood,note\n2026-10-01,4,"  two\r\nlines  \r\n"\n2026-10-02,3,"   "\n` },
   { name: "ours: the ' before a formula start comes off; one that isn't ours stays", csv: "date,mood,note\n2026-10-01,4,'- milk\n2026-10-02,4,''=x\n2026-10-03,4,'hello\n" },
   { name: "duplicates: the same words twice on a day, once the next day (dup index)", csv: "date,mood,note\n2026-10-01,4,Same\n2026-10-01,4,Same\n2026-10-02,4,Same\n2026-10-01,4,Same\n" },
+  // Tags (UX, 11 Nov; options.tags where tags-live is on): Daylio's activities and our
+  // export's tags column become the day's tags, the day's rows together, the first 5
+  // different (trimmed, cut to 32); off, activities are listed as not imported, as before.
+  { name: "tags: Daylio activities become the day's tags, the day's rows together", csv: daylio(["2026-10-19,x,x,8:15 pm,rad,friends | walk | good meal,,Dinner.", "2026-10-19,x,x,7:30 am,meh,work | Walk,,", "2026-10-18,x,x,9:00 pm,good,a | b | c | d | e | f,,"]), options: { tags: true } },
+  { name: "tags: our export's tags column comes back as the day's tags", csv: [`${OURS.replace(",moment,note", ",moment,tags,note")}`, "2026-10-01,4,Good,,,,,,Walk | Rain,A", "2026-10-01,4,Good,,,,,yes,Walk | Rain,B", `2026-10-02,3,Okay,,,,,,${"y".repeat(40)},`].join("\n"), options: { tags: true } },
+  { name: "tags off: the same Daylio activities stay listed as not imported", csv: daylio(["2026-10-19,x,x,8:15 pm,rad,friends | walk,,Dinner."]) },
   { name: "round trip: our own export of content/contracts/export_fixture.json (en)", csv: renderExportCsv(fixture as unknown as ExportDoc, t) },
 ];
 

@@ -403,7 +403,8 @@
     "exportExercise": "การเคลื่อนไหว",
     "exportStress": "ความเครียด",
     "exportOfFive": "{value}/5",
-    "exportReflectionOn": "สำหรับบันทึกวันที่ {date}"
+    "exportReflectionOn": "สำหรับบันทึกวันที่ {date}",
+    "exportTags": "แท็ก"
   },
   "help": {
     "helpTitle": "ความช่วยเหลือและคำถามที่พบบ่อย",

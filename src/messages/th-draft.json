@@ -1063,5 +1063,10 @@
     "key": "today.tagsTooLong",
     "en": "A tag can be up to 32 characters.",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "export.exportTags",
+    "en": "Tags",
+    "reason": "UX draft (native read pending)"
   }
 ]

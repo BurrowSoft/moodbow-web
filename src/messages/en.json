@@ -403,7 +403,8 @@
     "exportExercise": "Movement",
     "exportStress": "Stress",
     "exportOfFive": "{value}/5",
-    "exportReflectionOn": "On your entry of {date}"
+    "exportReflectionOn": "On your entry of {date}",
+    "exportTags": "Tags"
   },
   "help": {
     "helpTitle": "Help & FAQ",

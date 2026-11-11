@@ -403,7 +403,8 @@
     "exportExercise": "Activité",
     "exportStress": "Stress",
     "exportOfFive": "{value}/5",
-    "exportReflectionOn": "Sur votre note du {date}"
+    "exportReflectionOn": "Sur votre note du {date}",
+    "exportTags": "Étiquettes"
   },
   "help": {
     "helpTitle": "Aide et FAQ",

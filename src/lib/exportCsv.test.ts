@@ -108,7 +108,7 @@ describe("renderExportCsv: the file", () => {
   it("UTF-8 BOM, the 9 columns, CRLF rows", () => {
     expect(csv.startsWith(BOM)).toBe(true);
     expect(table[0]).toEqual([...CSV_COLUMNS]);
-    expect(csv.slice(1).split("\r\n")[0]).toBe("date,mood,mood_word,sleep_hours,sleep_quality,movement_minutes,stress,moment,note");
+    expect(csv.slice(1).split("\r\n")[0]).toBe("date,mood,mood_word,sleep_hours,sleep_quality,movement_minutes,stress,moment,tags,note");
     expect(csv.endsWith("\r\n")).toBe(true);
   });
 

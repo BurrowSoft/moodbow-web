@@ -403,7 +403,8 @@
     "exportExercise": "Movimento",
     "exportStress": "Estresse",
     "exportOfFive": "{value}/5",
-    "exportReflectionOn": "Sobre sua anotação de {date}"
+    "exportReflectionOn": "Sobre sua anotação de {date}",
+    "exportTags": "Tags"
   },
   "help": {
     "helpTitle": "Ajuda e perguntas frequentes",

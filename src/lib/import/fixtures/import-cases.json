@@ -1425,8 +1425,175 @@
       ]
     },
     {
+      "name": "tags: Daylio activities become the day's tags, the day's rows together",
+      "csv": "full_date,date,weekday,time,mood,activities,note_title,note\n2026-10-19,x,x,8:15 pm,rad,friends | walk | good meal,,Dinner.\n2026-10-19,x,x,7:30 am,meh,work | Walk,,\n2026-10-18,x,x,9:00 pm,good,a | b | c | d | e | f,,",
+      "options": {
+        "tags": true
+      },
+      "result": {
+        "status": "ok",
+        "plan": {
+          "format": "daylio",
+          "dateFormat": "iso",
+          "days": [
+            {
+              "date": "2026-10-18",
+              "mood": 4,
+              "tags": [
+                "a",
+                "b",
+                "c",
+                "d",
+                "e"
+              ]
+            },
+            {
+              "date": "2026-10-19",
+              "mood": 5,
+              "tags": [
+                "work",
+                "Walk",
+                "friends",
+                "good meal"
+              ]
+            }
+          ],
+          "entries": [
+            {
+              "date": "2026-10-19",
+              "time": "20:15",
+              "body": "Dinner."
+            }
+          ],
+          "customMoods": [],
+          "notImported": {
+            "activities": []
+          },
+          "skipped": {
+            "future": 0,
+            "tooLong": 0,
+            "olderDays": 0,
+            "olderEntries": 0
+          },
+          "range": {
+            "first": "2026-10-18",
+            "last": "2026-10-19"
+          }
+        }
+      },
+      "ids": [
+        "b5635519-4bb4-5da1-8de4-ea1d9b086cbe"
+      ]
+    },
+    {
+      "name": "tags: our export's tags column comes back as the day's tags",
+      "csv": "date,mood,mood_word,sleep_hours,sleep_quality,movement_minutes,stress,moment,tags,note\n2026-10-01,4,Good,,,,,,Walk | Rain,A\n2026-10-01,4,Good,,,,,yes,Walk | Rain,B\n2026-10-02,3,Okay,,,,,,yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy,",
+      "options": {
+        "tags": true
+      },
+      "result": {
+        "status": "ok",
+        "plan": {
+          "format": "generic",
+          "dateFormat": "iso",
+          "days": [
+            {
+              "date": "2026-10-01",
+              "mood": 4,
+              "tags": [
+                "Walk",
+                "Rain"
+              ]
+            },
+            {
+              "date": "2026-10-02",
+              "mood": 3,
+              "tags": [
+                "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
+              ]
+            }
+          ],
+          "entries": [
+            {
+              "date": "2026-10-01",
+              "time": null,
+              "body": "A"
+            },
+            {
+              "date": "2026-10-01",
+              "time": null,
+              "body": "B",
+              "isMoment": true
+            }
+          ],
+          "customMoods": [],
+          "notImported": {
+            "activities": []
+          },
+          "skipped": {
+            "future": 0,
+            "tooLong": 0,
+            "olderDays": 0,
+            "olderEntries": 0
+          },
+          "range": {
+            "first": "2026-10-01",
+            "last": "2026-10-02"
+          }
+        }
+      },
+      "ids": [
+        "1f39fa41-304b-5142-9033-daac200910a6",
+        "626e3a62-f804-5f56-8ac4-a206c08c7ece"
+      ]
+    },
+    {
+      "name": "tags off: the same Daylio activities stay listed as not imported",
+      "csv": "full_date,date,weekday,time,mood,activities,note_title,note\n2026-10-19,x,x,8:15 pm,rad,friends | walk,,Dinner.",
+      "result": {
+        "status": "ok",
+        "plan": {
+          "format": "daylio",
+          "dateFormat": "iso",
+          "days": [
+            {
+              "date": "2026-10-19",
+              "mood": 5
+            }
+          ],
+          "entries": [
+            {
+              "date": "2026-10-19",
+              "time": "20:15",
+              "body": "Dinner."
+            }
+          ],
+          "customMoods": [],
+          "notImported": {
+            "activities": [
+              "friends",
+              "walk"
+            ]
+          },
+          "skipped": {
+            "future": 0,
+            "tooLong": 0,
+            "olderDays": 0,
+            "olderEntries": 0
+          },
+          "range": {
+            "first": "2026-10-19",
+            "last": "2026-10-19"
+          }
+        }
+      },
+      "ids": [
+        "b5635519-4bb4-5da1-8de4-ea1d9b086cbe"
+      ]
+    },
+    {
       "name": "round trip: our own export of content/contracts/export_fixture.json (en)",
-      "csv": "﻿date,mood,mood_word,sleep_hours,sleep_quality,movement_minutes,stress,moment,note\r\n2026-09-28,2,Bad,,,,,,\r\n2026-09-29,3,Okay,7,,0,4,,\r\n2026-09-30,5,Great,,poor,90,,,\"Long day.\r\nBut a good talk with Mai at the end — ขอบคุณ.\r\n\r\n\"\r\n2026-10-02,4,Good,7.5,good,30,2,yes,A walk by the river.\r\n2026-10-02,4,Good,7.5,good,30,2,,\"\nGroceries  \n\n- rice\n- tea\n \t\n\t\n\"\r\n",
+      "csv": "﻿date,mood,mood_word,sleep_hours,sleep_quality,movement_minutes,stress,moment,tags,note\r\n2026-09-28,2,Bad,,,,,,,\r\n2026-09-29,3,Okay,7,,0,4,,,\r\n2026-09-30,5,Great,,poor,90,,,,\"Long day.\r\nBut a good talk with Mai at the end — ขอบคุณ.\r\n\r\n\"\r\n2026-10-02,4,Good,7.5,good,30,2,yes,,A walk by the river.\r\n2026-10-02,4,Good,7.5,good,30,2,,,\"\nGroceries  \n\n- rice\n- tea\n \t\n\t\n\"\r\n",
       "result": {
         "status": "ok",
         "plan": {
