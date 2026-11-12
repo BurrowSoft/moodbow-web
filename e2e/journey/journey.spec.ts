@@ -1782,6 +1782,45 @@ test("large text, set in the browser: the 1.2 pages' help is in the first view o
 // Print this month at 320 px and 300 % (Web Tester, #274): the help button and the month's title
 // stay inside the page (an automatic layout table grew to the title's longest word and carried
 // the button 43 px past it), help in the first view, nothing to scroll sideways.
+// The Timeline doesn't move once it has painted (the Web Tester's performance pass, 12 Nov: CLS
+// 0.176 about 5 s in, when "Share this month" appeared after its count and wrapped the month's
+// header). A month with enough check-ins for a card, on a phone: every layout shift not caused by
+// input, summed over 8 s after landing.
+test("the Timeline doesn't shift when Share this month arrives (CLS)", async ({ page, browserName }) => {
+  test.setTimeout(120_000);
+  test.skip(browserName !== "chromium", "layout-shift entries are Chromium's");
+  const email = newEmail();
+  try {
+    const password = await accountAtSetup(page, email);
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    // Five check-ins on the 1st to the 5th of last month: always past, one month, enough for a card.
+    const today = await journalToday(email, password);
+    const first = new Date(`${today.slice(0, 7)}-01T00:00:00Z`);
+    first.setUTCMonth(first.getUTCMonth() - 1);
+    const month = first.toISOString().slice(0, 7);
+    await seedCheckIns(email, password, `${month}-01`, [0, 1, 2, 3, 4].map((offset) => ({ offset, mood: 4 })));
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.addInitScript(() => {
+      const w = window as unknown as { __shift: number };
+      w.__shift = 0;
+      new PerformanceObserver((list) => {
+        for (const entry of list.getEntries() as (PerformanceEntry & { value: number; hadRecentInput: boolean })[]) if (!entry.hadRecentInput) w.__shift += entry.value;
+      }).observe({ type: "layout-shift", buffered: true });
+    });
+    await page.goto("/app/timeline");
+    // The share link has arrived (its count is done)...
+    await expect(page.getByTestId(`timeline-share-${month}`)).toBeVisible({ timeout: 15_000 });
+    // ...and a few more seconds for anything later.
+    await page.waitForTimeout(8_000);
+    const shift = await page.evaluate(() => (window as unknown as { __shift: number }).__shift);
+    console.log(`Timeline CLS after landing: ${shift.toFixed(4)}`);
+    expect(shift).toBeLessThanOrEqual(0.01);
+  } finally {
+    await cleanup(email);
+  }
+});
+
 test("large text, set in the browser: Print this month stays inside a 320 px phone, help first", async ({ page, browserName }) => {
   test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
   test.setTimeout(180_000);
