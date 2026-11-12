@@ -16,7 +16,7 @@ import { checkExtraTimes, EXTRA_REMINDERS, type ExtraReminderError } from "@/lib
 export type ExtraMode = { kind: "plus" } | { kind: "locked"; offer: PlusOffer };
 
 const FIELD = "block min-w-0 max-w-full rounded-2xl border border-border bg-bg px-[16px] py-3 text-text [font-size:min(1rem,max(10vw,32px))] disabled:opacity-50";
-const SMALL = "min-h-11 rounded-full border border-border px-4 text-sm font-medium text-text disabled:opacity-50";
+const SMALL = "min-h-11 rounded-full border border-border px-[16px] text-sm font-medium text-text disabled:opacity-50";
 
 export function timeLabel(hhmm: string, locale: string): string {
   const tag = locale === "pt-br" ? "pt-BR" : locale;
@@ -101,7 +101,7 @@ export function ExtraReminders({
                 className={`mt-2 ${FIELD}`}
               />
             ) : (
-              <p id={`${base}-${i}`} data-testid="me-reminder-extra-locked" className="mt-2 flex items-center gap-2 text-text">
+              <p id={`${base}-${i}`} data-testid="me-reminder-extra-locked" className="mt-2 flex items-center gap-[8px] text-text">
                 {timeLabel(time, locale)}
                 <PlusLock />
               </p>
@@ -164,7 +164,9 @@ export function ExtraReminders({
           sheetTitle={tp("sheetReminders")}
           offer={mode.offer}
           testId="me-reminder-extra-add-locked"
-          className={`inline-flex items-center gap-2 ${SMALL}`}
+          // A block that never outgrows the card: at 300 % on a 320 px phone the words wrap
+          // beside the lock (the large-text journey).
+          className={`flex w-fit max-w-full items-center gap-[8px] text-start [overflow-wrap:anywhere] ${SMALL}`}
         />
       )}
       <p role="status" data-testid="me-reminder-extra-status" className="text-sm font-medium text-text">
