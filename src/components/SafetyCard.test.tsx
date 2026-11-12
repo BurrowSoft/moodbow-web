@@ -227,12 +227,18 @@ describe("SafetyCard: the opener (#9765 S-03)", () => {
   });
 });
 
-describe("a number never breaks across lines (#247)", () => {
-  it("stays on one line by CSS, so what's copied has plain spaces, and it still dials", () => {
+describe("a number never breaks inside a digit group (#247; UX 12 Nov)", () => {
+  it("one block with its brackets, whole where it fits; wider than the line, it wraps only between groups; plain spaces, and it still dials", () => {
     render(<NextIntlClientProvider locale="en" messages={messages}><SafetyCard country="DE" onClose={() => {}} /></NextIntlClientProvider>);
     const link = screen.getByTestId("safety-call-helpline");
     const number = link.querySelector("[data-help-number]")!;
-    expect(number).toHaveClass("whitespace-nowrap");
+    // The block: "(", the number, ")"; it moves to the next line whole rather than splitting.
+    expect(number.parentElement).toHaveClass("inline-block");
+    expect(number.parentElement!.textContent).toBe("(0800 111 0 111)");
+    // Each group can't break; only the spaces between them can.
+    const groups = [...number.querySelectorAll("span")];
+    expect(groups.map((g) => g.textContent)).toEqual(["0800", "111", "0", "111"]);
+    for (const group of groups) expect(group).toHaveClass("whitespace-nowrap");
     expect(number.textContent).toBe("0800 111 0 111");
     expect(link.textContent).toContain("(0800 111 0 111)");
     expect(link.textContent).not.toContain(String.fromCharCode(160));
