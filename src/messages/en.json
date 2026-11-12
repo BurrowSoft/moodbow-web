@@ -325,6 +325,7 @@
     "reminderAddTime": "Add another time",
     "reminderExtraTime": "Another time",
     "reminderRemove": "Remove",
+    "reminderRemoveTime": "Remove the {time} reminder",
     "reminderTooClose": "Choose a time at least an hour from your other reminders.",
     "reminderMax": "You can have up to 3 reminders a day.",
     "reminderExtraRemoved": "Removed your {time} reminder: it was within an hour of your new time.",

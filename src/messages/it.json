@@ -325,6 +325,7 @@
     "reminderAddTime": "Aggiungi un altro orario",
     "reminderExtraTime": "Altro orario",
     "reminderRemove": "Rimuovi",
+    "reminderRemoveTime": "Rimuovi il promemoria delle {time}",
     "reminderTooClose": "Scegli un orario ad almeno un'ora dagli altri promemoria.",
     "reminderMax": "Puoi avere fino a 3 promemoria al giorno.",
     "reminderExtraRemoved": "Abbiamo rimosso il promemoria delle {time}: era a meno di un'ora dal nuovo orario.",

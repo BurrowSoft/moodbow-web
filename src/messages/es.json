@@ -325,6 +325,7 @@
     "reminderAddTime": "Añadir otra hora",
     "reminderExtraTime": "Otra hora",
     "reminderRemove": "Quitar",
+    "reminderRemoveTime": "Quitar el recordatorio de las {time}",
     "reminderTooClose": "Elige una hora que esté al menos a una hora de tus otros recordatorios.",
     "reminderMax": "Puedes tener hasta 3 recordatorios al día.",
     "reminderExtraRemoved": "Hemos quitado tu recordatorio de las {time}: estaba a menos de una hora de tu nueva hora.",

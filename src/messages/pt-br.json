@@ -325,6 +325,7 @@
     "reminderAddTime": "Adicionar outro horário",
     "reminderExtraTime": "Outro horário",
     "reminderRemove": "Remover",
+    "reminderRemoveTime": "Remover o lembrete das {time}",
     "reminderTooClose": "Escolha um horário com pelo menos uma hora de diferença dos seus outros lembretes.",
     "reminderMax": "Você pode ter até 3 lembretes por dia.",
     "reminderExtraRemoved": "Seu lembrete das {time} foi removido: estava a menos de uma hora do seu novo horário.",

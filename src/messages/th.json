@@ -325,6 +325,7 @@
     "reminderAddTime": "เพิ่มเวลาอื่น",
     "reminderExtraTime": "เวลาอื่น",
     "reminderRemove": "นำออก",
+    "reminderRemoveTime": "นำการแจ้งเตือนเวลา {time} ออก",
     "reminderTooClose": "เลือกเวลาที่ห่างจากการแจ้งเตือนอื่นอย่างน้อยหนึ่งชั่วโมง",
     "reminderMax": "คุณตั้งการแจ้งเตือนได้สูงสุด 3 ครั้งต่อวัน",
     "reminderExtraRemoved": "นำการแจ้งเตือนเวลา {time} ออกแล้ว เพราะห่างจากเวลาใหม่ของคุณไม่ถึงหนึ่งชั่วโมง",

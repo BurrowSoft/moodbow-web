@@ -9,6 +9,8 @@ const saveExtraReminders = vi.fn();
 vi.mock("./actions", () => ({ saveReminder: (...a: unknown[]) => saveReminder(...a), saveExtraReminders: (...a: unknown[]) => saveExtraReminders(...a) }));
 vi.mock("@/i18n/navigation", () => ({ Link: ({ children, href, ...rest }: { children: React.ReactNode; href: string }) => <a href={href} {...rest}>{children}</a> }));
 const { Reminder } = await import("./Reminder");
+const { timeLabel } = await import("./ExtraReminders");
+const removeName = (hhmm: string) => messages.me.reminderRemoveTime.replace("{time}", timeLabel(hhmm, "en"));
 
 type Extra = Parameters<typeof Reminder>[0]["extra"];
 const PLUS: Extra = { mode: { kind: "plus" }, times: [] };
@@ -54,13 +56,20 @@ describe("more reminders: with Plus", () => {
     expect(screen.getByTestId("me-reminder-extra-max")).toHaveTextContent(messages.me.reminderMax);
   });
 
-  it("Remove sends the list without that time; each Remove names its time", async () => {
+  it("Remove sends the list without that time", async () => {
     renderIt({ mode: { kind: "plus" }, times: ["08:00", "13:00"] });
-    const removes = screen.getAllByRole("button", { name: messages.me.reminderRemove });
-    expect(removes).toHaveLength(2);
-    expect(removes[0]).toHaveAttribute("aria-describedby");
-    fireEvent.click(removes[0]);
+    fireEvent.click(screen.getByRole("button", { name: removeName("08:00") }));
     await waitFor(() => expect(saveExtraReminders).toHaveBeenCalledWith(["13:00"]));
+  });
+
+  // UX: a screen reader never hears several bare "Remove"s.
+  it("each Remove is named with its own time, and no two controls share a name", () => {
+    renderIt({ mode: { kind: "plus" }, times: ["08:00", "13:00"] });
+    const removes = screen.getAllByTestId("me-reminder-extra-remove");
+    expect(removes.map((b) => b.getAttribute("aria-label"))).toEqual([removeName("08:00"), removeName("13:00")]);
+    expect(screen.queryByRole("button", { name: messages.me.reminderRemove })).toBeNull();
+    const names = screen.getAllByRole("button").map((b) => b.getAttribute("aria-label") ?? b.textContent);
+    expect(new Set(names).size).toBe(names.length);
   });
 
   it("the server's refusal says why and keeps the account's list", async () => {
@@ -108,7 +117,7 @@ describe("more reminders: without Plus", () => {
     renderIt({ ...LOCKED!, times: ["08:00"] });
     expect(screen.queryByTestId("me-reminder-extra-time")).toBeNull();
     expect(screen.getByTestId("me-reminder-extra-locked")).toHaveTextContent("8:00");
-    fireEvent.click(screen.getByRole("button", { name: messages.me.reminderRemove }));
+    fireEvent.click(screen.getByRole("button", { name: removeName("08:00") }));
     await waitFor(() => expect(saveExtraReminders).toHaveBeenCalledWith([]));
   });
 

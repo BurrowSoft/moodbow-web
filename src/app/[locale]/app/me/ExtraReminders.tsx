@@ -107,7 +107,15 @@ export function ExtraReminders({
               </p>
             )}
           </div>
-          <button type="button" data-testid="me-reminder-extra-remove" aria-describedby={`${base}-${i}`} disabled={pending} onClick={() => send(times.filter((x) => x !== time))} className={SMALL}>
+          {/* Named with its time, so a screen reader never hears several bare "Remove"s (UX). */}
+          <button
+            type="button"
+            data-testid="me-reminder-extra-remove"
+            aria-label={t("reminderRemoveTime", { time: timeLabel(time, locale) })}
+            disabled={pending}
+            onClick={() => send(times.filter((x) => x !== time))}
+            className={SMALL}
+          >
             {t("reminderRemove")}
           </button>
         </div>

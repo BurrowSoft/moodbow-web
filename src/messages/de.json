@@ -325,6 +325,7 @@
     "reminderAddTime": "Weitere Uhrzeit hinzufügen",
     "reminderExtraTime": "Weitere Uhrzeit",
     "reminderRemove": "Entfernen",
+    "reminderRemoveTime": "Erinnerung um {time} entfernen",
     "reminderTooClose": "Wähle eine Uhrzeit, die mindestens eine Stunde von deinen anderen Erinnerungen entfernt ist.",
     "reminderMax": "Du kannst bis zu 3 Erinnerungen am Tag haben.",
     "reminderExtraRemoved": "Deine Erinnerung um {time} wurde entfernt: Sie lag weniger als eine Stunde von deiner neuen Uhrzeit entfernt.",
