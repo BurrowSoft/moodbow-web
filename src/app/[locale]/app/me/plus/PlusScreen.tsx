@@ -224,9 +224,10 @@ export function PlusScreen({ view, price, aiShown, started }: { view: PlusView; 
         className={large ? "space-y-3 pb-3" : "min-h-0 flex-1 space-y-3 overflow-y-scroll pb-3 [scrollbar-width:thin]"}
       >
         <div className="space-y-1">
-          {/* At large text the eyebrow stays on one line and the title at the 32 px cap, so the whole
-              title is in view on landing above the pinned part (UX, 12 Nov; de put it at 304 px). */}
-          <p data-testid="plus-eyebrow" className={`font-medium tracking-wide text-accent uppercase ${large ? "[font-size:min(0.875rem,max(7.5vw,24px))]" : "text-sm"}`}>
+          {/* At large text the eyebrow is for screen readers only and the title at the 32 px cap, so
+              the whole title is in view on landing above the pinned part (UX, 12 Nov: de put it at
+              304, then 220-300 under a pinned top of 276; the price and button say it's Plus). */}
+          <p data-testid="plus-eyebrow" className={large ? "sr-only" : "text-sm font-medium tracking-wide text-accent uppercase"}>
             {t("label")}
           </p>
           <h1
