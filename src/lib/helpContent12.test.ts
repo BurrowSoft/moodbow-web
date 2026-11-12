@@ -17,7 +17,8 @@ type Row = {
 };
 
 const ROWS: Row[] = [
-  { slug: "things-that-help", app: "app_toolbox", web: "toolbox_live", shows: "If you feel dizzy, stop and breathe normally." },
+  // The app keeps Edit, Delete and the moves in a menu per row (UX 12 Nov).
+  { slug: "things-that-help", app: "app_toolbox", web: "toolbox_live", shows: "If you feel dizzy, stop and breathe normally.", appOnly: ["the menu beside each item"] },
 ];
 
 // Every language with its own Help folder, served or not yet.
