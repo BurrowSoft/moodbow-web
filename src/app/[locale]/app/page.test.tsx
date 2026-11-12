@@ -87,3 +87,35 @@ describe("Today, whatever failed", () => {
     expect(screen.getByTestId("checkin-card")).toHaveAttribute("data-first", "false");
   });
 });
+
+// Today's reads need only `me`, so they're asked together, not one after another (the Web Dev's
+// LCP read, 12 Nov: each one in turn cost a round trip to the database).
+describe("Today's reads", () => {
+  it("the check-in and the entries are both asked before either answers", async () => {
+    const asked: string[] = [];
+    const answers: (() => void)[] = [];
+    const held = (table: string, value: unknown) => {
+      const chain: Record<string, unknown> = {};
+      for (const step of ["select", "eq", "order"]) chain[step] = () => chain;
+      const wait = () => {
+        asked.push(table);
+        return new Promise((done) => answers.push(() => done(value)));
+      };
+      chain.maybeSingle = wait;
+      chain.then = (done: (v: unknown) => unknown) => wait().then(done);
+      return chain;
+    };
+    const from = client.from;
+    client.from = (table: string) => held(table, table === "check_ins" ? { data: null, error: null } : { data: [], error: null });
+    try {
+      const rendering = page();
+      // Both are asked while neither has answered: one after the other, only check_ins ever would be.
+      await vi.waitFor(() => expect([...asked].sort()).toEqual(["check_ins", "entries"]), { timeout: 1000 });
+      for (const answer of answers) answer();
+      render(await rendering);
+      expect(screen.getByTestId("checkin-card")).toHaveAttribute("data-load-failed", "false");
+    } finally {
+      client.from = from;
+    }
+  });
+});
