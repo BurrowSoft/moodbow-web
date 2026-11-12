@@ -17,7 +17,8 @@ type Row = {
 };
 
 const ROWS: Row[] = [
-  { slug: "things-that-help", app: "app_toolbox", web: "toolbox_live", shows: "If you feel dizzy, stop and breathe normally." },
+  // The app keeps Edit, Delete and the moves in a menu per row (UX 12 Nov).
+  { slug: "things-that-help", app: "app_toolbox", web: "toolbox_live", shows: "If you feel dizzy, stop and breathe normally.", appOnly: ["the menu beside each item"] },
   // The emergency line is inside the block too, so the article is never live on its own.
   {
     slug: "safety-plan",
