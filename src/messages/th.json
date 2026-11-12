@@ -294,7 +294,17 @@
     "entryNewTitle": "บันทึกใหม่",
     "entryEditTitle": "แก้ไขบันทึก",
     "entryAddMore": "เขียนเพิ่มในบันทึกนี้…",
-    "entryMoreActions": "ตัวเลือกเพิ่มเติม"
+    "entryMoreActions": "ตัวเลือกเพิ่มเติม",
+    "libraryOpen": "อยากได้คำถามชวนเขียนไหม?",
+    "libraryNoticing": "สังเกต",
+    "libraryGratitude": "ความรู้สึกขอบคุณ",
+    "libraryHardDays": "วันที่หนักหนา",
+    "libraryRelationships": "ความสัมพันธ์",
+    "libraryAhead": "มองไปข้างหน้า",
+    "libraryHardDaysIntro": "สำหรับวันที่รู้สึกหนัก เขียนน้อยแค่ไหนก็ได้",
+    "libraryAnother": "ข้อความอื่นในกลุ่มนี้",
+    "libraryBack": "กลับไปที่กลุ่ม",
+    "libraryUse": "ใช้ข้อความนี้"
   },
   "notFound": {
     "title": "ไม่พบหน้านี้",
@@ -685,6 +695,7 @@
     "paletteDusk": "ยามสนธยา",
     "paletteSunrise": "รุ่งอรุณ",
     "paletteSea": "ทะเล",
-    "sheetThemes": "ธีมเพิ่มเติมเป็นส่วนหนึ่งของ Plus"
+    "sheetThemes": "ธีมเพิ่มเติมเป็นส่วนหนึ่งของ Plus",
+    "rowPrompts": "คลังคำถามชวนเขียน"
   }
 }

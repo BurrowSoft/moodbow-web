@@ -294,7 +294,17 @@
     "entryNewTitle": "Neuer Eintrag",
     "entryEditTitle": "Eintrag bearbeiten",
     "entryAddMore": "Zu diesem Eintrag hinzufügen …",
-    "entryMoreActions": "Weitere Optionen"
+    "entryMoreActions": "Weitere Optionen",
+    "libraryOpen": "Eine Frage zum Schreiben?",
+    "libraryNoticing": "Wahrnehmen",
+    "libraryGratitude": "Dankbarkeit",
+    "libraryHardDays": "Schwere Tage",
+    "libraryRelationships": "Beziehungen",
+    "libraryAhead": "Nach vorn schauen",
+    "libraryHardDaysIntro": "Für Tage, die schwer wiegen. Schreib so wenig, wie du magst.",
+    "libraryAnother": "Eine andere aus dieser Gruppe",
+    "libraryBack": "Zurück zu den Gruppen",
+    "libraryUse": "Diese nehmen"
   },
   "notFound": {
     "title": "Seite nicht gefunden",
@@ -685,6 +695,7 @@
     "paletteDusk": "Dämmerung",
     "paletteSunrise": "Sonnenaufgang",
     "paletteSea": "Meer",
-    "sheetThemes": "Mehr Themes gehören zu Plus"
+    "sheetThemes": "Mehr Themes gehören zu Plus",
+    "rowPrompts": "Fragensammlung"
   }
 }
