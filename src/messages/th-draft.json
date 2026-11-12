@@ -1403,5 +1403,55 @@
     "key": "plus.moreNone",
     "en": "More patterns show up here once you have more check-ins in this period.",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.pdfIntro",
+    "en": "Pick a month or a year. Your journal is laid out as a PDF on this device and isn't saved anywhere. Anyone with the file can read it.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.pdfMonth",
+    "en": "A month",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.pdfYear",
+    "en": "A year",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.pdfButton",
+    "en": "Save as PDF or print",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.pdfEmpty",
+    "en": "There are no check-ins or entries in {period}.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.sheetPdf",
+    "en": "The designed PDF is part of Plus",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.pdfCoverTitle",
+    "en": "My journal",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.pdfCoverCounts",
+    "en": "{days, plural, one {# day with a check-in} other {# days with a check-in}} · {entries, plural, one {# entry} other {# entries}}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.pdfHelp",
+    "en": "If you need to talk to someone, help is at moodbow.com/help/get-help-now",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.pdfFileTitle",
+    "en": "Moodbow journal – {period}",
+    "reason": "UX draft (native read pending)"
   }
 ]

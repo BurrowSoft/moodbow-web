@@ -650,6 +650,16 @@
     "moreWeekdaysSame": "On weekdays and at weekends, your mood was about the same ({a} and {b} of 5).",
     "moreWritingShown": "On days you wrote, your mood averaged {a} of 5. On days you didn't, {b}.",
     "moreWritingSame": "On days you wrote and days you didn't, your mood was about the same ({a} and {b} of 5).",
-    "moreNone": "More patterns show up here once you have more check-ins in this period."
+    "moreNone": "More patterns show up here once you have more check-ins in this period.",
+    "pdfIntro": "Pick a month or a year. Your journal is laid out as a PDF on this device and isn't saved anywhere. Anyone with the file can read it.",
+    "pdfMonth": "A month",
+    "pdfYear": "A year",
+    "pdfButton": "Save as PDF or print",
+    "pdfEmpty": "There are no check-ins or entries in {period}.",
+    "sheetPdf": "The designed PDF is part of Plus",
+    "pdfCoverTitle": "My journal",
+    "pdfCoverCounts": "{days, plural, one {# day with a check-in} other {# days with a check-in}} · {entries, plural, one {# entry} other {# entries}}",
+    "pdfHelp": "If you need to talk to someone, help is at moodbow.com/help/get-help-now",
+    "pdfFileTitle": "Moodbow journal – {period}"
   }
 }

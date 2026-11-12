@@ -10,6 +10,13 @@ vi.mock("./actions", () => ({
   deleteMyAccount: (...a: unknown[]) => deleteMyAccount(...a),
 }));
 // The export's wait, shortened (45 s in the app; withTimeout.test pins it).
+vi.mock("@/i18n/navigation", () => ({
+  Link: ({ href, children, ...rest }: { href: string; children: React.ReactNode }) => (
+    <a href={href} {...rest}>
+      {children}
+    </a>
+  ),
+}));
 vi.mock("@/lib/ui/withTimeout", async (orig) => ({ ...(await orig<typeof import("@/lib/ui/withTimeout")>()), EXPORT_WAIT_MS: 300 }));
 const { YourData } = await import("./YourData");
 const m = messages.me;
@@ -171,6 +178,23 @@ describe("YourData: delete account", () => {
     withSource("play");
     fireEvent.click(screen.getByTestId("me-delete"));
     expect(screen.getByTestId("delete-plus")).toHaveTextContent(messages.plus.deleteStore);
+  });
+
+  it("the designed PDF: a link with Plus, a lock without, nothing when Plus can't be read", () => {
+    const withPdf = (pdf: React.ComponentProps<typeof YourData>["pdf"]) =>
+      render(
+        <NextIntlClientProvider locale="en" messages={messages}>
+          <YourData credits={0} uid={UID} pdf={pdf} />
+        </NextIntlClientProvider>,
+      );
+    withPdf("plus");
+    expect(screen.getByTestId("me-journal-pdf")).toHaveAttribute("href", "/app/me/journal-pdf");
+    cleanup();
+    withPdf({ trial: true, price: "US$59.99" });
+    expect(screen.getByTestId("me-journal-pdf")).toHaveAttribute("data-locked", "");
+    cleanup();
+    withPdf(null);
+    expect(screen.queryByTestId("me-journal-pdf")).toBeNull();
   });
 
   it("Cancel (or Escape) closes it and forgets what was typed", () => {

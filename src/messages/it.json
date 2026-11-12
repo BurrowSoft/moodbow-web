@@ -650,6 +650,16 @@
     "moreWeekdaysSame": "Nei giorni feriali e nel weekend il tuo umore è stato più o meno lo stesso ({a} e {b} su 5).",
     "moreWritingShown": "Nei giorni in cui hai scritto il tuo umore è stato in media {a} su 5. Negli altri, {b}.",
     "moreWritingSame": "Nei giorni in cui hai scritto e negli altri il tuo umore è stato più o meno lo stesso ({a} e {b} su 5).",
-    "moreNone": "Altri andamenti appariranno qui quando avrai più check-in in questo periodo."
+    "moreNone": "Altri andamenti appariranno qui quando avrai più check-in in questo periodo.",
+    "pdfIntro": "Scegli un mese o un anno. Il tuo diario viene impaginato come PDF su questo dispositivo e non viene salvato da nessuna parte. Chiunque abbia il file può leggerlo.",
+    "pdfMonth": "Un mese",
+    "pdfYear": "Un anno",
+    "pdfButton": "Salva come PDF o stampa",
+    "pdfEmpty": "Non ci sono check-in né pagine in {period}.",
+    "sheetPdf": "Il PDF curato fa parte di Plus",
+    "pdfCoverTitle": "Il mio diario",
+    "pdfCoverCounts": "{days, plural, one {# giorno con check-in} other {# giorni con check-in}} · {entries, plural, one {# pagina} other {# pagine}}",
+    "pdfHelp": "Se hai bisogno di parlare con qualcuno, trovi aiuto su moodbow.com/help/get-help-now",
+    "pdfFileTitle": "Diario Moodbow – {period}"
   }
 }

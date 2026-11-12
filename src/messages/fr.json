@@ -650,6 +650,16 @@
     "moreWeekdaysSame": "En semaine et le week-end, votre humeur était à peu près la même ({a} et {b} sur 5).",
     "moreWritingShown": "Les jours où vous avez écrit, votre humeur était en moyenne de {a} sur 5. Les autres jours, {b}.",
     "moreWritingSame": "Les jours où vous avez écrit et les autres, votre humeur était à peu près la même ({a} et {b} sur 5).",
-    "moreNone": "D'autres tendances apparaîtront ici quand vous aurez plus de bilans sur cette période."
+    "moreNone": "D'autres tendances apparaîtront ici quand vous aurez plus de bilans sur cette période.",
+    "pdfIntro": "Choisissez un mois ou une année. Votre journal est mis en page en PDF sur cet appareil et n'est enregistré nulle part. Toute personne qui a le fichier peut le lire.",
+    "pdfMonth": "Un mois",
+    "pdfYear": "Une année",
+    "pdfButton": "Enregistrer en PDF ou imprimer",
+    "pdfEmpty": "Il n'y a ni bilan ni note en {period}.",
+    "sheetPdf": "Le PDF soigné fait partie de Plus",
+    "pdfCoverTitle": "Mon journal",
+    "pdfCoverCounts": "{days, plural, one {# jour avec un bilan} other {# jours avec un bilan}} · {entries, plural, one {# note} other {# notes}}",
+    "pdfHelp": "Si vous avez besoin de parler à quelqu'un, l'aide est sur moodbow.com/help/get-help-now",
+    "pdfFileTitle": "Journal Moodbow – {period}"
   }
 }
