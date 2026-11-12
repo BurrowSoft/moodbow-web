@@ -1,7 +1,11 @@
 // Moodbow Plus: more daily reminders (specs/plus-more-reminders.md, UX 12 Nov). The rules
 // the server enforces in update_extra_reminders (the Mobile Dev's migration 031); the form
-// checks the same before sending, so a refusal is rare. These numbers move to the app repo's
-// supabase/contracts/reminders.json once it's committed (then synced, never edited here).
+// checks the same before sending, so a refusal is rare.
+// PENDING SYNC: the source is the app repo's supabase/contracts/reminders.json (moodbow-app
+// db/extra-reminders 586c90e: maxExtra 2, minGapMinutes 60, errors in this order). Check these
+// by hand against it until then. It's synced with scripts/sync-contracts.mjs once 030 and 031
+// are on the app's master, after the web takes 030's export contract in its own PR (UX 12 Nov);
+// then this reads the synced file and these lines go.
 export const EXTRA_REMINDERS = {
   maxExtra: 2,
   minGapMinutes: 60,
