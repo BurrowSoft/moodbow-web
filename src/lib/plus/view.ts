@@ -9,12 +9,12 @@ export type PlusView =
   // No Plus: offered with the free week (trial) or, once it was used, without.
   | { kind: "free"; trial: boolean }
   // Plus, from whichever store; daysLeft only while the free week runs.
-  | { kind: "plus"; source: PlusSource; daysLeft: number | null }
+  | { kind: "plus"; source: PlusSource; daysLeft: number | null; until?: string }
   // A Stripe renewal failed: Plus is paused until the card is fixed (a state, not a reminder).
   | { kind: "past_due" };
 
 export function plusView(row: EntitlementRow | null, now = Date.now()): PlusView {
-  if (row && hasPlus(row, now)) return { kind: "plus", source: row.source, daysLeft: trialDaysLeft(row, now) };
+  if (row && hasPlus(row, now)) return { kind: "plus", source: row.source, daysLeft: trialDaysLeft(row, now), ...(row.current_period_end ? { until: row.current_period_end } : {}) };
   if (row?.source === "stripe" && row.status === "past_due") return { kind: "past_due" };
   return { kind: "free", trial: trialAvailable(row) };
 }

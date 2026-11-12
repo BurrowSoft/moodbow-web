@@ -679,6 +679,12 @@
     "reviewWriting": "{entries, plural, other {# บันทึก}} และ {moments, plural, other {# ช่วงเวลา}}",
     "reviewMomentsTitle": "ช่วงเวลาของคุณ",
     "reviewNoMoments": "ไม่มีช่วงเวลาที่ทำเครื่องหมายไว้ในปี {year}",
-    "reviewEmpty": "ไม่มีการเช็กอินหรือบันทึกในปี {year}"
+    "reviewEmpty": "ไม่มีการเช็กอินหรือบันทึกในปี {year}",
+    "paletteLegend": "สี",
+    "paletteDefault": "ค่าเริ่มต้น",
+    "paletteDusk": "ยามสนธยา",
+    "paletteSunrise": "รุ่งอรุณ",
+    "paletteSea": "ทะเล",
+    "sheetThemes": "ธีมเพิ่มเติมเป็นส่วนหนึ่งของ Plus"
   }
 }

@@ -679,6 +679,12 @@
     "reviewWriting": "{entries, plural, one {# anotação} other {# anotações}} e {moments, plural, one {# momento} other {# momentos}}",
     "reviewMomentsTitle": "Seus momentos",
     "reviewNoMoments": "Nenhum momento marcado em {year}.",
-    "reviewEmpty": "Não há check-ins nem anotações em {year}."
+    "reviewEmpty": "Não há check-ins nem anotações em {year}.",
+    "paletteLegend": "Cores",
+    "paletteDefault": "Padrão",
+    "paletteDusk": "Entardecer",
+    "paletteSunrise": "Amanhecer",
+    "paletteSea": "Mar",
+    "sheetThemes": "Mais temas fazem parte do Plus"
   }
 }

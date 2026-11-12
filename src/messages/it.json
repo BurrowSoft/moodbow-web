@@ -679,6 +679,12 @@
     "reviewWriting": "{entries, plural, one {# pagina} other {# pagine}} e {moments, plural, one {# momento} other {# momenti}}",
     "reviewMomentsTitle": "I tuoi momenti",
     "reviewNoMoments": "Nessun momento segnato nel {year}.",
-    "reviewEmpty": "Non ci sono check-in né pagine nel {year}."
+    "reviewEmpty": "Non ci sono check-in né pagine nel {year}.",
+    "paletteLegend": "Colori",
+    "paletteDefault": "Predefinito",
+    "paletteDusk": "Crepuscolo",
+    "paletteSunrise": "Alba",
+    "paletteSea": "Mare",
+    "sheetThemes": "Più temi fanno parte di Plus"
   }
 }

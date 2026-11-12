@@ -679,6 +679,12 @@
     "reviewWriting": "{entries, plural, one {# note} other {# notes}} et {moments, plural, one {# moment} other {# moments}}",
     "reviewMomentsTitle": "Vos moments",
     "reviewNoMoments": "Aucun moment marqué en {year}.",
-    "reviewEmpty": "Il n'y a ni bilan ni note en {year}."
+    "reviewEmpty": "Il n'y a ni bilan ni note en {year}.",
+    "paletteLegend": "Couleurs",
+    "paletteDefault": "Par défaut",
+    "paletteDusk": "Crépuscule",
+    "paletteSunrise": "Aube",
+    "paletteSea": "Mer",
+    "sheetThemes": "Plus de thèmes font partie de Plus"
   }
 }

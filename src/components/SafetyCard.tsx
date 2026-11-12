@@ -42,7 +42,7 @@ export function SafetyCard({ country, onClose, neutral = false }: { country: str
   const link = "font-medium text-accent underline underline-offset-4";
   const small = "text-muted [font-size:min(0.875rem,max(8.75vw,28px))]";
   return (
-    <Dialog title={t("safetyTitle")} body={t(neutral ? "safetyBodyNeutral" : "safetyBody")} onCancel={onClose} testId="safety-card" initialFocus="title" capText>
+    <Dialog title={t("safetyTitle")} body={t(neutral ? "safetyBodyNeutral" : "safetyBody")} onCancel={onClose} testId="safety-card" initialFocus="title" capText defaultColours>
       <div className="w-full space-y-[max(6px,calc(28px-1rem))] text-left">
         {fromRequest && (
           <p data-testid="safety-request-country" className="font-medium text-text">
