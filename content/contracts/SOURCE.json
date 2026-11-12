@@ -1,7 +1,7 @@
 {
   "repo": "BurrowSoft/moodbow-app",
   "path": "supabase/contracts",
-  "commit": "7b32805ce4eeda0593ca2cfc28dfd0433825b8c1",
+  "commit": "d6b9cd52a8cb56fd12dd404763bfda9358e619cc",
   "sha256": {
     "colour-map.json": "2b861725dee87bd9e34f79a75fba0b0c26a3b5cab814b5aba1a8bc8f3c558269",
     "countries.json": "432a3ed32cda9f58746723e3b392a4e5e8299715b7ed0c339c3b98438ebbdc6c",
@@ -19,6 +19,7 @@
     "report.md": "d606c4598075a93cd9f8e19f1c5f0713113f5e471f0b41c70f9689c9e733b007",
     "search-fold.json": "7cd4154f2c307579acb236e4f565189b056c0d991be534420c3c83a84cdfec44",
     "share-cards.json": "f8155ccae9a5815140ef262bf6428879795735f5675ab0e7f6a535c0bd6066be",
+    "toolbox.json": "97a9bb4ce81ba19d1ae83099b96469b7d0ef6cb73f2706c4b36627518b3b30ba",
     "year-card.json": "afb30fa31ad96fba5c35958cdc97cd2130441c07d29b8d6e0cc12866bac4c031"
   }
 }
