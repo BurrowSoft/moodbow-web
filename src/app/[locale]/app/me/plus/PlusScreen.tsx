@@ -90,7 +90,11 @@ export function PlusScreen({ view, price, aiShown, started }: { view: PlusView; 
   const footer = useRef<HTMLDivElement>(null);
   const scroll = useRef<HTMLDivElement>(null);
   const [large, setLarge] = useState(false);
-  const sizeKey = () => `${window.innerWidth}x${window.innerHeight}:${getComputedStyle(document.documentElement).fontSize}`;
+  // Large mode, and even the compact pinned part would leave the content under 40 % (a short
+  // screen at large text): nothing is pinned, and the page is one scroll ending with the price,
+  // the renewal line and the button together (UX 12 Nov, specs/plus.md; the same rule as the app).
+  const [unpinned, setUnpinned] = useState(false);
+  const sizeKey =() => `${window.innerWidth}x${window.innerHeight}:${getComputedStyle(document.documentElement).fontSize}`;
   useLayoutEffect(() => {
     const root = screen.current;
     if (!root || typeof ResizeObserver === "undefined") return;
@@ -113,10 +117,18 @@ export function PlusScreen({ view, price, aiShown, started }: { view: PlusView; 
         window.removeEventListener("resize", check);
       };
     }
-    // In large mode: back to measuring the full footer when the screen or text size changes.
+    // In large mode: the compact pinned part over 60 % of the screen leaves the content under
+    // 40 %, so it unpins (measured while pinned; kept until the screen or text size changes).
+    const fits = () => {
+      if (!unpinned && (footer.current?.getBoundingClientRect().height ?? 0) > 0.6 * window.innerHeight) setUnpinned(true);
+    };
+    fits();
+    // Back to measuring the full footer when the screen or text size changes.
     const entered = sizeKey();
     const changed = () => {
-      if (sizeKey() !== entered) setLarge(false);
+      if (sizeKey() === entered) return;
+      setUnpinned(false);
+      setLarge(false);
     };
     const observer = new ResizeObserver(changed);
     observer.observe(root);
@@ -125,11 +137,17 @@ export function PlusScreen({ view, price, aiShown, started }: { view: PlusView; 
       observer.disconnect();
       window.removeEventListener("resize", changed);
     };
-  }, [large]);
+  }, [large, unpinned]);
   useEffect(() => {
     if (!large) return;
     const html = document.documentElement;
     html.dataset.tabsAside = "";
+    // Unpinned: the price is in the page's flow at the end; no room to keep under it.
+    if (unpinned) {
+      return () => {
+        delete html.dataset.tabsAside;
+      };
+    }
     // The pinned part is fixed at the bottom (UX, 12 Nov: on screen at every scroll position, the
     // site footer included), so the page keeps room under its end for it: the content and the
     // site footer scroll up clear of it, never under it.
@@ -146,7 +164,7 @@ export function PlusScreen({ view, price, aiShown, started }: { view: PlusView; 
       observer?.disconnect();
       body.style.paddingBottom = "";
     };
-  }, [large]);
+  }, [large, unpinned]);
 
   // The main action: what stays pinned at any size.
   const action = waiting ? (
@@ -209,6 +227,7 @@ export function PlusScreen({ view, price, aiShown, started }: { view: PlusView; 
       ref={screen}
       data-testid="plus-screen"
       data-large={large || undefined}
+      data-unpinned={(large && unpinned) || undefined}
       className={
         large
           ? "flex flex-col"
@@ -281,7 +300,7 @@ export function PlusScreen({ view, price, aiShown, started }: { view: PlusView; 
           // At large text: pinned, its text capped at 32 px (the 2x target, decision 231) and
           // its spacing in px, so it takes as little of the screen as it can.
           className={`flex shrink-0 flex-col border-t border-border bg-surface px-[12px] text-center ${
-            large ? "fixed inset-x-0 bottom-0 z-20 gap-[8px] pt-[12px] pb-[8px] [font-size:min(1rem,max(10vw,32px))]" : "gap-2 pt-3 pb-2"
+            large ? `${unpinned ? "" : "fixed inset-x-0 bottom-0 z-20 "}gap-[8px] pt-[12px] pb-[8px] [font-size:min(1rem,max(10vw,32px))]` : "gap-2 pt-3 pb-2"
           }`}
         >
           {action}
