@@ -1,6 +1,7 @@
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { localKey } from "@/lib/localData";
 import messages from "@/messages/en.json";
 
 const open = vi.fn();
@@ -19,12 +20,14 @@ const { LetterCard } = await import("./LetterCard");
 const m = messages.letters;
 afterEach(() => {
   cleanup();
+  window.localStorage.clear();
   vi.clearAllMocks();
 });
-const card = (helpFirst = false) =>
+const TODAY = "2026-11-12";
+const card = (helpFirst = false, today = TODAY) =>
   render(
     <NextIntlClientProvider locale="en" messages={messages}>
-      <LetterCard id="a" writtenLabel="Friday, 9 October 2026" helpFirst={helpFirst} country="NZ" />
+      <LetterCard id="a" uid="u1" today={today} writtenLabel="Friday, 9 October 2026" helpFirst={helpFirst} country="NZ" />
     </NextIntlClientProvider>,
   );
 
@@ -56,6 +59,29 @@ describe("LetterCard", () => {
     expect(screen.queryByTestId("letter-card")).toBeNull();
     expect(heading).toHaveFocus();
     heading.remove();
+  });
+
+  // UX 12 Nov (as the app): Not now means no letter card again today on this device, even after a
+  // reload, so letters don't come one after another; tomorrow, or for someone else, it's back.
+  it("after Not now, no letter card for the rest of today here, reload or not; tomorrow it's back", async () => {
+    notNow.mockReturnValueOnce(Promise.resolve({ status: "ok" }));
+    card();
+    await act(async () => fireEvent.click(screen.getByTestId("letter-card-not-now")));
+    expect(window.localStorage.getItem(localKey("letter-card-hidden", "u1", TODAY))).toBe("1");
+    cleanup();
+    card();
+    expect(screen.queryByTestId("letter-card")).toBeNull();
+    cleanup();
+    card(false, "2026-11-13");
+    expect(screen.getByTestId("letter-card")).toBeInTheDocument();
+  });
+
+  it("a failed Not now hides nothing and stores nothing", async () => {
+    notNow.mockReturnValueOnce(Promise.resolve({ status: "error" }));
+    card();
+    await act(async () => fireEvent.click(screen.getByTestId("letter-card-not-now")));
+    expect(screen.getByTestId("letter-card")).toBeInTheDocument();
+    expect(window.localStorage.getItem(localKey("letter-card-hidden", "u1", TODAY))).toBeNull();
   });
 
   it("matched on the server, or a hard week: the help offer comes above the letter", () => {

@@ -127,7 +127,7 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
       </header>
       <CheckInCard key={checkInError ? "unread" : "read"} initial={(data as CheckIn | null) ?? null} uid={user.id} date={me.today} dateLocaleTag={dateLocaleTag} keepDraft loadFailed={Boolean(checkInError)} />
       {toolboxOn && <ToolboxCard uid={user.id} today={me.today} todayMood={(data as CheckIn | null)?.mood ?? null} items={toolbox} />}
-      {letter && <LetterCard id={letter.id} writtenLabel={letter.writtenLabel} helpFirst={letter.helpFirst} country={me.profile?.country} />}
+      {letter && <LetterCard id={letter.id} uid={user.id} today={me.today} writtenLabel={letter.writtenLabel} helpFirst={letter.helpFirst} country={me.profile?.country} />}
       <Link
         href="/app/write"
         data-testid="today-write"
