@@ -207,6 +207,14 @@
     "met": false,
     "what": "Your week (specs/your-week.md): the rule-based card at the top of Insights, no AI, on the web. Met after the Web Tester's row."
   },
+  "toolbox-live": {
+    "met": false,
+    "what": "1.2: Things that help me (specs/1.2-features.md, content/toolbox.json): Me's list, the Today card after a low check-in, and a minute to breathe. Needs migration 025 on Production (Vitor), the Reviewer's read, the tester rows and Vitor's look."
+  },
+  "app-toolbox": {
+    "met": false,
+    "what": "Help only (decision 212 pattern, UX 2026-11-12): Things that help me and the minute to breathe (1.2 §1) are in the app build people have, so its Help article shows. Not toolbox-live (the web's own switch)."
+  },
   "test-only-unavailable-page": {
     "met": false,
     "what": "TEST ONLY, NEVER MET: /app/test/unavailable, a page that renders nothing but the journal's couldn't-load state (JournalUnavailable) inside the journal layout, so a journey can measure where its help sits at large text (the real pages fail only when Supabase does). No journal data on it. A 404 on Production at the routing level (lib/sitemapPages.ts), before any sign-in; a test and the publish-day checklist check that."
