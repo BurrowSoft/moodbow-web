@@ -215,6 +215,14 @@
     "met": false,
     "what": "/api/region answers on Production: the signed country token for functions that are only on in some countries (Bo first, specs/bo-design.md section 7). Before it's met, on Production: REGION_SECRET set by Vitor, and the Web Tester's forged-header row passed on Preview."
   },
+  "bo-pictures-live": {
+    "met": false,
+    "what": "Pictures in Bo on the web (specs/moodpal-1.0.md, specs/bo-design.md section 8). On top of the function's BO_PICTURES_ENABLED and status's pictures. Before it's met: B8 items 1 to 4 in specs/bo-risk-read.md, Anthropic's answer, the first picture's text and Vitor's rulings."
+  },
+  "bo-live": {
+    "met": false,
+    "what": "Bo, Moodbow's AI, on the web (specs/moodpal-1.0.md, plans/PLAN-bo-web-rows.md): the button, the conversation and /api/bo. Its own gate: ai-live stays off. Before it's met: the go-live runbook, the eval, the new AI consent, the legal text and Vitor's word."
+  },
   "consumer-health-data-approved": {
     "met": true,
     "what": "The Consumer Health Data Privacy Policy is approved by Vitor (6 November 2026, through UX & PM). Its link is in the footer of every page: Washington's RCW 19.373 counts any page collecting personal information as a homepage. Wording changes are his."

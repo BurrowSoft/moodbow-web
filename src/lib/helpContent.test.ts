@@ -2,7 +2,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { ALL_LOCALES, routing } from "@/i18n/routing";
-import { findArticle, helpArticles, helpIndex, parseArticle, renderArticle, TOPICS } from "./helpContent";
+import { findArticle, helpArticles, helpIndex, helpPageMet, parseArticle, renderArticle, TOPICS } from "./helpContent";
 import { isPendingMet, pendingIds } from "./legalContent";
 import { isHiddenPage } from "./sitemapPages";
 
@@ -231,6 +231,21 @@ describe("Help is public, scoped to what's live (decision 212)", () => {
 
 // A journal with no email can't be opened again after signing out: Forgot PIN's advice
 // must not reach those people without the warning (UX).
+describe("Help → Bo", () => {
+  const article = () => findArticle("en", "bo")!;
+  it("a 404 on Production until bo-live; published with it", () => {
+    expect(renderArticle(article())).toBe("");
+    expect(renderArticle(article(), () => true)).toContain("Talk to Bo");
+  });
+  it("through the page's own gate: nothing on Production, and readable on a Preview", () => {
+    expect(renderArticle(article(), (id) => helpPageMet(id, { vercelEnv: "production" }))).toBe("");
+    expect(renderArticle(article(), (id) => helpPageMet(id, { vercelEnv: "preview" }))).toContain("Talk to Bo");
+  });
+  it("isn't in the Help index until then", () => {
+    expect(helpIndex("en").flatMap((g) => g.articles.map((a) => a.slug))).not.toContain("bo");
+  });
+});
+
 describe("Help → App lock: no email, no signing out", () => {
   it.each([
     ["en", "don't sign out"],

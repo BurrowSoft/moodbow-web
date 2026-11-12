@@ -6,7 +6,7 @@ import { routing } from "@/i18n/routing";
 import { Link } from "@/i18n/navigation";
 import { PageShell } from "@/components/PageShell";
 import { pageGate } from "@/lib/conditions";
-import { findArticle, helpArticles, renderArticle } from "@/lib/helpContent";
+import { findArticle, helpArticles, helpPageMet, renderArticle } from "@/lib/helpContent";
 import { helplinesFor } from "@/lib/safety/helplines";
 import { HELP_GATE } from "@/lib/helpGate";
 import { pageMetadata } from "@/lib/metadata";
@@ -18,7 +18,8 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps<"/[locale]/help/[slug]">): Promise<Metadata> {
   const { locale, slug } = await params;
   const article = findArticle(locale, slug);
-  if (!article) return {};
+  // Nothing published, nothing said: a 404 doesn't name an article that isn't out yet.
+  if (!article || !renderArticle(article, (id) => helpPageMet(id))) return {};
   return pageMetadata({ locale: locale as Locale, path: `/help/${slug}`, title: article.title, description: article.summary, noindex: pageGate(HELP_GATE) !== "live" });
 }
 
@@ -30,7 +31,7 @@ export default async function HelpArticlePage({ params }: PageProps<"/[locale]/h
   const state = pageGate(HELP_GATE);
   if (state === "hidden") notFound();
   const article = findArticle(locale, slug);
-  const html = article ? renderArticle(article) : "";
+  const html = article ? renderArticle(article, (id) => helpPageMet(id)) : "";
   if (!article || !html) notFound();
   const t = await getTranslations("help");
   const ts = await getTranslations("safety");
