@@ -1745,9 +1745,12 @@ test("large text: the Plus screen at 300 % on a 320 px phone, free and in the fr
       await open(route);
       await expect(page.getByTestId("plus-screen")).toHaveAttribute("data-unpinned", "true");
       expect(await page.getByTestId("plus-footer").evaluate((el) => getComputedStyle(el).position), `${saved}: not pinned`).not.toBe("fixed");
-      await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+      // The three together at the end of the Plus content (the site's own footer follows the page,
+      // as everywhere): scrolled to, all three are on screen at once.
+      await page.getByTestId("plus-footer").evaluate((el) => el.scrollIntoView({ block: "start" }));
       await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))));
       for (const id of ["plus-price", "plus-renews", "plus-start"]) expect(await inView(id), `${saved}, short screen, at the end: ${id} in view`).toBe(true);
+      expect(await page.getByTestId("plus-screen").evaluate((el) => el.lastElementChild?.getAttribute("data-testid")), `${saved}: the price block ends the Plus screen`).toBe("plus-footer");
       const order = await page.evaluate(() => {
         const top = (sel: string) => document.querySelector(sel)!.getBoundingClientRect().top;
         return { notNowFirst: top('[data-testid="plus-rest"] [data-testid="plus-not-now"]') < top('[data-testid="plus-price"]') };
