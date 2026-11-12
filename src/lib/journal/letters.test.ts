@@ -36,8 +36,11 @@ describe("letters rules (content/letters.json)", () => {
         today,
       )?.id,
     ).toBe("aug");
-    // Same day written: the id breaks the tie.
+    // Same day written: the id breaks the tie, by code units, never the runtime's collation
+    // (UX 12 Nov): "B" (66) before "a" (97), where a locale compare would put "a" first.
     expect(dueLetter([row({ id: "b", written_on: "2026-08-14" }), row({ id: "a", written_on: "2026-08-14" })], today)?.id).toBe("a");
+    expect(dueLetter([row({ id: "a", written_on: "2026-08-14" }), row({ id: "B", written_on: "2026-08-14" })], today)?.id).toBe("B");
+    expect(parseLetterRows([row({ id: "a", written_on: "2026-08-14" }), row({ id: "B", written_on: "2026-08-14" })]).map((r) => r.id)).toEqual(["B", "a"]);
   });
 
   it("anything malformed is left out", () => {
