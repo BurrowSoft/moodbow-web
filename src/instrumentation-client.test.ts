@@ -16,8 +16,6 @@ beforeEach(() => {
 });
 afterEach(() => vi.unstubAllEnvs());
 
-const settle = () => new Promise((r) => setTimeout(r, 0));
-
 describe("instrumentation-client", () => {
   it("with a DSN: nothing at load; init once the browser is idle, without sessions and with the shared options", async () => {
     vi.stubEnv("NEXT_PUBLIC_SENTRY_DSN", "https://key@o0.ingest.sentry.io/1");
@@ -25,11 +23,15 @@ describe("instrumentation-client", () => {
     expect(init).not.toHaveBeenCalled();
     expect(window.requestIdleCallback).toHaveBeenCalledWith(expect.any(Function), { timeout: 2000 });
     idle!();
-    await settle();
-    expect(init).toHaveBeenCalledTimes(1);
+    // The import goes through lib/sentryClient.ts first: wait for the call itself, not one tick.
+    await vi.waitFor(() => expect(init).toHaveBeenCalledTimes(1));
     const options = init.mock.calls[0][0];
     expect(options).toMatchObject({ dsn: "https://key@o0.ingest.sentry.io/1", tracesSampleRate: 0 });
-    expect(options.integrations([{ name: "BrowserSession" }, { name: "Dedupe" }])).toEqual([{ name: "Dedupe" }]);
+    // Errors only: no sessions, and nothing that records, profiles or traces, even if a future SDK
+    // made one a default (UX & PM, 12 Nov).
+    const defaults = ["BrowserSession", "Dedupe", "Replay", "ReplayCanvas", "Feedback", "BrowserProfiling", "BrowserTracing", "GlobalHandlers"].map((name) => ({ name }));
+    expect(options.integrations(defaults)).toEqual([{ name: "Dedupe" }, { name: "GlobalHandlers" }]);
+    expect(Object.keys(options).filter((key) => /replay|profil/i.test(key))).toEqual([]);
     // Router transitions reach Sentry once it has started, not before.
     mod.onRouterTransitionStart("/app", "push");
     expect(captureRouterTransitionStart).toHaveBeenCalledWith("/app", "push");
@@ -44,8 +46,7 @@ describe("instrumentation-client", () => {
       window.dispatchEvent(new Event("load"));
       expect(window.requestIdleCallback).toHaveBeenCalledTimes(1);
       idle!();
-      await settle();
-      expect(init).toHaveBeenCalledTimes(1);
+      await vi.waitFor(() => expect(init).toHaveBeenCalledTimes(1));
     } finally {
       ready.mockRestore();
     }

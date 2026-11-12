@@ -211,6 +211,10 @@
     "met": false,
     "what": "1.2: Things that help me (specs/1.2-features.md, content/toolbox.json): Me's list, the Today card after a low check-in, and a minute to breathe. Needs migration 025 on Production (Vitor), the Reviewer's read, the tester rows and Vitor's look."
   },
+  "app-toolbox": {
+    "met": false,
+    "what": "Help only (decision 212 pattern, UX 2026-11-12): Things that help me and the minute to breathe (1.2 §1) are in the app build people have, so its Help article shows. Not toolbox-live (the web's own switch)."
+  },
   "safety-plan-live": {
     "met": false,
     "what": "1.2: My safety plan (specs/1.2-features.md §2, content/safety-plan.json): Me's plan, its button on the help card below the helplines and on a hard Your week. Needs the clinician's read of every string (Vitor), the privacy policy's text on other people's details (Vitor), migration 026 on Production (Vitor), the Reviewer's read, the tester rows and Vitor's look."
