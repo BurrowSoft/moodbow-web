@@ -21,7 +21,10 @@ const noSubscribe = () => () => {};
 // #9765 S-03); after a flagged entry or a crisis signal, safetyBody. Each
 // number once, inside its link (the link text says it, so it can still be
 // read out or copied on a computer that can't dial).
-export function SafetyCard({ country, onClose, neutral = false }: { country: string | null | undefined; onClose: () => void; neutral?: boolean }) {
+// where: Bo only (UX, 2026-11-09): the country the server verified from the region token, where
+// the person is. Its numbers come first; when Me's country differs, both sets are named and Me's
+// follow below. A country with no numbers at all would head an empty set, so then Me's alone.
+export function SafetyCard({ country, onClose, neutral = false, where = null }: { country: string | null | undefined; onClose: () => void; neutral?: boolean; where?: string | null }) {
   const t = useTranslations("safety");
   const tc = useTranslations("common");
   // No profile country (a page that couldn't read it, or none set): the country this request
@@ -30,10 +33,16 @@ export function SafetyCard({ country, onClose, neutral = false }: { country: str
   const requestCountry = useRequestCountry();
   const requested = country ? null : requestCountry;
   const locale = useLocale();
-  const lines = helplinesFor(country || requested, locale);
+  // Me's: the profile's country, else the request's (#269).
+  const mine = (country || requested || "").toUpperCase() || null;
+  const verified = where ? helplinesFor(where, locale) : null;
+  const first = where && verified && (verified.helpline || verified.emergency) ? where.toUpperCase() : null;
+  const both = first !== null && mine !== null && first !== mine;
+  const lines = first && verified ? verified : helplinesFor(country || requested, locale);
+  const also = both ? helplinesFor(mine, locale) : null;
   // Numbers from where the request came from, not the person's own country: say whose they
   // are, so someone travelling or on a VPN can tell (UX). The browser's own country name.
-  const fromRequest = !country && requested && (lines.helpline || lines.emergency) ? countryName(requested, locale) : null;
+  const fromRequest = !both && !country && requested && (lines.helpline || lines.emergency) ? countryName(requested, locale) : null;
   const ios = useSyncExternalStore(noSubscribe, () => isIos(navigator.userAgent, navigator.maxTouchPoints), () => false);
   // The numbers and links stop growing at about 200 % on narrow screens (decision 231). What comes
   // before them stays under the card's own cap (capText in Dialog): at 32 px it pushed the first help
@@ -41,6 +50,30 @@ export function SafetyCard({ country, onClose, neutral = false }: { country: str
   const help = "[font-size:min(1rem,max(10vw,32px))]";
   const link = "font-medium text-accent underline underline-offset-4";
   const small = "text-muted [font-size:min(0.875rem,max(8.75vw,28px))]";
+  const helplineRow = (line: NonNullable<typeof lines.helpline>, id: string, keypadId: string) =>
+    ios && isShortCode(line.dial) ? (
+      <div>
+        {/* iOS can't dial this from a link: the number, and what to do with it. */}
+        <p className={`font-medium text-text ${helpLineSize(line.display)}`}><HelpNumberText text={t("safetyCall", { name: line.name, number: line.display })} number={line.display} /></p>
+        <p data-testid={keypadId} className={small}>
+          <HelpNumberText text={t("safetyDialKeypad", { number: line.display })} number={line.display} />
+        </p>
+      </div>
+    ) : (
+      <p>
+        <a href={telHref(line.dial)} data-testid={id} className={`${link} ${helpLineSize(line.display)}`}>
+          <HelpNumberText text={t("safetyCall", { name: line.name, number: line.display })} number={line.display} />
+        </a>
+      </p>
+    );
+  // Its own line; the visible text is the spoken name (WCAG 2.5.3).
+  const emergencyRow = (line: NonNullable<typeof lines.emergency>, id: string) => (
+    <p>
+      <a href={telHref(line.dial)} data-testid={id} className={`${link} ${helpLineSize(line.display)}`}>
+        <HelpNumberText text={t("safetyCallEmergency", { number: line.display })} number={line.display} />
+      </a>
+    </p>
+  );
   return (
     <Dialog title={t("safetyTitle")} body={t(neutral ? "safetyBodyNeutral" : "safetyBody")} onCancel={onClose} testId="safety-card" initialFocus="title" capText>
       <div className="w-full space-y-[max(6px,calc(28px-1rem))] text-left">
@@ -49,35 +82,28 @@ export function SafetyCard({ country, onClose, neutral = false }: { country: str
             {fromRequest}
           </p>
         )}
-        {lines.helpline &&
-          (ios && isShortCode(lines.helpline.dial) ? (
-            <div>
-              {/* iOS can't dial this from a link: the number, and what to do with it. */}
-              <p className={`font-medium text-text ${helpLineSize(lines.helpline.display)}`}><HelpNumberText text={t("safetyCall", { name: lines.helpline.name, number: lines.helpline.display })} number={lines.helpline.display} /></p>
-              <p data-testid="safety-helpline-keypad" className={small}>
-                <HelpNumberText text={t("safetyDialKeypad", { number: lines.helpline.display })} number={lines.helpline.display} />
-              </p>
-            </div>
-          ) : (
-            <p>
-              <a href={telHref(lines.helpline.dial)} data-testid="safety-call-helpline" className={`${link} ${helpLineSize(lines.helpline.display)}`}>
-                <HelpNumberText text={t("safetyCall", { name: lines.helpline.name, number: lines.helpline.display })} number={lines.helpline.display} />
-              </a>
-            </p>
-          ))}
+        {both && (
+          <h3 data-testid="safety-country" className="font-medium text-text">
+            {countryName(first, locale)}
+          </h3>
+        )}
+        {lines.helpline && helplineRow(lines.helpline, "safety-call-helpline", "safety-helpline-keypad")}
         {lines.helpline?.hours && (
           <p data-testid="safety-helpline-hours" className={small}>
             {lines.helpline.hours}
           </p>
         )}
         <p className="text-text">{t("safetyEmergency")}</p>
-        {/* Its own line; the visible text is the spoken name (WCAG 2.5.3). */}
-        {lines.emergency && (
-          <p>
-            <a href={telHref(lines.emergency.dial)} data-testid="safety-call-emergency" className={`${link} ${helpLineSize(lines.emergency.display)}`}>
-              <HelpNumberText text={t("safetyCallEmergency", { number: lines.emergency.display })} number={lines.emergency.display} />
-            </a>
-          </p>
+        {lines.emergency && emergencyRow(lines.emergency, "safety-call-emergency")}
+        {/* Me's country's numbers, below where the person is (Bo, UX 2026-11-09). */}
+        {also && mine && (also.helpline || also.emergency) && (
+          <div data-testid="safety-also" className="space-y-[max(6px,calc(28px-1rem))] pt-[8px]">
+            <h3 data-testid="safety-also-country" className="font-medium text-text">
+              {countryName(mine, locale)}
+            </h3>
+            {also.helpline && helplineRow(also.helpline, "safety-also-call-helpline", "safety-also-helpline-keypad")}
+            {also.emergency && emergencyRow(also.emergency, "safety-also-call-emergency")}
+          </div>
         )}
         {/* Always, as a quiet link under the numbers (decision 135). */}
         <p>
@@ -106,7 +132,7 @@ export function SafetyCard({ country, onClose, neutral = false }: { country: str
 // page's scripts (#248); once they're running it opens the card instead. Its words stay whole: browser
 // hyphens split "par-ler" with room to spare (Web Tester). It stops growing at about 200 % on a narrow
 // screen, in em, so at the normal size it's the size of the text around it.
-export function GetHelpNow({ country, testId, className, neutral }: { country: string | null | undefined; testId: string; className?: string; neutral?: boolean }) {
+export function GetHelpNow({ country, testId, className, neutral, where }: { country: string | null | undefined; testId: string; className?: string; neutral?: boolean; where?: string | null }) {
   const t = useTranslations("me");
   const [open, setOpen] = useState(false);
   const close = useCallback(() => setOpen(false), []);
@@ -121,7 +147,7 @@ export function GetHelpNow({ country, testId, className, neutral }: { country: s
       <Link href="/help/get-help-now" prefetch={false} data-testid={testId} onClick={openCard} className={className ?? `${dialogButton(false, false)} [font-size:min(1em,max(10vw,32px))]`}>
         {t("meGetHelpNow")}
       </Link>
-      {open && <SafetyCard country={country} onClose={close} neutral={neutral} />}
+      {open && <SafetyCard country={country} onClose={close} neutral={neutral} where={where} />}
     </>
   );
 }
