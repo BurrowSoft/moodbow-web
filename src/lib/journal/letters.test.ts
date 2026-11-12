@@ -24,7 +24,20 @@ describe("letters rules (content/letters.json)", () => {
     expect(dueLetter([row({ card_from: "2026-11-16" })], today)).toBeNull();
     expect(dueLetter([row({ card_from: "2026-11-09" })], today)?.id).toBe("a");
     expect(dueLetter([row({ opened_at: "2026-11-09T08:00:00Z" })], today)).toBeNull();
-    expect(dueLetter([row({ id: "late", opens_on: "2026-11-08" }), row({ id: "early", opens_on: "2026-11-01" })], today)?.id).toBe("early");
+    // Oldest written first, whatever the opening days (UX 12 Nov; the phone check: written Aug 14,
+    // Sep 13, Oct 13, opening yesterday, 3 days ago and 2 days ago: Aug 14 shows).
+    expect(
+      dueLetter(
+        [
+          row({ id: "sep", written_on: "2026-09-13", opens_on: "2026-11-06" }),
+          row({ id: "aug", written_on: "2026-08-14", opens_on: "2026-11-08" }),
+          row({ id: "oct", written_on: "2026-10-13", opens_on: "2026-11-07" }),
+        ],
+        today,
+      )?.id,
+    ).toBe("aug");
+    // Same day written: the id breaks the tie.
+    expect(dueLetter([row({ id: "b", written_on: "2026-08-14" }), row({ id: "a", written_on: "2026-08-14" })], today)?.id).toBe("a");
   });
 
   it("anything malformed is left out", () => {

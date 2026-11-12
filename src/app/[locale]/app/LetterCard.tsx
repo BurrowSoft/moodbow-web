@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
 import { dialogButton } from "@/components/Dialog";
+import { localKey } from "@/lib/localData";
 import { GetHelpNow } from "@/components/SafetyCard";
 import { JOURNAL_CARD } from "@/lib/ui/journalLayout";
 import { letterNotNow, openLetter } from "./me/letters/actions";
@@ -10,15 +11,36 @@ import { letterNotNow, openLetter } from "./me/letters/actions";
 // A letter from you, on its day (1.2; content/letters.json). Only the date it was written
 // until Open: the text isn't in the page before then, only fetched by Open. helpFirst: the
 // server matched the text, or last week looked hard, so the help offer comes above it (the
-// Reviewer's read); this card is given a yes or no, never the text. Not now: a week on.
-export function LetterCard({ id, writtenLabel, helpFirst, country }: { id: string; writtenLabel: string; helpFirst: boolean; country: string | null | undefined }) {
+// Reviewer's read); this card is given a yes or no, never the text. Not now: that letter a week
+// on (the server), and no letter card again today on this device (UX 12 Nov, as the app and the
+// toolbox card): one offer a day, not one letter after another. Stored per user and day, removed
+// on sign-out (SIGN_OUT_TRACE_KINDS).
+const listeners = new Set<() => void>();
+const subscribe = (cb: () => void) => {
+  listeners.add(cb);
+  return () => {
+    listeners.delete(cb);
+  };
+};
+const hiddenFor = (key: string) => {
+  try {
+    return window.localStorage.getItem(key) === "1";
+  } catch {
+    return false;
+  }
+};
+
+export function LetterCard({ id, uid, today, writtenLabel, helpFirst, country }: { id: string; uid: string; today: string; writtenLabel: string; helpFirst: boolean; country: string | null | undefined }) {
   const t = useTranslations("letters");
   const tt = useTranslations("today");
+  const key = localKey("letter-card-hidden", uid, today);
+  const hiddenToday = useSyncExternalStore(subscribe, () => hiddenFor(key), () => false);
   const [body, setBody] = useState<string | null>(null);
   const [gone, setGone] = useState(false);
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
-  if (gone) return null;
+  // Hidden for today, unless this letter is open here (it was opened before Not now could hide it).
+  if (gone || (hiddenToday && body === null)) return null;
 
   const open = async () => {
     setBusy(true);
@@ -34,6 +56,12 @@ export function LetterCard({ id, writtenLabel, helpFirst, country }: { id: strin
     const result = await letterNotNow(id).catch(() => ({ status: "error" as const }));
     setBusy(false);
     if (result.status !== "ok") return setFailed(true);
+    try {
+      window.localStorage.setItem(key, "1");
+    } catch {
+      // storage unavailable: gone until the page reloads
+    }
+    listeners.forEach((cb) => cb());
     setGone(true);
     // The card goes with its button: focus to Today's heading, as other cards do.
     document.getElementById("today-title")?.focus();

@@ -22,9 +22,14 @@ export function parseLetterRows(rows: unknown): LetterRow[] {
 // What the client gets: a locked letter's text stays on the server.
 export const forClient = (row: LetterRow): Letter => ({ id: row.id, body: row.opened_at ? row.body : null, writtenOn: row.written_on, opensOn: row.opens_on, opened: row.opened_at !== null });
 
-// Today's card: the oldest locked letter whose day has come (opens_on, or card_from after Not now).
+// Today's card: of the locked letters whose day has come (opens_on, or card_from after Not now),
+// the oldest WRITTEN, the id breaking a tie (UX 12 Nov, the Mobile Tester's L note; as the app).
 export function dueLetter(rows: LetterRow[], today: string): LetterRow | null {
-  return rows.filter((r) => !r.opened_at && r.opens_on <= today && (r.card_from === null || r.card_from <= today)).sort((a, b) => (a.opens_on < b.opens_on ? -1 : a.opens_on > b.opens_on ? 1 : 0))[0] ?? null;
+  return (
+    rows
+      .filter((r) => !r.opened_at && r.opens_on <= today && (r.card_from === null || r.card_from <= today))
+      .sort((a, b) => (a.written_on === b.written_on ? a.id.localeCompare(b.id) : a.written_on < b.written_on ? -1 : 1))[0] ?? null
+  );
 }
 
 // Today's letter (1.2): the due one, matched here on the server against the current crisis
