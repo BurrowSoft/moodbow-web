@@ -17,7 +17,7 @@ Er hat sechs Teile:
 
 Tippe unter einem Teil auf **Speichern**, wenn du dort etwas geschrieben hast. Die Teile 4 und 5 haben jeweils Platz für bis zu 10 Personen.
 
-Sobald dein Plan etwas enthält, erscheint **Mein Sicherheitsplan** auch unter den Nummern bei **Möchtest du mit jemandem reden?**{pending:weekly_report_live} und daneben bei einer schweren **Deine Woche**{/pending}. Ein leerer Plan zeigt keinen Button.
+Sobald dein Plan etwas enthält, erscheint **Mein Sicherheitsplan** auch unter den Nummern bei **Möchtest du mit jemandem reden?**{pending:your_week_live} und daneben bei einer schweren **Deine Woche**{/pending}. Ein leerer Plan zeigt keinen Button.
 
 **Wer ihn sehen kann:** nur du. Die KI von Moodbow liest deinen Plan nie. Er ist dabei, wenn du deine Daten exportierst, und wird mit deinem Konto gelöscht.{pending:app_safety_plan}
 

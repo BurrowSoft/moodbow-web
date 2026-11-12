@@ -3,7 +3,7 @@ title: Things that help me
 summary: A short list of what helps on hard days, and a minute to breathe.
 topic: Your journal
 ---
-{pending:app_toolbox|toolbox_live}In **Me → Things that help me**, keep a short list of small things that help you on hard days: a walk, a song, someone to text. Type one, then tap **Add**. You can keep up to 20 things, each up to 120 characters. Use **Edit** or **Delete** to change one (**Undo** brings back what you deleted), and **Move up** or **Move down** to put them in order. Only you can see this list.
+{pending:app_toolbox|toolbox_live}In **Me → Things that help me**, keep a short list of small things that help you on hard days: a walk, a song, someone to text. Type one, then tap **Add**. You can keep up to 20 things, each up to 120 characters. Use **Edit** or **Delete** to change one (**Undo** brings back what you deleted), and **Move up** or **Move down** to put them in order. {pending:app_toolbox}In the app, they're in the menu beside each item. {/pending}Only you can see this list.
 
 When the check-in you saved today is **Awful** or **Bad**, Today shows **Things that help you**, with your list. **Not now** hides it for the rest of the day on this device. If you change today's check-in to a better mood, it goes.
 
