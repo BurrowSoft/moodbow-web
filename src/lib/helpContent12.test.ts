@@ -1,4 +1,5 @@
 // @vitest-environment node
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { ALL_LOCALES } from "@/i18n/routing";
 import { findArticle, renderArticle } from "./helpContent";
@@ -85,5 +86,21 @@ describe("Help: safety-plan's Your week line", () => {
     }
     expect(renderArticle(findArticle("en", "safety-plan")!, (id) => id === "safety_plan_live" || id === "your_week_live")).toContain("beside it on a hard");
     expect(renderArticle(findArticle("en", "safety-plan")!, (id) => id === "safety_plan_live" || id === "weekly_report_live")).not.toContain("beside it on a hard");
+  });
+});
+
+// UX 12 Nov (as the app and the web's Today): due letters oldest written first; Not now keeps any
+// letter card off Today for the rest of that day on this device; a help line that was showing stays.
+describe("Help: letters' day rules", () => {
+  it("say the order, the day's hide and that the help offer stays, with the help label in each language", () => {
+    const on = (id: string) => id === "letters_live" || id === "app_letters" || isPendingMet(id);
+    const en = renderArticle(findArticle("en", "letters")!, on);
+    expect(en).toContain("the one you wrote first comes first");
+    expect(en).toContain("Today shows no letter card again that day on this device");
+    for (const locale of LOCALES) {
+      const label = JSON.parse(readFileSync(`src/messages/${locale}.json`, "utf8")).me.meGetHelpNow as string;
+      // marked writes an apostrophe as &#39; (fr: quelqu'un).
+      expect(renderArticle(findArticle(locale, "letters")!, on).replaceAll("&#39;", "'"), locale).toContain(`<strong>${label}</strong>`);
+    }
   });
 });

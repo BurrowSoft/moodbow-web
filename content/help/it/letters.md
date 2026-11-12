@@ -7,7 +7,7 @@ topic: Your journal
 
 Fino al suo giorno, la lettera è chiusa: la **Cronologia** mostra **Una lettera da te · si apre il** e la data, mai quello che hai scritto. Chiusa vuol dire che Moodbow la tiene fuori dalla vista fino ad allora; è conservata con la stessa riservatezza del resto del tuo diario.
 
-Quel giorno, Oggi mostra **Una lettera da te, scritta il** e il giorno in cui l'hai scritta. Tocca **Apri** per leggerla, o **Non ora** per rivederla tra una settimana.{pending:app_letters} Nell'app, se il tuo promemoria giornaliero è attivo, quel giorno ricevi anche una notifica. Non mostra mai la lettera.{/pending}
+Quel giorno, Oggi mostra **Una lettera da te, scritta il** e il giorno in cui l'hai scritta. Se ce n'è più di una, compare prima quella che hai scritto prima. Tocca **Apri** per leggerla, o **Non ora**: quella lettera torna tra una settimana, e Oggi non mostra più lettere quel giorno su questo dispositivo. Se sopra c'era **Vuoi parlare con qualcuno?**, resta su Oggi per il resto della giornata.{pending:app_letters} Nell'app, se il tuo promemoria giornaliero è attivo, quel giorno ricevi anche una notifica. Non mostra mai la lettera.{/pending}
 
 **Aprirla prima:** apri una lettera da **Profilo → Lettere al me del futuro** prima del suo giorno e scegli **Apri ora** o **Tienila per dopo**.
 
