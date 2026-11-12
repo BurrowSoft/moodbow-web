@@ -70,6 +70,17 @@ function DueLetter({ letter, storageKey, country, onOpened, onNotNow }: { letter
     if (result.status === "ok") {
       setBody(result.body);
       onOpened();
+      // Opened, the letter isn't due any more, so the next load of Today has no card to put the
+      // help offer above: keep the help line alone for the rest of the day (UX 12 Nov, as the
+      // app's letters/app 71eef38). This visit still shows the opened letter (onOpened).
+      if (helpFirst) {
+        try {
+          window.localStorage.setItem(storageKey, HIDDEN_WITH_HELP);
+        } catch {
+          // storage unavailable: the help shows with the letter until the page reloads
+        }
+        listeners.forEach((cb) => cb());
+      }
     } else setFailed(true);
   };
   const notNow = async () => {

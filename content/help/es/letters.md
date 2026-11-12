@@ -7,7 +7,7 @@ topic: Your journal
 
 Hasta su día, la carta está bloqueada: **Cronología** muestra **Una carta tuya · se abre el** y su fecha, nunca lo que escribiste. Bloqueada significa que Moodbow la mantiene fuera de la vista hasta entonces; se guarda con la misma privacidad que el resto de tu diario.
 
-Ese día, Hoy muestra **Una carta tuya, escrita el** y el día en que la escribiste. Toca **Abrir** para leerla, o **Ahora no** para volver a verla en una semana.{pending:app_letters} En la app, si tu recordatorio diario está activado, también recibes una notificación ese día. Nunca muestra la carta.{/pending}
+Ese día, Hoy muestra **Una carta tuya, escrita el** y el día en que la escribiste. Si hay varias, aparece primero la que escribiste antes. Toca **Abrir** para leerla, o **Ahora no**: esa carta vuelve en una semana, y Hoy no muestra ninguna carta más ese día en este dispositivo. Si **¿Quieres hablar con alguien?** aparecía encima, se queda en Hoy el resto del día.{pending:app_letters} En la app, si tu recordatorio diario está activado, también recibes una notificación ese día. Nunca muestra la carta.{/pending}
 
 **Abrirla antes:** abre una carta desde **Yo → Cartas para mi yo del futuro** antes de su día y elige **Abrir ahora** o **Guardarla para después**.
 

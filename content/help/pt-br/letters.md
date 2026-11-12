@@ -7,7 +7,7 @@ topic: Your journal
 
 Até o dia dela, a carta fica trancada: a **Linha do tempo** mostra **Uma carta sua · abre em** e a data, nunca o que você escreveu. Trancada quer dizer que o Moodbow a mantém fora de vista até lá; ela é guardada com a mesma privacidade que o resto do seu diário.
 
-No dia, Hoje mostra **Uma carta sua, escrita em** e o dia em que você a escreveu. Toque em **Abrir** para ler, ou em **Agora não** para vê-la de novo em uma semana.{pending:app_letters} No app, se o seu lembrete diário estiver ligado, você também recebe uma notificação nesse dia. Ela nunca mostra a carta.{/pending}
+No dia, Hoje mostra **Uma carta sua, escrita em** e o dia em que você a escreveu. Se houver mais de uma, aparece primeiro a que você escreveu antes. Toque em **Abrir** para ler, ou em **Agora não**: essa carta volta em uma semana, e Hoje não mostra mais nenhuma carta nesse dia, neste aparelho. Se **Quer conversar com alguém?** aparecia acima dela, isso continua em Hoje pelo resto do dia.{pending:app_letters} No app, se o seu lembrete diário estiver ligado, você também recebe uma notificação nesse dia. Ela nunca mostra a carta.{/pending}
 
 **Abrir antes:** abra uma carta em **Perfil → Cartas para o meu eu do futuro** antes do dia dela e escolha **Abrir agora** ou **Guardar para depois**.
 
