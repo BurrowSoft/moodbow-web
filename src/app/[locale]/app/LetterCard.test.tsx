@@ -47,6 +47,42 @@ describe("LetterCard", () => {
     expect(screen.getByTestId("letter-card-body")).toHaveTextContent("You did it.");
   });
 
+  // UX 12 Nov (as the app's letters/app 71eef38): opened, the letter isn't due on the next load,
+  // so a help-first card's help offer would go with it; the help line stays alone for the day.
+  it("Open on a help-first card: the letter and the help now; after a reload the help line alone; gone the next day", async () => {
+    open.mockReturnValueOnce(Promise.resolve({ status: "ok", body: "Dear me,\nYou did it." }));
+    card(true);
+    await act(async () => fireEvent.click(screen.getByTestId("letter-card-open")));
+    expect(screen.getByTestId("letter-card-body")).toHaveTextContent("You did it.");
+    expect(screen.getByTestId("letter-help")).toBeInTheDocument();
+    expect(window.localStorage.getItem(localKey("letter-card-hidden", "u1", TODAY))).toBe("help");
+    // The next load: the opened letter isn't due any more.
+    cleanup();
+    card(false, TODAY, false);
+    expect(screen.getByTestId("letter-help")).toBeInTheDocument();
+    expect(screen.queryByTestId("letter-card")).toBeNull();
+    cleanup();
+    card(false, "2026-11-13", false);
+    expect(screen.queryByTestId("letter-help")).toBeNull();
+  });
+
+  it("Open without help first stores nothing: the next load is as the server says", async () => {
+    open.mockReturnValueOnce(Promise.resolve({ status: "ok", body: "Dear me," }));
+    card(false);
+    await act(async () => fireEvent.click(screen.getByTestId("letter-card-open")));
+    expect(window.localStorage.getItem(localKey("letter-card-hidden", "u1", TODAY))).toBeNull();
+    cleanup();
+    card(false, TODAY, false);
+    expect(document.body.textContent).toBe("");
+  });
+
+  it("a failed Open stores nothing", async () => {
+    open.mockReturnValueOnce(Promise.resolve({ status: "error" }));
+    card(true);
+    await act(async () => fireEvent.click(screen.getByTestId("letter-card-open")));
+    expect(window.localStorage.getItem(localKey("letter-card-hidden", "u1", TODAY))).toBeNull();
+  });
+
   it("Not now: a week on, and the card goes, with focus to Today's heading", async () => {
     notNow.mockReturnValueOnce(Promise.resolve({ status: "ok" }));
     const heading = document.createElement("h1");
