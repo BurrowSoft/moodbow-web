@@ -106,12 +106,15 @@ describe("PlusScreen: the table scrolls, the footer never does", () => {
     expect(within(footer).getByTestId("plus-start")).toBeTruthy();
     expect(within(footer).queryByTestId("plus-not-now")).toBeNull();
     expect(within(screen.getByTestId("plus-rest")).getByTestId("plus-not-now")).toBeTruthy();
-    expect(footer.className).toContain("sticky");
+    // Fixed at the bottom, with room kept under the page's end for it (its measured height).
+    expect(footer.className).toContain("fixed");
+    expect(document.body.style.paddingBottom).toBe("400px");
     // One scroll for the page: the table's box is no longer a scroll area of its own.
     expect(screen.getByTestId("plus-scroll")).not.toHaveAttribute("tabindex");
     expect(document.documentElement).toHaveAttribute("data-tabs-aside");
     unmount();
     expect(document.documentElement).not.toHaveAttribute("data-tabs-aside");
+    expect(document.body.style.paddingBottom).toBe("");
     rect.mockRestore();
     vi.unstubAllGlobals();
     vi.stubGlobal("fetch", fetchMock);
