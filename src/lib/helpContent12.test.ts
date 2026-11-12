@@ -34,6 +34,15 @@ const ROWS: Row[] = [
     shows: "Moodbow shows help when you write it and when you open it.",
     appOnly: ["you also get a notification that day"],
   },
+  // The web prints; the app shares a PDF.
+  {
+    slug: "appointment",
+    app: "app_appointment",
+    web: "appointment_live",
+    shows: "Nothing here is saved or sent",
+    appOnly: ["<strong>Share as PDF</strong>"],
+    webOnly: ["<strong>Print</strong>"],
+  },
 ];
 
 // Every language with its own Help folder, served or not yet.

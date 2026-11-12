@@ -235,6 +235,10 @@
     "met": false,
     "what": "1.2: For my appointment (specs/1.2-features.md §4, content/appointment.json): a printable summary of check-ins and starred entries, made in the browser, nothing stored or sent. Needs the Reviewer's read, the tester rows and Vitor's look."
   },
+  "app-appointment": {
+    "met": false,
+    "what": "Help only (decision 212 pattern, UX 2026-11-12): For my appointment (1.2 §4) is in the app build people have, with Share as PDF, so its Help article shows. Not appointment-live (the web's own switch, which brings Print)."
+  },
   "test-only-unavailable-page": {
     "met": false,
     "what": "TEST ONLY, NEVER MET: /app/test/unavailable, a page that renders nothing but the journal's couldn't-load state (JournalUnavailable) inside the journal layout, so a journey can measure where its help sits at large text (the real pages fail only when Supabase does). No journal data on it. A 404 on Production at the routing level (lib/sitemapPages.ts), before any sign-in; a test and the publish-day checklist check that."
