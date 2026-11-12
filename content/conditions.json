@@ -75,6 +75,10 @@
     "met": true,
     "what": "Help only (decision 212): app lock (PIN, fingerprint or face; decision 188) is in the app build people have (0.9 closed test on), so its Help article shows. Not app-lock (the privacy text's clause, Vitor's)."
   },
+  "app-today-help": {
+    "met": false,
+    "what": "Help only (decision 212 pattern, UX & PM 2026-11-13): Today's standing help button (a lifebuoy named with meGetHelpNow, specs/1.2-features.md) is in the app build people have; the web's ships with it (#298, after the pilot). Gates the get-help-now article's line about it."
+  },
   "app-share-cards": {
     "met": true,
     "what": "Help only (decision 212): \"My month's moodbow\" sharing is in the app build people have (0.9 closed test on), so its Help lines show. Not the web's own share cards (share-cards); Chart, Milestone and Year cards stay hidden."
