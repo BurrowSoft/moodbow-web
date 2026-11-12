@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { MIN_CHECK_INS } from "@/lib/share/moodbow";
 import { ShareMonth } from "../insights/ShareMonth";
 import { loadMonthCheckIns } from "../insights/shareActions";
@@ -27,10 +28,11 @@ function monthCount(counts: MonthCounts, month: string): Promise<number> {
 
 // "Share this month" in a Timeline month header (decision 161): the same
 // share flow as Insights, for that month. Shown only when the month has
-// enough check-ins for a card (MIN_CHECK_INS); otherwise nothing (hidden,
+// enough check-ins for a card (MIN_CHECK_INS); otherwise only its invisible place (hidden,
 // not disabled). The count comes from the month itself, not from the days
 // loaded so far (a month can span pages; Moments shows only some days).
 export function MonthShare({ month, dateLocaleTag, counts, year = null }: { month: string; dateLocaleTag: string; counts: MonthCounts; year?: number | null }) {
+  const t = useTranslations("share");
   const [enough, setEnough] = useState(false);
   useEffect(() => {
     let cancelled = false;
@@ -45,6 +47,17 @@ export function MonthShare({ month, dateLocaleTag, counts, year = null }: { mont
       cancelled = true;
     };
   }, [counts, month]);
-  if (!enough) return null;
+  // Its place is kept from the first paint, the same words at the same size but invisible (never
+  // focusable, never read): the count arrives seconds later, and the link appearing then made the
+  // header's row wrap and pushed the month's list down 20 px (CLS 0.176, the Web Tester's
+  // performance pass, 12 Nov). A month without enough check-ins keeps the empty place, so nothing
+  // moves either way.
+  if (!enough) {
+    return (
+      <span aria-hidden="true" data-testid={`timeline-share-place-${month}`} className="invisible inline-flex min-h-11 items-center text-sm font-medium underline underline-offset-4">
+        {t(SHARE_LABEL)}
+      </span>
+    );
+  }
   return <ShareMonth month={month} dateLocaleTag={dateLocaleTag} label={SHARE_LABEL} asLink testId={`timeline-share-${month}`} year={year} />;
 }
