@@ -130,8 +130,21 @@ export function PlusScreen({ view, price, aiShown, started }: { view: PlusView; 
     if (!large) return;
     const html = document.documentElement;
     html.dataset.tabsAside = "";
+    // The pinned part is fixed at the bottom (UX, 12 Nov: on screen at every scroll position, the
+    // site footer included), so the page keeps room under its end for it: the content and the
+    // site footer scroll up clear of it, never under it.
+    const body = document.body;
+    const pinned = footer.current;
+    const room = () => {
+      body.style.paddingBottom = pinned ? `${Math.ceil(pinned.getBoundingClientRect().height)}px` : "";
+    };
+    room();
+    const observer = typeof ResizeObserver === "undefined" || !pinned ? null : new ResizeObserver(room);
+    if (pinned) observer?.observe(pinned);
     return () => {
       delete html.dataset.tabsAside;
+      observer?.disconnect();
+      body.style.paddingBottom = "";
     };
   }, [large]);
 
@@ -211,8 +224,16 @@ export function PlusScreen({ view, price, aiShown, started }: { view: PlusView; 
         className={large ? "space-y-3 pb-3" : "min-h-0 flex-1 space-y-3 overflow-y-scroll pb-3 [scrollbar-width:thin]"}
       >
         <div className="space-y-1">
-          <p className="text-sm font-medium tracking-wide text-accent uppercase">{t("label")}</p>
-          <h1 data-testid="plus-title" className="font-medium leading-tight [font-size:min(1.375rem,max(11.25vw,36px))] [overflow-wrap:anywhere] sm:text-2xl">
+          {/* At large text the eyebrow is for screen readers only and the title at the 32 px cap, so
+              the whole title is in view on landing above the pinned part (UX, 12 Nov: de put it at
+              304, then 220-300 under a pinned top of 276; the price and button say it's Plus). */}
+          <p data-testid="plus-eyebrow" className={large ? "sr-only" : "text-sm font-medium tracking-wide text-accent uppercase"}>
+            {t("label")}
+          </p>
+          <h1
+            data-testid="plus-title"
+            className={`font-medium leading-tight [overflow-wrap:anywhere] ${large ? "[font-size:min(1.375rem,max(10vw,32px))]" : "[font-size:min(1.375rem,max(11.25vw,36px))] sm:text-2xl"}`}
+          >
             {has ? t("titleHas") : t("title")}
           </h1>
           <p className="text-sm text-muted">{t("lead")}</p>
@@ -260,7 +281,7 @@ export function PlusScreen({ view, price, aiShown, started }: { view: PlusView; 
           // At large text: pinned, its text capped at 32 px (the 2x target, decision 231) and
           // its spacing in px, so it takes as little of the screen as it can.
           className={`flex shrink-0 flex-col border-t border-border bg-surface px-[12px] text-center ${
-            large ? "sticky bottom-0 z-10 gap-[8px] pt-[12px] pb-[8px] [font-size:min(1rem,max(10vw,32px))]" : "gap-2 pt-3 pb-2"
+            large ? "fixed inset-x-0 bottom-0 z-20 gap-[8px] pt-[12px] pb-[8px] [font-size:min(1rem,max(10vw,32px))]" : "gap-2 pt-3 pb-2"
           }`}
         >
           {action}

@@ -1706,9 +1706,35 @@ test("large text: the Plus screen at 300 % on a 320 px phone, free and in the fr
       expect(await inView("plus-price"), `${saved}: the price on landing`).toBe(true);
       expect(await inView("plus-renews"), `${saved}: the renewal line on landing`).toBe(true);
       expect(await inView("plus-start"), `${saved}: the button on landing`).toBe(true);
+      // The whole title in view on landing, above the pinned part, never behind it (UX, 12 Nov: de
+      // had it at 304 px under a pinned part starting at 276).
+      const title = await page.evaluate(() => {
+        const t = document.querySelector('[data-testid="plus-title"]')!.getBoundingClientRect();
+        const pinnedTop = document.querySelector('[data-testid="plus-footer"]')!.getBoundingClientRect().top;
+        return { top: Math.round(t.top), bottom: Math.round(t.bottom), pinnedTop: Math.round(pinnedTop) };
+      });
+      console.log(`Plus screen at 300 %, ${saved}, free: the title ${JSON.stringify(title)}`);
+      expect(title.top, `${saved}: the title's top on screen`).toBeGreaterThanOrEqual(0);
+      expect(title.bottom, `${saved}: the title above the pinned part`).toBeLessThanOrEqual(title.pinnedTop);
       await expect(page.getByTestId("plus-footer").getByTestId("plus-not-now")).toHaveCount(0);
-      await page.getByTestId("plus-rest").getByTestId("plus-not-now").scrollIntoViewIfNeeded();
-      await expect(page.getByTestId("plus-rest").getByTestId("plus-not-now")).toBeVisible();
+      // At the very end of the page: the pinned part still on screen, and Not now and the site's
+      // footer above it, not under it.
+      await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+      await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))));
+      const end = await page.evaluate(() => {
+        const box = (sel: string) => document.querySelector(sel)?.getBoundingClientRect();
+        const pinned = box('[data-testid="plus-footer"]')!;
+        const notNow = box('[data-testid="plus-rest"] [data-testid="plus-not-now"]')!;
+        // The site's own footer: the page's last <footer>.
+        const siteFooter = [...document.querySelectorAll("footer")].at(-1)?.getBoundingClientRect();
+        return {
+          pinnedOnScreen: pinned.top >= 0 && pinned.bottom <= window.innerHeight + 0.5,
+          notNowAbove: notNow.bottom <= pinned.top + 0.5,
+          siteFooterAbove: !siteFooter || siteFooter.bottom <= pinned.top + 0.5,
+        };
+      });
+      expect(end, `${saved}: at the very end`).toEqual({ pinnedOnScreen: true, notNowAbove: true, siteFooterAbove: true });
+      await page.evaluate(() => window.scrollTo(0, 0));
     }
     await grantPlusTrial(email);
     for (const [route, saved] of [["", "en"], ["/de", "de"]] as const) {
