@@ -1907,6 +1907,10 @@ test("Plus more reminders on staging: locked when free; with Plus, saved, read b
   test.skip(!(await plusOnStaging()), "staging doesn't have 028's entitlements table yet");
   const email = newEmail();
   const password = newPassword();
+  // The reminder section takes no input until the page's code runs (useUntilLoaded): wait for that
+  // after every load, or a fill lands in the server's HTML and hydration puts the old value back
+  // (the first real run, 12 Nov: 08:20 typed, 21:00 shown, nothing sent).
+  const ready = () => expect(page.locator('section[aria-labelledby="me-reminder"]')).not.toHaveAttribute("data-until-loaded", "", { timeout: 15_000 });
   try {
     await signedUpUnconfirmed(email, password);
     await confirmEmail(email);
@@ -1920,6 +1924,7 @@ test("Plus more reminders on staging: locked when free; with Plus, saved, read b
 
     // Free: the lock, the sheet, nothing saved.
     await page.goto("/app/me");
+    await ready();
     await expect(page.getByTestId("me-reminder-extra")).toBeVisible({ timeout: 15_000 });
     await expect(page.getByTestId("me-reminder-extra-add")).toHaveCount(0);
     await page.getByTestId("me-reminder-extra-add-locked").click();
@@ -1929,6 +1934,7 @@ test("Plus more reminders on staging: locked when free; with Plus, saved, read b
     // With Plus: add 08:00 beside the main 21:00, saved by update_extra_reminders, read back by get_me.
     await grantPlusTrial(email);
     await page.goto("/app/me");
+    await ready();
     await expect(page.getByTestId("me-reminder-time")).toHaveValue("21:00", { timeout: 15_000 });
     await page.getByTestId("me-reminder-extra-add").click();
     const added = page.getByTestId("me-reminder-extra-new");
@@ -1936,9 +1942,11 @@ test("Plus more reminders on staging: locked when free; with Plus, saved, read b
     await added.blur();
     await expect(page.getByTestId("me-reminder-extra-status")).toHaveText(messages.today.checkinSaved, { timeout: 15_000 });
     await page.reload();
+    await ready();
     await expect(page.getByTestId("me-reminder-extra-time")).toHaveValue("08:00", { timeout: 15_000 });
     await axeAtWidths(page, "Me → Daily reminder, with a second time (Plus)", async () => {
       await page.goto("/app/me");
+      await ready();
       await expect(page.getByTestId("me-reminder-extra-time")).toBeVisible({ timeout: 15_000 });
     });
 
@@ -1951,6 +1959,7 @@ test("Plus more reminders on staging: locked when free; with Plus, saved, read b
 
     // A new main time within the hour of 08:00: the server drops it, and Me says so once.
     await page.goto("/app/me");
+    await ready();
     const main = page.getByTestId("me-reminder-time");
     await expect(main).toHaveValue("21:00", { timeout: 15_000 });
     await main.fill("08:20");
@@ -1961,6 +1970,7 @@ test("Plus more reminders on staging: locked when free; with Plus, saved, read b
     await expect(removed).toContainText(messages.me.reminderExtraRemoved.split("{time}")[0].trim());
     await expect(page.getByTestId("me-reminder-extra-time")).toHaveCount(0);
     await page.reload();
+    await ready();
     await expect(page.getByTestId("me-reminder-time")).toHaveValue("08:20", { timeout: 15_000 });
     await expect(page.getByTestId("me-reminder-extra-time")).toHaveCount(0);
     await expect(page.getByTestId("me-reminder-extra-removed")).toHaveCount(0);
