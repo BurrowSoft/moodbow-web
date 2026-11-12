@@ -746,7 +746,7 @@
   },
   {
     "key": "insights.chartNoChange",
-    "en": "Same as the previous {range, select, week {week} month {month} other {3 months}}",
+    "en": "Same as the previous {range, select, week {7 days} month {month} other {3 months}}",
     "reason": "UX draft (native read pending)"
   },
   {
@@ -980,6 +980,11 @@
     "reason": "UX draft (native read pending)"
   },
   {
+    "key": "insights.yourWeekLookGoodNoLow",
+    "en": "Your week had good days and no low ones.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
     "key": "insights.yourWeekLookSteady",
     "en": "Your week was mostly steady.",
     "reason": "UX draft (native read pending)"
@@ -1032,6 +1037,21 @@
   {
     "key": "me.meNoScript",
     "en": "The journal needs JavaScript. Turn it on in your browser to see your entries.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.rangeWeek",
+    "en": "Last 7 days",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.chartChangeUp",
+    "en": "Up {value} vs the previous {range, select, week {7 days} month {month} other {3 months}}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.chartChangeDown",
+    "en": "Down {value} vs the previous {range, select, week {7 days} month {month} other {3 months}}",
     "reason": "UX draft (native read pending)"
   }
 ]

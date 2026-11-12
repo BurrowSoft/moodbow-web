@@ -2,14 +2,14 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import contract from "../../../content/your-week.json";
+import contract from "../../../content/contracts/your-week.json";
 import en from "@/messages/en.json";
 import type { InsightRow } from "./insights";
 import { PATTERN_RULES } from "./patterns";
 import { YOUR_WEEK_RULES, yourWeek, type YourWeekMoment } from "./yourWeek";
 
-// content/your-week.json: the app runs these same cases when its side is built,
-// and takes the file over then (see its "about").
+// content/contracts/your-week.json, synced from the app repo (its home since the app port,
+// decision 99; scripts/sync-contracts.mjs): the app runs these same cases.
 type Case = { name: string; today?: string; rows: InsightRow[]; moments: YourWeekMoment[]; expect: unknown };
 
 describe("Your week: the contract", () => {
@@ -81,6 +81,6 @@ describe("Your week: Patterns' sides", () => {
       { local_date: "2026-10-28", mood: 3, sleep_hours: "6.5", stress: null, exercise_minutes: null },
       { local_date: "2026-10-29", mood: 3, sleep_hours: "6.5", stress: null, exercise_minutes: null },
     ];
-    expect(yourWeek(rows, "2026-11-04", [])).toMatchObject({ lines: [{ template: "patternSleep" }, { template: "lookMoreGood" }], caption: true });
+    expect(yourWeek(rows, "2026-11-04", [])).toMatchObject({ lines: [{ template: "patternSleep" }, { template: "lookGoodNoLow" }], caption: true });
   });
 });

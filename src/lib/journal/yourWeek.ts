@@ -5,7 +5,7 @@ import { lastWeekStart } from "./report";
 // Your week (specs/your-week.md; UX 2026-11-06): a small card at the top of
 // Insights that says something back about the person's week, from fixed rules,
 // no AI. Check-in values and the star only, never entry text. The rules are in
-// content/your-week.json with worked cases, for the app to run the same ones:
+// content/contracts/your-week.json (synced from the app repo) with worked cases, which both run:
 // - the last complete Monday to Sunday; a check-in counts if it has a mood;
 // - under 4 check-ins: no card;
 // - mood 1 or 2 on more than half: only "hard", nothing else;
@@ -27,7 +27,7 @@ export const YOUR_WEEK_RULES = {
 
 export type YourWeekMoment = { id: string; entry_date: string };
 export type YourWeekLine =
-  | { template: "patternSleep" | "patternMovement" | "patternStress" | "lookMoreGood" | "lookSteady" | "lookMixed" }
+  | { template: "patternSleep" | "patternMovement" | "patternStress" | "lookMoreGood" | "lookGoodNoLow" | "lookSteady" | "lookMixed" }
   | { template: "moment"; id: string; date: string };
 export type YourWeek =
   | { start: string; end: string; kind: "hard" }
@@ -63,8 +63,10 @@ function howItLooked(rows: InsightRow[]): YourWeekLine | null {
   const count = (moods: readonly number[]) => rows.filter((r) => moods.includes(r.mood)).length;
   const good = count(YOUR_WEEK_RULES.goodMoods);
   const low = count(YOUR_WEEK_RULES.lowMoods);
-  if (good > low && good >= YOUR_WEEK_RULES.minGoodDays) return { template: "lookMoreGood" };
+  // Steady first (version 2, after Vitor's look): 4, 4, 3, 3, 3 is a steady week, not a good one.
   if (count([YOUR_WEEK_RULES.steadyMood]) * 2 > rows.length) return { template: "lookSteady" };
+  // "More good days than low ones" read oddly with none low (v3, UX): 3, 3, 5, 5 says so.
+  if (good > low && good >= YOUR_WEEK_RULES.minGoodDays) return { template: low === 0 ? "lookGoodNoLow" : "lookMoreGood" };
   if (good === low && good >= 1) return { template: "lookMixed" };
   return null;
 }
