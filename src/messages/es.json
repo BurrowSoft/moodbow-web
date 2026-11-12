@@ -660,6 +660,25 @@
     "pdfCoverTitle": "Mi diario",
     "pdfCoverCounts": "{days, plural, one {# día con registro} other {# días con registro}} · {entries, plural, one {# entrada} other {# entradas}}",
     "pdfHelp": "Si necesitas hablar con alguien, hay ayuda en moodbow.com/help/get-help-now",
-    "pdfFileTitle": "Diario Moodbow – {period}"
+    "pdfFileTitle": "Diario Moodbow – {period}",
+    "sheetReview": "El resumen del año es parte de Plus",
+    "reviewTitle": "Tu {year}",
+    "reviewTitleSoFar": "Tu {year} hasta ahora",
+    "reviewYear": "Año",
+    "reviewDaysTitle": "Días con registro",
+    "reviewDays": "{days, plural, one {# día} other {# días}} con registro",
+    "reviewDaysCaption": "Días con registro, por mes",
+    "reviewMoodTitle": "Estado de ánimo por mes",
+    "reviewMoodCaption": "Tu estado de ánimo medio, por mes",
+    "reviewFactorsTitle": "Sueño, movimiento y estrés",
+    "reviewSleep": "Dormiste una media de {hours} h por noche.",
+    "reviewMovement": "El movimiento fue de {minutes} min al día de media, los días que lo registraste.",
+    "reviewStress": "Tu estrés fue de {stress} de 5 de media.",
+    "reviewNotEnough": "No se registró lo suficiente en {year} para mostrarlo.",
+    "reviewWritingTitle": "Escritura",
+    "reviewWriting": "{entries, plural, one {# entrada} other {# entradas}} y {moments, plural, one {# momento} other {# momentos}}",
+    "reviewMomentsTitle": "Tus momentos",
+    "reviewNoMoments": "No marcaste momentos en {year}.",
+    "reviewEmpty": "No hay registros ni entradas en {year}."
   }
 }

@@ -660,6 +660,25 @@
     "pdfCoverTitle": "Il mio diario",
     "pdfCoverCounts": "{days, plural, one {# giorno con check-in} other {# giorni con check-in}} · {entries, plural, one {# pagina} other {# pagine}}",
     "pdfHelp": "Se hai bisogno di parlare con qualcuno, trovi aiuto su moodbow.com/help/get-help-now",
-    "pdfFileTitle": "Diario Moodbow – {period}"
+    "pdfFileTitle": "Diario Moodbow – {period}",
+    "sheetReview": "L'anno in sintesi fa parte di Plus",
+    "reviewTitle": "Il tuo {year}",
+    "reviewTitleSoFar": "Il tuo {year} finora",
+    "reviewYear": "Anno",
+    "reviewDaysTitle": "Giorni con check-in",
+    "reviewDays": "{days, plural, one {# giorno} other {# giorni}} con check-in",
+    "reviewDaysCaption": "Giorni con check-in, per mese",
+    "reviewMoodTitle": "Umore per mese",
+    "reviewMoodCaption": "Il tuo umore medio, per mese",
+    "reviewFactorsTitle": "Sonno, movimento e stress",
+    "reviewSleep": "Hai dormito in media {hours} h a notte.",
+    "reviewMovement": "Il movimento è stato in media di {minutes} min al giorno, nei giorni in cui l'hai segnato.",
+    "reviewStress": "Il tuo stress è stato in media {stress} su 5.",
+    "reviewNotEnough": "Non segnato abbastanza nel {year} per mostrarlo.",
+    "reviewWritingTitle": "Scrittura",
+    "reviewWriting": "{entries, plural, one {# pagina} other {# pagine}} e {moments, plural, one {# momento} other {# momenti}}",
+    "reviewMomentsTitle": "I tuoi momenti",
+    "reviewNoMoments": "Nessun momento segnato nel {year}.",
+    "reviewEmpty": "Non ci sono check-in né pagine nel {year}."
   }
 }

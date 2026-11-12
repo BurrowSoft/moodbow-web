@@ -1453,5 +1453,100 @@
     "key": "plus.pdfFileTitle",
     "en": "Moodbow journal – {period}",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.sheetReview",
+    "en": "Year in review is part of Plus",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.reviewTitle",
+    "en": "Your {year}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.reviewTitleSoFar",
+    "en": "Your {year} so far",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.reviewYear",
+    "en": "Year",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.reviewDaysTitle",
+    "en": "Check-in days",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.reviewDays",
+    "en": "{days, plural, one {# day} other {# days}} with a check-in",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.reviewDaysCaption",
+    "en": "Days with a check-in, by month",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.reviewMoodTitle",
+    "en": "Mood by month",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.reviewMoodCaption",
+    "en": "Your average mood, by month",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.reviewFactorsTitle",
+    "en": "Sleep, movement and stress",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.reviewSleep",
+    "en": "Sleep averaged {hours} h a night.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.reviewMovement",
+    "en": "Movement averaged {minutes} min a day, on the days you logged it.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.reviewStress",
+    "en": "Stress averaged {stress} of 5.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.reviewNotEnough",
+    "en": "Not logged often enough in {year} to show.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.reviewWritingTitle",
+    "en": "Writing",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.reviewWriting",
+    "en": "{entries, plural, one {# entry} other {# entries}} and {moments, plural, one {# moment} other {# moments}}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.reviewMomentsTitle",
+    "en": "Your moments",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.reviewNoMoments",
+    "en": "No moments marked in {year}.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.reviewEmpty",
+    "en": "There are no check-ins or entries in {year}.",
+    "reason": "UX draft (native read pending)"
   }
 ]

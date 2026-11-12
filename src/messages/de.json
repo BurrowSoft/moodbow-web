@@ -660,6 +660,25 @@
     "pdfCoverTitle": "Mein Tagebuch",
     "pdfCoverCounts": "{days, plural, one {# Tag mit Check-in} other {# Tage mit Check-in}} · {entries, plural, one {# Eintrag} other {# Einträge}}",
     "pdfHelp": "Wenn du mit jemandem reden möchtest, findest du Hilfe unter moodbow.com/help/get-help-now",
-    "pdfFileTitle": "Moodbow-Tagebuch – {period}"
+    "pdfFileTitle": "Moodbow-Tagebuch – {period}",
+    "sheetReview": "Der Jahresrückblick gehört zu Plus",
+    "reviewTitle": "Dein {year}",
+    "reviewTitleSoFar": "Dein {year} bisher",
+    "reviewYear": "Jahr",
+    "reviewDaysTitle": "Tage mit Check-in",
+    "reviewDays": "{days, plural, one {# Tag} other {# Tage}} mit Check-in",
+    "reviewDaysCaption": "Tage mit Check-in, nach Monat",
+    "reviewMoodTitle": "Stimmung nach Monat",
+    "reviewMoodCaption": "Deine durchschnittliche Stimmung, nach Monat",
+    "reviewFactorsTitle": "Schlaf, Bewegung und Stress",
+    "reviewSleep": "Du hast im Schnitt {hours} h pro Nacht geschlafen.",
+    "reviewMovement": "Bewegung lag im Schnitt bei {minutes} min am Tag, an den Tagen, an denen du sie eingetragen hast.",
+    "reviewStress": "Dein Stress lag im Schnitt bei {stress} von 5.",
+    "reviewNotEnough": "{year} nicht oft genug eingetragen, um es zu zeigen.",
+    "reviewWritingTitle": "Schreiben",
+    "reviewWriting": "{entries, plural, one {# Eintrag} other {# Einträge}} und {moments, plural, one {# Moment} other {# Momente}}",
+    "reviewMomentsTitle": "Deine Momente",
+    "reviewNoMoments": "Keine Momente markiert in {year}.",
+    "reviewEmpty": "{year} gibt es keine Check-ins und keine Einträge."
   }
 }
