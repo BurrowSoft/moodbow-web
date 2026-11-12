@@ -12,11 +12,14 @@ export const isLetterMonths = (n: unknown): n is LetterMonths => (LETTER_RULES.m
 
 const isIso = (d: unknown): d is string => typeof d === "string" && /^\d{4}-\d{2}-\d{2}$/.test(d);
 
+// Ids compare by their code units, not the runtime's collation, so web and app agree (UX 12 Nov).
+const byId = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
+
 export function parseLetterRows(rows: unknown): LetterRow[] {
   return (Array.isArray(rows) ? rows : [])
     .filter((r): r is LetterRow => typeof r?.id === "string" && typeof r?.body === "string" && isIso(r?.written_on) && isIso(r?.opens_on))
     .map(({ id, body, written_on, opens_on, card_from, opened_at }) => ({ id, body, written_on, opens_on, card_from: isIso(card_from) ? card_from : null, opened_at: typeof opened_at === "string" ? opened_at : null }))
-    .sort((a, b) => (a.written_on === b.written_on ? a.id.localeCompare(b.id) : a.written_on < b.written_on ? -1 : 1));
+    .sort((a, b) => (a.written_on === b.written_on ? byId(a.id, b.id) : a.written_on < b.written_on ? -1 : 1));
 }
 
 // What the client gets: a locked letter's text stays on the server.
@@ -28,7 +31,7 @@ export function dueLetter(rows: LetterRow[], today: string): LetterRow | null {
   return (
     rows
       .filter((r) => !r.opened_at && r.opens_on <= today && (r.card_from === null || r.card_from <= today))
-      .sort((a, b) => (a.written_on === b.written_on ? a.id.localeCompare(b.id) : a.written_on < b.written_on ? -1 : 1))[0] ?? null
+      .sort((a, b) => (a.written_on === b.written_on ? byId(a.id, b.id) : a.written_on < b.written_on ? -1 : 1))[0] ?? null
   );
 }
 
