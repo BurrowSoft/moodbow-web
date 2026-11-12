@@ -1,5 +1,5 @@
 // The browser's Sentry: only the two calls the app makes, by name, so the bundler keeps just these
-// and what they need. Loading "@sentry/nextjs" as a whole module (import("@sentry/nextjs")) kept
+// and what they need. Loading "@sentry/nextjs" as a whole module (a dynamic import of it) kept
 // every export in the chunk, Session Replay (rrweb), the Feedback widget, the Profiler and tracing
 // among them: none of it ran, but every page downloaded it (the Web Tester's performance pass,
 // 12 Nov). A mental-health journal never records sessions (UX & PM): Replay, Feedback and
