@@ -29,7 +29,11 @@ describe("instrumentation-client", () => {
     expect(init).toHaveBeenCalledTimes(1);
     const options = init.mock.calls[0][0];
     expect(options).toMatchObject({ dsn: "https://key@o0.ingest.sentry.io/1", tracesSampleRate: 0 });
-    expect(options.integrations([{ name: "BrowserSession" }, { name: "Dedupe" }])).toEqual([{ name: "Dedupe" }]);
+    // Errors only: no sessions, and nothing that records, profiles or traces, even if a future SDK
+    // made one a default (UX & PM, 12 Nov).
+    const defaults = ["BrowserSession", "Dedupe", "Replay", "ReplayCanvas", "Feedback", "BrowserProfiling", "BrowserTracing", "GlobalHandlers"].map((name) => ({ name }));
+    expect(options.integrations(defaults)).toEqual([{ name: "Dedupe" }, { name: "GlobalHandlers" }]);
+    expect(Object.keys(options).filter((key) => /replay|profil/i.test(key))).toEqual([]);
     // Router transitions reach Sentry once it has started, not before.
     mod.onRouterTransitionStart("/app", "push");
     expect(captureRouterTransitionStart).toHaveBeenCalledWith("/app", "push");
