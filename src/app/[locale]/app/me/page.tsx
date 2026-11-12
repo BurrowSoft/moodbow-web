@@ -24,7 +24,7 @@ import { YourData } from "./YourData";
 import { ImportData } from "./ImportData";
 import { headers } from "next/headers";
 import { dateLocale } from "@/lib/journal/today";
-import { plusPriceLabel, readPlusView } from "@/lib/plus/view";
+import { extraReminders, plusPriceLabel, readPlusView } from "@/lib/plus/view";
 import { PlusInMe } from "./PlusInMe";
 
 // The export (export_my_data may take 30 s: lib/supabase/deadline) and the
@@ -79,7 +79,7 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
           credits={{ balance: me.credits?.balance ?? 0 }}
         />
       )}
-      <Reminder on={me.settings?.reminder_on ?? true} time={hhmm(me.settings?.reminder_time)} />
+      <Reminder on={me.settings?.reminder_on ?? true} time={hhmm(me.settings?.reminder_time)} extra={extraReminders(plus, me.settings?.extra_reminder_times, plusPriceLabel(locale))} />
       <LanguageRegion
         initial={{ locale: routeLocale(me.profile?.locale ?? locale), country: me.profile?.country ?? "", time_zone: me.profile?.time_zone ?? "UTC" }}
         countries={countryOptions(locale)}
