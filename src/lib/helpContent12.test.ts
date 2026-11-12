@@ -18,6 +18,14 @@ type Row = {
 
 const ROWS: Row[] = [
   { slug: "things-that-help", app: "app_toolbox", web: "toolbox_live", shows: "If you feel dizzy, stop and breathe normally." },
+  // The emergency line is inside the block too, so the article is never live on its own.
+  {
+    slug: "safety-plan",
+    app: "app_safety_plan",
+    web: "safety_plan_live",
+    shows: "Making my surroundings safer",
+    appOnly: ["Show my safety plan without unlocking", "opens without a connection"],
+  },
 ];
 
 // Every language with its own Help folder, served or not yet.
