@@ -178,3 +178,12 @@ describe("export-csv.json (the contract the app's CSV export matches)", () => {
     });
   }
 });
+
+// export-csv.json at the app's 586c90e: only day data has rows; Plus (030, the entitlements row)
+// is JSON only, never a column.
+describe("renderExportCsv: Plus is never a column", () => {
+  it("the same file with or without plus in the JSON", () => {
+    const withPlus = { ...(fixture as unknown as ExportDoc), plus: { source: "stripe", status: "active", current_period_end: "2027-01-01T00:00:00Z" } } as unknown as ExportDoc;
+    expect(renderExportCsv(withPlus, t)).toBe(renderExportCsv(fixture as unknown as ExportDoc, t));
+  });
+});
