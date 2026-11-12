@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "about": "Things that help me (specs/1.2-features.md, UX 2026-11-09; the Reviewer's read specs/1.2-features-read.md). TEMPORARY HOME, as content/your-week.json: when the app ports it, this moves to the app repo's supabase/contracts (decision 99). The person's own short list, plain text, in their own order: at most maxItems, each at most maxChars characters (counted as the server counts them, char_length), never blank. Stored in toolbox_items (migration 025, specs/toolbox-server-draft.md), written only through toolbox_add, toolbox_update, toolbox_delete and toolbox_move. No AI reads it, and nothing about it goes to analytics. The Today card shows when the latest check-in saved today, in the saved time zone, has a mood in lowMoods; a later one today outside them removes it. Not now hides it for that calendar day on that device only. If a help offer shows on Today too, help comes first: the card never pushes one down. Breathing: cycles of inSeconds in and outSeconds out, so totalSeconds in all; it ends on its own, with no sound and no health claims, and Stop is always on screen. With reduced motion, the phase's name and the seconds left count down in words instead of the circle.",
+  "rules": {
+    "maxItems": 20,
+    "maxChars": 120,
+    "lowMoods": [1, 2]
+  },
+  "breathing": {
+    "inSeconds": 4,
+    "outSeconds": 6,
+    "cycles": 6,
+    "totalSeconds": 60
+  },
+  "claimWords": {
+    "en": ["calm", "anxiety", "anxious", "stress", "panic", "heal", "cure", "therapy", "treatment", "exercise", "symptom"],
+    "fr": ["calm", "anxi", "stress", "panique", "guéri", "thérap", "traitement", "exercice", "symptôme"],
+    "es": ["calm", "ansi", "estrés", "pánico", "cura", "terap", "tratamiento", "ejercicio", "síntoma"],
+    "pt-br": ["calm", "ansi", "estresse", "pânico", "cura", "terap", "tratamento", "exercício", "sintoma"],
+    "de": ["beruhig", "angst", "stress", "panik", "heil", "therap", "behandlung", "übung", "symptom"],
+    "it": ["calm", "ansi", "stress", "panico", "guari", "terap", "trattamento", "esercizio", "sintomo"],
+    "th": ["สงบ", "วิตกกังวล", "ความเครียด", "รักษา", "บำบัด", "อาการ"]
+  }
+}

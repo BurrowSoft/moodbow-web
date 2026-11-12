@@ -1033,5 +1033,245 @@
     "key": "me.meNoScript",
     "en": "The journal needs JavaScript. Turn it on in your browser to see your entries.",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.meRow",
+    "en": "Things that help me",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.empty",
+    "en": "Add small things that help on hard days. Only you can see this list.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.placeholder",
+    "en": "Something that helps",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.add",
+    "en": "Add",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.edit",
+    "en": "Edit",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.delete",
+    "en": "Delete",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.save",
+    "en": "Save",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.cancel",
+    "en": "Cancel",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.moveUp",
+    "en": "Move up",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.moveDown",
+    "en": "Move down",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.deleted",
+    "en": "Deleted.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.undo",
+    "en": "Undo",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.limitCount",
+    "en": "You can keep up to 20 things here.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.limitLength",
+    "en": "Up to 120 characters.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.cardTitle",
+    "en": "Things that help you",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.breathe",
+    "en": "Breathe for a minute",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.notNow",
+    "en": "Not now",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.cardEmpty",
+    "en": "Add something that helps",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.breathTitle",
+    "en": "A minute to breathe",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.breatheIn",
+    "en": "Breathe in",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.breatheOut",
+    "en": "Breathe out",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.breatheInCount",
+    "en": "Breathe in · {n}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.breatheOutCount",
+    "en": "Breathe out · {n}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.stop",
+    "en": "Stop",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.breathEnd",
+    "en": "That was a minute. Take your time.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.done",
+    "en": "Done",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "safetyPlan.title",
+    "en": "My safety plan",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "safetyPlan.intro",
+    "en": "Fill this in on a calmer day, so it's here when you need it. Every part is optional. Only you can see it.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "safetyPlan.warningSigns",
+    "en": "Warning signs",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "safetyPlan.warningSignsPrompt",
+    "en": "What tells you a hard time might be starting? Thoughts, feelings, situations.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "safetyPlan.distractions",
+    "en": "People and places that take my mind off things",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "safetyPlan.people",
+    "en": "People I can ask for help",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "safetyPlan.professionals",
+    "en": "Professionals and services",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "safetyPlan.professionalsPrompt",
+    "en": "My doctor or therapist",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "safetyPlan.helpline",
+    "en": "Helpline",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "safetyPlan.surroundings",
+    "en": "Making my surroundings safer",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "safetyPlan.surroundingsPrompt",
+    "en": "What could make your surroundings safer when things are hard?",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "safetyPlan.name",
+    "en": "Name",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "safetyPlan.phone",
+    "en": "Phone number (optional)",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "safetyPlan.call",
+    "en": "Call",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "safetyPlan.addPerson",
+    "en": "Add a person",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "safetyPlan.saved",
+    "en": "Saved.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "safetyPlan.leaveTitle",
+    "en": "Leave without saving?",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "safetyPlan.leave",
+    "en": "Leave",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "safetyPlan.keepEditing",
+    "en": "Keep editing",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "safety.safetyPlanButton",
+    "en": "My safety plan",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "safetyPlan.peopleFull",
+    "en": "You can add up to 10 people here.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.breathSafety",
+    "en": "If you feel dizzy, stop and breathe normally.",
+    "reason": "UX draft (native read pending)"
   }
 ]

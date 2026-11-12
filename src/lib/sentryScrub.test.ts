@@ -161,3 +161,25 @@ describe("scrubbing at the edges", () => {
     expect(e.contexts).toEqual({ trace: {} });
   });
 });
+
+// My safety plan (1.2): other people's names and numbers never reach a crash report
+// (the Reviewer's read). A failed save carries them in the action's body and message.
+describe("scrubEvent: a safety plan's names and numbers", () => {
+  it("leave nothing behind, wherever they were", () => {
+    const NAME = "Sam Whittaker";
+    const PHONE = "+64 21 555 0100";
+    const e = scrubEvent({
+      message: `safety_plan_add_person failed for ${NAME}`,
+      request: { url: "https://www.moodbow.com/app/me/safety-plan", method: "POST", data: JSON.stringify([{ p_name: NAME, p_phone: PHONE }]) },
+      extra: { args: [NAME, PHONE] },
+      tags: { name: NAME },
+      exception: { values: [{ type: "Error", value: `invalid_value: ${PHONE}`, stacktrace: { frames: [{ context_line: `addSafetyPlanPerson("people", "${NAME}", "${PHONE}")` }] } }] },
+      breadcrumbs: [{ category: "ui.input", message: NAME }, { category: "fetch", data: { url: `/rest/v1/rpc/safety_plan_add_person?name=${encodeURIComponent(NAME)}`, method: "POST" } }],
+    });
+    const json = JSON.stringify(e);
+    expect(json).not.toContain(NAME);
+    expect(json).not.toContain("Whittaker");
+    expect(json).not.toContain(PHONE);
+    expect(json).not.toContain("555");
+  });
+});
