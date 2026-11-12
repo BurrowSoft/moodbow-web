@@ -22,33 +22,55 @@ const subscribe = (cb: () => void) => {
     listeners.delete(cb);
   };
 };
-const hiddenFor = (key: string) => {
+// The day's hide: "help" when the card was showing the help offer first (a matched letter or a
+// hard week), else "1"; null when not hidden.
+const HIDDEN = "1";
+const HIDDEN_WITH_HELP = "help";
+const hiddenFor = (key: string): string | null => {
   try {
-    return window.localStorage.getItem(key) === "1";
+    const value = window.localStorage.getItem(key);
+    return value === HIDDEN || value === HIDDEN_WITH_HELP ? value : null;
   } catch {
-    return false;
+    return null;
   }
 };
 
-export function LetterCard({ id, uid, today, writtenLabel, helpFirst, country }: { id: string; uid: string; today: string; writtenLabel: string; helpFirst: boolean; country: string | null | undefined }) {
+export type TodayLetter = { id: string; writtenLabel: string; helpFirst: boolean };
+
+// Rendered whenever letters are on, with or without a letter due: after Not now a reload may have
+// no letter left to offer, and a hide that had help first still owes the help line (UX 12 Nov,
+// the Reviewer's finding: Today has no standing Get help now). So Not now on a help-first card
+// leaves the help offer alone on Today for the rest of that day, on this device, reload or not.
+export function LetterCard({ letter, uid, today, country }: { letter: TodayLetter | null; uid: string; today: string; country: string | null | undefined }) {
+  const key = localKey("letter-card-hidden", uid, today);
+  const hidden = useSyncExternalStore(subscribe, () => hiddenFor(key), () => null);
+  // Not now this visit, when storage can't keep it: the same, until the page reloads.
+  const [gone, setGone] = useState<string | null>(null);
+  const [opened, setOpened] = useState(false);
+  const hide = gone ?? hidden;
+  // Hidden for today, unless this letter is open here (it was opened before Not now could hide it).
+  if (hide !== null && !opened) return hide === HIDDEN_WITH_HELP ? <GetHelpNow country={country} testId="letter-help" neutral /> : null;
+  if (!letter) return null;
+  return <DueLetter letter={letter} storageKey={key} country={country} onOpened={() => setOpened(true)} onNotNow={setGone} />;
+}
+
+function DueLetter({ letter, storageKey, country, onOpened, onNotNow }: { letter: TodayLetter; storageKey: string; country: string | null | undefined; onOpened: () => void; onNotNow: (value: string) => void }) {
+  const { id, writtenLabel, helpFirst } = letter;
   const t = useTranslations("letters");
   const tt = useTranslations("today");
-  const key = localKey("letter-card-hidden", uid, today);
-  const hiddenToday = useSyncExternalStore(subscribe, () => hiddenFor(key), () => false);
   const [body, setBody] = useState<string | null>(null);
-  const [gone, setGone] = useState(false);
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
-  // Hidden for today, unless this letter is open here (it was opened before Not now could hide it).
-  if (gone || (hiddenToday && body === null)) return null;
 
   const open = async () => {
     setBusy(true);
     setFailed(false);
     const result = await openLetter(id).catch(() => ({ status: "error" as const }));
     setBusy(false);
-    if (result.status === "ok") setBody(result.body);
-    else setFailed(true);
+    if (result.status === "ok") {
+      setBody(result.body);
+      onOpened();
+    } else setFailed(true);
   };
   const notNow = async () => {
     setBusy(true);
@@ -56,13 +78,14 @@ export function LetterCard({ id, uid, today, writtenLabel, helpFirst, country }:
     const result = await letterNotNow(id).catch(() => ({ status: "error" as const }));
     setBusy(false);
     if (result.status !== "ok") return setFailed(true);
+    const value = helpFirst ? HIDDEN_WITH_HELP : HIDDEN;
     try {
-      window.localStorage.setItem(key, "1");
+      window.localStorage.setItem(storageKey, value);
     } catch {
       // storage unavailable: gone until the page reloads
     }
     listeners.forEach((cb) => cb());
-    setGone(true);
+    onNotNow(value);
     // The card goes with its button: focus to Today's heading, as other cards do.
     document.getElementById("today-title")?.focus();
   };

@@ -24,10 +24,10 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 const TODAY = "2026-11-12";
-const card = (helpFirst = false, today = TODAY) =>
+const card = (helpFirst = false, today = TODAY, due = true) =>
   render(
     <NextIntlClientProvider locale="en" messages={messages}>
-      <LetterCard id="a" uid="u1" today={today} writtenLabel="Friday, 9 October 2026" helpFirst={helpFirst} country="NZ" />
+      <LetterCard letter={due ? { id: "a", writtenLabel: "Friday, 9 October 2026", helpFirst } : null} uid="u1" today={today} country="NZ" />
     </NextIntlClientProvider>,
   );
 
@@ -74,6 +74,40 @@ describe("LetterCard", () => {
     cleanup();
     card(false, "2026-11-13");
     expect(screen.getByTestId("letter-card")).toBeInTheDocument();
+  });
+
+  // UX 12 Nov (the Reviewer's finding: Today has no standing Get help now): a help-first card's
+  // Not now leaves the help offer alone on Today for the rest of the day, reload or not, even
+  // when no letter is left to offer.
+  it("Not now on a help-first card: only the help line stays, reload or not, letter or none", async () => {
+    notNow.mockReturnValueOnce(Promise.resolve({ status: "ok" }));
+    card(true);
+    await act(async () => fireEvent.click(screen.getByTestId("letter-card-not-now")));
+    expect(screen.queryByTestId("letter-card")).toBeNull();
+    expect(screen.getByTestId("letter-help")).toBeInTheDocument();
+    expect(window.localStorage.getItem(localKey("letter-card-hidden", "u1", TODAY))).toBe("help");
+    cleanup();
+    card(false, TODAY, false);
+    expect(screen.getByTestId("letter-help")).toBeInTheDocument();
+    expect(screen.queryByTestId("letter-card")).toBeNull();
+    cleanup();
+    card(false, "2026-11-13", false);
+    expect(screen.queryByTestId("letter-help")).toBeNull();
+  });
+
+  it("hidden without help first: nothing at all, letter or none", () => {
+    window.localStorage.setItem(localKey("letter-card-hidden", "u1", TODAY), "1");
+    card(false);
+    expect(screen.queryByTestId("letter-card")).toBeNull();
+    expect(screen.queryByTestId("letter-help")).toBeNull();
+    cleanup();
+    card(false, TODAY, false);
+    expect(document.body.textContent).toBe("");
+  });
+
+  it("no letter due and nothing hidden: nothing", () => {
+    card(false, TODAY, false);
+    expect(document.body.textContent).toBe("");
   });
 
   it("a failed Not now hides nothing and stores nothing", async () => {
