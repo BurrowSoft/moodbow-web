@@ -6,6 +6,8 @@ import type { Locale } from "@/i18n/routing";
 import { Logo } from "@/components/Logo";
 import { pageGate } from "@/lib/conditions";
 import { pageMetadata } from "@/lib/metadata";
+import { APP_STORE_URL, liveStores } from "@/lib/stores";
+import { PlayStoreLink } from "@/components/PlayStoreLink";
 import { WelcomeSlides } from "./WelcomeSlides";
 
 // The first onboarding screen on the web (no Language step while one locale
@@ -26,6 +28,9 @@ export default async function WelcomePage({ params }: PageProps<"/[locale]/welco
   setRequestLocale(locale as Locale);
   if (pageGate("web-journal-live") === "hidden") notFound();
   const tc = await getTranslations("common");
+  const th = await getTranslations("home");
+  const stores = liveStores();
+  const storeLink = "font-medium text-accent underline underline-offset-4";
 
   return (
     <main id="main" className="flex flex-1 flex-col items-center justify-center px-[24px] py-16 [overflow-wrap:anywhere]">
@@ -37,6 +42,25 @@ export default async function WelcomePage({ params }: PageProps<"/[locale]/welco
         <Suspense>
           <WelcomeSlides />
         </Suspense>
+        {/* The app's stores, once each listing is public (decision 185, play-live / appstore-live):
+            Home's words and links, on every device (the footer's button offers Play on Android
+            phones only). Nothing before then: no "coming soon" on the way into the journal. */}
+        {(stores.play || stores.appStore) && (
+          <p className="mt-10 text-center leading-[1.429] [font-size:min(0.875rem,max(8.75vw,28px))] text-muted" data-testid="welcome-stores">
+            {th("storeGetApp")}{" "}
+            {stores.play && (
+              <PlayStoreLink testId="welcome-store-play" className={storeLink}>
+                {th("storeGooglePlay")}
+              </PlayStoreLink>
+            )}
+            {stores.play && stores.appStore && <span aria-hidden="true"> · </span>}
+            {stores.appStore && (
+              <a href={APP_STORE_URL!} data-testid="welcome-store-appstore" className={storeLink}>
+                {th("storeAppStore")}
+              </a>
+            )}
+          </p>
+        )}
       </div>
     </main>
   );
