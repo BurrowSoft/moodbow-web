@@ -26,6 +26,14 @@ const ROWS: Row[] = [
     shows: "Making my surroundings safer",
     appOnly: ["Show my safety plan without unlocking", "opens without a connection"],
   },
+  // The help line (UX): help when a letter is written and when it's opened.
+  {
+    slug: "letters",
+    app: "app_letters",
+    web: "letters_live",
+    shows: "Moodbow shows help when you write it and when you open it.",
+    appOnly: ["you also get a notification that day"],
+  },
 ];
 
 // Every language with its own Help folder, served or not yet.

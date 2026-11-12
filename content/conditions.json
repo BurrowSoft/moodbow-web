@@ -227,6 +227,10 @@
     "met": false,
     "what": "1.2: Letters to future me (specs/1.2-features.md §3, content/letters.json): Me's letters, Today's card on the day, and the Timeline's locked line. Needs migration 027 on Production (Vitor), the Reviewer's read, the tester rows and Vitor's look."
   },
+  "app-letters": {
+    "met": false,
+    "what": "Help only (decision 212 pattern, UX 2026-11-12): Letters to future me (1.2 §3) are in the app build people have, with the opening-day notification, so its Help article shows. Not letters-live (the web's own switch)."
+  },
   "test-only-unavailable-page": {
     "met": false,
     "what": "TEST ONLY, NEVER MET: /app/test/unavailable, a page that renders nothing but the journal's couldn't-load state (JournalUnavailable) inside the journal layout, so a journey can measure where its help sits at large text (the real pages fail only when Supabase does). No journal data on it. A 404 on Production at the routing level (lib/sitemapPages.ts), before any sign-in; a test and the publish-day checklist check that."
