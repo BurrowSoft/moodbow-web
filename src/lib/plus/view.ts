@@ -1,4 +1,5 @@
 import { conditionMet } from "@/lib/conditions";
+import { parseExtraTimes } from "@/lib/journal/extraReminders";
 import type { createSupabaseServerClient } from "@/lib/supabase/server";
 import { ENTITLEMENT_COLUMNS, hasPlus, parseEntitlement, trialAvailable, trialDaysLeft, type EntitlementRow, type PlusSource } from "./entitlements";
 
@@ -42,6 +43,17 @@ export const plusAiRows = (me: { ai_available?: boolean | null }, met: (id: "ai-
 export function insightsOffer(view: PlusView | null, hardWeek: boolean, price: string): { trial: boolean; price: string } | null {
   if (!view || view.kind === "plus" || hardWeek) return null;
   return { trial: view.kind === "free" && view.trial, price };
+}
+
+// Me → Daily reminder's more reminders (specs/plus-more-reminders.md): editable with Plus;
+// otherwise Add another time is the lock, and times kept from an earlier Plus show locked
+// (the phone doesn't send them; nothing is deleted). null: nothing about Plus (the flag off, or
+// the row unreadable), not even the kept times.
+export function extraReminders(view: PlusView | null, stored: unknown, price: string): { mode: { kind: "plus" } | { kind: "locked"; offer: { trial: boolean; price: string } }; times: string[] } | null {
+  if (!view) return null;
+  const times = parseExtraTimes(stored);
+  if (view.kind === "plus") return { mode: { kind: "plus" }, times };
+  return { mode: { kind: "locked", offer: { trial: view.kind === "free" && view.trial, price } }, times };
 }
 
 // The price as the page shows it. Until the price table and Stripe's

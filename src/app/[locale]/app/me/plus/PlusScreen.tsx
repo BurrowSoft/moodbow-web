@@ -10,7 +10,7 @@ import type { PlusView } from "@/lib/plus/view";
 // Free rows, then what Plus adds (UX, 11 Nov: today's free ranges and
 // patterns stay free). The AI rows only while AI is shown.
 const FREE_ROWS = ["rowJournal", "rowHelp", "rowOwn", "rowRanges", "rowPatterns", "rowData"] as const;
-const PLUS_ROWS = ["rowYear", "rowMorePatterns", "rowReview", "rowThemes", "rowPdf"] as const;
+const PLUS_ROWS = ["rowYear", "rowMorePatterns", "rowReview", "rowThemes", "rowPdf", "rowReminders"] as const;
 
 function Tick({ label, plus }: { label: string; plus?: boolean }) {
   return (
