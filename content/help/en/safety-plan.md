@@ -17,7 +17,7 @@ It has six parts:
 
 Tap **Save** under a part when you've written in it. Each of parts 4 and 5 holds up to 10 people.
 
-Once your plan has something in it, **My safety plan** also appears under the numbers in **Want to talk to someone?**{pending:weekly_report_live}, and beside it on a hard **Your week**{/pending}. An empty plan shows no button.
+Once your plan has something in it, **My safety plan** also appears under the numbers in **Want to talk to someone?**{pending:your_week_live}, and beside it on a hard **Your week**{/pending}. An empty plan shows no button.
 
 **Who can see it:** only you. Moodbow's AI never reads your plan. It's included when you export your data, and deleted with your account.{pending:app_safety_plan}
 

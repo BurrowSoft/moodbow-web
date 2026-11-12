@@ -17,7 +17,7 @@ Ha sei parti:
 
 Tocca **Salva** sotto una parte quando ci hai scritto. Le parti 4 e 5 possono contenere fino a 10 persone ciascuna.
 
-Quando il tuo piano contiene qualcosa, **Il mio piano di sicurezza** compare anche sotto i numeri in **Vuoi parlare con qualcuno?**{pending:weekly_report_live}, e accanto in una **La tua settimana** difficile{/pending}. Un piano vuoto non mostra nessun pulsante.
+Quando il tuo piano contiene qualcosa, **Il mio piano di sicurezza** compare anche sotto i numeri in **Vuoi parlare con qualcuno?**{pending:your_week_live}, e accanto in una **La tua settimana** difficile{/pending}. Un piano vuoto non mostra nessun pulsante.
 
 **Chi può vederlo:** solo tu. L'IA di Moodbow non legge mai il tuo piano. È incluso quando esporti i tuoi dati e viene eliminato con il tuo account.{pending:app_safety_plan}
 

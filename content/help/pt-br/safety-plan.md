@@ -17,7 +17,7 @@ Ele tem seis partes:
 
 Toque em **Salvar** embaixo de uma parte quando tiver escrito nela. As partes 4 e 5 aceitam até 10 pessoas cada.
 
-Assim que o seu plano tiver algo, **Meu plano de segurança** também aparece embaixo dos números em **Quer conversar com alguém?**{pending:weekly_report_live}, e ao lado dele numa **Sua semana** difícil{/pending}. Um plano vazio não mostra nenhum botão.
+Assim que o seu plano tiver algo, **Meu plano de segurança** também aparece embaixo dos números em **Quer conversar com alguém?**{pending:your_week_live}, e ao lado dele numa **Sua semana** difícil{/pending}. Um plano vazio não mostra nenhum botão.
 
 **Quem pode ver:** só você. A IA do Moodbow nunca lê o seu plano. Ele é incluído quando você exporta seus dados e excluído junto com a sua conta.{pending:app_safety_plan}
 
