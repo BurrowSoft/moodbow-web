@@ -9,6 +9,7 @@ import { offeredLocales } from "@/i18n/routing";
 import { savedLanguageRoute } from "@/lib/savedLanguage";
 import { pageGate } from "@/lib/conditions";
 import { getMe, onboardingStep } from "@/lib/journal/me";
+import { authUser } from "@/lib/journal/currentUser";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { JournalUnavailable } from "@/components/JournalUnavailable";
 import { isAuthOutage } from "@/lib/supabase/proxy";
@@ -34,7 +35,8 @@ export default async function AppLayout({ children, params }: LayoutProps<"/[loc
   if (pageGate("web-journal-live") === "hidden") notFound();
 
   const supabase = await createSupabaseServerClient();
-  const { data, error } = supabase ? await supabase.auth.getUser() : { data: { user: null }, error: null };
+  // The same Auth answer the page gets (authUser: once per request render).
+  const { data, error } = supabase ? await authUser(supabase) : { data: { user: null }, error: null };
   // Supabase Auth unreachable: the session may be fine, so no sign-out look.
   if (!data.user && isAuthOutage(error)) return <NextIntlClientProvider messages={await getMessages()}><JournalUnavailable standalone /></NextIntlClientProvider>;
   const user = data.user;

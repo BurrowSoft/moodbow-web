@@ -60,75 +60,79 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
   const withYourWeek = pageGate("your-week-live") !== "hidden";
   const chartsStart = previousRangeStart(me.today, range);
   const patternsStart = patternsWindowStart(me.today);
-  const freeStart = [chartsStart, ...(withPatterns ? [patternsStart] : []), ...(withYourWeek ? [lastWeekStart(me.today)] : [])].sort()[0];
-  // Moodbow Plus (decision 246), read once: null when the row can't be read
-  // (then nothing about Plus at all). With Plus: Year and All time, and More
-  // patterns over the last 12 months (or all time on All time).
-  const plus = pageGate("plus") !== "hidden" ? await readPlusView(supabase, user.id) : null;
+  const more = pageGate("share-cards-more") !== "hidden";
+  const shareOn = pageGate("share-cards") !== "hidden";
+  const weekly = pageGate("weekly-report-live") !== "hidden";
+  const weekStart = lastWeekStart(me.today);
+  const freeStart = [chartsStart, ...(withPatterns ? [patternsStart] : []), ...(withYourWeek ? [weekStart] : [])].sort()[0];
+  // The page's reads all need only `me`, so they start together (the Web Dev's LCP read, 12 Nov:
+  // each one in turn cost a round trip to the database). Same reads, same results. Moodbow Plus's
+  // view is one of them (decision 246): null when its row can't be read (then nothing about Plus).
+  const [checkIns, plus, milestone, stored, moments, requestHeaders] = await Promise.all([
+    supabase
+      .from("check_ins")
+      .select("local_date, mood, sleep_hours, stress, exercise_minutes")
+      .gte("local_date", freeStart)
+      .lte("local_date", me.today),
+    pageGate("plus") !== "hidden" ? readPlusView(supabase, user.id) : null,
+    shareOn && more ? loadMilestone(supabase) : undefined,
+    weekly && canReflect(me)
+      ? supabase.from("ai_reports").select("id, period_start, body, tier, created_at").eq("kind", "weekly").eq("period_start", weekStart).maybeSingle()
+      : null,
+    // Your week: id and date only, never the body. A failed read: no moment.
+    withYourWeek ? supabase.from("entries").select("id, entry_date").eq("is_moment", true).gte("entry_date", weekStart).lte("entry_date", sixDaysAfter(weekStart)) : null,
+    headers(),
+  ]);
+  // With Plus: Year and All time, and More patterns over the last 12 months (or all time on All time).
   const hasPlus = plus?.kind === "plus";
   const longRange = hasPlus && isLongRange(asked) ? asked : null;
   const moreWindow = longRange === "all" ? "all" : "year";
   let rows: InsightRow[];
   if (hasPlus) {
-    // Year needs 24 months (its 12 and the 12 before); More patterns 12; All time everything.
+    // Only with Plus, one read more, further back (it needs the view first): Year needs 24 months
+    // (its 12 and the 12 before), More patterns 12, All time everything. Without Plus, the page
+    // keeps the single parallel read above.
     const plusStart = longRange === "all" ? null : [freeStart, longRange ? longRangeStart(longRange, me.today)! : freeStart, moreWindowStart("year", me.today)!].sort()[0];
     const read = await readCheckInsSince(supabase, plusStart, me.today);
     if (!read) return <JournalUnavailable />;
     rows = read;
   } else {
-    const { data, error } = await supabase
-      .from("check_ins")
-      .select("local_date, mood, sleep_hours, stress, exercise_minutes")
-      .gte("local_date", freeStart)
-      .lte("local_date", me.today);
+    const { data, error } = checkIns;
     if (error) return <JournalUnavailable />;
     rows = (data ?? []) as InsightRow[];
   }
   // Share: the current month's moodbow (M10), where share cards are on; and,
   // where the 1.1 cards are on too (decision 169), this range's mood line
   // (the chart card) and the milestone reached, if any.
-  const more = pageGate("share-cards-more") !== "hidden";
-  const dateLocaleTag = dateLocale(locale, (await headers()).get("accept-language"), me.profile?.country ?? null);
-  const share =
-    pageGate("share-cards") !== "hidden" ? (
-      <ShareMonth
-        month={me.today.slice(0, 7)}
-        dateLocaleTag={dateLocaleTag}
-        chart={more ? { range, moods: series(rows, rangeDays(me.today, range), "mood") } : undefined}
-        milestone={more ? await loadMilestone(supabase) : undefined}
-        year={pageGate("year-card") !== "hidden" ? yearOnOffer(me.today) : null}
-      />
-    ) : null;
+  const dateLocaleTag = dateLocale(locale, requestHeaders.get("accept-language"), me.profile?.country ?? null);
+  const share = shareOn ? (
+    <ShareMonth
+      month={me.today.slice(0, 7)}
+      dateLocaleTag={dateLocaleTag}
+      chart={more ? { range, moods: series(rows, rangeDays(me.today, range), "mood") } : undefined}
+      milestone={more ? milestone : undefined}
+      year={pageGate("year-card") !== "hidden" ? yearOnOffer(me.today) : null}
+    />
+  ) : null;
   // Your week (1.1 D): the last complete week's report, where AI is on for
   // this user and the weekly report is (weekly-report-live). A stored one
   // shows as is; a failed read just means the button. AI available but not
   // turned on by this person: the card explains, with no button (UX); AI
   // off for everyone: no card at all (text = enforcement).
   let week: React.ReactNode = null;
-  const weekly = pageGate("weekly-report-live") !== "hidden";
   if (weekly && aiShown(me) && !canReflect(me)) {
-    week = <WeeklyReport initial={null} weekStart={lastWeekStart(me.today)} dateLocaleTag={dateLocaleTag} balance={0} aiOff />;
+    week = <WeeklyReport initial={null} weekStart={weekStart} dateLocaleTag={dateLocaleTag} balance={0} aiOff />;
   } else if (weekly && canReflect(me)) {
-    const weekStart = lastWeekStart(me.today);
-    const { data: stored } = await supabase
-      .from("ai_reports")
-      .select("id, period_start, body, tier, created_at")
-      .eq("kind", "weekly")
-      .eq("period_start", weekStart)
-      .maybeSingle();
-    const row = stored as { id: string; period_start: string; body: unknown; tier: string; created_at: string } | null;
+    const row = (stored?.data ?? null) as { id: string; period_start: string; body: unknown; tier: string; created_at: string } | null;
     const body = row ? parseReportBody(row.body) : null;
     const initial: Report | null = row && body ? { id: row.id, week_start: row.period_start, body, tier: row.tier === "lite" ? "lite" : "full", created_at: row.created_at } : null;
     week = <WeeklyReport initial={initial} weekStart={weekStart} dateLocaleTag={dateLocaleTag} balance={me.credits?.balance ?? 0} country={me.profile?.country ?? null} />;
   }
-  // Your week (specs/your-week.md), no AI: today is the saved time zone's, from
-  // get_me. Moments: id and date only, never the body. A failed read: no moment.
+  // Your week (specs/your-week.md), no AI: today is the saved time zone's, from get_me.
   let summary: React.ReactNode = null;
   let hardWeek = false;
   if (withYourWeek) {
-    const start = lastWeekStart(me.today);
-    const { data: moments } = await supabase.from("entries").select("id, entry_date").eq("is_moment", true).gte("entry_date", start).lte("entry_date", sixDaysAfter(start));
-    const result = yourWeek(rows, me.today, (moments ?? []) as YourWeekMoment[]);
+    const result = yourWeek(rows, me.today, (moments?.data ?? []) as YourWeekMoment[]);
     if (result) summary = <YourWeekCard week={result} country={me.profile?.country} dateLocaleTag={dateLocaleTag} />;
     // Plus's quiet line goes under Your week, never under a hard week's help offer.
     hardWeek = result?.kind === "hard";
