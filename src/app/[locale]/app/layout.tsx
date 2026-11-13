@@ -76,7 +76,7 @@ export default async function AppLayout({ children, params }: LayoutProps<"/[loc
           <noscript>
             <div className="mx-auto mb-6 max-w-3xl space-y-3 max-sm:[font-size:min(1rem,max(10vw,32px))]">
               <p>
-                <Link href="/help/get-help-now" prefetch={false} data-testid="app-noscript-help" className="font-medium text-accent underline underline-offset-4">
+                <Link href={me.profile?.country ? `/help/get-help-now?country=${encodeURIComponent(me.profile.country)}` : "/help/get-help-now"} prefetch={false} data-testid="app-noscript-help" className="font-medium text-accent underline underline-offset-4">
                   {t("meGetHelpNow")}
                 </Link>
               </p>

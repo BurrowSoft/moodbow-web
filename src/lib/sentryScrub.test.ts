@@ -5,6 +5,10 @@ import { REDACTED, scrubBreadcrumb, scrubEvent, scrubUrl } from "./sentryScrub";
 const DIARY = "felt anxious after the call with Mom";
 
 describe("scrubUrl", () => {
+  it("the help page's country never reaches Sentry (#248)", () => {
+    expect(scrubUrl("https://www.moodbow.com/help/get-help-now?country=TH")).toBe("https://www.moodbow.com/help/get-help-now");
+  });
+
   it("keeps origin + path, drops query and fragment", () => {
     expect(scrubUrl("https://www.moodbow.com/email-confirmed?code=abc#access_token=secret")).toBe(
       "https://www.moodbow.com/email-confirmed",
