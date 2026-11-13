@@ -1872,6 +1872,8 @@ test("grounding: the three at large text on a 320 px phone, help on every screen
   const inView = async (testId: string, where: string) => {
     const box = (await page.getByTestId(testId).boundingBox())!;
     console.log(`grounding ${where}: ${testId} ${Math.round(box.x)},${Math.round(box.y)} ${Math.round(box.width)}×${Math.round(box.height)} px`);
+    // The top edge too: the close once scrolled the help above the window (y −134) unnoticed.
+    expect(box.y, `${where}: ${testId}'s top in the window`).toBeGreaterThanOrEqual(0);
     expect(box.y + box.height, `${where}: ${testId} in the first view`).toBeLessThanOrEqual(640);
     expect(box.x + box.width, `${where}: ${testId} inside the width`).toBeLessThanOrEqual(320.5);
   };

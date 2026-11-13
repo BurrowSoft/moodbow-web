@@ -16,18 +16,21 @@ import { useUntilLoaded } from "@/lib/ui/untilLoaded";
 const TOOLBOX = "/app/me/toolbox";
 // The words in focus stop growing at about 200 % on a narrow screen, as breathing's do.
 const BIG = "font-medium text-text leading-tight [font-size:min(1.125rem,max(10vw,32px))]";
+// Their buttons stop growing there too, at 48 px high in px: at 300 % Pause wrapped under Stop and
+// fell below the first view on a 320 px phone (#299's journey). The same 7:8 at the normal size.
+const button = (primary = false) => `${dialogButton(primary).replace("min-h-11", "min-h-[48px]")} [font-size:min(1rem,max(10vw,32px))]`;
 
 // The close, after any of them: the same line, and Done back to the list.
 function Close({ testId }: { testId: string }) {
   const t = useTranslations("toolbox");
   const line = useRef<HTMLParagraphElement>(null);
-  useEffect(() => line.current?.focus(), []);
+  useEffect(() => line.current?.focus({ preventScroll: true }), []);
   return (
     <div className="space-y-[16px]">
       <p ref={line} tabIndex={-1} role="status" data-testid={testId} className={`${BIG} outline-none`}>
         {t("groundingEnd")}
       </p>
-      <Link href={TOOLBOX} data-testid="grounding-done" className={dialogButton(true)}>
+      <Link href={TOOLBOX} data-testid="grounding-done" className={button(true)}>
         {t("done")}
       </Link>
     </div>
@@ -60,11 +63,11 @@ export function FiveSenses() {
         {t(SENSE_KEYS[n])}
       </p>
       <div className="flex flex-wrap gap-[12px]">
-        <button type="button" data-testid="senses-next" onClick={() => go(step + 1)} className={dialogButton(true)}>
+        <button type="button" data-testid="senses-next" onClick={() => go(step + 1)} className={button(true)}>
           {t("groundingNext")}
         </button>
         {step > 0 && (
-          <button type="button" data-testid="senses-back" onClick={() => go(step - 1)} className={dialogButton()}>
+          <button type="button" data-testid="senses-back" onClick={() => go(step - 1)} className={button()}>
             {t("groundingBack")}
           </button>
         )}
@@ -98,10 +101,10 @@ export function BodyScan() {
   return (
     <div {...untilLoaded} className="space-y-[16px]">
       <div className="flex flex-wrap gap-[12px]">
-        <Link href={TOOLBOX} data-testid="body-scan-stop" className={dialogButton()}>
+        <Link href={TOOLBOX} data-testid="body-scan-stop" className={button()}>
           {t("stop")}
         </Link>
-        <button type="button" data-testid="body-scan-pause" aria-pressed={paused} onClick={() => setPaused((p) => !p)} className={dialogButton()}>
+        <button type="button" data-testid="body-scan-pause" aria-pressed={paused} onClick={() => setPaused((p) => !p)} className={button()}>
           {paused ? t("resume") : t("pause")}
         </button>
       </div>
@@ -130,7 +133,7 @@ export function NameIt({ moods }: { moods: number[] }) {
       </p>
       <div role="group" aria-label={t("groundingNameIt")} className="flex flex-wrap gap-[12px]">
         {moods.map((m) => (
-          <button key={m} type="button" data-testid={`name-it-${m}`} aria-pressed={named === m} onClick={() => setNamed(m)} className={dialogButton(named === m)}>
+          <button key={m} type="button" data-testid={`name-it-${m}`} aria-pressed={named === m} onClick={() => setNamed(m)} className={button(named === m)}>
             {tt(`mood${m}` as "mood1")}
           </button>
         ))}
@@ -139,7 +142,7 @@ export function NameIt({ moods }: { moods: number[] }) {
         {named !== null ? t("nameItThanks") : ""}
       </p>
       {named !== null && (
-        <Link href={TOOLBOX} data-testid="grounding-done" className={dialogButton()}>
+        <Link href={TOOLBOX} data-testid="grounding-done" className={button()}>
           {t("done")}
         </Link>
       )}
@@ -153,13 +156,13 @@ export function GroundingLinks() {
   const t = useTranslations("toolbox");
   return (
     <div className="flex flex-wrap gap-[12px]" data-testid="grounding-links">
-      <Link href={`${TOOLBOX}/5-4-3-2-1`} data-testid="toolbox-senses" className={dialogButton()}>
+      <Link href={`${TOOLBOX}/5-4-3-2-1`} data-testid="toolbox-senses" className={button()}>
         {t("groundingSenses")}
       </Link>
-      <Link href={`${TOOLBOX}/body-scan`} data-testid="toolbox-body-scan" className={dialogButton()}>
+      <Link href={`${TOOLBOX}/body-scan`} data-testid="toolbox-body-scan" className={button()}>
         {t("groundingBodyScan")}
       </Link>
-      <Link href={`${TOOLBOX}/name-it`} data-testid="toolbox-name-it" className={dialogButton()}>
+      <Link href={`${TOOLBOX}/name-it`} data-testid="toolbox-name-it" className={button()}>
         {t("groundingNameIt")}
       </Link>
     </div>
