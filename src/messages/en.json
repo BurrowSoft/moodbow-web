@@ -627,5 +627,30 @@
     "leaveTitle": "Leave without saving?",
     "leave": "Leave",
     "keepEditing": "Keep editing"
+  },
+  "letters": {
+    "meRow": "Letters to future me",
+    "empty": "Write to yourself and choose when to read it.",
+    "editorTitle": "A letter to future me",
+    "placeholder": "Dear me,",
+    "openLabel": "Open it",
+    "in1": "In 1 month",
+    "in3": "In 3 months",
+    "in6": "In 6 months",
+    "in12": "In a year",
+    "save": "Save letter",
+    "savedLine": "Saved. It opens on {date}.",
+    "timelineLine": "A letter from you · opens on {date}",
+    "cardLine": "A letter from you, written on {date}",
+    "open": "Open",
+    "notNow": "Not now",
+    "earlyTitle": "Open this letter now?",
+    "earlyBody": "It was meant for {date}. It's yours to open whenever you like.",
+    "openNow": "Open now",
+    "keepForLater": "Keep it for later",
+    "deleteTitle": "Delete this letter?",
+    "deleteBody": "It will be gone for good.",
+    "delete": "Delete",
+    "keep": "Keep"
   }
 }

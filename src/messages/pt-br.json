@@ -627,5 +627,30 @@
     "leaveTitle": "Sair sem salvar?",
     "leave": "Sair",
     "keepEditing": "Continuar editando"
+  },
+  "letters": {
+    "meRow": "Cartas para o meu eu do futuro",
+    "empty": "Escreva para você e escolha quando ler.",
+    "editorTitle": "Uma carta para o meu eu do futuro",
+    "placeholder": "Querido eu,",
+    "openLabel": "Abrir",
+    "in1": "Em 1 mês",
+    "in3": "Em 3 meses",
+    "in6": "Em 6 meses",
+    "in12": "Em um ano",
+    "save": "Salvar carta",
+    "savedLine": "Salva. Ela abre em {date}.",
+    "timelineLine": "Uma carta sua · abre em {date}",
+    "cardLine": "Uma carta sua, escrita em {date}",
+    "open": "Abrir",
+    "notNow": "Agora não",
+    "earlyTitle": "Abrir esta carta agora?",
+    "earlyBody": "Ela era para {date}. É sua: abra quando quiser.",
+    "openNow": "Abrir agora",
+    "keepForLater": "Guardar para depois",
+    "deleteTitle": "Excluir esta carta?",
+    "deleteBody": "Ela será apagada para sempre.",
+    "delete": "Excluir",
+    "keep": "Manter"
   }
 }

@@ -86,8 +86,11 @@ describe("hasLocalKinds / wipeLocalKinds (sign-out, UX & PM 2026-11-03)", () => 
     window.localStorage.setItem(localKey("milestone-seen", GONE, "30"), "1");
     window.localStorage.setItem(localKey("on-this-day-hidden", GONE, "2026-10-02"), "1");
     window.localStorage.setItem(localKey("on-this-day-hidden", OTHER, "2026-10-02"), "1");
+    // Letters' Not now for today (1.2, UX 12 Nov): a trace like the others, gone on sign-out.
+    window.localStorage.setItem(localKey("letter-card-hidden", GONE, "2026-10-02"), "1");
     expect(hasLocalKinds(window.localStorage, GONE, UNSYNCED_KINDS)).toBe(true);
     wipeLocalKinds(window.localStorage, GONE, SIGN_OUT_TRACE_KINDS);
+    expect(window.localStorage.getItem(localKey("letter-card-hidden", GONE, "2026-10-02"))).toBeNull();
     expect(window.localStorage.getItem(localKey("on-this-day-hidden", GONE, "2026-10-02"))).toBeNull();
     expect(window.localStorage.getItem(localKey("on-this-day-hidden", OTHER, "2026-10-02"))).toBe("1");
     expect(window.localStorage.getItem(localKey("milestone-seen", GONE, "30"))).toBe("1");

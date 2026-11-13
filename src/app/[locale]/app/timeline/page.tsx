@@ -7,6 +7,7 @@ import { JournalUnavailable } from "@/components/JournalUnavailable";
 import { SessionEnded } from "@/components/SessionEnded";
 import { currentUser } from "@/lib/journal/currentUser";
 import { pageGate } from "@/lib/conditions";
+import { LockedLetters } from "./LockedLetters";
 import { yearOnOffer } from "@/lib/share/year";
 import { getMe } from "@/lib/journal/me";
 import { dateLocale } from "@/lib/journal/today";
@@ -83,6 +84,13 @@ export default async function TimelinePage({ params, searchParams }: PageProps<"
   const shareable = pageGate("share-cards") !== "hidden";
   const printable = pageGate("print-live") !== "hidden";
 
+  // Letters to future me (1.2): the locked ones' line, read as id and dates only, never the text.
+  let locked: { id: string; opensLabel: string }[] = [];
+  if (pageGate("letters-live") !== "hidden") {
+    const { data: rows } = await supabase.from("letters").select("id, written_on, opens_on").is("opened_at", null).order("opens_on");
+    locked = ((rows ?? []) as { id: string; opens_on: string }[]).map((r) => ({ id: r.id, opensLabel: dateLine(r.opens_on, dateLocaleTag) }));
+  }
+  const lettersLine = <LockedLetters letters={locked} />;
   const onThisDayCard = onThisDay && (
     <OnThisDay
       kind={onThisDay.kind}
@@ -112,6 +120,7 @@ export default async function TimelinePage({ params, searchParams }: PageProps<"
         </nav>
       )}
       {!calendarLive && onThisDayCard}
+      {!calendarLive && lettersLine}
       {/* Keyed by the view, so switching filters starts a fresh list. */}
       <TimelineList
         key={momentsOnly ? "moments" : "all"}
@@ -129,6 +138,7 @@ export default async function TimelinePage({ params, searchParams }: PageProps<"
   const content = calendarLive ? (
     <>
       {onThisDayCard}
+      {lettersLine}
       <TimelineViews
         initialView={view}
         list={list}
