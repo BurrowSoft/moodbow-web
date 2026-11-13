@@ -660,7 +660,7 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
         />
       </div>
       {!initial && !goodThings && goodThingsHref && (
-        <Link href={goodThingsHref} data-testid="write-good-things" className={`w-fit min-h-11 inline-flex items-center font-medium text-accent underline underline-offset-4 ${CAPPED}`}>
+        <Link href={goodThingsHref} data-testid="write-good-things" className={`w-fit min-h-[44px] inline-flex items-center font-medium text-accent underline underline-offset-4 ${CAPPED}`}>
           {goodHeading}
         </Link>
       )}
@@ -679,7 +679,7 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
         <div {...untilLoaded} className="flex flex-col gap-4" data-testid="good-things-fields">
           {([1, 2, 3] as const).map((n) => (
             <div key={n} className="flex flex-col gap-1">
-              <label htmlFor={`good-things-${n}`} className="font-medium text-text">
+              <label htmlFor={`good-things-${n}`} className={`font-medium text-text ${CAPPED}`}>
                 {t(`goodThings${n}`)}
               </label>
               <input
@@ -691,7 +691,9 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
                 onChange={(e) => setGoodLine(n - 1, e.target.value)}
                 aria-invalid={tooLong || undefined}
                 aria-describedby={tooLong ? "entry-error" : undefined}
-                className="min-h-11 w-full min-w-0 rounded-2xl border border-border bg-surface px-[12px] text-text"
+                // 48 px in px and the text capped as the editor's other controls: at 300 % on a 320 px
+                // phone the first field ended at 671 px, below the first view (#300's journey).
+                className={`min-h-[48px] w-full min-w-0 rounded-2xl border border-border bg-surface px-[12px] text-text ${CAPPED}`}
               />
             </div>
           ))}
