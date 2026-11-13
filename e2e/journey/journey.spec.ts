@@ -1317,6 +1317,46 @@ test("large text, set in the browser: breathing's Stop stays in view on a 320 px
   }
 });
 
+// The safety plan's help was below the first view at 320 px and 300 % (Web Tester, #266): it's
+// beside Back now, above the title, in every language; checked in en and pt-BR, the longest.
+test("large text, set in the browser: the safety plan's help is in the first view on a 320 px phone", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
+  test.setTimeout(120_000);
+  const email = newEmail();
+  const password = newPassword();
+  const cdp = await page.context().newCDPSession(page);
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    await page.setViewportSize({ width: 320, height: 640 });
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+      await setProfileLocale(email, password, saved);
+      for (const percent of [100, 300]) {
+        await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
+        await page.goto(`${route}/app/me/safety-plan`);
+        const help = page.getByTestId("plan-get-help");
+        await expect(help, `${saved} at ${percent} %`).toBeVisible();
+        const box = (await help.boundingBox())!;
+        expect(box.y, `${saved} at ${percent} %: help's top in the first view`).toBeGreaterThanOrEqual(0);
+        expect(box.y + box.height, `${saved} at ${percent} %: help's bottom in the first view`).toBeLessThanOrEqual(640);
+        expect(box.x + box.width, `${saved} at ${percent} %: help inside the width`).toBeLessThanOrEqual(320.5);
+        // Back keeps its name, as an icon alone, and a full target.
+        const back = (await page.getByTestId("nav-back").boundingBox())!;
+        expect(Math.min(back.width, back.height), `${saved} at ${percent} %: Back's target`).toBeGreaterThanOrEqual(44);
+      }
+    }
+  } finally {
+    await cleanup(email);
+  }
+});
+
 // The journal's couldn't-load state had its help below the first screen at 320 px and 300 %
 // (Web Tester, #267): it's right under the heading now. Measured on the test-only page, the
 // component alone inside the journal layout, as every journal page shows it.
@@ -1764,6 +1804,34 @@ test("axe: the toolbox and breathing, at 320 and 1280 px", async ({ page }) => {
         await expect(page.getByTestId("toolbox-get-help")).toBeVisible();
           await page.getByTestId("toolbox-breathe").click();
           await expect(page.getByTestId("breathing-stop")).toBeVisible();
+      });
+    }
+  } finally {
+    await cleanup(email);
+  }
+});
+
+// Automated accessibility (UX, 2026-11-12): no serious or critical axe violation on the safety plan, at
+// 320 and 1280 px, in en and pt-BR (the longest). axe can't hear a screen reader: the rows stand.
+test("axe: the safety plan, at 320 and 1280 px", async ({ page }) => {
+  test.setTimeout(240_000);
+  const email = newEmail();
+  const password = newPassword();
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+      await setProfileLocale(email, password, saved);
+      await axeAtWidths(page, `safety plan (${saved})`, async () => {
+        await page.goto(`${route}/app/me/safety-plan`);
+        await expect(page.getByTestId("plan-get-help")).toBeVisible();
       });
     }
   } finally {

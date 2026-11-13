@@ -574,6 +574,7 @@
     "safetyDialKeypad": "Wähle {number} auf der Tastatur deines Telefons",
     "safetyCallEmergency": "Notruf {number} anrufen",
     "safetyClose": "Schließen",
+    "safetyPlanButton": "Mein Sicherheitsplan",
     "safetyNotTherapy": "Moodbow ersetzt keine professionelle Hilfe."
   },
   "toolbox": {
@@ -604,5 +605,27 @@
     "breathEnd": "Das war eine Minute. Lass dir Zeit.",
     "done": "Fertig",
     "breathSafety": "Wenn dir schwindlig wird, hör auf und atme normal weiter."
+  },
+  "safetyPlan": {
+    "title": "Mein Sicherheitsplan",
+    "intro": "Füll ihn an einem ruhigeren Tag aus, damit er da ist, wenn du ihn brauchst. Jeder Teil ist freiwillig. Nur du kannst ihn sehen.",
+    "warningSigns": "Warnzeichen",
+    "warningSignsPrompt": "Woran merkst du, dass eine schwere Zeit beginnen könnte? Gedanken, Gefühle, Situationen.",
+    "distractions": "Menschen und Orte, die mich ablenken",
+    "people": "Menschen, die ich um Hilfe bitten kann",
+    "professionals": "Fachleute und Hilfsangebote",
+    "professionalsPrompt": "Mein Arzt oder meine Therapeutin",
+    "helpline": "Hilfetelefon",
+    "surroundings": "Meine Umgebung sicherer machen",
+    "surroundingsPrompt": "Was könnte deine Umgebung sicherer machen, wenn es schwer ist?",
+    "name": "Name",
+    "phone": "Telefonnummer (optional)",
+    "call": "Anrufen",
+    "addPerson": "Person hinzufügen",
+    "peopleFull": "Du kannst hier bis zu 10 Personen hinzufügen.",
+    "saved": "Gespeichert.",
+    "leaveTitle": "Ohne Speichern verlassen?",
+    "leave": "Verlassen",
+    "keepEditing": "Weiter bearbeiten"
   }
 }

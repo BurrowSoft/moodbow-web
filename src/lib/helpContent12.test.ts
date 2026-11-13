@@ -19,6 +19,14 @@ type Row = {
 const ROWS: Row[] = [
   // The app keeps Edit, Delete and the moves in a menu per row (UX 12 Nov).
   { slug: "things-that-help", app: "app_toolbox", web: "toolbox_live", shows: "If you feel dizzy, stop and breathe normally.", appOnly: ["the menu beside each item"] },
+  // The emergency line is inside the block too, so the article is never live on its own.
+  {
+    slug: "safety-plan",
+    app: "app_safety_plan",
+    web: "safety_plan_live",
+    shows: "Making my surroundings safer",
+    appOnly: ["Show my safety plan without unlocking", "opens without a connection"],
+  },
 ];
 
 // Every language with its own Help folder, served or not yet.
@@ -55,5 +63,19 @@ describe.each(ROWS)("Help: $slug (1.2)", (row) => {
   it("as published now: a 404 exactly while both are off", () => {
     const on = isPendingMet(row.app) || (row.web !== null && isPendingMet(row.web));
     for (const locale of LOCALES) expect(renderArticle(findArticle(locale, row.slug)!) === "", locale).toBe(!on);
+  });
+});
+
+// The plan link on a hard week sits on the rule-based Your week card (your-week-live), not
+// the AI weekly report (Reviewer, #266).
+describe("Help: safety-plan's Your week line", () => {
+  it("shows only with your-week-live, in every language", () => {
+    for (const locale of LOCALES) {
+      const article = findArticle(locale, "safety-plan")!;
+      const render = (yourWeek: boolean) => renderArticle(article, (id) => id === "safety_plan_live" || (id === "your_week_live" ? yourWeek : id === "weekly_report_live" ? true : isPendingMet(id)));
+      expect(render(true), locale).not.toBe(render(false));
+    }
+    expect(renderArticle(findArticle("en", "safety-plan")!, (id) => id === "safety_plan_live" || id === "your_week_live")).toContain("beside it on a hard");
+    expect(renderArticle(findArticle("en", "safety-plan")!, (id) => id === "safety_plan_live" || id === "weekly_report_live")).not.toContain("beside it on a hard");
   });
 });
