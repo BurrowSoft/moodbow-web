@@ -628,7 +628,8 @@
     "bodyScan6": "Your face and jaw.",
     "pause": "Pause",
     "resume": "Resume",
-    "nameItPrompt": "What are you feeling right now? Naming it can make it a little smaller.",
+    "nameItQuestion": "What are you feeling right now?",
+    "nameItSmaller": "Naming it can make it a little smaller.",
     "nameItThanks": "Thanks for naming it."
   }
 }

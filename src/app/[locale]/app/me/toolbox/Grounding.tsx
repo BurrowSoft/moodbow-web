@@ -133,18 +133,21 @@ export function NameIt({ moods }: { moods: number[] }) {
   const [named, setNamed] = useState<number | null>(null);
   return (
     <div {...untilLoaded} className="space-y-[16px]">
-      {/* The chips first, the question under them (UX 14 Nov, as the body scan): at 300 % on a
-          320 px phone the question pushed the first chip to 920 px. The group is described by it,
-          so a screen reader hears the question with the words; its text stops growing at ~200 %. */}
-      <div role="group" aria-label={t("groundingNameIt")} aria-describedby="name-it-prompt" className="flex flex-wrap gap-[12px]">
+      {/* The short question above the chips, the second sentence under them (UX 14 Nov): the
+          whole prompt above pushed the first chip to 920 px at 300 % on a 320 px phone. Both stop
+          growing at about 200 %; the group is described by both, so a screen reader hears them. */}
+      <p id="name-it-question" data-testid="name-it-question" className="font-medium text-text [font-size:min(1rem,max(10vw,32px))]">
+        {t("nameItQuestion")}
+      </p>
+      <div role="group" aria-label={t("groundingNameIt")} aria-describedby="name-it-question name-it-smaller" className="flex flex-wrap gap-[12px]">
         {moods.map((m) => (
           <button key={m} type="button" data-testid={`name-it-${m}`} aria-pressed={named === m} onClick={() => setNamed(m)} className={button(named === m)}>
             {tt(`mood${m}` as "mood1")}
           </button>
         ))}
       </div>
-      <p id="name-it-prompt" data-testid="name-it-prompt" className="text-text [font-size:min(1rem,max(10vw,32px))]">
-        {t("nameItPrompt")}
+      <p id="name-it-smaller" data-testid="name-it-smaller" className="text-text [font-size:min(1rem,max(10vw,32px))]">
+        {t("nameItSmaller")}
       </p>
       <p role="status" data-testid="name-it-thanks" className="min-h-[1.5em] text-text">
         {named !== null ? t("nameItThanks") : ""}

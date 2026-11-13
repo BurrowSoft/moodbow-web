@@ -628,7 +628,8 @@
     "bodyScan6": "Seu rosto e sua mandíbula.",
     "pause": "Pausar",
     "resume": "Continuar",
-    "nameItPrompt": "O que você está sentindo agora? Dar um nome pode deixar isso um pouco menor.",
+    "nameItQuestion": "O que você está sentindo agora?",
+    "nameItSmaller": "Dar um nome pode deixar isso um pouco menor.",
     "nameItThanks": "Que bom que você deu um nome."
   }
 }

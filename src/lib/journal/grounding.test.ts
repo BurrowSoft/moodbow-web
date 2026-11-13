@@ -10,7 +10,7 @@ import { BODY_SCAN_SECONDS, bodyScanAt, GROUNDING, GROUNDING_EXERCISES, isGround
 const LANGUAGES = ["en", "fr", "es", "pt-br", "de", "it", "th"] as const;
 type Messages = { app: { tabMe: string }; me: { meGetHelpNow: string }; today: Record<string, string>; toolbox: Record<string, string> };
 const messages = (l: string) => JSON.parse(readFileSync(`src/messages/${l}.json`, "utf8")) as Messages;
-const KEYS = ["groundingSenses", "groundingBodyScan", "groundingNameIt", "senses5", "senses4", "senses3", "senses2", "senses1", "groundingNext", "groundingBack", "groundingEnd", "bodyScanIntro", "bodyScan1", "bodyScan2", "bodyScan3", "bodyScan4", "bodyScan5", "bodyScan6", "pause", "resume", "nameItPrompt", "nameItThanks"];
+const KEYS = ["groundingSenses", "groundingBodyScan", "groundingNameIt", "senses5", "senses4", "senses3", "senses2", "senses1", "groundingNext", "groundingBack", "groundingEnd", "bodyScanIntro", "bodyScan1", "bodyScan2", "bodyScan3", "bodyScan4", "bodyScan5", "bodyScan6", "pause", "resume", "nameItQuestion", "nameItSmaller", "nameItThanks"];
 
 describe("grounding rules (content/toolbox.json)", () => {
   it("are the spec's: senses 5 to 1, a body scan of six 20 s steps (2 min)", () => {
@@ -57,7 +57,9 @@ describe("grounding strings", () => {
     expect(t.groundingEnd).toBe("Well done. Take a moment before you go on.");
     expect(t.bodyScanIntro).toBe("Stop any time, or try 5-4-3-2-1 instead.");
     expect([1, 2, 3, 4, 5, 6].map((n) => t[`bodyScan${n}`])).toEqual(["Notice your feet.", "Your legs.", "Your belly and back.", "Your shoulders.", "Your hands and arms.", "Your face and jaw."]);
-    expect(t.nameItPrompt).toBe("What are you feeling right now? Naming it can make it a little smaller.");
+    // The spec's one line, split around the chips (UX 14 Nov).
+    expect(t.nameItQuestion).toBe("What are you feeling right now?");
+    expect(t.nameItSmaller).toBe("Naming it can make it a little smaller.");
     expect(t.nameItThanks).toBe("Thanks for naming it.");
     expect(t.groundingBodyScan).toBe("Body scan (2 min)");
   });
