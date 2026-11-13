@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState, useSyncExternalStore } from "react";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { primaryButtonClass, textLinkClass } from "@/components/AuthField";
 import { BackLink } from "@/components/BackLink";
@@ -32,12 +32,11 @@ function Checkbox({ name, label, checked, onChange, testId }: { name: string; la
 // check, then the server's. askAi: the optional AI box (r1 §M3), never
 // required and never pre-ticked; hidden while this build doesn't show AI.
 // showBack: new accounts only (Back → Welcome slide 3, the privacy promise).
-export function ConsentForm({ askAge, askAi = false, showBack }: { askAge: boolean; askAi?: boolean; showBack: boolean }) {
+export function ConsentForm({ askAge, askAi = false, showBack, legalInEnglish = false }: { askAge: boolean; askAi?: boolean; showBack: boolean; legalInEnglish?: boolean }) {
   const tai = useTranslations("ai");
   const t = useTranslations("onboarding");
   const ta = useTranslations("auth");
   const tc = useTranslations("common");
-  const locale = useLocale();
   const [state, action, pending] = useActionState<ConsentState, FormData>(giveConsent, { status: "idle" });
   const [privacy, setPrivacy] = useState(false);
   const [health, setHealth] = useState(false);
@@ -63,8 +62,8 @@ export function ConsentForm({ askAge, askAi = false, showBack }: { askAge: boole
           <span className="sr-only">{tc("opensInNewTab")}</span>
         </Link>
       </p>
-      {/* The legal pages are in English for now, as on the app (UX 2026-11-05). */}
-      {locale !== "en" && (
+      {/* Said only where the Terms and Privacy Policy really are in English here. */}
+      {legalInEnglish && (
         <p data-testid="consent-legal-english" className="px-[4px] text-muted leading-[1.429] [font-size:min(0.875rem,max(8.75vw,28px))]">
           {t("consentLegalEnglish")}
         </p>
