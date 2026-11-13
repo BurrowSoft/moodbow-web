@@ -11,6 +11,8 @@ topic: Privacy & account
 
 **More patterns** can include your own tags, once you use them.
 
+{pending:lifts_live}**What lifts me** compares your mood on days with a tag to days without it, once a tag has been used on at least 5 days. It shows patterns, not causes, and it never shows some tags, such as ones about alcohol or skipping meals.{/pending}
+
 **The free week:** Plus starts with 7 days free, once per person. After the 7 days it becomes a yearly subscription and renews each year until you cancel. You only start it yourself, from **Me → Moodbow Plus**. During the free week, Me shows how many days are left.
 
 **Cancel:** you can cancel at any time, and you keep Plus until the end of the time you've paid for. If you cancel during the free week, you won't be charged.

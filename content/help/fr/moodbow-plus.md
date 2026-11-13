@@ -12,6 +12,8 @@ fr-draft: true
 
 **Plus de tendances** peut inclure vos propres étiquettes, dès que vous les utilisez.
 
+{pending:lifts_live}**Ce qui me fait du bien** compare votre humeur les jours avec une étiquette et les jours sans, dès qu'une étiquette a été utilisée au moins 5 jours. Il montre des tendances, pas des causes, et n'affiche jamais certaines étiquettes, comme celles sur l'alcool ou les repas sautés.{/pending}
+
 **La semaine gratuite :** Plus commence par 7 jours gratuits, une seule fois par personne. Après ces 7 jours, il devient un abonnement annuel qui se renouvelle chaque année jusqu'à ce que vous l'annuliez. C'est vous seul qui le lancez, depuis **Moi → Moodbow Plus**. Pendant la semaine gratuite, Moi indique combien de jours il reste.
 
 **Annuler :** vous pouvez annuler à tout moment, et vous gardez Plus jusqu'à la fin de la période payée. Si vous annulez pendant la semaine gratuite, vous ne serez pas débité.
