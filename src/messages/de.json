@@ -624,7 +624,8 @@
     "bodyScan6": "Dein Gesicht und deinen Kiefer.",
     "pause": "Pause",
     "resume": "Fortsetzen",
-    "nameItPrompt": "Was fühlst du gerade? Es zu benennen kann es ein bisschen kleiner machen.",
+    "nameItQuestion": "Was fühlst du gerade?",
+    "nameItSmaller": "Es zu benennen kann es ein bisschen kleiner machen.",
     "nameItThanks": "Danke, dass du es benannt hast."
   }
 }

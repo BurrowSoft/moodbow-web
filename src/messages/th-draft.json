@@ -1270,8 +1270,13 @@
     "reason": "UX draft (native read pending)"
   },
   {
-    "key": "toolbox.nameItPrompt",
-    "en": "What are you feeling right now? Naming it can make it a little smaller.",
+    "key": "toolbox.nameItQuestion",
+    "en": "What are you feeling right now?",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.nameItSmaller",
+    "en": "Naming it can make it a little smaller.",
     "reason": "UX draft (native read pending)"
   },
   {

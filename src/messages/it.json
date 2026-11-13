@@ -624,7 +624,8 @@
     "bodyScan6": "Il viso e la mascella.",
     "pause": "Pausa",
     "resume": "Riprendi",
-    "nameItPrompt": "Cosa senti in questo momento? Dargli un nome può renderlo un po' più piccolo.",
+    "nameItQuestion": "Cosa senti in questo momento?",
+    "nameItSmaller": "Dargli un nome può renderlo un po' più piccolo.",
     "nameItThanks": "Grazie di avergli dato un nome."
   }
 }

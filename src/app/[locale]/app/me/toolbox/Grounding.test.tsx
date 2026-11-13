@@ -102,7 +102,8 @@ describe("Body scan", () => {
 describe("Name it", () => {
   it("the mood words given, as chips, and only those; a tap thanks them, nothing saved", () => {
     wrap(<NameIt moods={[2, 4]} />);
-    expect(screen.getByTestId("name-it-prompt")).toHaveTextContent(m.nameItPrompt);
+    expect(screen.getByTestId("name-it-question")).toHaveTextContent(m.nameItQuestion);
+    expect(screen.getByTestId("name-it-smaller")).toHaveTextContent(m.nameItSmaller);
     expect(screen.getAllByRole("button").map((b) => b.textContent)).toEqual([messages.today.mood2, messages.today.mood4]);
     expect(screen.getByTestId("name-it-thanks")).toHaveTextContent("");
     fireEvent.click(screen.getByTestId("name-it-4"));
@@ -156,12 +157,14 @@ describe("the buttons stay a touch size at large text", () => {
 // UX 14 Nov (#299's journey: the first chip at 920 px at 300 %): the chips come first, the
 // question under them, describing the group; its text capped like the rest.
 describe("Name it's order at large text", () => {
-  it("chips before the question; the group is described by it", () => {
+  it("the question, then the chips, then the second sentence; the group is described by both", () => {
     wrap(<NameIt moods={[1, 2, 3, 4, 5]} />);
     const group = screen.getByRole("group");
-    const prompt = screen.getByTestId("name-it-prompt");
-    expect(group.compareDocumentPosition(prompt) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-    expect(group).toHaveAccessibleDescription(m.nameItPrompt);
-    expect(prompt.className).toContain("[font-size:min(1rem,max(10vw,32px))]");
+    const question = screen.getByTestId("name-it-question");
+    const smaller = screen.getByTestId("name-it-smaller");
+    expect(question.compareDocumentPosition(group) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(group.compareDocumentPosition(smaller) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(group).toHaveAccessibleDescription(`${m.nameItQuestion} ${m.nameItSmaller}`);
+    for (const p of [question, smaller]) expect(p.className).toContain("[font-size:min(1rem,max(10vw,32px))]");
   });
 });

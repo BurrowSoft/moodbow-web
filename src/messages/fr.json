@@ -624,7 +624,8 @@
     "bodyScan6": "Votre visage et votre mâchoire.",
     "pause": "Pause",
     "resume": "Reprendre",
-    "nameItPrompt": "Que ressentez-vous en ce moment ? Le nommer peut le rendre un peu plus petit.",
+    "nameItQuestion": "Que ressentez-vous en ce moment ?",
+    "nameItSmaller": "Le nommer peut le rendre un peu plus petit.",
     "nameItThanks": "Merci de l'avoir nommé."
   }
 }
