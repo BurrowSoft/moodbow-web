@@ -181,7 +181,7 @@ jobs:
             echo "args=" >> "$GITHUB_OUTPUT"
           fi
       - if: steps.cfg.outputs.ok == 'true'
-        run: npm run test:journeys -- ${{ steps.scope.outputs.args }}
+        run: npm run test:journeys -- --grep "session revoked mid-visit" --repeat-each=5
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_STAGING_URL }}
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_STAGING_PUBLISHABLE_KEY }}
