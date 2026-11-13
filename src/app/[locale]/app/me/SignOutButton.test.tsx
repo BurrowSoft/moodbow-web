@@ -137,7 +137,9 @@ describe("Me → Sign out (UX & PM 2026-11-03, option C)", () => {
     const dialog = await screen.findByRole("dialog", { name: m.signOutKeepTitle });
     expect(dialog).toHaveAccessibleDescription(m.signOutKeepBody);
     expect(screen.getByTestId("sign-out-keep")).toHaveTextContent(m.signOutKeep);
-    expect(screen.getByTestId("sign-out-keep")).toHaveFocus();
+    // The dialog moves focus in its effect, which can run just after the dialog is found: wait for it
+    // (a one-off red on the publish-day trial #307, run 43504243067; nothing in the product changed).
+    await waitFor(() => expect(screen.getByTestId("sign-out-keep")).toHaveFocus());
     expect(screen.getByTestId("sign-out-delete")).toHaveTextContent(m.signOutDelete);
     expect(signOut).not.toHaveBeenCalled();
     expect(fetchMock).not.toHaveBeenCalled();
