@@ -2051,7 +2051,7 @@ test("keyboard: a time field shows its ring at every stop inside it, the picker 
 // card and the Write button below it stay as they are.
 test("large text, set in the browser: Write is in Today's first view at 320 px, and only at large text", async ({ page, browserName }) => {
   test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
-  test.setTimeout(120_000);
+  test.setTimeout(180_000);
   const email = newEmail();
   const password = newPassword();
   const cdp = await page.context().newCDPSession(page);
@@ -2066,7 +2066,7 @@ test("large text, set in the browser: Write is in Today's first view at 320 px, 
     await page.getByTestId("setup-done").click();
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     await page.setViewportSize({ width: 320, height: 640 });
-    for (const percent of [100, 150, 300]) {
+    for (const percent of [100, 150, 200, 300]) {
       const where = `${percent} %`;
       // Whole pixels: CDP refuses 19.5 (13 px at 150 %).
       await cdp.send("Page.setFontSizes", { fontSizes: { standard: Math.round((16 * percent) / 100), fixed: Math.round((13 * percent) / 100) } });
@@ -2075,6 +2075,19 @@ test("large text, set in the browser: Write is in Today's first view at 320 px, 
       // The card's own Write is always there, after it.
       await expect(page.getByTestId("today-write"), where).toHaveCount(1);
       const top = page.getByTestId("today-write-top");
+      // Today's standing help (UX & PM, 13 Nov): the lifebuoy at every size, 48 px, in the header's
+      // first row and inside the width, beside (never over) the greeting and Write at the top.
+      const help = page.getByTestId("today-help");
+      await expect(help, where).toBeVisible();
+      await expect(help, where).toHaveAccessibleName(messages.me.meGetHelpNow);
+      const lifebuoy = (await help.boundingBox())!;
+      const title = (await page.getByTestId("today-greeting").boundingBox())!;
+      console.log(`Today ${where}: help ${Math.round(lifebuoy.x)},${Math.round(lifebuoy.y)} ${Math.round(lifebuoy.width)}×${Math.round(lifebuoy.height)} px; greeting ends at x ${Math.round(title.x + title.width)}`);
+      expect(lifebuoy.width, `${where}: help 48 px wide`).toBeGreaterThanOrEqual(48);
+      expect(lifebuoy.height, `${where}: help 48 px high`).toBeGreaterThanOrEqual(48);
+      expect(lifebuoy.x + lifebuoy.width, `${where}: help inside the width`).toBeLessThanOrEqual(320.5);
+      expect(lifebuoy.y, `${where}: help on the greeting's row`).toBeLessThan(title.y + title.height);
+      expect(title.x + title.width, `${where}: the greeting stops before the help`).toBeLessThanOrEqual(lifebuoy.x);
       if (percent === 100) {
         await expect(top, `${where}: no second Write`).toBeHidden();
         continue;
@@ -2090,11 +2103,40 @@ test("large text, set in the browser: Write is in Today's first view at 320 px, 
       expect(box.y + box.height, `${where}: Write above the tab bar, in the first view`).toBeLessThanOrEqual(bar.y);
       expect(box.x + box.width, `${where}: Write inside the width`).toBeLessThanOrEqual(320.5);
       expect(box.height, `${where}: a big enough target`).toBeGreaterThanOrEqual(44);
+      expect(box.x + box.width, `${where}: Write at the top stops before the help`).toBeLessThanOrEqual(lifebuoy.x);
       expect(await page.evaluate(() => document.documentElement.scrollWidth), `${where}: no sideways scroll`).toBeLessThanOrEqual(320);
     }
     // It opens the editor, as the other one does.
     await page.getByTestId("today-write-top").click();
     await expect(page.getByTestId("entry-text")).toBeVisible({ timeout: 15_000 });
+
+    // 200 % browser zoom on a laptop (1280 × 800 → 640 × 400 CSS px), normal text: the help sits
+    // at the header's end, on the greeting's row, and the card's Write is still on Today.
+    await cdp.send("Page.setFontSizes", { fontSizes: { standard: 16, fixed: 13 } });
+    await page.setViewportSize({ width: 640, height: 400 });
+    await page.goto("/app");
+    await expect(page.getByTestId("checkin-card")).toBeVisible();
+    const zoomHelp = (await page.getByTestId("today-help").boundingBox())!;
+    const zoomTitle = (await page.getByTestId("today-greeting").boundingBox())!;
+    expect(zoomHelp.x + zoomHelp.width, "200 % zoom: help inside the width").toBeLessThanOrEqual(640.5);
+    expect(zoomHelp.y, "200 % zoom: help on the greeting's row").toBeLessThan(zoomTitle.y + zoomTitle.height);
+    expect(zoomTitle.x + zoomTitle.width, "200 % zoom: the greeting stops before the help").toBeLessThanOrEqual(zoomHelp.x);
+    await expect(page.getByTestId("today-write")).toHaveCount(1);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth), "200 % zoom: no sideways scroll").toBeLessThanOrEqual(640);
+
+    // It opens Me's help card (neutral), and Close brings focus back to it.
+    await page.getByTestId("today-help").click();
+    await expect(page.getByTestId("safety-card")).toBeVisible();
+    await expect(page.getByTestId("safety-card")).toContainText(messages.safety.safetyBodyNeutral);
+    await page.getByTestId("safety-close").click();
+    await expect(page.getByTestId("safety-card")).toBeHidden();
+    await expect(page.getByTestId("today-help")).toBeFocused();
+
+    // No serious or critical axe violation on Today, at 320 and 1280 px (UX, 13 Nov).
+    await axeAtWidths(page, "Today with its help button", async () => {
+      await page.goto("/app");
+      await expect(page.getByTestId("today-help")).toBeVisible();
+    });
   } finally {
     await cleanup(email);
   }

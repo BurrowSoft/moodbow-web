@@ -29,6 +29,7 @@ import type { InsightRow } from "@/lib/journal/insights";
 import { parseToolboxItems } from "@/lib/journal/toolbox";
 import { SecurityNoticeRead } from "./SecurityNoticeRead";
 import { JOURNAL_HEADING } from "@/lib/ui/journalLayout";
+import { GetHelpNow } from "@/components/SafetyCard";
 
 // A stuck request ends here at the latest (UX, the timeout audit); each
 // data call gives up after 15 s on its own (lib/supabase/deadline).
@@ -103,27 +104,33 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
       <Suspense fallback={null}>
         <SecurityNoticeRead supabase={supabase} uid={user.id} />
       </Suspense>
-      <header>
-        {/* Focusable from code only: where focus goes when the milestone card is dismissed. */}
-        <h1 id="today-title" tabIndex={-1} className={`${JOURNAL_HEADING} focus:outline-none`} data-testid="today-greeting">
-          {t(greetingKey(localHour(timeZone)))}
-        </h1>
-        {/* Large text on a narrow screen: the date stops growing at about 200 %, as the help
-            buttons do (decision 231), so Write below it is in the first view (Web Tester, #282). */}
-        <p className="mt-1 text-muted max-[16em]:[font-size:min(1rem,max(10vw,32px))]" data-testid="today-date">
-          {dateLine(me.today, dateLocaleTag)}
-        </p>
-        {/* Large text on a narrow screen (UX, 2026-11-12): the check-in card runs to ~1,400 px at
-            320 px / 300 %, so Write is also offered here, in the first view. CSS only: em in a media
-            query is the reader's own text size, so at 100 % this never shows, and nothing moves after
-            load or depends on scripts. The card and the Write button below stay as they are. */}
-        <Link
-          href="/app/write"
-          data-testid="today-write-top"
-          className="mt-[8px] hidden min-h-[44px] max-w-full items-center font-medium text-accent underline underline-offset-4 [font-size:min(1rem,max(10vw,32px))] [overflow-wrap:anywhere] max-[16em]:inline-flex"
-        >
-          {te("writeButton")}
-        </Link>
+      {/* Today's standing help (UX & PM, 13 Nov): a quiet lifebuoy at the header's end, always
+          there whatever the cards show, opening Me's help card. A fixed 48 px, so at large text
+          it takes no more room and Write under the date stays in the first view. */}
+      <header className="flex items-start gap-[12px]">
+        <div className="min-w-0 flex-1">
+          {/* Focusable from code only: where focus goes when the milestone card is dismissed. */}
+          <h1 id="today-title" tabIndex={-1} className={`${JOURNAL_HEADING} focus:outline-none`} data-testid="today-greeting">
+            {t(greetingKey(localHour(timeZone)))}
+          </h1>
+          {/* Large text on a narrow screen: the date stops growing at about 200 %, as the help
+              buttons do (decision 231), so Write below it is in the first view (Web Tester, #282). */}
+          <p className="mt-1 text-muted max-[16em]:[font-size:min(1rem,max(10vw,32px))]" data-testid="today-date">
+            {dateLine(me.today, dateLocaleTag)}
+          </p>
+          {/* Large text on a narrow screen (UX, 2026-11-12): the check-in card runs to ~1,400 px at
+              320 px / 300 %, so Write is also offered here, in the first view. CSS only: em in a media
+              query is the reader's own text size, so at 100 % this never shows, and nothing moves after
+              load or depends on scripts. The card and the Write button below stay as they are. */}
+          <Link
+            href="/app/write"
+            data-testid="today-write-top"
+            className="mt-[8px] hidden min-h-[44px] max-w-full items-center font-medium text-accent underline underline-offset-4 [font-size:min(1rem,max(10vw,32px))] [overflow-wrap:anywhere] max-[16em]:inline-flex"
+          >
+            {te("writeButton")}
+          </Link>
+        </div>
+        <GetHelpNow country={me.profile?.country} testId="today-help" neutral icon />
       </header>
       <CheckInCard key={checkInError ? "unread" : "read"} initial={(data as CheckIn | null) ?? null} uid={user.id} date={me.today} dateLocaleTag={dateLocaleTag} keepDraft loadFailed={Boolean(checkInError)} />
       {toolboxOn && <ToolboxCard uid={user.id} today={me.today} todayMood={(data as CheckIn | null)?.mood ?? null} items={toolbox} />}

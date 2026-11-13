@@ -126,7 +126,10 @@ export function SafetyCard({ country, onClose, neutral = false }: { country: str
 // page's scripts (#248); once they're running it opens the card instead. Its words stay whole: browser
 // hyphens split "par-ler" with room to spare (Web Tester). It stops growing at about 200 % on a narrow
 // screen, in em, so at the normal size it's the size of the text around it.
-export function GetHelpNow({ country, testId, className, neutral }: { country: string | null | undefined; testId: string; className?: string; neutral?: boolean }) {
+// icon: Today's standing help button (UX & PM, 13 Nov; specs/1.2-features.md): a lifebuoy, named
+// and titled with the same words, opening the same card. Quiet (no colour of its own, no banner) and
+// 48 px in px, so large text never makes it push Write out of Today's header.
+export function GetHelpNow({ country, testId, className, neutral, icon }: { country: string | null | undefined; testId: string; className?: string; neutral?: boolean; icon?: boolean }) {
   const t = useTranslations("me");
   const [open, setOpen] = useState(false);
   const close = useCallback(() => setOpen(false), []);
@@ -136,12 +139,38 @@ export function GetHelpNow({ country, testId, className, neutral }: { country: s
     e.preventDefault();
     setOpen(true);
   };
+  const name = t("meGetHelpNow");
   return (
     <>
-      <Link href="/help/get-help-now" prefetch={false} data-testid={testId} onClick={openCard} className={className ?? `${dialogButton(false, false)} [font-size:min(1em,max(10vw,32px))]`}>
-        {t("meGetHelpNow")}
-      </Link>
+      {icon ? (
+        <Link
+          href="/help/get-help-now"
+          prefetch={false}
+          data-testid={testId}
+          onClick={openCard}
+          aria-label={name}
+          title={name}
+          className={className ?? "inline-flex h-[48px] w-[48px] shrink-0 items-center justify-center rounded-full text-muted hover:bg-pill hover:text-text"}
+        >
+          <LifebuoyIcon />
+        </Link>
+      ) : (
+        <Link href="/help/get-help-now" prefetch={false} data-testid={testId} onClick={openCard} className={className ?? `${dialogButton(false, false)} [font-size:min(1em,max(10vw,32px))]`}>
+          {name}
+        </Link>
+      )}
       {open && <SafetyCard country={country} onClose={close} neutral={neutral} />}
     </>
+  );
+}
+
+// A lifebuoy, in the tab bar's line style; its name is the link's (aria-label), so it's hidden here.
+function LifebuoyIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false" data-testid="lifebuoy-icon">
+      <circle cx="12" cy="12" r="10" />
+      <circle cx="12" cy="12" r="4" />
+      <path d="m4.93 4.93 4.24 4.24M14.83 9.17l4.24-4.24M14.83 14.83l4.24 4.24M9.17 14.83l-4.24 4.24" />
+    </svg>
   );
 }
