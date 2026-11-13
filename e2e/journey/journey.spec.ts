@@ -443,6 +443,18 @@ test.describe("a first run reaches Today without a reload", () => {
       await expect(page).toHaveURL(/\/app\/me$/);
       await revokeSessions(email, password);
       await page.getByTestId("tab-today").click();
+      // Two safe ends, whichever check sees the revoke first (#299's trace, UX 14 Nov): sign-in, or
+      // the journal page's own "Your session has ended" (SessionEnded) with its Sign in. 5 of 7
+      // runs went to sign-in; one showed the screen at /app. Either way, nothing of the journal.
+      const ended = page.getByTestId("session-ended");
+      await expect(page.getByLabel("Email").or(ended)).toBeVisible({ timeout: 20_000 });
+      await expect(page.getByTestId("checkin-card")).toHaveCount(0);
+      await expect(page.getByTestId("today-greeting")).toHaveCount(0);
+      await expect(page.locator('[data-testid^="today-entry-"]')).toHaveCount(0);
+      if (await ended.isVisible()) {
+        await expect(ended).toContainText(messages.auth.sessionEndedTitle);
+        await page.getByTestId("session-ended-sign-in").click();
+      }
       await expect(page).toHaveURL(/\/sign-in/, { timeout: 20_000 });
       await page.getByLabel("Email").fill(email);
       await page.getByLabel("Password").fill(password);
