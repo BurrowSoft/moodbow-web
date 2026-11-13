@@ -1453,5 +1453,25 @@
     "key": "plus.moreTagSame",
     "en": "On days tagged “{tag}” and other days, your mood was about the same ({a} and {b} of 5).",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.liftsTitle",
+    "en": "What lifts me",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.liftsRow",
+    "en": "On days with {tag}, your mood averaged {a}; on other days, {b}.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.liftsFooter",
+    "en": "Patterns, not causes. Only you can see this.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.liftsNone",
+    "en": "Keep tagging your days. Patterns show up after a few weeks.",
+    "reason": "UX draft (native read pending)"
   }
 ]

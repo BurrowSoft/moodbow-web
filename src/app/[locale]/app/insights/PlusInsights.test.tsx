@@ -92,3 +92,35 @@ describe("periodLine: the browser's own month names", () => {
     expect(line).toMatch(/Nov 2026/);
   });
 });
+
+// What lifts me (1.3 part 2): inside More patterns, the lines as given (lib/plus/whatLiftsMe picks
+// and orders them), its own footer, the quiet help beside its title; with none, the invitation;
+// with tags off or unread (null), nothing.
+describe("MorePatternsCard: What lifts me", () => {
+  const notEnough: MorePattern[] = [{ id: "sleep", state: "not_enough", a: null, b: null }];
+  it("the lines in order, as written, with the averages to one decimal; the footer and Get help now", () => {
+    wrap(<MorePatternsCard window="year" patterns={notEnough} lifts={[{ tag: "Walk <b>", a: side(6, 4.2), b: side(20, 3), gap: 1.2 }, { tag: "Tea", a: side(5, 3.6), b: side(21, 3.2), gap: 0.4 }]} country="NZ" />);
+    const section = screen.getByTestId("insights-lifts");
+    expect(section).toHaveTextContent(m.liftsTitle);
+    expect(screen.getAllByTestId("insights-lift").map((li) => li.textContent)).toEqual([
+      m.liftsRow.replace("{tag}", "Walk <b>").replace("{a}", "4.2").replace("{b}", "3.0"),
+      m.liftsRow.replace("{tag}", "Tea").replace("{a}", "3.6").replace("{b}", "3.2"),
+    ]);
+    expect(section.querySelector("b")).toBeNull();
+    expect(screen.getByTestId("insights-lifts-footer")).toHaveTextContent(m.liftsFooter);
+    expect(screen.getByTestId("lifts-get-help")).toHaveAccessibleName(messages.me.meGetHelpNow);
+    expect(screen.queryByTestId("insights-lifts-none")).toBeNull();
+  });
+  it("none qualifies: the invitation to keep tagging, still with the footer and help", () => {
+    wrap(<MorePatternsCard window="year" patterns={notEnough} lifts={[]} />);
+    expect(screen.getByTestId("insights-lifts-none")).toHaveTextContent(m.liftsNone);
+    expect(screen.queryByTestId("insights-lift")).toBeNull();
+    expect(screen.getByTestId("lifts-get-help")).toBeInTheDocument();
+  });
+  it("tags off or not read: no section at all", () => {
+    wrap(<MorePatternsCard window="year" patterns={notEnough} lifts={null} />);
+    expect(screen.queryByTestId("insights-lifts")).toBeNull();
+    wrap(<MorePatternsCard window="year" patterns={notEnough} />);
+    expect(screen.queryByTestId("insights-lifts")).toBeNull();
+  });
+});

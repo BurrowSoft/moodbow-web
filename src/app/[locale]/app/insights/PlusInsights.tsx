@@ -6,6 +6,8 @@ import { Link } from "@/i18n/navigation";
 import type { LongRange } from "@/lib/plus/longRange";
 import type { MorePattern, MorePatternId, MoreWindow } from "@/lib/plus/morePatterns";
 import type { TagPattern } from "@/lib/plus/tagPatterns";
+import type { Lift } from "@/lib/plus/whatLiftsMe";
+import { GetHelpNow } from "@/components/SafetyCard";
 import { LockedItem, PlusLock, PlusSheet, type PlusOffer } from "../PlusSheet";
 import { segment } from "@/lib/ui/journalLayout";
 
@@ -84,7 +86,10 @@ const FREE_LINES = new Set<MorePatternId>(["sleep", "movement", "stress"]);
 
 // tags: More patterns by tag (UX, 12 Nov), already chosen and ordered (lib/plus/tagPatterns), at
 // most 5; each tag shown as written, as plain text.
-export function MorePatternsCard({ patterns, window, tags = [] }: { patterns: MorePattern[]; window: MoreWindow; tags?: TagPattern[] }) {
+// lifts: What lifts me (1.3), already chosen and ordered (lib/plus/whatLiftsMe), at most 3; null when
+// tags are off or couldn't be read (nothing shown, never a guess). It shows the person's own words,
+// so the quiet Get help now sits beside its title (the ruling, the 11 Nov rule).
+export function MorePatternsCard({ patterns, window, tags = [], lifts = null, country = null }: { patterns: MorePattern[]; window: MoreWindow; tags?: TagPattern[]; lifts?: Lift[] | null; country?: string | null }) {
   const t = useTranslations("plus");
   const ti = useTranslations("insights");
   const number = new Intl.NumberFormat(useLocale(), { minimumFractionDigits: 1, maximumFractionDigits: 1 });
@@ -104,6 +109,32 @@ export function MorePatternsCard({ patterns, window, tags = [] }: { patterns: Mo
         </ul>
       </section>
     ) : null;
+  const liftList = lifts ? (
+    <section aria-labelledby="lifts-title" data-testid="insights-lifts" className="mt-4">
+      <div className="flex items-start justify-between gap-3">
+        <h3 id="lifts-title" className="min-w-0 pt-[12px] text-sm font-medium text-text">
+          {t("liftsTitle")}
+        </h3>
+        <GetHelpNow country={country} testId="lifts-get-help" neutral icon />
+      </div>
+      {lifts.length > 0 ? (
+        <ul className="mt-2 space-y-2 text-sm text-text">
+          {lifts.map((l) => (
+            <li key={l.tag} data-testid="insights-lift" className="[overflow-wrap:anywhere]">
+              {t("liftsRow", { tag: l.tag, a: number.format(l.a.mood), b: number.format(l.b.mood) })}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p data-testid="insights-lifts-none" className="mt-2 text-sm text-muted">
+          {t("liftsNone")}
+        </p>
+      )}
+      <p data-testid="insights-lifts-footer" className="mt-2 text-xs text-muted">
+        {t("liftsFooter")}
+      </p>
+    </section>
+  ) : null;
   return (
     <section data-testid="insights-more-patterns-card" aria-labelledby="more-patterns-title" className="mt-6 rounded-3xl border border-border bg-surface p-[20px]">
       <h2 id="more-patterns-title" className="text-lg font-medium text-text">
@@ -133,6 +164,7 @@ export function MorePatternsCard({ patterns, window, tags = [] }: { patterns: Mo
           {t("moreNone")}
         </p>
       )}
+      {liftList}
     </section>
   );
 }

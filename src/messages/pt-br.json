@@ -660,6 +660,10 @@
     "moreNone": "Mais padrões aparecem aqui quando você tiver mais check-ins neste período.",
     "moreTagsTitle": "Suas tags",
     "moreTagShown": "Nos dias com a tag \"{tag}\", seu humor ficou em média em {a} de 5. Nos outros dias, {b}.",
-    "moreTagSame": "Nos dias com a tag \"{tag}\" e nos outros, seu humor foi parecido ({a} e {b} de 5)."
+    "moreTagSame": "Nos dias com a tag \"{tag}\" e nos outros, seu humor foi parecido ({a} e {b} de 5).",
+    "liftsTitle": "O que me faz bem",
+    "liftsRow": "Nos dias com a tag \"{tag}\", seu humor ficou em média em {a}; nos outros dias, em {b}.",
+    "liftsFooter": "Padrões, não causas. Só você pode ver isto.",
+    "liftsNone": "Continue marcando seus dias com tags. Os padrões aparecem depois de algumas semanas."
   }
 }

@@ -24,6 +24,7 @@ import { insightsOffer, plusPriceLabel, readPlusView } from "@/lib/plus/view";
 import { isLongRange, longRangeStart, longSummary } from "@/lib/plus/longRange";
 import { morePatterns, moreWindowStart } from "@/lib/plus/morePatterns";
 import { tagPatterns, tagsByDayFrom, type TagPattern } from "@/lib/plus/tagPatterns";
+import { whatLiftsMe, type Lift } from "@/lib/plus/whatLiftsMe";
 import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
 import { periodLine, readCheckInsSince, readWrittenDays } from "@/lib/plus/insightsData";
 import { ShareMonth } from "./ShareMonth";
@@ -150,14 +151,20 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
     // More patterns by tag (UX, 12 Nov), where tags are on: the period's tags, the person's own
     // (RLS). A failed read: no tag lines, never a guess.
     let tagLines: TagPattern[] = [];
+    // What lifts me (1.3): from the same rows, computed here and now, never stored or logged.
+    let lifts: Lift[] | null = null;
     if (pageGate("tags-live") !== "hidden") {
       const start = moreWindowStart(moreWindow, me.today);
       let query = supabase.from("check_in_tags").select("local_date, tag, created_at").lte("local_date", me.today);
       if (start) query = query.gte("local_date", start);
       const { data: tagRows, error: tagError } = await query;
-      if (!tagError && tagRows) tagLines = tagPatterns(rows, me.today, moreWindow, tagsByDayFrom(tagRows as { local_date: string; tag: string; created_at: string | null }[]), CRISIS_KEYWORDS);
+      if (!tagError && tagRows) {
+        const byDay = tagsByDayFrom(tagRows as { local_date: string; tag: string; created_at: string | null }[]);
+        tagLines = tagPatterns(rows, me.today, moreWindow, byDay, CRISIS_KEYWORDS);
+        lifts = whatLiftsMe(rows, me.today, moreWindow, byDay, CRISIS_KEYWORDS);
+      }
     }
-    plusMore = <MorePatternsCard window={moreWindow} patterns={morePatterns(rows, me.today, moreWindow, written ?? new Set()).filter((p) => written || p.id !== "writing")} tags={tagLines} />;
+    plusMore = <MorePatternsCard window={moreWindow} patterns={morePatterns(rows, me.today, moreWindow, written ?? new Set()).filter((p) => written || p.id !== "writing")} tags={tagLines} lifts={lifts} country={me.profile?.country ?? null} />;
   }
   return (
     <InsightsView

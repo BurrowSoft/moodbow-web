@@ -660,6 +660,10 @@
     "moreNone": "D'autres tendances apparaîtront ici quand vous aurez plus de bilans sur cette période.",
     "moreTagsTitle": "Vos étiquettes",
     "moreTagShown": "Les jours avec l'étiquette « {tag} », votre humeur était en moyenne de {a} sur 5. Les autres jours, {b}.",
-    "moreTagSame": "Les jours avec l'étiquette « {tag} » et les autres, votre humeur était à peu près la même ({a} et {b} sur 5)."
+    "moreTagSame": "Les jours avec l'étiquette « {tag} » et les autres, votre humeur était à peu près la même ({a} et {b} sur 5).",
+    "liftsTitle": "Ce qui me fait du bien",
+    "liftsRow": "Les jours avec l'étiquette « {tag} », votre humeur était en moyenne de {a} ; les autres jours, de {b}.",
+    "liftsFooter": "Des tendances, pas des causes. Ceci n'est visible que par vous.",
+    "liftsNone": "Continuez à ajouter des étiquettes à vos journées. Les tendances apparaissent au bout de quelques semaines."
   }
 }

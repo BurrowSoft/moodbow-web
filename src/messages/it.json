@@ -660,6 +660,10 @@
     "moreNone": "Altri andamenti appariranno qui quando avrai più check-in in questo periodo.",
     "moreTagsTitle": "I tuoi tag",
     "moreTagShown": "Nei giorni con il tag «{tag}» il tuo umore è stato in media {a} su 5. Negli altri, {b}.",
-    "moreTagSame": "Nei giorni con il tag «{tag}» e negli altri il tuo umore è stato più o meno lo stesso ({a} e {b} su 5)."
+    "moreTagSame": "Nei giorni con il tag «{tag}» e negli altri il tuo umore è stato più o meno lo stesso ({a} e {b} su 5).",
+    "liftsTitle": "Cosa mi fa stare bene",
+    "liftsRow": "Nei giorni con il tag «{tag}» il tuo umore è stato in media {a}; negli altri giorni, {b}.",
+    "liftsFooter": "Andamenti, non cause. Solo tu puoi vederlo.",
+    "liftsNone": "Continua ad aggiungere tag alle tue giornate. Gli andamenti compaiono dopo qualche settimana."
   }
 }

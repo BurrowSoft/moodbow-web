@@ -660,6 +660,10 @@
     "moreNone": "Más patrones aparecerán aquí cuando tengas más registros en este periodo.",
     "moreTagsTitle": "Tus etiquetas",
     "moreTagShown": "Los días con la etiqueta «{tag}», tu estado de ánimo fue de {a} de 5 de media. Los demás días, {b}.",
-    "moreTagSame": "Los días con la etiqueta «{tag}» y los demás, tu estado de ánimo fue más o menos el mismo ({a} y {b} de 5)."
+    "moreTagSame": "Los días con la etiqueta «{tag}» y los demás, tu estado de ánimo fue más o menos el mismo ({a} y {b} de 5).",
+    "liftsTitle": "Lo que me levanta el ánimo",
+    "liftsRow": "Los días con la etiqueta «{tag}», tu estado de ánimo fue de {a} de media; los demás días, de {b}.",
+    "liftsFooter": "Patrones, no causas. Solo tú puedes ver esto.",
+    "liftsNone": "Sigue etiquetando tus días. Los patrones aparecen después de unas semanas."
   }
 }

@@ -6,7 +6,7 @@ import messages from "../../src/messages/en.json";
 import fr from "../../src/messages/fr.json";
 import { monthsBefore } from "../../src/lib/journal/onThisDay";
 import { axeAtWidths } from "../axe";
-import { aiConsentGranted, journalToday, aiAvailable, cleanup, configured, confirmEmail, createConfirmedUser, exists, lastWeekMonday, seedCheckIns, newEmail, newPassword, notConfigured, profileLocale, profileSaver, revokeSessions, setProfileLocale, signedUpUnconfirmed, sweep, grantPlusTrial, plusOnStaging } from "./staging";
+import { aiConsentGranted, journalToday, aiAvailable, cleanup, configured, confirmEmail, createConfirmedUser, exists, lastWeekMonday, seedCheckIns, newEmail, newPassword, notConfigured, profileLocale, profileSaver, revokeSessions, setProfileLocale, signedUpUnconfirmed, sweep, grantPlusTrial, plusOnStaging, seedTags } from "./staging";
 
 // The launch-critical journeys (1.0), end to end against staging with a
 // throwaway account each: sign-up → confirm → consent → setup → check-in →
@@ -1960,6 +1960,72 @@ test("large text, set in the browser: Write is in Today's first view at 320 px, 
     // It opens the editor, as the other one does.
     await page.getByTestId("today-write-top").click();
     await expect(page.getByTestId("entry-text")).toBeVisible({ timeout: 15_000 });
+  } finally {
+    await cleanup(email);
+  }
+});
+
+// What lifts me (1.3 part 2), inside More patterns with Plus: seeded check-ins and tags, a tag that
+// lifts the mood shown with both averages, a substances tag never shown; the help beside its title;
+// at 320 px, 100 and 300 %, inside the width; axe at 320 and 1280 px, en and pt-BR.
+test("What lifts me: shown with Plus, an excluded tag never, at large text, and axe", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
+  test.skip(!(await plusOnStaging()), "Plus (030) isn't on staging yet");
+  test.setTimeout(240_000);
+  const email = newEmail();
+  const password = newPassword();
+  const cdp = await page.context().newCDPSession(page);
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    // 25 days, ending yesterday: "Walk" on 6 at 5, "Wine" on 6 at 5 (on the list), 13 others at 3.
+    const today = await journalToday(email, password);
+    const start = new Date(`${today}T00:00:00Z`);
+    start.setUTCDate(start.getUTCDate() - 25);
+    const first = start.toISOString().slice(0, 10);
+    const plan = Array.from({ length: 25 }, (_, offset) => ({ offset, tag: offset < 6 ? "Walk" : offset < 12 ? "Wine" : null }));
+    await seedCheckIns(email, password, first, plan.map(({ offset, tag }) => ({ offset, mood: tag ? 5 : 3 })));
+    test.skip(!(await seedTags(email, password, first, plan.filter((p) => p.tag).map(({ offset, tag }) => ({ offset, tags: [tag!] })))), "tags (029) aren't on staging yet");
+    await grantPlusTrial(email);
+    await page.setViewportSize({ width: 320, height: 640 });
+    for (const percent of [100, 300]) {
+      const where = `${percent} %`;
+      await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
+      await page.goto("/app/insights?range=year");
+      const lifts = page.getByTestId("insights-lifts");
+      await expect(lifts, where).toBeVisible({ timeout: 15_000 });
+      await expect(lifts, where).toContainText(messages.plus.liftsTitle);
+      await expect(page.getByTestId("insights-lift"), where).toHaveCount(1);
+      await expect(page.getByTestId("insights-lift"), where).toContainText("Walk");
+      await expect(lifts, `${where}: the list's tag never shown`).not.toContainText("Wine");
+      await expect(page.getByTestId("insights-lifts-footer"), where).toHaveText(messages.plus.liftsFooter);
+      for (const testId of ["lifts-get-help", "insights-lift"]) {
+        await page.getByTestId(testId).scrollIntoViewIfNeeded();
+        const box = (await page.getByTestId(testId).boundingBox())!;
+        console.log(`What lifts me ${where}: ${testId} ${Math.round(box.x)},${Math.round(box.y)} ${Math.round(box.width)}×${Math.round(box.height)} px`);
+        expect(box.x + box.width, `${where}: ${testId} inside the width`).toBeLessThanOrEqual(320.5);
+      }
+      expect(await page.evaluate(() => document.documentElement.scrollWidth), `${where}: no sideways scroll`).toBeLessThanOrEqual(320);
+    }
+    // The help beside it is Me's card.
+    await cdp.send("Page.setFontSizes", { fontSizes: { standard: 16, fixed: 13 } });
+    await page.getByTestId("lifts-get-help").click();
+    await expect(page.getByTestId("safety-card")).toContainText(messages.safety.safetyBodyNeutral);
+    await page.getByTestId("safety-close").click();
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+      await setProfileLocale(email, password, saved);
+      await axeAtWidths(page, `What lifts me (${saved})`, async () => {
+        await page.goto(`${route}/app/insights?range=year`);
+        await expect(page.getByTestId("insights-lifts")).toBeVisible({ timeout: 15_000 });
+      });
+    }
   } finally {
     await cleanup(email);
   }

@@ -165,6 +165,23 @@ export async function seedCheckIns(email: string, password: string, monday: stri
   }
 }
 
+// Tags on seeded days (029), through the app's own RPC, signed in as them, as seedCheckIns. false:
+// staging has no tags yet (set_check_in_tags missing), so the caller can skip, never fake it.
+export async function seedTags(email: string, password: string, monday: string, days: { offset: number; tags: string[] }[]): Promise<boolean> {
+  if (!ours(email)) throw new Error("seedTags only touches this helper's own users");
+  const user = createClient(URL_, PUBLISHABLE, { auth: { persistSession: false, autoRefreshToken: false } });
+  const { error: signInError } = await user.auth.signInWithPassword({ email, password });
+  if (signInError) throw new Error(`sign-in to seed tags failed: ${signInError.message}`);
+  for (const { offset, tags } of days) {
+    const d = new Date(`${monday}T00:00:00Z`);
+    d.setUTCDate(d.getUTCDate() + offset);
+    const { error } = await user.rpc("set_check_in_tags", { p_date: d.toISOString().slice(0, 10), p_tags: tags });
+    if (error?.code === "PGRST202") return false;
+    if (error) throw new Error(`seeding tags failed: ${error.message}`);
+  }
+  return true;
+}
+
 // Whether the account holds a granted AI consent, as get_me says.
 export async function aiConsentGranted(email: string, password: string): Promise<boolean> {
   const user = createClient(URL_, PUBLISHABLE, { auth: { persistSession: false, autoRefreshToken: false } });
