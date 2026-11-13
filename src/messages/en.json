@@ -662,7 +662,7 @@
     "moreTagShown": "On days tagged “{tag}”, your mood averaged {a} of 5. On other days, {b}.",
     "moreTagSame": "On days tagged “{tag}” and other days, your mood was about the same ({a} and {b} of 5).",
     "liftsTitle": "What lifts me",
-    "liftsRow": "On days with {tag}, your mood averaged {a}; on other days, {b}.",
+    "liftsRow": "On days with “{tag}”, your mood averaged {a}; on other days, {b}.",
     "liftsFooter": "Patterns, not causes. Only you can see this.",
     "liftsNone": "Keep tagging your days. Patterns show up after a few weeks."
   }

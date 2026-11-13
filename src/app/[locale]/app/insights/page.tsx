@@ -161,7 +161,8 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
       if (!tagError && tagRows) {
         const byDay = tagsByDayFrom(tagRows as { local_date: string; tag: string; created_at: string | null }[]);
         tagLines = tagPatterns(rows, me.today, moreWindow, byDay, CRISIS_KEYWORDS);
-        lifts = whatLiftsMe(rows, me.today, moreWindow, byDay, CRISIS_KEYWORDS);
+        // With 1.3, not with the Plus stack (lifts-live, UX 14 Nov).
+        if (pageGate("lifts-live") !== "hidden") lifts = whatLiftsMe(rows, me.today, moreWindow, byDay, CRISIS_KEYWORDS);
       }
     }
     plusMore = <MorePatternsCard window={moreWindow} patterns={morePatterns(rows, me.today, moreWindow, written ?? new Set()).filter((p) => written || p.id !== "writing")} tags={tagLines} lifts={lifts} country={me.profile?.country ?? null} />;

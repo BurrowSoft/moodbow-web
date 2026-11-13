@@ -1461,7 +1461,7 @@
   },
   {
     "key": "plus.liftsRow",
-    "en": "On days with {tag}, your mood averaged {a}; on other days, {b}.",
+    "en": "On days with “{tag}”, your mood averaged {a}; on other days, {b}.",
     "reason": "UX draft (native read pending)"
   },
   {

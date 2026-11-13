@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import conditions from "../../../content/conditions.json";
 import contract from "../../../content/what-lifts-me.json";
 import type { InsightRow } from "@/lib/journal/insights";
 import { excludedTag, LIFTS_RULES, whatLiftsMe } from "./whatLiftsMe";
@@ -126,7 +127,7 @@ describe("strings", () => {
     const p = plus("en");
     expect([p.liftsTitle, p.liftsRow, p.liftsFooter, p.liftsNone]).toEqual([
       "What lifts me",
-      "On days with {tag}, your mood averaged {a}; on other days, {b}.",
+      "On days with “{tag}”, your mood averaged {a}; on other days, {b}.",
       "Patterns, not causes. Only you can see this.",
       "Keep tagging your days. Patterns show up after a few weeks.",
     ]);
@@ -136,7 +137,14 @@ describe("strings", () => {
       const p = plus(l);
       for (const k of ["liftsTitle", "liftsRow", "liftsFooter", "liftsNone"]) expect(p[k]?.trim(), `${l} ${k}`).toBeTruthy();
       for (const ph of ["{tag}", "{a}", "{b}"]) expect(p.liftsRow, `${l} ${ph}`).toContain(ph);
+      // The tag in that language's own quotes, as Your tags shows it (UX 14 Nov).
+      expect(p.liftsRow, `${l} quotes the tag`).toMatch(/["“«„]\s?\{tag\}\s?["”»“]/);
     }
     expect(Object.values(plus("en")).filter((v) => /brings? you down|you should|try to/i.test(v))).toEqual([]);
   });
+});
+
+// It ships with 1.3, not with the Plus stack (UX 14 Nov): its own switch, unmet for now.
+it("lifts-live is its own switch, not met yet", () => {
+  expect(conditions["lifts-live"].met).toBe(false);
 });
