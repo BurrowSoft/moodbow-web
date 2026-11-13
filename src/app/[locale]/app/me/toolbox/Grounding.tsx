@@ -54,7 +54,8 @@ export function FiveSenses() {
   const moved = useRef(false);
   // Each new step is read out: focus goes to its words (not on the first screen's arrival).
   useEffect(() => {
-    if (moved.current) text.current?.focus();
+    // Without scrolling: the sticky row stays on top, and a scroll here pushed help out of view.
+    if (moved.current) text.current?.focus({ preventScroll: true });
   }, [step]);
   if (step >= total) return <Close testId="senses-end" />;
   const go = (to: number) => {
