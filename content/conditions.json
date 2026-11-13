@@ -75,6 +75,10 @@
     "met": true,
     "what": "Help only (decision 212 pattern, UX 2026-11-04): import from another app (1.1 K) is in the app build people have (0.9.7; met on its publish, UX), so its Help article shows for app users ({pending:app_import|import_live}). Not import-live (the web's own import)."
   },
+  "app-quick-checkin": {
+    "met": false,
+    "what": "Help only (decision 212 pattern, UX 2026-11-12): the one-tap check-in from the daily reminder (1.2 §5, the app's QUICK_CHECKIN) is in the app build people have, so its Help article shows. App only: the web has no reminder of its own."
+  },
   "app-app-lock": {
     "met": true,
     "what": "Help only (decision 212): app lock (PIN, fingerprint or face; decision 188) is in the app build people have (0.9 closed test on), so its Help article shows. Not app-lock (the privacy text's clause, Vitor's)."
