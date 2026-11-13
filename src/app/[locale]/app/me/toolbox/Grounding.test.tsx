@@ -152,3 +152,16 @@ describe("the buttons stay a touch size at large text", () => {
     }
   });
 });
+
+// UX 14 Nov (#299's journey: the first chip at 920 px at 300 %): the chips come first, the
+// question under them, describing the group; its text capped like the rest.
+describe("Name it's order at large text", () => {
+  it("chips before the question; the group is described by it", () => {
+    wrap(<NameIt moods={[1, 2, 3, 4, 5]} />);
+    const group = screen.getByRole("group");
+    const prompt = screen.getByTestId("name-it-prompt");
+    expect(group.compareDocumentPosition(prompt) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(group).toHaveAccessibleDescription(m.nameItPrompt);
+    expect(prompt.className).toContain("[font-size:min(1rem,max(10vw,32px))]");
+  });
+});
