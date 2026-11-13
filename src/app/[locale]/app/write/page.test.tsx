@@ -70,3 +70,18 @@ describe("write page: the writing prompt's day", () => {
     expect(eq).not.toHaveBeenCalled();
   });
 });
+
+// Three good things (1.3, Ruling 9): Write offers it while good-things-live isn't hidden.
+describe("write page: the way to Three good things", () => {
+  const href = async () => {
+    await open();
+    return (editorProps.mock.calls.at(-1)![0] as { goodThingsHref: string | null }).goodThingsHref;
+  };
+  it("on (or a draft build): the link to its screen", async () => {
+    expect(await href()).toBe("/app/write/good-things");
+  });
+  it("hidden: none", async () => {
+    gate = "hidden";
+    expect(await href()).toBeNull();
+  });
+});

@@ -66,6 +66,8 @@ export default async function WritePage({ params, searchParams }: PageProps<"/[l
       backTo={from}
       promptDate={promptDate}
       back={<BackLink href={from} label={await backLabel(from, tag)} testId="nav-back" />}
+      // Three good things (1.3, Ruling 9): offered from Write, a plain new entry only.
+      goodThingsHref={pageGate("good-things-live") !== "hidden" ? "/app/write/good-things" : null}
     />
   );
 }

@@ -1283,5 +1283,25 @@
     "key": "toolbox.nameItThanks",
     "en": "Thanks for naming it.",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.goodThingsTitle",
+    "en": "Three good things",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.goodThings1",
+    "en": "One good thing",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.goodThings2",
+    "en": "Another",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.goodThings3",
+    "en": "And one more",
+    "reason": "UX draft (native read pending)"
   }
 ]

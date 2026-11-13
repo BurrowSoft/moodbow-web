@@ -294,7 +294,11 @@
     "entryNewTitle": "Neuer Eintrag",
     "entryEditTitle": "Eintrag bearbeiten",
     "entryAddMore": "Zu diesem Eintrag hinzufügen …",
-    "entryMoreActions": "Weitere Optionen"
+    "entryMoreActions": "Weitere Optionen",
+    "goodThingsTitle": "Drei gute Dinge",
+    "goodThings1": "Etwas Gutes",
+    "goodThings2": "Noch etwas",
+    "goodThings3": "Und noch etwas"
   },
   "notFound": {
     "title": "Seite nicht gefunden",
