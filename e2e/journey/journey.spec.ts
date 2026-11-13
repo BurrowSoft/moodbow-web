@@ -2141,3 +2141,100 @@ test("large text, set in the browser: Write is in Today's first view at 320 px, 
     await cleanup(email);
   }
 });
+
+// Grounding (1.3, specs/1.3-grounding-and-good-things.md): 5-4-3-2-1, Body scan and Name it, at
+// 320 px and 300 %: Back and the quiet help on top, and each screen's own way on (Next, Stop, a
+// mood) in the first view, nothing sideways; then axe on each, the close too, at 320 and 1280 px.
+test("grounding: the three at large text on a 320 px phone, help on every screen, and axe", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
+  test.setTimeout(240_000);
+  const email = newEmail();
+  const password = newPassword();
+  const cdp = await page.context().newCDPSession(page);
+  const inView = async (testId: string, where: string) => {
+    const box = (await page.getByTestId(testId).boundingBox())!;
+    console.log(`grounding ${where}: ${testId} ${Math.round(box.x)},${Math.round(box.y)} ${Math.round(box.width)}×${Math.round(box.height)} px`);
+    // The top edge too: the close once scrolled the help above the window (y −134) unnoticed.
+    expect(box.y, `${where}: ${testId}'s top in the window`).toBeGreaterThanOrEqual(0);
+    expect(box.y + box.height, `${where}: ${testId} in the first view`).toBeLessThanOrEqual(640);
+    expect(box.x + box.width, `${where}: ${testId} inside the width`).toBeLessThanOrEqual(320.5);
+  };
+  // Each screen takes taps once its scripts run (useUntilLoaded; a tap before then is lost, #296).
+  const loaded = () => expect(page.locator("[data-until-loaded]")).toHaveCount(0, { timeout: 15_000 });
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    await page.setViewportSize({ width: 320, height: 640 });
+    for (const percent of [100, 300]) {
+      const where = (s: string) => `${s} at ${percent} %`;
+      await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
+      await page.goto("/app/me/toolbox");
+      await expect(page.getByTestId("grounding-links")).toBeVisible();
+      await page.getByTestId("toolbox-senses").click();
+      await expect(page.getByTestId("senses-step")).toHaveText(messages.toolbox.senses5);
+      await loaded();
+      await inView("grounding-get-help", where("5-4-3-2-1"));
+      await inView("senses-next", where("5-4-3-2-1"));
+      // Help in view on every step, the close too (UX 14 Nov: steps 3 to 5 once scrolled it off).
+      for (let i = 0; i < 5; i++) {
+        await page.getByTestId("senses-next").click();
+        if (i < 4) await expect(page.getByTestId("senses-step")).toHaveAttribute("data-step", String(i + 2));
+        if (i < 4) await inView("grounding-get-help", where(`5-4-3-2-1 step ${i + 2}`));
+      }
+      await expect(page.getByTestId("senses-end")).toHaveText(messages.toolbox.groundingEnd);
+      await inView("grounding-get-help", where("the close"));
+      await inView("grounding-done", where("the close"));
+
+      await page.goto("/app/me/toolbox/body-scan");
+      await expect(page.getByTestId("body-scan-step")).toHaveText(messages.toolbox.bodyScan1);
+      await loaded();
+      await inView("grounding-get-help", where("Body scan"));
+      await inView("body-scan-stop", where("Body scan"));
+      await inView("body-scan-pause", where("Body scan"));
+
+      await page.goto("/app/me/toolbox/name-it");
+      // A new account has no check-ins: the whole fixed list (Ruling 2).
+      await expect(page.locator('[data-testid^="name-it-"][aria-pressed]')).toHaveCount(5);
+      await loaded();
+      await inView("grounding-get-help", where("Name it"));
+      await inView("name-it-1", where("Name it"));
+      await page.getByTestId("name-it-3").click();
+      await expect(page.getByTestId("name-it-thanks")).toHaveText(messages.toolbox.nameItThanks);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth), where("Name it: no sideways scroll")).toBeLessThanOrEqual(320);
+    }
+    // The help is Me's card, from any of them.
+    await cdp.send("Page.setFontSizes", { fontSizes: { standard: 16, fixed: 13 } });
+    await page.goto("/app/me/toolbox/body-scan");
+    await loaded();
+    await page.getByTestId("grounding-get-help").click();
+    await expect(page.getByTestId("safety-card")).toContainText(messages.safety.safetyBodyNeutral);
+    await page.getByTestId("safety-close").click();
+    await expect(page.getByTestId("safety-card")).toHaveCount(0);
+
+    // No serious or critical axe violation (UX, 2026-11-12), en and pt-BR (the longest).
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+      await setProfileLocale(email, password, saved);
+      for (const exercise of ["5-4-3-2-1", "body-scan", "name-it"]) {
+        await axeAtWidths(page, `grounding ${exercise} (${saved})`, async () => {
+          await page.goto(`${route}/app/me/toolbox/${exercise}`);
+          await expect(page.getByTestId("grounding-get-help")).toBeVisible();
+        });
+      }
+      await axeAtWidths(page, `grounding close (${saved})`, async () => {
+        await page.goto(`${route}/app/me/toolbox/5-4-3-2-1`);
+        await loaded();
+        for (let i = 0; i < 5; i++) await page.getByTestId("senses-next").click();
+        await expect(page.getByTestId("senses-end")).toBeVisible();
+      });
+    }
+  } finally {
+    await cleanup(email);
+  }
+});

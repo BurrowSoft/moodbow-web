@@ -12,6 +12,12 @@
     "cycles": 6,
     "totalSeconds": 60
   },
+  "grounding": {
+    "about": "1.3 (specs/1.3-grounding-and-good-things.md, UX 14 Nov, with the Rulings): three ways to ground, next to breathing. 5-4-3-2-1: one screen per sense, in senses' order, Next and Back, then the close; nothing typed or saved. Body scan: bodyScanSteps steps of bodyScanStepSeconds each, Pause and Stop always there, then the close. Name it: chips from the check-in's fixed mood words only (the moods this person has used, else all of them); a tap thanks them; nothing saved or sent. Get help now (the quiet icon) on every screen, the close too. No analytics, log or breadcrumb carries a word or a step.",
+    "senses": [5, 4, 3, 2, 1],
+    "bodyScanSteps": 6,
+    "bodyScanStepSeconds": 20
+  },
   "claimWords": {
     "en": ["calm", "anxiety", "anxious", "stress", "panic", "heal", "cure", "therapy", "treatment", "exercise", "symptom"],
     "fr": ["calm", "anxi", "stress", "panique", "guéri", "thérap", "traitement", "exercice", "symptôme"],
