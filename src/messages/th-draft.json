@@ -1385,6 +1385,81 @@
     "reason": "UX draft (native read pending)"
   },
   {
+    "key": "appointment.meRow",
+    "en": "For my appointment",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "appointment.intro",
+    "en": "A summary you can print or show at an appointment. Nothing here is saved or sent.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "appointment.show",
+    "en": "Show",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "appointment.range2",
+    "en": "Last 2 weeks",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "appointment.range4",
+    "en": "Last 4 weeks",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "appointment.range12",
+    "en": "Last 12 weeks",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "appointment.count",
+    "en": "{n, plural, one {# check-in} other {# check-ins}}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "appointment.averages",
+    "en": "Averages",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "appointment.starred",
+    "en": "Moments",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "appointment.fullText",
+    "en": "Include the full text",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "appointment.talk",
+    "en": "What I want to talk about",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "appointment.talkHint",
+    "en": "This isn't saved.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "appointment.print",
+    "en": "Print",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "appointment.empty",
+    "en": "No check-ins in this time yet.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "appointment.footer",
+    "en": "Made by you from your own Moodbow entries. Not a medical assessment.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
     "key": "toolbox.breathSafety",
     "en": "If you feel dizzy, stop and breathe normally.",
     "reason": "UX draft (native read pending)"
