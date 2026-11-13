@@ -56,7 +56,8 @@ export function whatLiftsMe(rows: InsightRow[], today: string, window: MoreWindo
     if (gap >= LIFTS_RULES.minGap) lifts.push({ tag, a, b, gap, days: used });
   }
   return lifts
-    .sort((x, y) => y.gap - x.gap || y.days - x.days || x.tag.localeCompare(y.tag))
+    // Names by plain code units, never the locale's collation, so the app orders them the same (UX 14 Nov).
+    .sort((x, y) => y.gap - x.gap || y.days - x.days || (x.tag < y.tag ? -1 : x.tag > y.tag ? 1 : 0))
     .slice(0, LIFTS_RULES.max)
     .map(({ tag, a, b, gap }) => ({ tag, a, b, gap }));
 }

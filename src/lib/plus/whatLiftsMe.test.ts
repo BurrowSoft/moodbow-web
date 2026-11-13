@@ -63,6 +63,22 @@ describe("the rules (content/what-lifts-me.json)", () => {
     expect(new Set(lifts.map((l) => l.gap)).size).toBe(1);
   });
 
+  // Parity with the app (UX 14 Nov): sum, then divide, then round half away from zero to one
+  // decimal, each side; the gap from the rounded sides. 4.35 → 4.4 and 3.45 → 3.5, so 0.9.
+  it("an average ending in 5 rounds up, each side, before the gap", () => {
+    const days: [number, string[]][] = [...repeat(13, [4, ["walk"]] as [number, string[]]), ...repeat(7, [5, ["walk"]] as [number, string[]]), ...repeat(11, [3, []] as [number, string[]]), ...repeat(9, [4, []] as [number, string[]])];
+    expect(run(days)).toEqual([{ tag: "walk", a: { days: 20, mood: 4.4 }, b: { days: 20, mood: 3.5 }, gap: 0.9 }]);
+  });
+
+  // Names by code units, not the locale's order: "Zebra" (Z, U+005A) before "apple" (a, U+0061),
+  // and "Éclair" (É, U+00C9) after both, as the app's compare has them.
+  it("the same gap and days: names by plain code units", () => {
+    const days: [number, string[]][] = [];
+    for (const tag of ["apple", "Éclair", "Zebra"]) days.push(...repeat(5, [5, [tag]] as [number, string[]]));
+    days.push(...repeat(20, [3, []] as [number, string[]]));
+    expect(run(days).map((l) => l.tag)).toEqual(["Zebra", "apple", "Éclair"]);
+  });
+
   it("a day's tag counts once; only the period's checked-in days count", () => {
     const { rows, tags } = build([...repeat(5, [5, ["walk", "walk"]] as [number, string[]]), ...repeat(5, [3, []] as [number, string[]])]);
     expect(whatLiftsMe(rows, TODAY, "year", tags, null)[0].a.days).toBe(5);
