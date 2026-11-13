@@ -8,3 +8,5 @@ topic: Your journal
 When the check-in you saved today is **Awful** or **Bad**, Today shows **Things that help you**, with your list. **Not now** hides it for the rest of the day on this device. If you change today's check-in to a better mood, it goes.
 
 **Breathe for a minute** opens **A minute to breathe**: breathe in for 4, out for 6, for one minute, and then it ends by itself. **Stop** is always there. If you feel dizzy, stop and breathe normally. You can also start it from **Me → Things that help me**.{/pending}
+
+{pending:app_grounding|grounding_live}Under **Breathe for a minute**, **Me → Things that help me** has three more. **5-4-3-2-1** goes through one sense at a time, with **Next** and **Back**. **Body scan (2 min)** moves through your body in six steps, with **Pause** and **Stop** always there. **Name it** shows the mood words from your check-ins: tap one. Nothing is saved. **Want to talk to someone?** is on each of these screens.{/pending}

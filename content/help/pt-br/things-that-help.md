@@ -8,3 +8,5 @@ topic: Your journal
 Quando o check-in que você salvou hoje é **Muito mal** ou **Mal**, Hoje mostra **O que ajuda você**, com a sua lista. **Agora não** esconde o cartão pelo resto do dia neste aparelho. Se você mudar o check-in de hoje para um humor melhor, ele some.
 
 **Respirar por um minuto** abre **Um minuto para respirar**: inspire contando 4 e expire contando 6, por um minuto, e depois termina sozinho. **Parar** está sempre à vista. Se sentir tontura, pare e respire normalmente. Você também pode começar por **Perfil → O que me ajuda**.{/pending}
+
+{pending:app_grounding|grounding_live}Abaixo de **Respirar por um minuto**, **Perfil → O que me ajuda** tem mais três. **5-4-3-2-1** passa por um sentido de cada vez, com **Próximo** e **Voltar**. **Escaneamento corporal (2 min)** percorre o seu corpo em seis passos, com **Pausar** e **Parar** sempre à vista. **Dê um nome** mostra as palavras de humor dos seus check-ins: toque em uma. Nada é salvo. **Quer conversar com alguém?** está em cada uma dessas telas.{/pending}

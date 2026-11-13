@@ -8,3 +8,5 @@ topic: Your journal
 Wenn dein heute gespeicherter Check-in **Furchtbar** oder **Schlecht** ist, zeigt Heute **Was dir hilft** mit deiner Liste. **Nicht jetzt** blendet die Karte für den Rest des Tages auf diesem Gerät aus. Wenn du den heutigen Check-in auf eine bessere Stimmung änderst, verschwindet sie.
 
 **Eine Minute atmen** öffnet **Eine Minute zum Atmen**: 4 Sekunden einatmen, 6 Sekunden ausatmen, eine Minute lang, dann endet es von selbst. **Stopp** ist immer zu sehen. Wenn dir schwindlig wird, hör auf und atme normal weiter. Du kannst es auch unter **Ich → Was mir hilft** starten.{/pending}
+
+{pending:app_grounding|grounding_live}Unter **Eine Minute atmen** findest du in **Ich → Was mir hilft** drei weitere. **5-4-3-2-1** geht einen Sinn nach dem anderen durch, mit **Weiter** und **Zurück**. **Body-Scan (2 Min.)** geht in sechs Schritten durch deinen Körper, **Pause** und **Stopp** sind immer da. **Benennen** zeigt die Stimmungswörter aus deinen Check-ins: Tippe auf eins. Nichts wird gespeichert. **Möchtest du mit jemandem reden?** ist auf jedem dieser Bildschirme.{/pending}
