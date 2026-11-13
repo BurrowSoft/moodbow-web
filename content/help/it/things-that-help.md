@@ -7,4 +7,4 @@ topic: Your journal
 
 Quando il check-in che hai salvato oggi è **Malissimo** o **Male**, Oggi mostra **Cose che ti aiutano**, con la tua lista. **Non ora** la nasconde per il resto della giornata su questo dispositivo. Se cambi il check-in di oggi con un umore migliore, sparisce.
 
-**Respira per un minuto** apre **Un minuto per respirare**: inspira contando fino a 4 ed espira contando fino a 6, per un minuto, poi finisce da solo. **Stop** è sempre visibile. Se ti gira la testa, fermati e respira normalmente. Puoi avviarlo anche da **Profilo → Cose che mi aiutano**.{/pending}
+**Respira per un minuto** apre **Un minuto per respirare**: inspira contando fino a 4 ed espira contando fino a 6, per un minuto, poi finisce da solo. **Interrompi** è sempre visibile. Se ti gira la testa, fermati e respira normalmente. Puoi avviarlo anche da **Profilo → Cose che mi aiutano**.{/pending}
