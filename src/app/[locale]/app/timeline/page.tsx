@@ -51,35 +51,37 @@ export default async function TimelinePage({ params, searchParams }: PageProps<"
 
   const momentsReady = pageGate("timeline-moments-rpc") !== "hidden";
   const momentsOnly = momentsReady && (await searchParams).view === "moments";
-  const page = await loadTimeline(null, momentsOnly);
-  if (page.status === "error") return <JournalUnavailable />;
-
-  const t = await getTranslations("timeline");
-  const dateLocaleTag = dateLocale(locale, (await headers()).get("accept-language"), me.profile?.country ?? null);
 
   // On this day (1.1 A): a moment from a month, 6 months or a year ago today
   // (the profile's today), never a crisis-flagged one. A failed read just
   // means no card.
-  let onThisDay: { kind: OnThisDayKind; entry: MomentRow; mood: number | null } | null = null;
-  if (pageGate("on-this-day-live") !== "hidden") {
+  const readOnThisDay = async (): Promise<{ kind: OnThisDayKind; entry: MomentRow; mood: number | null } | null> => {
+    if (pageGate("on-this-day-live") === "hidden") return null;
     const dates = onThisDayDates(me.today).map((d) => d.date);
     const { data: moments } = await supabase.from("entries").select("id, entry_date, body, is_moment, created_at").eq("is_moment", true).in("entry_date", dates);
     const picked = pickOnThisDay((moments ?? []) as MomentRow[], me.today, CRISIS_KEYWORDS);
-    if (picked) {
-      const { data: checkIn } = await supabase.from("check_ins").select("mood").eq("local_date", picked.entry.entry_date).maybeSingle();
-      onThisDay = { ...picked, mood: (checkIn as { mood: number } | null)?.mood ?? null };
-    }
-  }
-  const filter = segment;
-  const shareable = pageGate("share-cards") !== "hidden";
-  const printable = pageGate("print-live") !== "hidden";
-
+    if (!picked) return null;
+    const { data: checkIn } = await supabase.from("check_ins").select("mood").eq("local_date", picked.entry.entry_date).maybeSingle();
+    return { ...picked, mood: (checkIn as { mood: number } | null)?.mood ?? null };
+  };
   // Month calendar (1.1 M): List · Calendar, the choice from its cookie so
   // the chosen view paints first; this month is read here only for the
   // calendar (it draws at once). On this day stays above both.
   const calendarLive = pageGate("calendar-live") !== "hidden";
-  const view = calendarLive ? parseView((await cookies()).get(VIEW_COOKIE)?.value) : "list";
-  const calendarInitial = view === "calendar" ? await loadCalendarMonth(monthOf(me.today)) : null;
+  const readCalendar = async () => {
+    const view = calendarLive ? parseView((await cookies()).get(VIEW_COOKIE)?.value) : "list";
+    return { view, calendarInitial: view === "calendar" ? await loadCalendarMonth(monthOf(me.today)) : null };
+  };
+  // The list, On this day and the calendar need only `me`, so they're read together (the Web Dev's
+  // LCP read, 12 Nov: each one in turn cost a round trip to the database). Same reads, same results.
+  const [page, onThisDay, { view, calendarInitial }, requestHeaders] = await Promise.all([loadTimeline(null, momentsOnly), readOnThisDay(), readCalendar(), headers()]);
+  if (page.status === "error") return <JournalUnavailable />;
+
+  const t = await getTranslations("timeline");
+  const dateLocaleTag = dateLocale(locale, requestHeaders.get("accept-language"), me.profile?.country ?? null);
+  const filter = segment;
+  const shareable = pageGate("share-cards") !== "hidden";
+  const printable = pageGate("print-live") !== "hidden";
 
   const onThisDayCard = onThisDay && (
     <OnThisDay
