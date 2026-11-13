@@ -174,7 +174,7 @@ export function GroundingLinks() {
 export function GoodThingsLink() {
   const t = useTranslations("entry");
   return (
-    <Link href={`/app/write/good-things?from=${encodeURIComponent(TOOLBOX)}`} data-testid="toolbox-good-things" className={dialogButton()}>
+    <Link href={`/app/write/good-things?from=${encodeURIComponent(TOOLBOX)}`} data-testid="toolbox-good-things" className={button()}>
       {t("goodThingsTitle")}
     </Link>
   );
