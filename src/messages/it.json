@@ -294,7 +294,11 @@
     "entryNewTitle": "Nuova pagina",
     "entryEditTitle": "Modifica pagina",
     "entryAddMore": "Aggiungi a questa pagina…",
-    "entryMoreActions": "Altre opzioni"
+    "entryMoreActions": "Altre opzioni",
+    "goodThingsTitle": "Tre cose belle",
+    "goodThings1": "Una cosa bella",
+    "goodThings2": "Un'altra",
+    "goodThings3": "E un'altra ancora"
   },
   "notFound": {
     "title": "Pagina non trovata",

@@ -294,7 +294,11 @@
     "entryNewTitle": "บันทึกใหม่",
     "entryEditTitle": "แก้ไขบันทึก",
     "entryAddMore": "เขียนเพิ่มในบันทึกนี้…",
-    "entryMoreActions": "ตัวเลือกเพิ่มเติม"
+    "entryMoreActions": "ตัวเลือกเพิ่มเติม",
+    "goodThingsTitle": "สามเรื่องดีๆ",
+    "goodThings1": "เรื่องดีๆ เรื่องหนึ่ง",
+    "goodThings2": "อีกเรื่อง",
+    "goodThings3": "และอีกหนึ่งเรื่อง"
   },
   "notFound": {
     "title": "ไม่พบหน้านี้",

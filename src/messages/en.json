@@ -294,7 +294,11 @@
     "entryNewTitle": "New entry",
     "entryEditTitle": "Edit entry",
     "entryAddMore": "Add to this entry…",
-    "entryMoreActions": "More options"
+    "entryMoreActions": "More options",
+    "goodThingsTitle": "Three good things",
+    "goodThings1": "One good thing",
+    "goodThings2": "Another",
+    "goodThings3": "And one more"
   },
   "notFound": {
     "title": "Page not found",

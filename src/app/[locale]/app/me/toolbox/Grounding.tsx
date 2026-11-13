@@ -165,3 +165,14 @@ export function GroundingLinks() {
     </div>
   );
 }
+
+// Three good things (1.3, good-things-live), from the list too (Ruling 9): the entry editor's own
+// screen, with Back to here.
+export function GoodThingsLink() {
+  const t = useTranslations("entry");
+  return (
+    <Link href={`/app/write/good-things?from=${encodeURIComponent(TOOLBOX)}`} data-testid="toolbox-good-things" className={dialogButton()}>
+      {t("goodThingsTitle")}
+    </Link>
+  );
+}

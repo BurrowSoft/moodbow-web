@@ -294,7 +294,11 @@
     "entryNewTitle": "Nova anotação",
     "entryEditTitle": "Editar anotação",
     "entryAddMore": "Continuar esta anotação…",
-    "entryMoreActions": "Mais opções"
+    "entryMoreActions": "Mais opções",
+    "goodThingsTitle": "Três coisas boas",
+    "goodThings1": "Uma coisa boa",
+    "goodThings2": "Outra",
+    "goodThings3": "E mais uma"
   },
   "notFound": {
     "title": "Página não encontrada",
