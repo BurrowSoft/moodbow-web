@@ -1020,6 +1020,11 @@
     "reason": "UX draft (native read pending)"
   },
   {
+    "key": "onboarding.consentNotice",
+    "en": "Moodbow is run by Vitor Ribeiro Carvalho, trading as BurrowSoft, Thailand. We keep your journal, including sensitive data such as your mood and health, to run your account and show it back to you. We don't sell it or use it for ads. You can change or delete it in Me. The Privacy Policy has the details.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
     "key": "common.securityNotice",
     "en": "There's an important security update about Moodbow.",
     "reason": "UX draft (native read pending)"

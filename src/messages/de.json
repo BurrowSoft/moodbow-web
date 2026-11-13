@@ -177,6 +177,7 @@
     "welcomeStart": "Los geht’s",
     "welcomeHaveAccount": "Ich habe schon ein Konto",
     "consentTitle": "Bevor du startest",
+    "consentNotice": "Moodbow wird von Vitor Ribeiro Carvalho betrieben, tätig als BurrowSoft, in Thailand. Wir bewahren dein Tagebuch auf, einschließlich sensibler Daten wie deiner Stimmung und Gesundheit, um dein Konto zu betreiben und es dir anzuzeigen. Wir verkaufen es nicht und nutzen es nicht für Werbung. Du kannst es unter Ich ändern oder löschen. Die Datenschutzerklärung enthält die Details.",
     "consentPrivacy": "Ich stimme den Nutzungsbedingungen und der Datenschutzerklärung zu",
     "consentHealth": "Ich stimme zu, dass Moodbow mein Tagebuch, das Angaben zu meiner Gesundheit und meinem Wohlbefinden enthalten kann, speichert und verarbeitet, um den Dienst bereitzustellen.",
     "consentReadTerms": "Nutzungsbedingungen lesen",
