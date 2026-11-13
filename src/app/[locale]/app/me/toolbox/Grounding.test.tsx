@@ -128,3 +128,27 @@ describe("the three on the list", () => {
     expect(screen.getByTestId("toolbox-body-scan")).toHaveTextContent(m.groundingBodyScan);
   });
 });
+
+// #299's journey: at 300 % on a 320 px phone Pause wrapped under Stop, below the first view. The
+// buttons are 48 px in px and their text stops growing at about 200 % (UX 14 Nov).
+describe("the buttons stay a touch size at large text", () => {
+  it("every grounding button and link is min-h-[48px] (px, not rem) with its text capped", () => {
+    const { unmount } = wrap(<BodyScan />);
+    const all = () => [...document.querySelectorAll<HTMLElement>("a, button")];
+    const check = () => {
+      for (const el of all()) {
+        expect(el.className, el.dataset.testid).toContain("min-h-[48px]");
+        expect(el.className, el.dataset.testid).not.toMatch(/(^|\s)min-h-11(\s|$)/);
+        expect(el.className, el.dataset.testid).toContain("[font-size:min(1rem,max(10vw,32px))]");
+      }
+    };
+    check();
+    unmount();
+    for (const ui of [<FiveSenses key="f" />, <NameIt key="n" moods={[1, 2]} />, <GroundingLinks key="g" />]) {
+      const r = wrap(ui);
+      expect(all().length).toBeGreaterThan(0);
+      check();
+      r.unmount();
+    }
+  });
+});
