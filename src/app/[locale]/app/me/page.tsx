@@ -24,6 +24,8 @@ import { YourData } from "./YourData";
 import { ImportData } from "./ImportData";
 import { headers } from "next/headers";
 import { dateLocale } from "@/lib/journal/today";
+import { plusPriceLabel, readPlusView } from "@/lib/plus/view";
+import { PlusInMe } from "./PlusInMe";
 
 // The export (export_my_data may take 30 s: lib/supabase/deadline) and the
 // import batches run in this page's functions: 60, so their own clean error
@@ -55,6 +57,8 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
   const tm = await getTranslations("me");
   const tc = await getTranslations("common");
   const link = "font-medium text-accent underline underline-offset-4";
+  // Unreadable: nothing about Plus at all (null), never an offer to someone who may pay.
+  const plus = pageGate("plus") !== "hidden" ? await readPlusView(supabase, user.id) : null;
 
   return (
     <section className="space-y-8">
@@ -62,6 +66,8 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
       {/* Get help now (M8): at the top, on its own, AI or not; not repeated
           under Help (decision 128). */}
       <GetHelpNow country={me.profile?.country} testId="me-get-help" neutral />
+      {/* Moodbow Plus (decision 246): always after help, never in front of it. */}
+      {plus && <PlusInMe view={plus} price={plusPriceLabel(locale)} />}
 
       {aiShown(me) && (
         <AiSettings
@@ -118,10 +124,10 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
         languages={offeredLocales().map((code): [string, string] => [code, tc(`languageNames.${code}`)])}
       />
       <Appearance shortcuts={pageGate("shortcuts-live") !== "hidden"} />
-      <YourData credits={me.credits?.balance ?? 0} uid={user.id} csv={pageGate("export-csv-live") !== "hidden"} ai={conditionMet("ai-live")} />
+      <YourData credits={me.credits?.balance ?? 0} uid={user.id} csv={pageGate("export-csv-live") !== "hidden"} ai={conditionMet("ai-live")} plusSource={plus?.kind === "plus" ? plus.source : plus?.kind === "past_due" ? "stripe" : null} />
       {/* Import from another app (1.1 K), with Your data, where it's on. */}
       {pageGate("import-live") !== "hidden" && (
-        <ImportData uid={user.id} today={me.today} dateLocaleTag={dateLocale(locale, (await headers()).get("accept-language"), me.profile?.country ?? null)} country={me.profile?.country} />
+        <ImportData uid={user.id} today={me.today} dateLocaleTag={dateLocale(locale, (await headers()).get("accept-language"), me.profile?.country ?? null)} country={me.profile?.country} tags={pageGate("tags-live") !== "hidden"} />
       )}
 
       <section aria-labelledby="me-help" className="rounded-3xl border border-border bg-surface p-[24px]">

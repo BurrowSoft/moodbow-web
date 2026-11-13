@@ -43,6 +43,10 @@
       "created_at": "2026-10-02T01:30:00+00:00", "updated_at": "2026-10-02T01:30:00+00:00"
     }
   ],
+  "check_in_tags": [
+    { "local_date": "2026-09-28", "tag": "Walk" },
+    { "local_date": "2026-09-28", "tag": "Friends" }
+  ],
   "entries": [
     {
       "id": "e1", "entry_date": "2026-09-30", "body": "Long day.\r\nBut a good talk with Mai at the end — ขอบคุณ.\r\n\r\n",

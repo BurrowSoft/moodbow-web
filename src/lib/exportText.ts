@@ -20,6 +20,8 @@ export type ExportDoc = {
   account?: { email?: string | null } | null;
   check_ins?: CheckInRow[];
   entries?: EntryRow[];
+  // Tags on a check-in (the app's migration 029): each day's, in the order added.
+  check_in_tags?: { local_date: string; tag: string }[];
   ai_reflections?: ReflectionRow[];
   ai_memories?: MemoryRow[];
 };
@@ -67,6 +69,8 @@ export function renderExportText(doc: ExportDoc, t: Translate): string {
   );
 
   const checkIns = doc.check_ins ?? [];
+  const tagsByDay = new Map<string, string[]>();
+  for (const t of doc.check_in_tags ?? []) tagsByDay.set(t.local_date, [...(tagsByDay.get(t.local_date) ?? []), t.tag]);
   if (checkIns.length > 0) {
     const lines = checkIns.map((c) => {
       const parts = [c.local_date, field(t("export.exportMood"), t("export.exportMoodValue", { label: t(`today.mood${c.mood}`), value: num(c.mood) }))];
@@ -81,6 +85,9 @@ export function renderExportText(doc: ExportDoc, t: Translate): string {
         parts.push(field(t("export.exportExercise"), m === 0 ? t("today.exerciseNone") : m === 90 ? t("today.exercise90") : t("today.exerciseMinutes", { minutes: num(m) })));
       }
       if (c.stress !== null && c.stress !== undefined) parts.push(field(t("export.exportStress"), t("export.exportOfFive", { value: num(c.stress) })));
+      // The day's tags, last, in the order added ("Tags: Walk, Rain"; UX, 11 Nov).
+      const tags = tagsByDay.get(c.local_date);
+      if (tags?.length) parts.push(field(t("export.exportTags"), tags.join(", ")));
       return parts.join(" · ");
     });
     blocks.push([t("export.exportCheckins"), ...lines].join("\n"));

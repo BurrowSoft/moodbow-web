@@ -30,6 +30,7 @@ import { parseToolboxItems } from "@/lib/journal/toolbox";
 import { SecurityNoticeRead } from "./SecurityNoticeRead";
 import { JOURNAL_HEADING } from "@/lib/ui/journalLayout";
 import { GetHelpNow } from "@/components/SafetyCard";
+import { readCardTags } from "@/lib/journal/tagsData";
 
 // A stuck request ends here at the latest (UX, the timeout audit); each
 // data call gives up after 15 s on its own (lib/supabase/deadline).
@@ -99,6 +100,9 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
     }
   }
 
+  // Tags on the check-in (tags-live): the day's and the person's recent ones.
+  const cardTags = await readCardTags(supabase, me.today);
+
   return (
     <section className="space-y-8">
       <Suspense fallback={null}>
@@ -132,7 +136,7 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
         </div>
         <GetHelpNow country={me.profile?.country} testId="today-help" neutral icon />
       </header>
-      <CheckInCard key={checkInError ? "unread" : "read"} initial={(data as CheckIn | null) ?? null} uid={user.id} date={me.today} dateLocaleTag={dateLocaleTag} keepDraft loadFailed={Boolean(checkInError)} />
+      <CheckInCard key={checkInError ? "unread" : "read"} initial={(data as CheckIn | null) ?? null} uid={user.id} date={me.today} dateLocaleTag={dateLocaleTag} keepDraft loadFailed={Boolean(checkInError)} {...cardTags} country={me.profile?.country} />
       {toolboxOn && <ToolboxCard uid={user.id} today={me.today} todayMood={(data as CheckIn | null)?.mood ?? null} items={toolbox} />}
       {/* With letters on, always: a day's Not now may leave the help offer alone (LetterCard). */}
       {lettersOn && <LetterCard letter={letter} uid={user.id} today={me.today} country={me.profile?.country} />}

@@ -7,7 +7,7 @@ import type { Locale } from "@/i18n/routing";
 import { JournalUnavailable } from "@/components/JournalUnavailable";
 import { SessionEnded } from "@/components/SessionEnded";
 import { currentUser } from "@/lib/journal/currentUser";
-import { isRange, previousRangeStart, rangeDays, series, type InsightRow, type Range } from "@/lib/journal/insights";
+import { isRange, METRICS, previousRangeStart, rangeDays, series, type InsightRow, type Range } from "@/lib/journal/insights";
 import { loadMilestone } from "@/lib/share/milestoneData";
 import { yearOnOffer } from "@/lib/share/year";
 import { aiShown, canReflect } from "@/lib/journal/ai";
@@ -20,6 +20,14 @@ import { YourWeekCard } from "./YourWeekCard";
 import { tabMetadata } from "../pageMeta";
 import { InsightsView } from "./InsightsView";
 import { safetyPlanHasContent } from "../me/safety-plan/actions";
+import { MorePatternsCard, MorePatternsRow, PlusTabs, WeekLine, YearTab } from "./PlusInsights";
+import { insightsOffer, plusPriceLabel, readPlusView } from "@/lib/plus/view";
+import { isLongRange, longRangeStart, longSummary } from "@/lib/plus/longRange";
+import { morePatterns, moreWindowStart } from "@/lib/plus/morePatterns";
+import { tagPatterns, tagsByDayFrom, type TagPattern } from "@/lib/plus/tagPatterns";
+import { whatLiftsMe, type Lift } from "@/lib/plus/whatLiftsMe";
+import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
+import { periodLine, readCheckInsSince, readWrittenDays } from "@/lib/plus/insightsData";
 import { ShareMonth } from "./ShareMonth";
 import { WeeklyReport } from "./WeeklyReport";
 
@@ -57,14 +65,17 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
   const shareOn = pageGate("share-cards") !== "hidden";
   const weekly = pageGate("weekly-report-live") !== "hidden";
   const weekStart = lastWeekStart(me.today);
+  const freeStart = [chartsStart, ...(withPatterns ? [patternsStart] : []), ...(withYourWeek ? [weekStart] : [])].sort()[0];
   // The page's reads all need only `me`, so they start together (the Web Dev's LCP read, 12 Nov:
-  // each one in turn cost a round trip to the database). Same reads, same results.
-  const [checkIns, milestone, stored, moments, requestHeaders] = await Promise.all([
+  // each one in turn cost a round trip to the database). Same reads, same results. Moodbow Plus's
+  // view is one of them (decision 246): null when its row can't be read (then nothing about Plus).
+  const [checkIns, plus, milestone, stored, moments, requestHeaders] = await Promise.all([
     supabase
       .from("check_ins")
       .select("local_date, mood, sleep_hours, stress, exercise_minutes")
-      .gte("local_date", [chartsStart, ...(withPatterns ? [patternsStart] : []), ...(withYourWeek ? [weekStart] : [])].sort()[0])
+      .gte("local_date", freeStart)
       .lte("local_date", me.today),
+    pageGate("plus") !== "hidden" ? readPlusView(supabase, user.id) : null,
     shareOn && more ? loadMilestone(supabase) : undefined,
     weekly && canReflect(me)
       ? supabase.from("ai_reports").select("id, period_start, body, tier, created_at").eq("kind", "weekly").eq("period_start", weekStart).maybeSingle()
@@ -73,12 +84,27 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
     withYourWeek ? supabase.from("entries").select("id, entry_date").eq("is_moment", true).gte("entry_date", weekStart).lte("entry_date", sixDaysAfter(weekStart)) : null,
     headers(),
   ]);
-  const { data, error } = checkIns;
-  if (error) return <JournalUnavailable />;
+  // With Plus: Year and All time, and More patterns over the last 12 months (or all time on All time).
+  const hasPlus = plus?.kind === "plus";
+  const longRange = hasPlus && isLongRange(asked) ? asked : null;
+  const moreWindow = longRange === "all" ? "all" : "year";
+  let rows: InsightRow[];
+  if (hasPlus) {
+    // Only with Plus, one read more, further back (it needs the view first): Year needs 24 months
+    // (its 12 and the 12 before), More patterns 12, All time everything. Without Plus, the page
+    // keeps the single parallel read above.
+    const plusStart = longRange === "all" ? null : [freeStart, longRange ? longRangeStart(longRange, me.today)! : freeStart, moreWindowStart("year", me.today)!].sort()[0];
+    const read = await readCheckInsSince(supabase, plusStart, me.today);
+    if (!read) return <JournalUnavailable />;
+    rows = read;
+  } else {
+    const { data, error } = checkIns;
+    if (error) return <JournalUnavailable />;
+    rows = (data ?? []) as InsightRow[];
+  }
   // Share: the current month's moodbow (M10), where share cards are on; and,
   // where the 1.1 cards are on too (decision 169), this range's mood line
   // (the chart card) and the milestone reached, if any.
-  const rows = (data ?? []) as InsightRow[];
   const dateLocaleTag = dateLocale(locale, requestHeaders.get("accept-language"), me.profile?.country ?? null);
   const share = shareOn ? (
     <ShareMonth
@@ -105,11 +131,70 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
   }
   // Your week (specs/your-week.md), no AI: today is the saved time zone's, from get_me.
   let summary: React.ReactNode = null;
+  let hardWeek = false;
   if (withYourWeek) {
     const result = yourWeek(rows, me.today, (moments?.data ?? []) as YourWeekMoment[]);
     // A hard week offers the safety plan too, where it has content (1.2): a yes or no, read only then.
     const planLink = result?.kind === "hard" && pageGate("safety-plan-live") !== "hidden" ? await safetyPlanHasContent() : false;
     if (result) summary = <YourWeekCard week={result} country={me.profile?.country} dateLocaleTag={dateLocaleTag} planLink={planLink} />;
+    // Plus's quiet line goes under Your week, never under a hard week's help offer.
+    hardWeek = result?.kind === "hard";
   }
-  return <InsightsView rows={rows} today={me.today} range={range} share={share} summary={summary} week={week} patterns={withPatterns ? patterns(rows, me.today) : undefined} />;
+  // Its locked items only for someone without Plus, none on a hard week. With
+  // Plus, the views are theirs and show on a hard week too, with no offer (UX).
+  const offer = insightsOffer(plus, hardWeek, plusPriceLabel(locale));
+  let long: React.ComponentProps<typeof InsightsView>["long"];
+  if (longRange) {
+    const firstCheckIn = rows.length > 0 ? rows[0].local_date : null;
+    const charts = {} as NonNullable<typeof long>["charts"];
+    for (const m of METRICS) charts[m] = longSummary(rows, me.today, longRange, m, firstCheckIn);
+    const { unit, periods } = longSummary(rows, me.today, longRange, "mood", firstCheckIn);
+    long = { range: longRange, unit, periodLine: periodLine(periods[0].start, periods[periods.length - 1].end, dateLocaleTag), charts };
+  }
+  let plusMore: React.ReactNode = null;
+  if (hasPlus && withPatterns) {
+    const written = await readWrittenDays(supabase, moreWindowStart(moreWindow, me.today), me.today);
+    // A failed read of the days written: the card without that line, never a guess.
+    // More patterns by tag (UX, 12 Nov), where tags are on: the period's tags, the person's own
+    // (RLS). A failed read: no tag lines, never a guess.
+    let tagLines: TagPattern[] = [];
+    // What lifts me (1.3): from the same rows, computed here and now, never stored or logged.
+    let lifts: Lift[] | null = null;
+    if (pageGate("tags-live") !== "hidden") {
+      const start = moreWindowStart(moreWindow, me.today);
+      let query = supabase.from("check_in_tags").select("local_date, tag, created_at").lte("local_date", me.today);
+      if (start) query = query.gte("local_date", start);
+      const { data: tagRows, error: tagError } = await query;
+      if (!tagError && tagRows) {
+        const byDay = tagsByDayFrom(tagRows as { local_date: string; tag: string; created_at: string | null }[]);
+        tagLines = tagPatterns(rows, me.today, moreWindow, byDay, CRISIS_KEYWORDS);
+        // With 1.3, not with the Plus stack (lifts-live, UX 14 Nov).
+        if (pageGate("lifts-live") !== "hidden") lifts = whatLiftsMe(rows, me.today, moreWindow, byDay, CRISIS_KEYWORDS);
+      }
+    }
+    plusMore = <MorePatternsCard window={moreWindow} patterns={morePatterns(rows, me.today, moreWindow, written ?? new Set()).filter((p) => written || p.id !== "writing")} tags={tagLines} lifts={lifts} country={me.profile?.country ?? null} />;
+  }
+  return (
+    <InsightsView
+      rows={rows}
+      today={me.today}
+      range={range}
+      share={share}
+      summary={
+        offer && summary ? (
+          <>
+            {summary}
+            <WeekLine offer={offer} />
+          </>
+        ) : (
+          summary
+        )
+      }
+      week={week}
+      patterns={withPatterns ? patterns(rows, me.today) : undefined}
+      plusTab={hasPlus ? <PlusTabs current={longRange} /> : offer && <YearTab offer={offer} />}
+      plusPatterns={hasPlus ? plusMore : offer && withPatterns && <MorePatternsRow offer={offer} />}
+      long={long}
+    />
+  );
 }

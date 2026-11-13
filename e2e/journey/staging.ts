@@ -38,6 +38,11 @@ const admin = () => (client ??= createClient(URL_, SECRET, { auth: { persistSess
 
 // Only ever touches users this helper's naming made.
 const ours = (email: string | undefined) => !!email && email.startsWith(PREFIX) && email.endsWith("@example.invalid");
+// The users this run itself created, and those it gave a Plus row: an entitlements row is only
+// ever written for one of the first, and checked gone after its cleanup (UX and the Mobile Dev,
+// 12 Nov: every other row is the Mobile Dev's, by exact id).
+const createdHere = new Set<string>();
+const grantedHere = new Map<string, string>();
 
 async function* users() {
   for (let page = 1; page <= 20; page++) {
@@ -74,6 +79,7 @@ export async function signedUpUnconfirmed(email: string, password: string, { con
     options: { data: { locale, time_zone: "UTC", ...(consents ? { consents: [...grantedAtConsent(), consentItem("age_18")] } : {}) } },
   });
   if (error) throw new Error(`generateLink failed: ${error.message}`);
+  createdHere.add(email);
   return data.properties.hashed_token;
 }
 
@@ -81,6 +87,7 @@ export async function signedUpUnconfirmed(email: string, password: string, { con
 export async function createConfirmedUser(email: string, password: string): Promise<void> {
   const { error } = await admin().createUser({ email, password, email_confirm: true });
   if (error) throw new Error(`createUser failed: ${error.message}`);
+  createdHere.add(email);
 }
 
 // Ends every session of this user, as "sign out everywhere" on another device does.
@@ -158,6 +165,23 @@ export async function seedCheckIns(email: string, password: string, monday: stri
   }
 }
 
+// Tags on seeded days (029), through the app's own RPC, signed in as them, as seedCheckIns. false:
+// staging has no tags yet (set_check_in_tags missing), so the caller can skip, never fake it.
+export async function seedTags(email: string, password: string, monday: string, days: { offset: number; tags: string[] }[]): Promise<boolean> {
+  if (!ours(email)) throw new Error("seedTags only touches this helper's own users");
+  const user = createClient(URL_, PUBLISHABLE, { auth: { persistSession: false, autoRefreshToken: false } });
+  const { error: signInError } = await user.auth.signInWithPassword({ email, password });
+  if (signInError) throw new Error(`sign-in to seed tags failed: ${signInError.message}`);
+  for (const { offset, tags } of days) {
+    const d = new Date(`${monday}T00:00:00Z`);
+    d.setUTCDate(d.getUTCDate() + offset);
+    const { error } = await user.rpc("set_check_in_tags", { p_date: d.toISOString().slice(0, 10), p_tags: tags });
+    if (error?.code === "PGRST202") return false;
+    if (error) throw new Error(`seeding tags failed: ${error.message}`);
+  }
+  return true;
+}
+
 // Whether the account holds a granted AI consent, as get_me says.
 export async function aiConsentGranted(email: string, password: string): Promise<boolean> {
   const user = createClient(URL_, PUBLISHABLE, { auth: { persistSession: false, autoRefreshToken: false } });
@@ -193,6 +217,15 @@ export async function cleanup(email: string): Promise<void> {
   if (!ours(email)) throw new Error("cleanup only deletes e2e-ci-* users");
   const id = await userId(email);
   if (id) await admin().deleteUser(id);
+  // A Plus row this run wrote must have gone with its user (ON DELETE CASCADE); if not, say so
+  // loudly: the Mobile Dev removes it by exact id.
+  const granted = grantedHere.get(email);
+  if (granted) {
+    grantedHere.delete(email);
+    const { data, error } = await database().from("entitlements").select("user_id").eq("user_id", granted);
+    if (error) throw new Error(`the entitlements check after cleanup failed: ${error.message}`);
+    if ((data ?? []).length > 0) throw new Error(`an entitlements row was left for e2e user ${granted}: tell the Mobile Dev`);
+  }
 }
 
 // Users a crashed run left behind (older than 2 h, so a parallel run's are safe).
@@ -201,6 +234,12 @@ export async function sweep(): Promise<number> {
   const stale: string[] = [];
   for await (const u of users()) if (ours(u.email) && Date.parse(u.created_at) < cutoff) stale.push(u.id);
   for (const id of stale) await admin().deleteUser(id);
+  // UX's sweep check: no entitlements row may outlive the e2e users swept here.
+  if (stale.length > 0 && (await plusOnStaging())) {
+    const { data, error } = await database().from("entitlements").select("user_id").in("user_id", stale);
+    if (error) throw new Error(`the entitlements sweep check failed: ${error.message}`);
+    if ((data ?? []).length > 0) throw new Error(`entitlements rows were left for swept e2e users ${(data ?? []).map((r) => r.user_id).join(", ")}: tell the Mobile Dev`);
+  }
   return stale.length;
 }
 
@@ -215,4 +254,29 @@ export async function aiAvailable(email: string, password: string): Promise<bool
   await user.auth.signOut({ scope: "local" });
   if (error) throw new Error(`get_me failed: ${error.message}`);
   return (data as { ai_available?: boolean } | null)?.ai_available === true;
+}
+
+// Moodbow Plus (decision 246): whether staging has 028's entitlements table yet. The Plus pages
+// can't read it before then, so their journeys skip, saying so.
+export async function plusOnStaging(): Promise<boolean> {
+  if (!configured) return false;
+  const { error } = await database().from("entitlements").select("user_id").limit(1);
+  return !error;
+}
+
+// One of ours in the free week, as Checkout's webhook would leave it: a Stripe trial running for
+// 7 days, with no store ids (so no cron or Stripe call ever touches it). It goes with the user.
+// Staging only (the URL check above), never store ids or grace_until.
+export async function grantPlusTrial(email: string): Promise<void> {
+  if (!ours(email)) throw new Error("only e2e-ci-* users get Plus");
+  if (!createdHere.has(email)) throw new Error("grantPlusTrial only writes for a user this run created");
+  const id = await userId(email);
+  if (!id) throw new Error("the signed-up user isn't on staging");
+  const now = Date.now();
+  const end = new Date(now + 7 * 86_400_000).toISOString();
+  const { error } = await database()
+    .from("entitlements")
+    .upsert({ user_id: id, source: "stripe", status: "trialing", trial_started_at: new Date(now).toISOString(), trial_ends_at: end, current_period_end: end });
+  if (error) throw new Error(`the trial row failed: ${error.message}`);
+  grantedHere.set(email, id);
 }

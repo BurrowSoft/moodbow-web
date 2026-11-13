@@ -3,6 +3,7 @@ import { Link } from "@/i18n/navigation";
 import { CHARTS, METRICS, summarize, type InsightRow, type Metric, type Range } from "@/lib/journal/insights";
 import type { Pattern, PatternId } from "@/lib/journal/patterns";
 import { JOURNAL_HEADING, segment } from "@/lib/ui/journalLayout";
+import type { LongRange, LongSummary, Unit } from "@/lib/plus/longRange";
 import { Chart } from "./Chart";
 
 const RANGE_TABS: { range: Range; key: "rangeWeek" | "rangeMonth" | "range3Months" }[] = [
@@ -42,6 +43,9 @@ export function InsightsView({
   summary,
   week,
   patterns,
+  plusTab,
+  plusPatterns,
+  long,
 }: {
   rows: InsightRow[];
   today: string;
@@ -50,7 +54,15 @@ export function InsightsView({
   summary?: React.ReactNode;
   week?: React.ReactNode;
   patterns?: Pattern[];
+  // Moodbow Plus's locked Year tab and More patterns row, for someone without Plus.
+  plusTab?: React.ReactNode;
+  plusPatterns?: React.ReactNode;
+  // Moodbow Plus's Year or All time (someone with Plus): the same charts, one
+  // point per month or quarter (lib/plus/longRange). periodLine: the first and
+  // last period in the browser's own month or quarter names.
+  long?: { range: LongRange; unit: Unit; periodLine: string; charts: Record<Metric, LongSummary> };
 }) {
+  const tp = useTranslations("plus");
   const t = useTranslations("insights");
   const tt = useTranslations("today");
   // Always one decimal for mood, stress and sleep ("4.0", "↑ 1.0": the
@@ -79,20 +91,29 @@ export function InsightsView({
             key={r}
             href={r === "week" ? "/app/insights" : `/app/insights?range=${r}`}
             data-testid={`insights-range-${r}`}
-            aria-current={r === range ? "page" : undefined}
-            className={tab(r === range)}
+            aria-current={!long && r === range ? "page" : undefined}
+            className={tab(!long && r === range)}
           >
             {t(key)}
           </Link>
         ))}
+        {plusTab}
       </nav>
 
       {week}
 
+      {long && (
+        <div className="mt-6 space-y-1" data-testid="insights-long-heading">
+          <p className="font-medium text-text">{long.range === "year" ? tp("yearSubtitle") : long.unit === "quarter" ? tp("allSubtitleQuarter") : tp("allSubtitleMonth")}</p>
+          <p className="text-sm text-muted" data-testid="insights-long-period">
+            {long.periodLine}
+          </p>
+        </div>
+      )}
       <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2">
         {METRICS.map((metric) => {
           const chart = CHARTS[metric];
-          const s = summarize(rows, today, range, metric);
+          const s = long ? { ...long.charts[metric], missing: 0 } : summarize(rows, today, range, metric);
           const titleId = `chart-${metric}-title`;
           const summaryId = `chart-${metric}-summary`;
           return (
@@ -103,7 +124,7 @@ export function InsightsView({
               {s.enough && s.average !== null ? (
                 <>
                   <div className="mt-3">
-                    <Chart kind={chart.kind} points={s.points} min={chart.min} max={chart.max} labelledBy={`${titleId} ${summaryId}`} colourKey={chart.colourKey} gradientId={`chart-${metric}-gradient`} dots={range === "3months" ? "isolated" : "all"} />
+                    <Chart kind={chart.kind} points={s.points} min={chart.min} max={chart.max} labelledBy={`${titleId} ${summaryId}`} colourKey={chart.colourKey} gradientId={`chart-${metric}-gradient`} dots={!long && range === "3months" ? "isolated" : "all"} />
                   </div>
                   <div id={summaryId} className="mt-3 space-y-1 text-sm">
                     <p className="font-medium text-text" data-testid={`insights-average-${metric}`}>
@@ -113,24 +134,34 @@ export function InsightsView({
                     </p>
                     {s.change !== null && (
                       <p className="text-muted" data-testid={`insights-change-${metric}`}>
-                        {s.change === 0
-                          ? t("chartNoChange", { range })
-                          : t(s.change > 0 ? "chartChangeUp" : "chartChangeDown", { value: withUnit(metric, Math.abs(s.change)), range })}
+                        {long
+                          ? s.change === 0
+                            ? tp("longChangeSame")
+                            : tp(s.change > 0 ? "longChangeUp" : "longChangeDown", { value: withUnit(metric, Math.abs(s.change)) })
+                          : s.change === 0
+                            ? t("chartNoChange", { range })
+                            : t(s.change > 0 ? "chartChangeUp" : "chartChangeDown", { value: withUnit(metric, Math.abs(s.change)), range })}
                       </p>
                     )}
                   </div>
                 </>
               ) : (
                 <p className="mt-3 text-sm text-muted" data-testid={`insights-not-enough-${metric}`}>
-                  {t(NEED_MORE[metric], { count: s.missing })}
+                  {long ? tp("longNotEnough") : t(NEED_MORE[metric], { count: s.missing })}
                 </p>
               )}
             </section>
           );
         })}
       </div>
+      {long && (
+        <p className="mt-3 text-xs text-muted" data-testid="insights-long-footnote">
+          {long.unit === "quarter" ? tp("longFootnoteQuarter") : tp("longFootnoteMonth")}
+        </p>
+      )}
 
       {patterns && <Patterns patterns={patterns} format={(v) => number.format(v)} />}
+      {plusPatterns}
     </section>
   );
 }
