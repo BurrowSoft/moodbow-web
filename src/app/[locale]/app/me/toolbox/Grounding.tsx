@@ -24,7 +24,12 @@ const button = (primary = false) => `${dialogButton(primary).replace("min-h-11",
 function Close({ testId }: { testId: string }) {
   const t = useTranslations("toolbox");
   const line = useRef<HTMLParagraphElement>(null);
-  useEffect(() => line.current?.focus({ preventScroll: true }), []);
+  // A new screen starts at the top, so Back and the help are in view: at 300 % the last steps'
+  // Next sits below the fold, and the page was still scrolled when the close came (#299's journey).
+  useEffect(() => {
+    if (window.scrollY > 0) window.scrollTo(0, 0);
+    line.current?.focus({ preventScroll: true });
+  }, []);
   return (
     <div className="space-y-[16px]">
       <p ref={line} tabIndex={-1} role="status" data-testid={testId} className={`${BIG} outline-none`}>
