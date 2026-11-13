@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import type { LongRange } from "@/lib/plus/longRange";
 import type { MorePattern, MorePatternId, MoreWindow } from "@/lib/plus/morePatterns";
+import type { TagPattern } from "@/lib/plus/tagPatterns";
 import { LockedItem, PlusLock, PlusSheet, type PlusOffer } from "../PlusSheet";
 import { segment } from "@/lib/ui/journalLayout";
 
@@ -81,30 +82,50 @@ const MORE_TEXT: Record<MorePatternId, Record<"shown" | "same", string>> = {
 };
 const FREE_LINES = new Set<MorePatternId>(["sleep", "movement", "stress"]);
 
-export function MorePatternsCard({ patterns, window }: { patterns: MorePattern[]; window: MoreWindow }) {
+// tags: More patterns by tag (UX, 12 Nov), already chosen and ordered (lib/plus/tagPatterns), at
+// most 5; each tag shown as written, as plain text.
+export function MorePatternsCard({ patterns, window, tags = [] }: { patterns: MorePattern[]; window: MoreWindow; tags?: TagPattern[] }) {
   const t = useTranslations("plus");
   const ti = useTranslations("insights");
   const number = new Intl.NumberFormat(useLocale(), { minimumFractionDigits: 1, maximumFractionDigits: 1 });
   const visible = patterns.filter((p): p is Extract<MorePattern, { state: "shown" | "same" }> => p.state !== "not_enough");
+  const tagList =
+    tags.length > 0 ? (
+      <section aria-labelledby="more-tags-title" data-testid="insights-more-tags" className="mt-4">
+        <h3 id="more-tags-title" className="text-sm font-medium text-text">
+          {t("moreTagsTitle")}
+        </h3>
+        <ul className="mt-2 space-y-2 text-sm text-text">
+          {tags.map((p) => (
+            <li key={p.tag} data-testid="insights-more-tag" data-state={p.state} className="[overflow-wrap:anywhere]">
+              {t(p.state === "shown" ? "moreTagShown" : "moreTagSame", { tag: p.tag, a: number.format(p.a.mood), b: number.format(p.b.mood) })}
+            </li>
+          ))}
+        </ul>
+      </section>
+    ) : null;
   return (
     <section data-testid="insights-more-patterns-card" aria-labelledby="more-patterns-title" className="mt-6 rounded-3xl border border-border bg-surface p-[20px]">
       <h2 id="more-patterns-title" className="text-lg font-medium text-text">
         {t("morePatterns")}
       </h2>
       <p className="text-sm text-muted">{window === "all" ? t("moreSubtitleAll") : t("moreSubtitleYear")}</p>
-      {visible.length > 0 ? (
+      {visible.length > 0 || tags.length > 0 ? (
         <>
-          <ul className="mt-3 space-y-2 text-sm text-text">
-            {visible.map((p) => {
-              const values = { a: number.format(p.a.mood), b: number.format(p.b.mood) };
-              const key = MORE_TEXT[p.id][p.state];
-              return (
-                <li key={p.id} data-testid={`insights-more-pattern-${p.id}`} data-state={p.state}>
-                  {FREE_LINES.has(p.id) ? ti(key as Parameters<typeof ti>[0], values) : t(key as Parameters<typeof t>[0], values)}
-                </li>
-              );
-            })}
-          </ul>
+          {visible.length > 0 && (
+            <ul className="mt-3 space-y-2 text-sm text-text">
+              {visible.map((p) => {
+                const values = { a: number.format(p.a.mood), b: number.format(p.b.mood) };
+                const key = MORE_TEXT[p.id][p.state];
+                return (
+                  <li key={p.id} data-testid={`insights-more-pattern-${p.id}`} data-state={p.state}>
+                    {FREE_LINES.has(p.id) ? ti(key as Parameters<typeof ti>[0], values) : t(key as Parameters<typeof t>[0], values)}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+          {tagList}
           <p className="mt-3 text-xs text-muted">{ti("patternsFootnote")}</p>
         </>
       ) : (

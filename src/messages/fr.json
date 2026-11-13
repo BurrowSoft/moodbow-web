@@ -260,7 +260,13 @@
     "checkInConflictMine": "Le vôtre",
     "checkInConflictOther": "Déjà enregistré",
     "checkInConflictKeepMine": "Garder le mien",
-    "checkInConflictUseOther": "Prendre l'autre"
+    "checkInConflictUseOther": "Prendre l'autre",
+    "tagsLabel": "Étiquettes",
+    "tagsPlaceholder": "Ajouter une étiquette",
+    "tagsRecent": "Vos étiquettes",
+    "tagsRemove": "Retirer {tag}",
+    "tagsTooMany": "Jusqu'à 5 étiquettes par jour.",
+    "tagsTooLong": "Une étiquette peut faire jusqu'à 32 caractères."
   },
   "entry": {
     "writeButton": "Raconter votre journée",
@@ -397,7 +403,8 @@
     "exportExercise": "Activité",
     "exportStress": "Stress",
     "exportOfFive": "{value}/5",
-    "exportReflectionOn": "Sur votre note du {date}"
+    "exportReflectionOn": "Sur votre note du {date}",
+    "exportTags": "Étiquettes"
   },
   "help": {
     "helpTitle": "Aide et FAQ",
@@ -592,7 +599,7 @@
     "weekLine": "Envie de regarder plus loin ? Votre année, plus de tendances et un PDF soigné de votre journal viennent avec Plus.",
     "tabYear": "Année",
     "morePatterns": "Plus de tendances",
-    "morePatternsBody": "Semaine et week-end, jours d'écriture, et les 12 derniers mois ou tout l'historique",
+    "morePatternsBody": "Semaine et week-end, jours d'écriture, vos étiquettes, et les 12 derniers mois ou tout l'historique",
     "title": "Allez plus loin avec votre journal",
     "titleHas": "Vous avez Moodbow Plus",
     "lead": "Votre journal, l'aide et vos données restent gratuits pour tous.",
@@ -650,6 +657,9 @@
     "moreWeekdaysSame": "En semaine et le week-end, votre humeur était à peu près la même ({a} et {b} sur 5).",
     "moreWritingShown": "Les jours où vous avez écrit, votre humeur était en moyenne de {a} sur 5. Les autres jours, {b}.",
     "moreWritingSame": "Les jours où vous avez écrit et les autres, votre humeur était à peu près la même ({a} et {b} sur 5).",
-    "moreNone": "D'autres tendances apparaîtront ici quand vous aurez plus de bilans sur cette période."
+    "moreNone": "D'autres tendances apparaîtront ici quand vous aurez plus de bilans sur cette période.",
+    "moreTagsTitle": "Vos étiquettes",
+    "moreTagShown": "Les jours avec l'étiquette « {tag} », votre humeur était en moyenne de {a} sur 5. Les autres jours, {b}.",
+    "moreTagSame": "Les jours avec l'étiquette « {tag} » et les autres, votre humeur était à peu près la même ({a} et {b} sur 5)."
   }
 }

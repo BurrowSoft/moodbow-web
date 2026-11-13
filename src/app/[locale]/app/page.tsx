@@ -20,6 +20,7 @@ import { yearOnOffer } from "@/lib/share/year";
 import { MilestoneCard } from "./MilestoneCard";
 import { SecurityNoticeRead } from "./SecurityNoticeRead";
 import { JOURNAL_HEADING } from "@/lib/ui/journalLayout";
+import { readCardTags } from "@/lib/journal/tagsData";
 
 // A stuck request ends here at the latest (UX, the timeout audit); each
 // data call gives up after 15 s on its own (lib/supabase/deadline).
@@ -67,6 +68,9 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
   const timeZone = me.profile?.time_zone ?? "UTC";
   const dateLocaleTag = dateLocale(locale, requestHeaders.get("accept-language"), me.profile?.country ?? null);
 
+  // Tags on the check-in (tags-live): the day's and the person's recent ones.
+  const cardTags = await readCardTags(supabase, me.today);
+
   return (
     <section className="space-y-8">
       <Suspense fallback={null}>
@@ -94,7 +98,7 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
           {te("writeButton")}
         </Link>
       </header>
-      <CheckInCard key={checkInError ? "unread" : "read"} initial={(data as CheckIn | null) ?? null} uid={user.id} date={me.today} dateLocaleTag={dateLocaleTag} keepDraft loadFailed={Boolean(checkInError)} />
+      <CheckInCard key={checkInError ? "unread" : "read"} initial={(data as CheckIn | null) ?? null} uid={user.id} date={me.today} dateLocaleTag={dateLocaleTag} keepDraft loadFailed={Boolean(checkInError)} {...cardTags} country={me.profile?.country} />
       <Link
         href="/app/write"
         data-testid="today-write"

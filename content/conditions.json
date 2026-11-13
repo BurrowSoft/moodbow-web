@@ -230,5 +230,9 @@
   "thai-offered-live": {
     "met": false,
     "what": "1.1 F: Thai is offered on the web: the native reader has read the Thai UI, Help and dates (thai_reviewed, decision 193), with UX's go. Until then /th is a draft on test builds only (Preview, dev, CI) and Production is English only; the switcher, Me → Language, hreflang and the sitemap offer Thai only once met. The legal pages keep their own gates in every language."
+  },
+  "tags-live": {
+    "met": false,
+    "what": "Tags on a check-in (UX, 11 Nov; free journal data): the person's own words, up to 5 a day, on Today's card and the day view, read by the crisis list on save. Needs the app's migration 029 (check_in_tags, set_check_in_tags, my_recent_tags) on Production, the export and import cases synced from the app, the privacy line (VITOR.md), the Reviewer's read and the tester rows. After the pilot."
   }
 }

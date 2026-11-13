@@ -170,7 +170,7 @@
           }
         ]
       },
-      "csv": "﻿date,mood,mood_word,sleep_hours,sleep_quality,movement_minutes,stress,moment,note\r\n2026-10-01,4,Good,7.5,good,30,2,yes,Morning walk.\r\n2026-10-01,4,Good,7.5,good,30,2,,\"Evening: tea, and \"\"a quiet\"\" talk.\r\nTwo lines.\r\n\r\n\"\r\n2026-10-02,1,Awful,0,,0,,,\r\n2026-10-03,,,,,,,,\"'- milk\n- eggs\"\r\n2026-10-03,,,,,,,,'=SUM(A1:A9) is not a formula here\r\n2026-10-03,,,,,,,,''= starts with an apostrophe\r\n2026-10-04,,,,,,,,\"  indented, with spaces at the end  \"\r\n2026-10-04,,,,,,,,'@mention +1 -1\r\n2026-10-04,,,,,,,,'\tstarts with a tab\r\n2026-10-04,,,,,,,,it's fine; 'quoted' too\r\n2026-10-04,,,,,,,,Same words twice\r\n2026-10-04,,,,,,,,Same words twice\r\n2026-10-05,5,Great,,poor,,5,yes,วันนี้ไปเดินเล่นกับ Mai ✨\r\n"
+      "csv": "﻿date,mood,mood_word,sleep_hours,sleep_quality,movement_minutes,stress,moment,tags,note\r\n2026-10-01,4,Good,7.5,good,30,2,yes,,Morning walk.\r\n2026-10-01,4,Good,7.5,good,30,2,,,\"Evening: tea, and \"\"a quiet\"\" talk.\r\nTwo lines.\r\n\r\n\"\r\n2026-10-02,1,Awful,0,,0,,,,\r\n2026-10-03,,,,,,,,,\"'- milk\n- eggs\"\r\n2026-10-03,,,,,,,,,'=SUM(A1:A9) is not a formula here\r\n2026-10-03,,,,,,,,,''= starts with an apostrophe\r\n2026-10-04,,,,,,,,,\"  indented, with spaces at the end  \"\r\n2026-10-04,,,,,,,,,'@mention +1 -1\r\n2026-10-04,,,,,,,,,'\tstarts with a tab\r\n2026-10-04,,,,,,,,,it's fine; 'quoted' too\r\n2026-10-04,,,,,,,,,Same words twice\r\n2026-10-04,,,,,,,,,Same words twice\r\n2026-10-05,5,Great,,poor,,5,yes,,วันนี้ไปเดินเล่นกับ Mai ✨\r\n"
     },
     {
       "name": "hard cases, th (Thai mood words)",
@@ -290,7 +290,7 @@
           }
         ]
       },
-      "csv": "﻿date,mood,mood_word,sleep_hours,sleep_quality,movement_minutes,stress,moment,note\r\n2026-10-01,4,ดี,7.5,good,30,2,yes,Morning walk.\r\n2026-10-01,4,ดี,7.5,good,30,2,,\"Evening: tea, and \"\"a quiet\"\" talk.\r\nTwo lines.\r\n\r\n\"\r\n2026-10-02,1,แย่มาก,0,,0,,,\r\n2026-10-03,,,,,,,,\"'- milk\n- eggs\"\r\n2026-10-03,,,,,,,,'=SUM(A1:A9) is not a formula here\r\n2026-10-03,,,,,,,,''= starts with an apostrophe\r\n2026-10-04,,,,,,,,\"  indented, with spaces at the end  \"\r\n2026-10-04,,,,,,,,'@mention +1 -1\r\n2026-10-04,,,,,,,,'\tstarts with a tab\r\n2026-10-04,,,,,,,,it's fine; 'quoted' too\r\n2026-10-04,,,,,,,,Same words twice\r\n2026-10-04,,,,,,,,Same words twice\r\n2026-10-05,5,ดีมาก,,poor,,5,yes,วันนี้ไปเดินเล่นกับ Mai ✨\r\n"
+      "csv": "﻿date,mood,mood_word,sleep_hours,sleep_quality,movement_minutes,stress,moment,tags,note\r\n2026-10-01,4,ดี,7.5,good,30,2,yes,,Morning walk.\r\n2026-10-01,4,ดี,7.5,good,30,2,,,\"Evening: tea, and \"\"a quiet\"\" talk.\r\nTwo lines.\r\n\r\n\"\r\n2026-10-02,1,แย่มาก,0,,0,,,,\r\n2026-10-03,,,,,,,,,\"'- milk\n- eggs\"\r\n2026-10-03,,,,,,,,,'=SUM(A1:A9) is not a formula here\r\n2026-10-03,,,,,,,,,''= starts with an apostrophe\r\n2026-10-04,,,,,,,,,\"  indented, with spaces at the end  \"\r\n2026-10-04,,,,,,,,,'@mention +1 -1\r\n2026-10-04,,,,,,,,,'\tstarts with a tab\r\n2026-10-04,,,,,,,,,it's fine; 'quoted' too\r\n2026-10-04,,,,,,,,,Same words twice\r\n2026-10-04,,,,,,,,,Same words twice\r\n2026-10-05,5,ดีมาก,,poor,,5,yes,,วันนี้ไปเดินเล่นกับ Mai ✨\r\n"
     },
     {
       "name": "export_fixture.json, en",
@@ -447,7 +447,7 @@
           "ledger": []
         }
       },
-      "csv": "﻿date,mood,mood_word,sleep_hours,sleep_quality,movement_minutes,stress,moment,note\r\n2026-09-28,2,Bad,,,,,,\r\n2026-09-29,3,Okay,7,,0,4,,\r\n2026-09-30,5,Great,,poor,90,,,\"Long day.\r\nBut a good talk with Mai at the end — ขอบคุณ.\r\n\r\n\"\r\n2026-10-02,4,Good,7.5,good,30,2,yes,A walk by the river.\r\n2026-10-02,4,Good,7.5,good,30,2,,\"\nGroceries  \n\n- rice\n- tea\n \t\n\t\n\"\r\n"
+      "csv": "﻿date,mood,mood_word,sleep_hours,sleep_quality,movement_minutes,stress,moment,tags,note\r\n2026-09-28,2,Bad,,,,,,,\r\n2026-09-29,3,Okay,7,,0,4,,,\r\n2026-09-30,5,Great,,poor,90,,,,\"Long day.\r\nBut a good talk with Mai at the end — ขอบคุณ.\r\n\r\n\"\r\n2026-10-02,4,Good,7.5,good,30,2,yes,,A walk by the river.\r\n2026-10-02,4,Good,7.5,good,30,2,,,\"\nGroceries  \n\n- rice\n- tea\n \t\n\t\n\"\r\n"
     },
     {
       "name": "empty journal (header only)",
@@ -462,7 +462,66 @@
         "check_ins": [],
         "entries": []
       },
-      "csv": "﻿date,mood,mood_word,sleep_hours,sleep_quality,movement_minutes,stress,moment,note\r\n"
+      "csv": "﻿date,mood,mood_word,sleep_hours,sleep_quality,movement_minutes,stress,moment,tags,note\r\n"
+    },
+    {
+      "name": "tags: the day's tags on each of its rows, \" | \" joined, a \"|\" written as \"/\", en",
+      "locale": "en",
+      "input": {
+        "format": "moodbow-export",
+        "format_version": 1,
+        "exported_at": "2026-10-21T09:00:00Z",
+        "account": {
+          "email": "a@example.com"
+        },
+        "check_ins": [
+          {
+            "local_date": "2026-10-01",
+            "mood": 4,
+            "sleep_hours": null,
+            "sleep_quality": null,
+            "exercise_minutes": null,
+            "stress": null
+          },
+          {
+            "local_date": "2026-10-02",
+            "mood": 2,
+            "sleep_hours": null,
+            "sleep_quality": null,
+            "exercise_minutes": null,
+            "stress": null
+          }
+        ],
+        "check_in_tags": [
+          {
+            "local_date": "2026-10-01",
+            "tag": "Walk"
+          },
+          {
+            "local_date": "2026-10-01",
+            "tag": "A|B"
+          },
+          {
+            "local_date": "2026-10-02",
+            "tag": "Rain"
+          }
+        ],
+        "entries": [
+          {
+            "id": "t1",
+            "entry_date": "2026-10-01",
+            "body": "Morning.",
+            "is_moment": false
+          },
+          {
+            "id": "t2",
+            "entry_date": "2026-10-01",
+            "body": "Evening.",
+            "is_moment": true
+          }
+        ]
+      },
+      "csv": "﻿date,mood,mood_word,sleep_hours,sleep_quality,movement_minutes,stress,moment,tags,note\r\n2026-10-01,4,Good,,,,,,Walk | A/B,Morning.\r\n2026-10-01,4,Good,,,,,yes,Walk | A/B,Evening.\r\n2026-10-02,2,Bad,,,,,,Rain,\r\n"
     }
   ]
 }

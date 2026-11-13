@@ -1887,6 +1887,34 @@ test("axe: Plus's Year, All time and More patterns, at 320 and 1280 px", async (
   }
 });
 
+// Automated accessibility (UX, 2026-11-12): no serious or critical axe violation on Today's check-in with tags, at
+// 320 and 1280 px, in en and pt-BR (the longest). axe can't hear a screen reader: the rows stand.
+test("axe: Today's check-in with tags, at 320 and 1280 px", async ({ page }) => {
+  test.setTimeout(240_000);
+  const email = newEmail();
+  const password = newPassword();
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+      await setProfileLocale(email, password, saved);
+      await axeAtWidths(page, `Today with tags (${saved})`, async () => {
+        await page.goto(`${route}/app`);
+        await expect(page.getByTestId("checkin-card")).toBeVisible();
+      });
+    }
+  } finally {
+    await cleanup(email);
+  }
+});
+
 // The reminder time's picker button is the browser's own part inside the field: with focus on it
 // the field isn't :focus-visible, and its ring went (WCAG 2.4.7, Web Tester's keyboard pass,
 // 12 Nov). Tab through each time field's own stops (hours, minutes, AM/PM, the picker): the
