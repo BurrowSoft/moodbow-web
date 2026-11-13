@@ -427,37 +427,43 @@ test.describe("a first run reaches Today without a reload", () => {
     }
   });
 
-  // A sign-out safety test that failed once (#299's run 43487429524: still on /app 20 s after the
-  // revoke) and then passed 5/5 on master (UX 14 Nov): its trace is kept whenever it fails, in the
-  // run's journeys-report artifact, so the next failure says where the tap went.
-  test.describe(() => {
-    test.use({ trace: "retain-on-failure" });
-    test("a session revoked mid-visit: the next tab goes to sign-in, and signing in reaches Today", async ({ page }) => {
-      const email = newEmail();
-      const password = newPassword();
-      try {
-        await signedUpUnconfirmed(email, password);
-        await confirmEmail(email);
-        await page.goto("/sign-in");
-        await page.getByLabel("Email").fill(email);
-        await page.getByLabel("Password").fill(password);
-        await page.getByRole("button", { name: messages.auth.signinSubmit }).click();
-        await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
-        await finishSetup(page);
-        await page.getByTestId("tab-me").click();
-        await expect(page).toHaveURL(/\/app\/me$/);
-        await revokeSessions(email, password);
-        await page.getByTestId("tab-today").click();
-        await expect(page).toHaveURL(/\/sign-in/, { timeout: 20_000 });
-        await page.getByLabel("Email").fill(email);
-        await page.getByLabel("Password").fill(password);
-        await page.getByRole("button", { name: messages.auth.signinSubmit }).click();
-        await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
-        await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
-      } finally {
-        await cleanup(email);
+  test("a session revoked mid-visit: the next tab goes to sign-in, and signing in reaches Today", async ({ page }) => {
+    const email = newEmail();
+    const password = newPassword();
+    try {
+      await signedUpUnconfirmed(email, password);
+      await confirmEmail(email);
+      await page.goto("/sign-in");
+      await page.getByLabel("Email").fill(email);
+      await page.getByLabel("Password").fill(password);
+      await page.getByRole("button", { name: messages.auth.signinSubmit }).click();
+      await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+      await finishSetup(page);
+      await page.getByTestId("tab-me").click();
+      await expect(page).toHaveURL(/\/app\/me$/);
+      await revokeSessions(email, password);
+      await page.getByTestId("tab-today").click();
+      // Two safe ends, whichever check sees the revoke first (#299's trace, UX 14 Nov): sign-in, or
+      // the journal page's own "Your session has ended" (SessionEnded) with its Sign in. 5 of 7
+      // runs went to sign-in; one showed the screen at /app. Either way, nothing of the journal.
+      const ended = page.getByTestId("session-ended");
+      await expect(page.getByLabel("Email").or(ended)).toBeVisible({ timeout: 20_000 });
+      await expect(page.getByTestId("checkin-card")).toHaveCount(0);
+      await expect(page.getByTestId("today-greeting")).toHaveCount(0);
+      await expect(page.locator('[data-testid^="today-entry-"]')).toHaveCount(0);
+      if (await ended.isVisible()) {
+        await expect(ended).toContainText(messages.auth.sessionEndedTitle);
+        await page.getByTestId("session-ended-sign-in").click();
       }
-    });
+      await expect(page).toHaveURL(/\/sign-in/, { timeout: 20_000 });
+      await page.getByLabel("Email").fill(email);
+      await page.getByLabel("Password").fill(password);
+      await page.getByRole("button", { name: messages.auth.signinSubmit }).click();
+      await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
+      await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    } finally {
+      await cleanup(email);
+    }
   });
 
   test("no session on the next tab: says so, and signing in reaches Today", async ({ page, context }) => {
