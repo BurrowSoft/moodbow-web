@@ -294,7 +294,11 @@
     "entryNewTitle": "Nouvelle note",
     "entryEditTitle": "Modifier la note",
     "entryAddMore": "Compléter cette note…",
-    "entryMoreActions": "Plus d'options"
+    "entryMoreActions": "Plus d'options",
+    "goodThingsTitle": "Trois bonnes choses",
+    "goodThings1": "Une bonne chose",
+    "goodThings2": "Une autre",
+    "goodThings3": "Et encore une"
   },
   "notFound": {
     "title": "Page introuvable",

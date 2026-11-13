@@ -14,6 +14,10 @@ import { MAX_ENTRY_CHARS, sameEntry, type Entry } from "@/lib/journal/entry";
 import { localKey } from "@/lib/localData";
 import { flagsCrisis } from "@/lib/safety/crisis";
 import { holdLeaving } from "@/lib/ui/leaveGuard";
+import { goodThingsBody, goodThingsLines, NO_GOOD_THINGS, type GoodThingsLines } from "@/lib/journal/goodThings";
+import { JOURNAL_HEADING } from "@/lib/ui/journalLayout";
+import { useUntilLoaded } from "@/lib/ui/untilLoaded";
+import { Link } from "@/i18n/navigation";
 import { onSignOut } from "@/lib/signOutSignal";
 import { SAVE_WAIT_MS, TimedOut, withTimeout } from "@/lib/ui/withTimeout";
 import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
@@ -115,6 +119,12 @@ type Props = {
   // The screen's Back link: the editor's top row holds it, with Save beside
   // it on a narrow screen.
   back?: React.ReactNode;
+  // Three good things (1.3): three short fields write the text (the heading, then the filled
+  // lines as a list); everything else is this editor's, the save, its wait, the safety card and
+  // the leave dialog included (Ruling 3). No date or moment to set: today, ordinary.
+  goodThings?: boolean;
+  // A new entry on Write: where Three good things is, when it's on (Ruling 9).
+  goodThingsHref?: string | null;
 };
 
 const noSubscribe = () => () => {};
@@ -127,7 +137,7 @@ export function EntryEditor(props: Props) {
   return <Editor key={inBrowser ? "browser" : "server"} {...props} restore={inBrowser} />;
 }
 
-function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app", start, onLeave, restore, promptDate, back }: Props & { restore: boolean }) {
+function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app", start, onLeave, restore, promptDate, back, goodThings = false, goodThingsHref }: Props & { restore: boolean }) {
   const t = useTranslations("entry");
   const language = useLocale();
   // "Another" steps through the list from the day's prompt.
@@ -136,7 +146,8 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
   const router = useRouter();
   const announce = useAnnounce();
   const focusTitleAfterLeaving = useFocusTitleAfterLeaving();
-  const draftKey = localKey("draft-entry", uid, initial ? initial.id : "new");
+  // Three good things keeps its own new draft, apart from Write's.
+  const draftKey = localKey("draft-entry", uid, initial ? initial.id : goodThings ? "new-good-things" : "new");
 
   // What "unchanged" means: the server version, or a blank new entry.
   const [saved, setSaved] = useState<Fields>(initial ? fromEntry(initial) : { body: "", date: startDate ?? today, isMoment: false });
@@ -159,6 +170,19 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
     return { fields: { ...fresh, body, date: box?.date ?? fresh.date }, focused: !!box?.focused, from, end };
   });
   const [fields, setFields] = useState<Fields>(arrival.fields);
+  // Three good things: the three lines behind the text. Shown from the text whenever something
+  // else set it (a kept draft, a conflict's other version), else as typed (a blank first line
+  // with a second one filled stays where it was put).
+  const goodHeading = t("goodThingsTitle");
+  const [typedLines, setTypedLines] = useState<GoodThingsLines>(() => (goodThings ? goodThingsLines(goodHeading, arrival.fields.body) : [...NO_GOOD_THINGS]));
+  const goodLines = goodThingsBody(goodHeading, typedLines) === fields.body ? typedLines : goodThingsLines(goodHeading, fields.body);
+  const setGoodLine = (i: number, value: string) => {
+    const next = goodLines.map((l, j) => (j === i ? value : l)) as GoodThingsLines;
+    setTypedLines(next);
+    setFields((f) => ({ ...f, body: goodThingsBody(goodHeading, next) }));
+  };
+  // Its fields take typing once the page's code runs (a remount would drop what came before).
+  const untilLoaded = useUntilLoaded();
   // Before anything can paint or a key can land: a letter on the bare page
   // would be a keyboard shortcut (Web Tester, #100).
   useLayoutEffect(() => {
@@ -390,7 +414,7 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
     setSafety("closed");
     if (leaveAfterCard.current) return router.push(backTo);
     // After the card's own focus restore (on its unmount): back into the entry.
-    window.setTimeout(() => document.getElementById("entry-text")?.focus(), 0);
+    window.setTimeout(() => (document.getElementById("entry-text") ?? document.getElementById("good-things-1"))?.focus(), 0);
   }, [router, backTo]);
 
   // The card comes once per Save press, whichever answers first: the 30 s
@@ -590,7 +614,7 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
       }}
     >
       {/* The page's heading (also its title), for heading navigation. */}
-      <h1 className="sr-only">{initial ? t("entryEditTitle") : t("entryNewTitle")}</h1>
+      {!goodThings && <h1 className="sr-only">{initial ? t("entryEditTitle") : t("entryNewTitle")}</h1>}
       {/* The top row, as the app: Back, and on a narrow screen Save, kept at
           the top while the text scrolls, so it's in reach with the keyboard
           up (Web Tester: the bottom Save sat below the fold at 360 × 380). */}
@@ -611,8 +635,13 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
           </p>
         )}
       </div>
+      {goodThings && (
+        <h1 className={JOURNAL_HEADING} data-testid="good-things-title">
+          {goodHeading}
+        </h1>
+      )}
       {/* The date first, then the text (the mockups, decision 161). */}
-      <div className="flex flex-col gap-1">
+      <div className={goodThings ? "hidden" : "flex flex-col gap-1"}>
         <label htmlFor="entry-date" className="text-sm font-medium text-text">
           {t("entryDateLabel")}
         </label>
@@ -630,6 +659,11 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
           className="min-h-11 w-fit min-w-0 max-w-full rounded-full border border-border bg-bg px-4 text-text"
         />
       </div>
+      {!initial && !goodThings && goodThingsHref && (
+        <Link href={goodThingsHref} data-testid="write-good-things" className={`w-fit min-h-[44px] inline-flex items-center font-medium text-accent underline underline-offset-4 ${CAPPED}`}>
+          {goodHeading}
+        </Link>
+      )}
       {/* A quiet invitation, never inserted: only while the entry is empty. */}
       {showPrompt && (
         <p className={`flex flex-wrap items-baseline gap-x-3 gap-y-1 text-muted ${CAPPED}`} data-testid="entry-prompt">
@@ -641,6 +675,31 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
           </button>
         </p>
       )}
+      {goodThings ? (
+        <div {...untilLoaded} className="flex flex-col gap-4" data-testid="good-things-fields">
+          {([1, 2, 3] as const).map((n) => (
+            <div key={n} className="flex flex-col gap-1">
+              <label htmlFor={`good-things-${n}`} className={`font-medium text-text ${CAPPED}`}>
+                {t(`goodThings${n}`)}
+              </label>
+              <input
+                id={`good-things-${n}`}
+                data-testid={`good-things-${n}`}
+                type="text"
+                autoComplete="off"
+                value={goodLines[n - 1]}
+                onChange={(e) => setGoodLine(n - 1, e.target.value)}
+                aria-invalid={tooLong || undefined}
+                aria-describedby={tooLong ? "entry-error" : undefined}
+                // 48 px in px and the text capped as the editor's other controls: at 300 % on a 320 px
+                // phone the first field ended at 671 px, below the first view (#300's journey).
+                className={`min-h-[48px] w-full min-w-0 rounded-2xl border border-border bg-surface px-[12px] text-text ${CAPPED}`}
+              />
+            </div>
+          ))}
+        </div>
+      ) : (
+      <>
       <label className="sr-only" htmlFor="entry-text">
         {t("entryTextLabel")}
       </label>
@@ -658,8 +717,11 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
         aria-describedby={[tooLong && "entry-error", showPrompt && "entry-prompt-text"].filter(Boolean).join(" ") || undefined}
         className="min-h-[50dvh] w-full flex-1 resize-none rounded-3xl border border-border bg-surface p-[24px] text-lg leading-relaxed text-text placeholder:text-muted"
       />
+      </>
+      )}
 
       {/* A switch with its hint under it, as the app (decision 206). */}
+      {!goodThings && (
       <Switch
         checked={fields.isMoment}
         onChange={(isMoment) => setFields((f) => ({ ...f, isMoment }))}
@@ -669,6 +731,7 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
         testId="entry-moment"
         className="flex max-w-md flex-col gap-1"
       />
+      )}
 
       <div className="flex flex-wrap items-center gap-3 sm:order-last">
         {/* Wider screens only: on a narrow one Save is in the top row. */}

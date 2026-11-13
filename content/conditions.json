@@ -235,6 +235,14 @@
     "met": false,
     "what": "Help only (decision 212 pattern, 1.3 Ruling 8): the grounding exercises are in the app build people have, so their Help lines show ({pending:app_grounding|grounding_live}). Not grounding-live (the web's own switch)."
   },
+  "good-things-live": {
+    "met": false,
+    "what": "1.3 (specs/1.3-grounding-and-good-things.md): Three good things on the web, from Write and Me → Things that help me: the entry editor with three short fields, saving one ordinary entry through the normal save (Ruling 3). No evening prompt on the web (Ruling 9). Ships after 1.2; the Reviewer's read, the tester rows and Vitor's look."
+  },
+  "app-good-things": {
+    "met": false,
+    "what": "Help only (decision 212 pattern): Three good things, with its evening reminder, is in the app build people have, so its Help lines show ({pending:app_good_things|good_things_live}); the reminder sentence is the app's alone. Not good-things-live (the web's own switch)."
+  },
   "safety-plan-live": {
     "met": false,
     "what": "1.2: My safety plan (specs/1.2-features.md §2, content/safety-plan.json): Me's plan, its button on the help card below the helplines and on a hard Your week. Needs the clinician's read of every string (Vitor), the privacy policy's text on other people's details (Vitor), migration 026 on Production (Vitor), the Reviewer's read, the tester rows and Vitor's look."
