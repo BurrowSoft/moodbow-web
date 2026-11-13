@@ -43,7 +43,9 @@ export default async function GroundingPage({ params }: PageProps<"/[locale]/app
   const ta = await getTranslations("app");
   return (
     <section className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-x-[12px] gap-y-[8px] print:hidden">
+      {/* Sticky, as the app's app bar (UX 14 Nov): at 320 px and 300 % the steps' words and Next
+          scroll the page, and help has to stay in view on every step. */}
+      <div data-testid="grounding-top" className="sticky top-[env(safe-area-inset-top)] z-10 -mx-[4px] flex flex-wrap items-center justify-between gap-x-[12px] gap-y-[8px] bg-bg px-[4px] py-[4px] print:hidden">
         <BackLink href="/app/me/toolbox" label={ta("navBackTo", { screen: t("meRow") })} testId="nav-back" />
         <GetHelpNow country={me?.profile?.country} testId="grounding-get-help" neutral icon />
       </div>

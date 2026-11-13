@@ -1900,7 +1900,12 @@ test("grounding: the three at large text on a 320 px phone, help on every screen
       await loaded();
       await inView("grounding-get-help", where("5-4-3-2-1"));
       await inView("senses-next", where("5-4-3-2-1"));
-      for (let i = 0; i < 5; i++) await page.getByTestId("senses-next").click();
+      // Help in view on every step, the close too (UX 14 Nov: steps 3 to 5 once scrolled it off).
+      for (let i = 0; i < 5; i++) {
+        await page.getByTestId("senses-next").click();
+        if (i < 4) await expect(page.getByTestId("senses-step")).toHaveAttribute("data-step", String(i + 2));
+        if (i < 4) await inView("grounding-get-help", where(`5-4-3-2-1 step ${i + 2}`));
+      }
       await expect(page.getByTestId("senses-end")).toHaveText(messages.toolbox.groundingEnd);
       await inView("grounding-get-help", where("the close"));
       await inView("grounding-done", where("the close"));
