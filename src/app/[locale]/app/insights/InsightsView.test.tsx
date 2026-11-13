@@ -160,3 +160,37 @@ describe("InsightsView: Patterns", () => {
     expect(screen.queryByTestId("insights-patterns")).toBeNull();
   });
 });
+
+describe("InsightsView: Plus's Year and All time (someone with Plus)", () => {
+  const charts = {
+    mood: { points: [3, null, 4], enough: true, average: 3.5, change: 0.5 },
+    sleep: { points: [null, null, null], enough: false, average: null, change: null },
+    stress: { points: [2, 2, 2], enough: true, average: 2, change: 0 },
+    exercise: { points: [20, 30, 10], enough: true, average: 20, change: null },
+  };
+  const renderLong = (range: "year" | "all", unit: "month" | "quarter") =>
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <InsightsView rows={[]} today="2026-11-11" range="week" long={{ range, unit, periodLine: "Dec 2025 – Nov 2026", charts }} />
+      </NextIntlClientProvider>,
+    );
+
+  it("Year: its subtitle and months, the year-before line, a not-enough chart, and the footnote; no free tab is current", () => {
+    renderLong("year", "month");
+    const p = messages.plus;
+    expect(screen.getByTestId("insights-long-heading")).toHaveTextContent(p.yearSubtitle);
+    expect(screen.getByTestId("insights-long-period")).toHaveTextContent("Dec 2025 – Nov 2026");
+    expect(screen.getByTestId("insights-change-mood")).toHaveTextContent("Up 0.5 vs the year before");
+    expect(screen.getByTestId("insights-change-stress")).toHaveTextContent(p.longChangeSame);
+    expect(screen.queryByTestId("insights-change-exercise")).toBeNull();
+    expect(screen.getByTestId("insights-not-enough-sleep")).toHaveTextContent(p.longNotEnough);
+    expect(screen.getByTestId("insights-long-footnote")).toHaveTextContent(p.longFootnoteMonth);
+    expect(screen.getByTestId("insights-range-week")).not.toHaveAttribute("aria-current");
+  });
+
+  it("All time by quarter: its subtitle and footnote", () => {
+    renderLong("all", "quarter");
+    expect(screen.getByTestId("insights-long-heading")).toHaveTextContent(messages.plus.allSubtitleQuarter);
+    expect(screen.getByTestId("insights-long-footnote")).toHaveTextContent(messages.plus.longFootnoteQuarter);
+  });
+});

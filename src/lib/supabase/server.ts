@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { createServerClient } from "@supabase/ssr";
 import { cookies, headers } from "next/headers";
 import { AUTH_OUTAGE_HEADER, deadlineAbort, deadlineError, fetchUntil, startDeadline } from "./deadline";
@@ -56,7 +57,13 @@ export function clearSessionCookies(store: CookieStore): void {
 //   not_authenticated, and look like a sign-out. postgrest-js turns the
 //   abort into an { error } (the generic message) without retrying, so a
 //   data call fails fast instead.
-export async function createSupabaseServerClient() {
+// One client per request render (React's cache): the journal's layout and page share it, so the
+// per-request reads below (lib/journal: authUser, getMe) are made once, not once each (the Web
+// Dev's LCP read, 12 Nov). Outside a React render (route handlers) cache doesn't memoize, so
+// each call still makes its own client.
+export const createSupabaseServerClient = cache(createClientForRequest);
+
+async function createClientForRequest() {
   const config = supabaseConfig();
   if (!config) return null;
   const store = await cookies();

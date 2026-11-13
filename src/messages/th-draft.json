@@ -1111,7 +1111,7 @@
   },
   {
     "key": "plus.morePatternsBody",
-    "en": "Time of day, your tags and activities, over longer periods",
+    "en": "Weekdays and weekends, writing days, and the last 12 months or all time",
     "reason": "UX draft (native read pending)"
   },
   {
@@ -1211,7 +1211,7 @@
   },
   {
     "key": "plus.rowThemes",
-    "en": "More themes and your own moods",
+    "en": "More themes",
     "reason": "UX draft (native read pending)"
   },
   {
@@ -1312,6 +1312,96 @@
   {
     "key": "plus.deleteCancelledKept",
     "en": "Your Moodbow Plus subscription was cancelled, but your account wasn't deleted. Please try again.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.tabAllTime",
+    "en": "All time",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.sheetAllTime",
+    "en": "All time is part of Plus",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.yearSubtitle",
+    "en": "The last 12 months, by month",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.allSubtitleMonth",
+    "en": "Since your first check-in, by month",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.allSubtitleQuarter",
+    "en": "Since your first check-in, by quarter",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.longFootnoteMonth",
+    "en": "Months with fewer than 5 check-ins are left out.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.longFootnoteQuarter",
+    "en": "Quarters with fewer than 15 check-ins are left out.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.longChangeUp",
+    "en": "Up {value} vs the year before",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.longChangeDown",
+    "en": "Down {value} vs the year before",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.longChangeSame",
+    "en": "Same as the year before",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.longNotEnough",
+    "en": "A few more months of check-ins and this chart will appear.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.moreSubtitleYear",
+    "en": "In the last 12 months",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.moreSubtitleAll",
+    "en": "Since your first check-in",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.moreWeekdaysShown",
+    "en": "On weekdays, your mood averaged {a} of 5. At weekends, {b}.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.moreWeekdaysSame",
+    "en": "On weekdays and at weekends, your mood was about the same ({a} and {b} of 5).",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.moreWritingShown",
+    "en": "On days you wrote, your mood averaged {a} of 5. On days you didn't, {b}.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.moreWritingSame",
+    "en": "On days you wrote and days you didn't, your mood was about the same ({a} and {b} of 5).",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.moreNone",
+    "en": "More patterns show up here once you have more check-ins in this period.",
     "reason": "UX draft (native read pending)"
   }
 ]
