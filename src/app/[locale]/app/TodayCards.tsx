@@ -6,12 +6,13 @@ import { dialogButton } from "@/components/Dialog";
 import { Link } from "@/i18n/navigation";
 import { CHECKIN_SAVED_EVENT, isLowMood, type CheckInSavedDetail } from "@/lib/journal/checkInSaved";
 import { markSetupLaterDone, readSetupLaterDone } from "@/lib/journal/setupLater";
-import { useClosedToday } from "./me/PlusInMe";
+import type { PlusOfferPrices } from "@/lib/plus/page";
+import { PlusBanner, useClosedToday } from "./me/PlusInMe";
 
 // Today's Plus card on first landing (1.3 §6): the same card as Me's, closed for the day on either.
 // The server decides whether it may show at all (free, Plus row read, nothing flagged or low saved
 // today); a check-in saved here with one of the two lowest faces hides it at once.
-export function TodayPlusCard({ trial, price, date }: { trial: boolean; price: string; date: string }) {
+export function TodayPlusCard({ trial, price, offer = null, date }: { trial: boolean; price: string; offer?: PlusOfferPrices | null; date: string }) {
   const [low, setLow] = useState(false);
   useEffect(() => {
     const onSaved = (e: Event) => {
@@ -23,7 +24,10 @@ export function TodayPlusCard({ trial, price, date }: { trial: boolean; price: s
   }, [date]);
   const t = useTranslations("plus");
   const [closed, close] = useClosedToday();
-  if (low || closed) return null;
+  if (low) return null;
+  // In December, for someone eligible: the compact Christmas card (board 21b), its own close.
+  if (offer) return <PlusBanner trial={trial} price={price} offer={offer} id="today-plus-card" tryId="today-plus-try" compact />;
+  if (closed) return null;
   // Compact (board 21; UX ruling 2): the tag, one line, the price line and ✕; the title opens Plus.
   return (
     <section aria-labelledby="today-plus-card-title" data-testid="today-plus-card" className="relative rounded-2xl bg-pill py-[12px] ps-[16px] pe-[52px]">

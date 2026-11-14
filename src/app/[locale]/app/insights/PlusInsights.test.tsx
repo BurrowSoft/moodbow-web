@@ -21,9 +21,10 @@ const side = (days: number, mood: number) => ({ days, mood });
 const shown = (id: MorePattern["id"], a: number, b: number): MorePattern => ({ id, state: "shown", a: side(10, a), b: side(10, b) });
 
 describe("Plus tabs on Insights", () => {
-  it("without Plus: Year and All time locked, a tap opens the sheet", () => {
+  it("without Plus: Year and All time locked, each a link to the Plus screen (the sheet is retired)", () => {
     wrap(<YearTab offer={{ trial: true, price: "US$59.99" }} />);
     expect(screen.getByTestId("insights-range-year")).toHaveAttribute("data-locked", "");
+    expect(screen.getByTestId("insights-range-year")).toHaveAttribute("href", "/app/me/plus");
     expect(screen.getByTestId("insights-range-all")).toHaveTextContent(m.tabAllTime);
   });
   it("with Plus: real tabs, the current one marked", () => {

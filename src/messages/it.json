@@ -692,6 +692,17 @@
     "paletteSea": "Mare",
     "sheetThemes": "Più temi fanno parte di Plus",
     "todayCardTitle": "Guarda il tuo umore nel tempo",
-    "todayCardTrial": "Prova 7 giorni gratis. Poi {price} all'anno."
+    "todayCardTrial": "Prova 7 giorni gratis. Poi {price} all'anno.",
+    "close": "Chiudi",
+    "offerLabel": "Offerta speciale di Natale",
+    "offerBannerTitle": "Il tuo primo anno a {offer}",
+    "offerBannerBody": "Un andamento più approfondito per l'anno che viene: il tuo anno, i tuoi andamenti, Cosa mi fa stare bene, le lettere al me del futuro e altro ancora.",
+    "offerSee": "Vedi l'offerta",
+    "offerSmall": "Speciale Natale, fino al 31 dicembre. Poi {price} all'anno. Annulla quando vuoi in Profilo → Moodbow Plus.",
+    "offerCardSmall": "Fino al 31 dicembre. Poi {price} all'anno. Annulla quando vuoi in Profilo → Moodbow Plus.",
+    "offerStripBody": "Un prezzo più basso per il tuo primo anno, fino al 31 dicembre",
+    "offerFirstYear": "Il tuo primo anno: {offer}",
+    "offerButton": "Il mio primo anno a {offer}",
+    "offerThen": "Poi {price} all'anno · si rinnova automaticamente"
   }
 }

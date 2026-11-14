@@ -2,13 +2,12 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
-import { BackLink } from "@/components/BackLink";
 import { JournalUnavailable } from "@/components/JournalUnavailable";
 import { SessionEnded } from "@/components/SessionEnded";
 import { pageGate } from "@/lib/conditions";
 import { currentUser } from "@/lib/journal/currentUser";
 import { getMe } from "@/lib/journal/me";
-import { plusPriceLabel, readPlusView } from "@/lib/plus/view";
+import { readPlusPage } from "@/lib/plus/page";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { titledMetadata } from "../../pageMeta";
 import { PlusScreen } from "./PlusScreen";
@@ -29,15 +28,14 @@ export default async function PlusPage({ params, searchParams }: PageProps<"/[lo
   const { user, ended } = await currentUser(supabase);
   if (ended) return <SessionEnded />;
   if (!supabase || !user) return <JournalUnavailable />;
-  const [me, view] = await Promise.all([getMe(supabase), readPlusView(supabase, user.id)]);
+  const me = await getMe(supabase);
+  const plus = me ? await readPlusPage(supabase, user.id, me.profile?.country, locale) : null;
   // A row that can't be read: never an offer to someone who may already pay.
-  if (!me || !view) return <JournalUnavailable />;
-  const ta = await getTranslations("app");
+  if (!me || !plus) return <JournalUnavailable />;
   const started = (await searchParams).started === "1";
   return (
     <section className="space-y-2">
-      <BackLink href="/app/me" label={ta("navBackTo", { screen: ta("tabMe") })} testId="nav-back" />
-      <PlusScreen view={view} price={plusPriceLabel(locale)} started={started} />
+      <PlusScreen view={plus.view} price={plus.price} offer={plus.offer} started={started} />
     </section>
   );
 }

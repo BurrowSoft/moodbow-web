@@ -692,6 +692,17 @@
     "paletteSea": "Mar",
     "sheetThemes": "Mais temas fazem parte do Plus",
     "todayCardTitle": "Veja seus humores ao longo do tempo",
-    "todayCardTrial": "Experimente 7 dias grátis. Depois, {price} por ano."
+    "todayCardTrial": "Experimente 7 dias grátis. Depois, {price} por ano.",
+    "close": "Fechar",
+    "offerLabel": "Oferta especial de Natal",
+    "offerBannerTitle": "Seu primeiro ano por {offer}",
+    "offerBannerBody": "Insights mais profundos para o ano que vem: seu ano, seus padrões, O que me faz bem, as cartas para o meu eu do futuro e mais.",
+    "offerSee": "Ver a oferta",
+    "offerSmall": "Especial de Natal, até 31 de dezembro. Depois, {price} por ano. Cancele quando quiser em Perfil → Moodbow Plus.",
+    "offerCardSmall": "Até 31 de dezembro. Depois, {price} por ano. Cancele quando quiser em Perfil → Moodbow Plus.",
+    "offerStripBody": "Um preço menor no seu primeiro ano, até 31 de dezembro",
+    "offerFirstYear": "Seu primeiro ano: {offer}",
+    "offerButton": "Quero meu primeiro ano por {offer}",
+    "offerThen": "Depois, {price} por ano · renova automaticamente"
   }
 }
