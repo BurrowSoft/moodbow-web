@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen, within } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import messages from "@/messages/en.json";
@@ -38,9 +38,15 @@ describe("MorePatternsCard", () => {
   it("today's lines for the three factors, the new ones for weekdays and writing, in order, with the footnote", () => {
     wrap(<MorePatternsCard window="year" patterns={[shown("sleep", 4, 3), shown("weekdays", 4, 2.5), { id: "writing", state: "same", a: side(9, 3.2), b: side(9, 3) }, { id: "stress", state: "not_enough", a: null, b: null }]} />);
     expect(screen.getByText(m.moreSubtitleYear)).toBeInTheDocument();
-    expect(screen.getByTestId("insights-more-pattern-sleep")).toHaveTextContent("On days after 7 or more hours of sleep, your mood averaged 4.0 of 5. After less sleep, 3.0.");
-    expect(screen.getByTestId("insights-more-pattern-weekdays")).toHaveTextContent("On weekdays, your mood averaged 4.0 of 5. At weekends, 2.5.");
-    expect(screen.getByTestId("insights-more-pattern-writing")).toHaveTextContent("On days you wrote and days you didn't, your mood was about the same (3.2 and 3.0 of 5).");
+    // Board 3 (UX, 14 Nov): the sentence is the bars' image name; shown are the title and the row labels.
+    const named = (id: string) => within(screen.getByTestId(id)).getByRole("img");
+    expect(named("insights-more-pattern-sleep")).toHaveAccessibleName("On days after 7 or more hours of sleep, your mood averaged 4.0 of 5. After less sleep, 3.0.");
+    expect(named("insights-more-pattern-weekdays")).toHaveAccessibleName("On weekdays, your mood averaged 4.0 of 5. At weekends, 2.5.");
+    expect(named("insights-more-pattern-writing")).toHaveAccessibleName("On days you wrote and days you didn't, your mood was about the same (3.2 and 3.0 of 5).");
+    const i = messages.insights;
+    expect(screen.getByTestId("insights-more-pattern-weekdays")).toHaveTextContent(`${i.pairWeekTitle}+1.5${i.pairWeekdays}4.0${i.pairWeekends}2.5`);
+    expect(screen.getByTestId("insights-more-pattern-writing")).toHaveTextContent(`${i.pairWritingTitle}+0.2${i.pairWrote}3.2${i.pairNotWrote}3.0`);
+    expect(screen.getByTestId("insights-more-pattern-sleep").textContent).not.toContain("averaged");
     expect(screen.queryByTestId("insights-more-pattern-stress")).toBeNull();
     expect(screen.getByText(messages.insights.patternsFootnote)).toBeInTheDocument();
   });
@@ -60,9 +66,10 @@ describe("MorePatternsCard", () => {
     const tags = screen.getByTestId("insights-more-tags");
     expect(tags).toHaveTextContent(m.moreTagsTitle);
     const lines = screen.getAllByTestId("insights-more-tag");
-    // The sentence as shown (aria-hidden), and the same sentence as the bars' image name.
-    expect(lines.map((l) => l.querySelector(":scope > [aria-hidden=true]")?.textContent)).toEqual(lines.map((l) => l.querySelector("[role=img]")?.getAttribute("aria-label")));
-    expect(lines.map((l) => l.querySelector(":scope > [aria-hidden=true]")?.textContent)).toEqual([
+    // Board 3: the sentence is the bars' image name only; shown, the quoted tag and "With {tag}" / "Other days".
+    expect(lines[0]).toHaveTextContent("“walk”+0.5With walk4.0Other days3.5");
+    expect(lines.map((l) => l.textContent?.includes("averaged"))).toEqual([false, false]);
+    expect(lines.map((l) => l.querySelector("[role=img]")?.getAttribute("aria-label"))).toEqual([
       "On days tagged “walk”, your mood averaged 4.0 of 5. On other days, 3.5.",
       "On days tagged “<b>work</b>” and other days, your mood was about the same (3.2 and 3.0 of 5).",
     ]);
@@ -105,8 +112,12 @@ describe("MorePatternsCard: What lifts me", () => {
     const section = screen.getByTestId("insights-lifts");
     expect(section).toHaveTextContent(m.liftsTitle);
     const lifts = screen.getAllByTestId("insights-lift");
-    expect(lifts.map((li) => li.querySelector("[role=img]")?.getAttribute("aria-label"))).toEqual(lifts.map((li) => li.querySelector(":scope > [aria-hidden=true]")?.textContent));
-    expect(lifts.map((li) => li.querySelector(":scope > [aria-hidden=true]")?.textContent)).toEqual([
+    // Board 3: a header row (the quoted tag, the chip) and labelled rows; the sentence, with "of 5",
+    // is the image's name only.
+    expect(lifts[1]).toHaveTextContent("“Tea”+0.4With Tea3.6Other days3.2");
+    expect(lifts.map((li) => li.textContent?.includes("averaged"))).toEqual([false, false]);
+    expect(m.liftsRow).toContain("of 5");
+    expect(lifts.map((li) => li.querySelector("[role=img]")?.getAttribute("aria-label"))).toEqual([
       m.liftsRow.replace("{tag}", "Walk <b>").replace("{a}", "4.2").replace("{b}", "3.0"),
       m.liftsRow.replace("{tag}", "Tea").replace("{a}", "3.6").replace("{b}", "3.2"),
     ]);

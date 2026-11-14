@@ -1461,7 +1461,7 @@
   },
   {
     "key": "plus.liftsRow",
-    "en": "On days with “{tag}”, your mood averaged {a}; on other days, {b}.",
+    "en": "On days with “{tag}”, your mood averaged {a} of 5; on other days, {b}.",
     "reason": "UX draft (native read pending)"
   },
   {
@@ -1477,6 +1477,81 @@
   {
     "key": "insights.moodScale",
     "en": "mood, 1–5",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.pairTag",
+    "en": "“{tag}”",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.pairWith",
+    "en": "With {tag}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.pairOther",
+    "en": "Other days",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.pairSleepMore",
+    "en": "7+ hours",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.pairSleepLess",
+    "en": "Less sleep",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.pairMoved",
+    "en": "Moved",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.pairNotMoved",
+    "en": "Didn't move",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.pairStressLow",
+    "en": "Low stress",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.pairStressHigh",
+    "en": "High stress",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.pairWeekTitle",
+    "en": "Weekdays and weekends",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.pairWeekdays",
+    "en": "Weekdays",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.pairWeekends",
+    "en": "Weekends",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.pairWritingTitle",
+    "en": "Writing",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.pairWrote",
+    "en": "Wrote",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.pairNotWrote",
+    "en": "Didn't write",
     "reason": "UX draft (native read pending)"
   }
 ]

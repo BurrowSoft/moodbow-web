@@ -11,6 +11,7 @@ import { GetHelpNow } from "@/components/SafetyCard";
 import { LockedItem, PlusLock, PlusSheet, type PlusOffer } from "../PlusSheet";
 import { segment } from "@/lib/ui/journalLayout";
 import { MoodPair } from "@/components/MoodPair";
+import { PATTERN_PAIR } from "@/lib/journal/patternPair";
 
 // What Plus adds on Insights (decision 246; UX 11 Nov): Week, Month, 3 months
 // and today's Patterns stay free. Locked and visible: a Year tab beside them,
@@ -95,12 +96,11 @@ export function MorePatternsCard({ patterns, window, tags = [], lifts = null, co
   const ti = useTranslations("insights");
   const number = new Intl.NumberFormat(useLocale(), { minimumFractionDigits: 1, maximumFractionDigits: 1 });
   const signed = new Intl.NumberFormat(useLocale(), { minimumFractionDigits: 1, maximumFractionDigits: 1, signDisplay: "exceptZero" });
-  const bars = (sentence: string, a: number, b: number, testId: string) => (
-    <>
-      <span aria-hidden="true">{sentence}</span>
-      <MoodPair sentence={sentence} a={a} b={b} format={(v) => number.format(v)} signed={(v) => signed.format(v)} testId={testId} />
-    </>
+  // Board 3's layout (UX, 14 Nov): a title and two labelled rows; the sentence is the image's name.
+  const bars = (sentence: string, title: string, labels: [string, string], a: number, b: number, testId: string) => (
+    <MoodPair sentence={sentence} title={title} labels={labels} a={a} b={b} format={(v) => number.format(v)} signed={(v) => signed.format(v)} testId={testId} />
   );
+  const tagged = (tag: string): [string, [string, string]] => [ti("pairTag", { tag }), [ti("pairWith", { tag }), ti("pairOther")]];
   const visible = patterns.filter((p): p is Extract<MorePattern, { state: "shown" | "same" }> => p.state !== "not_enough");
   const tagList =
     tags.length > 0 ? (
@@ -111,7 +111,7 @@ export function MorePatternsCard({ patterns, window, tags = [], lifts = null, co
         <ul className="mt-2 space-y-2 text-sm text-text">
           {tags.map((p) => (
             <li key={p.tag} data-testid="insights-more-tag" data-state={p.state} className="[overflow-wrap:anywhere]">
-              {bars(t(p.state === "shown" ? "moreTagShown" : "moreTagSame", { tag: p.tag, a: number.format(p.a.mood), b: number.format(p.b.mood) }), p.a.mood, p.b.mood, "insights-more-tag-bars")}
+              {bars(t(p.state === "shown" ? "moreTagShown" : "moreTagSame", { tag: p.tag, a: number.format(p.a.mood), b: number.format(p.b.mood) }), ...tagged(p.tag), p.a.mood, p.b.mood, "insights-more-tag-bars")}
             </li>
           ))}
         </ul>
@@ -129,7 +129,7 @@ export function MorePatternsCard({ patterns, window, tags = [], lifts = null, co
         <ul className="mt-2 space-y-2 text-sm text-text">
           {lifts.map((l) => (
             <li key={l.tag} data-testid="insights-lift" className="[overflow-wrap:anywhere]">
-              {bars(t("liftsRow", { tag: l.tag, a: number.format(l.a.mood), b: number.format(l.b.mood) }), l.a.mood, l.b.mood, "insights-lift-bars")}
+              {bars(t("liftsRow", { tag: l.tag, a: number.format(l.a.mood), b: number.format(l.b.mood) }), ...tagged(l.tag), l.a.mood, l.b.mood, "insights-lift-bars")}
             </li>
           ))}
         </ul>
@@ -161,7 +161,7 @@ export function MorePatternsCard({ patterns, window, tags = [], lifts = null, co
                 const key = MORE_TEXT[p.id][p.state];
                 return (
                   <li key={p.id} data-testid={`insights-more-pattern-${p.id}`} data-state={p.state}>
-                    {bars(FREE_LINES.has(p.id) ? ti(key as Parameters<typeof ti>[0], values) : t(key as Parameters<typeof t>[0], values), p.a.mood, p.b.mood, `insights-more-pattern-${p.id}-bars`)}
+                    {bars(FREE_LINES.has(p.id) ? ti(key as Parameters<typeof ti>[0], values) : t(key as Parameters<typeof t>[0], values), ti(PATTERN_PAIR[p.id].title), [ti(PATTERN_PAIR[p.id].a), ti(PATTERN_PAIR[p.id].b)], p.a.mood, p.b.mood, `insights-more-pattern-${p.id}-bars`)}
                   </li>
                 );
               })}

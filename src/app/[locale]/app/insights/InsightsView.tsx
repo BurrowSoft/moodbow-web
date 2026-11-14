@@ -3,6 +3,7 @@ import { Link } from "@/i18n/navigation";
 import { METRICS, summarize, type InsightRow, type Metric, type Range } from "@/lib/journal/insights";
 import type { Pattern, PatternId } from "@/lib/journal/patterns";
 import { MoodPair } from "@/components/MoodPair";
+import { PATTERN_PAIR } from "@/lib/journal/patternPair";
 import type { ValueKey } from "@/lib/journal/valueColours";
 import { JOURNAL_HEADING, segment } from "@/lib/ui/journalLayout";
 import type { LongRange, LongSummary, Unit } from "@/lib/plus/longRange";
@@ -198,8 +199,8 @@ function Patterns({ patterns, format, signed }: { patterns: Pattern[]; format: (
               const sentence = t(PATTERN_TEXT[p.id][p.state], { a: format(p.a.mood), b: format(p.b.mood) });
               return (
                 <li key={p.id} data-testid={`insights-pattern-${p.id}`} data-state={p.state}>
-                  <span aria-hidden="true">{sentence}</span>
-                  <MoodPair sentence={sentence} a={p.a.mood} b={p.b.mood} format={format} signed={signed} testId={`insights-pattern-${p.id}-bars`} />
+                  {/* Board 3's layout (UX, 14 Nov): the sentence is the image's name, not shown. */}
+                  <MoodPair sentence={sentence} title={t(PATTERN_PAIR[p.id].title)} labels={[t(PATTERN_PAIR[p.id].a), t(PATTERN_PAIR[p.id].b)]} a={p.a.mood} b={p.b.mood} format={format} signed={signed} testId={`insights-pattern-${p.id}-bars`} />
                 </li>
               );
             })}

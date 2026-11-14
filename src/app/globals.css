@@ -24,6 +24,10 @@
      pass). Darker on light, lighter on dark. */
   --accent-hover: color-mix(in srgb, var(--accent) 85%, black);
   --pill: #f9eaec;
+  /* The mood pairs (board 3): the bars' track and the warm difference chip. */
+  --pair-track: #f3ecf0;
+  --pair-chip: #fcebdd;
+  --pair-chip-ink: #8a4b2e;
   --draft-bg: #fff4d6;
   --draft-text: #5c4400;
   /* Moodbow's voice (reflections, the Lite badge; decision 150): the brand
@@ -48,6 +52,9 @@
     --on-accent: var(--ink);
     --accent-hover: color-mix(in srgb, var(--accent) 85%, white);
     --pill: #382c43;
+    --pair-track: #463c56;
+    --pair-chip: #4a3428;
+    --pair-chip-ink: #f3c9a8;
     --draft-bg: #4a3d14;
     --draft-text: #ffe9a8;
     --voice: var(--accent);
@@ -70,6 +77,9 @@
   --on-accent: var(--ink);
   --accent-hover: color-mix(in srgb, var(--accent) 85%, white);
   --pill: #382c43;
+  --pair-track: #463c56;
+  --pair-chip: #4a3428;
+  --pair-chip-ink: #f3c9a8;
   --draft-bg: #4a3d14;
   --draft-text: #ffe9a8;
   --voice: var(--accent);
@@ -101,6 +111,9 @@
   --color-on-accent: var(--on-accent);
   --color-accent-hover: var(--accent-hover);
   --color-pill: var(--pill);
+  --color-pair-track: var(--pair-track);
+  --color-pair-chip: var(--pair-chip);
+  --color-pair-chip-ink: var(--pair-chip-ink);
   --color-peach: var(--peach);
   --color-rose: var(--rose);
   --color-lavender: var(--lavender);
