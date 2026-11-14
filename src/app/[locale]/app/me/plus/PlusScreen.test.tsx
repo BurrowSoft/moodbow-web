@@ -209,4 +209,21 @@ describe("PlusScreen: the footer's order, and the short screen (#271's unpin, re
     rect.mockRestore();
     vi.unstubAllGlobals();
   });
+
+  it("the tap test (UX, 14 Nov): pinned leaves the content 40 %+, but Not now can't come out from under the pinned part at the end: nothing pinned", () => {
+    vi.stubGlobal("ResizeObserver", class { observe() {} disconnect() {} });
+    // 300 of 640 (pinned by the 60 % rule), but Not now's centre at the page's end is at 522 px,
+    // under the pinned part's top at 340 px: a tap there would land on the price or Start.
+    const boxes: Record<string, { top: number; height: number }> = { "plus-footer": { top: 340, height: 300 }, "plus-scroll": { top: 0, height: 60 }, "plus-not-now": { top: 500, height: 44 } };
+    const rect = vi.spyOn(Element.prototype, "getBoundingClientRect").mockImplementation(function (this: Element) {
+      return (boxes[this.getAttribute("data-testid") ?? ""] ?? { top: 0, height: 0 }) as DOMRect;
+    });
+    vi.stubGlobal("innerHeight", 640);
+    const { unmount } = show({ kind: "free", trial: true });
+    expect(screen.getByTestId("plus-screen")).toHaveAttribute("data-unpinned");
+    expect(screen.getByTestId("plus-footer").className).not.toContain("fixed");
+    unmount();
+    rect.mockRestore();
+    vi.unstubAllGlobals();
+  });
 });

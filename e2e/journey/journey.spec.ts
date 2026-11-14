@@ -1608,8 +1608,8 @@ test("the Timeline doesn't shift when Share this month arrives (CLS)", async ({ 
   test.skip(browserName !== "chromium", "layout-shift entries are Chromium's");
   const email = newEmail();
   try {
+    // Signing in lands on Today now (Setup is later, #314): no Setup to finish first.
     const password = await accountAtSetup(page, email);
-    await page.getByTestId("setup-done").click();
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     // Five check-ins on the 1st to the 5th of last month: always past, one month, enough for a card.
     const today = await journalToday(email, password);
