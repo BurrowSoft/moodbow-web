@@ -12,6 +12,8 @@ pt-BR-draft: true
 
 **Mais padrões** pode incluir suas próprias tags, quando você começar a usá-las.
 
+{pending:lifts_live}**O que me faz bem** compara seu humor nos dias com uma tag e nos dias sem ela, quando uma tag já foi usada em pelo menos 5 dias. Mostra padrões, não causas, e nunca mostra algumas tags, como as sobre álcool ou pular refeições.{/pending}
+
 **A semana grátis:** o Plus começa com 7 dias grátis, uma vez por pessoa. Depois dos 7 dias, vira uma assinatura anual que renova todo ano até você cancelar. Só você começa, em **Perfil → Moodbow Plus**. Durante a semana grátis, o Perfil mostra quantos dias faltam.
 
 **Cancelar:** você pode cancelar quando quiser e fica com o Plus até o fim do período pago. Se você cancelar durante a semana grátis, não será cobrado.

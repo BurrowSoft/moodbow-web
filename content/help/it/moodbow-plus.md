@@ -12,6 +12,8 @@ it-draft: true
 
 **Più andamenti** può includere i tuoi tag, quando inizi a usarli.
 
+{pending:lifts_live}**Cosa mi fa stare bene** confronta il tuo umore nei giorni con un tag e in quelli senza, quando un tag è stato usato in almeno 5 giorni. Mostra andamenti, non cause, e non mostra mai alcuni tag, come quelli sull'alcol o sul saltare i pasti.{/pending}
+
 **La settimana gratis:** Plus inizia con 7 giorni gratis, una volta per persona. Dopo i 7 giorni diventa un abbonamento annuale che si rinnova ogni anno finché non lo annulli. Lo avvii solo tu, da **Profilo → Moodbow Plus**. Durante la settimana gratis, Profilo mostra quanti giorni mancano.
 
 **Annullare:** puoi annullare quando vuoi e tieni Plus fino alla fine del periodo pagato. Se annulli durante la settimana gratis, non ti verrà addebitato nulla.

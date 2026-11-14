@@ -12,6 +12,8 @@ de-draft: true
 
 **Mehr Muster** kann auch deine eigenen Tags einbeziehen, sobald du sie nutzt.
 
+{pending:lifts_live}**Was mir guttut** vergleicht deine Stimmung an Tagen mit einem Tag und an Tagen ohne ihn, sobald du einen Tag an mindestens 5 Tagen verwendet hast. Es zeigt Muster, keine Ursachen, und manche Tags zeigt es nie, etwa zu Alkohol oder ausgelassenen Mahlzeiten.{/pending}
+
 **Die kostenlose Woche:** Plus beginnt mit 7 kostenlosen Tagen, einmal pro Person. Danach wird es ein Jahresabo, das sich jedes Jahr verlängert, bis du kündigst. Du startest es nur selbst, unter **Ich → Moodbow Plus**. Während der kostenlosen Woche zeigt Ich, wie viele Tage noch übrig sind.
 
 **Kündigen:** du kannst jederzeit kündigen und behältst Plus bis zum Ende des bezahlten Zeitraums. Wenn du in der kostenlosen Woche kündigst, wird nichts abgebucht.

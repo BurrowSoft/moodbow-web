@@ -12,6 +12,8 @@ es-draft: true
 
 **Más patrones** puede incluir tus propias etiquetas, cuando empieces a usarlas.
 
+{pending:lifts_live}**Lo que me levanta el ánimo** compara tu estado de ánimo los días con una etiqueta y los días sin ella, cuando una etiqueta se ha usado al menos 5 días. Muestra patrones, no causas, y nunca muestra algunas etiquetas, como las de alcohol o saltarse comidas.{/pending}
+
 **La semana gratis:** Plus empieza con 7 días gratis, una vez por persona. Después de los 7 días se convierte en una suscripción anual que se renueva cada año hasta que la canceles. Solo la empiezas tú, desde **Yo → Moodbow Plus**. Durante la semana gratis, Yo muestra cuántos días quedan.
 
 **Cancelar:** puedes cancelar cuando quieras, y conservas Plus hasta el final del periodo pagado. Si cancelas durante la semana gratis, no se te cobrará.
