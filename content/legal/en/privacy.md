@@ -62,7 +62,7 @@ To show helplines near you when we don't know your country, we use the country y
 | Resend | Sending account emails (confirmation, password reset) | USA (company); emails are sent from Japan |
 | Sentry | Error and crash reports, with personal details removed | USA |
 {pending:purchases}| Google Play, Apple App Store | Payments for AI credits | Global |{/pending}
-{pending:wear}| Google (Wear OS Data Layer, part of Google Play services) | Carrying a watch check-in (a mood value and a time, no text) from your watch to your phone, only if you use the watch app | Global |{/pending}
+{pending:wear}| Google (Wear OS Data Layer, part of Google Play services) | Carrying a watch check-in (a mood value only, no text) from your watch to your phone, only if you use the watch app | Global |{/pending}
 
 {pending:wear}Watch check-ins normally go straight from your watch to your phone over Bluetooth. If the two aren't directly connected, Google may relay the message through its servers, encrypted end to end so Google can't read it. Nothing is stored there.{/pending}
 
