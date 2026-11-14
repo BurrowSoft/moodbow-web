@@ -1036,7 +1036,7 @@
   },
   {
     "key": "timeline.calDayLabel",
-    "en": "{date}{mood, select, none {} other {, {mood}}}{moment, select, yes {, moment} other {}}{entry, select, yes {, has writing} other {}}",
+    "en": "{date}{mood, select, none {} other {, {mood}}}{moment, select, yes {, moment} other {}}{entry, select, yes {, has writing} other {}}{pictures, select, yes {, has pictures} other {}}",
     "reason": "UX draft (native read pending)"
   },
   {
@@ -1717,6 +1717,86 @@
   {
     "key": "plus.exampleSample",
     "en": "{strip} {see}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.picturesRegion",
+    "en": "Pictures",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.pictureAdd",
+    "en": "Add a picture",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.pictureAddLocked",
+    "en": "Add a picture, Moodbow Plus",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.pictureOpen",
+    "en": "Picture {n} of {total}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.pictureRemove",
+    "en": "Remove picture {n}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.pictureAdding",
+    "en": "Adding the picture…",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.pictureFailed",
+    "en": "That picture couldn't be used. Try a JPEG or PNG.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.pictureQuota",
+    "en": "You've added this month's pictures. More next month.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.momentPicturesTitle",
+    "en": "Keep the pictures?",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.momentPicturesBody",
+    "en": "This moment has pictures. Keep them on the entry, or delete them?",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.momentPicturesKeep",
+    "en": "Keep them",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.momentPicturesDelete",
+    "en": "Delete them",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "timeline.calKeyPictures",
+    "en": "has pictures",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "timeline.timelinePictures",
+    "en": "{count, plural, =1 {1 picture} other {# pictures}}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "me.exportZip",
+    "en": "Data file with your pictures (.zip)",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "me.exportZipFailed",
+    "en": "Your pictures couldn't be added to a zip just now. The other files are ready; try Export again for the pictures.",
     "reason": "UX draft (native read pending)"
   }
 ]

@@ -18,6 +18,9 @@ vi.mock("../actions", () => ({
   getEntry: (...args: unknown[]) => getEntry(...args),
 }));
 vi.mock("../reflectActions", () => ({ reflectOnEntry: vi.fn(), deleteReflection: vi.fn() }));
+const deletePicture = vi.fn(async (_id: string) => ({ status: "ok" as const }));
+vi.mock("./pictureActions", () => ({ deletePicture: (id: string) => deletePicture(id) }));
+vi.mock("@/lib/journal/pictureEncode", () => ({ encodeForUpload: vi.fn() }));
 vi.mock("@/i18n/navigation", () => ({
   useRouter: () => ({ push, refresh }),
   Link: ({ href, children, ...rest }: { href: string; children: ReactNode }) => (
@@ -247,5 +250,56 @@ describe("EntryScreen: the strip as in the mockups (decision 161)", () => {
     expect(strip).toHaveTextContent(today.mood4);
     // 7.5 h sleep → gold, 30 min → gold, stress 2 → orange.
     expect([...strip.querySelectorAll("li [data-value-colour]")].map((d) => d.getAttribute("data-value-colour"))).toEqual(["#F3C24F", "#F3C24F", "#F4A77A"]);
+  });
+});
+
+// Pictures (035): unstarring a moment with pictures asks first (spec): keep them, or delete them.
+describe("EntryScreen: unstarring a moment with pictures", () => {
+  const MOMENT: Entry = { ...ENTRY, is_moment: true };
+  const PIC = { id: "p1", width: 2048, height: 1536, created_at: "2026-10-01T20:00:00Z", full: "https://signed.example/p1.jpg", thumb: "https://signed.example/p1_t.jpg" };
+  const show = () =>
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <EntryScreen entry={MOMENT} checkIn={null} from="/app/timeline" backLabel={BACK} dateLocaleTag="en-US" uid="u1" today="2026-10-02" reflect={null} pictures={{ list: [PIC], plus: true }} />
+      </NextIntlClientProvider>,
+    );
+  beforeEach(() => deletePicture.mockClear());
+
+  it("the pictures show under the text; the ★ asks keep or delete before anything is saved", () => {
+    show();
+    expect(screen.getByTestId("entry-pictures")).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId("entry-moment-toggle"));
+    expect(screen.getByTestId("entry-moment-pictures")).toHaveTextContent(m.momentPicturesTitle);
+    expect(saveEntry).not.toHaveBeenCalled();
+  });
+
+  it("Keep them: unstarred, the pictures stay (viewable, removable; nothing new to add)", async () => {
+    saveEntry.mockResolvedValue({ status: "saved", entry: { ...MOMENT, is_moment: false, updated_at: "2026-10-01T21:00:00Z" } });
+    show();
+    fireEvent.click(screen.getByTestId("entry-moment-toggle"));
+    await act(async () => fireEvent.click(screen.getByTestId("unstar-keep-pictures")));
+    expect(sent().is_moment).toBe("false");
+    expect(deletePicture).not.toHaveBeenCalled();
+    expect(screen.getByTestId("entry-picture")).toBeInTheDocument();
+    expect(screen.queryByTestId("entry-picture-add")).toBeNull();
+  });
+
+  it("Delete them: each picture goes, then it's unstarred", async () => {
+    saveEntry.mockResolvedValue({ status: "saved", entry: { ...MOMENT, is_moment: false, updated_at: "2026-10-01T21:00:00Z" } });
+    show();
+    fireEvent.click(screen.getByTestId("entry-moment-toggle"));
+    await act(async () => fireEvent.click(screen.getByTestId("unstar-delete-pictures")));
+    expect(deletePicture).toHaveBeenCalledWith("p1");
+    expect(sent().is_moment).toBe("false");
+    expect(screen.queryByTestId("entry-picture")).toBeNull();
+  });
+
+  it("a picture that won't delete: still a moment, and it says so", async () => {
+    deletePicture.mockResolvedValueOnce({ status: "error" } as never);
+    show();
+    fireEvent.click(screen.getByTestId("entry-moment-toggle"));
+    await act(async () => fireEvent.click(screen.getByTestId("unstar-delete-pictures")));
+    expect(saveEntry).not.toHaveBeenCalled();
+    expect(screen.getByTestId("entry-moment-error")).toBeInTheDocument();
   });
 });

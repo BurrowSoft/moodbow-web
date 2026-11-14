@@ -173,6 +173,16 @@ export function TimelineList({ initial, initialDone, momentsOnly, dateLocaleTag,
                             {entry.is_moment && <MomentStar label={te("momentBadge")} />}
                             <span className="line-clamp-2 whitespace-pre-line">{entry.preview}</span>
                           </Link>
+                          {/* The pictures (035; board 15): 64 px thumbnails under the text, indented like
+                              it, a group named by their count. */}
+                          {entry.thumbs && entry.thumbs.length > 0 && (
+                            <div role="group" aria-label={t("timelinePictures", { count: entry.thumbs.length })} data-testid="timeline-pictures" className={`mt-1.5 flex gap-1.5 ${entry.is_moment ? "ps-[24px]" : ""}`}>
+                              {entry.thumbs.map((src, i) => (
+                                // eslint-disable-next-line @next/next/no-img-element -- a short-lived signed URL: never through the image optimizer
+                                <img key={i} src={src} alt="" data-testid="timeline-picture" className="h-16 w-16 rounded-xl object-cover" />
+                              ))}
+                            </div>
+                          )}
                         </li>
                       ))}
                     </ul>
