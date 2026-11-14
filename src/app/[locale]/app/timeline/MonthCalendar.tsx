@@ -11,9 +11,10 @@ import { loadCalendarMonth } from "./calendarActions";
 import { PrintMonthLink } from "./PrintMonthLink";
 
 // Month calendar (1.1 M, decision 197): one month per screen, weeks from
-// Monday. A day with a check-in has a dot in its Sunrise mood colour, plus
-// ★ for a moment and a small line for an entry; a day without one shows its
-// number only (no "missed" mark, no guilt). Today is outlined; future days
+// Monday. In each day: the dot in its Sunrise mood colour on top, then the
+// number, then tiny marks: ★ for a moment and a pencil for writing (Vitor,
+// 14 Nov), explained in a key under the grid. A day without a check-in shows
+// its number only (no "missed" mark, no guilt). Today is outlined; future days
 // are muted and not links. Each cell is named in words (calDayLabel), never
 // colour alone, and the grid is one tab stop with arrow keys moving by day.
 
@@ -158,15 +159,14 @@ export function MonthCalendar({
               const future = date > today;
               const marks = (
                 <>
-                  <span>{dayNumber(date, dateLocaleTag)}</span>
-                  <span className="flex h-3.5 items-center gap-0.5" aria-hidden="true">
+                  {/* The same height with or without a dot, so the numbers line up. */}
+                  <span className="flex h-2.5 items-center" aria-hidden="true">
                     {day?.mood != null && <span className={`h-2.5 w-2.5 rounded-full ${MOOD_COLOURS[day.mood - 1]} ${MOOD_DOT_OUTLINE}`} data-testid="calendar-dot" />}
-                    {day?.moment && (
-                      <svg viewBox="0 0 24 24" className="h-2.5 w-2.5 fill-accent" data-testid="calendar-moment">
-                        <path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z" />
-                      </svg>
-                    )}
-                    {day?.entry && <span className="h-0.5 w-2 rounded-full bg-text" data-testid="calendar-entry" />}
+                  </span>
+                  <span>{dayNumber(date, dateLocaleTag)}</span>
+                  <span className="flex h-[9px] items-center gap-0.5" aria-hidden="true">
+                    {day?.moment && <MomentIcon testId="calendar-moment" />}
+                    {day?.entry && <PencilIcon testId="calendar-entry" />}
                   </span>
                 </>
               );
@@ -207,6 +207,18 @@ export function MonthCalendar({
         ))}
       </div>
 
+      {/* The key for the tiny marks (the day's own name says them in words too). */}
+      <ul aria-label={t("calKey")} data-testid="calendar-key" className="mt-2 flex flex-wrap justify-center gap-x-4 gap-y-1 text-xs text-muted">
+        <li className="inline-flex items-center gap-1">
+          <PencilIcon />
+          {t("calKeyWriting")}
+        </li>
+        <li className="inline-flex items-center gap-1">
+          <MomentIcon />
+          {t("calKeyMoment")}
+        </li>
+      </ul>
+
       {load.kind === "error" && (
         <div role="alert" className="mt-3" data-testid="calendar-error">
           <p className="text-sm text-text">{tt("errGeneric")}</p>
@@ -233,5 +245,22 @@ export function MonthCalendar({
         </div>
       )}
     </section>
+  );
+}
+
+// The tiny marks, ~9 px: a pencil in text ink for writing, the star for a moment. Decorative here
+// (aria-hidden); the day's name and the key say them in words.
+function PencilIcon({ testId }: { testId?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" width="9" height="9" aria-hidden="true" data-testid={testId} className="shrink-0 text-text" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 20l4-1 11-11-3-3L5 16z" />
+    </svg>
+  );
+}
+function MomentIcon({ testId }: { testId?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" width="9" height="9" aria-hidden="true" data-testid={testId} className="shrink-0 fill-accent">
+      <path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z" />
+    </svg>
   );
 }

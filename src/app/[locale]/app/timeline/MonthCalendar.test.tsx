@@ -57,8 +57,12 @@ describe("MonthCalendar (1.1 M)", () => {
 
   it("each day named in words: date, mood word, moment, entry (never colour alone)", () => {
     renderIt();
-    expect(day("2026-10-01")).toHaveAccessibleName(`Thursday 1 October, ${messages.today.mood4}, entry`);
-    expect(day("2026-10-02")).toHaveAccessibleName("Friday 2 October, moment, entry");
+    expect(day("2026-10-01")).toHaveAccessibleName(`Thursday 1 October, ${messages.today.mood4}, has writing`);
+    expect(day("2026-10-02")).toHaveAccessibleName("Friday 2 October, moment, has writing");
+    // The key under the grid names the tiny marks in words (Vitor, 14 Nov).
+    expect(screen.getByTestId("calendar-key")).toHaveTextContent(messages.timeline.calKeyWriting);
+    expect(screen.getByTestId("calendar-key")).toHaveTextContent(messages.timeline.calKeyMoment);
+    expect(day("2026-10-01").querySelector("[data-testid=calendar-entry]")?.tagName.toLowerCase()).toBe("svg");
     expect(day("2026-10-03")).toHaveAccessibleName("Saturday 3 October");
     expect(day("2026-10-01").querySelector("[data-testid=calendar-dot]")).not.toBeNull();
     expect(day("2026-10-02").querySelector("[data-testid=calendar-dot]")).toBeNull();
