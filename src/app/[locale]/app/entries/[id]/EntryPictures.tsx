@@ -9,6 +9,7 @@ import { PICTURES, type EntryPicture } from "@/lib/journal/pictures";
 import type { PictureAddResult } from "@/app/api/pictures/route";
 import { PlusLock } from "../../PlusSheet";
 import { deletePicture } from "./pictureActions";
+import { SAVE_WAIT_MS } from "@/lib/ui/withTimeout";
 
 // An entry's pictures (035; board 20): a row of square thumbnails under the text, each opening the
 // picture full size, each with × to remove it; and, on a moment with room, a "+" tile to add one.
@@ -41,7 +42,8 @@ export function EntryPictures({ entryId, pictures, onChange, add }: { entryId: s
       form.set("height", String(encoded.height));
       form.set("full", new File([encoded.full], "picture.jpg", { type: "image/jpeg" }));
       form.set("thumb", new File([encoded.thumb], "picture_t.jpg", { type: "image/jpeg" }));
-      const res = await fetch("/api/pictures", { method: "POST", body: form });
+      // A dead connection ends at SAVE_WAIT_MS as the generic error, never "adding" forever (audit B).
+      const res = await fetch("/api/pictures", { method: "POST", body: form, signal: AbortSignal.timeout(SAVE_WAIT_MS) });
       const result = (await res.json().catch(() => null)) as PictureAddResult | null;
       if (result?.status === "ok") onChange([...pictures, result.picture]);
       else setFailure(result?.status === "error" && result.error === "picture_quota" ? "quota" : result?.status === "error" && result.error === "invalid" ? "failed" : "generic");

@@ -20,7 +20,7 @@ vi.mock("@/i18n/navigation", () => ({
   ),
 }));
 vi.mock("@/lib/ui/withTimeout", async (orig) => ({ ...(await orig<typeof import("@/lib/ui/withTimeout")>()), EXPORT_WAIT_MS: 300 }));
-const { YourData } = await import("./YourData");
+const { YourData, PICTURE_FETCH_MS } = await import("./YourData");
 const m = messages.me;
 const UID = "0b5f2c1e-7d3a-4e8b-9c41-2a6f8e1d3b70";
 const KEYS = [`mb:pending-checkin:${UID}:2026-10-02`, `mb:draft-entry:${UID}:new`];
@@ -104,11 +104,34 @@ describe("YourData: export", () => {
     fireEvent.click(screen.getByTestId("me-export"));
     await waitFor(() => expect(screen.getByTestId("me-export-zip")).toBeInTheDocument());
     expect(screen.getByTestId("me-export-zip")).toHaveAttribute("download", "moodbow-export-2026-10-02.zip");
-    expect(fetchMock).toHaveBeenCalledWith("https://signed.example/p1");
+    expect(fetchMock).toHaveBeenCalledWith("https://signed.example/p1", expect.objectContaining({ signal: expect.any(AbortSignal) }));
     const zip = new Uint8Array(await blobs.at(-1)!.arrayBuffer());
     const { unzipSync } = await import("fflate");
     expect(Object.keys(unzipSync(zip)).sort()).toEqual(["moodbow-export-2026-10-02.json", "pictures/e2/p1.jpg"]);
     vi.unstubAllGlobals();
+  });
+
+  it("a picture that stalls (audit D, MAJOR): each gets PICTURE_FETCH_MS; past it, the export stands without the zip and says so", async () => {
+    const doc = { format: "moodbow-export", format_version: 1, exported_at: "2026-10-02T09:30:00Z", account: { email: "a@b.co" }, check_ins: [], entries: [{ id: "e2", entry_date: "2026-10-02", body: "A walk.", is_moment: true, created_at: "2026-10-02T02:00:00+00:00", updated_at: "2026-10-02T02:00:00+00:00", pictures: [{ id: "p1", created_at: "2026-10-02T02:05:00+00:00", width: 2048, height: 1536 }] }] };
+    exportMyData.mockResolvedValue({ status: "ok", json: JSON.stringify(doc), date: "2026-10-02" });
+    exportPictureUrls.mockResolvedValue({ status: "ok", pictures: [{ entry_id: "e2", id: "p1", url: "https://signed.example/p1" }] });
+    const timeout = vi.spyOn(AbortSignal, "timeout");
+    // What a timed-out fetch does: rejects with a TimeoutError.
+    vi.stubGlobal("fetch", vi.fn(async () => Promise.reject(new DOMException("The operation timed out.", "TimeoutError"))));
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <YourData credits={0} uid={UID} pictures />
+      </NextIntlClientProvider>,
+    );
+    fireEvent.click(screen.getByTestId("me-export"));
+    await waitFor(() => expect(screen.getByTestId("me-export-zip-failed")).toHaveTextContent(m.exportZipFailed));
+    expect(timeout).toHaveBeenCalledWith(PICTURE_FETCH_MS);
+    expect(PICTURE_FETCH_MS).toBe(30_000);
+    expect(screen.getByTestId("me-export-json")).toBeInTheDocument();
+    expect(screen.queryByTestId("me-export-zip")).toBeNull();
+    // The export itself is ready, not an error.
+    expect(screen.getByTestId("me-export-status")).toHaveTextContent(m.meExportReady);
+    timeout.mockRestore();
   });
 
   it("pictures that can't be zipped: the other files stand, and it says so; no pictures, no zip", async () => {

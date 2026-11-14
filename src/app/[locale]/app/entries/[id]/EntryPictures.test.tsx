@@ -4,6 +4,7 @@ import { useState } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import messages from "@/messages/en.json";
 import type { EntryPicture } from "@/lib/journal/pictures";
+import { SAVE_WAIT_MS } from "@/lib/ui/withTimeout";
 
 const deletePicture = vi.fn(async (_id: string) => ({ status: "ok" as const }));
 vi.mock("./pictureActions", () => ({ deletePicture: (id: string) => deletePicture(id) }));
@@ -59,6 +60,19 @@ describe("EntryPictures (035, board 20)", () => {
     expect(init.body.get("entry")).toBe("e1");
     expect(screen.getAllByTestId("entry-picture")).toHaveLength(3);
     expect(screen.queryByTestId("entry-picture-add")).toBeNull();
+  });
+
+  it("a dead connection: the upload gives up at SAVE_WAIT_MS with the generic error, and adding works again (audit B)", async () => {
+    const timeout = vi.spyOn(AbortSignal, "timeout");
+    fetchMock.mockRejectedValueOnce(new DOMException("The operation timed out.", "TimeoutError"));
+    render(<Harness start={[pic("p1")]} add="open" />);
+    await act(async () => fireEvent.change(screen.getByTestId("entry-picture-input"), { target: { files: [new File(["x"], "walk.jpg", { type: "image/jpeg" })] } }));
+    const [, init] = fetchMock.mock.calls[0] as [string, { signal?: AbortSignal }];
+    expect(init.signal).toBeInstanceOf(AbortSignal);
+    expect(timeout).toHaveBeenCalledWith(SAVE_WAIT_MS);
+    expect(screen.getByTestId("entry-picture-error")).toHaveTextContent(messages.today.errGeneric);
+    expect(screen.getByTestId("entry-picture-add")).not.toBeDisabled();
+    timeout.mockRestore();
   });
 
   it("without Plus: the camera is a lock to the Plus screen (adding is Plus; viewing and removing aren't)", () => {
