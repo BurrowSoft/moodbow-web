@@ -82,7 +82,7 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
   // failed), the labelled example and nothing of theirs. A row that can't be read, or Plus off,
   // shows their own Insights as before (ruling 5). The gate is here and on the route only, never in
   // lib/journal/insights, which the appointment summary uses (ruling 2).
-  if (plus && plus.kind !== "plus") return <InsightsExample help={<GetHelpNow country={me.profile?.country} testId="insights-example-help" neutral />} />;
+  if (plus && plus.kind !== "plus") return <InsightsExample help={<GetHelpNow country={me.profile?.country} testId="insights-example-help" neutral icon />} />;
   const hasPlus = plus?.kind === "plus";
   const longRange = hasPlus && isLongRange(asked) ? asked : null;
   const moreWindow = longRange === "all" ? "all" : "year";
