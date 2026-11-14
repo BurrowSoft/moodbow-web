@@ -2322,7 +2322,8 @@ test("pictures: a Plus moment takes a real JPEG with EXIF; the tile shows; the s
       ];
       const hits = corners.map(([px, py]) => {
         const el = document.elementFromPoint(px, py);
-        return el?.closest('[data-testid="entry-picture-open"]') ? "open" : el ? `${el.tagName.toLowerCase()}${el.getAttribute("data-testid") ? `[${el.getAttribute("data-testid")}]` : ""}` : "none";
+        // Each miss named in full: tag, test id and classes (the Reviewer, #322).
+        return el?.closest('[data-testid="entry-picture-open"]') ? "open" : el ? `${el.tagName.toLowerCase()}${el.getAttribute("data-testid") ? `[${el.getAttribute("data-testid")}]` : ""}.${(el.getAttribute("class") ?? "").trim().split(/\s+/).join(".")} @${Math.round(px)},${Math.round(py)}` : `none @${Math.round(px)},${Math.round(py)}`;
       });
       const clear = hits.every((h) => h === "open");
       const where = { open: [Math.round(open.left), Math.round(open.top), Math.round(open.width), Math.round(open.height)], viewport: [window.innerWidth, window.innerHeight], hits };
