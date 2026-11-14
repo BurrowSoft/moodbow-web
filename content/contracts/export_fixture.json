@@ -43,6 +43,10 @@
       "created_at": "2026-10-02T01:30:00+00:00", "updated_at": "2026-10-02T01:30:00+00:00"
     }
   ],
+  "check_in_tags": [
+    { "local_date": "2026-09-28", "tag": "Walk" },
+    { "local_date": "2026-09-28", "tag": "Friends" }
+  ],
   "entries": [
     {
       "id": "e1", "entry_date": "2026-09-30", "body": "Long day.\r\nBut a good talk with Mai at the end — ขอบคุณ.\r\n\r\n",
@@ -59,6 +63,25 @@
       "is_moment": false,
       "created_at": "2026-10-02T09:00:00+00:00", "updated_at": "2026-10-02T09:00:00+00:00"
     }
+  ],
+  "things_that_help": [
+    { "text": "Walk round the block", "position": 0, "created_at": "2026-10-02T08:00:00+00:00" },
+    { "text": "Text Sam", "position": 1, "created_at": "2026-10-02T08:01:00+00:00" }
+  ],
+  "safety_plan": {
+    "warning_signs": "Not sleeping\nSkipping meals",
+    "distractions": "The park by the river",
+    "surroundings": "",
+    "updated_at": "2026-10-02T09:00:00+00:00",
+    "people": [
+      { "section": "people", "name": "Sam", "phone": "+64 21 555 0100", "position": 0, "created_at": "2026-10-02T09:01:00+00:00" },
+      { "section": "people", "name": "Alex", "phone": null, "position": 1, "created_at": "2026-10-02T09:02:00+00:00" },
+      { "section": "professionals", "name": "Dr Lee", "phone": "09 555 0199", "position": 0, "created_at": "2026-10-02T09:03:00+00:00" }
+    ]
+  },
+  "letters": [
+    { "body": "Dear me,\nI hope the garden grew.", "written_on": "2026-10-02", "opens_on": "2027-10-02", "opened_at": null, "created_at": "2026-10-02T10:00:00+00:00" },
+    { "body": "Dear me,\nYou did it.", "written_on": "2026-10-03", "opens_on": "2026-11-03", "opened_at": "2026-11-03T08:00:00+00:00", "created_at": "2026-10-03T10:00:00+00:00" }
   ],
   "ai_reflections": [
     {

@@ -8,7 +8,8 @@ import { lastWeekStart } from "./report";
 // content/your-week.json with worked cases, for the app to run the same ones:
 // - the last complete Monday to Sunday; a check-in counts if it has a mood;
 // - under 4 check-ins: no card;
-// - mood 1 or 2 on more than half: only "hard", nothing else;
+// - mood 1 or 2 on more than half, or on at least half with no 4 or 5 at all: only "hard";
+// - how the week looked: mostly steady, else more good, else mixed (v2);
 // - otherwise at most 2 lines. First a pattern, else how the week looked. Then
 //   the moment, else how the week looked if the first line was a pattern;
 // - no lines, no card;
@@ -59,13 +60,25 @@ function bestPattern(rows: InsightRow[]): PatternId | null {
   return best?.id ?? null;
 }
 
+const countMoods = (rows: InsightRow[], moods: readonly number[]) => rows.filter((r) => moods.includes(r.mood)).length;
+
+// Hard (contract v2, UX 14 Nov): a low mood on more than half; or, with no good day at all, on at
+// least half (2,2,3,3 is hard; 2,2,4,4 isn't). It only ever adds help, never removes it.
+function isHard(rows: InsightRow[]): boolean {
+  const low = countMoods(rows, YOUR_WEEK_RULES.lowMoods);
+  const good = countMoods(rows, YOUR_WEEK_RULES.goodMoods);
+  return low * 2 > rows.length || (good === 0 && low * 2 >= rows.length);
+}
+
+// How the week looked (contract v2, UX's 9 Nov ruling, applied 14 Nov): steady first, then more
+// good, then mixed, the catch-all for at least one good and one low day. On a week that isn't hard,
+// one of the three always applies (the property test over every 4-7 day week proves it).
 function howItLooked(rows: InsightRow[]): YourWeekLine | null {
-  const count = (moods: readonly number[]) => rows.filter((r) => moods.includes(r.mood)).length;
-  const good = count(YOUR_WEEK_RULES.goodMoods);
-  const low = count(YOUR_WEEK_RULES.lowMoods);
+  const good = countMoods(rows, YOUR_WEEK_RULES.goodMoods);
+  const low = countMoods(rows, YOUR_WEEK_RULES.lowMoods);
+  if (countMoods(rows, [YOUR_WEEK_RULES.steadyMood]) * 2 > rows.length) return { template: "lookSteady" };
   if (good > low && good >= YOUR_WEEK_RULES.minGoodDays) return { template: "lookMoreGood" };
-  if (count([YOUR_WEEK_RULES.steadyMood]) * 2 > rows.length) return { template: "lookSteady" };
-  if (good === low && good >= 1) return { template: "lookMixed" };
+  if (good >= 1 && low >= 1) return { template: "lookMixed" };
   return null;
 }
 
@@ -76,8 +89,7 @@ export function yourWeek(allRows: InsightRow[], today: string, moments: YourWeek
   const rows = allRows.filter((r) => inWeek(r.local_date) && r.mood !== null && r.mood !== undefined);
   if (rows.length < YOUR_WEEK_RULES.minCheckIns) return null;
 
-  const low = rows.filter((r) => (YOUR_WEEK_RULES.lowMoods as readonly number[]).includes(r.mood)).length;
-  if (low * 2 > rows.length) return { start, end, kind: "hard" };
+  if (isHard(rows)) return { start, end, kind: "hard" };
 
   const pattern = bestPattern(rows);
   const look = howItLooked(rows);

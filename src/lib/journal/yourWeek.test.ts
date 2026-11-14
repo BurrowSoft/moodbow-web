@@ -84,3 +84,42 @@ describe("Your week: Patterns' sides", () => {
     expect(yourWeek(rows, "2026-11-04", [])).toMatchObject({ lines: [{ template: "patternSleep" }, { template: "lookMoreGood" }], caption: true });
   });
 });
+
+// Contract v2 (UX 14 Nov; the Reviewer's checklist): every week of 4 to 7 check-ins, as a multiset of
+// moods (no pattern, no moment), is hard or has exactly one "how it looked" line. Never no card.
+describe("Your week v2: every week of 4-7 check-ins says something", () => {
+  const multisets = (n: number, from = 1): number[][] => (n === 0 ? [[]] : [1, 2, 3, 4, 5].filter((m) => m >= from).flatMap((m) => multisets(n - 1, m).map((rest) => [m, ...rest])));
+  const days = ["2026-10-26", "2026-10-27", "2026-10-28", "2026-10-29", "2026-10-30", "2026-10-31", "2026-11-01"];
+  const weeks = [4, 5, 6, 7].flatMap((n) => multisets(n));
+
+  it("all 736 of them: hard exactly when low*2 > n, or no good day and low*2 >= n; otherwise one look line", () => {
+    expect(weeks).toHaveLength(70 + 126 + 210 + 330);
+    const silent: string[] = [];
+    for (const moods of weeks) {
+      const rows = moods.map((mood, i) => ({ local_date: days[i], mood, sleep_hours: null, stress: null, exercise_minutes: null })) as unknown as InsightRow[];
+      const n = moods.length;
+      const low = moods.filter((m) => m <= 2).length;
+      const good = moods.filter((m) => m >= 4).length;
+      const hard = low * 2 > n || (good === 0 && low * 2 >= n);
+      const week = yourWeek(rows, "2026-11-04", []);
+      if (!week) {
+        silent.push(moods.join(","));
+        continue;
+      }
+      if (hard) expect(week, moods.join(",")).toEqual({ start: "2026-10-26", end: "2026-11-01", kind: "hard" });
+      else {
+        expect(week.kind, moods.join(",")).toBe("lines");
+        const lines = week.kind === "lines" ? week.lines : [];
+        expect(lines.map((l) => l.template), moods.join(",")).toHaveLength(1);
+        expect(lines[0].template, moods.join(",")).toMatch(/^look(Steady|MoreGood|Mixed)$/);
+      }
+    }
+    // Named, so a rule that leaves a week silent says which.
+    expect(silent).toEqual([]);
+  });
+
+  it("the hard branch: no moment, no pattern, no lines, whatever else qualifies", () => {
+    const rows = [2, 2, 3, 3].map((mood, i) => ({ local_date: days[i], mood, sleep_hours: i < 2 ? 5 : 8, stress: null, exercise_minutes: null })) as unknown as InsightRow[];
+    expect(yourWeek(rows, "2026-11-04", [{ id: "m", entry_date: days[1] }])).toEqual({ start: "2026-10-26", end: "2026-11-01", kind: "hard" });
+  });
+});

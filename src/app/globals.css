@@ -24,6 +24,10 @@
      pass). Darker on light, lighter on dark. */
   --accent-hover: color-mix(in srgb, var(--accent) 85%, black);
   --pill: #f9eaec;
+  /* The mood pairs (board 3): the bars' track and the warm difference chip. */
+  --pair-track: #f3ecf0;
+  --pair-chip: #fcebdd;
+  --pair-chip-ink: #8a4b2e;
   --draft-bg: #fff4d6;
   --draft-text: #5c4400;
   /* Moodbow's voice (reflections, the Lite badge; decision 150): the brand
@@ -48,6 +52,9 @@
     --on-accent: var(--ink);
     --accent-hover: color-mix(in srgb, var(--accent) 85%, white);
     --pill: #382c43;
+    --pair-track: #463c56;
+    --pair-chip: #4a3428;
+    --pair-chip-ink: #f3c9a8;
     --draft-bg: #4a3d14;
     --draft-text: #ffe9a8;
     --voice: var(--accent);
@@ -70,6 +77,9 @@
   --on-accent: var(--ink);
   --accent-hover: color-mix(in srgb, var(--accent) 85%, white);
   --pill: #382c43;
+  --pair-track: #463c56;
+  --pair-chip: #4a3428;
+  --pair-chip-ink: #f3c9a8;
   --draft-bg: #4a3d14;
   --draft-text: #ffe9a8;
   --voice: var(--accent);
@@ -101,6 +111,9 @@
   --color-on-accent: var(--on-accent);
   --color-accent-hover: var(--accent-hover);
   --color-pill: var(--pill);
+  --color-pair-track: var(--pair-track);
+  --color-pair-chip: var(--pair-chip);
+  --color-pair-chip-ink: var(--pair-chip-ink);
   --color-peach: var(--peach);
   --color-rose: var(--rose);
   --color-lavender: var(--lavender);
@@ -250,6 +263,21 @@ input:is([type="date"], [type="time"], [type="datetime-local"], [type="month"], 
   }
 }
 
+/* Room at the page's very end for Bo's button (BoButton.tsx: its bottom, one capped
+   line and its 8 px padding, then a gap: 16 px, or 8 where its 48 px minimum sets the
+   height, as at normal size), so nothing ends under it, the footer's
+   account-deletion link included. As the milestone's below, which is taller and comes
+   later, so it wins; the card's room isn't the button's, so the button waits for it. */
+.has-bo-button {
+  --bo-bottom: calc(3.5rem + 16px);
+  --bo-room: calc(var(--bo-bottom) + min(1rem, max(8vw, 16px)) * 1.5 + 32px);
+  padding-bottom: var(--bo-room);
+  min-height: calc(100dvh + var(--bo-room));
+}
+@media (min-width: 48rem) {
+  .has-bo-button { --bo-bottom: 24px; }
+}
+
 /* Room at the page's very end while the milestone card floats: its height
    above the tab bar on phones (to ~15rem), above the corner on wide screens.
    The body is a min-h-dvh flex column with border-box sizing: on a short page
@@ -259,6 +287,7 @@ input:is([type="date"], [type="time"], [type="datetime-local"], [type="month"], 
 @media (min-width: 48rem) {
   .has-floating-card { padding-bottom: 12rem; min-height: calc(100dvh + 12rem); }
 }
+.has-floating-card .bo-button { display: none; }
 
 /* Today's milestone offer (decision 186): slides up from below; it's fixed,
    and a transform, so it moves nothing else. Reduced motion: just appears. */
@@ -316,6 +345,25 @@ input:is([type="date"], [type="time"], [type="datetime-local"], [type="month"], 
 /* The in-app navigation bar (components/NavProgress.tsx): a segment sliding across. */
 @keyframes nav-progress { from { transform: translateX(-100%); } to { transform: translateX(300%); } }
 
+/* Moodbow Plus palettes (lib/plus/paletteColours.ts, generated; palettes.test.ts checks it). */
+@media screen {
+  :root[data-palette="dusk"] { --bg: #f5f2fb; --surface: #ffffff; --border: #e4ddf3; --text: #2b2438; --muted: #5d5470; --accent: #6a4fb3; --on-accent: #ffffff; --pill: #ece6f8; --accent-hover: color-mix(in srgb, var(--accent) 85%, black); }
+  :root[data-palette="dusk"][data-theme="dark"] { --bg: #221d33; --surface: #2f2846; --border: #40375c; --text: #f3effb; --muted: #c6bedb; --accent: #b9a6ec; --on-accent: #221d33; --pill: #352d50; --accent-hover: color-mix(in srgb, var(--accent) 85%, white); }
+  :root[data-palette="sunrise"] { --bg: #fdf5ec; --surface: #ffffff; --border: #f1e2cf; --text: #2b2438; --muted: #635546; --accent: #9c4519; --on-accent: #ffffff; --pill: #fbe9d6; --accent-hover: color-mix(in srgb, var(--accent) 85%, black); }
+  :root[data-palette="sunrise"][data-theme="dark"] { --bg: #2a2019; --surface: #3a2c22; --border: #4d3b2d; --text: #fbf3ea; --muted: #d9c7b4; --accent: #e9b949; --on-accent: #2a2019; --pill: #44331f; --accent-hover: color-mix(in srgb, var(--accent) 85%, white); }
+  :root[data-palette="sea"] { --bg: #f1f4f7; --surface: #ffffff; --border: #dde4eb; --text: #1f2a36; --muted: #4f5d6b; --accent: #3c5a7a; --on-accent: #ffffff; --pill: #e3eaf1; --accent-hover: color-mix(in srgb, var(--accent) 85%, black); }
+  :root[data-palette="sea"][data-theme="dark"] { --bg: #18212b; --surface: #222e3a; --border: #33414f; --text: #eef3f7; --muted: #b7c4d1; --accent: #9fb6d0; --on-accent: #18212b; --pill: #2a3846; --accent-hover: color-mix(in srgb, var(--accent) 85%, white); }
+  [data-palette] [data-default-colours] { --bg: #fbf6f1; --surface: #ffffff; --border: #ece3da; --text: #2b2438; --muted: #6b6278; --accent: #a8456a; --on-accent: #fbf6f1; --pill: #f9eaec; --accent-hover: color-mix(in srgb, var(--accent) 85%, black); }
+  [data-palette][data-theme="dark"] [data-default-colours] { --bg: #2b2438; --surface: #352d43; --border: #463c56; --text: #fbf6f1; --muted: #c9c1d4; --accent: #d88aa6; --on-accent: #2b2438; --pill: #382c43; --accent-hover: color-mix(in srgb, var(--accent) 85%, white); }
+}
+@media screen and (prefers-color-scheme: dark) {
+  :root[data-palette="dusk"]:not([data-theme="light"]) { --bg: #221d33; --surface: #2f2846; --border: #40375c; --text: #f3effb; --muted: #c6bedb; --accent: #b9a6ec; --on-accent: #221d33; --pill: #352d50; --accent-hover: color-mix(in srgb, var(--accent) 85%, white); }
+  :root[data-palette="sunrise"]:not([data-theme="light"]) { --bg: #2a2019; --surface: #3a2c22; --border: #4d3b2d; --text: #fbf3ea; --muted: #d9c7b4; --accent: #e9b949; --on-accent: #2a2019; --pill: #44331f; --accent-hover: color-mix(in srgb, var(--accent) 85%, white); }
+  :root[data-palette="sea"]:not([data-theme="light"]) { --bg: #18212b; --surface: #222e3a; --border: #33414f; --text: #eef3f7; --muted: #b7c4d1; --accent: #9fb6d0; --on-accent: #18212b; --pill: #2a3846; --accent-hover: color-mix(in srgb, var(--accent) 85%, white); }
+  [data-palette]:not([data-theme="light"]) [data-default-colours] { --bg: #2b2438; --surface: #352d43; --border: #463c56; --text: #fbf6f1; --muted: #c9c1d4; --accent: #d88aa6; --on-accent: #2b2438; --pill: #382c43; --accent-hover: color-mix(in srgb, var(--accent) 85%, white); }
+}
+/* End of the Moodbow Plus palettes. */
+
 /* Paper (1.1 N "Print this month", and any page printed): black on white
    whatever the theme, with no app chrome (print:hidden on the nav and the
    footer). Last in the file, so it wins over the dark-theme rules of the
@@ -334,5 +382,20 @@ input:is([type="date"], [type="time"], [type="datetime-local"], [type="month"], 
   }
   @page {
     margin: 16mm 16mm 20mm;
+  }
+}
+
+/* Bo's conversation (BoConversation sets the mark): no footer, and on a phone a full
+   screen, with no tab bar and so no room kept for it. */
+html[data-bo-screen] footer {
+  display: none;
+}
+@media (width < 48rem) {
+  html[data-bo-screen] [data-app-nav] {
+    display: none;
+  }
+  html[data-bo-screen] #main {
+    padding-top: 0;
+    padding-bottom: 16px;
   }
 }

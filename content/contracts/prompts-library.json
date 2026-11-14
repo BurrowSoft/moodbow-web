@@ -1,0 +1,341 @@
+{
+  "version": 1,
+  "note": "The prompt library (Plus wave 2; UX, 12 Nov): local, no AI, the same on app and web. Groups in list order; each group's prompts in list order, resumed where the person left off (kept on the device, per group, by id). plus: in Plus only (Hard days is free for everyone). help: Get help now under the group's intro. The same client rules as prompts.json: shown only while the entry is empty, never on a day whose earlier entries the crisis matcher flags (every list, crisis-keywords rule 5), the UI language's text else en. en is approved; fr, es, pt (pt-BR), de, it and th are drafts until each <lang>_reviewed. Ids lib-<group>-<n> are stable. Generated from specs/plus-prompts-library.json by tool/gen_prompts_library.cjs; edit the source, not this file.",
+  "groups": [
+    {
+      "id": "noticing",
+      "plus": true,
+      "help": false,
+      "prompts": [
+        {
+          "id": "lib-noticing-1",
+          "en": "What did you notice today that you usually walk past?",
+          "fr": "Qu'avez-vous remarqué aujourd'hui que vous ne voyez pas d'habitude ?",
+          "es": "¿Qué notaste hoy que normalmente pasas por alto?",
+          "pt": "O que você notou hoje que normalmente passa despercebido?",
+          "de": "Was ist dir heute aufgefallen, woran du sonst vorbeigehst?",
+          "it": "Cosa hai notato oggi che di solito ti sfugge?",
+          "th": "วันนี้คุณสังเกตเห็นอะไรที่ปกติมักมองข้ามไป?"
+        },
+        {
+          "id": "lib-noticing-2",
+          "en": "What's the light like where you are right now?",
+          "fr": "Comment est la lumière là où vous êtes, en ce moment ?",
+          "es": "¿Cómo es la luz donde estás ahora mismo?",
+          "pt": "Como está a luz onde você está agora?",
+          "de": "Wie ist das Licht gerade dort, wo du bist?",
+          "it": "Com'è la luce dove sei in questo momento?",
+          "th": "ตอนนี้แสงรอบตัวคุณเป็นอย่างไร?"
+        },
+        {
+          "id": "lib-noticing-3",
+          "en": "What's one thing you can hear as you write this?",
+          "fr": "Qu'entendez-vous pendant que vous écrivez ?",
+          "es": "¿Qué es algo que oyes mientras escribes esto?",
+          "pt": "Que som você consegue ouvir enquanto escreve?",
+          "de": "Was hörst du gerade, während du das schreibst?",
+          "it": "Cosa senti mentre scrivi queste righe?",
+          "th": "ขณะเขียนอยู่นี้ คุณได้ยินเสียงอะไรบ้าง?"
+        },
+        {
+          "id": "lib-noticing-4",
+          "en": "What did your hands do today?",
+          "fr": "Qu'ont fait vos mains aujourd'hui ?",
+          "es": "¿Qué hicieron tus manos hoy?",
+          "pt": "O que suas mãos fizeram hoje?",
+          "de": "Was haben deine Hände heute gemacht?",
+          "it": "Cosa hanno fatto le tue mani oggi?",
+          "th": "วันนี้มือของคุณได้ทำอะไรบ้าง?"
+        },
+        {
+          "id": "lib-noticing-5",
+          "en": "Which moment from today would you keep as a photo?",
+          "fr": "Quel moment d'aujourd'hui garderiez-vous en photo ?",
+          "es": "¿Qué momento de hoy guardarías como una foto?",
+          "pt": "Que momento de hoje você guardaria como uma foto?",
+          "de": "Welchen Moment von heute würdest du als Foto behalten?",
+          "it": "Quale momento di oggi terresti come una foto?",
+          "th": "ช่วงเวลาไหนของวันนี้ที่คุณอยากเก็บไว้เป็นภาพถ่าย?"
+        },
+        {
+          "id": "lib-noticing-6",
+          "en": "What changed around you this week, even slightly?",
+          "fr": "Qu'est-ce qui a changé autour de vous cette semaine, même un peu ?",
+          "es": "¿Qué cambió a tu alrededor esta semana, aunque sea un poco?",
+          "pt": "O que mudou ao seu redor nesta semana, mesmo que pouco?",
+          "de": "Was hat sich diese Woche um dich herum verändert, auch nur ein bisschen?",
+          "it": "Cosa è cambiato intorno a te questa settimana, anche di poco?",
+          "th": "สัปดาห์นี้มีอะไรรอบตัวคุณเปลี่ยนไปบ้าง แม้เพียงเล็กน้อย?"
+        }
+      ]
+    },
+    {
+      "id": "gratitude",
+      "plus": true,
+      "help": false,
+      "prompts": [
+        {
+          "id": "lib-gratitude-1",
+          "en": "What's something ordinary you were glad of today?",
+          "fr": "Quelle chose ordinaire vous a fait plaisir aujourd'hui ?",
+          "es": "¿Qué cosa cotidiana te alegró hoy?",
+          "pt": "Que coisa comum te deixou contente hoje?",
+          "de": "Über welche ganz alltägliche Sache hast du dich heute gefreut?",
+          "it": "Quale cosa di tutti i giorni ti ha fatto piacere oggi?",
+          "th": "วันนี้มีเรื่องธรรมดาอะไรที่ทำให้คุณดีใจ?"
+        },
+        {
+          "id": "lib-gratitude-2",
+          "en": "Who or what made a hard part of the day easier?",
+          "fr": "Qui ou quoi a rendu un moment difficile de la journée plus facile ?",
+          "es": "¿Quién o qué hizo más fácil una parte difícil del día?",
+          "pt": "Quem ou o que deixou uma parte difícil do dia mais leve?",
+          "de": "Wer oder was hat einen schweren Teil des Tages leichter gemacht?",
+          "it": "Chi o cosa ha reso più facile un momento difficile della giornata?",
+          "th": "ใครหรืออะไรที่ทำให้ช่วงที่ยากของวันนี้ง่ายขึ้น?"
+        },
+        {
+          "id": "lib-gratitude-3",
+          "en": "What's a comfort you'd like to thank, out loud or not?",
+          "fr": "Quel réconfort aimeriez-vous remercier, à voix haute ou non ?",
+          "es": "¿Qué consuelo te gustaría agradecer, en voz alta o no?",
+          "pt": "Que conforto você gostaria de agradecer, em voz alta ou não?",
+          "de": "Für welchen Trost möchtest du danken, laut oder leise?",
+          "it": "Quale conforto ti piacerebbe ringraziare, ad alta voce o no?",
+          "th": "มีสิ่งปลอบใจอะไรที่คุณอยากขอบคุณ จะพูดออกมาหรือไม่ก็ได้?"
+        },
+        {
+          "id": "lib-gratitude-4",
+          "en": "What's working, even a little, right now?",
+          "fr": "Qu'est-ce qui fonctionne, même un peu, en ce moment ?",
+          "es": "¿Qué está funcionando, aunque sea un poco, ahora mismo?",
+          "pt": "O que está dando certo, mesmo que um pouco, agora?",
+          "de": "Was läuft gerade gut, auch nur ein bisschen?",
+          "it": "Cosa sta andando, anche solo un po', in questo momento?",
+          "th": "ตอนนี้มีอะไรที่กำลังไปได้ดี แม้เพียงเล็กน้อย?"
+        },
+        {
+          "id": "lib-gratitude-5",
+          "en": "What did someone do that you'd like to remember?",
+          "fr": "Qu'a fait quelqu'un dont vous aimeriez vous souvenir ?",
+          "es": "¿Qué hizo alguien que te gustaría recordar?",
+          "pt": "O que alguém fez que você gostaria de lembrar?",
+          "de": "Was hat jemand getan, woran du dich erinnern möchtest?",
+          "it": "Cosa ha fatto qualcuno che ti piacerebbe ricordare?",
+          "th": "มีใครทำอะไรที่คุณอยากจำไว้บ้าง?"
+        },
+        {
+          "id": "lib-gratitude-6",
+          "en": "What's a place you're glad exists?",
+          "fr": "Quel lieu vous fait du bien, rien que parce qu'il existe ?",
+          "es": "¿Qué lugar te alegra que exista?",
+          "pt": "Que lugar te deixa feliz só por existir?",
+          "de": "Über welchen Ort freust du dich, dass es ihn gibt?",
+          "it": "Quale posto ti fa piacere che esista?",
+          "th": "มีสถานที่ไหนที่คุณดีใจที่มันมีอยู่?"
+        }
+      ]
+    },
+    {
+      "id": "hard-days",
+      "plus": false,
+      "help": true,
+      "prompts": [
+        {
+          "id": "lib-hard-days-1",
+          "en": "If today was heavy, what's one word for it?",
+          "fr": "Si la journée a été lourde, quel mot la décrirait ?",
+          "es": "Si hoy fue un día pesado, ¿qué palabra lo describe?",
+          "pt": "Se hoje foi pesado, que palavra descreve o dia?",
+          "de": "Wenn der Tag schwer war: Welches Wort passt dazu?",
+          "it": "Se oggi è stata una giornata pesante, quale parola la descrive?",
+          "th": "ถ้าวันนี้หนักหนา คุณจะใช้คำไหนบรรยายมัน?"
+        },
+        {
+          "id": "lib-hard-days-2",
+          "en": "What's one small thing that got you through the last hour?",
+          "fr": "Quelle petite chose a rendu la dernière heure plus facile ?",
+          "es": "¿Qué pequeña cosa te ayudó a pasar la última hora?",
+          "pt": "Que coisa pequena te ajudou a passar pela última hora?",
+          "de": "Welche Kleinigkeit hat dir durch die letzte Stunde geholfen?",
+          "it": "Quale piccola cosa ha reso più facile l'ultima ora?",
+          "th": "มีเรื่องเล็กๆ อะไรที่ช่วยให้คุณผ่านชั่วโมงที่ผ่านมาได้?"
+        },
+        {
+          "id": "lib-hard-days-3",
+          "en": "What would be enough for the rest of today?",
+          "fr": "Qu'est-ce qui suffirait pour le reste de la journée ?",
+          "es": "¿Qué sería suficiente para lo que queda de hoy?",
+          "pt": "O que seria suficiente para o resto de hoje?",
+          "de": "Was würde für den Rest des Tages reichen?",
+          "it": "Cosa basterebbe per il resto della giornata?",
+          "th": "สำหรับเวลาที่เหลือของวันนี้ แค่ไหนถึงจะพอ?"
+        },
+        {
+          "id": "lib-hard-days-4",
+          "en": "Who or what could you lean on a little, even for a moment?",
+          "fr": "Sur qui ou sur quoi pourriez-vous vous appuyer un peu, même un instant ?",
+          "es": "¿En quién o en qué podrías apoyarte un poco, aunque sea un momento?",
+          "pt": "Em quem ou em que você poderia se apoiar um pouco, mesmo que por um momento?",
+          "de": "Auf wen oder was könntest du dich ein wenig stützen, auch nur kurz?",
+          "it": "Su chi o su cosa potresti appoggiarti un po', anche solo per un momento?",
+          "th": "มีใครหรืออะไรที่คุณพอจะพึ่งพิงได้บ้าง แม้เพียงครู่เดียว?"
+        },
+        {
+          "id": "lib-hard-days-5",
+          "en": "What do you wish someone would say to you right now?",
+          "fr": "Qu'aimeriez-vous que quelqu'un vous dise, là, maintenant ?",
+          "es": "¿Qué te gustaría que alguien te dijera ahora mismo?",
+          "pt": "O que você gostaria que alguém te dissesse agora?",
+          "de": "Was würdest du dir wünschen, dass dir jemand jetzt sagt?",
+          "it": "Cosa vorresti che qualcuno ti dicesse in questo momento?",
+          "th": "ตอนนี้คุณอยากให้ใครสักคนพูดอะไรกับคุณ?"
+        },
+        {
+          "id": "lib-hard-days-6",
+          "en": "What's one gentle thing you could do for yourself tonight?",
+          "fr": "Quelle chose douce pourriez-vous faire pour vous ce soir ?",
+          "es": "¿Qué cosa amable podrías hacer por ti esta noche?",
+          "pt": "Que coisa gentil você poderia fazer por você hoje à noite?",
+          "de": "Was könntest du heute Abend Sanftes für dich tun?",
+          "it": "Quale piccola gentilezza potresti farti stasera?",
+          "th": "คืนนี้คุณจะทำอะไรเบาๆ ดีๆ ให้ตัวเองได้บ้าง?"
+        }
+      ]
+    },
+    {
+      "id": "relationships",
+      "plus": true,
+      "help": false,
+      "prompts": [
+        {
+          "id": "lib-relationships-1",
+          "en": "Who was on your mind today?",
+          "fr": "À qui avez-vous pensé aujourd'hui ?",
+          "es": "¿En quién pensaste hoy?",
+          "pt": "Em quem você pensou hoje?",
+          "de": "An wen hast du heute gedacht?",
+          "it": "A chi hai pensato oggi?",
+          "th": "วันนี้คุณคิดถึงใครบ้าง?"
+        },
+        {
+          "id": "lib-relationships-2",
+          "en": "What's a conversation you'd like to have, or have again?",
+          "fr": "Quelle conversation aimeriez-vous avoir, ou avoir de nouveau ?",
+          "es": "¿Qué conversación te gustaría tener, o volver a tener?",
+          "pt": "Que conversa você gostaria de ter, ou ter de novo?",
+          "de": "Welches Gespräch würdest du gern führen, oder noch einmal führen?",
+          "it": "Quale conversazione ti piacerebbe fare, o rifare?",
+          "th": "มีบทสนทนาไหนที่คุณอยากคุย หรืออยากคุยอีกครั้ง?"
+        },
+        {
+          "id": "lib-relationships-3",
+          "en": "Who makes it easy to be yourself?",
+          "fr": "Avec qui est-ce facile d'être vous-même ?",
+          "es": "¿Con quién te resulta fácil ser tú?",
+          "pt": "Com quem é fácil ser quem você é?",
+          "de": "Bei wem fällt es dir leicht, du selbst zu sein?",
+          "it": "Con chi ti viene facile essere come sei?",
+          "th": "อยู่กับใครแล้วคุณเป็นตัวของตัวเองได้ง่าย?"
+        },
+        {
+          "id": "lib-relationships-4",
+          "en": "What do you appreciate about someone close to you?",
+          "fr": "Qu'appréciez-vous chez une personne proche de vous ?",
+          "es": "¿Qué valoras de alguien cercano a ti?",
+          "pt": "O que você admira em alguém próximo?",
+          "de": "Was schätzt du an einem Menschen, der dir nahesteht?",
+          "it": "Cosa apprezzi di una persona a te vicina?",
+          "th": "คุณชื่นชมอะไรในตัวคนใกล้ตัวบ้าง?"
+        },
+        {
+          "id": "lib-relationships-5",
+          "en": "Is there someone you'd like to hear from? What would you say?",
+          "fr": "Y a-t-il quelqu'un dont vous aimeriez avoir des nouvelles ? Que lui diriez-vous ?",
+          "es": "¿Hay alguien de quien te gustaría saber algo? ¿Qué le dirías?",
+          "pt": "Tem alguém de quem você gostaria de ter notícias? O que você diria?",
+          "de": "Gibt es jemanden, von dem du gern hören würdest? Was würdest du sagen?",
+          "it": "C'è qualcuno di cui ti piacerebbe avere notizie? Cosa vorresti dire?",
+          "th": "มีใครที่คุณอยากได้ยินข่าวคราวบ้างไหม? คุณจะพูดอะไรกับเขา?"
+        },
+        {
+          "id": "lib-relationships-6",
+          "en": "What did you give someone today, even something small?",
+          "fr": "Qu'avez-vous donné à quelqu'un aujourd'hui, même quelque chose de petit ?",
+          "es": "¿Qué le diste hoy a alguien, aunque fuera algo pequeño?",
+          "pt": "O que você deu a alguém hoje, mesmo que algo pequeno?",
+          "de": "Was hast du heute jemandem gegeben, auch etwas Kleines?",
+          "it": "Cosa hai dato oggi a qualcuno, anche una cosa piccola?",
+          "th": "วันนี้คุณให้อะไรกับใครบ้าง แม้จะเป็นสิ่งเล็กๆ?"
+        }
+      ]
+    },
+    {
+      "id": "ahead",
+      "plus": true,
+      "help": false,
+      "prompts": [
+        {
+          "id": "lib-ahead-1",
+          "en": "What would you like the next month to have in it?",
+          "fr": "Qu'aimeriez-vous trouver dans le mois qui vient ?",
+          "es": "¿Qué te gustaría que tuviera el próximo mes?",
+          "pt": "O que você gostaria que o próximo mês tivesse?",
+          "de": "Was soll der nächste Monat für dich bereithalten?",
+          "it": "Cosa ti piacerebbe che ci fosse nel prossimo mese?",
+          "th": "เดือนหน้าคุณอยากให้มีอะไรบ้าง?"
+        },
+        {
+          "id": "lib-ahead-2",
+          "en": "What's something you're curious to try?",
+          "fr": "Qu'aimeriez-vous essayer, par curiosité ?",
+          "es": "¿Qué te da curiosidad probar?",
+          "pt": "O que você tem curiosidade de experimentar?",
+          "de": "Was würdest du gern einmal ausprobieren?",
+          "it": "Cosa ti incuriosisce provare?",
+          "th": "มีอะไรที่คุณอยากลองทำดูบ้าง?"
+        },
+        {
+          "id": "lib-ahead-3",
+          "en": "What would a gentle week look like?",
+          "fr": "À quoi ressemblerait une semaine douce ?",
+          "es": "¿Cómo sería una semana tranquila?",
+          "pt": "Como seria uma semana tranquila?",
+          "de": "Wie sähe eine sanfte Woche aus?",
+          "it": "Come sarebbe una settimana tranquilla?",
+          "th": "สัปดาห์ที่สบายๆ จะเป็นแบบไหน?"
+        },
+        {
+          "id": "lib-ahead-4",
+          "en": "What's a plan, big or small, you'd like to make?",
+          "fr": "Quel projet, grand ou petit, aimeriez-vous faire ?",
+          "es": "¿Qué plan, grande o pequeño, te gustaría hacer?",
+          "pt": "Que plano, grande ou pequeno, você gostaria de fazer?",
+          "de": "Welchen Plan, groß oder klein, würdest du gern schmieden?",
+          "it": "Quale progetto, grande o piccolo, ti piacerebbe fare?",
+          "th": "มีแผนอะไร เล็กหรือใหญ่ก็ได้ ที่คุณอยากวางไว้?"
+        },
+        {
+          "id": "lib-ahead-5",
+          "en": "What would you like to remember next time a day like this comes?",
+          "fr": "De quoi aimeriez-vous vous souvenir la prochaine fois qu'une journée comme celle-ci arrivera ?",
+          "es": "¿Qué te gustaría recordar la próxima vez que llegue un día como este?",
+          "pt": "O que você gostaria de lembrar da próxima vez que vier um dia como este?",
+          "de": "Woran möchtest du dich erinnern, wenn wieder so ein Tag kommt?",
+          "it": "Cosa vorresti ricordare la prossima volta che arriva una giornata così?",
+          "th": "ครั้งหน้าที่วันแบบนี้มาถึง คุณอยากจำอะไรไว้?"
+        },
+        {
+          "id": "lib-ahead-6",
+          "en": "What can wait until later, so today is lighter?",
+          "fr": "Qu'est-ce qui peut attendre, pour que la journée soit plus légère ?",
+          "es": "¿Qué puede esperar para más tarde, para que hoy sea más ligero?",
+          "pt": "O que pode ficar para depois, para que hoje fique mais leve?",
+          "de": "Was kann warten, damit der Tag heute leichter wird?",
+          "it": "Cosa può aspettare, perché oggi sia più leggero?",
+          "th": "มีอะไรที่รอไว้ทีหลังได้ เพื่อให้วันนี้เบาลง?"
+        }
+      ]
+    }
+  ]
+}

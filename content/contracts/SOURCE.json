@@ -1,24 +1,27 @@
 {
   "repo": "BurrowSoft/moodbow-app",
   "path": "supabase/contracts",
-  "commit": "7b32805ce4eeda0593ca2cfc28dfd0433825b8c1",
+  "commit": "586c90e69cc3305fd2f80fa3b6613c91d5abd082",
   "sha256": {
+    "bo.md": "b6dbd3ff3158b4134ce92e4de0bc78dc1e010c4b27b62973c1d2f33747aca9fd",
     "colour-map.json": "2b861725dee87bd9e34f79a75fba0b0c26a3b5cab814b5aba1a8bc8f3c558269",
     "countries.json": "432a3ed32cda9f58746723e3b392a4e5e8299715b7ed0c339c3b98438ebbdc6c",
     "crisis-keywords.json": "63c3f72f96c9ac0e6870a7b4a363fdc4426cea153bbfb328c950bd1dd040bd99",
-    "export-csv.json": "adf49fbbdf04528934b7c8abe3a2e7d31323715446980febff2f4d9633bb5ee2",
-    "export-text.md": "2e0b995734d0745c8ea8329116c016e09ad6cc5a015f3bf3e435cc77177002e9",
-    "export_fixture.json": "12f9ac3bb8e97917a3d74be24385255823cc510544d2efd44f55ccf717dada48",
-    "export_fixture.txt": "e4e83a32c973ff70410c77c620108fa6169ac29325d00dcade84e0422d9cecbf",
+    "export-csv.json": "ee2e332aab26f2e33b04cf3e80b4f6f38cf66557b4bbc0e89f845d5b74c2e902",
+    "export-text.md": "5428aaea3febec6976b621e8b0e2ccab7b10301fdd5289ab9b351a76b3556af3",
+    "export_fixture.json": "779b70727ce44c1575c8e5337a06b2250d6a33a0ef71b0bd260a18ee215e9429",
+    "export_fixture.txt": "6242e9ba451e45f634843e4c707bdfda72141102d30b11ac9914dcc5632f776e",
     "get-help-label.json": "b9e82a25653c3cbfc3744b651554c71380a3cc755add91102e585a3681936d9c",
     "mood-faces.json": "15f1bed78b1dead54104cabf94efb1b5b99395bc2a4a7707c5f50d6a1e406dd0",
     "on-this-day.json": "e59744b0490302caa00ceb2a0a7c703ea13a070695b1215e2e5a9b62c20beb94",
     "patterns.json": "898ba229c3cfe8c39b914e9d3aa11fa097816842657b014cff4b013374839fd7",
+    "prompts-library.json": "e5eb7a727ed8f7c05a18f6de3f58aac6b03d6af8f41d5546d15e457b295c9768",
     "prompts.json": "eb4ca6d9dda842844133623b20ee016ade21db38c64ad657aa6a9c76cb89328c",
     "reflect.md": "a09f7e2b20172f6de1c13f659b2c13bae7f6b8b2d1f8f4bc3ac748bf016b0039",
     "report.md": "d606c4598075a93cd9f8e19f1c5f0713113f5e471f0b41c70f9689c9e733b007",
     "search-fold.json": "7cd4154f2c307579acb236e4f565189b056c0d991be534420c3c83a84cdfec44",
     "share-cards.json": "f8155ccae9a5815140ef262bf6428879795735f5675ab0e7f6a535c0bd6066be",
+    "toolbox.json": "97a9bb4ce81ba19d1ae83099b96469b7d0ef6cb73f2706c4b36627518b3b30ba",
     "year-card.json": "afb30fa31ad96fba5c35958cdc97cd2130441c07d29b8d6e0cc12866bac4c031"
   }
 }

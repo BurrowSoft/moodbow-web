@@ -67,7 +67,7 @@ export function WelcomeSlides() {
       </div>
       <div className="mt-10 flex w-full flex-col items-center gap-4">
         {last ? (
-          <Link href="/consent" data-testid="welcome-start" className={`${primaryButtonClass} max-sm:[font-size:min(1rem,max(10vw,32px))]`}>
+          <Link href="/sign-up" data-testid="welcome-start" className={`${primaryButtonClass} max-sm:[font-size:min(1rem,max(10vw,32px))]`}>
             {t("welcomeStart")}
           </Link>
         ) : (
@@ -90,7 +90,8 @@ export function WelcomeSlides() {
             {t("back")}
           </a>
         )}
-        <Link href="/sign-in" data-testid="welcome-have-account" className={`${textLinkClass} mt-4 text-sm max-sm:[font-size:min(0.875rem,max(8.75vw,28px))]`}>
+        {/* A 44 px tall tap area (Web Tester batch E). mt-1 plus the 12 px above a 20 px line keeps the text where mt-4 had it. */}
+        <Link href="/sign-in" data-testid="welcome-have-account" className={`${textLinkClass} mt-1 inline-flex min-h-11 items-center text-sm max-sm:[font-size:min(0.875rem,max(8.75vw,28px))]`}>
           {t("welcomeHaveAccount")}
         </Link>
       </div>

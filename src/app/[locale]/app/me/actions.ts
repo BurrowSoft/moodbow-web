@@ -5,11 +5,14 @@ import { getLocale } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
 import { deleteWordTyped, localDay } from "@/lib/journal/account";
 import { isFocusArea, isTone } from "@/lib/journal/ai";
+import { EXTRA_REMINDERS, extraReminderError, parseExtraTimes, toHHMM, type ExtraReminderError } from "@/lib/journal/extraReminders";
 import { consentItem } from "@/lib/legalVersions";
+import { cancelStripeBeforeDelete } from "@/lib/plus/cancelOnDelete";
 import { isCountry, isTimeZoneName } from "@/lib/region/countries";
 import { dataLocale, offeredLocales } from "@/i18n/routing";
 import { WIPE_COOKIE, WIPE_COOKIE_OPTIONS } from "@/lib/supabase/proxy";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { PICTURES } from "@/lib/journal/pictures";
 
 // Me → Sign out: this browser only (the app stays signed in).
 export async function signOut(): Promise<void> {
@@ -41,7 +44,36 @@ export async function exportMyData(): Promise<ExportResult> {
   return { status: "ok", json: JSON.stringify(data), date: localDay(exportedAt, typeof zone === "string" ? zone : "UTC") };
 }
 
-export type DeleteAccountState = { status: "idle" } | { status: "error"; error: "confirm" | "generic" };
+export type ExportPicture = { entry_id: string; id: string; url: string };
+export type ExportPicturesResult = { status: "ok"; pictures: ExportPicture[] } | { status: "error" };
+
+// Export my data, the pictures (035): every confirmed picture of the person's (RLS), each with a
+// fresh signed URL of 5 minutes for the browser to fetch and zip. Never a path in the zip's names
+// (pictures/<entry_id>/<picture_id>.jpg) and never stored anywhere on the way.
+// Whatever pictures-live says (the Reviewer, #322): a switch turned off must never leave someone's
+// own photos out of their export. Called only when the export's JSON lists pictures.
+export async function exportPictureUrls(): Promise<ExportPicturesResult> {
+  const supabase = await createSupabaseServerClient();
+  if (!supabase) return { status: "error" };
+  const { data, error } = await supabase.from("entry_pictures").select("id, entry_id, path").order("created_at");
+  if (error || !Array.isArray(data)) return { status: "error" };
+  const rows = data as { id: string; entry_id: string; path: string }[];
+  const out: ExportPicture[] = [];
+  for (let i = 0; i < rows.length; i += 100) {
+    const batch = rows.slice(i, i + 100);
+    const signed = await supabase.storage.from(PICTURES.bucket).createSignedUrls(batch.map((r) => r.path), PICTURES.signedSeconds);
+    if (signed.error || !signed.data) return { status: "error" };
+    const url = new Map(signed.data.filter((s) => s.path && s.signedUrl).map((s) => [s.path as string, s.signedUrl]));
+    for (const r of batch) {
+      const u = url.get(r.path);
+      if (!u) return { status: "error" };
+      out.push({ entry_id: r.entry_id, id: r.id, url: u });
+    }
+  }
+  return { status: "ok", pictures: out };
+}
+
+export type DeleteAccountState = { status: "idle" } | { status: "error"; error: "confirm" | "generic" | "plus_cancelled" };
 
 // Me → Delete account: delete_my_account() removes the auth user and,
 // with it, every row, right away (M7). Then this browser forgets the
@@ -56,8 +88,11 @@ export async function deleteMyAccount(_prev: DeleteAccountState, form: FormData)
   const uid = data.user?.id;
   if (!uid) return userError?.name === "AuthRetryableFetchError" ? { status: "error", error: "generic" } : redirect({ href: "/sign-in", locale });
 
+  // Plus bought on the web stops being charged first (never blocks the delete).
+  const plus = await cancelStripeBeforeDelete(supabase, uid);
   const { error } = await supabase.rpc("delete_my_account");
-  if (error) return { status: "error", error: "generic" };
+  // Cancelled, but the account is still there: the message says both (UX, #270).
+  if (error) return { status: "error", error: plus === "cancelled" ? "plus_cancelled" : "generic" };
 
   // The account is gone: the session's cookies go too (Auth may refuse the
   // sign-out itself now that the user doesn't exist; local scope clears the
@@ -67,7 +102,10 @@ export async function deleteMyAccount(_prev: DeleteAccountState, form: FormData)
   return redirect({ href: "/sign-in?signed_out=deleted", locale });
 }
 
-export type ReminderState = { status: "idle" } | { status: "saved"; on: boolean; time: string } | { status: "error"; on: boolean; time: string };
+// extra: the more reminders (Plus) the account has after the save, from the row
+// update_settings returns (a new main time drops any within an hour of it); null when the
+// row doesn't carry them (before migration 031).
+export type ReminderState = { status: "idle" } | { status: "saved"; on: boolean; time: string; extra?: string[] | null } | { status: "error"; on: boolean; time: string };
 
 const TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
 
@@ -80,12 +118,34 @@ export async function saveReminder(_prev: ReminderState, form: FormData): Promis
   if (!TIME.test(time)) return { status: "error", on, time };
   const supabase = await createSupabaseServerClient();
   if (!supabase) return { status: "error", on, time };
-  const { error } = await supabase.rpc("update_settings", { p_reminder_on: on, p_reminder_time: time });
+  const { data, error } = await supabase.rpc("update_settings", { p_reminder_on: on, p_reminder_time: time });
   if (error) {
     if (error.message.includes("not_authenticated")) return redirect({ href: "/sign-in", locale: await getLocale() });
     return { status: "error", on, time };
   }
-  return { status: "saved", on, time };
+  const row = (Array.isArray(data) ? data[0] : data) as { extra_reminder_times?: unknown } | null;
+  return { status: "saved", on, time, ...(row && typeof row === "object" && "extra_reminder_times" in row ? { extra: parseExtraTimes(row.extra_reminder_times) } : {}) };
+}
+
+export type ExtraRemindersResult = { ok: true; times: string[] } | { ok: false; error: ExtraReminderError | "generic" };
+
+// Me → Daily reminder, more times (Plus, specs/plus-more-reminders.md):
+// update_extra_reminders(p_times) stores the whole list and returns it. The server checks
+// Plus (has_plus), the count and the hour's gap; removing is always allowed. The form checks
+// the same first. Errors are codes, never messages.
+export async function saveExtraReminders(times: string[]): Promise<ExtraRemindersResult> {
+  if (!Array.isArray(times)) return { ok: false, error: "invalid" };
+  const list = times.map(toHHMM);
+  if (list.some((t) => t === null)) return { ok: false, error: "invalid" };
+  if (new Set(list).size > EXTRA_REMINDERS.maxExtra) return { ok: false, error: "too_many" };
+  const supabase = await createSupabaseServerClient();
+  if (!supabase) return { ok: false, error: "generic" };
+  const { data, error } = await supabase.rpc("update_extra_reminders", { p_times: list });
+  if (error) {
+    if (error.message.includes("not_authenticated")) return redirect({ href: "/sign-in", locale: await getLocale() });
+    return { ok: false, error: extraReminderError(error.message) };
+  }
+  return { ok: true, times: parseExtraTimes(data) };
 }
 
 // Me → AI (M9; reflect.md, "Me → AI"). Each returns whether the account now

@@ -38,8 +38,10 @@ export function buildCsp(nonce: string, { supabaseUrl, sentryDsn, vercelEnv }: C
     ["script-src", ["'self'", `'nonce-${nonce}'`, "'strict-dynamic'", ...(preview ? ["https://vercel.live"] : [])]],
     // Inline style attributes (React style={…}, the arc's delays) can't carry a nonce.
     ["style-src", ["'self'", "'unsafe-inline'"]],
-    // data: and blob: for the share card's canvas preview and download.
-    ["img-src", ["'self'", "data:", "blob:", ...(preview ? ["https://vercel.live", "https://vercel.com"] : [])]],
+    // data: and blob: for the share card's canvas preview and download; the project's own Supabase
+    // origin, exactly, for the moment pictures' signed URLs (035; the Web Tester, #322). Never a
+    // wildcard: staging and production each allow only their own project.
+    ["img-src", ["'self'", "data:", "blob:", ...(supabase ? [supabase] : []), ...(preview ? ["https://vercel.live", "https://vercel.com"] : [])]],
     ["font-src", ["'self'"]],
     ["connect-src", connect],
     ["frame-src", preview ? ["https://vercel.live"] : ["'none'"]],

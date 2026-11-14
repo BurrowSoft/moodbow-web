@@ -9,12 +9,15 @@ import { offeredLocales } from "@/i18n/routing";
 import { savedLanguageRoute } from "@/lib/savedLanguage";
 import { pageGate } from "@/lib/conditions";
 import { getMe, onboardingStep } from "@/lib/journal/me";
+import { PROTECTIVE_ONBOARDING } from "@/lib/journal/setupLater";
 import { authUser } from "@/lib/journal/currentUser";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { JournalUnavailable } from "@/components/JournalUnavailable";
 import { isAuthOutage } from "@/lib/supabase/proxy";
 import { AnnouncerProvider } from "./Announcer";
 import { AppNav } from "./AppNav";
+import { BoButton } from "./BoButton";
+import { boSpeaks } from "@/lib/journal/bo";
 import { CheckInDraftProvider } from "./CheckInDraft";
 import { KeyboardShortcuts } from "./KeyboardShortcuts";
 import { NavProgress } from "@/components/NavProgress";
@@ -23,8 +26,8 @@ import { APP_MAIN_GUTTER } from "@/lib/ui/journalLayout";
 
 // The signed-in web journal. Behind web-journal-live: the proxy 404s /app on
 // Production until it's met; this check is the backstop. Signed-out visitors
-// go to sign-in; anyone without current consents goes to Consent, then Set up
-// until onboarded (M3, same as the app). Data access is enforced by RLS and
+// go to sign-in; anyone without current consents goes to Consent. Set up comes after first use
+// (1.3 §6), offered on Today. Data access is enforced by RLS and
 // the RPCs, not by these redirects.
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { robots: { index: false, follow: false } };
@@ -47,10 +50,21 @@ export default async function AppLayout({ children, params }: LayoutProps<"/[loc
   if (!me) return <NextIntlClientProvider messages={await getMessages()}><JournalUnavailable standalone /></NextIntlClientProvider>;
   const step = onboardingStep(me);
   if (step === "consent") redirect({ href: "/consent", locale });
-  if (step === "setup") redirect({ href: "/setup", locale });
+  // Setup after first use (1.3 §6): the journal opens at once. The first time, onboarding is
+  // completed with protective defaults: the reminder off until they choose one; tone and focus
+  // stay at their defaults; AI only as its own consent says. Today then offers Setup.
+  if (step === "setup") {
+    const { error: setupError } = await supabase.rpc("complete_onboarding", PROTECTIVE_ONBOARDING);
+    if (setupError) return <NextIntlClientProvider messages={await getMessages()}><JournalUnavailable standalone /></NextIntlClientProvider>;
+  }
   // Their saved language wins in the journal, if it's offered (row RT4).
   const language = savedLanguageRoute(me.profile?.locale, locale, offeredLocales());
   if (language) return <SavedLanguageRedirect locale={language} />;
+
+  // Bo's button, where it could be: the flag, Bo's languages (decision 239) and the person's own
+  // switch. Whether it shows is the function's status (decision 240), asked by the button once the
+  // page is on screen, so no page waits on Bo. The function refuses whatever a client shows.
+  const boMayShow = pageGate("bo-live") !== "hidden" && boSpeaks(locale) && me.settings?.bo_off !== true;
 
   const t = await getTranslations("me");
   // The journal's client components get every message (the root layout sends
@@ -60,6 +74,7 @@ export default async function AppLayout({ children, params }: LayoutProps<"/[loc
       {/* data-journal: the journal's own rules in globals.css (hyphenation at large text). */}
       <div data-journal="" className="flex flex-1 flex-col md:flex-row">
         {/* It reads the search params: its own Suspense boundary. */}
+        {boMayShow && <BoButton uid={user.id} />}
         <Suspense fallback={null}>
           <NavProgress />
         </Suspense>
@@ -71,12 +86,14 @@ export default async function AppLayout({ children, params }: LayoutProps<"/[loc
             footer under it would be pushed down in view. Kept below the fold,
             nothing visible moves (Today CLS 0.13, Web Tester #82 isolation).
             On paper neither applies (no trailing blank page; 1.1 N). */}
-        <main id="main" className={`min-h-dvh min-w-0 flex-1 ${APP_MAIN_GUTTER} pb-28 pt-[max(16px,calc(56px-1rem))] md:pb-10 md:pt-10 print:min-h-0 print:p-0`}>
+        {/* The bottom padding clears the phone bar's real height (--tab-bar-h, AppNav), 7rem
+            before it's measured; a page that sets the bar aside keeps only a little. */}
+        <main id="main" className={`min-h-dvh min-w-0 flex-1 ${APP_MAIN_GUTTER} pb-[calc(var(--tab-bar-h,5.5rem)+1.5rem)] in-data-[tabs-aside]:max-md:pb-6 pt-[max(16px,calc(56px-1rem))] md:pb-10 md:pt-10 print:min-h-0 print:p-0`}>
           {/* With scripts off a page's content never appears here, as it's streamed: help still does (#249). */}
           <noscript>
             <div className="mx-auto mb-6 max-w-3xl space-y-3 max-sm:[font-size:min(1rem,max(10vw,32px))]">
               <p>
-                <Link href="/help/get-help-now" prefetch={false} data-testid="app-noscript-help" className="font-medium text-accent underline underline-offset-4">
+                <Link href={me.profile?.country ? `/help/get-help-now?country=${encodeURIComponent(me.profile.country)}` : "/help/get-help-now"} prefetch={false} data-testid="app-noscript-help" className="font-medium text-accent underline underline-offset-4">
                   {t("meGetHelpNow")}
                 </Link>
               </p>
