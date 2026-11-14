@@ -11,7 +11,7 @@ import { isRange, METRICS, previousRangeStart, rangeDays, series, type InsightRo
 import { loadMilestone } from "@/lib/share/milestoneData";
 import { yearOnOffer } from "@/lib/share/year";
 import { aiShown, canReflect } from "@/lib/journal/ai";
-import { lastWeekStart, parseReportBody, type WeeklyReport as Report } from "@/lib/journal/report";
+import { lastWeekStart, parseReportBody, weekRange, type WeeklyReport as Report } from "@/lib/journal/report";
 import { getMe } from "@/lib/journal/me";
 import { patterns, patternsWindowStart } from "@/lib/journal/patterns";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -123,12 +123,12 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
   // off for everyone: no card at all (text = enforcement).
   let week: React.ReactNode = null;
   if (weekly && aiShown(me) && !canReflect(me)) {
-    week = <WeeklyReport initial={null} weekStart={weekStart} dateLocaleTag={dateLocaleTag} balance={0} aiOff />;
+    week = <WeeklyReport initial={null} weekStart={weekStart} weekLabel={weekRange(weekStart, dateLocaleTag)} dateLocaleTag={dateLocaleTag} balance={0} aiOff />;
   } else if (weekly && canReflect(me)) {
     const row = (stored?.data ?? null) as { id: string; period_start: string; body: unknown; tier: string; created_at: string } | null;
     const body = row ? parseReportBody(row.body) : null;
     const initial: Report | null = row && body ? { id: row.id, week_start: row.period_start, body, tier: row.tier === "lite" ? "lite" : "full", created_at: row.created_at } : null;
-    week = <WeeklyReport initial={initial} weekStart={weekStart} dateLocaleTag={dateLocaleTag} balance={me.credits?.balance ?? 0} country={me.profile?.country ?? null} />;
+    week = <WeeklyReport initial={initial} weekStart={weekStart} weekLabel={weekRange(weekStart, dateLocaleTag)} dateLocaleTag={dateLocaleTag} balance={me.credits?.balance ?? 0} country={me.profile?.country ?? null} />;
   }
   // Your week moved to Today, for everyone (ruling 1): its hard-week help never waits behind Plus.
   let long: React.ComponentProps<typeof InsightsView>["long"];
