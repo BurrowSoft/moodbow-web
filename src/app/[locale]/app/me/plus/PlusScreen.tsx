@@ -155,8 +155,21 @@ export function PlusScreen({ view, price, started }: { view: PlusView; price: st
     // site footer scroll up clear of it, never under it.
     const body = document.body;
     const pinned = footer.current;
+    // The tap test (UX, 14 Nov, the Web Tester's #311 row): with the page scrolled to its end, Not
+    // now's centre must be above the pinned part, so a tap on it lands on Not now and never on the
+    // price or Start. When it can't come out from under it, nothing is pinned.
+    const tapTest = () => {
+      const notNow = screen.current?.querySelector<HTMLElement>('[data-testid="plus-rest"] [data-testid="plus-not-now"]');
+      if (!notNow || !pinned) return;
+      const box = notNow.getBoundingClientRect();
+      if (box.height === 0) return;
+      const end = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+      const centreAtEnd = box.top + window.scrollY + box.height / 2 - end;
+      if (centreAtEnd > window.innerHeight - pinned.getBoundingClientRect().height) setUnpinned(true);
+    };
     const room = () => {
       body.style.paddingBottom = pinned ? `${Math.ceil(pinned.getBoundingClientRect().height)}px` : "";
+      tapTest();
     };
     room();
     const observer = typeof ResizeObserver === "undefined" || !pinned ? null : new ResizeObserver(room);
