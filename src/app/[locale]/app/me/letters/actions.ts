@@ -1,6 +1,7 @@
 "use server";
 
 import { forClient, isLetterMonths, LETTER_RULES, parseLetterRows, type Letter, type LetterMonths } from "@/lib/journal/letters";
+import type { LetterReminder } from "@/lib/journal/letterReminders";
 import { ENTITLEMENT_COLUMNS, parseEntitlement } from "@/lib/plus/entitlements";
 import { letterWrite, lettersGate } from "@/lib/plus/letters";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -41,14 +42,24 @@ async function list(supabase: Client): Promise<LetterResult> {
   return error ? { status: "error" } : { status: "ok", letters: parseLetterRows(data).map(forClient) };
 }
 
-export async function saveLetter(body: string, months: LetterMonths): Promise<LetterResult> {
+// reminders (033): the letter's reminders, or undefined for the database's default (the opening day
+// at 09:00, on). The database checks them fully (invalid_value); here only their shape.
+const isReminders = (v: unknown): v is LetterReminder[] =>
+  Array.isArray(v) && v.length <= 4 && v.every((r) => r && typeof r === "object" && Number.isInteger(r.days_before) && typeof r.time === "string" && typeof r.on === "boolean");
+
+export async function saveLetter(body: string, months: LetterMonths, reminders?: LetterReminder[]): Promise<LetterResult> {
   if (typeof body !== "string" || body.trim() === "" || [...body].length > LETTER_RULES.maxChars || !isLetterMonths(months)) return { status: "error" };
+  if (reminders !== undefined && !isReminders(reminders)) return { status: "error" };
   const supabase = await client();
   if (!supabase) return { status: "error" };
   const may = await mayWrite(supabase);
   if (may === null) return { status: "error" };
   if (!may) return { status: "plus_required" };
-  const { error } = await supabase.rpc("letter_save", { p_body: body, p_months: months });
+  const { error } = await supabase.rpc("letter_save", {
+    p_body: body,
+    p_months: months,
+    ...(reminders ? { p_reminders: reminders.map(({ days_before, time, on }) => ({ days_before, time, on })) } : {}),
+  });
   // The database's own check (032: RAISE 'plus_required') says the same as the one above.
   if (error) return error.message?.includes("plus_required") ? { status: "plus_required" } : { status: "error" };
   return list(supabase);

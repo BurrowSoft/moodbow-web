@@ -715,6 +715,19 @@
     "lockedBody": "Einen neuen Brief zu schreiben gehört zu Moodbow Plus. Deine geschriebenen Briefe bleiben deine: Sie öffnen sich an ihrem Tag, und du kannst sie jederzeit öffnen oder löschen.",
     "lapsedBody": "Dein Moodbow Plus ist abgelaufen, deshalb kann dieser Brief nicht gespeichert werden. Kopiere ihn, um deine Worte zu behalten.",
     "copy": "Brief kopieren",
-    "copied": "Kopiert"
+    "copied": "Kopiert",
+    "remindersTitle": "Erinnerungen",
+    "remindersOnTheDay": "Am Tag selbst",
+    "remindersDay": "1 Tag vorher",
+    "remindersWeek": "1 Woche vorher",
+    "remindersMonth": "1 Monat vorher",
+    "remindersDays": "{n} Tage vorher",
+    "remindersDaysBefore": "Tage vorher",
+    "remindersTimeFor": "Uhrzeit, {when}",
+    "remindersOnFor": "Erinnerung {when}",
+    "remindersRemove": "Erinnerung {when} entfernen",
+    "remindersAdd": "Erinnerung hinzufügen",
+    "remindersApp": "Erinnerungen kommen in der Moodbow-App auf deinem Handy an.",
+    "remindersInvalid": "Eine Erinnerung kann nicht heute oder früher sein und nicht nach dem Tag, an dem sich der Brief öffnet."
   }
 }

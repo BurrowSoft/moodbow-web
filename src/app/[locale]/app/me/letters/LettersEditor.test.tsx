@@ -56,7 +56,7 @@ describe("LettersEditor", () => {
     fireEvent.change(screen.getByTestId("letter-text"), { target: { value: "Dear me, hello." } });
     fireEvent.click(screen.getByTestId("letter-months-6"));
     await act(async () => fireEvent.click(screen.getByTestId("letter-save")));
-    expect(save).toHaveBeenCalledWith("Dear me, hello.", 6);
+    expect(save).toHaveBeenCalledWith("Dear me, hello.", 6, [{ days_before: 0, time: "09:00", on: true }]);
     expect(screen.getByTestId("letter-saved")).toHaveTextContent(m.savedLine.replace("{date}", dateLine("2027-05-09", TAG)));
     expect(screen.getByTestId("letter-text")).toHaveValue("");
   });
@@ -106,7 +106,7 @@ describe("LettersEditor", () => {
     fireEvent.change(screen.getByTestId("letter-text"), { target: { value: `Dear me, ${phrase}` } });
     await act(async () => fireEvent.click(screen.getByTestId("letter-save")));
     expect(screen.getByTestId("safety-card")).toBeInTheDocument();
-    expect(save).toHaveBeenCalledWith(`Dear me, ${phrase}`, 1);
+    expect(save).toHaveBeenCalledWith(`Dear me, ${phrase}`, 1, [{ days_before: 0, time: "09:00", on: true }]);
   });
 });
 
@@ -189,5 +189,42 @@ describe("LettersEditor: letters to future you are part of Plus (1.3 §3)", () =
     await act(async () => fireEvent.click(screen.getByTestId("letter-copy")));
     expect(writeText).toHaveBeenCalledWith("Dear me, keep going.");
     expect(screen.getByTestId("letters-lapsed")).toHaveTextContent(m.copied);
+  });
+});
+
+describe("LettersEditor: reminders, like alarms (Vitor, 14 Nov; 033)", () => {
+  it("on the day at 09:00 by default; heads-ups added, timed, switched off and removed; the app line", async () => {
+    save.mockReturnValue(Promise.resolve({ status: "ok", letters: [] }));
+    page();
+    expect(screen.getByTestId("letter-reminder-day-on")).toBeChecked();
+    expect(screen.getByTestId("letter-reminder-day-time")).toHaveValue("09:00");
+    expect(screen.getByTestId("letter-reminders")).toHaveTextContent(m.remindersApp);
+    fireEvent.click(screen.getByTestId("letter-months-12"));
+    fireEvent.click(screen.getByTestId("letter-reminder-add"));
+    fireEvent.click(screen.getByTestId("letter-reminder-add"));
+    expect(screen.getAllByTestId("letter-reminder")).toHaveLength(2);
+    fireEvent.change(screen.getAllByTestId("letter-reminder-time")[1], { target: { value: "20:30" } });
+    fireEvent.click(screen.getAllByTestId("letter-reminder-on")[0]);
+    fireEvent.click(screen.getByTestId("letter-reminder-add"));
+    expect(screen.queryByTestId("letter-reminder-add")).toBeNull();
+    fireEvent.click(screen.getAllByTestId("letter-reminder-remove")[2]);
+    fireEvent.change(screen.getByTestId("letter-text"), { target: { value: "Dear me." } });
+    await act(async () => fireEvent.click(screen.getByTestId("letter-save")));
+    expect(save).toHaveBeenCalledWith("Dear me.", 12, [
+      { days_before: 0, time: "09:00", on: true },
+      { days_before: 1, time: "09:00", on: false },
+      { days_before: 7, time: "20:30", on: true },
+    ]);
+  });
+  it("a heads-up that no longer fits a shorter Open it: said, never sent", async () => {
+    page();
+    fireEvent.click(screen.getByTestId("letter-months-12"));
+    fireEvent.click(screen.getByTestId("letter-reminder-add"));
+    fireEvent.change(screen.getByTestId("letter-reminder-days"), { target: { value: "60" } });
+    fireEvent.click(screen.getByTestId("letter-months-1"));
+    fireEvent.change(screen.getByTestId("letter-text"), { target: { value: "Dear me." } });
+    await act(async () => fireEvent.click(screen.getByTestId("letter-save")));
+    expect(screen.getByTestId("letter-reminders-invalid")).toHaveTextContent(m.remindersInvalid);
+    expect(save).not.toHaveBeenCalled();
   });
 });

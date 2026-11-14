@@ -715,6 +715,19 @@
     "lockedBody": "Escribir una carta nueva es parte de Moodbow Plus. Las cartas que ya escribiste siguen siendo tuyas: se abren en su día y puedes abrirlas o eliminarlas cuando quieras.",
     "lapsedBody": "Tu Moodbow Plus ha terminado, así que esta carta no se puede guardar. Cópiala para conservar tus palabras.",
     "copy": "Copiar la carta",
-    "copied": "Copiada"
+    "copied": "Copiada",
+    "remindersTitle": "Recordatorios",
+    "remindersOnTheDay": "El mismo día",
+    "remindersDay": "1 día antes",
+    "remindersWeek": "1 semana antes",
+    "remindersMonth": "1 mes antes",
+    "remindersDays": "{n} días antes",
+    "remindersDaysBefore": "Días antes",
+    "remindersTimeFor": "Hora, {when}",
+    "remindersOnFor": "Recordatorio {when}",
+    "remindersRemove": "Quitar el recordatorio {when}",
+    "remindersAdd": "Añadir un recordatorio",
+    "remindersApp": "Los recordatorios llegan en la app Moodbow de tu teléfono.",
+    "remindersInvalid": "Un recordatorio no puede ser hoy ni antes, ni después del día en que se abre la carta."
   }
 }

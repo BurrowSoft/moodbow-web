@@ -715,6 +715,19 @@
     "lockedBody": "Writing a new letter is part of Moodbow Plus. The letters you've written stay yours: they open on their day, and you can open or delete them any time.",
     "lapsedBody": "Your Moodbow Plus has ended, so this letter can't be saved. Copy it to keep your words.",
     "copy": "Copy letter",
-    "copied": "Copied"
+    "copied": "Copied",
+    "remindersTitle": "Reminders",
+    "remindersOnTheDay": "On the day",
+    "remindersDay": "1 day before",
+    "remindersWeek": "1 week before",
+    "remindersMonth": "1 month before",
+    "remindersDays": "{n} days before",
+    "remindersDaysBefore": "Days before",
+    "remindersTimeFor": "Time, {when}",
+    "remindersOnFor": "Reminder {when}",
+    "remindersRemove": "Remove the reminder {when}",
+    "remindersAdd": "Add a reminder",
+    "remindersApp": "Reminders arrive in the Moodbow app on your phone.",
+    "remindersInvalid": "A reminder can't be on or before today, or after the day the letter opens."
   }
 }

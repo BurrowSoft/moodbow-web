@@ -35,6 +35,13 @@ describe("saveLetter: Plus, checked on the server", () => {
     entitlement = { data: row("active", day), error: null };
     expect((await saveLetter("Dear me.", 1)).status).toBe("ok");
     expect(rpc).toHaveBeenCalledWith("letter_save", { p_body: "Dear me.", p_months: 1 });
+    // With reminders (033): passed through as p_reminders, only their three keys.
+    await saveLetter("Dear me.", 3, [{ days_before: 0, time: "09:00", on: true }, { days_before: 7, time: "20:30", on: false }]);
+    expect(rpc).toHaveBeenLastCalledWith("letter_save", { p_body: "Dear me.", p_months: 3, p_reminders: [{ days_before: 0, time: "09:00", on: true }, { days_before: 7, time: "20:30", on: false }] });
+    // A bad shape never reaches the database.
+    rpc.mockClear();
+    expect((await saveLetter("Dear me.", 1, [{ days_before: "1", time: "09:00", on: true } as never])).status).toBe("error");
+    expect(rpc).not.toHaveBeenCalled();
   });
   it("without Plus, or no row: plus_required, and nothing is written", async () => {
     expect((await saveLetter("Dear me.", 1)).status).toBe("plus_required");

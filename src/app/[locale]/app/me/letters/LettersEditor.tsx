@@ -5,6 +5,8 @@ import { useTranslations } from "next-intl";
 import { Dialog, dialogButton } from "@/components/Dialog";
 import { GetHelpNow, SafetyCard } from "@/components/SafetyCard";
 import { LETTER_RULES, type Letter, type LetterMonths } from "@/lib/journal/letters";
+import { DEFAULT_REMINDERS, opensOn, remindersValid, type LetterReminder } from "@/lib/journal/letterReminders";
+import { LetterReminders } from "./LetterReminders";
 import { dateLine } from "@/lib/journal/today";
 import { flagsCrisis } from "@/lib/safety/crisis";
 import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
@@ -46,6 +48,9 @@ export function LettersEditor({
   const [letters, setLetters] = useState(initial);
   const [body, setBody] = useState("");
   const [months, setMonths] = useState<LetterMonths>(1);
+  // Reminders (033): the opening day at 09:00 by default, and up to 3 heads-ups.
+  const [reminders, setReminders] = useState<LetterReminder[]>(DEFAULT_REMINDERS);
+  const [badReminders, setBadReminders] = useState(false);
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
   const [saved, setSaved] = useState<string | null>(null);
@@ -64,8 +69,11 @@ export function LettersEditor({
     if (busy || body.trim() === "") return;
     // Before any request, as entries: the card needs no network (#190).
     if (flagsCrisis(body, CRISIS_KEYWORDS)) setCard(true);
+    // A shorter "Open it" can leave a heads-up on or before today: say so, never send it.
+    if (!remindersValid(reminders, today, opensOn(today, months))) return setBadReminders(true);
+    setBadReminders(false);
     const before = new Set(letters.map((l) => l.id));
-    const result: LetterResult | null = await run(saveLetter(body, months));
+    const result: LetterResult | null = await run(saveLetter(body, months, reminders));
     // Plus ended and its one save is used: keep the text on screen to copy.
     if (result?.status === "plus_required") return setLapsed(true);
     if (result?.status !== "ok") return setFailed(true);
@@ -73,6 +81,7 @@ export function LettersEditor({
     const made = result.letters.find((l) => !before.has(l.id));
     setSaved(made ? made.opensOn : null);
     setBody("");
+    setReminders(DEFAULT_REMINDERS);
   };
   const open = async (letter: Letter) => {
     const result = await run(openLetter(letter.id));
@@ -157,6 +166,12 @@ export function LettersEditor({
               </label>
             ))}
           </fieldset>
+          <LetterReminders value={reminders} onChange={(next) => { setReminders(next); setBadReminders(false); }} today={today} opens={opensOn(today, months)} />
+          {badReminders && (
+            <p role="alert" data-testid="letter-reminders-invalid" className="text-sm text-text">
+              {t("remindersInvalid")}
+            </p>
+          )}
           <div className="flex flex-wrap items-center gap-3">
             <button type="submit" data-testid="letter-save" disabled={busy || body.trim() === ""} className={dialogButton(true)}>
               {t("save")}
