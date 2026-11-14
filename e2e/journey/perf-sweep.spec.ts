@@ -1,5 +1,5 @@
 import { expect, test, type Browser, type BrowserContext } from "@playwright/test";
-import { cleanup, configured, createConfirmedUser, newEmail, newPassword, notConfigured } from "./staging";
+import { cleanup, configured, confirmEmail, newEmail, newPassword, notConfigured, signedUpUnconfirmed } from "./staging";
 
 // THROWAWAY (never merged): first-load JS per route, for UX's 1.3.0 performance check. Each
 // route opens in a fresh context (no cache) with the signed-in cookies; every script response
@@ -7,7 +7,7 @@ import { cleanup, configured, createConfirmedUser, newEmail, newPassword, notCon
 // error text ("date not in range 1980-2099"), which shows if the zip library loads up front.
 test.skip(!configured, notConfigured);
 
-type Row = { route: string; scripts: number; kb: number; fflate: boolean };
+type Row = { route: string; scripts: number; kb: number; fflate: boolean; unread: number };
 
 async function measure(browser: Browser, state: Awaited<ReturnType<BrowserContext["storageState"]>> | undefined, url: string, label: string): Promise<Row> {
   const context = await browser.newContext(state ? { storageState: state } : {});
@@ -15,19 +15,22 @@ async function measure(browser: Browser, state: Awaited<ReturnType<BrowserContex
   const pending: Promise<{ size: number; fflate: boolean }>[] = [];
   page.on("response", (res) => {
     if (res.request().resourceType() !== "script") return;
-    pending.push(
-      (async () => {
-        const sizes = await res.request().sizes().catch(() => ({ responseBodySize: 0 }));
-        const body = await res.text().catch(() => "");
-        return { size: sizes.responseBodySize, fflate: body.includes("date not in range 1980-2099") };
-      })(),
-    );
+    const read = (async () => {
+      const sizes = await res.request().sizes().catch(() => ({ responseBodySize: 0 }));
+      const body = await res.text().catch(() => "");
+      return { size: sizes.responseBodySize, fflate: body.includes("date not in range 1980-2099") };
+    })();
+    // A script that never finishes can't hold the sweep: 15 s each, then counted as unread (-1).
+    pending.push(Promise.race([read, new Promise<{ size: number; fflate: boolean }>((done) => setTimeout(() => done({ size: -1, fflate: false }), 15_000))]));
   });
-  await page.goto(url);
-  await page.waitForLoadState("networkidle", { timeout: 30_000 }).catch(() => {});
+  await page.goto(url, { timeout: 30_000 });
+  await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => {});
+  const landed = new URL(page.url()).pathname;
   const all = await Promise.all(pending);
   await context.close();
-  return { route: label, scripts: all.length, kb: Math.round(all.reduce((n, r) => n + r.size, 0) / 102.4) / 10, fflate: all.some((r) => r.fflate) };
+  const row = { route: `${label} (${landed})`, scripts: all.length, kb: Math.round(all.reduce((n, r) => n + Math.max(r.size, 0), 0) / 102.4) / 10, fflate: all.some((r) => r.fflate), unread: all.filter((r) => r.size < 0).length };
+  console.log(`PERF ${JSON.stringify(row)}`);
+  return row;
 }
 
 test("first-load JS per route (throwaway perf sweep)", async ({ browser }) => {
@@ -35,7 +38,9 @@ test("first-load JS per route (throwaway perf sweep)", async ({ browser }) => {
   const email = newEmail();
   const password = newPassword();
   try {
-    await createConfirmedUser(email, password);
+    // With the consents, as the launch journeys make their accounts (createConfirmedUser has none).
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
     const context = await browser.newContext();
     const page = await context.newPage();
     await page.goto("/sign-in");
@@ -63,7 +68,7 @@ test("first-load JS per route (throwaway perf sweep)", async ({ browser }) => {
     }
     rows.push(await measure(browser, undefined, "/sign-up", "Sign-up (signed out)"));
     rows.push(await measure(browser, undefined, "/", "Home (signed out)"));
-    for (const r of rows) console.log(`PERF ${JSON.stringify(r)}`);
+    expect(rows.length).toBe(8);
   } finally {
     await cleanup(email);
   }
