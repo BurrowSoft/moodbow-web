@@ -1976,8 +1976,8 @@ test("the prompt library by keyboard: focus follows each step, and Escape closes
     await page.locator("#email").fill(email);
     await page.locator("#password").fill(password);
     await page.locator("main form button[type=submit]").first().click();
-    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
-    await page.getByTestId("setup-done").click();
+    // Since #314 (fewer taps) sign-in lands on Today (release/1.3.0, as the audit trial did for 1.2).
+    await expect(page).toHaveURL(RegExp("/app$"), { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     await page.goto("/app/write");
     const open = page.getByTestId("entry-library-open");
@@ -3268,8 +3268,8 @@ test("Plus more reminders on staging: locked when free; with Plus, saved, read b
     await page.locator("#email").fill(email);
     await page.locator("#password").fill(password);
     await page.locator("main form button[type=submit]").first().click();
-    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
-    await page.getByTestId("setup-done").click();
+    // Since #314 (fewer taps) sign-in lands on Today (release/1.3.0, as the audit trial did for 1.2).
+    await expect(page).toHaveURL(RegExp("/app$"), { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
 
     // Free: the lock, the sheet, nothing saved.
@@ -3342,8 +3342,8 @@ test("Me → Use Bo off: bo_off is set, the switch goes, the conversation row st
     await page.locator("#email").fill(email);
     await page.locator("#password").fill(password);
     await page.locator("main form button[type=submit]").first().click();
-    await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
-    await page.getByTestId("setup-done").click();
+    // Since #314 (fewer taps) sign-in lands on Today (release/1.3.0, as the audit trial did for 1.2).
+    await expect(page).toHaveURL(RegExp("/app$"), { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     await page.goto("/app/me");
     const use = page.getByTestId("me-bo-use");
@@ -3387,8 +3387,8 @@ test("Bo's screen at large text: the header covers nothing, and help is reachabl
     await page.locator("#email").fill(email);
     await page.locator("#password").fill(password);
     await page.locator("main form button[type=submit]").first().click();
-    await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
-    await page.getByTestId("setup-done").click();
+    // Since #314 (fewer taps) sign-in lands on Today (release/1.3.0, as the audit trial did for 1.2).
+    await expect(page).toHaveURL(RegExp("/app$"), { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     await page.setViewportSize({ width: 320, height: 640 });
 
@@ -3467,7 +3467,6 @@ test("Bo's status never holds a page: check-in and help first, with the function
   const email = newEmail();
   try {
     await accountAtSetup(page, email);
-    await page.getByTestId("setup-done").click();
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     await page.route("**/api/bo", () => {});
     for (const [path, id] of [["/app", "checkin-card"], ["/app/me", "me-get-help"]]) {
