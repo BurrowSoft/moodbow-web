@@ -31,6 +31,7 @@ import { onThisDayDates, pickOnThisDay, type MomentRow, type OnThisDayKind } fro
 import { preview } from "@/lib/journal/entry";
 import { dateLine } from "@/lib/journal/today";
 import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
+import { GetHelpNow } from "@/components/SafetyCard";
 
 // A stuck request ends here at the latest (UX, the timeout audit); each
 // data call gives up after 15 s on its own (lib/supabase/deadline).
@@ -175,9 +176,14 @@ export default async function TimelinePage({ params, searchParams }: PageProps<"
   return (
     <section>
       {/* Focusable from code only: where focus goes when On this day is hidden. */}
-      <h1 id="timeline-title" tabIndex={-1} className={`${JOURNAL_HEADING} focus:outline-none`}>
-        {t("timelineTitle")}
-      </h1>
+      {/* Help everywhere (audit batch H): the lifebuoy by the title, as on Today; it covers On this
+          day and the milestone on this screen too. */}
+      <header className="flex items-start gap-[12px]">
+        <h1 id="timeline-title" tabIndex={-1} className={`${JOURNAL_HEADING} min-w-0 flex-1 focus:outline-none`}>
+          {t("timelineTitle")}
+        </h1>
+        <GetHelpNow country={me.profile?.country} testId="timeline-help" neutral icon />
+      </header>
       {/* Search (1.1 L), when shown: while it's open its results replace
           everything below the title (the list or the calendar). */}
       {pageGate("search-live") !== "hidden" ? <TimelineSearch dateLocaleTag={dateLocaleTag}>{content}</TimelineSearch> : content}

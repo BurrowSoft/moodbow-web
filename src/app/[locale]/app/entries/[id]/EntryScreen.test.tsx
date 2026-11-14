@@ -72,6 +72,20 @@ afterEach(() => {
 });
 
 describe("EntryScreen: the view", () => {
+  it("help everywhere (audit batch H): exactly one help control, beside Back, opening the help card; editing shows the editor's one instead", () => {
+    renderIt();
+    const help = screen.getAllByRole("link", { name: messages.me.meGetHelpNow });
+    expect(help).toHaveLength(1);
+    expect(before(screen.getByTestId("nav-back"), help[0])).toBe(true);
+    expect(before(help[0], screen.getByTestId("entry-moment-toggle"))).toBe(true);
+    fireEvent.click(help[0]);
+    expect(screen.getByTestId("safety-card")).toBeInTheDocument();
+    cleanup();
+    renderIt();
+    fireEvent.click(screen.getByTestId("entry-view-edit"));
+    expect(screen.getAllByRole("link", { name: messages.me.meGetHelpNow })).toHaveLength(1);
+  });
+
   it("top bar, date, the day's check-in, the text, Reflect, Add to this entry: in that order, also for the keyboard", () => {
     renderIt({ reflect: true });
     const back = screen.getByTestId("nav-back");

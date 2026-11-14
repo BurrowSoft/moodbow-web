@@ -3038,3 +3038,74 @@ test("help everywhere: Insights with Plus, every range, one lifebuoy in the firs
     await cleanup(email);
   }
 });
+
+// Help everywhere (audit batch H, UX and the Reviewer, 14 Nov): wherever someone writes their own
+// words or reads back their days, exactly one help control, and it opens the help card.
+// At 320 px with text at 300 % (the Reviewer): Back and the lifebuoy share a row, so each must stay
+// in the first view with nothing sideways.
+test("help everywhere: writing, Three good things, a day and the Timeline each have one lifebuoy in the first view at 300 %, opening the help card", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
+  test.setTimeout(150_000);
+  const email = newEmail();
+  try {
+    const password = await accountAtSetup(page, email);
+    // Setup first where this base still asks for it (before #314's fewer taps): the journal's
+    // pages send a new account there until it's done.
+    await page.goto("/setup");
+    const atSetup = await page
+      .getByTestId("setup-done")
+      .waitFor({ state: "visible", timeout: 5_000 })
+      .then(() => true)
+      .catch(() => false);
+    if (atSetup) {
+      await page.getByTestId("setup-done").click();
+      await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    }
+    const today = await journalToday(email, password);
+    await page.setViewportSize({ width: 320, height: 640 });
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send("Page.setFontSizes", { fontSizes: { standard: 48, fixed: 39 } });
+    const help = page.getByRole("link", { name: messages.me.meGetHelpNow });
+    for (const [path, testId] of [
+      ["/app/write", "editor-help"],
+      ["/app/write/good-things", "editor-help"],
+      [`/app/timeline/${today}`, "day-help"],
+      ["/app/timeline", "timeline-help"],
+    ]) {
+      await page.goto(path);
+      await expect(page.getByTestId(testId), path).toBeVisible({ timeout: 15_000 });
+      const box = await page.getByTestId(testId).evaluate((el) => {
+        const r = el.getBoundingClientRect();
+        return { inFirstView: r.top >= 0 && r.bottom <= window.innerHeight + 0.5 && r.right <= window.innerWidth + 0.5, overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth };
+      });
+      expect(box, `${path}: the lifebuoy in the first view, nothing sideways`).toEqual({ inFirstView: true, overflow: 0 });
+      await expect(help, `${path}: exactly one help control`).toHaveCount(1);
+      await help.click();
+      await expect(page.getByTestId("safety-card"), path).toBeVisible();
+      await page.keyboard.press("Escape");
+      await expect(page.getByTestId("safety-card"), path).toHaveCount(0);
+    }
+    // Every Timeline view keeps the lifebuoy (audit B): the empty list (a new account) is above;
+    // then the calendar, the list again and search, where they're on.
+    await page.goto("/app/timeline");
+    await expect(page.getByTestId("timeline-empty").first()).toBeVisible({ timeout: 15_000 });
+    const views: string[] = ["empty list"];
+    for (const v of ["calendar", "list"]) {
+      if ((await page.getByTestId(`timeline-view-${v}`).count()) === 0) continue;
+      await page.getByTestId(`timeline-view-${v}`).click();
+      await expect(page.getByTestId("timeline-help"), v).toBeVisible();
+      await expect(help, `${v}: exactly one help control`).toHaveCount(1);
+      views.push(v);
+    }
+    if ((await page.getByTestId("timeline-search-open").count()) > 0) {
+      await page.getByTestId("timeline-search-open").click();
+      await expect(page.getByTestId("timeline-search-input")).toBeVisible();
+      await expect(page.getByTestId("timeline-help"), "search").toBeVisible();
+      await expect(help, "search: exactly one help control").toHaveCount(1);
+      views.push("search");
+    }
+    console.log(`Timeline views with the lifebuoy: ${views.join(", ")}`);
+  } finally {
+    await cleanup(email);
+  }
+});

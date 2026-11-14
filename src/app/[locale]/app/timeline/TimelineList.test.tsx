@@ -72,6 +72,23 @@ describe("TimelineList", () => {
     expect(screen.getByTestId("timeline-entry-e1")).toHaveAttribute("href", "/app/entries/e1?from=%2Fapp%2Ftimeline");
   });
 
+  it("the whole card opens the day; each entry its own, above it; no link inside a link; the text names each (audit B)", () => {
+    renderList();
+    const day = screen.getByTestId("timeline-day-2026-10-02");
+    const card = day.closest("li")!;
+    expect(card.className).toContain("relative");
+    // The day link's ::after covers the card.
+    expect(day.className).toContain("after:absolute");
+    expect(day.className).toContain("after:inset-0");
+    const entry = screen.getByTestId("timeline-entry-e1");
+    expect(card).toContainElement(entry);
+    expect(entry.className).toContain("relative");
+    expect(entry.className).toContain("z-10");
+    expect(entry.className).toContain("min-h-11");
+    expect(document.querySelectorAll("a a")).toHaveLength(0);
+    expect(day).toHaveAccessibleName(/Fri, Oct 2/);
+  });
+
   it("a moment has the ★, named 'Moment' (UX); others don't", () => {
     renderList();
     expect(within(screen.getByTestId("timeline-entry-e1")).getByRole("img", { name: messages.entry.momentBadge })).toBeInTheDocument();

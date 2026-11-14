@@ -4,7 +4,7 @@ import { startTransition, useActionState, useCallback, useEffect, useLayoutEffec
 import { useLocale, useTranslations } from "next-intl";
 import { promptFor, promptText } from "@/lib/journal/prompts";
 import { Dialog, dialogButton } from "@/components/Dialog";
-import { SafetyCard } from "@/components/SafetyCard";
+import { GetHelpNow, SafetyCard } from "@/components/SafetyCard";
 import { Switch } from "@/components/Switch";
 import { useRouter } from "@/i18n/navigation";
 import { useAnnounce, useFocusTitleAfterLeaving } from "../Announcer";
@@ -624,7 +624,12 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
           just above Save at the bottom (sm:order-last, as the buttons). */}
       <div className="sticky top-0 z-10 flex flex-col gap-2 bg-bg pb-2 sm:contents">
         <div className="flex min-h-11 flex-wrap items-center justify-between gap-3" data-testid="entry-top-row">
-          {back}
+          {/* Help everywhere (audit batch H): the lifebuoy beside Back wherever someone writes their
+              own words (writing, editing an entry, Three good things). */}
+          <span className="flex min-w-0 items-center gap-1">
+            {back}
+            <GetHelpNow country={country} testId="editor-help" neutral icon />
+          </span>
           <button type="submit" data-testid="entry-save-top" disabled={cantSave} aria-disabled={busy || undefined} className={TOP_SAVE}>
             {t("entrySave")}
           </button>

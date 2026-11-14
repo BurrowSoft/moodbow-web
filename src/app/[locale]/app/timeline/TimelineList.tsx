@@ -142,11 +142,14 @@ export function TimelineList({ initial, initialDone, momentsOnly, dateLocaleTag,
             {monthDays.map((day) => {
               const c = day.check_in;
               return (
-                <li key={day.local_date} className="rounded-2xl border border-border bg-surface p-[16px]">
+                // The whole card opens the day (audit B, the Web Tester): the day link's ::after
+                // covers the card; the entries' own links sit above it. Nothing is nested, and each
+                // link's text stays its accessible name.
+                <li key={day.local_date} className="relative rounded-2xl border border-border bg-surface p-[16px]">
                   <Link
                     href={`/app/timeline/${day.local_date}`}
                     data-testid={`timeline-day-${day.local_date}`}
-                    className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg font-medium text-text hover:text-accent"
+                    className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg font-medium text-text hover:text-accent after:absolute after:inset-0 after:rounded-2xl after:content-['']"
                   >
                     {/* The mood's dot, named in words beside it (never colour
                         alone); a day without a check-in gets an empty dashed
@@ -178,7 +181,7 @@ export function TimelineList({ initial, initialDone, momentsOnly, dateLocaleTag,
                     <ul className="mt-3 space-y-2">
                       {day.entries.map((entry) => (
                         <li key={entry.id}>
-                          <Link href={withOrigin(`/app/entries/${entry.id}`, "/app/timeline")} data-testid={`timeline-entry-${entry.id}`} className="flex items-start gap-2 rounded-lg text-sm text-text hover:text-accent">
+                          <Link href={withOrigin(`/app/entries/${entry.id}`, "/app/timeline")} data-testid={`timeline-entry-${entry.id}`} className="relative z-10 flex min-h-11 items-start gap-2 rounded-lg py-[6px] text-sm text-text hover:text-accent">
                             {entry.is_moment && <MomentStar label={te("momentBadge")} />}
                             <span className="line-clamp-2 whitespace-pre-line">{entry.preview}</span>
                           </Link>

@@ -13,6 +13,7 @@ import { getMe } from "@/lib/journal/me";
 import { isIsoDate } from "@/lib/journal/timeline";
 import { withOrigin } from "@/lib/journal/origin";
 import { BackLink } from "@/components/BackLink";
+import { GetHelpNow } from "@/components/SafetyCard";
 import { backLabel } from "@/lib/journal/backLabel";
 import { dateLine, dateLocale } from "@/lib/journal/today";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -68,7 +69,11 @@ export default async function DayPage({ params }: PageProps<"/[locale]/app/timel
   return (
     <section className="space-y-8">
       {/* Opened from the Timeline (decision 152). */}
-      <BackLink href="/app/timeline" label={await backLabel("/app/timeline", dateLocaleTag)} testId="nav-back" />
+      {/* Help everywhere (audit batch H): the lifebuoy beside Back. */}
+      <div className="flex items-center gap-1">
+        <BackLink href="/app/timeline" label={await backLabel("/app/timeline", dateLocaleTag)} testId="nav-back" />
+        <GetHelpNow country={me.profile?.country} testId="day-help" neutral icon />
+      </div>
       <h1 className={JOURNAL_HEADING} data-testid="day-date">
         {dateLine(date, dateLocaleTag)}
       </h1>

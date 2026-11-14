@@ -81,12 +81,16 @@ describe("AppNav: the parent tab (decision 152)", () => {
     expect(current("/app/me")).toEqual(["tab-me"]);
   });
 
-  it("an entry or New entry: the tab it came from; Today on a direct load or a bad ?from", () => {
+  it("an entry or New entry: the tab it came from; a direct load: an entry is the Timeline's, New entry Today's (audit B)", () => {
     expect(current("/app/entries/e1", "from=%2Fapp%2Ftimeline")).toEqual(["tab-timeline"]);
     cleanup();
     expect(current("/app/entries/e1", "from=%2Fapp%2Ftimeline%2F2026-10-02")).toEqual(["tab-timeline"]);
     cleanup();
-    expect(current("/app/entries/e1")).toEqual(["tab-today"]);
+    expect(current("/app/entries/e1", "from=%2Fapp")).toEqual(["tab-today"]);
+    cleanup();
+    expect(current("/app/entries/e1")).toEqual(["tab-timeline"]);
+    cleanup();
+    expect(current("/app/write")).toEqual(["tab-today"]);
     cleanup();
     expect(current("/app/write", "from=https%3A%2F%2Fevil.example")).toEqual(["tab-today"]);
   });
