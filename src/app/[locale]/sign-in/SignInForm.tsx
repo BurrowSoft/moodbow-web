@@ -59,7 +59,7 @@ export function SignInForm() {
         <Link href="/forgot-password" className={textLinkClass}>
           {t("signinForgot")}
         </Link>
-        <Link href="/welcome" data-testid="signin-to-signup" className={textLinkClass}>
+        <Link href="/sign-up" data-testid="signin-to-signup" className={textLinkClass}>
           {t("signinNoAccount")}
         </Link>
       </p>

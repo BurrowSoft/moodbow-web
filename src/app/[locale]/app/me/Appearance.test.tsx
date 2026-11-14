@@ -6,6 +6,15 @@ import { THEME_KEY } from "@/lib/appearance";
 import { SHORTCUTS_KEY } from "@/lib/shortcuts";
 import { Appearance } from "./Appearance";
 
+// Appearance brings Plus's sheet (a Link) for the themes' lock.
+vi.mock("@/i18n/navigation", () => ({
+  Link: ({ href, children, prefetch, ...rest }: { href: string; prefetch?: boolean; children: React.ReactNode }) => (
+    <a href={href} data-prefetch={String(prefetch)} {...rest}>
+      {children}
+    </a>
+  ),
+}));
+
 const renderIt = () =>
   render(
     <NextIntlClientProvider locale="en" messages={messages}>
@@ -96,5 +105,16 @@ describe("Me → Appearance: keyboard shortcuts (1.1 O, WCAG 2.1.4)", () => {
   it("not shown where shortcuts aren't live", () => {
     renderIt();
     expect(screen.queryByRole("switch")).toBeNull();
+  });
+});
+
+describe("Me → Appearance: the theme radios are at least 24 px (audit D polish)", () => {
+  it("each radio h-6 w-6, inside a label that still picks it", () => {
+    renderIt();
+    for (const option of ["system", "light", "dark"]) {
+      const radio = screen.getByTestId(`me-theme-${option}`);
+      expect(radio.className.split(" ")).toEqual(expect.arrayContaining(["h-6", "w-6", "shrink-0"]));
+      expect(radio.closest("label")).not.toBeNull();
+    }
   });
 });

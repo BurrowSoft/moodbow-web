@@ -34,14 +34,17 @@ export function onThisDayDates(today: string): { kind: OnThisDayKind; date: stri
   });
 }
 
-export type MomentRow = { id: string; entry_date: string; body: string; is_moment: boolean; created_at: string };
+// recall_months (034): the anniversaries this moment may come back on; missing means all three.
+export type MomentRow = { id: string; entry_date: string; body: string; is_moment: boolean; created_at: string; recall_months?: number[] | null };
+const MONTHS: Record<OnThisDayKind, number> = { year: 12, sixMonths: 6, month: 1 };
 
 // The one card, if any: the first date (by priority) with a moment that the
-// crisis matcher doesn't flag; within a day, the newest.
+// crisis matcher doesn't flag and the person kept for that anniversary
+// (Memories, 034); within a day, the newest.
 export function pickOnThisDay(rows: MomentRow[], today: string, keywords: CrisisKeywords | null): { kind: OnThisDayKind; entry: MomentRow } | null {
   for (const { kind, date } of onThisDayDates(today)) {
     const entry = rows
-      .filter((r) => r.is_moment && r.entry_date === date && !flagsCrisis(r.body, keywords))
+      .filter((r) => r.is_moment && r.entry_date === date && (r.recall_months ?? [1, 6, 12]).includes(MONTHS[kind]) && !flagsCrisis(r.body, keywords))
       .sort((a, b) => b.created_at.localeCompare(a.created_at))[0];
     if (entry) return { kind, entry };
   }

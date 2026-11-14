@@ -56,3 +56,15 @@ describe("the first of a month in French and Brazilian Portuguese", () => {
     expect(dateLine("2026-11-01", "es-MX")).toContain("1 de noviembre");
   });
 });
+
+describe("YourWeekCard: a hard week and the safety plan (1.2)", () => {
+  const hard = { start: "2026-10-26", end: "2026-11-01", kind: "hard" } as const;
+  it("with content: the plan's link beside the help", async () => {
+    render(await YourWeekCard({ week: hard, country: "NZ", dateLocaleTag: "en-NZ", planLink: true }));
+    expect(screen.getByTestId("your-week-plan")).toHaveAttribute("href", "/app/me/safety-plan");
+  });
+  it("without: no link", async () => {
+    render(await YourWeekCard({ week: hard, country: "NZ", dateLocaleTag: "en-NZ" }));
+    expect(screen.queryByTestId("your-week-plan")).toBeNull();
+  });
+});

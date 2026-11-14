@@ -9,7 +9,7 @@ import { withOrigin } from "@/lib/journal/origin";
 import { SEARCH_DEBOUNCE_MS, searchTerm } from "@/lib/journal/search";
 import { dayLabel } from "@/lib/journal/timeline";
 import { onArrival } from "@/lib/ui/arrival";
-import { searchEntries, type SearchHit } from "./searchActions";
+import { searchEntries, type SearchHit, type TagDayHit } from "./searchActions";
 
 // Search your journal (1.1 L, decision 195): a magnifier at the top of the
 // Timeline opens a search field; while it's open the results replace the
@@ -17,7 +17,7 @@ import { searchEntries, type SearchHit } from "./searchActions";
 // characters. The text stays in this component: never in the URL, storage
 // or any log, and nothing is remembered ("no recent searches").
 
-type State = { kind: "idle" } | { kind: "searching" } | { kind: "results"; q: string; hits: SearchHit[]; more: boolean } | { kind: "error"; q: string; offline: boolean };
+type State = { kind: "idle" } | { kind: "searching" } | { kind: "results"; q: string; hits: SearchHit[]; more: boolean; tagDays: TagDayHit[] } | { kind: "error"; q: string; offline: boolean };
 
 export function TimelineSearch({ dateLocaleTag, children }: { dateLocaleTag: string; children: ReactNode }) {
   const t = useTranslations("timeline");
@@ -41,7 +41,7 @@ export function TimelineSearch({ dateLocaleTag, children }: { dateLocaleTag: str
     searchEntries(q)
       .then((r) => {
         if (latest.current !== ask) return;
-        if (r.status === "ok") setState({ kind: "results", q, hits: r.hits, more: r.more });
+        if (r.status === "ok") setState({ kind: "results", q, hits: r.hits, more: r.more, tagDays: r.tagDays ?? [] });
         else failed();
       })
       .catch(failed);
@@ -152,7 +152,7 @@ export function TimelineSearch({ dateLocaleTag, children }: { dateLocaleTag: str
 
         <div role="status" className="mt-4 text-sm text-muted" data-testid="timeline-search-status">
           {state.kind === "idle" && t("searchHint")}
-          {state.kind === "results" && (state.hits.length === 0 ? t("searchEmpty", { q: state.q }) : t("searchResultsCount", { n: state.hits.length }))}
+          {state.kind === "results" && (state.hits.length + state.tagDays.length === 0 ? t("searchEmpty", { q: state.q }) : t("searchResultsCount", { n: state.hits.length + state.tagDays.length }))}
         </div>
         {/* UX: the error itself, and a real button that asks again for the same text. */}
         {state.kind === "error" && (
@@ -169,6 +169,35 @@ export function TimelineSearch({ dateLocaleTag, children }: { dateLocaleTag: str
           </div>
         )}
 
+        {/* Days whose tags match (tags-live): the day, its mood and the matching tags. */}
+        {state.kind === "results" && state.tagDays.length > 0 && (
+          <section aria-label={tt("tagsLabel")} className="mt-2">
+            <ul className="space-y-3" data-testid="timeline-search-tag-days">
+              {state.tagDays.map((d) => (
+                <li key={d.date}>
+                  <Link href={`/app/timeline/${d.date}`} data-testid={`timeline-search-tag-day-${d.date}`} className="block rounded-2xl border border-border bg-surface p-[16px] hover:border-accent">
+                    <span className="flex flex-wrap items-center gap-x-2 font-medium text-text">
+                      {d.mood !== null && <span className={`h-3.5 w-3.5 shrink-0 rounded-full ${MOOD_COLOURS[d.mood - 1]} ${MOOD_DOT_OUTLINE}`} aria-hidden="true" />}
+                      <span>{dayLabel(d.date, dateLocaleTag)}</span>
+                      {d.mood !== null && (
+                        <span className="text-sm font-normal text-muted">
+                          <span aria-hidden="true">·</span> {tt(`mood${d.mood}` as "mood1")}
+                        </span>
+                      )}
+                    </span>
+                    <span className="mt-2 flex flex-wrap gap-2">
+                      {d.tags.map((tag) => (
+                        <span key={tag} className="inline-flex max-w-full items-center rounded-full border border-border px-3 py-0.5 text-sm text-text [overflow-wrap:anywhere]">
+                          {tag}
+                        </span>
+                      ))}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
         {state.kind === "results" && state.hits.length > 0 && (
           <ul className="mt-2 space-y-3" data-testid="timeline-search-results">
             {state.hits.map((h) => (

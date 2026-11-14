@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import messages from "../../src/messages/en.json";
-import { cleanup, configured, confirmEmail, newEmail, newPassword, notConfigured, recoveryLinkHash, signedUpUnconfirmed } from "./staging";
+import { profileSaver, cleanup, configured, confirmEmail, newEmail, newPassword, notConfigured, recoveryLinkHash, signedUpUnconfirmed } from "./staging";
 
 // A slow phone: the page has drawn, its code hasn't run, and the person is
 // already typing. The page's scripts are held back so this is the same every
@@ -9,6 +9,23 @@ test.skip(!configured, notConfigured);
 test.describe.configure({ timeout: 120_000 });
 
 const SCRIPTS = "**/_next/static/**/*.js";
+
+// A reload that accepts a beforeunload prompt (the editor asks before leaving unsaved text; the
+// draft is already kept by then) and waits for the new page. The handler is removed afterwards, so
+// it never answers a later dialog. A bare page.reload() left that prompt to Playwright's default,
+// and a session closing under it flaked across PRs (the Reviewer, 14 Nov).
+async function reloadPage(page: Page): Promise<void> {
+  const accept = (dialog: import("@playwright/test").Dialog) => {
+    if (dialog.type() === "beforeunload") void dialog.accept().catch(() => {});
+  };
+  page.on("dialog", accept);
+  try {
+    await page.reload({ waitUntil: "load" });
+  } finally {
+    page.off("dialog", accept);
+  }
+}
+
 
 async function beforeLoad(page: Page, path: string, act: () => Promise<void>): Promise<void> {
   let release = () => {};
@@ -44,8 +61,7 @@ async function onboarded(page: Page, email: string, password: string): Promise<v
   await signedUpUnconfirmed(email, password);
   await confirmEmail(email);
   await signIn(page, email, password);
-  await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
-  await page.getByTestId("setup-done").click();
+  await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
   await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
 }
 
@@ -76,7 +92,7 @@ test.describe("typing before the page has loaded", () => {
       await expect(page).toHaveURL(/\/app\/write$/);
       // The draft has it.
       await page.waitForTimeout(2_500);
-      await page.reload();
+      await reloadPage(page);
       await expect(box(page)).toHaveValue("Typed on a slow phone, tnci");
       expect(errors).toEqual([]);
     } finally {
@@ -169,7 +185,7 @@ test.describe("typing before the page has loaded", () => {
       await box(page).click();
       await page.keyboard.type("Only the draft");
       await page.waitForTimeout(2_500);
-      await page.reload();
+      await reloadPage(page);
       await expect(box(page)).toHaveValue("Only the draft");
     } finally {
       await cleanup(email);
@@ -193,22 +209,22 @@ test.describe("typing before the page has loaded", () => {
     await expect(page.locator("#email")).toHaveValue("a@b.co");
   });
 
-  test("sign-up: the email, the password and the age box stay", async ({ page }) => {
-    await page.goto("/consent");
-    await page.getByTestId("consent-privacy").check();
-    await page.getByTestId("consent-health").check();
-    await page.getByTestId("consent-continue").click();
-    await expect(page).toHaveURL(/\/sign-up$/);
+  // What's typed stays; the consent boxes go back to unticked and Create account waits: nobody
+  // consents by something the page didn't take in (UX; 1.3 §6 keeps it on Create account).
+  test("sign-up: the email and the password stay; the boxes go back to unticked", async ({ page }) => {
     await beforeLoad(page, "/sign-up", async () => {
       await page.locator("#email").click();
       await page.keyboard.type("a@b.co");
       await page.locator("#password").click();
       await page.keyboard.type("secret123");
-      await page.getByTestId("signup-age").check();
+      await page.getByTestId("consent-privacy").check();
+      await page.getByTestId("consent-health").check();
+      await page.getByTestId("consent-age").check();
     });
     await expect(page.locator("#email")).toHaveValue("a@b.co");
     await expect(page.locator("#password")).toHaveValue("secret123");
-    await expect(page.getByTestId("signup-age")).toBeChecked();
+    for (const id of ["consent-privacy", "consent-health", "consent-age"]) await expect(page.getByTestId(id)).not.toBeChecked();
+    await expect(page.getByTestId("signup-submit")).toBeDisabled();
     // It's in the page's state too: one more key, and it's all there.
     await page.locator("#password").click();
     await page.keyboard.press("End");
@@ -238,27 +254,22 @@ test.describe("typing before the page has loaded", () => {
 
   // Ticks before load go back to unticked, and Continue waits: nobody consents
   // by something the page didn't take in (UX). Setup's form reads the page itself.
-  test("consent goes back to unticked; setup keeps its choices", async ({ page }) => {
+  test("setup keeps its choices", async ({ page }) => {
     const email = newEmail();
     const password = newPassword();
     try {
-      await beforeLoad(page, "/consent", async () => {
-        await page.getByTestId("consent-privacy").check();
-        await page.getByTestId("consent-health").check();
-      });
-      await expect(page.getByTestId("consent-privacy")).not.toBeChecked();
-      await expect(page.getByTestId("consent-health")).not.toBeChecked();
-      await expect(page.getByTestId("consent-continue")).toBeDisabled();
       await signedUpUnconfirmed(email, password);
       await confirmEmail(email);
       await signIn(page, email, password);
-      await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+      await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
+      // Setup after first use (1.3 §6): opened from its page.
+      // The reminder starts off after first use (the protective default), its time field disabled
+      // until it's turned on: the choice made before load is turning it on, and it stays.
       await beforeLoad(page, "/setup", async () => {
-        await page.getByTestId("setup-reminder-time").fill("07:30");
-        await page.getByTestId("setup-reminder-off").check();
+        await expect(page.getByTestId("setup-reminder-off")).toBeChecked();
+        await page.getByTestId("setup-reminder-off").uncheck();
       });
-      await expect(page.getByTestId("setup-reminder-time")).toHaveValue("07:30");
-      await expect(page.getByTestId("setup-reminder-off")).toBeChecked();
+      await expect(page.getByTestId("setup-reminder-off")).not.toBeChecked();
     } finally {
       await cleanup(email);
     }
@@ -298,6 +309,7 @@ test.describe("typing before the page has loaded", () => {
     const password = newPassword();
     try {
       await onboarded(page, email, password);
+      await (await profileSaver(email, password))({ p_country: "TH" });
       await expect(page.getByTestId("app-noscript-help")).toHaveCount(0);
       const off = await browser.newContext({ baseURL, javaScriptEnabled: false, storageState: await page.context().storageState() });
       const noScript = await off.newPage();
@@ -316,7 +328,8 @@ test.describe("typing before the page has loaded", () => {
         return line.y + line.height <= bar.y;
       }).toBe(true);
       await noScript.getByTestId("app-noscript-help").click();
-      await expect(noScript).toHaveURL(/\/help\/get-help-now$/);
+      await expect(noScript).toHaveURL(/\/help\/get-help-now\?country=TH$/);
+      await expect(noScript.getByTestId("help-now-call-helpline")).toHaveAttribute("href", "tel:1323");
       await expect(noScript.getByTestId("help-now-find-helpline")).toBeVisible();
       await off.close();
     } finally {
@@ -333,7 +346,7 @@ test.describe("typing before the page has loaded", () => {
       // Help doesn't wait for any of it (#248).
       await beforeLoad(page, "/app/me", async () => {
         await page.getByTestId("me-get-help").click();
-        await expect(page).toHaveURL(/\/help\/get-help-now$/);
+        await expect(page).toHaveURL(/\/help\/get-help-now(\?country=[A-Z]+)?$/);
         await expect(page.getByTestId("help-now-find-helpline")).toBeVisible();
       });
       await beforeLoad(page, "/app/me", async () => {
@@ -354,7 +367,7 @@ test.describe("typing before the page has loaded", () => {
       // And it works from here on, and saves.
       await page.getByTestId("me-country").selectOption("FR");
       await page.waitForTimeout(1_000);
-      await page.reload();
+      await reloadPage(page);
       await expect(page.getByTestId("me-country")).toHaveValue("FR");
     } finally {
       await cleanup(email);

@@ -7,6 +7,8 @@ import { JournalUnavailable } from "@/components/JournalUnavailable";
 import { SessionEnded } from "@/components/SessionEnded";
 import { currentUser } from "@/lib/journal/currentUser";
 import { pageGate } from "@/lib/conditions";
+import { lettersGate } from "@/lib/plus/letters";
+import { LockedLetters } from "./LockedLetters";
 import { yearOnOffer } from "@/lib/share/year";
 import { getMe } from "@/lib/journal/me";
 import { dateLocale } from "@/lib/journal/today";
@@ -16,6 +18,9 @@ import { loadTimeline } from "./actions";
 import { JOURNAL_HEADING, segment } from "@/lib/ui/journalLayout";
 import { TimelineList } from "./TimelineList";
 import { OnThisDay } from "./OnThisDay";
+import { MilestoneCard } from "../MilestoneCard";
+import { loadMilestone } from "@/lib/share/milestoneData";
+import { readPlusView } from "@/lib/plus/view";
 import { TimelineSearch } from "./TimelineSearch";
 import { MonthCalendar } from "./MonthCalendar";
 import { TimelineViews } from "./TimelineViews";
@@ -26,6 +31,7 @@ import { onThisDayDates, pickOnThisDay, type MomentRow, type OnThisDayKind } fro
 import { preview } from "@/lib/journal/entry";
 import { dateLine } from "@/lib/journal/today";
 import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
+import { GetHelpNow } from "@/components/SafetyCard";
 
 // A stuck request ends here at the latest (UX, the timeout audit); each
 // data call gives up after 15 s on its own (lib/supabase/deadline).
@@ -58,8 +64,10 @@ export default async function TimelinePage({ params, searchParams }: PageProps<"
   const readOnThisDay = async (): Promise<{ kind: OnThisDayKind; entry: MomentRow; mood: number | null } | null> => {
     if (pageGate("on-this-day-live") === "hidden") return null;
     const dates = onThisDayDates(me.today).map((d) => d.date);
-    const { data: moments } = await supabase.from("entries").select("id, entry_date, body, is_moment, created_at").eq("is_moment", true).in("entry_date", dates);
-    const picked = pickOnThisDay((moments ?? []) as MomentRow[], me.today, CRISIS_KEYWORDS);
+    // recall_months (Memories, 034) only where moment-recall-live is on: a database without 034 has no such column.
+    const columns = pageGate("moment-recall-live") !== "hidden" ? "id, entry_date, body, is_moment, created_at, recall_months" : "id, entry_date, body, is_moment, created_at";
+    const { data: moments } = await supabase.from("entries").select(columns).eq("is_moment", true).in("entry_date", dates);
+    const picked = pickOnThisDay((moments ?? []) as unknown as MomentRow[], me.today, CRISIS_KEYWORDS);
     if (!picked) return null;
     const { data: checkIn } = await supabase.from("check_ins").select("mood").eq("local_date", picked.entry.entry_date).maybeSingle();
     return { ...picked, mood: (checkIn as { mood: number } | null)?.mood ?? null };
@@ -74,7 +82,16 @@ export default async function TimelinePage({ params, searchParams }: PageProps<"
   };
   // The list, On this day and the calendar need only `me`, so they're read together (the Web Dev's
   // LCP read, 12 Nov: each one in turn cost a round trip to the database). Same reads, same results.
-  const [page, onThisDay, { view, calendarInitial }, requestHeaders] = await Promise.all([loadTimeline(null, momentsOnly), readOnThisDay(), readCalendar(), headers()]);
+  // The milestone reached (decision 169), where the 1.1 cards are on, and whether Share it is open
+  // (Plus, or a Plus row that can't be read: spec "Insights become Plus", ruling 6).
+  const [page, onThisDay, { view, calendarInitial }, requestHeaders, milestone, plus] = await Promise.all([
+    loadTimeline(null, momentsOnly),
+    readOnThisDay(),
+    readCalendar(),
+    headers(),
+    pageGate("share-cards") !== "hidden" && pageGate("share-cards-more") !== "hidden" ? loadMilestone(supabase) : null,
+    pageGate("plus") !== "hidden" ? readPlusView(supabase, user.id) : null,
+  ]);
   if (page.status === "error") return <JournalUnavailable />;
 
   const t = await getTranslations("timeline");
@@ -83,6 +100,17 @@ export default async function TimelinePage({ params, searchParams }: PageProps<"
   const shareable = pageGate("share-cards") !== "hidden";
   const printable = pageGate("print-live") !== "hidden";
 
+  // The milestone card (Vitor, 14 Nov): at the top of the list, above On this day, in the page's flow.
+  const milestoneCard = milestone && (
+    <MilestoneCard n={milestone.n} colours={milestone.colours} uid={user.id} month={me.today.slice(0, 7)} dateLocaleTag={dateLocaleTag} year={pageGate("year-card") !== "hidden" ? yearOnOffer(me.today) : null} inline shareLocked={plus !== null && plus.kind !== "plus"} />
+  );
+  // Letters to future me (1.2): the locked ones' line, read as id and dates only, never the text.
+  let locked: { id: string; opensLabel: string }[] = [];
+  if (lettersGate() !== "hidden") {
+    const { data: rows } = await supabase.from("letters").select("id, written_on, opens_on").is("opened_at", null).order("opens_on");
+    locked = ((rows ?? []) as { id: string; opens_on: string }[]).map((r) => ({ id: r.id, opensLabel: dateLine(r.opens_on, dateLocaleTag) }));
+  }
+  const lettersLine = <LockedLetters letters={locked} />;
   const onThisDayCard = onThisDay && (
     <OnThisDay
       kind={onThisDay.kind}
@@ -111,7 +139,9 @@ export default async function TimelinePage({ params, searchParams }: PageProps<"
           </Link>
         </nav>
       )}
+      {!calendarLive && milestoneCard}
       {!calendarLive && onThisDayCard}
+      {!calendarLive && lettersLine}
       {/* Keyed by the view, so switching filters starts a fresh list. */}
       <TimelineList
         key={momentsOnly ? "moments" : "all"}
@@ -128,12 +158,14 @@ export default async function TimelinePage({ params, searchParams }: PageProps<"
 
   const content = calendarLive ? (
     <>
+      {milestoneCard}
       {onThisDayCard}
+      {lettersLine}
       <TimelineViews
         initialView={view}
         list={list}
         calendar={
-          <MonthCalendar today={me.today} dateLocaleTag={dateLocaleTag} initial={calendarInitial?.status === "ok" ? calendarInitial.days : null} shareable={shareable} printable={printable} />
+          <MonthCalendar today={me.today} dateLocaleTag={dateLocaleTag} initial={calendarInitial?.status === "ok" ? calendarInitial.days : null} shareable={shareable} printable={printable} picturesKey={pageGate("pictures-live") !== "hidden"} />
         }
       />
     </>
@@ -144,9 +176,14 @@ export default async function TimelinePage({ params, searchParams }: PageProps<"
   return (
     <section>
       {/* Focusable from code only: where focus goes when On this day is hidden. */}
-      <h1 id="timeline-title" tabIndex={-1} className={`${JOURNAL_HEADING} focus:outline-none`}>
-        {t("timelineTitle")}
-      </h1>
+      {/* Help everywhere (audit batch H): the lifebuoy by the title, as on Today; it covers On this
+          day and the milestone on this screen too. */}
+      <header className="flex items-start gap-[12px]">
+        <h1 id="timeline-title" tabIndex={-1} className={`${JOURNAL_HEADING} min-w-0 flex-1 focus:outline-none`}>
+          {t("timelineTitle")}
+        </h1>
+        <GetHelpNow country={me.profile?.country} testId="timeline-help" neutral icon />
+      </header>
       {/* Search (1.1 L), when shown: while it's open its results replace
           everything below the title (the list or the calendar). */}
       {pageGate("search-live") !== "hidden" ? <TimelineSearch dateLocaleTag={dateLocaleTag}>{content}</TimelineSearch> : content}

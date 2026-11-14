@@ -142,11 +142,14 @@ export function TimelineList({ initial, initialDone, momentsOnly, dateLocaleTag,
             {monthDays.map((day) => {
               const c = day.check_in;
               return (
-                <li key={day.local_date} className="rounded-2xl border border-border bg-surface p-[16px]">
+                // The whole card opens the day (audit B, the Web Tester): the day link's ::after
+                // covers the card; the entries' own links sit above it. Nothing is nested, and each
+                // link's text stays its accessible name.
+                <li key={day.local_date} className="relative rounded-2xl border border-border bg-surface p-[16px]">
                   <Link
                     href={`/app/timeline/${day.local_date}`}
                     data-testid={`timeline-day-${day.local_date}`}
-                    className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg font-medium text-text hover:text-accent"
+                    className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg font-medium text-text hover:text-accent after:absolute after:inset-0 after:rounded-2xl after:content-['']"
                   >
                     {/* The mood's dot, named in words beside it (never colour
                         alone); a day without a check-in gets an empty dashed
@@ -165,14 +168,34 @@ export function TimelineList({ initial, initialDone, momentsOnly, dateLocaleTag,
                       <span className="sr-only">{t("dayNoCheckin")}</span>
                     )}
                   </Link>
+                  {day.tags && day.tags.length > 0 && (
+                    <ul className="mt-2 flex flex-wrap gap-2" aria-label={tt("tagsLabel")} data-testid={`timeline-day-tags-${day.local_date}`}>
+                      {day.tags.map((tag) => (
+                        <li key={tag} className="inline-flex max-w-full items-center rounded-full border border-border px-3 py-0.5 text-sm text-text [overflow-wrap:anywhere]">
+                          {tag}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                   {day.entries.length > 0 && (
                     <ul className="mt-3 space-y-2">
                       {day.entries.map((entry) => (
                         <li key={entry.id}>
-                          <Link href={withOrigin(`/app/entries/${entry.id}`, "/app/timeline")} data-testid={`timeline-entry-${entry.id}`} className="flex items-start gap-2 rounded-lg text-sm text-text hover:text-accent">
+                          <Link href={withOrigin(`/app/entries/${entry.id}`, "/app/timeline")} data-testid={`timeline-entry-${entry.id}`} className="relative z-10 flex min-h-11 items-start gap-2 rounded-lg py-[6px] text-sm text-text hover:text-accent">
                             {entry.is_moment && <MomentStar label={te("momentBadge")} />}
                             <span className="line-clamp-2 whitespace-pre-line">{entry.preview}</span>
                           </Link>
+                          {/* The pictures (035; board 15): 64 px thumbnails under the text, indented like
+                              it, a group named by their count. In px, and wrapping: at 300 % text rem
+                              sizes made them 192 px each and the page scrolled sideways (UX, #322). */}
+                          {entry.thumbs && entry.thumbs.length > 0 && (
+                            <div role="group" aria-label={t("timelinePictures", { count: entry.thumbs.length })} data-testid="timeline-pictures" className={`mt-[6px] flex min-w-0 flex-wrap gap-[6px] ${entry.is_moment ? "ps-[24px]" : ""}`}>
+                              {entry.thumbs.map((src, i) => (
+                                // eslint-disable-next-line @next/next/no-img-element -- a short-lived signed URL: never through the image optimizer
+                                <img key={i} src={src} alt={te("pictureOpen", { n: i + 1, total: entry.thumbs!.length })} data-testid="timeline-picture" className="h-[64px] w-[64px] shrink-0 rounded-xl object-cover" />
+                              ))}
+                            </div>
+                          )}
                         </li>
                       ))}
                     </ul>

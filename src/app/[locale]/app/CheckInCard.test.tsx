@@ -21,6 +21,15 @@ vi.mock("@/lib/ui/withTimeout", async (orig) => {
 });
 const refresh = vi.fn();
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh }) }));
+// The card brings the help card (a Link) for tags the crisis list matches.
+vi.mock("@/i18n/navigation", () => ({
+  Link: ({ href, children, prefetch, ...rest }: { href: string; prefetch?: boolean; children: React.ReactNode }) => (
+    <a href={href} data-prefetch={String(prefetch)} {...rest}>
+      {children}
+    </a>
+  ),
+}));
+
 const { CheckInCard } = await import("./CheckInCard");
 const { CheckInDraftProvider } = await import("./CheckInDraft");
 

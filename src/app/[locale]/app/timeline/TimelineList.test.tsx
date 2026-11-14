@@ -72,6 +72,23 @@ describe("TimelineList", () => {
     expect(screen.getByTestId("timeline-entry-e1")).toHaveAttribute("href", "/app/entries/e1?from=%2Fapp%2Ftimeline");
   });
 
+  it("the whole card opens the day; each entry its own, above it; no link inside a link; the text names each (audit B)", () => {
+    renderList();
+    const day = screen.getByTestId("timeline-day-2026-10-02");
+    const card = day.closest("li")!;
+    expect(card.className).toContain("relative");
+    // The day link's ::after covers the card.
+    expect(day.className).toContain("after:absolute");
+    expect(day.className).toContain("after:inset-0");
+    const entry = screen.getByTestId("timeline-entry-e1");
+    expect(card).toContainElement(entry);
+    expect(entry.className).toContain("relative");
+    expect(entry.className).toContain("z-10");
+    expect(entry.className).toContain("min-h-11");
+    expect(document.querySelectorAll("a a")).toHaveLength(0);
+    expect(day).toHaveAccessibleName(/Fri, Oct 2/);
+  });
+
   it("a moment has the ★, named 'Moment' (UX); others don't", () => {
     renderList();
     expect(within(screen.getByTestId("timeline-entry-e1")).getByRole("img", { name: messages.entry.momentBadge })).toBeInTheDocument();
@@ -295,5 +312,32 @@ describe("Print this month: the click asks for the dialog once", () => {
       fireEvent.click(screen.getByTestId("timeline-print-2026-10"), mod);
       expect(takePrintRequest("2026-10")).toBe(false);
     }
+  });
+});
+
+// Pictures (035; board 15): an entry's thumbnails under its text, a group named by their count,
+// plain img from signed URLs; none, no strip.
+describe("TimelineList: the pictures strip", () => {
+  it("64 px thumbnails in a group named by their count; an entry without pictures has none", () => {
+    const withPictures: TimelineDay[] = [{ ...days[0], entries: [{ ...ENTRY, thumbs: ["https://signed.example/a_t.jpg", "https://signed.example/b_t.jpg"] }, { ...ENTRY, id: "e2", preview: "Later.", is_moment: false }] }];
+    renderList({ initial: withPictures });
+    const strip = screen.getByTestId("timeline-pictures");
+    expect(strip).toHaveAttribute("role", "group");
+    expect(strip).toHaveAccessibleName("2 pictures");
+    const imgs = within(strip).getAllByTestId("timeline-picture");
+    expect(imgs.map((i) => i.getAttribute("src"))).toEqual(["https://signed.example/a_t.jpg", "https://signed.example/b_t.jpg"]);
+    // The photos are content (the Reviewer): each named "Picture n of total".
+    expect(imgs.map((i) => i.getAttribute("alt"))).toEqual(["Picture 1 of 2", "Picture 2 of 2"]);
+    expect(screen.getAllByTestId("timeline-pictures")).toHaveLength(1);
+  });
+});
+
+describe("TimelineList: a day's tags (tags-live)", () => {
+  it("as chips under the day, named Tags; a day without them shows none", () => {
+    renderList({ initial: [{ ...days[0], tags: ["Walk", "Friends"] }, { ...days[1], tags: [] }] });
+    const chips = screen.getByTestId("timeline-day-tags-2026-10-02");
+    expect(chips).toHaveAccessibleName(messages.today.tagsLabel);
+    expect(within(chips).getAllByRole("listitem").map((li) => li.textContent)).toEqual(["Walk", "Friends"]);
+    expect(screen.queryByTestId("timeline-day-tags-2026-09-28")).toBeNull();
   });
 });

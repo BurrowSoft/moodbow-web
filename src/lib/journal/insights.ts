@@ -2,6 +2,8 @@
 // today (get_me().today), each with the range's average and the change vs
 // the range just before it. Computed from the check-ins themselves; no AI.
 
+import type { ValueKey } from "./valueColours";
+
 export const RANGES = { week: 7, month: 30, "3months": 90 } as const;
 export type Range = keyof typeof RANGES;
 // Own keys only: `in` would also accept "toString", "__proto__"…
@@ -86,3 +88,11 @@ export function summarize(rows: InsightRow[], today: string, range: Range, metri
   }
   return { points, enough, missing: Math.max(0, MIN_POINTS - count), average: average === null ? null : roundFor(metric, average), change };
 }
+
+// Each chart's title, shape, scale and colour: Insights' and the appointment summary's (1.2).
+export const CHARTS: Record<Metric, { title: "chartMood" | "chartSleep" | "chartStress" | "chartExercise"; kind: "line" | "bars"; min: number; max: number; colourKey: ValueKey }> = {
+  mood: { title: "chartMood", kind: "line", min: 1, max: 5, colourKey: "mood" },
+  sleep: { title: "chartSleep", kind: "bars", min: 0, max: 12, colourKey: "sleep_hours" },
+  stress: { title: "chartStress", kind: "line", min: 1, max: 5, colourKey: "stress" },
+  exercise: { title: "chartExercise", kind: "bars", min: 0, max: 90, colourKey: "exercise_minutes" },
+};

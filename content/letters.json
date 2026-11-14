@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "about": "Letters to future me (specs/1.2-features.md §3, UX 2026-11-09; the Reviewer's read; server specs/letters-server-draft.md, migration 027). TEMPORARY HOME, as content/toolbox.json: it moves to the app repo's supabase/contracts when the app ports it (decision 99). A letter is its own row, never an entry, so nothing that reads entries sees one; no AI reads it; opened letters stay out of search and Insights in this version. Written from Me, opening one of monthChoices after the day it's written, in the person's saved zone (the server sets opens_on; clients read it, never compute it). Up to maxChars characters, never blank. Locked: no opened_at. While locked a client shows only its dates, never its text, and the text isn't sent to the client at all until it's opened. On its day (opens_on, or card_from after Not now) Today shows one card, oldest first: the date it was written, Open and Not now; Not now moves it notNowDays on, again each time. Open early is allowed, with a confirm. Delete with a confirm; no edit once saved. No crisis flag is stored: the current matcher runs on the text at saving (the help card opens) and on the opening day, where the text is read on the server (the help offer goes above the card; the card gets a yes or no, not the text). A hard last week puts the help offer above it too. Locked is a display rule, never encryption: no copy says sealed or secure, and the export has the text, marked.",
+  "rules": {
+    "monthChoices": [1, 3, 6, 12],
+    "maxChars": 20000,
+    "notNowDays": 7
+  }
+}

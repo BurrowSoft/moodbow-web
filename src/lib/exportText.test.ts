@@ -70,3 +70,53 @@ describe("export file names (decision 107)", () => {
     expect(renderExportText(doc, t)).toContain("Exported: 2026-10-19 20:15 UTC");
   });
 });
+
+// export-text.md at the app's 586c90e (025-027, 030): the edge rules the fixture doesn't reach,
+// each as the app's renderer (lib/data/export_text.dart) has it.
+describe("readable export: the 1.2 sections and Plus", () => {
+  const base = () => ({ format: "moodbow-export", format_version: 1, exported_at: "2026-11-12T10:00:00Z", account: { email: "a@example.com" } });
+  const render = (extra: Record<string, unknown>) => renderExportText({ ...base(), ...extra } as never, t);
+
+  it("things that help: one line each, a line break shown as a space", () => {
+    expect(render({ things_that_help: [{ text: "Walk\nslowly" }, { text: "Tea\r\nnow" }] })).toContain("Things that help me\n- Walk slowly\n- Tea now");
+  });
+
+  it("the safety plan: only the parts with something in them; nothing at all for an empty plan", () => {
+    const plan = { warning_signs: " \n\t", distractions: null, surroundings: "", people: [] };
+    expect(render({ safety_plan: plan })).not.toContain("My safety plan");
+    expect(render({ safety_plan: null })).not.toContain("My safety plan");
+    const text = render({ safety_plan: { ...plan, surroundings: "Keep the door open", people: [{ section: "professionals", name: "Dr Lee", phone: null }] } });
+    expect(text).toContain("My safety plan\nProfessionals and services\n- Dr Lee\n\nMaking my surroundings safer\nKeep the door open");
+    expect(text).not.toContain("Warning signs");
+    expect(text).not.toContain("People I can ask for help");
+  });
+
+  it("a phone is shown whenever it's a string, as the app reads it", () => {
+    expect(render({ safety_plan: { people: [{ section: "people", name: "Sam", phone: "" }] } })).toContain("- Sam · \n");
+  });
+
+  it("letters: a locked one marked with its opening day, an opened one plain; opened_at missing reads as locked", () => {
+    const text = render({
+      letters: [
+        { body: "Dear me,", written_on: "2026-10-02", opens_on: "2027-10-02", opened_at: null },
+        { body: "Hi", written_on: "2026-10-03", opens_on: "2026-11-03", opened_at: "2026-11-03T08:00:00Z" },
+        { body: "Later", written_on: "2026-10-04", opens_on: "2026-12-04" },
+      ],
+    });
+    expect(text).toContain("Letters to future me\n2026-10-02 (locked until 2027-10-02)\nDear me,\n\n2026-10-03\nHi\n\n2026-10-04 (locked until 2026-12-04)\nLater");
+  });
+
+  it("Plus (030) is JSON only: the text is the same with or without it", () => {
+    expect(render({ plus: { source: "stripe", status: "active", current_period_end: "2027-01-01T00:00:00Z" } })).toBe(render({}));
+  });
+
+  it("every language has the nine new keys", () => {
+    for (const locale of ["en", "fr", "es", "pt-br", "de", "it", "th"]) {
+      const m = JSON.parse(fs.readFileSync(path.join(process.cwd(), "src", "messages", `${locale}.json`), "utf8"));
+      for (const key of ["exportThingsThatHelp", "exportSafetyPlan", "exportPlanWarningSigns", "exportPlanDistractions", "exportPlanPeople", "exportPlanProfessionals", "exportPlanSurroundings", "exportLetters", "exportLetterLocked"]) {
+        expect(typeof m.export[key], `${locale}: ${key}`).toBe("string");
+      }
+      expect(m.export.exportLetterLocked, locale).toContain("{date}");
+    }
+  });
+});

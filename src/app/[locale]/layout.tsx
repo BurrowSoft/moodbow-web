@@ -12,6 +12,7 @@ import { LocalDataWipe } from "@/components/LocalDataWipe";
 import { CampaignLanding } from "@/components/CampaignLanding";
 import { VisitCounts } from "@/components/VisitCounts";
 import { THEME_PRE_PAINT } from "@/lib/appearance";
+import { PALETTE_PRE_PAINT } from "@/lib/plus/palettes";
 import { conditionMet } from "@/lib/conditions";
 import { NONCE_HEADER } from "@/lib/csp";
 import { RequestCountryProvider } from "@/components/RequestCountry";
@@ -70,7 +71,8 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
     <html lang={locale} className={fontVariables} suppressHydrationWarning>
       <head>
         {/* Me → Appearance on this device (decision 133), before first paint. */}
-        <script nonce={nonce} dangerouslySetInnerHTML={{ __html: THEME_PRE_PAINT }} />
+        {/* Plus's palette too, only until the date Plus runs to (lib/plus/palettes). */}
+        <script nonce={nonce} dangerouslySetInnerHTML={{ __html: `${THEME_PRE_PAINT}${PALETTE_PRE_PAINT}` }} />
       </head>
       <body className="flex min-h-dvh flex-col font-sans">
         <a

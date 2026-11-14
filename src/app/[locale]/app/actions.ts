@@ -4,10 +4,12 @@ import { getLocale } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
 import { checkInErrorAction, parseCheckIn, sameCheckIn, type CheckIn, type CheckInError } from "@/lib/journal/checkIn";
 import { readMe } from "@/lib/journal/me";
+import { parseTags } from "@/lib/journal/tags";
 import { isDeadlineError } from "@/lib/supabase/deadline";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
-export type CheckInState = { status: "idle" } | { status: "saved"; checkIn: CheckIn } | { status: "error"; error: CheckInError; checkIn?: CheckIn };
+// tags / tagsSaved: only when the save carried the day's tags (they changed).
+export type CheckInState = { status: "idle" } | { status: "saved"; checkIn: CheckIn; tags?: string[]; tagsSaved?: false } | { status: "error"; error: CheckInError; checkIn?: CheckIn };
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 const COLUMNS = "local_date, mood, sleep_hours, sleep_quality, exercise_minutes, stress, updated_at";
@@ -18,7 +20,25 @@ const COLUMNS = "local_date, mood, sleep_hours, sleep_quality, exercise_minutes,
 // meanwhile on another device a stale_write: the card then shows the latest
 // version and asks to retry. Without one, a day that already has a check-in
 // is a conflict: both versions go to the check-in conflict dialog.
-export async function saveCheckIn(_prev: CheckInState, form: FormData): Promise<CheckInState> {
+// With the day's tags when the form carries them (they changed; UX, 11 Nov):
+// checked before anything is sent, then set after the check-in in one call
+// (set_check_in_tags replaces the day's). The check-in stays saved if the
+// tags fail; the card says so under the field. Offline copies and Keep mine
+// carry them too, through this same function (api/check-in-sync).
+export async function saveCheckIn(prev: CheckInState, form: FormData): Promise<CheckInState> {
+  const tags = form.has("tags") ? parseTags(form.get("tags")) : undefined;
+  if (tags === null) return { status: "error", error: "invalid" };
+  const result = await saveCheckInValues(prev, form);
+  if (result.status !== "saved" || tags === undefined) return result;
+  const supabase = await createSupabaseServerClient();
+  if (!supabase) return { ...result, tagsSaved: false };
+  const { data, error } = await supabase.rpc("set_check_in_tags", { p_date: result.checkIn.local_date, p_tags: tags });
+  if (error) return { ...result, tagsSaved: false };
+  const saved = ((data ?? []) as { tag?: unknown }[]).map((r) => r.tag).filter((t): t is string => typeof t === "string");
+  return { ...result, tags: saved };
+}
+
+async function saveCheckInValues(_prev: CheckInState, form: FormData): Promise<CheckInState> {
   const input = parseCheckIn(form);
   if (!input) return { status: "error", error: "invalid" };
   const supabase = await createSupabaseServerClient();

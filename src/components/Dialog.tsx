@@ -21,6 +21,7 @@ export function Dialog({
   testId,
   initialFocus = "first",
   capText = false,
+  defaultColours = false,
 }: {
   title: string;
   body?: string;
@@ -35,6 +36,8 @@ export function Dialog({
   // on a narrow screen. The safety card only (UX & PM 2026-11-06): reaching help
   // justifies it there, and other dialogs open at their top and scroll.
   capText?: boolean;
+  // The default theme's colours whatever Plus palette is on (the help card: UX, 11 Nov).
+  defaultColours?: boolean;
 }) {
   const titleId = useId();
   const bodyId = useId();
@@ -106,7 +109,7 @@ export function Dialog({
   // the first help fits the first screen at large text (UX, #247). No smaller text, no new order. Its
   // corner is in px there: in rem it's 72 px at 300 %, and cut off the title's first letter (Web Tester).
   return createPortal(
-    <div className={`fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center ${capText ? "p-[max(4px,calc(32px-1rem))]" : "p-[16px]"}`}>
+    <div data-default-colours={defaultColours ? "" : undefined} className={`fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center ${capText ? "p-[max(4px,calc(32px-1rem))]" : "p-[16px]"}`}>
       <div
         ref={ref}
         role="dialog"

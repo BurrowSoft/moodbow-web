@@ -8,6 +8,12 @@ import fr from "@/messages/fr.json";
 import ptBr from "@/messages/pt-br.json";
 import { helpLineSize, helplinesFor, isIos, telHref } from "@/lib/safety/helplines";
 import { GetHelpNow, SafetyCard } from "./SafetyCard";
+import { Dialog } from "@/components/Dialog";
+// My safety plan (1.2): whether it has content, asked once the card is open.
+let planHas: boolean | "never" = false;
+vi.mock("@/app/[locale]/app/me/safety-plan/actions", () => ({
+  safetyPlanHasContent: () => (planHas === "never" ? new Promise(() => {}) : Promise.resolve(planHas)),
+}));
 import { RequestCountryProvider } from "./RequestCountry";
 import { usableCountry } from "@/lib/region/requestCountry";
 vi.mock("@/i18n/navigation", () => ({
@@ -175,9 +181,14 @@ describe("Get help now with or without the page's scripts (#248)", () => {
     wrap(<GetHelpNow country="GB" testId="me-get-help" />);
     const link = screen.getByTestId("me-get-help");
     expect(link.tagName).toBe("A");
-    expect(link.getAttribute("href")).toMatch(/\/help\/get-help-now$/);
+    expect(link.getAttribute("href")).toMatch(/\/help\/get-help-now\?country=GB$/);
     expect(fireEvent.click(link)).toBe(false);
     expect(screen.getByTestId("safety-card")).toBeInTheDocument();
+  });
+
+  it("with no country known, the link carries none", () => {
+    wrap(<GetHelpNow country={null} testId="me-get-help" />);
+    expect(screen.getByTestId("me-get-help").getAttribute("href")).toMatch(/\/help\/get-help-now$/);
   });
 
   it("a click asking for a new tab is left to the browser", () => {
@@ -264,6 +275,38 @@ describe("a line's hours are in the live languages", () => {
   });
 });
 
+describe("SafetyCard: My safety plan (1.2, the Reviewer's read)", () => {
+  it("with content: the button, below the helplines, and it closes the card on the way", async () => {
+    planHas = true;
+    const onClose = vi.fn();
+    wrap(<SafetyCard country="TH" onClose={onClose} />);
+    const button = await screen.findByTestId("safety-plan-button");
+    expect(button).toHaveTextContent(s.safetyPlanButton);
+    expect(button).toHaveAttribute("href", "/app/me/safety-plan");
+    for (const id of ["safety-call-helpline", "safety-call-emergency", "safety-find-helpline"]) {
+      expect(screen.getByTestId(id).compareDocumentPosition(button) & Node.DOCUMENT_POSITION_FOLLOWING, id).toBeTruthy();
+    }
+    fireEvent.click(button);
+    expect(onClose).toHaveBeenCalled();
+    planHas = false;
+  });
+
+  it("an empty plan: the card exactly as it was, no button", async () => {
+    planHas = false;
+    wrap(<SafetyCard country="TH" onClose={() => {}} />);
+    await Promise.resolve();
+    expect(screen.queryByTestId("safety-plan-button")).toBeNull();
+  });
+
+  it("help never waits on the plan: no answer yet, the helplines are already there", () => {
+    planHas = "never";
+    wrap(<SafetyCard country="TH" onClose={() => {}} />);
+    expect(screen.getByTestId("safety-call-helpline")).toBeInTheDocument();
+    expect(screen.queryByTestId("safety-plan-button")).toBeNull();
+    planHas = false;
+  });
+});
+
 describe("SafetyCard: a number to tap even with no profile country (UX, #269)", () => {
   const withRequest = (country: string | null, ui: React.ReactNode) => wrap(<RequestCountryProvider country={country}>{ui}</RequestCountryProvider>);
 
@@ -290,5 +333,130 @@ describe("SafetyCard: a number to tap even with no profile country (UX, #269)", 
 
   it("the header is used only as two letters", () => {
     expect([null, "", "th", "TH", "T1", "THA", "XX"].map(usableCountry)).toEqual([null, null, "TH", "TH", null, null, "XX"]);
+  });
+});
+
+// The help card keeps the default colours whatever Plus palette is on (UX, 11 Nov):
+// the palette CSS resets every token under [data-default-colours], so the overlay must carry it.
+describe("SafetyCard: the default colours under any palette (#277)", () => {
+  it("the help card's overlay carries data-default-colours", () => {
+    wrap(<SafetyCard country="TH" onClose={() => {}} />);
+    expect(screen.getByTestId("safety-card").closest("[data-default-colours]")).not.toBeNull();
+  });
+
+  it("another dialog doesn't: it takes the chosen palette", () => {
+    wrap(
+      <Dialog title={messages.me.meAppearance} onCancel={() => {}} testId="other-dialog">
+        <button type="button">{messages.me.cancel}</button>
+      </Dialog>,
+    );
+    expect(screen.getByTestId("other-dialog").closest("[data-default-colours]")).toBeNull();
+  });
+});
+
+// Today's standing help (UX & PM, 13 Nov; specs/1.2-features.md): a lifebuoy named with the
+// existing words, the same destination as Me's, quiet, 48 px.
+describe("Get help now as Today's lifebuoy (icon)", () => {
+  it("named and titled with the same words in each language, no new copy, and the picture hidden", () => {
+    for (const [locale, m] of [["en", messages], ["fr", fr], ["es", es], ["pt-br", ptBr]] as const) {
+      const { unmount } = render(
+        <NextIntlClientProvider locale={locale} messages={m}>
+          <GetHelpNow country="GB" testId="today-help" neutral icon />
+        </NextIntlClientProvider>,
+      );
+      const link = screen.getByTestId("today-help");
+      expect(link).toHaveAccessibleName(m.me.meGetHelpNow);
+      expect(link).toHaveAttribute("title", m.me.meGetHelpNow);
+      expect(link.textContent).toBe("");
+      expect(screen.getByTestId("lifebuoy-icon")).toHaveAttribute("aria-hidden", "true");
+      unmount();
+    }
+  });
+
+  it("the same destination as Me's: the help page with no scripts, the neutral card with them, focus back after", () => {
+    wrap(<GetHelpNow country="TH" testId="today-help" neutral icon />);
+    const link = screen.getByTestId("today-help");
+    expect(link.tagName).toBe("A");
+    // Me's link carries the country (#250), so the lifebuoy's does too.
+    expect(link.getAttribute("href")).toMatch(/\/help\/get-help-now\?country=TH$/);
+    link.focus();
+    expect(fireEvent.click(link)).toBe(false);
+    expect(screen.getByTestId("safety-card")).toHaveTextContent(s.safetyBodyNeutral);
+    expect(screen.getByTestId("safety-call-helpline")).toHaveTextContent("1323");
+    fireEvent.click(screen.getByTestId("safety-close"));
+    expect(screen.queryByTestId("safety-card")).toBeNull();
+    expect(link).toHaveFocus();
+  });
+
+  it("a click asking for a new tab is left to the browser", () => {
+    wrap(<GetHelpNow country="GB" testId="today-help" neutral icon />);
+    const link = screen.getByTestId("today-help");
+    link.addEventListener("click", (e) => e.preventDefault());
+    fireEvent.click(link, { ctrlKey: true });
+    expect(screen.queryByTestId("safety-card")).toBeNull();
+  });
+
+  it("quiet and a fixed 48 px: no accent, no border, no banner colour; px, so large text doesn't grow it", () => {
+    wrap(<GetHelpNow country="GB" testId="today-help" neutral icon />);
+    const link = screen.getByTestId("today-help");
+    expect(link.className).toContain("h-[48px]");
+    expect(link.className).toContain("w-[48px]");
+    expect(link.className).toContain("shrink-0");
+    expect(link.className).toContain("text-muted");
+    expect(link.className).not.toMatch(/bg-accent|text-accent|border|bg-danger|text-danger|red/);
+  });
+});
+
+// Bo's card (UX, 2026-11-09; app #228): the country the server verified first, where the person
+// is, and Me's numbers below when they differ, each set under its country's name.
+describe("SafetyCard: where the person is, then Me's (Bo's help_country)", () => {
+  const withRequest = (country: string | null, ui: React.ReactNode) => wrap(<RequestCountryProvider country={country}>{ui}</RequestCountryProvider>);
+  const before = (a: HTMLElement, b: HTMLElement) => Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
+
+  it("verified TH, Me's NZ: Thailand's numbers first, then New Zealand's, each named once", () => {
+    wrap(<SafetyCard country="NZ" where="TH" onClose={() => {}} />);
+    expect(screen.getByTestId("safety-country")).toHaveTextContent("Thailand");
+    expect(screen.getByTestId("safety-call-helpline")).toHaveAttribute("href", "tel:1323");
+    expect(screen.getByTestId("safety-call-emergency")).toHaveAttribute("href", "tel:1669");
+    expect(screen.getByTestId("safety-also-country")).toHaveTextContent("New Zealand");
+    expect(screen.getByTestId("safety-also-call-helpline")).toHaveAttribute("href", "tel:1737");
+    expect(screen.getByTestId("safety-also-call-emergency")).toHaveAttribute("href", "tel:111");
+    expect(before(screen.getByTestId("safety-call-emergency"), screen.getByTestId("safety-also-country"))).toBe(true);
+    expect(screen.getAllByRole("heading", { level: 3 })).toHaveLength(2);
+    expect(screen.queryByTestId("safety-request-country")).toBeNull();
+  });
+
+  it("the same country: one set, unnamed, as without Bo", () => {
+    wrap(<SafetyCard country="th" where="TH" onClose={() => {}} />);
+    expect(screen.getByTestId("safety-call-helpline")).toHaveAttribute("href", "tel:1323");
+    expect(screen.queryByTestId("safety-country")).toBeNull();
+    expect(screen.queryByTestId("safety-also")).toBeNull();
+  });
+
+  it("a verified country with no numbers at all: Me's alone, never an empty set", () => {
+    wrap(<SafetyCard country="NZ" where="ZZ" onClose={() => {}} />);
+    expect(screen.getByTestId("safety-call-helpline")).toHaveAttribute("href", "tel:1737");
+    expect(screen.queryByTestId("safety-country")).toBeNull();
+    expect(screen.queryByTestId("safety-also")).toBeNull();
+  });
+
+  it("no verified country: as before", () => {
+    wrap(<SafetyCard country="NZ" where={null} onClose={() => {}} />);
+    expect(screen.getByTestId("safety-call-helpline")).toHaveAttribute("href", "tel:1737");
+    expect(screen.queryByTestId("safety-also")).toBeNull();
+  });
+
+  it("no profile country: the request's stands in for Me's, below the verified one", () => {
+    withRequest("NZ", <SafetyCard country={null} where="TH" onClose={() => {}} />);
+    expect(screen.getByTestId("safety-call-helpline")).toHaveAttribute("href", "tel:1323");
+    expect(screen.getByTestId("safety-also-country")).toHaveTextContent("New Zealand");
+    expect(screen.queryByTestId("safety-request-country")).toBeNull();
+  });
+
+  it("verified, with no country of Me's at all: the verified set alone, unnamed", () => {
+    withRequest(null, <SafetyCard country={null} where="TH" onClose={() => {}} />);
+    expect(screen.getByTestId("safety-call-helpline")).toHaveAttribute("href", "tel:1323");
+    expect(screen.queryByTestId("safety-country")).toBeNull();
+    expect(screen.queryByTestId("safety-also")).toBeNull();
   });
 });

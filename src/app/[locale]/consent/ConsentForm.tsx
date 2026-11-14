@@ -51,13 +51,14 @@ export function ConsentForm({ askAge, askAi = false, showBack }: { askAge: boole
     // word may still split. Nothing is cut off: the page still scrolls, and pinch zoom stays on.
     <form action={action} className="space-y-[16px] max-sm:[font-size:min(1rem,max(10vw,32px))]">
       <Checkbox name="privacy" testId="consent-privacy" label={t("consentPrivacy")} checked={privacy} onChange={setPrivacy} />
-      <p className="flex flex-wrap gap-x-[24px] gap-y-[4px] px-[4px] leading-[1.429] [font-size:min(0.875rem,max(8.75vw,28px))]">
-        <Link href="/terms" target="_blank" rel="noopener" data-testid="consent-read-terms" className={textLinkClass}>
+      {/* Each link is a 44 px tall tap area (Web Tester batch E), so wrapped rows need no gap of their own. */}
+      <p className="flex flex-wrap gap-x-[24px] px-[4px] leading-[1.429] [font-size:min(0.875rem,max(8.75vw,28px))]">
+        <Link href="/terms" target="_blank" rel="noopener" data-testid="consent-read-terms" className={`${textLinkClass} inline-flex min-h-11 items-center`}>
           {t("consentReadTerms")}
           {" "}
           <span className="sr-only">{tc("opensInNewTab")}</span>
         </Link>
-        <Link href="/privacy" target="_blank" rel="noopener" data-testid="consent-read-privacy" className={textLinkClass}>
+        <Link href="/privacy" target="_blank" rel="noopener" data-testid="consent-read-privacy" className={`${textLinkClass} inline-flex min-h-11 items-center`}>
           {t("consentReadPrivacy")}
           {" "}
           <span className="sr-only">{tc("opensInNewTab")}</span>
