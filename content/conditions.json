@@ -225,7 +225,7 @@
   },
   "letters-live": {
     "met": false,
-    "what": "1.2: Letters to future me (specs/1.2-features.md §3, content/letters.json): Me's letters, Today's card on the day, and the Timeline's locked line. Part of Moodbow Plus from the day they ship (1.3 §3, UX 14 Nov): on only together with plus (lib/plus/letters.ts lettersGate), and writing a new letter is checked on the server. Needs migration 027 on Production (Vitor), the Reviewer's read, the tester rows and Vitor's look."
+    "what": "1.2: Letters to future me (specs/1.2-features.md §3, content/letters.json): Me's letters, Today's card on the day, and the Timeline's locked line. Part of Moodbow Plus from the day they ship (1.3 §3, UX 14 Nov): on only together with plus (lib/plus/letters.ts lettersGate), and writing a new letter is checked on the server. With reminders (#319): moodbow-app migrations 027, 032 and 033 must all be on Production before this is met. Needs migration 027 on Production (Vitor), the Reviewer's read, the tester rows and Vitor's look."
   },
   "app-letters": {
     "met": false,

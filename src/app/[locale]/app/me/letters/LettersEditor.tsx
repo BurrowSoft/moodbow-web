@@ -73,7 +73,12 @@ export function LettersEditor({
     if (!remindersValid(reminders, today, opensOn(today, months))) return setBadReminders(true);
     setBadReminders(false);
     const before = new Set(letters.map((l) => l.id));
-    const result: LetterResult | null = await run(saveLetter(body, months, reminders));
+    // Only reminders that differ from the default travel (p_reminders): a database without 033 has
+    // no such argument, and the default is what it does anyway (the Reviewer, #319).
+    const custom = JSON.stringify(reminders) !== JSON.stringify(DEFAULT_REMINDERS);
+    const result: LetterResult | null = await run(custom ? saveLetter(body, months, reminders) : saveLetter(body, months));
+    // The server's own check (its today can differ from the page's near midnight): the same line.
+    if (result?.status === "invalid_reminders") return setBadReminders(true);
     // Plus ended and its one save is used: keep the text on screen to copy.
     if (result?.status === "plus_required") return setLapsed(true);
     if (result?.status !== "ok") return setFailed(true);

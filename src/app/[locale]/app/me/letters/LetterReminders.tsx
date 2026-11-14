@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { headsUpFits, MAX_HEADS_UPS, QUICK_DAYS, type LetterReminder } from "@/lib/journal/letterReminders";
 
@@ -10,6 +11,9 @@ const field = "rounded-xl border border-border bg-surface px-[8px] py-[6px] text
 
 export function LetterReminders({ value, onChange, today, opens }: { value: LetterReminder[]; onChange: (next: LetterReminder[]) => void; today: string; opens: string }) {
   const t = useTranslations("letters");
+  // A typed number applies when the field is left; one that doesn't fit (taken, or on or before
+  // today) goes back to what it was, and the line under it says why (the Reviewer, #319).
+  const [misfit, setMisfit] = useState(false);
   const day = value.find((r) => r.days_before === 0) ?? { days_before: 0, time: "09:00", on: true };
   const heads = value.filter((r) => r.days_before > 0);
   const set = (next: LetterReminder[]) => onChange([...next].sort((a, b) => a.days_before - b.days_before));
@@ -35,14 +39,22 @@ export function LetterReminders({ value, onChange, today, opens }: { value: Lett
             <input type="checkbox" checked={r.on} onChange={(e) => update(r.days_before, { on: e.target.checked })} aria-label={t("remindersOnFor", { when: daysLabel(r.days_before) })} data-testid="letter-reminder-on" />
           </label>
           <input
+            key={r.days_before}
             type="number"
             min={1}
             max={Math.max(1, Math.min(366, Math.round((Date.parse(`${opens}T00:00:00Z`) - Date.parse(`${today}T00:00:00Z`)) / 86_400_000) - 1))}
-            value={r.days_before}
+            defaultValue={r.days_before}
             aria-label={t("remindersDaysBefore")}
-            onChange={(e) => {
+            onBlur={(e) => {
               const n = Number(e.target.value);
-              if (headsUpFits(n, today, opens) && !others(r.days_before).some((o) => o.days_before === n)) set([...others(r.days_before), { ...r, days_before: n }]);
+              if (n === r.days_before) return;
+              if (headsUpFits(n, today, opens) && !others(r.days_before).some((o) => o.days_before === n)) {
+                setMisfit(false);
+                set([...others(r.days_before), { ...r, days_before: n }]);
+              } else {
+                e.target.value = String(r.days_before);
+                setMisfit(true);
+              }
             }}
             data-testid="letter-reminder-days"
             className={`${field} w-[5em]`}
@@ -60,6 +72,11 @@ export function LetterReminders({ value, onChange, today, opens }: { value: Lett
         <button type="button" onClick={() => set([...value, { days_before: free, time: day.time, on: true }])} data-testid="letter-reminder-add" className="inline-flex min-h-11 w-fit items-center font-medium text-accent underline underline-offset-4">
           {t("remindersAdd")}
         </button>
+      )}
+      {misfit && (
+        <p role="alert" data-testid="letter-reminder-misfit" className="text-sm text-text">
+          {t("remindersInvalid")}
+        </p>
       )}
       <p className="text-sm text-muted">{t("remindersApp")}</p>
     </fieldset>

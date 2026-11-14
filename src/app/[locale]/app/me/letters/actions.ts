@@ -10,7 +10,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 // back is the client's view: a locked letter's text never leaves the server.
 // Part of Moodbow Plus (1.3 §3): only saving a new letter checks Plus, here on the server.
 // Open, Not now, delete and the list never do: someone's own words are never held back.
-export type LetterResult = { status: "ok"; letters: Letter[] } | { status: "error" } | { status: "plus_required" };
+export type LetterResult = { status: "ok"; letters: Letter[] } | { status: "error" } | { status: "plus_required" } | { status: "invalid_reminders" };
 export type OpenResult = { status: "ok"; body: string } | { status: "error" };
 
 async function client() {
@@ -61,7 +61,12 @@ export async function saveLetter(body: string, months: LetterMonths, reminders?:
     ...(reminders ? { p_reminders: reminders.map(({ days_before, time, on }) => ({ days_before, time, on })) } : {}),
   });
   // The database's own check (032: RAISE 'plus_required') says the same as the one above.
-  if (error) return error.message?.includes("plus_required") ? { status: "plus_required" } : { status: "error" };
+  if (error) {
+    if (error.message?.includes("plus_required")) return { status: "plus_required" };
+    // 033's check refused the reminders (invalid_value): say so, as the editor does.
+    if (reminders && error.message?.includes("invalid_value")) return { status: "invalid_reminders" };
+    return { status: "error" };
+  }
   return list(supabase);
 }
 

@@ -56,7 +56,8 @@ describe("LettersEditor", () => {
     fireEvent.change(screen.getByTestId("letter-text"), { target: { value: "Dear me, hello." } });
     fireEvent.click(screen.getByTestId("letter-months-6"));
     await act(async () => fireEvent.click(screen.getByTestId("letter-save")));
-    expect(save).toHaveBeenCalledWith("Dear me, hello.", 6, [{ days_before: 0, time: "09:00", on: true }]);
+    // The default reminders don't travel (a database without 033 has no p_reminders).
+    expect(save).toHaveBeenCalledWith("Dear me, hello.", 6);
     expect(screen.getByTestId("letter-saved")).toHaveTextContent(m.savedLine.replace("{date}", dateLine("2027-05-09", TAG)));
     expect(screen.getByTestId("letter-text")).toHaveValue("");
   });
@@ -106,7 +107,7 @@ describe("LettersEditor", () => {
     fireEvent.change(screen.getByTestId("letter-text"), { target: { value: `Dear me, ${phrase}` } });
     await act(async () => fireEvent.click(screen.getByTestId("letter-save")));
     expect(screen.getByTestId("safety-card")).toBeInTheDocument();
-    expect(save).toHaveBeenCalledWith(`Dear me, ${phrase}`, 1, [{ days_before: 0, time: "09:00", on: true }]);
+    expect(save).toHaveBeenCalledWith(`Dear me, ${phrase}`, 1);
   });
 });
 
@@ -221,6 +222,7 @@ describe("LettersEditor: reminders, like alarms (Vitor, 14 Nov; 033)", () => {
     fireEvent.click(screen.getByTestId("letter-months-12"));
     fireEvent.click(screen.getByTestId("letter-reminder-add"));
     fireEvent.change(screen.getByTestId("letter-reminder-days"), { target: { value: "60" } });
+    fireEvent.blur(screen.getByTestId("letter-reminder-days"));
     fireEvent.click(screen.getByTestId("letter-months-1"));
     fireEvent.change(screen.getByTestId("letter-text"), { target: { value: "Dear me." } });
     await act(async () => fireEvent.click(screen.getByTestId("letter-save")));
