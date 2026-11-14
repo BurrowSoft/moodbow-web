@@ -6,7 +6,8 @@ import type { CheckIn } from "./checkIn";
 
 export const TIMELINE_PAGE_DAYS = 30;
 
-export type TimelineEntry = { id: string; preview: string; is_moment: boolean; created_at: string; updated_at: string };
+// thumbs (035, where pictures-live is on): the entry's picture thumbnails, signed URLs of 5 minutes.
+export type TimelineEntry = { id: string; preview: string; is_moment: boolean; created_at: string; updated_at: string; thumbs?: string[] };
 export type TimelineDay = { local_date: string; check_in: CheckIn | null; entries: TimelineEntry[]; entry_count: number };
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;

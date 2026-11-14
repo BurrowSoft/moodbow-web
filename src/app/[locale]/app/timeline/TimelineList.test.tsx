@@ -297,3 +297,20 @@ describe("Print this month: the click asks for the dialog once", () => {
     }
   });
 });
+
+// Pictures (035; board 15): an entry's thumbnails under its text, a group named by their count,
+// plain img from signed URLs; none, no strip.
+describe("TimelineList: the pictures strip", () => {
+  it("64 px thumbnails in a group named by their count; an entry without pictures has none", () => {
+    const withPictures: TimelineDay[] = [{ ...days[0], entries: [{ ...ENTRY, thumbs: ["https://signed.example/a_t.jpg", "https://signed.example/b_t.jpg"] }, { ...ENTRY, id: "e2", preview: "Later.", is_moment: false }] }];
+    renderList({ initial: withPictures });
+    const strip = screen.getByTestId("timeline-pictures");
+    expect(strip).toHaveAttribute("role", "group");
+    expect(strip).toHaveAccessibleName("2 pictures");
+    const imgs = within(strip).getAllByTestId("timeline-picture");
+    expect(imgs.map((i) => i.getAttribute("src"))).toEqual(["https://signed.example/a_t.jpg", "https://signed.example/b_t.jpg"]);
+    // The photos are content (the Reviewer): each named "Picture n of total".
+    expect(imgs.map((i) => i.getAttribute("alt"))).toEqual(["Picture 1 of 2", "Picture 2 of 2"]);
+    expect(screen.getAllByTestId("timeline-pictures")).toHaveLength(1);
+  });
+});

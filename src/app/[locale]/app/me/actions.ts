@@ -11,6 +11,7 @@ import { isCountry, isTimeZoneName } from "@/lib/region/countries";
 import { dataLocale, offeredLocales } from "@/i18n/routing";
 import { WIPE_COOKIE, WIPE_COOKIE_OPTIONS } from "@/lib/supabase/proxy";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { PICTURES } from "@/lib/journal/pictures";
 
 // Me → Sign out: this browser only (the app stays signed in).
 export async function signOut(): Promise<void> {
@@ -40,6 +41,35 @@ export async function exportMyData(): Promise<ExportResult> {
   // bug). The text's "Exported: … UTC" line stays UTC.
   const zone = (data as { profile?: { time_zone?: unknown } }).profile?.time_zone;
   return { status: "ok", json: JSON.stringify(data), date: localDay(exportedAt, typeof zone === "string" ? zone : "UTC") };
+}
+
+export type ExportPicture = { entry_id: string; id: string; url: string };
+export type ExportPicturesResult = { status: "ok"; pictures: ExportPicture[] } | { status: "error" };
+
+// Export my data, the pictures (035): every confirmed picture of the person's (RLS), each with a
+// fresh signed URL of 5 minutes for the browser to fetch and zip. Never a path in the zip's names
+// (pictures/<entry_id>/<picture_id>.jpg) and never stored anywhere on the way.
+// Whatever pictures-live says (the Reviewer, #322): a switch turned off must never leave someone's
+// own photos out of their export. Called only when the export's JSON lists pictures.
+export async function exportPictureUrls(): Promise<ExportPicturesResult> {
+  const supabase = await createSupabaseServerClient();
+  if (!supabase) return { status: "error" };
+  const { data, error } = await supabase.from("entry_pictures").select("id, entry_id, path").order("created_at");
+  if (error || !Array.isArray(data)) return { status: "error" };
+  const rows = data as { id: string; entry_id: string; path: string }[];
+  const out: ExportPicture[] = [];
+  for (let i = 0; i < rows.length; i += 100) {
+    const batch = rows.slice(i, i + 100);
+    const signed = await supabase.storage.from(PICTURES.bucket).createSignedUrls(batch.map((r) => r.path), PICTURES.signedSeconds);
+    if (signed.error || !signed.data) return { status: "error" };
+    const url = new Map(signed.data.filter((s) => s.path && s.signedUrl).map((s) => [s.path as string, s.signedUrl]));
+    for (const r of batch) {
+      const u = url.get(r.path);
+      if (!u) return { status: "error" };
+      out.push({ entry_id: r.entry_id, id: r.id, url: u });
+    }
+  }
+  return { status: "ok", pictures: out };
 }
 
 export type DeleteAccountState = { status: "idle" } | { status: "error"; error: "confirm" | "generic" | "plus_cancelled" };

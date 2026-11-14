@@ -7,8 +7,9 @@ import { ENTITLEMENT_COLUMNS, parseEntitlement, type EntitlementRow } from "./en
 // (lib/supabase/server.ts). Limits:
 // - Imported only by src/app/api/webhooks/stripe and src/app/api/cron/*
 //   (serviceRole.imports.test.ts fails on any other importer).
-// - It reaches two tables only, entitlements and stripe_cancel_queue, through
-//   the functions below; the client itself is never exported.
+// - It reaches entitlements, stripe_cancel_queue and (035) picture_deletions plus the
+//   entry-pictures bucket's queued files, through the functions below; the client itself
+//   is never exported.
 // - SUPABASE_SERVICE_ROLE_KEY is never NEXT_PUBLIC_: staging's on Preview,
 //   prod's on Production at launch (Vitor sets both).
 
@@ -97,4 +98,43 @@ export async function clearCancelQueue(subscriptionId: string): Promise<boolean>
   if (!client) return false;
   const { error } = await client.from("stripe_cancel_queue").delete().eq("store_subscription_id", subscriptionId);
   return !error;
+}
+
+// Pictures for moments (035): files whose rows are gone (a picture removed, its entry or the
+// account deleted, a reservation never confirmed) wait in picture_deletions until the Storage API
+// deletes them. Oldest first, a batch at a time.
+export type QueuedPicture = { id: number; user_id: string; path: string; attempts: number };
+export async function readPictureQueue(limit: number): Promise<Result<QueuedPicture[]>> {
+  const client = db();
+  if (!client) return fail;
+  const { data, error } = await client.from("picture_deletions").select("id, user_id, path, attempts").order("queued_at").limit(limit);
+  if (error) return fail;
+  const rows: QueuedPicture[] = [];
+  for (const r of (data ?? []) as Partial<QueuedPicture>[]) {
+    if (typeof r.id === "number" && typeof r.user_id === "string" && typeof r.path === "string" && typeof r.attempts === "number") rows.push(r as QueuedPicture);
+  }
+  return { ok: true, value: rows };
+}
+// Deletes these files from the private bucket. A file already gone counts as deleted (the API
+// answers without an error and simply lists fewer): the queue may run twice.
+export async function removePictureFiles(paths: string[]): Promise<boolean> {
+  const client = db();
+  if (!client) return false;
+  if (paths.length === 0) return true;
+  const { error } = await client.storage.from("entry-pictures").remove(paths);
+  return !error;
+}
+export async function clearPictureQueue(ids: number[]): Promise<boolean> {
+  const client = db();
+  if (!client) return false;
+  if (ids.length === 0) return true;
+  const { error } = await client.from("picture_deletions").delete().in("id", ids);
+  return !error;
+}
+// A failed try: counted, and left queued for the next run.
+export async function failPictureQueue(rows: Pick<QueuedPicture, "id" | "attempts">[]): Promise<void> {
+  const client = db();
+  if (!client) return;
+  const at = new Date().toISOString();
+  for (const r of rows) await client.from("picture_deletions").update({ attempts: r.attempts + 1, last_failed_at: at }).eq("id", r.id);
 }

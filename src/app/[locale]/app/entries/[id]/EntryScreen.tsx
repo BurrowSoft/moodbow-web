@@ -18,6 +18,9 @@ import { deleteEntry, saveEntry, type DeleteState } from "../actions";
 import { deletedRedirect, EntryEditor, hasDraft, type EditorStart } from "../EntryEditor";
 import { useAnnounce, useFocusTitleAfterLeaving } from "../../Announcer";
 import { ReflectPanel } from "../ReflectPanel";
+import type { EntryPicture } from "@/lib/journal/pictures";
+import { EntryPictures } from "./EntryPictures";
+import { deletePicture } from "./pictureActions";
 
 // The entry view (decision 151, the same layout as the app): a top bar with
 // Back, the ★ moment toggle and ⋯ (Edit, Delete); the date; that day's
@@ -39,6 +42,9 @@ type Props = {
   country?: string | null;
   // null: no Reflect (AI off, not consented, or its reflection unreadable).
   reflect: { initial: Reflection | null; balance: number } | null;
+  // Pictures (035), only where pictures-live is on: this entry's own, and whether adding is open
+  // (true: Plus; false: no Plus, a lock to the Plus screen; null: Plus off or unreadable, no add).
+  pictures?: { list: EntryPicture[]; plus: boolean | null };
 };
 
 type Mode = { kind: "view" } | { kind: "edit"; start: EditorStart };
@@ -74,7 +80,7 @@ function caretOffset(el: HTMLElement, x: number, y: number): number | "end" {
   return at;
 }
 
-function Screen({ entry: initial, checkIn, from, backLabel, dateLocaleTag, uid, today, country, reflect, startEditing }: Props & { startEditing: boolean }) {
+function Screen({ entry: initial, checkIn, from, backLabel, dateLocaleTag, uid, today, country, reflect, pictures: picturesIn, startEditing }: Props & { startEditing: boolean }) {
   const t = useTranslations("entry");
   const tt = useTranslations("today");
   const locale = useLocale();
@@ -89,6 +95,10 @@ function Screen({ entry: initial, checkIn, from, backLabel, dateLocaleTag, uid, 
   const [menu, setMenu] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [momentFailed, setMomentFailed] = useState(false);
+  const [pictures, setPictures] = useState<EntryPicture[]>(picturesIn?.list ?? []);
+  // Unstarring a moment with pictures asks first (spec): keep them on the entry, or delete them.
+  const [askPictures, setAskPictures] = useState(false);
+  const [deletingPictures, setDeletingPictures] = useState(false);
   const savingMoment = useRef(false);
   const heading = useRef<HTMLHeadingElement>(null);
   const more = useRef<HTMLButtonElement>(null);
@@ -123,6 +133,25 @@ function Screen({ entry: initial, checkIn, from, backLabel, dateLocaleTag, uid, 
   // ★: saved straight away; a failed save puts it back and offers Try
   // again (decision 111). Another device's newer version wins the view.
   const toggleMoment = async () => {
+    if (savingMoment.current) return;
+    if (entry.is_moment && pictures.length > 0) return setAskPictures(true);
+    await saveMoment();
+  };
+  const unstarDeleting = async () => {
+    setDeletingPictures(true);
+    let left = pictures;
+    for (const p of pictures) {
+      const result = await deletePicture(p.id).catch(() => null);
+      if (result?.status === "ok") left = left.filter((x) => x.id !== p.id);
+    }
+    setPictures(left);
+    setDeletingPictures(false);
+    setAskPictures(false);
+    // Every picture gone: unstarred. One that wouldn't go: still a moment, and it says so.
+    if (left.length === 0) await saveMoment();
+    else setMomentFailed(true);
+  };
+  const saveMoment = async () => {
     if (savingMoment.current) return;
     savingMoment.current = true;
     setMomentFailed(false);
@@ -299,6 +328,29 @@ function Screen({ entry: initial, checkIn, from, backLabel, dateLocaleTag, uid, 
       >
         {entry.body}
       </div>
+
+      {/* Pictures (035; board 20): under the text. Adding only on a moment, with Plus. */}
+      {picturesIn && (
+        <EntryPictures
+          entryId={entry.id}
+          pictures={pictures}
+          onChange={setPictures}
+          add={!entry.is_moment || picturesIn.plus === null ? "none" : picturesIn.plus ? "open" : "locked"}
+        />
+      )}
+      {askPictures && (
+        <Dialog title={t("momentPicturesTitle")} body={t("momentPicturesBody")} onCancel={() => setAskPictures(false)} testId="entry-moment-pictures">
+          <button type="button" data-testid="unstar-keep-pictures" disabled={deletingPictures} className={dialogButton()} onClick={() => {
+            setAskPictures(false);
+            void saveMoment();
+          }}>
+            {t("momentPicturesKeep")}
+          </button>
+          <button type="button" data-testid="unstar-delete-pictures" disabled={deletingPictures} className={dialogButton(true)} onClick={() => void unstarDeleting()}>
+            {t("momentPicturesDelete")}
+          </button>
+        </Dialog>
+      )}
 
       {reflect && (
         <ReflectPanel entryId={entry.id} initial={reflect.initial} balance={reflect.balance} country={country} onAnswer={(question) => edit({ at: "end", question })} />

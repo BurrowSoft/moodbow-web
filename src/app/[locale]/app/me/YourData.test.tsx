@@ -5,9 +5,11 @@ import messages from "@/messages/en.json";
 
 const exportMyData = vi.fn();
 const deleteMyAccount = vi.fn();
+const exportPictureUrls = vi.fn();
 vi.mock("./actions", () => ({
   exportMyData: (...a: unknown[]) => exportMyData(...a),
   deleteMyAccount: (...a: unknown[]) => deleteMyAccount(...a),
+  exportPictureUrls: (...a: unknown[]) => exportPictureUrls(...a),
 }));
 // The export's wait, shortened (45 s in the app; withTimeout.test pins it).
 vi.mock("@/i18n/navigation", () => ({
@@ -84,6 +86,44 @@ describe("YourData: export", () => {
     fireEvent.click(screen.getByTestId("me-export"));
     expect(await screen.findByRole("link", { name: m.exportData })).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: m.exportCsv })).toBeNull();
+  });
+
+  it("pictures (035): a zip with the data file and pictures/<entry>/<picture>.jpg, fetched through fresh signed URLs", async () => {
+    const doc = { format: "moodbow-export", format_version: 1, exported_at: "2026-10-02T09:30:00Z", account: { email: "a@b.co" }, check_ins: [], entries: [{ id: "e2", entry_date: "2026-10-02", body: "A walk.", is_moment: true, created_at: "2026-10-02T02:00:00+00:00", updated_at: "2026-10-02T02:00:00+00:00", pictures: [{ id: "p1", created_at: "2026-10-02T02:05:00+00:00", width: 2048, height: 1536 }] }] };
+    exportMyData.mockResolvedValue({ status: "ok", json: JSON.stringify(doc), date: "2026-10-02" });
+    exportPictureUrls.mockResolvedValue({ status: "ok", pictures: [{ entry_id: "e2", id: "p1", url: "https://signed.example/p1" }] });
+    const fetchMock = vi.fn(async () => ({ ok: true, arrayBuffer: async () => new Uint8Array([0xff, 0xd8, 0xff, 0xd9]).buffer }));
+    vi.stubGlobal("fetch", fetchMock);
+    const blobs: Blob[] = [];
+    (URL.createObjectURL as unknown as ReturnType<typeof vi.fn>).mockImplementation((b: Blob) => (blobs.push(b), `blob:${blobs.length}`));
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <YourData credits={0} uid={UID} pictures />
+      </NextIntlClientProvider>,
+    );
+    fireEvent.click(screen.getByTestId("me-export"));
+    await waitFor(() => expect(screen.getByTestId("me-export-zip")).toBeInTheDocument());
+    expect(screen.getByTestId("me-export-zip")).toHaveAttribute("download", "moodbow-export-2026-10-02.zip");
+    expect(fetchMock).toHaveBeenCalledWith("https://signed.example/p1");
+    const zip = new Uint8Array(await blobs.at(-1)!.arrayBuffer());
+    const { unzipSync } = await import("fflate");
+    expect(Object.keys(unzipSync(zip)).sort()).toEqual(["moodbow-export-2026-10-02.json", "pictures/e2/p1.jpg"]);
+    vi.unstubAllGlobals();
+  });
+
+  it("pictures that can't be zipped: the other files stand, and it says so; no pictures, no zip", async () => {
+    const doc = { format: "moodbow-export", format_version: 1, exported_at: "2026-10-02T09:30:00Z", account: { email: "a@b.co" }, check_ins: [], entries: [{ id: "e2", entry_date: "2026-10-02", body: "A walk.", is_moment: true, created_at: "2026-10-02T02:00:00+00:00", updated_at: "2026-10-02T02:00:00+00:00", pictures: [{ id: "p1", created_at: "2026-10-02T02:05:00+00:00", width: 2048, height: 1536 }] }] };
+    exportMyData.mockResolvedValue({ status: "ok", json: JSON.stringify(doc), date: "2026-10-02" });
+    exportPictureUrls.mockResolvedValue({ status: "error" });
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <YourData credits={0} uid={UID} pictures />
+      </NextIntlClientProvider>,
+    );
+    fireEvent.click(screen.getByTestId("me-export"));
+    await waitFor(() => expect(screen.getByTestId("me-export-zip-failed")).toHaveTextContent(m.exportZipFailed));
+    expect(screen.getByTestId("me-export-json")).toBeInTheDocument();
+    expect(screen.queryByTestId("me-export-zip")).toBeNull();
   });
 
   it("a format the renderer doesn't know: the data file alone (no partial text)", async () => {

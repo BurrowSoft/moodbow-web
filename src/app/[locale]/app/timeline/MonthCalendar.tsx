@@ -32,12 +32,15 @@ export function MonthCalendar({
   initial,
   shareable,
   printable = false,
+  picturesKey = false,
 }: {
   today: string;
   dateLocaleTag: string;
   initial: CalendarMonth | null;
   shareable: boolean;
   printable?: boolean;
+  // Pictures (035): the key gains the camera where pictures-live is on.
+  picturesKey?: boolean;
 }) {
   const t = useTranslations("timeline");
   const tt = useTranslations("today");
@@ -167,6 +170,7 @@ export function MonthCalendar({
                   <span>{dayNumber(date, dateLocaleTag)}</span>
                   <span className="flex h-[9px] items-center gap-0.5" aria-hidden="true">
                     {day?.entry && <PencilIcon testId="calendar-entry" />}
+                    {day?.pictures && <CameraIcon testId="calendar-pictures" />}
                   </span>
                 </>
               );
@@ -194,6 +198,7 @@ export function MonthCalendar({
                         mood: day?.mood != null ? tt(`mood${day.mood}` as "mood1") : "none",
                         moment: day?.moment ? "yes" : "no",
                         entry: day?.entry ? "yes" : "no",
+                        pictures: day?.pictures ? "yes" : "no",
                       })}
                       className={`${cell} text-text hover:bg-pill ${date === today ? "outline outline-1 outline-text" : ""}`}
                     >
@@ -213,6 +218,13 @@ export function MonthCalendar({
           <PencilIcon />
           {t("calKeyWriting")}
         </li>
+        {/* Pictures (035): its key only where pictures can exist. */}
+        {picturesKey && (
+          <li className="inline-flex items-center gap-1">
+            <CameraIcon />
+            {t("calKeyPictures")}
+          </li>
+        )}
       </ul>
 
       {load.kind === "error" && (
@@ -246,6 +258,16 @@ export function MonthCalendar({
 
 // The tiny mark, ~9 px: a pencil in text ink for writing. Decorative here (aria-hidden); the day's
 // name and the key say it in words.
+// The pictures mark (035), the same size and ink.
+function CameraIcon({ testId }: { testId?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" width="9" height="9" aria-hidden="true" data-testid={testId} className="shrink-0 text-text" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 8h4l2-3h6l2 3h4v12H3z" />
+      <circle cx="12" cy="13.5" r="3.5" />
+    </svg>
+  );
+}
+
 function PencilIcon({ testId }: { testId?: string }) {
   return (
     <svg viewBox="0 0 24 24" width="9" height="9" aria-hidden="true" data-testid={testId} className="shrink-0 text-text" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

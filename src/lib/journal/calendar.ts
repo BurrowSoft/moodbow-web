@@ -6,7 +6,8 @@
 // week-start setting yet).
 export const WEEK_START = 1;
 
-export type CalendarDay = { mood: number | null; moment: boolean; entry: boolean };
+// pictures (035): set (true) only on a day with an entry that has pictures, where pictures-live is on.
+export type CalendarDay = { mood: number | null; moment: boolean; entry: boolean; pictures?: true };
 export type CalendarMonth = Record<string, CalendarDay>;
 
 const atNoon = (date: string) => new Date(`${date}T12:00:00Z`);
@@ -62,7 +63,7 @@ export const dayNumber = (date: string, dateLocaleTag: string) => new Intl.DateT
 
 // Rows → the month's days: the check-in's mood, whether there's a moment,
 // whether there's an entry. Days with nothing are simply absent.
-export function calendarMonth(checkIns: { local_date: string; mood: number }[], entries: { entry_date: string; is_moment: boolean }[]): CalendarMonth {
+export function calendarMonth(checkIns: { local_date: string; mood: number }[], entries: { id?: string; entry_date: string; is_moment: boolean }[], withPictures: ReadonlySet<string> = new Set()): CalendarMonth {
   const days: CalendarMonth = {};
   const day = (date: string) => (days[date] ??= { mood: null, moment: false, entry: false });
   for (const c of checkIns) if (c.mood >= 1 && c.mood <= 5) day(c.local_date).mood = c.mood;
@@ -70,6 +71,7 @@ export function calendarMonth(checkIns: { local_date: string; mood: number }[], 
     const d = day(e.entry_date);
     d.entry = true;
     if (e.is_moment) d.moment = true;
+    if (e.id && withPictures.has(e.id)) d.pictures = true;
   }
   return days;
 }

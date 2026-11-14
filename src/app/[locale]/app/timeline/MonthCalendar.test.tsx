@@ -150,3 +150,23 @@ describe("MonthCalendar (1.1 M)", () => {
     expect(screen.queryByRole("alert")).toBeNull();
   });
 });
+
+// Pictures (035): the camera mark next to the pencil, "has pictures" in the day's name, and its key
+// where pictures are on.
+describe("MonthCalendar: the pictures mark", () => {
+  it("a day with pictures: the camera, and the words; the key gains it only where pictures are on", () => {
+    const month: CalendarMonth = { "2026-10-01": { mood: 4, moment: true, entry: true, pictures: true }, "2026-10-02": { mood: 3, moment: false, entry: true } };
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <MonthCalendar today={TODAY} dateLocaleTag="en-GB" initial={month} shareable={false} picturesKey />
+      </NextIntlClientProvider>,
+    );
+    expect(day("2026-10-01").querySelector("[data-testid=calendar-pictures]")).not.toBeNull();
+    expect(day("2026-10-01")).toHaveAccessibleName(`Thursday 1 October, ${messages.today.mood4}, moment, has writing, has pictures`);
+    expect(day("2026-10-02").querySelector("[data-testid=calendar-pictures]")).toBeNull();
+    expect(screen.getByTestId("calendar-key")).toHaveTextContent(t.calKeyPictures);
+    cleanup();
+    renderIt();
+    expect(screen.getByTestId("calendar-key")).not.toHaveTextContent(t.calKeyPictures);
+  });
+});
