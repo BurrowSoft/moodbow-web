@@ -80,7 +80,8 @@ test.describe("launch journeys", () => {
       await page.getByTestId("entry-save").click();
       await expect(page).toHaveURL(/\/app$/);
       await page.locator('[data-testid^="today-entry-"]').first().click();
-      await expect(page).toHaveURL(/\/app\/entries\/[0-9a-f-]{36}$/);
+      // Opened from Today: the link says so (audit B), so the nav keeps Today.
+      await expect(page).toHaveURL(/\/app\/entries\/[0-9a-f-]{36}\?from=%2Fapp$/);
       await expect(page.getByTestId("entry-body")).toContainText(ENTRY);
       await expect(page.getByTestId("entry-checkin")).toBeVisible();
 
@@ -320,7 +321,8 @@ test.describe("tonight's flows", () => {
       await page.getByTestId("entry-save").click();
       await expect(page).toHaveURL(/\/app$/);
       await page.locator('[data-testid^="today-entry-"]').first().click();
-      await expect(page).toHaveURL(/\/app\/entries\/[0-9a-f-]{36}$/);
+      // Opened from Today: the link says so (audit B), so the nav keeps Today.
+      await expect(page).toHaveURL(/\/app\/entries\/[0-9a-f-]{36}\?from=%2Fapp$/);
       await page.getByTestId("entry-more").click();
       await page.getByTestId("entry-menu-delete").click();
       await page.getByTestId("entry-delete-confirm").click();
@@ -443,6 +445,18 @@ test.describe("a first run reaches Today without a reload", () => {
       await expect(page).toHaveURL(/\/app\/me$/);
       await revokeSessions(email, password);
       await page.getByTestId("tab-today").click();
+      // Two safe ends, whichever check sees the revoke first (#299's trace, UX 14 Nov): sign-in, or
+      // the journal page's own "Your session has ended" (SessionEnded) with its Sign in. 5 of 7
+      // runs went to sign-in; one showed the screen at /app. Either way, nothing of the journal.
+      const ended = page.getByTestId("session-ended");
+      await expect(page.getByLabel("Email").or(ended)).toBeVisible({ timeout: 20_000 });
+      await expect(page.getByTestId("checkin-card")).toHaveCount(0);
+      await expect(page.getByTestId("today-greeting")).toHaveCount(0);
+      await expect(page.locator('[data-testid^="today-entry-"]')).toHaveCount(0);
+      if (await ended.isVisible()) {
+        await expect(ended).toContainText(messages.auth.sessionEndedTitle);
+        await page.getByTestId("session-ended-sign-in").click();
+      }
       await expect(page).toHaveURL(/\/sign-in/, { timeout: 20_000 });
       await page.getByLabel("Email").fill(email);
       await page.getByLabel("Password").fill(password);
@@ -1164,7 +1178,8 @@ test("large text, set in the browser: Today after a mood, calendar, day, entry a
     await page.getByTestId("entry-save").click();
     await expect(page).toHaveURL(/\/app$/);
     await page.locator('[data-testid^="today-entry-"]').first().click();
-    await expect(page).toHaveURL(/\/app\/entries\/[0-9a-f-]{36}$/);
+    // Opened from Today: the link says so (audit B), so the nav keeps Today.
+    await expect(page).toHaveURL(/\/app\/entries\/[0-9a-f-]{36}\?from=%2Fapp$/);
     const entry = new URL(page.url()).pathname;
 
     // A moment a month ago, with a check-in, so On this day shows with its mood in words.
@@ -1200,7 +1215,8 @@ test("large text, set in the browser: Today after a mood, calendar, day, entry a
       expect.soft({ screen, percent, overflow, sticksOut }).toEqual({ screen, percent, overflow: 0, sticksOut: [] });
     };
 
-    for (const [route, saved] of [["", "en"], ["/fr", "fr"], ["/de", "de"]]) {
+    // pt-BR too (the Reviewer, #325: the entry's top bar at 300 % in en and pt-BR).
+    for (const [route, saved] of [["", "en"], ["/fr", "fr"], ["/de", "de"], ["/pt-br", "pt"]]) {
       await setProfileLocale(email, password, saved);
       for (const percent of [200, 300]) {
         await textAt(percent);
@@ -1259,6 +1275,46 @@ test("large text, set in the browser: Today after a mood, calendar, day, entry a
       await textAt(100);
       await page.goto(`${route}/app/timeline`);
       await page.getByTestId("timeline-view-list").click();
+    }
+  } finally {
+    await cleanup(email);
+  }
+});
+
+// Breathing's Stop fell below the card at 320 px and 300 % (Web Tester, #265): it's in view the
+// whole minute, at the normal size and at large text, with the circle's words still readable.
+test("large text, set in the browser: breathing's Stop stays in view on a 320 px phone", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
+  test.setTimeout(120_000);
+  const email = newEmail();
+  const password = newPassword();
+  const cdp = await page.context().newCDPSession(page);
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    await page.setViewportSize({ width: 320, height: 640 });
+    for (const percent of [100, 300]) {
+      await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
+      // The list may not be readable yet on staging: breathing is offered either way (UX).
+      await page.goto("/app/me/toolbox");
+      await page.getByTestId("toolbox-breathe").click();
+      const stop = page.getByTestId("breathing-stop");
+      for (const moment of ["opening", "breathing out"]) {
+        if (moment === "breathing out") await expect(page.getByTestId("breathing-phase")).toHaveText(messages.toolbox.breatheOut, { timeout: 8_000 });
+        const box = (await stop.boundingBox())!;
+        expect(box.y, `${percent} %, ${moment}: Stop's top in the window`).toBeGreaterThanOrEqual(0);
+        expect(box.y + box.height, `${percent} %, ${moment}: Stop's bottom in the window`).toBeLessThanOrEqual(640);
+        expect(box.x + box.width, `${percent} %, ${moment}: Stop inside the width`).toBeLessThanOrEqual(320);
+      }
+      await stop.click();
+      await expect(page.getByTestId("breathing")).toHaveCount(0);
     }
   } finally {
     await cleanup(email);
@@ -1685,6 +1741,40 @@ test("large text, set in the browser: Print this month stays inside a 320 px pho
   }
 });
 
+// Automated accessibility (UX, 2026-11-12): no serious or critical axe violation on the toolbox and breathing, at
+// 320 and 1280 px, in en and pt-BR (the longest). axe can't hear a screen reader: the rows stand.
+test("axe: the toolbox and breathing, at 320 and 1280 px", async ({ page }) => {
+  test.setTimeout(240_000);
+  const email = newEmail();
+  const password = newPassword();
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+      await setProfileLocale(email, password, saved);
+      await axeAtWidths(page, `toolbox (${saved})`, async () => {
+        await page.goto(`${route}/app/me/toolbox`);
+        await expect(page.getByTestId("toolbox-get-help")).toBeVisible();
+      });
+      await axeAtWidths(page, `breathing (${saved})`, async () => {
+        await page.goto(`${route}/app/me/toolbox`);
+        await expect(page.getByTestId("toolbox-get-help")).toBeVisible();
+          await page.getByTestId("toolbox-breathe").click();
+          await expect(page.getByTestId("breathing-stop")).toBeVisible();
+      });
+    }
+  } finally {
+    await cleanup(email);
+  }
+});
+
 // The reminder time's picker button is the browser's own part inside the field: with focus on it
 // the field isn't :focus-visible, and its ring went (WCAG 2.4.7, Web Tester's keyboard pass,
 // 12 Nov). Tab through each time field's own stops (hours, minutes, AM/PM, the picker): the
@@ -1823,6 +1913,232 @@ test("large text, set in the browser: Write is in Today's first view at 320 px, 
       await page.goto("/app");
       await expect(page.getByTestId("today-help")).toBeVisible();
     });
+  } finally {
+    await cleanup(email);
+  }
+});
+
+// Grounding (1.3, specs/1.3-grounding-and-good-things.md): 5-4-3-2-1, Body scan and Name it, at
+// 320 px and 300 %: Back and the quiet help on top, and each screen's own way on (Next, Stop, a
+// mood) in the first view, nothing sideways; then axe on each, the close too, at 320 and 1280 px.
+test("grounding: the three at large text on a 320 px phone, help on every screen, and axe", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
+  test.setTimeout(240_000);
+  const email = newEmail();
+  const password = newPassword();
+  const cdp = await page.context().newCDPSession(page);
+  const inView = async (testId: string, where: string) => {
+    const box = (await page.getByTestId(testId).boundingBox())!;
+    console.log(`grounding ${where}: ${testId} ${Math.round(box.x)},${Math.round(box.y)} ${Math.round(box.width)}×${Math.round(box.height)} px`);
+    // The top edge too: the close once scrolled the help above the window (y −134) unnoticed.
+    expect(box.y, `${where}: ${testId}'s top in the window`).toBeGreaterThanOrEqual(0);
+    expect(box.y + box.height, `${where}: ${testId} in the first view`).toBeLessThanOrEqual(640);
+    expect(box.x + box.width, `${where}: ${testId} inside the width`).toBeLessThanOrEqual(320.5);
+  };
+  // Each screen takes taps once its scripts run (useUntilLoaded; a tap before then is lost, #296).
+  const loaded = () => expect(page.locator("[data-until-loaded]")).toHaveCount(0, { timeout: 15_000 });
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    await page.setViewportSize({ width: 320, height: 640 });
+    for (const percent of [100, 300]) {
+      const where = (s: string) => `${s} at ${percent} %`;
+      await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
+      await page.goto("/app/me/toolbox");
+      await expect(page.getByTestId("grounding-links")).toBeVisible();
+      await page.getByTestId("toolbox-senses").click();
+      await expect(page.getByTestId("senses-step")).toHaveText(messages.toolbox.senses5);
+      await loaded();
+      await inView("grounding-get-help", where("5-4-3-2-1"));
+      await inView("senses-next", where("5-4-3-2-1"));
+      // Help in view on every step, the close too (UX 14 Nov: steps 3 to 5 once scrolled it off).
+      for (let i = 0; i < 5; i++) {
+        await page.getByTestId("senses-next").click();
+        if (i < 4) await expect(page.getByTestId("senses-step")).toHaveAttribute("data-step", String(i + 2));
+        if (i < 4) await inView("grounding-get-help", where(`5-4-3-2-1 step ${i + 2}`));
+      }
+      await expect(page.getByTestId("senses-end")).toHaveText(messages.toolbox.groundingEnd);
+      await inView("grounding-get-help", where("the close"));
+      await inView("grounding-done", where("the close"));
+
+      await page.goto("/app/me/toolbox/body-scan");
+      await expect(page.getByTestId("body-scan-step")).toHaveText(messages.toolbox.bodyScan1);
+      await loaded();
+      await inView("grounding-get-help", where("Body scan"));
+      await inView("body-scan-stop", where("Body scan"));
+      await inView("body-scan-pause", where("Body scan"));
+
+      await page.goto("/app/me/toolbox/name-it");
+      // A new account has no check-ins: the whole fixed list (Ruling 2).
+      await expect(page.locator('[data-testid^="name-it-"][aria-pressed]')).toHaveCount(5);
+      await loaded();
+      await inView("grounding-get-help", where("Name it"));
+      await inView("name-it-1", where("Name it"));
+      await page.getByTestId("name-it-3").click();
+      await expect(page.getByTestId("name-it-thanks")).toHaveText(messages.toolbox.nameItThanks);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth), where("Name it: no sideways scroll")).toBeLessThanOrEqual(320);
+    }
+    // The help is Me's card, from any of them.
+    await cdp.send("Page.setFontSizes", { fontSizes: { standard: 16, fixed: 13 } });
+    await page.goto("/app/me/toolbox/body-scan");
+    await loaded();
+    await page.getByTestId("grounding-get-help").click();
+    await expect(page.getByTestId("safety-card")).toContainText(messages.safety.safetyBodyNeutral);
+    await page.getByTestId("safety-close").click();
+    await expect(page.getByTestId("safety-card")).toHaveCount(0);
+
+    // No serious or critical axe violation (UX, 2026-11-12), en and pt-BR (the longest).
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+      await setProfileLocale(email, password, saved);
+      for (const exercise of ["5-4-3-2-1", "body-scan", "name-it"]) {
+        await axeAtWidths(page, `grounding ${exercise} (${saved})`, async () => {
+          await page.goto(`${route}/app/me/toolbox/${exercise}`);
+          await expect(page.getByTestId("grounding-get-help")).toBeVisible();
+        });
+      }
+      await axeAtWidths(page, `grounding close (${saved})`, async () => {
+        await page.goto(`${route}/app/me/toolbox/5-4-3-2-1`);
+        await loaded();
+        for (let i = 0; i < 5; i++) await page.getByTestId("senses-next").click();
+        await expect(page.getByTestId("senses-end")).toBeVisible();
+      });
+    }
+  } finally {
+    await cleanup(email);
+  }
+});
+
+// Three good things (1.3, Rulings 3 and 9): from Write, three fields at 320 px, 100 and 300 %,
+// with Save and the first field in the first view; it saves one ordinary entry for today through
+// the normal save, which Today then lists; axe on the screen at 320 and 1280 px, en and pt-BR.
+test("Three good things: large text on a 320 px phone, one ordinary entry on Today, and axe", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
+  test.setTimeout(240_000);
+  const email = newEmail();
+  const password = newPassword();
+  const cdp = await page.context().newCDPSession(page);
+  const loaded = () => expect(page.locator("[data-until-loaded]")).toHaveCount(0, { timeout: 15_000 });
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    await page.setViewportSize({ width: 320, height: 640 });
+    for (const percent of [100, 300]) {
+      const where = `${percent} %`;
+      await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
+      await page.goto("/app/write");
+      await page.getByTestId("write-good-things").click();
+      await expect(page.getByTestId("good-things-title")).toHaveText(messages.entry.goodThingsTitle);
+      await loaded();
+      for (const testId of ["entry-save-top", "good-things-1"]) {
+        const box = (await page.getByTestId(testId).boundingBox())!;
+        console.log(`Three good things ${where}: ${testId} ${Math.round(box.x)},${Math.round(box.y)} ${Math.round(box.width)}×${Math.round(box.height)} px`);
+        expect(box.y + box.height, `${where}: ${testId} in the first view`).toBeLessThanOrEqual(640);
+        expect(box.x + box.width, `${where}: ${testId} inside the width`).toBeLessThanOrEqual(320.5);
+      }
+      expect(await page.evaluate(() => document.documentElement.scrollWidth), `${where}: no sideways scroll`).toBeLessThanOrEqual(320);
+    }
+    // One line left empty on purpose: any can be.
+    await page.getByTestId("good-things-1").fill("Tea with a friend");
+    await page.getByTestId("good-things-3").fill("The rain stopped");
+    await page.getByTestId("entry-save-top").click();
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
+    // Today lists it as any entry: one preview, starting with the heading.
+    await expect(page.locator('[data-testid^="today-entry-"]')).toHaveCount(1);
+    await expect(page.locator('[data-testid^="today-entry-"]').first()).toContainText(messages.entry.goodThingsTitle);
+
+    await cdp.send("Page.setFontSizes", { fontSizes: { standard: 16, fixed: 13 } });
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+      await setProfileLocale(email, password, saved);
+      await axeAtWidths(page, `Three good things (${saved})`, async () => {
+        await page.goto(`${route}/app/write/good-things`);
+        await expect(page.getByTestId("good-things-1")).toBeVisible();
+      });
+    }
+  } finally {
+    await cleanup(email);
+  }
+});
+
+// Help everywhere (audit batch H, UX and the Reviewer, 14 Nov): wherever someone writes their own
+// words or reads back their days, exactly one help control, and it opens the help card.
+// At 320 px with text at 300 % (the Reviewer): Back and the lifebuoy share a row, so each must stay
+// in the first view with nothing sideways.
+test("help everywhere: writing, Three good things, a day and the Timeline each have one lifebuoy in the first view at 300 %, opening the help card", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
+  test.setTimeout(150_000);
+  const email = newEmail();
+  try {
+    const password = await accountAtSetup(page, email);
+    // Setup first where this base still asks for it (before #314's fewer taps): the journal's
+    // pages send a new account there until it's done.
+    await page.goto("/setup");
+    const atSetup = await page
+      .getByTestId("setup-done")
+      .waitFor({ state: "visible", timeout: 5_000 })
+      .then(() => true)
+      .catch(() => false);
+    if (atSetup) {
+      await page.getByTestId("setup-done").click();
+      await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    }
+    const today = await journalToday(email, password);
+    await page.setViewportSize({ width: 320, height: 640 });
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send("Page.setFontSizes", { fontSizes: { standard: 48, fixed: 39 } });
+    const help = page.getByRole("link", { name: messages.me.meGetHelpNow });
+    for (const [path, testId] of [
+      ["/app/write", "editor-help"],
+      ["/app/write/good-things", "editor-help"],
+      [`/app/timeline/${today}`, "day-help"],
+      ["/app/timeline", "timeline-help"],
+    ]) {
+      await page.goto(path);
+      await expect(page.getByTestId(testId), path).toBeVisible({ timeout: 15_000 });
+      const box = await page.getByTestId(testId).evaluate((el) => {
+        const r = el.getBoundingClientRect();
+        return { inFirstView: r.top >= 0 && r.bottom <= window.innerHeight + 0.5 && r.right <= window.innerWidth + 0.5, overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth };
+      });
+      expect(box, `${path}: the lifebuoy in the first view, nothing sideways`).toEqual({ inFirstView: true, overflow: 0 });
+      await expect(help, `${path}: exactly one help control`).toHaveCount(1);
+      await help.click();
+      await expect(page.getByTestId("safety-card"), path).toBeVisible();
+      await page.keyboard.press("Escape");
+      await expect(page.getByTestId("safety-card"), path).toHaveCount(0);
+    }
+    // Every Timeline view keeps the lifebuoy (audit B): the empty list (a new account) is above;
+    // then the calendar, the list again and search, where they're on.
+    await page.goto("/app/timeline");
+    await expect(page.getByTestId("timeline-empty").first()).toBeVisible({ timeout: 15_000 });
+    const views: string[] = ["empty list"];
+    for (const v of ["calendar", "list"]) {
+      if ((await page.getByTestId(`timeline-view-${v}`).count()) === 0) continue;
+      await page.getByTestId(`timeline-view-${v}`).click();
+      await expect(page.getByTestId("timeline-help"), v).toBeVisible();
+      await expect(help, `${v}: exactly one help control`).toHaveCount(1);
+      views.push(v);
+    }
+    if ((await page.getByTestId("timeline-search-open").count()) > 0) {
+      await page.getByTestId("timeline-search-open").click();
+      await expect(page.getByTestId("timeline-search-input")).toBeVisible();
+      await expect(page.getByTestId("timeline-help"), "search").toBeVisible();
+      await expect(help, "search: exactly one help control").toHaveCount(1);
+      views.push("search");
+    }
+    console.log(`Timeline views with the lifebuoy: ${views.join(", ")}`);
   } finally {
     await cleanup(email);
   }

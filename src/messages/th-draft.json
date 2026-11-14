@@ -1033,5 +1033,275 @@
     "key": "me.meNoScript",
     "en": "The journal needs JavaScript. Turn it on in your browser to see your entries.",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.meRow",
+    "en": "Things that help me",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.empty",
+    "en": "Add small things that help on hard days. Only you can see this list.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.placeholder",
+    "en": "Something that helps",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.add",
+    "en": "Add",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.edit",
+    "en": "Edit",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.delete",
+    "en": "Delete",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.save",
+    "en": "Save",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.cancel",
+    "en": "Cancel",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.moveUp",
+    "en": "Move up",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.moveDown",
+    "en": "Move down",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.deleted",
+    "en": "Deleted.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.undo",
+    "en": "Undo",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.limitCount",
+    "en": "You can keep up to 20 things here.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.limitLength",
+    "en": "Up to 120 characters.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.cardTitle",
+    "en": "Things that help you",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.breathe",
+    "en": "Breathe for a minute",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.notNow",
+    "en": "Not now",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.cardEmpty",
+    "en": "Add something that helps",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.breathTitle",
+    "en": "A minute to breathe",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.breatheIn",
+    "en": "Breathe in",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.breatheOut",
+    "en": "Breathe out",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.breatheInCount",
+    "en": "Breathe in · {n}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.breatheOutCount",
+    "en": "Breathe out · {n}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.stop",
+    "en": "Stop",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.breathEnd",
+    "en": "That was a minute. Take your time.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.done",
+    "en": "Done",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.breathSafety",
+    "en": "If you feel dizzy, stop and breathe normally.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.groundingSenses",
+    "en": "5-4-3-2-1",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.groundingBodyScan",
+    "en": "Body scan (2 min)",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.groundingNameIt",
+    "en": "Name it",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.senses5",
+    "en": "Name 5 things you can see.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.senses4",
+    "en": "Name 4 things you can touch.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.senses3",
+    "en": "Name 3 things you can hear.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.senses2",
+    "en": "Name 2 things you can smell (or skip).",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.senses1",
+    "en": "Name 1 thing you can taste (or skip).",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.groundingNext",
+    "en": "Next",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.groundingBack",
+    "en": "Back",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.groundingEnd",
+    "en": "Well done. Take a moment before you go on.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.bodyScanIntro",
+    "en": "Stop any time, or try 5-4-3-2-1 instead.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.bodyScan1",
+    "en": "Notice your feet.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.bodyScan2",
+    "en": "Your legs.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.bodyScan3",
+    "en": "Your belly and back.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.bodyScan4",
+    "en": "Your shoulders.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.bodyScan5",
+    "en": "Your hands and arms.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.bodyScan6",
+    "en": "Your face and jaw.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.pause",
+    "en": "Pause",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.resume",
+    "en": "Resume",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.nameItQuestion",
+    "en": "What are you feeling right now?",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.nameItSmaller",
+    "en": "Naming it can make it a little smaller.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.nameItThanks",
+    "en": "Thanks for naming it.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.goodThingsTitle",
+    "en": "Three good things",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.goodThings1",
+    "en": "One good thing",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.goodThings2",
+    "en": "Another",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.goodThings3",
+    "en": "And one more",
+    "reason": "UX draft (native read pending)"
   }
 ]

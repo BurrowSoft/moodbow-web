@@ -13,7 +13,7 @@ import type { Reflection } from "@/lib/journal/reflect";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { headers } from "next/headers";
 import { backLabel } from "@/lib/journal/backLabel";
-import { originOf } from "@/lib/journal/origin";
+import { entryOriginOf } from "@/lib/journal/origin";
 import { dateLocale } from "@/lib/journal/today";
 import { titledMetadata } from "../../pageMeta";
 import { EntryScreen } from "./EntryScreen";
@@ -57,7 +57,8 @@ export default async function EntryPage({ params, searchParams }: PageProps<"/[l
   }
   // Opened from Today, the Timeline or a day (decision 152): Back
   // returns there.
-  const from = originOf((await searchParams).from);
+  // No ?from= at all (a direct load): the Timeline, for the tab and for Back (audit B).
+  const from = entryOriginOf((await searchParams).from);
   const tag = dateLocale(locale, (await headers()).get("accept-language"), me.profile?.country ?? null);
   // That day's check-in, for the strip under the date. Not read (an error):
   // no strip, the same as a day without one; the entry is still all here.

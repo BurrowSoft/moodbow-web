@@ -4,6 +4,7 @@ import { JOURNAL_HEADING } from "@/lib/ui/journalLayout";
 import { startTransition, useActionState, useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { BackLink } from "@/components/BackLink";
+import { GetHelpNow } from "@/components/SafetyCard";
 import { Dialog, dialogButton } from "@/components/Dialog";
 import { useRouter } from "@/i18n/navigation";
 import type { CheckIn } from "@/lib/journal/checkIn";
@@ -20,13 +21,13 @@ import { useAnnounce, useFocusTitleAfterLeaving } from "../../Announcer";
 import { ReflectPanel } from "../ReflectPanel";
 
 // The entry view (decision 151, the same layout as the app): a top bar with
-// Back, the ★ moment toggle and ⋯ (Edit, Delete); the date; that day's
+// Back, the ★ moment toggle, ✎ Edit entry and ⋯ (Delete only; board 20); the date; that day's
 // check-in strip; the entry as plain, selectable text; the reflection (or
 // Reflect) with "Write your answer"; and "Add to this entry…". A pointer
 // click on the text opens the editor with the caret there, unless the click
 // ended a text selection (copying). The text isn't a button: a button's
 // contents are presentational, so screen readers would skip the entry (UX
-// agreed); keyboards edit through ⋯ → Edit entry or "Add to this entry…".
+// agreed); keyboards edit through ✎ Edit entry (one Tab after ★) or "Add to this entry…".
 // Save and Cancel come back here; Back goes where the entry was opened from.
 type Props = {
   entry: Entry;
@@ -175,25 +176,42 @@ function Screen({ entry: initial, checkIn, from, backLabel, dateLocaleTag, uid, 
   const chips = checkIn ? checkInChips(checkIn, tt, locale) : [];
   return (
     <>
-      <div className="flex items-center gap-1">
+      {/* Wraps at large text: ★ ✎ ⋯ stay together at the right and drop under Back (or onto two
+          lines) rather than off a 320 px screen at 300 % (journey 1153; the Reviewer, #325). */}
+      <div className="flex flex-wrap items-center gap-1">
         {/* While editing, the editor's top row holds Back (with Save). */}
         {mode.kind === "view" && <BackLink href={from} label={backLabel} testId="nav-back" />}
+        {/* Help everywhere (audit batch H): beside Back. While editing, the editor's own shows. */}
+        {mode.kind === "view" && <GetHelpNow country={country} testId="entry-help" neutral icon />}
         {mode.kind === "view" && (
-          <>
+          <div className="ml-auto flex min-w-0 flex-wrap items-center justify-end gap-1" data-testid="entry-actions">
             <button
               type="button"
               data-testid="entry-moment-toggle"
               aria-pressed={entry.is_moment}
               aria-label={t("entryMoment")}
               onClick={() => void toggleMoment()}
-              className="ml-auto inline-flex h-11 w-11 items-center justify-center rounded-full text-accent hover:bg-pill"
+              className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-accent hover:bg-pill"
             >
               <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" className={entry.is_moment ? "fill-accent" : "fill-none"} stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round">
                 <path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z" />
               </svg>
             </button>
+            {/* ✎ Edit entry, one tap (and one Tab) to the editor, caret at the end (board 20, as the app). */}
+            <button
+              type="button"
+              data-testid="entry-view-edit"
+              aria-label={t("entryEditTitle")}
+              onClick={() => edit({ at: "end" })}
+              className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-accent hover:bg-pill"
+            >
+              <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 20h4L19 9a2.1 2.1 0 0 0-3-3L5 17z" />
+                <path d="M14 8l2 2" />
+              </svg>
+            </button>
             <div
-              className="relative"
+              className="relative shrink-0"
               onKeyDown={(e) => {
                 if (e.key === "Escape" && menu) {
                   setMenu(false);
@@ -222,11 +240,6 @@ function Screen({ entry: initial, checkIn, from, backLabel, dateLocaleTag, uid, 
               </button>
               <ul id="entry-menu" hidden={!menu} className="absolute right-0 top-12 z-10 min-w-44 rounded-2xl border border-border bg-surface p-[4px] shadow-lg">
                 <li>
-                  <button type="button" data-testid="entry-menu-edit" onClick={() => edit({ at: "end" })} className="flex min-h-11 w-full items-center rounded-xl px-4 text-left text-text hover:bg-pill">
-                    {t("entryEditTitle")}
-                  </button>
-                </li>
-                <li>
                   <button
                     type="button"
                     data-testid="entry-menu-delete"
@@ -245,7 +258,7 @@ function Screen({ entry: initial, checkIn, from, backLabel, dateLocaleTag, uid, 
                 </li>
               </ul>
             </div>
-          </>
+          </div>
         )}
       </div>
       {/* The editor has its own heading, Edit entry (a11y pass 5). */}
