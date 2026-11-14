@@ -627,7 +627,7 @@ test.describe("onboarding (signed out)", () => {
     const form = (await page.getByTestId("consent-privacy").boundingBox())!;
     expect(help.y).toBeLessThan(notice.y);
     expect(notice.y).toBeLessThan(form.y);
-    await expect(page.getByTestId("consent-notice")).toContainText("Moodbow is run by Vitor Ribeiro Carvalho");
+    await expect(page.getByTestId("consent-notice")).toContainText("Moodbow is run by Vitor Carvalho");
     await page.getByTestId("consent-get-help").click();
     await expect(page.getByTestId("safety-card")).toBeVisible();
     await expect(page.getByTestId("safety-find-helpline")).toBeVisible();

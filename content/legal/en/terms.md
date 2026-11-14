@@ -9,7 +9,7 @@
 ## Moodbow Terms of Use
 Last updated: 2 October 2026
 
-These terms are an agreement between you and Vitor Ribeiro Carvalho, trading as BurrowSoft (297 Moo 1, Baan Sanian, Mueang Nan, Nan 55000, Thailand) about using Moodbow, the app and the website moodbow.com. By creating an account you agree to them.
+These terms are an agreement between you and Vitor Carvalho, trading as BurrowSoft (297 Moo 1, Baan Sanian, Mueang Nan, Nan 55000, Thailand) about using Moodbow, the app and the website moodbow.com. By creating an account you agree to them.
 
 ### What Moodbow is, and isn't
 Moodbow is a private journal that helps you notice patterns in your mood, sleep and habits. It is **not** medical care, therapy or a diagnosis, and it isn't a crisis service. The AI's reflections are suggestions to think about, not professional advice. If you're in danger or thinking about harming yourself, contact your local emergency number or a crisis line right away; Moodbow lists some in Me → Want to talk to someone?.
