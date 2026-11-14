@@ -26,7 +26,7 @@ Moodbow is a private journal made by Vitor Ribeiro Carvalho, trading as BurrowSo
 {pending:toolbox_live|app_toolbox}**Things that help you:** the list you keep in Me → Things that help me.{/pending}
 {pending:letters_live|app_letters}**Letters to future you:** the letters you write, the day each one opens, and when you asked to be reminded of them.{/pending}
 {pending:safety_plan_live|app_safety_plan}**Your safety plan:** the plan you write. It can include the names and phone numbers of people and services you choose to list. They're stored with your journal, protected the same way, included when you export your data and deleted when you delete it. Moodbow never contacts them: a call only happens if you tap a number, through your phone's own dialer.{/pending}
-**Your settings:** language, country, time zone, reminder time, and your AI choices (on or off, tone, focus areas).
+**Your settings:** language, country, time zone, reminder time{pending:plus}s{/pending}, and your AI choices (on or off, tone, focus areas).
 **AI content (only if AI is on):** the reflections and reports the AI writes for you{pending:ai_memory}, and the short facts Moodbow remembers about you, which you can see, edit and delete in Me → What Moodbow remembers{/pending}.
 **AI usage:** for each AI request, the feature, the model, the number of tokens, the cost and the credits used. Not the text of your entries or of the AI's answer.
 {pending:purchases}**Purchases:** if you buy AI credits, Google Play or the App Store handles the payment. We receive a purchase reference and the number of credits, never your card details.{/pending}
@@ -75,7 +75,7 @@ We never sell your data, and we never share it with advertisers.
 ### 4. How long we keep it
 - Everything is kept until you delete it or delete your account.
 - **Deleting your account** removes your journal, check-ins, AI content, settings, credits history and login from our live database immediately.
-{pending:plus}- Payment records kept by Stripe, Google Play or the App Store follow their own rules; deleting your Moodbow account cancels a web subscription and removes our copy.{/pending}
+{pending:plus}- Payment records kept by Stripe, Google Play or the App Store follow their own rules; deleting your Moodbow account cancels a web subscription and removes our copy. A Google Play or App Store subscription has to be cancelled there; deleting your account doesn't stop it.{/pending}
 - Copies in our encrypted backups disappear automatically within {pending:backup_retention}8{/pending} days.
 - Error and crash reports are kept by our error-tracking provider for up to 90 days.
 - Technical logs at our providers (hosting, database, email delivery) are kept only for a limited period set by each provider, and then deleted.
