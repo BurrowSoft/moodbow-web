@@ -169,7 +169,8 @@ export function LettersEditor({
             <legend className="mb-1 font-medium text-text">{t("openLabel")}</legend>
             {(LETTER_RULES.monthChoices as LetterMonths[]).map((m) => (
               <label key={m} className="flex min-h-11 items-center gap-2 text-text">
-                <input type="radio" name="letter-months" value={m} checked={months === m} onChange={() => setMonths(m)} data-testid={`letter-months-${m}`} />
+                {/* At least 24 px (audit D polish); the whole label still picks it. */}
+                <input type="radio" name="letter-months" value={m} checked={months === m} onChange={() => setMonths(m)} data-testid={`letter-months-${m}`} className="h-6 w-6 shrink-0 accent-accent" />
                 {t(MONTHS_KEY[m])}
               </label>
             ))}
