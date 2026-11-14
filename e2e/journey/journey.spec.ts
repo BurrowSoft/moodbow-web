@@ -80,7 +80,8 @@ test.describe("launch journeys", () => {
       await page.getByTestId("entry-save").click();
       await expect(page).toHaveURL(/\/app$/);
       await page.locator('[data-testid^="today-entry-"]').first().click();
-      await expect(page).toHaveURL(/\/app\/entries\/[0-9a-f-]{36}$/);
+      // Opened from Today: the link says so (audit B), so the nav keeps Today.
+      await expect(page).toHaveURL(/\/app\/entries\/[0-9a-f-]{36}\?from=%2Fapp$/);
       await expect(page.getByTestId("entry-body")).toContainText(ENTRY);
       await expect(page.getByTestId("entry-checkin")).toBeVisible();
 
@@ -320,7 +321,8 @@ test.describe("tonight's flows", () => {
       await page.getByTestId("entry-save").click();
       await expect(page).toHaveURL(/\/app$/);
       await page.locator('[data-testid^="today-entry-"]').first().click();
-      await expect(page).toHaveURL(/\/app\/entries\/[0-9a-f-]{36}$/);
+      // Opened from Today: the link says so (audit B), so the nav keeps Today.
+      await expect(page).toHaveURL(/\/app\/entries\/[0-9a-f-]{36}\?from=%2Fapp$/);
       await page.getByTestId("entry-more").click();
       await page.getByTestId("entry-menu-delete").click();
       await page.getByTestId("entry-delete-confirm").click();
@@ -1176,7 +1178,8 @@ test("large text, set in the browser: Today after a mood, calendar, day, entry a
     await page.getByTestId("entry-save").click();
     await expect(page).toHaveURL(/\/app$/);
     await page.locator('[data-testid^="today-entry-"]').first().click();
-    await expect(page).toHaveURL(/\/app\/entries\/[0-9a-f-]{36}$/);
+    // Opened from Today: the link says so (audit B), so the nav keeps Today.
+    await expect(page).toHaveURL(/\/app\/entries\/[0-9a-f-]{36}\?from=%2Fapp$/);
     const entry = new URL(page.url()).pathname;
 
     // A moment a month ago, with a check-in, so On this day shows with its mood in words.
@@ -2116,6 +2119,26 @@ test("help everywhere: writing, Three good things, a day and the Timeline each h
       await page.keyboard.press("Escape");
       await expect(page.getByTestId("safety-card"), path).toHaveCount(0);
     }
+    // Every Timeline view keeps the lifebuoy (audit B): the empty list (a new account) is above;
+    // then the calendar, the list again and search, where they're on.
+    await page.goto("/app/timeline");
+    await expect(page.getByTestId("timeline-empty").first()).toBeVisible({ timeout: 15_000 });
+    const views: string[] = ["empty list"];
+    for (const v of ["calendar", "list"]) {
+      if ((await page.getByTestId(`timeline-view-${v}`).count()) === 0) continue;
+      await page.getByTestId(`timeline-view-${v}`).click();
+      await expect(page.getByTestId("timeline-help"), v).toBeVisible();
+      await expect(help, `${v}: exactly one help control`).toHaveCount(1);
+      views.push(v);
+    }
+    if ((await page.getByTestId("timeline-search-open").count()) > 0) {
+      await page.getByTestId("timeline-search-open").click();
+      await expect(page.getByTestId("timeline-search-input")).toBeVisible();
+      await expect(page.getByTestId("timeline-help"), "search").toBeVisible();
+      await expect(help, "search: exactly one help control").toHaveCount(1);
+      views.push("search");
+    }
+    console.log(`Timeline views with the lifebuoy: ${views.join(", ")}`);
   } finally {
     await cleanup(email);
   }

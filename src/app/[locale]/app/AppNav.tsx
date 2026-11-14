@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { Link, usePathname } from "@/i18n/navigation";
-import { originOf, originTab } from "@/lib/journal/origin";
+import { entryOriginOf, originOf, originTab } from "@/lib/journal/origin";
 import { Logo } from "@/components/Logo";
 import { TAB_COLUMNS, TAB_ITEM, TAB_LABEL, TAB_LINK_NARROW, tabLabelSize } from "@/lib/ui/journalLayout";
 import { useKeyboardOpen } from "@/lib/ui/keyboardOpen";
@@ -81,8 +81,9 @@ export function AppNav() {
   const row = useTabLabelsFit();
   const from = useSearchParams().get("from");
   // An entry page or New entry belongs to the tab it was opened from (Today
-  // or the Timeline; Today on a direct load), decision 152.
-  const section = pathname.startsWith("/app/entries/") || pathname === "/app/write" ? originTab(originOf(from)) : pathname;
+  // or the Timeline), decision 152. With no origin at all, an entry is the
+  // Timeline's and New entry is Today's (UX, audit B, parity with the app).
+  const section = pathname.startsWith("/app/entries/") ? originTab(entryOriginOf(from)) : pathname === "/app/write" ? originTab(originOf(from)) : pathname;
   const isActive = (href: string) => (href === "/app" ? section === "/app" : section === href || section.startsWith(`${href}/`));
   // The current tab again (r1, UX): on its own screen, back to the top
   // (smoothly, unless reduced motion), keeping its filter or range; below
