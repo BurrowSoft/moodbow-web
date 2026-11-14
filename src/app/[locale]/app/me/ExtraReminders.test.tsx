@@ -105,11 +105,11 @@ describe("more reminders: with Plus", () => {
 describe("more reminders: without Plus", () => {
   const LOCKED: Extra = { mode: { kind: "locked", offer: { trial: true, price: "US$59.99" } }, times: [] };
 
-  it("Add another time is the lock: the Plus sheet, only here", () => {
+  // The Plus sheet is retired since #315: the lock is a link to the Plus screen.
+  it("Add another time is the lock: a link to the Plus screen, only here", () => {
     renderIt(LOCKED);
     expect(screen.queryByTestId("me-reminder-extra-add")).toBeNull();
-    fireEvent.click(screen.getByTestId("me-reminder-extra-add-locked"));
-    expect(screen.getByRole("dialog", { name: messages.plus.sheetReminders })).toBeInTheDocument();
+    expect(screen.getByTestId("me-reminder-extra-add-locked")).toHaveAttribute("href", "/app/me/plus");
     expect(saveExtraReminders).not.toHaveBeenCalled();
   });
 

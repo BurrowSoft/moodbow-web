@@ -620,11 +620,6 @@
     "reason": "UX draft (native read pending)"
   },
   {
-    "key": "me.deleteCredits",
-    "en": "You'll also lose your {credits, plural, one {# AI credit} other {# AI credits}}.",
-    "reason": "UX draft (native read pending)"
-  },
-  {
     "key": "me.deleteWord",
     "en": "DELETE",
     "reason": "UX draft (native read pending): ลบ as the app (audit batch E); English DELETE is still accepted"
@@ -802,11 +797,6 @@
   {
     "key": "share.milestoneNotNow",
     "en": "Not now",
-    "reason": "UX draft (native read pending)"
-  },
-  {
-    "key": "ai.creditsBalance",
-    "en": "{credits, plural, one {# credit} other {# credits}}",
     "reason": "UX draft (native read pending)"
   },
   {
