@@ -13,8 +13,10 @@ type PageEntry = { path: string; gate?: ConditionId; gates?: ConditionId[]; pref
 // calls notFound() too, but /app streams (app/loading.tsx), so by then the 200 and the feature's
 // title are already sent. Gated here, they're true 404s with the generic title before rendering.
 // pagesGated.test.ts fails if a page's own gate isn't listed here.
-// Never in the sitemap: the signed-in area.
-const app = (p: Omit<PageEntry, "sitemap">): PageEntry => ({ ...p, sitemap: false });
+// Never in the sitemap: the signed-in area. Each also needs the web journal itself (web-journal-live,
+// /app's own gate): the first matching entry wins, so without it a met page here would skip /app's
+// gate (the Reviewer, #338).
+const app = ({ gate, gates, ...p }: Omit<PageEntry, "sitemap">): PageEntry => ({ ...p, gates: ["web-journal-live", ...(gates ?? (gate ? [gate] : []))], sitemap: false });
 const APP_GATED: PageEntry[] = [
   app({ path: "/app/bo", gate: "bo-live", prefix: true }),
   app({ path: "/app/insights/review", gate: "plus", prefix: true }),
@@ -40,7 +42,7 @@ const PAGES: PageEntry[] = [
   { path: "/consumer-health-data", gate: "consumer-health-data-approved" },
   { path: "/account-deletion", gate: "delete-account-live" },
   // Test only, never met: a 404 on Production before the signed-in area's own checks.
-  { path: "/app/test", gate: "test-only-unavailable-page", prefix: true, sitemap: false },
+  app({ path: "/app/test", gate: "test-only-unavailable-page", prefix: true }),
   ...APP_GATED,
   { path: "/app", gate: "web-journal-live", prefix: true, sitemap: false },
   { path: "/sign-in", gate: "web-journal-live", sitemap: false },

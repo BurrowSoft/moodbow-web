@@ -48,5 +48,8 @@ describe("gated pages in the signed-in area are hidden at the routing level too"
     expect(isHiddenPage(route, prod, () => true), `${route} all met`).toBe(false);
     // A preview shows drafts.
     expect(isHiddenPage(route, { vercelEnv: "preview" }, () => false), `${route} on a preview`).toBe(false);
+    // The web journal itself off: hidden even with the page's own conditions met (the first match wins,
+    // so each entry carries /app's gate too; the Reviewer, #338).
+    expect(isHiddenPage(route, prod, (id) => id !== "web-journal-live"), `${route} with web-journal-live unmet`).toBe(true);
   });
 });
