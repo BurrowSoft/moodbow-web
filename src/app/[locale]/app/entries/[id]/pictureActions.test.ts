@@ -7,13 +7,14 @@ const calls: string[] = [];
 let row: { path: string; thumb_path: string } | null = { path: "u/e/p.jpg", thumb_path: "u/e/p_t.jpg" };
 let removeError: unknown = null;
 let stillSigned = false;
+let checkFails = false;
 let rpcError: unknown = null;
 const client = {
   from: () => ({ select: () => ({ eq: () => ({ maybeSingle: async () => (calls.push("read"), { data: row, error: null }) }) }) }),
   storage: {
     from: () => ({
       remove: async (paths: string[]) => (calls.push(`remove ${paths.join(",")}`), { data: [], error: removeError }),
-      createSignedUrls: async (paths: string[]) => (calls.push("check"), { data: paths.map((p) => ({ path: p, signedUrl: stillSigned ? "https://x" : null })), error: null }),
+      createSignedUrls: async (paths: string[]) => (calls.push("check"), checkFails ? { data: null, error: { message: "503" } } : { data: paths.map((p) => ({ path: p, signedUrl: stillSigned ? "https://x" : null })), error: null }),
     }),
   },
   rpc: async (name: string) => (calls.push(name), { error: rpcError }),
@@ -27,6 +28,7 @@ beforeEach(() => {
   row = { path: "u/e/p.jpg", thumb_path: "u/e/p_t.jpg" };
   removeError = null;
   stillSigned = false;
+  checkFails = false;
   rpcError = null;
 });
 
@@ -42,6 +44,12 @@ describe("deletePicture: files first (own session, row live), checked gone, then
     calls.length = 0;
     removeError = null;
     stillSigned = true;
+    expect(await deletePicture(ID)).toEqual({ status: "error" });
+    expect(calls).not.toContain("picture_delete");
+    // The check failing as a whole request (network, 5xx) verified nothing: not gone (the Reviewer).
+    calls.length = 0;
+    stillSigned = false;
+    checkFails = true;
     expect(await deletePicture(ID)).toEqual({ status: "error" });
     expect(calls).not.toContain("picture_delete");
   });

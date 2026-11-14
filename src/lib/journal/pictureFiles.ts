@@ -13,5 +13,8 @@ export async function removePictureFiles(supabase: SupabaseClient, paths: string
   const removed = await bucket.remove(paths);
   if (removed.error) return false;
   const left = await bucket.createSignedUrls(paths, 60);
-  return !(left.data ?? []).some((s) => s.signedUrl);
+  // A request that failed as a whole (network, 5xx) couldn't verify anything: not gone. Missing
+  // objects come back as per-item errors inside a 200, with no signedUrl (the Reviewer).
+  if (left.error || !left.data) return false;
+  return !left.data.some((s) => s.signedUrl);
 }
