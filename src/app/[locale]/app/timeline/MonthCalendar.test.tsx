@@ -67,7 +67,7 @@ describe("MonthCalendar (1.1 M)", () => {
     expect(day("2026-10-03")).toHaveAccessibleName("Saturday 3 October");
     expect(day("2026-10-01").querySelector("[data-testid=calendar-dot]")).not.toBeNull();
     expect(day("2026-10-02").querySelector("[data-testid=calendar-dot]")).toBeNull();
-    expect(day("2026-10-02").querySelector("[data-testid=calendar-moment]")).not.toBeNull();
+    // The moment is said in the day's name ("…, moment", above), with no mark of its own.
     // No "missed" mark on a day with nothing.
     expect(day("2026-10-03").querySelectorAll("[data-testid^=calendar-]")).toHaveLength(0);
   });
