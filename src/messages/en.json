@@ -437,7 +437,9 @@
     "timelineViewCalendar": "Calendar",
     "calPrevMonth": "Previous month",
     "calNextMonth": "Next month",
-    "calDayLabel": "{date}{mood, select, none {} other {, {mood}}}{moment, select, yes {, moment} other {}}{entry, select, yes {, entry} other {}}",
+    "calDayLabel": "{date}{mood, select, none {} other {, {mood}}}{moment, select, yes {, moment} other {}}{entry, select, yes {, has writing} other {}}",
+    "calKey": "Key",
+    "calKeyWriting": "has writing",
     "printMonth": "Print this month",
     "printFooter": "Moodbow · {month}",
     "printEmpty": "Nothing written this month yet."
