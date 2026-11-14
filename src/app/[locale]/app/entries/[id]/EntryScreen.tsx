@@ -284,11 +284,6 @@ function Screen({ entry: initial, checkIn, from, backLabel, dateLocaleTag, uid, 
       {/* Hidden, not unmounted, while editing: a reflection made on this
           visit is still here after (ReflectPanel keeps it). */}
       <article hidden={mode.kind === "edit"} className="mt-6 space-y-6" data-testid="entry-view">
-      {mode.kind === "view" && recall && entry.is_moment && recallShown && (
-        <div className="mt-3">
-          <RecallChips id={entry.id} value={recallMonths} onChange={setRecallMonths} />
-        </div>
-      )}
       {momentFailed && (
         <div className="flex flex-wrap items-center gap-3">
           <p role="alert" data-testid="entry-moment-error" className="font-medium text-accent">
@@ -335,6 +330,10 @@ function Screen({ entry: initial, checkIn, from, backLabel, dateLocaleTag, uid, 
       >
         {entry.body}
       </div>
+
+      {/* Board 20: "Bring this back in" as a card under the entry's text (and its photos, when
+          pictures come), not above the date. */}
+      {mode.kind === "view" && recall && entry.is_moment && recallShown && <RecallChips id={entry.id} value={recallMonths} onChange={setRecallMonths} />}
 
       {reflect && (
         <ReflectPanel entryId={entry.id} initial={reflect.initial} balance={reflect.balance} country={country} onAnswer={(question) => edit({ at: "end", question })} />

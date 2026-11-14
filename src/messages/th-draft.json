@@ -1041,7 +1041,7 @@
   },
   {
     "key": "entry.recallIn",
-    "en": "Bring this back in:",
+    "en": "Bring this back in",
     "reason": "UX draft (native read pending)"
   },
   {
@@ -1057,6 +1057,11 @@
   {
     "key": "entry.recall12",
     "en": "1 year",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.recallHelp",
+    "en": "It comes back as a memory on the dates you keep.",
     "reason": "UX draft (native read pending)"
   }
 ]
