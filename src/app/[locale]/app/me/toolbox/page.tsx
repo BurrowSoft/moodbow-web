@@ -14,6 +14,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { JOURNAL_HEADING } from "@/lib/ui/journalLayout";
 import { titledMetadata } from "../../pageMeta";
 import { ToolboxBreatheOnly, ToolboxEditor } from "./ToolboxEditor";
+import { GroundingLinks } from "./Grounding";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/app/me/toolbox">): Promise<Metadata> {
   const { locale } = await params;
@@ -52,6 +53,8 @@ export default async function ToolboxPage({ params }: PageProps<"/[locale]/app/m
       ) : (
         <ToolboxEditor initial={parseToolboxItems(data)} />
       )}
+      {/* 1.3: grounding, next to breathing; it needs no data either. */}
+      {pageGate("grounding-live") !== "hidden" && <GroundingLinks />}
     </section>
   );
 }
