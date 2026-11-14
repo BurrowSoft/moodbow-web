@@ -2468,5 +2468,185 @@
     "key": "entry.goodThings3",
     "en": "And one more",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.meRow",
+    "en": "Letters to future me",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.empty",
+    "en": "Write to yourself and choose when to read it.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.editorTitle",
+    "en": "A letter to future me",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.placeholder",
+    "en": "Dear me,",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.openLabel",
+    "en": "Open it",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.in1",
+    "en": "In 1 month",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.in3",
+    "en": "In 3 months",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.in6",
+    "en": "In 6 months",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.in12",
+    "en": "In a year",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.save",
+    "en": "Save letter",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.savedLine",
+    "en": "Saved. It opens on {date}.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.timelineLine",
+    "en": "A letter from you · opens on {date}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.cardLine",
+    "en": "A letter from you, written on {date}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.open",
+    "en": "Open",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.notNow",
+    "en": "Not now",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.earlyTitle",
+    "en": "Open this letter now?",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.earlyBody",
+    "en": "It was meant for {date}. It's yours to open whenever you like.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.openNow",
+    "en": "Open now",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.keepForLater",
+    "en": "Keep it for later",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.deleteTitle",
+    "en": "Delete this letter?",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.deleteBody",
+    "en": "It will be gone for good.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.delete",
+    "en": "Delete",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.keep",
+    "en": "Keep",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.rowOwn",
+    "en": "Letters, appointment summary",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.rowRanges",
+    "en": "Your week, month and 3 months",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.rowPatterns",
+    "en": "Patterns over the last 3 months",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.rowAiFree",
+    "en": "AI reflections, 3 a week",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.rowYear",
+    "en": "Your year and all time",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.rowAiPlus",
+    "en": "More AI reflections and a weekly AI report",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.footerTrial",
+    "en": "7 days free, then {price} a year",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.writeLocked",
+    "en": "Write a new letter",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.lockedBody",
+    "en": "Writing a new letter is part of Moodbow Plus. The letters you've written stay yours: they open on their day, and you can open or delete them any time.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.lapsedBody",
+    "en": "Your Moodbow Plus has ended, so this letter can't be saved. Copy it to keep your words.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.copy",
+    "en": "Copy letter",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.copied",
+    "en": "Copied",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.sheetLetters",
+    "en": "Letters to future me are part of Plus",
+    "reason": "UX draft (native read pending)"
   }
 ]

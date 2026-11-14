@@ -124,6 +124,37 @@ describe("PlusScreen: the table scrolls, the footer never does", () => {
     vi.stubGlobal("fetch", fetchMock);
   });
 
+  // UX 12 Nov (specs/plus.md, the app's rule too): where even the compact pinned part would leave
+  // the content under 40 % (over 60 % of a short screen at large text), nothing is pinned: one
+  // scroll, ending with the price, the renewal line and the button together, after Not now.
+  it("large text on a short screen (the pinned part over 60 %): it unpins, and the page ends with the price, the renewal line and the button", () => {
+    vi.stubGlobal("ResizeObserver", class { observe() {} disconnect() {} });
+    const heights: Record<string, number> = { "plus-footer": 300, "plus-scroll": 60 };
+    const rect = vi.spyOn(Element.prototype, "getBoundingClientRect").mockImplementation(function (this: Element) {
+      return { height: heights[this.getAttribute("data-testid") ?? ""] ?? 0 } as DOMRect;
+    });
+    vi.stubGlobal("innerHeight", 480);
+    const { unmount } = show({ kind: "free", trial: true });
+    const root = screen.getByTestId("plus-screen");
+    const footer = screen.getByTestId("plus-footer");
+    expect(root).toHaveAttribute("data-large");
+    expect(root).toHaveAttribute("data-unpinned");
+    expect(footer.className).not.toContain("fixed");
+    expect(document.body.style.paddingBottom).toBe("");
+    // The page ends with them, together, after Not now.
+    for (const id of ["plus-price", "plus-renews", "plus-start"]) expect(within(footer).getByTestId(id)).toBeTruthy();
+    const notNow = within(screen.getByTestId("plus-rest")).getByTestId("plus-not-now");
+    expect(notNow.compareDocumentPosition(footer) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(root.lastElementChild).toBe(footer);
+    // Still one page scroll, the bar aside, as at large text.
+    expect(document.documentElement).toHaveAttribute("data-tabs-aside");
+    unmount();
+    expect(document.documentElement).not.toHaveAttribute("data-tabs-aside");
+    rect.mockRestore();
+    vi.unstubAllGlobals();
+    vi.stubGlobal("fetch", fetchMock);
+  });
+
   it("large text with Plus: nothing pinned; Manage at the end of the content", () => {
     vi.stubGlobal("ResizeObserver", class { observe() {} disconnect() {} });
     const heights: Record<string, number> = { "plus-footer": 205, "plus-scroll": 83 };

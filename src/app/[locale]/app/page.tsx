@@ -21,6 +21,9 @@ import { sixDaysAfter, yourWeek, type YourWeekMoment } from "@/lib/journal/yourW
 import { YourWeekCard } from "./insights/YourWeekCard";
 import { ToolboxCard } from "./ToolboxCard";
 import { safetyPlanHasContent } from "./me/safety-plan/actions";
+import { lettersGate } from "@/lib/plus/letters";
+import { LetterCard } from "./LetterCard";
+import { letterForToday, parseLetterRows } from "@/lib/journal/letters";
 import { parseToolboxItems } from "@/lib/journal/toolbox";
 import { SecurityNoticeRead } from "./SecurityNoticeRead";
 import { JOURNAL_HEADING } from "@/lib/ui/journalLayout";
@@ -75,7 +78,10 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
   // The safety plan link on a hard week (1.2, moved here with Your week; the PLAN's Today row): read
   // in the same round, not after the week is known, so it never adds a round trip on a hard week.
   const planOn = weekOn && pageGate("safety-plan-live") !== "hidden";
-  const [checkIn, todaysEntries, requestHeaders, plusPage, weekRead, momentsRead, toolboxRead, planHas] = await Promise.all([
+  // Letters (1.2): read with the rest; the body stays on the server (below).
+  // Letters wait for Plus (lettersGate); the card on the day never asks about Plus itself.
+  const lettersOn = lettersGate() !== "hidden";
+  const [checkIn, todaysEntries, requestHeaders, plusPage, weekRead, momentsRead, toolboxRead, planHas, lettersRead] = await Promise.all([
     supabase.from("check_ins").select("local_date, mood, sleep_hours, sleep_quality, exercise_minutes, stress, updated_at").eq("local_date", me.today).maybeSingle(),
     // Today's entries, newest first (previews only; the editor loads the rest).
     supabase.from("entries").select("id, body, is_moment, entry_date, created_at").eq("entry_date", me.today).order("created_at", { ascending: false }),
@@ -86,6 +92,7 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
     weekOn ? supabase.from("entries").select("id, entry_date").eq("is_moment", true).gte("entry_date", weekStart).lte("entry_date", weekEnd) : null,
     toolboxOn ? supabase.from("toolbox_items").select("id, text, position").order("position") : null,
     planOn ? safetyPlanHasContent().catch(() => false) : false,
+    lettersOn ? supabase.from("letters").select("id, body, written_on, opens_on, card_from, opened_at") : null,
   ]);
   const { data, error: checkInError } = checkIn;
   const { data: entries, error: entriesError } = todaysEntries;
@@ -128,6 +135,25 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
   // Tags on the check-in (tags-live): the day's and the person's recent ones.
   const cardTags = await readCardTags(supabase, me.today);
   const toolbox = toolboxRead && !toolboxRead.error ? parseToolboxItems(toolboxRead.data) : null;
+  // A letter from you (1.2), on its day: the oldest due one. Its text is matched here, before
+  // anything renders, and stays on the server: the card gets a yes or no (the Reviewer's read).
+  // A hard last week puts the help offer above it too. A failed read: no card.
+  let letter: { id: string; writtenLabel: string; helpFirst: boolean } | null = null;
+  if (lettersRead) {
+    const letters = lettersRead.error ? [] : parseLetterRows(lettersRead.data);
+    if (letterForToday(letters, me.today, false, () => false)) {
+      // Your week's own read already judged last week (same round, above): reuse it; read again only
+      // when Your week is off or its read failed (audit trial: no second sequential read).
+      let hard = hardWeek;
+      if (!weekRead || weekRead.error) {
+        const start = lastWeekStart(me.today);
+        const { data: week } = await supabase.from("check_ins").select("local_date, mood, sleep_hours, stress, exercise_minutes").gte("local_date", start).lte("local_date", sixDaysAfter(start));
+        hard = yourWeek((week ?? []) as InsightRow[], me.today, [])?.kind === "hard";
+      }
+      const due = letterForToday(letters, me.today, hard, (text) => flagsCrisis(text, CRISIS_KEYWORDS))!;
+      letter = { id: due.id, writtenLabel: dateLine(due.writtenOn, dateLocaleTag), helpFirst: due.helpFirst };
+    }
+  }
 
   return (
     <section className="space-y-8">
@@ -164,6 +190,8 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
       </header>
       <CheckInCard key={checkInError ? "unread" : "read"} initial={(data as CheckIn | null) ?? null} uid={user.id} date={me.today} dateLocaleTag={dateLocaleTag} keepDraft loadFailed={Boolean(checkInError)} {...cardTags} country={me.profile?.country} />
       {toolboxOn && <ToolboxCard uid={user.id} today={me.today} todayMood={(data as CheckIn | null)?.mood ?? null} items={toolbox} />}
+      {/* With letters on, always: a day's Not now may leave the help offer alone (LetterCard). */}
+      {lettersOn && <LetterCard letter={letter} uid={user.id} today={me.today} country={me.profile?.country} />}
       {/* Today's order (UX ruling 3): the check-in, the cards (Your week first: its hard-week help), the
           entries, then Write last. */}
       {yourWeekCard}

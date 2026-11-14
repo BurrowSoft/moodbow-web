@@ -255,6 +255,14 @@
     "met": false,
     "what": "Help only (decision 212 pattern, UX 2026-11-12): My safety plan (1.2 §2) is in the app build people have, with its lock switch and offline view, so its Help article shows. Not safety-plan-live (the web's own switch); like it, waits on the clinician's read."
   },
+  "letters-live": {
+    "met": false,
+    "what": "1.2: Letters to future me (specs/1.2-features.md §3, content/letters.json): Me's letters, Today's card on the day, and the Timeline's locked line. Part of Moodbow Plus from the day they ship (1.3 §3, UX 14 Nov): on only together with plus (lib/plus/letters.ts lettersGate), and writing a new letter is checked on the server. Needs migration 027 on Production (Vitor), the Reviewer's read, the tester rows and Vitor's look."
+  },
+  "app-letters": {
+    "met": false,
+    "what": "Help only (decision 212 pattern, UX 2026-11-12): Letters to future me (1.2 §3) are in the app build people have, with the opening-day notification, so its Help article shows. Not letters-live (the web's own switch)."
+  },
   "appointment-live": {
     "met": false,
     "what": "1.2: For my appointment (specs/1.2-features.md §4, content/appointment.json): a printable summary of check-ins and starred entries, made in the browser, nothing stored or sent. Needs the Reviewer's read, the tester rows and Vitor's look."
