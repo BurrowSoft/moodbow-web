@@ -403,7 +403,7 @@ test.describe("a first run reaches Today without a reload", () => {
         await expect(page).toHaveURL(RegExp(`${path}$`));
       }
       // The protective default: the reminder is off until they choose one.
-      await expect(page.getByTestId("reminder-toggle")).not.toBeChecked();
+      await expect(page.getByTestId("me-reminder-on")).toHaveAttribute("aria-checked", "false");
       // Today offers Setup once there's a check-in.
       await page.goto("/app");
       await expect(page.getByTestId("today-setup-later")).toHaveCount(0);
@@ -1947,7 +1947,10 @@ test("keyboard: a time field shows its ring at every stop inside it, the picker 
     await page.locator("main form button[type=submit]").first().click();
     await expect(page).toHaveURL(RegExp("/app$"), { timeout: 20_000 });
     await page.goto("/setup");
-    await expect(page.getByTestId("setup-reminder-time")).toBeVisible();
+    // After first use the reminder is off (the protective default), so its time field is disabled:
+    // turn it on first, as someone choosing a time would.
+    await page.getByTestId("setup-reminder-off").uncheck();
+    await expect(page.getByTestId("setup-reminder-time")).toBeEnabled();
     await ringThroughout("setup-reminder-time", "Set up's reminder time");
     await page.getByTestId("setup-done").click();
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });

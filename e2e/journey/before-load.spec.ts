@@ -246,12 +246,13 @@ test.describe("typing before the page has loaded", () => {
       await signIn(page, email, password);
       await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
       // Setup after first use (1.3 §6): opened from its page.
+      // The reminder starts off after first use (the protective default), its time field disabled
+      // until it's turned on: the choice made before load is turning it on, and it stays.
       await beforeLoad(page, "/setup", async () => {
-        await page.getByTestId("setup-reminder-time").fill("07:30");
-        await page.getByTestId("setup-reminder-off").check();
+        await expect(page.getByTestId("setup-reminder-off")).toBeChecked();
+        await page.getByTestId("setup-reminder-off").uncheck();
       });
-      await expect(page.getByTestId("setup-reminder-time")).toHaveValue("07:30");
-      await expect(page.getByTestId("setup-reminder-off")).toBeChecked();
+      await expect(page.getByTestId("setup-reminder-off")).not.toBeChecked();
     } finally {
       await cleanup(email);
     }

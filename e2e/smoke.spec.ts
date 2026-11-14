@@ -585,7 +585,8 @@ test.describe("web journal (signed out)", () => {
 // #248: help is on the safety path, so it can't wait for the page's scripts, or need them at all.
 test.describe("help with no script at all", () => {
   test.use({ javaScriptEnabled: false });
-  for (const [path, id] of [["/sign-in", "sign-in-get-help"], ["/forgot-password", "forgot-get-help"], ["/consent", "consent-get-help"]]) {
+  // Create account carries the consents now (1.3 §6): help before anything is agreed is there.
+  for (const [path, id] of [["/sign-in", "sign-in-get-help"], ["/forgot-password", "forgot-get-help"], ["/sign-up", "signup-get-help"]]) {
     for (const language of ["", "/fr", "/es", "/pt-br"]) {
       test(`${language}${path}: the help button leads to a page with the way to a helpline`, async ({ page }) => {
         await page.goto(`${language}${path}`);
@@ -620,9 +621,9 @@ test.describe("onboarding (signed out)", () => {
     await expect(page.getByTestId("home-security")).toHaveCount(0);
   });
 
-  test("Consent: help is there before anything's agreed, and it opens the card", async ({ page }) => {
-    await page.goto("/consent");
-    await page.getByTestId("consent-get-help").click();
+  test("Create account: help is there before anything's agreed, and it opens the card", async ({ page }) => {
+    await page.goto("/sign-up");
+    await page.getByTestId("signup-get-help").click();
     await expect(page.getByTestId("safety-card")).toBeVisible();
     await expect(page.getByTestId("safety-find-helpline")).toBeVisible();
     await page.getByTestId("safety-close").click();
