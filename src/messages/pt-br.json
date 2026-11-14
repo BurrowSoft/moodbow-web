@@ -64,7 +64,7 @@
     "featureInsightsTitle": "Veja o que costuma andar junto nos seus dias",
     "featureInsightsBody": "Gráficos da semana, do mês e de 3 meses.",
     "privateTitle": "Privado desde o início",
-    "privateBody": "Só você pode ler o seu diário. Exporte ou apague tudo quando quiser."
+    "privateBody": "Seu diário é privado e vinculado à sua conta. Exporte ou apague tudo em Perfil."
   },
   "support": {
     "title": "Suporte",
@@ -171,12 +171,13 @@
     "welcome2Title": "Veja seus padrões",
     "welcome2Body": "Sua linha do tempo e seus gráficos mostram o que costuma andar junto com os seus dias bons e os seus dias difíceis.",
     "welcome3Title": "Privado, e só seu",
-    "welcome3BodyNoAi": "Só você pode ler o seu diário, e pode apagar tudo quando quiser em Perfil.",
+    "welcome3BodyNoAi": "Seu diário é privado e vinculado à sua conta, e você pode apagar tudo em Perfil.",
     "welcomeNext": "Próximo",
     "welcomeSkip": "Pular",
     "welcomeStart": "Começar",
     "welcomeHaveAccount": "Já tenho uma conta",
     "consentTitle": "Antes de começar",
+    "consentNotice": "O Moodbow é administrado por Vitor Carvalho, que atua como BurrowSoft, na Tailândia. Guardamos o seu diário, incluindo dados sensíveis como o seu humor e a sua saúde, para fazer a sua conta funcionar e mostrá-lo a você. Não o vendemos nem o usamos para anúncios. Você pode alterá-lo ou apagá-lo em Perfil. A Política de Privacidade tem os detalhes.",
     "consentPrivacy": "Aceito os Termos e a Política de Privacidade",
     "consentHealth": "Aceito que o Moodbow armazene e trate meu diário, que pode incluir informações sobre minha saúde e bem-estar, para prestar o serviço.",
     "consentReadTerms": "Ler os Termos",

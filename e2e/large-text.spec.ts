@@ -96,12 +96,12 @@ test("large text: Consent's heading and boxes keep their words whole, on a 320 p
       await page.goto(`${language}/consent`);
       const split = await page.evaluate(() => {
         const out: string[] = [];
-        const roots = [document.querySelector("h1"), ...document.querySelectorAll("form label span"), document.querySelector("form button[type=submit]")];
+        const roots = [document.querySelector("h1"), document.querySelector("[data-testid=consent-notice]"), ...document.querySelectorAll("form label span"), document.querySelector("form button[type=submit]")];
         for (const root of roots) {
           if (!root) continue;
           const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
           for (let node = walker.nextNode() as Text | null; node; node = walker.nextNode() as Text | null) {
-            for (const m of node.data.matchAll(/[^\s-]+/g)) {
+            for (const m of node.data.matchAll(/[^\s\-–]+/g)) {
               const range = document.createRange();
               range.setStart(node, m.index);
               range.setEnd(node, m.index + m[0].length);
@@ -161,7 +161,7 @@ test("large text: a legal page's words stay whole on a 320 px phone, and normal 
           if (!root) continue;
           const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
           for (let node = walker.nextNode() as Text | null; node; node = walker.nextNode() as Text | null) {
-            for (const m of node.data.matchAll(/[^\s-]+/g)) {
+            for (const m of node.data.matchAll(/[^\s\-–]+/g)) {
               const range = document.createRange();
               range.setStart(node, m.index);
               range.setEnd(node, m.index + m[0].length);

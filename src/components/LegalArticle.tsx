@@ -18,7 +18,7 @@ type Props = { slug: LegalSlug; locale: string; gate: ConditionId };
 export async function LegalArticle({ slug, locale, gate }: Props) {
   const state = pageGate(gate);
   if (state === "hidden") notFound();
-  const textLocale = legalLocale(locale);
+  const textLocale = legalLocale(locale, slug);
   const { title, html, hidden } = renderLegal(legalSource(slug, textLocale));
   const t = await getTranslations("legal");
   const english = textLocale !== locale;

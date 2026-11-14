@@ -64,7 +64,7 @@
     "featureInsightsTitle": "See what goes together in your days",
     "featureInsightsBody": "Week, month and 3-month charts.",
     "privateTitle": "Private by design",
-    "privateBody": "Only you can read your journal. Export or delete everything, any time."
+    "privateBody": "Your journal is private to your account. Export or delete everything in Me."
   },
   "support": {
     "title": "Support",
@@ -171,12 +171,13 @@
     "welcome2Title": "See your patterns",
     "welcome2Body": "Your timeline and charts show what tends to go together with your good days and your hard ones.",
     "welcome3Title": "Private, and yours",
-    "welcome3BodyNoAi": "Only you can read your journal, and you can delete everything at any time in Me.",
+    "welcome3BodyNoAi": "Your journal is private to your account, and you can delete everything in Me.",
     "welcomeNext": "Next",
     "welcomeSkip": "Skip",
     "welcomeStart": "Get started",
     "welcomeHaveAccount": "I already have an account",
     "consentTitle": "Before you start",
+    "consentNotice": "Moodbow is run by Vitor Carvalho, trading as BurrowSoft, Thailand. We keep your journal, including sensitive data such as your mood and health, to run your account and show it back to you. We don't sell it or use it for ads. You can change or delete it in Me. The Privacy Policy has the details.",
     "consentPrivacy": "I agree to the Terms and the Privacy Policy",
     "consentHealth": "I agree that Moodbow stores and processes my journal, which can include information about my health and wellbeing, to provide the service.",
     "consentReadTerms": "Read the Terms",

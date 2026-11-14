@@ -18,4 +18,6 @@ Du kannst Moodbow in der App ohne E-Mail starten. Dein Tagebuch wird in einem Ko
 
 **Tagebücher ohne E-Mail:** Wenn du nie eine E-Mail hinzufügst und die App 12 Monate lang nicht mit Internetverbindung öffnest, löschen wir dieses Tagebuch. Wenn Mitteilungen für Moodbow an sind, erinnert es dich einen Monat vorher daran.
 
+Dein Tagebuch öffnet sich nur mit der Anmeldung auf diesem Handy. Geht sie verloren, zum Beispiel wenn du die App löschst, dein Handy wiederherstellst oder wechselst, oder durch einen technischen Fehler, kann es nicht wiederhergestellt werden. Eine E-Mail schützt dich davor.
+
 Ohne E-Mail gibt es unter **Ich** kein **Abmelden**, weil du dich nicht wieder anmelden könntest. **Konto löschen** funktioniert wie gewohnt.
