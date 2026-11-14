@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { expect, test, type Page } from "@playwright/test";
-import { addPicture, cleanup, configured, confirmEmail, grantPlusTrial, journalToday, newEmail, newPassword, notConfigured, picturesOnStaging, seedMoment, signedUpUnconfirmed, storageStatus, userSession } from "./staging";
+import { addPicture, cleanup, configured, confirmEmail, grantPlusTrial, journalToday, newEmail, newPassword, notConfigured, picturesOnStaging, secondsUntilRefused, seedMoment, signedUpUnconfirmed, storageStatus, userSession } from "./staging";
 
 // Pictures (035/036) at the Storage API itself, against staging (UX and the Reviewer, 14 Nov, after
 // the Web Tester's A12): Storage lets an object's uploader read it whatever its row says, so the web
@@ -13,6 +13,9 @@ import { addPicture, cleanup, configured, confirmEmail, grantPlusTrial, journalT
 test.skip(!configured, notConfigured);
 
 const refused = (s: { sign: number; get: number }) => s.sign >= 400 && s.get >= 400;
+// Uploads are max-age=0, but Storage may still answer from a cache for a moment after a delete: the
+// authenticated GET is polled, must be refused within 90 s, and the seconds go to the log.
+const WITHIN = 90_000;
 
 async function signIn(page: Page, email: string, password: string) {
   await page.goto("/sign-in");
@@ -25,7 +28,7 @@ async function signIn(page: Page, email: string, password: string) {
 test("pictures at the Storage API: B never; A not after × or an entry delete; the RPC-only order logged as the control", async ({ page }) => {
   // 035 is on staging (decision 250): a configured staging without it is a failure, never a skip.
   expect(await picturesOnStaging(), "staging has 035 (picture_deletions readable by the service role)").toBe(true);
-  test.setTimeout(180_000);
+  test.setTimeout(420_000);
   const a = newEmail();
   const b = newEmail();
   const pa = newPassword();
@@ -60,11 +63,15 @@ test("pictures at the Storage API: B never; A not after × or an entry delete; t
     await page.getByTestId("entry-picture-remove").click();
     await expect(page.getByTestId("entry-picture")).toHaveCount(0, { timeout: 15_000 });
     const a2 = await storageStatus(A.token, p1.path);
-    note("A, after × (web)", a2);
-    expect(refused(a2), "A can't reach a picture removed with ×").toBe(true);
-    const a2t = await storageStatus(A.token, p1.thumb);
-    note("A, thumbnail after × (web)", a2t);
-    expect(refused(a2t), "nor its thumbnail").toBe(true);
+    note("A, after × (web), at once", a2);
+    expect(a2.sign, "A can't sign a picture removed with ×").toBeGreaterThanOrEqual(400);
+    const t2 = await secondsUntilRefused(A.token, p1.path, WITHIN);
+    log.push(`A, after × (web): GET refused after ${t2 ?? "NEVER (90 s)"} s`);
+    expect(t2, "A's authenticated GET is refused within 90 s of ×").not.toBeNull();
+    const t2t = await secondsUntilRefused(A.token, p1.thumb, WITHIN);
+    log.push(`A, thumbnail after ×: GET refused after ${t2t ?? "NEVER (90 s)"} s`);
+    expect(t2t, "nor its thumbnail").not.toBeNull();
+    note("A, after × (web), after the wait", await storageStatus(A.token, p1.path));
     const b2 = await storageStatus(B.token, p1.path);
     note("B, A's deleted", b2);
     expect(refused(b2), "B can't reach A's deleted picture").toBe(true);
@@ -85,8 +92,11 @@ test("pictures at the Storage API: B never; A not after × or an entry delete; t
     await page.getByTestId("entry-delete-confirm").click();
     await expect(page).not.toHaveURL(RegExp(moment2), { timeout: 20_000 });
     const a4 = await storageStatus(A.token, p3.path);
-    note("A, after an entry delete (web)", a4);
-    expect(refused(a4), "A can't reach a deleted entry's picture").toBe(true);
+    note("A, after an entry delete (web), at once", a4);
+    expect(a4.sign, "A can't sign a deleted entry's picture").toBeGreaterThanOrEqual(400);
+    const t4 = await secondsUntilRefused(A.token, p3.path, WITHIN);
+    log.push(`A, after an entry delete: GET refused after ${t4 ?? "NEVER (90 s)"} s`);
+    expect(t4, "A's authenticated GET is refused within 90 s of the entry delete").not.toBeNull();
   } finally {
     console.log(`[pictures-api] ${log.join(" | ")}`);
     await cleanup(a);

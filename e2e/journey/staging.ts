@@ -328,12 +328,26 @@ export async function addPicture(session: { client: SupabaseClient }, entryId: s
   if (error || !row) throw new Error(`picture_reserve failed: ${error?.message ?? "no row"}`);
   const bucket = session.client.storage.from("entry-pictures");
   for (const p of [row.path, row.thumb_path]) {
-    const { error: upError } = await bucket.upload(p, new Blob([jpeg as BlobPart], { type: "image/jpeg" }), { contentType: "image/jpeg", upsert: false });
+    // max-age=0, as the web route uploads (storage-js's default would be 3600).
+    const { error: upError } = await bucket.upload(p, new Blob([jpeg as BlobPart], { type: "image/jpeg" }), { contentType: "image/jpeg", upsert: false, cacheControl: "0" });
     if (upError) throw new Error(`upload failed: ${upError.message}`);
   }
   const { error: confirmError } = await session.client.rpc("picture_confirm", { p_id: row.id, p_width: 16, p_height: 16 });
   if (confirmError) throw new Error(`picture_confirm failed: ${confirmError.message}`);
   return { id: row.id, path: row.path, thumb: row.thumb_path };
+}
+
+// The authenticated GET, polled until it's refused (>= 400) or the time runs out: the seconds it
+// took, or null when it never was.
+export async function secondsUntilRefused(token: string, path: string, limitMs = 90_000): Promise<number | null> {
+  const started = Date.now();
+  while (Date.now() - started < limitMs) {
+    const res = await fetch(`${URL_}/storage/v1/object/authenticated/entry-pictures/${path}`, { headers: { apikey: PUBLISHABLE, Authorization: `Bearer ${token}` }, cache: "no-store" });
+    await res.arrayBuffer().catch(() => undefined);
+    if (res.status >= 400) return Math.round((Date.now() - started) / 100) / 10;
+    await new Promise((r) => setTimeout(r, 2_000));
+  }
+  return null;
 }
 
 // The HTTP statuses a fresh sign request and an authenticated GET get for this path, with this

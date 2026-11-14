@@ -63,7 +63,9 @@ export async function POST(req: Request): Promise<Response> {
   if (reserved.error || !row?.id || !row.path || !row.thumb_path) return answer(codeOf(reserved.error));
 
   const bucket = supabase.storage.from(PICTURES.bucket);
-  const options = { contentType: "image/jpeg", upsert: false, cacheControl: "300" };
+  // max-age=0 (storage-js sends "max-age=<cacheControl>"): a private photo is never served from a
+  // cache after it's deleted (the Reviewer, #322: a cached authenticated GET outlived the delete).
+  const options = { contentType: "image/jpeg", upsert: false, cacheControl: "0" };
   const upFull = await bucket.upload(row.path, full, options);
   const upThumb = upFull.error ? { error: upFull.error } : await bucket.upload(row.thumb_path, thumb, options);
   if (upFull.error || upThumb.error) {
