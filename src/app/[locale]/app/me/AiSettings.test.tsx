@@ -35,7 +35,9 @@ describe("Me → AI", () => {
     expect(screen.getByTestId("me-ai-consent")).toHaveTextContent(m.consentAiBody);
     expect(screen.getByTestId("me-ai-off")).toHaveTextContent(m.meAiOffHint);
     expect(screen.queryByTestId("me-ai-tone-warm")).toBeNull();
-    expect(screen.getByTestId("me-ai-credits")).toHaveTextContent("700 credits");
+    // No credits product (14 Nov): no balance anywhere.
+    expect(screen.queryByTestId("me-ai-credits")).toBeNull();
+    expect(screen.getByTestId("me-ai-on").closest("section")?.textContent ?? "").not.toMatch(/credit/i);
   });
 
   it("turning it on saves at once and shows tone and focus", async () => {
@@ -114,9 +116,8 @@ describe("Me → AI", () => {
 
   it("at 0 credits, the steady Lite state (creditsLiteNow), never creditsOut (decision 122)", () => {
     renderIt(true, 0);
-    expect(screen.getByTestId("me-ai-credits")).toHaveTextContent("0 credits");
-    expect(screen.getByTestId("me-ai-credits")).toHaveTextContent(m.creditsLiteNow);
-    expect(screen.getByTestId("me-ai-credits")).not.toHaveTextContent(m.creditsOut);
+    expect(screen.getByTestId("me-ai-lite")).toHaveTextContent(m.creditsLiteNow);
+    expect(screen.getByTestId("me-ai-lite")).not.toHaveTextContent(m.creditsOut);
   });
 });
 

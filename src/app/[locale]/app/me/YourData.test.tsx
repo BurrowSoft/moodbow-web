@@ -190,18 +190,11 @@ describe("YourData: delete account", () => {
     expect(screen.getByTestId("delete-dialog")).not.toHaveTextContent("AI credit");
   });
 
-  it("credits: with AI live, warned only when there are some (one / many)", () => {
-    renderIt(0);
-    fireEvent.click(screen.getByTestId("me-delete"));
-    expect(screen.queryByTestId("delete-credits")).toBeNull();
-    cleanup();
-    renderIt(1);
-    fireEvent.click(screen.getByTestId("me-delete"));
-    expect(screen.getByTestId("delete-credits")).toHaveTextContent("You'll also lose your 1 AI credit.");
-    cleanup();
+  it("no credits line any more, with AI live and a balance (no credits product, 14 Nov)", () => {
     renderIt(40);
     fireEvent.click(screen.getByTestId("me-delete"));
-    expect(screen.getByTestId("delete-credits")).toHaveTextContent("You'll also lose your 40 AI credits.");
+    expect(screen.queryByTestId("delete-credits")).toBeNull();
+    expect(screen.getByTestId("delete-dialog")).not.toHaveTextContent("AI credit");
   });
 
   it("confirming sends DELETE; a failure shows the generic error and keeps the dialog", async () => {

@@ -43,12 +43,12 @@ const hasPictures = (doc: unknown) =>
   Array.isArray((doc as { entries?: unknown })?.entries) && (doc as { entries: { pictures?: unknown }[] }).entries.some((e) => Array.isArray(e?.pictures) && e.pictures.length > 0);
 
 // Me → Your data (M7): Export my data, and Delete account behind a dialog
-// that warns about lost AI credits, offers the export first, and needs
-// DELETE typed. The credits line only once AI is live (ai: "ai-live" met)
+// that offers the export first and needs DELETE typed. No credits line: there's no credits
+// product any more (14 Nov). credits and ai stay accepted for the callers
 // and there are some: text = enforcement, as the Help article's
 // {pending:ai_live} clause (UX, the Web Tester's forced pass). csv: the
 // spreadsheet link (1.1 P, export-csv-live).
-export function YourData({ credits, uid, csv = false, ai = false, plusSource = null, pdf = null, pictures = false }: { credits: number; uid: string; csv?: boolean; ai?: boolean; plusSource?: "stripe" | "play" | "apple" | null; pdf?: "plus" | PlusOffer | null; pictures?: boolean }) {
+export function YourData({ uid, csv = false, plusSource = null, pdf = null, pictures = false }: { credits?: number; uid: string; csv?: boolean; ai?: boolean; plusSource?: "stripe" | "play" | "apple" | null; pdf?: "plus" | PlusOffer | null; pictures?: boolean }) {
   const t = useTranslations("me");
   const tp = useTranslations("plus");
   const tt = useTranslations("today");
@@ -195,11 +195,6 @@ export function YourData({ credits, uid, csv = false, ai = false, plusSource = n
               startTransition(() => action(form));
             }}
           >
-            {ai && credits > 0 && (
-              <p className="font-medium text-text" data-testid="delete-credits">
-                {t("deleteCredits", { credits })}
-              </p>
-            )}
             {/* Moodbow Plus (UX, #270): only to someone with that source. On the web a
                 Stripe subscription is cancelled with the account; a store's isn't. */}
             {plusSource && (
