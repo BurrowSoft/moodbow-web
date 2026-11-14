@@ -463,6 +463,7 @@
     "insightsNeedMoreStress": "Aggiungi lo stress in {count, plural, =1 {1 altro giorno} other {altri {count} giorni}} per vedere questo grafico.",
     "patternsTitle": "Tendenze nei tuoi check-in",
     "patternsSubtitle": "Negli ultimi 3 mesi",
+    "moodScale": "umore, 1–5",
     "patternsSleepShown": "Nei giorni dopo 7 o più ore di sonno, il tuo umore medio è stato {a} su 5. Dopo meno sonno, {b}.",
     "patternsSleepSame": "Dopo 7 o più ore di sonno e dopo meno, il tuo umore è stato più o meno lo stesso ({a} e {b} su 5).",
     "patternsMovementShown": "Nei giorni con movimento, il tuo umore medio è stato {a} su 5. Nei giorni senza, {b}.",

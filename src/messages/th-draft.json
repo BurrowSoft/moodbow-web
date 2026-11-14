@@ -1473,5 +1473,10 @@
     "key": "plus.liftsNone",
     "en": "Keep tagging your days. Patterns show up after a few weeks.",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.moodScale",
+    "en": "mood, 1–5",
+    "reason": "UX draft (native read pending)"
   }
 ]

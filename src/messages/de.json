@@ -463,6 +463,7 @@
     "insightsNeedMoreStress": "Trag noch an {count, plural, =1 {1 weiteren Tag} other {{count} weiteren Tagen}} Stress ein, um dieses Diagramm zu sehen.",
     "patternsTitle": "Muster in deinen Check-ins",
     "patternsSubtitle": "In den letzten 3 Monaten",
+    "moodScale": "Stimmung, 1–5",
     "patternsSleepShown": "An Tagen nach 7 oder mehr Stunden Schlaf lag deine Stimmung im Schnitt bei {a} von 5. Nach weniger Schlaf bei {b}.",
     "patternsSleepSame": "Nach 7 oder mehr Stunden Schlaf und nach weniger war deine Stimmung etwa gleich ({a} und {b} von 5).",
     "patternsMovementShown": "An Tagen mit Bewegung lag deine Stimmung im Schnitt bei {a} von 5. An Tagen ohne Bewegung bei {b}.",

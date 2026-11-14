@@ -463,6 +463,7 @@
     "insightsNeedMoreStress": "Añade el estrés {count, plural, =1 {1 día más} other {{count} días más}} para ver este gráfico.",
     "patternsTitle": "Patrones en tus registros",
     "patternsSubtitle": "En los últimos 3 meses",
+    "moodScale": "ánimo, 1–5",
     "patternsSleepShown": "Los días después de dormir 7 horas o más, tu ánimo promedió {a} de 5. Después de dormir menos, {b}.",
     "patternsSleepSame": "Después de dormir 7 horas o más y después de dormir menos, tu ánimo fue más o menos igual ({a} y {b} de 5).",
     "patternsMovementShown": "Los días en que te moviste, tu ánimo promedió {a} de 5. Los días en que no, {b}.",

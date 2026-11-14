@@ -463,6 +463,7 @@
     "insightsNeedMoreStress": "Add stress on {count, plural, =1 {1 more day} other {{count} more days}} to see this chart.",
     "patternsTitle": "Patterns in your check-ins",
     "patternsSubtitle": "In the last 3 months",
+    "moodScale": "mood, 1–5",
     "patternsSleepShown": "On days after 7 or more hours of sleep, your mood averaged {a} of 5. After less sleep, {b}.",
     "patternsSleepSame": "After 7 or more hours of sleep and after less, your mood was about the same ({a} and {b} of 5).",
     "patternsMovementShown": "On days you moved, your mood averaged {a} of 5. On days you didn't, {b}.",

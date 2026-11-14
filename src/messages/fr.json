@@ -463,6 +463,7 @@
     "insightsNeedMoreStress": "Ajoutez votre stress encore {count, plural, =1 {1 jour} other {{count} jours}} pour voir ce graphique.",
     "patternsTitle": "Tendances dans vos bilans",
     "patternsSubtitle": "Sur les 3 derniers mois",
+    "moodScale": "humeur, 1–5",
     "patternsSleepShown": "Les jours suivant une nuit de 7 heures ou plus, votre humeur était en moyenne de {a} sur 5. Après moins de sommeil, {b}.",
     "patternsSleepSame": "Après 7 heures de sommeil ou plus, comme après moins, votre humeur était à peu près la même ({a} et {b} sur 5).",
     "patternsMovementShown": "Les jours où vous avez bougé, votre humeur était en moyenne de {a} sur 5. Les autres jours, {b}.",

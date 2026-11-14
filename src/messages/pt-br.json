@@ -463,6 +463,7 @@
     "insightsNeedMoreStress": "Registre o estresse em {count, plural, =1 {mais 1 dia} other {mais {count} dias}} para ver este gráfico.",
     "patternsTitle": "Padrões nos seus check-ins",
     "patternsSubtitle": "Nos últimos 3 meses",
+    "moodScale": "humor, 1–5",
     "patternsSleepShown": "Nos dias depois de 7 horas de sono ou mais, seu humor ficou em média {a} de 5. Depois de dormir menos, {b}.",
     "patternsSleepSame": "Depois de 7 horas de sono ou mais e depois de dormir menos, seu humor ficou mais ou menos igual ({a} e {b} de 5).",
     "patternsMovementShown": "Nos dias em que você se movimentou, seu humor ficou em média {a} de 5. Nos dias em que não, {b}.",
