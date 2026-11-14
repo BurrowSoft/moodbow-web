@@ -498,7 +498,22 @@
     "yourWeekLookMixed": "Sua semana teve dias bons e dias mais para baixo.",
     "yourWeekMoment": "Um momento daquela semana: {date}",
     "yourWeekHard": "Esta semana pareceu difícil.",
-    "yourWeekCaption": "Isso pode mostrar o que costuma andar junto, não o que causa o quê."
+    "yourWeekCaption": "Isso pode mostrar o que costuma andar junto, não o que causa o quê.",
+    "pairTag": "\"{tag}\"",
+    "pairWith": "Com {tag}",
+    "pairOther": "Outros dias",
+    "pairSleepMore": "7 h ou mais",
+    "pairSleepLess": "Menos sono",
+    "pairMoved": "Com movimento",
+    "pairNotMoved": "Sem movimento",
+    "pairStressLow": "Estresse baixo",
+    "pairStressHigh": "Estresse alto",
+    "pairWeekTitle": "Dias úteis e fins de semana",
+    "pairWeekdays": "Dias úteis",
+    "pairWeekends": "Fins de semana",
+    "pairWritingTitle": "Escrita",
+    "pairWrote": "Com escrita",
+    "pairNotWrote": "Sem escrita"
   },
   "share": {
     "shareButton": "Compartilhar",
@@ -728,6 +743,12 @@
     "exampleStrip": "Um exemplo de Insights. Com o Plus, aqui aparecem os seus próprios check-ins.",
     "exampleWatermark": "EXEMPLO",
     "exampleRanges": "Período do exemplo",
-    "exampleSample": "{strip} {see}"
+    "exampleSample": "{strip} {see}",
+    "exampleLabel": "Exemplo",
+    "exampleWeekLine": "Quase sempre estável, com dois dias bons no final.",
+    "exampleTagWalk": "Caminhada",
+    "exampleTagFriends": "Amigos",
+    "liftsTitle": "O que me faz bem",
+    "liftsRow": "Nos dias com a tag \"{tag}\", seu humor ficou em média em {a} de 5; nos outros dias, em {b}."
   }
 }

@@ -40,10 +40,22 @@ describe("InsightsExample (Insights become Plus, rulings 3 and 4)", () => {
   it("the range chips switch the example (the only taps besides the tab bar, Back and help that don't open Plus)", () => {
     show();
     expect(screen.getByTestId("insights-example-range-week")).toHaveAttribute("aria-pressed", "true");
-    const weekBars = screen.getByTestId("insights-example-mood").querySelectorAll("span.flex-1").length;
+    // Week (board 3): Your week's 7 bars and its sentence, then What lifts me's pairs, then Patterns.
+    const week = screen.getByTestId("insights-example-week");
+    expect(week.querySelectorAll("span.flex-1")).toHaveLength(7);
+    expect(week).toHaveTextContent(m.exampleWeekLine);
+    expect(screen.getByTestId("insights-example-lifts")).toHaveTextContent(`“${m.exampleTagWalk}”`);
+    expect(screen.getByTestId("insights-example-lifts")).toHaveTextContent(messages.insights.pairOther);
+    expect(screen.getByTestId("insights-example-patterns")).toHaveTextContent(messages.insights.pairSleepMore);
+    expect(screen.queryByTestId("insights-example-mood")).toBeNull();
+    // Month, 3 months, Year: the four cards (boards 11-13).
+    fireEvent.click(screen.getByTestId("insights-example-range-month"));
+    expect(screen.getByTestId("insights-example-mood").querySelectorAll("span.flex-1")).toHaveLength(30);
+    expect(screen.queryByTestId("insights-example-week")).toBeNull();
     fireEvent.click(screen.getByTestId("insights-example-range-year"));
     expect(screen.getByTestId("insights-example-range-year")).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByTestId("insights-example-mood").querySelectorAll("span.flex-1").length).not.toBe(weekBars);
+    expect(screen.getByTestId("insights-example-mood").querySelectorAll("span.flex-1")).toHaveLength(12);
+    for (const metric of ["sleep_hours", "stress", "exercise_minutes"]) expect(screen.getByTestId(`insights-example-${metric}`)).toBeInTheDocument();
   });
   it("the EXAMPLE watermark: hidden from screen readers, never catching a tap, scaled to fit whole", () => {
     show();

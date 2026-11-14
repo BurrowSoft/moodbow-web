@@ -498,7 +498,22 @@
     "yourWeekLookMixed": "Votre semaine a eu de bons jours et des jours moins bons.",
     "yourWeekMoment": "Un moment de cette semaine-là : {date}",
     "yourWeekHard": "Cette semaine a semblé difficile.",
-    "yourWeekCaption": "Cela peut montrer ce qui va souvent ensemble, pas ce qui cause quoi."
+    "yourWeekCaption": "Cela peut montrer ce qui va souvent ensemble, pas ce qui cause quoi.",
+    "pairTag": "« {tag} »",
+    "pairWith": "Avec {tag}",
+    "pairOther": "Autres jours",
+    "pairSleepMore": "7 h ou plus",
+    "pairSleepLess": "Moins de sommeil",
+    "pairMoved": "Avec activité",
+    "pairNotMoved": "Sans activité",
+    "pairStressLow": "Stress faible",
+    "pairStressHigh": "Stress élevé",
+    "pairWeekTitle": "Semaine et week-end",
+    "pairWeekdays": "En semaine",
+    "pairWeekends": "Week-ends",
+    "pairWritingTitle": "Écriture",
+    "pairWrote": "Avec écriture",
+    "pairNotWrote": "Sans écriture"
   },
   "share": {
     "shareButton": "Partager",
@@ -728,6 +743,12 @@
     "exampleStrip": "Un exemple de Statistiques. Avec Plus, cette page montre vos propres bilans.",
     "exampleWatermark": "EXEMPLE",
     "exampleRanges": "Période de l'exemple",
-    "exampleSample": "{strip} {see}"
+    "exampleSample": "{strip} {see}",
+    "exampleLabel": "Exemple",
+    "exampleWeekLine": "Plutôt stable, avec deux bonnes journées à la fin.",
+    "exampleTagWalk": "Marche",
+    "exampleTagFriends": "Amis",
+    "liftsTitle": "Ce qui me fait du bien",
+    "liftsRow": "Les jours avec l'étiquette « {tag} », votre humeur était en moyenne de {a} sur 5 ; les autres jours, de {b}."
   }
 }

@@ -498,7 +498,22 @@
     "yourWeekLookMixed": "Deine Woche hatte gute und schlechte Tage.",
     "yourWeekMoment": "Ein Moment aus dieser Woche: {date}",
     "yourWeekHard": "Das sah nach einer schweren Woche aus.",
-    "yourWeekCaption": "Das zeigt vielleicht, was oft zusammen auftritt, aber nicht, was was auslöst."
+    "yourWeekCaption": "Das zeigt vielleicht, was oft zusammen auftritt, aber nicht, was was auslöst.",
+    "pairTag": "„{tag}“",
+    "pairWith": "Mit {tag}",
+    "pairOther": "Andere Tage",
+    "pairSleepMore": "7 Std. oder mehr",
+    "pairSleepLess": "Weniger Schlaf",
+    "pairMoved": "Mit Bewegung",
+    "pairNotMoved": "Ohne Bewegung",
+    "pairStressLow": "Wenig Stress",
+    "pairStressHigh": "Viel Stress",
+    "pairWeekTitle": "Wochentage und Wochenenden",
+    "pairWeekdays": "Wochentage",
+    "pairWeekends": "Wochenenden",
+    "pairWritingTitle": "Schreiben",
+    "pairWrote": "Geschrieben",
+    "pairNotWrote": "Nicht geschrieben"
   },
   "share": {
     "shareButton": "Teilen",
@@ -728,6 +743,12 @@
     "exampleStrip": "Ein Beispiel für Einblicke. Mit Plus siehst du hier deine eigenen Check-ins.",
     "exampleWatermark": "BEISPIEL",
     "exampleRanges": "Zeitraum des Beispiels",
-    "exampleSample": "{strip} {see}"
+    "exampleSample": "{strip} {see}",
+    "exampleLabel": "Beispiel",
+    "exampleWeekLine": "Meist ausgeglichen, mit zwei guten Tagen am Ende.",
+    "exampleTagWalk": "Spaziergang",
+    "exampleTagFriends": "Freunde",
+    "liftsTitle": "Was mir guttut",
+    "liftsRow": "An Tagen mit dem Tag „{tag}“ lag deine Stimmung im Schnitt bei {a} von 5, an anderen Tagen bei {b}."
   }
 }
