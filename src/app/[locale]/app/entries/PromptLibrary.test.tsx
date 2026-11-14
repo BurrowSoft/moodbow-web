@@ -47,7 +47,7 @@ describe("the prompt library on Write (UX, 12 Nov)", () => {
     expect(within(library).getAllByRole("button").map((b) => b.getAttribute("data-testid"))).toEqual(["entry-library-group-hard-days"]);
     for (const id of ["noticing", "gratitude", "relationships", "ahead"]) expect(screen.queryByTestId(`entry-library-group-${id}`)).toBeNull();
     expect(library.querySelector("[data-locked]")).toBeNull();
-    expect(screen.queryByTestId("plus-sheet")).toBeNull();
+    expect(library.querySelector('a[href$="/app/me/plus"]')).toBeNull();
     expect(screen.queryByRole("dialog")).toBeNull();
     expect(library).not.toHaveTextContent(messages.plus.lock);
     fireEvent.click(screen.getByTestId("entry-library-group-hard-days"));
