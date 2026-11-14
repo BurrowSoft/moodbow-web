@@ -16,6 +16,9 @@ import { loadTimeline } from "./actions";
 import { JOURNAL_HEADING, segment } from "@/lib/ui/journalLayout";
 import { TimelineList } from "./TimelineList";
 import { OnThisDay } from "./OnThisDay";
+import { MilestoneCard } from "../MilestoneCard";
+import { loadMilestone } from "@/lib/share/milestoneData";
+import { readPlusView } from "@/lib/plus/view";
 import { TimelineSearch } from "./TimelineSearch";
 import { MonthCalendar } from "./MonthCalendar";
 import { TimelineViews } from "./TimelineViews";
@@ -74,7 +77,16 @@ export default async function TimelinePage({ params, searchParams }: PageProps<"
   };
   // The list, On this day and the calendar need only `me`, so they're read together (the Web Dev's
   // LCP read, 12 Nov: each one in turn cost a round trip to the database). Same reads, same results.
-  const [page, onThisDay, { view, calendarInitial }, requestHeaders] = await Promise.all([loadTimeline(null, momentsOnly), readOnThisDay(), readCalendar(), headers()]);
+  // The milestone reached (decision 169), where the 1.1 cards are on, and whether Share it is open
+  // (Plus, or a Plus row that can't be read: spec "Insights become Plus", ruling 6).
+  const [page, onThisDay, { view, calendarInitial }, requestHeaders, milestone, plus] = await Promise.all([
+    loadTimeline(null, momentsOnly),
+    readOnThisDay(),
+    readCalendar(),
+    headers(),
+    pageGate("share-cards") !== "hidden" && pageGate("share-cards-more") !== "hidden" ? loadMilestone(supabase) : null,
+    pageGate("plus") !== "hidden" ? readPlusView(supabase, user.id) : null,
+  ]);
   if (page.status === "error") return <JournalUnavailable />;
 
   const t = await getTranslations("timeline");
@@ -83,6 +95,10 @@ export default async function TimelinePage({ params, searchParams }: PageProps<"
   const shareable = pageGate("share-cards") !== "hidden";
   const printable = pageGate("print-live") !== "hidden";
 
+  // The milestone card (Vitor, 14 Nov): at the top of the list, above On this day, in the page's flow.
+  const milestoneCard = milestone && (
+    <MilestoneCard n={milestone.n} colours={milestone.colours} uid={user.id} month={me.today.slice(0, 7)} dateLocaleTag={dateLocaleTag} year={pageGate("year-card") !== "hidden" ? yearOnOffer(me.today) : null} inline shareLocked={plus !== null && plus.kind !== "plus"} />
+  );
   const onThisDayCard = onThisDay && (
     <OnThisDay
       kind={onThisDay.kind}
@@ -111,6 +127,7 @@ export default async function TimelinePage({ params, searchParams }: PageProps<"
           </Link>
         </nav>
       )}
+      {!calendarLive && milestoneCard}
       {!calendarLive && onThisDayCard}
       {/* Keyed by the view, so switching filters starts a fresh list. */}
       <TimelineList
@@ -128,6 +145,7 @@ export default async function TimelinePage({ params, searchParams }: PageProps<"
 
   const content = calendarLive ? (
     <>
+      {milestoneCard}
       {onThisDayCard}
       <TimelineViews
         initialView={view}

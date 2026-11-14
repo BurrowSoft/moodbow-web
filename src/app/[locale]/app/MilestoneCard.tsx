@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useRef, useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
 import { dialogButton } from "@/components/Dialog";
+import { Link } from "@/i18n/navigation";
+import { PlusLock } from "./PlusSheet";
 import type { Milestone } from "@/lib/share/cards";
 import { localKey } from "@/lib/localData";
 import { ShareMonth } from "./insights/ShareMonth";
@@ -11,7 +13,9 @@ import { ShareMonth } from "./insights/ShareMonth";
 // "Share it" opens the share sheet on the milestone card; "Not now" or
 // opening the sheet means it never shows again for that milestone, in this
 // browser. Total days journaled, never a streak.
-type Props = { n: Milestone; colours: string[]; uid: string; month: string; dateLocaleTag: string; year?: number | null };
+// inline: at the top of Timeline's list (Vitor, 14 Nov), in the page's flow, not floating.
+// shareLocked: Share it is Plus; without it, a lock to the Plus screen (spec "Insights become Plus", 6).
+type Props = { n: Milestone; colours: string[]; uid: string; month: string; dateLocaleTag: string; year?: number | null; inline?: boolean; shareLocked?: boolean };
 
 const SHARE_LABEL = "milestoneShare" as const;
 const listeners = new Set<() => void>();
@@ -27,7 +31,7 @@ const seen = (key: string) => {
   }
 };
 
-export function MilestoneCard({ n, colours, uid, month, dateLocaleTag, year = null }: Props) {
+export function MilestoneCard({ n, colours, uid, month, dateLocaleTag, year = null, inline = false, shareLocked = false }: Props) {
   const t = useTranslations("share");
   const key = localKey("milestone-seen", uid, String(n));
   // Until the browser says otherwise, assume it was seen: no flash of a card
@@ -49,16 +53,16 @@ export function MilestoneCard({ n, colours, uid, month, dateLocaleTag, year = nu
     const hadFocus = !!card.current?.contains(document.activeElement);
     markSeen();
     listeners.forEach((cb) => cb());
-    if (hadFocus) document.getElementById("today-title")?.focus({ preventScroll: true });
+    if (hadFocus) (document.getElementById("today-title") ?? document.querySelector<HTMLElement>("main h1"))?.focus({ preventScroll: true });
   }, [markSeen]);
   // While the card floats, the page gets room for it at its very end, after
   // the footer (Web Tester #82: an in-page spacer still left the footer
   // under the card): space added below everything moves nothing (no CLS).
   useEffect(() => {
-    if (done) return;
+    if (done || inline) return;
     document.body.classList.add("has-floating-card");
     return () => document.body.classList.remove("has-floating-card");
-  }, [done]);
+  }, [done, inline]);
   // Said once to screen readers when the card appears: the polite live
   // region is always there (empty in the server HTML, where it counts as
   // seen) and gets the title when the browser finds the milestone unseen.
@@ -83,7 +87,7 @@ export function MilestoneCard({ n, colours, uid, month, dateLocaleTag, year = nu
           ref={card}
           aria-labelledby="milestone-title"
           data-testid="milestone-card"
-          className="milestone-in fixed inset-x-[12px] bottom-[calc(3.5rem+24px)] z-10 max-h-[calc(100dvh-3.5rem-32px)] overflow-y-auto overflow-x-hidden overscroll-contain rounded-3xl [overflow-wrap:anywhere] border border-border bg-surface p-[20px] shadow-lg [font-size:min(1rem,max(8vw,16px))] min-[360px]:inset-x-[16px] md:inset-x-auto md:bottom-6 md:right-6 md:w-96"
+          className={inline ? "mt-4 rounded-3xl border border-border bg-surface p-[20px] [overflow-wrap:anywhere] [font-size:min(1rem,max(8vw,16px))]" : "milestone-in fixed inset-x-[12px] bottom-[calc(3.5rem+24px)] z-10 max-h-[calc(100dvh-3.5rem-32px)] overflow-y-auto overflow-x-hidden overscroll-contain rounded-3xl [overflow-wrap:anywhere] border border-border bg-surface p-[20px] shadow-lg [font-size:min(1rem,max(8vw,16px))] min-[360px]:inset-x-[16px] md:inset-x-auto md:bottom-6 md:right-6 md:w-96"}
         >
           <div className="flex items-start justify-between gap-[8px]">
             <h2 id="milestone-title" className="min-w-0 flex-1 font-medium leading-[1.556] text-text [font-size:min(1.125rem,max(9vw,18px))]">
@@ -104,7 +108,14 @@ export function MilestoneCard({ n, colours, uid, month, dateLocaleTag, year = nu
           </div>
           <div className="mt-[16px] flex flex-wrap gap-[12px] [&_button]:min-h-[44px]">
             {/* Opening the sheet counts as seen; the card stays until the sheet closes. */}
-            <ShareMonth month={month} dateLocaleTag={dateLocaleTag} label={SHARE_LABEL} testId="milestone-share" milestone={{ n, colours }} year={year} initialType="milestone" onOpen={markSeen} />
+            {shareLocked ? (
+              <Link href="/app/me/plus" data-testid="milestone-share" data-locked="" className={`${dialogButton(true)} inline-flex items-center gap-2`}>
+                {t(SHARE_LABEL)}
+                <PlusLock />
+              </Link>
+            ) : (
+              <ShareMonth month={month} dateLocaleTag={dateLocaleTag} label={SHARE_LABEL} testId="milestone-share" milestone={{ n, colours }} year={year} initialType="milestone" onOpen={markSeen} />
+            )}
             <button type="button" data-testid="milestone-not-now" onClick={dismiss} className={dialogButton()}>
               {t("milestoneNotNow")}
             </button>

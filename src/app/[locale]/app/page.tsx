@@ -15,13 +15,15 @@ import { EntryPreviews, type EntrySummary } from "./EntryPreviews";
 import { tabMetadata } from "./pageMeta";
 import { Link } from "@/i18n/navigation";
 import { pageGate } from "@/lib/conditions";
-import { loadMilestone } from "@/lib/share/milestoneData";
-import { yearOnOffer } from "@/lib/share/year";
-import { MilestoneCard } from "./MilestoneCard";
+import type { InsightRow } from "@/lib/journal/insights";
+import { lastWeekStart } from "@/lib/journal/report";
+import { sixDaysAfter, yourWeek, type YourWeekMoment } from "@/lib/journal/yourWeek";
+import { YourWeekCard } from "./insights/YourWeekCard";
 import { SecurityNoticeRead } from "./SecurityNoticeRead";
 import { JOURNAL_HEADING } from "@/lib/ui/journalLayout";
 import { isLowMood } from "@/lib/journal/checkInSaved";
 import { readPlusPage } from "@/lib/plus/page";
+import { withTimeout } from "@/lib/ui/withTimeout";
 import { flagsCrisis } from "@/lib/safety/crisis";
 import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
 import { SetupLaterCard, TodayPlusCard } from "./TodayCards";
@@ -29,6 +31,10 @@ import { SetupLaterCard, TodayPlusCard } from "./TodayCards";
 // A stuck request ends here at the latest (UX, the timeout audit); each
 // data call gives up after 15 s on its own (lib/supabase/deadline).
 export const maxDuration = 30;
+// The Plus card's reads on Today, as a whole: past this, Today shows no Plus card (never a reason
+// for the check-in to wait). Under one data deadline plus Stripe's.
+// (Not exported: a page file may export only Next's own fields.)
+const PLUS_ON_TODAY_MS = 10_000;
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/app">): Promise<Metadata> {
   return tabMetadata("tabToday", (await params).locale);
@@ -51,13 +57,22 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
 
   // Today's reads all need only `me`, so they start together (the Web Dev's LCP read, 12 Nov: each
   // one in turn cost a round trip to the database). Same reads, same results.
-  // A milestone reached (decision 169): offered once, where the 1.1 share cards are on.
-  const [checkIn, todaysEntries, milestone, requestHeaders] = await Promise.all([
+  // The milestone card moved to the top of Timeline's list (Vitor, 14 Nov).
+  // Your week's and Plus's reads too, in the same round (UX, 14 Nov): one after another, a slow one
+  // could push the render past maxDuration and take the check-in card and Write with it. Plus is
+  // also capped as a whole (entitlements, then Stripe's own 8 s deadline): past it, no Plus card.
+  const weekOn = pageGate("your-week-live") !== "hidden";
+  const weekStart = lastWeekStart(me.today);
+  const weekEnd = sixDaysAfter(weekStart);
+  const [checkIn, todaysEntries, requestHeaders, plusPage, weekRead, momentsRead] = await Promise.all([
     supabase.from("check_ins").select("local_date, mood, sleep_hours, sleep_quality, exercise_minutes, stress, updated_at").eq("local_date", me.today).maybeSingle(),
     // Today's entries, newest first (previews only; the editor loads the rest).
     supabase.from("entries").select("id, body, is_moment, entry_date, created_at").eq("entry_date", me.today).order("created_at", { ascending: false }),
-    pageGate("share-cards") !== "hidden" && pageGate("share-cards-more") !== "hidden" ? loadMilestone(supabase) : null,
     headers(),
+    pageGate("plus") !== "hidden" ? withTimeout(readPlusPage(supabase, user.id, me.profile?.country, locale), PLUS_ON_TODAY_MS).catch(() => null) : null,
+    // Your week: last week's check-ins (a mood counts) and moments (id and date only).
+    weekOn ? supabase.from("check_ins").select("local_date, mood, sleep_hours, stress, exercise_minutes").gte("local_date", weekStart).lte("local_date", weekEnd) : null,
+    weekOn ? supabase.from("entries").select("id, entry_date").eq("is_moment", true).gte("entry_date", weekStart).lte("entry_date", weekEnd) : null,
   ]);
   const { data, error: checkInError } = checkIn;
   const { data: entries, error: entriesError } = todaysEntries;
@@ -74,10 +89,26 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
   // Today's Plus card on first landing (1.3 §6 and the rulings): only for someone without Plus (never
   // with Plus, never past due), only when today's rows were read, and never on a day when anything
   // saved was flagged or was one of the two lowest faces. Help is always above it on the page.
-  const plusPage = pageGate("plus") !== "hidden" ? await readPlusPage(supabase, user.id, me.profile?.country, locale) : null;
   const plus = plusPage?.view ?? null;
+  // Your week, for everyone (Insights become Plus, ruling 1): its hard-week help is never behind
+  // Plus. A failed read, or a week it can't work out: no card, and the check-in is untouched. Moments
+  // that couldn't be read only drop the moment line (the hard-week help comes from check-ins).
+  // The app shows the same card above Write (Mobile Dev).
+  let yourWeekCard: React.ReactNode = null;
+  let hardWeek = false;
+  if (weekRead && !weekRead.error) {
+    let week: ReturnType<typeof yourWeek> = null;
+    try {
+      week = yourWeek((weekRead.data ?? []) as InsightRow[], me.today, ((momentsRead && !momentsRead.error ? momentsRead.data : null) ?? []) as YourWeekMoment[]);
+    } catch {
+      week = null;
+    }
+    hardWeek = week?.kind === "hard";
+    if (week) yourWeekCard = <YourWeekCard week={week} country={me.profile?.country} dateLocaleTag={dateLocaleTag} />;
+  }
   const flaggedToday = (entries ?? []).some((e) => flagsCrisis(String((e as { body?: unknown }).body ?? ""), CRISIS_KEYWORDS));
-  const plusCard = plus?.kind === "free" && !checkInError && !entriesError && !flaggedToday && !isLowMood((data as CheckIn | null)?.mood) ? plus : null;
+  // Never under a hard week's help either (the rule Your week brought with it).
+  const plusCard = plus?.kind === "free" && !hardWeek && !checkInError && !entriesError && !flaggedToday && !isLowMood((data as CheckIn | null)?.mood) ? plus : null;
   // Setup after first use (1.3 §6): offered once there's a check-in, while the reminder is still off.
   const setupLater = Boolean(data) && me.settings?.reminder_on === false;
 
@@ -109,7 +140,9 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
         </Link>
       </header>
       <CheckInCard key={checkInError ? "unread" : "read"} initial={(data as CheckIn | null) ?? null} uid={user.id} date={me.today} dateLocaleTag={dateLocaleTag} keepDraft loadFailed={Boolean(checkInError)} />
-      {/* Today's order (UX ruling 3): the check-in, the cards, the entries, then Write last. */}
+      {/* Today's order (UX ruling 3): the check-in, the cards (Your week first: its hard-week help), the
+          entries, then Write last. */}
+      {yourWeekCard}
       {plusCard && plusPage && <TodayPlusCard trial={plusCard.trial} price={plusPage.price} offer={plusPage.offer} date={me.today} />}
       {setupLater && <SetupLaterCard />}
       {entriesError && (
@@ -132,9 +165,6 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
       >
         {te("writeButton")}
       </Link>
-      {/* Last on the page: it floats above the tab bar (decision 186), and the room
-          it needs is added after the footer, so its late arrival moves nothing. */}
-      {milestone && <MilestoneCard n={milestone.n} colours={milestone.colours} uid={user.id} month={me.today.slice(0, 7)} dateLocaleTag={dateLocaleTag} year={pageGate("year-card") !== "hidden" ? yearOnOffer(me.today) : null} />}
     </section>
   );
 }

@@ -10,6 +10,13 @@ vi.mock("./insights/ShareMonth", () => ({
     <button type="button" data-testid={p.testId} data-type={p.initialType} data-n={p.milestone?.n} data-year={p.year ?? ""} onClick={() => p.onOpen?.()} />
   ),
 }));
+vi.mock("@/i18n/navigation", () => ({
+  Link: ({ href, children, ...rest }: { href: string; children: React.ReactNode }) => (
+    <a href={href} {...rest}>
+      {children}
+    </a>
+  ),
+}));
 const { MilestoneCard } = await import("./MilestoneCard");
 
 const UID = "11111111-1111-1111-1111-111111111111";
@@ -31,6 +38,19 @@ describe("MilestoneCard (decision 169)", () => {
     const share = screen.getByTestId("milestone-share");
     expect(share).toHaveAttribute("data-type", "milestone");
     expect(share).toHaveAttribute("data-n", "30");
+  });
+
+  it("on Timeline (Vitor, 14 Nov): in the page's flow, nothing floats; without Plus, Share it is a lock to the Plus screen", () => {
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <MilestoneCard n={30} colours={["#000000"]} uid={UID} month="2026-10" dateLocaleTag="en-US" inline shareLocked />
+      </NextIntlClientProvider>,
+    );
+    expect(screen.getByTestId("milestone-card").className).not.toMatch(/\bfixed\b/);
+    expect(document.body).not.toHaveClass("has-floating-card");
+    const share = screen.getByTestId("milestone-share");
+    expect(share).toHaveAttribute("href", "/app/me/plus");
+    expect(share).toHaveAttribute("data-locked");
   });
 
   it("decision 186: fixed above the tab bar (out of the flow), room at the page's very end keeps it reachable, announced once politely", () => {

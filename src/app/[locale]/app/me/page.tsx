@@ -24,12 +24,16 @@ import { ImportData } from "./ImportData";
 import { headers } from "next/headers";
 import { dateLocale } from "@/lib/journal/today";
 import { readPlusPage } from "@/lib/plus/page";
+import { withTimeout } from "@/lib/ui/withTimeout";
 import { PlusInMe } from "./PlusInMe";
 
 // The export (export_my_data may take 30 s: lib/supabase/deadline) and the
 // import batches run in this page's functions: 60, so their own clean error
 // comes back before the platform stops the function (reviewer, #122).
 export const maxDuration = 60;
+// Plus's reads on Me, as a whole (entitlements, then Stripe's own deadline): past this, Me shows
+// nothing about Plus (audit batch D). Not exported: a page file exports only Next's own fields.
+const PLUS_ON_ME_MS = 10_000;
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/app/me">): Promise<Metadata> {
   return tabMetadata("tabMe", (await params).locale);
@@ -56,9 +60,19 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
   const tm = await getTranslations("me");
   const tc = await getTranslations("common");
   const link = "font-medium text-accent underline underline-offset-4";
-  // Unreadable: nothing about Plus at all (null), never an offer to someone who may pay.
-  const plusPage = pageGate("plus") !== "hidden" ? await readPlusPage(supabase, user.id, me.profile?.country, locale) : null;
+  // Me's reads in one round (audit batch D, UX 14 Nov): one after another they could pass
+  // maxDuration and take the help row, export and delete with them. Plus is capped as on Today:
+  // past it, nothing about Plus (null), never an offer to someone who may pay.
+  // Your past reports (ruling 10): without Plus, the weekly AI reports already made stay readable
+  // here, read-only; with Plus they're on Insights. Only when there's at least one. Counted in the
+  // same round, used only once Plus says who this is.
+  const plusOn = pageGate("plus") !== "hidden";
+  const [plusPage, reports] = await Promise.all([
+    plusOn ? withTimeout(readPlusPage(supabase, user.id, me.profile?.country, locale), PLUS_ON_ME_MS).catch(() => null) : null,
+    plusOn ? supabase.from("ai_reports").select("id", { count: "exact", head: true }).eq("kind", "weekly") : null,
+  ]);
   const plus = plusPage?.view ?? null;
+  const pastReports = plus && plus.kind !== "plus" ? (reports?.count ?? 0) > 0 : false;
 
   return (
     <section className="space-y-8">
@@ -79,6 +93,15 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
           }}
           credits={{ balance: me.credits?.balance ?? 0 }}
         />
+      )}
+      {pastReports && (
+        <section aria-labelledby="me-past-reports" className="rounded-3xl border border-border bg-surface p-[24px]">
+          <h2 id="me-past-reports" className="text-lg font-medium text-text">
+            <Link href="/app/me/reports" data-testid="me-past-reports" className={link}>
+              {tm("pastReports")}
+            </Link>
+          </h2>
+        </section>
       )}
       <Reminder on={me.settings?.reminder_on ?? true} time={hhmm(me.settings?.reminder_time)} />
       <LanguageRegion

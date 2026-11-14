@@ -7,6 +7,7 @@ import { Link } from "@/i18n/navigation";
 import type { PlusOfferPrices } from "@/lib/plus/page";
 import type { PlusView } from "@/lib/plus/view";
 import { FESTIVE_CARD, Lights, Tree } from "../PlusSheet";
+import { SAVE_WAIT_MS } from "@/lib/ui/withTimeout";
 
 // Moodbow Plus in Me (decision 246, mockups 1 and 5), below Get help now
 // (help is always first). One of:
@@ -87,7 +88,8 @@ export function PlusInMe({ view, price, offer = null }: { view: PlusView; price:
       setBusy(true);
       setFailed(false);
       try {
-        const res = await fetch("/api/billing/portal", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ locale }) });
+        // A dead connection ends at SAVE_WAIT_MS as the error line (audit D).
+        const res = await fetch("/api/billing/portal", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ locale }), signal: AbortSignal.timeout(SAVE_WAIT_MS) });
         const body = (await res.json().catch(() => ({}))) as { url?: string };
         if (body.url) return window.location.assign(body.url);
       } catch {

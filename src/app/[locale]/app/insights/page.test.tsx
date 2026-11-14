@@ -37,10 +37,18 @@ let viewProps: { rows: InsightRow[] } | null = null;
 vi.mock("./InsightsView", () => ({ InsightsView: (p: { rows: InsightRow[] }) => ((viewProps = p), <div data-testid="insights-view" />) }));
 vi.mock("./PlusInsights", () => ({ MorePatternsCard: () => null, MorePatternsRow: () => null, PlusTabs: () => null, WeekLine: () => null, YearTab: () => null }));
 vi.mock("./YourWeekCard", () => ({ YourWeekCard: () => null }));
+vi.mock("./InsightsExample", () => ({ InsightsExample: () => <div data-testid="insights-example" /> }));
 vi.mock("./ShareMonth", () => ({ ShareMonth: () => null }));
 vi.mock("./WeeklyReport", () => ({ WeeklyReport: () => null }));
 vi.mock("@/components/JournalUnavailable", () => ({ JournalUnavailable: () => <div data-testid="journal-unavailable" /> }));
 vi.mock("@/components/SessionEnded", () => ({ SessionEnded: () => null }));
+vi.mock("@/i18n/navigation", () => ({
+  Link: ({ href, children, ...rest }: { href: string; children: React.ReactNode }) => (
+    <a href={href} {...rest}>
+      {children}
+    </a>
+  ),
+}));
 const { default: InsightsPage } = await import("./page");
 
 const page = (range?: string) => InsightsPage({ params: Promise.resolve({ locale: "en" }), searchParams: Promise.resolve(range ? { range } : {}) } as never);
@@ -58,6 +66,8 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe("Insights' reads with Plus (#272 × #293)", () => {
+  // Option (a), the Reviewer: #293's single parallel batch stays for everyone (Plus users' LCP);
+  // for a free account its rows are simply not used (read on the server, never sent).
   it("the check-ins and the Plus view are asked together, before the view answers", async () => {
     holdPlus = true;
     plusView = { kind: "free", trial: true };
@@ -65,14 +75,22 @@ describe("Insights' reads with Plus (#272 × #293)", () => {
     await vi.waitFor(() => expect([...asked].sort()).toEqual(["check_ins", "entitlements"]), { timeout: 1000 });
     plusAnswer!();
     render(await rendering);
-    expect(screen.getByTestId("insights-view")).toBeInTheDocument();
+    expect(screen.getByTestId("insights-example")).toBeInTheDocument();
   });
 
-  it("without Plus: that one read is the page's rows, and nothing more is read", async () => {
+  it("without Plus: the example, nothing of theirs shown, and nothing more is read", async () => {
     plusView = { kind: "free", trial: true };
     render(await page());
+    expect(screen.getByTestId("insights-example")).toBeInTheDocument();
+    expect(screen.queryByTestId("insights-view")).toBeNull();
     expect(readCheckInsSince).not.toHaveBeenCalled();
-    expect(viewProps!.rows).toEqual(FREE_ROWS);
+  });
+
+  it("a payment that failed (past_due): the example too", async () => {
+    plusView = { kind: "past_due" } as typeof plusView;
+    render(await page());
+    expect(screen.getByTestId("insights-example")).toBeInTheDocument();
+    expect(screen.queryByTestId("insights-view")).toBeNull();
   });
 
   it("the Plus view unreadable: as without Plus, nothing about Plus", async () => {
@@ -103,5 +121,24 @@ describe("Insights' reads with Plus (#272 × #293)", () => {
     checkInsResult = { data: null, error: { message: "boom" } };
     render(await page());
     expect(screen.getByTestId("journal-unavailable")).toBeInTheDocument();
+  });
+});
+
+// Help everywhere (audit batch H; the Reviewer's guard for #301, which drops What lifts me's own
+// lifebuoy): a Plus view's one help control is the lifebuoy by the title, on every range.
+describe("Insights with Plus: the page's one help control (audit batch H)", () => {
+  it("every range: InsightsView gets the GetHelpNow lifebuoy (insights-help, icon, neutral), and nothing else on the page opens help", async () => {
+    const { GetHelpNow } = await import("@/components/SafetyCard");
+    for (const range of [undefined, "month", "3months", "year", "all"]) {
+      plusView = { kind: "plus", source: "stripe", daysLeft: null };
+      viewProps = null;
+      render(await page(range));
+      const help = (viewProps as unknown as { help?: React.ReactElement<{ testId: string; icon?: boolean; neutral?: boolean }> } | null)?.help;
+      expect(help?.type, String(range)).toBe(GetHelpNow);
+      expect(help?.props, String(range)).toMatchObject({ testId: "insights-help", icon: true, neutral: true });
+      // The rest of the page (the mocked view aside) has no help link of its own.
+      expect(document.querySelectorAll('a[href="/help/get-help-now"]'), String(range)).toHaveLength(0);
+      cleanup();
+    }
   });
 });
