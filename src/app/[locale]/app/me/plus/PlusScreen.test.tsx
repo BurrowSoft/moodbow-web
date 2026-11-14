@@ -2,6 +2,7 @@ import { act, cleanup, fireEvent, render, screen, within } from "@testing-librar
 import { NextIntlClientProvider } from "next-intl";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import messages from "@/messages/en.json";
+import { SAVE_WAIT_MS } from "@/lib/ui/withTimeout";
 import type { PlusView } from "@/lib/plus/view";
 
 const refresh = vi.fn();
@@ -78,6 +79,18 @@ describe("PlusScreen: the table scrolls, the footer never does", () => {
     fetchMock.mockResolvedValueOnce({ json: async () => ({ code: "needs_email" }) });
     await act(async () => fireEvent.click(screen.getByTestId("plus-start")));
     expect(screen.getByTestId("plus-error")).toHaveTextContent(m.needsEmail);
+  });
+
+  it("a dead connection: the button gives up at SAVE_WAIT_MS with the generic line and works again (audit D)", async () => {
+    const timeout = vi.spyOn(AbortSignal, "timeout");
+    fetchMock.mockRejectedValueOnce(new DOMException("The operation timed out.", "TimeoutError"));
+    show({ kind: "free", trial: true });
+    await act(async () => fireEvent.click(screen.getByTestId("plus-start")));
+    expect(fetchMock).toHaveBeenCalledWith("/api/checkout/stripe", expect.objectContaining({ signal: expect.any(AbortSignal) }));
+    expect(timeout).toHaveBeenCalledWith(SAVE_WAIT_MS);
+    expect(screen.getByTestId("plus-error")).toHaveTextContent(messages.today.errGeneric);
+    expect(screen.getByTestId("plus-start")).not.toBeDisabled();
+    timeout.mockRestore();
   });
 
   it("has Plus: the title says so; Stripe: Manage Plus; a store: where to manage it; no price, no trial", () => {

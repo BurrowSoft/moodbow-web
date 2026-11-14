@@ -123,3 +123,22 @@ describe("Insights' reads with Plus (#272 × #293)", () => {
     expect(screen.getByTestId("journal-unavailable")).toBeInTheDocument();
   });
 });
+
+// Help everywhere (audit batch H; the Reviewer's guard for #301, which drops What lifts me's own
+// lifebuoy): a Plus view's one help control is the lifebuoy by the title, on every range.
+describe("Insights with Plus: the page's one help control (audit batch H)", () => {
+  it("every range: InsightsView gets the GetHelpNow lifebuoy (insights-help, icon, neutral), and nothing else on the page opens help", async () => {
+    const { GetHelpNow } = await import("@/components/SafetyCard");
+    for (const range of [undefined, "month", "3months", "year", "all"]) {
+      plusView = { kind: "plus", source: "stripe", daysLeft: null };
+      viewProps = null;
+      render(await page(range));
+      const help = (viewProps as unknown as { help?: React.ReactElement<{ testId: string; icon?: boolean; neutral?: boolean }> } | null)?.help;
+      expect(help?.type, String(range)).toBe(GetHelpNow);
+      expect(help?.props, String(range)).toMatchObject({ testId: "insights-help", icon: true, neutral: true });
+      // The rest of the page (the mocked view aside) has no help link of its own.
+      expect(document.querySelectorAll('a[href="/help/get-help-now"]'), String(range)).toHaveLength(0);
+      cleanup();
+    }
+  });
+});

@@ -31,6 +31,19 @@ const thisWeek = [
 const lastWeek = [row("2026-09-20", 3, { stress: 2 }), row("2026-09-22", 4, { stress: 2 }), row("2026-09-24", 4, { stress: 2 })];
 
 describe("InsightsView", () => {
+  it("help everywhere (audit batch H): the help slot sits on the title row, after the title", () => {
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <InsightsView rows={[]} today="2026-10-02" range="month" help={<span data-testid="insights-help" />} />
+      </NextIntlClientProvider>,
+    );
+    const title = screen.getByRole("heading", { level: 1 });
+    const help = screen.getByTestId("insights-help");
+    expect(title.parentElement).toContainElement(help);
+    expect(title.compareDocumentPosition(help) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(help.compareDocumentPosition(screen.getByTestId("insights-range-week")) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
   it("range tabs (Week current), with the spec's test ids", () => {
     renderView([]);
     expect(screen.getByTestId("insights-range-week")).toHaveAttribute("aria-current", "page");

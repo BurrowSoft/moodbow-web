@@ -3007,3 +3007,36 @@ test("axe: letters to future me, at 320 and 1280 px", async ({ page }) => {
     await cleanup(email);
   }
 });
+
+// Help everywhere (audit batch H, the Reviewer): Insights with Plus has the lifebuoy by its title on
+// every range, the screen's one help control, in the first view at 320 px / 300 %, nothing sideways.
+test("help everywhere: Insights with Plus, every range, one lifebuoy in the first view at 300 % that opens the help card", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
+  test.setTimeout(180_000);
+  expect(await plusOnStaging(), "staging has 028's entitlements").toBe(true);
+  const email = newEmail();
+  try {
+    await accountAtSetup(page, email);
+    await grantPlusTrial(email);
+    await page.setViewportSize({ width: 320, height: 640 });
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send("Page.setFontSizes", { fontSizes: { standard: 48, fixed: 39 } });
+    const help = page.getByRole("link", { name: messages.me.meGetHelpNow });
+    for (const range of ["week", "month", "3months", "year", "all"]) {
+      await page.goto(`/app/insights?range=${range}`);
+      await expect(page.getByTestId("insights-help"), range).toBeVisible({ timeout: 15_000 });
+      const box = await page.getByTestId("insights-help").evaluate((el) => {
+        const r = el.getBoundingClientRect();
+        return { inFirstView: r.top >= 0 && r.bottom <= window.innerHeight + 0.5 && r.right <= window.innerWidth + 0.5, overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth };
+      });
+      expect(box, `${range}: the lifebuoy in the first view, nothing sideways`).toEqual({ inFirstView: true, overflow: 0 });
+      await expect(help, `${range}: exactly one help control`).toHaveCount(1);
+      await help.click();
+      await expect(page.getByTestId("safety-card"), range).toBeVisible();
+      await page.keyboard.press("Escape");
+    }
+    await cdp.send("Page.setFontSizes", { fontSizes: { standard: 16, fixed: 13 } });
+  } finally {
+    await cleanup(email);
+  }
+});
