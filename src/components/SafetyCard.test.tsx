@@ -311,3 +311,55 @@ describe("SafetyCard: the default colours under any palette (#277)", () => {
     expect(screen.getByTestId("other-dialog").closest("[data-default-colours]")).toBeNull();
   });
 });
+
+// Today's standing help (UX & PM, 13 Nov; specs/1.2-features.md): a lifebuoy named with the
+// existing words, the same destination as Me's, quiet, 48 px.
+describe("Get help now as Today's lifebuoy (icon)", () => {
+  it("named and titled with the same words in each language, no new copy, and the picture hidden", () => {
+    for (const [locale, m] of [["en", messages], ["fr", fr], ["es", es], ["pt-br", ptBr]] as const) {
+      const { unmount } = render(
+        <NextIntlClientProvider locale={locale} messages={m}>
+          <GetHelpNow country="GB" testId="today-help" neutral icon />
+        </NextIntlClientProvider>,
+      );
+      const link = screen.getByTestId("today-help");
+      expect(link).toHaveAccessibleName(m.me.meGetHelpNow);
+      expect(link).toHaveAttribute("title", m.me.meGetHelpNow);
+      expect(link.textContent).toBe("");
+      expect(screen.getByTestId("lifebuoy-icon")).toHaveAttribute("aria-hidden", "true");
+      unmount();
+    }
+  });
+
+  it("the same destination as Me's: the help page with no scripts, the neutral card with them, focus back after", () => {
+    wrap(<GetHelpNow country="TH" testId="today-help" neutral icon />);
+    const link = screen.getByTestId("today-help");
+    expect(link.tagName).toBe("A");
+    expect(link.getAttribute("href")).toMatch(/\/help\/get-help-now$/);
+    link.focus();
+    expect(fireEvent.click(link)).toBe(false);
+    expect(screen.getByTestId("safety-card")).toHaveTextContent(s.safetyBodyNeutral);
+    expect(screen.getByTestId("safety-call-helpline")).toHaveTextContent("1323");
+    fireEvent.click(screen.getByTestId("safety-close"));
+    expect(screen.queryByTestId("safety-card")).toBeNull();
+    expect(link).toHaveFocus();
+  });
+
+  it("a click asking for a new tab is left to the browser", () => {
+    wrap(<GetHelpNow country="GB" testId="today-help" neutral icon />);
+    const link = screen.getByTestId("today-help");
+    link.addEventListener("click", (e) => e.preventDefault());
+    fireEvent.click(link, { ctrlKey: true });
+    expect(screen.queryByTestId("safety-card")).toBeNull();
+  });
+
+  it("quiet and a fixed 48 px: no accent, no border, no banner colour; px, so large text doesn't grow it", () => {
+    wrap(<GetHelpNow country="GB" testId="today-help" neutral icon />);
+    const link = screen.getByTestId("today-help");
+    expect(link.className).toContain("h-[48px]");
+    expect(link.className).toContain("w-[48px]");
+    expect(link.className).toContain("shrink-0");
+    expect(link.className).toContain("text-muted");
+    expect(link.className).not.toMatch(/bg-accent|text-accent|border|bg-danger|text-danger|red/);
+  });
+});
