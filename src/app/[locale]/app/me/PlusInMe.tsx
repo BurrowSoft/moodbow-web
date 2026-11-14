@@ -54,8 +54,6 @@ export function PlusInMe({ view, price }: { view: PlusView; price: string }) {
   // Closed today on this device? The server's HTML has no storage, so it starts
   // hidden there and never flashes for someone who closed it. closedHere: a
   // browser with no storage still closes it for this visit.
-  const closedToday = useSyncExternalStore(subscribeClosed, () => readClosed() === localDay(), () => true);
-  const [closedHere, setClosedHere] = useState(false);
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
 
@@ -111,13 +109,23 @@ export function PlusInMe({ view, price }: { view: PlusView; price: string }) {
     );
   }
 
+  return <PlusBanner trial={view.trial} price={price} id="me-plus-banner" tryId="me-plus-try" />;
+}
+
+// The free banner (decision 246): Me's, and Today's card on first landing (1.3 §6). Close hides it
+// for the rest of that day on this device, on both. The server's HTML starts hidden (no storage
+// there), so it never flashes for someone who closed it. closedHere: no storage, closed for this visit.
+export function PlusBanner({ trial, price, id, tryId }: { trial: boolean; price: string; id: string; tryId: string }) {
+  const t = useTranslations("plus");
+  const closedToday = useSyncExternalStore(subscribeClosed, () => readClosed() === localDay(), () => true);
+  const [closedHere, setClosedHere] = useState(false);
   if (closedToday || closedHere) return null;
   return (
-    <section aria-labelledby="me-plus-banner" data-testid="me-plus-banner" className="relative space-y-2 rounded-3xl bg-pill p-[20px]">
+    <section aria-labelledby={id} data-testid={id} className="relative space-y-2 rounded-3xl bg-pill p-[20px]">
       <button
         type="button"
         aria-label={t("bannerClose")}
-        data-testid="me-plus-banner-close"
+        data-testid={`${id}-close`}
         onClick={() => {
           try {
             window.localStorage.setItem(CLOSED_KEY, localDay());
@@ -137,14 +145,14 @@ export function PlusInMe({ view, price }: { view: PlusView; price: string }) {
         <Arcs />
         <span className="text-sm font-medium tracking-wide text-accent uppercase">{t("label")}</span>
       </div>
-      <h2 id="me-plus-banner" className="pr-12 text-lg font-medium leading-snug">
+      <h2 id={id} className="pr-12 text-lg font-medium leading-snug">
         {t("bannerTitle")}
       </h2>
       <p>{t("bannerBody")}</p>
-      <Link href="/app/me/plus" data-testid="me-plus-try" className={`${dialogButton(true)} w-full`}>
-        {view.trial ? t("tryFree") : t("seePlus")}
+      <Link href="/app/me/plus" data-testid={tryId} className={`${dialogButton(true)} w-full`}>
+        {trial ? t("tryFree") : t("seePlus")}
       </Link>
-      <p className="text-center text-sm text-muted">{view.trial ? t("thenPrice", { price }) : t("priceYear", { price })}</p>
+      <p className="text-center text-sm text-muted">{trial ? t("thenPrice", { price }) : t("priceYear", { price })}</p>
     </section>
   );
 }

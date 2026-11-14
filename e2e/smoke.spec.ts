@@ -25,7 +25,8 @@ test.describe("home", () => {
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Your month, as a rainbow");
     // The web journal is live (launch step): Start and Sign in, no Coming
     // soon and no Get notified.
-    await expect(page.getByTestId("home-start")).toHaveAttribute("href", "/welcome");
+    // Start goes straight to Create account (1.3 §6).
+    await expect(page.getByTestId("home-start")).toHaveAttribute("href", "/sign-up");
     await expect(page.getByTestId("home-sign-in")).toHaveAttribute("href", "/sign-in");
     await expect(page.getByTestId("home-coming-soon")).toHaveCount(0);
     await expect(page.getByTestId("home-notify")).toHaveCount(0);
@@ -629,7 +630,7 @@ test.describe("onboarding (signed out)", () => {
     await expect(page.getByTestId("consent-privacy")).toBeVisible();
   });
 
-  test("welcome: Next, Skip to slide 3, Get started → Consent; Back from Consent → slide 3", async ({ page }) => {
+  test("welcome: Next, Skip to slide 3, Get started → Create account", async ({ page }) => {
     await page.goto("/welcome");
     await expect(page.getByTestId("welcome-slide-1")).toBeVisible();
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("A private journal for your days");
@@ -641,27 +642,28 @@ test.describe("onboarding (signed out)", () => {
     await expect(page.getByTestId("welcome-skip")).toHaveCount(0);
     await expect(page).toHaveURL(/\/welcome\?slide=3$/);
     await page.getByTestId("welcome-start").click();
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Before you start");
-    await page.getByTestId("consent-back").click();
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Private, and yours");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Create your account");
   });
 
-  test("browser Back from Consent lands on slide 3 too", async ({ page }) => {
-    await page.goto("/welcome");
-    await page.getByTestId("welcome-skip").click();
-    await page.getByTestId("welcome-start").click();
-    await expect(page).toHaveURL(/\/consent$/);
-    await page.goBack();
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Private, and yours");
-  });
-
-  test("consent: Continue only with both boxes; the AI box optional; then Create account", async ({ page }) => {
-    await page.goto("/consent");
-    const cont = page.getByTestId("consent-continue");
+  test("Create account: the summary above three separate unticked boxes, each with its link; the AI box optional", async ({ page }) => {
+    await page.goto("/sign-up");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Create your account");
+    const summary = page.getByTestId("signup-summary");
+    await expect(summary).toContainText("Log your mood, sleep and movement in seconds");
+    // The summary lines sit above the boxes; help is on the page, as on Consent.
+    const summaryBox = (await summary.boundingBox())!;
+    expect(summaryBox.y).toBeLessThan((await page.getByTestId("consent-privacy").boundingBox())!.y);
+    await expect(page.getByTestId("signup-get-help")).toBeVisible();
+    await expect(page.getByTestId("consent-read-terms")).toHaveAttribute("target", "_blank");
+    await expect(page.getByTestId("consent-read-privacy")).toHaveAttribute("target", "_blank");
+    const cont = page.getByTestId("signup-submit");
+    for (const id of ["consent-privacy", "consent-health", "consent-age"]) await expect(page.getByTestId(id)).not.toBeChecked();
     await expect(cont).toBeDisabled();
     await page.getByTestId("consent-privacy").check();
     await expect(cont).toBeDisabled();
     await page.getByTestId("consent-health").check();
+    await expect(cont).toBeDisabled();
+    await page.getByTestId("consent-age").check();
     // This build shows drafts, so ai-live is a draft and the optional AI box
     // is there (#60; hidden on Production until ai-live is met): unticked,
     // never required, and Continue doesn't wait for it.
@@ -670,9 +672,6 @@ test.describe("onboarding (signed out)", () => {
     await expect(ai).not.toBeChecked();
     await expect(page.getByText("AI reflections and reports (optional)")).toBeVisible();
     await expect(cont).toBeEnabled();
-    await cont.click();
-    await expect(page).toHaveURL(/\/sign-up$/);
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Create your account");
     await expect(page.getByRole("contentinfo").locator('a[href$="/consumer-health-data"]'), "sign-up has the health data link").toBeVisible();
   });
 
@@ -681,7 +680,7 @@ test.describe("onboarding (signed out)", () => {
   test.describe("without JavaScript", () => {
     test.use({ javaScriptEnabled: false });
 
-    test("welcome → consent → sign-up, and the form answers", async ({ page }) => {
+    test("welcome → Create account, and the form answers", async ({ page }) => {
       await page.goto("/welcome");
       await page.getByTestId("welcome-next").click();
       await expect(page.getByRole("heading", { level: 1 })).toHaveText("See your patterns");
@@ -690,19 +689,9 @@ test.describe("onboarding (signed out)", () => {
       await page.getByTestId("welcome-skip").click();
       await expect(page.getByRole("heading", { level: 1 })).toHaveText("Private, and yours");
       await page.getByTestId("welcome-start").click();
-      await expect(page.getByRole("heading", { level: 1 })).toHaveText("Before you start");
-
-      // Continue is enabled without JS; the browser's required check stops
-      // an incomplete form (no request is sent).
-      const cont = page.getByTestId("consent-continue");
-      await expect(cont).toBeEnabled();
-      await cont.click();
-      await expect(page).toHaveURL(/\/consent$/);
-      await page.getByTestId("consent-privacy").check();
-      await page.getByTestId("consent-health").check();
-      await cont.click();
-      await expect(page).toHaveURL(/\/sign-up$/);
       await expect(page.getByRole("heading", { level: 1 })).toHaveText("Create your account");
+      // Create account is enabled without JS: the server checks every box.
+      await expect(page.getByTestId("signup-submit")).toBeEnabled();
 
       // A native POST: the server answers with the page (here: no Supabase,
       // so it fails closed with the validation message first).
@@ -711,6 +700,16 @@ test.describe("onboarding (signed out)", () => {
       const [response] = await Promise.all([page.waitForResponse((r) => r.request().method() === "POST"), page.getByTestId("signup-submit").click()]);
       expect(response.status()).toBeLessThan(500);
       await expect(page.getByTestId("signup-error")).toHaveText("Enter a valid email");
+      // A valid email and password, but no boxes: the server refuses (the browser didn't stop it).
+      await page.getByLabel("Email").fill("w0@example.invalid");
+      await page.getByLabel("Password").fill("secret-123");
+      await page.getByTestId("signup-submit").click();
+      await expect(page.getByTestId("signup-error")).toHaveText("Something went wrong. Please try again.");
+      await page.getByLabel("Password").fill("secret-123");
+      await page.getByTestId("consent-privacy").check();
+      await page.getByTestId("consent-health").check();
+      await page.getByTestId("signup-submit").click();
+      await expect(page.getByTestId("signup-error")).toHaveText("Moodbow is for people 18 and older");
     });
 
     test("sign-in: a native POST, and the server answers (then fails closed)", async ({ page }) => {
@@ -730,17 +729,16 @@ test.describe("onboarding (signed out)", () => {
     });
   });
 
-  test("sign-up without consent → Consent", async ({ page }) => {
-    await page.goto("/sign-up");
-    await expect(page).toHaveURL(/\/consent$/);
+  test("Consent signed out → Create account (its boxes are there now)", async ({ page }) => {
+    await page.goto("/consent");
+    await expect(page).toHaveURL(/\/sign-up$/);
   });
 
   test("sign-up validation, then fail closed without Supabase", async ({ page }) => {
-    await page.goto("/consent");
+    await page.goto("/sign-up");
     await page.getByTestId("consent-privacy").check();
     await page.getByTestId("consent-health").check();
-    await page.getByTestId("consent-continue").click();
-    await expect(page).toHaveURL(/\/sign-up$/);
+    await page.getByTestId("consent-age").check();
     // Decision 216: live since anon-start-live (0.9.4).
     await expect(page.getByTestId("auth-started-in-app")).toHaveText("Started in the app? Back up your journal there first, then sign in here with that email.");
     await page.getByLabel("Email").fill("nope");
@@ -753,18 +751,15 @@ test.describe("onboarding (signed out)", () => {
     await expect(page.getByTestId("signup-error")).toHaveText("Use at least 8 characters");
     await page.getByLabel("Password").fill("secret-123");
     await page.getByTestId("signup-submit").click();
-    await expect(page.getByTestId("signup-error")).toHaveText("Moodbow is for people 18 and older");
-    await page.getByTestId("signup-age").check();
-    await page.getByTestId("signup-submit").click();
     await expect(page.getByTestId("signup-error")).toHaveText("Something went wrong. Please try again.");
   });
 
-  test("sign-in links to Create account (Welcome); setup needs a session", async ({ page }) => {
+  test("sign-in links to Create account; setup needs a session", async ({ page }) => {
     await page.goto("/sign-in");
     // Decision 216: live since anon-start-live (0.9.4).
     await expect(page.getByTestId("auth-started-in-app")).toHaveText("Started in the app? Back up your journal there first, then sign in here with that email.");
     await page.getByTestId("signin-to-signup").click();
-    await expect(page).toHaveURL(/\/welcome$/);
+    await expect(page).toHaveURL(/\/sign-up$/);
     await page.goto("/setup");
     await expect(page).toHaveURL(/\/sign-in$/);
   });

@@ -20,6 +20,11 @@ import { yearOnOffer } from "@/lib/share/year";
 import { MilestoneCard } from "./MilestoneCard";
 import { SecurityNoticeRead } from "./SecurityNoticeRead";
 import { JOURNAL_HEADING } from "@/lib/ui/journalLayout";
+import { isLowMood } from "@/lib/journal/checkInSaved";
+import { plusPriceLabel, readPlusView } from "@/lib/plus/view";
+import { flagsCrisis } from "@/lib/safety/crisis";
+import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
+import { SetupLaterCard, TodayPlusCard } from "./TodayCards";
 
 // A stuck request ends here at the latest (UX, the timeout audit); each
 // data call gives up after 15 s on its own (lib/supabase/deadline).
@@ -67,6 +72,14 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
   const dateLocaleTag = dateLocale(locale, (await headers()).get("accept-language"), me.profile?.country ?? null);
   // A milestone reached (decision 169): offered once, where the 1.1 share cards are on.
   const milestone = pageGate("share-cards") !== "hidden" && pageGate("share-cards-more") !== "hidden" ? await loadMilestone(supabase) : null;
+  // Today's Plus card on first landing (1.3 §6 and the rulings): only for someone without Plus (never
+  // with Plus, never past due), only when today's rows were read, and never on a day when anything
+  // saved was flagged or was one of the two lowest faces. Help is always above it on the page.
+  const plus = pageGate("plus") !== "hidden" ? await readPlusView(supabase, user.id) : null;
+  const flaggedToday = (entries ?? []).some((e) => flagsCrisis(String((e as { body?: unknown }).body ?? ""), CRISIS_KEYWORDS));
+  const plusCard = plus?.kind === "free" && !checkInError && !entriesError && !flaggedToday && !isLowMood((data as CheckIn | null)?.mood) ? plus : null;
+  // Setup after first use (1.3 §6): offered once there's a check-in, while the reminder is still off.
+  const setupLater = Boolean(data) && me.settings?.reminder_on === false;
 
   return (
     <section className="space-y-8">
@@ -103,6 +116,8 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
       >
         {te("writeButton")}
       </Link>
+      {plusCard && <TodayPlusCard trial={plusCard.trial} price={plusPriceLabel(locale)} date={me.today} />}
+      {setupLater && <SetupLaterCard />}
       {entriesError && (
         <p role="alert" data-testid="today-entries-error" className="font-medium text-accent">
           {t("errGeneric")}

@@ -260,7 +260,10 @@
     "checkInConflictMine": "Le vôtre",
     "checkInConflictOther": "Déjà enregistré",
     "checkInConflictKeepMine": "Garder le mien",
-    "checkInConflictUseOther": "Prendre l'autre"
+    "checkInConflictUseOther": "Prendre l'autre",
+    "setupLaterBody": "Votre rappel quotidien est désactivé. Vous pouvez l'activer et choisir une heure quand vous voulez.",
+    "setupLaterOpen": "Configurer",
+    "setupLaterClose": "Pas maintenant"
   },
   "entry": {
     "writeButton": "Raconter votre journée",

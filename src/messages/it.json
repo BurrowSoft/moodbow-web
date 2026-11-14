@@ -260,7 +260,10 @@
     "checkInConflictMine": "Il tuo",
     "checkInConflictOther": "Già salvato",
     "checkInConflictKeepMine": "Tieni il mio",
-    "checkInConflictUseOther": "Usa l'altro"
+    "checkInConflictUseOther": "Usa l'altro",
+    "setupLaterBody": "Il tuo promemoria giornaliero è disattivato. Puoi attivarlo e scegliere un orario quando vuoi.",
+    "setupLaterOpen": "Configura",
+    "setupLaterClose": "Non ora"
   },
   "entry": {
     "writeButton": "Scrivi della tua giornata",

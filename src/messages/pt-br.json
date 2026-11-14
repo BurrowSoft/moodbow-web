@@ -260,7 +260,10 @@
     "checkInConflictMine": "O seu",
     "checkInConflictOther": "Já salvo",
     "checkInConflictKeepMine": "Manter o meu",
-    "checkInConflictUseOther": "Usar o outro"
+    "checkInConflictUseOther": "Usar o outro",
+    "setupLaterBody": "Seu lembrete diário está desligado. Você pode ligá-lo e escolher um horário quando quiser.",
+    "setupLaterOpen": "Configurar",
+    "setupLaterClose": "Agora não"
   },
   "entry": {
     "writeButton": "Escreva sobre o seu dia",

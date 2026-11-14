@@ -22,36 +22,38 @@ test.beforeAll(async () => {
 
 const ENTRY = "A calm walk by the river after work, then tea with a friend.";
 
-// Welcome → Consent (AI as asked) → Sign-up → confirmed → Setup.
+// Home's Start → Create account, with its consent boxes (AI as asked) → confirmed → Today (1.3 §6).
 // The real form sends a real email, and staging limits those: heavy days failed CI on "Please wait a
 // minute". So the journeys that test the form are tagged @real-email and run on PRs that touch
 // sign-up, and in the daily run of everything on master (ci.yml); the rest start from accountAtSetup, which sends none.
 async function signUp(page: Page, email: string, { ai }: { ai: boolean }): Promise<string> {
   const password = newPassword();
-  await page.goto("/welcome?slide=3");
-  await page.getByTestId("welcome-start").click();
-  await expect(page).toHaveURL(/\/consent$/);
-  await page.getByTestId("consent-privacy").check();
-  await page.getByTestId("consent-health").check();
-  if (ai) await page.getByTestId("consent-ai").check();
-  else await expect(page.getByTestId("consent-ai")).not.toBeChecked();
-  await page.getByTestId("consent-continue").click();
-
+  await page.goto("/");
+  await page.getByTestId("home-start").click();
   await expect(page).toHaveURL(/\/sign-up$/);
+  await expect(page.getByTestId("signup-summary")).toBeVisible();
   await page.getByLabel("Email").fill(email);
   await page.getByLabel("Password").fill(password);
-  await page.getByTestId("signup-age").check();
+  // Separate, unticked boxes; Create account waits for all three.
+  for (const id of ["consent-privacy", "consent-health", "consent-age"]) await expect(page.getByTestId(id)).not.toBeChecked();
+  await expect(page.getByTestId("signup-submit")).toBeDisabled();
+  await page.getByTestId("consent-privacy").check();
+  await page.getByTestId("consent-health").check();
+  await expect(page.getByTestId("signup-submit")).toBeDisabled();
+  await page.getByTestId("consent-age").check();
+  if (ai) await page.getByTestId("consent-ai").check();
+  else if (await page.getByTestId("consent-ai").count()) await expect(page.getByTestId("consent-ai")).not.toBeChecked();
   await page.getByTestId("signup-submit").click();
 
   // Staging asks for confirmation: confirm through the admin API, then the
   // "I've confirmed" button signs in. (Without confirmation it goes straight on.)
   const checkEmail = page.getByTestId("check-email");
-  await expect(checkEmail.or(page.getByRole("heading", { level: 1, name: messages.onboarding.setupTitle }))).toBeVisible({ timeout: 20_000 });
+  await expect(checkEmail.or(page.getByTestId("checkin-card"))).toBeVisible({ timeout: 20_000 });
   if (await checkEmail.isVisible()) {
     await confirmEmail(email);
     await page.getByTestId("check-email-confirmed").click();
   }
-  await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+  await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
   return password;
 }
 
@@ -61,7 +63,9 @@ test.describe("launch journeys", () => {
     try {
       await signUp(page, email, { ai: false });
 
-      // Setup: no AI, so no focus or tone; just the reminder.
+      // Setup after first use (1.3 §6): the journal opened at once; Setup is still there to open.
+      await page.goto("/setup");
+      // No AI, so no focus or tone; just the reminder.
       await expect(page.getByTestId("setup-tone-warm")).toHaveCount(0);
       await expect(page.getByTestId("setup-reminder-time")).toBeVisible();
       await page.getByTestId("setup-done").click();
@@ -134,7 +138,6 @@ test.describe("launch journeys", () => {
     const email = newEmail();
     try {
       await accountAtSetup(page, email);
-      await page.getByTestId("setup-done").click();
       await expect(page).toHaveURL(/\/app$/);
       await page.getByTestId("today-write").click();
       await expect(page).toHaveURL(/\/app\/write/);
@@ -175,6 +178,7 @@ test.describe("launch journeys", () => {
       // outside AI windows (decision 123): read it as the app does, and skip
       // rather than fail while it's off.
       test.skip(!(await aiAvailable(email, password)), "staging's AI switch is off (get_me().ai_available false): AI-on journey skipped");
+      await page.goto("/setup");
       const sleep = page.getByTestId("setup-focus-sleep");
       await expect(sleep).toHaveAttribute("aria-pressed", "false");
       await sleep.click();
@@ -230,7 +234,7 @@ async function accountAtSetup(page: Page, email: string): Promise<string> {
   await page.getByLabel("Email").fill(email);
   await page.getByLabel("Password").fill(password);
   await page.getByRole("button", { name: messages.auth.signinSubmit }).click();
-  await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+  await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
   return password;
 }
 
@@ -250,7 +254,6 @@ test.describe("tonight's flows", () => {
     const email = newEmail();
     try {
       await accountAtSetup(page, email);
-      await page.getByTestId("setup-done").click();
       await expect(page).toHaveURL(/\/app$/);
       await page.getByTestId("today-write").click();
       await expect(page).toHaveURL(/\/app\/write/);
@@ -276,7 +279,6 @@ test.describe("tonight's flows", () => {
     const email = newEmail();
     try {
       const password = await accountAtSetup(page, email);
-      await page.getByTestId("setup-done").click();
       await expect(page).toHaveURL(/\/app$/);
 
       // Keep it.
@@ -313,7 +315,6 @@ test.describe("tonight's flows", () => {
     const email = newEmail();
     try {
       await accountAtSetup(page, email);
-      await page.getByTestId("setup-done").click();
       await expect(page).toHaveURL(/\/app$/);
       await page.getByTestId("today-write").click();
       await page.getByTestId("entry-text").fill(ENTRY);
@@ -342,7 +343,6 @@ test.describe("tonight's flows", () => {
 // assertion: the address and title were already right on the blank page.
 test.describe("a first run reaches Today without a reload", () => {
   const finishSetup = async (page: Page) => {
-    await page.getByTestId("setup-done").click();
     await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     await expect(page.getByTestId("tab-today")).toBeVisible();
@@ -359,7 +359,7 @@ test.describe("a first run reaches Today without a reload", () => {
         await page.locator("main form button[type=submit]").click();
         await expect(page.getByTestId("email-confirmed-continue")).toBeVisible({ timeout: 20_000 });
         if (how === "Continue") await page.getByTestId("email-confirmed-continue").click();
-        await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+        await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
         await finishSetup(page);
       } finally {
         await cleanup(email);
@@ -367,7 +367,7 @@ test.describe("a first run reaches Today without a reload", () => {
     });
   }
 
-  test("the email link on an account that still owes Consent: Consent, Setup, then Today", async ({ page }) => {
+  test("the email link on an account that still owes Consent: Consent, then Today", async ({ page }) => {
     test.skip(!conditions["web-journal-live"].met, "the confirm link keeps a session only with web-journal-live met");
     const email = newEmail();
     const password = newPassword();
@@ -381,15 +381,13 @@ test.describe("a first run reaches Today without a reload", () => {
       await page.getByTestId("consent-health").check();
       await page.getByTestId("consent-age").check();
       await page.getByTestId("consent-continue").click();
-      await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
-      await expect(page.getByTestId("setup-done")).toBeVisible({ timeout: 15_000 });
       await finishSetup(page);
     } finally {
       await cleanup(email);
     }
   });
 
-  test("the journal stays closed until Setup is done", async ({ page }) => {
+  test("Setup after first use: the journal opens at once, the reminder off until chosen, Setup offered after a check-in", async ({ page }) => {
     const email = newEmail();
     const password = newPassword();
     try {
@@ -399,12 +397,24 @@ test.describe("a first run reaches Today without a reload", () => {
       await page.getByLabel("Email").fill(email);
       await page.getByLabel("Password").fill(password);
       await page.getByRole("button", { name: messages.auth.signinSubmit }).click();
-      await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
-      for (const path of ["/app", "/app/timeline", "/app/me"]) {
+      await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
+      for (const path of ["/app/timeline", "/app/me"]) {
         await page.goto(path);
-        await expect(page).toHaveURL(/\/setup$/);
-        await expect(page.getByTestId("setup-done")).toBeVisible();
+        await expect(page).toHaveURL(RegExp(`${path}$`));
       }
+      // The protective default: the reminder is off until they choose one.
+      await expect(page.getByTestId("reminder-toggle")).not.toBeChecked();
+      // Today offers Setup once there's a check-in.
+      await page.goto("/app");
+      await expect(page.getByTestId("today-setup-later")).toHaveCount(0);
+      await page.getByTestId("checkin-mood-4").click();
+      await page.getByTestId("checkin-save").click();
+      await expect(page.getByTestId("checkin-summary")).toBeVisible({ timeout: 15_000 });
+      await page.reload();
+      await expect(page.getByTestId("today-setup-later")).toBeVisible();
+      await page.getByTestId("today-setup-later-open").click();
+      await expect(page).toHaveURL(/\/setup$/);
+      await expect(page.getByTestId("setup-done")).toBeVisible();
     } finally {
       await cleanup(email);
     }
@@ -420,7 +430,7 @@ test.describe("a first run reaches Today without a reload", () => {
       await page.getByLabel("Email").fill(email);
       await page.getByLabel("Password").fill(password);
       await page.getByRole("button", { name: messages.auth.signinSubmit }).click();
-      await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+      await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
       await finishSetup(page);
     } finally {
       await cleanup(email);
@@ -437,7 +447,7 @@ test.describe("a first run reaches Today without a reload", () => {
       await page.getByLabel("Email").fill(email);
       await page.getByLabel("Password").fill(password);
       await page.getByRole("button", { name: messages.auth.signinSubmit }).click();
-      await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+      await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
       await finishSetup(page);
       await page.getByTestId("tab-me").click();
       await expect(page).toHaveURL(/\/app\/me$/);
@@ -464,7 +474,7 @@ test.describe("a first run reaches Today without a reload", () => {
       await page.getByLabel("Email").fill(email);
       await page.getByLabel("Password").fill(password);
       await page.getByRole("button", { name: messages.auth.signinSubmit }).click();
-      await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+      await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
       await finishSetup(page);
       await page.getByTestId("tab-me").click();
       await expect(page).toHaveURL(/\/app\/me$/);
@@ -498,7 +508,7 @@ test.describe("a first run reaches Today without a reload", () => {
       await page.getByTestId("consent-health").check();
       await page.getByTestId("consent-age").check();
       await page.getByTestId("consent-continue").click();
-      await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+      await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
       await finishSetup(page);
     } finally {
       await cleanup(email);
@@ -517,8 +527,7 @@ test.describe("importing the same file again", () => {
     await page.getByLabel("Email").fill(email);
     await page.getByLabel("Password").fill(password);
     await page.getByRole("button", { name: messages.auth.signinSubmit }).click();
-    await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
-    await page.getByTestId("setup-done").click();
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     await page.getByTestId("tab-me").click();
     await expect(page).toHaveURL(/\/app\/me$/);
@@ -584,8 +593,7 @@ test.describe("Your week on Insights", () => {
       await page.locator("#email").fill(email);
       await page.locator("#password").fill(password);
       await page.locator("main form button[type=submit]").first().click();
-      await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
-      await page.getByTestId("setup-done").click();
+      await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
       await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
       const monday = await lastWeekMonday(email);
 
@@ -638,7 +646,8 @@ test("the Consumer Health Data link is in the footer inside the journal too", as
     await page.locator("#email").fill(email);
     await page.locator("#password").fill(password);
     await page.locator("main form button[type=submit]").first().click();
-    await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
+    await page.goto("/setup");
     const link = page.getByRole("contentinfo").locator('a[href$="/consumer-health-data"]');
     await expect(link, "Setup").toBeVisible();
     await page.getByTestId("setup-done").click();
@@ -678,10 +687,6 @@ test.describe("the saved language in the journal", () => {
         await french();
         await expect(page.getByTestId("email-confirmed-continue")).toHaveText(fr.emailConfirmed.emailConfirmedContinue, { timeout: 20_000 });
         await page.getByTestId("email-confirmed-continue").click();
-        await expect(page).toHaveURL(/\/fr\/setup$/, { timeout: 20_000 });
-        await french();
-        await expect(page.getByRole("heading", { level: 1 })).toHaveText(fr.onboarding.setupTitle);
-        await page.getByTestId("setup-done").click();
         await expect(page).toHaveURL(/\/fr\/app$/, { timeout: 20_000 });
         await french();
         await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
@@ -708,7 +713,7 @@ test.describe("the saved language in the journal", () => {
       await page.locator("#email").fill(email);
       await page.locator("#password").fill(password);
       await page.locator("main form button[type=submit]").first().click();
-      await expect(page).toHaveURL(/\/fr\/setup$/, { timeout: 20_000 });
+      await expect(page).toHaveURL(/\/fr\/app$/, { timeout: 20_000 });
       // Signed in, Me → Language is the one control: no switcher to bounce off.
       await expect(page.locator("[data-language-switcher]")).toBeHidden();
       // The English route for real: the proxy would answer the French cookie itself.
@@ -763,8 +768,7 @@ test.describe("the saved language in the journal", () => {
       await page.goto("/sign-in");
       await expect(page).toHaveURL(/\/fr\/sign-in/);
       await signInForm(page, email, password);
-      await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
-      await page.getByTestId("setup-done").click();
+      await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
       await today(page);
       await settled(page, "/app", "en");
       await today(page);
@@ -785,8 +789,7 @@ test.describe("the saved language in the journal", () => {
       await confirmEmail(email);
       await page.goto("/sign-in");
       await signInForm(page, email, password);
-      await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
-      await page.getByTestId("setup-done").click();
+      await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
       await today(page);
       await settled(page, "/fr/app", "fr");
       await page.getByTestId("tab-me").click();
@@ -819,15 +822,13 @@ test.describe("the saved language in the journal", () => {
       await confirmEmail(email);
       await page.goto("/sign-in");
       await signInForm(page, email, password);
-      // Setup follows the saved language too, so that's where it stops now.
+      // Today follows the saved language too, so that's where it stops now (Setup comes after first use).
       await expect(page.getByTestId("saved-language-link")).toBeVisible({ timeout: 20_000 });
-      await settled(page, "/fr/setup", "fr");
+      await settled(page, "/fr/app", "fr");
       // Held back for 2 s on the way; here it must really show, reduced motion or not.
       await expect(page.getByTestId("saved-language-link")).toHaveCSS("opacity", "1");
       // The link gets them there: the server sets the cookie on that load.
       await page.getByTestId("saved-language-link").click();
-      await settled(page, "/setup", "en");
-      await page.getByTestId("setup-done").click();
       await settled(page, "/app", "en");
       await today(page);
     } finally {
@@ -845,8 +846,7 @@ test.describe("the saved language in the journal", () => {
       await confirmEmail(email);
       await page.goto("/sign-in");
       await signInForm(page, email, password);
-      await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
-      await page.getByTestId("setup-done").click();
+      await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
       await today(page);
       await settled(page, "/app", "en");
     } finally {
@@ -862,8 +862,7 @@ test.describe("the saved language in the journal", () => {
       await confirmEmail(email);
       await page.goto("/sign-in");
       await signInForm(page, email, password);
-      await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
-      await page.getByTestId("setup-done").click();
+      await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
       await today(page);
       await expect(page.locator("footer nav [lang]")).toHaveCount(0);
       await page.getByTestId("tab-me").click();
@@ -905,23 +904,20 @@ test.describe("the saved language in the journal", () => {
     const email = newEmail();
     const password = newPassword();
     try {
-      await page.goto("/pt-br/welcome?slide=3");
-      await page.getByTestId("welcome-start").click();
-      await expect(page).toHaveURL(/\/pt-br\/consent$/);
-      await page.getByTestId("consent-privacy").check();
-      await page.getByTestId("consent-health").check();
-      await page.getByTestId("consent-continue").click();
+      await page.goto("/pt-br");
+      await page.getByTestId("home-start").click();
       await expect(page).toHaveURL(/\/pt-br\/sign-up$/);
       await page.locator("#email").fill(email);
       await page.locator("#password").fill(password);
-      await page.getByTestId("signup-age").check();
+      await page.getByTestId("consent-privacy").check();
+      await page.getByTestId("consent-health").check();
+      await page.getByTestId("consent-age").check();
       await page.getByTestId("signup-submit").click();
       await expect(page.getByTestId("check-email")).toBeVisible({ timeout: 20_000 });
       await confirmEmail(email);
       await page.getByTestId("check-email-confirmed").click();
-      await expect(page).toHaveURL(/\/pt-br\/setup$/, { timeout: 20_000 });
+      await expect(page).toHaveURL(/\/pt-br\/app$/, { timeout: 20_000 });
       expect(await profileLocale(email)).toBe("pt");
-      await page.getByTestId("setup-done").click();
       await today(page);
       await settled(page, "/pt-br/app", /^pt/i);
       await page.reload();
@@ -947,8 +943,7 @@ test.describe("the tab bar in every language", () => {
         await page.getByLabel("Email").fill(email);
         await page.getByLabel("Password").fill(password);
         await page.getByRole("button", { name: messages.auth.signinSubmit }).click();
-        await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
-        await page.getByTestId("setup-done").click();
+        await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
         await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
         await page.setViewportSize({ width, height: 800 });
         for (const [route, saved] of [["", "en"], ["/th", "th"], ["/fr", "fr"], ["/es", "es"], ["/pt-br", "pt"], ["/de", "de"], ["/it", "it"]]) {
@@ -1017,8 +1012,7 @@ test.describe("the tab bar in every language", () => {
       await page.getByLabel("Email").fill(email);
       await page.getByLabel("Password").fill(password);
       await page.getByRole("button", { name: messages.auth.signinSubmit }).click();
-      await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
-      await page.getByTestId("setup-done").click();
+      await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
       await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
 
       const labelSize = async () => {
@@ -1152,8 +1146,7 @@ test("large text, set in the browser: Today after a mood, calendar, day, entry a
     await page.locator("#email").fill(email);
     await page.locator("#password").fill(password);
     await page.locator("main form button[type=submit]").first().click();
-    await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
-    await page.getByTestId("setup-done").click();
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
 
     // A past day with a check-in, and an entry, at the normal size.
@@ -1281,8 +1274,7 @@ test("large text, set in the browser: the couldn't-load state's help is in the f
     await page.locator("#email").fill(email);
     await page.locator("#password").fill(password);
     await page.locator("main form button[type=submit]").first().click();
-    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
-    await page.getByTestId("setup-done").click();
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     await page.setViewportSize({ width: 320, height: 640 });
     // fr and es too: their Try again pushed the page sideways at 300 % (Web Tester, #269).
@@ -1323,8 +1315,7 @@ test("large text, set in the browser: the milestone's title, X and Not now stay 
     await page.locator("#email").fill(email);
     await page.locator("#password").fill(password);
     await page.locator("main form button[type=submit]").first().click();
-    await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
-    await page.getByTestId("setup-done").click();
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     // 30 days journaled, all in the past: the first milestone.
     const day = await lastWeekMonday(email);
@@ -1372,8 +1363,7 @@ test("large text, set in the browser: the check-in conflict dialog shows the who
     await page.locator("#email").fill(email);
     await page.locator("#password").fill(password);
     await page.locator("main form button[type=submit]").first().click();
-    await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
-    await page.getByTestId("setup-done").click();
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     const today = await journalToday(email, password);
     await seedCheckIns(email, password, today, [{ offset: 0, mood: 4 }]);
@@ -1483,7 +1473,7 @@ test("large text, set in the browser: Set up stays inside a 320 px phone", async
     await page.locator("#email").fill(email);
     await page.locator("#password").fill(password);
     await page.locator("main form button[type=submit]").first().click();
-    await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     const cdp = await page.context().newCDPSession(page);
     await page.setViewportSize({ width: 320, height: 800 });
     for (const [route, saved] of [["", "en"], ["/fr", "fr"], ["/de", "de"]]) {
@@ -1521,7 +1511,6 @@ test("large text: every help number on the list stays whole on a phone", { tag: 
   const cdp = await page.context().newCDPSession(page);
   try {
     const password = await accountAtSetup(page, email);
-    await page.getByTestId("setup-done").click();
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     const saveProfile = await profileSaver(email, password);
     await cdp.send("Page.setFontSizes", { fontSizes: { standard: 48, fixed: 39 } });
@@ -1611,8 +1600,7 @@ test("large text, set in the browser: Print this month stays inside a 320 px pho
     await page.locator("#email").fill(email);
     await page.locator("#password").fill(password);
     await page.locator("main form button[type=submit]").first().click();
-    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
-    await page.getByTestId("setup-done").click();
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     const month = (await journalToday(email, password)).slice(0, 7);
     await page.setViewportSize({ width: 320, height: 640 });
@@ -1664,8 +1652,7 @@ test("large text: the Plus screen at 300 % on a 320 px phone, free and in the fr
     await page.locator("#email").fill(email);
     await page.locator("#password").fill(password);
     await page.locator("main form button[type=submit]").first().click();
-    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
-    await page.getByTestId("setup-done").click();
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     await page.setViewportSize({ width: 320, height: 640 });
     const cdp = await page.context().newCDPSession(page);
@@ -1769,8 +1756,7 @@ test("axe: Moodbow Plus, its screen and sheet, at 320 and 1280 px", async ({ pag
     await page.locator("#email").fill(email);
     await page.locator("#password").fill(password);
     await page.locator("main form button[type=submit]").first().click();
-    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
-    await page.getByTestId("setup-done").click();
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
       await setProfileLocale(email, password, saved);
@@ -1811,8 +1797,7 @@ test("axe: Plus's Year, All time and More patterns, at 320 and 1280 px", async (
     await page.locator("#email").fill(email);
     await page.locator("#password").fill(password);
     await page.locator("main form button[type=submit]").first().click();
-    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
-    await page.getByTestId("setup-done").click();
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     await grantPlusTrial(email);
     for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
@@ -1850,8 +1835,7 @@ test("axe: the PDF journal page, at 320 and 1280 px", async ({ page }) => {
     await page.locator("#email").fill(email);
     await page.locator("#password").fill(password);
     await page.locator("main form button[type=submit]").first().click();
-    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
-    await page.getByTestId("setup-done").click();
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     await grantPlusTrial(email);
     for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
@@ -1880,8 +1864,7 @@ test("axe: Year in review, at 320 and 1280 px", async ({ page }) => {
     await page.locator("#email").fill(email);
     await page.locator("#password").fill(password);
     await page.locator("main form button[type=submit]").first().click();
-    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
-    await page.getByTestId("setup-done").click();
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     await grantPlusTrial(email);
     for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
@@ -1910,8 +1893,7 @@ test("axe: Appearance with themes, at 320 and 1280 px", async ({ page }) => {
     await page.locator("#email").fill(email);
     await page.locator("#password").fill(password);
     await page.locator("main form button[type=submit]").first().click();
-    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
-    await page.getByTestId("setup-done").click();
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
       await setProfileLocale(email, password, saved);
@@ -1963,7 +1945,8 @@ test("keyboard: a time field shows its ring at every stop inside it, the picker 
     await page.locator("#email").fill(email);
     await page.locator("#password").fill(password);
     await page.locator("main form button[type=submit]").first().click();
-    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
+    await expect(page).toHaveURL(RegExp("/app$"), { timeout: 20_000 });
+    await page.goto("/setup");
     await expect(page.getByTestId("setup-reminder-time")).toBeVisible();
     await ringThroughout("setup-reminder-time", "Set up's reminder time");
     await page.getByTestId("setup-done").click();
@@ -1996,8 +1979,7 @@ test("large text, set in the browser: Write is in Today's first view at 320 px, 
     await page.locator("#email").fill(email);
     await page.locator("#password").fill(password);
     await page.locator("main form button[type=submit]").first().click();
-    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
-    await page.getByTestId("setup-done").click();
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     await page.setViewportSize({ width: 320, height: 640 });
     for (const percent of [100, 150, 300]) {

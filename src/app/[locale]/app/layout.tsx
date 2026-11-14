@@ -22,8 +22,8 @@ import { APP_MAIN_GUTTER } from "@/lib/ui/journalLayout";
 
 // The signed-in web journal. Behind web-journal-live: the proxy 404s /app on
 // Production until it's met; this check is the backstop. Signed-out visitors
-// go to sign-in; anyone without current consents goes to Consent, then Set up
-// until onboarded (M3, same as the app). Data access is enforced by RLS and
+// go to sign-in; anyone without current consents goes to Consent. Set up comes after first use
+// (1.3 §6), offered on Today. Data access is enforced by RLS and
 // the RPCs, not by these redirects.
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { robots: { index: false, follow: false } };
@@ -45,7 +45,13 @@ export default async function AppLayout({ children, params }: LayoutProps<"/[loc
   if (!me) return <NextIntlClientProvider messages={await getMessages()}><JournalUnavailable standalone /></NextIntlClientProvider>;
   const step = onboardingStep(me);
   if (step === "consent") redirect({ href: "/consent", locale });
-  if (step === "setup") redirect({ href: "/setup", locale });
+  // Setup after first use (1.3 §6): the journal opens at once. The first time, onboarding is
+  // completed with protective defaults: the reminder off until they choose one; tone and focus
+  // stay at their defaults; AI only as its own consent says. Today then offers Setup.
+  if (step === "setup") {
+    const { error: setupError } = await supabase.rpc("complete_onboarding", { p_reminder_on: false, p_reminder_time: "21:00" });
+    if (setupError) return <NextIntlClientProvider messages={await getMessages()}><JournalUnavailable standalone /></NextIntlClientProvider>;
+  }
   // Their saved language wins in the journal, if it's offered (row RT4).
   const language = savedLanguageRoute(me.profile?.locale, locale, offeredLocales());
   if (language) return <SavedLanguageRedirect locale={language} />;

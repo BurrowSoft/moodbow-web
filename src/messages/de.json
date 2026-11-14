@@ -260,7 +260,10 @@
     "checkInConflictMine": "Deiner",
     "checkInConflictOther": "Schon gespeichert",
     "checkInConflictKeepMine": "Meinen behalten",
-    "checkInConflictUseOther": "Den anderen nehmen"
+    "checkInConflictUseOther": "Den anderen nehmen",
+    "setupLaterBody": "Deine tägliche Erinnerung ist aus. Du kannst sie jederzeit einschalten und eine Uhrzeit wählen.",
+    "setupLaterOpen": "Einrichten",
+    "setupLaterClose": "Nicht jetzt"
   },
   "entry": {
     "writeButton": "Über deinen Tag schreiben",

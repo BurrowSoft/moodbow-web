@@ -1573,5 +1573,20 @@
     "key": "plus.rowExtras",
     "en": "More prompts, breathing exercises and reminders",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "today.setupLaterBody",
+    "en": "Your daily reminder is off. You can turn it on and choose a time whenever you like.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "today.setupLaterOpen",
+    "en": "Set it up",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "today.setupLaterClose",
+    "en": "Not now",
+    "reason": "UX draft (native read pending)"
   }
 ]

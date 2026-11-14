@@ -260,7 +260,10 @@
     "checkInConflictMine": "Yours",
     "checkInConflictOther": "Already saved",
     "checkInConflictKeepMine": "Keep mine",
-    "checkInConflictUseOther": "Use the other one"
+    "checkInConflictUseOther": "Use the other one",
+    "setupLaterBody": "Your daily reminder is off. You can turn it on and choose a time whenever you like.",
+    "setupLaterOpen": "Set it up",
+    "setupLaterClose": "Not now"
   },
   "entry": {
     "writeButton": "Write about your day",

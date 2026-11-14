@@ -260,7 +260,10 @@
     "checkInConflictMine": "El tuyo",
     "checkInConflictOther": "Ya guardado",
     "checkInConflictKeepMine": "Conservar el mío",
-    "checkInConflictUseOther": "Usar el otro"
+    "checkInConflictUseOther": "Usar el otro",
+    "setupLaterBody": "Tu recordatorio diario está desactivado. Puedes activarlo y elegir una hora cuando quieras.",
+    "setupLaterOpen": "Configurar",
+    "setupLaterClose": "Ahora no"
   },
   "entry": {
     "writeButton": "Escribe sobre tu día",

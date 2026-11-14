@@ -1,9 +1,10 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { primaryButtonClass } from "@/components/AuthField";
 import { FOCUS_AREAS, FOCUS_KEYS, TONE_KEYS, TONES, type FocusArea } from "@/lib/journal/ai";
+import { markSetupLaterDone } from "@/app/[locale]/app/TodayCards";
 import { completeSetup, type SetupState } from "./actions";
 
 // A focus area: a multi-select chip (UX: chips for multi-select), the same
@@ -16,6 +17,8 @@ const chip = (on: boolean) =>
 // radio list with hints) first, as on the app; otherwise only the reminder.
 // All skippable; defaults: no focus areas, tone Warm, reminder on at 21:00.
 export function SetupForm({ askAi }: { askAi: boolean }) {
+  // Setup opened: Today's "Make it yours" card has done its job (1.3 §6).
+  useEffect(markSetupLaterDone, []);
   const t = useTranslations("onboarding");
   const tai = useTranslations("ai");
   const ta = useTranslations("auth");

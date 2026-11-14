@@ -44,7 +44,7 @@ export default async function SetupPage({ params }: PageProps<"/[locale]/setup">
   if (!me) return <NextIntlClientProvider messages={await getMessages()}><JournalUnavailable standalone /></NextIntlClientProvider>;
   const step = onboardingStep(me);
   if (step === "consent") redirect({ href: "/consent", locale });
-  if (step === "journal") redirect({ href: "/app", locale });
+  // Onboarded already (protective defaults, 1.3 §6): Setup stays open to choose a reminder, tone and focus.
   // Their saved language, as in the journal: an email link may have brought them
   // here in another one (Vitor's French sign-up, 2026-11-06).
   const language = savedLanguageRoute(me.profile?.locale, locale, offeredLocales());

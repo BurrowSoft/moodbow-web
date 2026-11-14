@@ -6,8 +6,9 @@ import { redirect } from "@/i18n/navigation";
 import { dataLocale } from "@/i18n/routing";
 import { isRateLimit, logAuthFailure } from "@/lib/authErrors";
 import { isValidEmail, normalizeEmail } from "@/lib/email";
+import { askAiConsent } from "@/lib/journal/ai";
 import { consentItem } from "@/lib/legalVersions";
-import { CONSENT_COOKIE, parseConsentCookie } from "@/lib/onboardingConsent";
+import { CONSENT_COOKIE, grantedAtConsent } from "@/lib/onboardingConsent";
 import { PASSWORD_MIN_LENGTH } from "@/lib/password";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -16,7 +17,7 @@ export type SignUpState =
   // email/age echo what was typed: React resets the form after an action,
   // and the fields come back from these values (the password is held by the
   // page and never echoed).
-  | { status: "error"; error: "emailInvalid" | "passwordShort" | "ageRequired" | "emailTaken" | "rateLimited" | "generic"; email?: string; age?: boolean }
+  | { status: "error"; error: "emailInvalid" | "passwordShort" | "consentRequired" | "ageRequired" | "emailTaken" | "rateLimited" | "generic"; email?: string; age?: boolean }
   // notice: the outcome of the last action on the Check email step.
   | { status: "checkEmail"; email: string; notice?: "resent" | "notConfirmed" | "rateLimited" | "generic" };
 
@@ -44,12 +45,12 @@ async function signUp(form: FormData): Promise<SignUpState> {
   const password = String(form.get("password") ?? "");
   if (!isValidEmail(email)) return fail("emailInvalid");
   if ([...password].length < PASSWORD_MIN_LENGTH) return fail("passwordShort");
+  // The consents, on this form (1.3 §6): each its own box, never pre-ticked, checked here again
+  // whatever the browser sent. Per item with POLICY_VERSIONS, as Consent records them.
+  if (form.get("privacy") !== "on" || form.get("health") !== "on") return fail("consentRequired");
   if (form.get("age") !== "on") return fail("ageRequired");
-
-  // Consent comes first (M3): no account without the grants from /consent.
+  const consents = grantedAtConsent(askAiConsent() && form.get("ai") === "on");
   const store = await cookies();
-  const consents = parseConsentCookie(store.get(CONSENT_COOKIE)?.value);
-  if (!consents) return redirect({ href: "/consent", locale });
 
   const supabase = await createSupabaseServerClient();
   if (!supabase) {
@@ -81,14 +82,12 @@ async function signUp(form: FormData): Promise<SignUpState> {
   // user that has no identities (and sends nothing).
   if (data.user && data.user.identities?.length === 0) return fail("emailTaken");
   // No confirmation required on this project → already signed in.
+  // Straight into the journal: Setup comes after first use (1.3 §6). An old consent cookie from
+  // the previous flow is cleared on the way.
   if (data.session) {
     store.delete(CONSENT_COOKIE);
-    return redirect({ href: "/setup", locale });
+    return redirect({ href: "/app", locale });
   }
-  // The consent cookie stays until the user leaves this page signed in: the
-  // action's response re-renders /sign-up, which sends anyone without it
-  // back to /consent and would lose the Check email step (Web Tester, #6).
-  // It expires on its own after an hour if the flow is abandoned.
   return { status: "checkEmail", email };
 }
 
@@ -101,7 +100,7 @@ async function confirmedSignIn(prev: SignUpState, form: FormData): Promise<SignU
   if (error) return { ...prev, notice: error.code === "email_not_confirmed" ? "notConfirmed" : "generic" };
   // Signed in and leaving /sign-up: the consents are in the account now.
   (await cookies()).delete(CONSENT_COOKIE);
-  return redirect({ href: "/setup", locale: await getLocale() });
+  return redirect({ href: "/app", locale: await getLocale() });
 }
 
 async function resend(prev: SignUpState): Promise<SignUpState> {
