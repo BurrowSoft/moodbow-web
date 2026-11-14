@@ -25,13 +25,13 @@ import type { RecallMonth } from "@/lib/journal/momentRecall";
 import { RecallChips } from "./RecallChips";
 
 // The entry view (decision 151, the same layout as the app): a top bar with
-// Back, the ★ moment toggle and ⋯ (Edit, Delete); the date; that day's
+// Back, the ★ moment toggle, ✎ Edit entry and ⋯ (Delete only; board 20); the date; that day's
 // check-in strip; the entry as plain, selectable text; the reflection (or
 // Reflect) with "Write your answer"; and "Add to this entry…". A pointer
 // click on the text opens the editor with the caret there, unless the click
 // ended a text selection (copying). The text isn't a button: a button's
 // contents are presentational, so screen readers would skip the entry (UX
-// agreed); keyboards edit through ⋯ → Edit entry or "Add to this entry…".
+// agreed); keyboards edit through ✎ Edit entry (one Tab after ★) or "Add to this entry…".
 // Save and Cancel come back here; Back goes where the entry was opened from.
 type Props = {
   entry: Entry;
@@ -237,6 +237,19 @@ function Screen({ entry: initial, checkIn, from, backLabel, dateLocaleTag, uid, 
                 <path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z" />
               </svg>
             </button>
+            {/* ✎ Edit entry, one tap (and one Tab) to the editor, caret at the end (board 20, as the app). */}
+            <button
+              type="button"
+              data-testid="entry-view-edit"
+              aria-label={t("entryEditTitle")}
+              onClick={() => edit({ at: "end" })}
+              className="inline-flex h-11 w-11 items-center justify-center rounded-full text-accent hover:bg-pill"
+            >
+              <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 20h4L19 9a2.1 2.1 0 0 0-3-3L5 17z" />
+                <path d="M14 8l2 2" />
+              </svg>
+            </button>
             <div
               className="relative"
               onKeyDown={(e) => {
@@ -281,11 +294,6 @@ function Screen({ entry: initial, checkIn, from, backLabel, dateLocaleTag, uid, 
                     </button>
                   </li>
                 )}
-                <li>
-                  <button type="button" data-testid="entry-menu-edit" onClick={() => edit({ at: "end" })} className="flex min-h-11 w-full items-center rounded-xl px-4 text-left text-text hover:bg-pill">
-                    {t("entryEditTitle")}
-                  </button>
-                </li>
                 <li>
                   <button
                     type="button"
