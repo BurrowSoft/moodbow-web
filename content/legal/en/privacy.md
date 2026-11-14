@@ -56,6 +56,7 @@ To show helplines near you when we don't know your country, we use the country y
 | Vercel | Hosting the website and web journal{pending:web_analytics}; counting visits to the public website (no cookies){/pending} | USA and global edge network |
 | Resend | Sending account emails (confirmation, password reset) | USA (company); emails are sent from Japan |
 | Sentry | Error and crash reports, with personal details removed | USA |
+{pending:purchases}| Google Play, Apple App Store | Payments for AI credits | Global |{/pending}
 
 Each provider may use your data only to provide its service to us. Anthropic doesn't use data sent through its API to train its models, and it deletes it after a short period (at most 30 days) that it keeps for safety and abuse monitoring.
 When data goes outside your country (for example from the EU to the USA), we rely on each provider's data-processing agreement and its data-transfer safeguards, such as the EU Standard Contractual Clauses or the EU–US Data Privacy Framework.

@@ -295,7 +295,7 @@ test.describe("the live legal pages and account deletion (decision 164)", () => 
     // The draft panel (unmet pending blocks) exists only while it's a draft.
     const panel = page.getByTestId("legal-hidden");
     if (LEGAL) await expect(panel).toHaveCount(0);
-    else await expect(panel).toContainText("ai_memory");
+    else await expect(panel).toContainText("purchases");
     await expect(article.getByTestId("legal-hidden")).toHaveCount(0);
     await page.goto("/terms");
     await expect(page.locator('[data-content="article"]')).not.toContainText("AI credits");
