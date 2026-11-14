@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { fitWithin, hasMetadata as hasExif, isJpeg, PICTURES, readEntryPictures } from "./pictures";
 import { encodeForUpload } from "./pictureEncode";
@@ -23,6 +25,20 @@ describe("the byte checks the upload route relies on", () => {
     // APP0 then the image data: clean, even if the pixels happen to contain FF E1.
     expect(hasExif(new Uint8Array([...fromCanvas.slice(0, -2), 0xff, 0xda, 0, 2, 0xff, 0xe1, 0x45, 0x78, 0x69, 0x66, 0xff, 0xd9]))).toBe(false);
     expect(hasExif(new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0x00]))).toBe(true);
+  });
+  it("the bytes a real Chromium canvas wrote (the fixture, 16 x 16 at 0.85) pass the guard", () => {
+    // __fixtures__/chromium-canvas.jpg: made by canvas.toBlob("image/jpeg", 0.85) in Chromium. Its
+    // APP2 ICC_PROFILE segment refused every real upload until the guard allowed it (Web Tester, #322).
+    const real = new Uint8Array(readFileSync(path.join(__dirname, "__fixtures__", "chromium-canvas.jpg")));
+    expect(isJpeg(real)).toBe(true);
+    expect(hasExif(real)).toBe(false);
+  });
+  it("a real Chromium canvas JPEG passes: APP0 JFIF, then APP2 ICC_PROFILE (the browser's sRGB), then the tables; any other APP2 is refused", () => {
+    const icc = [...text("ICC_PROFILE"), 0, 1, 1, ...new Array(40).fill(0x20)];
+    const chromium = new Uint8Array([...fromCanvas.slice(0, -2), 0xff, 0xe2, 0, icc.length + 2, ...icc, 0xff, 0xdb, 0, 3, 0, 0xff, 0xda, 0, 2, 0xff, 0xd9]);
+    expect(hasExif(chromium)).toBe(false);
+    const mpf = [...text("MPF"), 0, 1, 2, 3, 4];
+    expect(hasExif(new Uint8Array([...fromCanvas.slice(0, -2), 0xff, 0xe2, 0, mpf.length + 2, ...mpf, 0xff, 0xda, 0, 2]))).toBe(true);
   });
   it("isJpeg: the JPEG start marker only", () => {
     expect(isJpeg(fromCanvas)).toBe(true);

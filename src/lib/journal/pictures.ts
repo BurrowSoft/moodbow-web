@@ -48,10 +48,15 @@ export async function readEntryPictures(supabase: SupabaseClient, entryIds: stri
 }
 
 // A JPEG carrying any metadata segment before its image data: APP1-APP15 (EXIF and XMP in APP1,
-// IPTC in APP13, ICC and maker data elsewhere) or a comment (COM). The browser's canvas re-encode
-// writes only APP0 (JFIF), so any of these means the file didn't come through it, and the server
-// refuses it (the Reviewer, #322). The marker segments are walked, not scanned for bytes; a file
-// that can't be walked to its first scan (SOS) counts as carrying metadata.
+// IPTC in APP13, maker data elsewhere) or a comment (COM). The browser's canvas re-encode writes
+// APP0 (JFIF) and, in Chromium, APP2 "ICC_PROFILE": the browser's own sRGB colour profile for the
+// canvas, never the photo's (checked on a real Chromium canvas: E0 JFIF, E2 ICC_PROFILE, then the
+// tables). So an APP2 that is exactly an ICC profile segment passes; anything else means the file
+// didn't come through the re-encode, and the server refuses it (the Reviewer, #322). The marker
+// segments are walked, not scanned for bytes; a file that can't be walked to its first scan (SOS)
+// counts as carrying metadata.
+const ICC = [0x49, 0x43, 0x43, 0x5f, 0x50, 0x52, 0x4f, 0x46, 0x49, 0x4c, 0x45, 0x00]; // "ICC_PROFILE\0"
+const isIccSegment = (bytes: Uint8Array, at: number, length: number) => length >= 2 + ICC.length && ICC.every((c, k) => bytes[at + 4 + k] === c);
 export function hasMetadata(bytes: Uint8Array): boolean {
   if (!isJpeg(bytes)) return true;
   let i = 2;
@@ -65,6 +70,12 @@ export function hasMetadata(bytes: Uint8Array): boolean {
     }
     if (m === 0xda) return false; // the image data starts: nothing before it carried metadata
     if (m === 0xd9) return false; // the end, with no image data (nothing to carry)
+    if (i + 3 >= bytes.length) return true;
+    const segment = (bytes[i + 2] << 8) | bytes[i + 3];
+    if (m === 0xe2 && isIccSegment(bytes, i, segment)) {
+      i += 2 + segment;
+      continue;
+    }
     if ((m >= 0xe1 && m <= 0xef) || m === 0xfe) return true;
     // Standalone markers have no length.
     if (m === 0x01 || (m >= 0xd0 && m <= 0xd7)) {

@@ -195,11 +195,56 @@ export async function exists(email: string): Promise<boolean> {
   return (await userId(email)) !== null;
 }
 
+// Pictures (035): whether staging has the bucket and table yet (the picture journeys skip before).
+export async function picturesOnStaging(): Promise<boolean> {
+  if (!configured) return false;
+  const { error } = await database().from("entry_pictures").select("id").limit(1);
+  return !error;
+}
+
+// A moment written through the app's own RPC, signed in as them (the service role has no write on
+// entries). Returns its id.
+export async function seedMoment(email: string, password: string, date: string, body: string): Promise<string> {
+  if (!ours(email)) throw new Error("seedMoment only touches this helper's own users");
+  const user = createClient(URL_, PUBLISHABLE, { auth: { persistSession: false, autoRefreshToken: false } });
+  const { error: signInError } = await user.auth.signInWithPassword({ email, password });
+  if (signInError) throw new Error(`sign-in to seed a moment failed: ${signInError.message}`);
+  const { data, error } = await user.rpc("save_entry", { p_id: null, p_date: date, p_body: body, p_is_moment: true, p_expected_updated_at: null });
+  await user.auth.signOut({ scope: "local" });
+  if (error) throw new Error(`seeding a moment failed: ${error.message}`);
+  return (data as { id: string }).id;
+}
+
+// This run's own user's stored picture files (name and bytes), read back with the service role.
+export async function pictureFiles(email: string): Promise<{ name: string; bytes: Buffer }[]> {
+  if (!ours(email)) throw new Error("pictureFiles only reads this helper's own users");
+  const id = await userId(email);
+  if (!id) return [];
+  const bucket = database().storage.from("entry-pictures");
+  const out: { name: string; bytes: Buffer }[] = [];
+  const { data: entries } = await bucket.list(id);
+  for (const entry of entries ?? []) {
+    const { data: files } = await bucket.list(`${id}/${entry.name}`);
+    for (const f of files ?? []) {
+      const name = `${id}/${entry.name}/${f.name}`;
+      const { data: blob, error } = await bucket.download(name);
+      if (error || !blob) throw new Error(`reading back ${f.name} failed`);
+      out.push({ name, bytes: Buffer.from(await blob.arrayBuffer()) });
+    }
+  }
+  return out;
+}
+
 // Deletes the user if it's still there (the journey may have deleted it).
 export async function cleanup(email: string): Promise<void> {
   if (!ours(email)) throw new Error("cleanup only deletes e2e-ci-* users");
   const id = await userId(email);
+  // Pictures (035): the files of this run's user go through the Storage API now (Preview runs no
+  // cron), and their queue rows after the user (the rows' trigger queues them on the cascade).
+  const pictures = id ? (await pictureFiles(email)).map((f) => f.name) : [];
+  if (pictures.length > 0) await database().storage.from("entry-pictures").remove(pictures);
   if (id) await admin().deleteUser(id);
+  if (id && pictures.length > 0) await database().from("picture_deletions").delete().eq("user_id", id);
   // A Plus row this run wrote must have gone with its user (ON DELETE CASCADE); if not, say so
   // loudly: the Mobile Dev removes it by exact id.
   const granted = grantedHere.get(email);

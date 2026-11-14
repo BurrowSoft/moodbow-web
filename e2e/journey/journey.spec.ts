@@ -6,7 +6,7 @@ import messages from "../../src/messages/en.json";
 import fr from "../../src/messages/fr.json";
 import { monthsBefore } from "../../src/lib/journal/onThisDay";
 import { axeAtWidths } from "../axe";
-import { aiConsentGranted, journalToday, aiAvailable, cleanup, configured, confirmEmail, createConfirmedUser, exists, lastWeekMonday, seedCheckIns, newEmail, newPassword, notConfigured, profileLocale, profileSaver, revokeSessions, setProfileLocale, signedUpUnconfirmed, sweep, grantPlusTrial, plusOnStaging } from "./staging";
+import { aiConsentGranted, journalToday, aiAvailable, cleanup, configured, confirmEmail, createConfirmedUser, exists, lastWeekMonday, seedCheckIns, newEmail, newPassword, notConfigured, profileLocale, profileSaver, revokeSessions, setProfileLocale, signedUpUnconfirmed, sweep, grantPlusTrial, plusOnStaging, picturesOnStaging, seedMoment, pictureFiles } from "./staging";
 
 // The launch-critical journeys (1.0), end to end against staging with a
 // throwaway account each: sign-up → confirm → consent → setup → check-in →
@@ -2184,6 +2184,63 @@ test("Insights for a free person: the example, its watermark whole at 320 and 12
         await expect(page).toHaveURL(RegExp(`${route}/app/me/plus$`), { timeout: 15_000 });
       }
     }
+  } finally {
+    await cleanup(email);
+  }
+});
+
+// Pictures for moments (035; #322): a real upload, in a real browser, against staging. A Plus account
+// adds a JPEG carrying EXIF with a GPS marker to a moment: the canvas re-encode passes the server's
+// metadata guard (a real Chromium JPEG carries an ICC profile segment), the tile shows, and the
+// stored files have no APP1 segment and no GPS marker; the full picture is at most 2048 px.
+test("pictures: a Plus moment takes a real JPEG with EXIF; the tile shows; the stored files carry no metadata", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "checked in Chromium");
+  test.skip(!(await picturesOnStaging()), "staging doesn't have 035 yet");
+  test.setTimeout(120_000);
+  const email = newEmail();
+  try {
+    const password = await accountAtSetup(page, email);
+    await grantPlusTrial(email);
+    const today = await journalToday(email, password);
+    const moment = await seedMoment(email, password, today, "A walk by the sea.");
+    await page.goto(`/app/entries/${moment}`);
+    await expect(page.getByTestId("entry-picture-add")).toBeVisible({ timeout: 15_000 });
+    // A 2400 x 1800 JPEG with an EXIF segment carrying a GPS marker, spliced in after its start.
+    const bytes = await page.evaluate(async () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = 2400;
+      canvas.height = 1800;
+      const ctx = canvas.getContext("2d")!;
+      ctx.fillStyle = "#3a7bd5";
+      ctx.fillRect(0, 0, 2400, 1800);
+      ctx.fillStyle = "#f2c66d";
+      ctx.fillRect(0, 600, 2400, 600);
+      const jpeg = new Uint8Array(await (await new Promise<Blob>((done) => canvas.toBlob((b) => done(b!), "image/jpeg", 0.9))).arrayBuffer());
+      const text = (s: string) => [...s].map((c) => c.charCodeAt(0));
+      const data = [...text("Exif"), 0, 0, ...text("GPSMOODBOW 51.5074N 0.1278W")];
+      const len = data.length + 2;
+      return [...jpeg.slice(0, 2), 0xff, 0xe1, len >> 8, len & 0xff, ...data, ...jpeg.slice(2)];
+    });
+    await page.getByTestId("entry-picture-input").setInputFiles({ name: "walk.jpg", mimeType: "image/jpeg", buffer: Buffer.from(bytes) });
+    await expect(page.getByTestId("entry-picture")).toHaveCount(1, { timeout: 30_000 });
+    await expect(page.getByTestId("entry-picture-error")).toHaveCount(0);
+    const files = await pictureFiles(email);
+    expect(files.map((f) => (f.name.endsWith("_t.jpg") ? "thumb" : "full")).sort()).toEqual(["full", "thumb"]);
+    for (const f of files) {
+      let app1 = false;
+      for (let i = 2; i + 3 < f.bytes.length; ) {
+        if (f.bytes[i] !== 0xff) break;
+        const m = f.bytes[i + 1];
+        if (m === 0xda) break;
+        if (m === 0xe1) app1 = true;
+        i += 2 + f.bytes.readUInt16BE(i + 2);
+      }
+      expect(app1, `${f.name.endsWith("_t.jpg") ? "thumb" : "full"}: no APP1`).toBe(false);
+      expect(f.bytes.includes(Buffer.from("GPSMOODBOW")), "no GPS marker").toBe(false);
+    }
+    // After a reload the picture is still there (from its signed URL).
+    await page.reload();
+    await expect(page.getByTestId("entry-picture")).toHaveCount(1, { timeout: 15_000 });
   } finally {
     await cleanup(email);
   }
