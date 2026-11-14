@@ -153,15 +153,15 @@ describe("LettersEditor: a letter opened from Me is matched too (the Reviewer, #
 });
 
 describe("LettersEditor: letters to future you are part of Plus (1.3 §3)", () => {
-  it("without Plus: no editor, a locked row whose tap opens the Plus sheet; the letters still open and delete", async () => {
+  // Audit trial: #315 retired the Plus sheet (518d664), so the locked row is a link to the Plus
+  // screen; #312's own test still expects the sheet (an audit finding for its day-of merge).
+  it("without Plus: no editor, a locked row that links to the Plus screen; the letters still open and delete", async () => {
     open.mockReturnValueOnce(Promise.resolve({ status: "ok", body: "Dear me." }));
     page([locked, opened], "locked");
     expect(screen.queryByTestId("letter-text")).toBeNull();
     expect(screen.queryByTestId("letter-save")).toBeNull();
     expect(screen.getByTestId("letters-locked")).toHaveTextContent(m.lockedBody);
-    fireEvent.click(screen.getByTestId("letters-write-lock"));
-    expect(screen.getByTestId("plus-sheet")).toHaveTextContent(messages.plus.sheetLetters);
-    fireEvent.click(screen.getByTestId("plus-sheet-not-now"));
+    expect(screen.getByTestId("letters-write-lock")).toHaveAttribute("href", "/app/me/plus");
     expect(screen.getAllByTestId("letter-delete")).toHaveLength(2);
     fireEvent.click(screen.getByTestId("letter-open"));
     await act(async () => fireEvent.click(screen.getByTestId("letter-open-now")));
