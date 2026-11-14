@@ -625,6 +625,11 @@
     "reason": "UX draft (native read pending)"
   },
   {
+    "key": "me.deleteWord",
+    "en": "DELETE",
+    "reason": "UX draft (native read pending): ลบ as the app (audit batch E); English DELETE is still accepted"
+  },
+  {
     "key": "me.exportReadable",
     "en": "Readable copy (.txt)",
     "reason": "UX draft (native read pending)"

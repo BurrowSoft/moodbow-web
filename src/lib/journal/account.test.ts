@@ -11,7 +11,7 @@ import { DELETE_WORD, deleteWordTyped, exportFileName, journalFileName, localDay
 
 // The typed word (app #141's cases, delete_word_test.dart).
 describe("deleteWordTyped", () => {
-  for (const [locale, word] of [["en", "DELETE"], ["th", "DELETE"], ["fr", "SUPPRIMER"], ["es", "ELIMINAR"], ["pt-br", "EXCLUIR"], ["de", "LÖSCHEN"], ["it", "ELIMINA"]]) {
+  for (const [locale, word] of [["en", "DELETE"], ["th", "ลบ"], ["fr", "SUPPRIMER"], ["es", "ELIMINAR"], ["pt-br", "EXCLUIR"], ["de", "LÖSCHEN"], ["it", "ELIMINA"]]) {
     it(`${locale}: ${word}, in any case, or DELETE`, () => {
       expect(deleteWordTyped(word, locale)).toBe(true);
       expect(deleteWordTyped(` ${word.toLowerCase()} `, locale)).toBe(true);
@@ -22,6 +22,12 @@ describe("deleteWordTyped", () => {
       expect(deleteWordTyped("   ", locale)).toBe(false);
     });
   }
+  it("Thai (audit batch E, as the app): ลบ with spaces around, or English DELETE in any case; ลบบัญชี isn't the word", () => {
+    for (const t of ["ลบ", " ลบ ", "\tลบ\n", "DELETE", " Delete "]) expect(deleteWordTyped(t, "th"), JSON.stringify(t)).toBe(true);
+    for (const t of ["ลบบัญชี", "บ", "ล บ"]) expect(deleteWordTyped(t, "th"), t).toBe(false);
+    expect(deleteWordTyped("ลบ", "en")).toBe(false);
+  });
+
   it("another language's word is not accepted", () => {
     expect(deleteWordTyped("LÖSCHEN", "fr")).toBe(false);
     expect(deleteWordTyped("SUPPRIMER", "en")).toBe(false);
