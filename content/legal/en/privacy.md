@@ -21,10 +21,16 @@ Moodbow is a private journal made by Vitor Ribeiro Carvalho, trading as BurrowSo
 **When you last connected:** the time your account last connected to our servers. We use it to keep you signed in and, for accounts without an email, to apply the 12-month rule below.
 {pending:anon_start_live}**Using Moodbow without an email:** you can start without giving us an email. We create an account for your phone that only it can use, and store your journal there like any other account. If you add an email later, your journal stays the same account. If you never add an email and don't open the app while connected to the internet for 12 months, we delete that account and its journal.{/pending}
 **Your journal:** the entries you write, your daily check-ins (mood, sleep, movement (active minutes), stress), the dates they belong to, and which entries you mark as moments.
-**Your settings:** language, country, time zone, reminder time, and your AI choices (on or off, tone, focus areas).
+{pending:tags_live}**Tags:** the words you add to a check-in, up to 5 a day.{/pending}
+{pending:moment_recall_live}**When a moment comes back:** which anniversaries (1 month, 6 months, 1 year) you chose for each moment to come back on.{/pending}
+{pending:toolbox_live|app_toolbox}**Things that help you:** the list you keep in Me → Things that help me.{/pending}
+{pending:letters_live|app_letters}**Letters to future you:** the letters you write, the day each one opens, and when you asked to be reminded of them.{/pending}
+{pending:safety_plan_live|app_safety_plan}**Your safety plan:** the plan you write. It can include the names and phone numbers of people and services you choose to list. They're stored with your journal, protected the same way, included when you export your data and deleted when you delete it. Moodbow never contacts them: a call only happens if you tap a number, through your phone's own dialer.{/pending}
+**Your settings:** language, country, time zone, reminder time{pending:plus}s{/pending}, and your AI choices (on or off, tone, focus areas).
 **AI content (only if AI is on):** the reflections and reports the AI writes for you{pending:ai_memory}, and the short facts Moodbow remembers about you, which you can see, edit and delete in Me → What Moodbow remembers{/pending}.
 **AI usage:** for each AI request, the feature, the model, the number of tokens, the cost and the credits used. Not the text of your entries or of the AI's answer.
 {pending:purchases}**Purchases:** if you buy AI credits, Google Play or the App Store handles the payment. We receive a purchase reference and the number of credits, never your card details.{/pending}
+{pending:plus}**Moodbow Plus purchases:** if you subscribe to Moodbow Plus, Google Play, the App Store or Stripe handles the payment. Stripe receives your email address to send receipts and keeps its own records. We keep a customer and subscription reference, its status, when the current period ends and when a free trial started, never your card details.{/pending}
 **Error reports:** if the app or website crashes or another error happens, a technical report (device type, app or browser version, the error) is sent to our error-tracking provider. We remove personal details and any text you've written before it's sent, and the provider doesn't store your IP address.
 
 **Cookies and storage on your device:** the website uses only the cookies it needs to work: one that keeps you signed in, one that remembers the language you chose, one that remembers list or calendar view, for a minute after you delete your account, one that tells your browser to clear its copies, and, while you create an account, one that briefly holds the consents you just gave. It also keeps a few display choices in your browser, such as light or dark appearance and the cards you've already closed. None of them track you across sites or are used for advertising or analytics.
@@ -34,7 +40,7 @@ Moodbow is a private journal made by Vitor Ribeiro Carvalho, trading as BurrowSo
 **Technical logs:** like almost every online service, our hosting providers record IP addresses and device or browser information when you connect, for security and to fix problems. They keep these logs for a limited time (see §4). We also keep daily totals of AI use (how many reflections were made that day and what they cost us), with no link to any person, so we can keep costs under control.
 **Emails you send us:** if you write to support@moodbow.com, we keep the conversation so we can answer you, and delete it when it's no longer needed.
 
-We don't collect your name, contacts, precise location, or advertising identifiers, and we don't use advertising trackers.
+We don't collect your name, contacts{pending:safety_plan_live|app_safety_plan} (other than the ones you type into a safety plan){/pending}, precise location, or advertising identifiers, and we don't use advertising trackers.
 
 To show helplines near you when we don't know your country, we use the country your connection comes from, at that moment only; it isn't stored.
 
@@ -58,6 +64,8 @@ To show helplines near you when we don't know your country, we use the country y
 | Resend | Sending account emails (confirmation, password reset) | USA (company); emails are sent from Japan |
 | Sentry | Error and crash reports, with personal details removed | USA |
 {pending:purchases}| Google Play, Apple App Store | Payments for AI credits | Global |{/pending}
+{pending:plus}| Google Play, Apple App Store | Payments for Moodbow Plus | Global |{/pending}
+{pending:plus}| Stripe | Payments and receipts for Moodbow Plus | USA |{/pending}
 
 Each provider may use your data only to provide its service to us. Anthropic doesn't use data sent through its API to train its models, and it deletes it after a short period (at most 30 days) that it keeps for safety and abuse monitoring.
 When data goes outside your country (for example from the EU to the USA), we rely on each provider's data-processing agreement and its data-transfer safeguards, such as the EU Standard Contractual Clauses or the EU–US Data Privacy Framework.
@@ -67,6 +75,7 @@ We never sell your data, and we never share it with advertisers.
 ### 4. How long we keep it
 - Everything is kept until you delete it or delete your account.
 - **Deleting your account** removes your journal, check-ins, AI content, settings, credits history and login from our live database immediately.
+{pending:plus}- Payment records kept by Stripe, Google Play or the App Store follow their own rules; deleting your Moodbow account cancels a web subscription and removes our copy. A Google Play or App Store subscription has to be cancelled there; deleting your account doesn't stop it.{/pending}
 - Copies in our encrypted backups disappear automatically within {pending:backup_retention}8{/pending} days.
 - Error and crash reports are kept by our error-tracking provider for up to 90 days.
 - Technical logs at our providers (hosting, database, email delivery) are kept only for a limited period set by each provider, and then deleted.
