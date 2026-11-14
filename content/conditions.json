@@ -246,5 +246,9 @@
   "wear": {
     "met": false,
     "what": "The Wear OS watch check-in (decision 248) is live in the Moodbow app on Google Play: met with that release. The privacy policy's watch lines and its Google Play services line show from then (the line also shows once Play Billing is live, purchases)."
+  },
+  "plus": {
+    "met": false,
+    "what": "Moodbow Plus (decision 246, specs/plus.md, docs/plus-entitlements.md): the yearly subscription with 7 free days, on the web through Stripe. Off until everything ships, and not before the pilot is published. Before it's met: the entitlements migration on Production, Vitor's prices, Stripe keys, webhook endpoint, CRON_SECRET and service role key on Production, his terms and privacy text, the Reviewer's read and the tester rows on test-mode Stripe."
   }
 }
