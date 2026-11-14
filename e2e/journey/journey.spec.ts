@@ -2057,7 +2057,9 @@ test("What lifts me: shown with Plus, an excluded tag never, at large text, and 
       await expect(page.getByTestId("insights-lift"), where).toContainText("Walk");
       await expect(lifts, `${where}: the list's tag never shown`).not.toContainText("Wine");
       await expect(page.getByTestId("insights-lifts-footer"), where).toHaveText(messages.plus.liftsFooter);
-      for (const testId of ["lifts-get-help", "insights-lift"]) {
+      // No help control of its own any more (audit batch H): the page's lifebuoy is by the title.
+      await expect(page.getByTestId("lifts-get-help"), where).toHaveCount(0);
+      for (const testId of ["insights-lift"]) {
         await page.getByTestId(testId).scrollIntoViewIfNeeded();
         const box = (await page.getByTestId(testId).boundingBox())!;
         console.log(`What lifts me ${where}: ${testId} ${Math.round(box.x)},${Math.round(box.y)} ${Math.round(box.width)}×${Math.round(box.height)} px`);
@@ -2065,11 +2067,7 @@ test("What lifts me: shown with Plus, an excluded tag never, at large text, and 
       }
       expect(await page.evaluate(() => document.documentElement.scrollWidth), `${where}: no sideways scroll`).toBeLessThanOrEqual(320);
     }
-    // The help beside it is Me's card.
     await cdp.send("Page.setFontSizes", { fontSizes: { standard: 16, fixed: 13 } });
-    await page.getByTestId("lifts-get-help").click();
-    await expect(page.getByTestId("safety-card")).toContainText(messages.safety.safetyBodyNeutral);
-    await page.getByTestId("safety-close").click();
     for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
       await setProfileLocale(email, password, saved);
       await axeAtWidths(page, `What lifts me (${saved})`, async () => {
