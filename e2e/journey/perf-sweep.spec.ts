@@ -50,6 +50,8 @@ test("first-load JS per route (throwaway perf sweep)", async ({ browser }) => {
     // master signs in to Setup; since #314 sign-in lands on Today.
     await page.waitForURL(/\/(setup|app)$/, { timeout: 20_000 });
     console.log(`PERFSTEP signed in at ${page.url()}`);
+    // master: Setup still has to be finished once (write redirects there until it is).
+    await page.goto("/setup");
     if (page.url().endsWith("/setup")) await page.getByTestId("setup-done").click({ timeout: 20_000 });
     await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     // One entry, for the entry view.
