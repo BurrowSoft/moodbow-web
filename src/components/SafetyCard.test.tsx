@@ -9,6 +9,11 @@ import ptBr from "@/messages/pt-br.json";
 import { helpLineSize, helplinesFor, isIos, telHref } from "@/lib/safety/helplines";
 import { GetHelpNow, SafetyCard } from "./SafetyCard";
 import { Dialog } from "@/components/Dialog";
+// My safety plan (1.2): whether it has content, asked once the card is open.
+let planHas: boolean | "never" = false;
+vi.mock("@/app/[locale]/app/me/safety-plan/actions", () => ({
+  safetyPlanHasContent: () => (planHas === "never" ? new Promise(() => {}) : Promise.resolve(planHas)),
+}));
 import { RequestCountryProvider } from "./RequestCountry";
 import { usableCountry } from "@/lib/region/requestCountry";
 vi.mock("@/i18n/navigation", () => ({
@@ -262,6 +267,38 @@ describe("a line's hours are in the live languages", () => {
         expect(helplinesFor(code, locale).helpline?.hours, `${code} ${locale}`).toBe(hours[data]);
       }
     }
+  });
+});
+
+describe("SafetyCard: My safety plan (1.2, the Reviewer's read)", () => {
+  it("with content: the button, below the helplines, and it closes the card on the way", async () => {
+    planHas = true;
+    const onClose = vi.fn();
+    wrap(<SafetyCard country="TH" onClose={onClose} />);
+    const button = await screen.findByTestId("safety-plan-button");
+    expect(button).toHaveTextContent(s.safetyPlanButton);
+    expect(button).toHaveAttribute("href", "/app/me/safety-plan");
+    for (const id of ["safety-call-helpline", "safety-call-emergency", "safety-find-helpline"]) {
+      expect(screen.getByTestId(id).compareDocumentPosition(button) & Node.DOCUMENT_POSITION_FOLLOWING, id).toBeTruthy();
+    }
+    fireEvent.click(button);
+    expect(onClose).toHaveBeenCalled();
+    planHas = false;
+  });
+
+  it("an empty plan: the card exactly as it was, no button", async () => {
+    planHas = false;
+    wrap(<SafetyCard country="TH" onClose={() => {}} />);
+    await Promise.resolve();
+    expect(screen.queryByTestId("safety-plan-button")).toBeNull();
+  });
+
+  it("help never waits on the plan: no answer yet, the helplines are already there", () => {
+    planHas = "never";
+    wrap(<SafetyCard country="TH" onClose={() => {}} />);
+    expect(screen.getByTestId("safety-call-helpline")).toBeInTheDocument();
+    expect(screen.queryByTestId("safety-plan-button")).toBeNull();
+    planHas = false;
   });
 });
 

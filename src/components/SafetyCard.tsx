@@ -1,11 +1,12 @@
 "use client";
 
-import { useCallback, useState, useSyncExternalStore, type MouseEvent } from "react";
+import { useCallback, useEffect, useState, useSyncExternalStore, type MouseEvent } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Dialog, dialogButton } from "@/components/Dialog";
 import { HelpNumberText } from "@/components/HelpNumberText";
 import { Link } from "@/i18n/navigation";
 import { helpLineSize, helplinesFor, isIos, isShortCode, telHref } from "@/lib/safety/helplines";
+import { safetyPlanHasContent } from "@/app/[locale]/app/me/safety-plan/actions";
 import { useRequestCountry } from "@/components/RequestCountry";
 import { countryName } from "@/lib/region/countries";
 
@@ -35,6 +36,18 @@ export function SafetyCard({ country, onClose, neutral = false }: { country: str
   // are, so someone travelling or on a VPN can tell (UX). The browser's own country name.
   const fromRequest = !country && requested && (lines.helpline || lines.emergency) ? countryName(requested, locale) : null;
   const ios = useSyncExternalStore(noSubscribe, () => isIos(navigator.userAgent, navigator.maxTouchPoints), () => false);
+  // My safety plan (1.2), below the helplines, only where it has content (the Reviewer's read):
+  // asked once the card is open, so help never waits on it; a yes or no, never the plan.
+  const [plan, setPlan] = useState(false);
+  useEffect(() => {
+    let open = true;
+    safetyPlanHasContent()
+      .then((has) => open && setPlan(has))
+      .catch(() => {});
+    return () => {
+      open = false;
+    };
+  }, []);
   // The numbers and links stop growing at about 200 % on narrow screens (decision 231). What comes
   // before them stays under the card's own cap (capText in Dialog): at 32 px it pushed the first help
   // line to 939 px, off a 640 px screen (#246). text-sm here: the same 7:8 as at the normal size.
@@ -87,6 +100,13 @@ export function SafetyCard({ country, onClose, neutral = false }: { country: str
             <span className="sr-only">{tc("opensInNewTab")}</span>
           </a>
         </p>
+        {plan && (
+          <p>
+            <Link href="/app/me/safety-plan" data-testid="safety-plan-button" onClick={onClose} className={`${link} [font-size:min(1rem,max(10vw,32px))]`}>
+              {t("safetyPlanButton")}
+            </Link>
+          </p>
+        )}
         <p className={small}>{t("safetyNotTherapy")}</p>
       </div>
       {/* Close is secondary (outline): the help above is what stands out

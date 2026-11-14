@@ -20,6 +20,7 @@ import { lastWeekStart } from "@/lib/journal/report";
 import { sixDaysAfter, yourWeek, type YourWeekMoment } from "@/lib/journal/yourWeek";
 import { YourWeekCard } from "./insights/YourWeekCard";
 import { ToolboxCard } from "./ToolboxCard";
+import { safetyPlanHasContent } from "./me/safety-plan/actions";
 import { parseToolboxItems } from "@/lib/journal/toolbox";
 import { SecurityNoticeRead } from "./SecurityNoticeRead";
 import { JOURNAL_HEADING } from "@/lib/ui/journalLayout";
@@ -70,7 +71,10 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
   // Things that help (1.2): read whenever it's on, as a save here can make today low. A failed
   // read is no list at all: the card still offers a minute to breathe (UX), and nothing else.
   const toolboxOn = pageGate("toolbox-live") !== "hidden";
-  const [checkIn, todaysEntries, requestHeaders, plusPage, weekRead, momentsRead, toolboxRead] = await Promise.all([
+  // The safety plan link on a hard week (1.2, moved here with Your week; the PLAN's Today row): read
+  // in the same round, not after the week is known, so it never adds a round trip on a hard week.
+  const planOn = weekOn && pageGate("safety-plan-live") !== "hidden";
+  const [checkIn, todaysEntries, requestHeaders, plusPage, weekRead, momentsRead, toolboxRead, planHas] = await Promise.all([
     supabase.from("check_ins").select("local_date, mood, sleep_hours, sleep_quality, exercise_minutes, stress, updated_at").eq("local_date", me.today).maybeSingle(),
     // Today's entries, newest first (previews only; the editor loads the rest).
     supabase.from("entries").select("id, body, is_moment, entry_date, created_at").eq("entry_date", me.today).order("created_at", { ascending: false }),
@@ -80,6 +84,7 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
     weekOn ? supabase.from("check_ins").select("local_date, mood, sleep_hours, stress, exercise_minutes").gte("local_date", weekStart).lte("local_date", weekEnd) : null,
     weekOn ? supabase.from("entries").select("id, entry_date").eq("is_moment", true).gte("entry_date", weekStart).lte("entry_date", weekEnd) : null,
     toolboxOn ? supabase.from("toolbox_items").select("id, text, position").order("position") : null,
+    planOn ? safetyPlanHasContent().catch(() => false) : false,
   ]);
   const { data, error: checkInError } = checkIn;
   const { data: entries, error: entriesError } = todaysEntries;
@@ -111,7 +116,7 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
       week = null;
     }
     hardWeek = week?.kind === "hard";
-    if (week) yourWeekCard = <YourWeekCard week={week} country={me.profile?.country} dateLocaleTag={dateLocaleTag} />;
+    if (week) yourWeekCard = <YourWeekCard week={week} country={me.profile?.country} dateLocaleTag={dateLocaleTag} planLink={hardWeek && planHas === true} />;
   }
   const flaggedToday = (entries ?? []).some((e) => flagsCrisis(String((e as { body?: unknown }).body ?? ""), CRISIS_KEYWORDS));
   // Never under a hard week's help either (the rule Your week brought with it).

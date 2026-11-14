@@ -632,6 +632,7 @@
     "safetyDialKeypad": "Dial {number} on your phone's keypad",
     "safetyCallEmergency": "Call emergency number {number}",
     "safetyClose": "Close",
+    "safetyPlanButton": "My safety plan",
     "safetyNotTherapy": "Moodbow isn't a substitute for professional help."
   },
   "toolbox": {
@@ -662,6 +663,28 @@
     "breathEnd": "That was a minute. Take your time.",
     "done": "Done",
     "breathSafety": "If you feel dizzy, stop and breathe normally."
+  },
+  "safetyPlan": {
+    "title": "My safety plan",
+    "intro": "Fill this in on a calmer day, so it's here when you need it. Every part is optional. Only you can see it.",
+    "warningSigns": "Warning signs",
+    "warningSignsPrompt": "What tells you a hard time might be starting? Thoughts, feelings, situations.",
+    "distractions": "People and places that take my mind off things",
+    "people": "People I can ask for help",
+    "professionals": "Professionals and services",
+    "professionalsPrompt": "My doctor or therapist",
+    "helpline": "Helpline",
+    "surroundings": "Making my surroundings safer",
+    "surroundingsPrompt": "What could make your surroundings safer when things are hard?",
+    "name": "Name",
+    "phone": "Phone number (optional)",
+    "call": "Call",
+    "addPerson": "Add a person",
+    "peopleFull": "You can add up to 10 people here.",
+    "saved": "Saved.",
+    "leaveTitle": "Leave without saving?",
+    "leave": "Leave",
+    "keepEditing": "Keep editing"
   },
   "plus": {
     "label": "Moodbow Plus",
