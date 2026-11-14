@@ -229,7 +229,7 @@
   },
   "me-picture-live": {
     "met": false,
-    "what": "1.3 (Vitor, 14 Nov; board 6b): Me's big card can hold the person's own picture, chosen with the browser's file picker, cropped to 2:1 and re-encoded (no metadata), kept in this browser only (IndexedDB), never uploaded, not in the export, deleted on sign-out and by Remove picture. For everyone. The web shows no App icon row (no home-screen icon). Met with UX's go after the Web Tester's row."
+    "what": "1.3 (Vitor, 14 Nov; board 6b): Me's big card can hold the person's own picture, chosen with the browser's file picker, cropped to 16:10 (at most 1200 x 750) and re-encoded (no metadata), kept in this browser only (IndexedDB), never uploaded, not in the export, deleted on sign-out and by Remove picture. For everyone. The web shows no App icon row (no home-screen icon). Met with UX's go after the Web Tester's row."
   },
   "pictures-live": {
     "met": false,
