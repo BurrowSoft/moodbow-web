@@ -5,7 +5,9 @@ import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { dialogButton } from "@/components/Dialog";
 import { Link } from "@/i18n/navigation";
+import type { PlusOfferPrices } from "@/lib/plus/page";
 import type { PlusView } from "@/lib/plus/view";
+import { FESTIVE_CARD, Lights, Tree } from "../../PlusSheet";
 
 // Free rows, then what Plus adds: "your journal is free, Insights come with Plus" (Vitor, 14 Nov;
 // specs/1.3-offer-review-voice-taps.md §2). No AI rows in any comparison: the AI allowance rules
@@ -35,7 +37,8 @@ function Lock({ label }: { label: string }) {
 // footer with the price and the one button never scrolls, so the action is
 // in view on landing at any size. No first-charge date, no countdown, no
 // pre-ticked box: Stripe's own page confirms the terms.
-export function PlusScreen({ view, price, started }: { view: PlusView; price: string; started: boolean }) {
+// offer: the Christmas special (1.3), only while it runs and for someone eligible (the server decides).
+export function PlusScreen({ view, price, offer = null, started }: { view: PlusView; price: string; offer?: PlusOfferPrices | null; started: boolean }) {
   const t = useTranslations("plus");
   const tt = useTranslations("today");
   const locale = useLocale();
@@ -162,6 +165,36 @@ export function PlusScreen({ view, price, started }: { view: PlusView; price: st
         {t("updateCard")}
       </button>
     </>
+  ) : offer ? (
+    <>
+      {/* The Christmas strip carries the offer's name (no kicker above the title). */}
+      <div data-testid="plus-offer-strip" className={`flex items-center gap-[12px] rounded-2xl px-[12px] py-[8px] text-left ${FESTIVE_CARD}`}>
+        <Tree />
+        <span className="min-w-0 flex-1">
+          <span className="block font-medium text-[#F3D27A]">{t("offerLabel")}</span>
+          <span className="block text-[0.875em]">{t("offerStripBody")}</span>
+        </span>
+        <Lights />
+      </div>
+      {/* Dropped on small screens and at large text: the button already says it (Vitor). */}
+      {!large && (
+        <p data-testid="plus-price" className="font-medium">
+          {t("offerFirstYear", { offer: offer.firstYear })}
+        </p>
+      )}
+      <button type="button" data-testid="plus-start" disabled={busy} onClick={() => void go("/api/checkout/stripe")} className={`${dialogButton(true)} ${large ? "leading-tight" : ""}`}>
+        {t("offerButton", { offer: offer.firstYear })}
+      </button>
+      {/* The renewal, at body size, right under the button (the ruling). */}
+      <p data-testid="plus-renews" className={large ? "leading-snug" : ""}>
+        {t("offerThen", { price: offer.price })}
+      </p>
+      {!large && (
+        <p data-testid="plus-cancel" className="text-[0.875em] text-muted">
+          {t("cancelWhere")}
+        </p>
+      )}
+    </>
   ) : (
     <>
       {/* At large text the short price, one line: the button already names the free week. */}
@@ -237,13 +270,23 @@ export function PlusScreen({ view, price, started }: { view: PlusView; price: st
         aria-label={large ? undefined : t("tableCaption")}
         className={large ? "space-y-3 pb-3" : "min-h-0 flex-1 space-y-3 overflow-y-scroll pb-3 [scrollbar-width:thin]"}
       >
-        <div className="space-y-1">
+        <div className="relative space-y-1 pr-[48px]">
+          {/* Close (all sizes, offer or not): on the title's row, where Back was; Not now and the
+              browser's Back still leave too (UX, 14 Nov). */}
+          <Link href="/app/me" aria-label={t("close")} data-testid="plus-close" className="absolute top-0 right-0 inline-flex h-11 w-11 items-center justify-center rounded-full text-muted">
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <path d="M6 6l12 12M18 6L6 18" />
+            </svg>
+          </Link>
           {/* At large text the eyebrow is for screen readers only and the title at the 32 px cap, so
               the whole title is in view on landing above the pinned part (UX, 12 Nov: de put it at
-              304, then 220-300 under a pinned top of 276; the price and button say it's Plus). */}
-          <p data-testid="plus-eyebrow" className={large ? "sr-only" : "text-sm font-medium tracking-wide text-accent uppercase"}>
-            {t("label")}
-          </p>
+              304, then 220-300 under a pinned top of 276; the price and button say it's Plus).
+              During the offer there's none: the footer's Christmas strip carries it (Vitor). */}
+          {!offer && (
+            <p data-testid="plus-eyebrow" className={large ? "sr-only" : "text-sm font-medium tracking-wide text-accent uppercase"}>
+              {t("label")}
+            </p>
+          )}
           <h1
             data-testid="plus-title"
             className={`font-medium leading-tight [overflow-wrap:anywhere] ${large ? "[font-size:min(1.375rem,max(10vw,32px))]" : "[font-size:min(1.375rem,max(11.25vw,36px))] sm:text-2xl"}`}

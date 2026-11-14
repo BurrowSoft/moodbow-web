@@ -23,7 +23,7 @@ import { YourData } from "./YourData";
 import { ImportData } from "./ImportData";
 import { headers } from "next/headers";
 import { dateLocale } from "@/lib/journal/today";
-import { plusPriceLabel, readPlusView } from "@/lib/plus/view";
+import { readPlusPage } from "@/lib/plus/page";
 import { PlusInMe } from "./PlusInMe";
 
 // The export (export_my_data may take 30 s: lib/supabase/deadline) and the
@@ -57,7 +57,8 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
   const tc = await getTranslations("common");
   const link = "font-medium text-accent underline underline-offset-4";
   // Unreadable: nothing about Plus at all (null), never an offer to someone who may pay.
-  const plus = pageGate("plus") !== "hidden" ? await readPlusView(supabase, user.id) : null;
+  const plusPage = pageGate("plus") !== "hidden" ? await readPlusPage(supabase, user.id, me.profile?.country, locale) : null;
+  const plus = plusPage?.view ?? null;
 
   return (
     <section className="space-y-8">
@@ -67,7 +68,7 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
           under Help (decision 128). */}
       <GetHelpNow country={me.profile?.country} testId="me-get-help" neutral />
       {/* Moodbow Plus (decision 246): always after help, never in front of it. */}
-      {plus && <PlusInMe view={plus} price={plusPriceLabel(locale)} />}
+      {plusPage && <PlusInMe view={plusPage.view} price={plusPage.price} offer={plusPage.offer} />}
 
       {aiShown(me) && (
         <AiSettings
@@ -86,8 +87,8 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
         zones={timeZoneOptions(me.profile?.time_zone)}
         languages={offeredLocales().map((code): [string, string] => [code, tc(`languageNames.${code}`)])}
       />
-      <Appearance shortcuts={pageGate("shortcuts-live") !== "hidden"} palette={plus?.kind === "plus" && plus.until ? { until: plus.until } : plus?.kind === "past_due" ? { pastDue: true } : plus ? { trial: plus.kind === "free" && plus.trial, price: plusPriceLabel(locale) } : null} />
-      <YourData credits={me.credits?.balance ?? 0} uid={user.id} csv={pageGate("export-csv-live") !== "hidden"} ai={conditionMet("ai-live")} plusSource={plus?.kind === "plus" ? plus.source : plus?.kind === "past_due" ? "stripe" : null} pdf={plus?.kind === "plus" ? "plus" : plus ? { trial: plus.kind === "free" && plus.trial, price: plusPriceLabel(locale) } : null} />
+      <Appearance shortcuts={pageGate("shortcuts-live") !== "hidden"} palette={plus?.kind === "plus" && plus.until ? { until: plus.until } : plus?.kind === "past_due" ? { pastDue: true } : plus ? { trial: plus.kind === "free" && plus.trial, price: plusPage?.price ?? "" } : null} />
+      <YourData credits={me.credits?.balance ?? 0} uid={user.id} csv={pageGate("export-csv-live") !== "hidden"} ai={conditionMet("ai-live")} plusSource={plus?.kind === "plus" ? plus.source : plus?.kind === "past_due" ? "stripe" : null} pdf={plus?.kind === "plus" ? "plus" : plus ? { trial: plus.kind === "free" && plus.trial, price: plusPage?.price ?? "" } : null} />
       {/* Import from another app (1.1 K), with Your data, where it's on. */}
       {pageGate("import-live") !== "hidden" && (
         <ImportData uid={user.id} today={me.today} dateLocaleTag={dateLocale(locale, (await headers()).get("accept-language"), me.profile?.country ?? null)} country={me.profile?.country} />

@@ -1593,5 +1593,55 @@
     "key": "onboarding.errConsentRequired",
     "en": "Please tick the boxes above to create your account.",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.close",
+    "en": "Close",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.offerLabel",
+    "en": "Christmas special offer",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.offerBannerTitle",
+    "en": "Your first year for {offer}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.offerBannerBody",
+    "en": "Deeper insights for the year ahead: your year, patterns, What lifts me, letters to future me and more.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.offerSee",
+    "en": "See the offer",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.offerSmall",
+    "en": "Christmas special, until 31 December. Then {price} a year. Cancel anytime.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.offerStripBody",
+    "en": "A lower price for your first year, until 31 December",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.offerFirstYear",
+    "en": "Your first year: {offer}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.offerButton",
+    "en": "Get my first year for {offer}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.offerThen",
+    "en": "Then {price} a year · renews automatically",
+    "reason": "UX draft (native read pending)"
   }
 ]

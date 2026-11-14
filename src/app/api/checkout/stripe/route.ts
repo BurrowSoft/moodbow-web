@@ -2,6 +2,7 @@ import type Stripe from "stripe";
 import { pageGate } from "@/lib/conditions";
 import { pageOrigin, sameOrigin } from "@/lib/http/sameOrigin";
 import { ENTITLEMENT_COLUMNS, hasPlus, parseEntitlement, TRIAL_DAYS, trialAvailable } from "@/lib/plus/entitlements";
+import { offerActive, offerEligible } from "@/lib/plus/offer";
 import { getStripe, isLive, isRouteLocale, needsCardFix, retrieveSubscriptionOrNull, stripeConfigured, stripeLocale } from "@/lib/plus/stripe";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -72,13 +73,18 @@ export async function POST(req: Request): Promise<Response> {
     return no("check_failed", 503);
   }
 
-  const trial = trialAvailable(row);
+  // The Christmas offer (1.3): while it runs, for someone with no previous subscription, the first
+  // year at the coupon's price instead of the free week (one introductory offer at a time, as the
+  // stores). Without the coupon configured, the usual checkout.
+  const coupon = process.env.STRIPE_PLUS_OFFER_COUPON_ID?.trim();
+  const offer = Boolean(coupon) && offerActive() && offerEligible(row);
+  const trial = !offer && trialAvailable(row);
   // Concurrent duplicates (a double tap, a retry) collapse into one session
   // within a 10-minute window. Everything in the key changes the parameters,
   // since Stripe refuses a reused key with different ones.
   const WINDOW_MS = 10 * 60 * 1000;
   const windowStart = Math.floor(Date.now() / WINDOW_MS) * WINDOW_MS;
-  const key = `plus-checkout-${user.id}-${locale}-${trial ? "trial" : "paid"}-${windowStart / WINDOW_MS}`;
+  const key = `plus-checkout-${user.id}-${locale}-${offer ? "offer" : trial ? "trial" : "paid"}-${windowStart / WINDOW_MS}`;
   const expiresAt = Math.floor(windowStart / 1000) + 70 * 60; // 60–70 min from now, inside Stripe's 30 min–24 h
 
   // At most one payable session per person: expire any other still open (an
@@ -108,7 +114,8 @@ export async function POST(req: Request): Promise<Response> {
           metadata: { user_id: user.id },
           ...(trial ? { trial_period_days: TRIAL_DAYS, trial_settings: { end_behavior: { missing_payment_method: "cancel" } } } : {}),
         },
-        metadata: { user_id: user.id, checkout_key: k, locale },
+        ...(offer && coupon ? { discounts: [{ coupon }] } : {}),
+        metadata: { user_id: user.id, checkout_key: k, locale, ...(offer ? { offer: "christmas" } : {}) },
         client_reference_id: user.id,
         ...(row?.store_customer_id ? { customer: row.store_customer_id } : { customer_email: user.email }),
         locale: stripeLocale(locale),

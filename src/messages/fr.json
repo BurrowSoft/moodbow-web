@@ -688,6 +688,16 @@
     "paletteDusk": "Crépuscule",
     "paletteSunrise": "Aube",
     "paletteSea": "Mer",
-    "sheetThemes": "Plus de thèmes font partie de Plus"
+    "sheetThemes": "Plus de thèmes font partie de Plus",
+    "close": "Fermer",
+    "offerLabel": "Offre spéciale de Noël",
+    "offerBannerTitle": "Votre première année pour {offer}",
+    "offerBannerBody": "Des statistiques plus poussées pour l'année à venir : votre année, vos tendances, Ce qui me fait du bien, les lettres à mon futur moi et plus encore.",
+    "offerSee": "Voir l'offre",
+    "offerSmall": "Spécial Noël, jusqu'au 31 décembre. Ensuite {price} par an. Annulable à tout moment.",
+    "offerStripBody": "Un prix plus bas pour votre première année, jusqu'au 31 décembre",
+    "offerFirstYear": "Votre première année : {offer}",
+    "offerButton": "Ma première année pour {offer}",
+    "offerThen": "Ensuite {price} par an · renouvellement automatique"
   }
 }

@@ -688,6 +688,16 @@
     "paletteDusk": "Dämmerung",
     "paletteSunrise": "Sonnenaufgang",
     "paletteSea": "Meer",
-    "sheetThemes": "Mehr Themes gehören zu Plus"
+    "sheetThemes": "Mehr Themes gehören zu Plus",
+    "close": "Schließen",
+    "offerLabel": "Weihnachtsangebot",
+    "offerBannerTitle": "Dein erstes Jahr für {offer}",
+    "offerBannerBody": "Tiefere Einblicke für das kommende Jahr: dein Jahr, deine Muster, Was mir guttut, Briefe an mein zukünftiges Ich und mehr.",
+    "offerSee": "Angebot ansehen",
+    "offerSmall": "Weihnachtsangebot bis 31. Dezember. Danach {price} pro Jahr. Jederzeit kündbar.",
+    "offerStripBody": "Ein niedrigerer Preis für dein erstes Jahr, bis 31. Dezember",
+    "offerFirstYear": "Dein erstes Jahr: {offer}",
+    "offerButton": "Mein erstes Jahr für {offer}",
+    "offerThen": "Danach {price} pro Jahr · verlängert sich automatisch"
   }
 }

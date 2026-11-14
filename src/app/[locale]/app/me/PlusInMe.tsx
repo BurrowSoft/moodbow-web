@@ -4,7 +4,9 @@ import { useState, useSyncExternalStore } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { dialogButton } from "@/components/Dialog";
 import { Link } from "@/i18n/navigation";
+import type { PlusOfferPrices } from "@/lib/plus/page";
 import type { PlusView } from "@/lib/plus/view";
+import { FESTIVE_CARD, Lights } from "../PlusSheet";
 
 // Moodbow Plus in Me (decision 246, mockups 1 and 5), below Get help now
 // (help is always first). One of:
@@ -47,7 +49,7 @@ function Arcs() {
   );
 }
 
-export function PlusInMe({ view, price }: { view: PlusView; price: string }) {
+export function PlusInMe({ view, price, offer = null }: { view: PlusView; price: string; offer?: PlusOfferPrices | null }) {
   const t = useTranslations("plus");
   const tt = useTranslations("today");
   const locale = useLocale();
@@ -109,19 +111,20 @@ export function PlusInMe({ view, price }: { view: PlusView; price: string }) {
     );
   }
 
-  return <PlusBanner trial={view.trial} price={price} id="me-plus-banner" tryId="me-plus-try" />;
+  return <PlusBanner trial={view.trial} price={price} offer={offer} id="me-plus-banner" tryId="me-plus-try" />;
 }
 
 // The free banner (decision 246): Me's, and Today's card on first landing (1.3 §6). Close hides it
 // for the rest of that day on this device, on both. The server's HTML starts hidden (no storage
 // there), so it never flashes for someone who closed it. closedHere: no storage, closed for this visit.
-export function PlusBanner({ trial, price, id, tryId }: { trial: boolean; price: string; id: string; tryId: string }) {
+// The Christmas offer (1.3): the same card in its festive look, its own words and price.
+export function PlusBanner({ trial, price, offer = null, id, tryId }: { trial: boolean; price: string; offer?: PlusOfferPrices | null; id: string; tryId: string }) {
   const t = useTranslations("plus");
   const closedToday = useSyncExternalStore(subscribeClosed, () => readClosed() === localDay(), () => true);
   const [closedHere, setClosedHere] = useState(false);
   if (closedToday || closedHere) return null;
   return (
-    <section aria-labelledby={id} data-testid={id} className="relative space-y-2 rounded-3xl bg-pill p-[20px]">
+    <section aria-labelledby={id} data-testid={id} data-offer={offer ? "" : undefined} className={`relative space-y-2 rounded-3xl p-[20px] ${offer ? FESTIVE_CARD : "bg-pill"}`}>
       <button
         type="button"
         aria-label={t("bannerClose")}
@@ -135,24 +138,26 @@ export function PlusBanner({ trial, price, id, tryId }: { trial: boolean; price:
           setClosedHere(true);
           window.dispatchEvent(new Event(CLOSED_EVENT));
         }}
-        className="absolute top-2 right-2 inline-flex h-11 w-11 items-center justify-center rounded-full text-muted"
+        className={`absolute top-2 right-2 inline-flex h-11 w-11 items-center justify-center rounded-full ${offer ? "text-white" : "text-muted"}`}
       >
         <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
           <path d="M6 6l12 12M18 6L6 18" />
         </svg>
       </button>
       <div className="flex items-center gap-2 pr-12">
-        <Arcs />
-        <span className="text-sm font-medium tracking-wide text-accent uppercase">{t("label")}</span>
+        {offer ? <Lights /> : <Arcs />}
+        <span className={`text-sm font-medium tracking-wide uppercase ${offer ? "text-[#F3D27A]" : "text-accent"}`}>{offer ? t("offerLabel") : t("label")}</span>
       </div>
       <h2 id={id} className="pr-12 text-lg font-medium leading-snug">
-        {t("bannerTitle")}
+        {offer ? t("offerBannerTitle", { offer: offer.firstYear }) : t("bannerTitle")}
       </h2>
-      <p>{t("bannerBody")}</p>
+      <p>{offer ? t("offerBannerBody") : t("bannerBody")}</p>
       <Link href="/app/me/plus" data-testid={tryId} className={`${dialogButton(true)} w-full`}>
-        {trial ? t("tryFree") : t("seePlus")}
+        {offer ? t("offerSee") : trial ? t("tryFree") : t("seePlus")}
       </Link>
-      <p className="text-center text-sm text-muted">{trial ? t("thenPrice", { price }) : t("priceYear", { price })}</p>
+      <p className={`text-center text-sm ${offer ? "text-white" : "text-muted"}`}>
+        {offer ? t("offerSmall", { price: offer.price }) : trial ? t("thenPrice", { price }) : t("priceYear", { price })}
+      </p>
     </section>
   );
 }

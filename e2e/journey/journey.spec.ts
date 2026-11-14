@@ -1732,8 +1732,8 @@ test("large text: the Plus screen at 300 % on a 320 px phone, free and in the fr
       await page.getByTestId("plus-rest").getByTestId("plus-manage").scrollIntoViewIfNeeded();
       await expect(page.getByTestId("plus-manage")).toBeVisible();
     }
-    // Leaving the Plus screen by its own Back (no reload) gives the phone bar back.
-    await page.getByTestId("nav-back").click();
+    // Leaving the Plus screen by its own close X (no reload) gives the phone bar back.
+    await page.getByTestId("plus-close").click();
     await expect(page).toHaveURL(/\/app\/me$/, { timeout: 15_000 });
     await expect(page.getByTestId("app-nav")).toBeVisible({ timeout: 15_000 });
     expect(await page.evaluate(() => document.documentElement.hasAttribute("data-tabs-aside"))).toBe(false);
@@ -1764,10 +1764,11 @@ test("axe: Moodbow Plus, its screen and sheet, at 320 and 1280 px", async ({ pag
         await page.goto(`${route}/app/me/plus`);
         await expect(page.getByTestId("plus-screen")).toBeVisible({ timeout: 15_000 });
       });
-      await axeAtWidths(page, `Plus sheet, from Insights' Year (${saved})`, async () => {
+      // The sheet is retired (Vitor, 14 Nov): Insights' Year opens the Plus screen itself.
+      await axeAtWidths(page, `Plus screen, from Insights' Year (${saved})`, async () => {
         await page.goto(`${route}/app/insights`);
         await page.getByTestId("insights-range-year").click();
-        await expect(page.getByTestId("plus-sheet-go")).toBeVisible({ timeout: 15_000 });
+        await expect(page.getByTestId("plus-screen")).toBeVisible({ timeout: 15_000 });
       });
     }
     await grantPlusTrial(email);

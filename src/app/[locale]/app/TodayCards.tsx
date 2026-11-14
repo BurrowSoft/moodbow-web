@@ -6,12 +6,13 @@ import { dialogButton } from "@/components/Dialog";
 import { Link } from "@/i18n/navigation";
 import { CHECKIN_SAVED_EVENT, isLowMood, type CheckInSavedDetail } from "@/lib/journal/checkInSaved";
 import { markSetupLaterDone, readSetupLaterDone } from "@/lib/journal/setupLater";
+import type { PlusOfferPrices } from "@/lib/plus/page";
 import { PlusBanner } from "./me/PlusInMe";
 
 // Today's Plus card on first landing (1.3 §6): the same card as Me's, closed for the day on either.
 // The server decides whether it may show at all (free, Plus row read, nothing flagged or low saved
 // today); a check-in saved here with one of the two lowest faces hides it at once.
-export function TodayPlusCard({ trial, price, date }: { trial: boolean; price: string; date: string }) {
+export function TodayPlusCard({ trial, price, offer = null, date }: { trial: boolean; price: string; offer?: PlusOfferPrices | null; date: string }) {
   const [low, setLow] = useState(false);
   useEffect(() => {
     const onSaved = (e: Event) => {
@@ -22,7 +23,7 @@ export function TodayPlusCard({ trial, price, date }: { trial: boolean; price: s
     return () => window.removeEventListener(CHECKIN_SAVED_EVENT, onSaved);
   }, [date]);
   if (low) return null;
-  return <PlusBanner trial={trial} price={price} id="today-plus-card" tryId="today-plus-try" />;
+  return <PlusBanner trial={trial} price={price} offer={offer} id="today-plus-card" tryId="today-plus-try" />;
 }
 
 // Setup after first use (1.3 §6): offered once there's a check-in, while the reminder is still off

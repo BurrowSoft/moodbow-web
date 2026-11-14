@@ -76,6 +76,41 @@ describe("POST /api/checkout/stripe", () => {
     expect(p.cancel_url).toBe(`${ORIGIN}/es/app/me/plus`);
   });
 
+  it("the Christmas offer (1.3), in December with the coupon set: the coupon instead of the free week, for someone with no previous subscription", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-12-10T12:00:00Z"));
+    vi.stubEnv("STRIPE_PLUS_OFFER_COUPON_ID", "coupon_xmas");
+    try {
+      await post();
+      const p = createParams();
+      expect(p.discounts).toEqual([{ coupon: "coupon_xmas" }]);
+      expect(p.subscription_data).toEqual({ metadata: { user_id: "u1" } });
+      expect(p.metadata).toMatchObject({ offer: "christmas" });
+      expect(String(stripe.checkout.sessions.create.mock.calls[0][1]?.idempotencyKey)).toContain("-offer-");
+      // A free week before: not eligible, so neither the offer nor another free week.
+      stripe.checkout.sessions.create.mockClear();
+      entitlement = { data: row({ trial_started_at: "2025-01-01T00:00:00Z" }), error: null };
+      await post();
+      const q = createParams();
+      expect(q.discounts).toBeUndefined();
+      expect(q.subscription_data).toEqual({ metadata: { user_id: "u1" } });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("outside December, or without the coupon: the usual free week", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-12-10T12:00:00Z"));
+    try {
+      await post();
+      expect(createParams().discounts).toBeUndefined();
+      expect(createParams().subscription_data).toMatchObject({ trial_period_days: 7 });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("the free week was used before (any store): no trial this time, the same customer", async () => {
     entitlement = { data: row({ trial_started_at: "2025-01-01T00:00:00Z", store_customer_id: "cus_9" }), error: null };
     await post();
