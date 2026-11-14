@@ -6,7 +6,6 @@ import type { LongRange } from "@/lib/plus/longRange";
 import type { MorePattern, MorePatternId, MoreWindow } from "@/lib/plus/morePatterns";
 import type { TagPattern } from "@/lib/plus/tagPatterns";
 import type { Lift } from "@/lib/plus/whatLiftsMe";
-import { GetHelpNow } from "@/components/SafetyCard";
 import { LockedItem, PlusLock, PlusSheet, type PlusOffer } from "../PlusSheet";
 import { segment } from "@/lib/ui/journalLayout";
 import { MoodPair } from "@/components/MoodPair";
@@ -93,7 +92,8 @@ const FREE_LINES = new Set<MorePatternId>(["sleep", "movement", "stress"]);
 // lifts: What lifts me (1.3), already chosen and ordered (lib/plus/whatLiftsMe), at most 3; null when
 // tags are off or couldn't be read (nothing shown, never a guess). It shows the person's own words,
 // so the quiet Get help now sits beside its title (the ruling, the 11 Nov rule).
-export function MorePatternsCard({ patterns, window, tags = [], lifts = null, country = null }: { patterns: MorePattern[]; window: MoreWindow; tags?: TagPattern[]; lifts?: Lift[] | null; country?: string | null }) {
+// country: kept for callers; the section no longer opens the help card itself (audit batch H).
+export function MorePatternsCard({ patterns, window, tags = [], lifts = null }: { patterns: MorePattern[]; window: MoreWindow; tags?: TagPattern[]; lifts?: Lift[] | null; country?: string | null }) {
   const t = useTranslations("plus");
   const ti = useTranslations("insights");
   const number = new Intl.NumberFormat(useLocale(), { minimumFractionDigits: 1, maximumFractionDigits: 1 });
@@ -121,12 +121,11 @@ export function MorePatternsCard({ patterns, window, tags = [], lifts = null, co
     ) : null;
   const liftList = lifts ? (
     <section aria-labelledby="lifts-title" data-testid="insights-lifts" className="mt-4">
-      <div className="flex items-start justify-between gap-3">
-        <h3 id="lifts-title" className="min-w-0 pt-[12px] text-sm font-medium text-text">
-          {t("liftsTitle")}
-        </h3>
-        <GetHelpNow country={country} testId="lifts-get-help" neutral icon />
-      </div>
+      {/* No help control of its own (audit batch H, UX): What lifts me is a section of Insights,
+          whose one lifebuoy sits by the page's title. */}
+      <h3 id="lifts-title" className="min-w-0 text-sm font-medium text-text">
+        {t("liftsTitle")}
+      </h3>
       {lifts.length > 0 ? (
         <ul className="mt-2 space-y-2 text-sm text-text">
           {lifts.map((l) => (

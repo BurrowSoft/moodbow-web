@@ -124,14 +124,16 @@ describe("MorePatternsCard: What lifts me", () => {
     ]);
     expect(section.querySelector("b")).toBeNull();
     expect(screen.getByTestId("insights-lifts-footer")).toHaveTextContent(m.liftsFooter);
-    expect(screen.getByTestId("lifts-get-help")).toHaveAccessibleName(messages.me.meGetHelpNow);
+    // No help control of its own: the page's one lifebuoy is by the Insights title (audit batch H).
+    expect(screen.queryByTestId("lifts-get-help")).toBeNull();
+    expect(screen.queryByRole("link", { name: messages.me.meGetHelpNow })).toBeNull();
     expect(screen.queryByTestId("insights-lifts-none")).toBeNull();
   });
-  it("none qualifies: the invitation to keep tagging, still with the footer and help", () => {
+  it("none qualifies: the invitation to keep tagging, still with the footer (help is the page's)", () => {
     wrap(<MorePatternsCard window="year" patterns={notEnough} lifts={[]} />);
     expect(screen.getByTestId("insights-lifts-none")).toHaveTextContent(m.liftsNone);
     expect(screen.queryByTestId("insights-lift")).toBeNull();
-    expect(screen.getByTestId("lifts-get-help")).toBeInTheDocument();
+    expect(screen.queryByTestId("lifts-get-help")).toBeNull();
   });
   it("tags off or not read: no section at all", () => {
     wrap(<MorePatternsCard window="year" patterns={notEnough} lifts={null} />);
