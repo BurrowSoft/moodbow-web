@@ -226,5 +226,21 @@
   "thai-offered-live": {
     "met": false,
     "what": "1.1 F: Thai is offered on the web: the native reader has read the Thai UI, Help and dates (thai_reviewed, decision 193), with UX's go. Until then /th is a draft on test builds only (Preview, dev, CI) and Production is English only; the switcher, Me → Language, hreflang and the sitemap offer Thai only once met. The legal pages keep their own gates in every language."
+  },
+  "me-picture-live": {
+    "met": false,
+    "what": "1.3 (Vitor, 14 Nov; board 6b): Me's big card can hold the person's own picture, chosen with the browser's file picker, cropped to 2:1 and re-encoded (no metadata), kept in this browser only (IndexedDB), never uploaded, not in the export, deleted on sign-out and by Remove picture. For everyone. The web shows no App icon row (no home-screen icon). Met with UX's go after the Web Tester's row."
+  },
+  "pictures-live": {
+    "met": false,
+    "what": "1.3 Pictures for moments (035; spec \"Pictures for moments\" and \"Pictures 035: build rulings\"): up to 3 pictures on a moment (Plus to add; viewing, export and deleting always), re-encoded in the browser (no EXIF), private bucket, signed URLs of 5 minutes. Needs moodbow-app 035 on Production AND the picture-deletions cron running on Production (vercel.json; CRON_SECRET is Vitor's): until it runs, deleted pictures' files are not removed. Also Vitor's privacy line, store labels and the storage cost. While it is unmet (or turned off again), pictures already added are still in Export my data and are deleted with their entry or the account, but there is no screen to view or remove a single picture."
+  },
+  "app-me-picture": {
+    "met": false,
+    "what": "1.3 (Vitor, 14 Nov): the app's Me card holds the person's own picture (on the phone only, never uploaded, metadata stripped; spec \"Me: the big card is your own picture\"). Met when that app release is live; the privacy policy's Me picture line (app sentence) shows from then."
+  },
+  "app-pictures": {
+    "met": false,
+    "what": "1.3 Pictures for moments in the app (035; Plus): met when the app release that adds pictures to moments is live (and 035 is on Production with the picture-deletions cron running). The privacy policy's moment pictures line shows from then."
   }
 }
