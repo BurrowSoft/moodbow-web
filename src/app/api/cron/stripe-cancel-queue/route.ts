@@ -1,4 +1,4 @@
-import * as Sentry from "@sentry/nextjs";
+import { captureMessage } from "@sentry/nextjs";
 import { conditionMet } from "@/lib/conditions";
 import { getStripe, retrieveSubscriptionOrNull, stripeConfigured } from "@/lib/plus/stripe";
 import { clearCancelQueue, readCancelQueue, serviceRoleConfigured } from "@/lib/plus/serviceRole";
@@ -40,6 +40,6 @@ export async function GET(req: Request): Promise<Response> {
       failed++; // stays queued for tomorrow
     }
   }
-  if (failed > 0) Sentry.captureMessage(`Stripe cancel queue: ${failed} not cancelled`, { level: "error", fingerprint: ["stripe-cancel-queue"] });
+  if (failed > 0) captureMessage(`Stripe cancel queue: ${failed} not cancelled`, { level: "error", fingerprint: ["stripe-cancel-queue"] });
   return Response.json({ cancelled, failed });
 }

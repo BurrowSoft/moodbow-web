@@ -1,5 +1,4 @@
 import { sentryOptions } from "./sentry.shared";
-import { withoutSessions } from "./lib/sentrySessions";
 
 // Browser-side Sentry. The DSN is public by design (it only allows sending
 // events). Unset locally and in CI, so nothing is sent from there.
@@ -7,15 +6,17 @@ import { withoutSessions } from "./lib/sentrySessions";
 // 130 kB of script that would otherwise load and run before the page is
 // usable, and the few errors of the very first second aren't worth that.
 // It's a dynamic import, so the SDK isn't in the page's first scripts at all.
-type SentryModule = typeof import("@sentry/nextjs");
+// Only init and captureRouterTransitionStart, by name (lib/sentryClient.ts): loading the whole
+// "@sentry/nextjs" module kept Replay, Feedback, the Profiler and tracing in the chunk.
+type SentryModule = typeof import("./lib/sentryClient");
 
 const dsn = process.env.NEXT_PUBLIC_SENTRY_DSN;
 const IDLE_TIMEOUT_MS = 2000;
 let sentry: SentryModule | null = null;
 
 export function startSentry(): Promise<void> {
-  return import("@sentry/nextjs").then((S) => {
-    S.init({ dsn, ...sentryOptions, integrations: withoutSessions });
+  return import("./lib/sentryClient").then((S) => {
+    S.init({ dsn, ...sentryOptions, integrations: S.errorsOnly });
     sentry = S;
   });
 }
