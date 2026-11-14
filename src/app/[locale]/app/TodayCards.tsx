@@ -6,7 +6,7 @@ import { dialogButton } from "@/components/Dialog";
 import { Link } from "@/i18n/navigation";
 import { CHECKIN_SAVED_EVENT, isLowMood, type CheckInSavedDetail } from "@/lib/journal/checkInSaved";
 import { markSetupLaterDone, readSetupLaterDone } from "@/lib/journal/setupLater";
-import { PlusBanner } from "./me/PlusInMe";
+import { useClosedToday } from "./me/PlusInMe";
 
 // Today's Plus card on first landing (1.3 §6): the same card as Me's, closed for the day on either.
 // The server decides whether it may show at all (free, Plus row read, nothing flagged or low saved
@@ -21,8 +21,26 @@ export function TodayPlusCard({ trial, price, date }: { trial: boolean; price: s
     window.addEventListener(CHECKIN_SAVED_EVENT, onSaved);
     return () => window.removeEventListener(CHECKIN_SAVED_EVENT, onSaved);
   }, [date]);
-  if (low) return null;
-  return <PlusBanner trial={trial} price={price} id="today-plus-card" tryId="today-plus-try" />;
+  const t = useTranslations("plus");
+  const [closed, close] = useClosedToday();
+  if (low || closed) return null;
+  // Compact (board 21; UX ruling 2): the tag, one line, the price line and ✕; the title opens Plus.
+  return (
+    <section aria-labelledby="today-plus-card-title" data-testid="today-plus-card" className="relative rounded-2xl bg-pill py-[12px] ps-[16px] pe-[52px]">
+      <button type="button" aria-label={t("bannerClose")} data-testid="today-plus-card-close" onClick={close} className="absolute top-1 right-1 inline-flex h-11 w-11 items-center justify-center rounded-full text-muted">
+        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+          <path d="M6 6l12 12M18 6L6 18" />
+        </svg>
+      </button>
+      <p className="text-xs font-medium tracking-wide text-accent uppercase">{t("label")}</p>
+      <h2 id="today-plus-card-title" className="font-medium text-text">
+        <Link href="/app/me/plus" data-testid="today-plus-try" className="underline-offset-4 hover:underline">
+          {t("todayCardTitle")}
+        </Link>
+      </h2>
+      <p className="text-sm text-muted">{trial ? t("todayCardTrial", { price }) : t("priceYear", { price })}</p>
+    </section>
+  );
 }
 
 // Setup after first use (1.3 §6): offered once there's a check-in, while the reminder is still off

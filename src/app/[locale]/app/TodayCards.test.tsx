@@ -19,9 +19,12 @@ beforeEach(() => window.localStorage.clear());
 afterEach(cleanup);
 
 describe("TodayPlusCard (1.3 §6)", () => {
-  it("Me's card, on Today: the offer, its button to the Plus screen, and Close", () => {
+  it("compact (board 21): the tag, See your moods over time to the Plus screen, the trial line, and Close", () => {
     wrap(<TodayPlusCard trial price="US$59.99" date="2026-12-10" />);
-    expect(screen.getByTestId("today-plus-card")).toHaveTextContent(messages.plus.bannerTitle);
+    expect(screen.getByTestId("today-plus-card")).toHaveTextContent(messages.plus.label);
+    expect(screen.getByTestId("today-plus-try")).toHaveTextContent(messages.plus.todayCardTitle);
+    expect(screen.getByTestId("today-plus-card")).toHaveTextContent("Try 7 days free. Then US$59.99 a year.");
+    expect(screen.getByTestId("today-plus-card")).not.toHaveTextContent(messages.plus.bannerBody);
     expect(screen.getByTestId("today-plus-try")).toHaveAttribute("href", "/app/me/plus");
     fireEvent.click(screen.getByTestId("today-plus-card-close"));
     expect(screen.queryByTestId("today-plus-card")).toBeNull();

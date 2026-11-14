@@ -689,6 +689,8 @@
     "paletteDusk": "Dusk",
     "paletteSunrise": "Sunrise",
     "paletteSea": "Sea",
-    "sheetThemes": "More themes are part of Plus"
+    "sheetThemes": "More themes are part of Plus",
+    "todayCardTitle": "See your moods over time",
+    "todayCardTrial": "Try 7 days free. Then {price} a year."
   }
 }

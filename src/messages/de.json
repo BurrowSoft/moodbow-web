@@ -689,6 +689,8 @@
     "paletteDusk": "Dämmerung",
     "paletteSunrise": "Sonnenaufgang",
     "paletteSea": "Meer",
-    "sheetThemes": "Mehr Themes gehören zu Plus"
+    "sheetThemes": "Mehr Themes gehören zu Plus",
+    "todayCardTitle": "Sieh deine Stimmungen im Verlauf",
+    "todayCardTrial": "7 Tage kostenlos testen. Danach {price} pro Jahr."
   }
 }

@@ -115,26 +115,34 @@ export function PlusInMe({ view, price }: { view: PlusView; price: string }) {
 // The free banner (decision 246): Me's, and Today's card on first landing (1.3 §6). Close hides it
 // for the rest of that day on this device, on both. The server's HTML starts hidden (no storage
 // there), so it never flashes for someone who closed it. closedHere: no storage, closed for this visit.
-export function PlusBanner({ trial, price, id, tryId }: { trial: boolean; price: string; id: string; tryId: string }) {
-  const t = useTranslations("plus");
+// Closed for the rest of today on this device, on Me and Today alike. The server's HTML has no
+// storage, so it starts hidden and never flashes for someone who closed it.
+export function useClosedToday(): [boolean, () => void] {
   const closedToday = useSyncExternalStore(subscribeClosed, () => readClosed() === localDay(), () => true);
   const [closedHere, setClosedHere] = useState(false);
-  if (closedToday || closedHere) return null;
+  const close = () => {
+    try {
+      window.localStorage.setItem(CLOSED_KEY, localDay());
+    } catch {
+      // no storage: closed for this visit only
+    }
+    setClosedHere(true);
+    window.dispatchEvent(new Event(CLOSED_EVENT));
+  };
+  return [closedToday || closedHere, close];
+}
+
+export function PlusBanner({ trial, price, id, tryId }: { trial: boolean; price: string; id: string; tryId: string }) {
+  const t = useTranslations("plus");
+  const [closed, close] = useClosedToday();
+  if (closed) return null;
   return (
     <section aria-labelledby={id} data-testid={id} className="relative space-y-2 rounded-3xl bg-pill p-[20px]">
       <button
         type="button"
         aria-label={t("bannerClose")}
         data-testid={`${id}-close`}
-        onClick={() => {
-          try {
-            window.localStorage.setItem(CLOSED_KEY, localDay());
-          } catch {
-            // no storage: closed for this visit only
-          }
-          setClosedHere(true);
-          window.dispatchEvent(new Event(CLOSED_EVENT));
-        }}
+        onClick={close}
         className="absolute top-2 right-2 inline-flex h-11 w-11 items-center justify-center rounded-full text-muted"
       >
         <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">

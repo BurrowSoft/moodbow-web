@@ -1598,5 +1598,15 @@
     "key": "onboarding.errConsentRequired",
     "en": "Please tick the boxes above to create your account.",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.todayCardTitle",
+    "en": "See your moods over time",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.todayCardTrial",
+    "en": "Try 7 days free. Then {price} a year.",
+    "reason": "UX draft (native read pending)"
   }
 ]
