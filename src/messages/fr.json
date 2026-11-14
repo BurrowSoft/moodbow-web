@@ -627,5 +627,22 @@
     "leaveTitle": "Quitter sans enregistrer ?",
     "leave": "Quitter",
     "keepEditing": "Continuer à modifier"
+  },
+  "appointment": {
+    "meRow": "Pour mon rendez-vous",
+    "intro": "Un résumé à imprimer ou à montrer lors d'un rendez-vous. Rien ici n'est enregistré ni envoyé.",
+    "show": "Afficher",
+    "range2": "Les 2 dernières semaines",
+    "range4": "Les 4 dernières semaines",
+    "range12": "Les 12 dernières semaines",
+    "count": "{n, plural, one {# bilan} other {# bilans}}",
+    "averages": "Moyennes",
+    "starred": "Moments forts",
+    "fullText": "Inclure le texte complet",
+    "talk": "Ce dont je veux parler",
+    "talkHint": "Ce n'est pas enregistré.",
+    "print": "Imprimer",
+    "empty": "Pas encore de bilan sur cette période.",
+    "footer": "Réalisé par vous à partir de vos propres notes Moodbow. Ce n'est pas une évaluation médicale."
   }
 }

@@ -627,5 +627,22 @@
     "leaveTitle": "Leave without saving?",
     "leave": "Leave",
     "keepEditing": "Keep editing"
+  },
+  "appointment": {
+    "meRow": "For my appointment",
+    "intro": "A summary you can print or show at an appointment. Nothing here is saved or sent.",
+    "show": "Show",
+    "range2": "Last 2 weeks",
+    "range4": "Last 4 weeks",
+    "range12": "Last 12 weeks",
+    "count": "{n, plural, one {# check-in} other {# check-ins}}",
+    "averages": "Averages",
+    "starred": "Moments",
+    "fullText": "Include the full text",
+    "talk": "What I want to talk about",
+    "talkHint": "This isn't saved.",
+    "print": "Print",
+    "empty": "No check-ins in this time yet.",
+    "footer": "Made by you from your own Moodbow entries. Not a medical assessment."
   }
 }
