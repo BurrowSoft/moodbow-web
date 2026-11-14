@@ -3285,6 +3285,16 @@ test("Plus more reminders on staging: locked when free; with Plus, saved, read b
     await page.goto("/app/me");
     await ready();
     await expect(page.getByTestId("me-reminder-time")).toHaveValue("21:00", { timeout: 15_000 });
+    // Since #314 sign-in skips Setup, so the reminder starts off (the protective default) and its
+    // time and extra times are disabled: turn it on here, as a person would in Me (release/1.3.0).
+    const reminderOn = page.getByTestId("me-reminder-on");
+    await expect(reminderOn).toHaveAttribute("aria-checked", "false");
+    await reminderOn.click();
+    await expect(reminderOn).toHaveAttribute("aria-checked", "true");
+    await expect(page.getByTestId("me-reminder-time")).toBeEnabled({ timeout: 15_000 });
+    await page.reload();
+    await ready();
+    await expect(page.getByTestId("me-reminder-on")).toHaveAttribute("aria-checked", "true", { timeout: 15_000 });
     await page.getByTestId("me-reminder-extra-add").click();
     const added = page.getByTestId("me-reminder-extra-new");
     await added.fill("08:00");
