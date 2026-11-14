@@ -2,6 +2,8 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { METRICS, summarize, type InsightRow, type Metric, type Range } from "@/lib/journal/insights";
 import type { Pattern, PatternId } from "@/lib/journal/patterns";
+import { MoodPair } from "@/components/MoodPair";
+import { PATTERN_PAIR } from "@/lib/journal/patternPair";
 import type { ValueKey } from "@/lib/journal/valueColours";
 import { JOURNAL_HEADING, segment } from "@/lib/ui/journalLayout";
 import type { LongRange, LongSummary, Unit } from "@/lib/plus/longRange";
@@ -75,6 +77,7 @@ export function InsightsView({
   // Always one decimal for mood, stress and sleep ("4.0", "↑ 1.0": the
   // precision stays visible), whole minutes for exercise; same as the app.
   const oneDecimal = new Intl.NumberFormat(useLocale(), { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  const signedDecimal = new Intl.NumberFormat(useLocale(), { minimumFractionDigits: 1, maximumFractionDigits: 1, signDisplay: "exceptZero" });
   // A value with its unit: "7.0 h", "35 min", or the bare number (1–5).
   const withUnit = (metric: Metric, v: number) =>
     metric === "sleep"
@@ -167,7 +170,7 @@ export function InsightsView({
         </p>
       )}
 
-      {patterns && <Patterns patterns={patterns} format={(v) => number.format(v)} />}
+      {patterns && <Patterns patterns={patterns} format={(v) => number.format(v)} signed={(v) => signedDecimal.format(v)} />}
       {plusPatterns}
     </section>
   );
@@ -177,7 +180,7 @@ export function InsightsView({
 // order (sleep, movement, stress), never sorted by size; a pattern without
 // enough days is left out; nothing to show is one line. Descriptive, never
 // causal: the footnote says so under the sentences.
-function Patterns({ patterns, format }: { patterns: Pattern[]; format: (v: number) => string }) {
+function Patterns({ patterns, format, signed }: { patterns: Pattern[]; format: (v: number) => string; signed: (v: number) => string }) {
   const t = useTranslations("insights");
   const visible = patterns.filter((p) => p.state !== "not_enough");
   return (
@@ -185,15 +188,22 @@ function Patterns({ patterns, format }: { patterns: Pattern[]; format: (v: numbe
       <h2 id="patterns-title" className="text-lg font-medium text-text">
         {t("patternsTitle")}
       </h2>
-      <p className="text-sm text-muted">{t("patternsSubtitle")}</p>
+      <p className="text-sm text-muted">
+        {t("patternsSubtitle")}
+        <span className="ms-[8px] text-xs">{t("moodScale")}</span>
+      </p>
       {visible.length > 0 ? (
         <>
-          <ul className="mt-3 space-y-2 text-sm text-text">
-            {visible.map((p) => (
-              <li key={p.id} data-testid={`insights-pattern-${p.id}`} data-state={p.state}>
-                {t(PATTERN_TEXT[p.id][p.state], { a: format(p.a.mood), b: format(p.b.mood) })}
-              </li>
-            ))}
+          <ul className="mt-3 space-y-3 text-sm text-text">
+            {visible.map((p) => {
+              const sentence = t(PATTERN_TEXT[p.id][p.state], { a: format(p.a.mood), b: format(p.b.mood) });
+              return (
+                <li key={p.id} data-testid={`insights-pattern-${p.id}`} data-state={p.state}>
+                  {/* Board 3's layout (UX, 14 Nov): the sentence is the image's name, not shown. */}
+                  <MoodPair sentence={sentence} title={t(PATTERN_PAIR[p.id].title)} labels={[t(PATTERN_PAIR[p.id].a), t(PATTERN_PAIR[p.id].b)]} a={p.a.mood} b={p.b.mood} format={format} signed={signed} testId={`insights-pattern-${p.id}-bars`} />
+                </li>
+              );
+            })}
           </ul>
           <p className="mt-3 text-xs text-muted" data-testid="insights-patterns-footnote">
             {t("patternsFootnote")}

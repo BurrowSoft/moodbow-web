@@ -48,6 +48,7 @@ The heading `{exportCheckins}`, then one line per check-in:
 - if only `sleep_quality` (no hours): `Sleep: Good`
 - if `exercise_minutes` is not null (0 counts): `Movement: ` (exportExercise) + `exerciseNone` (0) | `exercise90` (90) | `exerciseMinutes(n)`
 - if `stress`: `Stress: ` + `exportOfFive(n)` → `Stress: 2/5`
+- if the day has tags (`check_in_tags` with that `local_date`, 029): `{exportField(label: exportTags, value: the tags joined by ", ")}`, in the order they were added → `Tags: Walk, Friends`
 
 ## Entries
 The heading `{exportEntries}`, then one block per entry, with a blank line between blocks:
@@ -86,6 +87,7 @@ The heading `{exportMemories}`, then one line per memory: `- {fact}`.
 | exportSleepValue | {hours}, {quality} |
 | exportExercise | Movement (decision 158) |
 | exportStress | Stress |
+| exportTags | Tags |
 | exportOfFive | {value}/5 |
 | exportReflectionOn | On your entry of {date} |
 

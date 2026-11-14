@@ -26,6 +26,7 @@ import { readPlusPage } from "@/lib/plus/page";
 import { flagsCrisis } from "@/lib/safety/crisis";
 import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
 import { SetupLaterCard, TodayPlusCard } from "./TodayCards";
+import { readCardTags } from "@/lib/journal/tagsData";
 
 // A stuck request ends here at the latest (UX, the timeout audit); each
 // data call gives up after 15 s on its own (lib/supabase/deadline).
@@ -98,6 +99,9 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
   // Setup after first use (1.3 §6): offered once there's a check-in, while the reminder is still off.
   const setupLater = Boolean(data) && me.settings?.reminder_on === false;
 
+  // Tags on the check-in (tags-live): the day's and the person's recent ones.
+  const cardTags = await readCardTags(supabase, me.today);
+
   return (
     <section className="space-y-8">
       <Suspense fallback={null}>
@@ -125,7 +129,7 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
           {te("writeButton")}
         </Link>
       </header>
-      <CheckInCard key={checkInError ? "unread" : "read"} initial={(data as CheckIn | null) ?? null} uid={user.id} date={me.today} dateLocaleTag={dateLocaleTag} keepDraft loadFailed={Boolean(checkInError)} />
+      <CheckInCard key={checkInError ? "unread" : "read"} initial={(data as CheckIn | null) ?? null} uid={user.id} date={me.today} dateLocaleTag={dateLocaleTag} keepDraft loadFailed={Boolean(checkInError)} {...cardTags} country={me.profile?.country} />
       {/* Today's order (UX ruling 3): the check-in, the cards (Your week first: its hard-week help), the
           entries, then Write last. */}
       {yourWeekCard}

@@ -243,6 +243,10 @@
     "met": false,
     "what": "1.1 F: Thai is offered on the web: the native reader has read the Thai UI, Help and dates (thai_reviewed, decision 193), with UX's go. Until then /th is a draft on test builds only (Preview, dev, CI) and Production is English only; the switcher, Me → Language, hreflang and the sitemap offer Thai only once met. The legal pages keep their own gates in every language."
   },
+  "tags-live": {
+    "met": false,
+    "what": "Tags on a check-in (UX, 11 Nov; free journal data): the person's own words, up to 5 a day, on Today's card and the day view, read by the crisis list on save. Needs the app's migration 029 (check_in_tags, set_check_in_tags, my_recent_tags) on Production, the export and import cases synced from the app, the privacy line (VITOR.md), the Reviewer's read and the tester rows. After the pilot."
+  },
   "me-picture-live": {
     "met": false,
     "what": "1.3 (Vitor, 14 Nov; board 6b): Me's big card can hold the person's own picture, chosen with the browser's file picker, cropped to 16:10 (at most 1200 x 750) and re-encoded (no metadata), kept in this browser only (IndexedDB), never uploaded, not in the export, deleted on sign-out and by Remove picture. For everyone. The web shows no App icon row (no home-screen icon). Met with UX's go after the Web Tester's row."

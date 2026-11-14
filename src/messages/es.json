@@ -262,6 +262,12 @@
     "checkInConflictOther": "Ya guardado",
     "checkInConflictKeepMine": "Conservar el mío",
     "checkInConflictUseOther": "Usar el otro",
+    "tagsLabel": "Etiquetas",
+    "tagsPlaceholder": "Añade una etiqueta",
+    "tagsRecent": "Tus etiquetas",
+    "tagsRemove": "Quitar {tag}",
+    "tagsTooMany": "Hasta 5 etiquetas al día.",
+    "tagsTooLong": "Una etiqueta puede tener hasta 32 caracteres.",
     "setupLaterBody": "Tu recordatorio diario está desactivado. Puedes activarlo y elegir una hora cuando quieras.",
     "setupLaterOpen": "Configurar",
     "setupLaterClose": "Ahora no"
@@ -428,7 +434,8 @@
     "exportExercise": "Movimiento",
     "exportStress": "Estrés",
     "exportOfFive": "{value}/5",
-    "exportReflectionOn": "Sobre tu entrada del {date}"
+    "exportReflectionOn": "Sobre tu entrada del {date}",
+    "exportTags": "Etiquetas"
   },
   "help": {
     "helpTitle": "Ayuda y preguntas frecuentes",
@@ -491,6 +498,7 @@
     "insightsNeedMoreStress": "Añade el estrés {count, plural, =1 {1 día más} other {{count} días más}} para ver este gráfico.",
     "patternsTitle": "Patrones en tus registros",
     "patternsSubtitle": "En los últimos 3 meses",
+    "moodScale": "ánimo, 1–5",
     "patternsSleepShown": "Los días después de dormir 7 horas o más, tu ánimo promedió {a} de 5. Después de dormir menos, {b}.",
     "patternsSleepSame": "Después de dormir 7 horas o más y después de dormir menos, tu ánimo fue más o menos igual ({a} y {b} de 5).",
     "patternsMovementShown": "Los días en que te moviste, tu ánimo promedió {a} de 5. Los días en que no, {b}.",
@@ -643,7 +651,7 @@
     "weekLine": "¿Quieres mirar más atrás? Tu año, más patrones y un PDF cuidado de tu diario vienen con Plus.",
     "tabYear": "Año",
     "morePatterns": "Más patrones",
-    "morePatternsBody": "Entre semana y fines de semana, días en que escribes, y los últimos 12 meses o todo el historial",
+    "morePatternsBody": "Entre semana y fines de semana, días en que escribes, tus etiquetas, y los últimos 12 meses o todo el historial",
     "title": "Profundiza en tu diario",
     "titleHas": "Tienes Moodbow Plus",
     "lead": "Tu diario es gratis. El Resumen viene con Plus.",
@@ -702,6 +710,9 @@
     "moreWritingShown": "Los días que escribiste, tu estado de ánimo fue de {a} de 5 de media. Los días que no, {b}.",
     "moreWritingSame": "Los días que escribiste y los que no, tu estado de ánimo fue más o menos el mismo ({a} y {b} de 5).",
     "moreNone": "Más patrones aparecerán aquí cuando tengas más registros en este periodo.",
+    "moreTagsTitle": "Tus etiquetas",
+    "moreTagShown": "Los días con la etiqueta «{tag}», tu estado de ánimo fue de {a} de 5 de media. Los demás días, {b}.",
+    "moreTagSame": "Los días con la etiqueta «{tag}» y los demás, tu estado de ánimo fue más o menos el mismo ({a} y {b} de 5).",
     "pdfIntro": "Elige un mes o un año. Tu diario se compone como PDF en este dispositivo y no se guarda en ningún sitio. Cualquiera que tenga el archivo puede leerlo.",
     "pdfMonth": "Un mes",
     "pdfYear": "Un año",
@@ -759,6 +770,8 @@
     "exampleTagWalk": "Paseo",
     "exampleTagFriends": "Amigos",
     "liftsTitle": "Lo que me levanta el ánimo",
-    "liftsRow": "Los días con la etiqueta «{tag}», tu estado de ánimo fue de {a} de 5 de media; los demás días, de {b}."
+    "liftsRow": "Los días con la etiqueta «{tag}», tu estado de ánimo fue de {a} de 5 de media; los demás días, de {b}.",
+    "liftsFooter": "Patrones, no causas. Solo tú puedes ver esto.",
+    "liftsNone": "Sigue etiquetando tus días. Los patrones aparecen después de unas semanas."
   }
 }

@@ -82,7 +82,7 @@ describe("YourData: export", () => {
     expect(blob.type).toBe("text/csv;charset=utf-8");
     const bytes = new Uint8Array(await blob.arrayBuffer());
     expect([...bytes.slice(0, 3)]).toEqual([0xef, 0xbb, 0xbf]);
-    expect(await blob.text()).toContain(`2026-10-01,4,${messages.today.mood4},,,,,yes,'=A walk`);
+    expect(await blob.text()).toContain(`2026-10-01,4,${messages.today.mood4},,,,,yes,,'=A walk`);
     cleanup();
     renderIt();
     fireEvent.click(screen.getByTestId("me-export"));

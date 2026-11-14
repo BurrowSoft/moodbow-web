@@ -262,6 +262,12 @@
     "checkInConflictOther": "Já salvo",
     "checkInConflictKeepMine": "Manter o meu",
     "checkInConflictUseOther": "Usar o outro",
+    "tagsLabel": "Tags",
+    "tagsPlaceholder": "Adicionar uma tag",
+    "tagsRecent": "Suas tags",
+    "tagsRemove": "Remover {tag}",
+    "tagsTooMany": "Até 5 tags por dia.",
+    "tagsTooLong": "Uma tag pode ter até 32 caracteres.",
     "setupLaterBody": "Seu lembrete diário está desligado. Você pode ligá-lo e escolher um horário quando quiser.",
     "setupLaterOpen": "Configurar",
     "setupLaterClose": "Agora não"
@@ -428,7 +434,8 @@
     "exportExercise": "Movimento",
     "exportStress": "Estresse",
     "exportOfFive": "{value}/5",
-    "exportReflectionOn": "Sobre sua anotação de {date}"
+    "exportReflectionOn": "Sobre sua anotação de {date}",
+    "exportTags": "Tags"
   },
   "help": {
     "helpTitle": "Ajuda e perguntas frequentes",
@@ -491,6 +498,7 @@
     "insightsNeedMoreStress": "Registre o estresse em {count, plural, =1 {mais 1 dia} other {mais {count} dias}} para ver este gráfico.",
     "patternsTitle": "Padrões nos seus check-ins",
     "patternsSubtitle": "Nos últimos 3 meses",
+    "moodScale": "humor, 1–5",
     "patternsSleepShown": "Nos dias depois de 7 horas de sono ou mais, seu humor ficou em média {a} de 5. Depois de dormir menos, {b}.",
     "patternsSleepSame": "Depois de 7 horas de sono ou mais e depois de dormir menos, seu humor ficou mais ou menos igual ({a} e {b} de 5).",
     "patternsMovementShown": "Nos dias em que você se movimentou, seu humor ficou em média {a} de 5. Nos dias em que não, {b}.",
@@ -643,7 +651,7 @@
     "weekLine": "Quer olhar mais para trás? Seu ano, mais padrões e um PDF caprichado do seu diário vêm com o Plus.",
     "tabYear": "Ano",
     "morePatterns": "Mais padrões",
-    "morePatternsBody": "Dias úteis e fins de semana, dias em que você escreve, e os últimos 12 meses ou todo o histórico",
+    "morePatternsBody": "Dias úteis e fins de semana, dias em que você escreve, suas tags, e os últimos 12 meses ou todo o histórico",
     "title": "Vá mais fundo no seu diário",
     "titleHas": "Você tem o Moodbow Plus",
     "lead": "Seu diário é grátis. Os Insights vêm com o Plus.",
@@ -702,6 +710,9 @@
     "moreWritingShown": "Nos dias em que você escreveu, seu humor ficou em média em {a} de 5. Nos outros dias, {b}.",
     "moreWritingSame": "Nos dias em que você escreveu e nos outros, seu humor foi parecido ({a} e {b} de 5).",
     "moreNone": "Mais padrões aparecem aqui quando você tiver mais check-ins neste período.",
+    "moreTagsTitle": "Suas tags",
+    "moreTagShown": "Nos dias com a tag \"{tag}\", seu humor ficou em média em {a} de 5. Nos outros dias, {b}.",
+    "moreTagSame": "Nos dias com a tag \"{tag}\" e nos outros, seu humor foi parecido ({a} e {b} de 5).",
     "pdfIntro": "Escolha um mês ou um ano. Seu diário é montado como PDF neste aparelho e não fica salvo em lugar nenhum. Qualquer pessoa com o arquivo pode ler.",
     "pdfMonth": "Um mês",
     "pdfYear": "Um ano",
@@ -759,6 +770,8 @@
     "exampleTagWalk": "Caminhada",
     "exampleTagFriends": "Amigos",
     "liftsTitle": "O que me faz bem",
-    "liftsRow": "Nos dias com a tag \"{tag}\", seu humor ficou em média em {a} de 5; nos outros dias, em {b}."
+    "liftsRow": "Nos dias com a tag \"{tag}\", seu humor ficou em média em {a} de 5; nos outros dias, em {b}.",
+    "liftsFooter": "Padrões, não causas. Só você pode ver isto.",
+    "liftsNone": "Continue marcando seus dias com tags. Os padrões aparecem depois de algumas semanas."
   }
 }

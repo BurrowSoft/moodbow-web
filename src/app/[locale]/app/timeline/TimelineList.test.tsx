@@ -314,3 +314,13 @@ describe("TimelineList: the pictures strip", () => {
     expect(screen.getAllByTestId("timeline-pictures")).toHaveLength(1);
   });
 });
+
+describe("TimelineList: a day's tags (tags-live)", () => {
+  it("as chips under the day, named Tags; a day without them shows none", () => {
+    renderList({ initial: [{ ...days[0], tags: ["Walk", "Friends"] }, { ...days[1], tags: [] }] });
+    const chips = screen.getByTestId("timeline-day-tags-2026-10-02");
+    expect(chips).toHaveAccessibleName(messages.today.tagsLabel);
+    expect(within(chips).getAllByRole("listitem").map((li) => li.textContent)).toEqual(["Walk", "Friends"]);
+    expect(screen.queryByTestId("timeline-day-tags-2026-09-28")).toBeNull();
+  });
+});

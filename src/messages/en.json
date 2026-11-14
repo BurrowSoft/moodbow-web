@@ -262,6 +262,12 @@
     "checkInConflictOther": "Already saved",
     "checkInConflictKeepMine": "Keep mine",
     "checkInConflictUseOther": "Use the other one",
+    "tagsLabel": "Tags",
+    "tagsPlaceholder": "Add a tag",
+    "tagsRecent": "Your tags",
+    "tagsRemove": "Remove {tag}",
+    "tagsTooMany": "Up to 5 tags a day.",
+    "tagsTooLong": "A tag can be up to 32 characters.",
     "setupLaterBody": "Your daily reminder is off. You can turn it on and choose a time whenever you like.",
     "setupLaterOpen": "Set it up",
     "setupLaterClose": "Not now"
@@ -428,7 +434,8 @@
     "exportExercise": "Movement",
     "exportStress": "Stress",
     "exportOfFive": "{value}/5",
-    "exportReflectionOn": "On your entry of {date}"
+    "exportReflectionOn": "On your entry of {date}",
+    "exportTags": "Tags"
   },
   "help": {
     "helpTitle": "Help & FAQ",
@@ -491,6 +498,7 @@
     "insightsNeedMoreStress": "Add stress on {count, plural, =1 {1 more day} other {{count} more days}} to see this chart.",
     "patternsTitle": "Patterns in your check-ins",
     "patternsSubtitle": "In the last 3 months",
+    "moodScale": "mood, 1–5",
     "patternsSleepShown": "On days after 7 or more hours of sleep, your mood averaged {a} of 5. After less sleep, {b}.",
     "patternsSleepSame": "After 7 or more hours of sleep and after less, your mood was about the same ({a} and {b} of 5).",
     "patternsMovementShown": "On days you moved, your mood averaged {a} of 5. On days you didn't, {b}.",
@@ -643,7 +651,7 @@
     "weekLine": "Want to look back further? Your year, more patterns and a designed PDF of your journal come with Plus.",
     "tabYear": "Year",
     "morePatterns": "More patterns",
-    "morePatternsBody": "Weekdays and weekends, writing days, and the last 12 months or all time",
+    "morePatternsBody": "Weekdays and weekends, writing days, your tags, and the last 12 months or all time",
     "title": "Go deeper with your journal",
     "titleHas": "You have Moodbow Plus",
     "lead": "Your journal is free. Insights come with Plus.",
@@ -702,6 +710,9 @@
     "moreWritingShown": "On days you wrote, your mood averaged {a} of 5. On days you didn't, {b}.",
     "moreWritingSame": "On days you wrote and days you didn't, your mood was about the same ({a} and {b} of 5).",
     "moreNone": "More patterns show up here once you have more check-ins in this period.",
+    "moreTagsTitle": "Your tags",
+    "moreTagShown": "On days tagged “{tag}”, your mood averaged {a} of 5. On other days, {b}.",
+    "moreTagSame": "On days tagged “{tag}” and other days, your mood was about the same ({a} and {b} of 5).",
     "pdfIntro": "Pick a month or a year. Your journal is laid out as a PDF on this device and isn't saved anywhere. Anyone with the file can read it.",
     "pdfMonth": "A month",
     "pdfYear": "A year",
@@ -759,6 +770,8 @@
     "exampleTagWalk": "Walk",
     "exampleTagFriends": "Friends",
     "liftsTitle": "What lifts me",
-    "liftsRow": "On days with “{tag}”, your mood averaged {a} of 5; on other days, {b}."
+    "liftsRow": "On days with “{tag}”, your mood averaged {a} of 5; on other days, {b}.",
+    "liftsFooter": "Patterns, not causes. Only you can see this.",
+    "liftsNone": "Keep tagging your days. Patterns show up after a few weeks."
   }
 }
