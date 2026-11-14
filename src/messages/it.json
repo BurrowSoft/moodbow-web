@@ -381,7 +381,10 @@
     "importMapSkip": "Non importare",
     "importMapChoose": "Scegli un umore…",
     "importSkippedTooLong": "{count, plural, =1 {1 nota troppo lunga da importare.} other {# note troppo lunghe da importare.}}",
-    "importStopped": "L'importazione si è interrotta a metà. Tutto fino a quel punto è salvato; importa di nuovo lo stesso file per finire."
+    "importStopped": "L'importazione si è interrotta a metà. Tutto fino a quel punto è salvato; importa di nuovo lo stesso file per finire.",
+    "pastReports": "I tuoi report passati",
+    "pastReportsIntro": "I report settimanali che Moodbow ha preparato per te. Restano qui da leggere.",
+    "pastReportsWeek": "{start} – {end}"
   },
   "export": {
     "exportTitle": "Moodbow: il tuo diario",
@@ -698,6 +701,10 @@
     "offerStripBody": "Un prezzo più basso per il tuo primo anno, fino al 31 dicembre",
     "offerFirstYear": "Il tuo primo anno: {offer}",
     "offerButton": "Il mio primo anno a {offer}",
-    "offerThen": "Poi {price} all'anno · si rinnova automaticamente"
+    "offerThen": "Poi {price} all'anno · si rinnova automaticamente",
+    "exampleStrip": "Un esempio di Andamento. Con Plus, qui vedi i tuoi check-in.",
+    "exampleWatermark": "ESEMPIO",
+    "exampleRanges": "Periodo dell'esempio",
+    "exampleSample": "{strip} {see}"
   }
 }

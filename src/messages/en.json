@@ -381,7 +381,10 @@
     "importMapSkip": "Don't import",
     "importMapChoose": "Choose a mood…",
     "importSkippedTooLong": "{count, plural, =1 {1 note} other {# notes}} too long to import.",
-    "importStopped": "The import stopped partway. Everything up to that point is saved; import the same file again to finish."
+    "importStopped": "The import stopped partway. Everything up to that point is saved; import the same file again to finish.",
+    "pastReports": "Your past reports",
+    "pastReportsIntro": "The weekly reports Moodbow made for you. They stay here to read.",
+    "pastReportsWeek": "{start} – {end}"
   },
   "export": {
     "exportTitle": "Moodbow: your journal",
@@ -698,6 +701,10 @@
     "offerStripBody": "A lower price for your first year, until 31 December",
     "offerFirstYear": "Your first year: {offer}",
     "offerButton": "Get my first year for {offer}",
-    "offerThen": "Then {price} a year · renews automatically"
+    "offerThen": "Then {price} a year · renews automatically",
+    "exampleStrip": "An example of Insights. With Plus, this shows your own check-ins.",
+    "exampleWatermark": "EXAMPLE",
+    "exampleRanges": "The example's range",
+    "exampleSample": "{strip} {see}"
   }
 }

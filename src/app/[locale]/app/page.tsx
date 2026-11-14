@@ -16,6 +16,10 @@ import { tabMetadata } from "./pageMeta";
 import { Link } from "@/i18n/navigation";
 import { pageGate } from "@/lib/conditions";
 import { loadMilestone } from "@/lib/share/milestoneData";
+import type { InsightRow } from "@/lib/journal/insights";
+import { lastWeekStart } from "@/lib/journal/report";
+import { sixDaysAfter, yourWeek, type YourWeekMoment } from "@/lib/journal/yourWeek";
+import { YourWeekCard } from "./insights/YourWeekCard";
 import { yearOnOffer } from "@/lib/share/year";
 import { MilestoneCard } from "./MilestoneCard";
 import { SecurityNoticeRead } from "./SecurityNoticeRead";
@@ -77,8 +81,27 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
   // saved was flagged or was one of the two lowest faces. Help is always above it on the page.
   const plusPage = pageGate("plus") !== "hidden" ? await readPlusPage(supabase, user.id, me.profile?.country, locale) : null;
   const plus = plusPage?.view ?? null;
+  // Your week, for everyone (Insights become Plus, ruling 1): its hard-week help is never behind
+  // Plus. Today's own read of last week's check-ins (a mood counts) and moments (id and date only).
+  // A failed read: no card. The app shows the same card above Write (Mobile Dev).
+  let yourWeekCard: React.ReactNode = null;
+  let hardWeek = false;
+  if (pageGate("your-week-live") !== "hidden") {
+    const start = lastWeekStart(me.today);
+    const end = sixDaysAfter(start);
+    const [weekRead, momentsRead] = await Promise.all([
+      supabase.from("check_ins").select("local_date, mood, sleep_hours, stress, exercise_minutes").gte("local_date", start).lte("local_date", end),
+      supabase.from("entries").select("id, entry_date").eq("is_moment", true).gte("entry_date", start).lte("entry_date", end),
+    ]);
+    const week = weekRead.error ? null : yourWeek((weekRead.data ?? []) as InsightRow[], me.today, (momentsRead.data ?? []) as YourWeekMoment[]);
+    hardWeek = week?.kind === "hard";
+    if (week) yourWeekCard = <YourWeekCard week={week} country={me.profile?.country} dateLocaleTag={dateLocaleTag} />;
+  }
+  // Share cards are Plus once Plus is on (ruling 6); a row that can't be read keeps them, as Insights.
+  const sharesOpen = !plus || plus.kind === "plus";
   const flaggedToday = (entries ?? []).some((e) => flagsCrisis(String((e as { body?: unknown }).body ?? ""), CRISIS_KEYWORDS));
-  const plusCard = plus?.kind === "free" && !checkInError && !entriesError && !flaggedToday && !isLowMood((data as CheckIn | null)?.mood) ? plus : null;
+  // Never under a hard week's help either (the rule Your week brought with it).
+  const plusCard = plus?.kind === "free" && !hardWeek && !checkInError && !entriesError && !flaggedToday && !isLowMood((data as CheckIn | null)?.mood) ? plus : null;
   // Setup after first use (1.3 §6): offered once there's a check-in, while the reminder is still off.
   const setupLater = Boolean(data) && me.settings?.reminder_on === false;
 
@@ -110,6 +133,7 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
         </Link>
       </header>
       <CheckInCard key={checkInError ? "unread" : "read"} initial={(data as CheckIn | null) ?? null} uid={user.id} date={me.today} dateLocaleTag={dateLocaleTag} keepDraft loadFailed={Boolean(checkInError)} />
+      {yourWeekCard}
       <Link
         href="/app/write"
         data-testid="today-write"
@@ -134,7 +158,7 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
       )}
       {/* Last on the page: it floats above the tab bar (decision 186), and the room
           it needs is added after the footer, so its late arrival moves nothing. */}
-      {milestone && <MilestoneCard n={milestone.n} colours={milestone.colours} uid={user.id} month={me.today.slice(0, 7)} dateLocaleTag={dateLocaleTag} year={pageGate("year-card") !== "hidden" ? yearOnOffer(me.today) : null} />}
+      {milestone && sharesOpen && <MilestoneCard n={milestone.n} colours={milestone.colours} uid={user.id} month={me.today.slice(0, 7)} dateLocaleTag={dateLocaleTag} year={pageGate("year-card") !== "hidden" ? yearOnOffer(me.today) : null} />}
     </section>
   );
 }

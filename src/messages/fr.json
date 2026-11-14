@@ -381,7 +381,10 @@
     "importMapSkip": "Ne pas importer",
     "importMapChoose": "Choisir une humeur…",
     "importSkippedTooLong": "{count, plural, =1 {1 note trop longue pour être importée.} other {# notes trop longues pour être importées.}}",
-    "importStopped": "L'importation s'est arrêtée en cours de route. Tout ce qui précède est enregistré ; importez à nouveau le même fichier pour terminer."
+    "importStopped": "L'importation s'est arrêtée en cours de route. Tout ce qui précède est enregistré ; importez à nouveau le même fichier pour terminer.",
+    "pastReports": "Vos anciens rapports",
+    "pastReportsIntro": "Les rapports hebdomadaires que Moodbow a faits pour vous. Ils restent ici, à relire.",
+    "pastReportsWeek": "{start} – {end}"
   },
   "export": {
     "exportTitle": "Moodbow : votre journal",
@@ -698,6 +701,10 @@
     "offerStripBody": "Un prix plus bas pour votre première année, jusqu'au 31 décembre",
     "offerFirstYear": "Votre première année : {offer}",
     "offerButton": "Ma première année pour {offer}",
-    "offerThen": "Ensuite {price} par an · renouvellement automatique"
+    "offerThen": "Ensuite {price} par an · renouvellement automatique",
+    "exampleStrip": "Un exemple de Statistiques. Avec Plus, cette page montre vos propres bilans.",
+    "exampleWatermark": "EXEMPLE",
+    "exampleRanges": "Période de l'exemple",
+    "exampleSample": "{strip} {see}"
   }
 }

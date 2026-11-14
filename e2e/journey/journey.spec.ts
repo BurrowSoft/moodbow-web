@@ -2016,3 +2016,36 @@ test("large text, set in the browser: Write is in Today's first view at 320 px, 
     await cleanup(email);
   }
 });
+
+// Insights become Plus (14 Nov): a free person sees the labelled EXAMPLE, and the word "EXAMPLE" is
+// whole at 320 and 1280 px (Vitor), in en and de. Skipped, saying so, until staging has 028's
+// entitlements (without them Plus can't be read, and Insights shows their own, as ruling 5 says).
+test("Insights for a free person: the example, its watermark whole at 320 and 1280 px, help and the tab bar there", async ({ page }) => {
+  test.setTimeout(240_000);
+  test.skip(!(await plusOnStaging()), "staging doesn't have 028's entitlements table yet: the Plus pages can't be read there");
+  const email = newEmail();
+  try {
+    const password = await accountAtSetup(page, email);
+    for (const [route, saved] of [["", "en"], ["/de", "de"]] as const) {
+      await setProfileLocale(email, password, saved);
+      for (const width of [320, 1280]) {
+        await page.setViewportSize({ width, height: 800 });
+        await page.goto(`${route}/app/insights`);
+        await expect(page.getByTestId("insights-example")).toBeVisible({ timeout: 15_000 });
+        await expect(page.getByTestId("insights-example-help")).toBeVisible();
+        const box = await page.evaluate(() => {
+          const text = document.querySelector("[data-testid=insights-example-watermark] text")!.getBoundingClientRect();
+          const area = document.querySelector("[data-testid=insights-example]")!.getBoundingClientRect();
+          return { text: [text.left, text.top, text.right, text.bottom], area: [area.left, area.top, area.right, area.bottom] };
+        });
+        const [l, t, r, b] = box.text;
+        const [al, at, ar, ab] = box.area;
+        expect(l >= al - 0.5 && t >= at - 0.5 && r <= ar + 0.5 && b <= ab + 0.5, `${saved} at ${width} px: the whole word inside the example`).toBe(true);
+        await page.getByTestId("insights-example-sample").click();
+        await expect(page).toHaveURL(RegExp(`${route}/app/me/plus$`), { timeout: 15_000 });
+      }
+    }
+  } finally {
+    await cleanup(email);
+  }
+});

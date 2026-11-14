@@ -381,7 +381,10 @@
     "importMapSkip": "Não importar",
     "importMapChoose": "Escolha um humor…",
     "importSkippedTooLong": "{count, plural, =1 {1 nota longa demais para importar.} other {# notas longas demais para importar.}}",
-    "importStopped": "A importação parou no meio. Tudo até ali foi salvo; importe o mesmo arquivo de novo para terminar."
+    "importStopped": "A importação parou no meio. Tudo até ali foi salvo; importe o mesmo arquivo de novo para terminar.",
+    "pastReports": "Seus relatórios anteriores",
+    "pastReportsIntro": "Os relatórios semanais que o Moodbow fez para você. Eles ficam aqui para você ler.",
+    "pastReportsWeek": "{start} – {end}"
   },
   "export": {
     "exportTitle": "Moodbow: seu diário",
@@ -698,6 +701,10 @@
     "offerStripBody": "Um preço menor no seu primeiro ano, até 31 de dezembro",
     "offerFirstYear": "Seu primeiro ano: {offer}",
     "offerButton": "Quero meu primeiro ano por {offer}",
-    "offerThen": "Depois, {price} por ano · renova automaticamente"
+    "offerThen": "Depois, {price} por ano · renova automaticamente",
+    "exampleStrip": "Um exemplo de Insights. Com o Plus, aqui aparecem os seus próprios check-ins.",
+    "exampleWatermark": "EXEMPLO",
+    "exampleRanges": "Período do exemplo",
+    "exampleSample": "{strip} {see}"
   }
 }

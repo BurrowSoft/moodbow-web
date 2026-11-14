@@ -59,6 +59,9 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
   // Unreadable: nothing about Plus at all (null), never an offer to someone who may pay.
   const plusPage = pageGate("plus") !== "hidden" ? await readPlusPage(supabase, user.id, me.profile?.country, locale) : null;
   const plus = plusPage?.view ?? null;
+  // Your past reports (ruling 10): without Plus, the weekly AI reports already made stay readable
+  // here, read-only; with Plus they're on Insights. Only when there's at least one.
+  const pastReports = plus && plus.kind !== "plus" ? (((await supabase.from("ai_reports").select("id", { count: "exact", head: true }).eq("kind", "weekly")).count ?? 0) > 0) : false;
 
   return (
     <section className="space-y-8">
@@ -79,6 +82,15 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
           }}
           credits={{ balance: me.credits?.balance ?? 0 }}
         />
+      )}
+      {pastReports && (
+        <section aria-labelledby="me-past-reports" className="rounded-3xl border border-border bg-surface p-[24px]">
+          <h2 id="me-past-reports" className="text-lg font-medium text-text">
+            <Link href="/app/me/reports" data-testid="me-past-reports" className={link}>
+              {tm("pastReports")}
+            </Link>
+          </h2>
+        </section>
       )}
       <Reminder on={me.settings?.reminder_on ?? true} time={hhmm(me.settings?.reminder_time)} />
       <LanguageRegion

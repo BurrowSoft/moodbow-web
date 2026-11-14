@@ -381,7 +381,10 @@
     "importMapSkip": "ไม่นำเข้า",
     "importMapChoose": "เลือกอารมณ์…",
     "importSkippedTooLong": "{count, number} บันทึกยาวเกินกว่าจะนำเข้าได้",
-    "importStopped": "การนำเข้าหยุดกลางคัน ทุกอย่างก่อนหน้านั้นบันทึกไว้แล้ว นำเข้าไฟล์เดิมอีกครั้งเพื่อให้เสร็จ"
+    "importStopped": "การนำเข้าหยุดกลางคัน ทุกอย่างก่อนหน้านั้นบันทึกไว้แล้ว นำเข้าไฟล์เดิมอีกครั้งเพื่อให้เสร็จ",
+    "pastReports": "รายงานที่ผ่านมาของคุณ",
+    "pastReportsIntro": "รายงานรายสัปดาห์ที่ Moodbow ทำให้คุณ ยังอยู่ที่นี่ให้อ่านได้",
+    "pastReportsWeek": "{start} – {end}"
   },
   "export": {
     "exportTitle": "Moodbow: ไดอารี่ของคุณ",
@@ -698,6 +701,10 @@
     "offerStripBody": "ราคาที่ต่ำกว่าสำหรับปีแรกของคุณ ถึง 31 ธันวาคม",
     "offerFirstYear": "ปีแรกของคุณ: {offer}",
     "offerButton": "รับปีแรกในราคา {offer}",
-    "offerThen": "จากนั้น {price} ต่อปี · ต่ออายุอัตโนมัติ"
+    "offerThen": "จากนั้น {price} ต่อปี · ต่ออายุอัตโนมัติ",
+    "exampleStrip": "ตัวอย่างข้อมูลเชิงลึก เมื่อมี Plus หน้านี้จะแสดงการเช็กอินของคุณเอง",
+    "exampleWatermark": "ตัวอย่าง",
+    "exampleRanges": "ช่วงเวลาของตัวอย่าง",
+    "exampleSample": "{strip} {see}"
   }
 }

@@ -1643,5 +1643,40 @@
     "key": "plus.offerThen",
     "en": "Then {price} a year · renews automatically",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.exampleStrip",
+    "en": "An example of Insights. With Plus, this shows your own check-ins.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.exampleWatermark",
+    "en": "EXAMPLE",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.exampleRanges",
+    "en": "The example's range",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "me.pastReports",
+    "en": "Your past reports",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "me.pastReportsIntro",
+    "en": "The weekly reports Moodbow made for you. They stay here to read.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "me.pastReportsWeek",
+    "en": "{start} – {end}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.exampleSample",
+    "en": "{strip} {see}",
+    "reason": "UX draft (native read pending)"
   }
 ]
