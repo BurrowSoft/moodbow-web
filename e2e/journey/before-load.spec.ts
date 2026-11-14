@@ -10,6 +10,23 @@ test.describe.configure({ timeout: 120_000 });
 
 const SCRIPTS = "**/_next/static/**/*.js";
 
+// A reload that accepts a beforeunload prompt (the editor asks before leaving unsaved text; the
+// draft is already kept by then) and waits for the new page. The handler is removed afterwards, so
+// it never answers a later dialog. A bare page.reload() left that prompt to Playwright's default,
+// and a session closing under it flaked across PRs (the Reviewer, 14 Nov).
+async function reloadPage(page: Page): Promise<void> {
+  const accept = (dialog: import("@playwright/test").Dialog) => {
+    if (dialog.type() === "beforeunload") void dialog.accept().catch(() => {});
+  };
+  page.on("dialog", accept);
+  try {
+    await page.reload({ waitUntil: "load" });
+  } finally {
+    page.off("dialog", accept);
+  }
+}
+
+
 async function beforeLoad(page: Page, path: string, act: () => Promise<void>): Promise<void> {
   let release = () => {};
   const held = new Promise<void>((resolve) => (release = resolve));
@@ -76,7 +93,7 @@ test.describe("typing before the page has loaded", () => {
       await expect(page).toHaveURL(/\/app\/write$/);
       // The draft has it.
       await page.waitForTimeout(2_500);
-      await page.reload();
+      await reloadPage(page);
       await expect(box(page)).toHaveValue("Typed on a slow phone, tnci");
       expect(errors).toEqual([]);
     } finally {
@@ -169,7 +186,7 @@ test.describe("typing before the page has loaded", () => {
       await box(page).click();
       await page.keyboard.type("Only the draft");
       await page.waitForTimeout(2_500);
-      await page.reload();
+      await reloadPage(page);
       await expect(box(page)).toHaveValue("Only the draft");
     } finally {
       await cleanup(email);
@@ -354,7 +371,7 @@ test.describe("typing before the page has loaded", () => {
       // And it works from here on, and saves.
       await page.getByTestId("me-country").selectOption("FR");
       await page.waitForTimeout(1_000);
-      await page.reload();
+      await reloadPage(page);
       await expect(page.getByTestId("me-country")).toHaveValue("FR");
     } finally {
       await cleanup(email);
