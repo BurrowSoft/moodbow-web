@@ -159,6 +159,33 @@ describe("PlusScreen: the table scrolls, the footer never does", () => {
   });
 });
 
+describe("PlusScreen: the close X and the Christmas offer (1.3)", () => {
+  const offer = { firstYear: "€24.99", price: "€49.99" };
+  const withOffer = () =>
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <PlusScreen view={{ kind: "free", trial: true }} price="€49.99" offer={offer} started={false} />
+      </NextIntlClientProvider>,
+    );
+  it("a close X on the title's row, named Close, back to Me (offer or not)", () => {
+    show({ kind: "free", trial: true });
+    expect(screen.getByTestId("plus-close")).toHaveAttribute("href", "/app/me");
+    expect(screen.getByTestId("plus-close")).toHaveAccessibleName(m.close);
+  });
+  it("the offer: no kicker; the strip, the first year, its button, the renewal right under it, where to cancel; no free week, no % off", () => {
+    withOffer();
+    expect(screen.queryByTestId("plus-eyebrow")).toBeNull();
+    const footer = screen.getByTestId("plus-footer");
+    expect(within(footer).getByTestId("plus-offer-strip")).toHaveTextContent(m.offerLabel);
+    expect(within(footer).getByTestId("plus-price")).toHaveTextContent("Your first year: €24.99");
+    expect(within(footer).getByTestId("plus-start")).toHaveTextContent("Get my first year for €24.99");
+    expect(within(footer).getByTestId("plus-renews")).toHaveTextContent("Then €49.99 a year · renews automatically");
+    expect(within(footer).getByTestId("plus-start").nextElementSibling).toBe(within(footer).getByTestId("plus-renews"));
+    expect(within(footer).getByTestId("plus-cancel")).toHaveTextContent(m.cancelWhere);
+    expect(footer.textContent).not.toMatch(/7 days|free|%|half/i);
+  });
+});
+
 describe("PlusScreen: the footer's order, and the short screen (#271's unpin, restored)", () => {
   it("the price, the button, the renewal line under it, then where to cancel", () => {
     show({ kind: "free", trial: true });

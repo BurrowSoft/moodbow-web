@@ -7,10 +7,23 @@ vi.mock("@/lib/conditions", async (actual) => ({ ...(await actual<typeof import(
 // The person's own entitlements row, as RLS lets them read it.
 let user: { id: string; email?: string } | null = { id: "u1", email: "a@example.com" };
 let entitlement: { data: unknown; error: unknown } = { data: null, error: null };
+let country: string | null = "FR";
+// The deal the page shows and the checkout charges (lib/plus/prices plusDeal), mocked here; its own
+// rules (the currency, the coupon in that currency, once only) are prices.test.
+type Deal = { currency: string; year: number; firstYear: number | null; coupon: string | null };
+let deal: Deal | null = { currency: "eur", year: 4999, firstYear: null, coupon: null };
+const dealCalls: [string | null, boolean][] = [];
+vi.mock("@/lib/plus/prices", () => ({ plusDeal: async (c: string | null, withOffer: boolean) => (dealCalls.push([c, withOffer]), deal) }));
 vi.mock("@/lib/supabase/server", () => ({
   createSupabaseServerClient: async () => ({
     auth: { getUser: async () => ({ data: { user }, error: null }) },
-    from: (table: string) => ({ select: () => ({ eq: (_c: string, v: string) => ({ maybeSingle: async () => (table === "entitlements" && v === user?.id ? entitlement : { data: null, error: "wrong" }) }) }) }),
+    from: (table: string) => ({
+      select: () => ({
+        eq: (_c: string, v: string) => ({
+          maybeSingle: async () => (v !== user?.id ? { data: null, error: "wrong" } : table === "entitlements" ? entitlement : table === "profiles" ? { data: { country }, error: null } : { data: null, error: "wrong" }),
+        }),
+      }),
+    }),
   }),
 }));
 
@@ -49,6 +62,9 @@ beforeEach(() => {
   gate = "draft";
   user = { id: "u1", email: "a@example.com" };
   entitlement = { data: null, error: null };
+  country = "FR";
+  deal = { currency: "eur", year: 4999, firstYear: null, coupon: null };
+  dealCalls.length = 0;
   listed.complete = [];
   listed.open = [];
   vi.stubEnv("STRIPE_PLUS_PRICE_ID", "price_plus_yearly");
@@ -74,6 +90,65 @@ describe("POST /api/checkout/stripe", () => {
     expect(p.locale).toBe("es");
     expect(p.success_url).toBe(`${ORIGIN}/es/app/me/plus?started=1`);
     expect(p.cancel_url).toBe(`${ORIGIN}/es/app/me/plus`);
+  });
+
+  it("the currency the page showed is the one charged: the session carries it (the Reviewer, #315)", async () => {
+    await post();
+    expect(createParams().currency).toBe("eur");
+    expect(dealCalls.at(-1)?.[0]).toBe("FR");
+    expect(String(stripe.checkout.sessions.create.mock.calls[0][1]?.idempotencyKey)).toContain("-eur-");
+  });
+
+  it("the Christmas offer (1.3): the coupon instead of the free week, exactly when the deal has a first-year price", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-12-10T12:00:00Z"));
+    try {
+      deal = { currency: "eur", year: 4999, firstYear: 2499, coupon: "coupon_xmas" };
+      await post();
+      const p = createParams();
+      expect(dealCalls.at(-1)).toEqual(["FR", true]);
+      expect(p.discounts).toEqual([{ coupon: "coupon_xmas" }]);
+      expect(p.subscription_data).toEqual({ metadata: { user_id: "u1" } });
+      expect(p.metadata).toMatchObject({ offer: "christmas" });
+      expect(String(stripe.checkout.sessions.create.mock.calls[0][1]?.idempotencyKey)).toContain("-offer-");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("the coupon has no amount in this currency (the page showed the free week): the free week, no coupon", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-12-10T12:00:00Z"));
+    try {
+      country = "PL";
+      deal = { currency: "pln", year: 23999, firstYear: null, coupon: null };
+      await post();
+      const p = createParams();
+      expect(p.discounts).toBeUndefined();
+      expect(p.currency).toBe("pln");
+      expect(p.subscription_data).toMatchObject({ trial_period_days: 7 });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("not eligible (a free week before): the offer isn't even asked for", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-12-10T12:00:00Z"));
+    try {
+      entitlement = { data: row({ trial_started_at: "2025-01-01T00:00:00Z" }), error: null };
+      await post();
+      expect(dealCalls.at(-1)?.[1]).toBe(false);
+      expect(createParams().discounts).toBeUndefined();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("the profile or Stripe can't be read: check_failed, never a guess", async () => {
+    deal = null;
+    expect((await post()).status).toBe(503);
+    expect(stripe.checkout.sessions.create).not.toHaveBeenCalled();
   });
 
   it("the free week was used before (any store): no trial this time, the same customer", async () => {
@@ -123,7 +198,8 @@ describe("POST /api/checkout/stripe", () => {
     await post();
     const keys = stripe.checkout.sessions.create.mock.calls.map((c) => (c[1] as { idempotencyKey: string }).idempotencyKey);
     expect(keys[0]).toBe(keys[1]);
-    expect(keys[0]).toMatch(/^plus-checkout-u1-en-trial-\d+$/);
+    // The charged currency is part of the key (one shared deal, #315).
+    expect(keys[0]).toMatch(/^plus-checkout-u1-en-[a-z]{3}-trial-\d+$/);
   });
 
   it("a key replaying an expired session: the next key in the sequence", async () => {

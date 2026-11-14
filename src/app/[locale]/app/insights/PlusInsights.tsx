@@ -1,11 +1,10 @@
 "use client";
 
-import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import type { LongRange } from "@/lib/plus/longRange";
 import type { MorePattern, MorePatternId, MoreWindow } from "@/lib/plus/morePatterns";
-import { LockedItem, PlusLock, PlusSheet, type PlusOffer } from "../PlusSheet";
+import { LockedItem, PlusLock, type PlusOffer } from "../PlusSheet";
 import { segment } from "@/lib/ui/journalLayout";
 
 // What Plus adds on Insights (decision 246; UX 11 Nov): Week, Month, 3 months
@@ -60,17 +59,16 @@ export function MorePatternsRow({ offer }: { offer: PlusOffer }) {
   );
 }
 
-export function WeekLine({ offer }: { offer: PlusOffer }) {
+// offer: kept for its callers; the sheet is retired, so See Plus opens the Plus screen.
+export function WeekLine({ offer: _offer }: { offer: PlusOffer }) {
   const t = useTranslations("plus");
-  const [open, setOpen] = useState(false);
   return (
     <div data-testid="insights-plus-line" className="mt-4 flex items-center gap-3 rounded-2xl border border-border px-[16px] py-[12px]">
       <p className="min-w-0 flex-1 text-sm">{t("weekLine")}</p>
-      <button type="button" data-testid="insights-plus-see" onClick={() => setOpen(true)} className="inline-flex min-h-12 min-w-14 shrink-0 flex-col items-center justify-center gap-0.5 text-sm font-medium text-accent">
+      <Link href="/app/me/plus" data-testid="insights-plus-see" className="inline-flex min-h-12 min-w-14 shrink-0 flex-col items-center justify-center gap-0.5 text-sm font-medium text-accent">
         <PlusLock />
         <span className="underline underline-offset-4">{t("seePlus")}</span>
-      </button>
-      {open && <PlusSheet title={t("sheetYear")} offer={offer} onClose={() => setOpen(false)} />}
+      </Link>
     </div>
   );
 }

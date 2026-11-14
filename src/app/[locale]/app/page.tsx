@@ -21,7 +21,7 @@ import { MilestoneCard } from "./MilestoneCard";
 import { SecurityNoticeRead } from "./SecurityNoticeRead";
 import { JOURNAL_HEADING } from "@/lib/ui/journalLayout";
 import { isLowMood } from "@/lib/journal/checkInSaved";
-import { plusPriceLabel, readPlusView } from "@/lib/plus/view";
+import { readPlusPage } from "@/lib/plus/page";
 import { flagsCrisis } from "@/lib/safety/crisis";
 import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
 import { SetupLaterCard, TodayPlusCard } from "./TodayCards";
@@ -74,7 +74,8 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
   // Today's Plus card on first landing (1.3 §6 and the rulings): only for someone without Plus (never
   // with Plus, never past due), only when today's rows were read, and never on a day when anything
   // saved was flagged or was one of the two lowest faces. Help is always above it on the page.
-  const plus = pageGate("plus") !== "hidden" ? await readPlusView(supabase, user.id) : null;
+  const plusPage = pageGate("plus") !== "hidden" ? await readPlusPage(supabase, user.id, me.profile?.country, locale) : null;
+  const plus = plusPage?.view ?? null;
   const flaggedToday = (entries ?? []).some((e) => flagsCrisis(String((e as { body?: unknown }).body ?? ""), CRISIS_KEYWORDS));
   const plusCard = plus?.kind === "free" && !checkInError && !entriesError && !flaggedToday && !isLowMood((data as CheckIn | null)?.mood) ? plus : null;
   // Setup after first use (1.3 §6): offered once there's a check-in, while the reminder is still off.
@@ -109,7 +110,7 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
       </header>
       <CheckInCard key={checkInError ? "unread" : "read"} initial={(data as CheckIn | null) ?? null} uid={user.id} date={me.today} dateLocaleTag={dateLocaleTag} keepDraft loadFailed={Boolean(checkInError)} />
       {/* Today's order (UX ruling 3): the check-in, the cards, the entries, then Write last. */}
-      {plusCard && <TodayPlusCard trial={plusCard.trial} price={plusPriceLabel(locale)} date={me.today} />}
+      {plusCard && plusPage && <TodayPlusCard trial={plusCard.trial} price={plusPage.price} offer={plusPage.offer} date={me.today} />}
       {setupLater && <SetupLaterCard />}
       {entriesError && (
         <p role="alert" data-testid="today-entries-error" className="font-medium text-accent">

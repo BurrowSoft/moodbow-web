@@ -81,3 +81,20 @@ describe("PlusInMe: the trial counter and a failed renewal", () => {
     expect(screen.queryByTestId("me-plus-banner")).toBeNull();
   });
 });
+
+describe("PlusInMe: the Christmas offer's banner (1.3)", () => {
+  it("its label, the first year, See the offer, and the renewal in the small print", () => {
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <PlusInMe view={{ kind: "free", trial: true }} price="€49.99" offer={{ firstYear: "€24.99", price: "€49.99" }} />
+      </NextIntlClientProvider>,
+    );
+    const banner = screen.getByTestId("me-plus-banner");
+    expect(banner).toHaveAttribute("data-offer", "");
+    expect(banner).toHaveTextContent(m.offerLabel);
+    expect(banner).toHaveTextContent("Your first year for €24.99");
+    expect(screen.getByTestId("me-plus-try")).toHaveTextContent(m.offerSee);
+    expect(banner).toHaveTextContent("Christmas special, until 31 December. Then €49.99 a year. Cancel anytime in Me → Moodbow Plus.");
+    expect(banner.textContent).not.toMatch(/%|half|7 days/i);
+  });
+});

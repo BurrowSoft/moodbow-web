@@ -219,6 +219,10 @@
     "met": false,
     "what": "Moodbow Plus (decision 246, specs/plus.md, docs/plus-entitlements.md): the yearly subscription with 7 free days, on the web through Stripe. Off until everything ships, and not before the pilot is published. Before it's met: the entitlements migration on Production, Vitor's prices, Stripe keys, webhook endpoint, CRON_SECRET and service role key on Production, his terms and privacy text, the Reviewer's read and the tester rows on test-mode Stripe."
   },
+  "offer-live": {
+    "met": false,
+    "what": "The Christmas special offer (specs/1.3-offer-review-voice-taps.md §1 and its Christmas section): the first year at a lower price, 1 December to 1 January 00:00 UTC on the server's clock, for people with no previous subscription, instead of the free week; lib/plus/offer.ts. Only with plus. Before it's met: Vitor's first-year coupon in Stripe (STRIPE_PLUS_OFFER_COUPON_ID, duration \"once\" so the renewal is the full price, amount_off per currency from store/plus-prices.md's half prices; a currency without an amount shows and charges the usual free week), the same offer in Apple and Play, his terms text for it, the Reviewer's read and the tester rows (OFFER_PREVIEW=1 on a Preview opens the window there; Production ignores it)."
+  },
   "lifts-live": {
     "met": false,
     "what": "1.3 part 2: What lifts me, inside More patterns with Plus (specs/1.3-grounding-and-good-things.md), on the web (#301, with tags-live) and in the app build people have. Ships with 1.3, not with the Plus stack (UX 14 Nov). Also gates the Moodbow Plus article's line about it."
