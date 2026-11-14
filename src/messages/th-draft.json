@@ -1195,11 +1195,6 @@
     "reason": "UX draft (native read pending)"
   },
   {
-    "key": "plus.footerTrial",
-    "en": "7 days free, then {price} a year",
-    "reason": "UX draft (native read pending)"
-  },
-  {
     "key": "plus.renews",
     "en": "Renews automatically.",
     "reason": "UX draft (native read pending)"
@@ -1577,6 +1572,16 @@
   {
     "key": "plus.rowTimeline",
     "en": "Timeline: list, calendar, moments, memories and search",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.trialFree",
+    "en": "Try 7 days free",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.renewsTrial",
+    "en": "Then {price} a year · renews automatically",
     "reason": "UX draft (native read pending)"
   },
   {
