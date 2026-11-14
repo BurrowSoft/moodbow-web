@@ -633,7 +633,8 @@
     "needsEmail": "Füge deinem Konto zuerst eine E-Mail-Adresse hinzu, damit wir dir deine Belege schicken können.",
     "deleteStripe": "Dein Moodbow-Plus-Abo wird jetzt gekündigt. Es wird nichts mehr abgebucht.",
     "deleteStore": "Wenn du Moodbow Plus über Google Play oder den App Store hast, kündige es auch dort. Das Löschen deines Kontos beendet das Abo im Store nicht.",
-    "deleteCancelledKept": "Dein Moodbow-Plus-Abo wurde gekündigt, aber dein Konto wurde nicht gelöscht. Bitte versuch es noch einmal."
+    "deleteCancelledKept": "Dein Moodbow-Plus-Abo wurde gekündigt, aber dein Konto wurde nicht gelöscht. Bitte versuch es noch einmal.",
+    "sheetLetters": "Briefe an dein zukünftiges Ich gehören zu Plus"
   },
   "toolbox": {
     "meRow": "Was mir hilft",
@@ -709,6 +710,11 @@
     "deleteTitle": "Diesen Brief löschen?",
     "deleteBody": "Er ist dann für immer weg.",
     "delete": "Löschen",
-    "keep": "Behalten"
+    "keep": "Behalten",
+    "writeLocked": "Einen neuen Brief schreiben",
+    "lockedBody": "Einen neuen Brief zu schreiben gehört zu Moodbow Plus. Deine geschriebenen Briefe bleiben deine: Sie öffnen sich an ihrem Tag, und du kannst sie jederzeit öffnen oder löschen.",
+    "lapsedBody": "Dein Moodbow Plus ist abgelaufen, deshalb kann dieser Brief nicht gespeichert werden. Kopiere ihn, um deine Worte zu behalten.",
+    "copy": "Brief kopieren",
+    "copied": "Kopiert"
   }
 }

@@ -633,7 +633,8 @@
     "needsEmail": "Aggiungi prima un'email al tuo account, così possiamo inviarti le ricevute.",
     "deleteStripe": "Il tuo abbonamento a Moodbow Plus verrà annullato ora. Non ti verrà addebitato più nulla.",
     "deleteStore": "Se hai Moodbow Plus tramite Google Play o l'App Store, annullalo anche lì. Eliminare l'account non interrompe l'abbonamento dello store.",
-    "deleteCancelledKept": "Il tuo abbonamento a Moodbow Plus è stato annullato, ma il tuo account non è stato eliminato. Riprova."
+    "deleteCancelledKept": "Il tuo abbonamento a Moodbow Plus è stato annullato, ma il tuo account non è stato eliminato. Riprova.",
+    "sheetLetters": "Le lettere al te del futuro fanno parte di Plus"
   },
   "toolbox": {
     "meRow": "Cose che mi aiutano",
@@ -709,6 +710,11 @@
     "deleteTitle": "Eliminare questa lettera?",
     "deleteBody": "Sparirà per sempre.",
     "delete": "Elimina",
-    "keep": "Tieni"
+    "keep": "Tieni",
+    "writeLocked": "Scrivi una nuova lettera",
+    "lockedBody": "Scrivere una nuova lettera fa parte di Moodbow Plus. Le lettere che hai già scritto restano tue: si aprono nel loro giorno e puoi aprirle o eliminarle quando vuoi.",
+    "lapsedBody": "Il tuo Moodbow Plus è terminato, quindi questa lettera non può essere salvata. Copiala per conservare le tue parole.",
+    "copy": "Copia la lettera",
+    "copied": "Copiata"
   }
 }

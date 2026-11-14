@@ -5,6 +5,8 @@ topic: Your journal
 ---
 {pending:app_letters|letters_live}En **Yo → Cartas para mi yo del futuro**, escríbete y elige cuándo leerla. En **Abrirla**, elige **En 1 mes**, **En 3 meses**, **En 6 meses** o **En un año**, y toca **Guardar carta**. Una vez guardada, una carta no se puede editar.
 
+{pending:plus}Escribir una carta nueva es parte de **Moodbow Plus**. Las cartas que ya escribiste siempre son tuyas, con Plus o sin él: se abren en su día, y puedes abrirlas antes, eliminarlas y exportarlas cuando quieras.{/pending}
+
 Hasta su día, la carta está bloqueada: **Cronología** muestra **Una carta tuya · se abre el** y su fecha, nunca lo que escribiste. Bloqueada significa que Moodbow la mantiene fuera de la vista hasta entonces; se guarda con la misma privacidad que el resto de tu diario.
 
 Ese día, Hoy muestra **Una carta tuya, escrita el** y el día en que la escribiste. Si hay varias, aparece primero la que escribiste antes. Toca **Abrir** para leerla, o **Ahora no**: esa carta vuelve en una semana, y Hoy no muestra ninguna carta más ese día en este dispositivo. Si **¿Quieres hablar con alguien?** aparecía encima, se queda en Hoy el resto del día.{pending:app_letters} En la app, si tu recordatorio diario está activado, también recibes una notificación ese día. Nunca muestra la carta.{/pending}

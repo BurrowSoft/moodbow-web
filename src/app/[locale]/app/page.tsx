@@ -15,6 +15,7 @@ import { EntryPreviews, type EntrySummary } from "./EntryPreviews";
 import { tabMetadata } from "./pageMeta";
 import { Link } from "@/i18n/navigation";
 import { pageGate } from "@/lib/conditions";
+import { lettersGate } from "@/lib/plus/letters";
 import { loadMilestone } from "@/lib/share/milestoneData";
 import { yearOnOffer } from "@/lib/share/year";
 import { MilestoneCard } from "./MilestoneCard";
@@ -60,7 +61,8 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
   // read is no list at all: the card still offers a minute to breathe (UX), and nothing else.
   const toolboxOn = pageGate("toolbox-live") !== "hidden";
   // Letters (1.2): read with the rest; the body stays on the server (below).
-  const lettersOn = pageGate("letters-live") !== "hidden";
+  // Letters wait for Plus (lettersGate); the card on the day never asks about Plus itself.
+  const lettersOn = lettersGate() !== "hidden";
   const [checkIn, todaysEntries, milestone, requestHeaders, toolboxRead, lettersRead] = await Promise.all([
     supabase.from("check_ins").select("local_date, mood, sleep_hours, sleep_quality, exercise_minutes, stress, updated_at").eq("local_date", me.today).maybeSingle(),
     // Today's entries, newest first (previews only; the editor loads the rest).

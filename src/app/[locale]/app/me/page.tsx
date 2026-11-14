@@ -26,6 +26,8 @@ import { headers } from "next/headers";
 import { dateLocale } from "@/lib/journal/today";
 import { plusPriceLabel, readPlusView } from "@/lib/plus/view";
 import { PlusInMe } from "./PlusInMe";
+import { lettersGate } from "@/lib/plus/letters";
+import { LockedItem, PlusLock } from "../PlusSheet";
 
 // The export (export_my_data may take 30 s: lib/supabase/deadline) and the
 // import batches run in this page's functions: 60, so their own clean error
@@ -59,6 +61,13 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
   const link = "font-medium text-accent underline underline-offset-4";
   // Unreadable: nothing about Plus at all (null), never an offer to someone who may pay.
   const plus = pageGate("plus") !== "hidden" ? await readPlusView(supabase, user.id) : null;
+  // Letters to future you are Plus (1.3 §3). Without Plus, the row carries the lock: with no letters
+  // yet a tap opens the Plus sheet; with letters it still opens them (they always open, Plus or not).
+  const lettersOn = lettersGate() !== "hidden";
+  const lettersLocked = lettersOn && plus !== null && plus.kind !== "plus";
+  const hasLetters = lettersLocked ? ((await supabase.from("letters").select("id", { count: "exact", head: true })).count ?? 1) > 0 : true;
+  const tl = await getTranslations("letters");
+  const tp = await getTranslations("plus");
 
   return (
     <section className="space-y-8">
@@ -98,12 +107,23 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
           </h2>
         </section>
       )}
-      {pageGate("letters-live") !== "hidden" && (
+      {lettersOn && (
         <section aria-labelledby="me-letters" className="rounded-3xl border border-border bg-surface p-[24px]">
           <h2 id="me-letters" className="text-lg font-medium text-text">
-            <Link href="/app/me/letters" data-testid="me-letters" className={link}>
-              {(await getTranslations("letters"))("meRow")}
-            </Link>
+            {lettersLocked && !hasLetters ? (
+              <LockedItem
+                label={tl("meRow")}
+                sheetTitle={tp("sheetLetters")}
+                offer={{ trial: plus?.kind === "free" && plus.trial, price: plusPriceLabel(locale) }}
+                testId="me-letters-lock"
+                className={`${link} inline-flex items-center gap-2 text-left`}
+              />
+            ) : (
+              <Link href="/app/me/letters" data-testid="me-letters" className={`${link} inline-flex items-center gap-2`}>
+                {tl("meRow")}
+                {lettersLocked && <PlusLock />}
+              </Link>
+            )}
           </h2>
         </section>
       )}

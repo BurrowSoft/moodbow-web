@@ -1668,5 +1668,35 @@
     "key": "plus.deleteCancelledKept",
     "en": "Your Moodbow Plus subscription was cancelled, but your account wasn't deleted. Please try again.",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.writeLocked",
+    "en": "Write a new letter",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.lockedBody",
+    "en": "Writing a new letter is part of Moodbow Plus. The letters you've written stay yours: they open on their day, and you can open or delete them any time.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.lapsedBody",
+    "en": "Your Moodbow Plus has ended, so this letter can't be saved. Copy it to keep your words.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.copy",
+    "en": "Copy letter",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.copied",
+    "en": "Copied",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.sheetLetters",
+    "en": "Letters to future you are part of Plus",
+    "reason": "UX draft (native read pending)"
   }
 ]

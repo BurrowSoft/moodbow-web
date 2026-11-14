@@ -8,6 +8,7 @@ import { LETTER_RULES, type Letter, type LetterMonths } from "@/lib/journal/lett
 import { dateLine } from "@/lib/journal/today";
 import { flagsCrisis } from "@/lib/safety/crisis";
 import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
+import { LockedItem, type PlusOffer } from "../../PlusSheet";
 import { deleteLetter, openLetter, saveLetter, type LetterResult } from "./actions";
 
 const MONTHS_KEY: Record<LetterMonths, "in1" | "in3" | "in6" | "in12"> = { 1: "in1", 3: "in3", 6: "in6", 12: "in12" };
@@ -18,9 +19,30 @@ const SECTION = "rounded-3xl border border-border bg-surface p-[24px] max-sm:px-
 // with a confirm (only before opens_on; on or after its day, Open just opens); delete with a
 // confirm; no edit. The matcher runs on the text at saving and opens the help card on a
 // match, as entries do. Nothing about that is stored.
-export function LettersEditor({ initial, dateLocaleTag, country, today }: { initial: Letter[]; dateLocaleTag: string; country: string | null | undefined; today: string }) {
+// Moodbow Plus (1.3 §3): write "plus" shows the editor; "locked" shows a locked row whose tap
+// opens the Plus sheet; "none" (the Plus row couldn't be read) shows neither. The list, Open,
+// Not now and Delete never depend on it. If Plus lapses while a letter is being written, the
+// server saves it once; after that, the text stays here with a Copy button, never lost.
+export function LettersEditor({
+  initial,
+  dateLocaleTag,
+  country,
+  today,
+  write,
+  offer,
+}: {
+  initial: Letter[];
+  dateLocaleTag: string;
+  country: string | null | undefined;
+  today: string;
+  write: "plus" | "locked" | "none";
+  offer: PlusOffer;
+}) {
   const t = useTranslations("letters");
   const tt = useTranslations("today");
+  const tp = useTranslations("plus");
+  const [lapsed, setLapsed] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [letters, setLetters] = useState(initial);
   const [body, setBody] = useState("");
   const [months, setMonths] = useState<LetterMonths>(1);
@@ -44,6 +66,8 @@ export function LettersEditor({ initial, dateLocaleTag, country, today }: { init
     if (flagsCrisis(body, CRISIS_KEYWORDS)) setCard(true);
     const before = new Set(letters.map((l) => l.id));
     const result: LetterResult | null = await run(saveLetter(body, months));
+    // Plus ended and its one save is used: keep the text on screen to copy.
+    if (result?.status === "plus_required") return setLapsed(true);
     if (result?.status !== "ok") return setFailed(true);
     setLetters(result.letters);
     const made = result.letters.find((l) => !before.has(l.id));
@@ -65,8 +89,36 @@ export function LettersEditor({ initial, dateLocaleTag, country, today }: { init
     setLetters(result.letters);
   };
 
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(body);
+      setCopied(true);
+    } catch {
+      // No clipboard (an old browser, or permission): the text stays in the field to select.
+      setCopied(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
+      {write === "locked" && (
+        <section aria-labelledby="letter-new-title" data-testid="letters-locked" className={SECTION}>
+          <h2 id="letter-new-title" className="text-lg font-medium text-text max-sm:[font-size:min(1.125rem,max(11.25vw,36px))]">
+            {t("editorTitle")}
+          </h2>
+          <p className="mt-1 text-muted">{t("lockedBody")}</p>
+          <div className="mt-3">
+            <LockedItem
+              label={t("writeLocked")}
+              sheetTitle={tp("sheetLetters")}
+              offer={offer}
+              testId="letters-write-lock"
+              className={`${dialogButton()} inline-flex items-center gap-2`}
+            />
+          </div>
+        </section>
+      )}
+      {write === "plus" && (
       <section aria-labelledby="letter-new-title" className={SECTION}>
         <h2 id="letter-new-title" className="text-lg font-medium text-text max-sm:[font-size:min(1.125rem,max(11.25vw,36px))]">
           {t("editorTitle")}
@@ -113,8 +165,22 @@ export function LettersEditor({ initial, dateLocaleTag, country, today }: { init
               {saved ? t("savedLine", { date: date(saved) }) : ""}
             </p>
           </div>
+          {lapsed && (
+            <div role="alert" data-testid="letters-lapsed" className="flex flex-col gap-3">
+              <p className="text-text">{t("lapsedBody")}</p>
+              <div className="flex flex-wrap items-center gap-3">
+                <button type="button" data-testid="letter-copy" onClick={() => void copy()} className={dialogButton()}>
+                  {t("copy")}
+                </button>
+                <p role="status" className="text-sm text-muted">
+                  {copied ? t("copied") : ""}
+                </p>
+              </div>
+            </div>
+          )}
         </form>
       </section>
+      )}
 
       {letters.length > 0 && (
         <ul data-testid="letters-list" className="space-y-3">

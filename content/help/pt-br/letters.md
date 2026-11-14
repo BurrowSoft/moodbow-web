@@ -5,6 +5,8 @@ topic: Your journal
 ---
 {pending:app_letters|letters_live}Em **Perfil → Cartas para o meu eu do futuro**, escreva para você e escolha quando ler. Em **Abrir**, escolha **Em 1 mês**, **Em 3 meses**, **Em 6 meses** ou **Em um ano**, e toque em **Salvar carta**. Depois de salva, uma carta não pode ser editada.
 
+{pending:plus}Escrever uma nova carta faz parte do **Moodbow Plus**. As cartas que você já escreveu são sempre suas, com ou sem Plus: elas abrem no dia certo, e você pode abri-las antes, apagá-las e exportá-las quando quiser.{/pending}
+
 Até o dia dela, a carta fica trancada: a **Linha do tempo** mostra **Uma carta sua · abre em** e a data, nunca o que você escreveu. Trancada quer dizer que o Moodbow a mantém fora de vista até lá; ela é guardada com a mesma privacidade que o resto do seu diário.
 
 No dia, Hoje mostra **Uma carta sua, escrita em** e o dia em que você a escreveu. Se houver mais de uma, aparece primeiro a que você escreveu antes. Toque em **Abrir** para ler, ou em **Agora não**: essa carta volta em uma semana, e Hoje não mostra mais nenhuma carta nesse dia, neste aparelho. Se **Quer conversar com alguém?** aparecia acima dela, isso continua em Hoje pelo resto do dia.{pending:app_letters} No app, se o seu lembrete diário estiver ligado, você também recebe uma notificação nesse dia. Ela nunca mostra a carta.{/pending}

@@ -633,7 +633,8 @@
     "needsEmail": "Primeiro adicione um e-mail à sua conta, para podermos enviar seus recibos.",
     "deleteStripe": "Sua assinatura do Moodbow Plus será cancelada agora. Você não será cobrado de novo.",
     "deleteStore": "Se você tem o Moodbow Plus pelo Google Play ou pela App Store, cancele lá também. Apagar sua conta não interrompe a assinatura da loja.",
-    "deleteCancelledKept": "Sua assinatura do Moodbow Plus foi cancelada, mas sua conta não foi apagada. Tente de novo."
+    "deleteCancelledKept": "Sua assinatura do Moodbow Plus foi cancelada, mas sua conta não foi apagada. Tente de novo.",
+    "sheetLetters": "As cartas para o seu eu do futuro fazem parte do Plus"
   },
   "toolbox": {
     "meRow": "O que me ajuda",
@@ -709,6 +710,11 @@
     "deleteTitle": "Excluir esta carta?",
     "deleteBody": "Ela será apagada para sempre.",
     "delete": "Excluir",
-    "keep": "Manter"
+    "keep": "Manter",
+    "writeLocked": "Escrever uma nova carta",
+    "lockedBody": "Escrever uma nova carta faz parte do Moodbow Plus. As cartas que você já escreveu continuam suas: elas abrem no dia certo, e você pode abri-las ou apagá-las quando quiser.",
+    "lapsedBody": "Seu Moodbow Plus terminou, então esta carta não pode ser salva. Copie-a para guardar suas palavras.",
+    "copy": "Copiar a carta",
+    "copied": "Copiada"
   }
 }

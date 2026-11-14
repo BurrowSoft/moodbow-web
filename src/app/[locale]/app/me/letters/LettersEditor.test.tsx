@@ -34,10 +34,10 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-const page = (initial: Letter[] = []) =>
+const page = (initial: Letter[] = [], write: "plus" | "locked" | "none" = "plus") =>
   render(
     <NextIntlClientProvider locale="en" messages={messages}>
-      <LettersEditor initial={initial} dateLocaleTag={TAG} country="NZ" today="2026-11-10" />
+      <LettersEditor initial={initial} dateLocaleTag={TAG} country="NZ" today="2026-11-10" write={write} offer={{ trial: true, price: "US$59.99" }} />
     </NextIntlClientProvider>,
   );
 
@@ -148,5 +148,46 @@ describe("LettersEditor: a letter opened from Me is matched too (the Reviewer, #
     await act(async () => fireEvent.click(screen.getByTestId("letter-open-now")));
     expect(screen.queryByTestId("safety-card")).toBeNull();
     expect(screen.queryByTestId("letter-open-help")).toBeNull();
+  });
+});
+
+describe("LettersEditor: letters to future you are part of Plus (1.3 §3)", () => {
+  it("without Plus: no editor, a locked row whose tap opens the Plus sheet; the letters still open and delete", async () => {
+    open.mockReturnValueOnce(Promise.resolve({ status: "ok", body: "Dear me." }));
+    page([locked, opened], "locked");
+    expect(screen.queryByTestId("letter-text")).toBeNull();
+    expect(screen.queryByTestId("letter-save")).toBeNull();
+    expect(screen.getByTestId("letters-locked")).toHaveTextContent(m.lockedBody);
+    fireEvent.click(screen.getByTestId("letters-write-lock"));
+    expect(screen.getByTestId("plus-sheet")).toHaveTextContent(messages.plus.sheetLetters);
+    fireEvent.click(screen.getByTestId("plus-sheet-not-now"));
+    expect(screen.getAllByTestId("letter-delete")).toHaveLength(2);
+    fireEvent.click(screen.getByTestId("letter-open"));
+    await act(async () => fireEvent.click(screen.getByTestId("letter-open-now")));
+    expect(open).toHaveBeenCalledWith("a");
+    expect(screen.getAllByTestId("letter-body")).toHaveLength(2);
+  });
+
+  it("the Plus row unreadable: neither the editor nor anything about Plus; the letters show", () => {
+    page([opened], "none");
+    expect(screen.queryByTestId("letter-text")).toBeNull();
+    expect(screen.queryByTestId("letters-locked")).toBeNull();
+    expect(document.body.textContent).not.toContain("Plus");
+    expect(screen.getByTestId("letter-body")).toBeInTheDocument();
+  });
+
+  it("Plus ended while writing, its one save used: the text stays, with Copy", async () => {
+    save.mockReturnValueOnce(Promise.resolve({ status: "plus_required" }));
+    const writeText = vi.fn(() => Promise.resolve());
+    Object.assign(navigator, { clipboard: { writeText } });
+    page();
+    fireEvent.change(screen.getByTestId("letter-text"), { target: { value: "Dear me, keep going." } });
+    await act(async () => fireEvent.click(screen.getByTestId("letter-save")));
+    expect(screen.getByTestId("letters-lapsed")).toHaveTextContent(m.lapsedBody);
+    expect(screen.getByTestId("letter-text")).toHaveValue("Dear me, keep going.");
+    expect(screen.queryByTestId("letters-failed")).toBeNull();
+    await act(async () => fireEvent.click(screen.getByTestId("letter-copy")));
+    expect(writeText).toHaveBeenCalledWith("Dear me, keep going.");
+    expect(screen.getByTestId("letters-lapsed")).toHaveTextContent(m.copied);
   });
 });

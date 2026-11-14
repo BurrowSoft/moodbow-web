@@ -633,7 +633,8 @@
     "needsEmail": "Add an email to your account first, so we can send your receipts.",
     "deleteStripe": "Your Moodbow Plus subscription will be cancelled now. You won't be charged again.",
     "deleteStore": "If you have Moodbow Plus through Google Play or the App Store, cancel it there too. Deleting your account doesn't stop the store's subscription.",
-    "deleteCancelledKept": "Your Moodbow Plus subscription was cancelled, but your account wasn't deleted. Please try again."
+    "deleteCancelledKept": "Your Moodbow Plus subscription was cancelled, but your account wasn't deleted. Please try again.",
+    "sheetLetters": "Letters to future you are part of Plus"
   },
   "toolbox": {
     "meRow": "Things that help me",
@@ -709,6 +710,11 @@
     "deleteTitle": "Delete this letter?",
     "deleteBody": "It will be gone for good.",
     "delete": "Delete",
-    "keep": "Keep"
+    "keep": "Keep",
+    "writeLocked": "Write a new letter",
+    "lockedBody": "Writing a new letter is part of Moodbow Plus. The letters you've written stay yours: they open on their day, and you can open or delete them any time.",
+    "lapsedBody": "Your Moodbow Plus has ended, so this letter can't be saved. Copy it to keep your words.",
+    "copy": "Copy letter",
+    "copied": "Copied"
   }
 }

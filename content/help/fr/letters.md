@@ -5,6 +5,8 @@ topic: Your journal
 ---
 {pending:app_letters|letters_live}Dans **Moi → Lettres à mon futur moi**, écrivez-vous et choisissez quand la lire. Sous **L'ouvrir**, choisissez **Dans 1 mois**, **Dans 3 mois**, **Dans 6 mois** ou **Dans un an**, puis appuyez sur **Enregistrer la lettre**. Une fois enregistrée, une lettre ne peut plus être modifiée.
 
+{pending:plus}Écrire une nouvelle lettre fait partie de **Moodbow Plus**. Les lettres déjà écrites restent toujours à vous, avec ou sans Plus : elles s'ouvrent le jour prévu, et vous pouvez les ouvrir en avance, les supprimer et les exporter à tout moment.{/pending}
+
 Jusqu'à son jour, une lettre est verrouillée : **Chronologie** affiche **Une lettre de vous · s'ouvre le** et sa date, jamais ce que vous avez écrit. Verrouillée veut dire que Moodbow la garde hors de vue jusque-là ; elle est conservée aussi discrètement que le reste de votre journal.
 
 Le jour venu, Aujourd'hui affiche **Une lettre de vous, écrite le** et le jour où vous l'avez écrite. S'il y en a plusieurs, celle que vous avez écrite en premier s'affiche d'abord. Appuyez sur **Ouvrir** pour la lire, ou sur **Pas maintenant** : cette lettre revient dans une semaine, et Aujourd'hui n'affiche plus de lettre ce jour-là sur cet appareil. Si **Envie de parler à quelqu'un ?** s'affichait au-dessus, cela reste sur Aujourd'hui jusqu'à la fin de la journée.{pending:app_letters} Dans l'app, si votre rappel quotidien est activé, vous recevez aussi une notification ce jour-là. Elle ne montre jamais la lettre.{/pending}
