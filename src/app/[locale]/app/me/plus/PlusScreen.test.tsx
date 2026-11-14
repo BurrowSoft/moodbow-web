@@ -96,7 +96,8 @@ describe("PlusScreen: the table scrolls, the footer never does", () => {
 
   it("large text (the footer over 40 % of the screen): the page scrolls, the bar steps aside, only the price, the renewal line and the button stay pinned", () => {
     vi.stubGlobal("ResizeObserver", class { observe() {} disconnect() {} });
-    const heights: Record<string, number> = { "plus-footer": 400, "plus-scroll": 60 };
+    // 300 of 640: over 40 % (large), under 60 % (still pinned; over it unpins, #271's rule).
+    const heights: Record<string, number> = { "plus-footer": 300, "plus-scroll": 60 };
     const rect = vi.spyOn(Element.prototype, "getBoundingClientRect").mockImplementation(function (this: Element) {
       return { height: heights[this.getAttribute("data-testid") ?? ""] ?? 0 } as DOMRect;
     });
@@ -111,7 +112,7 @@ describe("PlusScreen: the table scrolls, the footer never does", () => {
     expect(within(screen.getByTestId("plus-rest")).getByTestId("plus-not-now")).toBeTruthy();
     // Fixed at the bottom, with room kept under the page's end for it (its measured height).
     expect(footer.className).toContain("fixed");
-    expect(document.body.style.paddingBottom).toBe("400px");
+    expect(document.body.style.paddingBottom).toBe("300px");
     // One scroll for the page: the table's box is no longer a scroll area of its own.
     expect(screen.getByTestId("plus-scroll")).not.toHaveAttribute("tabindex");
     expect(document.documentElement).toHaveAttribute("data-tabs-aside");
