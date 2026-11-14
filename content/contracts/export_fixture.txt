@@ -4,7 +4,7 @@ Account: sam@example.invalid
 This file holds your private journal. Keep it somewhere safe.
 
 Check-ins
-2026-09-28 · Mood: Bad (2/5)
+2026-09-28 · Mood: Bad (2/5) · Tags: Walk, Friends
 2026-09-29 · Mood: Okay (3/5) · Sleep: 7 h · Movement: Rest day · Stress: 4/5
 2026-09-30 · Mood: Great (5/5) · Sleep: Poor · Movement: 90+ min
 2026-10-02 · Mood: Good (4/5) · Sleep: 7.5 h, Good · Movement: 30 min · Stress: 2/5
@@ -23,6 +23,34 @@ Groceries
 
 - rice
 - tea
+
+Things that help me
+- Walk round the block
+- Text Sam
+
+My safety plan
+Warning signs
+Not sleeping
+Skipping meals
+
+People and places that take my mind off things
+The park by the river
+
+People I can ask for help
+- Sam · +64 21 555 0100
+- Alex
+
+Professionals and services
+- Dr Lee · 09 555 0199
+
+Letters to future me
+2026-10-02 (locked until 2027-10-02)
+Dear me,
+I hope the garden grew.
+
+2026-10-03
+Dear me,
+You did it.
 
 AI reflections
 On your entry of 2026-10-02

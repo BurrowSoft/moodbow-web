@@ -49,3 +49,25 @@ describe("SetupForm (r1 Make it yours)", () => {
     expect(sent().filter(([k]) => k === "focus")).toHaveLength(1);
   });
 });
+
+describe("SetupForm starts from what's saved (1.3 §6; the Reviewer, #314)", () => {
+  const withInitial = (initial: { reminderOn: boolean; reminderTime: string; tone: string; focus: string[] }) =>
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <SetupForm askAi initial={initial} />
+      </NextIntlClientProvider>,
+    );
+  it("after first use (the protective default, reminder off): saving without a change keeps it off", () => {
+    withInitial({ reminderOn: false, reminderTime: "21:00", tone: "warm", focus: [] });
+    expect(screen.getByTestId("setup-reminder-off")).toBeChecked();
+    expect(screen.getByTestId("setup-reminder-time")).toBeDisabled();
+    expect(sent()).toEqual(expect.arrayContaining([["reminder_off", "on"]]));
+  });
+  it("a chosen reminder, tone and focus come back as they were", () => {
+    withInitial({ reminderOn: true, reminderTime: "07:30", tone: "direct", focus: ["sleep"] });
+    expect(screen.getByTestId("setup-reminder-off")).not.toBeChecked();
+    expect(screen.getByTestId("setup-reminder-time")).toHaveValue("07:30");
+    expect(screen.getByTestId("setup-tone-direct")).toBeChecked();
+    expect(screen.getByTestId("setup-focus-sleep")).toHaveAttribute("aria-pressed", "true");
+  });
+});

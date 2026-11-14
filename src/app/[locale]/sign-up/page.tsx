@@ -1,13 +1,16 @@
 import type { Metadata } from "next";
-import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 import { redirect } from "@/i18n/navigation";
 import { PageShell } from "@/components/PageShell";
-import { pageGate } from "@/lib/conditions";
+import { NextIntlClientProvider } from "next-intl";
+import { getMessages } from "next-intl/server";
+import { pickMessages } from "@/i18n/clientMessages";
+import { GetHelpNow } from "@/components/SafetyCard";
+import { conditionMet, pageGate } from "@/lib/conditions";
+import { askAiConsent } from "@/lib/journal/ai";
 import { pageMetadata } from "@/lib/metadata";
-import { CONSENT_COOKIE, parseConsentCookie } from "@/lib/onboardingConsent";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { SignUpForm } from "./SignUpForm";
 
@@ -28,8 +31,8 @@ export default async function SignUpPage({ params }: PageProps<"/[locale]/sign-u
   const supabase = await createSupabaseServerClient();
   const user = supabase ? (await supabase.auth.getUser()).data.user : null;
   if (user) redirect({ href: "/app", locale });
-  // Consent first (M3): without its grants, back to Consent.
-  if (!parseConsentCookie((await cookies()).get(CONSENT_COOKIE)?.value)) redirect({ href: "/consent", locale });
+  // The consent boxes are on this form now (1.3 §6): separate, unticked, each with its link, and
+  // checked again by the action. /consent stays for signed-in accounts that owe a consent.
 
   const t = await getTranslations("onboarding");
   const ta = await getTranslations("auth");
@@ -42,7 +45,13 @@ export default async function SignUpPage({ params }: PageProps<"/[locale]/sign-u
           {ta("startedInApp")}
         </p>
       )}
-      <SignUpForm />
+      <SignUpForm askAi={askAiConsent()} healthLink={conditionMet("consumer-health-data-approved")} />
+      {/* Help is never behind a consent, as on Consent: its card and words come only to this page. */}
+      <NextIntlClientProvider messages={pickMessages(await getMessages(), ["me", "safety", "common"])}>
+        <div className="mt-[24px] [font-size:min(1rem,max(10vw,32px))] [&_a]:min-h-[44px] [&_button]:min-h-[44px]">
+          <GetHelpNow country={null} testId="signup-get-help" neutral />
+        </div>
+      </NextIntlClientProvider>
     </PageShell>
   );
 }

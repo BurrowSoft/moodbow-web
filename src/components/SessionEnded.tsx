@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { GetHelpNow } from "./SafetyCard";
+import { PicturesClear } from "./PicturesClear";
 
 // Shown by a journal page when there's no session any more, reached by moving
 // between tabs: the shared layout, which would send them to sign-in, doesn't
@@ -13,6 +14,7 @@ export function SessionEnded() {
   const t = useTranslations("auth");
   return (
     <section className="flex flex-1 flex-col items-center justify-center px-6 py-16 text-center" data-testid="session-ended">
+      <PicturesClear />
       <div role="alert" data-alert="heading">
         <h1 className="text-lg font-medium text-text">{t("sessionEndedTitle")}</h1>
       </div>

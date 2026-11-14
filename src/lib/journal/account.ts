@@ -11,6 +11,8 @@ const DELETE_WORDS: Record<string, string[]> = {
   "pt-br": ["APAGAR", "EXCLUIR"],
   de: ["LÖSCHEN"],
   it: ["ELIMINA"],
+  // Thai (UX, audit batch E, as the app; draft, native read pending): ลบ, "delete".
+  th: ["ลบ"],
 };
 const fold = (s: string) => foldForSearch(s.trim()).text;
 // ö → oe etc. before the fold: the German way to type without umlauts, so

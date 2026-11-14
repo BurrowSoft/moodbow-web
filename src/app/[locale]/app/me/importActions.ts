@@ -5,9 +5,11 @@ import { redirect } from "@/i18n/navigation";
 import { EXERCISE_MINUTES, SLEEP_HOURS, SLEEP_QUALITIES } from "@/lib/journal/checkIn";
 import { MAX_ENTRY_CHARS } from "@/lib/journal/entry";
 import { getMe } from "@/lib/journal/me";
+import { parseTags } from "@/lib/journal/tags";
 import { IMPORT_BATCH, MAX_IMPORT_DAYS } from "@/lib/import/journalImport";
 import { noteKey } from "@/lib/import/noteDedupe";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { pageGate } from "@/lib/conditions";
 
 // Import from another journal (1.1 K): one batch of the plan the person
 // confirmed in the browser. Never overwriting: what's already there is
@@ -34,7 +36,7 @@ async function signedIn() {
 
 // Days' moods: a day that already has a check-in keeps ours (M5: its notes
 // still come in through importEntries).
-type ImportCheckIn = { date: string; mood: number; sleep_hours?: number; sleep_quality?: string; exercise_minutes?: number; stress?: number };
+type ImportCheckIn = { date: string; mood: number; sleep_hours?: number; sleep_quality?: string; exercise_minutes?: number; stress?: number; tags?: string[] };
 
 // The other values, when there: the check-in's own rules (as the form and
 // upsert_check_in), checked again because the rows come from the browser.
@@ -42,7 +44,8 @@ const extrasOk = (d: ImportCheckIn) =>
   (d.sleep_hours === undefined || (SLEEP_HOURS as number[]).includes(d.sleep_hours)) &&
   (d.sleep_quality === undefined || (SLEEP_QUALITIES as readonly string[]).includes(d.sleep_quality)) &&
   (d.exercise_minutes === undefined || (EXERCISE_MINUTES as readonly number[]).includes(d.exercise_minutes)) &&
-  (d.stress === undefined || (Number.isInteger(d.stress) && d.stress >= 1 && d.stress <= 5));
+  (d.stress === undefined || (Number.isInteger(d.stress) && d.stress >= 1 && d.stress <= 5)) &&
+  (d.tags === undefined || (Array.isArray(d.tags) && parseTags(JSON.stringify(d.tags)) !== null));
 
 export async function importCheckIns(days: ImportCheckIn[]): Promise<ImportBatchResult> {
   if (!Array.isArray(days) || days.length === 0 || days.length > IMPORT_BATCH) return { status: "error" };
@@ -72,6 +75,9 @@ export async function importCheckIns(days: ImportCheckIn[]): Promise<ImportBatch
     });
     if (writeError?.message.includes("check_in_exists")) continue;
     if (writeError) return { status: "error" };
+    // The day's tags, after its check-in (tags-live). A refusal doesn't stop the import:
+    // the check-in is in, and the tags can be added on the day.
+    if (d.tags?.length && pageGate("tags-live") !== "hidden") await supabase.rpc("set_check_in_tags", { p_date: d.date, p_tags: d.tags });
     written.push(d.date);
   }
   return { status: "ok", written, skipped: days.length - written.length };

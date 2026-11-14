@@ -5,13 +5,24 @@ import messages from "@/messages/en.json";
 
 const exportMyData = vi.fn();
 const deleteMyAccount = vi.fn();
+const exportPictureUrls = vi.fn();
 vi.mock("./actions", () => ({
   exportMyData: (...a: unknown[]) => exportMyData(...a),
   deleteMyAccount: (...a: unknown[]) => deleteMyAccount(...a),
+  exportPictureUrls: (...a: unknown[]) => exportPictureUrls(...a),
 }));
 // The export's wait, shortened (45 s in the app; withTimeout.test pins it).
+vi.mock("@/i18n/navigation", () => ({
+  Link: ({ href, children, ...rest }: { href: string; children: React.ReactNode }) => (
+    <a href={href} {...rest}>
+      {children}
+    </a>
+  ),
+}));
+const removePicture = vi.fn(async () => {});
+vi.mock("@/lib/me/picture", () => ({ removePicture: (...a: unknown[]) => removePicture(...(a as [])) }));
 vi.mock("@/lib/ui/withTimeout", async (orig) => ({ ...(await orig<typeof import("@/lib/ui/withTimeout")>()), EXPORT_WAIT_MS: 300 }));
-const { YourData } = await import("./YourData");
+const { YourData, PICTURE_FETCH_MS } = await import("./YourData");
 const m = messages.me;
 const UID = "0b5f2c1e-7d3a-4e8b-9c41-2a6f8e1d3b70";
 const KEYS = [`mb:pending-checkin:${UID}:2026-10-02`, `mb:draft-entry:${UID}:new`];
@@ -71,12 +82,73 @@ describe("YourData: export", () => {
     expect(blob.type).toBe("text/csv;charset=utf-8");
     const bytes = new Uint8Array(await blob.arrayBuffer());
     expect([...bytes.slice(0, 3)]).toEqual([0xef, 0xbb, 0xbf]);
-    expect(await blob.text()).toContain(`2026-10-01,4,${messages.today.mood4},,,,,yes,'=A walk`);
+    expect(await blob.text()).toContain(`2026-10-01,4,${messages.today.mood4},,,,,yes,,'=A walk`);
     cleanup();
     renderIt();
     fireEvent.click(screen.getByTestId("me-export"));
     expect(await screen.findByRole("link", { name: m.exportData })).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: m.exportCsv })).toBeNull();
+  });
+
+  it("pictures (035): a zip with the data file and pictures/<entry>/<picture>.jpg, fetched through fresh signed URLs", async () => {
+    const doc = { format: "moodbow-export", format_version: 1, exported_at: "2026-10-02T09:30:00Z", account: { email: "a@b.co" }, check_ins: [], entries: [{ id: "e2", entry_date: "2026-10-02", body: "A walk.", is_moment: true, created_at: "2026-10-02T02:00:00+00:00", updated_at: "2026-10-02T02:00:00+00:00", pictures: [{ id: "p1", created_at: "2026-10-02T02:05:00+00:00", width: 2048, height: 1536 }] }] };
+    exportMyData.mockResolvedValue({ status: "ok", json: JSON.stringify(doc), date: "2026-10-02" });
+    exportPictureUrls.mockResolvedValue({ status: "ok", pictures: [{ entry_id: "e2", id: "p1", url: "https://signed.example/p1" }] });
+    const fetchMock = vi.fn(async () => ({ ok: true, arrayBuffer: async () => new Uint8Array([0xff, 0xd8, 0xff, 0xd9]).buffer }));
+    vi.stubGlobal("fetch", fetchMock);
+    const blobs: Blob[] = [];
+    (URL.createObjectURL as unknown as ReturnType<typeof vi.fn>).mockImplementation((b: Blob) => (blobs.push(b), `blob:${blobs.length}`));
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <YourData credits={0} uid={UID} pictures />
+      </NextIntlClientProvider>,
+    );
+    fireEvent.click(screen.getByTestId("me-export"));
+    await waitFor(() => expect(screen.getByTestId("me-export-zip")).toBeInTheDocument());
+    expect(screen.getByTestId("me-export-zip")).toHaveAttribute("download", "moodbow-export-2026-10-02.zip");
+    expect(fetchMock).toHaveBeenCalledWith("https://signed.example/p1", expect.objectContaining({ signal: expect.any(AbortSignal) }));
+    const zip = new Uint8Array(await blobs.at(-1)!.arrayBuffer());
+    const { unzipSync } = await import("fflate");
+    expect(Object.keys(unzipSync(zip)).sort()).toEqual(["moodbow-export-2026-10-02.json", "pictures/e2/p1.jpg"]);
+    vi.unstubAllGlobals();
+  });
+
+  it("a picture that stalls (audit D, MAJOR): each gets PICTURE_FETCH_MS; past it, the export stands without the zip and says so", async () => {
+    const doc = { format: "moodbow-export", format_version: 1, exported_at: "2026-10-02T09:30:00Z", account: { email: "a@b.co" }, check_ins: [], entries: [{ id: "e2", entry_date: "2026-10-02", body: "A walk.", is_moment: true, created_at: "2026-10-02T02:00:00+00:00", updated_at: "2026-10-02T02:00:00+00:00", pictures: [{ id: "p1", created_at: "2026-10-02T02:05:00+00:00", width: 2048, height: 1536 }] }] };
+    exportMyData.mockResolvedValue({ status: "ok", json: JSON.stringify(doc), date: "2026-10-02" });
+    exportPictureUrls.mockResolvedValue({ status: "ok", pictures: [{ entry_id: "e2", id: "p1", url: "https://signed.example/p1" }] });
+    const timeout = vi.spyOn(AbortSignal, "timeout");
+    // What a timed-out fetch does: rejects with a TimeoutError.
+    vi.stubGlobal("fetch", vi.fn(async () => Promise.reject(new DOMException("The operation timed out.", "TimeoutError"))));
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <YourData credits={0} uid={UID} pictures />
+      </NextIntlClientProvider>,
+    );
+    fireEvent.click(screen.getByTestId("me-export"));
+    await waitFor(() => expect(screen.getByTestId("me-export-zip-failed")).toHaveTextContent(m.exportZipFailed));
+    expect(timeout).toHaveBeenCalledWith(PICTURE_FETCH_MS);
+    expect(PICTURE_FETCH_MS).toBe(30_000);
+    expect(screen.getByTestId("me-export-json")).toBeInTheDocument();
+    expect(screen.queryByTestId("me-export-zip")).toBeNull();
+    // The export itself is ready, not an error.
+    expect(screen.getByTestId("me-export-status")).toHaveTextContent(m.meExportReady);
+    timeout.mockRestore();
+  });
+
+  it("pictures that can't be zipped: the other files stand, and it says so; no pictures, no zip", async () => {
+    const doc = { format: "moodbow-export", format_version: 1, exported_at: "2026-10-02T09:30:00Z", account: { email: "a@b.co" }, check_ins: [], entries: [{ id: "e2", entry_date: "2026-10-02", body: "A walk.", is_moment: true, created_at: "2026-10-02T02:00:00+00:00", updated_at: "2026-10-02T02:00:00+00:00", pictures: [{ id: "p1", created_at: "2026-10-02T02:05:00+00:00", width: 2048, height: 1536 }] }] };
+    exportMyData.mockResolvedValue({ status: "ok", json: JSON.stringify(doc), date: "2026-10-02" });
+    exportPictureUrls.mockResolvedValue({ status: "error" });
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <YourData credits={0} uid={UID} pictures />
+      </NextIntlClientProvider>,
+    );
+    fireEvent.click(screen.getByTestId("me-export"));
+    await waitFor(() => expect(screen.getByTestId("me-export-zip-failed")).toHaveTextContent(m.exportZipFailed));
+    expect(screen.getByTestId("me-export-json")).toBeInTheDocument();
+    expect(screen.queryByTestId("me-export-zip")).toBeNull();
   });
 
   it("a format the renderer doesn't know: the data file alone (no partial text)", async () => {
@@ -118,18 +190,11 @@ describe("YourData: delete account", () => {
     expect(screen.getByTestId("delete-dialog")).not.toHaveTextContent("AI credit");
   });
 
-  it("credits: with AI live, warned only when there are some (one / many)", () => {
-    renderIt(0);
-    fireEvent.click(screen.getByTestId("me-delete"));
-    expect(screen.queryByTestId("delete-credits")).toBeNull();
-    cleanup();
-    renderIt(1);
-    fireEvent.click(screen.getByTestId("me-delete"));
-    expect(screen.getByTestId("delete-credits")).toHaveTextContent("You'll also lose your 1 AI credit.");
-    cleanup();
+  it("no credits line any more, with AI live and a balance (no credits product, 14 Nov)", () => {
     renderIt(40);
     fireEvent.click(screen.getByTestId("me-delete"));
-    expect(screen.getByTestId("delete-credits")).toHaveTextContent("You'll also lose your 40 AI credits.");
+    expect(screen.queryByTestId("delete-credits")).toBeNull();
+    expect(screen.getByTestId("delete-dialog")).not.toHaveTextContent("AI credit");
   });
 
   it("confirming sends DELETE; a failure shows the generic error and keeps the dialog", async () => {
@@ -142,6 +207,52 @@ describe("YourData: delete account", () => {
     expect((deleteMyAccount.mock.calls[0][1] as FormData).get("confirm")).toBe("DELETE");
     expect(await screen.findByTestId("delete-error")).toHaveTextContent(messages.today.errGeneric);
     expect(screen.getByTestId("delete-dialog")).toBeInTheDocument();
+  });
+
+  it("Plus was cancelled but the delete failed: the message says both (UX, #270)", async () => {
+    deleteMyAccount.mockResolvedValue({ status: "error", error: "plus_cancelled" });
+    renderIt();
+    fireEvent.click(screen.getByTestId("me-delete"));
+    fireEvent.change(screen.getByTestId("delete-confirm-input"), { target: { value: "DELETE" } });
+    fireEvent.click(screen.getByTestId("delete-confirm"));
+    expect(await screen.findByTestId("delete-error")).toHaveTextContent(messages.plus.deleteCancelledKept);
+  });
+
+  it("the Plus line only for someone with that source: Stripe is cancelled with the account, a store's isn't", () => {
+    const withSource = (plusSource: "stripe" | "play" | null) =>
+      render(
+        <NextIntlClientProvider locale="en" messages={messages}>
+          <YourData credits={0} uid={UID} plusSource={plusSource} />
+        </NextIntlClientProvider>,
+      );
+    withSource(null);
+    fireEvent.click(screen.getByTestId("me-delete"));
+    expect(screen.queryByTestId("delete-plus")).toBeNull();
+    cleanup();
+    withSource("stripe");
+    fireEvent.click(screen.getByTestId("me-delete"));
+    expect(screen.getByTestId("delete-plus")).toHaveTextContent(messages.plus.deleteStripe);
+    cleanup();
+    withSource("play");
+    fireEvent.click(screen.getByTestId("me-delete"));
+    expect(screen.getByTestId("delete-plus")).toHaveTextContent(messages.plus.deleteStore);
+  });
+
+  it("the designed PDF: a link with Plus, a lock without, nothing when Plus can't be read", () => {
+    const withPdf = (pdf: React.ComponentProps<typeof YourData>["pdf"]) =>
+      render(
+        <NextIntlClientProvider locale="en" messages={messages}>
+          <YourData credits={0} uid={UID} pdf={pdf} />
+        </NextIntlClientProvider>,
+      );
+    withPdf("plus");
+    expect(screen.getByTestId("me-journal-pdf")).toHaveAttribute("href", "/app/me/journal-pdf");
+    cleanup();
+    withPdf({ trial: true, price: "US$59.99" });
+    expect(screen.getByTestId("me-journal-pdf")).toHaveAttribute("data-locked", "");
+    cleanup();
+    withPdf(null);
+    expect(screen.queryByTestId("me-journal-pdf")).toBeNull();
   });
 
   it("Cancel (or Escape) closes it and forgets what was typed", () => {
@@ -194,6 +305,8 @@ describe("YourData: this browser forgets a deleted account (decision 85; reviewe
       confirmDelete();
       await waitFor(() => expect(KEYS.every((k) => window.localStorage.getItem(k) === null)).toBe(true));
       expect(window.localStorage.getItem("mb:pending-checkin:someone-else:2026-10-02")).toBe("y");
+      // Me's own picture in this browser goes too (the Reviewer, #321).
+      await waitFor(() => expect(removePicture).toHaveBeenCalledTimes(1));
     } finally {
       window.removeEventListener("error", swallow);
       onError.mockRestore();
@@ -206,6 +319,7 @@ describe("YourData: this browser forgets a deleted account (decision 85; reviewe
     confirmDelete();
     await screen.findByTestId("delete-error");
     expect(KEYS.every((k) => window.localStorage.getItem(k) === "x")).toBe(true);
+    expect(removePicture).not.toHaveBeenCalled();
   });
 });
 

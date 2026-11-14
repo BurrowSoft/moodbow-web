@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "about": "My safety plan (specs/1.2-features.md §2, UX 2026-11-09; the Reviewer's read specs/1.2-features-read.md; server specs/safety-plan-server-draft.md, migration 026). TEMPORARY HOME, as content/toolbox.json: it moves to the app repo's supabase/contracts when the app ports it (decision 99). The standard safety-planning structure, every part optional. Sections 1, 3 and 6 are one text each, at most maxTextChars, saved by their own Save. Section 2 is the toolbox list (content/toolbox.json), read and edited in place, never copied. Sections 4 and 5 are people, at most maxPeoplePerSection each, a name of at most maxNameChars and an optional phone of at most maxPhoneChars, in any format (a person in crisis shouldn't fight a validator); Call shows only with at least callMinDigits digits, as a tel: link the phone's own dialer opens. Section 5 also shows the country's helpline, read live from countries.json for Me's country with the help card's rule, never stored and never removable. The plan has content when a text isn't blank, a person is there, or the toolbox has an item: only then does the help card show its button, below the helplines, and a hard Your week its link. An empty plan never blocks help. Names and numbers are other people's: never in logs, crash reports or analytics, never read by Bo or Reflect, in Export, removed by Delete account. No import from the phone's contacts. EVERY string in clinicianDraft is a draft pending the clinician's read (Vitor): safety-plan-live stays off until then.",
+  "sections": [
+    { "id": "warning_signs", "number": 1, "kind": "text" },
+    { "id": "toolbox", "number": 2, "kind": "toolbox" },
+    { "id": "distractions", "number": 3, "kind": "text" },
+    { "id": "people", "number": 4, "kind": "people" },
+    { "id": "professionals", "number": 5, "kind": "people", "helpline": true },
+    { "id": "surroundings", "number": 6, "kind": "text" }
+  ],
+  "rules": {
+    "maxTextChars": 2000,
+    "maxPeoplePerSection": 10,
+    "maxNameChars": 100,
+    "maxPhoneChars": 40,
+    "callMinDigits": 3
+  },
+  "clinicianDraft": [
+    "title",
+    "intro",
+    "warningSigns",
+    "warningSignsPrompt",
+    "distractions",
+    "people",
+    "professionals",
+    "professionalsPrompt",
+    "helpline",
+    "surroundings",
+    "surroundingsPrompt",
+    "safety.safetyPlanButton"
+  ]
+}

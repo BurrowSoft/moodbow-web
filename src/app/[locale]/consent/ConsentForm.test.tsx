@@ -56,3 +56,13 @@ describe("ConsentForm: the optional AI box (r1 §M3)", () => {
     expect(screen.getByTestId("consent-continue")).toBeEnabled();
   });
 });
+
+// Web Tester batch E: the two links were 20 px tall. min-h-11 is 44 px; the measured height is checked in Chromium.
+describe("ConsentForm: the legal links are 44 px tap areas", () => {
+  it("Read the Terms and Read the Privacy Policy", () => {
+    renderIt(false);
+    for (const id of ["consent-read-terms", "consent-read-privacy"]) {
+      expect(screen.getByTestId(id).className.split(" ")).toEqual(expect.arrayContaining(["inline-flex", "min-h-11", "items-center"]));
+    }
+  });
+});

@@ -2,6 +2,7 @@ import { restoreCell } from "@/lib/csvSafety";
 import { EXERCISE_MINUTES, SLEEP_HOURS, SLEEP_QUALITIES, type SleepQuality } from "@/lib/journal/checkIn";
 import { MAX_ENTRY_CHARS } from "@/lib/journal/entry";
 import { parseCsv } from "./csv";
+import { activitiesToTags } from "@/lib/journal/tags";
 
 // Import from another journal (1.1 K, decision 189; specs/1.1-features.md §K
 // and both "Settled" blocks): a CSV read in the browser only, turned into a
@@ -19,7 +20,9 @@ export type DateOrder = "dmy" | "mdy";
 export type DateFormat = "iso" | DateOrder | "ambiguous";
 // A day's check-in. The other values come only from a generic file that
 // has those columns (our own CSV export, 1.1 P); absent means none.
-export type ImportDay = { date: string; mood: Mood; sleep_hours?: number; sleep_quality?: SleepQuality; exercise_minutes?: number; stress?: number };
+// tags (options.tags, tags-live): our export's tags column, or Daylio's activities;
+// the day's rows together, the first 5 different ones.
+export type ImportDay = { date: string; mood: Mood; sleep_hours?: number; sleep_quality?: SleepQuality; exercise_minutes?: number; stress?: number; tags?: string[] };
 // isMoment: our export's moment column. dup: the n-th copy of the same text
 // on the same day and time (n ≥ 1), so each copy keeps its own id.
 export type ImportEntry = { date: string; time: string | null; body: string; isMoment?: true; dup?: number };
@@ -40,7 +43,9 @@ export type ImportPlan = {
 };
 export type ImportError = "empty" | "format" | "dates" | "size" | "encoding";
 export type ImportResult = { status: "ok"; plan: ImportPlan } | { status: "error"; reason: ImportError; row?: number };
-export type ImportOptions = { dateOrder?: DateOrder; customMoods?: Record<string, Mood> };
+// tags: where tags are on, Daylio's activities and our export's tags column become the days' tags
+// (UX, 11 Nov); off, activities are listed as not imported, as before.
+export type ImportOptions = { dateOrder?: DateOrder; customMoods?: Record<string, Mood>; tags?: boolean };
 
 export const MAX_IMPORT_DAYS = 2000;
 export const MAX_IMPORT_ENTRIES = 5000;
@@ -125,7 +130,7 @@ export function htmlToText(html: string): string {
 }
 
 type Extras = Omit<ImportDay, "date" | "mood">;
-type Row = { date: string; time: string | null; mood: Mood | null; extras: Extras; body: string; isMoment: boolean; order: number };
+type Row = { date: string; time: string | null; mood: Mood | null; extras: Extras; body: string; isMoment: boolean; order: number; tags: string[] };
 
 // A generic file's other check-in values (our CSV export's columns), each
 // only when it's one the check-in allows (the same rules as the form and
@@ -197,7 +202,7 @@ export function planImport(text: string, today: string, options: ImportOptions =
       const name = moodRaw.toLowerCase();
       mood = DAYLIO_MOODS[name] ?? options.customMoods?.[moodRaw] ?? null;
       if (!(name in DAYLIO_MOODS) && moodRaw !== "") custom.add(moodRaw);
-      for (const a of get("activities").split("|").map((s) => s.trim()).filter(Boolean)) activities.add(a);
+      if (!options.tags) for (const a of get("activities").split("|").map((s) => s.trim()).filter(Boolean)) activities.add(a);
     } else if (/^[1-5]$/.test(moodRaw)) mood = Number(moodRaw) as Mood;
     // Daylio: title + a blank line + the note; either alone if the other is
     // empty. Generic: the note as written (only line endings change), so our
@@ -215,6 +220,7 @@ export function planImport(text: string, today: string, options: ImportOptions =
       body: body.trim() ? body : "",
       isMoment: generic && get("moment").toLowerCase() === "yes",
       order: i,
+      tags: options.tags ? activitiesToTags(get(format === "daylio" ? "activities" : "tags")) : [],
     });
   });
 
@@ -227,11 +233,13 @@ export function planImport(text: string, today: string, options: ImportOptions =
   kept.sort((a, b) => a.date.localeCompare(b.date) || (a.time ?? "").localeCompare(b.time ?? "") || a.order - b.order);
 
   const dayOf = new Map<string, ImportDay>();
+  const tagsOf = new Map<string, string[]>();
   const copies = new Map<string, number>();
   let entries: ImportEntry[] = [];
   for (const r of kept) {
     // The latest row of the day with a mood wins, with its other values.
     if (r.mood !== null) dayOf.set(r.date, { date: r.date, mood: r.mood, ...r.extras });
+    if (r.tags.length) tagsOf.set(r.date, activitiesToTags([...(tagsOf.get(r.date) ?? []), ...r.tags].join("|")));
     if (!r.body) continue;
     // Over 20,000 characters: skipped and counted (H3).
     if (r.body.length > MAX_ENTRY_CHARS) {
@@ -248,7 +256,8 @@ export function planImport(text: string, today: string, options: ImportOptions =
     skipped.olderEntries = entries.length - MAX_IMPORT_ENTRIES;
     entries = entries.slice(-MAX_IMPORT_ENTRIES);
   }
-  const days = [...dayOf.values()].sort((a, b) => a.date.localeCompare(b.date));
+  // A day's tags go with its check-in (tags need one: set_check_in_tags).
+  const days = [...dayOf.values()].map((d) => (tagsOf.get(d.date)?.length ? { ...d, tags: tagsOf.get(d.date)! } : d)).sort((a, b) => a.date.localeCompare(b.date));
   const all = [...days.map((d) => d.date), ...entries.map((e) => e.date)].sort();
   return {
     status: "ok",

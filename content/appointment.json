@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "about": "For my appointment (specs/1.2-features.md §4, UX 2026-11-09; the Reviewer's read). TEMPORARY HOME, as content/toolbox.json: it moves to the app repo's supabase/contracts when the app ports it (decision 99), where it's a PDF made on the device. A summary of the last rangeWeeks weeks, ending today in the saved zone: the number of check-ins (never \"of N days\": that's a missed-days count), the average and small chart for each of mood, sleep, stress and movement (Insights' own rules: a day without a value doesn't count, at least 3 to show), and the starred entries as their date and first line (cut at firstLineChars on a word boundary, with …). An entry's full text only where the person ticks it, none ticked at the start. Never included: neverIncluded. An optional box, What I want to talk about, isn't saved. Nothing is stored or sent by us; the ticks and the box live in the page's memory only. Every string is checked against diagnosisWords (your-week.json's lists), the footer and headings included.",
+  "rules": {
+    "rangeWeeks": [2, 4, 12],
+    "defaultWeeks": 4,
+    "firstLineChars": 120
+  },
+  "neverIncluded": ["letters", "safety_plan", "toolbox_items", "bo_messages", "ai_reflections", "ai_reports", "ai_memories"]
+}

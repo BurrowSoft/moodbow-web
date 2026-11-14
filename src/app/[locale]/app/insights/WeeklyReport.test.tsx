@@ -16,7 +16,8 @@ vi.mock("./reportActions", () => ({
   requestWeeklyReport: (...a: unknown[]) => requestWeeklyReport(...a),
   deleteWeeklyReport: (...a: unknown[]) => deleteWeeklyReport(...a),
 }));
-const { WeeklyReport, weekRange } = await import("./WeeklyReport");
+const { WeeklyReport } = await import("./WeeklyReport");
+const { weekRange } = await import("@/lib/journal/report");
 const m = messages.ai;
 
 const SECTIONS = { changed: "You slept about an hour more.", went_well: "The Tuesday walk.", notice: "Busier days came after short nights.", idea: "An earlier night before Thursday." };
@@ -25,7 +26,7 @@ const ok = (over: object = {}, balance: number | null = 600) => ({ status: "ok",
 const renderIt = (initial: ReturnType<typeof report> | null = null, balance = 600) =>
   render(
     <NextIntlClientProvider locale="en" messages={messages}>
-      <WeeklyReport initial={initial} weekStart="2026-10-12" dateLocaleTag="en-GB" balance={balance} />
+      <WeeklyReport initial={initial} weekStart="2026-10-12" weekLabel={weekRange("2026-10-12", "en-GB")} dateLocaleTag="en-GB" balance={balance} />
     </NextIntlClientProvider>,
   );
 const keys = () => requestWeeklyReport.mock.calls.map((c) => c[0] as string);
@@ -51,7 +52,7 @@ describe("WeeklyReport: AI available but not turned on by this person (UX)", () 
   it("the card explains with meAiOffHint and offers nothing to press", () => {
     render(
       <NextIntlClientProvider locale="en" messages={messages}>
-        <WeeklyReport initial={null} weekStart="2026-10-12" dateLocaleTag="en-GB" balance={0} aiOff />
+        <WeeklyReport initial={null} weekStart="2026-10-12" weekLabel={weekRange("2026-10-12", "en-GB")} dateLocaleTag="en-GB" balance={0} aiOff />
       </NextIntlClientProvider>,
     );
     expect(screen.getByRole("heading", { name: m.reportWeekly })).toBeInTheDocument();
@@ -176,5 +177,19 @@ describe("WeeklyReport (1.1 D)", () => {
     fireEvent.click(screen.getByTestId("weekly-report-button"));
     await settle();
     expect(screen.getByTestId("weekly-report-credits-out")).toHaveTextContent(m.creditsOut);
+  });
+});
+
+describe("WeeklyReport: the week's range comes from the server, as is (#418)", () => {
+  it("shows the label it's given, with and without AI on, never formatting its own week again", () => {
+    for (const aiOff of [false, true]) {
+      render(
+        <NextIntlClientProvider locale="en" messages={messages}>
+          <WeeklyReport initial={null} weekStart="2026-10-12" weekLabel="SERVER LABEL" dateLocaleTag="en-GB" balance={1} aiOff={aiOff} />
+        </NextIntlClientProvider>,
+      );
+      expect(screen.getByTestId("weekly-report-range"), String(aiOff)).toHaveTextContent("SERVER LABEL");
+      cleanup();
+    }
   });
 });

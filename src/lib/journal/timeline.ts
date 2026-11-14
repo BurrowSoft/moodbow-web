@@ -6,8 +6,10 @@ import type { CheckIn } from "./checkIn";
 
 export const TIMELINE_PAGE_DAYS = 30;
 
-export type TimelineEntry = { id: string; preview: string; is_moment: boolean; created_at: string; updated_at: string };
-export type TimelineDay = { local_date: string; check_in: CheckIn | null; entries: TimelineEntry[]; entry_count: number };
+// thumbs (035, where pictures-live is on): the entry's picture thumbnails, signed URLs of 5 minutes.
+export type TimelineEntry = { id: string; preview: string; is_moment: boolean; created_at: string; updated_at: string; thumbs?: string[] };
+// tags: the day's tags (tags-live), added after get_timeline; absent when off or unread.
+export type TimelineDay = { local_date: string; check_in: CheckIn | null; entries: TimelineEntry[]; entry_count: number; tags?: string[] };
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 export const isIsoDate = (s: string) => ISO_DATE.test(s) && !Number.isNaN(Date.parse(`${s}T12:00:00Z`)) && new Date(`${s}T12:00:00Z`).toISOString().startsWith(s);

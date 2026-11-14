@@ -1,0 +1,57 @@
+import type { Metadata } from "next";
+import { headers } from "next/headers";
+import { notFound } from "next/navigation";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import type { Locale } from "@/i18n/routing";
+import { BackLink } from "@/components/BackLink";
+import { GetHelpNow } from "@/components/SafetyCard";
+import { JournalUnavailable } from "@/components/JournalUnavailable";
+import { SessionEnded } from "@/components/SessionEnded";
+import { currentUser } from "@/lib/journal/currentUser";
+import { forClient, parseLetterRows } from "@/lib/journal/letters";
+import { getMe } from "@/lib/journal/me";
+import { lettersGate } from "@/lib/plus/letters";
+import { plusPriceLabel, readPlusView } from "@/lib/plus/view";
+import { dateLocale } from "@/lib/journal/today";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { JOURNAL_HEADING } from "@/lib/ui/journalLayout";
+import { titledMetadata } from "../../pageMeta";
+import { LettersEditor } from "./LettersEditor";
+
+export async function generateMetadata({ params }: PageProps<"/[locale]/app/me/letters">): Promise<Metadata> {
+  const { locale } = await params;
+  return titledMetadata((await getTranslations({ locale, namespace: "letters" }))("meRow"), locale);
+}
+
+// Me → Letters to future me (1.2, letters-live with plus): write one (Plus), and the list (always). A locked letter's
+// text stays here on the server (forClient); it's sent only when the person opens it.
+export default async function LettersPage({ params }: PageProps<"/[locale]/app/me/letters">) {
+  const { locale } = await params;
+  setRequestLocale(locale as Locale);
+  if (lettersGate() === "hidden") notFound();
+  const supabase = await createSupabaseServerClient();
+  const { user, ended } = await currentUser(supabase);
+  if (ended) return <SessionEnded />;
+  if (!supabase || !user) return <JournalUnavailable />;
+  const [me, { data, error }, plus] = await Promise.all([getMe(supabase), supabase.from("letters").select("id, body, written_on, opens_on, card_from, opened_at"), readPlusView(supabase, user.id)]);
+  // Writing a new letter is Plus (the server checks again on saving). A row that can't be read:
+  // nothing about Plus, and no editor ("none"); the letters themselves always show.
+  const write = !plus ? "none" : plus.kind === "plus" ? "plus" : "locked";
+  const offer = { trial: plus?.kind === "free" && plus.trial, price: plusPriceLabel(locale) };
+  const t = await getTranslations("letters");
+  const ta = await getTranslations("app");
+  const tag = dateLocale(locale, (await headers()).get("accept-language"), me?.profile?.country ?? null);
+  return (
+    <section className="space-y-6">
+      {/* Help first, beside Back (UX's rule: every page with journal content), hidden on paper. */}
+      <div className="flex flex-wrap items-center gap-x-[12px] gap-y-[8px] print:hidden">
+        <BackLink href="/app/me" label={ta("navBackTo", { screen: ta("tabMe") })} testId="nav-back" />
+        <GetHelpNow country={me?.profile?.country} testId="letters-get-help" neutral />
+      </div>
+      <h1 className={JOURNAL_HEADING} data-testid="letters-title">
+        {t("meRow")}
+      </h1>
+      {error || !me ? <JournalUnavailable /> : <LettersEditor initial={parseLetterRows(data).map(forClient)} dateLocaleTag={tag} country={me.profile?.country} today={me.today} write={write} offer={offer} />}
+    </section>
+  );
+}

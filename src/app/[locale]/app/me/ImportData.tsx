@@ -43,7 +43,8 @@ const chunks = <T,>(xs: T[], n: number) => Array.from({ length: Math.ceil(xs.len
 const levelsOnly = (choices: Record<string, MoodChoice>) =>
   Object.fromEntries(Object.entries(choices).filter((e): e is [string, Mood] => e[1] !== "skip"));
 
-export function ImportData({ uid, today, dateLocaleTag, country }: { uid: string; today: string; dateLocaleTag: string; country?: string | null }) {
+// tags: tags are on here (tags-live), so a file's activities or tags column come in as the days' tags.
+export function ImportData({ uid, today, dateLocaleTag, country, tags = false }: { uid: string; today: string; dateLocaleTag: string; country?: string | null; tags?: boolean }) {
   const untilLoaded = useUntilLoaded();
   const t = useTranslations("me");
   const tt = useTranslations("today");
@@ -71,7 +72,7 @@ export function ImportData({ uid, today, dateLocaleTag, country }: { uid: string
 
   const replan = (order: DateOrder, choices: Record<string, MoodChoice>) => {
     if (text.current === null) return;
-    const result = planImport(text.current, today, { dateOrder: order, customMoods: levelsOnly(choices) });
+    const result = planImport(text.current, today, { dateOrder: order, customMoods: levelsOnly(choices), tags });
     setPhase(result.status === "ok" ? { kind: "preview", plan: result.plan } : { kind: "error" });
   };
 

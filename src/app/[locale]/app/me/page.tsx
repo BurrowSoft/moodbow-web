@@ -13,7 +13,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { tabMetadata } from "../pageMeta";
 import { SignOutButton } from "./SignOutButton";
 import { GetHelpNow } from "@/components/SafetyCard";
-import { JOURNAL_HEADING } from "@/lib/ui/journalLayout";
+import { BoMeRowLive } from "../bo/BoMeRow";
 import { AiSettings } from "./AiSettings";
 import { Appearance } from "./Appearance";
 import { LanguageRegion } from "./LanguageRegion";
@@ -24,11 +24,21 @@ import { YourData } from "./YourData";
 import { ImportData } from "./ImportData";
 import { headers } from "next/headers";
 import { dateLocale } from "@/lib/journal/today";
+import { readPlusPage } from "@/lib/plus/page";
+import { withTimeout } from "@/lib/ui/withTimeout";
+import { extraReminders } from "@/lib/plus/view";
+import { PlusInMe } from "./PlusInMe";
+import { MePicture } from "./MePicture";
+import { lettersGate } from "@/lib/plus/letters";
+import { LockedItem, PlusLock } from "../PlusSheet";
 
 // The export (export_my_data may take 30 s: lib/supabase/deadline) and the
 // import batches run in this page's functions: 60, so their own clean error
 // comes back before the platform stops the function (reviewer, #122).
 export const maxDuration = 60;
+// Plus's reads on Me, as a whole (entitlements, then Stripe's own deadline): past this, Me shows
+// nothing about Plus (audit batch D). Not exported: a page file exports only Next's own fields.
+const PLUS_ON_ME_MS = 10_000;
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/app/me">): Promise<Metadata> {
   return tabMetadata("tabMe", (await params).locale);
@@ -55,13 +65,53 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
   const tm = await getTranslations("me");
   const tc = await getTranslations("common");
   const link = "font-medium text-accent underline underline-offset-4";
+  // Me's reads in one round (audit batch D, UX 14 Nov): one after another they could pass
+  // maxDuration and take the help row, export and delete with them. Plus is capped as on Today:
+  // past it, nothing about Plus (null), never an offer to someone who may pay.
+  // Your past reports (ruling 10): without Plus, the weekly AI reports already made stay readable
+  // here, read-only; with Plus they're on Insights. Only when there's at least one. Counted in the
+  // same round, used only once Plus says who this is.
+  // Letters to future you are Plus (1.3 §3). Without Plus, the row carries the lock: with no letters
+  // yet a tap opens the Plus sheet; with letters it still opens them (they always open, Plus or not).
+  // Their count joins the same round too (audit D, the PLAN's #312 day-of rule).
+  const plusOn = pageGate("plus") !== "hidden";
+  const lettersOn = lettersGate() !== "hidden";
+  const [plusPage, reports, letterCount] = await Promise.all([
+    plusOn ? withTimeout(readPlusPage(supabase, user.id, me.profile?.country, locale), PLUS_ON_ME_MS).catch(() => null) : null,
+    plusOn ? supabase.from("ai_reports").select("id", { count: "exact", head: true }).eq("kind", "weekly") : null,
+    lettersOn && plusOn ? supabase.from("letters").select("id", { count: "exact", head: true }) : null,
+  ]);
+  const plus = plusPage?.view ?? null;
+  const pastReports = plus && plus.kind !== "plus" ? (reports?.count ?? 0) > 0 : false;
+  const lettersLocked = lettersOn && plus !== null && plus.kind !== "plus";
+  const hasLetters = lettersLocked ? (letterCount?.count ?? 1) > 0 : true;
+  const tl = await getTranslations("letters");
+  const tp = await getTranslations("plus");
+  // Bo's row, also where Bo is off (the conversation stays theirs). A failed read keeps
+  // Clear reachable, and the switch off: off is the default, and what the function reads.
+  let boHas = false;
+  let boReads = false;
+  if (pageGate("bo-live") !== "hidden") {
+    const [kept, settings] = await Promise.all([
+      supabase.from("bo_messages").select("id").limit(1),
+      supabase.from("user_settings").select("bo_reads_journal").maybeSingle(),
+    ]);
+    boHas = kept.error ? true : (kept.data ?? []).length > 0;
+    boReads = (settings.data as { bo_reads_journal?: boolean } | null)?.bo_reads_journal === true;
+  }
 
   return (
     <section className="space-y-8">
-      <h1 className={JOURNAL_HEADING}>{t("tabMe")}</h1>
+      {/* No visible title (Vitor, 14 Nov): help comes first; screen readers still hear "Me". */}
+      <h1 className="sr-only">{t("tabMe")}</h1>
       {/* Get help now (M8): at the top, on its own, AI or not; not repeated
           under Help (decision 128). */}
       <GetHelpNow country={me.profile?.country} testId="me-get-help" neutral />
+      {/* The big card (board 6b): their own picture, this browser only. After help, which stays
+          first on the web until Me follows board 1 (UX, F5). No App icon row on the web. */}
+      {pageGate("me-picture-live") !== "hidden" && <MePicture uid={user.id} />}
+      {/* Moodbow Plus (decision 246): always after help, never in front of it. */}
+      {plusPage && <PlusInMe view={plusPage.view} price={plusPage.price} offer={plusPage.offer} />}
 
       {aiShown(me) && (
         <AiSettings
@@ -73,18 +123,76 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
           credits={{ balance: me.credits?.balance ?? 0 }}
         />
       )}
-      <Reminder on={me.settings?.reminder_on ?? true} time={hhmm(me.settings?.reminder_time)} />
+      {pastReports && (
+        <section aria-labelledby="me-past-reports" className="rounded-3xl border border-border bg-surface p-[24px]">
+          <h2 id="me-past-reports" className="text-lg font-medium text-text">
+            <Link href="/app/me/reports" data-testid="me-past-reports" className={link}>
+              {tm("pastReports")}
+            </Link>
+          </h2>
+        </section>
+      )}
+      {/* Things that help me (1.2): its own page, with a minute to breathe. */}
+      {pageGate("toolbox-live") !== "hidden" && (
+        <section aria-labelledby="me-toolbox" className="rounded-3xl border border-border bg-surface p-[24px]">
+          <h2 id="me-toolbox" className="text-lg font-medium text-text">
+            <Link href="/app/me/toolbox" data-testid="me-toolbox" className={link}>
+              {(await getTranslations("toolbox"))("meRow")}
+            </Link>
+          </h2>
+        </section>
+      )}
+      {pageGate("safety-plan-live") !== "hidden" && (
+        <section aria-labelledby="me-safety-plan" className="rounded-3xl border border-border bg-surface p-[24px]">
+          <h2 id="me-safety-plan" className="text-lg font-medium text-text">
+            <Link href="/app/me/safety-plan" data-testid="me-safety-plan" className={link}>
+              {(await getTranslations("safetyPlan"))("title")}
+            </Link>
+          </h2>
+        </section>
+      )}
+      {pageGate("appointment-live") !== "hidden" && (
+        <section aria-labelledby="me-appointment" className="rounded-3xl border border-border bg-surface p-[24px]">
+          <h2 id="me-appointment" className="text-lg font-medium text-text">
+            <Link href="/app/me/appointment" data-testid="me-appointment" className={link}>
+              {(await getTranslations("appointment"))("meRow")}
+            </Link>
+          </h2>
+        </section>
+      )}
+      {lettersOn && (
+        <section aria-labelledby="me-letters" className="rounded-3xl border border-border bg-surface p-[24px]">
+          <h2 id="me-letters" className="text-lg font-medium text-text">
+            {lettersLocked && !hasLetters ? (
+              <LockedItem
+                label={tl("meRow")}
+                sheetTitle={tp("sheetLetters")}
+                offer={{ trial: plus?.kind === "free" && plus.trial, price: plusPage?.price ?? "" }}
+                testId="me-letters-lock"
+                className={`${link} inline-flex items-center gap-2 text-left`}
+              />
+            ) : (
+              <Link href="/app/me/letters" data-testid="me-letters" className={`${link} inline-flex items-center gap-2`}>
+                {tl("meRow")}
+                {lettersLocked && <PlusLock />}
+              </Link>
+            )}
+          </h2>
+        </section>
+      )}
+      {pageGate("bo-live") !== "hidden" && <BoMeRowLive uid={user.id} hasConversation={boHas} readsJournal={boReads} consented={hasCurrentConsent(me, "ai")} turnedOff={me.settings?.bo_off === true} />}
+      <Reminder on={me.settings?.reminder_on ?? true} time={hhmm(me.settings?.reminder_time)} extra={extraReminders(plus, me.settings?.extra_reminder_times, plusPage?.price ?? "")} />
       <LanguageRegion
         initial={{ locale: routeLocale(me.profile?.locale ?? locale), country: me.profile?.country ?? "", time_zone: me.profile?.time_zone ?? "UTC" }}
         countries={countryOptions(locale)}
         zones={timeZoneOptions(me.profile?.time_zone)}
         languages={offeredLocales().map((code): [string, string] => [code, tc(`languageNames.${code}`)])}
       />
-      <Appearance shortcuts={pageGate("shortcuts-live") !== "hidden"} />
-      <YourData credits={me.credits?.balance ?? 0} uid={user.id} csv={pageGate("export-csv-live") !== "hidden"} ai={conditionMet("ai-live")} />
+      <Appearance shortcuts={pageGate("shortcuts-live") !== "hidden"} palette={plus?.kind === "plus" && plus.until ? { until: plus.until } : plus?.kind === "past_due" ? { pastDue: true } : plus ? { trial: plus.kind === "free" && plus.trial, price: plusPage?.price ?? "" } : null} />
+      <YourData credits={me.credits?.balance ?? 0} uid={user.id} csv={pageGate("export-csv-live") !== "hidden"} ai={conditionMet("ai-live")} plusSource={plus?.kind === "plus" ? plus.source : plus?.kind === "past_due" ? "stripe" : null} pdf={plus?.kind === "plus" ? "plus" : plus ? { trial: plus.kind === "free" && plus.trial, price: plusPage?.price ?? "" } : null} pictures={pageGate("pictures-live") !== "hidden"} />
       {/* Import from another app (1.1 K), with Your data, where it's on. */}
       {pageGate("import-live") !== "hidden" && (
-        <ImportData uid={user.id} today={me.today} dateLocaleTag={dateLocale(locale, (await headers()).get("accept-language"), me.profile?.country ?? null)} country={me.profile?.country} />
+        <ImportData uid={user.id} today={me.today} dateLocaleTag={dateLocale(locale, (await headers()).get("accept-language"), me.profile?.country ?? null)} country={me.profile?.country} tags={pageGate("tags-live") !== "hidden"} />
       )}
 
       <section aria-labelledby="me-help" className="rounded-3xl border border-border bg-surface p-[24px]">

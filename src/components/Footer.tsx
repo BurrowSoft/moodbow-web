@@ -21,6 +21,7 @@ export async function Footer() {
     // information is a "homepage"). Never hide this footer on a page that asks for any.
     { href: "/consumer-health-data", label: t("consumerHealthData"), show: conditionMet("consumer-health-data-approved") },
     { href: "/account-deletion", label: t("accountDeletion"), show: conditionMet("delete-account-live") },
+    { href: "/help/moodbow-plus", label: (await getTranslations("plus"))("label"), show: conditionMet("plus"), testId: "footer-moodbow-plus" },
   ] as const;
 
   return (
@@ -33,7 +34,7 @@ export async function Footer() {
           {links
             .filter((l) => l.show)
             .map((l) => (
-              <Link key={l.href} href={l.href} className={linkClass}>
+              <Link key={l.href} href={l.href} data-testid={"testId" in l ? l.testId : undefined} className={linkClass}>
                 {l.label}
               </Link>
             ))}

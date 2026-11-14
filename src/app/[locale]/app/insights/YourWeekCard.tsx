@@ -18,7 +18,8 @@ const TEXT = {
 // from the check-ins this page already read: nothing new is stored or sent, and
 // nothing here logs which kind of week it was (Reviewer). A hard week is only that
 // line and the way to the safety card, opened neutrally: this isn't a crisis check.
-export async function YourWeekCard({ week, country, dateLocaleTag }: { week: YourWeek; country: string | null | undefined; dateLocaleTag: string }) {
+// planLink: the safety plan has content (1.2), so a hard week offers it beside the help.
+export async function YourWeekCard({ week, country, dateLocaleTag, planLink = false }: { week: YourWeek; country: string | null | undefined; dateLocaleTag: string; planLink?: boolean }) {
   const t = await getTranslations("insights");
   const range = dateRangeLine(week.start, week.end, dateLocaleTag);
   const line = (l: YourWeekLine) =>
@@ -45,6 +46,11 @@ export async function YourWeekCard({ week, country, dateLocaleTag }: { week: You
             {t("yourWeekHard")}
           </p>
           <GetHelpNow country={country} testId="your-week-help" neutral />
+          {planLink && (
+            <Link href="/app/me/safety-plan" data-testid="your-week-plan" className="inline-flex min-h-11 items-center font-medium text-accent underline underline-offset-4">
+              {(await getTranslations("safety"))("safetyPlanButton")}
+            </Link>
+          )}
         </div>
       ) : (
         <div className="mt-3 space-y-2 text-text">

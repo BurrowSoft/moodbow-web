@@ -31,7 +31,7 @@ describe("sign-up errors point at their field", () => {
     it(`${error} → ${field}`, () => {
       state = { status: "error", error, email: "a@b.co", age: false };
       wrap(<SignUpForm />);
-      const target = field === "age" ? screen.getByTestId("signup-age") : document.getElementById(field)!;
+      const target = field === "age" ? screen.getByTestId("consent-age") : document.getElementById(field)!;
       expect(target).toHaveAttribute("aria-invalid", "true");
       expect(target.getAttribute("aria-describedby")).toContain("signup-error");
       for (const other of ["email", "password"].filter((f) => f !== field)) expect(document.getElementById(other)).not.toHaveAttribute("aria-invalid");

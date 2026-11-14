@@ -13,12 +13,14 @@ import { getMe } from "@/lib/journal/me";
 import { isIsoDate } from "@/lib/journal/timeline";
 import { withOrigin } from "@/lib/journal/origin";
 import { BackLink } from "@/components/BackLink";
+import { GetHelpNow } from "@/components/SafetyCard";
 import { backLabel } from "@/lib/journal/backLabel";
 import { dateLine, dateLocale } from "@/lib/journal/today";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { EntryPreviews, type EntrySummary } from "../../EntryPreviews";
 import { tabMetadata, titledMetadata } from "../../pageMeta";
 import { DayCheckIn } from "./DayCheckIn";
+import { readCardTags } from "@/lib/journal/tagsData";
 
 // A stuck request ends here at the latest (UX, the timeout audit); each
 // data call gives up after 15 s on its own (lib/supabase/deadline).
@@ -67,11 +69,15 @@ export default async function DayPage({ params }: PageProps<"/[locale]/app/timel
   return (
     <section className="space-y-8">
       {/* Opened from the Timeline (decision 152). */}
-      <BackLink href="/app/timeline" label={await backLabel("/app/timeline", dateLocaleTag)} testId="nav-back" />
+      {/* Help everywhere (audit batch H): the lifebuoy beside Back. */}
+      <div className="flex items-center gap-1">
+        <BackLink href="/app/timeline" label={await backLabel("/app/timeline", dateLocaleTag)} testId="nav-back" />
+        <GetHelpNow country={me.profile?.country} testId="day-help" neutral icon />
+      </div>
       <h1 className={JOURNAL_HEADING} data-testid="day-date">
         {dateLine(date, dateLocaleTag)}
       </h1>
-      <DayCheckIn initial={(checkIn as CheckIn | null) ?? null} uid={user.id} date={date} dateLocaleTag={dateLocaleTag} />
+      <DayCheckIn initial={(checkIn as CheckIn | null) ?? null} uid={user.id} date={date} dateLocaleTag={dateLocaleTag} {...(await readCardTags(supabase, date))} country={me.profile?.country} />
       {entriesError ? (
         <p role="alert" data-testid="day-entries-error" className="font-medium text-accent">
           {tt("errGeneric")}

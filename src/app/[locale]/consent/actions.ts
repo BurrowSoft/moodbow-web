@@ -1,13 +1,12 @@
 "use server";
 
-import { cookies } from "next/headers";
 import { getLocale } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
 import { askAiConsent } from "@/lib/journal/ai";
 import { gateChanged } from "@/lib/journal/gateChanged";
 import { getMe, hasCurrentConsent } from "@/lib/journal/me";
 import { consentItem, type ConsentItem } from "@/lib/legalVersions";
-import { CONSENT_COOKIE, CONSENT_COOKIE_MAX_AGE, grantedAtConsent, serializeConsent } from "@/lib/onboardingConsent";
+import { grantedAtConsent } from "@/lib/onboardingConsent";
 import { isAuthOutage } from "@/lib/supabase/proxy";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -33,17 +32,8 @@ export async function giveConsent(_prev: ConsentState, form: FormData): Promise<
   // not a new account; never start the sign-up path for them.
   if (!user && isAuthOutage(userError)) return { status: "error", error: "generic" };
 
-  if (!supabase || !user) {
-    const store = await cookies();
-    store.set(CONSENT_COOKIE, serializeConsent(grantedAtConsent(ai)), {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      maxAge: CONSENT_COOKIE_MAX_AGE,
-    });
-    return redirect({ href: "/sign-up", locale });
-  }
+  // A new account gives its consents on Create account now (1.3 §6), never through here.
+  if (!supabase || !user) return redirect({ href: "/sign-up", locale });
 
   const me = await getMe(supabase);
   const needsAge = !me || !hasCurrentConsent(me, "age_18");

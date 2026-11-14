@@ -1,9 +1,10 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { primaryButtonClass } from "@/components/AuthField";
 import { FOCUS_AREAS, FOCUS_KEYS, TONE_KEYS, TONES, type FocusArea } from "@/lib/journal/ai";
+import { markSetupLaterDone } from "@/lib/journal/setupLater";
 import { completeSetup, type SetupState } from "./actions";
 
 // A focus area: a multi-select chip (UX: chips for multi-select), the same
@@ -14,14 +15,20 @@ const chip = (on: boolean) =>
 // Set up (M3, r1 "Make it yours"), web version. askAi: AI was turned on at
 // Consent (and AI is shown on the web): focus areas (chips) and tone (a
 // radio list with hints) first, as on the app; otherwise only the reminder.
-// All skippable; defaults: no focus areas, tone Warm, reminder on at 21:00.
-export function SetupForm({ askAi }: { askAi: boolean }) {
+// All skippable. It starts from what's saved (initial): after first use the protective defaults
+// (the reminder off until chosen, 1.3 §6), so saving without a change never turns anything on.
+// Without initial (no settings row read): no focus areas, tone Warm, the reminder off at 21:00.
+export type SetupInitial = { reminderOn: boolean; reminderTime: string; tone: string; focus: readonly string[] };
+export function SetupForm({ askAi, initial }: { askAi: boolean; initial?: SetupInitial }) {
+  // Setup opened: Today's "Make it yours" card has done its job (1.3 §6).
+  useEffect(markSetupLaterDone, []);
   const t = useTranslations("onboarding");
   const tai = useTranslations("ai");
   const ta = useTranslations("auth");
   const [state, action, pending] = useActionState<SetupState, FormData>(completeSetup, { status: "idle" });
-  const [off, setOff] = useState(false);
-  const [focus, setFocus] = useState<FocusArea[]>([]);
+  const [off, setOff] = useState(!(initial?.reminderOn ?? false));
+  const [focus, setFocus] = useState<FocusArea[]>(() => FOCUS_AREAS.filter((a) => initial?.focus.includes(a)));
+  const startTone = TONES.find((tone) => tone === initial?.tone) ?? "warm";
 
   return (
     <form action={action} className="space-y-6">
@@ -62,7 +69,7 @@ export function SetupForm({ askAi }: { askAi: boolean }) {
                     type="radio"
                     name="tone"
                     value={tone}
-                    defaultChecked={tone === "warm"}
+                    defaultChecked={tone === startTone}
                     data-testid={`setup-tone-${tone}`}
                     aria-describedby={`setup-tone-${tone}-hint`}
                     className="h-5 w-5 accent-[var(--color-accent)]"
@@ -88,7 +95,7 @@ export function SetupForm({ askAi }: { askAi: boolean }) {
           id="reminder_time"
           name="reminder_time"
           type="time"
-          defaultValue="21:00"
+          defaultValue={initial?.reminderTime ?? "21:00"}
           disabled={off}
           data-testid="setup-reminder-time"
           className="mt-2 block min-w-0 max-w-full rounded-2xl border border-border bg-bg px-[16px] py-3 text-text [font-size:min(1rem,max(10vw,32px))] disabled:opacity-50"
