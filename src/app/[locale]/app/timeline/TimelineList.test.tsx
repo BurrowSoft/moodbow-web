@@ -309,7 +309,8 @@ describe("TimelineList: the pictures strip", () => {
     expect(strip).toHaveAccessibleName("2 pictures");
     const imgs = within(strip).getAllByTestId("timeline-picture");
     expect(imgs.map((i) => i.getAttribute("src"))).toEqual(["https://signed.example/a_t.jpg", "https://signed.example/b_t.jpg"]);
-    expect(imgs.every((i) => i.getAttribute("alt") === "")).toBe(true);
+    // The photos are content (the Reviewer): each named "Picture n of total".
+    expect(imgs.map((i) => i.getAttribute("alt"))).toEqual(["Picture 1 of 2", "Picture 2 of 2"]);
     expect(screen.getAllByTestId("timeline-pictures")).toHaveLength(1);
   });
 });

@@ -47,13 +47,36 @@ export async function readEntryPictures(supabase: SupabaseClient, entryIds: stri
   return out;
 }
 
-// A JPEG carrying an EXIF segment (APP1 "Exif"). The server refuses such a file: the browser's
-// re-encode never writes one, so it means the file didn't come through it.
-export function hasExif(bytes: Uint8Array): boolean {
-  for (let i = 0; i + 9 < bytes.length; i++) {
-    if (bytes[i] === 0xff && bytes[i + 1] === 0xe1 && bytes[i + 4] === 0x45 && bytes[i + 5] === 0x78 && bytes[i + 6] === 0x69 && bytes[i + 7] === 0x66) return true;
+// A JPEG carrying any metadata segment before its image data: APP1-APP15 (EXIF and XMP in APP1,
+// IPTC in APP13, ICC and maker data elsewhere) or a comment (COM). The browser's canvas re-encode
+// writes only APP0 (JFIF), so any of these means the file didn't come through it, and the server
+// refuses it (the Reviewer, #322). The marker segments are walked, not scanned for bytes; a file
+// that can't be walked to its first scan (SOS) counts as carrying metadata.
+export function hasMetadata(bytes: Uint8Array): boolean {
+  if (!isJpeg(bytes)) return true;
+  let i = 2;
+  while (i + 1 < bytes.length) {
+    if (bytes[i] !== 0xff) return true;
+    let m = bytes[i + 1];
+    // Fill bytes (0xFF 0xFF ...) before a marker.
+    while (m === 0xff && i + 2 < bytes.length) {
+      i++;
+      m = bytes[i + 1];
+    }
+    if (m === 0xda) return false; // the image data starts: nothing before it carried metadata
+    if (m === 0xd9) return false; // the end, with no image data (nothing to carry)
+    if ((m >= 0xe1 && m <= 0xef) || m === 0xfe) return true;
+    // Standalone markers have no length.
+    if (m === 0x01 || (m >= 0xd0 && m <= 0xd7)) {
+      i += 2;
+      continue;
+    }
+    if (i + 3 >= bytes.length) return true;
+    const length = (bytes[i + 2] << 8) | bytes[i + 3];
+    if (length < 2) return true;
+    i += 2 + length;
   }
-  return false;
+  return true;
 }
 export const isJpeg = (bytes: Uint8Array) => bytes.length > 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
 

@@ -1,6 +1,5 @@
 "use server";
 
-import { pageGate } from "@/lib/conditions";
 import { PICTURES } from "@/lib/journal/pictures";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -11,7 +10,8 @@ export type PictureDeleteResult = { status: "ok" } | { status: "error" };
 // session (the bucket's owner-only DELETE policy). Whatever that misses, the row's trigger already
 // queued for the picture-deletions cron.
 export async function deletePicture(id: string): Promise<PictureDeleteResult> {
-  if (pageGate("pictures-live") === "hidden" || typeof id !== "string" || !/^[0-9a-f-]{36}$/i.test(id)) return { status: "error" };
+  // Never gated by pictures-live: removing one's own picture always works (only adding is gated).
+  if (typeof id !== "string" || !/^[0-9a-f-]{36}$/i.test(id)) return { status: "error" };
   const supabase = await createSupabaseServerClient();
   if (!supabase) return { status: "error" };
   const { data } = await supabase.from("entry_pictures").select("path, thumb_path").eq("id", id).maybeSingle();

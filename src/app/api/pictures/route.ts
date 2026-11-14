@@ -1,6 +1,6 @@
 import { pageGate } from "@/lib/conditions";
 import { sameOrigin } from "@/lib/http/sameOrigin";
-import { hasExif, isJpeg, PICTURES, type EntryPicture } from "@/lib/journal/pictures";
+import { hasMetadata, PICTURES, type EntryPicture } from "@/lib/journal/pictures";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 // Adding a picture to a moment (035), as the signed-in person (their session, RLS and the storage
@@ -9,8 +9,10 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 // confirm (the real sizes count). A plain request rather than a server action: the files are up
 // to 3 MB and a server action's body is capped far lower. Same-origin only.
 //
-// The files must be JPEGs without an EXIF segment: the browser's canvas re-encode never writes one,
-// so a file carrying one didn't come through it and is refused (no metadata ever reaches storage).
+// The files must be JPEGs with no metadata segment at all (APP1-APP15: EXIF, XMP, IPTC...; COM):
+// the browser's canvas re-encode writes only APP0, so a file carrying one didn't come through it and
+// is refused (no metadata ever reaches storage). The files pass through this function on the way to
+// the bucket and aren't stored by it.
 
 export const dynamic = "force-dynamic";
 
@@ -29,7 +31,7 @@ const codeOf = (e: { message?: string } | null): PictureAddResult => {
 async function jpegOk(file: FormDataEntryValue | null): Promise<File | null> {
   if (!(file instanceof File) || file.size < 1 || file.size > PICTURES.fileMax || file.type !== "image/jpeg") return null;
   const bytes = new Uint8Array(await file.arrayBuffer());
-  return isJpeg(bytes) && !hasExif(bytes) ? file : null;
+  return hasMetadata(bytes) ? null : file;
 }
 const side = (v: FormDataEntryValue | null) => {
   const n = Number(v);

@@ -115,7 +115,7 @@ export function EntryPictures({ entryId, pictures, onChange, add }: { entryId: s
       {viewing !== null && pictures[viewing] && (
         <Dialog title={t("pictureOpen", { n: viewing + 1, total: pictures.length })} onCancel={() => setViewing(null)} testId="entry-picture-view">
           {/* eslint-disable-next-line @next/next/no-img-element -- a short-lived signed URL: never through the image optimizer */}
-          <img src={pictures[viewing].full} alt="" data-testid="entry-picture-full" className="max-h-[70vh] w-full rounded-xl object-contain" />
+          <img src={pictures[viewing].full} alt={t("pictureOpen", { n: viewing + 1, total: pictures.length })} data-testid="entry-picture-full" className="max-h-[70vh] w-full rounded-xl object-contain" />
           <button type="button" className={dialogButton(true)} onClick={() => setViewing(null)} data-testid="entry-picture-close">
             {tp("close")}
           </button>

@@ -179,7 +179,7 @@ export function TimelineList({ initial, initialDone, momentsOnly, dateLocaleTag,
                             <div role="group" aria-label={t("timelinePictures", { count: entry.thumbs.length })} data-testid="timeline-pictures" className={`mt-1.5 flex gap-1.5 ${entry.is_moment ? "ps-[24px]" : ""}`}>
                               {entry.thumbs.map((src, i) => (
                                 // eslint-disable-next-line @next/next/no-img-element -- a short-lived signed URL: never through the image optimizer
-                                <img key={i} src={src} alt="" data-testid="timeline-picture" className="h-16 w-16 rounded-xl object-cover" />
+                                <img key={i} src={src} alt={te("pictureOpen", { n: i + 1, total: entry.thumbs!.length })} data-testid="timeline-picture" className="h-16 w-16 rounded-xl object-cover" />
                               ))}
                             </div>
                           )}

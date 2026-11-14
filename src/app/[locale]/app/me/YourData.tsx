@@ -98,7 +98,8 @@ export function YourData({ credits, uid, csv = false, ai = false, plusSource = n
         next.push({ kind: "json", name: exportFileName(result.date), url: URL.createObjectURL(new Blob([result.json], { type: "application/json" })) });
         // Pictures (035): the zip, when there are any and pictures are on here. Can't be made: the
         // export still stands without it, and says the pictures are missing.
-        if (pictures && hasPictures(doc)) {
+        // Whenever the JSON lists pictures, whatever pictures-live says (the Reviewer, #322).
+        if (hasPictures(doc)) {
           const zip = await zipWithPictures(result.json, exportFileName(result.date));
           if (zip) next.push({ kind: "zip", name: zipFileName(result.date), url: URL.createObjectURL(zip) });
           else setZipFailed(true);

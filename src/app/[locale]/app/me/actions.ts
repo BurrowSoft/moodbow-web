@@ -11,7 +11,6 @@ import { isCountry, isTimeZoneName } from "@/lib/region/countries";
 import { dataLocale, offeredLocales } from "@/i18n/routing";
 import { WIPE_COOKIE, WIPE_COOKIE_OPTIONS } from "@/lib/supabase/proxy";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { pageGate } from "@/lib/conditions";
 import { PICTURES } from "@/lib/journal/pictures";
 
 // Me → Sign out: this browser only (the app stays signed in).
@@ -50,8 +49,9 @@ export type ExportPicturesResult = { status: "ok"; pictures: ExportPicture[] } |
 // Export my data, the pictures (035): every confirmed picture of the person's (RLS), each with a
 // fresh signed URL of 5 minutes for the browser to fetch and zip. Never a path in the zip's names
 // (pictures/<entry_id>/<picture_id>.jpg) and never stored anywhere on the way.
+// Whatever pictures-live says (the Reviewer, #322): a switch turned off must never leave someone's
+// own photos out of their export. Called only when the export's JSON lists pictures.
 export async function exportPictureUrls(): Promise<ExportPicturesResult> {
-  if (pageGate("pictures-live") === "hidden") return { status: "ok", pictures: [] };
   const supabase = await createSupabaseServerClient();
   if (!supabase) return { status: "error" };
   const { data, error } = await supabase.from("entry_pictures").select("id, entry_id, path").order("created_at");

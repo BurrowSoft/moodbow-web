@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { fitWithin, hasExif, isJpeg, PICTURES, readEntryPictures } from "./pictures";
+import { fitWithin, hasMetadata as hasExif, isJpeg, PICTURES, readEntryPictures } from "./pictures";
 import { encodeForUpload } from "./pictureEncode";
 
 const text = (s: string) => [...s].map((c) => c.charCodeAt(0));
@@ -11,9 +11,18 @@ const fromCanvas = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, ...text("
 afterEach(() => vi.unstubAllGlobals());
 
 describe("the byte checks the upload route relies on", () => {
-  it("hasExif: an APP1 Exif segment, yes; a canvas JPEG, no", () => {
+  it("hasMetadata: EXIF, XMP (with GPS) and IPTC segments, a comment, or a file that can't be walked: yes; a canvas JPEG: no", () => {
     expect(hasExif(withExif)).toBe(true);
     expect(hasExif(fromCanvas)).toBe(false);
+    const xmp = text('http://ns.adobe.com/xap/1.0/\0<x:xmpmeta><exif:GPSLatitude>51,30N</exif:GPSLatitude></x:xmpmeta>');
+    const xmpJpeg = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, ...text("JFIF"), 0, 1, 1, 0, 0, 1, 0, 1, 0, 0, 0xff, 0xe1, (xmp.length + 2) >> 8, (xmp.length + 2) & 255, ...xmp, 0xff, 0xda, 0, 2, 0xff, 0xd9]);
+    expect(hasExif(xmpJpeg)).toBe(true);
+    const iptc = text("Photoshop 3.0\0");
+    expect(hasExif(new Uint8Array([0xff, 0xd8, 0xff, 0xed, 0, iptc.length + 2, ...iptc, 0xff, 0xda, 0, 2]))).toBe(true);
+    expect(hasExif(new Uint8Array([0xff, 0xd8, 0xff, 0xfe, 0, 6, ...text("GPS!"), 0xff, 0xda, 0, 2]))).toBe(true);
+    // APP0 then the image data: clean, even if the pixels happen to contain FF E1.
+    expect(hasExif(new Uint8Array([...fromCanvas.slice(0, -2), 0xff, 0xda, 0, 2, 0xff, 0xe1, 0x45, 0x78, 0x69, 0x66, 0xff, 0xd9]))).toBe(false);
+    expect(hasExif(new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0x00]))).toBe(true);
   });
   it("isJpeg: the JPEG start marker only", () => {
     expect(isJpeg(fromCanvas)).toBe(true);
