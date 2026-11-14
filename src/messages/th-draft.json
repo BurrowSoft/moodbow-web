@@ -1033,5 +1033,35 @@
     "key": "me.meNoScript",
     "en": "The journal needs JavaScript. Turn it on in your browser to see your entries.",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.recallTitle",
+    "en": "Bring this back",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.recallIn",
+    "en": "Bring this back in",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.recall1",
+    "en": "1 month",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.recall6",
+    "en": "6 months",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.recall12",
+    "en": "1 year",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.recallHelp",
+    "en": "It comes back as a memory on the dates you keep.",
+    "reason": "UX draft (native read pending)"
   }
 ]

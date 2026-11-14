@@ -35,11 +35,12 @@ const BACK = "Back to Timeline";
 const m = messages.entry;
 const today = messages.today;
 
-const renderIt = (over: { checkIn?: CheckIn | null; reflect?: boolean } = {}) =>
+const renderIt = (over: { checkIn?: CheckIn | null; reflect?: boolean; entry?: Entry; recall?: (1 | 6 | 12)[] } = {}) =>
   render(
     <NextIntlClientProvider locale="en" messages={messages}>
       <EntryScreen
-        entry={ENTRY}
+        entry={over.entry ?? ENTRY}
+        recall={over.recall}
         checkIn={over.checkIn === undefined ? CHECK_IN : over.checkIn}
         from="/app/timeline"
         backLabel={BACK}
@@ -122,6 +123,35 @@ describe("EntryScreen: the view", () => {
     vi.spyOn(window, "getSelection").mockReturnValue({ isCollapsed: false } as Selection);
     fireEvent.click(screen.getByTestId("entry-body"));
     expect(screen.queryByTestId("entry-text")).toBeNull();
+  });
+
+  it("Bring this back in: the card on every moment, under the text; none on an entry that isn't one; never in ⋯ (board 20, UX 14 Nov)", () => {
+    const { unmount } = renderIt({ entry: { ...ENTRY, is_moment: true }, recall: [1, 12] });
+    const card = screen.getByTestId("entry-recall");
+    expect(before(screen.getByTestId("entry-body"), card)).toBe(true);
+    expect(screen.getByTestId("entry-recall-6")).toHaveAttribute("aria-pressed", "false");
+    expect(screen.queryByTestId("entry-menu-recall")).toBeNull();
+    unmount();
+    renderIt({ recall: [1, 6, 12] });
+    expect(screen.queryByTestId("entry-recall")).toBeNull();
+    // Recall off (moment-recall-live): no card either.
+    cleanup();
+    renderIt({ entry: { ...ENTRY, is_moment: true } });
+    expect(screen.queryByTestId("entry-recall")).toBeNull();
+  });
+
+  it("starring shows the card straight away, and it stays", async () => {
+    vi.useFakeTimers();
+    try {
+      saveEntry.mockResolvedValueOnce({ status: "saved", entry: { ...ENTRY, is_moment: true, updated_at: "2026-10-02T09:00:00Z" } });
+      renderIt({ recall: [1, 6, 12] });
+      await act(async () => fireEvent.click(screen.getByTestId("entry-moment-toggle")));
+      expect(screen.getByTestId("entry-recall")).toBeInTheDocument();
+      await act(async () => vi.advanceTimersByTimeAsync(10_000));
+      expect(screen.getByTestId("entry-recall")).toBeInTheDocument();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("⋯ opens Edit entry and Delete; Escape closes it and focus goes back to ⋯", () => {

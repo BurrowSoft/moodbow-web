@@ -18,6 +18,8 @@ import { deleteEntry, saveEntry, type DeleteState } from "../actions";
 import { deletedRedirect, EntryEditor, hasDraft, type EditorStart } from "../EntryEditor";
 import { useAnnounce, useFocusTitleAfterLeaving } from "../../Announcer";
 import { ReflectPanel } from "../ReflectPanel";
+import type { RecallMonth } from "@/lib/journal/momentRecall";
+import { RecallChips } from "./RecallChips";
 
 // The entry view (decision 151, the same layout as the app): a top bar with
 // Back, the ★ moment toggle and ⋯ (Edit, Delete); the date; that day's
@@ -39,6 +41,8 @@ type Props = {
   country?: string | null;
   // null: no Reflect (AI off, not consented, or its reflection unreadable).
   reflect: { initial: Reflection | null; balance: number } | null;
+  // Memories (034): this moment's "Bring this back" months; undefined while moment-recall-live is off.
+  recall?: RecallMonth[];
 };
 
 type Mode = { kind: "view" } | { kind: "edit"; start: EditorStart };
@@ -74,7 +78,7 @@ function caretOffset(el: HTMLElement, x: number, y: number): number | "end" {
   return at;
 }
 
-function Screen({ entry: initial, checkIn, from, backLabel, dateLocaleTag, uid, today, country, reflect, startEditing }: Props & { startEditing: boolean }) {
+function Screen({ entry: initial, checkIn, from, backLabel, dateLocaleTag, uid, today, country, reflect, recall, startEditing }: Props & { startEditing: boolean }) {
   const t = useTranslations("entry");
   const tt = useTranslations("today");
   const locale = useLocale();
@@ -122,6 +126,9 @@ function Screen({ entry: initial, checkIn, from, backLabel, dateLocaleTag, uid, 
 
   // ★: saved straight away; a failed save puts it back and offers Try
   // again (decision 111). Another device's newer version wins the view.
+  // The "Bring this back in" card shows on every moment, under the text (board 20; UX, 14 Nov:
+  // no ⋯ item for it, no 6 s slide-in).
+  const [recallMonths, setRecallMonths] = useState<RecallMonth[]>(recall ?? []);
   const toggleMoment = async () => {
     if (savingMoment.current) return;
     savingMoment.current = true;
@@ -136,7 +143,9 @@ function Screen({ entry: initial, checkIn, from, backLabel, dateLocaleTag, uid, 
     form.set("expected_updated_at", before.updated_at);
     try {
       const result = await saveEntry({ status: "idle" }, form);
-      if (result.status === "saved") setEntry(result.entry);
+      if (result.status === "saved") {
+        setEntry(result.entry);
+      }
       else {
         setEntry(result.status === "error" && result.error === "stale" && result.latest ? result.latest : before);
         setMomentFailed(true);
@@ -299,6 +308,10 @@ function Screen({ entry: initial, checkIn, from, backLabel, dateLocaleTag, uid, 
       >
         {entry.body}
       </div>
+
+      {/* Board 20: "Bring this back in" as a card under the entry's text (and its photos, when
+          pictures come), not above the date. */}
+      {mode.kind === "view" && recall && entry.is_moment && <RecallChips id={entry.id} value={recallMonths} onChange={setRecallMonths} />}
 
       {reflect && (
         <ReflectPanel entryId={entry.id} initial={reflect.initial} balance={reflect.balance} country={country} onAnswer={(question) => edit({ at: "end", question })} />

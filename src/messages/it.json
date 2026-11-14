@@ -294,7 +294,13 @@
     "entryNewTitle": "Nuova pagina",
     "entryEditTitle": "Modifica pagina",
     "entryAddMore": "Aggiungi a questa pagina…",
-    "entryMoreActions": "Altre opzioni"
+    "entryMoreActions": "Altre opzioni",
+    "recallTitle": "Riproponi questo momento",
+    "recallIn": "Riproponilo tra",
+    "recallHelp": "Torna come ricordo nelle date che scegli.",
+    "recall1": "1 mese",
+    "recall6": "6 mesi",
+    "recall12": "1 anno"
   },
   "notFound": {
     "title": "Pagina non trovata",

@@ -131,6 +131,10 @@
     "met": true,
     "what": "1.1 A \"On this day\" (specs/1.1-features.md) is tested on both the app and the web; then the Timeline card shows on Production (UX: not tied to a release, may be in time for 1.0)."
   },
+  "moment-recall-live": {
+    "met": false,
+    "what": "Memories: the person chooses when a moment comes back (Vitor, 14 Nov; specs/1.3-offer-review-voice-taps.md \"Memories\"): each moment's \"Bring this back\" chips (1 month, 6 months, 1 year; all by default), and On this day keeps only the anniversaries kept. Needs moodbow-app migration 034 (entries.recall_months, entry_set_recall) on Production first: without it the column doesn't exist, so the web reads and writes it only while this is met (drafts on Preview and CI, against staging, which has 034)."
+  },
   "patterns-live": {
     "met": true,
     "what": "Patterns (no AI; UX 2026-11-04, contracts/patterns.json): the Insights card that sets the person's own check-ins side by side (mood after 7+ h of sleep vs less, on days with movement vs none, on low- vs high-stress days; the last 90 days) is tested on the app and the web. Then it shows on Production. Shown on Previews before that."
