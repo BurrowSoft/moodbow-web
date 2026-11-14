@@ -10,7 +10,7 @@ import { LetterReminders } from "./LetterReminders";
 import { dateLine } from "@/lib/journal/today";
 import { flagsCrisis } from "@/lib/safety/crisis";
 import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
-import { LockedItem, type PlusOffer } from "../../PlusSheet";
+import { LockedItem } from "../../PlusSheet";
 import { deleteLetter, openLetter, saveLetter, type LetterResult } from "./actions";
 
 const MONTHS_KEY: Record<LetterMonths, "in1" | "in3" | "in6" | "in12"> = { 1: "in1", 3: "in3", 6: "in6", 12: "in12" };
@@ -31,18 +31,15 @@ export function LettersEditor({
   country,
   today,
   write,
-  offer,
 }: {
   initial: Letter[];
   dateLocaleTag: string;
   country: string | null | undefined;
   today: string;
   write: "plus" | "locked" | "none";
-  offer: PlusOffer;
 }) {
   const t = useTranslations("letters");
   const tt = useTranslations("today");
-  const tp = useTranslations("plus");
   const [lapsed, setLapsed] = useState(false);
   const [copied, setCopied] = useState(false);
   const [letters, setLetters] = useState(initial);
@@ -124,8 +121,6 @@ export function LettersEditor({
           <div className="mt-3">
             <LockedItem
               label={t("writeLocked")}
-              sheetTitle={tp("sheetLetters")}
-              offer={offer}
               testId="letters-write-lock"
               className={`${dialogButton()} inline-flex items-center gap-2`}
             />

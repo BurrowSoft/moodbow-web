@@ -42,7 +42,7 @@ describe("Me → Appearance: Plus's extra themes", () => {
     window.localStorage.setItem(PALETTE_KEY, `sea@${LATER}`);
     document.documentElement.dataset.palette = "sea";
     act(() => {
-      show({ trial: false, price: "US$59.99" });
+      show({ locked: true });
     });
     expect(screen.getByTestId("me-palettes")).toHaveAttribute("data-locked", "");
     expect(screen.queryByRole("group", { name: p.paletteLegend })).toBeNull();

@@ -86,7 +86,6 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
   const lettersLocked = lettersOn && plus !== null && plus.kind !== "plus";
   const hasLetters = lettersLocked ? (letterCount?.count ?? 1) > 0 : true;
   const tl = await getTranslations("letters");
-  const tp = await getTranslations("plus");
   // Bo's row, also where Bo is off (the conversation stays theirs). A failed read keeps
   // Clear reachable, and the switch off: off is the default, and what the function reads.
   let boHas = false;
@@ -166,8 +165,6 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
             {lettersLocked && !hasLetters ? (
               <LockedItem
                 label={tl("meRow")}
-                sheetTitle={tp("sheetLetters")}
-                offer={{ trial: plus?.kind === "free" && plus.trial, price: plusPage?.price ?? "" }}
                 testId="me-letters-lock"
                 className={`${link} inline-flex items-center gap-2 text-left`}
               />
@@ -181,15 +178,15 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
         </section>
       )}
       {pageGate("bo-live") !== "hidden" && <BoMeRowLive uid={user.id} hasConversation={boHas} readsJournal={boReads} consented={hasCurrentConsent(me, "ai")} turnedOff={me.settings?.bo_off === true} />}
-      <Reminder on={me.settings?.reminder_on ?? true} time={hhmm(me.settings?.reminder_time)} extra={extraReminders(plus, me.settings?.extra_reminder_times, plusPage?.price ?? "")} />
+      <Reminder on={me.settings?.reminder_on ?? true} time={hhmm(me.settings?.reminder_time)} extra={extraReminders(plus, me.settings?.extra_reminder_times)} />
       <LanguageRegion
         initial={{ locale: routeLocale(me.profile?.locale ?? locale), country: me.profile?.country ?? "", time_zone: me.profile?.time_zone ?? "UTC" }}
         countries={countryOptions(locale)}
         zones={timeZoneOptions(me.profile?.time_zone)}
         languages={offeredLocales().map((code): [string, string] => [code, tc(`languageNames.${code}`)])}
       />
-      <Appearance shortcuts={pageGate("shortcuts-live") !== "hidden"} palette={plus?.kind === "plus" && plus.until ? { until: plus.until } : plus?.kind === "past_due" ? { pastDue: true } : plus ? { trial: plus.kind === "free" && plus.trial, price: plusPage?.price ?? "" } : null} />
-      <YourData credits={me.credits?.balance ?? 0} uid={user.id} csv={pageGate("export-csv-live") !== "hidden"} ai={conditionMet("ai-live")} plusSource={plus?.kind === "plus" ? plus.source : plus?.kind === "past_due" ? "stripe" : null} pdf={plus?.kind === "plus" ? "plus" : plus ? { trial: plus.kind === "free" && plus.trial, price: plusPage?.price ?? "" } : null} pictures={pageGate("pictures-live") !== "hidden"} />
+      <Appearance shortcuts={pageGate("shortcuts-live") !== "hidden"} palette={plus?.kind === "plus" && plus.until ? { until: plus.until } : plus?.kind === "past_due" ? { pastDue: true } : plus ? { locked: true } : null} />
+      <YourData credits={me.credits?.balance ?? 0} uid={user.id} csv={pageGate("export-csv-live") !== "hidden"} ai={conditionMet("ai-live")} plusSource={plus?.kind === "plus" ? plus.source : plus?.kind === "past_due" ? "stripe" : null} pdf={plus?.kind === "plus" ? "plus" : plus ? "locked" : null} pictures={pageGate("pictures-live") !== "hidden"} />
       {/* Import from another app (1.1 K), with Your data, where it's on. */}
       {pageGate("import-live") !== "hidden" && (
         <ImportData uid={user.id} today={me.today} dateLocaleTag={dateLocale(locale, (await headers()).get("accept-language"), me.profile?.country ?? null)} country={me.profile?.country} tags={pageGate("tags-live") !== "hidden"} />

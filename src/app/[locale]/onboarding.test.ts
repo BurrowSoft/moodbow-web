@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { CONSENT_COOKIE, grantedAtConsent, parseConsentCookie, serializeConsent } from "@/lib/onboardingConsent";
+import { CONSENT_COOKIE, grantedAtConsent } from "@/lib/onboardingConsent";
 import { onboardingStep } from "@/lib/journal/me";
 import { POLICY_VERSIONS } from "@/lib/legalVersions";
 
@@ -71,24 +71,10 @@ beforeEach(() => {
   for (const fn of Object.values(auth)) fn.mockReset();
 });
 
-describe("consent cookie", () => {
-  it("round-trips the current grants and rejects anything else", () => {
-    expect(parseConsentCookie(serializeConsent(grantedAtConsent()))).toEqual(grantedAtConsent());
-    expect(parseConsentCookie(undefined)).toBeNull();
-    expect(parseConsentCookie("not json")).toBeNull();
-    const stale = grantedAtConsent().map((i) => (i.kind === "privacy" ? { ...i, version: "2020-01-01" } : i));
-    expect(parseConsentCookie(serializeConsent(stale))).toBeNull();
-    const refused = grantedAtConsent().map((i) => (i.kind === "health_data" ? { ...i, granted: false } : i));
-    expect(parseConsentCookie(serializeConsent(refused))).toBeNull();
-  });
-
-  it("carries the optional AI grant (current version), and nothing else extra", () => {
-    expect(parseConsentCookie(serializeConsent(grantedAtConsent(true)))).toEqual(grantedAtConsent(true));
+describe("grantedAtConsent", () => {
+  it("the required three, plus the current AI grant when its box was ticked", () => {
+    expect(grantedAtConsent().map((i) => i.kind)).toEqual(["privacy", "terms", "health_data"]);
     expect(grantedAtConsent(true)).toContainEqual({ kind: "ai", version: POLICY_VERSIONS.ai, granted: true });
-    const staleAi = grantedAtConsent(true).map((i) => (i.kind === "ai" ? { ...i, version: "2020-01-01" } : i));
-    expect(parseConsentCookie(serializeConsent(staleAi))).toBeNull();
-    const extra = [...grantedAtConsent(true), { kind: "age_18" as const, version: POLICY_VERSIONS.age_18, granted: true }];
-    expect(parseConsentCookie(serializeConsent(extra))).toBeNull();
   });
 });
 
@@ -168,7 +154,7 @@ describe("giveConsent", () => {
 });
 
 describe("signUpFlow", () => {
-  const withConsent = () => jar.set(CONSENT_COOKIE, { value: serializeConsent(grantedAtConsent()) });
+  const withConsent = () => jar.set(CONSENT_COOKIE, { value: "leftover" });
   const valid = { email: " New@Example.invalid ", password: "secret-123", privacy: "on", health: "on", age: "on", time_zone: "Asia/Bangkok", intent: "signup" };
 
   it("validates email, password length and 18+", async () => {
@@ -230,7 +216,7 @@ describe("signUpFlow", () => {
   });
 
   it("I've confirmed my email: signs in with the in-memory password → Today (Setup after first use; an old cookie cleared), or says not confirmed yet", async () => {
-    jar.set(CONSENT_COOKIE, { value: serializeConsent(grantedAtConsent()) });
+    jar.set(CONSENT_COOKIE, { value: "leftover" });
     const check = { status: "checkEmail", email: "new@example.invalid" } as const;
     auth.signInWithPassword.mockResolvedValue({ error: { code: "email_not_confirmed" } });
     expect(await signUpFlow(check, form({ intent: "confirmed", password: "secret-123" }))).toEqual({ ...check, notice: "notConfirmed" });
@@ -253,7 +239,7 @@ describe("signUpFlow", () => {
 // Coverage pass (UX): the rest of Supabase's answers, and each step without
 // Supabase or out of order.
 describe("signUpFlow: every other answer", () => {
-  const withConsent = () => jar.set(CONSENT_COOKIE, { value: serializeConsent(grantedAtConsent()) });
+  const withConsent = () => jar.set(CONSENT_COOKIE, { value: "leftover" });
   const valid = { email: "new@example.invalid", password: "secret-123", privacy: "on", health: "on", age: "on", time_zone: "Asia/Bangkok", intent: "signup" };
   const check = { status: "checkEmail", email: "new@example.invalid" } as const;
 
@@ -357,7 +343,7 @@ describe("completeSetup", () => {
 
 describe("errors keep what was typed (React resets the form after an action)", () => {
   it("sign-up echoes the email and the 18+ choice, never the password", async () => {
-    jar.set(CONSENT_COOKIE, { value: serializeConsent(grantedAtConsent()) });
+    jar.set(CONSENT_COOKIE, { value: "leftover" });
     const state = await signUpFlow(idle, form({ intent: "signup", email: "a@b.co", password: "short", age: "on" }));
     expect(state).toEqual({ status: "error", error: "passwordShort", email: "a@b.co", age: true });
     expect(JSON.stringify(state)).not.toContain("short\"");

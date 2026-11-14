@@ -1,14 +1,11 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Dialog, dialogButton } from "@/components/Dialog";
 import { Link } from "@/i18n/navigation";
 
-// Moodbow Plus's lock and its sheet (decision 246, mockups 4): a locked item
-// stays visible with the lock; a tap opens the sheet ("{feature} is part of
-// Plus", Try 7 days free or See Plus, the price, Not now). Never on help, the
-// safety plan, the crisis card or while writing: only the callers decide
-// where, and none of those use it.
+// Moodbow Plus's lock (decision 246, mockups 4): a locked item stays visible with the lock, and a
+// tap opens the Plus screen (the sheet is retired since #315). Never on help, the safety plan, the
+// crisis card or while writing: only the callers decide where, and none of those use it.
 
 export function PlusLock({ size = 16 }: { size?: number }) {
   const t = useTranslations("plus");
@@ -20,31 +17,9 @@ export function PlusLock({ size = 16 }: { size?: number }) {
   );
 }
 
-export type PlusOffer = { trial: boolean; price: string };
-
-export function PlusSheet({ title, offer, onClose, testId = "plus-sheet" }: { title: string; offer: PlusOffer; onClose: () => void; testId?: string }) {
-  const t = useTranslations("plus");
-  return (
-    <Dialog
-      title={title}
-      body={t("bannerBody")}
-      details={<p className="text-sm text-muted" data-testid="plus-sheet-price">{offer.trial ? t("thenPrice", { price: offer.price }) : t("priceYear", { price: offer.price })}</p>}
-      onCancel={onClose}
-      testId={testId}
-    >
-      <Link href="/app/me/plus" data-testid="plus-sheet-go" className={dialogButton(true)}>
-        {offer.trial ? t("tryFree") : t("seePlus")}
-      </Link>
-      <button type="button" data-testid="plus-sheet-not-now" onClick={onClose} className={dialogButton()}>
-        {t("notNow")}
-      </button>
-    </Dialog>
-  );
-}
-
 // A Plus item that stays visible, locked: its label and the lock; a tap opens the Plus screen (the
-// sheet is retired, Vitor 14 Nov). sheetTitle and offer stay accepted for the branches that pass them.
-export function LockedItem({ label, className, testId, children }: { label: string; sheetTitle?: string; offer?: PlusOffer; className: string; testId: string; children?: React.ReactNode }) {
+// sheet is retired, Vitor 14 Nov).
+export function LockedItem({ label, className, testId, children }: { label: string; className: string; testId: string; children?: React.ReactNode }) {
   return (
     <Link href="/app/me/plus" data-testid={testId} data-locked="" className={className}>
       <span className="min-w-0">

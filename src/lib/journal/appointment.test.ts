@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import contract from "../../../content/appointment.json";
 import yourWeek from "../../../content/your-week.json";
-import { APPOINTMENT_RULES, checkInCount, firstLine, isWeeks, rangeAverage, starredIn, weeksDays } from "./appointment";
+import { APPOINTMENT_RULES, checkInCount, firstLine, rangeAverage, starredIn, weeksDays } from "./appointment";
 import type { InsightRow } from "./insights";
 
 const LANGUAGES = ["en", "fr", "es", "pt-br", "de", "it", "th"] as const;
@@ -12,7 +12,6 @@ const row = (local_date: string, mood: number, more: Partial<InsightRow> = {}): 
 describe("appointment rules (content/appointment.json)", () => {
   it("are the contract's: 2, 4 or 12 weeks, 4 by default, first lines of 120", () => {
     expect(APPOINTMENT_RULES).toEqual({ rangeWeeks: [2, 4, 12], defaultWeeks: 4, firstLineChars: 120 });
-    expect([1, 2, 4, 12, "4"].map(isWeeks)).toEqual([false, true, true, true, false]);
   });
 
   it("the range ends today, oldest first", () => {

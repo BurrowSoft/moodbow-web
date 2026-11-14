@@ -37,7 +37,7 @@ afterEach(() => {
 const page = (initial: Letter[] = [], write: "plus" | "locked" | "none" = "plus") =>
   render(
     <NextIntlClientProvider locale="en" messages={messages}>
-      <LettersEditor initial={initial} dateLocaleTag={TAG} country="NZ" today="2026-11-10" write={write} offer={{ trial: true, price: "US$59.99" }} />
+      <LettersEditor initial={initial} dateLocaleTag={TAG} country="NZ" today="2026-11-10" write={write} />
     </NextIntlClientProvider>,
   );
 

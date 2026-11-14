@@ -11,7 +11,7 @@ import { currentUser } from "@/lib/journal/currentUser";
 import { forClient, parseLetterRows } from "@/lib/journal/letters";
 import { getMe } from "@/lib/journal/me";
 import { lettersGate } from "@/lib/plus/letters";
-import { plusPriceLabel, readPlusView } from "@/lib/plus/view";
+import { readPlusView } from "@/lib/plus/view";
 import { dateLocale } from "@/lib/journal/today";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { JOURNAL_HEADING } from "@/lib/ui/journalLayout";
@@ -37,7 +37,6 @@ export default async function LettersPage({ params }: PageProps<"/[locale]/app/m
   // Writing a new letter is Plus (the server checks again on saving). A row that can't be read:
   // nothing about Plus, and no editor ("none"); the letters themselves always show.
   const write = !plus ? "none" : plus.kind === "plus" ? "plus" : "locked";
-  const offer = { trial: plus?.kind === "free" && plus.trial, price: plusPriceLabel(locale) };
   const t = await getTranslations("letters");
   const ta = await getTranslations("app");
   const tag = dateLocale(locale, (await headers()).get("accept-language"), me?.profile?.country ?? null);
@@ -51,7 +50,7 @@ export default async function LettersPage({ params }: PageProps<"/[locale]/app/m
       <h1 className={JOURNAL_HEADING} data-testid="letters-title">
         {t("meRow")}
       </h1>
-      {error || !me ? <JournalUnavailable /> : <LettersEditor initial={parseLetterRows(data).map(forClient)} dateLocaleTag={tag} country={me.profile?.country} today={me.today} write={write} offer={offer} />}
+      {error || !me ? <JournalUnavailable /> : <LettersEditor initial={parseLetterRows(data).map(forClient)} dateLocaleTag={tag} country={me.profile?.country} today={me.today} write={write} />}
     </section>
   );
 }

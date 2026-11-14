@@ -4,7 +4,6 @@ import { roundFor, series, type InsightRow, type Metric } from "./insights";
 // For my appointment (1.2; content/appointment.json, the rules both clients run).
 export const APPOINTMENT_RULES = contract.rules;
 export type Weeks = 2 | 4 | 12;
-export const isWeeks = (n: unknown): n is Weeks => (APPOINTMENT_RULES.rangeWeeks as unknown[]).includes(n);
 
 const DAY_MS = 86_400_000;
 const toTime = (date: string) => Date.parse(`${date}T00:00:00Z`);

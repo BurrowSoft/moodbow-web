@@ -2,7 +2,7 @@
 
 import { useId, useRef, useState, useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { LockedItem, PlusLock, type PlusOffer } from "../PlusSheet";
+import { LockedItem, PlusLock } from "../PlusSheet";
 import { saveExtraReminders } from "./actions";
 import { checkExtraTimes, EXTRA_REMINDERS, type ExtraReminderError } from "@/lib/journal/extraReminders";
 
@@ -13,7 +13,7 @@ import { checkExtraTimes, EXTRA_REMINDERS, type ExtraReminderError } from "@/lib
 // phone doesn't send them). The main switch off: nothing here can change but Remove.
 // Like the main reminder, a failed save puts the list back to what the account has.
 
-export type ExtraMode = { kind: "plus" } | { kind: "locked"; offer: PlusOffer };
+export type ExtraMode = { kind: "plus" } | { kind: "locked" };
 
 const FIELD = "block min-w-0 max-w-full rounded-2xl border border-border bg-bg px-[16px] py-3 text-text [font-size:min(1rem,max(10vw,32px))] disabled:opacity-50";
 const SMALL = "min-h-11 rounded-full border border-border px-[16px] text-sm font-medium text-text disabled:opacity-50";
@@ -39,7 +39,6 @@ export function ExtraReminders({
 }) {
   const t = useTranslations("me");
   const tt = useTranslations("today");
-  const tp = useTranslations("plus");
   const locale = useLocale();
   const base = useId();
   const [draft, setDraft] = useState<string | null>(null);
@@ -169,8 +168,6 @@ export function ExtraReminders({
       ) : (
         <LockedItem
           label={t("reminderAddTime")}
-          sheetTitle={tp("sheetReminders")}
-          offer={mode.offer}
           testId="me-reminder-extra-add-locked"
           // A block that never outgrows the card: at 300 % on a 320 px phone the words wrap
           // beside the lock (the large-text journey).
