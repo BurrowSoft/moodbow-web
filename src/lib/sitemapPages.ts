@@ -13,21 +13,23 @@ type PageEntry = { path: string; gate?: ConditionId; gates?: ConditionId[]; pref
 // calls notFound() too, but /app streams (app/loading.tsx), so by then the 200 and the feature's
 // title are already sent. Gated here, they're true 404s with the generic title before rendering.
 // pagesGated.test.ts fails if a page's own gate isn't listed here.
+// Never in the sitemap: the signed-in area.
+const app = (p: Omit<PageEntry, "sitemap">): PageEntry => ({ ...p, sitemap: false });
 const APP_GATED: PageEntry[] = [
-  { path: "/app/bo", gate: "bo-live", prefix: true },
-  { path: "/app/insights/review", gate: "plus", prefix: true },
-  { path: "/app/me/plus", gate: "plus", prefix: true },
-  { path: "/app/me/journal-pdf", gate: "plus", prefix: true },
+  app({ path: "/app/bo", gate: "bo-live", prefix: true }),
+  app({ path: "/app/insights/review", gate: "plus", prefix: true }),
+  app({ path: "/app/me/plus", gate: "plus", prefix: true }),
+  app({ path: "/app/me/journal-pdf", gate: "plus", prefix: true }),
   // Letters are Plus from the day they ship (lettersGate: letters-live AND plus).
-  { path: "/app/me/letters", gates: ["letters-live", "plus"], prefix: true },
-  { path: "/app/me/appointment", gate: "appointment-live", prefix: true },
-  { path: "/app/me/safety-plan", gate: "safety-plan-live", prefix: true },
+  app({ path: "/app/me/letters", gates: ["letters-live", "plus"], prefix: true }),
+  app({ path: "/app/me/appointment", gate: "appointment-live", prefix: true }),
+  app({ path: "/app/me/safety-plan", gate: "safety-plan-live", prefix: true }),
   // The grounding exercises below the toolbox need both; the toolbox page itself only its own.
-  { path: "/app/me/toolbox", gates: ["toolbox-live", "grounding-live"], prefix: "children" },
-  { path: "/app/me/toolbox", gate: "toolbox-live" },
-  { path: "/app/print", gate: "print-live", prefix: true },
-  { path: "/app/write/good-things", gate: "good-things-live", prefix: true },
-].map((p) => ({ ...p, sitemap: false as const }));
+  app({ path: "/app/me/toolbox", gates: ["toolbox-live", "grounding-live"], prefix: "children" }),
+  app({ path: "/app/me/toolbox", gate: "toolbox-live" }),
+  app({ path: "/app/print", gate: "print-live", prefix: true }),
+  app({ path: "/app/write/good-things", gate: "good-things-live", prefix: true }),
+];
 
 const PAGES: PageEntry[] = [
   { path: "/" },
