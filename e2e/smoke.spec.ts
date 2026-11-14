@@ -308,10 +308,10 @@ test.describe("the live legal pages and account deletion (decision 164)", () => 
     // Sign-up is reached through Consent.
     await page.goto("/consumer-health-data");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Moodbow: Consumer Health Data Privacy Policy");
-    await expect(page.locator('[data-content="article"]')).toContainText("We answer within 45 days");
+    await expect(page.locator('[data-content="article"]')).toContainText("We answer within 10 days");
     await page.goto("/fr/consumer-health-data");
     await expect(page.getByTestId("page-notice")).toHaveText(fr.legal.legalEnglishOnly);
-    await expect(page.locator('[data-content="article"]')).toContainText("We answer within 45 days");
+    await expect(page.locator('[data-content="article"]')).toContainText("We answer within 10 days");
   });
 
   test("the footer links only live pages: account deletion, and the legal pages once live", async ({ page }) => {
@@ -621,6 +621,13 @@ test.describe("onboarding (signed out)", () => {
 
   test("Consent: help is there before anything's agreed, and it opens the card", async ({ page }) => {
     await page.goto("/consent");
+    // Help first, then who keeps what, then the boxes (UX).
+    const help = (await page.getByTestId("consent-get-help").boundingBox())!;
+    const notice = (await page.getByTestId("consent-notice").boundingBox())!;
+    const form = (await page.getByTestId("consent-privacy").boundingBox())!;
+    expect(help.y).toBeLessThan(notice.y);
+    expect(notice.y).toBeLessThan(form.y);
+    await expect(page.getByTestId("consent-notice")).toContainText("Moodbow is run by Vitor Carvalho");
     await page.getByTestId("consent-get-help").click();
     await expect(page.getByTestId("safety-card")).toBeVisible();
     await expect(page.getByTestId("safety-find-helpline")).toBeVisible();
@@ -637,7 +644,7 @@ test.describe("onboarding (signed out)", () => {
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("See your patterns");
     await page.getByTestId("welcome-skip").click();
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Private, and yours");
-    await expect(page.getByText("Only you can read your journal, and you can delete everything at any time in Me.")).toBeVisible();
+    await expect(page.getByText("Your journal is private to your account, and you can delete everything in Me.")).toBeVisible();
     await expect(page.getByTestId("welcome-skip")).toHaveCount(0);
     await expect(page).toHaveURL(/\/welcome\?slide=3$/);
     await page.getByTestId("welcome-start").click();

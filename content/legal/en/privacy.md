@@ -9,18 +9,21 @@
 ## Moodbow Privacy Policy
 Last updated: 11 November 2026
 
-Moodbow is a private journal made by Vitor Ribeiro Carvalho, trading as BurrowSoft (297 Moo 1, Baan Sanian, Mueang Nan, Nan 55000, Thailand), "we" in this policy. We wrote this to be read, not skimmed past. If anything is unclear, email support@moodbow.com.
+Moodbow is a private journal made by Vitor Carvalho, trading as BurrowSoft (297 Moo 1, Baan Sanian, Mueang Nan, Nan 55000, Thailand), "we" in this policy. We wrote this to be read, not skimmed past. If anything is unclear, email support@moodbow.com.
 
 ### The short version
-- Only you can read your journal. BurrowSoft staff don't read journals; direct database access is limited to maintenance by Vitor Ribeiro Carvalho. We don't sell your data, show ads, or use your journal to train AI.
+- Your journal is private to your account. BurrowSoft staff don't read journals; direct database access is limited to maintenance by Vitor Carvalho. We don't sell your data, show ads, or use your journal to train AI.
 {pending:ai_live}- AI features are optional. If you turn them on, the parts of your journal needed for a reflection or report are sent to our AI provider, Anthropic, in the USA.{/pending}
-- You can export everything, or delete your account and everything in it, at any time, from the app{pending:web_journal_live} or the website{/pending}.
+- You can export everything, or delete your account and everything in it, from the app{pending:web_journal_live} or the website{/pending}.
 
 ### 1. What we collect
-**Your account:** your email address, your password (stored only as a secure hash), and when you agreed to our Terms and this policy, and confirmed you're 18 or older.
+**Your account:** your email address, your password (stored only as a secure hash), and when you agreed to our Terms and this policy{pending:consent_language_live}, and in which language{/pending}, and confirmed you're 18 or older.
 **When you last connected:** the time your account last connected to our servers. We use it to keep you signed in and, for accounts without an email, to apply the 12-month rule below.
-{pending:anon_start_live}**Using Moodbow without an email:** you can start without giving us an email. We create an account for your phone that only it can use, and store your journal there like any other account. If you add an email later, your journal stays the same account. If you never add an email and don't open the app while connected to the internet for 12 months, we delete that account and its journal.{/pending}
+{pending:anon_start_live}**Using Moodbow without an email:** you can start without giving us an email. We create an account for your phone that only it can use, and store your journal there like any other account. If you add an email later, your journal stays the same account. If you never add an email and don't open the app while connected to the internet for 12 months, we delete that account and its journal. This can happen sooner if you sign out, because we can then no longer tell when you last opened the app.
+
+**Without an email, only this phone's sign-in can open your journal.** If that sign-in is lost, for example because you delete the app, clear its data, restore or change your phone, or because of a technical fault, you can't get back in, and we can't return your journal or delete it on request, because we have no way to confirm it's yours. It stays on our servers until the 12-month rule deletes it. Adding an email protects you against this, and Export gives you your own copy.{/pending}
 **Your journal:** the entries you write, your daily check-ins (mood, sleep, movement (active minutes), stress), the dates they belong to, and which entries you mark as moments.
+**Sensitive data:** what you write and log can include sensitive data, such as your health, your mood or your private life. We process it only with the consent you give when you create your account.
 **Your settings:** language, country, time zone, reminder time, and your AI choices (on or off, tone, focus areas).
 **AI content (only if AI is on):** the reflections and reports the AI writes for you{pending:ai_memory}, and the short facts Moodbow remembers about you, which you can see, edit and delete in Me → What Moodbow remembers{/pending}.
 **AI usage:** for each AI request, the feature, the model, the number of tokens, the cost and the credits used. Not the text of your entries or of the AI's answer.
@@ -31,7 +34,8 @@ Moodbow is a private journal made by Vitor Ribeiro Carvalho, trading as BurrowSo
 
 **What stays only on your device:** unsent drafts{pending:app_app_lock}, your app-lock PIN{/pending}{pending:app_share_cards}, and the share cards you create. Share cards are made on your device and only leave it if you share them yourself{/pending}.
 
-**Technical logs:** like almost every online service, our hosting providers record IP addresses and device or browser information when you connect, for security and to fix problems. They keep these logs for a limited time (see §4). We also keep daily totals of AI use (how many reflections were made that day and what they cost us), with no link to any person, so we can keep costs under control.
+**Technical logs:** like almost every online service, our hosting providers record IP addresses, the page requested, and device or browser information when you connect, for security and to fix problems. They keep these logs for a limited time (see §4). We also keep daily totals of AI use (how many reflections were made that day and what they cost us), with no link to any person, so we can keep costs under control.
+
 **Emails you send us:** if you write to support@moodbow.com, we keep the conversation so we can answer you, and delete it when it's no longer needed.
 
 We don't collect your name, contacts, precise location, or advertising identifiers, and we don't use advertising trackers.
@@ -39,6 +43,8 @@ We don't collect your name, contacts, precise location, or advertising identifie
 To show helplines near you when we don't know your country, we use the country your connection comes from, at that moment only; it isn't stored.
 
 {pending:web_analytics}**Visit counts (public website only):** we count visits to our public pages with a cookie-free tool from our host, Vercel: which page was opened, from what kind of device and country, and which of our campaign links brought you there, if any. It uses no cookies or identifiers, never runs in the web journal, never sees what you write, and can't tell who you are. The mobile app sends no analytics.{/pending}
+
+{pending:play_live}**Campaign links to Google Play:** if you came from one of our campaign links and follow our link to Google Play, the link tells Google Play which campaign it was, and Google sees that with your install. We only see totals for each campaign, never who.{/pending}
 
 ### 2. Why we use it, and on what legal basis
 | Purpose | Legal basis |
@@ -65,7 +71,7 @@ When data goes outside your country (for example from the EU to the USA), we rel
 We never sell your data, and we never share it with advertisers.
 
 ### 4. How long we keep it
-- Everything is kept until you delete it or delete your account.
+- Everything is kept until you delete it or delete your account, except as this policy says.
 - **Deleting your account** removes your journal, check-ins, AI content, settings, credits history and login from our live database immediately.
 - Copies in our encrypted backups disappear automatically within {pending:backup_retention}8{/pending} days.
 - Error and crash reports are kept by our error-tracking provider for up to 90 days.
@@ -76,13 +82,17 @@ We never sell your data, and we never share it with advertisers.
 Wherever you live, you can:
 - **see and download** everything: Me → Export my data;
 - **correct** it: edit any entry, check-in or setting;
-- **delete** it: delete any item, or your whole account in Me → Delete account;
+- **delete** it: delete any item, or your whole account in Me → Delete account{pending:anon_start_live} (without an email, this needs access to the app on your phone){/pending};
 {pending:ai_live}- **withdraw your AI consent** at any time in Me → AI. This stops new AI requests; past reflections stay until you delete them;{/pending}
-- **object or ask questions**: email support@moodbow.com. We answer within 30 days.
-You can also complain to a data-protection authority: in Thailand, the Personal Data Protection Committee (PDPC); in the EU or UK, your local authority.
+- **limit how we use it:** we use your journal only to run the service. You choose what you write, and you can edit or delete any of it. To limit anything else, write to us;
+- **object or ask questions**: email support@moodbow.com. We answer within 10 days.
+
+**How to make a request:** most of this is in Me, with no need to ask. Otherwise, email support@moodbow.com and say what you'd like done. Vitor Carvalho handles requests. We may ask you to write from your account's email so we know it's yours. Without an email on the account we can't confirm that, so use Me in the app.
+
+You can also complain to a data-protection authority: in Thailand, the Personal Data Protection Committee (PDPC); in Mexico, the Secretaría Anticorrupción y Buen Gobierno; in Argentina, the Agencia de Acceso a la Información Pública (AAIP); in Chile, the Agencia de Protección de Datos Personales, once it has begun work; in the EU or UK, your local authority; elsewhere, your country's authority.
 
 ### 6. Security
-Your data is encrypted in transit (HTTPS) and at rest. Database rules make sure each account can only ever read its own rows. {pending:app_lock}You can add an app lock (PIN or fingerprint/face) on your phone.{/pending} No system is perfectly secure; if a breach ever affects your data, we'll tell you and the authorities as the law requires.
+Your data is encrypted in transit (HTTPS) and at rest. Database rules make sure each account can only ever read its own rows. {pending:app_app_lock}You can add an app lock (PIN or fingerprint/face) on your phone.{/pending} No system is perfectly secure; if a breach ever affects your data, we'll tell you and the authorities as the law requires{pending:security_notice_live}: by email if your account has one, and in the app and on moodbow.com otherwise{/pending}.
 
 ### 7. Age
 Moodbow is for people aged 18 and older. We don't knowingly collect data from anyone younger. If you believe a child has an account, email us and we'll delete it.
@@ -91,6 +101,6 @@ Moodbow is for people aged 18 and older. We don't knowingly collect data from an
 If we change this policy in a way that matters, we'll update the date at the top and tell you in the app before the change applies.
 
 ### 9. Contact
-Vitor Ribeiro Carvalho, trading as BurrowSoft, 297 Moo 1, Baan Sanian, Mueang Nan, Nan 55000, Thailand · support@moodbow.com
+Vitor Carvalho, trading as BurrowSoft, 297 Moo 1, Baan Sanian, Mueang Nan, Nan 55000, Thailand · support@moodbow.com
 
 ---

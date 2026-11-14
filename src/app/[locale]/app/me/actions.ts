@@ -5,7 +5,7 @@ import { getLocale } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
 import { deleteWordTyped, localDay } from "@/lib/journal/account";
 import { isFocusArea, isTone } from "@/lib/journal/ai";
-import { consentItem } from "@/lib/legalVersions";
+import { consentItem, withLanguage } from "@/lib/legalVersions";
 import { isCountry, isTimeZoneName } from "@/lib/region/countries";
 import { dataLocale, offeredLocales } from "@/i18n/routing";
 import { WIPE_COOKIE, WIPE_COOKIE_OPTIONS } from "@/lib/supabase/proxy";
@@ -112,7 +112,7 @@ export async function setAiEnabled(on: boolean): Promise<AiSwitchResult> {
   if (!supabase) return { ok: false, aiEnabled: !on };
   const failed = async (message: string, result: AiSwitchResult) => ((await settingsFailed(message)), result);
   if (on) {
-    const consent = await supabase.rpc("record_consents", { p_items: [consentItem("ai", true)] });
+    const consent = await supabase.rpc("record_consents", { p_items: withLanguage([consentItem("ai", true)], dataLocale(await getLocale())) });
     if (consent.error) return failed(consent.error.message, { ok: false, aiEnabled: false });
     const setting = await supabase.rpc("update_settings", { p_ai_enabled: true });
     if (setting.error) return failed(setting.error.message, { ok: false, aiEnabled: false });
@@ -128,7 +128,7 @@ export async function setAiEnabled(on: boolean): Promise<AiSwitchResult> {
 export async function recordAiWithdrawal(): Promise<AiSwitchResult> {
   const supabase = await createSupabaseServerClient();
   if (!supabase) return { ok: false, aiEnabled: false, pending: "withdrawal" };
-  const { error } = await supabase.rpc("record_consents", { p_items: [consentItem("ai", false)] });
+  const { error } = await supabase.rpc("record_consents", { p_items: withLanguage([consentItem("ai", false)], dataLocale(await getLocale())) });
   if (error) {
     await settingsFailed(error.message);
     return { ok: false, aiEnabled: false, pending: "withdrawal" };

@@ -4,7 +4,7 @@ summary: Wer dein Tagebuch lesen kann und wie du es herunterlädst.
 topic: Privacy & account
 de-draft: true
 ---
-Nur du kannst dein Tagebuch lesen. Wir verkaufen deine Daten nicht und zeigen keine Werbung.
+Dein Tagebuch ist privat und an dein Konto gebunden. Wir verkaufen deine Daten nicht und zeigen keine Werbung.
 
 **Alles herunterladen:** Geh zu **Ich → Meine Daten exportieren**. Du bekommst eine Datei mit allem, was du geschrieben und eingetragen hast. {pending:app_export_csv}Du kannst auch **Tabelle (.csv)** wählen, um deine Tage als Tabelle zu bekommen, die sich in Excel oder Google Tabellen öffnen lässt{pending:import_live} und die Moodbow im Web wieder importieren kann{/pending}.{/pending}
 
