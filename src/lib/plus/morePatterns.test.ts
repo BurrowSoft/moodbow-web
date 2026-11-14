@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { InsightRow } from "@/lib/journal/insights";
-import { MORE_PATTERN_IDS, morePatterns, moreWindowStart } from "./morePatterns";
+import { MORE_PATTERN_IDS, morePatterns, moreWindowStart, recentStart } from "./morePatterns";
 
 const TODAY = "2026-11-11"; // a Wednesday
 const day = (date: string, mood: number, over: Partial<InsightRow> = {}): InsightRow => ({ local_date: date, mood, sleep_hours: 7, stress: 2, exercise_minutes: 20, ...over });
@@ -15,8 +15,22 @@ const fourWeeks = Array.from({ length: 28 }, (_, i) => {
 const by = (ps: ReturnType<typeof morePatterns>, id: string) => ps.find((p) => p.id === id)!;
 
 describe("morePatterns: today's rules over a longer period", () => {
-  it("the fixed order, never sorted by size", () => {
-    expect(morePatterns(fourWeeks, TODAY, "year", new Set()).map((p) => p.id)).toEqual(MORE_PATTERN_IDS);
+  it("the fixed order, never sorted by size (with check-ins older than 3 months, so all five)", () => {
+    expect(morePatterns([...fourWeeks, day("2026-06-01", 3)], TODAY, "year", new Set()).map((p) => p.id)).toEqual(MORE_PATTERN_IDS);
+  });
+  it("audit C: under 3 months of check-ins, no Sleep, Movement or Stress (they'd repeat Patterns); only weekdays and writing", () => {
+    expect(recentStart(TODAY)).toBe("2026-08-14");
+    expect(morePatterns(fourWeeks, TODAY, "year", new Set()).map((p) => p.id)).toEqual(["weekdays", "writing"]);
+    // A check-in on the range's first day is still recent; the day before it counts as older.
+    expect(morePatterns([...fourWeeks, day("2026-08-14", 3)], TODAY, "year", new Set()).map((p) => p.id)).toEqual(["weekdays", "writing"]);
+    expect(morePatterns([...fourWeeks, day("2026-08-13", 3)], TODAY, "all", new Set()).map((p) => p.id)).toEqual(MORE_PATTERN_IDS);
+    // Not enough in the period either way: only the rows it would show, each "not enough".
+    expect(morePatterns(fourWeeks.slice(0, 5), TODAY, "year", new Set())).toEqual([
+      { id: "weekdays", state: "not_enough", a: null, b: null },
+      { id: "writing", state: "not_enough", a: null, b: null },
+    ]);
+    // An older check-in outside the 12-month window doesn't count for "year".
+    expect(morePatterns([...fourWeeks, day("2025-01-01", 3)], TODAY, "year", new Set()).map((p) => p.id)).toEqual(["weekdays", "writing"]);
   });
   it("weekdays vs weekends: Saturday and Sunday are the weekend", () => {
     const p = by(morePatterns(fourWeeks, TODAY, "year", new Set()), "weekdays");

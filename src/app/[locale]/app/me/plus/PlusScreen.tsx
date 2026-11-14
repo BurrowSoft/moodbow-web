@@ -8,6 +8,7 @@ import { Link } from "@/i18n/navigation";
 import type { PlusOfferPrices } from "@/lib/plus/page";
 import type { PlusView } from "@/lib/plus/view";
 import { FESTIVE_CARD, Lights, Tree } from "../../PlusSheet";
+import { SAVE_WAIT_MS } from "@/lib/ui/withTimeout";
 
 // Free rows, then what Plus adds: "your journal is free, Insights come with Plus" (Vitor, 14 Nov;
 // specs/1.3-offer-review-voice-taps.md §2). No AI rows in any comparison: the AI allowance rules
@@ -69,7 +70,8 @@ export function PlusScreen({ view, price, offer = null, started }: { view: PlusV
     setBusy(true);
     setError(null);
     try {
-      const res = await fetch(path, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ locale }) });
+      // A dead connection ends at SAVE_WAIT_MS as the generic line, never a button busy forever (audit D).
+      const res = await fetch(path, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ locale }), signal: AbortSignal.timeout(SAVE_WAIT_MS) });
       const body = (await res.json().catch(() => ({}))) as { url?: string; code?: string };
       if (body.url) {
         window.location.assign(body.url);

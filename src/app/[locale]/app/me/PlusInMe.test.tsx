@@ -2,6 +2,7 @@ import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { NextIntlClientProvider } from "next-intl";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import messages from "@/messages/en.json";
+import { SAVE_WAIT_MS } from "@/lib/ui/withTimeout";
 import type { PlusView } from "@/lib/plus/view";
 
 vi.mock("@/i18n/navigation", () => ({
@@ -74,6 +75,20 @@ describe("PlusInMe: the trial counter and a failed renewal", () => {
     const { container } = show({ kind: "plus", source: "stripe", daysLeft: null });
     expect(container).toBeEmptyDOMElement();
   });
+  it("past_due, a dead connection: Update card gives up at SAVE_WAIT_MS with the error line and works again (audit D)", async () => {
+    const timeout = vi.spyOn(AbortSignal, "timeout");
+    const fetchMock = vi.fn(async () => Promise.reject(new DOMException("The operation timed out.", "TimeoutError")));
+    vi.stubGlobal("fetch", fetchMock);
+    show({ kind: "past_due" });
+    await act(async () => fireEvent.click(screen.getByTestId("me-plus-update-card")));
+    expect(fetchMock).toHaveBeenCalledWith("/api/billing/portal", expect.objectContaining({ signal: expect.any(AbortSignal) }));
+    expect(timeout).toHaveBeenCalledWith(SAVE_WAIT_MS);
+    expect(screen.getByRole("alert")).toBeInTheDocument();
+    expect(screen.getByTestId("me-plus-update-card")).not.toBeDisabled();
+    timeout.mockRestore();
+    vi.unstubAllGlobals();
+  });
+
   it("past_due: the state line and Update card, no offer", () => {
     show({ kind: "past_due" });
     expect(screen.getByTestId("me-plus-past-due")).toHaveTextContent(m.pastDue);
