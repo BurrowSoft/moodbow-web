@@ -620,11 +620,6 @@
     "reason": "UX draft (native read pending)"
   },
   {
-    "key": "me.deleteCredits",
-    "en": "You'll also lose your {credits, plural, one {# AI credit} other {# AI credits}}.",
-    "reason": "UX draft (native read pending)"
-  },
-  {
     "key": "me.exportReadable",
     "en": "Readable copy (.txt)",
     "reason": "UX draft (native read pending)"
@@ -797,11 +792,6 @@
   {
     "key": "share.milestoneNotNow",
     "en": "Not now",
-    "reason": "UX draft (native read pending)"
-  },
-  {
-    "key": "ai.creditsBalance",
-    "en": "{credits, plural, one {# credit} other {# credits}}",
     "reason": "UX draft (native read pending)"
   },
   {
