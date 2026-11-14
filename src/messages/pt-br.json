@@ -384,7 +384,11 @@
     "importStopped": "A importação parou no meio. Tudo até ali foi salvo; importe o mesmo arquivo de novo para terminar.",
     "pastReports": "Seus relatórios anteriores",
     "pastReportsIntro": "Os relatórios semanais que o Moodbow fez para você. Eles ficam aqui para você ler.",
-    "pastReportsWeek": "{start} – {end}"
+    "pastReportsWeek": "{start} – {end}",
+    "pictureRegion": "Sua imagem",
+    "pictureChoose": "Escolher uma imagem para este espaço",
+    "pictureRemove": "Remover imagem",
+    "pictureFailed": "Não foi possível usar essa imagem. Tente outra."
   },
   "export": {
     "exportTitle": "Moodbow: seu diário",

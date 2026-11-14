@@ -384,7 +384,11 @@
     "importStopped": "The import stopped partway. Everything up to that point is saved; import the same file again to finish.",
     "pastReports": "Your past reports",
     "pastReportsIntro": "The weekly reports Moodbow made for you. They stay here to read.",
-    "pastReportsWeek": "{start} – {end}"
+    "pastReportsWeek": "{start} – {end}",
+    "pictureRegion": "Your picture",
+    "pictureChoose": "Choose a picture for this space",
+    "pictureRemove": "Remove picture",
+    "pictureFailed": "That picture couldn't be used. Try another one."
   },
   "export": {
     "exportTitle": "Moodbow: your journal",
