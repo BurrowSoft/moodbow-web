@@ -9,9 +9,10 @@ import type { PlusView } from "@/lib/plus/view";
 
 // Free rows, then what Plus adds: "your journal is free, insights are Plus" (Vitor, 14 Nov;
 // specs/1.3-offer-review-voice-taps.md §2). No AI rows in any comparison: the AI allowance rules
-// stay in the code, unadvertised. Nothing free today gets a lock (wording only).
+// stay in the code, unadvertised. Nothing free today gets a lock (wording only). rowExtras: one row
+// for the prompt library, the other ways to breathe and more reminders (UX, 14 Nov), never one each.
 const FREE_ROWS = ["rowJournal", "rowHelp", "rowRanges", "rowAppointment", "rowData"] as const;
-const PLUS_ROWS = ["rowYear", "rowMorePatterns", "rowReview", "rowLetters", "rowPdf", "rowThemes"] as const;
+const PLUS_ROWS = ["rowYear", "rowMorePatterns", "rowReview", "rowLetters", "rowExtras", "rowPdf", "rowThemes"] as const;
 
 function Tick({ label, plus }: { label: string; plus?: boolean }) {
   return (

@@ -1568,5 +1568,10 @@
     "key": "plus.rowLetters",
     "en": "Letters to future you",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.rowExtras",
+    "en": "More prompts, breathing exercises and reminders",
+    "reason": "UX draft (native read pending)"
   }
 ]
