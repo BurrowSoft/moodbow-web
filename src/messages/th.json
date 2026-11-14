@@ -715,6 +715,20 @@
     "lockedBody": "การเขียนจดหมายฉบับใหม่เป็นส่วนหนึ่งของ Moodbow Plus จดหมายที่คุณเขียนไว้แล้วยังเป็นของคุณ จะเปิดในวันที่กำหนด และคุณเปิดหรือลบได้ทุกเมื่อ",
     "lapsedBody": "Moodbow Plus ของคุณสิ้นสุดแล้ว จึงบันทึกจดหมายนี้ไม่ได้ คัดลอกไว้เพื่อเก็บถ้อยคำของคุณ",
     "copy": "คัดลอกจดหมาย",
-    "copied": "คัดลอกแล้ว"
+    "copied": "คัดลอกแล้ว",
+    "remindersTitle": "การแจ้งเตือน",
+    "remindersOnTheDay": "ในวันที่เปิด",
+    "remindersDay": "1 วันก่อน",
+    "remindersWeek": "1 สัปดาห์ก่อน",
+    "remindersTwoWeeks": "2 สัปดาห์ก่อน",
+    "remindersMonth": "1 เดือนก่อน",
+    "remindersDays": "{n} วันก่อน",
+    "remindersDaysBefore": "จำนวนวันก่อน",
+    "remindersTimeFor": "เวลา {when}",
+    "remindersOnFor": "แจ้งเตือน {when}",
+    "remindersRemove": "ลบการแจ้งเตือน {when}",
+    "remindersAdd": "เพิ่มการแจ้งเตือน",
+    "remindersApp": "การแจ้งเตือนจะมาในแอป Moodbow บนโทรศัพท์ของคุณ",
+    "remindersInvalid": "การแจ้งเตือนต้องไม่ใช่วันนี้หรือก่อนหน้า และไม่หลังวันที่จดหมายเปิด"
   }
 }

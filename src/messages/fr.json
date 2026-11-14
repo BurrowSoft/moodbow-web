@@ -715,6 +715,20 @@
     "lockedBody": "Écrire une nouvelle lettre fait partie de Moodbow Plus. Les lettres déjà écrites restent à vous : elles s'ouvrent le jour prévu, et vous pouvez les ouvrir ou les supprimer à tout moment.",
     "lapsedBody": "Votre Moodbow Plus a pris fin, cette lettre ne peut donc pas être enregistrée. Copiez-la pour garder vos mots.",
     "copy": "Copier la lettre",
-    "copied": "Copiée"
+    "copied": "Copiée",
+    "remindersTitle": "Rappels",
+    "remindersOnTheDay": "Le jour même",
+    "remindersDay": "1 jour avant",
+    "remindersWeek": "1 semaine avant",
+    "remindersTwoWeeks": "2 semaines avant",
+    "remindersMonth": "1 mois avant",
+    "remindersDays": "{n} jours avant",
+    "remindersDaysBefore": "Jours avant",
+    "remindersTimeFor": "Heure, {when}",
+    "remindersOnFor": "Rappel {when}",
+    "remindersRemove": "Supprimer le rappel {when}",
+    "remindersAdd": "Ajouter un rappel",
+    "remindersApp": "Les rappels arrivent dans l'app Moodbow sur votre téléphone.",
+    "remindersInvalid": "Un rappel ne peut pas tomber aujourd'hui ou avant, ni après le jour où la lettre s'ouvre."
   }
 }

@@ -5,6 +5,8 @@ import { useTranslations } from "next-intl";
 import { Dialog, dialogButton } from "@/components/Dialog";
 import { GetHelpNow, SafetyCard } from "@/components/SafetyCard";
 import { LETTER_RULES, type Letter, type LetterMonths } from "@/lib/journal/letters";
+import { DEFAULT_REMINDERS, opensOn, remindersValid, type LetterReminder } from "@/lib/journal/letterReminders";
+import { LetterReminders } from "./LetterReminders";
 import { dateLine } from "@/lib/journal/today";
 import { flagsCrisis } from "@/lib/safety/crisis";
 import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
@@ -46,6 +48,9 @@ export function LettersEditor({
   const [letters, setLetters] = useState(initial);
   const [body, setBody] = useState("");
   const [months, setMonths] = useState<LetterMonths>(1);
+  // Reminders (033): the opening day at 09:00 by default, and up to 3 heads-ups.
+  const [reminders, setReminders] = useState<LetterReminder[]>(DEFAULT_REMINDERS);
+  const [badReminders, setBadReminders] = useState(false);
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
   const [saved, setSaved] = useState<string | null>(null);
@@ -64,8 +69,16 @@ export function LettersEditor({
     if (busy || body.trim() === "") return;
     // Before any request, as entries: the card needs no network (#190).
     if (flagsCrisis(body, CRISIS_KEYWORDS)) setCard(true);
+    // A shorter "Open it" can leave a heads-up on or before today: say so, never send it.
+    if (!remindersValid(reminders, today, opensOn(today, months))) return setBadReminders(true);
+    setBadReminders(false);
     const before = new Set(letters.map((l) => l.id));
-    const result: LetterResult | null = await run(saveLetter(body, months));
+    // Only reminders that differ from the default travel (p_reminders): a database without 033 has
+    // no such argument, and the default is what it does anyway (the Reviewer, #319).
+    const custom = JSON.stringify(reminders) !== JSON.stringify(DEFAULT_REMINDERS);
+    const result: LetterResult | null = await run(custom ? saveLetter(body, months, reminders) : saveLetter(body, months));
+    // The server's own check (its today can differ from the page's near midnight): the same line.
+    if (result?.status === "invalid_reminders") return setBadReminders(true);
     // Plus ended and its one save is used: keep the text on screen to copy.
     if (result?.status === "plus_required") return setLapsed(true);
     if (result?.status !== "ok") return setFailed(true);
@@ -73,6 +86,7 @@ export function LettersEditor({
     const made = result.letters.find((l) => !before.has(l.id));
     setSaved(made ? made.opensOn : null);
     setBody("");
+    setReminders(DEFAULT_REMINDERS);
   };
   const open = async (letter: Letter) => {
     const result = await run(openLetter(letter.id));
@@ -128,7 +142,10 @@ export function LettersEditor({
             {t("empty")}
           </p>
         )}
+        {/* noValidate: a heads-up a shorter "Open it" no longer fits is over its field's max; the
+            editor's own line says so, not the browser's bubble (and Save isn't silently blocked). */}
         <form
+          noValidate
           className="mt-3 flex flex-col gap-3"
           onSubmit={(e) => {
             e.preventDefault();
@@ -152,11 +169,18 @@ export function LettersEditor({
             <legend className="mb-1 font-medium text-text">{t("openLabel")}</legend>
             {(LETTER_RULES.monthChoices as LetterMonths[]).map((m) => (
               <label key={m} className="flex min-h-11 items-center gap-2 text-text">
-                <input type="radio" name="letter-months" value={m} checked={months === m} onChange={() => setMonths(m)} data-testid={`letter-months-${m}`} />
+                {/* At least 24 px (audit D polish); the whole label still picks it. */}
+                <input type="radio" name="letter-months" value={m} checked={months === m} onChange={() => setMonths(m)} data-testid={`letter-months-${m}`} className="h-6 w-6 shrink-0 accent-accent" />
                 {t(MONTHS_KEY[m])}
               </label>
             ))}
           </fieldset>
+          <LetterReminders value={reminders} onChange={(next) => { setReminders(next); setBadReminders(false); }} today={today} opens={opensOn(today, months)} />
+          {badReminders && (
+            <p role="alert" data-testid="letter-reminders-invalid" className="text-sm text-text">
+              {t("remindersInvalid")}
+            </p>
+          )}
           <div className="flex flex-wrap items-center gap-3">
             <button type="submit" data-testid="letter-save" disabled={busy || body.trim() === ""} className={dialogButton(true)}>
               {t("save")}

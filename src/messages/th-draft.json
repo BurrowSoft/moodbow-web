@@ -1698,5 +1698,75 @@
     "key": "plus.sheetLetters",
     "en": "Letters to future me are part of Plus",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.remindersTitle",
+    "en": "Reminders",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.remindersOnTheDay",
+    "en": "On the day",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.remindersDay",
+    "en": "1 day before",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.remindersWeek",
+    "en": "1 week before",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.remindersMonth",
+    "en": "1 month before",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.remindersDays",
+    "en": "{n} days before",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.remindersDaysBefore",
+    "en": "Days before",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.remindersTimeFor",
+    "en": "Time, {when}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.remindersOnFor",
+    "en": "Reminder {when}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.remindersRemove",
+    "en": "Remove the reminder {when}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.remindersAdd",
+    "en": "Add a reminder",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.remindersApp",
+    "en": "Reminders arrive in the Moodbow app on your phone.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.remindersInvalid",
+    "en": "A reminder can't be on or before today, or after the day the letter opens.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.remindersTwoWeeks",
+    "en": "2 weeks before",
+    "reason": "UX draft (native read pending)"
   }
 ]

@@ -715,6 +715,20 @@
     "lockedBody": "Escrever uma nova carta faz parte do Moodbow Plus. As cartas que você já escreveu continuam suas: elas abrem no dia certo, e você pode abri-las ou apagá-las quando quiser.",
     "lapsedBody": "Seu Moodbow Plus terminou, então esta carta não pode ser salva. Copie-a para guardar suas palavras.",
     "copy": "Copiar a carta",
-    "copied": "Copiada"
+    "copied": "Copiada",
+    "remindersTitle": "Lembretes",
+    "remindersOnTheDay": "No dia",
+    "remindersDay": "1 dia antes",
+    "remindersWeek": "1 semana antes",
+    "remindersTwoWeeks": "2 semanas antes",
+    "remindersMonth": "1 mês antes",
+    "remindersDays": "{n} dias antes",
+    "remindersDaysBefore": "Dias antes",
+    "remindersTimeFor": "Horário, {when}",
+    "remindersOnFor": "Lembrete {when}",
+    "remindersRemove": "Remover o lembrete {when}",
+    "remindersAdd": "Adicionar um lembrete",
+    "remindersApp": "Os lembretes chegam no app Moodbow do seu celular.",
+    "remindersInvalid": "Um lembrete não pode ser hoje ou antes, nem depois do dia em que a carta abre."
   }
 }

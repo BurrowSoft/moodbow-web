@@ -1,6 +1,8 @@
 "use server";
 
 import { forClient, isLetterMonths, LETTER_RULES, parseLetterRows, type Letter, type LetterMonths } from "@/lib/journal/letters";
+import { opensOn, remindersValid, type LetterReminder } from "@/lib/journal/letterReminders";
+import { getMe } from "@/lib/journal/me";
 import { ENTITLEMENT_COLUMNS, parseEntitlement } from "@/lib/plus/entitlements";
 import { letterWrite, lettersGate } from "@/lib/plus/letters";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -9,7 +11,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 // back is the client's view: a locked letter's text never leaves the server.
 // Part of Moodbow Plus (1.3 §3): only saving a new letter checks Plus, here on the server.
 // Open, Not now, delete and the list never do: someone's own words are never held back.
-export type LetterResult = { status: "ok"; letters: Letter[] } | { status: "error" } | { status: "plus_required" };
+export type LetterResult = { status: "ok"; letters: Letter[] } | { status: "error" } | { status: "plus_required" } | { status: "invalid_reminders" };
 export type OpenResult = { status: "ok"; body: string } | { status: "error" };
 
 async function client() {
@@ -41,16 +43,37 @@ async function list(supabase: Client): Promise<LetterResult> {
   return error ? { status: "error" } : { status: "ok", letters: parseLetterRows(data).map(forClient) };
 }
 
-export async function saveLetter(body: string, months: LetterMonths): Promise<LetterResult> {
+// reminders (033): the letter's reminders, or undefined for the database's default (the opening day
+// at 09:00, on). Here their shape, then the editor's own rule against the person's today (the server's
+// check, UX #319: a client calling this directly can't pass 4 heads-ups); the database checks too.
+const isReminders = (v: unknown): v is LetterReminder[] =>
+  Array.isArray(v) && v.length <= 4 && v.every((r) => r && typeof r === "object" && Number.isInteger(r.days_before) && typeof r.time === "string" && typeof r.on === "boolean");
+
+export async function saveLetter(body: string, months: LetterMonths, reminders?: LetterReminder[]): Promise<LetterResult> {
   if (typeof body !== "string" || body.trim() === "" || [...body].length > LETTER_RULES.maxChars || !isLetterMonths(months)) return { status: "error" };
+  if (reminders !== undefined && !isReminders(reminders)) return { status: "error" };
   const supabase = await client();
   if (!supabase) return { status: "error" };
   const may = await mayWrite(supabase);
   if (may === null) return { status: "error" };
   if (!may) return { status: "plus_required" };
-  const { error } = await supabase.rpc("letter_save", { p_body: body, p_months: months });
+  if (reminders) {
+    const me = await getMe(supabase);
+    if (!me) return { status: "error" };
+    if (!remindersValid(reminders, me.today, opensOn(me.today, months))) return { status: "invalid_reminders" };
+  }
+  const { error } = await supabase.rpc("letter_save", {
+    p_body: body,
+    p_months: months,
+    ...(reminders ? { p_reminders: reminders.map(({ days_before, time, on }) => ({ days_before, time, on })) } : {}),
+  });
   // The database's own check (032: RAISE 'plus_required') says the same as the one above.
-  if (error) return error.message?.includes("plus_required") ? { status: "plus_required" } : { status: "error" };
+  if (error) {
+    if (error.message?.includes("plus_required")) return { status: "plus_required" };
+    // 033's check refused the reminders (invalid_value): say so, as the editor does.
+    if (reminders && error.message?.includes("invalid_value")) return { status: "invalid_reminders" };
+    return { status: "error" };
+  }
   return list(supabase);
 }
 

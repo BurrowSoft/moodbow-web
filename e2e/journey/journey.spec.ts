@@ -2157,3 +2157,71 @@ test("axe: Moodbow Plus, its screen and sheet, at 320 and 1280 px", async ({ pag
     await cleanup(email);
   }
 });
+
+// Letter reminders at 390 px and at 320 px with text at 300 %, en and de (the Web Tester, audit D):
+// no reminder label squeezed or clipped ("Am Tag selbst" was), the time, switch and × never on top
+// of it, nothing sideways.
+test("letter reminders: labels whole at 390 and 320 px / 300 %, en and de, controls never over them", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
+  test.setTimeout(180_000);
+  expect(await plusOnStaging(), "staging has 028's entitlements").toBe(true);
+  const email = newEmail();
+  const password = newPassword();
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    // As #319's letters axe test: this base (before #314) lands a new account on Setup.
+    await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    await grantPlusTrial(email);
+    const cdp = await page.context().newCDPSession(page);
+    const check = () =>
+      page.evaluate(() => {
+        const labels = [...document.querySelectorAll('[data-testid="letter-reminder-label"] > span[aria-hidden="true"], [data-testid="letter-reminder-day-label"]')] as HTMLElement[];
+        const clipped = labels.filter((el) => el.scrollWidth > el.clientWidth + 1 || el.getBoundingClientRect().width < 40).map((el) => `${el.textContent} ${el.scrollWidth}/${el.clientWidth}`);
+        // Each row's controls start below its label or to its right, never over it.
+        const overlaps = [...document.querySelectorAll('[data-testid="letter-reminder"], [data-testid="letter-reminder-day"]')].filter((row) => {
+          const label = (row.querySelector('[data-testid="letter-reminder-label"], [data-testid="letter-reminder-day-label"]') as HTMLElement).getBoundingClientRect();
+          const time = (row.querySelector('input[type="time"]') as HTMLElement).getBoundingClientRect();
+          const apart = time.left >= label.right - 0.5 || time.top >= label.bottom - 0.5;
+          return !apart;
+        }).length;
+        // What sticks out past the right edge, named, so a failure says which part.
+        const sticksOut = [...document.querySelectorAll("main *")]
+          .filter((e) => e.getBoundingClientRect().right > window.innerWidth + 0.5 && e.getBoundingClientRect().width > 1 && !e.classList.contains("sr-only"))
+          .slice(0, 4)
+          .map((e) => `${e.tagName.toLowerCase()}${e.getAttribute("data-testid") ? `[${e.getAttribute("data-testid")}]` : ""} ${Math.round(e.getBoundingClientRect().right)}`);
+        return { clipped, overlaps, sticksOut, overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth };
+      });
+    for (const [route, saved] of [["", "en"], ["/de", "de"]] as const) {
+      await setProfileLocale(email, password, saved);
+      for (const [width, percent] of [[390, 100], [320, 300]] as const) {
+        await page.setViewportSize({ width, height: 800 });
+        await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
+        await page.goto(`${route}/app/me/letters`);
+        await expect(page.getByTestId("letter-reminders")).toBeVisible({ timeout: 15_000 });
+        // One heads-up too, so a chosen day's label is checked as well.
+        await page.getByTestId("letter-reminder-add").click();
+        await expect(page.getByTestId("letter-reminder")).toHaveCount(1);
+        const where = `${saved} at ${width} px / ${percent} %`;
+        const result = await check();
+        console.log(`letter reminders ${where}: ${JSON.stringify(result)}`);
+        expect(result, `${where}: labels whole, controls apart, nothing sideways`).toEqual({ clipped: [], overlaps: 0, sticksOut: [], overflow: 0 });
+      }
+    }
+    // The transparent select keeps a visible ring (UX): Tab back onto it from its time field.
+    await page.getByTestId("letter-reminder-time").first().focus();
+    await page.keyboard.press("Shift+Tab");
+    await expect(page.getByTestId("letter-reminder-days").first()).toBeFocused();
+    const ring = await page.getByTestId("letter-reminder-label").first().evaluate((el) => getComputedStyle(el).outlineStyle);
+    expect(ring, "the label shows the ring while its select has keyboard focus").toBe("solid");
+    await cdp.send("Page.setFontSizes", { fontSizes: { standard: 16, fixed: 13 } });
+  } finally {
+    await cleanup(email);
+  }
+});
