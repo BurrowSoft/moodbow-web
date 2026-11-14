@@ -270,3 +270,17 @@ describe("Help → Want to talk to someone?: Today's lifebuoy", () => {
     expect(isPendingMet("app_today_help")).toBe(false);
   });
 });
+
+// 1.3.0 ships with Plus off (decision 255): no help text may name Plus while plus is unmet, even with
+// every free feature on. The Plus features' own conditions stay off with it.
+describe("Help with Plus off: no article names Plus", () => {
+  const PLUS_ONLY = new Set(["plus", "offer_live", "letters_live", "app_letters", "pictures_live", "app_pictures", "lifts_live", "app_icons"]);
+  it.each(ALL_LOCALES)("%s", (language) => {
+    for (const a of helpArticles(language)) {
+      const text = renderArticle(a, (id) => !PLUS_ONLY.has(id));
+      if (text.trim() === "") continue; // an article with nothing left is a 404
+      // French "Plus de…" / "Plus d'…" means "more", not the product.
+      expect(text, `${language}/${a.slug}`).not.toMatch(/\bPlus\b(?! de\b| d['’])/);
+    }
+  });
+});

@@ -12,4 +12,4 @@ It says one or two short things:
 
 If most of your days were low, or half of them were and none were good, the card says only **"This looked like a hard week."**, with **Want to talk to someone?**{pending:safety_plan_live}, and **My safety plan** if your plan has something in it{/pending}. Nothing about it is recorded.
 
-Your week is for everyone, Plus or not. It isn't advice or a diagnosis.{/pending}
+Your week is for everyone{pending:plus}, Plus or not{/pending}. It isn't advice or a diagnosis.{/pending}

@@ -13,4 +13,4 @@ Sie sagt ein oder zwei kurze Dinge:
 
 Wenn die meisten deiner Tage schlecht waren, oder die Hälfte und keiner gut, sagt die Karte nur **„Das sah nach einer schweren Woche aus.“**, mit **Möchtest du mit jemandem reden?**{pending:safety_plan_live}, und **Mein Sicherheitsplan**, wenn in deinem Plan etwas steht{/pending}. Nichts davon wird gespeichert.
 
-Deine Woche ist für alle da, mit oder ohne Plus. Sie ist kein Rat und keine Diagnose.{/pending}
+Deine Woche ist für alle da{pending:plus}, mit oder ohne Plus{/pending}. Sie ist kein Rat und keine Diagnose.{/pending}

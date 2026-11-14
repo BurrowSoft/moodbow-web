@@ -13,4 +13,4 @@ Ela diz uma ou duas coisas curtas:
 
 Se a maioria dos seus dias foi para baixo, ou metade foi e nenhum foi bom, o card diz só **"Esta semana pareceu difícil."**, com **Quer conversar com alguém?**{pending:safety_plan_live}, e **Meu plano de segurança** se o seu plano tiver algo{/pending}. Nada disso fica registrado.
 
-Sua semana é para todo mundo, com ou sem Plus. Não é um conselho nem um diagnóstico.{/pending}
+Sua semana é para todo mundo{pending:plus}, com ou sem Plus{/pending}. Não é um conselho nem um diagnóstico.{/pending}

@@ -13,4 +13,4 @@ Dice una o dos cosas breves:
 
 Si la mayoría de tus días fueron bajos, o la mitad y ninguno fue bueno, la tarjeta solo dice **«Esta semana pareció difícil.»**, con **¿Quieres hablar con alguien?**{pending:safety_plan_live}, y **Mi plan de seguridad** si tu plan tiene algo{/pending}. No se guarda nada de esto.
 
-Tu semana es para todos, con Plus o sin él. No es un consejo ni un diagnóstico.{/pending}
+Tu semana es para todos{pending:plus}, con Plus o sin él{/pending}. No es un consejo ni un diagnóstico.{/pending}
