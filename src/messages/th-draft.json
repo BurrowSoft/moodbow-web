@@ -1573,5 +1573,10 @@
     "key": "plus.cancelWhere",
     "en": "Cancel anytime in Me → Moodbow Plus.",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.rowTimeline",
+    "en": "Timeline: list, calendar, moments and search",
+    "reason": "UX draft (native read pending)"
   }
 ]

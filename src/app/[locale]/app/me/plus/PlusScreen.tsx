@@ -11,7 +11,7 @@ import type { PlusView } from "@/lib/plus/view";
 // specs/1.3-offer-review-voice-taps.md §2). No AI rows in any comparison: the AI allowance rules
 // stay in the code, unadvertised. Nothing free today gets a lock (wording only). rowExtras: one row
 // for the prompt library, the other ways to breathe and more reminders (UX, 14 Nov), never one each.
-const FREE_ROWS = ["rowJournal", "rowHelp", "rowAppointment", "rowData"] as const;
+const FREE_ROWS = ["rowJournal", "rowTimeline", "rowHelp", "rowAppointment", "rowData"] as const;
 const PLUS_ROWS = ["rowInsights", "rowMorePatterns", "rowReview", "rowLetters", "rowExtras", "rowPdf", "rowThemes"] as const;
 
 function Tick({ label, plus }: { label: string; plus?: boolean }) {
