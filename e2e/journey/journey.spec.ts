@@ -2080,6 +2080,18 @@ test("help everywhere: writing, Three good things, a day and the Timeline each h
   const email = newEmail();
   try {
     const password = await accountAtSetup(page, email);
+    // Setup first where this base still asks for it (before #314's fewer taps): the journal's
+    // pages send a new account there until it's done.
+    await page.goto("/setup");
+    const atSetup = await page
+      .getByTestId("setup-done")
+      .waitFor({ state: "visible", timeout: 5_000 })
+      .then(() => true)
+      .catch(() => false);
+    if (atSetup) {
+      await page.getByTestId("setup-done").click();
+      await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    }
     const today = await journalToday(email, password);
     await page.setViewportSize({ width: 320, height: 640 });
     const cdp = await page.context().newCDPSession(page);
