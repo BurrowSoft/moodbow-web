@@ -1051,7 +1051,7 @@
   },
   {
     "key": "plus.bannerBody",
-    "en": "Your year, more patterns, themes and a designed PDF of your journal.",
+    "en": "Insights into your moods and patterns, What lifts me, letters to future me and more.",
     "reason": "UX draft (native read pending)"
   },
   {
@@ -1126,7 +1126,7 @@
   },
   {
     "key": "plus.lead",
-    "en": "Your journal is free. Plus adds deeper insights.",
+    "en": "Your journal is free. Insights come with Plus.",
     "reason": "UX draft (native read pending)"
   },
   {
@@ -1170,23 +1170,13 @@
     "reason": "UX draft (native read pending)"
   },
   {
-    "key": "plus.rowRanges",
-    "en": "Week, month and 3-month view",
-    "reason": "UX draft (native read pending)"
-  },
-  {
     "key": "plus.rowData",
     "en": "Export, import and delete",
     "reason": "UX draft (native read pending)"
   },
   {
-    "key": "plus.rowYear",
-    "en": "Your year and all your history",
-    "reason": "UX draft (native read pending)"
-  },
-  {
     "key": "plus.rowMorePatterns",
-    "en": "Deeper patterns and What lifts me",
+    "en": "Patterns and What lifts me",
     "reason": "UX draft (native read pending)"
   },
   {
@@ -1211,7 +1201,7 @@
   },
   {
     "key": "plus.renews",
-    "en": "Renews automatically. Cancel anytime in Me → Moodbow Plus.",
+    "en": "Renews automatically.",
     "reason": "UX draft (native read pending)"
   },
   {
@@ -1566,12 +1556,22 @@
   },
   {
     "key": "plus.rowLetters",
-    "en": "Letters to future you",
+    "en": "Letters to future me",
     "reason": "UX draft (native read pending)"
   },
   {
     "key": "plus.rowExtras",
     "en": "More prompts, breathing exercises and reminders",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.rowInsights",
+    "en": "Insights: week, month, 3 months, your year",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.cancelWhere",
+    "en": "Cancel anytime in Me → Moodbow Plus.",
     "reason": "UX draft (native read pending)"
   }
 ]

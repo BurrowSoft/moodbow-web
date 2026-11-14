@@ -36,6 +36,7 @@ describe("PlusScreen: the table scrolls, the footer never does", () => {
     const footer = screen.getByTestId("plus-footer");
     expect(within(footer).getByTestId("plus-price")).toHaveTextContent("7 days free, then US$59.99 a year");
     expect(footer).toHaveTextContent(m.renews);
+    expect(within(footer).getByTestId("plus-cancel")).toHaveTextContent(m.cancelWhere);
     expect(within(footer).getByTestId("plus-start")).toHaveTextContent(m.startTrial);
     expect(within(footer).getByTestId("plus-not-now")).toHaveAttribute("href", "/app/me");
     expect(footer.textContent).not.toMatch(/20\d\d|charged on|reminder/i);
@@ -51,12 +52,12 @@ describe("PlusScreen: the table scrolls, the footer never does", () => {
     expect(screen.getByText(m.lead)).toBeInTheDocument();
     const order = screen.getAllByTestId(/^plus-row-/).map((r) => r.getAttribute("data-testid"));
     expect(order).toEqual(
-      ["rowJournal", "rowHelp", "rowRanges", "rowAppointment", "rowData", "rowYear", "rowMorePatterns", "rowReview", "rowLetters", "rowExtras", "rowPdf", "rowThemes"].map((k) => `plus-row-${k}`),
+      ["rowJournal", "rowHelp", "rowAppointment", "rowData", "rowInsights", "rowMorePatterns", "rowReview", "rowLetters", "rowExtras", "rowPdf", "rowThemes"].map((k) => `plus-row-${k}`),
     );
     // The Free column's cell: free rows are Included, Plus rows are Plus only.
     const free = (row: string) => within(within(screen.getByTestId(`plus-row-${row}`)).getAllByRole("cell")[0]);
-    for (const row of ["rowJournal", "rowHelp", "rowRanges", "rowAppointment", "rowData"]) expect(free(row).getByRole("img", { name: m.included })).toBeInTheDocument();
-    for (const row of ["rowYear", "rowMorePatterns", "rowReview", "rowLetters", "rowExtras", "rowPdf", "rowThemes"]) expect(free(row).getByRole("img", { name: m.plusOnly })).toBeInTheDocument();
+    for (const row of ["rowJournal", "rowHelp", "rowAppointment", "rowData"]) expect(free(row).getByRole("img", { name: m.included })).toBeInTheDocument();
+    for (const row of ["rowInsights", "rowMorePatterns", "rowReview", "rowLetters", "rowExtras", "rowPdf", "rowThemes"]) expect(free(row).getByRole("img", { name: m.plusOnly })).toBeInTheDocument();
     expect(screen.getByTestId("plus-table").textContent).not.toMatch(/\bAI\b/);
   });
 

@@ -4,11 +4,11 @@ summary: Cosa è gratis, cosa aggiunge Plus, la settimana gratis e come annullar
 topic: Privacy & account
 it-draft: true
 ---
-{pending:plus}Il tuo diario è gratis. Plus aggiunge analisi più approfondite. L'aiuto e i tuoi dati sono gratis per tutti, sempre.
+{pending:plus}Il tuo diario è gratis. L'Andamento è incluso in Plus. L'aiuto e i tuoi dati sono gratis per tutti, sempre.
 
-**Gratis:** check-in e il tuo diario senza limiti, la Cronologia, il calendario e la ricerca, l'aiuto e il tuo piano di sicurezza, ciò che ti aiuta e gli esercizi di radicamento, il riepilogo per l'appuntamento, La tua settimana, Settimana, Mese e 3 mesi in Andamento, gli andamenti degli ultimi 3 mesi, esportare, importare ed eliminare.
+**Gratis:** check-in e il tuo diario senza limiti, la Cronologia, il calendario e la ricerca, l'aiuto e il tuo piano di sicurezza, ciò che ti aiuta e gli esercizi di radicamento, il riepilogo per l'appuntamento, esportare, importare ed eliminare.
 
-**Plus aggiunge:** il tuo anno e tutto lo storico in Andamento, più andamenti e Cosa mi fa stare bene, l'anno in sintesi, le lettere al te del futuro, più temi (e icone nell'app), un PDF curato del tuo diario, una raccolta di domande per scrivere e più modi di respirare in **Cose che mi aiutano**. Le domande di «Giornate difficili» della raccolta di domande sono gratis per tutti.
+**Plus aggiunge:** l'Andamento (settimana, mese, 3 mesi, il tuo anno e tutto lo storico), gli andamenti e Cosa mi fa stare bene, l'anno in sintesi, le lettere al me del futuro, più temi (e icone nell'app), un PDF curato del tuo diario, una raccolta di domande per scrivere, più modi di respirare in **Cose che mi aiutano** e più promemoria. Le domande di «Giornate difficili» della raccolta di domande sono gratis per tutti.
 
 **Più andamenti** può includere i tuoi tag, quando inizi a usarli.
 
