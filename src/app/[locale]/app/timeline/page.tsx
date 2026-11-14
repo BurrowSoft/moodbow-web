@@ -61,8 +61,10 @@ export default async function TimelinePage({ params, searchParams }: PageProps<"
   const readOnThisDay = async (): Promise<{ kind: OnThisDayKind; entry: MomentRow; mood: number | null } | null> => {
     if (pageGate("on-this-day-live") === "hidden") return null;
     const dates = onThisDayDates(me.today).map((d) => d.date);
-    const { data: moments } = await supabase.from("entries").select("id, entry_date, body, is_moment, created_at").eq("is_moment", true).in("entry_date", dates);
-    const picked = pickOnThisDay((moments ?? []) as MomentRow[], me.today, CRISIS_KEYWORDS);
+    // recall_months (Memories, 034) only where moment-recall-live is on: a database without 034 has no such column.
+    const columns = pageGate("moment-recall-live") !== "hidden" ? "id, entry_date, body, is_moment, created_at, recall_months" : "id, entry_date, body, is_moment, created_at";
+    const { data: moments } = await supabase.from("entries").select(columns).eq("is_moment", true).in("entry_date", dates);
+    const picked = pickOnThisDay((moments ?? []) as unknown as MomentRow[], me.today, CRISIS_KEYWORDS);
     if (!picked) return null;
     const { data: checkIn } = await supabase.from("check_ins").select("mood").eq("local_date", picked.entry.entry_date).maybeSingle();
     return { ...picked, mood: (checkIn as { mood: number } | null)?.mood ?? null };

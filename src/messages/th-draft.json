@@ -1035,6 +1035,36 @@
     "reason": "UX draft (native read pending)"
   },
   {
+    "key": "entry.recallTitle",
+    "en": "Bring this back",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.recallIn",
+    "en": "Bring this back in",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.recall1",
+    "en": "1 month",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.recall6",
+    "en": "6 months",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.recall12",
+    "en": "1 year",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.recallHelp",
+    "en": "It comes back as a memory on the dates you keep.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
     "key": "timeline.calDayLabel",
     "en": "{date}{mood, select, none {} other {, {mood}}}{moment, select, yes {, moment} other {}}{entry, select, yes {, has writing} other {}}{pictures, select, yes {, has pictures} other {}}",
     "reason": "UX draft (native read pending)"
