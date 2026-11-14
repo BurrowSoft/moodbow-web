@@ -34,7 +34,7 @@ describe("InsightsView", () => {
   it("help everywhere (audit batch H): the help slot sits on the title row, after the title", () => {
     render(
       <NextIntlClientProvider locale="en" messages={messages}>
-        <InsightsView rows={[]} today="2026-10-02" range="month" help={<a href="/help/get-help-now" data-testid="insights-help">help</a>} />
+        <InsightsView rows={[]} today="2026-10-02" range="month" help={<span data-testid="insights-help" />} />
       </NextIntlClientProvider>,
     );
     const title = screen.getByRole("heading", { level: 1 });
