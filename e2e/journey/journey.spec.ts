@@ -96,10 +96,13 @@ test.describe("launch journeys", () => {
       await expect(day.getByTestId("timeline-mood-dot")).toBeVisible();
       await expect(day.locator('[data-testid^="timeline-entry-"]')).toHaveCount(1);
 
-      // Insights: one check-in isn't a chart yet.
+      // Insights: a free account sees the labelled example, never its own data (spec "Insights
+      // become Plus", 14 Nov), with the way to Plus; the tab bar stays.
       await page.getByTestId("tab-insights").click();
       await expect(page).toHaveURL(/\/app\/insights$/);
-      await expect(page.getByTestId("insights-not-enough-mood")).toBeVisible();
+      await expect(page.getByTestId("insights-example")).toBeVisible();
+      await expect(page.getByTestId("insights-example-see")).toBeVisible();
+      await expect(page.getByTestId("insights-not-enough-mood")).toHaveCount(0);
 
       // Me: the export, both files, each with the entry in it.
       await page.getByTestId("tab-me").click();
@@ -594,8 +597,10 @@ test.describe("importing the same file again", () => {
   });
 });
 
-test.describe("Your week on Insights", () => {
-  test("under 4 check-ins no card; a pattern and how it looked; a hard week, only that and the way to help", async ({ page }) => {
+// Your week is on Today for everyone, free accounts included (Vitor, 14 Nov, #316); Insights shows
+// a free account the example instead.
+test.describe("Your week on Today", () => {
+  test("a free account: under 4 check-ins no card; a pattern and how it looked; a hard week, only that and the way to help", async ({ page }) => {
     const email = newEmail();
     const password = newPassword();
     try {
@@ -611,8 +616,8 @@ test.describe("Your week on Insights", () => {
 
       // Three check-ins: nothing, not even a message about too few days.
       await seedCheckIns(email, password, monday, [0, 1, 2].map((offset) => ({ offset, mood: 5 })));
-      await page.goto("/app/insights");
-      await expect(page.getByTestId("insights-range-week")).toBeVisible({ timeout: 15_000 });
+      await page.goto("/app");
+      await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
       await expect(page.getByTestId("your-week")).toHaveCount(0);
 
       // A pattern (sleep), then how it looked, with the quiet line.
@@ -642,6 +647,10 @@ test.describe("Your week on Insights", () => {
       await expect(card.locator('[data-testid^="your-week-pattern"], [data-testid^="your-week-look"], [data-testid="your-week-caption"], [data-testid="your-week-moment"]')).toHaveCount(0);
       await card.getByTestId("your-week-help").click();
       await expect(page.getByTestId("safety-card")).toBeVisible();
+      // On Insights, this free account sees the example, and no Your week there.
+      await page.goto("/app/insights");
+      await expect(page.getByTestId("insights-example")).toBeVisible({ timeout: 15_000 });
+      await expect(page.getByTestId("your-week")).toHaveCount(0);
     } finally {
       await cleanup(email);
     }
@@ -1885,10 +1894,16 @@ test("axe: Moodbow Plus, its screen and sheet, at 320 and 1280 px", async ({ pag
         await page.goto(`${route}/app/me/plus`);
         await expect(page.getByTestId("plus-screen")).toBeVisible({ timeout: 15_000 });
       });
-      // The sheet is retired (Vitor, 14 Nov): Insights' Year opens the Plus screen itself.
-      await axeAtWidths(page, `Plus screen, from Insights' Year (${saved})`, async () => {
+      // Without Plus, Insights is the labelled example (#316): the example itself, its Year chip
+      // (it switches the example), and the sample opening the Plus screen.
+      await axeAtWidths(page, `Insights example, Year (${saved})`, async () => {
         await page.goto(`${route}/app/insights`);
-        await page.getByTestId("insights-range-year").click();
+        await page.getByTestId("insights-example-range-year").click();
+        await expect(page.getByTestId("insights-example-range-year")).toHaveAttribute("aria-pressed", "true");
+      });
+      await axeAtWidths(page, `Plus screen, from the Insights example (${saved})`, async () => {
+        await page.goto(`${route}/app/insights`);
+        await page.getByTestId("insights-example-sample").click();
         await expect(page.getByTestId("plus-screen")).toBeVisible({ timeout: 15_000 });
       });
     }

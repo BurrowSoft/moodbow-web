@@ -41,6 +41,13 @@ vi.mock("./ShareMonth", () => ({ ShareMonth: () => null }));
 vi.mock("./WeeklyReport", () => ({ WeeklyReport: () => null }));
 vi.mock("@/components/JournalUnavailable", () => ({ JournalUnavailable: () => <div data-testid="journal-unavailable" /> }));
 vi.mock("@/components/SessionEnded", () => ({ SessionEnded: () => null }));
+vi.mock("@/i18n/navigation", () => ({
+  Link: ({ href, children, ...rest }: { href: string; children: React.ReactNode }) => (
+    <a href={href} {...rest}>
+      {children}
+    </a>
+  ),
+}));
 const { default: InsightsPage } = await import("./page");
 
 const page = (range?: string) => InsightsPage({ params: Promise.resolve({ locale: "en" }), searchParams: Promise.resolve(range ? { range } : {}) } as never);

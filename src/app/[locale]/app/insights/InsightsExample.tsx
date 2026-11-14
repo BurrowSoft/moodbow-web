@@ -45,7 +45,7 @@ export function InsightsExample({ help }: { help: React.ReactNode }) {
         {help}
       </div>
       <div data-testid="insights-example-strip" className="flex flex-wrap items-center gap-3 rounded-2xl bg-pill px-[16px] py-[12px]">
-        <p className="min-w-0 flex-1">{tp("exampleStrip")}</p>
+        <p className="min-w-0 flex-1 [overflow-wrap:anywhere]">{tp("exampleStrip")}</p>
         <Link href="/app/me/plus" data-testid="insights-example-see" className="inline-flex min-h-11 items-center font-medium text-accent underline underline-offset-4">
           {tp("seePlus")}
         </Link>
@@ -60,9 +60,9 @@ export function InsightsExample({ help }: { help: React.ReactNode }) {
       <Link href="/app/me/plus" data-testid="insights-example-sample" aria-label={tp("exampleSample", { strip: tp("exampleStrip"), see: tp("seePlus") })} className="block space-y-3 rounded-3xl no-underline">
         <span aria-hidden="true" className="block space-y-3">
           {INSIGHTS_EXAMPLE[range].map((c) => (
-            <span key={c.metric} data-testid={`insights-example-${c.metric}`} className={`block ${JOURNAL_CARD}`}>
-              <span className="flex items-baseline justify-between gap-2">
-                <span className="font-medium text-text">{t(TITLE[c.metric])}</span>
+            <span key={c.metric} data-testid={`insights-example-${c.metric}`} className={`block min-w-0 [overflow-wrap:anywhere] ${JOURNAL_CARD}`}>
+              <span className="flex flex-wrap items-baseline justify-between gap-2">
+                <span className="min-w-0 font-medium text-text">{t(TITLE[c.metric])}</span>
                 <span className="rounded-full border border-border px-2 py-0.5 text-sm text-text">{change(c)}</span>
               </span>
               <span className="mt-1 block text-sm text-muted">{average(c)}</span>
@@ -72,7 +72,7 @@ export function InsightsExample({ help }: { help: React.ReactNode }) {
                   return (
                     <span
                       key={i}
-                      className="flex-1 rounded-t border border-muted"
+                      className="min-w-0 flex-1 rounded-t border border-muted"
                       style={{ height: `${Math.max(8, (v / max) * 100)}%`, backgroundColor: valueHex(c.metric, v) ?? "transparent" }}
                     />
                   );
