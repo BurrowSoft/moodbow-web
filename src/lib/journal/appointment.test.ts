@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import contract from "../../../content/appointment.json";
-import yourWeek from "../../../content/your-week.json";
+import yourWeek from "../../../content/contracts/your-week.json";
 import { APPOINTMENT_RULES, checkInCount, firstLine, rangeAverage, starredIn, weeksDays } from "./appointment";
 import type { InsightRow } from "./insights";
 
