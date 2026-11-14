@@ -20,6 +20,11 @@ import { yearOnOffer } from "@/lib/share/year";
 import { MilestoneCard } from "./MilestoneCard";
 import { SecurityNoticeRead } from "./SecurityNoticeRead";
 import { JOURNAL_HEADING } from "@/lib/ui/journalLayout";
+import { isLowMood } from "@/lib/journal/checkInSaved";
+import { plusPriceLabel, readPlusView } from "@/lib/plus/view";
+import { flagsCrisis } from "@/lib/safety/crisis";
+import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
+import { SetupLaterCard, TodayPlusCard } from "./TodayCards";
 
 // A stuck request ends here at the latest (UX, the timeout audit); each
 // data call gives up after 15 s on its own (lib/supabase/deadline).
@@ -66,6 +71,14 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
   const te = await getTranslations("entry");
   const timeZone = me.profile?.time_zone ?? "UTC";
   const dateLocaleTag = dateLocale(locale, requestHeaders.get("accept-language"), me.profile?.country ?? null);
+  // Today's Plus card on first landing (1.3 §6 and the rulings): only for someone without Plus (never
+  // with Plus, never past due), only when today's rows were read, and never on a day when anything
+  // saved was flagged or was one of the two lowest faces. Help is always above it on the page.
+  const plus = pageGate("plus") !== "hidden" ? await readPlusView(supabase, user.id) : null;
+  const flaggedToday = (entries ?? []).some((e) => flagsCrisis(String((e as { body?: unknown }).body ?? ""), CRISIS_KEYWORDS));
+  const plusCard = plus?.kind === "free" && !checkInError && !entriesError && !flaggedToday && !isLowMood((data as CheckIn | null)?.mood) ? plus : null;
+  // Setup after first use (1.3 §6): offered once there's a check-in, while the reminder is still off.
+  const setupLater = Boolean(data) && me.settings?.reminder_on === false;
 
   return (
     <section className="space-y-8">
@@ -95,13 +108,9 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
         </Link>
       </header>
       <CheckInCard key={checkInError ? "unread" : "read"} initial={(data as CheckIn | null) ?? null} uid={user.id} date={me.today} dateLocaleTag={dateLocaleTag} keepDraft loadFailed={Boolean(checkInError)} />
-      <Link
-        href="/app/write"
-        data-testid="today-write"
-        className="inline-flex min-h-12 max-w-full items-center justify-center rounded-full bg-accent px-8 text-center font-medium text-on-accent hover:bg-accent-hover"
-      >
-        {te("writeButton")}
-      </Link>
+      {/* Today's order (UX ruling 3): the check-in, the cards, the entries, then Write last. */}
+      {plusCard && <TodayPlusCard trial={plusCard.trial} price={plusPriceLabel(locale)} date={me.today} />}
+      {setupLater && <SetupLaterCard />}
       {entriesError && (
         <p role="alert" data-testid="today-entries-error" className="font-medium text-accent">
           {t("errGeneric")}
@@ -115,6 +124,13 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
           <EntryPreviews entries={entries as EntrySummary[]} testIdPrefix="today-entry" from="/app" timeZone={me.profile?.time_zone ?? "UTC"} dateLocaleTag={dateLocaleTag} />
         </section>
       )}
+      <Link
+        href="/app/write"
+        data-testid="today-write"
+        className="inline-flex min-h-12 max-w-full items-center justify-center rounded-full bg-accent px-8 text-center font-medium text-on-accent hover:bg-accent-hover"
+      >
+        {te("writeButton")}
+      </Link>
       {/* Last on the page: it floats above the tab bar (decision 186), and the room
           it needs is added after the footer, so its late arrival moves nothing. */}
       {milestone && <MilestoneCard n={milestone.n} colours={milestone.colours} uid={user.id} month={me.today.slice(0, 7)} dateLocaleTag={dateLocaleTag} year={pageGate("year-card") !== "hidden" ? yearOnOffer(me.today) : null} />}

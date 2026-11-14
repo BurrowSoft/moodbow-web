@@ -195,6 +195,7 @@
     "checkEmailResend": "Erneut senden",
     "errPasswordShort": "Nutze mindestens 8 Zeichen",
     "errAgeRequired": "Moodbow ist für Menschen ab 18 Jahren",
+    "errConsentRequired": "Hake die Kästchen oben an, um dein Konto zu erstellen.",
     "errEmailTaken": "Für diese E-Mail gibt es schon ein Konto. Stattdessen anmelden?",
     "setupTitle": "Mach es zu deinem",
     "setupFocusTitle": "Worauf soll Moodbow achten?",
@@ -260,7 +261,10 @@
     "checkInConflictMine": "Deiner",
     "checkInConflictOther": "Schon gespeichert",
     "checkInConflictKeepMine": "Meinen behalten",
-    "checkInConflictUseOther": "Den anderen nehmen"
+    "checkInConflictUseOther": "Den anderen nehmen",
+    "setupLaterBody": "Deine tägliche Erinnerung ist aus. Du kannst sie jederzeit einschalten und eine Uhrzeit wählen.",
+    "setupLaterOpen": "Einrichten",
+    "setupLaterClose": "Nicht jetzt"
   },
   "entry": {
     "writeButton": "Über deinen Tag schreiben",
@@ -686,6 +690,8 @@
     "paletteDusk": "Dämmerung",
     "paletteSunrise": "Sonnenaufgang",
     "paletteSea": "Meer",
-    "sheetThemes": "Mehr Themes gehören zu Plus"
+    "sheetThemes": "Mehr Themes gehören zu Plus",
+    "todayCardTitle": "Sieh deine Stimmungen im Verlauf",
+    "todayCardTrial": "7 Tage kostenlos testen. Danach {price} pro Jahr."
   }
 }

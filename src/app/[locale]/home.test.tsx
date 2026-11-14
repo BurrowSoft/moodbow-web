@@ -75,7 +75,8 @@ describe("Home page", () => {
     await renderHome();
     expect(screen.queryByTestId("home-coming-soon")).toBeNull();
     expect(screen.queryByTestId("home-notify")).toBeNull();
-    expect(screen.getByTestId("home-start")).toHaveAttribute("href", "/welcome");
+    // Start goes straight to Create account (1.3 §6).
+    expect(screen.getByTestId("home-start")).toHaveAttribute("href", "/sign-up");
     expect(screen.getByTestId("home-start")).toHaveTextContent(h.start);
     expect(screen.getByTestId("home-sign-in")).toHaveAttribute("href", "/sign-in");
   });

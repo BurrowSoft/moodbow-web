@@ -42,6 +42,8 @@ export default async function ConsentPage({ params }: PageProps<"/[locale]/conse
   // with the generic error (its Continue answers the same until Auth is
   // back), never the new-account flow's Back to Welcome.
   const outage = !user && isAuthOutage(error);
+  // A new account's boxes are on Create account now (1.3 §6).
+  if (!user && !outage) redirect({ href: "/sign-up", locale });
   let askAge = false;
   let country: string | null | undefined = null;
   if (supabase && user) {
