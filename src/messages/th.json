@@ -480,7 +480,22 @@
     "yourWeekLookMixed": "สัปดาห์นี้มีทั้งวันดีและวันที่แย่",
     "yourWeekMoment": "ช่วงเวลาหนึ่งจากสัปดาห์นั้น: {date}",
     "yourWeekHard": "ดูเหมือนสัปดาห์นี้จะหนักหน่วง",
-    "yourWeekCaption": "อาจช่วยให้เห็นว่าอะไรมักเกิดขึ้นคู่กัน แต่ไม่ได้บอกว่าอะไรเป็นสาเหตุของอะไร"
+    "yourWeekCaption": "อาจช่วยให้เห็นว่าอะไรมักเกิดขึ้นคู่กัน แต่ไม่ได้บอกว่าอะไรเป็นสาเหตุของอะไร",
+    "pairTag": "\"{tag}\"",
+    "pairWith": "วันที่มี {tag}",
+    "pairOther": "วันอื่นๆ",
+    "pairSleepMore": "7 ชม. ขึ้นไป",
+    "pairSleepLess": "นอนน้อยกว่า",
+    "pairMoved": "ได้ขยับตัว",
+    "pairNotMoved": "ไม่ได้ขยับตัว",
+    "pairStressLow": "เครียดน้อย",
+    "pairStressHigh": "เครียดมาก",
+    "pairWeekTitle": "วันธรรมดาและวันหยุด",
+    "pairWeekdays": "วันธรรมดา",
+    "pairWeekends": "วันหยุดสุดสัปดาห์",
+    "pairWritingTitle": "การเขียน",
+    "pairWrote": "ได้เขียน",
+    "pairNotWrote": "ไม่ได้เขียน"
   },
   "share": {
     "shareButton": "แชร์",
@@ -710,6 +725,12 @@
     "exampleStrip": "ตัวอย่างข้อมูลเชิงลึก เมื่อมี Plus หน้านี้จะแสดงการเช็กอินของคุณเอง",
     "exampleWatermark": "ตัวอย่าง",
     "exampleRanges": "ช่วงเวลาของตัวอย่าง",
-    "exampleSample": "{strip} {see}"
+    "exampleSample": "{strip} {see}",
+    "exampleLabel": "ตัวอย่าง",
+    "exampleWeekLine": "ส่วนใหญ่ค่อนข้างคงที่ มีสองวันดีๆ ในช่วงท้าย",
+    "exampleTagWalk": "เดินเล่น",
+    "exampleTagFriends": "เพื่อน",
+    "liftsTitle": "สิ่งที่ทำให้ฉันรู้สึกดีขึ้น",
+    "liftsRow": "ในวันที่มีแท็ก \"{tag}\" อารมณ์ของคุณเฉลี่ย {a} จาก 5 ส่วนวันอื่นๆ เฉลี่ย {b}"
   }
 }
