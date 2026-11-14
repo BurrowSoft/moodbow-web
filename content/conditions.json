@@ -219,6 +219,10 @@
     "met": false,
     "what": "Moodbow Plus (decision 246, specs/plus.md, docs/plus-entitlements.md): the yearly subscription with 7 free days, on the web through Stripe. Off until everything ships, and not before the pilot is published. Before it's met: the entitlements migration on Production, Vitor's prices, Stripe keys, webhook endpoint, CRON_SECRET and service role key on Production, his terms and privacy text, the Reviewer's read and the tester rows on test-mode Stripe."
   },
+  "lifts-live": {
+    "met": false,
+    "what": "1.3 part 2: What lifts me, inside More patterns with Plus (specs/1.3-grounding-and-good-things.md), on the web (#301, with tags-live) and in the app build people have. Ships with 1.3, not with the Plus stack (UX 14 Nov). Also gates the Moodbow Plus article's line about it."
+  },
   "region-live": {
     "met": false,
     "what": "/api/region answers on Production: the signed country token for functions that are only on in some countries (Bo first, specs/bo-design.md section 7). Before it's met, on Production: REGION_SECRET set by Vitor, and the Web Tester's forged-header row passed on Preview."

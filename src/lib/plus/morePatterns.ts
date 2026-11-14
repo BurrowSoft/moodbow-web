@@ -1,4 +1,4 @@
-import { roundFor, type InsightRow } from "@/lib/journal/insights";
+import { RANGES, roundFor, type InsightRow } from "@/lib/journal/insights";
 import { PATTERN_RULES, PATTERN_SIDE, patternSide, type PatternSide } from "@/lib/journal/patterns";
 
 // Moodbow Plus: More patterns (decision 246; UX, 11 Nov: the first wave).
@@ -30,11 +30,23 @@ export function moreWindowStart(window: MoreWindow, today: string): string | nul
   return d.toISOString().slice(0, 10);
 }
 
+// The first day of the "3 months" range (today and the 89 days before), the same as its tab.
+export function recentStart(today: string): string {
+  const d = new Date(`${today}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() - (RANGES["3months"] - 1));
+  return d.toISOString().slice(0, 10);
+}
+
 export function morePatterns(rows: InsightRow[], today: string, window: MoreWindow, writtenDays: ReadonlySet<string>): MorePattern[] {
   const start = moreWindowStart(window, today);
   const inWindow = rows.filter((r) => r.local_date <= today && (start === null || r.local_date >= start) && r.mood !== null && r.mood !== undefined);
+  // Sleep, Movement and Stress only once there are check-ins older than the 3-month range (UX,
+  // audit C): before that they'd repeat Patterns' numbers exactly. Then More patterns shows only
+  // its own rows (weekdays and weekends, writing days; tags come from the page).
+  const older = recentStart(today);
+  const ids = inWindow.some((r) => r.local_date < older) ? MORE_PATTERN_IDS : MORE_PATTERN_IDS.filter((id) => id === "weekdays" || id === "writing");
   const notEnough = (id: MorePatternId): MorePattern => ({ id, state: "not_enough", a: null, b: null });
-  if (inWindow.length < PATTERN_RULES.minCheckIns) return MORE_PATTERN_IDS.map(notEnough);
+  if (inWindow.length < PATTERN_RULES.minCheckIns) return ids.map(notEnough);
   const sideOf: Record<MorePatternId, (row: InsightRow) => "a" | "b" | null> = {
     sleep: PATTERN_SIDE.sleep,
     movement: PATTERN_SIDE.movement,
@@ -42,7 +54,7 @@ export function morePatterns(rows: InsightRow[], today: string, window: MoreWind
     weekdays: (row) => (weekend(row.local_date) ? "b" : "a"),
     writing: (row) => (writtenDays.has(row.local_date) ? "a" : "b"),
   };
-  return MORE_PATTERN_IDS.map((id) => {
+  return ids.map((id) => {
     const groups = { a: [] as number[], b: [] as number[] };
     for (const row of inWindow) {
       const s = sideOf[id](row);

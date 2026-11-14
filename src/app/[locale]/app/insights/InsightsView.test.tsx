@@ -140,8 +140,14 @@ describe("InsightsView: Patterns", () => {
     const card = screen.getByTestId("insights-patterns");
     expect(within(card).getByRole("heading", { name: messages.insights.patternsTitle })).toBeInTheDocument();
     expect(card).toHaveTextContent(messages.insights.patternsSubtitle);
-    expect(screen.getByTestId("insights-pattern-sleep")).toHaveTextContent("On days after 7 or more hours of sleep, your mood averaged 4.0 of 5. After less sleep, 3.4.");
-    expect(screen.getByTestId("insights-pattern-stress")).toHaveTextContent("On low- and high-stress days, your mood was about the same (3.5 and 3.2 of 5).");
+    // Board 3 (UX, 14 Nov): the sentence is the bars' image name; shown are the title and the row labels.
+    const named = (id: string) => within(screen.getByTestId(id)).getByRole("img");
+    expect(named("insights-pattern-sleep")).toHaveAccessibleName("On days after 7 or more hours of sleep, your mood averaged 4.0 of 5. After less sleep, 3.4.");
+    expect(named("insights-pattern-stress")).toHaveAccessibleName("On low- and high-stress days, your mood was about the same (3.5 and 3.2 of 5).");
+    const i = messages.insights;
+    expect(screen.getByTestId("insights-pattern-sleep")).toHaveTextContent(`${i.chartSleep}+0.6${i.pairSleepMore}4.0${i.pairSleepLess}3.4`);
+    expect(screen.getByTestId("insights-pattern-stress")).toHaveTextContent(`${i.chartStress}+0.3${i.pairStressLow}3.5${i.pairStressHigh}3.2`);
+    expect(screen.getByTestId("insights-pattern-sleep").textContent).not.toContain("averaged");
     expect(screen.queryByTestId("insights-pattern-movement")).toBeNull();
     expect(within(card).getAllByRole("listitem").map((li) => li.getAttribute("data-testid"))).toEqual(["insights-pattern-sleep", "insights-pattern-stress"]);
     expect(screen.getByTestId("insights-patterns-footnote")).toHaveTextContent(messages.insights.patternsFootnote);
