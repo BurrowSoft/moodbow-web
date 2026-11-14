@@ -18,6 +18,8 @@ import { deleteEntry, saveEntry, type DeleteState } from "../actions";
 import { deletedRedirect, EntryEditor, hasDraft, type EditorStart } from "../EntryEditor";
 import { useAnnounce, useFocusTitleAfterLeaving } from "../../Announcer";
 import { ReflectPanel } from "../ReflectPanel";
+import type { RecallMonth } from "@/lib/journal/momentRecall";
+import { RecallChips } from "./RecallChips";
 
 // The entry view (decision 151, the same layout as the app): a top bar with
 // Back, the ★ moment toggle and ⋯ (Edit, Delete); the date; that day's
@@ -39,6 +41,8 @@ type Props = {
   country?: string | null;
   // null: no Reflect (AI off, not consented, or its reflection unreadable).
   reflect: { initial: Reflection | null; balance: number } | null;
+  // Memories (034): this moment's "Bring this back" months; undefined while moment-recall-live is off.
+  recall?: RecallMonth[];
 };
 
 type Mode = { kind: "view" } | { kind: "edit"; start: EditorStart };
@@ -74,7 +78,7 @@ function caretOffset(el: HTMLElement, x: number, y: number): number | "end" {
   return at;
 }
 
-function Screen({ entry: initial, checkIn, from, backLabel, dateLocaleTag, uid, today, country, reflect, startEditing }: Props & { startEditing: boolean }) {
+function Screen({ entry: initial, checkIn, from, backLabel, dateLocaleTag, uid, today, country, reflect, recall, startEditing }: Props & { startEditing: boolean }) {
   const t = useTranslations("entry");
   const tt = useTranslations("today");
   const locale = useLocale();
@@ -122,6 +126,14 @@ function Screen({ entry: initial, checkIn, from, backLabel, dateLocaleTag, uid, 
 
   // ★: saved straight away; a failed save puts it back and offers Try
   // again (decision 111). Another device's newer version wins the view.
+  const [recallMonths, setRecallMonths] = useState<RecallMonth[]>(recall ?? []);
+  // "auto": shown after starring, for about 6 s; "kept": opened from the menu, until they leave.
+  const [recallShown, setRecallShown] = useState<false | "auto" | "kept">(false);
+  useEffect(() => {
+    if (recallShown !== "auto") return;
+    const timer = window.setTimeout(() => setRecallShown(false), 6000);
+    return () => window.clearTimeout(timer);
+  }, [recallShown]);
   const toggleMoment = async () => {
     if (savingMoment.current) return;
     savingMoment.current = true;
@@ -136,7 +148,11 @@ function Screen({ entry: initial, checkIn, from, backLabel, dateLocaleTag, uid, 
     form.set("expected_updated_at", before.updated_at);
     try {
       const result = await saveEntry({ status: "idle" }, form);
-      if (result.status === "saved") setEntry(result.entry);
+      if (result.status === "saved") {
+        setEntry(result.entry);
+        // Just starred: the "Bring this back" chips slide in for about 6 s (no extra tap needed).
+        if (result.entry.is_moment && recall) setRecallShown("auto");
+      }
       else {
         setEntry(result.status === "error" && result.error === "stale" && result.latest ? result.latest : before);
         setMomentFailed(true);
@@ -221,6 +237,21 @@ function Screen({ entry: initial, checkIn, from, backLabel, dateLocaleTag, uid, 
                 </svg>
               </button>
               <ul id="entry-menu" hidden={!menu} className="absolute right-0 top-12 z-10 min-w-44 rounded-2xl border border-border bg-surface p-[4px] shadow-lg">
+                {recall && entry.is_moment && (
+                  <li>
+                    <button
+                      type="button"
+                      data-testid="entry-menu-recall"
+                      onClick={() => {
+                        setMenu(false);
+                        setRecallShown("kept");
+                      }}
+                      className="flex min-h-11 w-full items-center rounded-xl px-4 text-left text-text hover:bg-pill"
+                    >
+                      {t("recallTitle")}
+                    </button>
+                  </li>
+                )}
                 <li>
                   <button type="button" data-testid="entry-menu-edit" onClick={() => edit({ at: "end" })} className="flex min-h-11 w-full items-center rounded-xl px-4 text-left text-text hover:bg-pill">
                     {t("entryEditTitle")}
@@ -253,6 +284,11 @@ function Screen({ entry: initial, checkIn, from, backLabel, dateLocaleTag, uid, 
       {/* Hidden, not unmounted, while editing: a reflection made on this
           visit is still here after (ReflectPanel keeps it). */}
       <article hidden={mode.kind === "edit"} className="mt-6 space-y-6" data-testid="entry-view">
+      {mode.kind === "view" && recall && entry.is_moment && recallShown && (
+        <div className="mt-3">
+          <RecallChips id={entry.id} value={recallMonths} onChange={setRecallMonths} />
+        </div>
+      )}
       {momentFailed && (
         <div className="flex flex-wrap items-center gap-3">
           <p role="alert" data-testid="entry-moment-error" className="font-medium text-accent">

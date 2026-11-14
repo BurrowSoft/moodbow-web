@@ -294,7 +294,12 @@
     "entryNewTitle": "New entry",
     "entryEditTitle": "Edit entry",
     "entryAddMore": "Add to this entry…",
-    "entryMoreActions": "More options"
+    "entryMoreActions": "More options",
+    "recallTitle": "Bring this back",
+    "recallIn": "Bring this back in:",
+    "recall1": "1 month",
+    "recall6": "6 months",
+    "recall12": "1 year"
   },
   "notFound": {
     "title": "Page not found",

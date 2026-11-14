@@ -294,7 +294,12 @@
     "entryNewTitle": "บันทึกใหม่",
     "entryEditTitle": "แก้ไขบันทึก",
     "entryAddMore": "เขียนเพิ่มในบันทึกนี้…",
-    "entryMoreActions": "ตัวเลือกเพิ่มเติม"
+    "entryMoreActions": "ตัวเลือกเพิ่มเติม",
+    "recallTitle": "นำกลับมาแสดงอีกครั้ง",
+    "recallIn": "นำกลับมาใน:",
+    "recall1": "1 เดือน",
+    "recall6": "6 เดือน",
+    "recall12": "1 ปี"
   },
   "notFound": {
     "title": "ไม่พบหน้านี้",

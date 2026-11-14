@@ -294,7 +294,12 @@
     "entryNewTitle": "Neuer Eintrag",
     "entryEditTitle": "Eintrag bearbeiten",
     "entryAddMore": "Zu diesem Eintrag hinzufügen …",
-    "entryMoreActions": "Weitere Optionen"
+    "entryMoreActions": "Weitere Optionen",
+    "recallTitle": "Wieder zeigen",
+    "recallIn": "Wieder zeigen in:",
+    "recall1": "1 Monat",
+    "recall6": "6 Monaten",
+    "recall12": "1 Jahr"
   },
   "notFound": {
     "title": "Seite nicht gefunden",

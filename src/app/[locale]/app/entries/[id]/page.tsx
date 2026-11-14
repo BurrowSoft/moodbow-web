@@ -9,6 +9,8 @@ import type { CheckIn } from "@/lib/journal/checkIn";
 import { ENTRY_COLUMNS, isEntryId, type Entry } from "@/lib/journal/entry";
 import { canReflect } from "@/lib/journal/ai";
 import { getMe } from "@/lib/journal/me";
+import { pageGate } from "@/lib/conditions";
+import { parseRecall } from "@/lib/journal/momentRecall";
 import type { Reflection } from "@/lib/journal/reflect";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { headers } from "next/headers";
@@ -62,6 +64,9 @@ export default async function EntryPage({ params, searchParams }: PageProps<"/[l
   // That day's check-in, for the strip under the date. Not read (an error):
   // no strip, the same as a day without one; the entry is still all here.
   const entry = data as Entry;
+  // Memories (034): this entry's "Bring this back" months, only where moment-recall-live is on (a
+  // database without 034 has no such column). Unreadable: all three, as stored by default.
+  const recall = pageGate("moment-recall-live") !== "hidden" ? parseRecall((await supabase.from("entries").select("recall_months").eq("id", entry.id).maybeSingle()).data?.recall_months) : undefined;
   const { data: checkIn } = await supabase
     .from("check_ins")
     .select("local_date, mood, sleep_hours, sleep_quality, exercise_minutes, stress, updated_at")
@@ -78,6 +83,7 @@ export default async function EntryPage({ params, searchParams }: PageProps<"/[l
       today={me.today}
       country={me.profile?.country}
       reflect={reflect ? { initial: reflection, balance: me.credits?.balance ?? 0 } : null}
+      recall={recall}
     />
   );
 }
