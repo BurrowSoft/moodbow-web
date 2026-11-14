@@ -433,7 +433,6 @@
     "calDayLabel": "{date}{mood, select, none {} other {, {mood}}}{moment, select, yes {, moment fort} other {}}{entry, select, yes {, avec du texte} other {}}",
     "calKey": "Légende",
     "calKeyWriting": "avec du texte",
-    "calKeyMoment": "moment fort",
     "printMonth": "Imprimer ce mois",
     "printFooter": "Moodbow · {month}",
     "printEmpty": "Rien d'écrit ce mois-ci pour l'instant."

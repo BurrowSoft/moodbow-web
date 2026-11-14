@@ -61,7 +61,8 @@ describe("MonthCalendar (1.1 M)", () => {
     expect(day("2026-10-02")).toHaveAccessibleName("Friday 2 October, moment, has writing");
     // The key under the grid names the tiny marks in words (Vitor, 14 Nov).
     expect(screen.getByTestId("calendar-key")).toHaveTextContent(messages.timeline.calKeyWriting);
-    expect(screen.getByTestId("calendar-key")).toHaveTextContent(messages.timeline.calKeyMoment);
+    // Exactly two markers (Vitor): the pencil now; no moment star in the cells or the key.
+    expect(day("2026-10-02").querySelector("[data-testid=calendar-moment]")).toBeNull();
     expect(day("2026-10-01").querySelector("[data-testid=calendar-entry]")?.tagName.toLowerCase()).toBe("svg");
     expect(day("2026-10-03")).toHaveAccessibleName("Saturday 3 October");
     expect(day("2026-10-01").querySelector("[data-testid=calendar-dot]")).not.toBeNull();

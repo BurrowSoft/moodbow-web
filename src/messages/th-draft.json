@@ -1048,10 +1048,5 @@
     "key": "timeline.calKeyWriting",
     "en": "has writing",
     "reason": "UX draft (native read pending)"
-  },
-  {
-    "key": "timeline.calKeyMoment",
-    "en": "moment",
-    "reason": "UX draft (native read pending)"
   }
 ]

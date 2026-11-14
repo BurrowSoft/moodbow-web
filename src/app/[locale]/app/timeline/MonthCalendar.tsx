@@ -12,8 +12,9 @@ import { PrintMonthLink } from "./PrintMonthLink";
 
 // Month calendar (1.1 M, decision 197): one month per screen, weeks from
 // Monday. In each day: the dot in its Sunrise mood colour on top, then the
-// number, then tiny marks: ★ for a moment and a pencil for writing (Vitor,
-// 14 Nov), explained in a key under the grid. A day without a check-in shows
+// number, then the tiny marks, exactly two (Vitor, 14 Nov): a pencil for
+// writing, and a camera for pictures once there are pictures; a key under the
+// grid names them. A moment is said in the day's name, with no mark. A day without a check-in shows
 // its number only (no "missed" mark, no guilt). Today is outlined; future days
 // are muted and not links. Each cell is named in words (calDayLabel), never
 // colour alone, and the grid is one tab stop with arrow keys moving by day.
@@ -165,7 +166,6 @@ export function MonthCalendar({
                   </span>
                   <span>{dayNumber(date, dateLocaleTag)}</span>
                   <span className="flex h-[9px] items-center gap-0.5" aria-hidden="true">
-                    {day?.moment && <MomentIcon testId="calendar-moment" />}
                     {day?.entry && <PencilIcon testId="calendar-entry" />}
                   </span>
                 </>
@@ -213,10 +213,6 @@ export function MonthCalendar({
           <PencilIcon />
           {t("calKeyWriting")}
         </li>
-        <li className="inline-flex items-center gap-1">
-          <MomentIcon />
-          {t("calKeyMoment")}
-        </li>
       </ul>
 
       {load.kind === "error" && (
@@ -248,19 +244,12 @@ export function MonthCalendar({
   );
 }
 
-// The tiny marks, ~9 px: a pencil in text ink for writing, the star for a moment. Decorative here
-// (aria-hidden); the day's name and the key say them in words.
+// The tiny mark, ~9 px: a pencil in text ink for writing. Decorative here (aria-hidden); the day's
+// name and the key say it in words.
 function PencilIcon({ testId }: { testId?: string }) {
   return (
     <svg viewBox="0 0 24 24" width="9" height="9" aria-hidden="true" data-testid={testId} className="shrink-0 text-text" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
       <path d="M4 20l4-1 11-11-3-3L5 16z" />
-    </svg>
-  );
-}
-function MomentIcon({ testId }: { testId?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" width="9" height="9" aria-hidden="true" data-testid={testId} className="shrink-0 fill-accent">
-      <path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z" />
     </svg>
   );
 }
