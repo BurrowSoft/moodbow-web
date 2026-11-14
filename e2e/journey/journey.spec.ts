@@ -2204,6 +2204,13 @@ test("pictures: a Plus moment takes a real JPEG with EXIF; the tile shows; the s
     await grantPlusTrial(email);
     const today = await journalToday(email, password);
     const moment = await seedMoment(email, password, today, "A walk by the sea.");
+    // Any CSP violation on the way, recorded in the page (the Web Tester, #322: img-src blocked
+    // every picture while the signed URLs served 200).
+    await page.addInitScript(() => {
+      const w = window as unknown as { __csp: string[] };
+      w.__csp = [];
+      document.addEventListener("securitypolicyviolation", (e) => w.__csp.push(`${e.violatedDirective} ${e.blockedURI}`));
+    });
     await page.goto(`/app/entries/${moment}`);
     await expect(page.getByTestId("entry-picture-add")).toBeVisible({ timeout: 15_000 });
     // A 2400 x 1800 JPEG with an EXIF segment carrying a GPS marker, spliced in after its start.
@@ -2225,6 +2232,12 @@ test("pictures: a Plus moment takes a real JPEG with EXIF; the tile shows; the s
     await page.getByTestId("entry-picture-input").setInputFiles({ name: "walk.jpg", mimeType: "image/jpeg", buffer: Buffer.from(bytes) });
     await expect(page.getByTestId("entry-picture")).toHaveCount(1, { timeout: 30_000 });
     await expect(page.getByTestId("entry-picture-error")).toHaveCount(0);
+    // The picture really renders: the tile's image and the full view decode (naturalWidth > 0).
+    const decoded = (selector: string) => page.locator(selector).first().evaluate((img: HTMLImageElement) => (img.complete ? img.naturalWidth : 0));
+    await expect.poll(() => decoded('[data-testid="entry-picture-open"] img'), { timeout: 15_000 }).toBeGreaterThan(0);
+    await page.getByTestId("entry-picture-open").first().click();
+    await expect.poll(() => decoded('[data-testid="entry-picture-full"]'), { timeout: 15_000 }).toBeGreaterThan(0);
+    await page.getByTestId("entry-picture-close").click();
     const files = await pictureFiles(email);
     expect(files.map((f) => (f.name.endsWith("_t.jpg") ? "thumb" : "full")).sort()).toEqual(["full", "thumb"]);
     for (const f of files) {
@@ -2239,9 +2252,34 @@ test("pictures: a Plus moment takes a real JPEG with EXIF; the tile shows; the s
       expect(app1, `${f.name.endsWith("_t.jpg") ? "thumb" : "full"}: no APP1`).toBe(false);
       expect(f.bytes.includes(Buffer.from("GPSMOODBOW")), "no GPS marker").toBe(false);
     }
-    // After a reload the picture is still there (from its signed URL).
+    // After a reload the picture is still there (from its signed URL), and still renders.
     await page.reload();
     await expect(page.getByTestId("entry-picture")).toHaveCount(1, { timeout: 15_000 });
+    await expect.poll(() => decoded('[data-testid="entry-picture-open"] img'), { timeout: 15_000 }).toBeGreaterThan(0);
+    // The export: a zip with the data file and this picture's bytes (fetched through fresh signed
+    // URLs, which the CSP's connect-src must allow).
+    await page.goto("/app/me");
+    await page.getByTestId("me-export").click();
+    await expect(page.getByTestId("me-export-zip")).toBeVisible({ timeout: 30_000 });
+    const [download] = await Promise.all([page.waitForEvent("download"), page.getByTestId("me-export-zip").click()]);
+    const zip = await readFile((await download.path())!);
+    const names: string[] = [];
+    for (let i = 0; i + 46 < zip.length; i++) if (zip.readUInt32LE(i) === 0x02014b50) names.push(zip.subarray(i + 46, i + 46 + zip.readUInt16LE(i + 28)).toString("utf8"));
+    const picture = names.find((n) => n.startsWith(`pictures/${moment}/`) && n.endsWith(".jpg"));
+    expect(picture, `the zip holds the picture (${names.join(", ")})`).toBeTruthy();
+    const full = files.find((f) => !f.name.endsWith("_t.jpg"))!;
+    expect(zip.includes(full.bytes.subarray(0, 64)), "the zip holds the picture's own bytes").toBe(true);
+    // And nothing was blocked by the CSP anywhere on the way.
+    expect(await page.evaluate(() => (window as unknown as { __csp: string[] }).__csp)).toEqual([]);
+    // Timeline's strip at 300 % on a 320 px phone: it shows, and nothing scrolls sideways (UX, #322:
+    // rem-sized thumbnails grew to 192 px each).
+    await page.setViewportSize({ width: 320, height: 800 });
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send("Page.setFontSizes", { fontSizes: { standard: 48, fixed: 39 } });
+    await page.goto("/app/timeline");
+    await expect(page.getByTestId("timeline-pictures").first()).toBeVisible({ timeout: 15_000 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth), "Timeline with pictures at 300 %: no sideways scroll").toBeLessThanOrEqual(0);
+    await cdp.send("Page.setFontSizes", { fontSizes: { standard: 16, fixed: 13 } });
   } finally {
     await cleanup(email);
   }
