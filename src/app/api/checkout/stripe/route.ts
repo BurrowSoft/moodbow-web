@@ -3,6 +3,7 @@ import { pageGate } from "@/lib/conditions";
 import { pageOrigin, sameOrigin } from "@/lib/http/sameOrigin";
 import { ENTITLEMENT_COLUMNS, hasPlus, parseEntitlement, TRIAL_DAYS, trialAvailable } from "@/lib/plus/entitlements";
 import { offerActive, offerEligible } from "@/lib/plus/offer";
+import { plusDeal } from "@/lib/plus/prices";
 import { getStripe, isLive, isRouteLocale, needsCardFix, retrieveSubscriptionOrNull, stripeConfigured, stripeLocale } from "@/lib/plus/stripe";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -73,18 +74,23 @@ export async function POST(req: Request): Promise<Response> {
     return no("check_failed", 503);
   }
 
-  // The Christmas offer (1.3): while it runs, for someone with no previous subscription, the first
-  // year at the coupon's price instead of the free week (one introductory offer at a time, as the
-  // stores). Without the coupon configured, the usual checkout.
-  const coupon = process.env.STRIPE_PLUS_OFFER_COUPON_ID?.trim();
-  const offer = Boolean(coupon) && offerActive() && offerEligible(row);
+  // The same deal the page showed (plusDeal, the Reviewer #315): the currency from the saved country
+  // (the one shown is the one charged), and the Christmas offer (1.3) only when the page could show
+  // it: running, eligible, and the coupon has a once-only amount in that currency. Then the coupon
+  // instead of the free week (one introductory offer at a time); otherwise exactly as shown.
+  const { data: profile, error: profileError } = await supabase.from("profiles").select("country").eq("user_id", user.id).maybeSingle();
+  if (profileError) return no("check_failed", 503);
+  const deal = await plusDeal((profile as { country?: string | null } | null)?.country ?? null, offerActive() && offerEligible(row));
+  if (!deal) return no("check_failed", 503);
+  const offer = deal.firstYear !== null && deal.coupon !== null;
+  const coupon = offer ? deal.coupon : null;
   const trial = !offer && trialAvailable(row);
   // Concurrent duplicates (a double tap, a retry) collapse into one session
   // within a 10-minute window. Everything in the key changes the parameters,
   // since Stripe refuses a reused key with different ones.
   const WINDOW_MS = 10 * 60 * 1000;
   const windowStart = Math.floor(Date.now() / WINDOW_MS) * WINDOW_MS;
-  const key = `plus-checkout-${user.id}-${locale}-${offer ? "offer" : trial ? "trial" : "paid"}-${windowStart / WINDOW_MS}`;
+  const key = `plus-checkout-${user.id}-${locale}-${deal.currency}-${offer ? "offer" : trial ? "trial" : "paid"}-${windowStart / WINDOW_MS}`;
   const expiresAt = Math.floor(windowStart / 1000) + 70 * 60; // 60–70 min from now, inside Stripe's 30 min–24 h
 
   // At most one payable session per person: expire any other still open (an
@@ -105,6 +111,8 @@ export async function POST(req: Request): Promise<Response> {
       {
         mode: "subscription",
         line_items: [{ price, quantity: 1 }],
+        // The currency the page showed (the Price's currency_options has it), never Stripe's guess from the IP.
+        currency: deal.currency,
         // The card is taken now so the trial can turn into the yearly charge;
         // without one at the end, the subscription cancels instead.
         payment_method_collection: "always",
@@ -114,7 +122,7 @@ export async function POST(req: Request): Promise<Response> {
           metadata: { user_id: user.id },
           ...(trial ? { trial_period_days: TRIAL_DAYS, trial_settings: { end_behavior: { missing_payment_method: "cancel" } } } : {}),
         },
-        ...(offer && coupon ? { discounts: [{ coupon }] } : {}),
+        ...(coupon ? { discounts: [{ coupon }] } : {}),
         metadata: { user_id: user.id, checkout_key: k, locale, ...(offer ? { offer: "christmas" } : {}) },
         client_reference_id: user.id,
         ...(row?.store_customer_id ? { customer: row.store_customer_id } : { customer_email: user.email }),

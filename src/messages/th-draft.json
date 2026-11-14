@@ -1621,7 +1621,7 @@
   },
   {
     "key": "plus.offerSmall",
-    "en": "Christmas special, until 31 December. Then {price} a year. Cancel anytime.",
+    "en": "Christmas special, until 31 December. Then {price} a year. Cancel anytime in Me → Moodbow Plus.",
     "reason": "UX draft (native read pending)"
   },
   {

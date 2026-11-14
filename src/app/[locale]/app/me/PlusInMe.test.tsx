@@ -94,7 +94,7 @@ describe("PlusInMe: the Christmas offer's banner (1.3)", () => {
     expect(banner).toHaveTextContent(m.offerLabel);
     expect(banner).toHaveTextContent("Your first year for €24.99");
     expect(screen.getByTestId("me-plus-try")).toHaveTextContent(m.offerSee);
-    expect(banner).toHaveTextContent("Christmas special, until 31 December. Then €49.99 a year. Cancel anytime.");
+    expect(banner).toHaveTextContent("Christmas special, until 31 December. Then €49.99 a year. Cancel anytime in Me → Moodbow Plus.");
     expect(banner.textContent).not.toMatch(/%|half|7 days/i);
   });
 });

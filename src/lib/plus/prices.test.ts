@@ -3,10 +3,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 const prices = { retrieve: vi.fn() };
 const coupons = { retrieve: vi.fn() };
 vi.mock("./stripe", () => ({ getStripe: () => ({ prices, coupons }), stripeConfigured: () => true }));
-const { clearPriceCache, currencyFor, formatPrice, readPlusPrices } = await import("./prices");
+const { clearPriceCache, currencyFor, formatPrice, plusDeal, readPlusPrices } = await import("./prices");
 
 const PRICE = { currency: "usd", unit_amount: 5999, currency_options: { eur: { unit_amount: 4999 }, jpy: { unit_amount: 9599 }, gbp: { unit_amount: 4999 } } };
-const COUPON = { currency: "usd", amount_off: 3000, currency_options: { eur: { amount_off: 2500 }, jpy: { amount_off: 4800 } } };
+const COUPON = { valid: true, duration: "once", currency: "usd", amount_off: 3000, currency_options: { eur: { amount_off: 2500 }, jpy: { amount_off: 4800 } } };
 beforeEach(() => {
   vi.stubEnv("STRIPE_PLUS_PRICE_ID", "price_1");
   vi.stubEnv("STRIPE_PLUS_OFFER_COUPON_ID", "coupon_1");
@@ -45,5 +45,26 @@ describe("prices from Stripe, never typed in (the Reviewer's ruling)", () => {
     const p = await readPlusPrices("FR", "en", true);
     expect(p.firstYear).toBeNull();
     expect(p.year).toContain("59.99");
+  });
+});
+
+describe("plusDeal: the one decision the page and the checkout share (the Reviewer, #315)", () => {
+  it("the currency charged is the one shown: theirs where the Price has it, else the Price's own", async () => {
+    expect(await plusDeal("FR", true)).toEqual({ currency: "eur", year: 4999, firstYear: 2499, coupon: "coupon_1" });
+    clearPriceCache();
+    expect(await plusDeal("BR", true)).toEqual({ currency: "usd", year: 5999, firstYear: 2999, coupon: "coupon_1" });
+  });
+  it("no first-year price, so no coupon, when the coupon lacks that currency", async () => {
+    expect(await plusDeal("GB", true)).toEqual({ currency: "gbp", year: 4999, firstYear: null, coupon: null });
+  });
+  it("a coupon that isn't once-only (or isn't valid): no offer at all, or the renewal line would be untrue", async () => {
+    coupons.retrieve.mockResolvedValue({ ...COUPON, duration: "forever" });
+    expect((await plusDeal("FR", true))?.firstYear).toBeNull();
+    clearPriceCache();
+    coupons.retrieve.mockResolvedValue({ ...COUPON, duration: "repeating" });
+    expect((await plusDeal("FR", true))?.coupon).toBeNull();
+    clearPriceCache();
+    coupons.retrieve.mockResolvedValue({ ...COUPON, valid: false });
+    expect((await plusDeal("FR", true))?.firstYear).toBeNull();
   });
 });

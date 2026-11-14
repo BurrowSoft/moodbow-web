@@ -2,6 +2,7 @@ import type { createSupabaseServerClient } from "@/lib/supabase/server";
 import { ENTITLEMENT_COLUMNS, parseEntitlement } from "./entitlements";
 import { offerActive, offerEligible } from "./offer";
 import { readPlusPrices } from "./prices";
+// readPlusPrices goes through plusDeal, the decision the checkout shares (the Reviewer, #315).
 import { plusView, type PlusView } from "./view";
 
 // What Me, Today and the Plus screen show about Plus: the person's view, the yearly price in their

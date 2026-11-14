@@ -3,9 +3,10 @@ import { plusPriceLabel } from "./view";
 
 // Every price on screen comes from Stripe, in the person's currency, the renewal included (the
 // Reviewer's ruling, 1.3): the yearly Price's currency_options (STRIPE_PLUS_PRICE_ID), and for the
-// Christmas offer the first-year coupon's (STRIPE_PLUS_OFFER_COUPON_ID, amount_off per currency;
-// the first year is the price less that). Nothing is typed in here. Without Stripe (a build with no
-// keys) the yearly label falls back to the pre-launch US$ one, and there's no offer at all.
+// Christmas offer the first-year coupon's (STRIPE_PLUS_OFFER_COUPON_ID, amount_off per currency,
+// duration "once"; the first year is the price less that). Nothing is typed in here.
+// plusDeal is the ONE decision the page and the checkout share (the Reviewer, #315): the currency
+// shown is the currency charged, and the offer shows exactly when the checkout applies it.
 
 // The person's currency from their saved country (store/plus-prices.md's 40 rows). Argentina,
 // Turkey, Egypt and Nigeria pay in US$ (the USD fallbacks there); anywhere else not listed too.
@@ -33,35 +34,38 @@ export function formatPrice(value: number, currency: string, locale: string): st
   return /(^|[^A-Za-z])\$/.test(symbol) ? fmt("code") : symbol;
 }
 
-export type PlusPrices = { year: string; firstYear: string | null };
+// The deal for one person: the currency (theirs where the Price has it, else the Price's own), the
+// yearly amount, and the first year's only when the offer is wanted AND the coupon has an amount
+// for that very currency AND it applies once (a "forever" or "repeating" coupon would make "Then
+// {price} a year" untrue: no offer then). In minor units. null: Stripe isn't there or can't be read.
+export type PlusDeal = { currency: string; year: number; firstYear: number | null; coupon: string | null };
 
-type Amounts = { currency: string; year: number; off: number | null };
-const cache = new Map<string, { at: number; value: Amounts | null }>();
+const cache = new Map<string, { at: number; value: PlusDeal | null }>();
 const TTL_MS = 10 * 60 * 1000;
 
-async function amountsFor(currency: string, withOffer: boolean): Promise<Amounts | null> {
-  const key = `${currency}:${withOffer}`;
+export async function plusDeal(country: string | null | undefined, withOffer: boolean): Promise<PlusDeal | null> {
+  const wanted = currencyFor(country);
+  const key = `${wanted}:${withOffer}`;
   const hit = cache.get(key);
   if (hit && Date.now() - hit.at < TTL_MS) return hit.value;
   const priceId = process.env.STRIPE_PLUS_PRICE_ID?.trim();
   if (!priceId || !stripeConfigured()) return null;
-  let value: Amounts | null = null;
+  let value: PlusDeal | null = null;
   try {
     const stripe = getStripe();
     const price = await stripe.prices.retrieve(priceId, { expand: ["currency_options"] });
-    // The person's currency where the Price has it, else the Price's own (US$).
-    const own = price.currency_options?.[currency]?.unit_amount;
-    const cur = typeof own === "number" ? currency : price.currency;
+    const own = price.currency_options?.[wanted]?.unit_amount;
+    const currency = typeof own === "number" ? wanted : price.currency;
     const year = typeof own === "number" ? own : price.unit_amount;
     if (typeof year === "number") {
-      let off: number | null = null;
-      const couponId = process.env.STRIPE_PLUS_OFFER_COUPON_ID?.trim();
+      let firstYear: number | null = null;
+      const couponId = process.env.STRIPE_PLUS_OFFER_COUPON_ID?.trim() || null;
       if (withOffer && couponId) {
         const coupon = await stripe.coupons.retrieve(couponId, { expand: ["currency_options"] });
-        const amount = coupon.currency_options?.[cur]?.amount_off ?? (coupon.currency === cur ? coupon.amount_off : null);
-        off = typeof amount === "number" && amount > 0 && amount < year ? amount : null;
+        const off = coupon.currency_options?.[currency]?.amount_off ?? (coupon.currency === currency ? coupon.amount_off : null);
+        if (coupon.valid && coupon.duration === "once" && typeof off === "number" && off > 0 && off < year) firstYear = year - off;
       }
-      value = { currency: cur, year, off };
+      value = { currency, year, firstYear, coupon: firstYear === null ? null : couponId };
     }
   } catch {
     value = null;
@@ -70,13 +74,15 @@ async function amountsFor(currency: string, withOffer: boolean): Promise<Amounts
   return value;
 }
 
-// The yearly price and, during the offer for someone eligible, the first year's.
+export type PlusPrices = { year: string; firstYear: string | null };
+
+// The yearly price and, when the deal has one, the first year's, formatted for the page.
 export async function readPlusPrices(country: string | null | undefined, locale: string, withOffer: boolean): Promise<PlusPrices> {
-  const a = await amountsFor(currencyFor(country), withOffer);
-  if (!a) return { year: plusPriceLabel(locale), firstYear: null };
+  const d = await plusDeal(country, withOffer);
+  if (!d) return { year: plusPriceLabel(locale), firstYear: null };
   return {
-    year: formatPrice(fromMinor(a.year, a.currency), a.currency, locale),
-    firstYear: a.off === null ? null : formatPrice(fromMinor(a.year - a.off, a.currency), a.currency, locale),
+    year: formatPrice(fromMinor(d.year, d.currency), d.currency, locale),
+    firstYear: d.firstYear === null ? null : formatPrice(fromMinor(d.firstYear, d.currency), d.currency, locale),
   };
 }
 
