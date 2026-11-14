@@ -77,6 +77,12 @@ vi.mock("./EntryPreviews", () => ({ EntryPreviews: () => null }));
 vi.mock("./MilestoneCard", () => ({ MilestoneCard: () => null }));
 vi.mock("@/components/JournalUnavailable", () => ({ JournalUnavailable: () => <div data-testid="journal-unavailable" /> }));
 vi.mock("@/components/SessionEnded", () => ({ SessionEnded: () => null }));
+// Its own tests are SafetyCard.test.tsx; here, only what Today gives it.
+vi.mock("@/components/SafetyCard", () => ({
+  GetHelpNow: ({ testId, country, neutral, icon }: { testId: string; country: string | null | undefined; neutral?: boolean; icon?: boolean }) => (
+    <a data-testid={testId} data-country={String(country)} data-neutral={String(neutral)} data-icon={String(icon)} />
+  ),
+}));
 const { default: TodayPage } = await import("./page");
 
 const page = () => TodayPage({ params: Promise.resolve({ locale: "en" }) } as never);
@@ -113,6 +119,19 @@ describe("Today, whatever failed", () => {
   it("nothing failed: no error", async () => {
     await open();
     expect(screen.getByTestId("checkin-card")).toHaveAttribute("data-load-failed", "false");
+  });
+  // UX & PM, 13 Nov: Today's standing help, Me's card as a lifebuoy, in the header, always.
+  it("the lifebuoy is in Today's header, Me's neutral help, whatever failed or not", async () => {
+    for (const [c, e] of [[null, null], [{ message: "boom" }, null], [null, { message: "boom" }]] as const) {
+      checkInError = c;
+      entriesError = e;
+      await open();
+      const help = screen.getByTestId("today-help");
+      expect(help.closest("header")).not.toBeNull();
+      expect(help).toHaveAttribute("data-icon", "true");
+      expect(help).toHaveAttribute("data-neutral", "true");
+      cleanup();
+    }
   });
   it("a security update's read never holds Today: the page doesn't wait for it, and leaves it to its own part", async () => {
     await open();
