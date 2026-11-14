@@ -7,12 +7,12 @@ import { dialogButton } from "@/components/Dialog";
 import { Link } from "@/i18n/navigation";
 import type { PlusView } from "@/lib/plus/view";
 
-// Free rows, then what Plus adds: "your journal is free, insights are Plus" (Vitor, 14 Nov;
+// Free rows, then what Plus adds: "your journal is free, Insights come with Plus" (Vitor, 14 Nov;
 // specs/1.3-offer-review-voice-taps.md §2). No AI rows in any comparison: the AI allowance rules
 // stay in the code, unadvertised. Nothing free today gets a lock (wording only). rowExtras: one row
 // for the prompt library, the other ways to breathe and more reminders (UX, 14 Nov), never one each.
-const FREE_ROWS = ["rowJournal", "rowHelp", "rowRanges", "rowAppointment", "rowData"] as const;
-const PLUS_ROWS = ["rowYear", "rowMorePatterns", "rowReview", "rowLetters", "rowExtras", "rowPdf", "rowThemes"] as const;
+const FREE_ROWS = ["rowJournal", "rowHelp", "rowAppointment", "rowData"] as const;
+const PLUS_ROWS = ["rowInsights", "rowMorePatterns", "rowReview", "rowLetters", "rowExtras", "rowPdf", "rowThemes"] as const;
 
 function Tick({ label, plus }: { label: string; plus?: boolean }) {
   return (
@@ -172,6 +172,13 @@ export function PlusScreen({ view, price, started }: { view: PlusView; price: st
       <p data-testid="plus-renews" className={`text-[0.875em] text-muted ${large ? "leading-snug" : ""}`}>
         {t("renews")}
       </p>
+      {/* Where to cancel (the Reviewer's ruling): here, or at the end of the content at large text,
+          where the pinned part keeps only the price, the renewal and the button. */}
+      {!large && (
+        <p data-testid="plus-cancel" className="text-[0.875em] text-muted">
+          {t("cancelWhere")}
+        </p>
+      )}
       {/* At large text its lines sit closer (de: three lines at 32 px), so the content keeps room. */}
       <button type="button" data-testid="plus-start" disabled={busy} onClick={() => void go("/api/checkout/stripe")} className={`${dialogButton(true)} ${large ? "leading-tight" : ""}`}>
         {view.trial ? t("startTrial") : t("start")}
@@ -192,6 +199,11 @@ export function PlusScreen({ view, price, started }: { view: PlusView; price: st
           </p>
         )
       ) : null}
+      {!has && large && (
+        <p data-testid="plus-cancel" className="text-sm text-muted">
+          {t("cancelWhere")}
+        </p>
+      )}
       {!has && (
         <Link href="/app/me" data-testid="plus-not-now" className="inline-flex min-h-11 items-center justify-center text-sm font-medium text-accent underline underline-offset-4">
           {t("notNow")}

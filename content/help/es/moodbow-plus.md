@@ -4,11 +4,11 @@ summary: Lo que es gratis, lo que añade Plus, la semana gratis y cómo cancelar
 topic: Privacy & account
 es-draft: true
 ---
-{pending:plus}Tu diario es gratis. Plus añade un análisis más profundo. La ayuda y tus datos son gratis para todos, siempre.
+{pending:plus}Tu diario es gratis. El Resumen viene con Plus. La ayuda y tus datos son gratis para todos, siempre.
 
-**Gratis:** registros y tu diario sin límite, la Cronología, el calendario y la búsqueda, la ayuda y tu plan de seguridad, lo que te ayuda y los ejercicios de anclaje, el resumen para tu cita, Tu semana, Semana, Mes y 3 meses en Resumen, los patrones de los últimos 3 meses, exportar, importar y eliminar.
+**Gratis:** registros y tu diario sin límite, la Cronología, el calendario y la búsqueda, la ayuda y tu plan de seguridad, lo que te ayuda y los ejercicios de anclaje, el resumen para tu cita, exportar, importar y eliminar.
 
-**Plus añade:** tu año y todo el historial en Resumen, más patrones y Lo que me levanta el ánimo, el resumen del año, las cartas para tu yo del futuro, más temas (e iconos en la app), un PDF cuidado de tu diario, una biblioteca de preguntas para escribir y más formas de respirar en **Lo que me ayuda**. Las preguntas de «Días difíciles» de la biblioteca de preguntas son gratis para todos.
+**Plus añade:** el Resumen (semana, mes, 3 meses, tu año y todo el historial), los patrones y Lo que me levanta el ánimo, el resumen del año, las cartas para mi yo del futuro, más temas (e iconos en la app), un PDF cuidado de tu diario, una biblioteca de preguntas para escribir, más formas de respirar en **Lo que me ayuda** y más recordatorios. Las preguntas de «Días difíciles» de la biblioteca de preguntas son gratis para todos.
 
 **Más patrones** puede incluir tus propias etiquetas, cuando empieces a usarlas.
 

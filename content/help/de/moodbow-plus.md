@@ -4,11 +4,11 @@ summary: Was kostenlos ist, was Plus dazugibt, die kostenlose Woche und wie du k
 topic: Privacy & account
 de-draft: true
 ---
-{pending:plus}Dein Tagebuch ist kostenlos. Plus bringt tiefere Einblicke. Hilfe und deine Daten sind für alle kostenlos, immer.
+{pending:plus}Dein Tagebuch ist kostenlos. Einblicke gibt es mit Plus. Hilfe und deine Daten sind für alle kostenlos, immer.
 
-**Kostenlos:** Check-ins und dein Tagebuch ohne Grenze, der Verlauf, der Kalender und die Suche, Hilfe und dein Sicherheitsplan, was dir hilft und Erdungsübungen, die Zusammenfassung für den Termin, Deine Woche, Woche, Monat und 3 Monate in Einblicke, Muster der letzten 3 Monate, Export, Import und Löschen.
+**Kostenlos:** Check-ins und dein Tagebuch ohne Grenze, der Verlauf, der Kalender und die Suche, Hilfe und dein Sicherheitsplan, was dir hilft und Erdungsübungen, die Zusammenfassung für den Termin, Export, Import und Löschen.
 
-**Plus gibt dazu:** dein Jahr und alles bisher in Einblicke, mehr Muster und Was mir guttut, den Jahresrückblick, Briefe an dein zukünftiges Ich, mehr Themes (und App-Symbole in der App), ein gestaltetes PDF deines Tagebuchs, eine Fragensammlung zum Schreiben und mehr Arten zu atmen in **Was mir hilft**. Die Fragen für „Schwere Tage“ in der Fragensammlung sind für alle kostenlos.
+**Plus gibt dazu:** Einblicke (Woche, Monat, 3 Monate, dein Jahr und alles bisher), Muster und Was mir guttut, den Jahresrückblick, Briefe an mein zukünftiges Ich, mehr Themes (und App-Symbole in der App), ein gestaltetes PDF deines Tagebuchs, eine Fragensammlung zum Schreiben, mehr Arten zu atmen in **Was mir hilft** und mehr Erinnerungen. Die Fragen für „Schwere Tage“ in der Fragensammlung sind für alle kostenlos.
 
 **Mehr Muster** kann auch deine eigenen Tags einbeziehen, sobald du sie nutzt.
 

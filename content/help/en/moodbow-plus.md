@@ -3,11 +3,11 @@ title: Moodbow Plus
 summary: What's free, what Plus adds, the free week, and how to cancel.
 topic: Privacy & account
 ---
-{pending:plus}Your journal is free. Plus adds deeper insights. Help and your data are free for everyone, always.
+{pending:plus}Your journal is free. Insights come with Plus. Help and your data are free for everyone, always.
 
-**Free:** check-ins and your journal with no limit, the Timeline, the calendar and search, help and your safety plan, things that help you and grounding, the appointment summary, Your week, Week, Month and 3 months in Insights, patterns over the last 3 months, export, import and delete.
+**Free:** check-ins and your journal with no limit, the Timeline, the calendar and search, help and your safety plan, things that help you and grounding, the appointment summary, export, import and delete.
 
-**Plus adds:** your year and all time in Insights, more patterns and What lifts me, Year in review, letters to future you, more themes (and app icons in the app), a designed PDF of your journal, a prompt library to write from, and more ways to breathe in **Things that help me**. The prompt library's Hard days prompts are free for everyone.
+**Plus adds:** Insights (week, month, 3 months, your year and all time), patterns and What lifts me, Year in review, letters to future me, more themes (and app icons in the app), a designed PDF of your journal, a prompt library to write from, more ways to breathe in **Things that help me**, and more reminders. The prompt library's Hard days prompts are free for everyone.
 
 **More patterns** can include your own tags, once you use them.
 
