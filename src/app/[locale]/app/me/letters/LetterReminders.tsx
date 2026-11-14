@@ -84,7 +84,7 @@ export function LetterReminders({ value, onChange, today, opens }: { value: Lett
                 <path d="M6 9l6 7 6-7z" />
               </svg>
             </label>
-            <div data-testid="letter-reminder-controls" className="ms-auto flex shrink-0 items-center gap-x-[10px]">
+            <div data-testid="letter-reminder-controls" className="ms-auto flex min-w-0 max-w-full flex-wrap items-center justify-end gap-x-[10px] gap-y-[6px]">
               <input type="time" aria-label={t("remindersTimeFor", { when: daysLabel(r.days_before) })} value={r.time} onChange={(e) => e.target.value && update(r.days_before, { time: e.target.value })} data-testid="letter-reminder-time" className={pill} />
               <Switch on={r.on} label={t("remindersOnFor", { when: daysLabel(r.days_before) })} onChange={(on) => update(r.days_before, { on })} testId="letter-reminder-on" />
               <button type="button" aria-label={t("remindersRemove", { when: daysLabel(r.days_before) })} onClick={() => set(others(r.days_before))} data-testid="letter-reminder-remove" className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-muted">
@@ -98,7 +98,7 @@ export function LetterReminders({ value, onChange, today, opens }: { value: Lett
       })}
       <div data-testid="letter-reminder-day" className="flex min-h-12 flex-wrap items-center gap-x-[10px]">
         <span data-testid="letter-reminder-day-label" className="min-w-0 grow basis-[10em] text-sm text-text [overflow-wrap:anywhere]">{t("remindersOnTheDay")}</span>
-        <div className="ms-auto flex shrink-0 items-center gap-x-[10px]">
+        <div className="ms-auto flex min-w-0 max-w-full flex-wrap items-center justify-end gap-x-[10px] gap-y-[6px]">
           <input type="time" aria-label={t("remindersTimeFor", { when: t("remindersOnTheDay") })} value={day.time} onChange={(e) => e.target.value && update(0, { time: e.target.value })} data-testid="letter-reminder-day-time" className={pill} />
           <Switch on={day.on} label={t("remindersOnFor", { when: t("remindersOnTheDay") })} onChange={(on) => update(0, { on })} testId="letter-reminder-day-on" />
           <span aria-hidden="true" className="w-11 shrink-0" />

@@ -3145,7 +3145,12 @@ test("letter reminders: labels whole at 390 and 320 px / 300 %, en and de, contr
           const apart = time.left >= label.right - 0.5 || time.top >= label.bottom - 0.5;
           return !apart;
         }).length;
-        return { clipped, overlaps, overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth };
+        // What sticks out past the right edge, named, so a failure says which part.
+        const sticksOut = [...document.querySelectorAll("main *")]
+          .filter((e) => e.getBoundingClientRect().right > window.innerWidth + 0.5 && e.getBoundingClientRect().width > 1 && !e.classList.contains("sr-only"))
+          .slice(0, 4)
+          .map((e) => `${e.tagName.toLowerCase()}${e.getAttribute("data-testid") ? `[${e.getAttribute("data-testid")}]` : ""} ${Math.round(e.getBoundingClientRect().right)}`);
+        return { clipped, overlaps, sticksOut, overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth };
       });
     for (const [route, saved] of [["", "en"], ["/de", "de"]] as const) {
       await setProfileLocale(email, password, saved);
@@ -3160,7 +3165,7 @@ test("letter reminders: labels whole at 390 and 320 px / 300 %, en and de, contr
         const where = `${saved} at ${width} px / ${percent} %`;
         const result = await check();
         console.log(`letter reminders ${where}: ${JSON.stringify(result)}`);
-        expect(result, `${where}: labels whole, controls apart, nothing sideways`).toEqual({ clipped: [], overlaps: 0, overflow: 0 });
+        expect(result, `${where}: labels whole, controls apart, nothing sideways`).toEqual({ clipped: [], overlaps: 0, sticksOut: [], overflow: 0 });
       }
     }
     // The transparent select keeps a visible ring (UX): Tab back onto it from its time field.
