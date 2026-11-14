@@ -26,6 +26,7 @@ import { dateLocale } from "@/lib/journal/today";
 import { readPlusPage } from "@/lib/plus/page";
 import { withTimeout } from "@/lib/ui/withTimeout";
 import { PlusInMe } from "./PlusInMe";
+import { MePicture } from "./MePicture";
 
 // The export (export_my_data may take 30 s: lib/supabase/deadline) and the
 // import batches run in this page's functions: 60, so their own clean error
@@ -81,6 +82,9 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
       {/* Get help now (M8): at the top, on its own, AI or not; not repeated
           under Help (decision 128). */}
       <GetHelpNow country={me.profile?.country} testId="me-get-help" neutral />
+      {/* The big card (board 6b): their own picture, this browser only. After help, which stays
+          first on the web until Me follows board 1 (UX, F5). No App icon row on the web. */}
+      {pageGate("me-picture-live") !== "hidden" && <MePicture uid={user.id} />}
       {/* Moodbow Plus (decision 246): always after help, never in front of it. */}
       {plusPage && <PlusInMe view={plusPage.view} price={plusPage.price} offer={plusPage.offer} />}
 

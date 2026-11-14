@@ -10,6 +10,8 @@ vi.mock("@/i18n/navigation", () => ({
     </a>
   ),
 }));
+const clearPictures = vi.fn(async () => {});
+vi.mock("@/lib/me/picture", () => ({ clearPictures: () => clearPictures() }));
 const { SessionEnded } = await import("./SessionEnded");
 afterEach(cleanup);
 
@@ -24,5 +26,16 @@ describe("SessionEnded: help stays (decision 218)", () => {
     expect(help).toHaveTextContent(messages.me.meGetHelpNow);
     fireEvent.click(help);
     expect(screen.getByText(messages.safety.safetyTitle)).toBeInTheDocument();
+  });
+});
+
+describe("SessionEnded: no session, no picture left (the Reviewer, #321)", () => {
+  it("every Me picture in this browser is removed", () => {
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <SessionEnded />
+      </NextIntlClientProvider>,
+    );
+    expect(clearPictures).toHaveBeenCalledTimes(1);
   });
 });

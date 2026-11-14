@@ -11,6 +11,7 @@ import { csvFileName, deleteWordTyped, exportFileName, journalFileName } from "@
 import { wipeLocalData } from "@/lib/localData";
 import { EXPORT_WAIT_MS, withTimeout } from "@/lib/ui/withTimeout";
 import { deleteMyAccount, exportMyData, type DeleteAccountState } from "./actions";
+import { removePicture } from "@/lib/me/picture";
 
 type ExportFile = { kind: "txt" | "json" | "csv"; name: string; url: string };
 const LINK_LABELS = { txt: "exportReadable", json: "exportData", csv: "exportCsv" } as const;
@@ -49,6 +50,8 @@ export function YourData({ credits, uid, csv = false, ai = false, plusSource = n
           } catch {
             // storage unavailable: nothing was kept here either
           }
+          // Me's own picture too (this browser only).
+          await removePicture(uid).catch(() => {});
         }
         throw e;
       }

@@ -384,7 +384,11 @@
     "importStopped": "การนำเข้าหยุดกลางคัน ทุกอย่างก่อนหน้านั้นบันทึกไว้แล้ว นำเข้าไฟล์เดิมอีกครั้งเพื่อให้เสร็จ",
     "pastReports": "รายงานที่ผ่านมาของคุณ",
     "pastReportsIntro": "รายงานรายสัปดาห์ที่ Moodbow ทำให้คุณ ยังอยู่ที่นี่ให้อ่านได้",
-    "pastReportsWeek": "{start} – {end}"
+    "pastReportsWeek": "{start} – {end}",
+    "pictureRegion": "รูปของคุณ",
+    "pictureChoose": "เลือกรูปสำหรับพื้นที่นี้",
+    "pictureRemove": "ลบรูป",
+    "pictureFailed": "ใช้รูปนี้ไม่ได้ ลองใช้ไฟล์ JPEG หรือ PNG"
   },
   "export": {
     "exportTitle": "Moodbow: ไดอารี่ของคุณ",

@@ -384,7 +384,11 @@
     "importStopped": "L'importation s'est arrêtée en cours de route. Tout ce qui précède est enregistré ; importez à nouveau le même fichier pour terminer.",
     "pastReports": "Vos anciens rapports",
     "pastReportsIntro": "Les rapports hebdomadaires que Moodbow a faits pour vous. Ils restent ici, à relire.",
-    "pastReportsWeek": "{start} – {end}"
+    "pastReportsWeek": "{start} – {end}",
+    "pictureRegion": "Votre image",
+    "pictureChoose": "Choisir une image pour cet espace",
+    "pictureRemove": "Retirer l'image",
+    "pictureFailed": "Cette image n'a pas pu être utilisée. Essayez un JPEG ou un PNG."
   },
   "export": {
     "exportTitle": "Moodbow : votre journal",
