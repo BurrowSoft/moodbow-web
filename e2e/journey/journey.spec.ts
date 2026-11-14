@@ -2302,15 +2302,17 @@ test("pictures: a Plus moment takes a real JPEG with EXIF; the tile shows; the s
     expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth), "Timeline with pictures at 300 %: no sideways scroll").toBeLessThanOrEqual(0);
     // The entry's tile at 300 % on 320 px: the ✕ (44 px) never covers the whole open button
     // (the a11y sweep, #326: a rem ✕ grew past a 60 px tile, axe target-size). A clear 24 px
-    // square at the tile's bottom-left belongs to the open button, and nothing scrolls sideways.
+    // square in the tile's bottom-left quadrant belongs to the open button, and nothing scrolls sideways.
     await page.goto(`/app/entries/${moment}`);
     await expect(page.getByTestId("entry-picture")).toHaveCount(1, { timeout: 15_000 });
     // elementFromPoint sees only the viewport: at 300 % the tile is below the fold, so centre it first.
     await page.getByTestId("entry-picture-open").first().evaluate((el) => el.scrollIntoView({ block: "center" }));
     const tile = await page.evaluate(() => {
       const open = document.querySelector('[data-testid="entry-picture-open"]')!.getBoundingClientRect();
-      const x = open.left + 12;
-      const y = open.bottom - 12;
+      // The middle of the bottom-left quadrant: clear of the ✕ (top right) and of the tile's rounded
+      // corner, which hit-testing clips (the first probe at 12 px in landed on the corner's curve).
+      const x = open.left + open.width / 4;
+      const y = open.bottom - open.height / 4;
       const corners = [
         [x - 11, y - 11],
         [x + 11, y - 11],
