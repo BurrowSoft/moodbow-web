@@ -2301,6 +2301,38 @@ test("pictures: a Plus moment takes a real JPEG with EXIF; the tile shows; the s
     await page.goto("/app/timeline");
     await expect(page.getByTestId("timeline-pictures").first()).toBeVisible({ timeout: 15_000 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth), "Timeline with pictures at 300 %: no sideways scroll").toBeLessThanOrEqual(0);
+    // The entry's tile at 300 % on 320 px: the ✕ (44 px) never covers the whole open button
+    // (the a11y sweep, #326: a rem ✕ grew past a 60 px tile, axe target-size). A clear 24 px
+    // square in the tile's bottom-left quadrant belongs to the open button, and nothing scrolls sideways.
+    await page.goto(`/app/entries/${moment}`);
+    await expect(page.getByTestId("entry-picture")).toHaveCount(1, { timeout: 15_000 });
+    // elementFromPoint sees only the viewport: at 300 % the tile is below the fold, so centre it first.
+    await page.getByTestId("entry-picture-open").first().evaluate((el) => el.scrollIntoView({ block: "center" }));
+    const tile = await page.evaluate(() => {
+      const open = document.querySelector('[data-testid="entry-picture-open"]')!.getBoundingClientRect();
+      // The middle of the bottom-left quadrant: clear of the ✕ (top right) and of the tile's rounded
+      // corner, which hit-testing clips (the first probe at 12 px in landed on the corner's curve).
+      const x = open.left + open.width / 4;
+      const y = open.bottom - open.height / 4;
+      const corners = [
+        [x - 11, y - 11],
+        [x + 11, y - 11],
+        [x - 11, y + 11],
+        [x + 11, y + 11],
+        [x, y],
+      ];
+      const hits = corners.map(([px, py]) => {
+        const el = document.elementFromPoint(px, py);
+        // Each miss named in full: tag, test id and classes (the Reviewer, #322).
+        return el?.closest('[data-testid="entry-picture-open"]') ? "open" : el ? `${el.tagName.toLowerCase()}${el.getAttribute("data-testid") ? `[${el.getAttribute("data-testid")}]` : ""}.${(el.getAttribute("class") ?? "").trim().split(/\s+/).join(".")} @${Math.round(px)},${Math.round(py)}` : `none @${Math.round(px)},${Math.round(py)}`;
+      });
+      const clear = hits.every((h) => h === "open");
+      const where = { open: [Math.round(open.left), Math.round(open.top), Math.round(open.width), Math.round(open.height)], viewport: [window.innerWidth, window.innerHeight], hits };
+      const remove = document.querySelector('[data-testid="entry-picture-remove"]')!.getBoundingClientRect();
+      return { where, clear, remove: [Math.round(remove.width), Math.round(remove.height)], overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth };
+    });
+    console.log(`entry tile at 300 %: ${JSON.stringify(tile)}`);
+    expect(tile, "the entry's tile at 300 %: a clear 24 px square to open it, the ✕ 44 px, no sideways scroll").toEqual({ where: tile.where, clear: true, remove: [44, 44], overflow: 0 });
     await cdp.send("Page.setFontSizes", { fontSizes: { standard: 16, fixed: 13 } });
   } finally {
     await cleanup(email);
