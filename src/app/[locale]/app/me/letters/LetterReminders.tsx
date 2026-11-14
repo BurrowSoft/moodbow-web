@@ -55,14 +55,24 @@ export function LetterReminders({ value, onChange, today, opens }: { value: Lett
         // shorter Open it shows what's there, and Save says why it can't go).
         const choices = [...new Set([...QUICK_DAYS.filter((d) => d === r.days_before || (fits(d) && !others(r.days_before).some((o) => o.days_before === d))), r.days_before])].sort((a, b) => a - b);
         return (
+          // When space is tight (390 px, long languages, large text) the label takes its own line
+          // and the time, switch and × move under it together, as in the app; never squeezed or
+          // clipped (the Web Tester, audit D). The select can't wrap, so its choice is shown as
+          // text that can, with the real select over it, transparent: taps and screen readers
+          // still reach the select.
           <div key={r.days_before} data-testid="letter-reminder" className="flex min-h-12 flex-wrap items-center gap-x-[10px]">
-            <label className="relative flex min-h-11 min-w-0 flex-1 items-center text-sm text-text">
+            {/* The transparent select's own ring would be invisible: the label draws the app's
+                ring (2 px accent, 3 px off) while the select has keyboard focus (UX). */}
+            <label data-testid="letter-reminder-label" className="relative flex min-h-11 min-w-0 grow basis-[10em] items-center rounded-md text-sm text-text has-[select:focus-visible]:outline-2 has-[select:focus-visible]:outline-offset-[3px] has-[select:focus-visible]:outline-[var(--accent)] has-[select:focus-visible]:outline-solid">
               <span className="sr-only">{t("remindersDaysBefore")}</span>
+              <span aria-hidden="true" className="min-w-0 pe-[20px] [overflow-wrap:anywhere]">
+                {daysLabel(r.days_before)}
+              </span>
               <select
                 value={r.days_before}
                 onChange={(e) => set([...others(r.days_before), { ...r, days_before: Number(e.target.value) }])}
                 data-testid="letter-reminder-days"
-                className="min-h-11 w-full min-w-0 cursor-pointer appearance-none bg-transparent pe-[20px] text-sm text-text [overflow-wrap:anywhere]"
+                className="absolute inset-0 h-full w-full cursor-pointer appearance-none opacity-0"
               >
                 {choices.map((d) => (
                   <option key={d} value={d}>
@@ -74,21 +84,25 @@ export function LetterReminders({ value, onChange, today, opens }: { value: Lett
                 <path d="M6 9l6 7 6-7z" />
               </svg>
             </label>
-            <input type="time" aria-label={t("remindersTimeFor", { when: daysLabel(r.days_before) })} value={r.time} onChange={(e) => e.target.value && update(r.days_before, { time: e.target.value })} data-testid="letter-reminder-time" className={pill} />
-            <Switch on={r.on} label={t("remindersOnFor", { when: daysLabel(r.days_before) })} onChange={(on) => update(r.days_before, { on })} testId="letter-reminder-on" />
-            <button type="button" aria-label={t("remindersRemove", { when: daysLabel(r.days_before) })} onClick={() => set(others(r.days_before))} data-testid="letter-reminder-remove" className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-muted">
-              <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                <path d="M6 6l12 12M18 6L6 18" />
-              </svg>
-            </button>
+            <div data-testid="letter-reminder-controls" className="ms-auto flex shrink-0 items-center gap-x-[10px]">
+              <input type="time" aria-label={t("remindersTimeFor", { when: daysLabel(r.days_before) })} value={r.time} onChange={(e) => e.target.value && update(r.days_before, { time: e.target.value })} data-testid="letter-reminder-time" className={pill} />
+              <Switch on={r.on} label={t("remindersOnFor", { when: daysLabel(r.days_before) })} onChange={(on) => update(r.days_before, { on })} testId="letter-reminder-on" />
+              <button type="button" aria-label={t("remindersRemove", { when: daysLabel(r.days_before) })} onClick={() => set(others(r.days_before))} data-testid="letter-reminder-remove" className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-muted">
+                <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <path d="M6 6l12 12M18 6L6 18" />
+                </svg>
+              </button>
+            </div>
           </div>
         );
       })}
-      <div className="flex min-h-12 flex-wrap items-center gap-x-[10px]">
-        <span className="min-w-0 flex-1 text-sm text-text">{t("remindersOnTheDay")}</span>
-        <input type="time" aria-label={t("remindersTimeFor", { when: t("remindersOnTheDay") })} value={day.time} onChange={(e) => e.target.value && update(0, { time: e.target.value })} data-testid="letter-reminder-day-time" className={pill} />
-        <Switch on={day.on} label={t("remindersOnFor", { when: t("remindersOnTheDay") })} onChange={(on) => update(0, { on })} testId="letter-reminder-day-on" />
-        <span aria-hidden="true" className="w-11 shrink-0" />
+      <div data-testid="letter-reminder-day" className="flex min-h-12 flex-wrap items-center gap-x-[10px]">
+        <span data-testid="letter-reminder-day-label" className="min-w-0 grow basis-[10em] text-sm text-text [overflow-wrap:anywhere]">{t("remindersOnTheDay")}</span>
+        <div className="ms-auto flex shrink-0 items-center gap-x-[10px]">
+          <input type="time" aria-label={t("remindersTimeFor", { when: t("remindersOnTheDay") })} value={day.time} onChange={(e) => e.target.value && update(0, { time: e.target.value })} data-testid="letter-reminder-day-time" className={pill} />
+          <Switch on={day.on} label={t("remindersOnFor", { when: t("remindersOnTheDay") })} onChange={(on) => update(0, { on })} testId="letter-reminder-day-on" />
+          <span aria-hidden="true" className="w-11 shrink-0" />
+        </div>
       </div>
       {heads.length < MAX_HEADS_UPS && free !== undefined && (
         <button type="button" onClick={() => set([...value, { days_before: free, time: day.time, on: true }])} data-testid="letter-reminder-add" className="inline-flex min-h-11 w-fit items-center gap-[6px] text-sm font-medium text-accent">

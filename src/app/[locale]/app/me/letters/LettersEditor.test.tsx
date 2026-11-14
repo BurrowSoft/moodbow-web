@@ -193,6 +193,33 @@ describe("LettersEditor: letters to future you are part of Plus (1.3 §3)", () =
   });
 });
 
+describe("LettersEditor: reminders and Open it, never squeezed (audit D)", () => {
+  it("a heads-up's choice shows as wrapping text with the real select over it; the controls move as one group; radios 24 px", () => {
+    page();
+    fireEvent.click(screen.getByTestId("letter-months-12"));
+    fireEvent.click(screen.getByTestId("letter-reminder-add"));
+    const row = screen.getByTestId("letter-reminder");
+    const label = within(row).getByTestId("letter-reminder-label");
+    const select = within(row).getByTestId("letter-reminder-days") as HTMLSelectElement;
+    const shown = label.querySelector('span[aria-hidden="true"]')!;
+    expect(shown.textContent).toBe(select.selectedOptions[0].textContent);
+    expect(select.className).toContain("absolute");
+    expect(select.className).toContain("opacity-0");
+    expect(label.className).toContain("basis-[10em]");
+    // The ring shows on the label while the transparent select has keyboard focus (UX).
+    expect(label.className).toContain("has-[select:focus-visible]:outline-2");
+    // The time, switch and × are one group, so they wrap under the label together.
+    const controls = within(row).getByTestId("letter-reminder-controls");
+    expect(controls).toContainElement(within(row).getByTestId("letter-reminder-time"));
+    expect(controls).toContainElement(within(row).getByTestId("letter-reminder-remove"));
+    expect(screen.getByTestId("letter-reminder-day-label").className).toContain("basis-[10em]");
+    // Changing the choice changes the shown text.
+    fireEvent.change(select, { target: { value: select.options[0].value } });
+    expect(within(screen.getByTestId("letter-reminder")).getByTestId("letter-reminder-label").querySelector('span[aria-hidden="true"]')!.textContent).toBe(select.options[0].textContent);
+    for (const radio of screen.getAllByRole("radio")) expect(radio.className).toContain("h-6 w-6");
+  });
+});
+
 describe("LettersEditor: reminders, like alarms (Vitor, 14 Nov; 033)", () => {
   it("on the day at 09:00 by default; heads-ups added, timed, switched off and removed; the app line", async () => {
     save.mockReturnValue(Promise.resolve({ status: "ok", letters: [] }));
