@@ -62,6 +62,8 @@ To show helplines near you when we don't know your country, we use the country y
 | Sentry | Error and crash reports, with personal details removed | USA |
 {pending:purchases}| Google Play, Apple App Store | Payments for AI credits | Global |{/pending}
 
+{pending:wear|purchases}Google Play services runs under [Google's own privacy policy](https://policies.google.com/privacy).{/pending}
+
 Each provider may use your data only to provide its service to us. Anthropic doesn't use data sent through its API to train its models, and it deletes it after a short period (at most 30 days) that it keeps for safety and abuse monitoring.
 When data goes outside your country (for example from the EU to the USA), we rely on each provider's data-processing agreement and its data-transfer safeguards, such as the EU Standard Contractual Clauses or the EU–US Data Privacy Framework.
 
