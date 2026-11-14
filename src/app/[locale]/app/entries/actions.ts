@@ -5,6 +5,7 @@ import { redirect } from "@/i18n/navigation";
 import { ENTRY_COLUMNS, entryErrorAction, isEntryId, parseEntry, sameEntry, type Entry, type EntryError } from "@/lib/journal/entry";
 import { originOf } from "@/lib/journal/origin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { removePictureFiles } from "@/lib/journal/pictureFiles";
 
 // stale: the entry changed (or was deleted) on another device since the
 // editor loaded it. `latest` is the server's version now (null if it's
@@ -79,6 +80,13 @@ export async function deleteEntry(_prev: DeleteState, form: FormData): Promise<D
   if (!isEntryId(id)) return { status: "error" };
   const supabase = await createSupabaseServerClient();
   if (!supabase) return { status: "error" };
+  // Its pictures' files go first, under their own session while the rows are live, and are checked
+  // gone (Storage lets the uploader read their own file whatever the row says). A failed remove
+  // leaves the entry as it is: they try again. No entry_pictures table yet (before 035): nothing.
+  const pictures = await supabase.from("entry_pictures").select("path, thumb_path").eq("entry_id", id);
+  if (pictures.error && !/entry_pictures|42P01|PGRST205/.test(`${pictures.error.code ?? ""} ${pictures.error.message ?? ""}`)) return { status: "error" };
+  const paths = ((pictures.data ?? []) as { path: string; thumb_path: string }[]).flatMap((p) => [p.path, p.thumb_path]);
+  if (!(await removePictureFiles(supabase, paths))) return { status: "error" };
   const { error } = await supabase.rpc("delete_entry", { p_id: id });
   const locale = await getLocale();
   if (error) {

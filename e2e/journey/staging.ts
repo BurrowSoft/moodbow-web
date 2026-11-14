@@ -308,3 +308,39 @@ export async function grantPlusTrial(email: string): Promise<void> {
   if (error) throw new Error(`the trial row failed: ${error.message}`);
   grantedHere.set(email, id);
 }
+
+// Pictures (035/036), the Storage API's own path: a user signed in with the publishable key, as the
+// app and the web are. Only this run's own users.
+export async function userSession(email: string, password: string): Promise<{ client: SupabaseClient; token: string }> {
+  if (!ours(email)) throw new Error("userSession only signs in this helper's own users");
+  const client = createClient(URL_, PUBLISHABLE, { auth: { persistSession: false, autoRefreshToken: false } });
+  const { data, error } = await client.auth.signInWithPassword({ email, password });
+  if (error || !data.session) throw new Error(`sign-in failed: ${error?.message ?? "no session"}`);
+  return { client, token: data.session.access_token };
+}
+
+// A picture added as the web route does it (reserve, both uploads, confirm), as that user.
+export async function addPicture(session: { client: SupabaseClient }, entryId: string, jpeg: Uint8Array): Promise<{ id: string; path: string; thumb: string }> {
+  const { data, error } = await session.client.rpc("picture_reserve", { p_entry: entryId, p_bytes: jpeg.length * 2 });
+  const row = Array.isArray(data) ? (data[0] as { id: string; path: string; thumb_path: string }) : null;
+  if (error || !row) throw new Error(`picture_reserve failed: ${error?.message ?? "no row"}`);
+  const bucket = session.client.storage.from("entry-pictures");
+  for (const p of [row.path, row.thumb_path]) {
+    const { error: upError } = await bucket.upload(p, new Blob([jpeg as BlobPart], { type: "image/jpeg" }), { contentType: "image/jpeg", upsert: false });
+    if (upError) throw new Error(`upload failed: ${upError.message}`);
+  }
+  const { error: confirmError } = await session.client.rpc("picture_confirm", { p_id: row.id, p_width: 16, p_height: 16 });
+  if (confirmError) throw new Error(`picture_confirm failed: ${confirmError.message}`);
+  return { id: row.id, path: row.path, thumb: row.thumb_path };
+}
+
+// The HTTP statuses a fresh sign request and an authenticated GET get for this path, with this
+// user's token (raw fetch, so the log holds the real codes).
+export async function storageStatus(token: string, path: string): Promise<{ sign: number; get: number }> {
+  const headers = { apikey: PUBLISHABLE, Authorization: `Bearer ${token}` };
+  const sign = await fetch(`${URL_}/storage/v1/object/sign/entry-pictures/${path}`, { method: "POST", headers: { ...headers, "content-type": "application/json" }, body: JSON.stringify({ expiresIn: 60 }) });
+  const get = await fetch(`${URL_}/storage/v1/object/authenticated/entry-pictures/${path}`, { headers });
+  await sign.arrayBuffer().catch(() => undefined);
+  await get.arrayBuffer().catch(() => undefined);
+  return { sign: sign.status, get: get.status };
+}
