@@ -16,6 +16,8 @@ export type Me = {
   settings?: {
     reminder_on: boolean;
     reminder_time: string | null;
+    // Plus: more daily reminders, "HH:MM:SS" each (migration 031); absent before it.
+    extra_reminder_times?: string[];
     tone?: string;
     focus_areas?: string[];
     ai_enabled?: boolean;

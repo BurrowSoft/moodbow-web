@@ -25,6 +25,7 @@ import { headers } from "next/headers";
 import { dateLocale } from "@/lib/journal/today";
 import { readPlusPage } from "@/lib/plus/page";
 import { withTimeout } from "@/lib/ui/withTimeout";
+import { extraReminders } from "@/lib/plus/view";
 import { PlusInMe } from "./PlusInMe";
 import { MePicture } from "./MePicture";
 import { lettersGate } from "@/lib/plus/letters";
@@ -166,7 +167,7 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
           </h2>
         </section>
       )}
-      <Reminder on={me.settings?.reminder_on ?? true} time={hhmm(me.settings?.reminder_time)} />
+      <Reminder on={me.settings?.reminder_on ?? true} time={hhmm(me.settings?.reminder_time)} extra={extraReminders(plus, me.settings?.extra_reminder_times, plusPage?.price ?? "")} />
       <LanguageRegion
         initial={{ locale: routeLocale(me.profile?.locale ?? locale), country: me.profile?.country ?? "", time_zone: me.profile?.time_zone ?? "UTC" }}
         countries={countryOptions(locale)}

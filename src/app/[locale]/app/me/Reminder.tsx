@@ -1,9 +1,11 @@
 "use client";
 
 import { startTransition, useActionState, useRef, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Switch } from "@/components/Switch";
+import { removedTimes } from "@/lib/journal/extraReminders";
 import { saveReminder, type ReminderState } from "./actions";
+import { ExtraReminders, timeLabel, type ExtraMode } from "./ExtraReminders";
 import { useUntilLoaded } from "@/lib/ui/untilLoaded";
 
 // Me → Daily reminder (M7): on/off and the time, saved as soon as either
@@ -12,13 +14,25 @@ import { useUntilLoaded } from "@/lib/ui/untilLoaded";
 // A failed save puts both controls back to what the account has, with the
 // error and Try again (which resends what was tried): a control never shows
 // a state the server doesn't have (decision 111, after the Web Tester's #19).
-export function Reminder({ on: initialOn, time: initialTime }: { on: boolean; time: string }) {
+// extra: Moodbow Plus's more reminders (ExtraReminders), or null where Plus isn't shown at all
+// (the plus flag off, or the Plus row unreadable).
+export function Reminder({ on: initialOn, time: initialTime, extra = null }: { on: boolean; time: string; extra?: { mode: ExtraMode; times: string[] } | null }) {
   const untilLoaded = useUntilLoaded();
   const t = useTranslations("me");
   const tt = useTranslations("today");
   const ta = useTranslations("app");
+  const locale = useLocale();
   const [on, setOn] = useState(initialOn);
   const [time, setTime] = useState(initialTime);
+  // The more reminders the account has; a new main time can remove some (the server drops any
+  // within an hour of it), and Me then says which, once (UX 12 Nov).
+  const [extraTimes, setExtraTimesState] = useState(extra?.times ?? []);
+  const extraRef = useRef(extraTimes);
+  const setExtraTimes = (next: string[]) => {
+    extraRef.current = next;
+    setExtraTimesState(next);
+  };
+  const [removed, setRemoved] = useState<string[]>([]);
   // What the account has (the last successful save).
   const saved = useRef({ on: initialOn, time: initialTime });
   // The last time sent, so leaving the field unchanged sends nothing.
@@ -31,7 +45,13 @@ export function Reminder({ on: initialOn, time: initialTime }: { on: boolean; ti
       if (typeof (e as { digest?: unknown })?.digest === "string" && (e as { digest: string }).digest.startsWith("NEXT_REDIRECT")) throw e;
       result = { status: "error", on: form.get("reminder_on") === "true", time: String(form.get("reminder_time")) };
     }
-    if (result.status === "saved") saved.current = { on: result.on, time: result.time };
+    if (result.status === "saved") {
+      saved.current = { on: result.on, time: result.time };
+      if (result.extra) {
+        setRemoved(removedTimes(extraRef.current, result.extra));
+        setExtraTimes(result.extra);
+      } else setRemoved([]);
+    }
     if (result.status === "error") {
       setOn(saved.current.on);
       setTime(saved.current.time);
@@ -85,6 +105,14 @@ export function Reminder({ on: initialOn, time: initialTime }: { on: boolean; ti
         onBlur={(e) => e.target.value && e.target.value !== sentTime.current && save(on, e.target.value)}
         className="mt-2 block min-w-0 max-w-full rounded-2xl border border-border bg-bg px-[16px] py-3 text-text [font-size:min(1rem,max(10vw,32px))] disabled:opacity-50"
       />
+      {extra && <ExtraReminders mode={extra.mode} on={on && !busy} mainTime={time} times={extraTimes} setTimes={setExtraTimes} />}
+      {extra && removed.length > 0 && (
+        <ul data-testid="me-reminder-extra-removed" className="mt-3 space-y-1 text-sm font-medium text-text">
+          {removed.map((r) => (
+            <li key={r}>{t("reminderExtraRemoved", { time: timeLabel(r, locale) })}</li>
+          ))}
+        </ul>
+      )}
       <p className="mt-3 text-sm text-muted" data-testid="me-reminder-note">
         {t("webReminderNote")}
       </p>

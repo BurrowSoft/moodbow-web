@@ -5,4 +5,6 @@ topic: Settings
 ---
 {pending:app_reminders}In **Me → Daily reminder**{pending:web_journal_live} (in the app or on the web){/pending}, turn the reminder on or off and choose its time. Your phone sends the reminder itself, so it works even without a connection, and it never shows anything you wrote. If you've checked in on this phone that day, there's no reminder. If you don't open Moodbow for a month, the reminders pause until you open it again.
 
-The reminder itself arrives on your phone, from the Moodbow app. If notifications are off for Moodbow in your phone's settings, turn them on there.{/pending}
+The reminder itself arrives on your phone, from the Moodbow app. If notifications are off for Moodbow in your phone's settings, turn them on there.
+
+{pending:plus}With Moodbow Plus, you can add up to 2 more times a day, at least an hour apart, with **Add another time**. After you check in, the rest of that day's reminders are skipped.{/pending}{/pending}

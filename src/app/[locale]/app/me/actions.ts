@@ -5,6 +5,7 @@ import { getLocale } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
 import { deleteWordTyped, localDay } from "@/lib/journal/account";
 import { isFocusArea, isTone } from "@/lib/journal/ai";
+import { EXTRA_REMINDERS, extraReminderError, parseExtraTimes, toHHMM, type ExtraReminderError } from "@/lib/journal/extraReminders";
 import { consentItem } from "@/lib/legalVersions";
 import { cancelStripeBeforeDelete } from "@/lib/plus/cancelOnDelete";
 import { isCountry, isTimeZoneName } from "@/lib/region/countries";
@@ -101,7 +102,10 @@ export async function deleteMyAccount(_prev: DeleteAccountState, form: FormData)
   return redirect({ href: "/sign-in?signed_out=deleted", locale });
 }
 
-export type ReminderState = { status: "idle" } | { status: "saved"; on: boolean; time: string } | { status: "error"; on: boolean; time: string };
+// extra: the more reminders (Plus) the account has after the save, from the row
+// update_settings returns (a new main time drops any within an hour of it); null when the
+// row doesn't carry them (before migration 031).
+export type ReminderState = { status: "idle" } | { status: "saved"; on: boolean; time: string; extra?: string[] | null } | { status: "error"; on: boolean; time: string };
 
 const TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
 
@@ -114,12 +118,34 @@ export async function saveReminder(_prev: ReminderState, form: FormData): Promis
   if (!TIME.test(time)) return { status: "error", on, time };
   const supabase = await createSupabaseServerClient();
   if (!supabase) return { status: "error", on, time };
-  const { error } = await supabase.rpc("update_settings", { p_reminder_on: on, p_reminder_time: time });
+  const { data, error } = await supabase.rpc("update_settings", { p_reminder_on: on, p_reminder_time: time });
   if (error) {
     if (error.message.includes("not_authenticated")) return redirect({ href: "/sign-in", locale: await getLocale() });
     return { status: "error", on, time };
   }
-  return { status: "saved", on, time };
+  const row = (Array.isArray(data) ? data[0] : data) as { extra_reminder_times?: unknown } | null;
+  return { status: "saved", on, time, ...(row && typeof row === "object" && "extra_reminder_times" in row ? { extra: parseExtraTimes(row.extra_reminder_times) } : {}) };
+}
+
+export type ExtraRemindersResult = { ok: true; times: string[] } | { ok: false; error: ExtraReminderError | "generic" };
+
+// Me → Daily reminder, more times (Plus, specs/plus-more-reminders.md):
+// update_extra_reminders(p_times) stores the whole list and returns it. The server checks
+// Plus (has_plus), the count and the hour's gap; removing is always allowed. The form checks
+// the same first. Errors are codes, never messages.
+export async function saveExtraReminders(times: string[]): Promise<ExtraRemindersResult> {
+  if (!Array.isArray(times)) return { ok: false, error: "invalid" };
+  const list = times.map(toHHMM);
+  if (list.some((t) => t === null)) return { ok: false, error: "invalid" };
+  if (new Set(list).size > EXTRA_REMINDERS.maxExtra) return { ok: false, error: "too_many" };
+  const supabase = await createSupabaseServerClient();
+  if (!supabase) return { ok: false, error: "generic" };
+  const { data, error } = await supabase.rpc("update_extra_reminders", { p_times: list });
+  if (error) {
+    if (error.message.includes("not_authenticated")) return redirect({ href: "/sign-in", locale: await getLocale() });
+    return { ok: false, error: extraReminderError(error.message) };
+  }
+  return { ok: true, times: parseExtraTimes(data) };
 }
 
 // Me → AI (M9; reflect.md, "Me → AI"). Each returns whether the account now
