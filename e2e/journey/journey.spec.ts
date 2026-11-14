@@ -3277,9 +3277,8 @@ test("Plus more reminders on staging: locked when free; with Plus, saved, read b
     await ready();
     await expect(page.getByTestId("me-reminder-extra")).toBeVisible({ timeout: 15_000 });
     await expect(page.getByTestId("me-reminder-extra-add")).toHaveCount(0);
-    await page.getByTestId("me-reminder-extra-add-locked").click();
-    await expect(page.getByRole("dialog", { name: messages.plus.sheetReminders })).toBeVisible();
-    await page.getByTestId("plus-sheet-not-now").click();
+    // The Plus sheet is retired since #315: the lock links to the Plus screen (release/1.3.0).
+    await expect(page.getByTestId("me-reminder-extra-add-locked")).toHaveAttribute("href", "/app/me/plus");
 
     // With Plus: add 08:00 beside the main 21:00, saved by update_extra_reminders, read back by get_me.
     await grantPlusTrial(email);
