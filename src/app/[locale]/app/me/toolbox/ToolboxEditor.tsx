@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { dialogButton } from "@/components/Dialog";
 import { TOOLBOX_RULES, toolboxLength, toolboxProblem, type ToolboxItem } from "@/lib/journal/toolbox";
 import { addToolboxItem, deleteToolboxItem, moveToolboxItem, updateToolboxItem, type ToolboxResult } from "./actions";
-import { Breathing } from "./Breathing";
+import { Breathe } from "./Breathe";
 
 const FIELD = "min-h-11 w-full min-w-0 rounded-2xl border border-border bg-surface px-[12px] text-text placeholder:text-muted";
 const SMALL = "inline-flex min-h-11 min-w-11 items-center justify-center rounded-full px-[12px] font-medium text-accent underline underline-offset-4 disabled:opacity-50";
@@ -23,20 +23,12 @@ function Arrow({ up }: { up: boolean }) {
 }
 
 // The list couldn't be read: nothing to change, but a minute to breathe needs no data (UX).
-export function ToolboxBreatheOnly() {
-  const t = useTranslations("toolbox");
-  const [breathing, setBreathing] = useState(false);
-  return (
-    <>
-      <button type="button" data-testid="toolbox-breathe" onClick={() => setBreathing(true)} className={dialogButton()}>
-        {t("breathe")}
-      </button>
-      {breathing && <Breathing onClose={() => setBreathing(false)} />}
-    </>
-  );
+// hasPlus: the other ways to breathe too (Plus); without it, exactly today's.
+export function ToolboxBreatheOnly({ hasPlus = false }: { hasPlus?: boolean }) {
+  return <Breathe hasPlus={hasPlus} />;
 }
 
-export function ToolboxEditor({ initial }: { initial: ToolboxItem[] }) {
+export function ToolboxEditor({ initial, hasPlus = false }: { initial: ToolboxItem[]; hasPlus?: boolean }) {
   const t = useTranslations("toolbox");
   const tt = useTranslations("today");
   const [items, setItems] = useState(initial);
@@ -45,7 +37,6 @@ export function ToolboxEditor({ initial }: { initial: ToolboxItem[] }) {
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState<"full" | "tooLong" | "failed" | null>(null);
   const [deleted, setDeleted] = useState<{ text: string; position: number } | null>(null);
-  const [breathing, setBreathing] = useState(false);
   const addField = useRef<HTMLInputElement>(null);
   const full = items.length >= TOOLBOX_RULES.maxItems;
 
@@ -224,10 +215,7 @@ export function ToolboxEditor({ initial }: { initial: ToolboxItem[] }) {
         </p>
       )}
 
-      <button type="button" data-testid="toolbox-breathe" onClick={() => setBreathing(true)} className={dialogButton()}>
-        {t("breathe")}
-      </button>
-      {breathing && <Breathing onClose={() => setBreathing(false)} />}
+      <Breathe hasPlus={hasPlus} />
     </div>
   );
 }

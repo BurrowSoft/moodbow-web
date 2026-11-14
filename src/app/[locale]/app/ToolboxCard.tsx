@@ -25,7 +25,7 @@ const hiddenFor = (key: string) => {
 };
 
 // Things that help you (1.2): a gentle card on Today when the latest check-in saved today
-// is low (content/toolbox.json). It follows the check-in card, so it never comes before
+// is low (content/contracts/toolbox.json). It follows the check-in card, so it never comes before
 // a help offer (the Reviewer's read). Not now hides it for today, in this browser only.
 // The person's own items, and a minute to breathe; with none yet, a way to add one. items null:
 // the list couldn't be read, so only breathing, which needs no data (UX).

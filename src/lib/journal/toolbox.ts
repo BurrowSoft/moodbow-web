@@ -1,8 +1,19 @@
-import toolbox from "../../../content/toolbox.json";
+import toolbox from "../../../content/contracts/toolbox.json";
 
-// Things that help me (1.2; content/toolbox.json, the rules both clients run).
+// Things that help me (1.2; content/contracts/toolbox.json, the rules both clients run, from the
+// app repo since v2).
 export const TOOLBOX_RULES = toolbox.rules;
-export const BREATHING = toolbox.breathing;
+
+// Breathing (v2, specs/plus-breathing-draft.md): patterns of steps, each "in", "out" or "hold"
+// for whole seconds, run for whole cycles. The first is free (today's: in 4, out 6, six times);
+// the rest are Plus. No hold longer than 4 s, and each about a minute (the contract test).
+export type BreathStep = "in" | "out" | "hold";
+export type BreathingPattern = { id: string; plus: boolean; steps: [BreathStep, number][]; cycles: number };
+export const PATTERNS: BreathingPattern[] = toolbox.patterns as BreathingPattern[];
+export const FREE_PATTERN: BreathingPattern = PATTERNS[0];
+export const cycleSeconds = (p: BreathingPattern) => p.steps.reduce((sum, [, s]) => sum + s, 0);
+export const patternSeconds = (p: BreathingPattern) => cycleSeconds(p) * p.cycles;
+export const patternById = (id: string | null | undefined): BreathingPattern | null => PATTERNS.find((p) => p.id === id) ?? null;
 
 export type ToolboxItem = { id: string; text: string; position: number };
 
@@ -20,12 +31,19 @@ export function toolboxProblem(text: string, count: number, adding: boolean): To
 // Today's card: the latest check-in saved today has a low mood. null: none today.
 export const toolboxCardShows = (todayMood: number | null) => todayMood !== null && (TOOLBOX_RULES.lowMoods as readonly number[]).includes(todayMood);
 
-// Where breathing is, `second` seconds in (0 ≤ second < totalSeconds): the phase and
-// the whole seconds left in it, for the words shown with reduced motion.
-export function breathingAt(second: number): { phase: "in" | "out"; left: number } {
-  const cycle = BREATHING.inSeconds + BREATHING.outSeconds;
-  const into = second % cycle;
-  return into < BREATHING.inSeconds ? { phase: "in", left: BREATHING.inSeconds - into } : { phase: "out", left: cycle - into };
+// Where breathing is, `second` seconds in (0 ≤ second < the pattern's length): the step, the
+// whole seconds left in it (the words shown with reduced motion), and the breath before a hold
+// ("in": the circle stays full; "out": it stays small).
+export function breathingAt(second: number, pattern: BreathingPattern = FREE_PATTERN): { phase: BreathStep; left: number; held: "in" | "out" | null; of: number } {
+  let into = second % cycleSeconds(pattern);
+  // A hold at the very start follows the previous cycle's last breath.
+  let last = ([...pattern.steps].reverse().find(([s]) => s !== "hold")?.[0] ?? "out") as "in" | "out";
+  for (const [step, seconds] of pattern.steps) {
+    if (into < seconds) return { phase: step, left: seconds - into, held: step === "hold" ? last : null, of: seconds };
+    into -= seconds;
+    if (step !== "hold") last = step;
+  }
+  return { phase: "out", left: 1, held: null, of: 1 };
 }
 
 export const parseToolboxItems = (rows: unknown): ToolboxItem[] =>
