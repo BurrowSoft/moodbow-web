@@ -1,5 +1,11 @@
 import { getStripe, stripeConfigured } from "./stripe";
 import { plusPriceLabel } from "./view";
+import { TimedOut, withTimeout } from "@/lib/ui/withTimeout";
+
+// How long a page waits for Stripe's price reads (UX, 14 Nov): past it, the no-Stripe path (the
+// placeholder price, no offer), so a slow Stripe never holds Today's check-in. Not cached: the next
+// page asks again.
+export const STRIPE_DEADLINE_MS = 8_000;
 
 // Every price on screen comes from Stripe, in the person's currency, the renewal included (the
 // Reviewer's ruling, 1.3): the yearly Price's currency_options (STRIPE_PLUS_PRICE_ID), and for the
@@ -50,28 +56,34 @@ export async function plusDeal(country: string | null | undefined, withOffer: bo
   if (hit && Date.now() - hit.at < TTL_MS) return hit.value;
   const priceId = process.env.STRIPE_PLUS_PRICE_ID?.trim();
   if (!priceId || !stripeConfigured()) return null;
-  let value: PlusDeal | null = null;
+  let value: PlusDeal | null;
   try {
-    const stripe = getStripe();
-    const price = await stripe.prices.retrieve(priceId, { expand: ["currency_options"] });
-    const own = price.currency_options?.[wanted]?.unit_amount;
-    const currency = typeof own === "number" ? wanted : price.currency;
-    const year = typeof own === "number" ? own : price.unit_amount;
-    if (typeof year === "number") {
-      let firstYear: number | null = null;
-      const couponId = process.env.STRIPE_PLUS_OFFER_COUPON_ID?.trim() || null;
-      if (withOffer && couponId) {
-        const coupon = await stripe.coupons.retrieve(couponId, { expand: ["currency_options"] });
-        const off = coupon.currency_options?.[currency]?.amount_off ?? (coupon.currency === currency ? coupon.amount_off : null);
-        if (coupon.valid && coupon.duration === "once" && typeof off === "number" && off > 0 && off < year) firstYear = year - off;
-      }
-      value = { currency, year, firstYear, coupon: firstYear === null ? null : couponId };
-    }
-  } catch {
+    value = await withTimeout(readDeal(priceId, wanted, withOffer), STRIPE_DEADLINE_MS);
+  } catch (error) {
+    // Too slow: the no-Stripe path now, not remembered. Stripe said no: remembered for the TTL.
+    if (error instanceof TimedOut) return null;
     value = null;
   }
   cache.set(key, { at: Date.now(), value });
   return value;
+}
+
+// Stripe's two reads (the Price, then the coupon when the offer is wanted). Throws when Stripe does.
+async function readDeal(priceId: string, wanted: string, withOffer: boolean): Promise<PlusDeal | null> {
+  const stripe = getStripe();
+  const price = await stripe.prices.retrieve(priceId, { expand: ["currency_options"] });
+  const own = price.currency_options?.[wanted]?.unit_amount;
+  const currency = typeof own === "number" ? wanted : price.currency;
+  const year = typeof own === "number" ? own : price.unit_amount;
+  if (typeof year !== "number") return null;
+  let firstYear: number | null = null;
+  const couponId = process.env.STRIPE_PLUS_OFFER_COUPON_ID?.trim() || null;
+  if (withOffer && couponId) {
+    const coupon = await stripe.coupons.retrieve(couponId, { expand: ["currency_options"] });
+    const off = coupon.currency_options?.[currency]?.amount_off ?? (coupon.currency === currency ? coupon.amount_off : null);
+    if (coupon.valid && coupon.duration === "once" && typeof off === "number" && off > 0 && off < year) firstYear = year - off;
+  }
+  return { currency, year, firstYear, coupon: firstYear === null ? null : couponId };
 }
 
 export type PlusPrices = { year: string; firstYear: string | null };
