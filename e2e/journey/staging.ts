@@ -195,10 +195,12 @@ export async function exists(email: string): Promise<boolean> {
   return (await userId(email)) !== null;
 }
 
-// Pictures (035): whether staging has the bucket and table yet (the picture journeys skip before).
+// Pictures (035): whether staging has 035 yet. Read through picture_deletions, the one 035 table the
+// service role may SELECT (entry_pictures grants it nothing, by design, so a read there always fails
+// and the picture journeys silently skipped; the Reviewer caught it, 14 Nov).
 export async function picturesOnStaging(): Promise<boolean> {
   if (!configured) return false;
-  const { error } = await database().from("entry_pictures").select("id").limit(1);
+  const { error } = await database().from("picture_deletions").select("id").limit(1);
   return !error;
 }
 

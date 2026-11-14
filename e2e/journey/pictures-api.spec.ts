@@ -23,7 +23,8 @@ async function signIn(page: Page, email: string, password: string) {
 }
 
 test("pictures at the Storage API: B never; A not after × or an entry delete; the RPC-only order logged as the control", async ({ page }) => {
-  test.skip(!(await picturesOnStaging()), "staging doesn't have 035 yet");
+  // 035 is on staging (decision 250): a configured staging without it is a failure, never a skip.
+  expect(await picturesOnStaging(), "staging has 035 (picture_deletions readable by the service role)").toBe(true);
   test.setTimeout(180_000);
   const a = newEmail();
   const b = newEmail();

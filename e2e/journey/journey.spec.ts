@@ -2195,7 +2195,8 @@ test("Insights for a free person: the example, its watermark whole at 320 and 12
 // stored files have no APP1 segment and no GPS marker; the full picture is at most 2048 px.
 test("pictures: a Plus moment takes a real JPEG with EXIF; the tile shows; the stored files carry no metadata", async ({ page, browserName }) => {
   test.skip(browserName !== "chromium", "checked in Chromium");
-  test.skip(!(await picturesOnStaging()), "staging doesn't have 035 yet");
+  // 035 is on staging (decision 250): a configured staging without it is a failure, never a skip.
+  expect(await picturesOnStaging(), "staging has 035 (picture_deletions readable by the service role)").toBe(true);
   test.setTimeout(120_000);
   const email = newEmail();
   try {
