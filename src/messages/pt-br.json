@@ -388,7 +388,7 @@
     "pictureRegion": "Sua imagem",
     "pictureChoose": "Escolher uma imagem para este espaço",
     "pictureRemove": "Remover imagem",
-    "pictureFailed": "Não foi possível usar essa imagem. Tente outra."
+    "pictureFailed": "Não foi possível usar essa imagem. Tente um JPEG ou PNG."
   },
   "export": {
     "exportTitle": "Moodbow: seu diário",

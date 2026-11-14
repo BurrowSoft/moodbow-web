@@ -1721,7 +1721,7 @@
   },
   {
     "key": "me.pictureFailed",
-    "en": "That picture couldn't be used. Try another one.",
+    "en": "That picture couldn't be used. Try a JPEG or PNG.",
     "reason": "UX draft (native read pending)"
   }
 ]

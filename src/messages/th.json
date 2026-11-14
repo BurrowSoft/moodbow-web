@@ -388,7 +388,7 @@
     "pictureRegion": "รูปของคุณ",
     "pictureChoose": "เลือกรูปสำหรับพื้นที่นี้",
     "pictureRemove": "ลบรูป",
-    "pictureFailed": "ใช้รูปนี้ไม่ได้ ลองรูปอื่น"
+    "pictureFailed": "ใช้รูปนี้ไม่ได้ ลองใช้ไฟล์ JPEG หรือ PNG"
   },
   "export": {
     "exportTitle": "Moodbow: ไดอารี่ของคุณ",
