@@ -75,6 +75,8 @@ describe("EntryScreen: the view", () => {
     expect(back).toHaveAttribute("href", "/app/timeline");
     const star = screen.getByRole("button", { name: m.entryMoment });
     expect(star).toHaveAttribute("aria-pressed", "false");
+    const editBtn = screen.getByRole("button", { name: m.entryEditTitle });
+    expect(editBtn).toHaveAttribute("data-testid", "entry-view-edit");
     const more = screen.getByRole("button", { name: m.entryMoreActions });
     expect(more).toHaveAttribute("aria-expanded", "false");
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Thursday, October 1, 2026");
@@ -84,7 +86,7 @@ describe("EntryScreen: the view", () => {
     expect(strip).toHaveTextContent("30 min");
     expect(strip).toHaveTextContent("Stress 2 of 5");
     expect(screen.getByTestId("entry-body").textContent).toBe(ENTRY.body);
-    const order = [back, star, more, screen.getByTestId("entry-date"), strip, screen.getByTestId("entry-body"), screen.getByTestId("reflect-panel"), screen.getByTestId("entry-add-more")];
+    const order = [back, star, editBtn, more, screen.getByTestId("entry-date"), strip, screen.getByTestId("entry-body"), screen.getByTestId("reflect-panel"), screen.getByTestId("entry-add-more")];
     order.slice(1).forEach((el, i) => expect(before(order[i], el)).toBe(true));
     expect(screen.getByTestId("entry-add-more")).toHaveTextContent(m.entryAddMore);
     // Viewing isn't editing: no text area until asked.
@@ -124,20 +126,27 @@ describe("EntryScreen: the view", () => {
     expect(screen.queryByTestId("entry-text")).toBeNull();
   });
 
-  it("⋯ opens Edit entry and Delete; Escape closes it and focus goes back to ⋯", () => {
+  it("✎ Edit entry: one tap to the editor, caret at the end (board 20)", () => {
+    renderIt();
+    fireEvent.click(screen.getByTestId("entry-view-edit"));
+    expect(text()).toHaveFocus();
+    expect(text().value).toBe(ENTRY.body);
+    expect(text().selectionStart).toBe(ENTRY.body.length);
+  });
+
+  it("⋯ holds Delete only; Escape closes it and focus goes back to ⋯", () => {
     renderIt();
     const more = screen.getByTestId("entry-more");
-    expect(screen.getByTestId("entry-menu-edit")).not.toBeVisible();
+    expect(screen.getByTestId("entry-menu-delete")).not.toBeVisible();
     fireEvent.click(more);
     expect(more).toHaveAttribute("aria-expanded", "true");
-    expect(screen.getByRole("button", { name: m.entryEditTitle })).toBeVisible();
-    fireEvent.keyDown(screen.getByTestId("entry-menu-edit"), { key: "Escape" });
+    expect(screen.getByTestId("entry-menu-delete")).toBeVisible();
+    const items = document.getElementById("entry-menu")!.querySelectorAll("button");
+    expect([...items].map((b) => b.textContent)).toEqual([m.entryDelete]);
+    expect(screen.queryByTestId("entry-menu-edit")).toBeNull();
+    fireEvent.keyDown(screen.getByTestId("entry-menu-delete"), { key: "Escape" });
     expect(more).toHaveAttribute("aria-expanded", "false");
     expect(more).toHaveFocus();
-    fireEvent.click(more);
-    fireEvent.click(screen.getByTestId("entry-menu-edit"));
-    expect(text()).toHaveFocus();
-    expect(text().selectionStart).toBe(ENTRY.body.length);
   });
 
   it("Cancel goes back to the view, focus on the date; Back still goes where the entry was opened from", async () => {

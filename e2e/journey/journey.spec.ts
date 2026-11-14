@@ -1212,7 +1212,8 @@ test("large text, set in the browser: Today after a mood, calendar, day, entry a
       expect.soft({ screen, percent, overflow, sticksOut }).toEqual({ screen, percent, overflow: 0, sticksOut: [] });
     };
 
-    for (const [route, saved] of [["", "en"], ["/fr", "fr"], ["/de", "de"]]) {
+    // pt-BR too (the Reviewer, #325: the entry's top bar at 300 % in en and pt-BR).
+    for (const [route, saved] of [["", "en"], ["/fr", "fr"], ["/de", "de"], ["/pt-br", "pt"]]) {
       await setProfileLocale(email, password, saved);
       for (const percent of [200, 300]) {
         await textAt(percent);
