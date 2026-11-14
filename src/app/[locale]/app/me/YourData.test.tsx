@@ -144,6 +144,35 @@ describe("YourData: delete account", () => {
     expect(screen.getByTestId("delete-dialog")).toBeInTheDocument();
   });
 
+  it("Plus was cancelled but the delete failed: the message says both (UX, #270)", async () => {
+    deleteMyAccount.mockResolvedValue({ status: "error", error: "plus_cancelled" });
+    renderIt();
+    fireEvent.click(screen.getByTestId("me-delete"));
+    fireEvent.change(screen.getByTestId("delete-confirm-input"), { target: { value: "DELETE" } });
+    fireEvent.click(screen.getByTestId("delete-confirm"));
+    expect(await screen.findByTestId("delete-error")).toHaveTextContent(messages.plus.deleteCancelledKept);
+  });
+
+  it("the Plus line only for someone with that source: Stripe is cancelled with the account, a store's isn't", () => {
+    const withSource = (plusSource: "stripe" | "play" | null) =>
+      render(
+        <NextIntlClientProvider locale="en" messages={messages}>
+          <YourData credits={0} uid={UID} plusSource={plusSource} />
+        </NextIntlClientProvider>,
+      );
+    withSource(null);
+    fireEvent.click(screen.getByTestId("me-delete"));
+    expect(screen.queryByTestId("delete-plus")).toBeNull();
+    cleanup();
+    withSource("stripe");
+    fireEvent.click(screen.getByTestId("me-delete"));
+    expect(screen.getByTestId("delete-plus")).toHaveTextContent(messages.plus.deleteStripe);
+    cleanup();
+    withSource("play");
+    fireEvent.click(screen.getByTestId("me-delete"));
+    expect(screen.getByTestId("delete-plus")).toHaveTextContent(messages.plus.deleteStore);
+  });
+
   it("Cancel (or Escape) closes it and forgets what was typed", () => {
     renderIt();
     fireEvent.click(screen.getByTestId("me-delete"));

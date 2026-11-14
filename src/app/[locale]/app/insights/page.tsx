@@ -20,6 +20,8 @@ import { YourWeekCard } from "./YourWeekCard";
 import { tabMetadata } from "../pageMeta";
 import { InsightsView } from "./InsightsView";
 import { safetyPlanHasContent } from "../me/safety-plan/actions";
+import { MorePatternsRow, WeekLine, YearTab } from "./PlusInsights";
+import { insightsOffer, plusPriceLabel, readPlusView } from "@/lib/plus/view";
 import { ShareMonth } from "./ShareMonth";
 import { WeeklyReport } from "./WeeklyReport";
 
@@ -105,11 +107,38 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
   }
   // Your week (specs/your-week.md), no AI: today is the saved time zone's, from get_me.
   let summary: React.ReactNode = null;
+  let hardWeek = false;
   if (withYourWeek) {
     const result = yourWeek(rows, me.today, (moments?.data ?? []) as YourWeekMoment[]);
     // A hard week offers the safety plan too, where it has content (1.2): a yes or no, read only then.
     const planLink = result?.kind === "hard" && pageGate("safety-plan-live") !== "hidden" ? await safetyPlanHasContent() : false;
     if (result) summary = <YourWeekCard week={result} country={me.profile?.country} dateLocaleTag={dateLocaleTag} planLink={planLink} />;
+    // Plus's quiet line goes under Your week, never under a hard week's help offer.
+    hardWeek = result?.kind === "hard";
   }
-  return <InsightsView rows={rows} today={me.today} range={range} share={share} summary={summary} week={week} patterns={withPatterns ? patterns(rows, me.today) : undefined} />;
+  // Moodbow Plus (decision 246): its locked items only for someone without
+  // Plus, none on a hard week, and nothing at all when the row can't be read.
+  const offer = insightsOffer(pageGate("plus") !== "hidden" ? await readPlusView(supabase, user.id) : null, hardWeek, plusPriceLabel(locale));
+  return (
+    <InsightsView
+      rows={rows}
+      today={me.today}
+      range={range}
+      share={share}
+      summary={
+        offer && summary ? (
+          <>
+            {summary}
+            <WeekLine offer={offer} />
+          </>
+        ) : (
+          summary
+        )
+      }
+      week={week}
+      patterns={withPatterns ? patterns(rows, me.today) : undefined}
+      plusTab={offer && <YearTab offer={offer} />}
+      plusPatterns={offer && withPatterns && <MorePatternsRow offer={offer} />}
+    />
+  );
 }
