@@ -1,4 +1,4 @@
-import * as Sentry from "@sentry/nextjs";
+import { captureMessage } from "@sentry/nextjs";
 import type Stripe from "stripe";
 import { getStripe, retrieveSubscriptionOrNull, stripeConfigured } from "@/lib/plus/stripe";
 import { insertEntitlement, readEntitlement, serviceRoleConfigured, updateEntitlement } from "@/lib/plus/serviceRole";
@@ -18,7 +18,7 @@ import { subscriptionIdOf, syncSubscription, type SyncOutcome } from "@/lib/plus
 export const dynamic = "force-dynamic";
 
 function report(reason: string, event?: { id: string; type: string }) {
-  Sentry.captureMessage(`Stripe webhook: ${reason}`, {
+  captureMessage(`Stripe webhook: ${reason}`, {
     level: "error",
     fingerprint: ["stripe-webhook", reason],
     tags: { stripe_webhook_failure: reason, ...(event ? { stripe_event_type: event.type, stripe_event_id: event.id } : {}) },
