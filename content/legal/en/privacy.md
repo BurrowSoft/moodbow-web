@@ -7,7 +7,7 @@
   (src/lib/legalContent.test.ts).
 -->
 ## Moodbow Privacy Policy
-Last updated: 11 November 2026
+Last updated: 14 November 2026
 
 Moodbow is a private journal made by Vitor Ribeiro Carvalho, trading as BurrowSoft (297 Moo 1, Baan Sanian, Mueang Nan, Nan 55000, Thailand), "we" in this policy. We wrote this to be read, not skimmed past. If anything is unclear, email support@moodbow.com.
 
@@ -27,7 +27,7 @@ Moodbow is a private journal made by Vitor Ribeiro Carvalho, trading as BurrowSo
 {pending:purchases}**Purchases:** if you buy AI credits, Google Play or the App Store handles the payment. We receive a purchase reference and the number of credits, never your card details.{/pending}
 **Error reports:** if the app or website crashes or another error happens, a technical report (device type, app or browser version, the error) is sent to our error-tracking provider. We remove personal details and any text you've written before it's sent, and the provider doesn't store your IP address.
 
-**Cookies and storage on your device:** the website uses only the cookies it needs to work: one that keeps you signed in, and one that remembers whether you view your Timeline as a list or a calendar. It also keeps a few display choices in your browser, such as light or dark appearance and the cards you've already closed. None of them track you across sites or are used for advertising or analytics.
+**Cookies and storage on your device:** the website uses only the cookies it needs to work: one that keeps you signed in, one that remembers the language you chose, one that remembers list or calendar view, and, for a minute after you delete your account, one that tells your browser to clear its copies. It also keeps a few display choices in your browser, such as light or dark appearance and the cards you've already closed. None of them track you across sites or are used for advertising or analytics.
 
 **What stays only on your device:** unsent drafts{pending:app_app_lock}, your app-lock PIN{/pending}{pending:app_share_cards}, and the share cards you create. Share cards are made on your device and only leave it if you share them yourself{/pending}.
 
