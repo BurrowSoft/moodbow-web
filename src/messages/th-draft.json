@@ -1035,6 +1035,21 @@
     "reason": "UX draft (native read pending)"
   },
   {
+    "key": "timeline.calDayLabel",
+    "en": "{date}{mood, select, none {} other {, {mood}}}{moment, select, yes {, moment} other {}}{entry, select, yes {, has writing} other {}}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "timeline.calKey",
+    "en": "Key",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "timeline.calKeyWriting",
+    "en": "has writing",
+    "reason": "UX draft (native read pending)"
+  },
+  {
     "key": "plus.label",
     "en": "Moodbow Plus",
     "reason": "UX draft (native read pending)"
