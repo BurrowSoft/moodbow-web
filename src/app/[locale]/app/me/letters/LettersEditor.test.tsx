@@ -56,6 +56,7 @@ describe("LettersEditor", () => {
     fireEvent.change(screen.getByTestId("letter-text"), { target: { value: "Dear me, hello." } });
     fireEvent.click(screen.getByTestId("letter-months-6"));
     await act(async () => fireEvent.click(screen.getByTestId("letter-save")));
+    // The default reminders don't travel (a database without 033 has no p_reminders).
     expect(save).toHaveBeenCalledWith("Dear me, hello.", 6);
     expect(screen.getByTestId("letter-saved")).toHaveTextContent(m.savedLine.replace("{date}", dateLine("2027-05-09", TAG)));
     expect(screen.getByTestId("letter-text")).toHaveValue("");
@@ -189,5 +190,65 @@ describe("LettersEditor: letters to future you are part of Plus (1.3 §3)", () =
     await act(async () => fireEvent.click(screen.getByTestId("letter-copy")));
     expect(writeText).toHaveBeenCalledWith("Dear me, keep going.");
     expect(screen.getByTestId("letters-lapsed")).toHaveTextContent(m.copied);
+  });
+});
+
+describe("LettersEditor: reminders, like alarms (Vitor, 14 Nov; 033)", () => {
+  it("on the day at 09:00 by default; heads-ups added, timed, switched off and removed; the app line", async () => {
+    save.mockReturnValue(Promise.resolve({ status: "ok", letters: [] }));
+    page();
+    expect(screen.getByTestId("letter-reminder-day-on")).toBeChecked();
+    expect(screen.getByTestId("letter-reminder-day-time")).toHaveValue("09:00");
+    expect(screen.getByTestId("letter-reminders")).toHaveTextContent(m.remindersApp);
+    fireEvent.click(screen.getByTestId("letter-months-12"));
+    fireEvent.click(screen.getByTestId("letter-reminder-add"));
+    fireEvent.click(screen.getByTestId("letter-reminder-add"));
+    expect(screen.getAllByTestId("letter-reminder")).toHaveLength(2);
+    // Furthest first (board 26b v58): the 1 week row, then the 1 day row.
+    fireEvent.change(screen.getAllByTestId("letter-reminder-time")[0], { target: { value: "20:30" } });
+    fireEvent.click(screen.getAllByTestId("letter-reminder-on")[1]);
+    fireEvent.click(screen.getByTestId("letter-reminder-add"));
+    expect(screen.queryByTestId("letter-reminder-add")).toBeNull();
+    // The newest (2 weeks) is now first: removed.
+    fireEvent.click(screen.getAllByTestId("letter-reminder-remove")[0]);
+    fireEvent.change(screen.getByTestId("letter-text"), { target: { value: "Dear me." } });
+    await act(async () => fireEvent.click(screen.getByTestId("letter-save")));
+    expect(save).toHaveBeenCalledWith("Dear me.", 12, [
+      { days_before: 0, time: "09:00", on: true },
+      { days_before: 1, time: "09:00", on: false },
+      { days_before: 7, time: "20:30", on: true },
+    ]);
+  });
+  it("board 26b: a heads-up's label chooses 1 day, 1 week, 2 weeks or 1 month; one that wouldn't fit, or is used, isn't offered", () => {
+    page();
+    // A letter opening in 1 month (2026-11-10 to 2026-12-10, 30 days): 1 month before doesn't fit.
+    fireEvent.click(screen.getByTestId("letter-reminder-add"));
+    // The newest row's choices: the furthest-first order puts the 1 week row first once it's added.
+    const options = (i = 0) => [...screen.getAllByTestId("letter-reminder-days")[i].querySelectorAll("option")].map((o) => o.textContent);
+    expect(options()).toEqual([m.remindersDay, m.remindersWeek, m.remindersTwoWeeks]);
+    // Another row's choice isn't offered here.
+    fireEvent.click(screen.getByTestId("letter-reminder-add"));
+    expect(options()).toEqual([m.remindersWeek, m.remindersTwoWeeks]);
+    fireEvent.click(screen.getByTestId("letter-reminder-add"));
+    // The order on screen: furthest first, On the day last.
+    expect(screen.getAllByTestId("letter-reminder-days").map((s) => (s as HTMLSelectElement).value)).toEqual(["14", "7", "1"]);
+    const rows = [...screen.getByTestId("letter-reminders").querySelectorAll("[data-testid=letter-reminder], [data-testid=letter-reminder-day-time]")];
+    expect(rows.at(-1)).toHaveAttribute("data-testid", "letter-reminder-day-time");
+    // At 3, Add goes; the switch says its state (role="switch").
+    expect(screen.queryByTestId("letter-reminder-add")).toBeNull();
+    expect(screen.getAllByRole("switch")).toHaveLength(4);
+  });
+  it("a heads-up that no longer fits a shorter Open it: said, never sent", async () => {
+    page();
+    fireEvent.click(screen.getByTestId("letter-months-12"));
+    fireEvent.click(screen.getByTestId("letter-reminder-add"));
+    // A choice (UX, board 26b): 1 month before, which fits a year away...
+    fireEvent.change(screen.getByTestId("letter-reminder-days"), { target: { value: "30" } });
+    // ...but not a letter opening in 1 month (30 days): still shown, and Save says why.
+    fireEvent.click(screen.getByTestId("letter-months-1"));
+    fireEvent.change(screen.getByTestId("letter-text"), { target: { value: "Dear me." } });
+    await act(async () => fireEvent.click(screen.getByTestId("letter-save")));
+    expect(screen.getByTestId("letter-reminders-invalid")).toHaveTextContent(m.remindersInvalid);
+    expect(save).not.toHaveBeenCalled();
   });
 });

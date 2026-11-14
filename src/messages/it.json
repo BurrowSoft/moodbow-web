@@ -741,7 +741,21 @@
     "lockedBody": "Scrivere una nuova lettera fa parte di Moodbow Plus. Le lettere che hai già scritto restano tue: si aprono nel loro giorno e puoi aprirle o eliminarle quando vuoi.",
     "lapsedBody": "Il tuo Moodbow Plus è terminato, quindi questa lettera non può essere salvata. Copiala per conservare le tue parole.",
     "copy": "Copia la lettera",
-    "copied": "Copiata"
+    "copied": "Copiata",
+    "remindersTitle": "Promemoria",
+    "remindersOnTheDay": "Il giorno stesso",
+    "remindersDay": "1 giorno prima",
+    "remindersWeek": "1 settimana prima",
+    "remindersTwoWeeks": "2 settimane prima",
+    "remindersMonth": "1 mese prima",
+    "remindersDays": "{n} giorni prima",
+    "remindersDaysBefore": "Giorni prima",
+    "remindersTimeFor": "Ora, {when}",
+    "remindersOnFor": "Promemoria {when}",
+    "remindersRemove": "Rimuovi il promemoria {when}",
+    "remindersAdd": "Aggiungi un promemoria",
+    "remindersApp": "I promemoria arrivano nell'app Moodbow sul tuo telefono.",
+    "remindersInvalid": "Un promemoria non può essere oggi o prima, né dopo il giorno in cui la lettera si apre."
   },
   "appointment": {
     "meRow": "Per il mio appuntamento",
