@@ -323,6 +323,7 @@
     "pictureAdding": "Aggiunta della foto…",
     "pictureFailed": "Non è stato possibile usare quella foto. Prova un JPEG o un PNG.",
     "pictureQuota": "Hai aggiunto le foto di questo mese. Altre il mese prossimo.",
+    "pictureSlow": "Ci sta mettendo più del solito. Controlla la connessione: la foto potrebbe comparire tra poco.",
     "momentPicturesTitle": "Tenere le foto?",
     "momentPicturesBody": "Questo momento ha delle foto. Tenerle nella voce o eliminarle?",
     "momentPicturesKeep": "Tenerle",

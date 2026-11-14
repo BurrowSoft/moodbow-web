@@ -323,6 +323,7 @@
     "pictureAdding": "Adicionando a foto…",
     "pictureFailed": "Não foi possível usar essa foto. Tente um JPEG ou PNG.",
     "pictureQuota": "Você já adicionou as fotos deste mês. Mais no mês que vem.",
+    "pictureSlow": "Está demorando mais que o normal. Verifique a internet — a foto ainda pode aparecer em instantes.",
     "momentPicturesTitle": "Manter as fotos?",
     "momentPicturesBody": "Este momento tem fotos. Manter na entrada ou excluir?",
     "momentPicturesKeep": "Manter",

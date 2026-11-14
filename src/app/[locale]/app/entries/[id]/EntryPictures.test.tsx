@@ -4,6 +4,7 @@ import { useState } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import messages from "@/messages/en.json";
 import type { EntryPicture } from "@/lib/journal/pictures";
+import { SAVE_WAIT_MS } from "@/lib/ui/withTimeout";
 
 const deletePicture = vi.fn(async (_id: string) => ({ status: "ok" as const }));
 vi.mock("./pictureActions", () => ({ deletePicture: (id: string) => deletePicture(id) }));
@@ -59,6 +60,31 @@ describe("EntryPictures (035, board 20)", () => {
     expect(init.body.get("entry")).toBe("e1");
     expect(screen.getAllByTestId("entry-picture")).toHaveLength(3);
     expect(screen.queryByTestId("entry-picture-add")).toBeNull();
+  });
+
+  it("stopped waiting (SAVE_WAIT_MS): the slow line, since the server may still finish; adding works again (audit B)", async () => {
+    const timeout = vi.spyOn(AbortSignal, "timeout");
+    fetchMock.mockRejectedValueOnce(new DOMException("The operation timed out.", "TimeoutError"));
+    render(<Harness start={[pic("p1")]} add="open" />);
+    await act(async () => fireEvent.change(screen.getByTestId("entry-picture-input"), { target: { files: [new File(["x"], "walk.jpg", { type: "image/jpeg" })] } }));
+    const [, init] = fetchMock.mock.calls[0] as [string, { signal?: AbortSignal }];
+    expect(init.signal).toBeInstanceOf(AbortSignal);
+    expect(timeout).toHaveBeenCalledWith(SAVE_WAIT_MS);
+    expect(screen.getByTestId("entry-picture-slow")).toHaveTextContent(m.pictureSlow);
+    expect(screen.queryByTestId("entry-picture-error")).toBeNull();
+    expect(screen.getByTestId("entry-picture-add")).not.toBeDisabled();
+    timeout.mockRestore();
+  });
+
+  it("a real failure (the request failed, or the server refused): the generic line, never the slow one", async () => {
+    fetchMock.mockRejectedValueOnce(new TypeError("Failed to fetch"));
+    render(<Harness start={[pic("p1")]} add="open" />);
+    await act(async () => fireEvent.change(screen.getByTestId("entry-picture-input"), { target: { files: [new File(["x"], "walk.jpg", { type: "image/jpeg" })] } }));
+    expect(screen.getByTestId("entry-picture-error")).toHaveTextContent(messages.today.errGeneric);
+    expect(screen.queryByTestId("entry-picture-slow")).toBeNull();
+    fetchMock.mockResolvedValueOnce({ json: async () => ({ status: "error", error: "generic" }) });
+    await act(async () => fireEvent.change(screen.getByTestId("entry-picture-input"), { target: { files: [new File(["x"], "walk.jpg", { type: "image/jpeg" })] } }));
+    expect(screen.getByTestId("entry-picture-error")).toHaveTextContent(messages.today.errGeneric);
   });
 
   it("without Plus: the camera is a lock to the Plus screen (adding is Plus; viewing and removing aren't)", () => {

@@ -323,6 +323,7 @@
     "pictureAdding": "Foto wird hinzugefügt …",
     "pictureFailed": "Dieses Foto konnte nicht verwendet werden. Versuch ein JPEG oder PNG.",
     "pictureQuota": "Du hast die Fotos für diesen Monat hinzugefügt. Mehr im nächsten Monat.",
+    "pictureSlow": "Das dauert länger als sonst. Prüf deine Verbindung – das Foto erscheint vielleicht gleich noch.",
     "momentPicturesTitle": "Fotos behalten?",
     "momentPicturesBody": "Dieser Moment hat Fotos. Im Eintrag behalten oder löschen?",
     "momentPicturesKeep": "Behalten",

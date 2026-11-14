@@ -18,6 +18,7 @@ const LINK_LABELS = { txt: "exportReadable", json: "exportData", csv: "exportCsv
 
 // Pictures (035): the data file with the pictures themselves, zipped in the browser (stored, not
 // compressed: JPEGs don't shrink). pictures/<entry_id>/<picture_id>.jpg beside the JSON.
+export const PICTURE_FETCH_MS = 30_000;
 async function zipWithPictures(json: string, jsonName: string): Promise<Blob | null> {
   const listed = await exportPictureUrls().catch(() => null);
   if (!listed || listed.status !== "ok") return null;
@@ -25,9 +26,15 @@ async function zipWithPictures(json: string, jsonName: string): Promise<Blob | n
   const { zipSync, strToU8 } = await import("fflate");
   const files: Record<string, [Uint8Array, { level: 0 }]> = { [jsonName]: [strToU8(json), { level: 0 }] };
   for (const p of listed.pictures) {
-    const res = await fetch(p.url);
-    if (!res.ok) return null;
-    files[`pictures/${p.entry_id}/${p.id}.jpg`] = [new Uint8Array(await res.arrayBuffer()), { level: 0 }];
+    // Each picture gets PICTURE_FETCH_MS (audit batch D, MAJOR): a stalled or dropped one ends as
+    // "pictures missing" with the other files ready, never a hung or failed export.
+    try {
+      const res = await fetch(p.url, { signal: AbortSignal.timeout(PICTURE_FETCH_MS) });
+      if (!res.ok) return null;
+      files[`pictures/${p.entry_id}/${p.id}.jpg`] = [new Uint8Array(await res.arrayBuffer()), { level: 0 }];
+    } catch {
+      return null;
+    }
   }
   return new Blob([zipSync(files)], { type: "application/zip" });
 }
