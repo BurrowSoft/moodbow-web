@@ -37,6 +37,7 @@ let viewProps: { rows: InsightRow[] } | null = null;
 vi.mock("./InsightsView", () => ({ InsightsView: (p: { rows: InsightRow[] }) => ((viewProps = p), <div data-testid="insights-view" />) }));
 vi.mock("./PlusInsights", () => ({ MorePatternsCard: () => null, MorePatternsRow: () => null, PlusTabs: () => null, WeekLine: () => null, YearTab: () => null }));
 vi.mock("./YourWeekCard", () => ({ YourWeekCard: () => null }));
+vi.mock("./InsightsExample", () => ({ InsightsExample: () => <div data-testid="insights-example" /> }));
 vi.mock("./ShareMonth", () => ({ ShareMonth: () => null }));
 vi.mock("./WeeklyReport", () => ({ WeeklyReport: () => null }));
 vi.mock("@/components/JournalUnavailable", () => ({ JournalUnavailable: () => <div data-testid="journal-unavailable" /> }));
@@ -65,6 +66,8 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe("Insights' reads with Plus (#272 × #293)", () => {
+  // Option (a), the Reviewer: #293's single parallel batch stays for everyone (Plus users' LCP);
+  // for a free account its rows are simply not used (read on the server, never sent).
   it("the check-ins and the Plus view are asked together, before the view answers", async () => {
     holdPlus = true;
     plusView = { kind: "free", trial: true };
@@ -72,14 +75,22 @@ describe("Insights' reads with Plus (#272 × #293)", () => {
     await vi.waitFor(() => expect([...asked].sort()).toEqual(["check_ins", "entitlements"]), { timeout: 1000 });
     plusAnswer!();
     render(await rendering);
-    expect(screen.getByTestId("insights-view")).toBeInTheDocument();
+    expect(screen.getByTestId("insights-example")).toBeInTheDocument();
   });
 
-  it("without Plus: that one read is the page's rows, and nothing more is read", async () => {
+  it("without Plus: the example, nothing of theirs shown, and nothing more is read", async () => {
     plusView = { kind: "free", trial: true };
     render(await page());
+    expect(screen.getByTestId("insights-example")).toBeInTheDocument();
+    expect(screen.queryByTestId("insights-view")).toBeNull();
     expect(readCheckInsSince).not.toHaveBeenCalled();
-    expect(viewProps!.rows).toEqual(FREE_ROWS);
+  });
+
+  it("a payment that failed (past_due): the example too", async () => {
+    plusView = { kind: "past_due" } as typeof plusView;
+    render(await page());
+    expect(screen.getByTestId("insights-example")).toBeInTheDocument();
+    expect(screen.queryByTestId("insights-view")).toBeNull();
   });
 
   it("the Plus view unreadable: as without Plus, nothing about Plus", async () => {
