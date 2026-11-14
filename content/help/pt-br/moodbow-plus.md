@@ -4,11 +4,11 @@ summary: O que é grátis, o que o Plus acrescenta, a semana grátis e como canc
 topic: Privacy & account
 pt-BR-draft: true
 ---
-{pending:plus}Seu diário, a ajuda e seus dados são grátis para todos, sempre. O Plus é para ir mais fundo.
+{pending:plus}Seu diário é grátis. O Plus traz análises mais profundas. A ajuda e seus dados são grátis para todos, sempre.
 
-**Grátis:** check-ins e seu diário sem limite, a Linha do tempo, o calendário e a busca, a ajuda e seu plano de segurança, o que ajuda você, as cartas para você no futuro, o resumo para a consulta, Sua semana, Semana, Mês e 3 meses em Insights, os padrões dos últimos 3 meses, exportar, importar e apagar.
+**Grátis:** check-ins e seu diário sem limite, a Linha do tempo, o calendário e a busca, a ajuda e seu plano de segurança, o que ajuda você e os exercícios de aterramento, o resumo para a consulta, Sua semana, Semana, Mês e 3 meses em Insights, os padrões dos últimos 3 meses, exportar, importar e apagar.
 
-**O Plus acrescenta:** seu ano e todo o histórico em Insights, mais padrões, a retrospectiva do ano, mais temas, um PDF caprichado do seu diário, uma biblioteca de perguntas para escrever e mais formas de respirar em **O que me ajuda**. As perguntas de "Dias difíceis" da biblioteca de perguntas são grátis para todos.
+**O Plus acrescenta:** seu ano e todo o histórico em Insights, mais padrões e O que me faz bem, a retrospectiva do ano, as cartas para o seu eu do futuro, mais temas (e ícones no app), um PDF caprichado do seu diário, uma biblioteca de perguntas para escrever e mais formas de respirar em **O que me ajuda**. As perguntas de "Dias difíceis" da biblioteca de perguntas são grátis para todos.
 
 **Mais padrões** pode incluir suas próprias tags, quando você começar a usá-las.
 

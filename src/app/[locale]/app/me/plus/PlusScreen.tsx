@@ -7,10 +7,11 @@ import { dialogButton } from "@/components/Dialog";
 import { Link } from "@/i18n/navigation";
 import type { PlusView } from "@/lib/plus/view";
 
-// Free rows, then what Plus adds (UX, 11 Nov: today's free ranges and
-// patterns stay free). The AI rows only while AI is shown.
-const FREE_ROWS = ["rowJournal", "rowHelp", "rowOwn", "rowRanges", "rowPatterns", "rowData"] as const;
-const PLUS_ROWS = ["rowYear", "rowMorePatterns", "rowReview", "rowThemes", "rowPdf"] as const;
+// Free rows, then what Plus adds: "your journal is free, insights are Plus" (Vitor, 14 Nov;
+// specs/1.3-offer-review-voice-taps.md §2). No AI rows in any comparison: the AI allowance rules
+// stay in the code, unadvertised. Nothing free today gets a lock (wording only).
+const FREE_ROWS = ["rowJournal", "rowHelp", "rowRanges", "rowAppointment", "rowData"] as const;
+const PLUS_ROWS = ["rowYear", "rowMorePatterns", "rowReview", "rowLetters", "rowPdf", "rowThemes"] as const;
 
 function Tick({ label, plus }: { label: string; plus?: boolean }) {
   return (
@@ -33,7 +34,7 @@ function Lock({ label }: { label: string }) {
 // footer with the price and the one button never scrolls, so the action is
 // in view on landing at any size. No first-charge date, no countdown, no
 // pre-ticked box: Stripe's own page confirms the terms.
-export function PlusScreen({ view, price, aiShown, started }: { view: PlusView; price: string; aiShown: boolean; started: boolean }) {
+export function PlusScreen({ view, price, started }: { view: PlusView; price: string; started: boolean }) {
   const t = useTranslations("plus");
   const tt = useTranslations("today");
   const locale = useLocale();
@@ -77,8 +78,8 @@ export function PlusScreen({ view, price, aiShown, started }: { view: PlusView; 
     setBusy(false);
   };
 
-  const rows = [...FREE_ROWS, ...(aiShown ? (["rowAiFree"] as const) : [])].map((k) => ({ k, free: true }));
-  const plusRows = [...PLUS_ROWS, ...(aiShown ? (["rowAiPlus"] as const) : [])].map((k) => ({ k, free: false }));
+  const rows = FREE_ROWS.map((k) => ({ k, free: true }));
+  const plusRows = PLUS_ROWS.map((k) => ({ k, free: false }));
 
   // Large text (UX, 12 Nov, the Web Tester's long-language pass): when the whole footer would take
   // more than 40 % of the screen's height, the table was left a slit. Then the page scrolls as a

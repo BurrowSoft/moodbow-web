@@ -16,10 +16,10 @@ vi.mock("@/i18n/navigation", () => ({
 const { PlusScreen } = await import("./PlusScreen");
 const m = messages.plus;
 
-const show = (view: PlusView, { aiShown = false, started = false } = {}) =>
+const show = (view: PlusView, { started = false } = {}) =>
   render(
     <NextIntlClientProvider locale="en" messages={messages}>
-      <PlusScreen view={view} price="US$59.99" aiShown={aiShown} started={started} />
+      <PlusScreen view={view} price="US$59.99" started={started} />
     </NextIntlClientProvider>,
   );
 const fetchMock = vi.fn();
@@ -46,18 +46,18 @@ describe("PlusScreen: the table scrolls, the footer never does", () => {
     expect(scroll).not.toContainElement(footer);
   });
 
-  it("today's free ranges and patterns are Free; what Plus adds is Plus only; the AI rows only with AI", () => {
+  it("your journal is free, insights are Plus (Vitor, 14 Nov): the rows in order, and no AI rows", () => {
     show({ kind: "free", trial: true });
-    // The Free column's cell, then Plus's: free rows are Included in both.
+    expect(screen.getByText(m.lead)).toBeInTheDocument();
+    const order = screen.getAllByTestId(/^plus-row-/).map((r) => r.getAttribute("data-testid"));
+    expect(order).toEqual(
+      ["rowJournal", "rowHelp", "rowRanges", "rowAppointment", "rowData", "rowYear", "rowMorePatterns", "rowReview", "rowLetters", "rowPdf", "rowThemes"].map((k) => `plus-row-${k}`),
+    );
+    // The Free column's cell: free rows are Included, Plus rows are Plus only.
     const free = (row: string) => within(within(screen.getByTestId(`plus-row-${row}`)).getAllByRole("cell")[0]);
-    expect(free("rowRanges").getByRole("img", { name: m.included })).toBeInTheDocument();
-    expect(free("rowPatterns").getByRole("img", { name: m.included })).toBeInTheDocument();
-    expect(free("rowYear").getByRole("img", { name: m.plusOnly })).toBeInTheDocument();
-    expect(screen.queryByTestId("plus-row-rowAiFree")).toBeNull();
-    cleanup();
-    show({ kind: "free", trial: true }, { aiShown: true });
-    expect(screen.getByTestId("plus-row-rowAiFree")).toBeInTheDocument();
-    expect(screen.getByTestId("plus-row-rowAiPlus")).toBeInTheDocument();
+    for (const row of ["rowJournal", "rowHelp", "rowRanges", "rowAppointment", "rowData"]) expect(free(row).getByRole("img", { name: m.included })).toBeInTheDocument();
+    for (const row of ["rowYear", "rowMorePatterns", "rowReview", "rowLetters", "rowPdf", "rowThemes"]) expect(free(row).getByRole("img", { name: m.plusOnly })).toBeInTheDocument();
+    expect(screen.getByTestId("plus-table").textContent).not.toMatch(/\bAI\b/);
   });
 
   it("the free week used: the yearly price and Start Plus", () => {

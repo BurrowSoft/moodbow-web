@@ -1,4 +1,3 @@
-import { conditionMet } from "@/lib/conditions";
 import type { createSupabaseServerClient } from "@/lib/supabase/server";
 import { ENTITLEMENT_COLUMNS, hasPlus, parseEntitlement, trialAvailable, trialDaysLeft, type EntitlementRow, type PlusSource } from "./entitlements";
 
@@ -31,10 +30,6 @@ export async function readPlusView(supabase: Reader, uid: string): Promise<PlusV
     return null;
   }
 }
-
-// The Plus table's AI rows only once AI is live (decision 69: no line may
-// point at AI before then; Reviewer, #271), and only where AI is available.
-export const plusAiRows = (me: { ai_available?: boolean | null }, met: (id: "ai-live") => boolean = conditionMet): boolean => met("ai-live") && me.ai_available === true;
 
 // Insights' locked items (Year tab, More patterns, the Your week line): only for
 // someone without Plus, and none at all on a hard week, beside the help offer

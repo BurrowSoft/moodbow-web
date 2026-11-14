@@ -1126,7 +1126,7 @@
   },
   {
     "key": "plus.lead",
-    "en": "Your journal, help and your data stay free for everyone.",
+    "en": "Your journal is free. Plus adds deeper insights.",
     "reason": "UX draft (native read pending)"
   },
   {
@@ -1161,27 +1161,17 @@
   },
   {
     "key": "plus.rowJournal",
-    "en": "Check-ins and journal, no limit",
+    "en": "Your journal: check-ins and entries, no limit",
     "reason": "UX draft (native read pending)"
   },
   {
     "key": "plus.rowHelp",
-    "en": "Help, safety plan, toolbox",
-    "reason": "UX draft (native read pending)"
-  },
-  {
-    "key": "plus.rowOwn",
-    "en": "Letters, appointment summary",
+    "en": "Help, safety plan, toolbox, grounding",
     "reason": "UX draft (native read pending)"
   },
   {
     "key": "plus.rowRanges",
-    "en": "Your week, month and 3 months",
-    "reason": "UX draft (native read pending)"
-  },
-  {
-    "key": "plus.rowPatterns",
-    "en": "Patterns over the last 3 months",
+    "en": "Week, month and 3-month view",
     "reason": "UX draft (native read pending)"
   },
   {
@@ -1190,18 +1180,13 @@
     "reason": "UX draft (native read pending)"
   },
   {
-    "key": "plus.rowAiFree",
-    "en": "AI reflections, 3 a week",
-    "reason": "UX draft (native read pending)"
-  },
-  {
     "key": "plus.rowYear",
-    "en": "Your year and all time",
+    "en": "Your year and all your history",
     "reason": "UX draft (native read pending)"
   },
   {
     "key": "plus.rowMorePatterns",
-    "en": "More patterns",
+    "en": "Deeper patterns and What lifts me",
     "reason": "UX draft (native read pending)"
   },
   {
@@ -1211,17 +1196,12 @@
   },
   {
     "key": "plus.rowThemes",
-    "en": "More themes",
+    "en": "More themes and app icons",
     "reason": "UX draft (native read pending)"
   },
   {
     "key": "plus.rowPdf",
     "en": "Designed PDF of your journal",
-    "reason": "UX draft (native read pending)"
-  },
-  {
-    "key": "plus.rowAiPlus",
-    "en": "More AI reflections and a weekly AI report",
     "reason": "UX draft (native read pending)"
   },
   {
@@ -1231,7 +1211,7 @@
   },
   {
     "key": "plus.renews",
-    "en": "Renews automatically. Cancel anytime.",
+    "en": "Renews automatically. Cancel anytime in Me → Moodbow Plus.",
     "reason": "UX draft (native read pending)"
   },
   {
@@ -1577,6 +1557,16 @@
   {
     "key": "plus.sheetThemes",
     "en": "More themes are part of Plus",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.rowAppointment",
+    "en": "Appointment summary",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.rowLetters",
+    "en": "Letters to future you",
     "reason": "UX draft (native read pending)"
   }
 ]
