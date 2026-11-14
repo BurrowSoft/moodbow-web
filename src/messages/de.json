@@ -686,6 +686,23 @@
     "leave": "Verlassen",
     "keepEditing": "Weiter bearbeiten"
   },
+  "appointment": {
+    "meRow": "Für meinen Termin",
+    "intro": "Eine Zusammenfassung zum Ausdrucken oder Zeigen bei einem Termin. Hier wird nichts gespeichert oder gesendet.",
+    "show": "Zeigen",
+    "range2": "Letzte 2 Wochen",
+    "range4": "Letzte 4 Wochen",
+    "range12": "Letzte 12 Wochen",
+    "count": "{n, plural, one {# Check-in} other {# Check-ins}}",
+    "averages": "Durchschnitte",
+    "starred": "Momente",
+    "fullText": "Den ganzen Text zeigen",
+    "talk": "Worüber ich sprechen möchte",
+    "talkHint": "Das wird nicht gespeichert.",
+    "print": "Drucken",
+    "empty": "Noch keine Check-ins in dieser Zeit.",
+    "footer": "Von dir aus deinen eigenen Moodbow-Einträgen erstellt. Keine medizinische Beurteilung."
+  },
   "plus": {
     "label": "Moodbow Plus",
     "lock": "Plus",

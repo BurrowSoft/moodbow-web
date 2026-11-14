@@ -686,6 +686,23 @@
     "leave": "Esci",
     "keepEditing": "Continua a modificare"
   },
+  "appointment": {
+    "meRow": "Per il mio appuntamento",
+    "intro": "Un riepilogo da stampare o mostrare a un appuntamento. Qui non viene salvato né inviato nulla.",
+    "show": "Mostra",
+    "range2": "Ultime 2 settimane",
+    "range4": "Ultime 4 settimane",
+    "range12": "Ultime 12 settimane",
+    "count": "{n, plural, one {# check-in} other {# check-in}}",
+    "averages": "Medie",
+    "starred": "Momenti",
+    "fullText": "Includi il testo completo",
+    "talk": "Di cosa voglio parlare",
+    "talkHint": "Questo non viene salvato.",
+    "print": "Stampa",
+    "empty": "Ancora nessun check-in in questo periodo.",
+    "footer": "Creato da te con le tue voci di Moodbow. Non è una valutazione medica."
+  },
   "plus": {
     "label": "Moodbow Plus",
     "lock": "Plus",

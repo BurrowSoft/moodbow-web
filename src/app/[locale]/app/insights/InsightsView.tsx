@@ -1,6 +1,6 @@
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { METRICS, summarize, type InsightRow, type Metric, type Range } from "@/lib/journal/insights";
+import { CHARTS, METRICS, summarize, type InsightRow, type Metric, type Range } from "@/lib/journal/insights";
 import type { Pattern, PatternId } from "@/lib/journal/patterns";
 import { MoodPair } from "@/components/MoodPair";
 import { PATTERN_PAIR } from "@/lib/journal/patternPair";
@@ -14,12 +14,6 @@ const RANGE_TABS: { range: Range; key: "rangeWeek" | "rangeMonth" | "range3Month
   { range: "month", key: "rangeMonth" },
   { range: "3months", key: "range3Months" },
 ];
-const CHARTS: Record<Metric, { title: "chartMood" | "chartSleep" | "chartStress" | "chartExercise"; kind: "line" | "bars"; min: number; max: number; colourKey: ValueKey }> = {
-  mood: { title: "chartMood", kind: "line", min: 1, max: 5, colourKey: "mood" },
-  sleep: { title: "chartSleep", kind: "bars", min: 0, max: 12, colourKey: "sleep_hours" },
-  stress: { title: "chartStress", kind: "line", min: 1, max: 5, colourKey: "stress" },
-  exercise: { title: "chartExercise", kind: "bars", min: 0, max: 90, colourKey: "exercise_minutes" },
-};
 // Too few days: how many more, per chart (#9765 S-02, the same as the app).
 const NEED_MORE: Record<Metric, "insightsNeedMore" | "insightsNeedMoreSleep" | "insightsNeedMoreStress" | "insightsNeedMoreMovement"> = {
   mood: "insightsNeedMore",
