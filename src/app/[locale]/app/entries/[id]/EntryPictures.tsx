@@ -17,7 +17,7 @@ import { SAVE_WAIT_MS } from "@/lib/ui/withTimeout";
 // are). The pictures are the person's own photos, shown from signed URLs of at most 5 minutes with
 // plain <img> (never next/image). Never in AI, share cards or notifications.
 export type PictureAdd = "open" | "locked" | "none";
-type Failure = "failed" | "quota" | "generic";
+type Failure = "failed" | "quota" | "generic" | "slow";
 
 export function EntryPictures({ entryId, pictures, onChange, add }: { entryId: string; pictures: EntryPicture[]; onChange: (next: EntryPicture[]) => void; add: PictureAdd }) {
   const t = useTranslations("entry");
@@ -47,8 +47,11 @@ export function EntryPictures({ entryId, pictures, onChange, add }: { entryId: s
       const result = (await res.json().catch(() => null)) as PictureAddResult | null;
       if (result?.status === "ok") onChange([...pictures, result.picture]);
       else setFailure(result?.status === "error" && result.error === "picture_quota" ? "quota" : result?.status === "error" && result.error === "invalid" ? "failed" : "generic");
-    } catch {
-      setFailure("generic");
+    } catch (error) {
+      // Stopped waiting (SAVE_WAIT_MS) or the connection dropped: the server may still finish, so
+      // say so (audit B, UX) rather than call it a failure. Anything else: the generic line.
+      const name = (error as { name?: string } | null)?.name;
+      setFailure(name === "TimeoutError" || name === "AbortError" ? "slow" : "generic");
     } finally {
       setBusy(false);
       if (input.current) input.current.value = "";
@@ -114,8 +117,8 @@ export function EntryPictures({ entryId, pictures, onChange, add }: { entryId: s
         </p>
       )}
       {failure && (
-        <p role="alert" data-testid={failure === "quota" ? "entry-pictures-quota" : "entry-picture-error"} className="text-sm font-medium text-accent">
-          {failure === "quota" ? t("pictureQuota") : failure === "failed" ? t("pictureFailed") : tt("errGeneric")}
+        <p role="alert" data-testid={failure === "quota" ? "entry-pictures-quota" : failure === "slow" ? "entry-picture-slow" : "entry-picture-error"} className="text-sm font-medium text-accent">
+          {failure === "quota" ? t("pictureQuota") : failure === "failed" ? t("pictureFailed") : failure === "slow" ? t("pictureSlow") : tt("errGeneric")}
         </p>
       )}
       {viewing !== null && pictures[viewing] && (

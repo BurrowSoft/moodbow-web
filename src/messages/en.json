@@ -307,6 +307,7 @@
     "pictureAdding": "Adding the picture…",
     "pictureFailed": "That picture couldn't be used. Try a JPEG or PNG.",
     "pictureQuota": "You've added this month's pictures. More next month.",
+    "pictureSlow": "This is taking longer than usual. Check your connection — the picture may still appear in a moment.",
     "momentPicturesTitle": "Keep the pictures?",
     "momentPicturesBody": "This moment has pictures. Keep them on the entry, or delete them?",
     "momentPicturesKeep": "Keep them",

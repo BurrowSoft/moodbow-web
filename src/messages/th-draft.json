@@ -1865,6 +1865,11 @@
     "reason": "UX draft (native read pending)"
   },
   {
+    "key": "entry.pictureSlow",
+    "en": "This is taking longer than usual. Check your connection — the picture may still appear in a moment.",
+    "reason": "UX draft (native read pending): the picture upload's timeout line (audit B)"
+  },
+  {
     "key": "entry.momentPicturesTitle",
     "en": "Keep the pictures?",
     "reason": "UX draft (native read pending)"
