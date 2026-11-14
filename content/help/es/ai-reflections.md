@@ -1,6 +1,6 @@
 ---
-title: Reflexiones de IA y créditos
-summary: Cómo funciona "Reflexionar con Moodbow" y qué son los créditos.
+title: Reflexiones de IA
+summary: Cómo funciona "Reflexionar con Moodbow" y qué es Moodbow AI Lite.
 topic: AI
 es-draft: true
 ---
@@ -8,6 +8,6 @@ es-draft: true
 
 **Activar o desactivar la IA:** la IA es opcional y necesita tu consentimiento. Actívala o desactívala en **Yo → IA**. Para escribir una reflexión, Moodbow envía esa entrada y los números de tus registros recientes a nuestro proveedor de IA, Anthropic. No se usan para entrenar modelos de IA.
 
-**Créditos:** las cuentas nuevas reciben créditos gratis para el Moodbow AI completo después de confirmar su correo. Cuando se acaban, Moodbow sigue con **Moodbow AI Lite**, un modelo más sencillo, con respuestas más cortas y un uso diario incluido. Tu saldo está en **Yo → IA**.
+**Moodbow AI Lite:** cuando el Moodbow AI completo no está disponible, Moodbow sigue con **Moodbow AI Lite**, un modelo más sencillo, con respuestas más cortas y un uso diario incluido.
 
 La IA de Moodbow no es terapeuta y no da consejos médicos. Si lo estás pasando mal, usa **¿Quieres hablar con alguien?**.{/pending}
