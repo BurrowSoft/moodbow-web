@@ -22,8 +22,18 @@ export type ExportDoc = {
   entries?: EntryRow[];
   // Tags on a check-in (the app's migration 029): each day's, in the order added.
   check_in_tags?: { local_date: string; tag: string }[];
+  // 1.2 (the app's migrations 025, 026, 027): each in the server's order, never re-sorted.
+  things_that_help?: { text: string }[];
+  safety_plan?: {
+    warning_signs?: string | null;
+    distractions?: string | null;
+    surroundings?: string | null;
+    people?: { section: string; name: string; phone?: string | null }[];
+  } | null;
+  letters?: { body: string; written_on: string; opens_on: string; opened_at: string | null }[];
   ai_reflections?: ReflectionRow[];
   ai_memories?: MemoryRow[];
+  // `plus` (030) and the rest of the account are JSON only (the contract): never rendered.
 };
 
 // Only format 1 of moodbow-export: anything else is refused (no partial
@@ -97,6 +107,35 @@ export function renderExportText(doc: ExportDoc, t: Translate): string {
   if (entries.length > 0) {
     const items = entries.map((e) => `${e.entry_date}${e.is_moment ? ` · ★ ${t("entry.momentBadge")}` : ""}\n${cleanBody(e.body)}`);
     blocks.push(`${t("export.exportEntries")}\n${items.join("\n\n")}`);
+  }
+
+  // 1.2 Things that help me (025): one line per item; an item holds no line break, and one found
+  // is shown as a space.
+  const helps = doc.things_that_help ?? [];
+  if (helps.length > 0) blocks.push([t("export.exportThingsThatHelp"), ...helps.map((h) => `- ${h.text.replace(/\r\n|\r|\n/g, " ")}`)].join("\n"));
+
+  // 1.2 My safety plan (026): each part that has something in it, in the plan's order. The
+  // toolbox list has its own section; the helpline is read live and isn't the person's data.
+  const plan = doc.safety_plan;
+  if (plan) {
+    const text = (value: string | null | undefined) => cleanBody(value ?? "");
+    const people = (section: string) => (plan.people ?? []).filter((p) => p.section === section).map((p) => (typeof p.phone === "string" ? `- ${p.name} · ${p.phone}` : `- ${p.name}`));
+    const parts: string[] = [];
+    if (text(plan.warning_signs).trim()) parts.push(`${t("export.exportPlanWarningSigns")}\n${text(plan.warning_signs)}`);
+    if (text(plan.distractions).trim()) parts.push(`${t("export.exportPlanDistractions")}\n${text(plan.distractions)}`);
+    if (people("people").length > 0) parts.push([t("export.exportPlanPeople"), ...people("people")].join("\n"));
+    if (people("professionals").length > 0) parts.push([t("export.exportPlanProfessionals"), ...people("professionals")].join("\n"));
+    if (text(plan.surroundings).trim()) parts.push(`${t("export.exportPlanSurroundings")}\n${text(plan.surroundings)}`);
+    if (parts.length > 0) blocks.push(`${t("export.exportSafetyPlan")}\n${parts.join("\n\n")}`);
+  }
+
+  // 1.2 Letters to future me (027): the person's own copy, a locked letter's text included,
+  // marked while it's unopened. opens_on is the server's, never computed here.
+  const letters = doc.letters ?? [];
+  if (letters.length > 0) {
+    // Unopened: opened_at null or missing, as the app reads it.
+    const items = letters.map((l) => `${!l.opened_at ? `${l.written_on} ${t("export.exportLetterLocked", { date: l.opens_on })}` : l.written_on}\n${cleanBody(l.body)}`);
+    blocks.push(`${t("export.exportLetters")}\n${items.join("\n\n")}`);
   }
 
   const reflections = doc.ai_reflections ?? [];

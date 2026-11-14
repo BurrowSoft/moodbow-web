@@ -17,17 +17,20 @@
 Render only `format: "moodbow-export"` with `format_version: 1`. For anything else, a renderer refuses: no partial text. The client then offers the JSON alone.
 
 ## Order and sections
-Render in the JSON's array order (the server already sorts it: check-ins by date, entries by date then created_at, reflections and memories by created_at). Never re-sort.
+Render in the JSON's array order (the server already sorts it: check-ins by date, entries by date then created_at, things that help by position, the plan's people by section (people, then professionals) then position, letters by written_on then created_at, reflections and memories by created_at). Never re-sort.
 
 1. The header (always).
 2. **Check-ins** (`check_ins`).
 3. **Entries** (`entries`).
-4. **AI reflections** (`ai_reflections`).
-5. **What Moodbow remembers** (`ai_memories`).
+4. **Things that help me** (`things_that_help`, 1.2, migration 025).
+5. **My safety plan** (`safety_plan`, 1.2, migration 026).
+6. **Letters to future me** (`letters`, 1.2, migration 027).
+7. **AI reflections** (`ai_reflections`).
+8. **What Moodbow remembers** (`ai_memories`).
 
 A section with no items is left out entirely, heading included. There's exactly one blank line between blocks (header → section, section → section), and none at the very end.
 
-`ai_reports` aren't in the text in format 1: their `body` is structured and M9 defines how to read it. They stay in the JSON. Profile, settings, consents, usage and credits are also JSON only.
+`ai_reports` aren't in the text in format 1: their `body` is structured and M9 defines how to read it. They stay in the JSON. Profile, settings, consents, usage, credits and Moodbow Plus (`plus`, migration 030: the entitlements row's source, status and dates, or null) are also JSON only.
 
 ## Header
 ```
@@ -57,6 +60,27 @@ The heading `{exportEntries}`, then one block per entry, with a blank line betwe
 {body}
 ```
 
+## Things that help me
+The heading `{exportThingsThatHelp}`, then one line per item: `- {text}`. The text is as stored, on one line: it can't hold a line break, and a client that finds one renders it as a space. The key is translated in fr, es and pt-BR; de, it and th are drafts behind their gate (UX, 2026-11-09).
+
+## My safety plan
+The heading `{exportSafetyPlan}`, then, in this order, each part that has something in it (an empty part is left out, heading included):
+- `{exportPlanWarningSigns}`, then `warning_signs` as a body;
+- `{exportPlanDistractions}`, then `distractions` as a body;
+- `{exportPlanPeople}`, then one line per person in `people` with section `people`: `- {name}`, or `- {name} · {phone}` with a phone;
+- `{exportPlanProfessionals}`, the same for section `professionals`;
+- `{exportPlanSurroundings}`, then `surroundings` as a body.
+
+Bodies follow the Encoding rules, as entries do. There's one blank line between parts. The section is left out entirely when `safety_plan` is null or every part is empty. The toolbox list isn't repeated here: it has its own section. The helpline isn't in the export: it's read live, and it isn't the person's data. The six keys are drafts pending the clinician's read, in the same words as the plan's own headings (specs/1.2-features.md, "Safety plan headings, all languages").
+
+## Letters to future me
+The heading `{exportLetters}`, then one block per letter, in the JSON's order, with a blank line between blocks:
+```
+{written_on}[ {exportLetterLocked(date: opens_on)}]
+{body}
+```
+The marker shows while `opened_at` is null. The export is the person's own copy, so a locked letter's text is in it, marked. The body follows the Encoding rules, as entries' do. `{date}` is ISO `YYYY-MM-DD`. Clients read `opens_on` from the data and never compute it: a month after 31 January is 28 or 29 February on the server.
+
 ## AI reflections
 The heading `{exportReflections}`, then one block per reflection, with a blank line between blocks:
 ```
@@ -80,6 +104,15 @@ The heading `{exportMemories}`, then one line per memory: `- {fact}`.
 | exportEntries | Entries |
 | exportReflections | AI reflections |
 | exportMemories | What Moodbow remembers |
+| exportThingsThatHelp | Things that help me |
+| exportSafetyPlan | My safety plan |
+| exportPlanWarningSigns | Warning signs |
+| exportPlanDistractions | People and places that take my mind off things |
+| exportPlanPeople | People I can ask for help |
+| exportPlanProfessionals | Professionals and services |
+| exportPlanSurroundings | Making my surroundings safer |
+| exportLetters | Letters to future me |
+| exportLetterLocked | (locked until {date}) |
 | exportField | {label}: {value} |
 | exportMood | Mood |
 | exportMoodValue | {label} ({value}/5) |
