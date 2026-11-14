@@ -47,3 +47,15 @@ describe("SetupLaterCard (1.3 §6)", () => {
     expect(screen.queryByTestId("today-setup-later")).toBeNull();
   });
 });
+
+describe("TodayPlusCard in December: the compact Christmas look (board 21b)", () => {
+  it("the gold tag, the first year, the short small print with where to cancel; no body", () => {
+    wrap(<TodayPlusCard trial price="€49.99" offer={{ firstYear: "€24.99", price: "€49.99" }} date="2026-12-10" />);
+    const card = screen.getByTestId("today-plus-card");
+    expect(card).toHaveAttribute("data-offer", "");
+    expect(card).toHaveTextContent(messages.plus.offerLabel);
+    expect(card).toHaveTextContent("Your first year for €24.99");
+    expect(card).toHaveTextContent("Until 31 December. Then €49.99 a year. Cancel anytime in Me → Moodbow Plus.");
+    expect(card).not.toHaveTextContent(messages.plus.offerBannerBody);
+  });
+});

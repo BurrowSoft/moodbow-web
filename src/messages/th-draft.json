@@ -1648,5 +1648,10 @@
     "key": "plus.offerThen",
     "en": "Then {price} a year · renews automatically",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.offerCardSmall",
+    "en": "Until 31 December. Then {price} a year. Cancel anytime in Me → Moodbow Plus.",
+    "reason": "UX draft (native read pending)"
   }
 ]

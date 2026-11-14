@@ -23,7 +23,7 @@ export function TodayPlusCard({ trial, price, offer = null, date }: { trial: boo
     return () => window.removeEventListener(CHECKIN_SAVED_EVENT, onSaved);
   }, [date]);
   if (low) return null;
-  return <PlusBanner trial={trial} price={price} offer={offer} id="today-plus-card" tryId="today-plus-try" />;
+  return <PlusBanner trial={trial} price={price} offer={offer} id="today-plus-card" tryId="today-plus-try" compact />;
 }
 
 // Setup after first use (1.3 §6): offered once there's a check-in, while the reminder is still off
