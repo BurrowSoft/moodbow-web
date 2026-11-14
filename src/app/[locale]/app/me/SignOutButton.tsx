@@ -7,6 +7,7 @@ import { hasLocalKinds, SIGN_OUT_TRACE_KINDS, UNSYNCED_KINDS, wipeLocalKinds } f
 import { broadcastSignOut, type SignOutMode } from "@/lib/signOutSignal";
 import { pendingForms, removePending } from "../CheckInCard";
 import { signOut } from "./actions";
+import { removePicture } from "@/lib/me/picture";
 
 // Me → Sign out on a shared computer (UX & PM 2026-11-03, option C, amending
 // decision 81 for deliberate web sign-outs; an expired session still keeps
@@ -84,6 +85,8 @@ export function SignOutButton({ uid }: { uid: string }) {
     } catch (e) {
       if (!isRedirect(e)) return failureFor(uid);
       broadcastSignOut({ uid, mode });
+      // Me's own picture never outlives the sign-out (this browser only, either way they choose).
+      await removePicture(uid).catch(() => {});
       try {
         if (mode === "delete") wipeLocalKinds(window.localStorage, uid, UNSYNCED_KINDS);
         wipeLocalKinds(window.localStorage, uid, SIGN_OUT_TRACE_KINDS);

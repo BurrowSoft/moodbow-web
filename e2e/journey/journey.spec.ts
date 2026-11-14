@@ -2245,3 +2245,79 @@ test("pictures: a Plus moment takes a real JPEG with EXIF; the tile shows; the s
     await cleanup(email);
   }
 });
+
+// Me's own picture (Vitor, 14 Nov; board 6b): this browser only, and no metadata survives. A JPEG
+// carrying EXIF (with a GPS-like marker) goes in; what IndexedDB keeps is a fresh JPEG with no APP1
+// EXIF segment and no marker, the centre 16:10 at most 1200 × 750; Remove picture empties it.
+test("Me's picture: kept in this browser, re-encoded without EXIF, 16:10; Remove brings the rainbow back", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "createImageBitmap and IndexedDB reads, checked in Chromium");
+  const email = newEmail();
+  try {
+    await accountAtSetup(page, email);
+    await page.goto("/app/me");
+    await expect(page.getByTestId("me-picture-choose")).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId("me-picture-choose")).toHaveAccessibleName(messages.me.pictureChoose);
+    // A 900 × 1600 photo as a JPEG, with an EXIF segment spliced in after its start marker.
+    const bytes = await page.evaluate(async () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = 900;
+      canvas.height = 1600;
+      const ctx = canvas.getContext("2d")!;
+      ctx.fillStyle = "#3a7bd5";
+      ctx.fillRect(0, 0, 900, 1600);
+      ctx.fillStyle = "#f2c66d";
+      ctx.fillRect(0, 700, 900, 200);
+      const jpeg = new Uint8Array(await (await new Promise<Blob>((done) => canvas.toBlob((b) => done(b!), "image/jpeg", 0.9))).arrayBuffer());
+      const text = (s: string) => [...s].map((c) => c.charCodeAt(0));
+      const data = [...text("Exif"), 0, 0, ...text("GPSMOODBOW 51.5074N 0.1278W")];
+      const len = data.length + 2;
+      const app1 = [0xff, 0xe1, len >> 8, len & 0xff, ...data];
+      return [...jpeg.slice(0, 2), ...app1, ...jpeg.slice(2)];
+    });
+    const file = Buffer.from(bytes);
+    expect(file.includes(Buffer.from("Exif"))).toBe(true);
+    await page.getByTestId("me-picture-input").setInputFiles({ name: "walk.jpg", mimeType: "image/jpeg", buffer: file });
+    await expect(page.getByTestId("me-picture-img")).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId("me-picture-remove")).toBeVisible();
+    const kept = await page.evaluate(
+      () =>
+        new Promise<{ count: number; type: string; exif: boolean; marker: boolean; width: number; height: number } | null>((done) => {
+          const req = indexedDB.open("moodbow-me");
+          req.onsuccess = () => {
+            const all = req.result.transaction("pictures").objectStore("pictures").getAll();
+            all.onsuccess = async () => {
+              const blobs = all.result as Blob[];
+              if (blobs.length === 0) return done(null);
+              const b = new Uint8Array(await blobs[0].arrayBuffer());
+              let exif = false;
+              for (let i = 0; i + 8 < b.length; i++) if (b[i] === 0xff && b[i + 1] === 0xe1 && String.fromCharCode(b[i + 4], b[i + 5], b[i + 6], b[i + 7]) === "Exif") exif = true;
+              const marker = new TextDecoder("latin1").decode(b).includes("GPSMOODBOW");
+              const bitmap = await createImageBitmap(blobs[0]);
+              done({ count: blobs.length, type: blobs[0].type, exif, marker, width: bitmap.width, height: bitmap.height });
+            };
+          };
+          req.onerror = () => done(null);
+        }),
+    );
+    expect(kept).toEqual({ count: 1, type: "image/jpeg", exif: false, marker: false, width: 900, height: 563 });
+    // Still there after a reload (this browser keeps it).
+    await page.reload();
+    await expect(page.getByTestId("me-picture-img")).toBeVisible({ timeout: 15_000 });
+    // Remove: the rainbow, and nothing kept.
+    await page.getByTestId("me-picture-remove").click();
+    await expect(page.getByTestId("me-picture-img")).toHaveCount(0);
+    const left = await page.evaluate(
+      () =>
+        new Promise<number>((done) => {
+          const req = indexedDB.open("moodbow-me");
+          req.onsuccess = () => {
+            const c = req.result.transaction("pictures").objectStore("pictures").count();
+            c.onsuccess = () => done(c.result);
+          };
+        }),
+    );
+    expect(left).toBe(0);
+  } finally {
+    await cleanup(email);
+  }
+});

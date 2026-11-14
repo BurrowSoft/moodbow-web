@@ -1825,6 +1825,26 @@
     "reason": "UX draft (native read pending)"
   },
   {
+    "key": "me.pictureRegion",
+    "en": "Your picture",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "me.pictureChoose",
+    "en": "Choose a picture for this space",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "me.pictureRemove",
+    "en": "Remove picture",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "me.pictureFailed",
+    "en": "That picture couldn't be used. Try a JPEG or PNG.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
     "key": "entry.picturesRegion",
     "en": "Pictures",
     "reason": "UX draft (native read pending)"

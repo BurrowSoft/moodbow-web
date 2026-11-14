@@ -19,6 +19,8 @@ vi.mock("@/i18n/navigation", () => ({
     </a>
   ),
 }));
+const removePicture = vi.fn(async () => {});
+vi.mock("@/lib/me/picture", () => ({ removePicture: (...a: unknown[]) => removePicture(...(a as [])) }));
 vi.mock("@/lib/ui/withTimeout", async (orig) => ({ ...(await orig<typeof import("@/lib/ui/withTimeout")>()), EXPORT_WAIT_MS: 300 }));
 const { YourData } = await import("./YourData");
 const m = messages.me;
@@ -287,6 +289,8 @@ describe("YourData: this browser forgets a deleted account (decision 85; reviewe
       confirmDelete();
       await waitFor(() => expect(KEYS.every((k) => window.localStorage.getItem(k) === null)).toBe(true));
       expect(window.localStorage.getItem("mb:pending-checkin:someone-else:2026-10-02")).toBe("y");
+      // Me's own picture in this browser goes too (the Reviewer, #321).
+      await waitFor(() => expect(removePicture).toHaveBeenCalledTimes(1));
     } finally {
       window.removeEventListener("error", swallow);
       onError.mockRestore();
@@ -299,6 +303,7 @@ describe("YourData: this browser forgets a deleted account (decision 85; reviewe
     confirmDelete();
     await screen.findByTestId("delete-error");
     expect(KEYS.every((k) => window.localStorage.getItem(k) === "x")).toBe(true);
+    expect(removePicture).not.toHaveBeenCalled();
   });
 });
 
