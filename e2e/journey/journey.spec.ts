@@ -2174,8 +2174,9 @@ test("letter reminders: labels whole at 390 and 320 px / 300 %, en and de, contr
     await page.locator("#email").fill(email);
     await page.locator("#password").fill(password);
     await page.locator("main form button[type=submit]").first().click();
-    await expect(page).toHaveURL(/\/(setup|app)$/, { timeout: 20_000 });
-    if (page.url().endsWith("/setup")) await page.getByTestId("setup-done").click();
+    // As #319's letters axe test: this base (before #314) lands a new account on Setup.
+    await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+    await page.getByTestId("setup-done").click();
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     await grantPlusTrial(email);
     const cdp = await page.context().newCDPSession(page);
