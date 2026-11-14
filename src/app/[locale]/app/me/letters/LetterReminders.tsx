@@ -9,7 +9,8 @@ import { headsUpFits, MAX_HEADS_UPS, QUICK_DAYS, type LetterReminder } from "@/l
 // chooses 1 day, 1 week, 2 weeks or 1 month before; choices that wouldn't fit (on or before today)
 // or are already used aren't offered. Add picks the first free choice that fits, and goes at 3 or
 // when none fits. The web schedules nothing: the app on the person's phone does, from what's saved.
-const pill = "rounded-[10px] bg-pill px-[12px] min-h-9 text-sm font-medium text-text";
+// min-w-0 / max-w-full: a time field never pushes past the row at large text (it wraps, then shrinks).
+const pill = "min-h-9 min-w-0 max-w-full rounded-[10px] bg-pill px-[12px] text-sm font-medium text-text";
 
 function Switch({ on, label, onChange, testId }: { on: boolean; label: string; onChange: (on: boolean) => void; testId: string }) {
   return (
@@ -32,7 +33,8 @@ function Switch({ on, label, onChange, testId }: { on: boolean; label: string; o
 export function LetterReminders({ value, onChange, today, opens }: { value: LetterReminder[]; onChange: (next: LetterReminder[]) => void; today: string; opens: string }) {
   const t = useTranslations("letters");
   const day = value.find((r) => r.days_before === 0) ?? { days_before: 0, time: "09:00", on: true };
-  const heads = value.filter((r) => r.days_before > 0);
+  // Furthest first (1 month before … 1 day before), then On the day last (UX, board 26b v58).
+  const heads = value.filter((r) => r.days_before > 0).sort((a, b) => b.days_before - a.days_before);
   const set = (next: LetterReminder[]) => onChange([...next].sort((a, b) => a.days_before - b.days_before));
   const others = (days: number) => value.filter((r) => r.days_before !== days);
   const update = (days: number, patch: Partial<LetterReminder>) => set(value.map((r) => (r.days_before === days ? { ...r, ...patch } : r)));
@@ -48,12 +50,6 @@ export function LetterReminders({ value, onChange, today, opens }: { value: Lett
       <p aria-hidden="true" className="pt-[8px] pb-[2px] font-medium text-text">
         {t("remindersTitle")}
       </p>
-      <div className="flex min-h-12 flex-wrap items-center gap-x-[10px]">
-        <span className="min-w-0 flex-1 text-sm text-text">{t("remindersOnTheDay")}</span>
-        <input type="time" aria-label={t("remindersTimeFor", { when: t("remindersOnTheDay") })} value={day.time} onChange={(e) => e.target.value && update(0, { time: e.target.value })} data-testid="letter-reminder-day-time" className={pill} />
-        <Switch on={day.on} label={t("remindersOnFor", { when: t("remindersOnTheDay") })} onChange={(on) => update(0, { on })} testId="letter-reminder-day-on" />
-        <span aria-hidden="true" className="w-11 shrink-0" />
-      </div>
       {heads.map((r) => {
         // The choices: those that fit and aren't another row's, and always this row's own (so a
         // shorter Open it shows what's there, and Save says why it can't go).
@@ -88,6 +84,12 @@ export function LetterReminders({ value, onChange, today, opens }: { value: Lett
           </div>
         );
       })}
+      <div className="flex min-h-12 flex-wrap items-center gap-x-[10px]">
+        <span className="min-w-0 flex-1 text-sm text-text">{t("remindersOnTheDay")}</span>
+        <input type="time" aria-label={t("remindersTimeFor", { when: t("remindersOnTheDay") })} value={day.time} onChange={(e) => e.target.value && update(0, { time: e.target.value })} data-testid="letter-reminder-day-time" className={pill} />
+        <Switch on={day.on} label={t("remindersOnFor", { when: t("remindersOnTheDay") })} onChange={(on) => update(0, { on })} testId="letter-reminder-day-on" />
+        <span aria-hidden="true" className="w-11 shrink-0" />
+      </div>
       {heads.length < MAX_HEADS_UPS && free !== undefined && (
         <button type="button" onClick={() => set([...value, { days_before: free, time: day.time, on: true }])} data-testid="letter-reminder-add" className="inline-flex min-h-11 w-fit items-center gap-[6px] text-sm font-medium text-accent">
           <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">

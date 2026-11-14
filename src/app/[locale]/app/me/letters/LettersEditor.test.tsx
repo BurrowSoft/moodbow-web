@@ -204,11 +204,13 @@ describe("LettersEditor: reminders, like alarms (Vitor, 14 Nov; 033)", () => {
     fireEvent.click(screen.getByTestId("letter-reminder-add"));
     fireEvent.click(screen.getByTestId("letter-reminder-add"));
     expect(screen.getAllByTestId("letter-reminder")).toHaveLength(2);
-    fireEvent.change(screen.getAllByTestId("letter-reminder-time")[1], { target: { value: "20:30" } });
-    fireEvent.click(screen.getAllByTestId("letter-reminder-on")[0]);
+    // Furthest first (board 26b v58): the 1 week row, then the 1 day row.
+    fireEvent.change(screen.getAllByTestId("letter-reminder-time")[0], { target: { value: "20:30" } });
+    fireEvent.click(screen.getAllByTestId("letter-reminder-on")[1]);
     fireEvent.click(screen.getByTestId("letter-reminder-add"));
     expect(screen.queryByTestId("letter-reminder-add")).toBeNull();
-    fireEvent.click(screen.getAllByTestId("letter-reminder-remove")[2]);
+    // The newest (2 weeks) is now first: removed.
+    fireEvent.click(screen.getAllByTestId("letter-reminder-remove")[0]);
     fireEvent.change(screen.getByTestId("letter-text"), { target: { value: "Dear me." } });
     await act(async () => fireEvent.click(screen.getByTestId("letter-save")));
     expect(save).toHaveBeenCalledWith("Dear me.", 12, [
@@ -221,12 +223,17 @@ describe("LettersEditor: reminders, like alarms (Vitor, 14 Nov; 033)", () => {
     page();
     // A letter opening in 1 month (2026-11-10 to 2026-12-10, 30 days): 1 month before doesn't fit.
     fireEvent.click(screen.getByTestId("letter-reminder-add"));
-    const options = () => [...screen.getAllByTestId("letter-reminder-days").at(-1)!.querySelectorAll("option")].map((o) => o.textContent);
+    // The newest row's choices: the furthest-first order puts the 1 week row first once it's added.
+    const options = (i = 0) => [...screen.getAllByTestId("letter-reminder-days")[i].querySelectorAll("option")].map((o) => o.textContent);
     expect(options()).toEqual([m.remindersDay, m.remindersWeek, m.remindersTwoWeeks]);
     // Another row's choice isn't offered here.
     fireEvent.click(screen.getByTestId("letter-reminder-add"));
     expect(options()).toEqual([m.remindersWeek, m.remindersTwoWeeks]);
     fireEvent.click(screen.getByTestId("letter-reminder-add"));
+    // The order on screen: furthest first, On the day last.
+    expect(screen.getAllByTestId("letter-reminder-days").map((s) => (s as HTMLSelectElement).value)).toEqual(["14", "7", "1"]);
+    const rows = [...screen.getByTestId("letter-reminders").querySelectorAll("[data-testid=letter-reminder], [data-testid=letter-reminder-day-time]")];
+    expect(rows.at(-1)).toHaveAttribute("data-testid", "letter-reminder-day-time");
     // At 3, Add goes; the switch says its state (role="switch").
     expect(screen.queryByTestId("letter-reminder-add")).toBeNull();
     expect(screen.getAllByRole("switch")).toHaveLength(4);
