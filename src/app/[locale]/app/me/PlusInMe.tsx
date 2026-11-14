@@ -6,7 +6,7 @@ import { dialogButton } from "@/components/Dialog";
 import { Link } from "@/i18n/navigation";
 import type { PlusOfferPrices } from "@/lib/plus/page";
 import type { PlusView } from "@/lib/plus/view";
-import { FESTIVE_CARD, Lights } from "../PlusSheet";
+import { FESTIVE_CARD, Lights, Tree } from "../PlusSheet";
 
 // Moodbow Plus in Me (decision 246, mockups 1 and 5), below Get help now
 // (help is always first). One of:
@@ -118,7 +118,8 @@ export function PlusInMe({ view, price, offer = null }: { view: PlusView; price:
 // for the rest of that day on this device, on both. The server's HTML starts hidden (no storage
 // there), so it never flashes for someone who closed it. closedHere: no storage, closed for this visit.
 // The Christmas offer (1.3): the same card in its festive look, its own words and price.
-export function PlusBanner({ trial, price, offer = null, id, tryId }: { trial: boolean; price: string; offer?: PlusOfferPrices | null; id: string; tryId: string }) {
+// compact: Today's card during the offer (board 21b): no body, the tree, and a shorter small print.
+export function PlusBanner({ trial, price, offer = null, id, tryId, compact = false }: { trial: boolean; price: string; offer?: PlusOfferPrices | null; id: string; tryId: string; compact?: boolean }) {
   const t = useTranslations("plus");
   const closedToday = useSyncExternalStore(subscribeClosed, () => readClosed() === localDay(), () => true);
   const [closedHere, setClosedHere] = useState(false);
@@ -145,18 +146,25 @@ export function PlusBanner({ trial, price, offer = null, id, tryId }: { trial: b
         </svg>
       </button>
       <div className="flex items-center gap-2 pr-12">
-        {offer ? <Lights /> : <Arcs />}
+        {offer ? (
+          <>
+            {compact && <Tree />}
+            <Lights />
+          </>
+        ) : (
+          <Arcs />
+        )}
         <span className={`text-sm font-medium tracking-wide uppercase ${offer ? "text-[#F3D27A]" : "text-accent"}`}>{offer ? t("offerLabel") : t("label")}</span>
       </div>
       <h2 id={id} className="pr-12 text-lg font-medium leading-snug">
         {offer ? t("offerBannerTitle", { offer: offer.firstYear }) : t("bannerTitle")}
       </h2>
-      <p>{offer ? t("offerBannerBody") : t("bannerBody")}</p>
+      {!(offer && compact) && <p>{offer ? t("offerBannerBody") : t("bannerBody")}</p>}
       <Link href="/app/me/plus" data-testid={tryId} className={`${dialogButton(true)} w-full`}>
         {offer ? t("offerSee") : trial ? t("tryFree") : t("seePlus")}
       </Link>
       <p className={`text-center text-sm ${offer ? "text-white" : "text-muted"}`}>
-        {offer ? t("offerSmall", { price: offer.price }) : trial ? t("thenPrice", { price }) : t("priceYear", { price })}
+        {offer ? t(compact ? "offerCardSmall" : "offerSmall", { price: offer.price }) : trial ? t("thenPrice", { price }) : t("priceYear", { price })}
       </p>
     </section>
   );
