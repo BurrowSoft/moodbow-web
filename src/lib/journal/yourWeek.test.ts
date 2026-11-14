@@ -2,13 +2,13 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import contract from "../../../content/your-week.json";
+import contract from "../../../content/contracts/your-week.json";
 import en from "@/messages/en.json";
 import type { InsightRow } from "./insights";
 import { PATTERN_RULES } from "./patterns";
 import { YOUR_WEEK_RULES, yourWeek, type YourWeekMoment } from "./yourWeek";
 
-// content/your-week.json: the app runs these same cases when its side is built,
+// content/contracts/your-week.json: the app runs these same cases when its side is built,
 // and takes the file over then (see its "about").
 type Case = { name: string; today?: string; rows: InsightRow[]; moments: YourWeekMoment[]; expect: unknown };
 

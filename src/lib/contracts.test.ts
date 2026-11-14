@@ -11,7 +11,7 @@ import { dataLocale, routing } from "@/i18n/routing";
 // files; a mismatch means one changed here (an editor stripping the
 // fixture's trailing spaces, say): re-sync instead.
 const DIR = join(process.cwd(), "content", "contracts");
-const source = JSON.parse(readFileSync(join(DIR, "SOURCE.json"), "utf8")) as { repo: string; commit: string; sha256: Record<string, string> };
+const source = JSON.parse(readFileSync(join(DIR, "SOURCE.json"), "utf8")) as { repo: string; commit: string; held?: Record<string, string>; sha256: Record<string, string> };
 
 describe("shared contracts (synced from the app)", () => {
   it("every file matches its pin, and nothing unpinned is there", () => {
@@ -21,6 +21,11 @@ describe("shared contracts (synced from the app)", () => {
       expect(createHash("sha256").update(readFileSync(join(DIR, name))).digest("hex"), name).toBe(pin);
     }
     expect(source.commit).toMatch(/^[0-9a-f]{40}$/);
+    // A file held at another app commit is still a pinned file, at a full commit sha.
+    for (const [name, commit] of Object.entries(source.held ?? {})) {
+      expect(Object.keys(source.sha256), name).toContain(name);
+      expect(commit, name).toMatch(/^[0-9a-f]{40}$/);
+    }
   });
 
   it("the Get help label equals get-help-label.json in every web locale (the reflect function names it)", async () => {

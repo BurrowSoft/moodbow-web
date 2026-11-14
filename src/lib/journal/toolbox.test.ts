@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import contract from "../../../content/contracts/toolbox.json";
-import yourWeek from "../../../content/your-week.json";
+import yourWeek from "../../../content/contracts/your-week.json";
 import { breathingAt, cycleSeconds, FREE_PATTERN, parseToolboxItems, patternById, patternSeconds, PATTERNS, TOOLBOX_RULES, toolboxCardShows, toolboxLength, toolboxProblem } from "./toolbox";
 
 const LANGUAGES = ["en", "fr", "es", "pt-br", "de", "it", "th"] as const;

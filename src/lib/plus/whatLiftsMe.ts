@@ -1,11 +1,11 @@
-import contract from "../../../content/what-lifts-me.json";
+import contract from "../../../content/contracts/what-lifts-me.json";
 import { roundFor, type InsightRow } from "@/lib/journal/insights";
 import { patternSide, type PatternSide } from "@/lib/journal/patterns";
 import { flagsCrisis, type CrisisKeywords } from "@/lib/safety/crisis";
 import { moreWindowStart, type MoreWindow } from "./morePatterns";
 
 // Moodbow Plus: What lifts me, inside More patterns (1.3 part 2 and its rulings; the rules and the
-// excluded words are content/what-lifts-me.json, shared with the app). Computed here, per request,
+// excluded words are content/contracts/what-lifts-me.json, shared with the app). Computed here, per request,
 // from the person's own rows; nothing is stored, cached or logged.
 export const LIFTS_RULES = contract.rules;
 export type Lift = { tag: string; a: PatternSide; b: PatternSide; gap: number };
