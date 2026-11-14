@@ -35,7 +35,7 @@ vi.mock("@/lib/plus/view", async (orig) => ({ ...(await orig<typeof import("@/li
 vi.mock("@/lib/plus/insightsData", async (orig) => ({ ...(await orig<typeof import("@/lib/plus/insightsData")>()), readCheckInsSince: (...a: unknown[]) => readCheckInsSince(...(a as [])), readWrittenDays: async () => new Set<string>() }));
 let viewProps: { rows: InsightRow[] } | null = null;
 vi.mock("./InsightsView", () => ({ InsightsView: (p: { rows: InsightRow[] }) => ((viewProps = p), <div data-testid="insights-view" />) }));
-vi.mock("./PlusInsights", () => ({ MorePatternsCard: () => null, MorePatternsRow: () => null, PlusTabs: () => null, WeekLine: () => null, YearTab: () => null }));
+vi.mock("./PlusInsights", () => ({ MorePatternsCard: () => null, PlusTabs: () => null }));
 vi.mock("./YourWeekCard", () => ({ YourWeekCard: () => null }));
 vi.mock("./InsightsExample", () => ({ InsightsExample: () => <div data-testid="insights-example" /> }));
 vi.mock("./ShareMonth", () => ({ ShareMonth: () => null }));

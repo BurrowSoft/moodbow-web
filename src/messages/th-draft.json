@@ -1125,21 +1125,6 @@
     "reason": "UX draft (native read pending)"
   },
   {
-    "key": "plus.sheetYear",
-    "en": "Your year is part of Plus",
-    "reason": "UX draft (native read pending)"
-  },
-  {
-    "key": "plus.sheetMorePatterns",
-    "en": "More patterns are part of Plus",
-    "reason": "UX draft (native read pending)"
-  },
-  {
-    "key": "plus.weekLine",
-    "en": "Want to look back further? Your year, more patterns and a designed PDF of your journal come with Plus.",
-    "reason": "UX draft (native read pending)"
-  },
-  {
     "key": "plus.tabYear",
     "en": "Year",
     "reason": "UX draft (native read pending)"
@@ -1147,11 +1132,6 @@
   {
     "key": "plus.morePatterns",
     "en": "More patterns",
-    "reason": "UX draft (native read pending)"
-  },
-  {
-    "key": "plus.morePatternsBody",
-    "en": "Weekdays and weekends, writing days, your tags, and the last 12 months or all time",
     "reason": "UX draft (native read pending)"
   },
   {
@@ -1325,11 +1305,6 @@
     "reason": "UX draft (native read pending)"
   },
   {
-    "key": "plus.sheetAllTime",
-    "en": "All time is part of Plus",
-    "reason": "UX draft (native read pending)"
-  },
-  {
     "key": "plus.yearSubtitle",
     "en": "The last 12 months, by month",
     "reason": "UX draft (native read pending)"
@@ -1485,11 +1460,6 @@
     "reason": "UX draft (native read pending)"
   },
   {
-    "key": "plus.sheetPdf",
-    "en": "The designed PDF is part of Plus",
-    "reason": "UX draft (native read pending)"
-  },
-  {
     "key": "plus.pdfCoverTitle",
     "en": "My journal",
     "reason": "UX draft (native read pending)"
@@ -1507,11 +1477,6 @@
   {
     "key": "plus.pdfFileTitle",
     "en": "Moodbow journal – {period}",
-    "reason": "UX draft (native read pending)"
-  },
-  {
-    "key": "plus.sheetReview",
-    "en": "Year in review is part of Plus",
     "reason": "UX draft (native read pending)"
   },
   {
@@ -1627,11 +1592,6 @@
   {
     "key": "plus.paletteSea",
     "en": "Sea",
-    "reason": "UX draft (native read pending)"
-  },
-  {
-    "key": "plus.sheetThemes",
-    "en": "More themes are part of Plus",
     "reason": "UX draft (native read pending)"
   },
   {
@@ -2642,11 +2602,6 @@
   {
     "key": "letters.copied",
     "en": "Copied",
-    "reason": "UX draft (native read pending)"
-  },
-  {
-    "key": "plus.sheetLetters",
-    "en": "Letters to future me are part of Plus",
     "reason": "UX draft (native read pending)"
   },
   {

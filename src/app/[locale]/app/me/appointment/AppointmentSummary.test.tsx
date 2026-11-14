@@ -82,3 +82,13 @@ describe("AppointmentSummary", () => {
     expect(screen.queryByText(a.averages)).toBeNull();
   });
 });
+
+describe("AppointmentSummary: Full text's box is at least 24 px (audit D polish)", () => {
+  it("h-6 w-6, inside a label that still ticks it", () => {
+    summary();
+    const box = screen.getByTestId("appointment-full");
+    expect(box.className.split(" ")).toEqual(expect.arrayContaining(["h-6", "w-6", "shrink-0"]));
+    fireEvent.click(box.closest("label")!);
+    expect(box).toBeChecked();
+  });
+});

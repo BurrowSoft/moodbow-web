@@ -103,7 +103,7 @@ describe("more reminders: with Plus", () => {
 });
 
 describe("more reminders: without Plus", () => {
-  const LOCKED: Extra = { mode: { kind: "locked", offer: { trial: true, price: "US$59.99" } }, times: [] };
+  const LOCKED: Extra = { mode: { kind: "locked" }, times: [] };
 
   // The Plus sheet is retired since #315: the lock is a link to the Plus screen.
   it("Add another time is the lock: a link to the Plus screen, only here", () => {

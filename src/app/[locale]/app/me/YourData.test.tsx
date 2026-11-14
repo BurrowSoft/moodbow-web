@@ -248,7 +248,7 @@ describe("YourData: delete account", () => {
     withPdf("plus");
     expect(screen.getByTestId("me-journal-pdf")).toHaveAttribute("href", "/app/me/journal-pdf");
     cleanup();
-    withPdf({ trial: true, price: "US$59.99" });
+    withPdf("locked");
     expect(screen.getByTestId("me-journal-pdf")).toHaveAttribute("data-locked", "");
     cleanup();
     withPdf(null);

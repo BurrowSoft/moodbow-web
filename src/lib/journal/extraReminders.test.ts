@@ -51,17 +51,17 @@ describe("more reminders: the rules the server enforces", () => {
 
 describe("more reminders on Me: what each person sees", () => {
   it("nothing at all where Plus isn't shown (flag off, row unreadable), not even kept times", () => {
-    expect(extraReminders(null, ["08:00:00"], "US$59.99")).toBeNull();
+    expect(extraReminders(null, ["08:00:00"])).toBeNull();
   });
 
   it("with Plus: editable, with the stored times", () => {
-    expect(extraReminders({ kind: "plus", source: "stripe", daysLeft: null }, ["20:00:00", "08:00:00"], "US$59.99")).toEqual({ mode: { kind: "plus" }, times: ["08:00", "20:00"] });
+    expect(extraReminders({ kind: "plus", source: "stripe", daysLeft: null }, ["20:00:00", "08:00:00"])).toEqual({ mode: { kind: "plus" }, times: ["08:00", "20:00"] });
   });
 
-  it("without Plus: locked, kept times still listed (nothing deleted), the trial offered only if unused", () => {
-    expect(extraReminders({ kind: "free", trial: true }, ["08:00:00"], "US$59.99")).toEqual({ mode: { kind: "locked", offer: { trial: true, price: "US$59.99" } }, times: ["08:00"] });
-    expect(extraReminders({ kind: "free", trial: false }, [], "P")).toEqual({ mode: { kind: "locked", offer: { trial: false, price: "P" } }, times: [] });
-    expect(extraReminders({ kind: "past_due" }, undefined, "P")).toEqual({ mode: { kind: "locked", offer: { trial: false, price: "P" } }, times: [] });
+  it("without Plus: locked (a link to the Plus screen), kept times still listed (nothing deleted)", () => {
+    expect(extraReminders({ kind: "free", trial: true }, ["08:00:00"])).toEqual({ mode: { kind: "locked" }, times: ["08:00"] });
+    expect(extraReminders({ kind: "free", trial: false }, [])).toEqual({ mode: { kind: "locked" }, times: [] });
+    expect(extraReminders({ kind: "past_due" }, undefined)).toEqual({ mode: { kind: "locked" }, times: [] });
   });
 });
 

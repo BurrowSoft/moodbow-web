@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { applyTheme, readTheme, THEME_KEY, THEMES, writeTheme, type Theme } from "@/lib/appearance";
 import { readShortcutsOn, writeShortcutsOn } from "@/lib/shortcuts";
 import { applyPalette, PALETTES, PALETTE_KEY, readPalette, refreshPaletteUntil, writePalette, type Palette } from "@/lib/plus/palettes";
-import { LockedItem, type PlusOffer } from "../PlusSheet";
+import { LockedItem } from "../PlusSheet";
 import { useUntilLoaded } from "@/lib/ui/untilLoaded";
 
 const LABELS = { system: "themeSystem", light: "themeLight", dark: "themeDark" } as const;
@@ -36,9 +36,9 @@ const subscribe = (cb: () => void) => {
 // default, also for this device only.
 // palette: Moodbow Plus's extra themes (decision 246): { until } with Plus (the date
 // it runs to, kept with the choice), { pastDue } while a renewal fails (the
-// payment line, and the choice kept), the offer without (a lock), null when
+// payment line, and the choice kept), { locked } without (a lock to the Plus screen), null when
 // Plus can't be read (nothing shown, nothing changed).
-export function Appearance({ shortcuts = false, palette = null }: { shortcuts?: boolean; palette?: { until: string } | { pastDue: true } | PlusOffer | null }) {
+export function Appearance({ shortcuts = false, palette = null }: { shortcuts?: boolean; palette?: { until: string } | { pastDue: true } | { locked: true } | null }) {
   const untilLoaded = useUntilLoaded();
   const t = useTranslations("me");
   const theme = useSyncExternalStore(subscribe, readTheme, () => "system" as Theme);
@@ -81,6 +81,7 @@ export function Appearance({ shortcuts = false, palette = null }: { shortcuts?: 
           {t("meAppearance")}
         </legend>
         <div className="mt-4 space-y-2">
+          {/* At least 24 px (audit D polish, as the letter radios); the whole label still picks it. */}
           {THEMES.map((option) => (
             <label key={option} className="flex min-h-11 items-center gap-3 text-text">
               <input
@@ -89,7 +90,7 @@ export function Appearance({ shortcuts = false, palette = null }: { shortcuts?: 
                 data-testid={`me-theme-${option}`}
                 checked={theme === option}
                 onChange={() => choose(option)}
-                className="h-5 w-5 accent-[var(--color-accent)]"
+                className="h-6 w-6 shrink-0 accent-[var(--color-accent)]"
               />
               <span className="min-w-0 [overflow-wrap:anywhere]">{t(LABELS[option])}</span>
             </label>
@@ -108,7 +109,7 @@ export function Appearance({ shortcuts = false, palette = null }: { shortcuts?: 
                   data-testid={`me-palette-${option ?? "default"}`}
                   checked={chosenPalette === option}
                   onChange={() => choosePalette(option)}
-                  className="h-5 w-5 accent-[var(--color-accent)]"
+                  className="h-6 w-6 shrink-0 accent-[var(--color-accent)]"
                 />
                 <span className="min-w-0 [overflow-wrap:anywhere]">{option ? tp(PALETTE_LABELS[option]) : tp("paletteDefault")}</span>
               </label>
@@ -122,7 +123,7 @@ export function Appearance({ shortcuts = false, palette = null }: { shortcuts?: 
         </p>
       )}
       {palette && !until && !pastDue && (
-        <LockedItem label={tp("rowThemes")} sheetTitle={tp("sheetThemes")} offer={palette as PlusOffer} testId="me-palettes" className="mt-6 flex min-h-11 w-full items-center justify-between gap-3 border-t border-border pt-4 text-left font-medium text-text" />
+        <LockedItem label={tp("rowThemes")} testId="me-palettes" className="mt-6 flex min-h-11 w-full items-center justify-between gap-3 border-t border-border pt-4 text-left font-medium text-text" />
       )}
       {shortcuts && (
         <div className="mt-6 border-t border-border pt-4">

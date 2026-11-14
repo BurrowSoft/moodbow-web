@@ -102,6 +102,8 @@ export function AppointmentSummary({ today, rows, starred, dateLabels }: { today
                       <input
                         type="checkbox"
                         data-testid="appointment-full"
+                        // At least 24 px (audit D polish); the whole label still ticks it.
+                        className="h-6 w-6 shrink-0 accent-accent"
                         checked={whole}
                         onChange={(ev) =>
                           setFull((now) => {

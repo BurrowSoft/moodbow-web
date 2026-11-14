@@ -1,7 +1,6 @@
 // Three good things (1.3; specs/1.3-grounding-and-good-things.md with its Rulings): three short
 // lines, any of them empty, saved as ONE ordinary entry through the editor's own save (Ruling 3):
 // the heading, then the filled lines as a list. Not a streak: nothing here counts anything.
-export const GOOD_THINGS_FIELDS = 3;
 
 export type GoodThingsLines = [string, string, string];
 export const NO_GOOD_THINGS: GoodThingsLines = ["", "", ""];

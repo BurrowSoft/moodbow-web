@@ -8,7 +8,6 @@ import { roundFor, value, type InsightRow, type Metric } from "@/lib/journal/ins
 // before, only when those have 2 counted months; All time has no change line.
 
 export type LongRange = "year" | "all";
-export const LONG_RANGES: LongRange[] = ["year", "all"];
 export const isLongRange = (r: unknown): r is LongRange => r === "year" || r === "all";
 export const LONG_RULES = { monthMin: 5, quarterMin: 15, monthsBeforeQuarters: 24, minPeriods: 2 } as const;
 
