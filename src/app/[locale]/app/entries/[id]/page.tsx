@@ -17,6 +17,9 @@ import { originOf } from "@/lib/journal/origin";
 import { dateLocale } from "@/lib/journal/today";
 import { titledMetadata } from "../../pageMeta";
 import { EntryScreen } from "./EntryScreen";
+import { pageGate } from "@/lib/conditions";
+import { readEntryPictures, type EntryPicture } from "@/lib/journal/pictures";
+import { readPlusView } from "@/lib/plus/view";
 
 // The Reflect server action runs in this page's function: room for the
 // reflect call's 45 s deadline (REFLECT_SERVER_DEADLINE_MS).
@@ -67,6 +70,14 @@ export default async function EntryPage({ params, searchParams }: PageProps<"/[l
     .select("local_date, mood, sleep_hours, sleep_quality, exercise_minutes, stress, updated_at")
     .eq("local_date", entry.entry_date)
     .maybeSingle();
+  // Pictures (035), where pictures-live is on: this entry's (signed URLs, 5 minutes), and whether
+  // adding is open (Plus; unreadable or Plus off: no add, never a lock to someone who may pay). Not
+  // read: the entry without them (never a guess).
+  let pictures: { list: EntryPicture[]; plus: boolean | null } | undefined;
+  if (pageGate("pictures-live") !== "hidden") {
+    const [read, plus] = await Promise.all([readEntryPictures(supabase, [entry.id]), pageGate("plus") !== "hidden" ? readPlusView(supabase, user.id) : null]);
+    if (read) pictures = { list: read.get(entry.id) ?? [], plus: plus ? plus.kind === "plus" : null };
+  }
   return (
     <EntryScreen
       entry={entry}
@@ -78,6 +89,7 @@ export default async function EntryPage({ params, searchParams }: PageProps<"/[l
       today={me.today}
       country={me.profile?.country}
       reflect={reflect ? { initial: reflection, balance: me.credits?.balance ?? 0 } : null}
+      pictures={pictures}
     />
   );
 }

@@ -26,8 +26,11 @@ describe("buildCsp (audit A1)", () => {
     expect(directive(csp, "frame-src")).toEqual(["'none'"]);
   });
 
-  it("the share card's canvas: images from data: and blob:", () => {
-    expect(directive(buildCsp("n", ENV), "img-src")).toEqual(["'self'", "data:", "blob:"]);
+  it("images: the share card's canvas (data:, blob:) and the project's own Supabase storage for the pictures, exactly", () => {
+    expect(directive(buildCsp("n", ENV), "img-src")).toEqual(["'self'", "data:", "blob:", "https://abc.supabase.co"]);
+    expect(buildCsp("n", ENV)).not.toContain("*.supabase.co");
+    // No Supabase configured: no storage origin.
+    expect(directive(buildCsp("n", {}), "img-src")).toEqual(["'self'", "data:", "blob:"]);
   });
 
   it("no report-uri: a report would carry the page's full address (an auth token on /auth/confirm) past our scrubbing", () => {

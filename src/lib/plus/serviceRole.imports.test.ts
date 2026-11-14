@@ -45,10 +45,14 @@ describe("the service role on the web", () => {
     expect(all).not.toMatch(/NEXT_PUBLIC_[A-Z_]*SERVICE_ROLE/);
   });
 
-  it("it reaches only entitlements and stripe_cancel_queue, never a journal table", () => {
+  it("it reaches only entitlements, stripe_cancel_queue and picture_deletions, never a journal table; the pictures bucket only to remove queued files", () => {
     const text = readFileSync(path.join(SRC, "lib", "plus", "serviceRole.ts"), "utf8");
-    const tables = [...text.matchAll(/\.from\("([^"]+)"\)/g)].map((m) => m[1]);
-    expect(new Set(tables)).toEqual(new Set(["entitlements", "stripe_cancel_queue"]));
+    const tables = [...text.matchAll(/(?<!storage)\.from\("([^"]+)"\)/g)].map((m) => m[1]);
+    expect(new Set(tables)).toEqual(new Set(["entitlements", "stripe_cancel_queue", "picture_deletions"]));
+    // Storage (035): the entry-pictures bucket, and only .remove (never a read, a list or a URL).
+    const buckets = [...text.matchAll(/storage\.from\("([^"]+)"\)\.(\w+)/g)].map((m) => `${m[1]}.${m[2]}`);
+    expect(buckets).toEqual(["entry-pictures.remove"]);
+    expect(text).not.toMatch(/createSignedUrl|getPublicUrl|\.download\(|\.list\(/);
     expect(text).not.toMatch(/\.rpc\(/);
     expect(text).not.toMatch(/export\s+(const|function)\s+db\b/);
   });

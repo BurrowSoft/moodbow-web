@@ -151,7 +151,7 @@ export default async function TimelinePage({ params, searchParams }: PageProps<"
         initialView={view}
         list={list}
         calendar={
-          <MonthCalendar today={me.today} dateLocaleTag={dateLocaleTag} initial={calendarInitial?.status === "ok" ? calendarInitial.days : null} shareable={shareable} printable={printable} />
+          <MonthCalendar today={me.today} dateLocaleTag={dateLocaleTag} initial={calendarInitial?.status === "ok" ? calendarInitial.days : null} shareable={shareable} printable={printable} picturesKey={pageGate("pictures-live") !== "hidden"} />
         }
       />
     </>

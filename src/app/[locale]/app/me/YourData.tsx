@@ -10,10 +10,36 @@ import { renderExportCsv } from "@/lib/exportCsv";
 import { csvFileName, deleteWordTyped, exportFileName, journalFileName } from "@/lib/journal/account";
 import { wipeLocalData } from "@/lib/localData";
 import { EXPORT_WAIT_MS, withTimeout } from "@/lib/ui/withTimeout";
-import { deleteMyAccount, exportMyData, type DeleteAccountState } from "./actions";
+import { deleteMyAccount, exportMyData, exportPictureUrls, type DeleteAccountState } from "./actions";
 
-type ExportFile = { kind: "txt" | "json" | "csv"; name: string; url: string };
-const LINK_LABELS = { txt: "exportReadable", json: "exportData", csv: "exportCsv" } as const;
+type ExportFile = { kind: "txt" | "json" | "csv" | "zip"; name: string; url: string };
+const LINK_LABELS = { txt: "exportReadable", json: "exportData", csv: "exportCsv", zip: "exportZip" } as const;
+
+// Pictures (035): the data file with the pictures themselves, zipped in the browser (stored, not
+// compressed: JPEGs don't shrink). pictures/<entry_id>/<picture_id>.jpg beside the JSON.
+export const PICTURE_FETCH_MS = 30_000;
+async function zipWithPictures(json: string, jsonName: string): Promise<Blob | null> {
+  const listed = await exportPictureUrls().catch(() => null);
+  if (!listed || listed.status !== "ok") return null;
+  if (listed.pictures.length === 0) return null;
+  const { zipSync, strToU8 } = await import("fflate");
+  const files: Record<string, [Uint8Array, { level: 0 }]> = { [jsonName]: [strToU8(json), { level: 0 }] };
+  for (const p of listed.pictures) {
+    // Each picture gets PICTURE_FETCH_MS (audit batch D, MAJOR): a stalled or dropped one ends as
+    // "pictures missing" with the other files ready, never a hung or failed export.
+    try {
+      const res = await fetch(p.url, { signal: AbortSignal.timeout(PICTURE_FETCH_MS) });
+      if (!res.ok) return null;
+      files[`pictures/${p.entry_id}/${p.id}.jpg`] = [new Uint8Array(await res.arrayBuffer()), { level: 0 }];
+    } catch {
+      return null;
+    }
+  }
+  return new Blob([zipSync(files)], { type: "application/zip" });
+}
+const zipFileName = (date: string) => `moodbow-export-${date}.zip`;
+const hasPictures = (doc: unknown) =>
+  Array.isArray((doc as { entries?: unknown })?.entries) && (doc as { entries: { pictures?: unknown }[] }).entries.some((e) => Array.isArray(e?.pictures) && e.pictures.length > 0);
 
 // Me → Your data (M7): Export my data, and Delete account behind a dialog
 // that warns about lost AI credits, offers the export first, and needs
@@ -21,13 +47,15 @@ const LINK_LABELS = { txt: "exportReadable", json: "exportData", csv: "exportCsv
 // and there are some: text = enforcement, as the Help article's
 // {pending:ai_live} clause (UX, the Web Tester's forced pass). csv: the
 // spreadsheet link (1.1 P, export-csv-live).
-export function YourData({ credits, uid, csv = false, ai = false, plusSource = null, pdf = null }: { credits: number; uid: string; csv?: boolean; ai?: boolean; plusSource?: "stripe" | "play" | "apple" | null; pdf?: "plus" | PlusOffer | null }) {
+export function YourData({ credits, uid, csv = false, ai = false, plusSource = null, pdf = null, pictures = false }: { credits: number; uid: string; csv?: boolean; ai?: boolean; plusSource?: "stripe" | "play" | "apple" | null; pdf?: "plus" | PlusOffer | null; pictures?: boolean }) {
   const t = useTranslations("me");
   const tp = useTranslations("plus");
   const tt = useTranslations("today");
   const locale = useLocale();
   const [exporting, startExport] = useTransition();
   const [exportState, setExportState] = useState<"idle" | "ready" | "error">("idle");
+  // Pictures (035): the zip couldn't be made (the rest of the export stands).
+  const [zipFailed, setZipFailed] = useState(false);
   const [files, setFiles] = useState<ExportFile[]>([]);
   // The whole message tree, for the readable export's keys (lib/exportText).
   const tr = useTranslations();
@@ -65,6 +93,7 @@ export function YourData({ credits, uid, csv = false, ai = false, plusSource = n
     startExport(async () => {
       try {
         // No answer in 45 s: the export's error and Try again (the timeout audit).
+        setZipFailed(false);
         const result = await withTimeout(exportMyData(), EXPORT_WAIT_MS);
         if (result.status !== "ok") return setExportState("error");
         const doc: unknown = JSON.parse(result.json);
@@ -74,6 +103,14 @@ export function YourData({ credits, uid, csv = false, ai = false, plusSource = n
           next.push({ kind: "txt", name: journalFileName(result.date), url: URL.createObjectURL(new Blob([renderExportText(doc, tr as Translate)], { type: "text/plain;charset=utf-8" })) });
         }
         next.push({ kind: "json", name: exportFileName(result.date), url: URL.createObjectURL(new Blob([result.json], { type: "application/json" })) });
+        // Pictures (035): the zip, when there are any and pictures are on here. Can't be made: the
+        // export still stands without it, and says the pictures are missing.
+        // Whenever the JSON lists pictures, whatever pictures-live says (the Reviewer, #322).
+        if (hasPictures(doc)) {
+          const zip = await zipWithPictures(result.json, exportFileName(result.date));
+          if (zip) next.push({ kind: "zip", name: zipFileName(result.date), url: URL.createObjectURL(zip) });
+          else setZipFailed(true);
+        }
         // The spreadsheet (1.1 P): from the same document, no AI text.
         if (csv && canRenderText(doc)) {
           next.push({ kind: "csv", name: csvFileName(result.date), url: URL.createObjectURL(new Blob([renderExportCsv(doc, tr as Translate)], { type: "text/csv;charset=utf-8" })) });
@@ -106,6 +143,11 @@ export function YourData({ credits, uid, csv = false, ai = false, plusSource = n
             </li>
           ))}
         </ul>
+      )}
+      {exportState === "ready" && zipFailed && (
+        <p role="alert" data-testid="me-export-zip-failed" className="text-sm text-text">
+          {t("exportZipFailed")}
+        </p>
       )}
     </div>
   );

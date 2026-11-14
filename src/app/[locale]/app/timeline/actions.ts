@@ -3,6 +3,7 @@
 import { pageGate } from "@/lib/conditions";
 import { isIsoDate, TIMELINE_PAGE_DAYS, type TimelineDay } from "@/lib/journal/timeline";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { readEntryPictures } from "@/lib/journal/pictures";
 
 export type TimelinePage = { status: "ok"; days: TimelineDay[]; done: boolean } | { status: "error" };
 
@@ -25,5 +26,15 @@ export async function loadTimeline(before: string | null, momentsOnly: boolean):
   });
   if (error || !Array.isArray(data)) return { status: "error" };
   const days = data as TimelineDay[];
+  // Pictures (035): each entry's thumbnails for the strip, signed for 5 minutes. Unreadable: the
+  // list without them (never a failed page over a picture).
+  if (pageGate("pictures-live") !== "hidden") {
+    const ids = days.flatMap((d) => (Array.isArray(d.entries) ? d.entries.map((e) => e.id) : []));
+    const pictures = await readEntryPictures(supabase, ids, { full: false });
+    if (pictures) for (const d of days) for (const e of d.entries ?? []) {
+      const list = pictures.get(e.id);
+      if (list?.length) e.thumbs = list.map((p) => p.thumb);
+    }
+  }
   return { status: "ok", days, done: days.length < TIMELINE_PAGE_DAYS };
 }

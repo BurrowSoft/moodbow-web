@@ -6,7 +6,7 @@ import messages from "../../src/messages/en.json";
 import fr from "../../src/messages/fr.json";
 import { monthsBefore } from "../../src/lib/journal/onThisDay";
 import { axeAtWidths } from "../axe";
-import { aiConsentGranted, journalToday, aiAvailable, cleanup, configured, confirmEmail, createConfirmedUser, exists, lastWeekMonday, seedCheckIns, newEmail, newPassword, notConfigured, profileLocale, profileSaver, revokeSessions, setProfileLocale, signedUpUnconfirmed, sweep, grantPlusTrial, plusOnStaging } from "./staging";
+import { aiConsentGranted, journalToday, aiAvailable, cleanup, configured, confirmEmail, createConfirmedUser, exists, lastWeekMonday, seedCheckIns, newEmail, newPassword, notConfigured, profileLocale, profileSaver, revokeSessions, setProfileLocale, signedUpUnconfirmed, sweep, grantPlusTrial, plusOnStaging, picturesOnStaging, seedMoment, pictureFiles } from "./staging";
 
 // The launch-critical journeys (1.0), end to end against staging with a
 // throwaway account each: sign-up → confirm → consent → setup → check-in →
@@ -2204,6 +2204,134 @@ test("Insights for a free person: the example, its watermark whole at 320 and 12
       }));
       expect.soft(wide, `${range} at 300 % on 320 px: nothing scrolls sideways`).toEqual({ overflow: 0, sticksOut: [] });
     }
+    await cdp.send("Page.setFontSizes", { fontSizes: { standard: 16, fixed: 13 } });
+  } finally {
+    await cleanup(email);
+  }
+});
+
+// Pictures for moments (035; #322): a real upload, in a real browser, against staging. A Plus account
+// adds a JPEG carrying EXIF with a GPS marker to a moment: the canvas re-encode passes the server's
+// metadata guard (a real Chromium JPEG carries an ICC profile segment), the tile shows, and the
+// stored files have no APP1 segment and no GPS marker; the full picture is at most 2048 px.
+test("pictures: a Plus moment takes a real JPEG with EXIF; the tile shows; the stored files carry no metadata", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "checked in Chromium");
+  // 035 is on staging (decision 250): a configured staging without it is a failure, never a skip.
+  expect(await picturesOnStaging(), "staging has 035 (picture_deletions readable by the service role)").toBe(true);
+  test.setTimeout(120_000);
+  const email = newEmail();
+  try {
+    const password = await accountAtSetup(page, email);
+    await grantPlusTrial(email);
+    const today = await journalToday(email, password);
+    const moment = await seedMoment(email, password, today, "A walk by the sea.");
+    // Any CSP violation on the way, recorded in the page (the Web Tester, #322: img-src blocked
+    // every picture while the signed URLs served 200).
+    await page.addInitScript(() => {
+      const w = window as unknown as { __csp: string[] };
+      w.__csp = [];
+      document.addEventListener("securitypolicyviolation", (e) => w.__csp.push(`${e.violatedDirective} ${e.blockedURI}`));
+    });
+    await page.goto(`/app/entries/${moment}`);
+    await expect(page.getByTestId("entry-picture-add")).toBeVisible({ timeout: 15_000 });
+    // A 2400 x 1800 JPEG with an EXIF segment carrying a GPS marker, spliced in after its start.
+    const bytes = await page.evaluate(async () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = 2400;
+      canvas.height = 1800;
+      const ctx = canvas.getContext("2d")!;
+      ctx.fillStyle = "#3a7bd5";
+      ctx.fillRect(0, 0, 2400, 1800);
+      ctx.fillStyle = "#f2c66d";
+      ctx.fillRect(0, 600, 2400, 600);
+      const jpeg = new Uint8Array(await (await new Promise<Blob>((done) => canvas.toBlob((b) => done(b!), "image/jpeg", 0.9))).arrayBuffer());
+      const text = (s: string) => [...s].map((c) => c.charCodeAt(0));
+      const data = [...text("Exif"), 0, 0, ...text("GPSMOODBOW 51.5074N 0.1278W")];
+      const len = data.length + 2;
+      return [...jpeg.slice(0, 2), 0xff, 0xe1, len >> 8, len & 0xff, ...data, ...jpeg.slice(2)];
+    });
+    await page.getByTestId("entry-picture-input").setInputFiles({ name: "walk.jpg", mimeType: "image/jpeg", buffer: Buffer.from(bytes) });
+    await expect(page.getByTestId("entry-picture")).toHaveCount(1, { timeout: 30_000 });
+    await expect(page.getByTestId("entry-picture-error")).toHaveCount(0);
+    // The picture really renders: the tile's image and the full view decode (naturalWidth > 0).
+    const decoded = (selector: string) => page.locator(selector).first().evaluate((img: HTMLImageElement) => (img.complete ? img.naturalWidth : 0));
+    await expect.poll(() => decoded('[data-testid="entry-picture-open"] img'), { timeout: 15_000 }).toBeGreaterThan(0);
+    await page.getByTestId("entry-picture-open").first().click();
+    await expect.poll(() => decoded('[data-testid="entry-picture-full"]'), { timeout: 15_000 }).toBeGreaterThan(0);
+    await page.getByTestId("entry-picture-close").click();
+    const files = await pictureFiles(email);
+    expect(files.map((f) => (f.name.endsWith("_t.jpg") ? "thumb" : "full")).sort()).toEqual(["full", "thumb"]);
+    for (const f of files) {
+      let app1 = false;
+      for (let i = 2; i + 3 < f.bytes.length; ) {
+        if (f.bytes[i] !== 0xff) break;
+        const m = f.bytes[i + 1];
+        if (m === 0xda) break;
+        if (m === 0xe1) app1 = true;
+        i += 2 + f.bytes.readUInt16BE(i + 2);
+      }
+      expect(app1, `${f.name.endsWith("_t.jpg") ? "thumb" : "full"}: no APP1`).toBe(false);
+      expect(f.bytes.includes(Buffer.from("GPSMOODBOW")), "no GPS marker").toBe(false);
+    }
+    // After a reload the picture is still there (from its signed URL), and still renders.
+    await page.reload();
+    await expect(page.getByTestId("entry-picture")).toHaveCount(1, { timeout: 15_000 });
+    await expect.poll(() => decoded('[data-testid="entry-picture-open"] img'), { timeout: 15_000 }).toBeGreaterThan(0);
+    // The export: a zip with the data file and this picture's bytes (fetched through fresh signed
+    // URLs, which the CSP's connect-src must allow).
+    await page.goto("/app/me");
+    await page.getByTestId("me-export").click();
+    await expect(page.getByTestId("me-export-zip")).toBeVisible({ timeout: 30_000 });
+    const [download] = await Promise.all([page.waitForEvent("download"), page.getByTestId("me-export-zip").click()]);
+    const zip = await readFile((await download.path())!);
+    const names: string[] = [];
+    for (let i = 0; i + 46 < zip.length; i++) if (zip.readUInt32LE(i) === 0x02014b50) names.push(zip.subarray(i + 46, i + 46 + zip.readUInt16LE(i + 28)).toString("utf8"));
+    const picture = names.find((n) => n.startsWith(`pictures/${moment}/`) && n.endsWith(".jpg"));
+    expect(picture, `the zip holds the picture (${names.join(", ")})`).toBeTruthy();
+    const full = files.find((f) => !f.name.endsWith("_t.jpg"))!;
+    expect(zip.includes(full.bytes.subarray(0, 64)), "the zip holds the picture's own bytes").toBe(true);
+    // And nothing was blocked by the CSP anywhere on the way.
+    expect(await page.evaluate(() => (window as unknown as { __csp: string[] }).__csp)).toEqual([]);
+    // Timeline's strip at 300 % on a 320 px phone: it shows, and nothing scrolls sideways (UX, #322:
+    // rem-sized thumbnails grew to 192 px each).
+    await page.setViewportSize({ width: 320, height: 800 });
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send("Page.setFontSizes", { fontSizes: { standard: 48, fixed: 39 } });
+    await page.goto("/app/timeline");
+    await expect(page.getByTestId("timeline-pictures").first()).toBeVisible({ timeout: 15_000 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth), "Timeline with pictures at 300 %: no sideways scroll").toBeLessThanOrEqual(0);
+    // The entry's tile at 300 % on 320 px: the ✕ (44 px) never covers the whole open button
+    // (the a11y sweep, #326: a rem ✕ grew past a 60 px tile, axe target-size). A clear 24 px
+    // square in the tile's bottom-left quadrant belongs to the open button, and nothing scrolls sideways.
+    await page.goto(`/app/entries/${moment}`);
+    await expect(page.getByTestId("entry-picture")).toHaveCount(1, { timeout: 15_000 });
+    // elementFromPoint sees only the viewport: at 300 % the tile is below the fold, so centre it first.
+    await page.getByTestId("entry-picture-open").first().evaluate((el) => el.scrollIntoView({ block: "center" }));
+    const tile = await page.evaluate(() => {
+      const open = document.querySelector('[data-testid="entry-picture-open"]')!.getBoundingClientRect();
+      // The middle of the bottom-left quadrant: clear of the ✕ (top right) and of the tile's rounded
+      // corner, which hit-testing clips (the first probe at 12 px in landed on the corner's curve).
+      const x = open.left + open.width / 4;
+      const y = open.bottom - open.height / 4;
+      const corners = [
+        [x - 11, y - 11],
+        [x + 11, y - 11],
+        [x - 11, y + 11],
+        [x + 11, y + 11],
+        [x, y],
+      ];
+      const hits = corners.map(([px, py]) => {
+        const el = document.elementFromPoint(px, py);
+        // Each miss named in full: tag, test id and classes (the Reviewer, #322).
+        return el?.closest('[data-testid="entry-picture-open"]') ? "open" : el ? `${el.tagName.toLowerCase()}${el.getAttribute("data-testid") ? `[${el.getAttribute("data-testid")}]` : ""}.${(el.getAttribute("class") ?? "").trim().split(/\s+/).join(".")} @${Math.round(px)},${Math.round(py)}` : `none @${Math.round(px)},${Math.round(py)}`;
+      });
+      const clear = hits.every((h) => h === "open");
+      const where = { open: [Math.round(open.left), Math.round(open.top), Math.round(open.width), Math.round(open.height)], viewport: [window.innerWidth, window.innerHeight], hits };
+      const remove = document.querySelector('[data-testid="entry-picture-remove"]')!.getBoundingClientRect();
+      return { where, clear, remove: [Math.round(remove.width), Math.round(remove.height)], overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth };
+    });
+    console.log(`entry tile at 300 %: ${JSON.stringify(tile)}`);
+    expect(tile, "the entry's tile at 300 %: a clear 24 px square to open it, the ✕ 44 px, no sideways scroll").toEqual({ where: tile.where, clear: true, remove: [44, 44], overflow: 0 });
     await cdp.send("Page.setFontSizes", { fontSizes: { standard: 16, fixed: 13 } });
   } finally {
     await cleanup(email);

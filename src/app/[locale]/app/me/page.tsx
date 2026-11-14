@@ -111,7 +111,7 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
         languages={offeredLocales().map((code): [string, string] => [code, tc(`languageNames.${code}`)])}
       />
       <Appearance shortcuts={pageGate("shortcuts-live") !== "hidden"} palette={plus?.kind === "plus" && plus.until ? { until: plus.until } : plus?.kind === "past_due" ? { pastDue: true } : plus ? { trial: plus.kind === "free" && plus.trial, price: plusPage?.price ?? "" } : null} />
-      <YourData credits={me.credits?.balance ?? 0} uid={user.id} csv={pageGate("export-csv-live") !== "hidden"} ai={conditionMet("ai-live")} plusSource={plus?.kind === "plus" ? plus.source : plus?.kind === "past_due" ? "stripe" : null} pdf={plus?.kind === "plus" ? "plus" : plus ? { trial: plus.kind === "free" && plus.trial, price: plusPage?.price ?? "" } : null} />
+      <YourData credits={me.credits?.balance ?? 0} uid={user.id} csv={pageGate("export-csv-live") !== "hidden"} ai={conditionMet("ai-live")} plusSource={plus?.kind === "plus" ? plus.source : plus?.kind === "past_due" ? "stripe" : null} pdf={plus?.kind === "plus" ? "plus" : plus ? { trial: plus.kind === "free" && plus.trial, price: plusPage?.price ?? "" } : null} pictures={pageGate("pictures-live") !== "hidden"} />
       {/* Import from another app (1.1 K), with Your data, where it's on. */}
       {pageGate("import-live") !== "hidden" && (
         <ImportData uid={user.id} today={me.today} dateLocaleTag={dateLocale(locale, (await headers()).get("accept-language"), me.profile?.country ?? null)} country={me.profile?.country} />

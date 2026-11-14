@@ -173,6 +173,17 @@ export function TimelineList({ initial, initialDone, momentsOnly, dateLocaleTag,
                             {entry.is_moment && <MomentStar label={te("momentBadge")} />}
                             <span className="line-clamp-2 whitespace-pre-line">{entry.preview}</span>
                           </Link>
+                          {/* The pictures (035; board 15): 64 px thumbnails under the text, indented like
+                              it, a group named by their count. In px, and wrapping: at 300 % text rem
+                              sizes made them 192 px each and the page scrolled sideways (UX, #322). */}
+                          {entry.thumbs && entry.thumbs.length > 0 && (
+                            <div role="group" aria-label={t("timelinePictures", { count: entry.thumbs.length })} data-testid="timeline-pictures" className={`mt-[6px] flex min-w-0 flex-wrap gap-[6px] ${entry.is_moment ? "ps-[24px]" : ""}`}>
+                              {entry.thumbs.map((src, i) => (
+                                // eslint-disable-next-line @next/next/no-img-element -- a short-lived signed URL: never through the image optimizer
+                                <img key={i} src={src} alt={te("pictureOpen", { n: i + 1, total: entry.thumbs!.length })} data-testid="timeline-picture" className="h-[64px] w-[64px] shrink-0 rounded-xl object-cover" />
+                              ))}
+                            </div>
+                          )}
                         </li>
                       ))}
                     </ul>

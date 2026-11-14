@@ -238,5 +238,9 @@
   "thai-offered-live": {
     "met": false,
     "what": "1.1 F: Thai is offered on the web: the native reader has read the Thai UI, Help and dates (thai_reviewed, decision 193), with UX's go. Until then /th is a draft on test builds only (Preview, dev, CI) and Production is English only; the switcher, Me → Language, hreflang and the sitemap offer Thai only once met. The legal pages keep their own gates in every language."
+  },
+  "pictures-live": {
+    "met": false,
+    "what": "1.3 Pictures for moments (035; spec \"Pictures for moments\" and \"Pictures 035: build rulings\"): up to 3 pictures on a moment (Plus to add; viewing, export and deleting always), re-encoded in the browser (no EXIF), private bucket, signed URLs of 5 minutes. Needs moodbow-app 035 on Production AND the picture-deletions cron running on Production (vercel.json; CRON_SECRET is Vitor's): until it runs, deleted pictures' files are not removed. Also Vitor's privacy line, store labels and the storage cost. While it is unmet (or turned off again), pictures already added are still in Export my data and are deleted with their entry or the account, but there is no screen to view or remove a single picture."
   }
 }
