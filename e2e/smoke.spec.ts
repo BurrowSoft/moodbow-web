@@ -277,7 +277,9 @@ test.describe("the live legal pages and account deletion (decision 164)", () => 
     await page.goto("/privacy");
     const article = page.locator('[data-content="article"]');
     await expect(article.getByRole("heading", { level: 2, name: "The short version" })).toBeVisible();
-    await expect(article.getByText("Last updated: 11 November 2026")).toBeVisible();
+    await expect(article.getByText("Last updated: 14 November 2026")).toBeVisible();
+    // Every cookie the website sets, as the policy names them (the full-app audit, round 1, item 1).
+    await expect(article).toContainText("one that keeps you signed in, one that remembers the language you chose, one that remembers list or calendar view, for a minute after you delete your account, one that tells your browser to clear its copies, and, while you create an account, one that briefly holds the consents you just gave.");
     // The help card's country fallback, as the policy says it (decision 245, #269).
     await expect(article).toContainText("To show helplines near you when we don't know your country, we use the country your connection comes from, at that moment only; it isn't stored.");
     await expect(article).not.toContainText("Google Play, Apple App Store");
