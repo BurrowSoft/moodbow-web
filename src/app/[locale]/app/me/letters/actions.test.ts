@@ -18,6 +18,8 @@ const query = (table: string) => {
   };
 };
 vi.mock("@/lib/supabase/server", () => ({ createSupabaseServerClient: () => Promise.resolve({ from: query, rpc }) }));
+// The person's today, for the reminders' rule (as the editor's).
+vi.mock("@/lib/journal/me", () => ({ getMe: () => Promise.resolve({ today: "2026-11-10" }) }));
 vi.mock("@/lib/plus/letters", async (orig) => ({ ...(await orig<typeof import("@/lib/plus/letters")>()), lettersGate: () => "live" }));
 const { deleteLetter, letterNotNow, openLetter, saveLetter } = await import("./actions");
 
@@ -41,6 +43,12 @@ describe("saveLetter: Plus, checked on the server", () => {
     // A bad shape never reaches the database.
     rpc.mockClear();
     expect((await saveLetter("Dear me.", 1, [{ days_before: "1", time: "09:00", on: true } as never])).status).toBe("error");
+    expect(rpc).not.toHaveBeenCalled();
+    // The editor's rule, on the server (UX, #319): 4 heads-ups and no day entry, or a heads-up that
+    // doesn't fit before the letter opens, never reach the database.
+    const four = [1, 2, 3, 4].map((d) => ({ days_before: d, time: "09:00", on: true }));
+    expect((await saveLetter("Dear me.", 3, four)).status).toBe("invalid_reminders");
+    expect((await saveLetter("Dear me.", 1, [{ days_before: 60, time: "09:00", on: true }])).status).toBe("invalid_reminders");
     expect(rpc).not.toHaveBeenCalled();
   });
   it("without Plus, or no row: plus_required, and nothing is written", async () => {

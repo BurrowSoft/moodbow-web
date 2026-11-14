@@ -32,6 +32,8 @@ export function daysUntil(today: string, date: string): number {
 // The server's rule, here first so the editor never sends what letter_save would refuse.
 export function remindersValid(list: LetterReminder[], today: string, opens: string): boolean {
   if (!Array.isArray(list) || list.length > MAX_HEADS_UPS + 1) return false;
+  // At most 3 heads-ups before the day, whether or not the day itself is in the list (UX, #319).
+  if (list.filter((r) => r && typeof r === "object" && typeof r.days_before === "number" && r.days_before > 0).length > MAX_HEADS_UPS) return false;
   const until = daysUntil(today, opens);
   const seen = new Set<number>();
   for (const r of list) {

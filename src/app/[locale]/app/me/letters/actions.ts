@@ -1,7 +1,8 @@
 "use server";
 
 import { forClient, isLetterMonths, LETTER_RULES, parseLetterRows, type Letter, type LetterMonths } from "@/lib/journal/letters";
-import type { LetterReminder } from "@/lib/journal/letterReminders";
+import { opensOn, remindersValid, type LetterReminder } from "@/lib/journal/letterReminders";
+import { getMe } from "@/lib/journal/me";
 import { ENTITLEMENT_COLUMNS, parseEntitlement } from "@/lib/plus/entitlements";
 import { letterWrite, lettersGate } from "@/lib/plus/letters";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -43,7 +44,8 @@ async function list(supabase: Client): Promise<LetterResult> {
 }
 
 // reminders (033): the letter's reminders, or undefined for the database's default (the opening day
-// at 09:00, on). The database checks them fully (invalid_value); here only their shape.
+// at 09:00, on). Here their shape, then the editor's own rule against the person's today (the server's
+// check, UX #319: a client calling this directly can't pass 4 heads-ups); the database checks too.
 const isReminders = (v: unknown): v is LetterReminder[] =>
   Array.isArray(v) && v.length <= 4 && v.every((r) => r && typeof r === "object" && Number.isInteger(r.days_before) && typeof r.time === "string" && typeof r.on === "boolean");
 
@@ -55,6 +57,11 @@ export async function saveLetter(body: string, months: LetterMonths, reminders?:
   const may = await mayWrite(supabase);
   if (may === null) return { status: "error" };
   if (!may) return { status: "plus_required" };
+  if (reminders) {
+    const me = await getMe(supabase);
+    if (!me) return { status: "error" };
+    if (!remindersValid(reminders, me.today, opensOn(me.today, months))) return { status: "invalid_reminders" };
+  }
   const { error } = await supabase.rpc("letter_save", {
     p_body: body,
     p_months: months,

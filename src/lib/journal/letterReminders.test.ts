@@ -23,6 +23,8 @@ describe("remindersValid: letter_save's rule (033)", () => {
   });
   it("refused: 5 entries, a repeated day, a heads-up on or before today, a bad time, an extra key", () => {
     expect(remindersValid([r(0), r(1), r(2), r(3), r(4)], TODAY, opens)).toBe(false);
+    // 4 heads-ups and no day entry: still more than 3 heads-ups (UX, #319).
+    expect(remindersValid([r(1), r(2), r(3), r(4)], TODAY, opens)).toBe(false);
     expect(remindersValid([r(1), r(1)], TODAY, opens)).toBe(false);
     expect(remindersValid([r(30)], TODAY, opens)).toBe(false);
     expect(remindersValid([r(0, "9:00")], TODAY, opens)).toBe(false);
