@@ -189,14 +189,15 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
         <GetHelpNow country={me.profile?.country} testId="today-help" neutral icon />
       </header>
       <CheckInCard key={checkInError ? "unread" : "read"} initial={(data as CheckIn | null) ?? null} uid={user.id} date={me.today} dateLocaleTag={dateLocaleTag} keepDraft loadFailed={Boolean(checkInError)} {...cardTags} country={me.profile?.country} />
-      {toolboxOn && <ToolboxCard uid={user.id} today={me.today} todayMood={(data as CheckIn | null)?.mood ?? null} items={toolbox} />}
-      {/* With letters on, always: a day's Not now may leave the help offer alone (LetterCard). */}
-      {lettersOn && <LetterCard letter={letter} uid={user.id} today={me.today} country={me.profile?.country} />}
-      {/* Today's order (UX ruling 3): the check-in, the cards (Your week first: its hard-week help), the
-          entries, then Write last. */}
+      {/* Today's order (UX ruling, audit 14 Nov; the app and board 22): check-in → Your week (first,
+          so its hard-week help is high) → Plus card → setup/reminder offer → things that help →
+          a letter → entries → Write last. */}
       {yourWeekCard}
       {plusCard && plusPage && <TodayPlusCard trial={plusCard.trial} price={plusPage.price} offer={plusPage.offer} date={me.today} />}
       {setupLater && <SetupLaterCard />}
+      {toolboxOn && <ToolboxCard uid={user.id} today={me.today} todayMood={(data as CheckIn | null)?.mood ?? null} items={toolbox} />}
+      {/* With letters on, always: a day's Not now may leave the help offer alone (LetterCard). */}
+      {lettersOn && <LetterCard letter={letter} uid={user.id} today={me.today} country={me.profile?.country} />}
       {entriesError && (
         <p role="alert" data-testid="today-entries-error" className="font-medium text-accent">
           {t("errGeneric")}

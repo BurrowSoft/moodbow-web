@@ -2567,8 +2567,8 @@ test("large text, set in the browser: breathing's Stop stays in view on a 320 px
     await page.locator("#email").fill(email);
     await page.locator("#password").fill(password);
     await page.locator("main form button[type=submit]").first().click();
-    await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
-    await page.getByTestId("setup-done").click();
+    // Since #314 (fewer taps) sign-in lands on Today (audit trial).
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     await page.setViewportSize({ width: 320, height: 640 });
     for (const percent of [100, 300]) {
@@ -2605,8 +2605,8 @@ test("axe: the toolbox and breathing, at 320 and 1280 px", async ({ page }) => {
     await page.locator("#email").fill(email);
     await page.locator("#password").fill(password);
     await page.locator("main form button[type=submit]").first().click();
-    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
-    await page.getByTestId("setup-done").click();
+    // Since #314 (fewer taps) sign-in lands on Today (audit trial).
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
       await setProfileLocale(email, password, saved);
@@ -2641,8 +2641,8 @@ test("large text, set in the browser: the safety plan's help is in the first vie
     await page.locator("#email").fill(email);
     await page.locator("#password").fill(password);
     await page.locator("main form button[type=submit]").first().click();
-    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
-    await page.getByTestId("setup-done").click();
+    // Since #314 (fewer taps) sign-in lands on Today (audit trial).
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     await page.setViewportSize({ width: 320, height: 640 });
     for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
@@ -2679,8 +2679,8 @@ test("axe: the safety plan, at 320 and 1280 px", async ({ page }) => {
     await page.locator("#email").fill(email);
     await page.locator("#password").fill(password);
     await page.locator("main form button[type=submit]").first().click();
-    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
-    await page.getByTestId("setup-done").click();
+    // Since #314 (fewer taps) sign-in lands on Today (audit trial).
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
       await setProfileLocale(email, password, saved);
@@ -2724,8 +2724,8 @@ test("large text, set in the browser: the appointment summary's title keeps its 
     await page.locator("#email").fill(email);
     await page.locator("#password").fill(password);
     await page.locator("main form button[type=submit]").first().click();
-    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
-    await page.getByTestId("setup-done").click();
+    // Since #314 (fewer taps) sign-in lands on Today (audit trial).
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     await page.setViewportSize({ width: 320, height: 640 });
     for (const [route, saved] of [["", "en"], ["/fr", "fr"], ["/es", "es"], ["/pt-br", "pt"]] as const) {
@@ -2766,8 +2766,8 @@ test("large text, set in the browser: the 1.2 pages' help is in the first view o
     await page.locator("#email").fill(email);
     await page.locator("#password").fill(password);
     await page.locator("main form button[type=submit]").first().click();
-    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
-    await page.getByTestId("setup-done").click();
+    // Since #314 (fewer taps) sign-in lands on Today (audit trial).
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     await page.setViewportSize({ width: 320, height: 640 });
     const pages = [
@@ -2810,8 +2810,8 @@ test("axe: the appointment summary, at 320 and 1280 px", async ({ page }) => {
     await page.locator("#email").fill(email);
     await page.locator("#password").fill(password);
     await page.locator("main form button[type=submit]").first().click();
-    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
-    await page.getByTestId("setup-done").click();
+    // Since #314 (fewer taps) sign-in lands on Today (audit trial).
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
       await setProfileLocale(email, password, saved);
@@ -2851,8 +2851,8 @@ test("grounding: the three at large text on a 320 px phone, help on every screen
     await page.locator("#email").fill(email);
     await page.locator("#password").fill(password);
     await page.locator("main form button[type=submit]").first().click();
-    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
-    await page.getByTestId("setup-done").click();
+    // Since #314 (fewer taps) sign-in lands on Today (audit trial).
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     await page.setViewportSize({ width: 320, height: 640 });
     for (const percent of [100, 300]) {
@@ -2939,8 +2939,8 @@ test("Three good things: large text on a 320 px phone, one ordinary entry on Tod
     await page.locator("#email").fill(email);
     await page.locator("#password").fill(password);
     await page.locator("main form button[type=submit]").first().click();
-    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
-    await page.getByTestId("setup-done").click();
+    // Since #314 (fewer taps) sign-in lands on Today (audit trial).
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     await page.setViewportSize({ width: 320, height: 640 });
     for (const percent of [100, 300]) {
@@ -2993,8 +2993,8 @@ test("axe: letters to future me, at 320 and 1280 px", async ({ page }) => {
     await page.locator("#email").fill(email);
     await page.locator("#password").fill(password);
     await page.locator("main form button[type=submit]").first().click();
-    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
-    await page.getByTestId("setup-done").click();
+    // Since #314 (fewer taps) sign-in lands on Today (audit trial).
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
       await setProfileLocale(email, password, saved);

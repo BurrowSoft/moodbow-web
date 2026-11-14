@@ -4,7 +4,6 @@ import { CHARTS, METRICS, summarize, type InsightRow, type Metric, type Range } 
 import type { Pattern, PatternId } from "@/lib/journal/patterns";
 import { MoodPair } from "@/components/MoodPair";
 import { PATTERN_PAIR } from "@/lib/journal/patternPair";
-import type { ValueKey } from "@/lib/journal/valueColours";
 import { JOURNAL_HEADING, segment } from "@/lib/ui/journalLayout";
 import type { LongRange, LongSummary, Unit } from "@/lib/plus/longRange";
 import { Chart } from "./Chart";
