@@ -690,6 +690,8 @@
     "paletteSunrise": "รุ่งอรุณ",
     "paletteSea": "ทะเล",
     "sheetThemes": "ธีมเพิ่มเติมเป็นส่วนหนึ่งของ Plus",
+    "todayCardTitle": "ดูอารมณ์ของคุณตลอดช่วงเวลา",
+    "todayCardTrial": "ทดลองใช้ฟรี 7 วัน จากนั้น {price} ต่อปี",
     "close": "ปิด",
     "offerLabel": "ข้อเสนอพิเศษช่วงคริสต์มาส",
     "offerBannerTitle": "ปีแรกของคุณในราคา {offer}",

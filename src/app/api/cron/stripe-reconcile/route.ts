@@ -1,4 +1,4 @@
-import * as Sentry from "@sentry/nextjs";
+import { captureMessage } from "@sentry/nextjs";
 import { pageGate } from "@/lib/conditions";
 import { getStripe, stripeConfigured } from "@/lib/plus/stripe";
 import { readStripeEntitlements, serviceRoleConfigured } from "@/lib/plus/serviceRole";
@@ -32,7 +32,7 @@ export async function GET(req: Request): Promise<Response> {
     // ids are in this run's response, for whoever runs it by hand.
     const kinds: Record<string, number> = {};
     for (const m of mismatches) kinds[m.kind] = (kinds[m.kind] ?? 0) + 1;
-    Sentry.captureMessage(`Stripe reconcile: ${mismatches.length} mismatch(es)`, { level: "error", fingerprint: ["stripe-reconcile"], extra: { kinds, counts } });
+    captureMessage(`Stripe reconcile: ${mismatches.length} mismatch(es)`, { level: "error", fingerprint: ["stripe-reconcile"], extra: { kinds, counts } });
   }
   return Response.json({ mismatches, counts });
 }
