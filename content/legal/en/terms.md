@@ -25,16 +25,6 @@ Everything you write and log stays yours. You give us only the permission needed
 - AI is optional and needs your separate consent.
 - AI can be wrong, incomplete or unhelpful. Don't rely on it for medical, legal or financial decisions.
 - Moodbow gives everyone a free daily allowance of Moodbow AI Lite, a simpler model with shorter answers. The size of the free allowance may change.
-- {pending:starter_credits}New accounts get free starter credits for the full Moodbow AI after confirming their email.{/pending}
-{/pending}
-
-{pending:purchases}
-### AI credits
-- You can buy credits for the full Moodbow AI in the app, through Google Play or the App Store. Their terms apply to the payment.
-- Credits are used up as you use AI features. The number used depends on the request; the app shows your balance and history.
-- Credits have no cash value, can't be transferred, and are lost when you delete your account (the app warns you first).
-- Refunds go through Google Play or the App Store, under their rules and your local law. If a purchase is refunded, its credits are removed, even if that takes your balance below zero; until your balance is above zero you use Moodbow AI Lite.
-- When you run out of credits, Moodbow keeps working, with Moodbow AI Lite.
 {/pending}
 
 ### Fair use
