@@ -49,14 +49,17 @@ test("first-load JS per route (throwaway perf sweep)", async ({ browser }) => {
     await page.locator("main form button[type=submit]").first().click();
     // master signs in to Setup; since #314 sign-in lands on Today.
     await page.waitForURL(/\/(setup|app)$/, { timeout: 20_000 });
-    if (page.url().endsWith("/setup")) await page.getByTestId("setup-done").click();
+    console.log(`PERFSTEP signed in at ${page.url()}`);
+    if (page.url().endsWith("/setup")) await page.getByTestId("setup-done").click({ timeout: 20_000 });
     await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     // One entry, for the entry view.
     await page.goto("/app/write");
-    await page.getByTestId("entry-text").fill("A quiet afternoon by the river.");
-    await page.getByTestId("entry-save").click();
+    console.log(`PERFSTEP today at ${page.url()}`);
+    await page.getByTestId("entry-text").fill("A quiet afternoon by the river.", { timeout: 20_000 });
+    await page.getByTestId("entry-save").click({ timeout: 20_000 });
     await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
-    await page.locator('[data-testid^="today-entry-"]').first().click();
+    console.log(`PERFSTEP saved at ${page.url()}`);
+    await page.locator('[data-testid^="today-entry-"]').first().click({ timeout: 20_000 });
     await expect(page).toHaveURL(/\/app\/entries\/[0-9a-f-]{36}/, { timeout: 20_000 });
     const entry = new URL(page.url()).pathname;
     const state = await context.storageState();
