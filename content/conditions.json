@@ -215,6 +215,30 @@
     "met": false,
     "what": "Your week (specs/your-week.md): the rule-based card at the top of Insights, no AI, on the web. Met after the Web Tester's row."
   },
+  "toolbox-live": {
+    "met": false,
+    "what": "1.2: Things that help me (specs/1.2-features.md, content/toolbox.json): Me's list, the Today card after a low check-in, and a minute to breathe. Needs migration 025 on Production (Vitor), the Reviewer's read, the tester rows and Vitor's look."
+  },
+  "app-toolbox": {
+    "met": false,
+    "what": "Help only (decision 212 pattern, UX 2026-11-12): Things that help me and the minute to breathe (1.2 §1) are in the app build people have, so its Help article shows. Not toolbox-live (the web's own switch)."
+  },
+  "grounding-live": {
+    "met": false,
+    "what": "1.3 (specs/1.3-grounding-and-good-things.md): 5-4-3-2-1, Body scan and Name it in Me → Things that help me (content/toolbox.json, grounding). Ships after 1.2, with toolbox-live; the Reviewer's read, the tester rows and Vitor's look."
+  },
+  "app-grounding": {
+    "met": false,
+    "what": "Help only (decision 212 pattern, 1.3 Ruling 8): the grounding exercises are in the app build people have, so their Help lines show ({pending:app_grounding|grounding_live}). Not grounding-live (the web's own switch)."
+  },
+  "good-things-live": {
+    "met": false,
+    "what": "1.3 (specs/1.3-grounding-and-good-things.md): Three good things on the web, from Write and Me → Things that help me: the entry editor with three short fields, saving one ordinary entry through the normal save (Ruling 3). No evening prompt on the web (Ruling 9). Ships after 1.2; the Reviewer's read, the tester rows and Vitor's look."
+  },
+  "app-good-things": {
+    "met": false,
+    "what": "Help only (decision 212 pattern): Three good things, with its evening reminder, is in the app build people have, so its Help lines show ({pending:app_good_things|good_things_live}); the reminder sentence is the app's alone. Not good-things-live (the web's own switch)."
+  },
   "test-only-unavailable-page": {
     "met": false,
     "what": "TEST ONLY, NEVER MET: /app/test/unavailable, a page that renders nothing but the journal's couldn't-load state (JournalUnavailable) inside the journal layout, so a journey can measure where its help sits at large text (the real pages fail only when Supabase does). No journal data on it. A 404 on Production at the routing level (lib/sitemapPages.ts), before any sign-in; a test and the publish-day checklist check that."
