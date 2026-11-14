@@ -63,7 +63,10 @@ export function EntryPictures({ entryId, pictures, onChange, add }: { entryId: s
   const tile = "relative aspect-square w-full overflow-hidden rounded-xl";
   return (
     <section aria-label={t("picturesRegion")} data-testid="entry-pictures" className="space-y-2">
-      <ul className="grid grid-cols-3 gap-2">
+      {/* Three across, but never narrower than 5.5rem: at large text the tiles go to two or one per
+          row, so the 44 px ✕ always leaves the open button a clear area (the a11y sweep, #326:
+          axe target-size at 300 % on 320 px). Gaps in px. */}
+      <ul className="grid grid-cols-[repeat(auto-fill,minmax(max(5.5rem,calc((100%_-_16px)/3)),1fr))] gap-[8px]">
         {pictures.map((p, i) => (
           <li key={p.id} className="relative" data-testid="entry-picture">
             <button type="button" onClick={() => setViewing(i)} aria-label={t("pictureOpen", { n: i + 1, total: pictures.length })} data-testid="entry-picture-open" className={tile}>
@@ -75,9 +78,9 @@ export function EntryPictures({ entryId, pictures, onChange, add }: { entryId: s
               onClick={() => void remove(p.id)}
               aria-label={t("pictureRemove", { n: i + 1 })}
               data-testid="entry-picture-remove"
-              className="absolute top-1 right-1 inline-flex h-11 w-11 items-center justify-center"
+              className="absolute top-[4px] right-[4px] inline-flex h-[44px] w-[44px] items-center justify-center"
             >
-              <span aria-hidden="true" className="flex h-7 w-7 items-center justify-center rounded-full bg-surface/90 text-text shadow">
+              <span aria-hidden="true" className="flex h-[28px] w-[28px] items-center justify-center rounded-full bg-surface/90 text-text shadow">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
                   <path d="M6 6l12 12M18 6L6 18" />
                 </svg>

@@ -2300,6 +2300,27 @@ test("pictures: a Plus moment takes a real JPEG with EXIF; the tile shows; the s
     await page.goto("/app/timeline");
     await expect(page.getByTestId("timeline-pictures").first()).toBeVisible({ timeout: 15_000 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth), "Timeline with pictures at 300 %: no sideways scroll").toBeLessThanOrEqual(0);
+    // The entry's tile at 300 % on 320 px: the ✕ (44 px) never covers the whole open button
+    // (the a11y sweep, #326: a rem ✕ grew past a 60 px tile, axe target-size). A clear 24 px
+    // square at the tile's bottom-left belongs to the open button, and nothing scrolls sideways.
+    await page.goto(`/app/entries/${moment}`);
+    await expect(page.getByTestId("entry-picture")).toHaveCount(1, { timeout: 15_000 });
+    const tile = await page.evaluate(() => {
+      const open = document.querySelector('[data-testid="entry-picture-open"]')!.getBoundingClientRect();
+      const x = open.left + 12;
+      const y = open.bottom - 12;
+      const corners = [
+        [x - 11, y - 11],
+        [x + 11, y - 11],
+        [x - 11, y + 11],
+        [x + 11, y + 11],
+        [x, y],
+      ];
+      const clear = corners.every(([px, py]) => document.elementFromPoint(px, py)?.closest('[data-testid="entry-picture-open"]') != null);
+      const remove = document.querySelector('[data-testid="entry-picture-remove"]')!.getBoundingClientRect();
+      return { width: Math.round(open.width), clear, remove: [Math.round(remove.width), Math.round(remove.height)], overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth };
+    });
+    expect(tile, "the entry's tile at 300 %: a clear 24 px square to open it, the ✕ 44 px, no sideways scroll").toEqual({ width: tile.width, clear: true, remove: [44, 44], overflow: 0 });
     await cdp.send("Page.setFontSizes", { fontSizes: { standard: 16, fixed: 13 } });
   } finally {
     await cleanup(email);
