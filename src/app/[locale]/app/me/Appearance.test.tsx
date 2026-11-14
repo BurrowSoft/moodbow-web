@@ -6,6 +6,15 @@ import { THEME_KEY } from "@/lib/appearance";
 import { SHORTCUTS_KEY } from "@/lib/shortcuts";
 import { Appearance } from "./Appearance";
 
+// Appearance brings Plus's sheet (a Link) for the themes' lock.
+vi.mock("@/i18n/navigation", () => ({
+  Link: ({ href, children, prefetch, ...rest }: { href: string; prefetch?: boolean; children: React.ReactNode }) => (
+    <a href={href} data-prefetch={String(prefetch)} {...rest}>
+      {children}
+    </a>
+  ),
+}));
+
 const renderIt = () =>
   render(
     <NextIntlClientProvider locale="en" messages={messages}>

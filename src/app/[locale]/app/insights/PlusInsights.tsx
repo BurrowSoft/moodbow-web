@@ -13,18 +13,19 @@ import { segment } from "@/lib/ui/journalLayout";
 // a "More patterns" row under today's card, and one quiet line under Your
 // week. A tap opens the Plus sheet. Shown only to someone without Plus.
 
-// Free: Year and All time, locked; a tap opens the sheet.
+// Free: Year, All time and Year in review, locked; a tap opens the sheet.
 export function YearTab({ offer }: { offer: PlusOffer }) {
   const t = useTranslations("plus");
   return (
     <>
       <LockedItem label={t("tabYear")} sheetTitle={t("sheetYear")} offer={offer} testId="insights-range-year" className={`${segment(false)} inline-flex items-center gap-1.5`} />
       <LockedItem label={t("tabAllTime")} sheetTitle={t("sheetAllTime")} offer={offer} testId="insights-range-all" className={`${segment(false)} inline-flex items-center gap-1.5`} />
+      <LockedItem label={t("rowReview")} sheetTitle={t("sheetReview")} offer={offer} testId="insights-review" className={`${segment(false)} inline-flex items-center gap-1.5`} />
     </>
   );
 }
 
-// With Plus: Year and All time are tabs like the others.
+// With Plus: Year and All time are tabs like the others, then Year in review.
 export function PlusTabs({ current }: { current: LongRange | null }) {
   const t = useTranslations("plus");
   return (
@@ -37,6 +38,9 @@ export function PlusTabs({ current }: { current: LongRange | null }) {
           {label}
         </Link>
       ))}
+      <Link href="/app/insights/review" data-testid="insights-review" className={segment(false)}>
+        {t("rowReview")}
+      </Link>
     </>
   );
 }

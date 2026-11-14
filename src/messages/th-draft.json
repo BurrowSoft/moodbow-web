@@ -1403,5 +1403,180 @@
     "key": "plus.moreNone",
     "en": "More patterns show up here once you have more check-ins in this period.",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.pdfIntro",
+    "en": "Pick a month or a year. Your journal is laid out as a PDF on this device and isn't saved anywhere. Anyone with the file can read it.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.pdfMonth",
+    "en": "A month",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.pdfYear",
+    "en": "A year",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.pdfButton",
+    "en": "Save as PDF or print",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.pdfEmpty",
+    "en": "There are no check-ins or entries in {period}.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.sheetPdf",
+    "en": "The designed PDF is part of Plus",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.pdfCoverTitle",
+    "en": "My journal",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.pdfCoverCounts",
+    "en": "{days, plural, one {# day with a check-in} other {# days with a check-in}} · {entries, plural, one {# entry} other {# entries}}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.pdfHelp",
+    "en": "If you need to talk to someone, help is at moodbow.com/help/get-help-now",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.pdfFileTitle",
+    "en": "Moodbow journal – {period}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.sheetReview",
+    "en": "Year in review is part of Plus",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.reviewTitle",
+    "en": "Your {year}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.reviewTitleSoFar",
+    "en": "Your {year} so far",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.reviewYear",
+    "en": "Year",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.reviewDaysTitle",
+    "en": "Check-in days",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.reviewDays",
+    "en": "{days, plural, one {# day} other {# days}} with a check-in",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.reviewDaysCaption",
+    "en": "Days with a check-in, by month",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.reviewMoodTitle",
+    "en": "Mood by month",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.reviewMoodCaption",
+    "en": "Your average mood, by month",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.reviewFactorsTitle",
+    "en": "Sleep, movement and stress",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.reviewSleep",
+    "en": "Sleep averaged {hours} h a night.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.reviewMovement",
+    "en": "Movement averaged {minutes} min a day, on the days you logged it.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.reviewStress",
+    "en": "Stress averaged {stress} of 5.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.reviewNotEnough",
+    "en": "Not logged often enough in {year} to show.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.reviewWritingTitle",
+    "en": "Writing",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.reviewWriting",
+    "en": "{entries, plural, one {# entry} other {# entries}} and {moments, plural, one {# moment} other {# moments}}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.reviewMomentsTitle",
+    "en": "Your moments",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.reviewNoMoments",
+    "en": "No moments marked in {year}.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.reviewEmpty",
+    "en": "There are no check-ins or entries in {year}.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.paletteLegend",
+    "en": "Colours",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.paletteDefault",
+    "en": "Default",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.paletteDusk",
+    "en": "Dusk",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.paletteSunrise",
+    "en": "Sunrise",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.paletteSea",
+    "en": "Sea",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.sheetThemes",
+    "en": "More themes are part of Plus",
+    "reason": "UX draft (native read pending)"
   }
 ]
