@@ -1265,6 +1265,86 @@ test("large text, set in the browser: Today after a mood, calendar, day, entry a
   }
 });
 
+// Breathing's Stop fell below the card at 320 px and 300 % (Web Tester, #265): it's in view the
+// whole minute, at the normal size and at large text, with the circle's words still readable.
+test("large text, set in the browser: breathing's Stop stays in view on a 320 px phone", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
+  test.setTimeout(120_000);
+  const email = newEmail();
+  const password = newPassword();
+  const cdp = await page.context().newCDPSession(page);
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    await page.setViewportSize({ width: 320, height: 640 });
+    for (const percent of [100, 300]) {
+      await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
+      // The list may not be readable yet on staging: breathing is offered either way (UX).
+      await page.goto("/app/me/toolbox");
+      await page.getByTestId("toolbox-breathe").click();
+      const stop = page.getByTestId("breathing-stop");
+      for (const moment of ["opening", "breathing out"]) {
+        if (moment === "breathing out") await expect(page.getByTestId("breathing-phase")).toHaveText(messages.toolbox.breatheOut, { timeout: 8_000 });
+        const box = (await stop.boundingBox())!;
+        expect(box.y, `${percent} %, ${moment}: Stop's top in the window`).toBeGreaterThanOrEqual(0);
+        expect(box.y + box.height, `${percent} %, ${moment}: Stop's bottom in the window`).toBeLessThanOrEqual(640);
+        expect(box.x + box.width, `${percent} %, ${moment}: Stop inside the width`).toBeLessThanOrEqual(320);
+      }
+      await stop.click();
+      await expect(page.getByTestId("breathing")).toHaveCount(0);
+    }
+  } finally {
+    await cleanup(email);
+  }
+});
+
+// The safety plan's help was below the first view at 320 px and 300 % (Web Tester, #266): it's
+// beside Back now, above the title, in every language; checked in en and pt-BR, the longest.
+test("large text, set in the browser: the safety plan's help is in the first view on a 320 px phone", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
+  test.setTimeout(120_000);
+  const email = newEmail();
+  const password = newPassword();
+  const cdp = await page.context().newCDPSession(page);
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    await page.setViewportSize({ width: 320, height: 640 });
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+      await setProfileLocale(email, password, saved);
+      for (const percent of [100, 300]) {
+        await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
+        await page.goto(`${route}/app/me/safety-plan`);
+        const help = page.getByTestId("plan-get-help");
+        await expect(help, `${saved} at ${percent} %`).toBeVisible();
+        const box = (await help.boundingBox())!;
+        expect(box.y, `${saved} at ${percent} %: help's top in the first view`).toBeGreaterThanOrEqual(0);
+        expect(box.y + box.height, `${saved} at ${percent} %: help's bottom in the first view`).toBeLessThanOrEqual(640);
+        expect(box.x + box.width, `${saved} at ${percent} %: help inside the width`).toBeLessThanOrEqual(320.5);
+        // Back keeps its name, as an icon alone, and a full target.
+        const back = (await page.getByTestId("nav-back").boundingBox())!;
+        expect(Math.min(back.width, back.height), `${saved} at ${percent} %: Back's target`).toBeGreaterThanOrEqual(44);
+      }
+    }
+  } finally {
+    await cleanup(email);
+  }
+});
+
 // The journal's couldn't-load state had its help below the first screen at 320 px and 300 %
 // (Web Tester, #267): it's right under the heading now. Measured on the test-only page, the
 // component alone inside the journal layout, as every journal page shows it.
@@ -1598,6 +1678,45 @@ test("large text: every help number on the list stays whole on a phone", { tag: 
 // Print this month at 320 px and 300 % (Web Tester, #274): the help button and the month's title
 // stay inside the page (an automatic layout table grew to the title's longest word and carried
 // the button 43 px past it), help in the first view, nothing to scroll sideways.
+// The Timeline doesn't move once it has painted (the Web Tester's performance pass, 12 Nov: CLS
+// 0.176 about 5 s in, when "Share this month" appeared after its count and wrapped the month's
+// header). A month with enough check-ins for a card, on a phone: every layout shift not caused by
+// input, summed over 8 s after landing.
+test("the Timeline doesn't shift when Share this month arrives (CLS)", async ({ page, browserName }) => {
+  test.setTimeout(120_000);
+  test.skip(browserName !== "chromium", "layout-shift entries are Chromium's");
+  const email = newEmail();
+  try {
+    const password = await accountAtSetup(page, email);
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    // Five check-ins on the 1st to the 5th of last month: always past, one month, enough for a card.
+    const today = await journalToday(email, password);
+    const first = new Date(`${today.slice(0, 7)}-01T00:00:00Z`);
+    first.setUTCMonth(first.getUTCMonth() - 1);
+    const month = first.toISOString().slice(0, 7);
+    await seedCheckIns(email, password, `${month}-01`, [0, 1, 2, 3, 4].map((offset) => ({ offset, mood: 4 })));
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.addInitScript(() => {
+      const w = window as unknown as { __shift: number };
+      w.__shift = 0;
+      new PerformanceObserver((list) => {
+        for (const entry of list.getEntries() as (PerformanceEntry & { value: number; hadRecentInput: boolean })[]) if (!entry.hadRecentInput) w.__shift += entry.value;
+      }).observe({ type: "layout-shift", buffered: true });
+    });
+    await page.goto("/app/timeline");
+    // The share link has arrived (its count is done)...
+    await expect(page.getByTestId(`timeline-share-${month}`)).toBeVisible({ timeout: 15_000 });
+    // ...and a few more seconds for anything later.
+    await page.waitForTimeout(8_000);
+    const shift = await page.evaluate(() => (window as unknown as { __shift: number }).__shift);
+    console.log(`Timeline CLS after landing: ${shift.toFixed(4)}`);
+    expect(shift).toBeLessThanOrEqual(0.01);
+  } finally {
+    await cleanup(email);
+  }
+});
+
 test("large text, set in the browser: Print this month stays inside a 320 px phone, help first", async ({ page, browserName }) => {
   test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
   test.setTimeout(180_000);
@@ -1641,6 +1760,197 @@ test("large text, set in the browser: Print this month stays inside a 320 px pho
         await expect(page.getByTestId("print-get-help")).toBeVisible();
       });
     }
+  } finally {
+    await cleanup(email);
+  }
+});
+
+// Automated accessibility (UX, 2026-11-12): no serious or critical axe violation on the toolbox and breathing, at
+// 320 and 1280 px, in en and pt-BR (the longest). axe can't hear a screen reader: the rows stand.
+test("axe: the toolbox and breathing, at 320 and 1280 px", async ({ page }) => {
+  test.setTimeout(240_000);
+  const email = newEmail();
+  const password = newPassword();
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+      await setProfileLocale(email, password, saved);
+      await axeAtWidths(page, `toolbox (${saved})`, async () => {
+        await page.goto(`${route}/app/me/toolbox`);
+        await expect(page.getByTestId("toolbox-get-help")).toBeVisible();
+      });
+      await axeAtWidths(page, `breathing (${saved})`, async () => {
+        await page.goto(`${route}/app/me/toolbox`);
+        await expect(page.getByTestId("toolbox-get-help")).toBeVisible();
+          await page.getByTestId("toolbox-breathe").click();
+          await expect(page.getByTestId("breathing-stop")).toBeVisible();
+      });
+    }
+  } finally {
+    await cleanup(email);
+  }
+});
+
+// Automated accessibility (UX, 2026-11-12): no serious or critical axe violation on the safety plan, at
+// 320 and 1280 px, in en and pt-BR (the longest). axe can't hear a screen reader: the rows stand.
+test("axe: the safety plan, at 320 and 1280 px", async ({ page }) => {
+  test.setTimeout(240_000);
+  const email = newEmail();
+  const password = newPassword();
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+      await setProfileLocale(email, password, saved);
+      await axeAtWidths(page, `safety plan (${saved})`, async () => {
+        await page.goto(`${route}/app/me/safety-plan`);
+        await expect(page.getByTestId("plan-get-help")).toBeVisible();
+      });
+    }
+  } finally {
+    await cleanup(email);
+  }
+});
+
+// Automated accessibility (UX, 2026-11-12): no serious or critical axe violation on letters to future me, at
+// 320 and 1280 px, in en and pt-BR (the longest). axe can't hear a screen reader: the rows stand.
+test("axe: letters to future me, at 320 and 1280 px", async ({ page }) => {
+  test.setTimeout(240_000);
+  const email = newEmail();
+  const password = newPassword();
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+      await setProfileLocale(email, password, saved);
+      await axeAtWidths(page, `letters (${saved})`, async () => {
+        await page.goto(`${route}/app/me/letters`);
+        await expect(page.getByTestId("letters-get-help")).toBeVisible();
+      });
+    }
+  } finally {
+    await cleanup(email);
+  }
+});
+
+// The reminder time's picker button is the browser's own part inside the field: with focus on it
+// the field isn't :focus-visible, and its ring went (WCAG 2.4.7, Web Tester's keyboard pass,
+// 12 Nov). Tab through each time field's own stops (hours, minutes, AM/PM, the picker): the
+// ring is drawn at every one while focus is inside it. Set up's, then Me's.
+test("keyboard: a time field shows its ring at every stop inside it, the picker button too", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "the stops inside a time field are Chromium's");
+  const email = newEmail();
+  const password = newPassword();
+  const ringThroughout = async (testId: string, where: string) => {
+    const field = page.getByTestId(testId);
+    await field.focus();
+    let stops = 0;
+    for (let i = 0; i < 8; i++) {
+      const state = await field.evaluate((input) => ({ inside: document.activeElement === input, outline: getComputedStyle(input).outlineStyle }));
+      if (!state.inside) break;
+      stops++;
+      expect.soft(state.outline, `${where}, stop ${stops}: the ring`).toBe("solid");
+      await page.keyboard.press("Tab");
+    }
+    console.log(`${where}: ${stops} stops inside the field, each with the ring`);
+    // Hours, minutes and the picker at least (a 12-hour browser adds AM/PM).
+    expect(stops, `${where}: Tab went through the field's own stops`).toBeGreaterThanOrEqual(3);
+  };
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
+    await expect(page.getByTestId("setup-reminder-time")).toBeVisible();
+    await ringThroughout("setup-reminder-time", "Set up's reminder time");
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    await page.goto("/app/me");
+    await expect(page.getByTestId("me-reminder-time")).toBeEnabled({ timeout: 15_000 });
+    // The section takes no input until the page's code has run (useUntilLoaded: inert, which
+    // toBeEnabled doesn't see), so a focus before that never lands: wait for it (#266, #286).
+    await expect(page.locator('section[aria-labelledby="me-reminder"]')).not.toHaveAttribute("inert", { timeout: 15_000 });
+    await ringThroughout("me-reminder-time", "Me's reminder time");
+  } finally {
+    await cleanup(email);
+  }
+});
+
+// Write in the first view at large text (UX, 2026-11-12; the pilot checklist's known shortfall):
+// at 320 px / 300 % the check-in card runs to ~1,400 px, so Write is also offered under the date.
+// It shows only when the text is large for the screen (an em media query), never at 100 %; the
+// card and the Write button below it stay as they are.
+test("large text, set in the browser: Write is in Today's first view at 320 px, and only at large text", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
+  test.setTimeout(120_000);
+  const email = newEmail();
+  const password = newPassword();
+  const cdp = await page.context().newCDPSession(page);
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    await page.setViewportSize({ width: 320, height: 640 });
+    for (const percent of [100, 150, 300]) {
+      const where = `${percent} %`;
+      // Whole pixels: CDP refuses 19.5 (13 px at 150 %).
+      await cdp.send("Page.setFontSizes", { fontSizes: { standard: Math.round((16 * percent) / 100), fixed: Math.round((13 * percent) / 100) } });
+      await page.goto("/app");
+      await expect(page.getByTestId("checkin-card"), where).toBeVisible();
+      // The card's own Write is always there, after it.
+      await expect(page.getByTestId("today-write"), where).toHaveCount(1);
+      const top = page.getByTestId("today-write-top");
+      if (percent === 100) {
+        await expect(top, `${where}: no second Write`).toBeHidden();
+        continue;
+      }
+      await expect(top, where).toBeVisible();
+      await expect(top, where).toHaveText(messages.entry.writeButton);
+      const box = (await top.boundingBox())!;
+      const bar = (await page.getByRole("navigation", { name: messages.app.appName }).boundingBox())!;
+      // Measured first, so the log says what changed even when a check below fails.
+      const card = (await page.getByTestId("checkin-card").boundingBox())!;
+      const below = (await page.getByTestId("today-write").boundingBox())!;
+      console.log(`Today ${where}: Write at the top ${Math.round(box.y)}–${Math.round(box.y + box.height)} px; the card ${Math.round(card.y)}–${Math.round(card.y + card.height)} px; the Write below it at ${Math.round(below.y)} px; first view ends at ${Math.round(bar.y)} px`);
+      expect(box.y + box.height, `${where}: Write above the tab bar, in the first view`).toBeLessThanOrEqual(bar.y);
+      expect(box.x + box.width, `${where}: Write inside the width`).toBeLessThanOrEqual(320.5);
+      expect(box.height, `${where}: a big enough target`).toBeGreaterThanOrEqual(44);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth), `${where}: no sideways scroll`).toBeLessThanOrEqual(320);
+    }
+    // It opens the editor, as the other one does.
+    await page.getByTestId("today-write-top").click();
+    await expect(page.getByTestId("entry-text")).toBeVisible({ timeout: 15_000 });
   } finally {
     await cleanup(email);
   }
@@ -1843,107 +2153,6 @@ test("axe: Moodbow Plus, its screen and sheet, at 320 and 1280 px", async ({ pag
         await expect(page.getByTestId("plus-screen")).toBeVisible({ timeout: 15_000 });
       });
     }
-  } finally {
-    await cleanup(email);
-  }
-});
-
-// The reminder time's picker button is the browser's own part inside the field: with focus on it
-// the field isn't :focus-visible, and its ring went (WCAG 2.4.7, Web Tester's keyboard pass,
-// 12 Nov). Tab through each time field's own stops (hours, minutes, AM/PM, the picker): the
-// ring is drawn at every one while focus is inside it. Set up's, then Me's.
-test("keyboard: a time field shows its ring at every stop inside it, the picker button too", async ({ page, browserName }) => {
-  test.skip(browserName !== "chromium", "the stops inside a time field are Chromium's");
-  const email = newEmail();
-  const password = newPassword();
-  const ringThroughout = async (testId: string, where: string) => {
-    const field = page.getByTestId(testId);
-    await field.focus();
-    let stops = 0;
-    for (let i = 0; i < 8; i++) {
-      const state = await field.evaluate((input) => ({ inside: document.activeElement === input, outline: getComputedStyle(input).outlineStyle }));
-      if (!state.inside) break;
-      stops++;
-      expect.soft(state.outline, `${where}, stop ${stops}: the ring`).toBe("solid");
-      await page.keyboard.press("Tab");
-    }
-    console.log(`${where}: ${stops} stops inside the field, each with the ring`);
-    // Hours, minutes and the picker at least (a 12-hour browser adds AM/PM).
-    expect(stops, `${where}: Tab went through the field's own stops`).toBeGreaterThanOrEqual(3);
-  };
-  try {
-    await signedUpUnconfirmed(email, password);
-    await confirmEmail(email);
-    await page.goto("/sign-in");
-    await page.locator("#email").fill(email);
-    await page.locator("#password").fill(password);
-    await page.locator("main form button[type=submit]").first().click();
-    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
-    await expect(page.getByTestId("setup-reminder-time")).toBeVisible();
-    await ringThroughout("setup-reminder-time", "Set up's reminder time");
-    await page.getByTestId("setup-done").click();
-    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
-    await page.goto("/app/me");
-    await expect(page.getByTestId("me-reminder-time")).toBeEnabled({ timeout: 15_000 });
-    // The section takes no input until the page's code has run (useUntilLoaded: inert, which
-    // toBeEnabled doesn't see), so a focus before that never lands: wait for it (#266, #286).
-    await expect(page.locator('section[aria-labelledby="me-reminder"]')).not.toHaveAttribute("inert", { timeout: 15_000 });
-    await ringThroughout("me-reminder-time", "Me's reminder time");
-  } finally {
-    await cleanup(email);
-  }
-});
-
-// Write in the first view at large text (UX, 2026-11-12; the pilot checklist's known shortfall):
-// at 320 px / 300 % the check-in card runs to ~1,400 px, so Write is also offered under the date.
-// It shows only when the text is large for the screen (an em media query), never at 100 %; the
-// card and the Write button below it stay as they are.
-test("large text, set in the browser: Write is in Today's first view at 320 px, and only at large text", async ({ page, browserName }) => {
-  test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
-  test.setTimeout(120_000);
-  const email = newEmail();
-  const password = newPassword();
-  const cdp = await page.context().newCDPSession(page);
-  try {
-    await signedUpUnconfirmed(email, password);
-    await confirmEmail(email);
-    await page.goto("/sign-in");
-    await page.locator("#email").fill(email);
-    await page.locator("#password").fill(password);
-    await page.locator("main form button[type=submit]").first().click();
-    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
-    await page.getByTestId("setup-done").click();
-    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
-    await page.setViewportSize({ width: 320, height: 640 });
-    for (const percent of [100, 150, 300]) {
-      const where = `${percent} %`;
-      // Whole pixels: CDP refuses 19.5 (13 px at 150 %).
-      await cdp.send("Page.setFontSizes", { fontSizes: { standard: Math.round((16 * percent) / 100), fixed: Math.round((13 * percent) / 100) } });
-      await page.goto("/app");
-      await expect(page.getByTestId("checkin-card"), where).toBeVisible();
-      // The card's own Write is always there, after it.
-      await expect(page.getByTestId("today-write"), where).toHaveCount(1);
-      const top = page.getByTestId("today-write-top");
-      if (percent === 100) {
-        await expect(top, `${where}: no second Write`).toBeHidden();
-        continue;
-      }
-      await expect(top, where).toBeVisible();
-      await expect(top, where).toHaveText(messages.entry.writeButton);
-      const box = (await top.boundingBox())!;
-      const bar = (await page.getByRole("navigation", { name: messages.app.appName }).boundingBox())!;
-      // Measured first, so the log says what changed even when a check below fails.
-      const card = (await page.getByTestId("checkin-card").boundingBox())!;
-      const below = (await page.getByTestId("today-write").boundingBox())!;
-      console.log(`Today ${where}: Write at the top ${Math.round(box.y)}–${Math.round(box.y + box.height)} px; the card ${Math.round(card.y)}–${Math.round(card.y + card.height)} px; the Write below it at ${Math.round(below.y)} px; first view ends at ${Math.round(bar.y)} px`);
-      expect(box.y + box.height, `${where}: Write above the tab bar, in the first view`).toBeLessThanOrEqual(bar.y);
-      expect(box.x + box.width, `${where}: Write inside the width`).toBeLessThanOrEqual(320.5);
-      expect(box.height, `${where}: a big enough target`).toBeGreaterThanOrEqual(44);
-      expect(await page.evaluate(() => document.documentElement.scrollWidth), `${where}: no sideways scroll`).toBeLessThanOrEqual(320);
-    }
-    // It opens the editor, as the other one does.
-    await page.getByTestId("today-write-top").click();
-    await expect(page.getByTestId("entry-text")).toBeVisible({ timeout: 15_000 });
   } finally {
     await cleanup(email);
   }

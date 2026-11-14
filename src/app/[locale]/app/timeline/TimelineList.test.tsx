@@ -204,6 +204,26 @@ describe("TimelineList: Share this month (decision 161)", () => {
     expect(screen.queryByTestId("timeline-share-2026-09")).toBeNull();
   });
 
+  it("its place is kept from the first paint, invisible and never read, so nothing moves when the count arrives (CLS 0.176, 12 Nov)", async () => {
+    let answer: (v: unknown) => void = () => {};
+    loadMonthCheckIns.mockImplementation((month: string) => (month === "2026-10" ? new Promise((done) => (answer = done)) : Promise.resolve(moods(4))));
+    renderList({ shareable: true });
+    // Before the count: the same words, invisible, hidden from screen readers, not a control.
+    const place = screen.getByTestId("timeline-share-place-2026-10");
+    expect(place).toHaveTextContent(messages.share.shareThisMonth);
+    expect(place).toHaveClass("invisible");
+    expect(place).toHaveAttribute("aria-hidden", "true");
+    expect(place.tagName).toBe("SPAN");
+    expect(screen.queryByTestId("timeline-share-2026-10")).toBeNull();
+    // Enough: the link takes its place.
+    await act(async () => answer(moods(5)));
+    expect(await screen.findByTestId("timeline-share-2026-10")).toBeInTheDocument();
+    expect(screen.queryByTestId("timeline-share-place-2026-10")).toBeNull();
+    // Not enough: the place stays, still invisible.
+    expect(screen.getByTestId("timeline-share-place-2026-09")).toHaveClass("invisible");
+    expect(screen.queryByTestId("timeline-share-2026-09")).toBeNull();
+  });
+
   it("in Dec/Jan the month share offers the Year card too (1.1 J; UX: the app's entry points)", async () => {
     loadMonthCheckIns.mockResolvedValue(moods(5));
     const months = [1, 4, 8].flatMap((m) => Array.from({ length: 5 }, (_, i) => ({ local_date: `2026-${String(m).padStart(2, "0")}-0${i + 1}`, mood: 4 })));
