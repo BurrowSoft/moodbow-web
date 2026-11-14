@@ -403,7 +403,7 @@ test.describe("a first run reaches Today without a reload", () => {
         await expect(page).toHaveURL(RegExp(`${path}$`));
       }
       // The protective default: the reminder is off until they choose one.
-      await expect(page.getByTestId("reminder-toggle")).not.toBeChecked();
+      await expect(page.getByTestId("me-reminder-on")).toHaveAttribute("aria-checked", "false");
       // Today offers Setup once there's a check-in.
       await page.goto("/app");
       await expect(page.getByTestId("today-setup-later")).toHaveCount(0);
@@ -1723,6 +1723,72 @@ test("large text: the Plus screen at 300 % on a 320 px phone, free and in the fr
       expect(end, `${saved}: at the very end`).toEqual({ pinnedOnScreen: true, notNowAbove: true, siteFooterAbove: true });
       await page.evaluate(() => window.scrollTo(0, 0));
     }
+    // A short screen (320 × 480) at 300 %: the compact pinned part would leave the content under
+    // 40 %, so nothing is pinned (UX 12 Nov, specs/plus.md): one scroll, ending with the price,
+    // the renewal line and the button together, below Not now; nothing scrolls sideways.
+    await page.setViewportSize({ width: 320, height: 480 });
+    for (const [route, saved] of [["", "en"], ["/de", "de"]] as const) {
+      await setProfileLocale(email, password, saved);
+      await open(route);
+      await expect(page.getByTestId("plus-screen")).toHaveAttribute("data-unpinned", "true");
+      expect(await page.getByTestId("plus-footer").evaluate((el) => getComputedStyle(el).position), `${saved}: not pinned`).not.toBe("fixed");
+      // The three together at the end of the Plus content (the site's own footer follows the page,
+      // as everywhere): scrolled to, all three are on screen at once.
+      await page.getByTestId("plus-footer").evaluate((el) => el.scrollIntoView({ block: "start" }));
+      await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))));
+      for (const id of ["plus-price", "plus-renews", "plus-start"]) expect(await inView(id), `${saved}, short screen, at the end: ${id} in view`).toBe(true);
+      expect(await page.getByTestId("plus-screen").evaluate((el) => el.lastElementChild?.getAttribute("data-testid")), `${saved}: the price block ends the Plus screen`).toBe("plus-footer");
+      const order = await page.evaluate(() => {
+        const top = (sel: string) => document.querySelector(sel)!.getBoundingClientRect().top;
+        return { notNowFirst: top('[data-testid="plus-rest"] [data-testid="plus-not-now"]') < top('[data-testid="plus-price"]') };
+      });
+      expect(order, `${saved}, short screen: Not now before the price`).toEqual({ notNowFirst: true });
+      console.log(`Plus screen at 300 % on 320 × 480, ${saved}, free: unpinned`);
+      await page.evaluate(() => window.scrollTo(0, 0));
+    }
+    // 200 % on 320 × 640 (UX 12 Nov, after the app's Plus screen gave its list too little room
+    // there): free, en and de, whichever layout the page picks, the content above the price keeps
+    // at least 40 % of the screen, with the price, the renewal line and the button in view on landing.
+    await page.setViewportSize({ width: 320, height: 640 });
+    await cdp.send("Page.setFontSizes", { fontSizes: { standard: 32, fixed: 26 } });
+    for (const [route, saved] of [["", "en"], ["/de", "de"]] as const) {
+      await setProfileLocale(email, password, saved);
+      await page.goto(`${route}/app/me/plus`);
+      await expect(page.getByTestId("plus-title")).toBeVisible({ timeout: 15_000 });
+      expect(await page.evaluate(() => getComputedStyle(document.documentElement).fontSize), `${saved}: the text really is at 200 %`).toBe("32px");
+      await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))));
+      const at200 = await page.evaluate(() => {
+        const footer = document.querySelector('[data-testid="plus-footer"]')!.getBoundingClientRect();
+        const root = document.querySelector('[data-testid="plus-screen"]')!;
+        return {
+          large: root.hasAttribute("data-large"),
+          unpinned: root.hasAttribute("data-unpinned"),
+          content: Math.round((footer.top / window.innerHeight) * 100),
+          footer: Math.round(footer.height),
+          viewport: window.innerHeight,
+        };
+      });
+      console.log(`Plus screen at 200 %, ${saved}, free: ${JSON.stringify(at200)}`);
+      expect(at200.unpinned, `${saved} at 200 %: still pinned on a 640 px screen`).toBe(false);
+      expect(at200.content, `${saved} at 200 %: the content takes ${at200.content} % of the screen`).toBeGreaterThanOrEqual(40);
+      for (const id of ["plus-price", "plus-renews", "plus-start"]) expect(await inView(id), `${saved} at 200 %: ${id} on landing`).toBe(true);
+    }
+    await cdp.send("Page.setFontSizes", { fontSizes: { standard: 48, fixed: 39 } });
+    // Not now really taps Not now on the short screen (the Web Tester, #311: when it stayed pinned
+    // over 68 % of the screen, a tap on Not now landed on Start).
+    await page.setViewportSize({ width: 320, height: 480 });
+    await setProfileLocale(email, password, "de");
+    await open("/de");
+    await expect(page.getByTestId("plus-screen")).toHaveAttribute("data-unpinned", "true");
+    await page.getByTestId("plus-rest").getByTestId("plus-not-now").scrollIntoViewIfNeeded();
+    const hit = await page.getByTestId("plus-rest").getByTestId("plus-not-now").evaluate((el) => {
+      const r = el.getBoundingClientRect();
+      return document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2)?.closest("[data-testid]")?.getAttribute("data-testid");
+    });
+    expect(hit, "de, 320 × 480 at 300 %: the point under Not now is Not now").toBe("plus-not-now");
+    await page.getByTestId("plus-rest").getByTestId("plus-not-now").click();
+    await expect(page).toHaveURL(RegExp("/de/app/me$"), { timeout: 15_000 });
+    await page.setViewportSize({ width: 320, height: 640 });
     await grantPlusTrial(email);
     for (const [route, saved] of [["", "en"], ["/de", "de"]] as const) {
       await setProfileLocale(email, password, saved);
@@ -1948,7 +2014,10 @@ test("keyboard: a time field shows its ring at every stop inside it, the picker 
     await page.locator("main form button[type=submit]").first().click();
     await expect(page).toHaveURL(RegExp("/app$"), { timeout: 20_000 });
     await page.goto("/setup");
-    await expect(page.getByTestId("setup-reminder-time")).toBeVisible();
+    // After first use the reminder is off (the protective default), so its time field is disabled:
+    // turn it on first, as someone choosing a time would.
+    await page.getByTestId("setup-reminder-off").uncheck();
+    await expect(page.getByTestId("setup-reminder-time")).toBeEnabled();
     await ringThroughout("setup-reminder-time", "Set up's reminder time");
     await page.getByTestId("setup-done").click();
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
