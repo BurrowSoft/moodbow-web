@@ -2728,5 +2728,60 @@
     "key": "letters.remindersTwoWeeks",
     "en": "2 weeks before",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.libraryOpen",
+    "en": "Need a prompt?",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.libraryNoticing",
+    "en": "Noticing",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.libraryGratitude",
+    "en": "Gratitude",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.libraryHardDays",
+    "en": "Hard days",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.libraryRelationships",
+    "en": "Relationships",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.libraryAhead",
+    "en": "Looking ahead",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.libraryHardDaysIntro",
+    "en": "For days that feel heavy. Write as little as you like.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.libraryAnother",
+    "en": "Another from this group",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.libraryBack",
+    "en": "Back to the groups",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.libraryUse",
+    "en": "Use this",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.rowPrompts",
+    "en": "Prompt library",
+    "reason": "UX draft (native read pending)"
   }
 ]

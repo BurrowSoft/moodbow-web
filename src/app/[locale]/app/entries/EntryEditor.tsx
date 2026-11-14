@@ -23,6 +23,7 @@ import { SAVE_WAIT_MS, TimedOut, withTimeout } from "@/lib/ui/withTimeout";
 import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
 import { PRIMARY_SAVE } from "@/lib/ui/journalLayout";
 import { deleteEntry, getEntry, saveEntry, type DeleteState, type EntryState } from "./actions";
+import { PromptLibrary } from "./PromptLibrary";
 
 // The entry editor (M4): a full-page text area, a date (today or earlier)
 // and "Mark as a moment". A draft is autosaved in this browser, per user and
@@ -125,6 +126,10 @@ type Props = {
   goodThings?: boolean;
   // A new entry on Write: where Three good things is, when it's on (Ruling 9).
   goodThingsHref?: string | null;
+  // The prompt library (Plus wave 2), beside the day's prompt and only where it shows: true with
+  // Plus (all five groups), false without it or where Plus can't be read (the free group only;
+  // no lock or sheet while writing, UX); absent: not offered at all (the Plus flag).
+  library?: boolean;
 };
 
 const noSubscribe = () => () => {};
@@ -137,11 +142,13 @@ export function EntryEditor(props: Props) {
   return <Editor key={inBrowser ? "browser" : "server"} {...props} restore={inBrowser} />;
 }
 
-function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app", start, onLeave, restore, promptDate, back, goodThings = false, goodThingsHref }: Props & { restore: boolean }) {
+function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app", start, onLeave, restore, promptDate, back, goodThings = false, goodThingsHref, library }: Props & { restore: boolean }) {
   const t = useTranslations("entry");
   const language = useLocale();
   // "Another" steps through the list from the day's prompt.
   const [promptStep, setPromptStep] = useState(0);
+  // A prompt chosen from the library: shown where the day's prompt is, until "Another".
+  const [chosenPrompt, setChosenPrompt] = useState<string | null>(null);
   const tt = useTranslations("today");
   const router = useRouter();
   const announce = useAnnounce();
@@ -673,13 +680,23 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
       {showPrompt && (
         <p className={`flex flex-wrap items-baseline gap-x-3 gap-y-1 text-muted ${CAPPED}`} data-testid="entry-prompt">
           <span id="entry-prompt-text" data-testid="entry-prompt-text" className="min-w-0 [overflow-wrap:anywhere]">
-            {promptText(promptFor(promptDate!, promptStep), language)}
+            {chosenPrompt ?? promptText(promptFor(promptDate!, promptStep), language)}
           </span>
-          <button type="button" data-testid="entry-prompt-another" onClick={() => setPromptStep((n) => n + 1)} className="min-h-11 font-medium text-accent underline underline-offset-4">
+          <button
+            type="button"
+            data-testid="entry-prompt-another"
+            onClick={() => {
+              // Back to the day's list: the chosen one goes, and the next of the day's comes.
+              if (chosenPrompt) setChosenPrompt(null);
+              setPromptStep((n) => n + 1);
+            }}
+            className="min-h-11 font-medium text-accent underline underline-offset-4"
+          >
             {t("promptAnother")}
           </button>
         </p>
       )}
+      {showPrompt && library !== undefined && <PromptLibrary uid={uid} country={country} hasPlus={library} onUse={setChosenPrompt} />}
       {goodThings ? (
         <div {...untilLoaded} className="flex flex-col gap-4" data-testid="good-things-fields">
           {([1, 2, 3] as const).map((n) => (
