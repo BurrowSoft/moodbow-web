@@ -8,6 +8,8 @@ export default defineConfig({
   ...base,
   testDir: "./e2e/journey",
   testIgnore: undefined,
+  // THROWAWAY trial/a11y-13p3 only (never merged): the sweep alone; the stack's journeys ran in #324.
+  testMatch: /a11y-sweep\.spec\.ts/,
   retries: 0,
   projects: [{ name: "desktop", use: { ...devices["Desktop Chrome"], locale: "en-US" } }],
   // The server needs only the public staging values; the admin key stays in
