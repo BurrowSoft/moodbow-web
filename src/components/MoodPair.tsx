@@ -9,7 +9,9 @@ import { MOOD_DOT_OUTLINE, STEP_HEX } from "@/lib/journal/valueColours";
 const step = (v: number) => STEP_HEX[Math.min(5, Math.max(1, Math.round(v))) - 1];
 
 export function MoodPair({ sentence, a, b, format, signed, testId }: { sentence: string; a: number; b: number; format: (v: number) => string; signed: (v: number) => string; testId?: string }) {
-  const diff = Math.round((a - b) * 10) / 10;
+  // The chip from the two values as shown (tenths), so the three numbers always agree (the Reviewer).
+  const tenths = (v: number) => Math.round(v * 10) / 10;
+  const diff = tenths(tenths(a) - tenths(b));
   return (
     <div role="img" aria-label={sentence} data-testid={testId} className="mt-2 flex items-center gap-[12px]">
       <span className="min-w-0 flex-1 space-y-[4px]">

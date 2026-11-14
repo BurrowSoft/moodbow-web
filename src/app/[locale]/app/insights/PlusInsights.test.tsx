@@ -60,7 +60,9 @@ describe("MorePatternsCard", () => {
     const tags = screen.getByTestId("insights-more-tags");
     expect(tags).toHaveTextContent(m.moreTagsTitle);
     const lines = screen.getAllByTestId("insights-more-tag");
-    expect(lines.map((l) => l.textContent)).toEqual([
+    // The sentence as shown (aria-hidden), and the same sentence as the bars' image name.
+    expect(lines.map((l) => l.querySelector(":scope > [aria-hidden=true]")?.textContent)).toEqual(lines.map((l) => l.querySelector("[role=img]")?.getAttribute("aria-label")));
+    expect(lines.map((l) => l.querySelector(":scope > [aria-hidden=true]")?.textContent)).toEqual([
       "On days tagged “walk”, your mood averaged 4.0 of 5. On other days, 3.5.",
       "On days tagged “<b>work</b>” and other days, your mood was about the same (3.2 and 3.0 of 5).",
     ]);
@@ -102,7 +104,9 @@ describe("MorePatternsCard: What lifts me", () => {
     wrap(<MorePatternsCard window="year" patterns={notEnough} lifts={[{ tag: "Walk <b>", a: side(6, 4.2), b: side(20, 3), gap: 1.2 }, { tag: "Tea", a: side(5, 3.6), b: side(21, 3.2), gap: 0.4 }]} country="NZ" />);
     const section = screen.getByTestId("insights-lifts");
     expect(section).toHaveTextContent(m.liftsTitle);
-    expect(screen.getAllByTestId("insights-lift").map((li) => li.textContent)).toEqual([
+    const lifts = screen.getAllByTestId("insights-lift");
+    expect(lifts.map((li) => li.querySelector("[role=img]")?.getAttribute("aria-label"))).toEqual(lifts.map((li) => li.querySelector(":scope > [aria-hidden=true]")?.textContent));
+    expect(lifts.map((li) => li.querySelector(":scope > [aria-hidden=true]")?.textContent)).toEqual([
       m.liftsRow.replace("{tag}", "Walk <b>").replace("{a}", "4.2").replace("{b}", "3.0"),
       m.liftsRow.replace("{tag}", "Tea").replace("{a}", "3.6").replace("{b}", "3.2"),
     ]);

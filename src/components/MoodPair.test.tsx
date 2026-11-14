@@ -16,6 +16,12 @@ describe("MoodPair: a comparison as colour bars (14 Nov)", () => {
     expect(pair).toHaveTextContent("3.2");
     expect(screen.getByTestId("pair-diff")).toHaveTextContent("+0.9");
   });
+  it("the chip agrees with the values as shown: 3.86 and 3.54 read 3.9 and 3.5, so +0.4 (the Reviewer)", () => {
+    render(<MoodPair sentence="s" a={3.86} b={3.54} format={(v) => one.format(v)} signed={(v) => signed.format(v)} testId="pair" />);
+    expect(screen.getByTestId("pair")).toHaveTextContent("3.9");
+    expect(screen.getByTestId("pair")).toHaveTextContent("3.5");
+    expect(screen.getByTestId("pair-diff")).toHaveTextContent("+0.4");
+  });
   it("BOTH bars take their own value's mood colour, rounded to the nearest step, each outlined", () => {
     render(<MoodPair sentence="s" a={4.1} b={2.6} format={(v) => one.format(v)} signed={(v) => signed.format(v)} testId="pair" />);
     const bars = [...screen.getByTestId("pair").querySelectorAll<HTMLElement>("span[style]")];
