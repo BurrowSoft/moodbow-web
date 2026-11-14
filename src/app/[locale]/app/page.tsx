@@ -23,6 +23,7 @@ import { SecurityNoticeRead } from "./SecurityNoticeRead";
 import { JOURNAL_HEADING } from "@/lib/ui/journalLayout";
 import { isLowMood } from "@/lib/journal/checkInSaved";
 import { readPlusPage } from "@/lib/plus/page";
+import { withTimeout } from "@/lib/ui/withTimeout";
 import { flagsCrisis } from "@/lib/safety/crisis";
 import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
 import { SetupLaterCard, TodayPlusCard } from "./TodayCards";
@@ -30,6 +31,10 @@ import { SetupLaterCard, TodayPlusCard } from "./TodayCards";
 // A stuck request ends here at the latest (UX, the timeout audit); each
 // data call gives up after 15 s on its own (lib/supabase/deadline).
 export const maxDuration = 30;
+// The Plus card's reads on Today, as a whole: past this, Today shows no Plus card (never a reason
+// for the check-in to wait). Under one data deadline plus Stripe's.
+// (Not exported: a page file may export only Next's own fields.)
+const PLUS_ON_TODAY_MS = 10_000;
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/app">): Promise<Metadata> {
   return tabMetadata("tabToday", (await params).locale);
@@ -53,11 +58,21 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
   // Today's reads all need only `me`, so they start together (the Web Dev's LCP read, 12 Nov: each
   // one in turn cost a round trip to the database). Same reads, same results.
   // The milestone card moved to the top of Timeline's list (Vitor, 14 Nov).
-  const [checkIn, todaysEntries, requestHeaders] = await Promise.all([
+  // Your week's and Plus's reads too, in the same round (UX, 14 Nov): one after another, a slow one
+  // could push the render past maxDuration and take the check-in card and Write with it. Plus is
+  // also capped as a whole (entitlements, then Stripe's own 8 s deadline): past it, no Plus card.
+  const weekOn = pageGate("your-week-live") !== "hidden";
+  const weekStart = lastWeekStart(me.today);
+  const weekEnd = sixDaysAfter(weekStart);
+  const [checkIn, todaysEntries, requestHeaders, plusPage, weekRead, momentsRead] = await Promise.all([
     supabase.from("check_ins").select("local_date, mood, sleep_hours, sleep_quality, exercise_minutes, stress, updated_at").eq("local_date", me.today).maybeSingle(),
     // Today's entries, newest first (previews only; the editor loads the rest).
     supabase.from("entries").select("id, body, is_moment, entry_date, created_at").eq("entry_date", me.today).order("created_at", { ascending: false }),
     headers(),
+    pageGate("plus") !== "hidden" ? withTimeout(readPlusPage(supabase, user.id, me.profile?.country, locale), PLUS_ON_TODAY_MS).catch(() => null) : null,
+    // Your week: last week's check-ins (a mood counts) and moments (id and date only).
+    weekOn ? supabase.from("check_ins").select("local_date, mood, sleep_hours, stress, exercise_minutes").gte("local_date", weekStart).lte("local_date", weekEnd) : null,
+    weekOn ? supabase.from("entries").select("id, entry_date").eq("is_moment", true).gte("entry_date", weekStart).lte("entry_date", weekEnd) : null,
   ]);
   const { data, error: checkInError } = checkIn;
   const { data: entries, error: entriesError } = todaysEntries;
@@ -74,21 +89,20 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
   // Today's Plus card on first landing (1.3 §6 and the rulings): only for someone without Plus (never
   // with Plus, never past due), only when today's rows were read, and never on a day when anything
   // saved was flagged or was one of the two lowest faces. Help is always above it on the page.
-  const plusPage = pageGate("plus") !== "hidden" ? await readPlusPage(supabase, user.id, me.profile?.country, locale) : null;
   const plus = plusPage?.view ?? null;
   // Your week, for everyone (Insights become Plus, ruling 1): its hard-week help is never behind
-  // Plus. Today's own read of last week's check-ins (a mood counts) and moments (id and date only).
-  // A failed read: no card. The app shows the same card above Write (Mobile Dev).
+  // Plus. A failed read, or a week it can't work out: no card, and the check-in is untouched. Moments
+  // that couldn't be read only drop the moment line (the hard-week help comes from check-ins).
+  // The app shows the same card above Write (Mobile Dev).
   let yourWeekCard: React.ReactNode = null;
   let hardWeek = false;
-  if (pageGate("your-week-live") !== "hidden") {
-    const start = lastWeekStart(me.today);
-    const end = sixDaysAfter(start);
-    const [weekRead, momentsRead] = await Promise.all([
-      supabase.from("check_ins").select("local_date, mood, sleep_hours, stress, exercise_minutes").gte("local_date", start).lte("local_date", end),
-      supabase.from("entries").select("id, entry_date").eq("is_moment", true).gte("entry_date", start).lte("entry_date", end),
-    ]);
-    const week = weekRead.error ? null : yourWeek((weekRead.data ?? []) as InsightRow[], me.today, (momentsRead.data ?? []) as YourWeekMoment[]);
+  if (weekRead && !weekRead.error) {
+    let week: ReturnType<typeof yourWeek> = null;
+    try {
+      week = yourWeek((weekRead.data ?? []) as InsightRow[], me.today, ((momentsRead && !momentsRead.error ? momentsRead.data : null) ?? []) as YourWeekMoment[]);
+    } catch {
+      week = null;
+    }
     hardWeek = week?.kind === "hard";
     if (week) yourWeekCard = <YourWeekCard week={week} country={me.profile?.country} dateLocaleTag={dateLocaleTag} />;
   }

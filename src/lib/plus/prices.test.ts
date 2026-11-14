@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 const prices = { retrieve: vi.fn() };
 const coupons = { retrieve: vi.fn() };
 vi.mock("./stripe", () => ({ getStripe: () => ({ prices, coupons }), stripeConfigured: () => true }));
-const { clearPriceCache, currencyFor, formatPrice, plusDeal, readPlusPrices } = await import("./prices");
+const { clearPriceCache, currencyFor, formatPrice, plusDeal, readPlusPrices, STRIPE_DEADLINE_MS } = await import("./prices");
 
 const PRICE = { currency: "usd", unit_amount: 5999, currency_options: { eur: { unit_amount: 4999 }, jpy: { unit_amount: 9599 }, gbp: { unit_amount: 4999 } } };
 const COUPON = { valid: true, duration: "once", currency: "usd", amount_off: 3000, currency_options: { eur: { amount_off: 2500 }, jpy: { amount_off: 4800 } } };
@@ -45,6 +45,40 @@ describe("prices from Stripe, never typed in (the Reviewer's ruling)", () => {
     const p = await readPlusPrices("FR", "en", true);
     expect(p.firstYear).toBeNull();
     expect(p.year).toContain("59.99");
+  });
+});
+
+describe("a slow Stripe never holds a page (UX, 14 Nov)", () => {
+  it("past STRIPE_DEADLINE_MS: the no-Stripe path (placeholder price, no offer), and not remembered", async () => {
+    vi.useFakeTimers();
+    try {
+      prices.retrieve.mockReturnValueOnce(new Promise(() => {}));
+      const slow = readPlusPrices("FR", "en", true);
+      await vi.advanceTimersByTimeAsync(STRIPE_DEADLINE_MS);
+      const p = await slow;
+      expect(p.firstYear).toBeNull();
+      expect(p.year).toContain("59.99");
+      // The next page asks Stripe again (a timeout isn't cached), and gets the real price.
+      expect(await plusDeal("FR", true)).toEqual({ currency: "eur", year: 4999, firstYear: 2499, coupon: "coupon_1" });
+      expect(prices.retrieve).toHaveBeenCalledTimes(2);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+  it("the coupon read is inside the same deadline", async () => {
+    vi.useFakeTimers();
+    try {
+      coupons.retrieve.mockReturnValueOnce(new Promise(() => {}));
+      const slow = plusDeal("FR", true);
+      await vi.advanceTimersByTimeAsync(STRIPE_DEADLINE_MS);
+      expect(await slow).toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+  it("under the deadline: the real deal", async () => {
+    expect(STRIPE_DEADLINE_MS).toBe(8_000);
+    expect(await plusDeal("FR", true)).toEqual({ currency: "eur", year: 4999, firstYear: 2499, coupon: "coupon_1" });
   });
 });
 
