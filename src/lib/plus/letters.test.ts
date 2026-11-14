@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { ConditionId, PageGate } from "@/lib/conditions";
-import { lapseDay, LAPSED_DRAFT_MS, letterWrite, lettersGate } from "./letters";
+import { LAPSED_DRAFT_MS, letterWrite, lettersGate } from "./letters";
 
 const NOW = Date.parse("2026-12-10T12:00:00Z");
 const at = (ms: number) => new Date(NOW + ms).toISOString();
@@ -34,9 +34,5 @@ describe("letterWrite: the server's check on saving a new letter", () => {
     expect(letterWrite(lapsed, true, NOW)).toBe("locked");
     expect(letterWrite({ status: "active", current_period_end: at(-LAPSED_DRAFT_MS + 1) }, false, NOW)).toBe("lapsed_once");
     expect(letterWrite({ status: "active", current_period_end: at(-LAPSED_DRAFT_MS) }, false, NOW)).toBe("locked");
-  });
-  it("lapseDay is the UTC day Plus ended", () => {
-    expect(lapseDay({ current_period_end: "2026-12-09T23:30:00.000Z" })).toBe("2026-12-09");
-    expect(lapseDay({ current_period_end: null })).toBeNull();
   });
 });

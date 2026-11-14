@@ -2,7 +2,7 @@
 
 import { forClient, isLetterMonths, LETTER_RULES, parseLetterRows, type Letter, type LetterMonths } from "@/lib/journal/letters";
 import { ENTITLEMENT_COLUMNS, parseEntitlement } from "@/lib/plus/entitlements";
-import { lapseDay, letterWrite, lettersGate } from "@/lib/plus/letters";
+import { letterWrite, lettersGate } from "@/lib/plus/letters";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 // Letters to future me (1.2): every write is one of migration 027's functions. What comes
@@ -26,10 +26,11 @@ async function mayWrite(supabase: Supabase): Promise<boolean | null> {
   const row = parseEntitlement(data);
   const first = letterWrite(row, false);
   if (first !== "lapsed_once") return first === "plus";
-  // A draft in progress when Plus lapsed: saved once, so only if nothing was written since that day.
-  const since = row ? lapseDay(row) : null;
+  // A draft in progress when Plus lapsed: saved once, so only if no letter was created after Plus
+  // ended. The same rule as letter_save in the database (moodbow-app 032_letters_plus.sql).
+  const since = row?.current_period_end;
   if (!since) return false;
-  const { count, error: countError } = await supabase.from("letters").select("id", { count: "exact", head: true }).gte("written_on", since);
+  const { count, error: countError } = await supabase.from("letters").select("id", { count: "exact", head: true }).gt("created_at", since);
   if (countError) return null;
   return letterWrite(row, (count ?? 0) > 0) === "lapsed_once";
 }
@@ -48,7 +49,9 @@ export async function saveLetter(body: string, months: LetterMonths): Promise<Le
   if (may === null) return { status: "error" };
   if (!may) return { status: "plus_required" };
   const { error } = await supabase.rpc("letter_save", { p_body: body, p_months: months });
-  return error ? { status: "error" } : list(supabase);
+  // The database's own check (032: RAISE 'plus_required') says the same as the one above.
+  if (error) return error.message?.includes("plus_required") ? { status: "plus_required" } : { status: "error" };
+  return list(supabase);
 }
 
 // On the day, or early (the person's choice). The text comes back only now.

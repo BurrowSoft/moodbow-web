@@ -15,10 +15,11 @@ export function lettersGate(gate: (id: ConditionId) => PageGate = pageGate): Pag
 
 // Writing a new letter is the one thing Plus decides, and the server checks it on every save.
 // - "plus": Plus is active (trialing or active, inside its period: has_plus()'s rule).
-// - "lapsed_once": Plus ended in the last 24 hours and no letter was written since that day. A
+// - "lapsed_once": Plus ended in the last 24 hours and no letter was created after it ended. A
 //   draft in progress when Plus lapsed can be saved once (the ruling). The page never offers a
 //   new draft then: only an editor opened while Plus was on can reach this.
 // - "locked": anything else, a missing row included. The editor offers to copy the text instead.
+// The database applies the identical rule in letter_save (moodbow-app 032_letters_plus.sql).
 export type LetterWrite = "plus" | "lapsed_once" | "locked";
 export const LAPSED_DRAFT_MS = 24 * 60 * 60 * 1000;
 
@@ -29,5 +30,3 @@ export function letterWrite(row: Pick<EntitlementRow, "status" | "current_period
   return "locked";
 }
 
-// The day Plus ended (UTC), to look for a letter written since: letters.written_on is a date.
-export const lapseDay = (row: Pick<EntitlementRow, "current_period_end">): string | null => row.current_period_end?.slice(0, 10) ?? null;

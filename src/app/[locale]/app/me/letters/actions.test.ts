@@ -8,12 +8,13 @@ let entitlement: Result = { data: null, error: null };
 let sinceCount: Result = { count: 0, error: null };
 const rpc = vi.fn((): Promise<{ data: unknown; error: unknown }> => Promise.resolve({ data: { body: "Dear me." }, error: null }));
 const tables: string[] = [];
+const sinceAt: [string, string][] = [];
 const query = (table: string) => {
   tables.push(table);
   if (table === "entitlements") return { select: () => ({ maybeSingle: () => Promise.resolve(entitlement) }) };
   return {
     select: (_cols: string, opts?: { head?: boolean }) =>
-      opts?.head ? { gte: () => Promise.resolve(sinceCount) } : Promise.resolve({ data: [], error: null }),
+      opts?.head ? { gt: (col: string, at: string) => (sinceAt.push([col, at]), Promise.resolve(sinceCount)) } : Promise.resolve({ data: [], error: null }),
   };
 };
 vi.mock("@/lib/supabase/server", () => ({ createSupabaseServerClient: () => Promise.resolve({ from: query, rpc }) }));
@@ -52,6 +53,13 @@ describe("saveLetter: Plus, checked on the server", () => {
     sinceCount = { count: 1, error: null };
     expect((await saveLetter("Dear me, again.", 1)).status).toBe("plus_required");
     expect(rpc).toHaveBeenCalledTimes(1);
+    // "Since" is letters created after Plus ended, as the database counts it (032).
+    expect(sinceAt.at(-1)).toEqual(["created_at", (entitlement.data as { current_period_end: string }).current_period_end]);
+  });
+  it("the database refuses (032's plus_required): the same answer", async () => {
+    entitlement = { data: row("active", day), error: null };
+    rpc.mockReturnValueOnce(Promise.resolve({ data: null, error: { message: "plus_required" } }));
+    expect((await saveLetter("Dear me.", 1)).status).toBe("plus_required");
   });
 });
 
