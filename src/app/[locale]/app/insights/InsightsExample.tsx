@@ -109,9 +109,10 @@ function WeekExample() {
   const sleep = PATTERN_PAIR.sleep;
   return (
     <>
-      <div data-testid="insights-example-week" className={JOURNAL_CARD}>
-        <div className="flex items-baseline justify-between gap-2">
-          <span className="font-medium text-text">{t("yourWeekTitle")}</span>
+      <div data-testid="insights-example-week" className={`min-w-0 [overflow-wrap:anywhere] ${JOURNAL_CARD}`}>
+        {/* Wraps at large text (300 % on a 320 px phone: the label went 9 px past the edge). */}
+        <div className="flex flex-wrap items-baseline justify-between gap-x-2">
+          <span className="min-w-0 font-medium text-text">{t("yourWeekTitle")}</span>
           <span className="text-xs text-muted">{tp("exampleLabel")}</span>
         </div>
         <div className="mt-3 flex h-24 items-end gap-2">
@@ -121,7 +122,7 @@ function WeekExample() {
         </div>
         <p className="mt-3 text-sm text-text">{tp("exampleWeekLine")}</p>
       </div>
-      <div data-testid="insights-example-lifts" className={JOURNAL_CARD}>
+      <div data-testid="insights-example-lifts" className={`min-w-0 [overflow-wrap:anywhere] ${JOURNAL_CARD}`}>
         <span className="font-medium text-text">{tp("liftsTitle")}</span>
         <div className="mt-2 space-y-4">
           {WEEK_EXAMPLE.lifts.map((l) => {
@@ -141,7 +142,7 @@ function WeekExample() {
           })}
         </div>
       </div>
-      <div data-testid="insights-example-patterns" className={JOURNAL_CARD}>
+      <div data-testid="insights-example-patterns" className={`min-w-0 [overflow-wrap:anywhere] ${JOURNAL_CARD}`}>
         <span className="font-medium text-text">{t("patternsTitle")}</span>
         <MoodPair
           sentence={t("patternsSleepShown", { a: fmt(WEEK_EXAMPLE.sleep.a), b: fmt(WEEK_EXAMPLE.sleep.b) })}
