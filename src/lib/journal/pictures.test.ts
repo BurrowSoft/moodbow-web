@@ -22,8 +22,8 @@ describe("the byte checks the upload route relies on", () => {
     const iptc = text("Photoshop 3.0\0");
     expect(hasExif(new Uint8Array([0xff, 0xd8, 0xff, 0xed, 0, iptc.length + 2, ...iptc, 0xff, 0xda, 0, 2]))).toBe(true);
     expect(hasExif(new Uint8Array([0xff, 0xd8, 0xff, 0xfe, 0, 6, ...text("GPS!"), 0xff, 0xda, 0, 2]))).toBe(true);
-    // APP0 then the image data: clean, even if the pixels happen to contain FF E1.
-    expect(hasExif(new Uint8Array([...fromCanvas.slice(0, -2), 0xff, 0xda, 0, 2, 0xff, 0xe1, 0x45, 0x78, 0x69, 0x66, 0xff, 0xd9]))).toBe(false);
+    // APP0 then the image data: clean, FF 00 stuffing and an RST inside the scan included.
+    expect(hasExif(new Uint8Array([...fromCanvas.slice(0, -2), 0xff, 0xda, 0, 2, 1, 0xff, 0x00, 2, 0xff, 0xd0, 3, 0xff, 0xd9]))).toBe(false);
     expect(hasExif(new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0x00]))).toBe(true);
   });
   it("each engine's real canvas JPEG is clean as written and unchanged by the strip (Chromium, Firefox, Playwright's WebKit)", () => {
@@ -41,13 +41,28 @@ describe("the byte checks the upload route relies on", () => {
     const seg = (m: number, body: number[]) => [0xff, m, (body.length + 2) >> 8, (body.length + 2) & 255, ...body];
     const dirty = new Uint8Array([
       0xff, 0xd8, ...seg(0xe0, text("JFIF\0")), ...seg(0xe1, exif), ...seg(0xe2, icc), ...seg(0xe1, xmp), ...seg(0xed, iptc), ...seg(0xe2, text("MPF\0")), ...seg(0xfe, text("hello")),
-      ...seg(0xdb, [0, 1, 2]), 0xff, 0xda, 0, 2, 0xff, 0xe1, 7, 7, 0xff, 0xd9,
+      ...seg(0xdb, [0, 1, 2]), 0xff, 0xda, 0, 2, 7, 7, 0xff, 0xd9,
     ]);
     const clean = stripMetadata(dirty)!;
     expect(hasExif(dirty)).toBe(true);
     expect(hasExif(clean)).toBe(false);
-    expect([...clean]).toEqual([0xff, 0xd8, ...seg(0xe0, text("JFIF\0")), ...seg(0xe2, icc), ...seg(0xdb, [0, 1, 2]), 0xff, 0xda, 0, 2, 0xff, 0xe1, 7, 7, 0xff, 0xd9]);
+    expect([...clean]).toEqual([0xff, 0xd8, ...seg(0xe0, text("JFIF\0")), ...seg(0xe2, icc), ...seg(0xdb, [0, 1, 2]), 0xff, 0xda, 0, 2, 7, 7, 0xff, 0xd9]);
     expect(stripMetadata(new Uint8Array([0xff, 0xd8, 0xff, 0xe1, 0, 40]))).toBeNull();
+  });
+  it("after the scans: a motion photo's MP4 (or a second JPEG) after EOI is cut; APPn and COM between progressive scans are dropped; no EOI is refused", () => {
+    const seg = (m: number, body: number[]) => [0xff, m, (body.length + 2) >> 8, (body.length + 2) & 255, ...body];
+    const head = [0xff, 0xd8, ...seg(0xe0, text("JFIF\0")), ...seg(0xdb, [0, 1, 2])];
+    const mp4 = [0, 0, 0, 0x18, ...text("ftypmp42"), ...text("moov...audio")];
+    const motion = new Uint8Array([...head, ...seg(0xda, [1, 2]), 5, 6, 0xff, 0xd9, ...mp4, 0xff, 0xd8, ...seg(0xe1, [...text("Exif"), 0, 0, 9])]);
+    expect([...stripMetadata(motion)!]).toEqual([...head, ...seg(0xda, [1, 2]), 5, 6, 0xff, 0xd9]);
+    expect(hasExif(motion)).toBe(true);
+    const progressive = new Uint8Array([
+      ...head, ...seg(0xda, [1]), 1, 0xff, 0x00, 2, 0xff, 0xd1, 3,
+      ...seg(0xfe, text("between")), ...seg(0xe1, [...text("Exif"), 0, 0, 1]), ...seg(0xc4, [4, 4]),
+      ...seg(0xda, [2]), 7, 8, 0xff, 0xd9,
+    ]);
+    expect([...stripMetadata(progressive)!]).toEqual([...head, ...seg(0xda, [1]), 1, 0xff, 0x00, 2, 0xff, 0xd1, 3, ...seg(0xc4, [4, 4]), ...seg(0xda, [2]), 7, 8, 0xff, 0xd9]);
+    expect(stripMetadata(new Uint8Array([...head, ...seg(0xda, [1]), 1, 2, 3]))).toBeNull();
   });
   it("the bytes a real Chromium canvas wrote (the fixture, 16 x 16 at 0.85) pass the guard", () => {
     // __fixtures__/chromium-canvas.jpg: made by canvas.toBlob("image/jpeg", 0.85) in Chromium. Its

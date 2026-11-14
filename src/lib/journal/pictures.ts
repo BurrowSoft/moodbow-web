@@ -58,36 +58,9 @@ export async function readEntryPictures(supabase: SupabaseClient, entryIds: stri
 const ICC = [0x49, 0x43, 0x43, 0x5f, 0x50, 0x52, 0x4f, 0x46, 0x49, 0x4c, 0x45, 0x00]; // "ICC_PROFILE\0"
 const isIccSegment = (bytes: Uint8Array, at: number, length: number) => length >= 2 + ICC.length && ICC.every((c, k) => bytes[at + 4 + k] === c);
 export function hasMetadata(bytes: Uint8Array): boolean {
-  if (!isJpeg(bytes)) return true;
-  let i = 2;
-  while (i + 1 < bytes.length) {
-    if (bytes[i] !== 0xff) return true;
-    let m = bytes[i + 1];
-    // Fill bytes (0xFF 0xFF ...) before a marker.
-    while (m === 0xff && i + 2 < bytes.length) {
-      i++;
-      m = bytes[i + 1];
-    }
-    if (m === 0xda) return false; // the image data starts: nothing before it carried metadata
-    if (m === 0xd9) return false; // the end, with no image data (nothing to carry)
-    if (i + 3 >= bytes.length) return true;
-    const segment = (bytes[i + 2] << 8) | bytes[i + 3];
-    if (m === 0xe2 && isIccSegment(bytes, i, segment)) {
-      i += 2 + segment;
-      continue;
-    }
-    if ((m >= 0xe1 && m <= 0xef) || m === 0xfe) return true;
-    // Standalone markers have no length.
-    if (m === 0x01 || (m >= 0xd0 && m <= 0xd7)) {
-      i += 2;
-      continue;
-    }
-    if (i + 3 >= bytes.length) return true;
-    const length = (bytes[i + 2] << 8) | bytes[i + 3];
-    if (length < 2) return true;
-    i += 2 + length;
-  }
-  return true;
+  // Anything the strip would take out (before, between or after the scans), or a file it refuses.
+  const stripped = stripMetadata(bytes);
+  return stripped === null || stripped.length !== bytes.length;
 }
 export const isJpeg = (bytes: Uint8Array) => bytes.length > 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
 
@@ -97,24 +70,41 @@ export function fitWithin(w: number, h: number, side: number): { width: number; 
   return { width: Math.max(1, Math.round(w * scale)), height: Math.max(1, Math.round(h * scale)) };
 }
 
-// The same file without its metadata segments (the Reviewer, #322: a server-side strip, so a browser
-// whose canvas adds its own Exif, as Safari's CoreGraphics may, is never locked out). Kept: SOI, APP0,
-// an APP2 that is exactly an ICC profile, every non-APP segment (tables, frame) and everything from
-// the first scan (SOS) to the end. Dropped: every other APP1-APP15 (EXIF, XMP, IPTC, MPF...) and COM.
-// null when the file can't be walked to its scan (it isn't stored).
+// The same file without its metadata (the Reviewer, #322: a server-side strip, so a browser whose
+// canvas adds its own Exif, as Safari's CoreGraphics may, is never locked out). The whole file is
+// walked: before and between scans, SOI, APP0, an APP2 that is exactly an ICC profile and every table
+// or frame segment (DQT, DHT, DRI, SOF, SOS...) are kept, and every other APP1-APP15 (EXIF, XMP,
+// IPTC, MPF...) and COM is dropped; each scan's entropy data is copied as it is (FF 00 stuffing and
+// RST0-7 belong to it) up to the next real marker; EOI is kept and is the end, so anything after it (a
+// motion photo's MP4, a second JPEG with its own EXIF) is dropped. A file without an EOI, or one that
+// can't be walked, gives null (it isn't stored).
 export function stripMetadata(bytes: Uint8Array): Uint8Array | null {
   if (!isJpeg(bytes)) return null;
   const keep: Uint8Array[] = [bytes.subarray(0, 2)];
   let i = 2;
-  while (i + 3 < bytes.length) {
-    if (bytes[i] !== 0xff) return null;
+  let inScan = false;
+  while (i < bytes.length) {
+    if (inScan) {
+      // Entropy data: up to an FF that starts a real marker (not 00 stuffing, an RSTn, or a fill FF).
+      const start = i;
+      while (i + 1 < bytes.length) {
+        const next = bytes[i + 1];
+        if (bytes[i] === 0xff && next !== 0x00 && next !== 0xff && !(next >= 0xd0 && next <= 0xd7)) break;
+        i++;
+      }
+      if (i + 1 >= bytes.length) return null;
+      keep.push(bytes.subarray(start, i));
+      inScan = false;
+      continue;
+    }
+    if (bytes[i] !== 0xff || i + 1 >= bytes.length) return null;
     let m = bytes[i + 1];
     while (m === 0xff && i + 2 < bytes.length) {
       i++;
       m = bytes[i + 1];
     }
-    if (m === 0xda) {
-      keep.push(bytes.subarray(i));
+    if (m === 0xd9) {
+      keep.push(bytes.subarray(i, i + 2));
       const out = new Uint8Array(keep.reduce((n, k) => n + k.length, 0));
       let at = 0;
       for (const k of keep) {
@@ -134,6 +124,7 @@ export function stripMetadata(bytes: Uint8Array): Uint8Array | null {
     const metadata = (m >= 0xe1 && m <= 0xef && !(m === 0xe2 && isIccSegment(bytes, i, length))) || m === 0xfe;
     if (!metadata) keep.push(bytes.subarray(i, i + 2 + length));
     i += 2 + length;
+    if (m === 0xda) inScan = true;
   }
   return null;
 }
