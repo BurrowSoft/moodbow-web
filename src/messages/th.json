@@ -431,6 +431,8 @@
     "calPrevMonth": "เดือนก่อนหน้า",
     "calNextMonth": "เดือนถัดไป",
     "calDayLabel": "{date}{mood, select, none {} other {, {mood}}}{moment, select, yes {, ช่วงเวลาสำคัญ} other {}}{entry, select, yes {, มีบันทึก} other {}}",
+    "calKey": "คำอธิบายสัญลักษณ์",
+    "calKeyWriting": "มีบันทึก",
     "printMonth": "พิมพ์เดือนนี้",
     "printFooter": "Moodbow · {month}",
     "printEmpty": "เดือนนี้ยังไม่มีบันทึก"
