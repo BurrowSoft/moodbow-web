@@ -21,6 +21,8 @@ Moodbow is a private journal made by Vitor Ribeiro Carvalho, trading as BurrowSo
 **When you last connected:** the time your account last connected to our servers. We use it to keep you signed in and, for accounts without an email, to apply the 12-month rule below.
 {pending:anon_start_live}**Using Moodbow without an email:** you can start without giving us an email. We create an account for your phone that only it can use, and store your journal there like any other account. If you add an email later, your journal stays the same account. If you never add an email and don't open the app while connected to the internet for 12 months, we delete that account and its journal.{/pending}
 **Your journal:** the entries you write, your daily check-ins (mood, sleep, movement (active minutes), stress), the dates they belong to, and which entries you mark as moments.
+{pending:pictures_live|app_pictures}**Pictures in your moments (Moodbow Plus):** If you add pictures to a moment, they're stored with your journal in our database provider's storage in the EU, visible only to you, and included when you export your data. Location and other hidden details are removed before upload. When you delete a picture, its entry or your account, it disappears from Moodbow straight away; for up to a minute a copy you'd opened may still be reachable from your own account, and no one else can reach it. Deleted files are removed from our live storage within a day.{/pending}
+{pending:wear}**Watch:** A mood you tap on the watch is saved like any one-tap check-in. The watch stores nothing and never contacts our servers.{/pending}
 **Your settings:** language, country, time zone, reminder time, and your AI choices (on or off, tone, focus areas).
 **AI content (only if AI is on):** the reflections and reports the AI writes for you{pending:ai_memory}, and the short facts Moodbow remembers about you, which you can see, edit and delete in Me → What Moodbow remembers{/pending}.
 **AI usage:** for each AI request, the feature, the model, the number of tokens, the cost and the credits used. Not the text of your entries or of the AI's answer.
@@ -30,6 +32,8 @@ Moodbow is a private journal made by Vitor Ribeiro Carvalho, trading as BurrowSo
 **Cookies and storage on your device:** the website uses only the cookies it needs to work: one that keeps you signed in, and one that remembers whether you view your Timeline as a list or a calendar. It also keeps a few display choices in your browser, such as light or dark appearance and the cards you've already closed. None of them track you across sites or are used for advertising or analytics.
 
 **What stays only on your device:** unsent drafts{pending:app_app_lock}, your app-lock PIN{/pending}{pending:app_share_cards}, and the share cards you create. Share cards are made on your device and only leave it if you share them yourself{/pending}.
+
+{pending:me_picture_live|app_me_picture}**Your picture in Me:** {pending:me_picture_live}If you choose a picture for Me on the website, it's kept only in this browser, never sent to us, and removed when you sign out, delete your account, or remove it. {/pending}{pending:app_me_picture}If you choose a picture for Me in the app, it's kept on your phone (and in your phone's own backup, if you use one), never sent to us, and removed when you sign out, remove it, or delete the app's data. {/pending}Location and other hidden details are removed from the picture when you choose it.{/pending}
 
 **Technical logs:** like almost every online service, our hosting providers record IP addresses and device or browser information when you connect, for security and to fix problems. They keep these logs for a limited time (see §4). We also keep daily totals of AI use (how many reflections were made that day and what they cost us), with no link to any person, so we can keep costs under control.
 **Emails you send us:** if you write to support@moodbow.com, we keep the conversation so we can answer you, and delete it when it's no longer needed.
@@ -58,6 +62,11 @@ To show helplines near you when we don't know your country, we use the country y
 | Resend | Sending account emails (confirmation, password reset) | USA (company); emails are sent from Japan |
 | Sentry | Error and crash reports, with personal details removed | USA |
 {pending:purchases}| Google Play, Apple App Store | Payments for AI credits | Global |{/pending}
+{pending:wear}| Google (Wear OS Data Layer, part of Google Play services) | Carrying a watch check-in (a mood value only, no text) from your watch to your phone, only if you use the watch app | Global |{/pending}
+
+{pending:wear}Watch check-ins normally go straight from your watch to your phone over Bluetooth. If the two aren't directly connected, Google may relay the message through its servers, encrypted end to end so Google can't read it. Nothing is stored there.{/pending}
+
+{pending:wear|plus|purchases}Google Play services runs under [Google's own privacy policy](https://policies.google.com/privacy).{/pending}
 
 Each provider may use your data only to provide its service to us. Anthropic doesn't use data sent through its API to train its models, and it deletes it after a short period (at most 30 days) that it keeps for safety and abuse monitoring.
 When data goes outside your country (for example from the EU to the USA), we rely on each provider's data-processing agreement and its data-transfer safeguards, such as the EU Standard Contractual Clauses or the EU–US Data Privacy Framework.
