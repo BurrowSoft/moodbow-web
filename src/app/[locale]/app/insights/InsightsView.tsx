@@ -47,6 +47,7 @@ export function InsightsView({
   today,
   range,
   share,
+  help,
   summary,
   week,
   patterns,
@@ -58,6 +59,8 @@ export function InsightsView({
   today: string;
   range: Range;
   share?: React.ReactNode;
+  // help: the lifebuoy by the title (audit batch H).
+  help?: React.ReactNode;
   summary?: React.ReactNode;
   week?: React.ReactNode;
   patterns?: Pattern[];
@@ -89,7 +92,12 @@ export function InsightsView({
     <section>
       <div className="flex flex-wrap items-center justify-between gap-4">
         <h1 className={`min-w-0 ${JOURNAL_HEADING}`}>{t("insightsTitle")}</h1>
-        {share}
+        {/* Help everywhere (audit batch H): the lifebuoy by the title, on every range, as on the
+            example; the screen's one help control. */}
+        <div className="flex flex-wrap items-center gap-2">
+          {share}
+          {help}
+        </div>
       </div>
       {summary}
       <nav aria-label={t("insightsTitle")} className="mt-4 flex flex-wrap gap-2">

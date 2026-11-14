@@ -148,6 +148,7 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
       today={me.today}
       range={range}
       share={share}
+      help={<GetHelpNow country={me.profile?.country} testId="insights-help" neutral icon />}
       summary={null}
       week={week}
       patterns={withPatterns ? patterns(rows, me.today) : undefined}
