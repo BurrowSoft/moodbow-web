@@ -9,7 +9,7 @@ import { legalSource, stripComments } from "./legalContent";
 // The Spanish has to say what the English says (decision 222): an English change blocks here until
 // the Spanish follows. This checks structure and facts; a person compares the words.
 const raw = (slug: string, locale: string) => readFileSync(path.join(process.cwd(), "content", "legal", locale, `${slug}.md`), "utf8").replace(/\r\n/g, "\n");
-const NAMES = ["Vitor Ribeiro Carvalho", "BurrowSoft", "297 Moo 1, Baan Sanian, Mueang Nan, Nan 55000", "support@moodbow.com", "moodbow.com", "Anthropic", "Supabase", "Amazon Web Services", "Vercel", "Resend", "Sentry", "Google Play", "App Store", "HTTPS", "PDPC", "Moodbow AI Lite", "AAIP"];
+const NAMES = ["Vitor Carvalho", "BurrowSoft", "297 Moo 1, Baan Sanian, Mueang Nan, Nan 55000", "support@moodbow.com", "moodbow.com", "Anthropic", "Supabase", "Amazon Web Services", "Vercel", "Resend", "Sentry", "Google Play", "App Store", "HTTPS", "PDPC", "Moodbow AI Lite", "AAIP"];
 const SHAPES: Record<string, (text: string) => string[]> = {
   "pending blocks, in order": (s) => s.match(/\{\/?pending(:[a-z_|]+)?\}/g) ?? [],
   headings: (s) => s.match(/^#{2,3} /gm) ?? [],

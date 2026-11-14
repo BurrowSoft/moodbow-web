@@ -1,17 +1,17 @@
 <!--
   Spanish of content/legal/en/privacy.md. Wording is Vitor's, as in English. AI translation, checked
   by back-translation, a script and the Code Reviewer; no native lawyer has read it.
-  en-sha256: 573979f9e98dfac7575e09462be304a56031dddfe02296264677c6311d4a7544
+  en-sha256: 853a0bc6f6799a37e06e6f9201b3429c315fd9c7dfa10e5f7ab7ae3ddedb9602
   It's the English this translates: legalSpanish.test.ts fails if the English changes, until the
   Spanish follows and this is updated. Shows on Production only once legal-es-approved is met.
 -->
 ## Política de privacidad de Moodbow
 Última actualización: 11 de noviembre de 2026
 
-Moodbow es un diario privado creado por Vitor Ribeiro Carvalho, que opera como BurrowSoft (297 Moo 1, Baan Sanian, Mueang Nan, Nan 55000, Tailandia), «nosotros» en esta política. La escribimos para que se lea, no para que se pase por alto. Si algo no queda claro, escribe a support@moodbow.com.
+Moodbow es un diario privado creado por Vitor Carvalho, que opera como BurrowSoft (297 Moo 1, Baan Sanian, Mueang Nan, Nan 55000, Tailandia), «nosotros» en esta política. La escribimos para que se lea, no para que se pase por alto. Si algo no queda claro, escribe a support@moodbow.com.
 
 ### En resumen
-- Tu diario es privado y está vinculado a tu cuenta. El personal de BurrowSoft no lee los diarios; el acceso directo a la base de datos se limita al mantenimiento a cargo de Vitor Ribeiro Carvalho. No vendemos tus datos, no mostramos anuncios y no usamos tu diario para entrenar modelos de IA.
+- Tu diario es privado y está vinculado a tu cuenta. El personal de BurrowSoft no lee los diarios; el acceso directo a la base de datos se limita al mantenimiento a cargo de Vitor Carvalho. No vendemos tus datos, no mostramos anuncios y no usamos tu diario para entrenar modelos de IA.
 {pending:ai_live}- Las funciones de IA son opcionales. Si las activas, las partes de tu diario necesarias para una reflexión o un informe se envían a nuestro proveedor de IA, Anthropic, en Estados Unidos.{/pending}
 - Puedes exportar todo, o eliminar tu cuenta y todo lo que contiene, desde la app{pending:web_journal_live} o el sitio web{/pending}.
 
@@ -86,7 +86,7 @@ Vivas donde vivas, puedes:
 - **limitar cómo usamos tus datos:** usamos tu diario solo para hacer funcionar el servicio. Tú eliges qué escribes, y puedes editar o eliminar cualquier parte. Para limitar cualquier otra cosa, escríbenos;
 - **oponerte o hacer preguntas:** escribe a support@moodbow.com. Respondemos en un plazo de 10 días.
 
-**Cómo hacer una solicitud:** la mayor parte de esto está en la sección Yo, sin necesidad de pedirlo. Si no, escribe a support@moodbow.com y dinos qué quieres que hagamos. Vitor Ribeiro Carvalho se encarga de las solicitudes. Podemos pedirte que escribas desde el correo de tu cuenta para saber que es tuya. Sin un correo en la cuenta no podemos confirmarlo, así que usa la sección Yo de la app.
+**Cómo hacer una solicitud:** la mayor parte de esto está en la sección Yo, sin necesidad de pedirlo. Si no, escribe a support@moodbow.com y dinos qué quieres que hagamos. Vitor Carvalho se encarga de las solicitudes. Podemos pedirte que escribas desde el correo de tu cuenta para saber que es tuya. Sin un correo en la cuenta no podemos confirmarlo, así que usa la sección Yo de la app.
 
 También puedes presentar una queja ante una autoridad de protección de datos: en Tailandia, el Comité de Protección de Datos Personales (PDPC); en México, la Secretaría Anticorrupción y Buen Gobierno; en Argentina, la Agencia de Acceso a la Información Pública (AAIP); en Chile, la Agencia de Protección de Datos Personales, cuando haya comenzado a funcionar; en la UE o el Reino Unido, la autoridad de protección de datos de tu país; en otros lugares, la autoridad de tu país.
 
@@ -100,6 +100,6 @@ Moodbow es para personas de 18 años o más. No recopilamos a sabiendas datos de
 Si cambiamos esta política de forma importante, actualizaremos la fecha de arriba y te lo diremos en la app antes de que el cambio se aplique.
 
 ### 9. Contacto
-Vitor Ribeiro Carvalho, que opera como BurrowSoft, 297 Moo 1, Baan Sanian, Mueang Nan, Nan 55000, Tailandia · support@moodbow.com
+Vitor Carvalho, que opera como BurrowSoft, 297 Moo 1, Baan Sanian, Mueang Nan, Nan 55000, Tailandia · support@moodbow.com
 
 ---

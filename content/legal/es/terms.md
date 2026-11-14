@@ -1,14 +1,14 @@
 <!--
   Spanish of content/legal/en/terms.md. Wording is Vitor's, as in English. AI translation, checked
   by back-translation, a script and the Code Reviewer; no native lawyer has read it.
-  en-sha256: 0819f8b4559153956b504b78aeeef1c9095c4ebcdbbc23d8924999cfda4205a6
+  en-sha256: 31d12d8dfaf8557202639bb03c76afedc856510ce5513700bb1e3cf41b192fe9
   It's the English this translates: legalSpanish.test.ts fails if the English changes, until the
   Spanish follows and this is updated. Shows on Production only once legal-es-approved is met.
 -->
 ## Términos de uso de Moodbow
 Última actualización: 2 de octubre de 2026
 
-Estos términos son un acuerdo entre tú y Vitor Ribeiro Carvalho, que opera como BurrowSoft (297 Moo 1, Baan Sanian, Mueang Nan, Nan 55000, Tailandia), sobre el uso de Moodbow, la app y el sitio web moodbow.com. Al crear una cuenta, los aceptas.
+Estos términos son un acuerdo entre tú y Vitor Carvalho, que opera como BurrowSoft (297 Moo 1, Baan Sanian, Mueang Nan, Nan 55000, Tailandia), sobre el uso de Moodbow, la app y el sitio web moodbow.com. Al crear una cuenta, los aceptas.
 
 ### Qué es Moodbow y qué no es
 Moodbow es un diario privado que te ayuda a notar patrones en tu estado de ánimo, tu sueño y tus hábitos. **No** es atención médica, terapia ni un diagnóstico, y no es un servicio de crisis. Las reflexiones de la IA son sugerencias para pensar, no asesoramiento profesional. Si estás en peligro o piensas en hacerte daño, comunícate de inmediato con tu número de emergencias local o con una línea de crisis; Moodbow enumera algunas en Yo → ¿Quieres hablar con alguien?.
