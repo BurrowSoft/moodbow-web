@@ -34,8 +34,9 @@ test("a11y sweep: the letter editor with reminders, light and dark, 320 px at 30
     await page.locator("#email").fill(email);
     await page.locator("#password").fill(password);
     await page.locator("main form button[type=submit]").first().click();
-    await expect(page).toHaveURL(/\/(app|setup)$/, { timeout: 20_000 });
-    if (page.url().endsWith("/setup")) await page.getByTestId("setup-done").click();
+    // As #319's own letters axe test: this base lands a new account on Setup.
+    await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+    await page.getByTestId("setup-done").click();
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     await grantPlusTrial(email);
     await page.setViewportSize({ width: 320, height: 640 });
