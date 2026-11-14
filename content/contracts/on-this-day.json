@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "about": "On this day (1.1 A, decision 168). Given 'today' (the profile's local date) and the person's entries, the one card to show, or none. Rules: look 1 year, then 6 months, then 1 month back, in that order (the rarer first); the same day of the month, with no rounding (if that day doesn't exist in that month, that anniversary is skipped); moments (is_moment) only; skip any entry the crisis matcher flags (crisis-keywords.json v1, every list whatever the language, as on the write screen: crisis-keywords 1.0 rule 5); within a day, the newest by created_at. Dismissal ('Hide for today') is per person and local day, so it isn't in these cases.",
+  "about": "On this day (1.1 A, decision 168). Given 'today' (the profile's local date) and the person's entries, the one card to show, or none. Rules: look 1 year, then 6 months, then 1 month back, in that order (the rarer first); the same day of the month, with no rounding (if that day doesn't exist in that month, that anniversary is skipped); moments (is_moment) only; skip any entry the crisis matcher flags (crisis-keywords.json v1, every list whatever the language, as on the write screen: crisis-keywords 1.0 rule 5); within a day, the newest by created_at. Dismissal ('Hide for today') is per person and local day, so it isn't in these cases. 1.3 Memories (034): each moment has recall_months, a subset of [1, 6, 12] (default all three; a missing value means all three); an anniversary counts only when its months value (year 12, six months 6, month 1) is in that entry's recall_months, so none kept means it never comes back. A changed choice doesn't touch updated_at, so another device learns it on its next full read.",
   "monthsBefore": [
     {
       "today": "2026-10-21",
@@ -211,6 +211,49 @@
         "kind": "sixMonths",
         "id": "six"
       }
+    },
+    {
+      "name": "a year ago not kept (recall_months [1, 6]): the month's moment instead",
+      "today": "2026-10-21",
+      "entries": [
+        {
+          "id": "year",
+          "entry_date": "2025-10-21",
+          "created_at": "2025-10-21T09:00:00Z",
+          "is_moment": true,
+          "body": "A good walk.",
+          "recall_months": [
+            1,
+            6
+          ]
+        },
+        {
+          "id": "month",
+          "entry_date": "2026-09-21",
+          "created_at": "2026-09-21T09:00:00Z",
+          "is_moment": true,
+          "body": "A good walk."
+        }
+      ],
+      "expected": {
+        "kind": "month",
+        "id": "month"
+      }
+    },
+    {
+      "name": "nothing kept (recall_months []): never comes back, no card",
+      "today": "2026-10-21",
+      "entries": [
+        {
+          "id": "year",
+          "entry_date": "2025-10-21",
+          "created_at": "2025-10-21T09:00:00Z",
+          "is_moment": true,
+          "body": "A good walk.",
+          "recall_months": []
+        }
+      ],
+      "expected": null
     }
   ],
   "labels": {

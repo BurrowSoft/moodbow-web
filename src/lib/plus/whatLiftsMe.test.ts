@@ -2,11 +2,11 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import conditions from "../../../content/conditions.json";
-import contract from "../../../content/what-lifts-me.json";
+import contract from "../../../content/contracts/what-lifts-me.json";
 import type { InsightRow } from "@/lib/journal/insights";
 import { excludedTag, LIFTS_RULES, whatLiftsMe } from "./whatLiftsMe";
 
-// What lifts me (1.3 part 2 and its rulings; content/what-lifts-me.json, shared with the app).
+// What lifts me (1.3 part 2 and its rulings; content/contracts/what-lifts-me.json, shared with the app).
 const TODAY = "2026-11-14";
 const day = (n: number) => new Date(Date.UTC(2026, 10, 14 - n)).toISOString().slice(0, 10);
 const row = (n: number, mood: number) => ({ local_date: day(n), mood }) as InsightRow;
@@ -21,7 +21,7 @@ const run = (days: [number, string[]][], keywords: Parameters<typeof whatLiftsMe
 };
 const repeat = <T,>(n: number, v: T): T[] => Array.from({ length: n }, () => v);
 
-describe("the rules (content/what-lifts-me.json)", () => {
+describe("the rules (content/contracts/what-lifts-me.json)", () => {
   it("are the spec's: 5 days with, 5 without, a gap of 0.3 or more, at most 3", () => {
     expect(LIFTS_RULES).toEqual({ minDaysWith: 5, minDaysWithout: 5, minGap: 0.3, max: 3 });
   });

@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import contract from "../../../content/safety-plan.json";
-import yourWeek from "../../../content/your-week.json";
+import yourWeek from "../../../content/contracts/your-week.json";
 import { canCall, EMPTY_PLAN, parsePlan, personProblem, planHasContent, planTextTooLong, SAFETY_PLAN_RULES } from "./safetyPlan";
 
 const LANGUAGES = ["en", "fr", "es", "pt-br", "de", "it", "th"] as const;
