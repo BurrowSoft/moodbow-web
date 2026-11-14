@@ -143,7 +143,7 @@ describe("strings", () => {
     const p = plus("en");
     expect([p.liftsTitle, p.liftsRow, p.liftsFooter, p.liftsNone]).toEqual([
       "What lifts me",
-      "On days with “{tag}”, your mood averaged {a}; on other days, {b}.",
+      "On days with “{tag}”, your mood averaged {a} of 5; on other days, {b}.",
       "Patterns, not causes. Only you can see this.",
       "Keep tagging your days. Patterns show up after a few weeks.",
     ]);
