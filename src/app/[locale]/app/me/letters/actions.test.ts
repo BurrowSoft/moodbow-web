@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 type Result = { data?: unknown; error: unknown; count?: number | null };
 let entitlement: Result = { data: null, error: null };
 let sinceCount: Result = { count: 0, error: null };
-const rpc = vi.fn(() => Promise.resolve({ data: { body: "Dear me." }, error: null }));
+const rpc = vi.fn((): Promise<{ data: unknown; error: unknown }> => Promise.resolve({ data: { body: "Dear me." }, error: null }));
 const tables: string[] = [];
 const query = (table: string) => {
   tables.push(table);

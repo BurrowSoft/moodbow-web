@@ -24,7 +24,7 @@ async function mayWrite(supabase: Supabase): Promise<boolean | null> {
   const { data, error } = await supabase.from("entitlements").select(ENTITLEMENT_COLUMNS).maybeSingle();
   if (error) return null;
   const row = parseEntitlement(data);
-  const first = letterWrite(row);
+  const first = letterWrite(row, false);
   if (first !== "lapsed_once") return first === "plus";
   // A draft in progress when Plus lapsed: saved once, so only if nothing was written since that day.
   const since = row ? lapseDay(row) : null;
