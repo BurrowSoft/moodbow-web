@@ -2072,16 +2072,32 @@ test("Three good things: large text on a 320 px phone, one ordinary entry on Tod
 
 // Help everywhere (audit batch H, UX and the Reviewer, 14 Nov): wherever someone writes their own
 // words or reads back their days, exactly one help control, and it opens the help card.
-test("help everywhere: writing, Three good things, a day and the Timeline each have one lifebuoy that opens the help card", async ({ page }) => {
-  test.setTimeout(120_000);
+// At 320 px with text at 300 % (the Reviewer): Back and the lifebuoy share a row, so each must stay
+// in the first view with nothing sideways.
+test("help everywhere: writing, Three good things, a day and the Timeline each have one lifebuoy in the first view at 300 %, opening the help card", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
+  test.setTimeout(150_000);
   const email = newEmail();
   try {
     const password = await accountAtSetup(page, email);
     const today = await journalToday(email, password);
+    await page.setViewportSize({ width: 320, height: 640 });
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send("Page.setFontSizes", { fontSizes: { standard: 48, fixed: 39 } });
     const help = page.getByRole("link", { name: messages.me.meGetHelpNow });
-    for (const path of ["/app/write", "/app/write/good-things", `/app/timeline/${today}`, "/app/timeline"]) {
+    for (const [path, testId] of [
+      ["/app/write", "editor-help"],
+      ["/app/write/good-things", "editor-help"],
+      [`/app/timeline/${today}`, "day-help"],
+      ["/app/timeline", "timeline-help"],
+    ]) {
       await page.goto(path);
-      await expect(help.first(), path).toBeVisible({ timeout: 15_000 });
+      await expect(page.getByTestId(testId), path).toBeVisible({ timeout: 15_000 });
+      const box = await page.getByTestId(testId).evaluate((el) => {
+        const r = el.getBoundingClientRect();
+        return { inFirstView: r.top >= 0 && r.bottom <= window.innerHeight + 0.5 && r.right <= window.innerWidth + 0.5, overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth };
+      });
+      expect(box, `${path}: the lifebuoy in the first view, nothing sideways`).toEqual({ inFirstView: true, overflow: 0 });
       await expect(help, `${path}: exactly one help control`).toHaveCount(1);
       await help.click();
       await expect(page.getByTestId("safety-card"), path).toBeVisible();
