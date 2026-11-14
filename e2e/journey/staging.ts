@@ -38,6 +38,11 @@ const admin = () => (client ??= createClient(URL_, SECRET, { auth: { persistSess
 
 // Only ever touches users this helper's naming made.
 const ours = (email: string | undefined) => !!email && email.startsWith(PREFIX) && email.endsWith("@example.invalid");
+// The users this run itself created, and those it gave a Plus row: an entitlements row is only
+// ever written for one of the first, and checked gone after its cleanup (UX and the Mobile Dev,
+// 12 Nov: every other row is the Mobile Dev's, by exact id).
+const createdHere = new Set<string>();
+const grantedHere = new Map<string, string>();
 
 async function* users() {
   for (let page = 1; page <= 20; page++) {
@@ -74,6 +79,7 @@ export async function signedUpUnconfirmed(email: string, password: string, { con
     options: { data: { locale, time_zone: "UTC", ...(consents ? { consents: [...grantedAtConsent(), consentItem("age_18")] } : {}) } },
   });
   if (error) throw new Error(`generateLink failed: ${error.message}`);
+  createdHere.add(email);
   return data.properties.hashed_token;
 }
 
@@ -81,6 +87,7 @@ export async function signedUpUnconfirmed(email: string, password: string, { con
 export async function createConfirmedUser(email: string, password: string): Promise<void> {
   const { error } = await admin().createUser({ email, password, email_confirm: true });
   if (error) throw new Error(`createUser failed: ${error.message}`);
+  createdHere.add(email);
 }
 
 // Ends every session of this user, as "sign out everywhere" on another device does.
@@ -158,6 +165,23 @@ export async function seedCheckIns(email: string, password: string, monday: stri
   }
 }
 
+// Tags on seeded days (029), through the app's own RPC, signed in as them, as seedCheckIns. false:
+// staging has no tags yet (set_check_in_tags missing), so the caller can skip, never fake it.
+export async function seedTags(email: string, password: string, monday: string, days: { offset: number; tags: string[] }[]): Promise<boolean> {
+  if (!ours(email)) throw new Error("seedTags only touches this helper's own users");
+  const user = createClient(URL_, PUBLISHABLE, { auth: { persistSession: false, autoRefreshToken: false } });
+  const { error: signInError } = await user.auth.signInWithPassword({ email, password });
+  if (signInError) throw new Error(`sign-in to seed tags failed: ${signInError.message}`);
+  for (const { offset, tags } of days) {
+    const d = new Date(`${monday}T00:00:00Z`);
+    d.setUTCDate(d.getUTCDate() + offset);
+    const { error } = await user.rpc("set_check_in_tags", { p_date: d.toISOString().slice(0, 10), p_tags: tags });
+    if (error?.code === "PGRST202") return false;
+    if (error) throw new Error(`seeding tags failed: ${error.message}`);
+  }
+  return true;
+}
+
 // Whether the account holds a granted AI consent, as get_me says.
 export async function aiConsentGranted(email: string, password: string): Promise<boolean> {
   const user = createClient(URL_, PUBLISHABLE, { auth: { persistSession: false, autoRefreshToken: false } });
@@ -188,11 +212,67 @@ export async function exists(email: string): Promise<boolean> {
   return (await userId(email)) !== null;
 }
 
+// Pictures (035): whether staging has 035 yet. Read through picture_deletions, the one 035 table the
+// service role may SELECT (entry_pictures grants it nothing, by design, so a read there always fails
+// and the picture journeys silently skipped; the Reviewer caught it, 14 Nov).
+export async function picturesOnStaging(): Promise<boolean> {
+  if (!configured) return false;
+  const { error } = await database().from("picture_deletions").select("id").limit(1);
+  return !error;
+}
+
+// A moment written through the app's own RPC, signed in as them (the service role has no write on
+// entries). Returns its id.
+export async function seedMoment(email: string, password: string, date: string, body: string): Promise<string> {
+  if (!ours(email)) throw new Error("seedMoment only touches this helper's own users");
+  const user = createClient(URL_, PUBLISHABLE, { auth: { persistSession: false, autoRefreshToken: false } });
+  const { error: signInError } = await user.auth.signInWithPassword({ email, password });
+  if (signInError) throw new Error(`sign-in to seed a moment failed: ${signInError.message}`);
+  const { data, error } = await user.rpc("save_entry", { p_id: null, p_date: date, p_body: body, p_is_moment: true, p_expected_updated_at: null });
+  await user.auth.signOut({ scope: "local" });
+  if (error) throw new Error(`seeding a moment failed: ${error.message}`);
+  return (data as { id: string }).id;
+}
+
+// This run's own user's stored picture files (name and bytes), read back with the service role.
+export async function pictureFiles(email: string): Promise<{ name: string; bytes: Buffer }[]> {
+  if (!ours(email)) throw new Error("pictureFiles only reads this helper's own users");
+  const id = await userId(email);
+  if (!id) return [];
+  const bucket = database().storage.from("entry-pictures");
+  const out: { name: string; bytes: Buffer }[] = [];
+  const { data: entries } = await bucket.list(id);
+  for (const entry of entries ?? []) {
+    const { data: files } = await bucket.list(`${id}/${entry.name}`);
+    for (const f of files ?? []) {
+      const name = `${id}/${entry.name}/${f.name}`;
+      const { data: blob, error } = await bucket.download(name);
+      if (error || !blob) throw new Error(`reading back ${f.name} failed`);
+      out.push({ name, bytes: Buffer.from(await blob.arrayBuffer()) });
+    }
+  }
+  return out;
+}
+
 // Deletes the user if it's still there (the journey may have deleted it).
 export async function cleanup(email: string): Promise<void> {
   if (!ours(email)) throw new Error("cleanup only deletes e2e-ci-* users");
   const id = await userId(email);
+  // Pictures (035): the files of this run's user go through the Storage API now (Preview runs no
+  // cron), and their queue rows after the user (the rows' trigger queues them on the cascade).
+  const pictures = id ? (await pictureFiles(email)).map((f) => f.name) : [];
+  if (pictures.length > 0) await database().storage.from("entry-pictures").remove(pictures);
   if (id) await admin().deleteUser(id);
+  if (id && pictures.length > 0) await database().from("picture_deletions").delete().eq("user_id", id);
+  // A Plus row this run wrote must have gone with its user (ON DELETE CASCADE); if not, say so
+  // loudly: the Mobile Dev removes it by exact id.
+  const granted = grantedHere.get(email);
+  if (granted) {
+    grantedHere.delete(email);
+    const { data, error } = await database().from("entitlements").select("user_id").eq("user_id", granted);
+    if (error) throw new Error(`the entitlements check after cleanup failed: ${error.message}`);
+    if ((data ?? []).length > 0) throw new Error(`an entitlements row was left for e2e user ${granted}: tell the Mobile Dev`);
+  }
 }
 
 // Users a crashed run left behind (older than 2 h, so a parallel run's are safe).
@@ -201,6 +281,12 @@ export async function sweep(): Promise<number> {
   const stale: string[] = [];
   for await (const u of users()) if (ours(u.email) && Date.parse(u.created_at) < cutoff) stale.push(u.id);
   for (const id of stale) await admin().deleteUser(id);
+  // UX's sweep check: no entitlements row may outlive the e2e users swept here.
+  if (stale.length > 0 && (await plusOnStaging())) {
+    const { data, error } = await database().from("entitlements").select("user_id").in("user_id", stale);
+    if (error) throw new Error(`the entitlements sweep check failed: ${error.message}`);
+    if ((data ?? []).length > 0) throw new Error(`entitlements rows were left for swept e2e users ${(data ?? []).map((r) => r.user_id).join(", ")}: tell the Mobile Dev`);
+  }
   return stale.length;
 }
 
@@ -215,4 +301,79 @@ export async function aiAvailable(email: string, password: string): Promise<bool
   await user.auth.signOut({ scope: "local" });
   if (error) throw new Error(`get_me failed: ${error.message}`);
   return (data as { ai_available?: boolean } | null)?.ai_available === true;
+}
+
+// Moodbow Plus (decision 246): whether staging has 028's entitlements table yet. The Plus pages
+// can't read it before then, so their journeys skip, saying so.
+export async function plusOnStaging(): Promise<boolean> {
+  if (!configured) return false;
+  const { error } = await database().from("entitlements").select("user_id").limit(1);
+  return !error;
+}
+
+// One of ours in the free week, as Checkout's webhook would leave it: a Stripe trial running for
+// 7 days, with no store ids (so no cron or Stripe call ever touches it). It goes with the user.
+// Staging only (the URL check above), never store ids or grace_until.
+export async function grantPlusTrial(email: string): Promise<void> {
+  if (!ours(email)) throw new Error("only e2e-ci-* users get Plus");
+  if (!createdHere.has(email)) throw new Error("grantPlusTrial only writes for a user this run created");
+  const id = await userId(email);
+  if (!id) throw new Error("the signed-up user isn't on staging");
+  const now = Date.now();
+  const end = new Date(now + 7 * 86_400_000).toISOString();
+  const { error } = await database()
+    .from("entitlements")
+    .upsert({ user_id: id, source: "stripe", status: "trialing", trial_started_at: new Date(now).toISOString(), trial_ends_at: end, current_period_end: end });
+  if (error) throw new Error(`the trial row failed: ${error.message}`);
+  grantedHere.set(email, id);
+}
+
+// Pictures (035/036), the Storage API's own path: a user signed in with the publishable key, as the
+// app and the web are. Only this run's own users.
+export async function userSession(email: string, password: string): Promise<{ client: SupabaseClient; token: string }> {
+  if (!ours(email)) throw new Error("userSession only signs in this helper's own users");
+  const client = createClient(URL_, PUBLISHABLE, { auth: { persistSession: false, autoRefreshToken: false } });
+  const { data, error } = await client.auth.signInWithPassword({ email, password });
+  if (error || !data.session) throw new Error(`sign-in failed: ${error?.message ?? "no session"}`);
+  return { client, token: data.session.access_token };
+}
+
+// A picture added as the web route does it (reserve, both uploads, confirm), as that user.
+export async function addPicture(session: { client: SupabaseClient }, entryId: string, jpeg: Uint8Array): Promise<{ id: string; path: string; thumb: string }> {
+  const { data, error } = await session.client.rpc("picture_reserve", { p_entry: entryId, p_bytes: jpeg.length * 2 });
+  const row = Array.isArray(data) ? (data[0] as { id: string; path: string; thumb_path: string }) : null;
+  if (error || !row) throw new Error(`picture_reserve failed: ${error?.message ?? "no row"}`);
+  const bucket = session.client.storage.from("entry-pictures");
+  for (const p of [row.path, row.thumb_path]) {
+    // max-age=0, as the web route uploads (storage-js's default would be 3600).
+    const { error: upError } = await bucket.upload(p, new Blob([jpeg as BlobPart], { type: "image/jpeg" }), { contentType: "image/jpeg", upsert: false, cacheControl: "0" });
+    if (upError) throw new Error(`upload failed: ${upError.message}`);
+  }
+  const { error: confirmError } = await session.client.rpc("picture_confirm", { p_id: row.id, p_width: 16, p_height: 16 });
+  if (confirmError) throw new Error(`picture_confirm failed: ${confirmError.message}`);
+  return { id: row.id, path: row.path, thumb: row.thumb_path };
+}
+
+// The authenticated GET, polled until it's refused (>= 400) or the time runs out: the seconds it
+// took, or null when it never was.
+export async function secondsUntilRefused(token: string, path: string, limitMs = 90_000): Promise<number | null> {
+  const started = Date.now();
+  while (Date.now() - started < limitMs) {
+    const res = await fetch(`${URL_}/storage/v1/object/authenticated/entry-pictures/${path}`, { headers: { apikey: PUBLISHABLE, Authorization: `Bearer ${token}` }, cache: "no-store" });
+    await res.arrayBuffer().catch(() => undefined);
+    if (res.status >= 400) return Math.round((Date.now() - started) / 100) / 10;
+    await new Promise((r) => setTimeout(r, 2_000));
+  }
+  return null;
+}
+
+// The HTTP statuses a fresh sign request and an authenticated GET get for this path, with this
+// user's token (raw fetch, so the log holds the real codes).
+export async function storageStatus(token: string, path: string): Promise<{ sign: number; get: number }> {
+  const headers = { apikey: PUBLISHABLE, Authorization: `Bearer ${token}` };
+  const sign = await fetch(`${URL_}/storage/v1/object/sign/entry-pictures/${path}`, { method: "POST", headers: { ...headers, "content-type": "application/json" }, body: JSON.stringify({ expiresIn: 60 }) });
+  const get = await fetch(`${URL_}/storage/v1/object/authenticated/entry-pictures/${path}`, { headers });
+  await sign.arrayBuffer().catch(() => undefined);
+  await get.arrayBuffer().catch(() => undefined);
+  return { sign: sign.status, get: get.status };
 }

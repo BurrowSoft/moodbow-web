@@ -625,6 +625,11 @@
     "reason": "UX draft (native read pending)"
   },
   {
+    "key": "me.deleteWord",
+    "en": "DELETE",
+    "reason": "UX draft (native read pending): ลบ as the app (audit batch E); English DELETE is still accepted"
+  },
+  {
     "key": "me.exportReadable",
     "en": "Readable copy (.txt)",
     "reason": "UX draft (native read pending)"
@@ -1032,6 +1037,1696 @@
   {
     "key": "me.meNoScript",
     "en": "The journal needs JavaScript. Turn it on in your browser to see your entries.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.recallTitle",
+    "en": "Bring this back",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.recallIn",
+    "en": "Bring this back in",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.recall1",
+    "en": "1 month",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.recall6",
+    "en": "6 months",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.recall12",
+    "en": "1 year",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.recallHelp",
+    "en": "It comes back as a memory on the dates you keep.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "timeline.calDayLabel",
+    "en": "{date}{mood, select, none {} other {, {mood}}}{moment, select, yes {, moment} other {}}{entry, select, yes {, has writing} other {}}{pictures, select, yes {, has pictures} other {}}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "timeline.calKey",
+    "en": "Key",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "timeline.calKeyWriting",
+    "en": "has writing",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.label",
+    "en": "Moodbow Plus",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.lock",
+    "en": "Plus",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.bannerTitle",
+    "en": "See the bigger picture",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.bannerBody",
+    "en": "Insights into your moods and patterns, What lifts me, letters to future me and more.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.bannerClose",
+    "en": "Close for today",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.tryFree",
+    "en": "Try 7 days free",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.seePlus",
+    "en": "See Plus",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.thenPrice",
+    "en": "Then {price} a year",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.priceYear",
+    "en": "{price} a year",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.notNow",
+    "en": "Not now",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.sheetYear",
+    "en": "Your year is part of Plus",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.sheetMorePatterns",
+    "en": "More patterns are part of Plus",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.weekLine",
+    "en": "Want to look back further? Your year, more patterns and a designed PDF of your journal come with Plus.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.tabYear",
+    "en": "Year",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.morePatterns",
+    "en": "More patterns",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.morePatternsBody",
+    "en": "Weekdays and weekends, writing days, your tags, and the last 12 months or all time",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.title",
+    "en": "Go deeper with your journal",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.titleHas",
+    "en": "You have Moodbow Plus",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.lead",
+    "en": "Your journal is free. Insights come with Plus.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.tableCaption",
+    "en": "What's free and what comes with Plus",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.colFeature",
+    "en": "Feature",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.colFree",
+    "en": "Free",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.colPlus",
+    "en": "Plus",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.included",
+    "en": "Included",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.plusOnly",
+    "en": "Plus only",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.rowJournal",
+    "en": "Your journal: check-ins and entries, no limit",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.rowHelp",
+    "en": "Help, safety plan, toolbox, grounding",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.rowData",
+    "en": "Export, import and delete",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.rowMorePatterns",
+    "en": "Patterns and What lifts me",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.rowReview",
+    "en": "Year in review",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.rowThemes",
+    "en": "More themes and app icons",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.rowPdf",
+    "en": "Designed PDF of your journal",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.renews",
+    "en": "Renews automatically.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.startTrial",
+    "en": "Start my 7-day free trial",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.start",
+    "en": "Start Plus",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.manage",
+    "en": "Manage Plus",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.managePlay",
+    "en": "Manage it in Google Play",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.manageApple",
+    "en": "Manage it in the App Store",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.trialTitle",
+    "en": "Plus trial",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.trialLeft",
+    "en": "{n, plural, one {# day left} other {# days left}}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.trialDay",
+    "en": "Day {day} of 7",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.pastDue",
+    "en": "Your last payment didn't go through. Update your card to keep Plus.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.updateCard",
+    "en": "Update card",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.starting",
+    "en": "Starting your Plus…",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.onItsWay",
+    "en": "Your Plus is on its way. It can take a minute.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.needsEmail",
+    "en": "Add an email to your account first, so we can send your receipts.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.deleteStripe",
+    "en": "Your Moodbow Plus subscription will be cancelled now. You won't be charged again.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.deleteStore",
+    "en": "If you have Moodbow Plus through Google Play or the App Store, cancel it there too. Deleting your account doesn't stop the store's subscription.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.deleteCancelledKept",
+    "en": "Your Moodbow Plus subscription was cancelled, but your account wasn't deleted. Please try again.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.tabAllTime",
+    "en": "All time",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.sheetAllTime",
+    "en": "All time is part of Plus",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.yearSubtitle",
+    "en": "The last 12 months, by month",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.allSubtitleMonth",
+    "en": "Since your first check-in, by month",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.allSubtitleQuarter",
+    "en": "Since your first check-in, by quarter",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.longFootnoteMonth",
+    "en": "Months with fewer than 5 check-ins are left out.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.longFootnoteQuarter",
+    "en": "Quarters with fewer than 15 check-ins are left out.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.longChangeUp",
+    "en": "Up {value} vs the year before",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.longChangeDown",
+    "en": "Down {value} vs the year before",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.longChangeSame",
+    "en": "Same as the year before",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.longNotEnough",
+    "en": "A few more months of check-ins and this chart will appear.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.moreSubtitleYear",
+    "en": "In the last 12 months",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.moreSubtitleAll",
+    "en": "Since your first check-in",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.moreWeekdaysShown",
+    "en": "On weekdays, your mood averaged {a} of 5. At weekends, {b}.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.moreWeekdaysSame",
+    "en": "On weekdays and at weekends, your mood was about the same ({a} and {b} of 5).",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.moreWritingShown",
+    "en": "On days you wrote, your mood averaged {a} of 5. On days you didn't, {b}.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.moreWritingSame",
+    "en": "On days you wrote and days you didn't, your mood was about the same ({a} and {b} of 5).",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.moreNone",
+    "en": "More patterns show up here once you have more check-ins in this period.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "today.tagsLabel",
+    "en": "Tags",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "today.tagsPlaceholder",
+    "en": "Add a tag",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "today.tagsRecent",
+    "en": "Your tags",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "today.tagsRemove",
+    "en": "Remove {tag}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "today.tagsTooMany",
+    "en": "Up to 5 tags a day.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "today.tagsTooLong",
+    "en": "A tag can be up to 32 characters.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "export.exportTags",
+    "en": "Tags",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.moreTagsTitle",
+    "en": "Your tags",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.moreTagShown",
+    "en": "On days tagged “{tag}”, your mood averaged {a} of 5. On other days, {b}.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.moreTagSame",
+    "en": "On days tagged “{tag}” and other days, your mood was about the same ({a} and {b} of 5).",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.pdfIntro",
+    "en": "Pick a month or a year. Your journal is laid out as a PDF on this device and isn't saved anywhere. Anyone with the file can read it.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.pdfMonth",
+    "en": "A month",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.pdfYear",
+    "en": "A year",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.pdfButton",
+    "en": "Save as PDF or print",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.pdfEmpty",
+    "en": "There are no check-ins or entries in {period}.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.sheetPdf",
+    "en": "The designed PDF is part of Plus",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.pdfCoverTitle",
+    "en": "My journal",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.pdfCoverCounts",
+    "en": "{days, plural, one {# day with a check-in} other {# days with a check-in}} · {entries, plural, one {# entry} other {# entries}}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.pdfHelp",
+    "en": "If you need to talk to someone, help is at moodbow.com/help/get-help-now",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.pdfFileTitle",
+    "en": "Moodbow journal – {period}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.sheetReview",
+    "en": "Year in review is part of Plus",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.reviewTitle",
+    "en": "Your {year}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.reviewTitleSoFar",
+    "en": "Your {year} so far",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.reviewYear",
+    "en": "Year",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.reviewDaysTitle",
+    "en": "Check-in days",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.reviewDays",
+    "en": "{days, plural, one {# day} other {# days}} with a check-in",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.reviewDaysCaption",
+    "en": "Days with a check-in, by month",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.reviewMoodTitle",
+    "en": "Mood by month",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.reviewMoodCaption",
+    "en": "Your average mood, by month",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.reviewFactorsTitle",
+    "en": "Sleep, movement and stress",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.reviewSleep",
+    "en": "Sleep averaged {hours} h a night.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.reviewMovement",
+    "en": "Movement averaged {minutes} min a day, on the days you logged it.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.reviewStress",
+    "en": "Stress averaged {stress} of 5.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.reviewNotEnough",
+    "en": "Not logged often enough in {year} to show.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.reviewWritingTitle",
+    "en": "Writing",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.reviewWriting",
+    "en": "{entries, plural, one {# entry} other {# entries}} and {moments, plural, one {# moment} other {# moments}}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.reviewMomentsTitle",
+    "en": "Your moments",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.reviewNoMoments",
+    "en": "No moments marked in {year}.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.reviewEmpty",
+    "en": "There are no check-ins or entries in {year}.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.paletteLegend",
+    "en": "Colours",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.paletteDefault",
+    "en": "Default",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.paletteDusk",
+    "en": "Dusk",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.paletteSunrise",
+    "en": "Sunrise",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.paletteSea",
+    "en": "Sea",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.sheetThemes",
+    "en": "More themes are part of Plus",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.rowAppointment",
+    "en": "Appointment summary",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.rowLetters",
+    "en": "Letters to future me",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.rowExtras",
+    "en": "More prompts, breathing exercises and reminders",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.rowInsights",
+    "en": "Insights: week, month, 3 months, your year",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.cancelWhere",
+    "en": "Cancel anytime in Me → Moodbow Plus.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.rowTimeline",
+    "en": "Timeline: list, calendar, moments, memories and search",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.trialFree",
+    "en": "Try 7 days free",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.renewsTrial",
+    "en": "Then {price} a year · renews automatically",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "today.setupLaterBody",
+    "en": "Your daily reminder is off. You can turn it on and choose a time whenever you like.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "today.setupLaterOpen",
+    "en": "Set it up",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "today.setupLaterClose",
+    "en": "Not now",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "onboarding.errConsentRequired",
+    "en": "Please tick the boxes above to create your account.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.todayCardTitle",
+    "en": "See your moods over time",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.todayCardTrial",
+    "en": "Try 7 days free. Then {price} a year.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.close",
+    "en": "Close",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.offerLabel",
+    "en": "Christmas special offer",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.offerBannerTitle",
+    "en": "Your first year for {offer}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.offerBannerBody",
+    "en": "Deeper insights for the year ahead: your year, patterns, What lifts me, letters to future me and more.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.offerSee",
+    "en": "See the offer",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.offerSmall",
+    "en": "Christmas special, until 31 December. Then {price} a year. Cancel anytime in Me → Moodbow Plus.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.offerStripBody",
+    "en": "A lower price for your first year, until 31 December",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.offerFirstYear",
+    "en": "Your first year: {offer}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.offerButton",
+    "en": "Get my first year for {offer}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.offerThen",
+    "en": "Then {price} a year · renews automatically",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.offerCardSmall",
+    "en": "Until 31 December. Then {price} a year. Cancel anytime in Me → Moodbow Plus.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.exampleStrip",
+    "en": "An example of Insights. With Plus, this shows your own check-ins.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.exampleWatermark",
+    "en": "EXAMPLE",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.exampleRanges",
+    "en": "The example's range",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "me.pastReports",
+    "en": "Your past reports",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "me.pastReportsIntro",
+    "en": "The weekly reports Moodbow made for you. They stay here to read.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "me.pastReportsWeek",
+    "en": "{start} – {end}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.exampleSample",
+    "en": "{strip} {see}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.pairTag",
+    "en": "“{tag}”",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.pairWith",
+    "en": "With {tag}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.pairOther",
+    "en": "Other days",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.pairSleepMore",
+    "en": "7+ hours",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.pairSleepLess",
+    "en": "Less sleep",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.pairMoved",
+    "en": "Moved",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.pairNotMoved",
+    "en": "Didn't move",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.pairStressLow",
+    "en": "Low stress",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.pairStressHigh",
+    "en": "High stress",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.pairWeekTitle",
+    "en": "Weekdays and weekends",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.pairWeekdays",
+    "en": "Weekdays",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.pairWeekends",
+    "en": "Weekends",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.pairWritingTitle",
+    "en": "Writing",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.pairWrote",
+    "en": "Wrote",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.pairNotWrote",
+    "en": "Didn't write",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.liftsTitle",
+    "en": "What lifts me",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.liftsRow",
+    "en": "On days with “{tag}”, your mood averaged {a} of 5; on other days, {b}.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.liftsFooter",
+    "en": "Patterns, not causes. Only you can see this.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.liftsNone",
+    "en": "Keep tagging your days. Patterns show up after a few weeks.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.moodScale",
+    "en": "mood, 1–5",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.exampleLabel",
+    "en": "Example",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.exampleWeekLine",
+    "en": "Mostly steady, with two good days at the end.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.exampleTagWalk",
+    "en": "Walk",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.exampleTagFriends",
+    "en": "Friends",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "me.pictureRegion",
+    "en": "Your picture",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "me.pictureChoose",
+    "en": "Choose a picture for this space",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "me.pictureRemove",
+    "en": "Remove picture",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "me.pictureFailed",
+    "en": "That picture couldn't be used. Try a JPEG or PNG.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.picturesRegion",
+    "en": "Pictures",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.pictureAdd",
+    "en": "Add a picture",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.pictureAddLocked",
+    "en": "Add a picture, Moodbow Plus",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.pictureOpen",
+    "en": "Picture {n} of {total}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.pictureRemove",
+    "en": "Remove picture {n}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.pictureAdding",
+    "en": "Adding the picture…",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.pictureFailed",
+    "en": "That picture couldn't be used. Try a JPEG or PNG.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.pictureQuota",
+    "en": "You've added this month's pictures. More next month.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.pictureSlow",
+    "en": "This is taking longer than usual. Check your connection — the picture may still appear in a moment.",
+    "reason": "UX draft (native read pending): the picture upload's timeout line (audit B)"
+  },
+  {
+    "key": "entry.momentPicturesTitle",
+    "en": "Keep the pictures?",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.momentPicturesBody",
+    "en": "This moment has pictures. Keep them on the entry, or delete them?",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.momentPicturesKeep",
+    "en": "Keep them",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.momentPicturesDelete",
+    "en": "Delete them",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "timeline.calKeyPictures",
+    "en": "has pictures",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "timeline.timelinePictures",
+    "en": "{count, plural, =1 {1 picture} other {# pictures}}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "me.exportZip",
+    "en": "Data file with your pictures (.zip)",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "me.exportZipFailed",
+    "en": "Your pictures couldn't be added to a zip just now. The other files are ready; try Export again for the pictures.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.meRow",
+    "en": "Things that help me",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.empty",
+    "en": "Add small things that help on hard days. Only you can see this list.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.placeholder",
+    "en": "Something that helps",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.add",
+    "en": "Add",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.edit",
+    "en": "Edit",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.delete",
+    "en": "Delete",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.save",
+    "en": "Save",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.cancel",
+    "en": "Cancel",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.moveUp",
+    "en": "Move up",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.moveDown",
+    "en": "Move down",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.deleted",
+    "en": "Deleted.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.undo",
+    "en": "Undo",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.limitCount",
+    "en": "You can keep up to 20 things here.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.limitLength",
+    "en": "Up to 120 characters.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.cardTitle",
+    "en": "Things that help you",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.breathe",
+    "en": "Breathe for a minute",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.notNow",
+    "en": "Not now",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.cardEmpty",
+    "en": "Add something that helps",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.breathTitle",
+    "en": "A minute to breathe",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.breatheIn",
+    "en": "Breathe in",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.breatheOut",
+    "en": "Breathe out",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.breatheInCount",
+    "en": "Breathe in · {n}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.breatheOutCount",
+    "en": "Breathe out · {n}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.stop",
+    "en": "Stop",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.breathEnd",
+    "en": "That was a minute. Take your time.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.done",
+    "en": "Done",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "safetyPlan.title",
+    "en": "My safety plan",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "safetyPlan.intro",
+    "en": "Fill this in on a calmer day, so it's here when you need it. Every part is optional. Only you can see it.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "safetyPlan.warningSigns",
+    "en": "Warning signs",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "safetyPlan.warningSignsPrompt",
+    "en": "What tells you a hard time might be starting? Thoughts, feelings, situations.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "safetyPlan.distractions",
+    "en": "People and places that take my mind off things",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "safetyPlan.people",
+    "en": "People I can ask for help",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "safetyPlan.professionals",
+    "en": "Professionals and services",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "safetyPlan.professionalsPrompt",
+    "en": "My doctor or therapist",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "safetyPlan.helpline",
+    "en": "Helpline",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "safetyPlan.surroundings",
+    "en": "Making my surroundings safer",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "safetyPlan.surroundingsPrompt",
+    "en": "What could make your surroundings safer when things are hard?",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "safetyPlan.name",
+    "en": "Name",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "safetyPlan.phone",
+    "en": "Phone number (optional)",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "safetyPlan.call",
+    "en": "Call",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "safetyPlan.addPerson",
+    "en": "Add a person",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "safetyPlan.saved",
+    "en": "Saved.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "safetyPlan.leaveTitle",
+    "en": "Leave without saving?",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "safetyPlan.leave",
+    "en": "Leave",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "safetyPlan.keepEditing",
+    "en": "Keep editing",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "safety.safetyPlanButton",
+    "en": "My safety plan",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "safetyPlan.peopleFull",
+    "en": "You can add up to 10 people here.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "appointment.meRow",
+    "en": "For my appointment",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "appointment.intro",
+    "en": "A summary you can print or show at an appointment. Nothing here is saved or sent.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "appointment.show",
+    "en": "Show",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "appointment.range2",
+    "en": "Last 2 weeks",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "appointment.range4",
+    "en": "Last 4 weeks",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "appointment.range12",
+    "en": "Last 12 weeks",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "appointment.count",
+    "en": "{n, plural, one {# check-in} other {# check-ins}}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "appointment.averages",
+    "en": "Averages",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "appointment.starred",
+    "en": "Moments",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "appointment.fullText",
+    "en": "Include the full text",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "appointment.talk",
+    "en": "What I want to talk about",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "appointment.talkHint",
+    "en": "This isn't saved.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "appointment.print",
+    "en": "Print",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "appointment.empty",
+    "en": "No check-ins in this time yet.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "appointment.footer",
+    "en": "Made by you from your own Moodbow entries. Not a medical assessment.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.breathSafety",
+    "en": "If you feel dizzy, stop and breathe normally.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.groundingSenses",
+    "en": "5-4-3-2-1",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.groundingBodyScan",
+    "en": "Body scan (2 min)",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.groundingNameIt",
+    "en": "Name it",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.senses5",
+    "en": "Name 5 things you can see.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.senses4",
+    "en": "Name 4 things you can touch.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.senses3",
+    "en": "Name 3 things you can hear.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.senses2",
+    "en": "Name 2 things you can smell (or skip).",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.senses1",
+    "en": "Name 1 thing you can taste (or skip).",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.groundingNext",
+    "en": "Next",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.groundingBack",
+    "en": "Back",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.groundingEnd",
+    "en": "Well done. Take a moment before you go on.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.bodyScanIntro",
+    "en": "Stop any time, or try 5-4-3-2-1 instead.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.bodyScan1",
+    "en": "Notice your feet.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.bodyScan2",
+    "en": "Your legs.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.bodyScan3",
+    "en": "Your belly and back.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.bodyScan4",
+    "en": "Your shoulders.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.bodyScan5",
+    "en": "Your hands and arms.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.bodyScan6",
+    "en": "Your face and jaw.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.pause",
+    "en": "Pause",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.resume",
+    "en": "Resume",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.nameItQuestion",
+    "en": "What are you feeling right now?",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.nameItSmaller",
+    "en": "Naming it can make it a little smaller.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "toolbox.nameItThanks",
+    "en": "Thanks for naming it.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.goodThingsTitle",
+    "en": "Three good things",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.goodThings1",
+    "en": "One good thing",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.goodThings2",
+    "en": "Another",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "entry.goodThings3",
+    "en": "And one more",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.meRow",
+    "en": "Letters to future me",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.empty",
+    "en": "Write to yourself and choose when to read it.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.editorTitle",
+    "en": "A letter to future me",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.placeholder",
+    "en": "Dear me,",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.openLabel",
+    "en": "Open it",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.in1",
+    "en": "In 1 month",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.in3",
+    "en": "In 3 months",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.in6",
+    "en": "In 6 months",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.in12",
+    "en": "In a year",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.save",
+    "en": "Save letter",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.savedLine",
+    "en": "Saved. It opens on {date}.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.timelineLine",
+    "en": "A letter from you · opens on {date}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.cardLine",
+    "en": "A letter from you, written on {date}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.open",
+    "en": "Open",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.notNow",
+    "en": "Not now",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.earlyTitle",
+    "en": "Open this letter now?",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.earlyBody",
+    "en": "It was meant for {date}. It's yours to open whenever you like.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.openNow",
+    "en": "Open now",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.keepForLater",
+    "en": "Keep it for later",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.deleteTitle",
+    "en": "Delete this letter?",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.deleteBody",
+    "en": "It will be gone for good.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.delete",
+    "en": "Delete",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.keep",
+    "en": "Keep",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.rowOwn",
+    "en": "Letters, appointment summary",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.rowRanges",
+    "en": "Your week, month and 3 months",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.rowPatterns",
+    "en": "Patterns over the last 3 months",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.rowAiFree",
+    "en": "AI reflections, 3 a week",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.rowYear",
+    "en": "Your year and all time",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.rowAiPlus",
+    "en": "More AI reflections and a weekly AI report",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.footerTrial",
+    "en": "7 days free, then {price} a year",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.writeLocked",
+    "en": "Write a new letter",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.lockedBody",
+    "en": "Writing a new letter is part of Moodbow Plus. The letters you've written stay yours: they open on their day, and you can open or delete them any time.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.lapsedBody",
+    "en": "Your Moodbow Plus has ended, so this letter can't be saved. Copy it to keep your words.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.copy",
+    "en": "Copy letter",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.copied",
+    "en": "Copied",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.sheetLetters",
+    "en": "Letters to future me are part of Plus",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.remindersTitle",
+    "en": "Reminders",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.remindersOnTheDay",
+    "en": "On the day",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.remindersDay",
+    "en": "1 day before",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.remindersWeek",
+    "en": "1 week before",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.remindersMonth",
+    "en": "1 month before",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.remindersDays",
+    "en": "{n} days before",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.remindersDaysBefore",
+    "en": "Days before",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.remindersTimeFor",
+    "en": "Time, {when}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.remindersOnFor",
+    "en": "Reminder {when}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.remindersRemove",
+    "en": "Remove the reminder {when}",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.remindersAdd",
+    "en": "Add a reminder",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.remindersApp",
+    "en": "Reminders arrive in the Moodbow app on your phone.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.remindersInvalid",
+    "en": "A reminder can't be on or before today, or after the day the letter opens.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.remindersTwoWeeks",
+    "en": "2 weeks before",
     "reason": "UX draft (native read pending)"
   }
 ]

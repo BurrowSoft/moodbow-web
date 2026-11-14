@@ -6,7 +6,7 @@ import messages from "../../src/messages/en.json";
 import fr from "../../src/messages/fr.json";
 import { monthsBefore } from "../../src/lib/journal/onThisDay";
 import { axeAtWidths } from "../axe";
-import { aiConsentGranted, journalToday, aiAvailable, cleanup, configured, confirmEmail, createConfirmedUser, exists, lastWeekMonday, seedCheckIns, newEmail, newPassword, notConfigured, profileLocale, profileSaver, revokeSessions, setProfileLocale, signedUpUnconfirmed, sweep } from "./staging";
+import { aiConsentGranted, journalToday, aiAvailable, cleanup, configured, confirmEmail, createConfirmedUser, exists, lastWeekMonday, seedCheckIns, newEmail, newPassword, notConfigured, profileLocale, profileSaver, revokeSessions, setProfileLocale, signedUpUnconfirmed, sweep, grantPlusTrial, plusOnStaging, picturesOnStaging, seedMoment, pictureFiles, seedTags } from "./staging";
 
 // The launch-critical journeys (1.0), end to end against staging with a
 // throwaway account each: sign-up → confirm → consent → setup → check-in →
@@ -22,36 +22,38 @@ test.beforeAll(async () => {
 
 const ENTRY = "A calm walk by the river after work, then tea with a friend.";
 
-// Welcome → Consent (AI as asked) → Sign-up → confirmed → Setup.
+// Home's Start → Create account, with its consent boxes (AI as asked) → confirmed → Today (1.3 §6).
 // The real form sends a real email, and staging limits those: heavy days failed CI on "Please wait a
 // minute". So the journeys that test the form are tagged @real-email and run on PRs that touch
 // sign-up, and in the daily run of everything on master (ci.yml); the rest start from accountAtSetup, which sends none.
 async function signUp(page: Page, email: string, { ai }: { ai: boolean }): Promise<string> {
   const password = newPassword();
-  await page.goto("/welcome?slide=3");
-  await page.getByTestId("welcome-start").click();
-  await expect(page).toHaveURL(/\/consent$/);
-  await page.getByTestId("consent-privacy").check();
-  await page.getByTestId("consent-health").check();
-  if (ai) await page.getByTestId("consent-ai").check();
-  else await expect(page.getByTestId("consent-ai")).not.toBeChecked();
-  await page.getByTestId("consent-continue").click();
-
+  await page.goto("/");
+  await page.getByTestId("home-start").click();
   await expect(page).toHaveURL(/\/sign-up$/);
+  await expect(page.getByTestId("signup-summary")).toBeVisible();
   await page.getByLabel("Email").fill(email);
   await page.getByLabel("Password").fill(password);
-  await page.getByTestId("signup-age").check();
+  // Separate, unticked boxes; Create account waits for all three.
+  for (const id of ["consent-privacy", "consent-health", "consent-age"]) await expect(page.getByTestId(id)).not.toBeChecked();
+  await expect(page.getByTestId("signup-submit")).toBeDisabled();
+  await page.getByTestId("consent-privacy").check();
+  await page.getByTestId("consent-health").check();
+  await expect(page.getByTestId("signup-submit")).toBeDisabled();
+  await page.getByTestId("consent-age").check();
+  if (ai) await page.getByTestId("consent-ai").check();
+  else if (await page.getByTestId("consent-ai").count()) await expect(page.getByTestId("consent-ai")).not.toBeChecked();
   await page.getByTestId("signup-submit").click();
 
   // Staging asks for confirmation: confirm through the admin API, then the
   // "I've confirmed" button signs in. (Without confirmation it goes straight on.)
   const checkEmail = page.getByTestId("check-email");
-  await expect(checkEmail.or(page.getByRole("heading", { level: 1, name: messages.onboarding.setupTitle }))).toBeVisible({ timeout: 20_000 });
+  await expect(checkEmail.or(page.getByTestId("checkin-card"))).toBeVisible({ timeout: 20_000 });
   if (await checkEmail.isVisible()) {
     await confirmEmail(email);
     await page.getByTestId("check-email-confirmed").click();
   }
-  await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+  await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
   return password;
 }
 
@@ -61,7 +63,9 @@ test.describe("launch journeys", () => {
     try {
       await signUp(page, email, { ai: false });
 
-      // Setup: no AI, so no focus or tone; just the reminder.
+      // Setup after first use (1.3 §6): the journal opened at once; Setup is still there to open.
+      await page.goto("/setup");
+      // No AI, so no focus or tone; just the reminder.
       await expect(page.getByTestId("setup-tone-warm")).toHaveCount(0);
       await expect(page.getByTestId("setup-reminder-time")).toBeVisible();
       await page.getByTestId("setup-done").click();
@@ -80,7 +84,8 @@ test.describe("launch journeys", () => {
       await page.getByTestId("entry-save").click();
       await expect(page).toHaveURL(/\/app$/);
       await page.locator('[data-testid^="today-entry-"]').first().click();
-      await expect(page).toHaveURL(/\/app\/entries\/[0-9a-f-]{36}$/);
+      // Opened from Today: the link says so (audit B), so the nav keeps Today.
+      await expect(page).toHaveURL(/\/app\/entries\/[0-9a-f-]{36}\?from=%2Fapp$/);
       await expect(page.getByTestId("entry-body")).toContainText(ENTRY);
       await expect(page.getByTestId("entry-checkin")).toBeVisible();
 
@@ -92,10 +97,13 @@ test.describe("launch journeys", () => {
       await expect(day.getByTestId("timeline-mood-dot")).toBeVisible();
       await expect(day.locator('[data-testid^="timeline-entry-"]')).toHaveCount(1);
 
-      // Insights: one check-in isn't a chart yet.
+      // Insights: a free account sees the labelled example, never its own data (spec "Insights
+      // become Plus", 14 Nov), with the way to Plus; the tab bar stays.
       await page.getByTestId("tab-insights").click();
       await expect(page).toHaveURL(/\/app\/insights$/);
-      await expect(page.getByTestId("insights-not-enough-mood")).toBeVisible();
+      await expect(page.getByTestId("insights-example")).toBeVisible();
+      await expect(page.getByTestId("insights-example-see")).toBeVisible();
+      await expect(page.getByTestId("insights-not-enough-mood")).toHaveCount(0);
 
       // Me: the export, both files, each with the entry in it.
       await page.getByTestId("tab-me").click();
@@ -134,7 +142,6 @@ test.describe("launch journeys", () => {
     const email = newEmail();
     try {
       await accountAtSetup(page, email);
-      await page.getByTestId("setup-done").click();
       await expect(page).toHaveURL(/\/app$/);
       await page.getByTestId("today-write").click();
       await expect(page).toHaveURL(/\/app\/write/);
@@ -175,6 +182,7 @@ test.describe("launch journeys", () => {
       // outside AI windows (decision 123): read it as the app does, and skip
       // rather than fail while it's off.
       test.skip(!(await aiAvailable(email, password)), "staging's AI switch is off (get_me().ai_available false): AI-on journey skipped");
+      await page.goto("/setup");
       const sleep = page.getByTestId("setup-focus-sleep");
       await expect(sleep).toHaveAttribute("aria-pressed", "false");
       await sleep.click();
@@ -230,7 +238,7 @@ async function accountAtSetup(page: Page, email: string): Promise<string> {
   await page.getByLabel("Email").fill(email);
   await page.getByLabel("Password").fill(password);
   await page.getByRole("button", { name: messages.auth.signinSubmit }).click();
-  await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+  await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
   return password;
 }
 
@@ -250,7 +258,6 @@ test.describe("tonight's flows", () => {
     const email = newEmail();
     try {
       await accountAtSetup(page, email);
-      await page.getByTestId("setup-done").click();
       await expect(page).toHaveURL(/\/app$/);
       await page.getByTestId("today-write").click();
       await expect(page).toHaveURL(/\/app\/write/);
@@ -276,7 +283,6 @@ test.describe("tonight's flows", () => {
     const email = newEmail();
     try {
       const password = await accountAtSetup(page, email);
-      await page.getByTestId("setup-done").click();
       await expect(page).toHaveURL(/\/app$/);
 
       // Keep it.
@@ -313,14 +319,14 @@ test.describe("tonight's flows", () => {
     const email = newEmail();
     try {
       await accountAtSetup(page, email);
-      await page.getByTestId("setup-done").click();
       await expect(page).toHaveURL(/\/app$/);
       await page.getByTestId("today-write").click();
       await page.getByTestId("entry-text").fill(ENTRY);
       await page.getByTestId("entry-save").click();
       await expect(page).toHaveURL(/\/app$/);
       await page.locator('[data-testid^="today-entry-"]').first().click();
-      await expect(page).toHaveURL(/\/app\/entries\/[0-9a-f-]{36}$/);
+      // Opened from Today: the link says so (audit B), so the nav keeps Today.
+      await expect(page).toHaveURL(/\/app\/entries\/[0-9a-f-]{36}\?from=%2Fapp$/);
       await page.getByTestId("entry-more").click();
       await page.getByTestId("entry-menu-delete").click();
       await page.getByTestId("entry-delete-confirm").click();
@@ -342,7 +348,6 @@ test.describe("tonight's flows", () => {
 // assertion: the address and title were already right on the blank page.
 test.describe("a first run reaches Today without a reload", () => {
   const finishSetup = async (page: Page) => {
-    await page.getByTestId("setup-done").click();
     await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     await expect(page.getByTestId("tab-today")).toBeVisible();
@@ -359,7 +364,7 @@ test.describe("a first run reaches Today without a reload", () => {
         await page.locator("main form button[type=submit]").click();
         await expect(page.getByTestId("email-confirmed-continue")).toBeVisible({ timeout: 20_000 });
         if (how === "Continue") await page.getByTestId("email-confirmed-continue").click();
-        await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+        await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
         await finishSetup(page);
       } finally {
         await cleanup(email);
@@ -367,7 +372,7 @@ test.describe("a first run reaches Today without a reload", () => {
     });
   }
 
-  test("the email link on an account that still owes Consent: Consent, Setup, then Today", async ({ page }) => {
+  test("the email link on an account that still owes Consent: Consent, then Today", async ({ page }) => {
     test.skip(!conditions["web-journal-live"].met, "the confirm link keeps a session only with web-journal-live met");
     const email = newEmail();
     const password = newPassword();
@@ -381,15 +386,13 @@ test.describe("a first run reaches Today without a reload", () => {
       await page.getByTestId("consent-health").check();
       await page.getByTestId("consent-age").check();
       await page.getByTestId("consent-continue").click();
-      await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
-      await expect(page.getByTestId("setup-done")).toBeVisible({ timeout: 15_000 });
       await finishSetup(page);
     } finally {
       await cleanup(email);
     }
   });
 
-  test("the journal stays closed until Setup is done", async ({ page }) => {
+  test("Setup after first use: the journal opens at once, the reminder off until chosen, Setup offered after a check-in", async ({ page }) => {
     const email = newEmail();
     const password = newPassword();
     try {
@@ -399,12 +402,24 @@ test.describe("a first run reaches Today without a reload", () => {
       await page.getByLabel("Email").fill(email);
       await page.getByLabel("Password").fill(password);
       await page.getByRole("button", { name: messages.auth.signinSubmit }).click();
-      await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
-      for (const path of ["/app", "/app/timeline", "/app/me"]) {
+      await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
+      for (const path of ["/app/timeline", "/app/me"]) {
         await page.goto(path);
-        await expect(page).toHaveURL(/\/setup$/);
-        await expect(page.getByTestId("setup-done")).toBeVisible();
+        await expect(page).toHaveURL(RegExp(`${path}$`));
       }
+      // The protective default: the reminder is off until they choose one.
+      await expect(page.getByTestId("me-reminder-on")).toHaveAttribute("aria-checked", "false");
+      // Today offers Setup once there's a check-in.
+      await page.goto("/app");
+      await expect(page.getByTestId("today-setup-later")).toHaveCount(0);
+      await page.getByTestId("checkin-mood-4").click();
+      await page.getByTestId("checkin-save").click();
+      await expect(page.getByTestId("checkin-summary")).toBeVisible({ timeout: 15_000 });
+      await page.reload();
+      await expect(page.getByTestId("today-setup-later")).toBeVisible();
+      await page.getByTestId("today-setup-later-open").click();
+      await expect(page).toHaveURL(/\/setup$/);
+      await expect(page.getByTestId("setup-done")).toBeVisible();
     } finally {
       await cleanup(email);
     }
@@ -420,7 +435,7 @@ test.describe("a first run reaches Today without a reload", () => {
       await page.getByLabel("Email").fill(email);
       await page.getByLabel("Password").fill(password);
       await page.getByRole("button", { name: messages.auth.signinSubmit }).click();
-      await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+      await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
       await finishSetup(page);
     } finally {
       await cleanup(email);
@@ -437,7 +452,7 @@ test.describe("a first run reaches Today without a reload", () => {
       await page.getByLabel("Email").fill(email);
       await page.getByLabel("Password").fill(password);
       await page.getByRole("button", { name: messages.auth.signinSubmit }).click();
-      await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+      await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
       await finishSetup(page);
       await page.getByTestId("tab-me").click();
       await expect(page).toHaveURL(/\/app\/me$/);
@@ -476,7 +491,7 @@ test.describe("a first run reaches Today without a reload", () => {
       await page.getByLabel("Email").fill(email);
       await page.getByLabel("Password").fill(password);
       await page.getByRole("button", { name: messages.auth.signinSubmit }).click();
-      await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+      await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
       await finishSetup(page);
       await page.getByTestId("tab-me").click();
       await expect(page).toHaveURL(/\/app\/me$/);
@@ -510,7 +525,7 @@ test.describe("a first run reaches Today without a reload", () => {
       await page.getByTestId("consent-health").check();
       await page.getByTestId("consent-age").check();
       await page.getByTestId("consent-continue").click();
-      await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+      await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
       await finishSetup(page);
     } finally {
       await cleanup(email);
@@ -529,8 +544,7 @@ test.describe("importing the same file again", () => {
     await page.getByLabel("Email").fill(email);
     await page.getByLabel("Password").fill(password);
     await page.getByRole("button", { name: messages.auth.signinSubmit }).click();
-    await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
-    await page.getByTestId("setup-done").click();
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     await page.getByTestId("tab-me").click();
     await expect(page).toHaveURL(/\/app\/me$/);
@@ -585,8 +599,10 @@ test.describe("importing the same file again", () => {
   });
 });
 
-test.describe("Your week on Insights", () => {
-  test("under 4 check-ins no card; a pattern and how it looked; a hard week, only that and the way to help", async ({ page }) => {
+// Your week is on Today for everyone, free accounts included (Vitor, 14 Nov, #316); Insights shows
+// a free account the example instead.
+test.describe("Your week on Today", () => {
+  test("a free account: under 4 check-ins no card; a pattern and how it looked; a hard week, only that and the way to help", async ({ page }) => {
     const email = newEmail();
     const password = newPassword();
     try {
@@ -596,15 +612,14 @@ test.describe("Your week on Insights", () => {
       await page.locator("#email").fill(email);
       await page.locator("#password").fill(password);
       await page.locator("main form button[type=submit]").first().click();
-      await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
-      await page.getByTestId("setup-done").click();
+      await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
       await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
       const monday = await lastWeekMonday(email);
 
       // Three check-ins: nothing, not even a message about too few days.
       await seedCheckIns(email, password, monday, [0, 1, 2].map((offset) => ({ offset, mood: 5 })));
-      await page.goto("/app/insights");
-      await expect(page.getByTestId("insights-range-week")).toBeVisible({ timeout: 15_000 });
+      await page.goto("/app");
+      await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
       await expect(page.getByTestId("your-week")).toHaveCount(0);
 
       // A pattern (sleep), then how it looked, with the quiet line.
@@ -634,6 +649,10 @@ test.describe("Your week on Insights", () => {
       await expect(card.locator('[data-testid^="your-week-pattern"], [data-testid^="your-week-look"], [data-testid="your-week-caption"], [data-testid="your-week-moment"]')).toHaveCount(0);
       await card.getByTestId("your-week-help").click();
       await expect(page.getByTestId("safety-card")).toBeVisible();
+      // On Insights, this free account sees the example, and no Your week there.
+      await page.goto("/app/insights");
+      await expect(page.getByTestId("insights-example")).toBeVisible({ timeout: 15_000 });
+      await expect(page.getByTestId("your-week")).toHaveCount(0);
     } finally {
       await cleanup(email);
     }
@@ -650,7 +669,8 @@ test("the Consumer Health Data link is in the footer inside the journal too", as
     await page.locator("#email").fill(email);
     await page.locator("#password").fill(password);
     await page.locator("main form button[type=submit]").first().click();
-    await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
+    await page.goto("/setup");
     const link = page.getByRole("contentinfo").locator('a[href$="/consumer-health-data"]');
     await expect(link, "Setup").toBeVisible();
     await page.getByTestId("setup-done").click();
@@ -690,10 +710,6 @@ test.describe("the saved language in the journal", () => {
         await french();
         await expect(page.getByTestId("email-confirmed-continue")).toHaveText(fr.emailConfirmed.emailConfirmedContinue, { timeout: 20_000 });
         await page.getByTestId("email-confirmed-continue").click();
-        await expect(page).toHaveURL(/\/fr\/setup$/, { timeout: 20_000 });
-        await french();
-        await expect(page.getByRole("heading", { level: 1 })).toHaveText(fr.onboarding.setupTitle);
-        await page.getByTestId("setup-done").click();
         await expect(page).toHaveURL(/\/fr\/app$/, { timeout: 20_000 });
         await french();
         await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
@@ -720,7 +736,7 @@ test.describe("the saved language in the journal", () => {
       await page.locator("#email").fill(email);
       await page.locator("#password").fill(password);
       await page.locator("main form button[type=submit]").first().click();
-      await expect(page).toHaveURL(/\/fr\/setup$/, { timeout: 20_000 });
+      await expect(page).toHaveURL(/\/fr\/app$/, { timeout: 20_000 });
       // Signed in, Me → Language is the one control: no switcher to bounce off.
       await expect(page.locator("[data-language-switcher]")).toBeHidden();
       // The English route for real: the proxy would answer the French cookie itself.
@@ -775,8 +791,7 @@ test.describe("the saved language in the journal", () => {
       await page.goto("/sign-in");
       await expect(page).toHaveURL(/\/fr\/sign-in/);
       await signInForm(page, email, password);
-      await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
-      await page.getByTestId("setup-done").click();
+      await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
       await today(page);
       await settled(page, "/app", "en");
       await today(page);
@@ -797,8 +812,7 @@ test.describe("the saved language in the journal", () => {
       await confirmEmail(email);
       await page.goto("/sign-in");
       await signInForm(page, email, password);
-      await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
-      await page.getByTestId("setup-done").click();
+      await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
       await today(page);
       await settled(page, "/fr/app", "fr");
       await page.getByTestId("tab-me").click();
@@ -831,15 +845,13 @@ test.describe("the saved language in the journal", () => {
       await confirmEmail(email);
       await page.goto("/sign-in");
       await signInForm(page, email, password);
-      // Setup follows the saved language too, so that's where it stops now.
+      // Today follows the saved language too, so that's where it stops now (Setup comes after first use).
       await expect(page.getByTestId("saved-language-link")).toBeVisible({ timeout: 20_000 });
-      await settled(page, "/fr/setup", "fr");
+      await settled(page, "/fr/app", "fr");
       // Held back for 2 s on the way; here it must really show, reduced motion or not.
       await expect(page.getByTestId("saved-language-link")).toHaveCSS("opacity", "1");
       // The link gets them there: the server sets the cookie on that load.
       await page.getByTestId("saved-language-link").click();
-      await settled(page, "/setup", "en");
-      await page.getByTestId("setup-done").click();
       await settled(page, "/app", "en");
       await today(page);
     } finally {
@@ -857,8 +869,7 @@ test.describe("the saved language in the journal", () => {
       await confirmEmail(email);
       await page.goto("/sign-in");
       await signInForm(page, email, password);
-      await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
-      await page.getByTestId("setup-done").click();
+      await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
       await today(page);
       await settled(page, "/app", "en");
     } finally {
@@ -874,8 +885,7 @@ test.describe("the saved language in the journal", () => {
       await confirmEmail(email);
       await page.goto("/sign-in");
       await signInForm(page, email, password);
-      await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
-      await page.getByTestId("setup-done").click();
+      await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
       await today(page);
       await expect(page.locator("footer nav [lang]")).toHaveCount(0);
       await page.getByTestId("tab-me").click();
@@ -917,23 +927,20 @@ test.describe("the saved language in the journal", () => {
     const email = newEmail();
     const password = newPassword();
     try {
-      await page.goto("/pt-br/welcome?slide=3");
-      await page.getByTestId("welcome-start").click();
-      await expect(page).toHaveURL(/\/pt-br\/consent$/);
-      await page.getByTestId("consent-privacy").check();
-      await page.getByTestId("consent-health").check();
-      await page.getByTestId("consent-continue").click();
+      await page.goto("/pt-br");
+      await page.getByTestId("home-start").click();
       await expect(page).toHaveURL(/\/pt-br\/sign-up$/);
       await page.locator("#email").fill(email);
       await page.locator("#password").fill(password);
-      await page.getByTestId("signup-age").check();
+      await page.getByTestId("consent-privacy").check();
+      await page.getByTestId("consent-health").check();
+      await page.getByTestId("consent-age").check();
       await page.getByTestId("signup-submit").click();
       await expect(page.getByTestId("check-email")).toBeVisible({ timeout: 20_000 });
       await confirmEmail(email);
       await page.getByTestId("check-email-confirmed").click();
-      await expect(page).toHaveURL(/\/pt-br\/setup$/, { timeout: 20_000 });
+      await expect(page).toHaveURL(/\/pt-br\/app$/, { timeout: 20_000 });
       expect(await profileLocale(email)).toBe("pt");
-      await page.getByTestId("setup-done").click();
       await today(page);
       await settled(page, "/pt-br/app", /^pt/i);
       await page.reload();
@@ -959,8 +966,7 @@ test.describe("the tab bar in every language", () => {
         await page.getByLabel("Email").fill(email);
         await page.getByLabel("Password").fill(password);
         await page.getByRole("button", { name: messages.auth.signinSubmit }).click();
-        await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
-        await page.getByTestId("setup-done").click();
+        await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
         await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
         await page.setViewportSize({ width, height: 800 });
         for (const [route, saved] of [["", "en"], ["/th", "th"], ["/fr", "fr"], ["/es", "es"], ["/pt-br", "pt"], ["/de", "de"], ["/it", "it"]]) {
@@ -1029,8 +1035,7 @@ test.describe("the tab bar in every language", () => {
       await page.getByLabel("Email").fill(email);
       await page.getByLabel("Password").fill(password);
       await page.getByRole("button", { name: messages.auth.signinSubmit }).click();
-      await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
-      await page.getByTestId("setup-done").click();
+      await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
       await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
 
       const labelSize = async () => {
@@ -1164,8 +1169,7 @@ test("large text, set in the browser: Today after a mood, calendar, day, entry a
     await page.locator("#email").fill(email);
     await page.locator("#password").fill(password);
     await page.locator("main form button[type=submit]").first().click();
-    await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
-    await page.getByTestId("setup-done").click();
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
 
     // A past day with a check-in, and an entry, at the normal size.
@@ -1176,7 +1180,8 @@ test("large text, set in the browser: Today after a mood, calendar, day, entry a
     await page.getByTestId("entry-save").click();
     await expect(page).toHaveURL(/\/app$/);
     await page.locator('[data-testid^="today-entry-"]').first().click();
-    await expect(page).toHaveURL(/\/app\/entries\/[0-9a-f-]{36}$/);
+    // Opened from Today: the link says so (audit B), so the nav keeps Today.
+    await expect(page).toHaveURL(/\/app\/entries\/[0-9a-f-]{36}\?from=%2Fapp$/);
     const entry = new URL(page.url()).pathname;
 
     // A moment a month ago, with a check-in, so On this day shows with its mood in words.
@@ -1212,7 +1217,8 @@ test("large text, set in the browser: Today after a mood, calendar, day, entry a
       expect.soft({ screen, percent, overflow, sticksOut }).toEqual({ screen, percent, overflow: 0, sticksOut: [] });
     };
 
-    for (const [route, saved] of [["", "en"], ["/fr", "fr"], ["/de", "de"]]) {
+    // pt-BR too (the Reviewer, #325: the entry's top bar at 300 % in en and pt-BR).
+    for (const [route, saved] of [["", "en"], ["/fr", "fr"], ["/de", "de"], ["/pt-br", "pt"]]) {
       await setProfileLocale(email, password, saved);
       for (const percent of [200, 300]) {
         await textAt(percent);
@@ -1293,8 +1299,7 @@ test("large text, set in the browser: the couldn't-load state's help is in the f
     await page.locator("#email").fill(email);
     await page.locator("#password").fill(password);
     await page.locator("main form button[type=submit]").first().click();
-    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
-    await page.getByTestId("setup-done").click();
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     await page.setViewportSize({ width: 320, height: 640 });
     // fr and es too: their Try again pushed the page sideways at 300 % (Web Tester, #269).
@@ -1335,8 +1340,7 @@ test("large text, set in the browser: the milestone's title, X and Not now stay 
     await page.locator("#email").fill(email);
     await page.locator("#password").fill(password);
     await page.locator("main form button[type=submit]").first().click();
-    await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
-    await page.getByTestId("setup-done").click();
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     // 30 days journaled, all in the past: the first milestone.
     const day = await lastWeekMonday(email);
@@ -1344,9 +1348,13 @@ test("large text, set in the browser: the milestone's title, X and Not now stay 
     await page.setViewportSize({ width: 320, height: 640 });
     await page.emulateMedia({ reducedMotion: "reduce" });
 
+    // Not on Today any more: at the top of Timeline's list, above On this day (Vitor, 14 Nov).
+    await page.goto("/app");
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId("milestone-card")).toHaveCount(0);
     for (const percent of [100, 200, 300]) {
       await textAt(percent);
-      await page.goto("/app");
+      await page.goto("/app/timeline");
       const card = page.getByTestId("milestone-card");
       await expect(card, `${percent} %`).toBeVisible({ timeout: 15_000 });
       const box = async (id: string) => (await page.getByTestId(id).boundingBox())!;
@@ -1384,8 +1392,7 @@ test("large text, set in the browser: the check-in conflict dialog shows the who
     await page.locator("#email").fill(email);
     await page.locator("#password").fill(password);
     await page.locator("main form button[type=submit]").first().click();
-    await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
-    await page.getByTestId("setup-done").click();
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     const today = await journalToday(email, password);
     await seedCheckIns(email, password, today, [{ offset: 0, mood: 4 }]);
@@ -1495,7 +1502,7 @@ test("large text, set in the browser: Set up stays inside a 320 px phone", async
     await page.locator("#email").fill(email);
     await page.locator("#password").fill(password);
     await page.locator("main form button[type=submit]").first().click();
-    await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     const cdp = await page.context().newCDPSession(page);
     await page.setViewportSize({ width: 320, height: 800 });
     for (const [route, saved] of [["", "en"], ["/fr", "fr"], ["/de", "de"]]) {
@@ -1533,7 +1540,6 @@ test("large text: every help number on the list stays whole on a phone", { tag: 
   const cdp = await page.context().newCDPSession(page);
   try {
     const password = await accountAtSetup(page, email);
-    await page.getByTestId("setup-done").click();
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     const saveProfile = await profileSaver(email, password);
     await cdp.send("Page.setFontSizes", { fontSizes: { standard: 48, fixed: 39 } });
@@ -1619,8 +1625,8 @@ test("the Timeline doesn't shift when Share this month arrives (CLS)", async ({ 
   test.skip(browserName !== "chromium", "layout-shift entries are Chromium's");
   const email = newEmail();
   try {
+    // Signing in lands on Today now (Setup is later, #314): no Setup to finish first.
     const password = await accountAtSetup(page, email);
-    await page.getByTestId("setup-done").click();
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     // Five check-ins on the 1st to the 5th of last month: always past, one month, enough for a card.
     const today = await journalToday(email, password);
@@ -1662,8 +1668,7 @@ test("large text, set in the browser: Print this month stays inside a 320 px pho
     await page.locator("#email").fill(email);
     await page.locator("#password").fill(password);
     await page.locator("main form button[type=submit]").first().click();
-    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
-    await page.getByTestId("setup-done").click();
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     const month = (await journalToday(email, password)).slice(0, 7);
     await page.setViewportSize({ width: 320, height: 640 });
@@ -1690,6 +1695,360 @@ test("large text, set in the browser: Print this month stays inside a 320 px pho
       await axeAtWidths(page, `Print this month (${saved})`, async () => {
         await page.goto(`${route}/app/print/${month}`);
         await expect(page.getByTestId("print-get-help")).toBeVisible();
+      });
+    }
+  } finally {
+    await cleanup(email);
+  }
+});
+
+// The Plus screen at 300 % on a 320 × 640 phone (the Web Tester's long-language pass, UX 12 Nov):
+// the table had a 36 px slit under a footer of 1,009 px. Now the page scrolls as a whole, the
+// phone bar steps aside, and only the price, the renewal line and the button stay pinned: the
+// content gets at least 40 % of the screen, and the price, the renewal line and the button are in view on
+// landing. With Plus nothing is pinned, and Manage is at the end. Leaving gives the bar back.
+test("large text: the Plus screen at 300 % on a 320 px phone, free and in the free week, en and de", async ({ page, browserName }) => {
+  test.setTimeout(240_000);
+  test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
+  test.skip(!(await plusOnStaging()), "staging doesn't have 028's entitlements table yet: the Plus pages can't be read there");
+  const email = newEmail();
+  const password = newPassword();
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    await page.setViewportSize({ width: 320, height: 640 });
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send("Page.setFontSizes", { fontSizes: { standard: 48, fixed: 39 } });
+    const inView = (testId: string) =>
+      page.getByTestId(testId).evaluate((el) => {
+        const r = el.getBoundingClientRect();
+        return r.height > 0 && r.top >= 0 && r.bottom <= window.innerHeight + 0.5;
+      });
+    const open = async (route: string) => {
+      await page.goto(`${route}/app/me/plus`);
+      await expect(page.getByTestId("plus-title")).toBeVisible({ timeout: 15_000 });
+      await expect(page.getByTestId("plus-screen")).toHaveAttribute("data-large", "true");
+      await expect(page.getByTestId("app-nav")).toBeHidden();
+      // What sticks out, named, so a failure says where.
+      const wide = await page.evaluate(() => ({
+        overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        sticksOut: [...document.querySelectorAll("main *")]
+          .filter((e) => e.getBoundingClientRect().right > window.innerWidth + 0.5 && e.getBoundingClientRect().width > 1 && !e.classList.contains("sr-only"))
+          .slice(0, 4)
+          .map((e) => `${e.tagName.toLowerCase()}${e.getAttribute("data-testid") ? `[${e.getAttribute("data-testid")}]` : ""} "${(e.textContent ?? "").trim().slice(0, 24)}" ${Math.round(e.getBoundingClientRect().right)}`),
+      }));
+      expect(wide, `${route || "/en"}: nothing scrolls sideways`).toEqual({ overflow: 0, sticksOut: [] });
+    };
+    for (const [route, saved] of [["", "en"], ["/de", "de"]] as const) {
+      await setProfileLocale(email, password, saved);
+      await open(route);
+      // Free: the pinned footer leaves the content at least 40 % of the screen.
+      const sizes = await page.evaluate(() => {
+        const h = (id: string) => Math.round(document.querySelector(`[data-testid="${id}"]`)?.getBoundingClientRect().height ?? -1);
+        return { footer: h("plus-footer"), price: h("plus-price"), renews: h("plus-renews"), button: h("plus-start"), viewport: window.innerHeight };
+      });
+      const top = await page.getByTestId("plus-footer").evaluate((el) => el.getBoundingClientRect().top / window.innerHeight);
+      console.log(`Plus screen at 300 %, ${saved}, free: content ${Math.round(top * 100)} % of the screen; ${JSON.stringify(sizes)}`);
+      // UX, 12 Nov, from the first run's numbers (46 % in en): at least 40 % for the content, the
+      // table scrolling, rather than squeezing the renewal disclosure out of the pinned part.
+      expect(top, `${saved}: the content takes ${Math.round(top * 100)} % of the screen`).toBeGreaterThanOrEqual(0.4);
+      expect(await inView("plus-price"), `${saved}: the price on landing`).toBe(true);
+      expect(await inView("plus-renews"), `${saved}: the renewal line on landing`).toBe(true);
+      expect(await inView("plus-start"), `${saved}: the button on landing`).toBe(true);
+      // The whole title in view on landing, above the pinned part, never behind it (UX, 12 Nov: de
+      // had it at 304 px under a pinned part starting at 276).
+      const title = await page.evaluate(() => {
+        const t = document.querySelector('[data-testid="plus-title"]')!.getBoundingClientRect();
+        const pinnedTop = document.querySelector('[data-testid="plus-footer"]')!.getBoundingClientRect().top;
+        return { top: Math.round(t.top), bottom: Math.round(t.bottom), pinnedTop: Math.round(pinnedTop) };
+      });
+      console.log(`Plus screen at 300 %, ${saved}, free: the title ${JSON.stringify(title)}`);
+      expect(title.top, `${saved}: the title's top on screen`).toBeGreaterThanOrEqual(0);
+      expect(title.bottom, `${saved}: the title above the pinned part`).toBeLessThanOrEqual(title.pinnedTop);
+      await expect(page.getByTestId("plus-footer").getByTestId("plus-not-now")).toHaveCount(0);
+      // At the very end of the page: the pinned part still on screen, and Not now and the site's
+      // footer above it, not under it.
+      await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+      await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))));
+      const end = await page.evaluate(() => {
+        const box = (sel: string) => document.querySelector(sel)?.getBoundingClientRect();
+        const pinned = box('[data-testid="plus-footer"]')!;
+        const notNow = box('[data-testid="plus-rest"] [data-testid="plus-not-now"]')!;
+        // The site's own footer: the page's last <footer>.
+        const siteFooter = [...document.querySelectorAll("footer")].at(-1)?.getBoundingClientRect();
+        return {
+          pinnedOnScreen: pinned.top >= 0 && pinned.bottom <= window.innerHeight + 0.5,
+          notNowAbove: notNow.bottom <= pinned.top + 0.5,
+          siteFooterAbove: !siteFooter || siteFooter.bottom <= pinned.top + 0.5,
+        };
+      });
+      expect(end, `${saved}: at the very end`).toEqual({ pinnedOnScreen: true, notNowAbove: true, siteFooterAbove: true });
+      await page.evaluate(() => window.scrollTo(0, 0));
+    }
+    // A short screen (320 × 480) at 300 %: the compact pinned part would leave the content under
+    // 40 %, so nothing is pinned (UX 12 Nov, specs/plus.md): one scroll, ending with the price,
+    // the renewal line and the button together, below Not now; nothing scrolls sideways.
+    await page.setViewportSize({ width: 320, height: 480 });
+    for (const [route, saved] of [["", "en"], ["/de", "de"]] as const) {
+      await setProfileLocale(email, password, saved);
+      await open(route);
+      await expect(page.getByTestId("plus-screen")).toHaveAttribute("data-unpinned", "true");
+      expect(await page.getByTestId("plus-footer").evaluate((el) => getComputedStyle(el).position), `${saved}: not pinned`).not.toBe("fixed");
+      // The three together at the end of the Plus content (the site's own footer follows the page,
+      // as everywhere): scrolled to, all three are on screen at once.
+      await page.getByTestId("plus-footer").evaluate((el) => el.scrollIntoView({ block: "start" }));
+      await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))));
+      for (const id of ["plus-price", "plus-renews", "plus-start"]) expect(await inView(id), `${saved}, short screen, at the end: ${id} in view`).toBe(true);
+      expect(await page.getByTestId("plus-screen").evaluate((el) => el.lastElementChild?.getAttribute("data-testid")), `${saved}: the price block ends the Plus screen`).toBe("plus-footer");
+      const order = await page.evaluate(() => {
+        const top = (sel: string) => document.querySelector(sel)!.getBoundingClientRect().top;
+        return { notNowFirst: top('[data-testid="plus-rest"] [data-testid="plus-not-now"]') < top('[data-testid="plus-price"]') };
+      });
+      expect(order, `${saved}, short screen: Not now before the price`).toEqual({ notNowFirst: true });
+      console.log(`Plus screen at 300 % on 320 × 480, ${saved}, free: unpinned`);
+      await page.evaluate(() => window.scrollTo(0, 0));
+    }
+    // 200 % on 320 × 640 (UX 12 Nov, after the app's Plus screen gave its list too little room
+    // there): free, en and de, whichever layout the page picks, the content above the price keeps
+    // at least 40 % of the screen, with the price, the renewal line and the button in view on landing.
+    await page.setViewportSize({ width: 320, height: 640 });
+    await cdp.send("Page.setFontSizes", { fontSizes: { standard: 32, fixed: 26 } });
+    for (const [route, saved] of [["", "en"], ["/de", "de"]] as const) {
+      await setProfileLocale(email, password, saved);
+      await page.goto(`${route}/app/me/plus`);
+      await expect(page.getByTestId("plus-title")).toBeVisible({ timeout: 15_000 });
+      expect(await page.evaluate(() => getComputedStyle(document.documentElement).fontSize), `${saved}: the text really is at 200 %`).toBe("32px");
+      await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))));
+      const at200 = await page.evaluate(() => {
+        const footer = document.querySelector('[data-testid="plus-footer"]')!.getBoundingClientRect();
+        const root = document.querySelector('[data-testid="plus-screen"]')!;
+        return {
+          large: root.hasAttribute("data-large"),
+          unpinned: root.hasAttribute("data-unpinned"),
+          content: Math.round((footer.top / window.innerHeight) * 100),
+          footer: Math.round(footer.height),
+          viewport: window.innerHeight,
+        };
+      });
+      console.log(`Plus screen at 200 %, ${saved}, free: ${JSON.stringify(at200)}`);
+      expect(at200.unpinned, `${saved} at 200 %: still pinned on a 640 px screen`).toBe(false);
+      expect(at200.content, `${saved} at 200 %: the content takes ${at200.content} % of the screen`).toBeGreaterThanOrEqual(40);
+      for (const id of ["plus-price", "plus-renews", "plus-start"]) expect(await inView(id), `${saved} at 200 %: ${id} on landing`).toBe(true);
+    }
+    await cdp.send("Page.setFontSizes", { fontSizes: { standard: 48, fixed: 39 } });
+    // Not now really taps Not now on the short screen (the Web Tester, #311: when it stayed pinned
+    // over 68 % of the screen, a tap on Not now landed on Start).
+    await page.setViewportSize({ width: 320, height: 480 });
+    await setProfileLocale(email, password, "de");
+    await open("/de");
+    await expect(page.getByTestId("plus-screen")).toHaveAttribute("data-unpinned", "true");
+    await page.getByTestId("plus-rest").getByTestId("plus-not-now").scrollIntoViewIfNeeded();
+    const hit = await page.getByTestId("plus-rest").getByTestId("plus-not-now").evaluate((el) => {
+      const r = el.getBoundingClientRect();
+      return document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2)?.closest("[data-testid]")?.getAttribute("data-testid");
+    });
+    expect(hit, "de, 320 × 480 at 300 %: the point under Not now is Not now").toBe("plus-not-now");
+    await page.getByTestId("plus-rest").getByTestId("plus-not-now").click();
+    await expect(page).toHaveURL(RegExp("/de/app/me$"), { timeout: 15_000 });
+    await page.setViewportSize({ width: 320, height: 640 });
+    await grantPlusTrial(email);
+    for (const [route, saved] of [["", "en"], ["/de", "de"]] as const) {
+      await setProfileLocale(email, password, saved);
+      await open(route);
+      // In the free week: nothing pinned, so the content has the whole screen; Manage at the end.
+      await expect(page.getByTestId("plus-footer")).toHaveCount(0);
+      await page.getByTestId("plus-rest").getByTestId("plus-manage").scrollIntoViewIfNeeded();
+      await expect(page.getByTestId("plus-manage")).toBeVisible();
+    }
+    // Leaving the Plus screen by its own close X (no reload) gives the phone bar back.
+    await page.getByTestId("plus-close").click();
+    await expect(page).toHaveURL(/\/app\/me$/, { timeout: 15_000 });
+    await expect(page.getByTestId("app-nav")).toBeVisible({ timeout: 15_000 });
+    expect(await page.evaluate(() => document.documentElement.hasAttribute("data-tabs-aside"))).toBe(false);
+  } finally {
+    await cleanup(email);
+  }
+});
+
+// Automated accessibility (UX, 2026-11-12): no serious or critical axe violation on Moodbow Plus, its screen and sheet, at
+// 320 and 1280 px, in en and pt-BR. Skipped, saying so, until staging has 028's entitlements.
+test("axe: Moodbow Plus, its screen and sheet, at 320 and 1280 px", async ({ page }) => {
+  test.setTimeout(300_000);
+  test.skip(!(await plusOnStaging()), "staging doesn't have 028's entitlements table yet: the Plus pages can't be read there");
+  const email = newEmail();
+  const password = newPassword();
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+      await setProfileLocale(email, password, saved);
+      await axeAtWidths(page, `Plus screen, free (${saved})`, async () => {
+        await page.goto(`${route}/app/me/plus`);
+        await expect(page.getByTestId("plus-screen")).toBeVisible({ timeout: 15_000 });
+      });
+      // Without Plus, Insights is the labelled example (#316): the example itself, its Year chip
+      // (it switches the example), and the sample opening the Plus screen.
+      await axeAtWidths(page, `Insights example, Year (${saved})`, async () => {
+        await page.goto(`${route}/app/insights`);
+        await page.getByTestId("insights-example-range-year").click();
+        await expect(page.getByTestId("insights-example-range-year")).toHaveAttribute("aria-pressed", "true");
+      });
+      await axeAtWidths(page, `Plus screen, from the Insights example (${saved})`, async () => {
+        await page.goto(`${route}/app/insights`);
+        await page.getByTestId("insights-example-sample").click();
+        await expect(page.getByTestId("plus-screen")).toBeVisible({ timeout: 15_000 });
+      });
+    }
+    await grantPlusTrial(email);
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+      await setProfileLocale(email, password, saved);
+      await axeAtWidths(page, `Plus screen, in the free week (${saved})`, async () => {
+        await page.goto(`${route}/app/me/plus`);
+        await expect(page.getByTestId("plus-screen")).toBeVisible({ timeout: 15_000 });
+      });
+    }
+  } finally {
+    await cleanup(email);
+  }
+});
+
+// Automated accessibility (UX, 2026-11-12): no serious or critical axe violation on Plus's Year, All time and More patterns, at
+// 320 and 1280 px, in en and pt-BR. Skipped, saying so, until staging has 028's entitlements.
+test("axe: Plus's Year, All time and More patterns, at 320 and 1280 px", async ({ page }) => {
+  test.setTimeout(300_000);
+  test.skip(!(await plusOnStaging()), "staging doesn't have 028's entitlements table yet: the Plus pages can't be read there");
+  const email = newEmail();
+  const password = newPassword();
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    await grantPlusTrial(email);
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+      await setProfileLocale(email, password, saved);
+      await axeAtWidths(page, `Insights, Year (${saved})`, async () => {
+        await page.goto(`${route}/app/insights?range=year`);
+        await expect(page.getByTestId("insights-long-heading")).toBeVisible({ timeout: 15_000 });
+      });
+      await axeAtWidths(page, `Insights, All time (${saved})`, async () => {
+        await page.goto(`${route}/app/insights?range=all`);
+        await expect(page.getByTestId("insights-long-heading")).toBeVisible({ timeout: 15_000 });
+      });
+      await axeAtWidths(page, `More patterns (${saved})`, async () => {
+        await page.goto(`${route}/app/insights?range=year`);
+        // The card is always there; its "none yet" line sits inside it, so an .or() of the two matches both.
+        await expect(page.getByTestId("insights-more-patterns-card")).toBeVisible({ timeout: 15_000 });
+      });
+    }
+  } finally {
+    await cleanup(email);
+  }
+});
+
+// Automated accessibility (UX, 2026-11-12): no serious or critical axe violation on the PDF journal page, at
+// 320 and 1280 px, in en and pt-BR. Skipped, saying so, until staging has 028's entitlements.
+test("axe: the PDF journal page, at 320 and 1280 px", async ({ page }) => {
+  test.setTimeout(300_000);
+  test.skip(!(await plusOnStaging()), "staging doesn't have 028's entitlements table yet: the Plus pages can't be read there");
+  const email = newEmail();
+  const password = newPassword();
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    await grantPlusTrial(email);
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+      await setProfileLocale(email, password, saved);
+      await axeAtWidths(page, `PDF journal (${saved})`, async () => {
+        await page.goto(`${route}/app/me/journal-pdf`);
+        await expect(page.getByTestId("pdf-get-help")).toBeVisible({ timeout: 15_000 });
+      });
+    }
+  } finally {
+    await cleanup(email);
+  }
+});
+
+// Automated accessibility (UX, 2026-11-12): no serious or critical axe violation on Year in review, at
+// 320 and 1280 px, in en and pt-BR. Skipped, saying so, until staging has 028's entitlements.
+test("axe: Year in review, at 320 and 1280 px", async ({ page }) => {
+  test.setTimeout(300_000);
+  test.skip(!(await plusOnStaging()), "staging doesn't have 028's entitlements table yet: the Plus pages can't be read there");
+  const email = newEmail();
+  const password = newPassword();
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    await grantPlusTrial(email);
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+      await setProfileLocale(email, password, saved);
+      await axeAtWidths(page, `Year in review (${saved})`, async () => {
+        await page.goto(`${route}/app/insights/review`);
+        await expect(page.getByTestId("review-get-help")).toBeVisible({ timeout: 15_000 });
+      });
+    }
+  } finally {
+    await cleanup(email);
+  }
+});
+
+// Automated accessibility (UX, 2026-11-12): no serious or critical axe violation on Appearance with themes, at
+// 320 and 1280 px, in en and pt-BR. Skipped, saying so, until staging has 028's entitlements.
+test("axe: Appearance with themes, at 320 and 1280 px", async ({ page }) => {
+  test.setTimeout(300_000);
+  test.skip(!(await plusOnStaging()), "staging doesn't have 028's entitlements table yet: the Plus pages can't be read there");
+  const email = newEmail();
+  const password = newPassword();
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+      await setProfileLocale(email, password, saved);
+      await axeAtWidths(page, `Appearance, free (the lock) (${saved})`, async () => {
+        await page.goto(`${route}/app/me`);
+        await expect(page.getByTestId("me-palettes")).toBeVisible({ timeout: 15_000 });
+      });
+    }
+    await grantPlusTrial(email);
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+      await setProfileLocale(email, password, saved);
+      await axeAtWidths(page, `Appearance, the themes (${saved})`, async () => {
+        await page.goto(`${route}/app/me`);
+        await expect(page.getByTestId("me-palettes")).toBeVisible({ timeout: 15_000 });
       });
     }
   } finally {
@@ -1727,8 +2086,12 @@ test("keyboard: a time field shows its ring at every stop inside it, the picker 
     await page.locator("#email").fill(email);
     await page.locator("#password").fill(password);
     await page.locator("main form button[type=submit]").first().click();
-    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
-    await expect(page.getByTestId("setup-reminder-time")).toBeVisible();
+    await expect(page).toHaveURL(RegExp("/app$"), { timeout: 20_000 });
+    await page.goto("/setup");
+    // After first use the reminder is off (the protective default), so its time field is disabled:
+    // turn it on first, as someone choosing a time would.
+    await page.getByTestId("setup-reminder-off").uncheck();
+    await expect(page.getByTestId("setup-reminder-time")).toBeEnabled();
     await ringThroughout("setup-reminder-time", "Set up's reminder time");
     await page.getByTestId("setup-done").click();
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
@@ -1749,7 +2112,7 @@ test("keyboard: a time field shows its ring at every stop inside it, the picker 
 // card and the Write button below it stay as they are.
 test("large text, set in the browser: Write is in Today's first view at 320 px, and only at large text", async ({ page, browserName }) => {
   test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
-  test.setTimeout(120_000);
+  test.setTimeout(180_000);
   const email = newEmail();
   const password = newPassword();
   const cdp = await page.context().newCDPSession(page);
@@ -1760,11 +2123,10 @@ test("large text, set in the browser: Write is in Today's first view at 320 px, 
     await page.locator("#email").fill(email);
     await page.locator("#password").fill(password);
     await page.locator("main form button[type=submit]").first().click();
-    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
-    await page.getByTestId("setup-done").click();
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     await page.setViewportSize({ width: 320, height: 640 });
-    for (const percent of [100, 150, 300]) {
+    for (const percent of [100, 150, 200, 300]) {
       const where = `${percent} %`;
       // Whole pixels: CDP refuses 19.5 (13 px at 150 %).
       await cdp.send("Page.setFontSizes", { fontSizes: { standard: Math.round((16 * percent) / 100), fixed: Math.round((13 * percent) / 100) } });
@@ -1773,6 +2135,19 @@ test("large text, set in the browser: Write is in Today's first view at 320 px, 
       // The card's own Write is always there, after it.
       await expect(page.getByTestId("today-write"), where).toHaveCount(1);
       const top = page.getByTestId("today-write-top");
+      // Today's standing help (UX & PM, 13 Nov): the lifebuoy at every size, 48 px, in the header's
+      // first row and inside the width, beside (never over) the greeting and Write at the top.
+      const help = page.getByTestId("today-help");
+      await expect(help, where).toBeVisible();
+      await expect(help, where).toHaveAccessibleName(messages.me.meGetHelpNow);
+      const lifebuoy = (await help.boundingBox())!;
+      const title = (await page.getByTestId("today-greeting").boundingBox())!;
+      console.log(`Today ${where}: help ${Math.round(lifebuoy.x)},${Math.round(lifebuoy.y)} ${Math.round(lifebuoy.width)}×${Math.round(lifebuoy.height)} px; greeting ends at x ${Math.round(title.x + title.width)}`);
+      expect(lifebuoy.width, `${where}: help 48 px wide`).toBeGreaterThanOrEqual(48);
+      expect(lifebuoy.height, `${where}: help 48 px high`).toBeGreaterThanOrEqual(48);
+      expect(lifebuoy.x + lifebuoy.width, `${where}: help inside the width`).toBeLessThanOrEqual(320.5);
+      expect(lifebuoy.y, `${where}: help on the greeting's row`).toBeLessThan(title.y + title.height);
+      expect(title.x + title.width, `${where}: the greeting stops before the help`).toBeLessThanOrEqual(lifebuoy.x);
       if (percent === 100) {
         await expect(top, `${where}: no second Write`).toBeHidden();
         continue;
@@ -1788,11 +2163,1018 @@ test("large text, set in the browser: Write is in Today's first view at 320 px, 
       expect(box.y + box.height, `${where}: Write above the tab bar, in the first view`).toBeLessThanOrEqual(bar.y);
       expect(box.x + box.width, `${where}: Write inside the width`).toBeLessThanOrEqual(320.5);
       expect(box.height, `${where}: a big enough target`).toBeGreaterThanOrEqual(44);
+      expect(box.x + box.width, `${where}: Write at the top stops before the help`).toBeLessThanOrEqual(lifebuoy.x);
       expect(await page.evaluate(() => document.documentElement.scrollWidth), `${where}: no sideways scroll`).toBeLessThanOrEqual(320);
     }
     // It opens the editor, as the other one does.
     await page.getByTestId("today-write-top").click();
     await expect(page.getByTestId("entry-text")).toBeVisible({ timeout: 15_000 });
+
+    // 200 % browser zoom on a laptop (1280 × 800 → 640 × 400 CSS px), normal text: the help sits
+    // at the header's end, on the greeting's row, and the card's Write is still on Today.
+    await cdp.send("Page.setFontSizes", { fontSizes: { standard: 16, fixed: 13 } });
+    await page.setViewportSize({ width: 640, height: 400 });
+    await page.goto("/app");
+    await expect(page.getByTestId("checkin-card")).toBeVisible();
+    const zoomHelp = (await page.getByTestId("today-help").boundingBox())!;
+    const zoomTitle = (await page.getByTestId("today-greeting").boundingBox())!;
+    expect(zoomHelp.x + zoomHelp.width, "200 % zoom: help inside the width").toBeLessThanOrEqual(640.5);
+    expect(zoomHelp.y, "200 % zoom: help on the greeting's row").toBeLessThan(zoomTitle.y + zoomTitle.height);
+    expect(zoomTitle.x + zoomTitle.width, "200 % zoom: the greeting stops before the help").toBeLessThanOrEqual(zoomHelp.x);
+    await expect(page.getByTestId("today-write")).toHaveCount(1);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth), "200 % zoom: no sideways scroll").toBeLessThanOrEqual(640);
+
+    // It opens Me's help card (neutral), and Close brings focus back to it.
+    await page.getByTestId("today-help").click();
+    await expect(page.getByTestId("safety-card")).toBeVisible();
+    await expect(page.getByTestId("safety-card")).toContainText(messages.safety.safetyBodyNeutral);
+    await page.getByTestId("safety-close").click();
+    await expect(page.getByTestId("safety-card")).toBeHidden();
+    await expect(page.getByTestId("today-help")).toBeFocused();
+
+    // No serious or critical axe violation on Today, at 320 and 1280 px (UX, 13 Nov).
+    await axeAtWidths(page, "Today with its help button", async () => {
+      await page.goto("/app");
+      await expect(page.getByTestId("today-help")).toBeVisible();
+    });
+  } finally {
+    await cleanup(email);
+  }
+});
+
+// Insights become Plus (14 Nov): a free person sees the labelled EXAMPLE, and the word "EXAMPLE" is
+// whole at 320 and 1280 px (Vitor), in en and de. Skipped, saying so, until staging has 028's
+// entitlements (without them Plus can't be read, and Insights shows their own, as ruling 5 says).
+test("Insights for a free person: the example, its watermark whole at 320 and 1280 px, help and the tab bar there", async ({ page }) => {
+  test.setTimeout(240_000);
+  test.skip(!(await plusOnStaging()), "staging doesn't have 028's entitlements table yet: the Plus pages can't be read there");
+  const email = newEmail();
+  try {
+    const password = await accountAtSetup(page, email);
+    for (const [route, saved] of [["", "en"], ["/de", "de"]] as const) {
+      await setProfileLocale(email, password, saved);
+      for (const width of [320, 1280]) {
+        await page.setViewportSize({ width, height: 800 });
+        await page.goto(`${route}/app/insights`);
+        await expect(page.getByTestId("insights-example")).toBeVisible({ timeout: 15_000 });
+        await expect(page.getByTestId("insights-example-help")).toBeVisible();
+        const box = await page.evaluate(() => {
+          const text = document.querySelector("[data-testid=insights-example-watermark] text")!.getBoundingClientRect();
+          const area = document.querySelector("[data-testid=insights-example]")!.getBoundingClientRect();
+          return { text: [text.left, text.top, text.right, text.bottom], area: [area.left, area.top, area.right, area.bottom] };
+        });
+        const [l, t, r, b] = box.text;
+        const [al, at, ar, ab] = box.area;
+        expect(l >= al - 0.5 && t >= at - 0.5 && r <= ar + 0.5 && b <= ab + 0.5, `${saved} at ${width} px: the whole word inside the example`).toBe(true);
+        await page.getByTestId("insights-example-sample").click();
+        await expect(page).toHaveURL(RegExp(`${route}/app/me/plus$`), { timeout: 15_000 });
+      }
+    }
+    // Every range at 300 % on a 320 px phone: nothing scrolls sideways (the a11y sweep, #326: the
+    // month's 30 bars with rem gaps were 113 px too wide). What sticks out is named.
+    await setProfileLocale(email, password, "en");
+    await page.setViewportSize({ width: 320, height: 640 });
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send("Page.setFontSizes", { fontSizes: { standard: 48, fixed: 39 } });
+    await page.goto("/app/insights");
+    await expect(page.getByTestId("insights-example")).toBeVisible({ timeout: 15_000 });
+    for (const range of ["week", "month", "3months", "year"]) {
+      await page.getByTestId(`insights-example-range-${range}`).click();
+      await expect(page.getByTestId(`insights-example-range-${range}`)).toHaveAttribute("aria-pressed", "true");
+      const wide = await page.evaluate(() => ({
+        overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        sticksOut: [...document.querySelectorAll("main *")]
+          .filter((e) => e.getBoundingClientRect().right > window.innerWidth + 0.5 && e.getBoundingClientRect().width > 1 && !e.classList.contains("sr-only"))
+          .slice(0, 4)
+          .map((e) => `${e.tagName.toLowerCase()}${e.getAttribute("data-testid") ? `[${e.getAttribute("data-testid")}]` : ""} ${Math.round(e.getBoundingClientRect().right)}`),
+      }));
+      expect.soft(wide, `${range} at 300 % on 320 px: nothing scrolls sideways`).toEqual({ overflow: 0, sticksOut: [] });
+    }
+    await cdp.send("Page.setFontSizes", { fontSizes: { standard: 16, fixed: 13 } });
+  } finally {
+    await cleanup(email);
+  }
+});
+
+// Pictures for moments (035; #322): a real upload, in a real browser, against staging. A Plus account
+// adds a JPEG carrying EXIF with a GPS marker to a moment: the canvas re-encode passes the server's
+// metadata guard (a real Chromium JPEG carries an ICC profile segment), the tile shows, and the
+// stored files have no APP1 segment and no GPS marker; the full picture is at most 2048 px.
+test("pictures: a Plus moment takes a real JPEG with EXIF; the tile shows; the stored files carry no metadata", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "checked in Chromium");
+  // 035 is on staging (decision 250): a configured staging without it is a failure, never a skip.
+  expect(await picturesOnStaging(), "staging has 035 (picture_deletions readable by the service role)").toBe(true);
+  test.setTimeout(120_000);
+  const email = newEmail();
+  try {
+    const password = await accountAtSetup(page, email);
+    await grantPlusTrial(email);
+    const today = await journalToday(email, password);
+    const moment = await seedMoment(email, password, today, "A walk by the sea.");
+    // Any CSP violation on the way, recorded in the page (the Web Tester, #322: img-src blocked
+    // every picture while the signed URLs served 200).
+    await page.addInitScript(() => {
+      const w = window as unknown as { __csp: string[] };
+      w.__csp = [];
+      document.addEventListener("securitypolicyviolation", (e) => w.__csp.push(`${e.violatedDirective} ${e.blockedURI}`));
+    });
+    await page.goto(`/app/entries/${moment}`);
+    await expect(page.getByTestId("entry-picture-add")).toBeVisible({ timeout: 15_000 });
+    // A 2400 x 1800 JPEG with an EXIF segment carrying a GPS marker, spliced in after its start.
+    const bytes = await page.evaluate(async () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = 2400;
+      canvas.height = 1800;
+      const ctx = canvas.getContext("2d")!;
+      ctx.fillStyle = "#3a7bd5";
+      ctx.fillRect(0, 0, 2400, 1800);
+      ctx.fillStyle = "#f2c66d";
+      ctx.fillRect(0, 600, 2400, 600);
+      const jpeg = new Uint8Array(await (await new Promise<Blob>((done) => canvas.toBlob((b) => done(b!), "image/jpeg", 0.9))).arrayBuffer());
+      const text = (s: string) => [...s].map((c) => c.charCodeAt(0));
+      const data = [...text("Exif"), 0, 0, ...text("GPSMOODBOW 51.5074N 0.1278W")];
+      const len = data.length + 2;
+      return [...jpeg.slice(0, 2), 0xff, 0xe1, len >> 8, len & 0xff, ...data, ...jpeg.slice(2)];
+    });
+    await page.getByTestId("entry-picture-input").setInputFiles({ name: "walk.jpg", mimeType: "image/jpeg", buffer: Buffer.from(bytes) });
+    await expect(page.getByTestId("entry-picture")).toHaveCount(1, { timeout: 30_000 });
+    await expect(page.getByTestId("entry-picture-error")).toHaveCount(0);
+    // The picture really renders: the tile's image and the full view decode (naturalWidth > 0).
+    const decoded = (selector: string) => page.locator(selector).first().evaluate((img: HTMLImageElement) => (img.complete ? img.naturalWidth : 0));
+    await expect.poll(() => decoded('[data-testid="entry-picture-open"] img'), { timeout: 15_000 }).toBeGreaterThan(0);
+    await page.getByTestId("entry-picture-open").first().click();
+    await expect.poll(() => decoded('[data-testid="entry-picture-full"]'), { timeout: 15_000 }).toBeGreaterThan(0);
+    await page.getByTestId("entry-picture-close").click();
+    const files = await pictureFiles(email);
+    expect(files.map((f) => (f.name.endsWith("_t.jpg") ? "thumb" : "full")).sort()).toEqual(["full", "thumb"]);
+    for (const f of files) {
+      let app1 = false;
+      for (let i = 2; i + 3 < f.bytes.length; ) {
+        if (f.bytes[i] !== 0xff) break;
+        const m = f.bytes[i + 1];
+        if (m === 0xda) break;
+        if (m === 0xe1) app1 = true;
+        i += 2 + f.bytes.readUInt16BE(i + 2);
+      }
+      expect(app1, `${f.name.endsWith("_t.jpg") ? "thumb" : "full"}: no APP1`).toBe(false);
+      expect(f.bytes.includes(Buffer.from("GPSMOODBOW")), "no GPS marker").toBe(false);
+    }
+    // After a reload the picture is still there (from its signed URL), and still renders.
+    await page.reload();
+    await expect(page.getByTestId("entry-picture")).toHaveCount(1, { timeout: 15_000 });
+    await expect.poll(() => decoded('[data-testid="entry-picture-open"] img'), { timeout: 15_000 }).toBeGreaterThan(0);
+    // The export: a zip with the data file and this picture's bytes (fetched through fresh signed
+    // URLs, which the CSP's connect-src must allow).
+    await page.goto("/app/me");
+    await page.getByTestId("me-export").click();
+    await expect(page.getByTestId("me-export-zip")).toBeVisible({ timeout: 30_000 });
+    const [download] = await Promise.all([page.waitForEvent("download"), page.getByTestId("me-export-zip").click()]);
+    const zip = await readFile((await download.path())!);
+    const names: string[] = [];
+    for (let i = 0; i + 46 < zip.length; i++) if (zip.readUInt32LE(i) === 0x02014b50) names.push(zip.subarray(i + 46, i + 46 + zip.readUInt16LE(i + 28)).toString("utf8"));
+    const picture = names.find((n) => n.startsWith(`pictures/${moment}/`) && n.endsWith(".jpg"));
+    expect(picture, `the zip holds the picture (${names.join(", ")})`).toBeTruthy();
+    const full = files.find((f) => !f.name.endsWith("_t.jpg"))!;
+    expect(zip.includes(full.bytes.subarray(0, 64)), "the zip holds the picture's own bytes").toBe(true);
+    // And nothing was blocked by the CSP anywhere on the way.
+    expect(await page.evaluate(() => (window as unknown as { __csp: string[] }).__csp)).toEqual([]);
+    // Timeline's strip at 300 % on a 320 px phone: it shows, and nothing scrolls sideways (UX, #322:
+    // rem-sized thumbnails grew to 192 px each).
+    await page.setViewportSize({ width: 320, height: 800 });
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send("Page.setFontSizes", { fontSizes: { standard: 48, fixed: 39 } });
+    await page.goto("/app/timeline");
+    await expect(page.getByTestId("timeline-pictures").first()).toBeVisible({ timeout: 15_000 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth), "Timeline with pictures at 300 %: no sideways scroll").toBeLessThanOrEqual(0);
+    // The entry's tile at 300 % on 320 px: the ✕ (44 px) never covers the whole open button
+    // (the a11y sweep, #326: a rem ✕ grew past a 60 px tile, axe target-size). A clear 24 px
+    // square in the tile's bottom-left quadrant belongs to the open button, and nothing scrolls sideways.
+    await page.goto(`/app/entries/${moment}`);
+    await expect(page.getByTestId("entry-picture")).toHaveCount(1, { timeout: 15_000 });
+    // elementFromPoint sees only the viewport: at 300 % the tile is below the fold, so centre it first.
+    await page.getByTestId("entry-picture-open").first().evaluate((el) => el.scrollIntoView({ block: "center" }));
+    const tile = await page.evaluate(() => {
+      const open = document.querySelector('[data-testid="entry-picture-open"]')!.getBoundingClientRect();
+      // The middle of the bottom-left quadrant: clear of the ✕ (top right) and of the tile's rounded
+      // corner, which hit-testing clips (the first probe at 12 px in landed on the corner's curve).
+      const x = open.left + open.width / 4;
+      const y = open.bottom - open.height / 4;
+      const corners = [
+        [x - 11, y - 11],
+        [x + 11, y - 11],
+        [x - 11, y + 11],
+        [x + 11, y + 11],
+        [x, y],
+      ];
+      const hits = corners.map(([px, py]) => {
+        const el = document.elementFromPoint(px, py);
+        // Each miss named in full: tag, test id and classes (the Reviewer, #322).
+        return el?.closest('[data-testid="entry-picture-open"]') ? "open" : el ? `${el.tagName.toLowerCase()}${el.getAttribute("data-testid") ? `[${el.getAttribute("data-testid")}]` : ""}.${(el.getAttribute("class") ?? "").trim().split(/\s+/).join(".")} @${Math.round(px)},${Math.round(py)}` : `none @${Math.round(px)},${Math.round(py)}`;
+      });
+      const clear = hits.every((h) => h === "open");
+      const where = { open: [Math.round(open.left), Math.round(open.top), Math.round(open.width), Math.round(open.height)], viewport: [window.innerWidth, window.innerHeight], hits };
+      const remove = document.querySelector('[data-testid="entry-picture-remove"]')!.getBoundingClientRect();
+      return { where, clear, remove: [Math.round(remove.width), Math.round(remove.height)], overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth };
+    });
+    console.log(`entry tile at 300 %: ${JSON.stringify(tile)}`);
+    expect(tile, "the entry's tile at 300 %: a clear 24 px square to open it, the ✕ 44 px, no sideways scroll").toEqual({ where: tile.where, clear: true, remove: [44, 44], overflow: 0 });
+    await cdp.send("Page.setFontSizes", { fontSizes: { standard: 16, fixed: 13 } });
+  } finally {
+    await cleanup(email);
+  }
+});
+
+// Me's own picture (Vitor, 14 Nov; board 6b): this browser only, and no metadata survives. A JPEG
+// carrying EXIF (with a GPS-like marker) goes in; what IndexedDB keeps is a fresh JPEG with no APP1
+// EXIF segment and no marker, the centre 16:10 at most 1200 × 750; Remove picture empties it.
+test("Me's picture: kept in this browser, re-encoded without EXIF, 16:10; Remove brings the rainbow back", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "createImageBitmap and IndexedDB reads, checked in Chromium");
+  const email = newEmail();
+  try {
+    await accountAtSetup(page, email);
+    await page.goto("/app/me");
+    await expect(page.getByTestId("me-picture-choose")).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId("me-picture-choose")).toHaveAccessibleName(messages.me.pictureChoose);
+    // A 900 × 1600 photo as a JPEG, with an EXIF segment spliced in after its start marker.
+    const bytes = await page.evaluate(async () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = 900;
+      canvas.height = 1600;
+      const ctx = canvas.getContext("2d")!;
+      ctx.fillStyle = "#3a7bd5";
+      ctx.fillRect(0, 0, 900, 1600);
+      ctx.fillStyle = "#f2c66d";
+      ctx.fillRect(0, 700, 900, 200);
+      const jpeg = new Uint8Array(await (await new Promise<Blob>((done) => canvas.toBlob((b) => done(b!), "image/jpeg", 0.9))).arrayBuffer());
+      const text = (s: string) => [...s].map((c) => c.charCodeAt(0));
+      const data = [...text("Exif"), 0, 0, ...text("GPSMOODBOW 51.5074N 0.1278W")];
+      const len = data.length + 2;
+      const app1 = [0xff, 0xe1, len >> 8, len & 0xff, ...data];
+      return [...jpeg.slice(0, 2), ...app1, ...jpeg.slice(2)];
+    });
+    const file = Buffer.from(bytes);
+    expect(file.includes(Buffer.from("Exif"))).toBe(true);
+    await page.getByTestId("me-picture-input").setInputFiles({ name: "walk.jpg", mimeType: "image/jpeg", buffer: file });
+    await expect(page.getByTestId("me-picture-img")).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId("me-picture-remove")).toBeVisible();
+    const kept = await page.evaluate(
+      () =>
+        new Promise<{ count: number; type: string; exif: boolean; marker: boolean; width: number; height: number } | null>((done) => {
+          const req = indexedDB.open("moodbow-me");
+          req.onsuccess = () => {
+            const all = req.result.transaction("pictures").objectStore("pictures").getAll();
+            all.onsuccess = async () => {
+              const blobs = all.result as Blob[];
+              if (blobs.length === 0) return done(null);
+              const b = new Uint8Array(await blobs[0].arrayBuffer());
+              let exif = false;
+              for (let i = 0; i + 8 < b.length; i++) if (b[i] === 0xff && b[i + 1] === 0xe1 && String.fromCharCode(b[i + 4], b[i + 5], b[i + 6], b[i + 7]) === "Exif") exif = true;
+              const marker = new TextDecoder("latin1").decode(b).includes("GPSMOODBOW");
+              const bitmap = await createImageBitmap(blobs[0]);
+              done({ count: blobs.length, type: blobs[0].type, exif, marker, width: bitmap.width, height: bitmap.height });
+            };
+          };
+          req.onerror = () => done(null);
+        }),
+    );
+    expect(kept).toEqual({ count: 1, type: "image/jpeg", exif: false, marker: false, width: 900, height: 563 });
+    // Still there after a reload (this browser keeps it).
+    await page.reload();
+    await expect(page.getByTestId("me-picture-img")).toBeVisible({ timeout: 15_000 });
+    // Remove: the rainbow, and nothing kept.
+    await page.getByTestId("me-picture-remove").click();
+    await expect(page.getByTestId("me-picture-img")).toHaveCount(0);
+    const left = await page.evaluate(
+      () =>
+        new Promise<number>((done) => {
+          const req = indexedDB.open("moodbow-me");
+          req.onsuccess = () => {
+            const c = req.result.transaction("pictures").objectStore("pictures").count();
+            c.onsuccess = () => done(c.result);
+          };
+        }),
+    );
+    expect(left).toBe(0);
+  } finally {
+    await cleanup(email);
+  }
+});
+
+
+// Automated accessibility (UX, 2026-11-12): no serious or critical axe violation on Today's check-in with tags, at
+// 320 and 1280 px, in en and pt-BR (the longest). axe can't hear a screen reader: the rows stand.
+test("axe: Today's check-in with tags, at 320 and 1280 px", async ({ page }) => {
+  test.setTimeout(240_000);
+  const email = newEmail();
+  const password = newPassword();
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    // Signing in lands on Today now (Setup is later, #314).
+    await expect(page).toHaveURL(RegExp("/app$"), { timeout: 20_000 });
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+      await setProfileLocale(email, password, saved);
+      await axeAtWidths(page, `Today with tags (${saved})`, async () => {
+        await page.goto(`${route}/app`);
+        await expect(page.getByTestId("checkin-card")).toBeVisible();
+      });
+    }
+  } finally {
+    await cleanup(email);
+  }
+});
+
+// What lifts me (1.3 part 2), inside More patterns with Plus: seeded check-ins and tags, a tag that
+// lifts the mood shown with both averages, a substances tag never shown; the help beside its title;
+// at 320 px, 100 and 300 %, inside the width; axe at 320 and 1280 px, en and pt-BR.
+test("What lifts me: shown with Plus, an excluded tag never, at large text, and axe", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
+  test.skip(!(await plusOnStaging()), "Plus (030) isn't on staging yet");
+  test.setTimeout(240_000);
+  const email = newEmail();
+  const password = newPassword();
+  const cdp = await page.context().newCDPSession(page);
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    // Signing in lands on Today now (Setup is later, #314).
+    await expect(page).toHaveURL(RegExp("/app$"), { timeout: 20_000 });
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    // 25 days, ending yesterday: "Walk" on 6 at 5, "Wine" on 6 at 5 (on the list), 13 others at 3.
+    const today = await journalToday(email, password);
+    const start = new Date(`${today}T00:00:00Z`);
+    start.setUTCDate(start.getUTCDate() - 25);
+    const first = start.toISOString().slice(0, 10);
+    const plan = Array.from({ length: 25 }, (_, offset) => ({ offset, tag: offset < 6 ? "Walk" : offset < 12 ? "Wine" : null }));
+    await seedCheckIns(email, password, first, plan.map(({ offset, tag }) => ({ offset, mood: tag ? 5 : 3 })));
+    test.skip(!(await seedTags(email, password, first, plan.filter((p) => p.tag).map(({ offset, tag }) => ({ offset, tags: [tag!] })))), "tags (029) aren't on staging yet");
+    await grantPlusTrial(email);
+    await page.setViewportSize({ width: 320, height: 640 });
+    for (const percent of [100, 300]) {
+      const where = `${percent} %`;
+      await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
+      await page.goto("/app/insights?range=year");
+      const lifts = page.getByTestId("insights-lifts");
+      await expect(lifts, where).toBeVisible({ timeout: 15_000 });
+      await expect(lifts, where).toContainText(messages.plus.liftsTitle);
+      await expect(page.getByTestId("insights-lift"), where).toHaveCount(1);
+      await expect(page.getByTestId("insights-lift"), where).toContainText("Walk");
+      await expect(lifts, `${where}: the list's tag never shown`).not.toContainText("Wine");
+      await expect(page.getByTestId("insights-lifts-footer"), where).toHaveText(messages.plus.liftsFooter);
+      // No help control of its own any more (audit batch H): the page's lifebuoy is by the title.
+      await expect(page.getByTestId("lifts-get-help"), where).toHaveCount(0);
+      for (const testId of ["insights-lift"]) {
+        await page.getByTestId(testId).scrollIntoViewIfNeeded();
+        const box = (await page.getByTestId(testId).boundingBox())!;
+        console.log(`What lifts me ${where}: ${testId} ${Math.round(box.x)},${Math.round(box.y)} ${Math.round(box.width)}×${Math.round(box.height)} px`);
+        expect(box.x + box.width, `${where}: ${testId} inside the width`).toBeLessThanOrEqual(320.5);
+      }
+      expect(await page.evaluate(() => document.documentElement.scrollWidth), `${where}: no sideways scroll`).toBeLessThanOrEqual(320);
+    }
+    await cdp.send("Page.setFontSizes", { fontSizes: { standard: 16, fixed: 13 } });
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+      await setProfileLocale(email, password, saved);
+      await axeAtWidths(page, `What lifts me (${saved})`, async () => {
+        await page.goto(`${route}/app/insights?range=year`);
+        await expect(page.getByTestId("insights-lifts")).toBeVisible({ timeout: 15_000 });
+      });
+    }
+  } finally {
+    await cleanup(email);
+  }
+});
+
+// Breathing's Stop fell below the card at 320 px and 300 % (Web Tester, #265): it's in view the
+// whole minute, at the normal size and at large text, with the circle's words still readable.
+test("large text, set in the browser: breathing's Stop stays in view on a 320 px phone", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
+  test.setTimeout(120_000);
+  const email = newEmail();
+  const password = newPassword();
+  const cdp = await page.context().newCDPSession(page);
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    // Since #314 (fewer taps) sign-in lands on Today (audit trial).
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    await page.setViewportSize({ width: 320, height: 640 });
+    for (const percent of [100, 300]) {
+      await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
+      // The list may not be readable yet on staging: breathing is offered either way (UX).
+      await page.goto("/app/me/toolbox");
+      await page.getByTestId("toolbox-breathe").click();
+      const stop = page.getByTestId("breathing-stop");
+      for (const moment of ["opening", "breathing out"]) {
+        if (moment === "breathing out") await expect(page.getByTestId("breathing-phase")).toHaveText(messages.toolbox.breatheOut, { timeout: 8_000 });
+        const box = (await stop.boundingBox())!;
+        expect(box.y, `${percent} %, ${moment}: Stop's top in the window`).toBeGreaterThanOrEqual(0);
+        expect(box.y + box.height, `${percent} %, ${moment}: Stop's bottom in the window`).toBeLessThanOrEqual(640);
+        expect(box.x + box.width, `${percent} %, ${moment}: Stop inside the width`).toBeLessThanOrEqual(320);
+      }
+      await stop.click();
+      await expect(page.getByTestId("breathing")).toHaveCount(0);
+    }
+  } finally {
+    await cleanup(email);
+  }
+});
+
+// Automated accessibility (UX, 2026-11-12): no serious or critical axe violation on the toolbox and breathing, at
+// 320 and 1280 px, in en and pt-BR (the longest). axe can't hear a screen reader: the rows stand.
+test("axe: the toolbox and breathing, at 320 and 1280 px", async ({ page }) => {
+  test.setTimeout(240_000);
+  const email = newEmail();
+  const password = newPassword();
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    // Since #314 (fewer taps) sign-in lands on Today (audit trial).
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+      await setProfileLocale(email, password, saved);
+      await axeAtWidths(page, `toolbox (${saved})`, async () => {
+        await page.goto(`${route}/app/me/toolbox`);
+        await expect(page.getByTestId("toolbox-get-help")).toBeVisible();
+      });
+      await axeAtWidths(page, `breathing (${saved})`, async () => {
+        await page.goto(`${route}/app/me/toolbox`);
+        await expect(page.getByTestId("toolbox-get-help")).toBeVisible();
+          await page.getByTestId("toolbox-breathe").click();
+          await expect(page.getByTestId("breathing-stop")).toBeVisible();
+      });
+    }
+  } finally {
+    await cleanup(email);
+  }
+});
+
+// The safety plan's help was below the first view at 320 px and 300 % (Web Tester, #266): it's
+// beside Back now, above the title, in every language; checked in en and pt-BR, the longest.
+test("large text, set in the browser: the safety plan's help is in the first view on a 320 px phone", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
+  test.setTimeout(120_000);
+  const email = newEmail();
+  const password = newPassword();
+  const cdp = await page.context().newCDPSession(page);
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    // Since #314 (fewer taps) sign-in lands on Today (audit trial).
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    await page.setViewportSize({ width: 320, height: 640 });
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+      await setProfileLocale(email, password, saved);
+      for (const percent of [100, 300]) {
+        await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
+        await page.goto(`${route}/app/me/safety-plan`);
+        const help = page.getByTestId("plan-get-help");
+        await expect(help, `${saved} at ${percent} %`).toBeVisible();
+        const box = (await help.boundingBox())!;
+        expect(box.y, `${saved} at ${percent} %: help's top in the first view`).toBeGreaterThanOrEqual(0);
+        expect(box.y + box.height, `${saved} at ${percent} %: help's bottom in the first view`).toBeLessThanOrEqual(640);
+        expect(box.x + box.width, `${saved} at ${percent} %: help inside the width`).toBeLessThanOrEqual(320.5);
+        // Back keeps its name, as an icon alone, and a full target.
+        const back = (await page.getByTestId("nav-back").boundingBox())!;
+        expect(Math.min(back.width, back.height), `${saved} at ${percent} %: Back's target`).toBeGreaterThanOrEqual(44);
+      }
+    }
+  } finally {
+    await cleanup(email);
+  }
+});
+
+// Automated accessibility (UX, 2026-11-12): no serious or critical axe violation on the safety plan, at
+// 320 and 1280 px, in en and pt-BR (the longest). axe can't hear a screen reader: the rows stand.
+test("axe: the safety plan, at 320 and 1280 px", async ({ page }) => {
+  test.setTimeout(240_000);
+  const email = newEmail();
+  const password = newPassword();
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    // Since #314 (fewer taps) sign-in lands on Today (audit trial).
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+      await setProfileLocale(email, password, saved);
+      await axeAtWidths(page, `safety plan (${saved})`, async () => {
+        await page.goto(`${route}/app/me/safety-plan`);
+        await expect(page.getByTestId("plan-get-help")).toBeVisible();
+      });
+    }
+  } finally {
+    await cleanup(email);
+  }
+});
+
+// For my appointment's title at 320 px and 300 % (Web Tester, #268): at most 36 px on a phone
+// (decision 231), each word on one line, inside the width, and the summary's start not pushed far
+// down; in en and the languages with the longest title.
+test("large text, set in the browser: the appointment summary's title keeps its words whole on a 320 px phone", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
+  test.setTimeout(120_000);
+  const email = newEmail();
+  const password = newPassword();
+  const cdp = await page.context().newCDPSession(page);
+  // A line may break after a hyphen ("rendez-" / "vous", as French does at any
+  // size), never inside a part.
+  const splitWords = (el: Element) => {
+    if (!el.isConnected) return null;
+    const text = el.firstChild!;
+    return [...(text.textContent ?? "").matchAll(/[^\s-]+-?/g)]
+      .filter((word) => {
+        const range = document.createRange();
+        range.setStart(text, word.index);
+        range.setEnd(text, word.index + word[0].length);
+        return new Set([...range.getClientRects()].map((rect) => Math.round(rect.top))).size > 1;
+      })
+      .map((word) => word[0]);
+  };
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    // Since #314 (fewer taps) sign-in lands on Today (audit trial).
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    await page.setViewportSize({ width: 320, height: 640 });
+    for (const [route, saved] of [["", "en"], ["/fr", "fr"], ["/es", "es"], ["/pt-br", "pt"]] as const) {
+      await setProfileLocale(email, password, saved);
+      for (const percent of [100, 300]) {
+        const where = `${saved} at ${percent} %`;
+        await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
+        await page.goto(`${route}/app/me/appointment`);
+        const title = page.getByTestId("appointment-title");
+        await expect(title, where).toBeVisible();
+        const size = await title.evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
+        expect(size, `${where}: the title's size`).toBeLessThanOrEqual(36.5);
+        expect(await title.evaluate(splitWords), `${where}: no word split across lines`).toEqual([]);
+        const box = (await title.boundingBox())!;
+        expect(box.x + box.width, `${where}: the title inside the width`).toBeLessThanOrEqual(320.5);
+        expect(await page.evaluate(() => document.documentElement.scrollWidth), `${where}: no sideways scroll`).toBeLessThanOrEqual(320);
+      }
+    }
+  } finally {
+    await cleanup(email);
+  }
+});
+
+// UX's rule (11 Nov): every page with journal content has Get help now first, beside Back (the
+// Web Tester found the appointment page without it, #268). The toolbox and appointment
+// pages, in en and pt-BR (the longest), at 320 px, 100 % and 300 %: help in the first view, inside
+// the width, above the page's title.
+test("large text, set in the browser: the 1.2 pages' help is in the first view on a 320 px phone", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
+  test.setTimeout(180_000);
+  const email = newEmail();
+  const password = newPassword();
+  const cdp = await page.context().newCDPSession(page);
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    // Since #314 (fewer taps) sign-in lands on Today (audit trial).
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    await page.setViewportSize({ width: 320, height: 640 });
+    const pages = [
+      ["toolbox", "toolbox-get-help", "toolbox-title"],
+      ["appointment", "appointment-get-help", "appointment-title"],
+    ] as const;
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+      await setProfileLocale(email, password, saved);
+      for (const percent of [100, 300]) {
+        await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
+        for (const [path, helpId, titleId] of pages) {
+          const where = `${path}, ${saved} at ${percent} %`;
+          await page.goto(`${route}/app/me/${path}`);
+          const help = page.getByTestId(helpId);
+          await expect(help, where).toBeVisible();
+          const box = (await help.boundingBox())!;
+          expect(box.y, `${where}: help's top in the first view`).toBeGreaterThanOrEqual(0);
+          expect(box.y + box.height, `${where}: help's bottom in the first view`).toBeLessThanOrEqual(640);
+          expect(box.x + box.width, `${where}: help inside the width`).toBeLessThanOrEqual(320.5);
+          const title = (await page.getByTestId(titleId).boundingBox())!;
+          expect(box.y, `${where}: help above the title`).toBeLessThan(title.y);
+        }
+      }
+    }
+  } finally {
+    await cleanup(email);
+  }
+});
+
+// Automated accessibility (UX, 2026-11-12): no serious or critical axe violation on the appointment summary, at
+// 320 and 1280 px, in en and pt-BR (the longest). axe can't hear a screen reader: the rows stand.
+test("axe: the appointment summary, at 320 and 1280 px", async ({ page }) => {
+  test.setTimeout(240_000);
+  const email = newEmail();
+  const password = newPassword();
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    // Since #314 (fewer taps) sign-in lands on Today (audit trial).
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+      await setProfileLocale(email, password, saved);
+      await axeAtWidths(page, `appointment summary (${saved})`, async () => {
+        await page.goto(`${route}/app/me/appointment`);
+        await expect(page.getByTestId("appointment-get-help")).toBeVisible();
+      });
+    }
+  } finally {
+    await cleanup(email);
+  }
+});
+
+// Grounding (1.3, specs/1.3-grounding-and-good-things.md): 5-4-3-2-1, Body scan and Name it, at
+// 320 px and 300 %: Back and the quiet help on top, and each screen's own way on (Next, Stop, a
+// mood) in the first view, nothing sideways; then axe on each, the close too, at 320 and 1280 px.
+test("grounding: the three at large text on a 320 px phone, help on every screen, and axe", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
+  test.setTimeout(240_000);
+  const email = newEmail();
+  const password = newPassword();
+  const cdp = await page.context().newCDPSession(page);
+  const inView = async (testId: string, where: string) => {
+    const box = (await page.getByTestId(testId).boundingBox())!;
+    console.log(`grounding ${where}: ${testId} ${Math.round(box.x)},${Math.round(box.y)} ${Math.round(box.width)}×${Math.round(box.height)} px`);
+    // The top edge too: the close once scrolled the help above the window (y −134) unnoticed.
+    expect(box.y, `${where}: ${testId}'s top in the window`).toBeGreaterThanOrEqual(0);
+    expect(box.y + box.height, `${where}: ${testId} in the first view`).toBeLessThanOrEqual(640);
+    expect(box.x + box.width, `${where}: ${testId} inside the width`).toBeLessThanOrEqual(320.5);
+  };
+  // Each screen takes taps once its scripts run (useUntilLoaded; a tap before then is lost, #296).
+  const loaded = () => expect(page.locator("[data-until-loaded]")).toHaveCount(0, { timeout: 15_000 });
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    // Since #314 (fewer taps) sign-in lands on Today (audit trial).
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    await page.setViewportSize({ width: 320, height: 640 });
+    for (const percent of [100, 300]) {
+      const where = (s: string) => `${s} at ${percent} %`;
+      await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
+      await page.goto("/app/me/toolbox");
+      await expect(page.getByTestId("grounding-links")).toBeVisible();
+      await page.getByTestId("toolbox-senses").click();
+      await expect(page.getByTestId("senses-step")).toHaveText(messages.toolbox.senses5);
+      await loaded();
+      await inView("grounding-get-help", where("5-4-3-2-1"));
+      await inView("senses-next", where("5-4-3-2-1"));
+      // Help in view on every step, the close too (UX 14 Nov: steps 3 to 5 once scrolled it off).
+      for (let i = 0; i < 5; i++) {
+        await page.getByTestId("senses-next").click();
+        if (i < 4) await expect(page.getByTestId("senses-step")).toHaveAttribute("data-step", String(i + 2));
+        if (i < 4) await inView("grounding-get-help", where(`5-4-3-2-1 step ${i + 2}`));
+      }
+      await expect(page.getByTestId("senses-end")).toHaveText(messages.toolbox.groundingEnd);
+      await inView("grounding-get-help", where("the close"));
+      await inView("grounding-done", where("the close"));
+
+      await page.goto("/app/me/toolbox/body-scan");
+      await expect(page.getByTestId("body-scan-step")).toHaveText(messages.toolbox.bodyScan1);
+      await loaded();
+      await inView("grounding-get-help", where("Body scan"));
+      await inView("body-scan-stop", where("Body scan"));
+      await inView("body-scan-pause", where("Body scan"));
+
+      await page.goto("/app/me/toolbox/name-it");
+      // A new account has no check-ins: the whole fixed list (Ruling 2).
+      await expect(page.locator('[data-testid^="name-it-"][aria-pressed]')).toHaveCount(5);
+      await loaded();
+      await inView("grounding-get-help", where("Name it"));
+      await inView("name-it-1", where("Name it"));
+      await page.getByTestId("name-it-3").click();
+      await expect(page.getByTestId("name-it-thanks")).toHaveText(messages.toolbox.nameItThanks);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth), where("Name it: no sideways scroll")).toBeLessThanOrEqual(320);
+    }
+    // The help is Me's card, from any of them.
+    await cdp.send("Page.setFontSizes", { fontSizes: { standard: 16, fixed: 13 } });
+    await page.goto("/app/me/toolbox/body-scan");
+    await loaded();
+    await page.getByTestId("grounding-get-help").click();
+    await expect(page.getByTestId("safety-card")).toContainText(messages.safety.safetyBodyNeutral);
+    await page.getByTestId("safety-close").click();
+    await expect(page.getByTestId("safety-card")).toHaveCount(0);
+
+    // No serious or critical axe violation (UX, 2026-11-12), en and pt-BR (the longest).
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+      await setProfileLocale(email, password, saved);
+      for (const exercise of ["5-4-3-2-1", "body-scan", "name-it"]) {
+        await axeAtWidths(page, `grounding ${exercise} (${saved})`, async () => {
+          await page.goto(`${route}/app/me/toolbox/${exercise}`);
+          await expect(page.getByTestId("grounding-get-help")).toBeVisible();
+        });
+      }
+      await axeAtWidths(page, `grounding close (${saved})`, async () => {
+        await page.goto(`${route}/app/me/toolbox/5-4-3-2-1`);
+        await loaded();
+        for (let i = 0; i < 5; i++) await page.getByTestId("senses-next").click();
+        await expect(page.getByTestId("senses-end")).toBeVisible();
+      });
+    }
+  } finally {
+    await cleanup(email);
+  }
+});
+
+// Three good things (1.3, Rulings 3 and 9): from Write, three fields at 320 px, 100 and 300 %,
+// with Save and the first field in the first view; it saves one ordinary entry for today through
+// the normal save, which Today then lists; axe on the screen at 320 and 1280 px, en and pt-BR.
+test("Three good things: large text on a 320 px phone, one ordinary entry on Today, and axe", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
+  test.setTimeout(240_000);
+  const email = newEmail();
+  const password = newPassword();
+  const cdp = await page.context().newCDPSession(page);
+  const loaded = () => expect(page.locator("[data-until-loaded]")).toHaveCount(0, { timeout: 15_000 });
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    // Since #314 (fewer taps) sign-in lands on Today (audit trial).
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    await page.setViewportSize({ width: 320, height: 640 });
+    for (const percent of [100, 300]) {
+      const where = `${percent} %`;
+      await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
+      await page.goto("/app/write");
+      await page.getByTestId("write-good-things").click();
+      await expect(page.getByTestId("good-things-title")).toHaveText(messages.entry.goodThingsTitle);
+      await loaded();
+      for (const testId of ["entry-save-top", "good-things-1"]) {
+        const box = (await page.getByTestId(testId).boundingBox())!;
+        console.log(`Three good things ${where}: ${testId} ${Math.round(box.x)},${Math.round(box.y)} ${Math.round(box.width)}×${Math.round(box.height)} px`);
+        expect(box.y + box.height, `${where}: ${testId} in the first view`).toBeLessThanOrEqual(640);
+        expect(box.x + box.width, `${where}: ${testId} inside the width`).toBeLessThanOrEqual(320.5);
+      }
+      expect(await page.evaluate(() => document.documentElement.scrollWidth), `${where}: no sideways scroll`).toBeLessThanOrEqual(320);
+    }
+    // One line left empty on purpose: any can be.
+    await page.getByTestId("good-things-1").fill("Tea with a friend");
+    await page.getByTestId("good-things-3").fill("The rain stopped");
+    await page.getByTestId("entry-save-top").click();
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
+    // Today lists it as any entry: one preview, starting with the heading.
+    await expect(page.locator('[data-testid^="today-entry-"]')).toHaveCount(1);
+    await expect(page.locator('[data-testid^="today-entry-"]').first()).toContainText(messages.entry.goodThingsTitle);
+
+    await cdp.send("Page.setFontSizes", { fontSizes: { standard: 16, fixed: 13 } });
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+      await setProfileLocale(email, password, saved);
+      await axeAtWidths(page, `Three good things (${saved})`, async () => {
+        await page.goto(`${route}/app/write/good-things`);
+        await expect(page.getByTestId("good-things-1")).toBeVisible();
+      });
+    }
+  } finally {
+    await cleanup(email);
+  }
+});
+
+// Automated accessibility (UX, 2026-11-12): no serious or critical axe violation on letters to future me, at
+// 320 and 1280 px, in en and pt-BR (the longest). axe can't hear a screen reader: the rows stand.
+test("axe: letters to future me, at 320 and 1280 px", async ({ page }) => {
+  test.setTimeout(240_000);
+  const email = newEmail();
+  const password = newPassword();
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    // Since #314 (fewer taps) sign-in lands on Today (audit trial).
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+      await setProfileLocale(email, password, saved);
+      await axeAtWidths(page, `letters (${saved})`, async () => {
+        await page.goto(`${route}/app/me/letters`);
+        await expect(page.getByTestId("letters-get-help")).toBeVisible();
+      });
+    }
+  } finally {
+    await cleanup(email);
+  }
+});
+
+// Help everywhere (audit batch H, the Reviewer): Insights with Plus has the lifebuoy by its title on
+// every range, the screen's one help control, in the first view at 320 px / 300 %, nothing sideways.
+test("help everywhere: Insights with Plus, every range, one lifebuoy in the first view at 300 % that opens the help card", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
+  test.setTimeout(180_000);
+  expect(await plusOnStaging(), "staging has 028's entitlements").toBe(true);
+  const email = newEmail();
+  try {
+    await accountAtSetup(page, email);
+    await grantPlusTrial(email);
+    await page.setViewportSize({ width: 320, height: 640 });
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send("Page.setFontSizes", { fontSizes: { standard: 48, fixed: 39 } });
+    const help = page.getByRole("link", { name: messages.me.meGetHelpNow });
+    for (const range of ["week", "month", "3months", "year", "all"]) {
+      await page.goto(`/app/insights?range=${range}`);
+      await expect(page.getByTestId("insights-help"), range).toBeVisible({ timeout: 15_000 });
+      const box = await page.getByTestId("insights-help").evaluate((el) => {
+        const r = el.getBoundingClientRect();
+        return { inFirstView: r.top >= 0 && r.bottom <= window.innerHeight + 0.5 && r.right <= window.innerWidth + 0.5, overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth };
+      });
+      expect(box, `${range}: the lifebuoy in the first view, nothing sideways`).toEqual({ inFirstView: true, overflow: 0 });
+      await expect(help, `${range}: exactly one help control`).toHaveCount(1);
+      await help.click();
+      await expect(page.getByTestId("safety-card"), range).toBeVisible();
+      await page.keyboard.press("Escape");
+    }
+    await cdp.send("Page.setFontSizes", { fontSizes: { standard: 16, fixed: 13 } });
+  } finally {
+    await cleanup(email);
+  }
+});
+
+// Help everywhere (audit batch H, UX and the Reviewer, 14 Nov): wherever someone writes their own
+// words or reads back their days, exactly one help control, and it opens the help card.
+// At 320 px with text at 300 % (the Reviewer): Back and the lifebuoy share a row, so each must stay
+// in the first view with nothing sideways.
+test("help everywhere: writing, Three good things, a day and the Timeline each have one lifebuoy in the first view at 300 %, opening the help card", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
+  test.setTimeout(150_000);
+  const email = newEmail();
+  try {
+    const password = await accountAtSetup(page, email);
+    // Setup first where this base still asks for it (before #314's fewer taps): the journal's
+    // pages send a new account there until it's done.
+    await page.goto("/setup");
+    const atSetup = await page
+      .getByTestId("setup-done")
+      .waitFor({ state: "visible", timeout: 5_000 })
+      .then(() => true)
+      .catch(() => false);
+    if (atSetup) {
+      await page.getByTestId("setup-done").click();
+      await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    }
+    const today = await journalToday(email, password);
+    await page.setViewportSize({ width: 320, height: 640 });
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send("Page.setFontSizes", { fontSizes: { standard: 48, fixed: 39 } });
+    const help = page.getByRole("link", { name: messages.me.meGetHelpNow });
+    for (const [path, testId] of [
+      ["/app/write", "editor-help"],
+      ["/app/write/good-things", "editor-help"],
+      [`/app/timeline/${today}`, "day-help"],
+      ["/app/timeline", "timeline-help"],
+    ]) {
+      await page.goto(path);
+      await expect(page.getByTestId(testId), path).toBeVisible({ timeout: 15_000 });
+      const box = await page.getByTestId(testId).evaluate((el) => {
+        const r = el.getBoundingClientRect();
+        return { inFirstView: r.top >= 0 && r.bottom <= window.innerHeight + 0.5 && r.right <= window.innerWidth + 0.5, overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth };
+      });
+      expect(box, `${path}: the lifebuoy in the first view, nothing sideways`).toEqual({ inFirstView: true, overflow: 0 });
+      await expect(help, `${path}: exactly one help control`).toHaveCount(1);
+      await help.click();
+      await expect(page.getByTestId("safety-card"), path).toBeVisible();
+      await page.keyboard.press("Escape");
+      await expect(page.getByTestId("safety-card"), path).toHaveCount(0);
+    }
+    // Every Timeline view keeps the lifebuoy (audit B): the empty list (a new account) is above;
+    // then the calendar, the list again and search, where they're on.
+    await page.goto("/app/timeline");
+    await expect(page.getByTestId("timeline-empty").first()).toBeVisible({ timeout: 15_000 });
+    const views: string[] = ["empty list"];
+    for (const v of ["calendar", "list"]) {
+      if ((await page.getByTestId(`timeline-view-${v}`).count()) === 0) continue;
+      await page.getByTestId(`timeline-view-${v}`).click();
+      await expect(page.getByTestId("timeline-help"), v).toBeVisible();
+      await expect(help, `${v}: exactly one help control`).toHaveCount(1);
+      views.push(v);
+    }
+    if ((await page.getByTestId("timeline-search-open").count()) > 0) {
+      await page.getByTestId("timeline-search-open").click();
+      await expect(page.getByTestId("timeline-search-input")).toBeVisible();
+      await expect(page.getByTestId("timeline-help"), "search").toBeVisible();
+      await expect(help, "search: exactly one help control").toHaveCount(1);
+      views.push("search");
+    }
+    console.log(`Timeline views with the lifebuoy: ${views.join(", ")}`);
+  } finally {
+    await cleanup(email);
+  }
+});
+
+// Letter reminders at 390 px and at 320 px with text at 300 %, en and de (the Web Tester, audit D):
+// no reminder label squeezed or clipped ("Am Tag selbst" was), the time, switch and × never on top
+// of it, nothing sideways.
+test("letter reminders: labels whole at 390 and 320 px / 300 %, en and de, controls never over them", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
+  test.setTimeout(180_000);
+  expect(await plusOnStaging(), "staging has 028's entitlements").toBe(true);
+  const email = newEmail();
+  const password = newPassword();
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    // Since #314 (fewer taps) sign-in lands on Today (audit trial).
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    await grantPlusTrial(email);
+    const cdp = await page.context().newCDPSession(page);
+    const check = () =>
+      page.evaluate(() => {
+        const labels = [...document.querySelectorAll('[data-testid="letter-reminder-label"] > span[aria-hidden="true"], [data-testid="letter-reminder-day-label"]')] as HTMLElement[];
+        const clipped = labels.filter((el) => el.scrollWidth > el.clientWidth + 1 || el.getBoundingClientRect().width < 40).map((el) => `${el.textContent} ${el.scrollWidth}/${el.clientWidth}`);
+        // Each row's controls start below its label or to its right, never over it.
+        const overlaps = [...document.querySelectorAll('[data-testid="letter-reminder"], [data-testid="letter-reminder-day"]')].filter((row) => {
+          const label = (row.querySelector('[data-testid="letter-reminder-label"], [data-testid="letter-reminder-day-label"]') as HTMLElement).getBoundingClientRect();
+          const time = (row.querySelector('input[type="time"]') as HTMLElement).getBoundingClientRect();
+          const apart = time.left >= label.right - 0.5 || time.top >= label.bottom - 0.5;
+          return !apart;
+        }).length;
+        // What sticks out past the right edge, named, so a failure says which part.
+        const sticksOut = [...document.querySelectorAll("main *")]
+          .filter((e) => e.getBoundingClientRect().right > window.innerWidth + 0.5 && e.getBoundingClientRect().width > 1 && !e.classList.contains("sr-only"))
+          .slice(0, 4)
+          .map((e) => `${e.tagName.toLowerCase()}${e.getAttribute("data-testid") ? `[${e.getAttribute("data-testid")}]` : ""} ${Math.round(e.getBoundingClientRect().right)}`);
+        return { clipped, overlaps, sticksOut, overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth };
+      });
+    for (const [route, saved] of [["", "en"], ["/de", "de"]] as const) {
+      await setProfileLocale(email, password, saved);
+      for (const [width, percent] of [[390, 100], [320, 300]] as const) {
+        await page.setViewportSize({ width, height: 800 });
+        await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
+        await page.goto(`${route}/app/me/letters`);
+        await expect(page.getByTestId("letter-reminders")).toBeVisible({ timeout: 15_000 });
+        // One heads-up too, so a chosen day's label is checked as well.
+        await page.getByTestId("letter-reminder-add").click();
+        await expect(page.getByTestId("letter-reminder")).toHaveCount(1);
+        const where = `${saved} at ${width} px / ${percent} %`;
+        const result = await check();
+        console.log(`letter reminders ${where}: ${JSON.stringify(result)}`);
+        expect(result, `${where}: labels whole, controls apart, nothing sideways`).toEqual({ clipped: [], overlaps: 0, sticksOut: [], overflow: 0 });
+      }
+    }
+    // The transparent select keeps a visible ring (UX): Tab back onto it from its time field.
+    await page.getByTestId("letter-reminder-time").first().focus();
+    await page.keyboard.press("Shift+Tab");
+    await expect(page.getByTestId("letter-reminder-days").first()).toBeFocused();
+    const ring = await page.getByTestId("letter-reminder-label").first().evaluate((el) => getComputedStyle(el).outlineStyle);
+    expect(ring, "the label shows the ring while its select has keyboard focus").toBe("solid");
+    await cdp.send("Page.setFontSizes", { fontSizes: { standard: 16, fixed: 13 } });
   } finally {
     await cleanup(email);
   }

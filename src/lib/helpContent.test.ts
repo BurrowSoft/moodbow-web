@@ -246,3 +246,27 @@ describe("Help → App lock: no email, no signing out", () => {
     expect(readFileSync(`content/help/${language}/app-lock.md`, "utf8")).toContain("Face ID");
   });
 });
+
+// Today's standing help (UX & PM, 13 Nov; #298): "Want to talk to someone?" says where it is, in
+// every language, named with that language's own UI strings. A help-only id (decision 212
+// pattern): the line waits for the app build people have, and the web's ships with it.
+describe("Help → Want to talk to someone?: Today's lifebuoy", () => {
+  const ui = (locale: string) => JSON.parse(readFileSync(`src/messages/${locale}.json`, "utf8")) as { app: { tabToday: string }; me: { meGetHelpNow: string } };
+  const text = (html: string) => html.replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&amp;/g, "&");
+  const render = (locale: string, on: boolean) => text(renderArticle(findArticle(locale, "get-help-now")!, (id) => (id === "app_today_help" ? on : isPendingMet(id))));
+  for (const locale of ["en", "de", "es", "fr", "it", "pt-br", "th"]) {
+    it(`${locale}: the button's name and Today's tab, exactly as the UI says them, once it's met`, () => {
+      const { app, me } = ui(locale);
+      const shown = render(locale, true);
+      expect(shown).toContain(`<strong>${app.tabToday}</strong>`);
+      // The button's name: the same string as its aria-label and title (GetHelpNow icon).
+      expect(shown).toContain(`<strong>${me.meGetHelpNow}</strong>`);
+      expect(render(locale, false)).not.toContain(`<strong>${me.meGetHelpNow}</strong>`);
+      expect(readFileSync(`content/help/${locale}/get-help-now.md`, "utf8")).toContain(`{pending:app_today_help}`);
+      expect(render(locale, false)).not.toContain(`<strong>${app.tabToday}</strong>`);
+    });
+  }
+  it("waits for the app build (help only, not met yet)", () => {
+    expect(isPendingMet("app_today_help")).toBe(false);
+  });
+});

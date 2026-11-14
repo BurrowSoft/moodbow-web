@@ -9,6 +9,7 @@ import { offeredLocales } from "@/i18n/routing";
 import { savedLanguageRoute } from "@/lib/savedLanguage";
 import { pageGate } from "@/lib/conditions";
 import { getMe, onboardingStep } from "@/lib/journal/me";
+import { PROTECTIVE_ONBOARDING } from "@/lib/journal/setupLater";
 import { authUser } from "@/lib/journal/currentUser";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { JournalUnavailable } from "@/components/JournalUnavailable";
@@ -23,8 +24,8 @@ import { APP_MAIN_GUTTER } from "@/lib/ui/journalLayout";
 
 // The signed-in web journal. Behind web-journal-live: the proxy 404s /app on
 // Production until it's met; this check is the backstop. Signed-out visitors
-// go to sign-in; anyone without current consents goes to Consent, then Set up
-// until onboarded (M3, same as the app). Data access is enforced by RLS and
+// go to sign-in; anyone without current consents goes to Consent. Set up comes after first use
+// (1.3 §6), offered on Today. Data access is enforced by RLS and
 // the RPCs, not by these redirects.
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { robots: { index: false, follow: false } };
@@ -47,7 +48,13 @@ export default async function AppLayout({ children, params }: LayoutProps<"/[loc
   if (!me) return <NextIntlClientProvider messages={await getMessages()}><JournalUnavailable standalone /></NextIntlClientProvider>;
   const step = onboardingStep(me);
   if (step === "consent") redirect({ href: "/consent", locale });
-  if (step === "setup") redirect({ href: "/setup", locale });
+  // Setup after first use (1.3 §6): the journal opens at once. The first time, onboarding is
+  // completed with protective defaults: the reminder off until they choose one; tone and focus
+  // stay at their defaults; AI only as its own consent says. Today then offers Setup.
+  if (step === "setup") {
+    const { error: setupError } = await supabase.rpc("complete_onboarding", PROTECTIVE_ONBOARDING);
+    if (setupError) return <NextIntlClientProvider messages={await getMessages()}><JournalUnavailable standalone /></NextIntlClientProvider>;
+  }
   // Their saved language wins in the journal, if it's offered (row RT4).
   const language = savedLanguageRoute(me.profile?.locale, locale, offeredLocales());
   if (language) return <SavedLanguageRedirect locale={language} />;
@@ -71,7 +78,9 @@ export default async function AppLayout({ children, params }: LayoutProps<"/[loc
             footer under it would be pushed down in view. Kept below the fold,
             nothing visible moves (Today CLS 0.13, Web Tester #82 isolation).
             On paper neither applies (no trailing blank page; 1.1 N). */}
-        <main id="main" className={`min-h-dvh min-w-0 flex-1 ${APP_MAIN_GUTTER} pb-28 pt-[max(16px,calc(56px-1rem))] md:pb-10 md:pt-10 print:min-h-0 print:p-0`}>
+        {/* The bottom padding clears the phone bar's real height (--tab-bar-h, AppNav), 7rem
+            before it's measured; a page that sets the bar aside keeps only a little. */}
+        <main id="main" className={`min-h-dvh min-w-0 flex-1 ${APP_MAIN_GUTTER} pb-[calc(var(--tab-bar-h,5.5rem)+1.5rem)] in-data-[tabs-aside]:max-md:pb-6 pt-[max(16px,calc(56px-1rem))] md:pb-10 md:pt-10 print:min-h-0 print:p-0`}>
           {/* With scripts off a page's content never appears here, as it's streamed: help still does (#249). */}
           <noscript>
             <div className="mx-auto mb-6 max-w-3xl space-y-3 max-sm:[font-size:min(1rem,max(10vw,32px))]">

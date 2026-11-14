@@ -4,7 +4,10 @@ import { getLocale } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
 import { ENTRY_COLUMNS, entryErrorAction, isEntryId, parseEntry, sameEntry, type Entry, type EntryError } from "@/lib/journal/entry";
 import { originOf } from "@/lib/journal/origin";
+import { pageGate } from "@/lib/conditions";
+import { parseRecall, RECALL_MONTHS, type RecallMonth } from "@/lib/journal/momentRecall";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { removePictureFiles } from "@/lib/journal/pictureFiles";
 
 // stale: the entry changed (or was deleted) on another device since the
 // editor loaded it. `latest` is the server's version now (null if it's
@@ -79,6 +82,13 @@ export async function deleteEntry(_prev: DeleteState, form: FormData): Promise<D
   if (!isEntryId(id)) return { status: "error" };
   const supabase = await createSupabaseServerClient();
   if (!supabase) return { status: "error" };
+  // Its pictures' files go first, under their own session while the rows are live, and are checked
+  // gone (Storage lets the uploader read their own file whatever the row says). A failed remove
+  // leaves the entry as it is: they try again. No entry_pictures table yet (before 035): nothing.
+  const pictures = await supabase.from("entry_pictures").select("path, thumb_path").eq("entry_id", id);
+  if (pictures.error && !/entry_pictures|42P01|PGRST205/.test(`${pictures.error.code ?? ""} ${pictures.error.message ?? ""}`)) return { status: "error" };
+  const paths = ((pictures.data ?? []) as { path: string; thumb_path: string }[]).flatMap((p) => [p.path, p.thumb_path]);
+  if (!(await removePictureFiles(supabase, paths))) return { status: "error" };
   const { error } = await supabase.rpc("delete_entry", { p_id: id });
   const locale = await getLocale();
   if (error) {
@@ -86,4 +96,16 @@ export async function deleteEntry(_prev: DeleteState, form: FormData): Promise<D
     if (!error.message.includes("not_found")) return { status: "error" };
   }
   return redirect({ href: originOf(form.get("from")), locale });
+}
+
+// Memories (spec "Memories"; moodbow-app 034): a moment's "Bring this back" months, through
+// entry_set_recall, which validates them and returns what it stored. Off until moment-recall-live
+// (Production gets 034 first), the server's switch too.
+export async function setMomentRecall(id: string, months: RecallMonth[]): Promise<{ status: "ok"; months: RecallMonth[] } | { status: "error" }> {
+  if (pageGate("moment-recall-live") === "hidden") return { status: "error" };
+  if (!isEntryId(id) || !Array.isArray(months) || months.some((m) => !(RECALL_MONTHS as readonly number[]).includes(m))) return { status: "error" };
+  const supabase = await createSupabaseServerClient();
+  if (!supabase) return { status: "error" };
+  const { data, error } = await supabase.rpc("entry_set_recall", { p_id: id, p_months: months });
+  return error ? { status: "error" } : { status: "ok", months: parseRecall(data) };
 }

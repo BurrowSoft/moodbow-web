@@ -1,11 +1,12 @@
 "use client";
 
-import { useCallback, useState, useSyncExternalStore, type MouseEvent } from "react";
+import { useCallback, useEffect, useState, useSyncExternalStore, type MouseEvent } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Dialog, dialogButton } from "@/components/Dialog";
 import { HelpNumberText } from "@/components/HelpNumberText";
 import { Link } from "@/i18n/navigation";
 import { helpLineSize, helplinesFor, isIos, isShortCode, telHref } from "@/lib/safety/helplines";
+import { safetyPlanHasContent } from "@/app/[locale]/app/me/safety-plan/actions";
 import { useRequestCountry } from "@/components/RequestCountry";
 import { countryName } from "@/lib/region/countries";
 
@@ -35,6 +36,18 @@ export function SafetyCard({ country, onClose, neutral = false }: { country: str
   // are, so someone travelling or on a VPN can tell (UX). The browser's own country name.
   const fromRequest = !country && requested && (lines.helpline || lines.emergency) ? countryName(requested, locale) : null;
   const ios = useSyncExternalStore(noSubscribe, () => isIos(navigator.userAgent, navigator.maxTouchPoints), () => false);
+  // My safety plan (1.2), below the helplines, only where it has content (the Reviewer's read):
+  // asked once the card is open, so help never waits on it; a yes or no, never the plan.
+  const [plan, setPlan] = useState(false);
+  useEffect(() => {
+    let open = true;
+    safetyPlanHasContent()
+      .then((has) => open && setPlan(has))
+      .catch(() => {});
+    return () => {
+      open = false;
+    };
+  }, []);
   // The numbers and links stop growing at about 200 % on narrow screens (decision 231). What comes
   // before them stays under the card's own cap (capText in Dialog): at 32 px it pushed the first help
   // line to 939 px, off a 640 px screen (#246). text-sm here: the same 7:8 as at the normal size.
@@ -42,7 +55,7 @@ export function SafetyCard({ country, onClose, neutral = false }: { country: str
   const link = "font-medium text-accent underline underline-offset-4";
   const small = "text-muted [font-size:min(0.875rem,max(8.75vw,28px))]";
   return (
-    <Dialog title={t("safetyTitle")} body={t(neutral ? "safetyBodyNeutral" : "safetyBody")} onCancel={onClose} testId="safety-card" initialFocus="title" capText>
+    <Dialog title={t("safetyTitle")} body={t(neutral ? "safetyBodyNeutral" : "safetyBody")} onCancel={onClose} testId="safety-card" initialFocus="title" capText defaultColours>
       <div className="w-full space-y-[max(6px,calc(28px-1rem))] text-left">
         {fromRequest && (
           <p data-testid="safety-request-country" className="font-medium text-text">
@@ -87,6 +100,13 @@ export function SafetyCard({ country, onClose, neutral = false }: { country: str
             <span className="sr-only">{tc("opensInNewTab")}</span>
           </a>
         </p>
+        {plan && (
+          <p>
+            <Link href="/app/me/safety-plan" data-testid="safety-plan-button" onClick={onClose} className={`${link} [font-size:min(1rem,max(10vw,32px))]`}>
+              {t("safetyPlanButton")}
+            </Link>
+          </p>
+        )}
         <p className={small}>{t("safetyNotTherapy")}</p>
       </div>
       {/* Close is secondary (outline): the help above is what stands out
@@ -106,7 +126,10 @@ export function SafetyCard({ country, onClose, neutral = false }: { country: str
 // page's scripts (#248); once they're running it opens the card instead. Its words stay whole: browser
 // hyphens split "par-ler" with room to spare (Web Tester). It stops growing at about 200 % on a narrow
 // screen, in em, so at the normal size it's the size of the text around it.
-export function GetHelpNow({ country, testId, className, neutral }: { country: string | null | undefined; testId: string; className?: string; neutral?: boolean }) {
+// icon: Today's standing help button (UX & PM, 13 Nov; specs/1.2-features.md): a lifebuoy, named
+// and titled with the same words, opening the same card. Quiet (no colour of its own, no banner) and
+// 48 px in px, so large text never makes it push Write out of Today's header.
+export function GetHelpNow({ country, testId, className, neutral, icon }: { country: string | null | undefined; testId: string; className?: string; neutral?: boolean; icon?: boolean }) {
   const t = useTranslations("me");
   const [open, setOpen] = useState(false);
   const close = useCallback(() => setOpen(false), []);
@@ -116,12 +139,38 @@ export function GetHelpNow({ country, testId, className, neutral }: { country: s
     e.preventDefault();
     setOpen(true);
   };
+  const name = t("meGetHelpNow");
   return (
     <>
-      <Link href="/help/get-help-now" prefetch={false} data-testid={testId} onClick={openCard} className={className ?? `${dialogButton(false, false)} [font-size:min(1em,max(10vw,32px))]`}>
-        {t("meGetHelpNow")}
-      </Link>
+      {icon ? (
+        <Link
+          href="/help/get-help-now"
+          prefetch={false}
+          data-testid={testId}
+          onClick={openCard}
+          aria-label={name}
+          title={name}
+          className={className ?? "inline-flex h-[48px] w-[48px] shrink-0 items-center justify-center rounded-full text-muted hover:bg-pill hover:text-text"}
+        >
+          <LifebuoyIcon />
+        </Link>
+      ) : (
+        <Link href="/help/get-help-now" prefetch={false} data-testid={testId} onClick={openCard} className={className ?? `${dialogButton(false, false)} [font-size:min(1em,max(10vw,32px))]`}>
+          {name}
+        </Link>
+      )}
       {open && <SafetyCard country={country} onClose={close} neutral={neutral} />}
     </>
+  );
+}
+
+// A lifebuoy, in the tab bar's line style; its name is the link's (aria-label), so it's hidden here.
+function LifebuoyIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false" data-testid="lifebuoy-icon">
+      <circle cx="12" cy="12" r="10" />
+      <circle cx="12" cy="12" r="4" />
+      <path d="m4.93 4.93 4.24 4.24M14.83 9.17l4.24-4.24M14.83 14.83l4.24 4.24M9.17 14.83l-4.24 4.24" />
+    </svg>
   );
 }

@@ -75,9 +75,17 @@
     "met": true,
     "what": "Help only (decision 212 pattern, UX 2026-11-04): import from another app (1.1 K) is in the app build people have (0.9.7; met on its publish, UX), so its Help article shows for app users ({pending:app_import|import_live}). Not import-live (the web's own import)."
   },
+  "app-quick-checkin": {
+    "met": false,
+    "what": "Help only (decision 212 pattern, UX 2026-11-12): the one-tap check-in from the daily reminder (1.2 §5, the app's QUICK_CHECKIN) is in the app build people have, so its Help article shows. App only: the web has no reminder of its own."
+  },
   "app-app-lock": {
     "met": true,
     "what": "Help only (decision 212): app lock (PIN, fingerprint or face; decision 188) is in the app build people have (0.9 closed test on), so its Help article shows. Not app-lock (the privacy text's clause, Vitor's)."
+  },
+  "app-today-help": {
+    "met": false,
+    "what": "Help only (decision 212 pattern, UX & PM 2026-11-13): Today's standing help button (a lifebuoy named with meGetHelpNow, specs/1.2-features.md) is in the app build people have; the web's ships with it (#298, after the pilot). Gates the get-help-now article's line about it."
   },
   "app-share-cards": {
     "met": true,
@@ -130,6 +138,10 @@
   "on-this-day-live": {
     "met": true,
     "what": "1.1 A \"On this day\" (specs/1.1-features.md) is tested on both the app and the web; then the Timeline card shows on Production (UX: not tied to a release, may be in time for 1.0)."
+  },
+  "moment-recall-live": {
+    "met": false,
+    "what": "Memories: the person chooses when a moment comes back (Vitor, 14 Nov; specs/1.3-offer-review-voice-taps.md \"Memories\"): each moment's \"Bring this back\" chips (1 month, 6 months, 1 year; all by default), and On this day keeps only the anniversaries kept. Needs moodbow-app migration 034 (entries.recall_months, entry_set_recall) on Production first: without it the column doesn't exist, so the web reads and writes it only while this is met (drafts on Preview and CI, against staging, which has 034)."
   },
   "patterns-live": {
     "met": true,
@@ -211,9 +223,81 @@
     "met": false,
     "what": "Your week (specs/your-week.md): the rule-based card at the top of Insights, no AI, on the web. Met after the Web Tester's row."
   },
+  "toolbox-live": {
+    "met": false,
+    "what": "1.2: Things that help me (specs/1.2-features.md, content/toolbox.json): Me's list, the Today card after a low check-in, and a minute to breathe. Needs migration 025 on Production (Vitor), the Reviewer's read, the tester rows and Vitor's look."
+  },
+  "app-toolbox": {
+    "met": false,
+    "what": "Help only (decision 212 pattern, UX 2026-11-12): Things that help me and the minute to breathe (1.2 §1) are in the app build people have, so its Help article shows. Not toolbox-live (the web's own switch)."
+  },
+  "grounding-live": {
+    "met": false,
+    "what": "1.3 (specs/1.3-grounding-and-good-things.md): 5-4-3-2-1, Body scan and Name it in Me → Things that help me (content/toolbox.json, grounding). Ships after 1.2, with toolbox-live; the Reviewer's read, the tester rows and Vitor's look."
+  },
+  "app-grounding": {
+    "met": false,
+    "what": "Help only (decision 212 pattern, 1.3 Ruling 8): the grounding exercises are in the app build people have, so their Help lines show ({pending:app_grounding|grounding_live}). Not grounding-live (the web's own switch)."
+  },
+  "good-things-live": {
+    "met": false,
+    "what": "1.3 (specs/1.3-grounding-and-good-things.md): Three good things on the web, from Write and Me → Things that help me: the entry editor with three short fields, saving one ordinary entry through the normal save (Ruling 3). No evening prompt on the web (Ruling 9). Ships after 1.2; the Reviewer's read, the tester rows and Vitor's look."
+  },
+  "app-good-things": {
+    "met": false,
+    "what": "Help only (decision 212 pattern): Three good things, with its evening reminder, is in the app build people have, so its Help lines show ({pending:app_good_things|good_things_live}); the reminder sentence is the app's alone. Not good-things-live (the web's own switch)."
+  },
+  "safety-plan-live": {
+    "met": false,
+    "what": "1.2: My safety plan (specs/1.2-features.md §2, content/safety-plan.json): Me's plan, its button on the help card below the helplines and on a hard Your week. Needs the clinician's read of every string (Vitor), the privacy policy's text on other people's details (Vitor), migration 026 on Production (Vitor), the Reviewer's read, the tester rows and Vitor's look."
+  },
+  "app-safety-plan": {
+    "met": false,
+    "what": "Help only (decision 212 pattern, UX 2026-11-12): My safety plan (1.2 §2) is in the app build people have, with its lock switch and offline view, so its Help article shows. Not safety-plan-live (the web's own switch); like it, waits on the clinician's read."
+  },
+  "letters-live": {
+    "met": false,
+    "what": "1.2: Letters to future me (specs/1.2-features.md §3, content/letters.json): Me's letters, Today's card on the day, and the Timeline's locked line. Part of Moodbow Plus from the day they ship (1.3 §3, UX 14 Nov): on only together with plus (lib/plus/letters.ts lettersGate), and writing a new letter is checked on the server. With reminders (#319): moodbow-app migrations 027, 032 and 033 must all be on Production before this is met. Needs migration 027 on Production (Vitor), the Reviewer's read, the tester rows and Vitor's look."
+  },
+  "app-letters": {
+    "met": false,
+    "what": "Help only (decision 212 pattern, UX 2026-11-12): Letters to future me (1.2 §3) are in the app build people have, with the opening-day notification, so its Help article shows. Not letters-live (the web's own switch)."
+  },
+  "appointment-live": {
+    "met": false,
+    "what": "1.2: For my appointment (specs/1.2-features.md §4, content/appointment.json): a printable summary of check-ins and starred entries, made in the browser, nothing stored or sent. Needs the Reviewer's read, the tester rows and Vitor's look."
+  },
+  "app-appointment": {
+    "met": false,
+    "what": "Help only (decision 212 pattern, UX 2026-11-12): For my appointment (1.2 §4) is in the app build people have, with Share as PDF, so its Help article shows. Not appointment-live (the web's own switch, which brings Print)."
+  },
   "test-only-unavailable-page": {
     "met": false,
     "what": "TEST ONLY, NEVER MET: /app/test/unavailable, a page that renders nothing but the journal's couldn't-load state (JournalUnavailable) inside the journal layout, so a journey can measure where its help sits at large text (the real pages fail only when Supabase does). No journal data on it. A 404 on Production at the routing level (lib/sitemapPages.ts), before any sign-in; a test and the publish-day checklist check that."
+  },
+  "plus": {
+    "met": false,
+    "what": "Moodbow Plus (decision 246, specs/plus.md, docs/plus-entitlements.md): the yearly subscription with 7 free days, on the web through Stripe. Off until everything ships, and not before the pilot is published. Before it's met: the entitlements migration on Production, Vitor's prices, Stripe keys, webhook endpoint, CRON_SECRET and service role key on Production, his terms and privacy text, the Reviewer's read and the tester rows on test-mode Stripe."
+  },
+  "offer-live": {
+    "met": false,
+    "what": "The Christmas special offer (specs/1.3-offer-review-voice-taps.md §1 and its Christmas section): the first year at a lower price, 1 December to 1 January 00:00 UTC on the server's clock, for people with no previous subscription, instead of the free week; lib/plus/offer.ts. Only with plus. Before it's met: Vitor's first-year coupon in Stripe (STRIPE_PLUS_OFFER_COUPON_ID, duration \"once\" so the renewal is the full price, amount_off per currency from store/plus-prices.md's half prices; a currency without an amount shows and charges the usual free week), the same offer in Apple and Play, his terms text for it, the Reviewer's read and the tester rows (OFFER_PREVIEW=1 on a Preview opens the window there; Production ignores it)."
+  },
+  "app-pictures": {
+    "met": false,
+    "what": "1.3 Pictures for moments in the app (035; Plus): met when the app release that adds pictures to moments is live (and 035 is on Production with the picture-deletions cron running). The privacy policy's moment pictures line shows from then."
+  },
+  "app-me-picture": {
+    "met": false,
+    "what": "1.3 (Vitor, 14 Nov): the app's Me card holds the person's own picture (on the phone only, never uploaded, metadata stripped; spec \"Me: the big card is your own picture\"). Met when that app release is live; the privacy policy's Me picture line (app sentence) shows from then."
+  },
+  "app-icons": {
+    "met": false,
+    "what": "Help only (decision 212 pattern, UX 14 Nov): the App icon picker (Plus; specs/1.3-offer-review-voice-taps.md \"App icon pick\") is in the app build people have from the stores. Met with that release; the help article is app-only."
+  },
+  "lifts-live": {
+    "met": false,
+    "what": "1.3 part 2: What lifts me, inside More patterns with Plus (specs/1.3-grounding-and-good-things.md), on the web (#301, with tags-live) and in the app build people have. Ships with 1.3, not with the Plus stack (UX 14 Nov). Also gates the Moodbow Plus article's line about it."
   },
   "region-live": {
     "met": false,
@@ -226,5 +310,17 @@
   "thai-offered-live": {
     "met": false,
     "what": "1.1 F: Thai is offered on the web: the native reader has read the Thai UI, Help and dates (thai_reviewed, decision 193), with UX's go. Until then /th is a draft on test builds only (Preview, dev, CI) and Production is English only; the switcher, Me → Language, hreflang and the sitemap offer Thai only once met. The legal pages keep their own gates in every language."
+  },
+  "tags-live": {
+    "met": false,
+    "what": "Tags on a check-in (UX, 11 Nov; free journal data): the person's own words, up to 5 a day, on Today's card and the day view, read by the crisis list on save. Needs the app's migration 029 (check_in_tags, set_check_in_tags, my_recent_tags) on Production, the export and import cases synced from the app, the privacy line (VITOR.md), the Reviewer's read and the tester rows. After the pilot."
+  },
+  "me-picture-live": {
+    "met": false,
+    "what": "1.3 (Vitor, 14 Nov; board 6b): Me's big card can hold the person's own picture, chosen with the browser's file picker, cropped to 16:10 (at most 1200 x 750) and re-encoded (no metadata), kept in this browser only (IndexedDB), never uploaded, not in the export, deleted on sign-out and by Remove picture. For everyone. The web shows no App icon row (no home-screen icon). Met with UX's go after the Web Tester's row."
+  },
+  "pictures-live": {
+    "met": false,
+    "what": "1.3 Pictures for moments (035; spec \"Pictures for moments\" and \"Pictures 035: build rulings\"): up to 3 pictures on a moment (Plus to add; viewing, export and deleting always), re-encoded in the browser (no EXIF), private bucket, signed URLs of 5 minutes. Needs moodbow-app 035 on Production AND the picture-deletions cron running on Production (vercel.json; CRON_SECRET is Vitor's): until it runs, deleted pictures' files are not removed. Also Vitor's privacy line, store labels and the storage cost. While it is unmet (or turned off again), pictures already added are still in Export my data and are deleted with their entry or the account, but there is no screen to view or remove a single picture."
   }
 }

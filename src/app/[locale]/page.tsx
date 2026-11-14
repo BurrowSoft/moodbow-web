@@ -75,7 +75,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
         {live ? (
           <div className="mt-9 flex w-full flex-col items-center gap-4 sm:w-auto">
             <Link
-              href="/welcome"
+              href="/sign-up"
               data-testid="home-start"
               className="inline-flex min-h-[52px] w-full items-center justify-center rounded-full text-center sm:w-auto sm:min-w-[220px] bg-accent px-5 py-3.5 sm:px-8 [font-size:min(1rem,max(10vw,32px))] font-medium text-on-accent transition-opacity hover:bg-accent-hover"
             >
