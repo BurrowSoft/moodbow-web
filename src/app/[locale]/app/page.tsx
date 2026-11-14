@@ -19,6 +19,8 @@ import type { InsightRow } from "@/lib/journal/insights";
 import { lastWeekStart } from "@/lib/journal/report";
 import { sixDaysAfter, yourWeek, type YourWeekMoment } from "@/lib/journal/yourWeek";
 import { YourWeekCard } from "./insights/YourWeekCard";
+import { ToolboxCard } from "./ToolboxCard";
+import { parseToolboxItems } from "@/lib/journal/toolbox";
 import { SecurityNoticeRead } from "./SecurityNoticeRead";
 import { JOURNAL_HEADING } from "@/lib/ui/journalLayout";
 import { isLowMood } from "@/lib/journal/checkInSaved";
@@ -65,7 +67,10 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
   const weekOn = pageGate("your-week-live") !== "hidden";
   const weekStart = lastWeekStart(me.today);
   const weekEnd = sixDaysAfter(weekStart);
-  const [checkIn, todaysEntries, requestHeaders, plusPage, weekRead, momentsRead] = await Promise.all([
+  // Things that help (1.2): read whenever it's on, as a save here can make today low. A failed
+  // read is no list at all: the card still offers a minute to breathe (UX), and nothing else.
+  const toolboxOn = pageGate("toolbox-live") !== "hidden";
+  const [checkIn, todaysEntries, requestHeaders, plusPage, weekRead, momentsRead, toolboxRead] = await Promise.all([
     supabase.from("check_ins").select("local_date, mood, sleep_hours, sleep_quality, exercise_minutes, stress, updated_at").eq("local_date", me.today).maybeSingle(),
     // Today's entries, newest first (previews only; the editor loads the rest).
     supabase.from("entries").select("id, body, is_moment, entry_date, created_at").eq("entry_date", me.today).order("created_at", { ascending: false }),
@@ -74,6 +79,7 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
     // Your week: last week's check-ins (a mood counts) and moments (id and date only).
     weekOn ? supabase.from("check_ins").select("local_date, mood, sleep_hours, stress, exercise_minutes").gte("local_date", weekStart).lte("local_date", weekEnd) : null,
     weekOn ? supabase.from("entries").select("id, entry_date").eq("is_moment", true).gte("entry_date", weekStart).lte("entry_date", weekEnd) : null,
+    toolboxOn ? supabase.from("toolbox_items").select("id, text, position").order("position") : null,
   ]);
   const { data, error: checkInError } = checkIn;
   const { data: entries, error: entriesError } = todaysEntries;
@@ -115,6 +121,7 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
 
   // Tags on the check-in (tags-live): the day's and the person's recent ones.
   const cardTags = await readCardTags(supabase, me.today);
+  const toolbox = toolboxRead && !toolboxRead.error ? parseToolboxItems(toolboxRead.data) : null;
 
   return (
     <section className="space-y-8">
@@ -144,6 +151,7 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
         </Link>
       </header>
       <CheckInCard key={checkInError ? "unread" : "read"} initial={(data as CheckIn | null) ?? null} uid={user.id} date={me.today} dateLocaleTag={dateLocaleTag} keepDraft loadFailed={Boolean(checkInError)} {...cardTags} country={me.profile?.country} />
+      {toolboxOn && <ToolboxCard uid={user.id} today={me.today} todayMood={(data as CheckIn | null)?.mood ?? null} items={toolbox} />}
       {/* Today's order (UX ruling 3): the check-in, the cards (Your week first: its hard-week help), the
           entries, then Write last. */}
       {yourWeekCard}

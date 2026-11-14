@@ -19,6 +19,7 @@ import { MoodFace } from "@/components/MoodFace";
 import { onArrival } from "@/lib/ui/arrival";
 import { useUntilLoaded } from "@/lib/ui/untilLoaded";
 import { saveCheckIn, type CheckInState } from "./actions";
+import { publishTodayMood } from "@/lib/journal/todayMood";
 import { useCheckInDraft } from "./CheckInDraft";
 import { TagsField } from "./TagsField";
 import { SafetyCard } from "@/components/SafetyCard";
@@ -491,6 +492,7 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
       if (next.tags) setSavedTags(next.tags);
       setTagsFailed(next.tagsSaved === false);
       setRow(next.checkIn);
+      publishTodayMood(next.checkIn.local_date, next.checkIn.mood);
       setDraftBase(null);
       setFields(fromRow(next.checkIn));
       setEditing(false);

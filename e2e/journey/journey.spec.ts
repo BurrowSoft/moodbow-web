@@ -2509,3 +2509,77 @@ test("What lifts me: shown with Plus, an excluded tag never, at large text, and 
     await cleanup(email);
   }
 });
+
+// Breathing's Stop fell below the card at 320 px and 300 % (Web Tester, #265): it's in view the
+// whole minute, at the normal size and at large text, with the circle's words still readable.
+test("large text, set in the browser: breathing's Stop stays in view on a 320 px phone", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
+  test.setTimeout(120_000);
+  const email = newEmail();
+  const password = newPassword();
+  const cdp = await page.context().newCDPSession(page);
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    await page.setViewportSize({ width: 320, height: 640 });
+    for (const percent of [100, 300]) {
+      await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
+      // The list may not be readable yet on staging: breathing is offered either way (UX).
+      await page.goto("/app/me/toolbox");
+      await page.getByTestId("toolbox-breathe").click();
+      const stop = page.getByTestId("breathing-stop");
+      for (const moment of ["opening", "breathing out"]) {
+        if (moment === "breathing out") await expect(page.getByTestId("breathing-phase")).toHaveText(messages.toolbox.breatheOut, { timeout: 8_000 });
+        const box = (await stop.boundingBox())!;
+        expect(box.y, `${percent} %, ${moment}: Stop's top in the window`).toBeGreaterThanOrEqual(0);
+        expect(box.y + box.height, `${percent} %, ${moment}: Stop's bottom in the window`).toBeLessThanOrEqual(640);
+        expect(box.x + box.width, `${percent} %, ${moment}: Stop inside the width`).toBeLessThanOrEqual(320);
+      }
+      await stop.click();
+      await expect(page.getByTestId("breathing")).toHaveCount(0);
+    }
+  } finally {
+    await cleanup(email);
+  }
+});
+
+// Automated accessibility (UX, 2026-11-12): no serious or critical axe violation on the toolbox and breathing, at
+// 320 and 1280 px, in en and pt-BR (the longest). axe can't hear a screen reader: the rows stand.
+test("axe: the toolbox and breathing, at 320 and 1280 px", async ({ page }) => {
+  test.setTimeout(240_000);
+  const email = newEmail();
+  const password = newPassword();
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+      await setProfileLocale(email, password, saved);
+      await axeAtWidths(page, `toolbox (${saved})`, async () => {
+        await page.goto(`${route}/app/me/toolbox`);
+        await expect(page.getByTestId("toolbox-get-help")).toBeVisible();
+      });
+      await axeAtWidths(page, `breathing (${saved})`, async () => {
+        await page.goto(`${route}/app/me/toolbox`);
+        await expect(page.getByTestId("toolbox-get-help")).toBeVisible();
+          await page.getByTestId("toolbox-breathe").click();
+          await expect(page.getByTestId("breathing-stop")).toBeVisible();
+      });
+    }
+  } finally {
+    await cleanup(email);
+  }
+});

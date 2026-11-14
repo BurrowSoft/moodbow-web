@@ -96,6 +96,16 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
           </h2>
         </section>
       )}
+      {/* Things that help me (1.2): its own page, with a minute to breathe. */}
+      {pageGate("toolbox-live") !== "hidden" && (
+        <section aria-labelledby="me-toolbox" className="rounded-3xl border border-border bg-surface p-[24px]">
+          <h2 id="me-toolbox" className="text-lg font-medium text-text">
+            <Link href="/app/me/toolbox" data-testid="me-toolbox" className={link}>
+              {(await getTranslations("toolbox"))("meRow")}
+            </Link>
+          </h2>
+        </section>
+      )}
       <Reminder on={me.settings?.reminder_on ?? true} time={hhmm(me.settings?.reminder_time)} />
       <LanguageRegion
         initial={{ locale: routeLocale(me.profile?.locale ?? locale), country: me.profile?.country ?? "", time_zone: me.profile?.time_zone ?? "UTC" }}
