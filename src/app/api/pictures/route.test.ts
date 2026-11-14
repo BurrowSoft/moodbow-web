@@ -17,7 +17,8 @@ const { POST } = await import("./route");
 
 const E = "a0350000-0000-4000-8000-0000000000e1";
 // A minimal well-formed JPEG as a canvas writes it: SOI, APP0, then the scan (SOS) and EOI.
-const jpeg = (extra: number[] = []) => new File([new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0, 2, 0xff, 0xda, 0, 2, ...extra, 0xff, 0xd9])], "p.jpg", { type: "image/jpeg" });
+const JFIF = [0xff, 0xe0, 0, 7, 0x4a, 0x46, 0x49, 0x46, 0];
+const jpeg = (extra: number[] = []) => new File([new Uint8Array([0xff, 0xd8, ...JFIF, 0xff, 0xda, 0, 2, ...extra, 0xff, 0xd9])], "p.jpg", { type: "image/jpeg" });
 const exifJpeg = () => new File([new Uint8Array([0xff, 0xd8, 0xff, 0xe1, 0, 16, 0x45, 0x78, 0x69, 0x66, 0, 0, 1, 2, 0xff, 0xd9])], "p.jpg", { type: "image/jpeg" });
 const post = (fields: Record<string, string | File>) => {
   const form = new FormData();
@@ -38,7 +39,7 @@ describe("POST /api/pictures (035)", () => {
   it("reserve, both uploads (no overwrite), confirm; the answer has short-lived signed URLs", async () => {
     rpc.mockResolvedValueOnce(reserved).mockResolvedValueOnce(confirmed);
     const body = await (await post(good())).json();
-    expect(rpc.mock.calls[0]).toEqual(["picture_reserve", { p_entry: E, p_bytes: 26 }]);
+    expect(rpc.mock.calls[0]).toEqual(["picture_reserve", { p_entry: E, p_bytes: 36 }]);
     expect(upload.mock.calls.map((c) => [c[0], (c[2] as { upsert: boolean; contentType: string }).upsert, (c[2] as { contentType: string }).contentType])).toEqual([
       [`u/${E}/p1.jpg`, false, "image/jpeg"],
       [`u/${E}/p1_t.jpg`, false, "image/jpeg"],
@@ -51,10 +52,10 @@ describe("POST /api/pictures (035)", () => {
   it("a file carrying EXIF is stored without it (stripped on the server; a Safari canvas's own Exif never locks anyone out)", async () => {
     rpc.mockResolvedValueOnce(reserved).mockResolvedValueOnce(confirmed);
     const exif = [..."Exif"].map((c) => c.charCodeAt(0));
-    const dirty = new File([new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0, 2, 0xff, 0xe1, 0, exif.length + 6, ...exif, 0, 0, 1, 2, 0xff, 0xda, 0, 2, 9, 0xff, 0xd9])], "p.jpg", { type: "image/jpeg" });
+    const dirty = new File([new Uint8Array([0xff, 0xd8, ...JFIF, 0xff, 0xe1, 0, exif.length + 6, ...exif, 0, 0, 1, 2, 0xff, 0xda, 0, 2, 9, 0xff, 0xd9])], "p.jpg", { type: "image/jpeg" });
     expect((await (await post({ ...good(), full: dirty })).json()).status).toBe("ok");
     const stored = new Uint8Array(await (upload.mock.calls[0][1] as Blob).arrayBuffer());
-    expect([...stored]).toEqual([0xff, 0xd8, 0xff, 0xe0, 0, 2, 0xff, 0xda, 0, 2, 9, 0xff, 0xd9]);
+    expect([...stored]).toEqual([0xff, 0xd8, ...JFIF, 0xff, 0xda, 0, 2, 9, 0xff, 0xd9]);
   });
   it("a file that can't be walked to its image data is refused before anything", async () => {
     const res = await post({ ...good(), full: exifJpeg() });

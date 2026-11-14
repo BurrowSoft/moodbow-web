@@ -57,6 +57,9 @@ export async function readEntryPictures(supabase: SupabaseClient, entryIds: stri
 // counts as carrying metadata.
 const ICC = [0x49, 0x43, 0x43, 0x5f, 0x50, 0x52, 0x4f, 0x46, 0x49, 0x4c, 0x45, 0x00]; // "ICC_PROFILE\0"
 const isIccSegment = (bytes: Uint8Array, at: number, length: number) => length >= 2 + ICC.length && ICC.every((c, k) => bytes[at + 4 + k] === c);
+// An APP0 kept only when it is JFIF: a JFXX APP0 can carry a whole thumbnail JPEG (the Reviewer).
+const JFIF = [0x4a, 0x46, 0x49, 0x46, 0x00]; // "JFIF\0"
+const isJfifSegment = (bytes: Uint8Array, at: number, length: number) => length >= 2 + JFIF.length && JFIF.every((c, k) => bytes[at + 4 + k] === c);
 export function hasMetadata(bytes: Uint8Array): boolean {
   // Anything the strip would take out (before, between or after the scans), or a file it refuses.
   const stripped = stripMetadata(bytes);
@@ -72,7 +75,7 @@ export function fitWithin(w: number, h: number, side: number): { width: number; 
 
 // The same file without its metadata (the Reviewer, #322: a server-side strip, so a browser whose
 // canvas adds its own Exif, as Safari's CoreGraphics may, is never locked out). The whole file is
-// walked: before and between scans, SOI, APP0, an APP2 that is exactly an ICC profile and every table
+// walked: before and between scans, SOI, an APP0 that is exactly JFIF, an APP2 that is exactly an ICC profile and every table
 // or frame segment (DQT, DHT, DRI, SOF, SOS...) are kept, and every other APP1-APP15 (EXIF, XMP,
 // IPTC, MPF...) and COM is dropped; each scan's entropy data is copied as it is (FF 00 stuffing and
 // RST0-7 belong to it) up to the next real marker; EOI is kept and is the end, so anything after it (a
@@ -121,7 +124,8 @@ export function stripMetadata(bytes: Uint8Array): Uint8Array | null {
     if (i + 3 >= bytes.length) return null;
     const length = (bytes[i + 2] << 8) | bytes[i + 3];
     if (length < 2 || i + 2 + length > bytes.length) return null;
-    const metadata = (m >= 0xe1 && m <= 0xef && !(m === 0xe2 && isIccSegment(bytes, i, length))) || m === 0xfe;
+    const metadata =
+      (m === 0xe0 && !isJfifSegment(bytes, i, length)) || (m >= 0xe1 && m <= 0xef && !(m === 0xe2 && isIccSegment(bytes, i, length))) || m === 0xfe;
     if (!metadata) keep.push(bytes.subarray(i, i + 2 + length));
     i += 2 + length;
     if (m === 0xda) inScan = true;

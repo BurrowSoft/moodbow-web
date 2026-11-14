@@ -64,6 +64,13 @@ describe("the byte checks the upload route relies on", () => {
     expect([...stripMetadata(progressive)!]).toEqual([...head, ...seg(0xda, [1]), 1, 0xff, 0x00, 2, 0xff, 0xd1, 3, ...seg(0xc4, [4, 4]), ...seg(0xda, [2]), 7, 8, 0xff, 0xd9]);
     expect(stripMetadata(new Uint8Array([...head, ...seg(0xda, [1]), 1, 2, 3]))).toBeNull();
   });
+  it("a JFXX APP0 (an embedded thumbnail JPEG, possibly with its own EXIF) is dropped; JFIF kept", () => {
+    const seg = (m: number, body: number[]) => [0xff, m, (body.length + 2) >> 8, (body.length + 2) & 255, ...body];
+    const jfxx = [...text("JFXX"), 0, 0x10, 0xff, 0xd8, 0xff, 0xe1, 0, 8, ...text("Exif"), 0, 0, 0xff, 0xd9];
+    const file = new Uint8Array([0xff, 0xd8, ...seg(0xe0, [...text("JFIF"), 0, 1, 1]), ...seg(0xe0, jfxx), ...seg(0xda, [1]), 5, 0xff, 0xd9]);
+    expect([...stripMetadata(file)!]).toEqual([0xff, 0xd8, ...seg(0xe0, [...text("JFIF"), 0, 1, 1]), ...seg(0xda, [1]), 5, 0xff, 0xd9]);
+    expect(hasExif(file)).toBe(true);
+  });
   it("the bytes a real Chromium canvas wrote (the fixture, 16 x 16 at 0.85) pass the guard", () => {
     // __fixtures__/chromium-canvas.jpg: made by canvas.toBlob("image/jpeg", 0.85) in Chromium. Its
     // APP2 ICC_PROFILE segment refused every real upload until the guard allowed it (Web Tester, #322).
