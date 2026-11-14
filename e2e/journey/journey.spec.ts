@@ -2921,3 +2921,61 @@ test("grounding: the three at large text on a 320 px phone, help on every screen
     await cleanup(email);
   }
 });
+
+// Three good things (1.3, Rulings 3 and 9): from Write, three fields at 320 px, 100 and 300 %,
+// with Save and the first field in the first view; it saves one ordinary entry for today through
+// the normal save, which Today then lists; axe on the screen at 320 and 1280 px, en and pt-BR.
+test("Three good things: large text on a 320 px phone, one ordinary entry on Today, and axe", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
+  test.setTimeout(240_000);
+  const email = newEmail();
+  const password = newPassword();
+  const cdp = await page.context().newCDPSession(page);
+  const loaded = () => expect(page.locator("[data-until-loaded]")).toHaveCount(0, { timeout: 15_000 });
+  try {
+    await signedUpUnconfirmed(email, password);
+    await confirmEmail(email);
+    await page.goto("/sign-in");
+    await page.locator("#email").fill(email);
+    await page.locator("#password").fill(password);
+    await page.locator("main form button[type=submit]").first().click();
+    await expect(page).toHaveURL(RegExp("/setup$"), { timeout: 20_000 });
+    await page.getByTestId("setup-done").click();
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
+    await page.setViewportSize({ width: 320, height: 640 });
+    for (const percent of [100, 300]) {
+      const where = `${percent} %`;
+      await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
+      await page.goto("/app/write");
+      await page.getByTestId("write-good-things").click();
+      await expect(page.getByTestId("good-things-title")).toHaveText(messages.entry.goodThingsTitle);
+      await loaded();
+      for (const testId of ["entry-save-top", "good-things-1"]) {
+        const box = (await page.getByTestId(testId).boundingBox())!;
+        console.log(`Three good things ${where}: ${testId} ${Math.round(box.x)},${Math.round(box.y)} ${Math.round(box.width)}×${Math.round(box.height)} px`);
+        expect(box.y + box.height, `${where}: ${testId} in the first view`).toBeLessThanOrEqual(640);
+        expect(box.x + box.width, `${where}: ${testId} inside the width`).toBeLessThanOrEqual(320.5);
+      }
+      expect(await page.evaluate(() => document.documentElement.scrollWidth), `${where}: no sideways scroll`).toBeLessThanOrEqual(320);
+    }
+    // One line left empty on purpose: any can be.
+    await page.getByTestId("good-things-1").fill("Tea with a friend");
+    await page.getByTestId("good-things-3").fill("The rain stopped");
+    await page.getByTestId("entry-save-top").click();
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
+    // Today lists it as any entry: one preview, starting with the heading.
+    await expect(page.locator('[data-testid^="today-entry-"]')).toHaveCount(1);
+    await expect(page.locator('[data-testid^="today-entry-"]').first()).toContainText(messages.entry.goodThingsTitle);
+
+    await cdp.send("Page.setFontSizes", { fontSizes: { standard: 16, fixed: 13 } });
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+      await setProfileLocale(email, password, saved);
+      await axeAtWidths(page, `Three good things (${saved})`, async () => {
+        await page.goto(`${route}/app/write/good-things`);
+        await expect(page.getByTestId("good-things-1")).toBeVisible();
+      });
+    }
+  } finally {
+    await cleanup(email);
+  }
+});
