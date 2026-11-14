@@ -34,8 +34,9 @@ describe("PlusScreen: the table scrolls, the footer never does", () => {
   it("before the trial: the price, the renewal line and one button, in the footer; no first-charge date", () => {
     show({ kind: "free", trial: true });
     const footer = screen.getByTestId("plus-footer");
-    expect(within(footer).getByTestId("plus-price")).toHaveTextContent("7 days free, then US$59.99 a year");
-    expect(footer).toHaveTextContent(m.renews);
+    // The words (UX, board 2): Try 7 days free, then the price and the renewal under the button.
+    expect(within(footer).getByTestId("plus-price")).toHaveTextContent(m.trialFree);
+    expect(within(footer).getByTestId("plus-renews")).toHaveTextContent("Then US$59.99 a year · renews automatically");
     expect(within(footer).getByTestId("plus-cancel")).toHaveTextContent(m.cancelWhere);
     expect(within(footer).getByTestId("plus-start")).toHaveTextContent(m.startTrial);
     expect(within(footer).getByTestId("plus-not-now")).toHaveAttribute("href", "/app/me");
@@ -64,6 +65,7 @@ describe("PlusScreen: the table scrolls, the footer never does", () => {
   it("the free week used: the yearly price and Start Plus", () => {
     show({ kind: "free", trial: false });
     expect(screen.getByTestId("plus-price")).toHaveTextContent("US$59.99 a year");
+    expect(screen.getByTestId("plus-renews")).toHaveTextContent(m.renews);
     expect(screen.getByTestId("plus-start")).toHaveTextContent(m.start);
   });
 
@@ -103,8 +105,8 @@ describe("PlusScreen: the table scrolls, the footer never does", () => {
     const { unmount } = show({ kind: "free", trial: true });
     const footer = screen.getByTestId("plus-footer");
     expect(screen.getByTestId("plus-screen")).toHaveAttribute("data-large");
-    expect(within(footer).getByTestId("plus-price")).toBeTruthy();
-    expect(within(footer).getByTestId("plus-renews")).toHaveTextContent(m.renews);
+    expect(within(footer).getByTestId("plus-price")).toHaveTextContent(m.trialFree);
+    expect(within(footer).getByTestId("plus-renews")).toHaveTextContent("Then US$59.99 a year · renews automatically");
     expect(within(footer).getByTestId("plus-start")).toBeTruthy();
     expect(within(footer).queryByTestId("plus-not-now")).toBeNull();
     expect(within(screen.getByTestId("plus-rest")).getByTestId("plus-not-now")).toBeTruthy();

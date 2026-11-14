@@ -182,9 +182,10 @@ export function PlusScreen({ view, price, started }: { view: PlusView; price: st
     </>
   ) : (
     <>
-      {/* At large text the short price, one line: the button already names the free week. */}
+      {/* The words (UX, board 2): with the free week, "Try 7 days free" here and the price under
+          the button with the renewal; without it, the yearly price here. The same at every size. */}
       <p data-testid="plus-price" className={`font-medium ${large ? "leading-tight" : ""}`}>
-        {view.trial && !large ? t("footerTrial", { price }) : t("priceYear", { price })}
+        {view.trial ? t("trialFree") : t("priceYear", { price })}
       </p>
       {/* At large text its lines sit closer (de: three lines at 32 px), so the content keeps room.
           The order (UX, the Web Tester's board comparison): the price, the button, the renewal
@@ -194,7 +195,7 @@ export function PlusScreen({ view, price, started }: { view: PlusView; price: st
       </button>
       {/* In em, so it follows the footer's cap at large text (the same size as before otherwise). */}
       <p data-testid="plus-renews" className={`text-[0.875em] text-muted ${large ? "leading-snug" : ""}`}>
-        {t("renews")}
+        {view.trial ? t("renewsTrial", { price }) : t("renews")}
       </p>
       {/* Where to cancel (the Reviewer's ruling): here, or at the end of the content at large text,
           where the pinned part keeps only the price, the button and the renewal. */}
