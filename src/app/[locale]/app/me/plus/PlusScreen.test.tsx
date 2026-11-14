@@ -34,8 +34,9 @@ describe("PlusScreen: the table scrolls, the footer never does", () => {
   it("before the trial: the price, the renewal line and one button, in the footer; no first-charge date", () => {
     show({ kind: "free", trial: true });
     const footer = screen.getByTestId("plus-footer");
-    expect(within(footer).getByTestId("plus-price")).toHaveTextContent("7 days free, then US$59.99 a year");
-    expect(footer).toHaveTextContent(m.renews);
+    // The words (UX, board 2): Try 7 days free, then the price and the renewal under the button.
+    expect(within(footer).getByTestId("plus-price")).toHaveTextContent(m.trialFree);
+    expect(within(footer).getByTestId("plus-renews")).toHaveTextContent("Then US$59.99 a year · renews automatically");
     expect(within(footer).getByTestId("plus-cancel")).toHaveTextContent(m.cancelWhere);
     expect(within(footer).getByTestId("plus-start")).toHaveTextContent(m.startTrial);
     expect(within(footer).getByTestId("plus-not-now")).toHaveAttribute("href", "/app/me");
@@ -64,6 +65,7 @@ describe("PlusScreen: the table scrolls, the footer never does", () => {
   it("the free week used: the yearly price and Start Plus", () => {
     show({ kind: "free", trial: false });
     expect(screen.getByTestId("plus-price")).toHaveTextContent("US$59.99 a year");
+    expect(screen.getByTestId("plus-renews")).toHaveTextContent(m.renews);
     expect(screen.getByTestId("plus-start")).toHaveTextContent(m.start);
   });
 
@@ -94,7 +96,8 @@ describe("PlusScreen: the table scrolls, the footer never does", () => {
 
   it("large text (the footer over 40 % of the screen): the page scrolls, the bar steps aside, only the price, the renewal line and the button stay pinned", () => {
     vi.stubGlobal("ResizeObserver", class { observe() {} disconnect() {} });
-    const heights: Record<string, number> = { "plus-footer": 400, "plus-scroll": 60 };
+    // 300 of 640: over 40 % (large), under 60 % (still pinned; over it unpins, #271's rule).
+    const heights: Record<string, number> = { "plus-footer": 300, "plus-scroll": 60 };
     const rect = vi.spyOn(Element.prototype, "getBoundingClientRect").mockImplementation(function (this: Element) {
       return { height: heights[this.getAttribute("data-testid") ?? ""] ?? 0 } as DOMRect;
     });
@@ -102,14 +105,14 @@ describe("PlusScreen: the table scrolls, the footer never does", () => {
     const { unmount } = show({ kind: "free", trial: true });
     const footer = screen.getByTestId("plus-footer");
     expect(screen.getByTestId("plus-screen")).toHaveAttribute("data-large");
-    expect(within(footer).getByTestId("plus-price")).toBeTruthy();
-    expect(within(footer).getByTestId("plus-renews")).toHaveTextContent(m.renews);
+    expect(within(footer).getByTestId("plus-price")).toHaveTextContent(m.trialFree);
+    expect(within(footer).getByTestId("plus-renews")).toHaveTextContent("Then US$59.99 a year · renews automatically");
     expect(within(footer).getByTestId("plus-start")).toBeTruthy();
     expect(within(footer).queryByTestId("plus-not-now")).toBeNull();
     expect(within(screen.getByTestId("plus-rest")).getByTestId("plus-not-now")).toBeTruthy();
     // Fixed at the bottom, with room kept under the page's end for it (its measured height).
     expect(footer.className).toContain("fixed");
-    expect(document.body.style.paddingBottom).toBe("400px");
+    expect(document.body.style.paddingBottom).toBe("300px");
     // One scroll for the page: the table's box is no longer a scroll area of its own.
     expect(screen.getByTestId("plus-scroll")).not.toHaveAttribute("tabindex");
     expect(document.documentElement).toHaveAttribute("data-tabs-aside");
@@ -202,6 +205,23 @@ describe("PlusScreen: the footer's order, and the short screen (#271's unpin, re
     expect(screen.getByTestId("plus-screen")).toHaveAttribute("data-unpinned");
     expect(screen.getByTestId("plus-footer").className).not.toContain("fixed");
     expect(document.body.style.paddingBottom).toBe("");
+    unmount();
+    rect.mockRestore();
+    vi.unstubAllGlobals();
+  });
+
+  it("the tap test (UX, 14 Nov): pinned leaves the content 40 %+, but Not now can't come out from under the pinned part at the end: nothing pinned", () => {
+    vi.stubGlobal("ResizeObserver", class { observe() {} disconnect() {} });
+    // 300 of 640 (pinned by the 60 % rule), but Not now's centre at the page's end is at 522 px,
+    // under the pinned part's top at 340 px: a tap there would land on the price or Start.
+    const boxes: Record<string, { top: number; height: number }> = { "plus-footer": { top: 340, height: 300 }, "plus-scroll": { top: 0, height: 60 }, "plus-not-now": { top: 500, height: 44 } };
+    const rect = vi.spyOn(Element.prototype, "getBoundingClientRect").mockImplementation(function (this: Element) {
+      return (boxes[this.getAttribute("data-testid") ?? ""] ?? { top: 0, height: 0 }) as DOMRect;
+    });
+    vi.stubGlobal("innerHeight", 640);
+    const { unmount } = show({ kind: "free", trial: true });
+    expect(screen.getByTestId("plus-screen")).toHaveAttribute("data-unpinned");
+    expect(screen.getByTestId("plus-footer").className).not.toContain("fixed");
     unmount();
     rect.mockRestore();
     vi.unstubAllGlobals();

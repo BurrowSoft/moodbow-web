@@ -198,7 +198,8 @@ describe("POST /api/checkout/stripe", () => {
     await post();
     const keys = stripe.checkout.sessions.create.mock.calls.map((c) => (c[1] as { idempotencyKey: string }).idempotencyKey);
     expect(keys[0]).toBe(keys[1]);
-    expect(keys[0]).toMatch(/^plus-checkout-u1-en-trial-\d+$/);
+    // The charged currency is part of the key (one shared deal, #315).
+    expect(keys[0]).toMatch(/^plus-checkout-u1-en-[a-z]{3}-trial-\d+$/);
   });
 
   it("a key replaying an expired session: the next key in the sequence", async () => {
