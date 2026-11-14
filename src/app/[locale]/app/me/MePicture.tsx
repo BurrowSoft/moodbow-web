@@ -67,17 +67,29 @@ export function MePicture({ uid }: { uid: string }) {
         data-has-picture={url ? "" : undefined}
         disabled={busy}
         onClick={() => input.current?.click()}
-        className="relative flex aspect-[2/1] max-h-[220px] w-full items-center justify-center overflow-hidden rounded-[20px] bg-[radial-gradient(90%_90%_at_50%_40%,#FDF3F6_0%,#F6E6EE_70%,#F1DEE8_100%)]"
+        className="relative flex aspect-[16/10] w-full max-w-[560px] items-center justify-center overflow-hidden rounded-[20px] bg-[radial-gradient(90%_90%_at_50%_40%,#FDF3F6_0%,#F6E6EE_70%,#F1DEE8_100%)]"
       >
         {url ? (
           // eslint-disable-next-line @next/next/no-img-element -- a local object URL, nothing to optimise
           <img src={url} alt="" data-testid="me-picture-img" className="absolute inset-0 h-full w-full object-cover" />
         ) : (
+          <>
+            {/* The faint sparkle dots on the default rainbow (board 6b), gone with a picture. */}
+            <svg aria-hidden="true" data-testid="me-picture-sparkles" width="100%" height="100%" viewBox="0 0 350 220" preserveAspectRatio="xMidYMid slice" className="absolute inset-0 opacity-50">
+              <g fill="#FFFFFF">
+                <circle cx="40" cy="40" r="3" />
+                <circle cx="300" cy="60" r="2.5" />
+                <circle cx="270" cy="170" r="3" />
+                <circle cx="70" cy="180" r="2" />
+                <circle cx="180" cy="30" r="2" />
+              </g>
+            </svg>
           <svg aria-hidden="true" width="128" height="128" viewBox="0 0 64 64" fill="none" strokeLinecap="round" strokeWidth="6" className="relative">
             <path d="M8 46a24 24 0 0 1 48 0" stroke="#E07A8E" />
             <path d="M16 46a16 16 0 0 1 32 0" stroke="#F2C66D" />
             <path d="M24 46a8 8 0 0 1 16 0" stroke="#A99BD6" />
           </svg>
+          </>
         )}
         <span aria-hidden="true" className="absolute right-[12px] bottom-[12px] flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-[0_2px_8px_rgba(43,36,56,.16)]">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A8456A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

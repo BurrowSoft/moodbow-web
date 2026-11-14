@@ -42,6 +42,8 @@ describe("MePicture (board 6b): their own picture, this browser only", () => {
     expect(screen.getByRole("button", { name: m.pictureChoose })).toBeInTheDocument();
     expect(screen.queryByTestId("me-picture-img")).toBeNull();
     expect(screen.queryByTestId("me-picture-remove")).toBeNull();
+    // The sparkle dots on the default rainbow, hidden from screen readers.
+    expect(screen.getByTestId("me-picture-sparkles")).toHaveAttribute("aria-hidden", "true");
     expect(screen.getByTestId("me-picture-input")).toHaveAttribute("accept", "image/*");
   });
   it("a picture chosen: re-encoded, kept, shown (decorative: the button names it); Remove brings the rainbow back", async () => {
@@ -50,6 +52,7 @@ describe("MePicture (board 6b): their own picture, this browser only", () => {
     expect(encodePicture).toHaveBeenCalledTimes(1);
     expect(stored.get("u1")).toBeDefined();
     expect(screen.getByTestId("me-picture-img")).toHaveAttribute("alt", "");
+    expect(screen.queryByTestId("me-picture-sparkles")).toBeNull();
     await act(async () => fireEvent.click(screen.getByRole("button", { name: m.pictureRemove })));
     expect(stored.has("u1")).toBe(false);
     expect(screen.queryByTestId("me-picture-img")).toBeNull();

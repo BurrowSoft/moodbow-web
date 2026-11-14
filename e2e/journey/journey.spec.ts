@@ -2191,8 +2191,8 @@ test("Insights for a free person: the example, its watermark whole at 320 and 12
 
 // Me's own picture (Vitor, 14 Nov; board 6b): this browser only, and no metadata survives. A JPEG
 // carrying EXIF (with a GPS-like marker) goes in; what IndexedDB keeps is a fresh JPEG with no APP1
-// EXIF segment and no marker, the centre 2:1 at most 1200 × 600; Remove picture empties it.
-test("Me's picture: kept in this browser, re-encoded without EXIF, 2:1; Remove brings the rainbow back", async ({ page, browserName }) => {
+// EXIF segment and no marker, the centre 16:10 at most 1200 × 750; Remove picture empties it.
+test("Me's picture: kept in this browser, re-encoded without EXIF, 16:10; Remove brings the rainbow back", async ({ page, browserName }) => {
   test.skip(browserName !== "chromium", "createImageBitmap and IndexedDB reads, checked in Chromium");
   const email = newEmail();
   try {
@@ -2242,7 +2242,7 @@ test("Me's picture: kept in this browser, re-encoded without EXIF, 2:1; Remove b
           req.onerror = () => done(null);
         }),
     );
-    expect(kept).toEqual({ count: 1, type: "image/jpeg", exif: false, marker: false, width: 900, height: 450 });
+    expect(kept).toEqual({ count: 1, type: "image/jpeg", exif: false, marker: false, width: 900, height: 563 });
     // Still there after a reload (this browser keeps it).
     await page.reload();
     await expect(page.getByTestId("me-picture-img")).toBeVisible({ timeout: 15_000 });

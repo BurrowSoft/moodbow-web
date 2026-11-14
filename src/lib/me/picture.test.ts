@@ -15,17 +15,17 @@ const fromCanvas = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, ...[..."J
 
 afterEach(() => vi.unstubAllGlobals());
 
-describe("cropFor: the centre 2:1, at most 1200 × 600", () => {
+describe("cropFor: the centre 16:10 (board 6b), at most 1200 × 750", () => {
   it("a tall phone photo: its full width, the middle band", () => {
-    expect(cropFor(3000, 4000)).toEqual({ sx: 0, sy: 1250, sw: 3000, sh: 1500, width: 1200, height: 600 });
+    expect(cropFor(3000, 4000)).toEqual({ sx: 0, sy: 1062.5, sw: 3000, sh: 1875, width: 1200, height: 750 });
   });
   it("a wide panorama: its full height, the middle part", () => {
-    expect(cropFor(5000, 1000)).toEqual({ sx: 1500, sy: 0, sw: 2000, sh: 1000, width: 1200, height: 600 });
+    expect(cropFor(5000, 1000)).toEqual({ sx: 1700, sy: 0, sw: 1600, sh: 1000, width: 1200, height: 750 });
   });
   it("a small picture is never enlarged", () => {
     const c = cropFor(400, 300);
     expect(c.width).toBe(400);
-    expect(c.height).toBe(200);
+    expect(c.height).toBe(250);
     expect(c.width).toBeLessThanOrEqual(PICTURE_MAX.width);
   });
 });
@@ -51,7 +51,7 @@ describe("encodePicture: only pixels survive (no EXIF, no GPS)", () => {
     expect(out).not.toBe(file);
     expect(out!.type).toBe("image/jpeg");
     expect(hasExif(new Uint8Array(await out!.arrayBuffer()))).toBe(false);
-    expect(drawImage).toHaveBeenCalledWith(bitmap, 0, 1250, 3000, 1500, 0, 0, 1200, 600);
+    expect(drawImage).toHaveBeenCalledWith(bitmap, 0, 1062.5, 3000, 1875, 0, 0, 1200, 750);
     expect(bitmap.close).toHaveBeenCalled();
   });
   it("not an image, or one the browser can't read: nothing kept", async () => {
