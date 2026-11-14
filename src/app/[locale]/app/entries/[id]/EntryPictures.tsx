@@ -65,8 +65,9 @@ export function EntryPictures({ entryId, pictures, onChange, add }: { entryId: s
     <section aria-label={t("picturesRegion")} data-testid="entry-pictures" className="space-y-2">
       {/* Three across, but never narrower than 5.5rem: at large text the tiles go to two or one per
           row, so the 44 px ✕ always leaves the open button a clear area (the a11y sweep, #326:
-          axe target-size at 300 % on 320 px). Gaps in px. */}
-      <ul className="grid grid-cols-[repeat(auto-fill,minmax(max(5.5rem,calc((100%_-_16px)/3)),1fr))] gap-[8px]">
+          axe target-size at 300 % on 320 px), and never wider than the list itself (min(100%, …):
+          5.5rem at 300 % is 264 px, past a 224 px column). Gaps in px. */}
+      <ul className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,max(5.5rem,calc((100%_-_16px)/3))),1fr))] gap-[8px]">
         {pictures.map((p, i) => (
           <li key={p.id} className="relative" data-testid="entry-picture">
             <button type="button" onClick={() => setViewing(i)} aria-label={t("pictureOpen", { n: i + 1, total: pictures.length })} data-testid="entry-picture-open" className={tile}>
