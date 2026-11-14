@@ -65,8 +65,13 @@ export default async function EntryPage({ params, searchParams }: PageProps<"/[l
   // no strip, the same as a day without one; the entry is still all here.
   const entry = data as Entry;
   // Memories (034): this entry's "Bring this back" months, only where moment-recall-live is on (a
-  // database without 034 has no such column). Unreadable: all three, as stored by default.
-  const recall = pageGate("moment-recall-live") !== "hidden" ? parseRecall((await supabase.from("entries").select("recall_months").eq("id", entry.id).maybeSingle()).data?.recall_months) : undefined;
+  // database without 034 has no such column). A read that fails: no chips (undefined), never "all
+  // three", or one tap would overwrite what's really stored (the Reviewer, #320).
+  let recall: ReturnType<typeof parseRecall> | undefined;
+  if (pageGate("moment-recall-live") !== "hidden") {
+    const read = await supabase.from("entries").select("recall_months").eq("id", entry.id).maybeSingle();
+    recall = read.error || !read.data ? undefined : parseRecall((read.data as { recall_months?: unknown }).recall_months);
+  }
   const { data: checkIn } = await supabase
     .from("check_ins")
     .select("local_date, mood, sleep_hours, sleep_quality, exercise_minutes, stress, updated_at")
