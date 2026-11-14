@@ -1800,7 +1800,7 @@ test("large text: the Plus screen at 300 % on a 320 px phone, free and in the fr
     });
     expect(hit, "de, 320 × 480 at 300 %: the point under Not now is Not now").toBe("plus-not-now");
     await page.getByTestId("plus-rest").getByTestId("plus-not-now").click();
-    await expect(page).toHaveURL(//de/app/me$/, { timeout: 15_000 });
+    await expect(page).toHaveURL(RegExp("/de/app/me$"), { timeout: 15_000 });
     await page.setViewportSize({ width: 320, height: 640 });
     await grantPlusTrial(email);
     for (const [route, saved] of [["", "en"], ["/de", "de"]] as const) {
