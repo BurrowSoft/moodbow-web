@@ -8,6 +8,8 @@ export default defineConfig({
   ...base,
   testDir: "./e2e/journey",
   testIgnore: undefined,
+  // THROWAWAY perf sweep (never merged): only the measuring spec.
+  testMatch: "**/perf-sweep.spec.ts",
   retries: 0,
   projects: [{ name: "desktop", use: { ...devices["Desktop Chrome"], locale: "en-US" } }],
   // The server needs only the public staging values; the admin key stays in
