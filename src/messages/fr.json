@@ -720,6 +720,7 @@
     "remindersOnTheDay": "Le jour même",
     "remindersDay": "1 jour avant",
     "remindersWeek": "1 semaine avant",
+    "remindersTwoWeeks": "2 semaines avant",
     "remindersMonth": "1 mois avant",
     "remindersDays": "{n} jours avant",
     "remindersDaysBefore": "Jours avant",

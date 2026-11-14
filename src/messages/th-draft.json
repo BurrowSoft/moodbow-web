@@ -1763,5 +1763,10 @@
     "key": "letters.remindersInvalid",
     "en": "A reminder can't be on or before today, or after the day the letter opens.",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "letters.remindersTwoWeeks",
+    "en": "2 weeks before",
+    "reason": "UX draft (native read pending)"
   }
 ]

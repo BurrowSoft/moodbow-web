@@ -10,7 +10,9 @@ export type LetterReminder = { days_before: number; time: string; on: boolean };
 
 export const MAX_HEADS_UPS = 3;
 export const DEFAULT_REMINDERS: LetterReminder[] = [{ days_before: 0, time: "09:00", on: true }];
-export const QUICK_DAYS = [1, 7, 30] as const;
+// A heads-up's choices (UX, boards 26/26b v54): 1 day, 1 week, 2 weeks, 1 month before. The server
+// takes any whole number of days (an app may save others; they're shown as "{n} days before").
+export const QUICK_DAYS = [1, 7, 14, 30] as const;
 
 const TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
 const iso = (d: Date) => d.toISOString().slice(0, 10);

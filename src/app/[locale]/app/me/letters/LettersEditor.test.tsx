@@ -217,12 +217,27 @@ describe("LettersEditor: reminders, like alarms (Vitor, 14 Nov; 033)", () => {
       { days_before: 7, time: "20:30", on: true },
     ]);
   });
+  it("board 26b: a heads-up's label chooses 1 day, 1 week, 2 weeks or 1 month; one that wouldn't fit, or is used, isn't offered", () => {
+    page();
+    // A letter opening in 1 month (2026-11-10 to 2026-12-10, 30 days): 1 month before doesn't fit.
+    fireEvent.click(screen.getByTestId("letter-reminder-add"));
+    const options = () => [...screen.getAllByTestId("letter-reminder-days").at(-1)!.querySelectorAll("option")].map((o) => o.textContent);
+    expect(options()).toEqual([m.remindersDay, m.remindersWeek, m.remindersTwoWeeks]);
+    // Another row's choice isn't offered here.
+    fireEvent.click(screen.getByTestId("letter-reminder-add"));
+    expect(options()).toEqual([m.remindersWeek, m.remindersTwoWeeks]);
+    fireEvent.click(screen.getByTestId("letter-reminder-add"));
+    // At 3, Add goes; the switch says its state (role="switch").
+    expect(screen.queryByTestId("letter-reminder-add")).toBeNull();
+    expect(screen.getAllByRole("switch")).toHaveLength(4);
+  });
   it("a heads-up that no longer fits a shorter Open it: said, never sent", async () => {
     page();
     fireEvent.click(screen.getByTestId("letter-months-12"));
     fireEvent.click(screen.getByTestId("letter-reminder-add"));
-    fireEvent.change(screen.getByTestId("letter-reminder-days"), { target: { value: "60" } });
-    fireEvent.blur(screen.getByTestId("letter-reminder-days"));
+    // A choice (UX, board 26b): 1 month before, which fits a year away...
+    fireEvent.change(screen.getByTestId("letter-reminder-days"), { target: { value: "30" } });
+    // ...but not a letter opening in 1 month (30 days): still shown, and Save says why.
     fireEvent.click(screen.getByTestId("letter-months-1"));
     fireEvent.change(screen.getByTestId("letter-text"), { target: { value: "Dear me." } });
     await act(async () => fireEvent.click(screen.getByTestId("letter-save")));

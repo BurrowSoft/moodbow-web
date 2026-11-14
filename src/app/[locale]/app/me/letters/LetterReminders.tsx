@@ -1,84 +1,102 @@
 "use client";
 
-import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { headsUpFits, MAX_HEADS_UPS, QUICK_DAYS, type LetterReminder } from "@/lib/journal/letterReminders";
 
-// The letter editor's Reminders (Vitor, 14 Nov): on the day (on by default, 09:00) and up to 3
-// heads-ups before it, each with its days, its own time and an on/off, and × to remove. The web
-// schedules nothing: the app on the person's phone does, from what's saved with the letter.
-const field = "rounded-xl border border-border bg-surface px-[8px] py-[6px] text-text";
+// The letter editor's Reminders (Vitor, 14 Nov; storybook boards 26/26b v54, spec "Letter reminders:
+// the row"): a white card; each row its label, its time (a pill), an on/off switch at the end and,
+// for a heads-up, × to remove. On the day is on by default at 09:00. A heads-up's label (with ▾)
+// chooses 1 day, 1 week, 2 weeks or 1 month before; choices that wouldn't fit (on or before today)
+// or are already used aren't offered. Add picks the first free choice that fits, and goes at 3 or
+// when none fits. The web schedules nothing: the app on the person's phone does, from what's saved.
+const pill = "rounded-[10px] bg-pill px-[12px] min-h-9 text-sm font-medium text-text";
+
+function Switch({ on, label, onChange, testId }: { on: boolean; label: string; onChange: (on: boolean) => void; testId: string }) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={on}
+      aria-label={label}
+      data-testid={testId}
+      onClick={() => onChange(!on)}
+      className="inline-flex h-11 w-12 shrink-0 items-center justify-center"
+    >
+      <span aria-hidden="true" className={`relative block h-[26px] w-[44px] rounded-full ${on ? "bg-accent" : "bg-border"}`}>
+        <span className={`absolute top-[3px] block h-5 w-5 rounded-full bg-surface ${on ? "right-[3px]" : "left-[3px]"}`} />
+      </span>
+    </button>
+  );
+}
 
 export function LetterReminders({ value, onChange, today, opens }: { value: LetterReminder[]; onChange: (next: LetterReminder[]) => void; today: string; opens: string }) {
   const t = useTranslations("letters");
-  // A typed number applies when the field is left; one that doesn't fit (taken, or on or before
-  // today) goes back to what it was, and the line under it says why (the Reviewer, #319).
-  const [misfit, setMisfit] = useState(false);
   const day = value.find((r) => r.days_before === 0) ?? { days_before: 0, time: "09:00", on: true };
   const heads = value.filter((r) => r.days_before > 0);
   const set = (next: LetterReminder[]) => onChange([...next].sort((a, b) => a.days_before - b.days_before));
   const others = (days: number) => value.filter((r) => r.days_before !== days);
   const update = (days: number, patch: Partial<LetterReminder>) => set(value.map((r) => (r.days_before === days ? { ...r, ...patch } : r)));
-  // A heads-up's first choice: the first quick one that fits and isn't taken.
-  const free = QUICK_DAYS.find((d) => headsUpFits(d, today, opens) && !value.some((r) => r.days_before === d));
-  const daysLabel = (n: number) => (n === 1 ? t("remindersDay") : n === 7 ? t("remindersWeek") : n === 30 ? t("remindersMonth") : t("remindersDays", { n }));
+  const fits = (d: number) => headsUpFits(d, today, opens);
+  // Add's choice: the first that fits and isn't used.
+  const free = QUICK_DAYS.find((d) => fits(d) && !value.some((r) => r.days_before === d));
+  const daysLabel = (n: number) =>
+    n === 1 ? t("remindersDay") : n === 7 ? t("remindersWeek") : n === 14 ? t("remindersTwoWeeks") : n === 30 ? t("remindersMonth") : t("remindersDays", { n });
 
   return (
-    <fieldset data-testid="letter-reminders" className="flex flex-col gap-3">
-      <legend className="mb-1 font-medium text-text">{t("remindersTitle")}</legend>
-      <div className="flex flex-wrap items-center gap-3">
-        <label className="flex min-h-11 items-center gap-2 text-text">
-          <input type="checkbox" checked={day.on} onChange={(e) => update(0, { on: e.target.checked })} data-testid="letter-reminder-day-on" />
-          {t("remindersOnTheDay")}
-        </label>
-        <input type="time" aria-label={t("remindersTimeFor", { when: t("remindersOnTheDay") })} value={day.time} onChange={(e) => e.target.value && update(0, { time: e.target.value })} data-testid="letter-reminder-day-time" className={field} />
+    <fieldset data-testid="letter-reminders" className="flex flex-col rounded-2xl border border-border bg-surface px-[16px] pt-[8px] pb-[12px]">
+      <legend className="sr-only">{t("remindersTitle")}</legend>
+      <p aria-hidden="true" className="pt-[8px] pb-[2px] font-medium text-text">
+        {t("remindersTitle")}
+      </p>
+      <div className="flex min-h-12 flex-wrap items-center gap-x-[10px]">
+        <span className="min-w-0 flex-1 text-sm text-text">{t("remindersOnTheDay")}</span>
+        <input type="time" aria-label={t("remindersTimeFor", { when: t("remindersOnTheDay") })} value={day.time} onChange={(e) => e.target.value && update(0, { time: e.target.value })} data-testid="letter-reminder-day-time" className={pill} />
+        <Switch on={day.on} label={t("remindersOnFor", { when: t("remindersOnTheDay") })} onChange={(on) => update(0, { on })} testId="letter-reminder-day-on" />
+        <span aria-hidden="true" className="w-11 shrink-0" />
       </div>
-      {heads.map((r) => (
-        <div key={r.days_before} data-testid="letter-reminder" className="flex flex-wrap items-center gap-3">
-          <label className="flex min-h-11 items-center gap-2 text-text">
-            <input type="checkbox" checked={r.on} onChange={(e) => update(r.days_before, { on: e.target.checked })} aria-label={t("remindersOnFor", { when: daysLabel(r.days_before) })} data-testid="letter-reminder-on" />
-          </label>
-          <input
-            key={r.days_before}
-            type="number"
-            min={1}
-            max={Math.max(1, Math.min(366, Math.round((Date.parse(`${opens}T00:00:00Z`) - Date.parse(`${today}T00:00:00Z`)) / 86_400_000) - 1))}
-            defaultValue={r.days_before}
-            aria-label={t("remindersDaysBefore")}
-            onBlur={(e) => {
-              const n = Number(e.target.value);
-              if (n === r.days_before) return;
-              if (headsUpFits(n, today, opens) && !others(r.days_before).some((o) => o.days_before === n)) {
-                setMisfit(false);
-                set([...others(r.days_before), { ...r, days_before: n }]);
-              } else {
-                e.target.value = String(r.days_before);
-                setMisfit(true);
-              }
-            }}
-            data-testid="letter-reminder-days"
-            className={`${field} w-[5em]`}
-          />
-          <span className="text-text">{daysLabel(r.days_before)}</span>
-          <input type="time" aria-label={t("remindersTimeFor", { when: daysLabel(r.days_before) })} value={r.time} onChange={(e) => e.target.value && update(r.days_before, { time: e.target.value })} data-testid="letter-reminder-time" className={field} />
-          <button type="button" aria-label={t("remindersRemove", { when: daysLabel(r.days_before) })} onClick={() => set(others(r.days_before))} data-testid="letter-reminder-remove" className="inline-flex h-11 w-11 items-center justify-center rounded-full text-muted">
-            <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <path d="M6 6l12 12M18 6L6 18" />
-            </svg>
-          </button>
-        </div>
-      ))}
+      {heads.map((r) => {
+        // The choices: those that fit and aren't another row's, and always this row's own (so a
+        // shorter Open it shows what's there, and Save says why it can't go).
+        const choices = [...new Set([...QUICK_DAYS.filter((d) => d === r.days_before || (fits(d) && !others(r.days_before).some((o) => o.days_before === d))), r.days_before])].sort((a, b) => a - b);
+        return (
+          <div key={r.days_before} data-testid="letter-reminder" className="flex min-h-12 flex-wrap items-center gap-x-[10px]">
+            <label className="relative flex min-h-11 min-w-0 flex-1 items-center text-sm text-text">
+              <span className="sr-only">{t("remindersDaysBefore")}</span>
+              <select
+                value={r.days_before}
+                onChange={(e) => set([...others(r.days_before), { ...r, days_before: Number(e.target.value) }])}
+                data-testid="letter-reminder-days"
+                className="min-h-11 w-full min-w-0 cursor-pointer appearance-none bg-transparent pe-[20px] text-sm text-text [overflow-wrap:anywhere]"
+              >
+                {choices.map((d) => (
+                  <option key={d} value={d}>
+                    {daysLabel(d)}
+                  </option>
+                ))}
+              </select>
+              <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="pointer-events-none absolute end-0 text-muted">
+                <path d="M6 9l6 7 6-7z" />
+              </svg>
+            </label>
+            <input type="time" aria-label={t("remindersTimeFor", { when: daysLabel(r.days_before) })} value={r.time} onChange={(e) => e.target.value && update(r.days_before, { time: e.target.value })} data-testid="letter-reminder-time" className={pill} />
+            <Switch on={r.on} label={t("remindersOnFor", { when: daysLabel(r.days_before) })} onChange={(on) => update(r.days_before, { on })} testId="letter-reminder-on" />
+            <button type="button" aria-label={t("remindersRemove", { when: daysLabel(r.days_before) })} onClick={() => set(others(r.days_before))} data-testid="letter-reminder-remove" className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-muted">
+              <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <path d="M6 6l12 12M18 6L6 18" />
+              </svg>
+            </button>
+          </div>
+        );
+      })}
       {heads.length < MAX_HEADS_UPS && free !== undefined && (
-        <button type="button" onClick={() => set([...value, { days_before: free, time: day.time, on: true }])} data-testid="letter-reminder-add" className="inline-flex min-h-11 w-fit items-center font-medium text-accent underline underline-offset-4">
+        <button type="button" onClick={() => set([...value, { days_before: free, time: day.time, on: true }])} data-testid="letter-reminder-add" className="inline-flex min-h-11 w-fit items-center gap-[6px] text-sm font-medium text-accent">
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+            <path d="M12 5v14M5 12h14" />
+          </svg>
           {t("remindersAdd")}
         </button>
       )}
-      {misfit && (
-        <p role="alert" data-testid="letter-reminder-misfit" className="text-sm text-text">
-          {t("remindersInvalid")}
-        </p>
-      )}
-      <p className="text-sm text-muted">{t("remindersApp")}</p>
+      <p className="text-xs text-muted">{t("remindersApp")}</p>
     </fieldset>
   );
 }
