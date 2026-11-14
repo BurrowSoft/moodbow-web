@@ -12,7 +12,7 @@ Il riepilogo mostra:
 
 In **Di cosa voglio parlare**, annota ciò di cui vorresti parlare.
 
-Usa solo i tuoi check-in e i tuoi Momenti: mai le tue lettere, il tuo piano di sicurezza o la tua lista di cose che ti aiutano. Qui non viene salvato né inviato nulla: quando esci, le tue scelte e le tue note spariscono.
+Usa solo i tuoi check-in e i tuoi Momenti: mai il tuo piano di sicurezza o la tua lista di cose che ti aiutano. Qui non viene salvato né inviato nulla: quando esci, le tue scelte e le tue note spariscono.
 
 {pending:appointment_live}Sul web, tocca **Stampa**. Per tenerne una copia, scegli di salvare come PDF nella finestra di stampa del browser.{/pending}{pending:app_appointment}Nell'app, tocca **Condividi come PDF** per inviarlo o salvarlo.{/pending}
 

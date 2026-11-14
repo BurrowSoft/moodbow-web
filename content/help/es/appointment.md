@@ -12,7 +12,7 @@ El resumen muestra:
 
 En **De qué quiero hablar**, apunta lo que te gustaría comentar.
 
-Solo usa tus registros y tus Momentos: nunca tus cartas, tu plan de seguridad ni tu lista de lo que te ayuda. Aquí no se guarda ni se envía nada: cuando sales, tus elecciones y tus notas desaparecen.
+Solo usa tus registros y tus Momentos: nunca tu plan de seguridad ni tu lista de lo que te ayuda. Aquí no se guarda ni se envía nada: cuando sales, tus elecciones y tus notas desaparecen.
 
 {pending:appointment_live}En la web, toca **Imprimir**. Para guardar una copia, elige guardar como PDF en la ventana de impresión de tu navegador.{/pending}{pending:app_appointment}En la app, toca **Compartir como PDF** para enviarlo o guardarlo.{/pending}
 

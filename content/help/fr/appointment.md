@@ -12,7 +12,7 @@ Le résumé montre :
 
 Dans **Ce dont je veux parler**, notez ce que vous aimeriez aborder.
 
-Il n'utilise que vos bilans et vos Moments forts : jamais vos lettres, votre plan de sécurité ni votre liste de ce qui vous aide. Rien ici n'est enregistré ni envoyé : quand vous partez, vos choix et vos notes disparaissent.
+Il n'utilise que vos bilans et vos Moments forts : jamais votre plan de sécurité ni votre liste de ce qui vous aide. Rien ici n'est enregistré ni envoyé : quand vous partez, vos choix et vos notes disparaissent.
 
 {pending:appointment_live}Sur le web, appuyez sur **Imprimer**. Pour garder une copie, choisissez d'enregistrer au format PDF dans la fenêtre d'impression de votre navigateur.{/pending}{pending:app_appointment}Dans l'app, appuyez sur **Partager en PDF** pour l'envoyer ou l'enregistrer.{/pending}
 

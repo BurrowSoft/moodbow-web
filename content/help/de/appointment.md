@@ -12,7 +12,7 @@ Die Zusammenfassung zeigt:
 
 Unter **Worüber ich sprechen möchte** notierst du, was du ansprechen willst.
 
-Sie nutzt nur deine Check-ins und Momente: nie deine Briefe, deinen Sicherheitsplan oder deine Liste mit dem, was dir hilft. Hier wird nichts gespeichert oder gesendet: Wenn du die Seite verlässt, sind deine Auswahl und deine Notizen weg.
+Sie nutzt nur deine Check-ins und Momente: nie deinen Sicherheitsplan oder deine Liste mit dem, was dir hilft. Hier wird nichts gespeichert oder gesendet: Wenn du die Seite verlässt, sind deine Auswahl und deine Notizen weg.
 
 {pending:appointment_live}Tippe im Web auf **Drucken**. Für eine Kopie wähle im Druckfenster deines Browsers „Als PDF speichern“.{/pending}{pending:app_appointment}Tippe in der App auf **Als PDF teilen**, um sie zu senden oder zu speichern.{/pending}
 

@@ -12,7 +12,7 @@ The summary shows:
 
 In **What I want to talk about**, note what you'd like to bring up.
 
-It uses only your check-ins and Moments: never your letters, your safety plan or your list of things that help. Nothing here is saved or sent: when you leave, your choices and notes are gone.
+It uses only your check-ins and Moments: never your safety plan or your list of things that help. Nothing here is saved or sent: when you leave, your choices and notes are gone.
 
 {pending:appointment_live}On the web, tap **Print**. To keep a copy, choose to save as PDF in your browser's print window.{/pending}{pending:app_appointment}In the app, tap **Share as PDF** to send or save it.{/pending}
 
