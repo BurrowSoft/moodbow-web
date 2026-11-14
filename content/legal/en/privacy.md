@@ -9,10 +9,10 @@
 ## Moodbow Privacy Policy
 Last updated: 11 November 2026
 
-Moodbow is a private journal made by Vitor Ribeiro Carvalho, trading as BurrowSoft (297 Moo 1, Baan Sanian, Mueang Nan, Nan 55000, Thailand), "we" in this policy. We wrote this to be read, not skimmed past. If anything is unclear, email support@moodbow.com.
+Moodbow is a private journal made by Vitor Carvalho, trading as BurrowSoft (297 Moo 1, Baan Sanian, Mueang Nan, Nan 55000, Thailand), "we" in this policy. We wrote this to be read, not skimmed past. If anything is unclear, email support@moodbow.com.
 
 ### The short version
-- Your journal is private to your account. BurrowSoft staff don't read journals; direct database access is limited to maintenance by Vitor Ribeiro Carvalho. We don't sell your data, show ads, or use your journal to train AI.
+- Your journal is private to your account. BurrowSoft staff don't read journals; direct database access is limited to maintenance by Vitor Carvalho. We don't sell your data, show ads, or use your journal to train AI.
 {pending:ai_live}- AI features are optional. If you turn them on, the parts of your journal needed for a reflection or report are sent to our AI provider, Anthropic, in the USA.{/pending}
 - You can export everything, or delete your account and everything in it, from the app{pending:web_journal_live} or the website{/pending}.
 
@@ -87,7 +87,7 @@ Wherever you live, you can:
 - **limit how we use it:** we use your journal only to run the service. You choose what you write, and you can edit or delete any of it. To limit anything else, write to us;
 - **object or ask questions**: email support@moodbow.com. We answer within 10 days.
 
-**How to make a request:** most of this is in Me, with no need to ask. Otherwise, email support@moodbow.com and say what you'd like done. Vitor Ribeiro Carvalho handles requests. We may ask you to write from your account's email so we know it's yours. Without an email on the account we can't confirm that, so use Me in the app.
+**How to make a request:** most of this is in Me, with no need to ask. Otherwise, email support@moodbow.com and say what you'd like done. Vitor Carvalho handles requests. We may ask you to write from your account's email so we know it's yours. Without an email on the account we can't confirm that, so use Me in the app.
 
 You can also complain to a data-protection authority: in Thailand, the Personal Data Protection Committee (PDPC); in Mexico, the Secretaría Anticorrupción y Buen Gobierno; in Argentina, the Agencia de Acceso a la Información Pública (AAIP); in Chile, the Agencia de Protección de Datos Personales, once it has begun work; in the EU or UK, your local authority; elsewhere, your country's authority.
 
@@ -101,6 +101,6 @@ Moodbow is for people aged 18 and older. We don't knowingly collect data from an
 If we change this policy in a way that matters, we'll update the date at the top and tell you in the app before the change applies.
 
 ### 9. Contact
-Vitor Ribeiro Carvalho, trading as BurrowSoft, 297 Moo 1, Baan Sanian, Mueang Nan, Nan 55000, Thailand · support@moodbow.com
+Vitor Carvalho, trading as BurrowSoft, 297 Moo 1, Baan Sanian, Mueang Nan, Nan 55000, Thailand · support@moodbow.com
 
 ---

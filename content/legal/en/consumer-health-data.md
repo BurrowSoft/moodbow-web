@@ -7,7 +7,7 @@
 ## Moodbow: Consumer Health Data Privacy Policy
 Last updated: 6 November 2026
 
-This policy is for people in Washington State, Nevada and anywhere else where a consumer health data law applies. It adds to our [Privacy Policy](https://www.moodbow.com/privacy). Moodbow is run by Vitor Ribeiro Carvalho, trading as BurrowSoft. Moodbow is a wellbeing journal, not a medical service.
+This policy is for people in Washington State, Nevada and anywhere else where a consumer health data law applies. It adds to our [Privacy Policy](https://www.moodbow.com/privacy). Moodbow is run by Vitor Carvalho, trading as BurrowSoft. Moodbow is a wellbeing journal, not a medical service.
 
 ### What we collect that may be consumer health data
 - Your journal entries and moments, which can reveal how you feel or your health.
