@@ -1583,5 +1583,35 @@
     "key": "plus.renewsTrial",
     "en": "Then {price} a year · renews automatically",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "today.setupLaterBody",
+    "en": "Your daily reminder is off. You can turn it on and choose a time whenever you like.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "today.setupLaterOpen",
+    "en": "Set it up",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "today.setupLaterClose",
+    "en": "Not now",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "onboarding.errConsentRequired",
+    "en": "Please tick the boxes above to create your account.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.todayCardTitle",
+    "en": "See your moods over time",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.todayCardTrial",
+    "en": "Try 7 days free. Then {price} a year.",
+    "reason": "UX draft (native read pending)"
   }
 ]

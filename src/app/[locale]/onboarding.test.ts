@@ -114,22 +114,6 @@ describe("onboardingStep", () => {
 });
 
 describe("giveConsent: the optional AI box (r1 §M3)", () => {
-  it("signed out, AI shown and ticked: the AI grant rides in the cookie to sign-up", async () => {
-    signedOut();
-    aiGate = "draft";
-    await redirected(giveConsent(idle, form({ privacy: "on", health: "on", ai: "on" })));
-    expect(parseConsentCookie(jar.get(CONSENT_COOKIE)!.value)).toEqual(grantedAtConsent(true));
-  });
-
-  it("not ticked, or ticked where it wasn't shown: no AI grant", async () => {
-    signedOut();
-    aiGate = "draft";
-    await redirected(giveConsent(idle, form({ privacy: "on", health: "on" })));
-    expect(parseConsentCookie(jar.get(CONSENT_COOKIE)!.value)).toEqual(grantedAtConsent());
-    aiGate = "hidden";
-    await redirected(giveConsent(idle, form({ privacy: "on", health: "on", ai: "on" })));
-    expect(parseConsentCookie(jar.get(CONSENT_COOKIE)!.value)).toEqual(grantedAtConsent());
-  });
 
   it("signed in: record_consents with the AI grant (the database then turns AI on)", async () => {
     signedIn();
@@ -148,12 +132,11 @@ describe("giveConsent", () => {
     expect(jar.size).toBe(0);
   });
 
-  it("signed out: a short-lived httpOnly cookie with the grants, then /sign-up", async () => {
+  it("signed out: straight to Create account, where the boxes are now (1.3 §6); no cookie, nothing recorded", async () => {
     signedOut();
-    expect(await redirected(giveConsent(idle, form({ privacy: "on", health: "on" })))).toEqual({ redirect: "/sign-up" });
-    const cookie = jar.get(CONSENT_COOKIE)!;
-    expect(parseConsentCookie(cookie.value)).toEqual(grantedAtConsent());
-    expect(cookie.options).toMatchObject({ httpOnly: true, sameSite: "lax", maxAge: 3600 });
+    aiGate = "draft";
+    expect(await redirected(giveConsent(idle, form({ privacy: "on", health: "on", ai: "on" })))).toEqual({ redirect: "/sign-up" });
+    expect(jar.size).toBe(0);
     expect(rpc).not.toHaveBeenCalled();
   });
 
@@ -186,7 +169,7 @@ describe("giveConsent", () => {
 
 describe("signUpFlow", () => {
   const withConsent = () => jar.set(CONSENT_COOKIE, { value: serializeConsent(grantedAtConsent()) });
-  const valid = { email: " New@Example.invalid ", password: "secret-123", age: "on", time_zone: "Asia/Bangkok", intent: "signup" };
+  const valid = { email: " New@Example.invalid ", password: "secret-123", privacy: "on", health: "on", age: "on", time_zone: "Asia/Bangkok", intent: "signup" };
 
   it("validates email, password length and 18+", async () => {
     withConsent();
@@ -197,9 +180,22 @@ describe("signUpFlow", () => {
     expect(auth.signUp).not.toHaveBeenCalled();
   });
 
-  it("no consent cookie → back to Consent, no account", async () => {
-    expect(await redirected(signUpFlow(idle, form(valid)))).toEqual({ redirect: "/consent" });
+  it("the consent boxes, each checked on the server whatever the browser sent: no account without them", async () => {
+    const { privacy: _p, ...noPrivacy } = valid;
+    const { health: _h, ...noHealth } = valid;
+    expect(await signUpFlow(idle, form(noPrivacy))).toMatchObject({ status: "error", error: "consentRequired" });
+    expect(await signUpFlow(idle, form(noHealth))).toMatchObject({ status: "error", error: "consentRequired" });
     expect(auth.signUp).not.toHaveBeenCalled();
+  });
+
+  it("the optional AI box: its grant only where it's shown and ticked", async () => {
+    auth.signUp.mockResolvedValue({ data: { user: { identities: [{}] }, session: null }, error: null });
+    aiGate = "draft";
+    await signUpFlow(idle, form({ ...valid, ai: "on" }));
+    expect(auth.signUp.mock.calls[0][0].options.data.consents.map((c: { kind: string }) => c.kind)).toEqual(["privacy", "terms", "health_data", "ai", "age_18"]);
+    aiGate = "hidden";
+    await signUpFlow(idle, form({ ...valid, ai: "on" }));
+    expect(auth.signUp.mock.calls[1][0].options.data.consents.map((c: { kind: string }) => c.kind)).toEqual(["privacy", "terms", "health_data", "age_18"]);
   });
 
   it("signs up with the consents (+ 18+), locale and time zone in metadata, then Check email", async () => {
@@ -212,9 +208,8 @@ describe("signUpFlow", () => {
     expect(arg.options.data.time_zone).toBe("Asia/Bangkok");
     expect(arg.options.data.consents.map((c: { kind: string }) => c.kind)).toEqual(["privacy", "terms", "health_data", "age_18"]);
     expect(arg.options.data).not.toHaveProperty("country");
-    // Kept: the action's re-render of /sign-up needs it, or the page would
-    // send the user back to /consent and lose Check email (#6 ❌).
-    expect(parseConsentCookie(jar.get(CONSENT_COOKIE)?.value)).toEqual(grantedAtConsent());
+    // Each with this build's version, as Consent records them (POLICY_VERSIONS).
+    expect(arg.options.data.consents.slice(0, 3)).toEqual(grantedAtConsent());
   });
 
   it("a bad time zone is sent as null (the DB falls back to UTC)", async () => {
@@ -234,14 +229,14 @@ describe("signUpFlow", () => {
     expect(await signUpFlow(idle, form(valid))).toMatchObject({ status: "error", error: "passwordShort" });
   });
 
-  it("I've confirmed my email: signs in with the in-memory password → /setup (cookie cleared), or says not confirmed yet", async () => {
+  it("I've confirmed my email: signs in with the in-memory password → Today (Setup after first use; an old cookie cleared), or says not confirmed yet", async () => {
     jar.set(CONSENT_COOKIE, { value: serializeConsent(grantedAtConsent()) });
     const check = { status: "checkEmail", email: "new@example.invalid" } as const;
     auth.signInWithPassword.mockResolvedValue({ error: { code: "email_not_confirmed" } });
     expect(await signUpFlow(check, form({ intent: "confirmed", password: "secret-123" }))).toEqual({ ...check, notice: "notConfirmed" });
     expect(jar.has(CONSENT_COOKIE)).toBe(true);
     auth.signInWithPassword.mockResolvedValue({ error: null });
-    expect(await redirected(signUpFlow(check, form({ intent: "confirmed", password: "secret-123" })))).toEqual({ redirect: "/setup" });
+    expect(await redirected(signUpFlow(check, form({ intent: "confirmed", password: "secret-123" })))).toEqual({ redirect: "/app" });
     expect(auth.signInWithPassword).toHaveBeenLastCalledWith({ email: "new@example.invalid", password: "secret-123" });
     expect(jar.has(CONSENT_COOKIE)).toBe(false);
   });
@@ -259,7 +254,7 @@ describe("signUpFlow", () => {
 // Supabase or out of order.
 describe("signUpFlow: every other answer", () => {
   const withConsent = () => jar.set(CONSENT_COOKIE, { value: serializeConsent(grantedAtConsent()) });
-  const valid = { email: "new@example.invalid", password: "secret-123", age: "on", time_zone: "Asia/Bangkok", intent: "signup" };
+  const valid = { email: "new@example.invalid", password: "secret-123", privacy: "on", health: "on", age: "on", time_zone: "Asia/Bangkok", intent: "signup" };
   const check = { status: "checkEmail", email: "new@example.invalid" } as const;
 
   it("Supabase's codes: email_exists → emailTaken, email_address_invalid → emailInvalid, anything else → generic (the email and 18+ kept)", async () => {
@@ -280,10 +275,10 @@ describe("signUpFlow: every other answer", () => {
     }
   });
 
-  it("no confirmation needed on the project (a session at once): the consent cookie goes and it's /setup", async () => {
+  it("no confirmation needed on the project (a session at once): an old consent cookie goes and it's Today", async () => {
     withConsent();
     auth.signUp.mockResolvedValue({ data: { user: { identities: [{}] }, session: { access_token: "x" } }, error: null });
-    expect(await redirected(signUpFlow(idle, form(valid)))).toEqual({ redirect: "/setup" });
+    expect(await redirected(signUpFlow(idle, form(valid)))).toEqual({ redirect: "/app" });
     expect(jar.has(CONSENT_COOKIE)).toBe(false);
   });
 

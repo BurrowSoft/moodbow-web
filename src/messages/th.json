@@ -195,6 +195,7 @@
     "checkEmailResend": "ส่งอีกครั้ง",
     "errPasswordShort": "กรุณาใช้อย่างน้อย 8 ตัวอักษร",
     "errAgeRequired": "Moodbow สำหรับผู้ที่มีอายุ 18 ปีขึ้นไป",
+    "errConsentRequired": "ติ๊กช่องด้านบนเพื่อสร้างบัญชีของคุณ",
     "errEmailTaken": "อีเมลนี้มีบัญชีอยู่แล้ว เข้าสู่ระบบแทนไหม?",
     "setupTitle": "ปรับให้เป็นของคุณ",
     "setupFocusTitle": "อยากให้ Moodbow ใส่ใจเรื่องอะไรเป็นพิเศษ?",
@@ -260,7 +261,10 @@
     "checkInConflictMine": "ของคุณ",
     "checkInConflictOther": "บันทึกไว้แล้ว",
     "checkInConflictKeepMine": "เก็บของฉัน",
-    "checkInConflictUseOther": "ใช้อันที่บันทึกไว้แล้ว"
+    "checkInConflictUseOther": "ใช้อันที่บันทึกไว้แล้ว",
+    "setupLaterBody": "การแจ้งเตือนรายวันของคุณปิดอยู่ คุณเปิดและเลือกเวลาได้ทุกเมื่อ",
+    "setupLaterOpen": "ตั้งค่า",
+    "setupLaterClose": "ไว้ทีหลัง"
   },
   "entry": {
     "writeButton": "เขียนเล่าเรื่องราววันนี้",
@@ -686,6 +690,8 @@
     "paletteDusk": "ยามสนธยา",
     "paletteSunrise": "รุ่งอรุณ",
     "paletteSea": "ทะเล",
-    "sheetThemes": "ธีมเพิ่มเติมเป็นส่วนหนึ่งของ Plus"
+    "sheetThemes": "ธีมเพิ่มเติมเป็นส่วนหนึ่งของ Plus",
+    "todayCardTitle": "ดูอารมณ์ของคุณตลอดช่วงเวลา",
+    "todayCardTrial": "ทดลองใช้ฟรี 7 วัน จากนั้น {price} ต่อปี"
   }
 }

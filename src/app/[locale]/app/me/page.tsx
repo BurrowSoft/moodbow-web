@@ -13,7 +13,6 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { tabMetadata } from "../pageMeta";
 import { SignOutButton } from "./SignOutButton";
 import { GetHelpNow } from "@/components/SafetyCard";
-import { JOURNAL_HEADING } from "@/lib/ui/journalLayout";
 import { AiSettings } from "./AiSettings";
 import { Appearance } from "./Appearance";
 import { LanguageRegion } from "./LanguageRegion";
@@ -62,7 +61,8 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
 
   return (
     <section className="space-y-8">
-      <h1 className={JOURNAL_HEADING}>{t("tabMe")}</h1>
+      {/* No visible title (Vitor, 14 Nov): help comes first; screen readers still hear "Me". */}
+      <h1 className="sr-only">{t("tabMe")}</h1>
       {/* Get help now (M8): at the top, on its own, AI or not; not repeated
           under Help (decision 128). */}
       <GetHelpNow country={me.profile?.country} testId="me-get-help" neutral />

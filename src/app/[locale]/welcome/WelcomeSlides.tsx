@@ -67,7 +67,7 @@ export function WelcomeSlides() {
       </div>
       <div className="mt-10 flex w-full flex-col items-center gap-4">
         {last ? (
-          <Link href="/consent" data-testid="welcome-start" className={`${primaryButtonClass} max-sm:[font-size:min(1rem,max(10vw,32px))]`}>
+          <Link href="/sign-up" data-testid="welcome-start" className={`${primaryButtonClass} max-sm:[font-size:min(1rem,max(10vw,32px))]`}>
             {t("welcomeStart")}
           </Link>
         ) : (

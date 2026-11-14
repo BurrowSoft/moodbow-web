@@ -4,6 +4,7 @@ import { startTransition, useActionState, useCallback, useEffect, useId, useRef,
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { EXERCISE_MINUTES, MOODS, SLEEP_HOURS, SLEEP_QUALITIES, SLEEP_START, STRESS_LEVELS, type CheckIn, type SleepQuality } from "@/lib/journal/checkIn";
+import { CHECKIN_SAVED_EVENT } from "@/lib/journal/checkInSaved";
 import { dateLine } from "@/lib/journal/today";
 import { valueHex } from "@/lib/journal/valueColours";
 import { localKey } from "@/lib/localData";
@@ -467,6 +468,8 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
       return prev;
     }
     if (next.status === "saved") {
+      // For what follows on Today (its Plus card hides after one of the two lowest faces).
+      window.dispatchEvent(new CustomEvent(CHECKIN_SAVED_EVENT, { detail: { date: next.checkIn.local_date, mood: next.checkIn.mood } }));
       setRow(next.checkIn);
       setDraftBase(null);
       setFields(fromRow(next.checkIn));

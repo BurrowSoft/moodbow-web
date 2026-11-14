@@ -195,6 +195,7 @@
     "checkEmailResend": "Renvoyer",
     "errPasswordShort": "Utilisez au moins 8 caractères",
     "errAgeRequired": "Moodbow est réservé aux personnes de 18 ans et plus",
+    "errConsentRequired": "Cochez les cases ci-dessus pour créer votre compte.",
     "errEmailTaken": "Cet e-mail a déjà un compte. Se connecter plutôt ?",
     "setupTitle": "À votre image",
     "setupFocusTitle": "À quoi aimeriez-vous que Moodbow prête attention ?",
@@ -260,7 +261,10 @@
     "checkInConflictMine": "Le vôtre",
     "checkInConflictOther": "Déjà enregistré",
     "checkInConflictKeepMine": "Garder le mien",
-    "checkInConflictUseOther": "Prendre l'autre"
+    "checkInConflictUseOther": "Prendre l'autre",
+    "setupLaterBody": "Votre rappel quotidien est désactivé. Vous pouvez l'activer et choisir une heure quand vous voulez.",
+    "setupLaterOpen": "Configurer",
+    "setupLaterClose": "Pas maintenant"
   },
   "entry": {
     "writeButton": "Raconter votre journée",
@@ -686,6 +690,8 @@
     "paletteDusk": "Crépuscule",
     "paletteSunrise": "Aube",
     "paletteSea": "Mer",
-    "sheetThemes": "Plus de thèmes font partie de Plus"
+    "sheetThemes": "Plus de thèmes font partie de Plus",
+    "todayCardTitle": "Voyez vos humeurs dans le temps",
+    "todayCardTrial": "Essayez 7 jours gratuits. Ensuite {price} par an."
   }
 }
