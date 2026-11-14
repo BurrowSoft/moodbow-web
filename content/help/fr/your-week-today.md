@@ -13,4 +13,4 @@ Elle dit une ou deux choses courtes :
 
 Si la plupart de vos jours ont été difficiles, ou la moitié et aucun bon, la carte dit seulement **« Cette semaine a semblé difficile. »**, avec **Envie de parler à quelqu'un ?**{pending:safety_plan_live}, et **Mon plan de sécurité** si votre plan contient quelque chose{/pending}. Rien de tout cela n'est enregistré.
 
-Votre semaine est pour tout le monde, avec ou sans Plus. Ce n'est ni un conseil ni un diagnostic.{/pending}
+Votre semaine est pour tout le monde{pending:plus}, avec ou sans Plus{/pending}. Ce n'est ni un conseil ni un diagnostic.{/pending}
