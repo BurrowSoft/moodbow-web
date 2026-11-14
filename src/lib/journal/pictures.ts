@@ -96,3 +96,44 @@ export function fitWithin(w: number, h: number, side: number): { width: number; 
   const scale = Math.min(1, side / Math.max(w, h));
   return { width: Math.max(1, Math.round(w * scale)), height: Math.max(1, Math.round(h * scale)) };
 }
+
+// The same file without its metadata segments (the Reviewer, #322: a server-side strip, so a browser
+// whose canvas adds its own Exif, as Safari's CoreGraphics may, is never locked out). Kept: SOI, APP0,
+// an APP2 that is exactly an ICC profile, every non-APP segment (tables, frame) and everything from
+// the first scan (SOS) to the end. Dropped: every other APP1-APP15 (EXIF, XMP, IPTC, MPF...) and COM.
+// null when the file can't be walked to its scan (it isn't stored).
+export function stripMetadata(bytes: Uint8Array): Uint8Array | null {
+  if (!isJpeg(bytes)) return null;
+  const keep: Uint8Array[] = [bytes.subarray(0, 2)];
+  let i = 2;
+  while (i + 3 < bytes.length) {
+    if (bytes[i] !== 0xff) return null;
+    let m = bytes[i + 1];
+    while (m === 0xff && i + 2 < bytes.length) {
+      i++;
+      m = bytes[i + 1];
+    }
+    if (m === 0xda) {
+      keep.push(bytes.subarray(i));
+      const out = new Uint8Array(keep.reduce((n, k) => n + k.length, 0));
+      let at = 0;
+      for (const k of keep) {
+        out.set(k, at);
+        at += k.length;
+      }
+      return out;
+    }
+    if (m === 0x01 || (m >= 0xd0 && m <= 0xd7)) {
+      keep.push(bytes.subarray(i, i + 2));
+      i += 2;
+      continue;
+    }
+    if (i + 3 >= bytes.length) return null;
+    const length = (bytes[i + 2] << 8) | bytes[i + 3];
+    if (length < 2 || i + 2 + length > bytes.length) return null;
+    const metadata = (m >= 0xe1 && m <= 0xef && !(m === 0xe2 && isIccSegment(bytes, i, length))) || m === 0xfe;
+    if (!metadata) keep.push(bytes.subarray(i, i + 2 + length));
+    i += 2 + length;
+  }
+  return null;
+}

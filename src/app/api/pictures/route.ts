@@ -1,6 +1,6 @@
 import { pageGate } from "@/lib/conditions";
 import { sameOrigin } from "@/lib/http/sameOrigin";
-import { hasMetadata, PICTURES, type EntryPicture } from "@/lib/journal/pictures";
+import { hasMetadata, PICTURES, stripMetadata, type EntryPicture } from "@/lib/journal/pictures";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 // Adding a picture to a moment (035), as the signed-in person (their session, RLS and the storage
@@ -9,9 +9,10 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 // confirm (the real sizes count). A plain request rather than a server action: the files are up
 // to 3 MB and a server action's body is capped far lower. Same-origin only.
 //
-// The files must be JPEGs with no metadata segment at all (APP1-APP15: EXIF, XMP, IPTC...; COM):
-// the browser's canvas re-encode writes only APP0, so a file carrying one didn't come through it and
-// is refused (no metadata ever reaches storage). The files pass through this function on the way to
+// The browser re-encodes each picture through a canvas (pixels only). The server then STRIPS any
+// metadata segment still in the file (APP1-APP15 except an exact ICC profile: EXIF, XMP, IPTC...;
+// COM) and checks the result has none, so no metadata ever reaches storage, whatever the browser's
+// canvas adds (Chromium and WebKit add an sRGB ICC profile; Safari's may add an orientation Exif). The files pass through this function on the way to
 // the bucket and aren't stored by it.
 
 export const dynamic = "force-dynamic";
@@ -28,10 +29,11 @@ const codeOf = (e: { message?: string } | null): PictureAddResult => {
   return { status: "error", error: known ?? "generic" };
 };
 
-async function jpegOk(file: FormDataEntryValue | null): Promise<File | null> {
+async function jpegOk(file: FormDataEntryValue | null): Promise<Blob | null> {
   if (!(file instanceof File) || file.size < 1 || file.size > PICTURES.fileMax || file.type !== "image/jpeg") return null;
-  const bytes = new Uint8Array(await file.arrayBuffer());
-  return hasMetadata(bytes) ? null : file;
+  const stripped = stripMetadata(new Uint8Array(await file.arrayBuffer()));
+  if (!stripped || hasMetadata(stripped)) return null;
+  return new Blob([stripped as BlobPart], { type: "image/jpeg" });
 }
 const side = (v: FormDataEntryValue | null) => {
   const n = Number(v);

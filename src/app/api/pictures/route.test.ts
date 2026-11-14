@@ -48,19 +48,27 @@ describe("POST /api/pictures (035)", () => {
     expect(body).toEqual({ status: "ok", picture: { id: "p1", width: 2048, height: 1536, created_at: "2026-11-14T09:00:00Z", full: `https://signed.example/u/${E}/p1.jpg`, thumb: `https://signed.example/u/${E}/p1_t.jpg` } });
   });
 
-  it("a file carrying EXIF never reaches storage: refused before anything", async () => {
+  it("a file carrying EXIF is stored without it (stripped on the server; a Safari canvas's own Exif never locks anyone out)", async () => {
+    rpc.mockResolvedValueOnce(reserved).mockResolvedValueOnce(confirmed);
+    const exif = [..."Exif"].map((c) => c.charCodeAt(0));
+    const dirty = new File([new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0, 2, 0xff, 0xe1, 0, exif.length + 6, ...exif, 0, 0, 1, 2, 0xff, 0xda, 0, 2, 9, 0xff, 0xd9])], "p.jpg", { type: "image/jpeg" });
+    expect((await (await post({ ...good(), full: dirty })).json()).status).toBe("ok");
+    const stored = new Uint8Array(await (upload.mock.calls[0][1] as Blob).arrayBuffer());
+    expect([...stored]).toEqual([0xff, 0xd8, 0xff, 0xe0, 0, 2, 0xff, 0xda, 0, 2, 9, 0xff, 0xd9]);
+  });
+  it("a file that can't be walked to its image data is refused before anything", async () => {
     const res = await post({ ...good(), full: exifJpeg() });
     expect(res.status).toBe(400);
-    expect(await res.json()).toEqual({ status: "error", error: "invalid" });
     expect(rpc).not.toHaveBeenCalled();
-    expect(upload).not.toHaveBeenCalled();
   });
 
-  it("XMP or IPTC metadata (GPS can live there too) is refused like EXIF", async () => {
+  it("XMP (GPS can live there too) is stripped like EXIF", async () => {
+    rpc.mockResolvedValueOnce(reserved).mockResolvedValueOnce(confirmed);
     const xmp = [..."http://ns.adobe.com/xap/1.0/"].map((c) => c.charCodeAt(0));
     const res = await post({ ...good(), thumb: new File([new Uint8Array([0xff, 0xd8, 0xff, 0xe1, 0, xmp.length + 2, ...xmp, 0xff, 0xda, 0, 2, 0xff, 0xd9])], "t.jpg", { type: "image/jpeg" }) });
-    expect(res.status).toBe(400);
-    expect(rpc).not.toHaveBeenCalled();
+    expect((await res.json()).status).toBe("ok");
+    const stored = new Uint8Array(await (upload.mock.calls[1][1] as Blob).arrayBuffer());
+    expect([...stored]).toEqual([0xff, 0xd8, 0xff, 0xda, 0, 2, 0xff, 0xd9]);
   });
 
   it("not a JPEG, a size over 2048, or not an entry id: invalid", async () => {

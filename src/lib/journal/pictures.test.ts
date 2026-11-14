@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { fitWithin, hasMetadata as hasExif, isJpeg, PICTURES, readEntryPictures } from "./pictures";
+import { fitWithin, hasMetadata as hasExif, isJpeg, PICTURES, readEntryPictures, stripMetadata } from "./pictures";
 import { encodeForUpload } from "./pictureEncode";
 
 const text = (s: string) => [...s].map((c) => c.charCodeAt(0));
@@ -25,6 +25,29 @@ describe("the byte checks the upload route relies on", () => {
     // APP0 then the image data: clean, even if the pixels happen to contain FF E1.
     expect(hasExif(new Uint8Array([...fromCanvas.slice(0, -2), 0xff, 0xda, 0, 2, 0xff, 0xe1, 0x45, 0x78, 0x69, 0x66, 0xff, 0xd9]))).toBe(false);
     expect(hasExif(new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0x00]))).toBe(true);
+  });
+  it("each engine's real canvas JPEG is clean as written and unchanged by the strip (Chromium, Firefox, Playwright's WebKit)", () => {
+    for (const name of ["chromium-canvas.jpg", "firefox-canvas.jpg", "playwright-webkit-canvas.jpg"]) {
+      const real = new Uint8Array(readFileSync(path.join(__dirname, "__fixtures__", name)));
+      expect(hasExif(real), name).toBe(false);
+      expect(stripMetadata(real), name).toEqual(real);
+    }
+  });
+  it("the strip drops EXIF, XMP, IPTC, MPF and COM, keeps APP0, an ICC profile, the tables and the scan", () => {
+    const icc = [...text("ICC_PROFILE"), 0, 1, 1, ...new Array(20).fill(0x20)];
+    const exif = [...text("Exif"), 0, 0, ...text("GPS 51.5N")];
+    const xmp = text("http://ns.adobe.com/xap/1.0/");
+    const iptc = text("Photoshop 3.0");
+    const seg = (m: number, body: number[]) => [0xff, m, (body.length + 2) >> 8, (body.length + 2) & 255, ...body];
+    const dirty = new Uint8Array([
+      0xff, 0xd8, ...seg(0xe0, text("JFIF\0")), ...seg(0xe1, exif), ...seg(0xe2, icc), ...seg(0xe1, xmp), ...seg(0xed, iptc), ...seg(0xe2, text("MPF\0")), ...seg(0xfe, text("hello")),
+      ...seg(0xdb, [0, 1, 2]), 0xff, 0xda, 0, 2, 0xff, 0xe1, 7, 7, 0xff, 0xd9,
+    ]);
+    const clean = stripMetadata(dirty)!;
+    expect(hasExif(dirty)).toBe(true);
+    expect(hasExif(clean)).toBe(false);
+    expect([...clean]).toEqual([0xff, 0xd8, ...seg(0xe0, text("JFIF\0")), ...seg(0xe2, icc), ...seg(0xdb, [0, 1, 2]), 0xff, 0xda, 0, 2, 0xff, 0xe1, 7, 7, 0xff, 0xd9]);
+    expect(stripMetadata(new Uint8Array([0xff, 0xd8, 0xff, 0xe1, 0, 40]))).toBeNull();
   });
   it("the bytes a real Chromium canvas wrote (the fixture, 16 x 16 at 0.85) pass the guard", () => {
     // __fixtures__/chromium-canvas.jpg: made by canvas.toBlob("image/jpeg", 0.85) in Chromium. Its
