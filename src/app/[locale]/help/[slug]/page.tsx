@@ -4,10 +4,11 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 import { routing } from "@/i18n/routing";
 import { Link } from "@/i18n/navigation";
+import { HelpNowLines, HelpNowNumbers } from "@/components/HelpNowLines";
+import { helplinesFor } from "@/lib/safety/helplines";
 import { PageShell } from "@/components/PageShell";
 import { pageGate } from "@/lib/conditions";
 import { findArticle, helpArticles, renderArticle } from "@/lib/helpContent";
-import { helplinesFor } from "@/lib/safety/helplines";
 import { HELP_GATE } from "@/lib/helpGate";
 import { pageMetadata } from "@/lib/metadata";
 
@@ -24,8 +25,9 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/help/[sl
 
 // One Help article, exactly as published (unmet pending blocks removed; an
 // article with nothing left is a 404, like a missing one).
-export default async function HelpArticlePage({ params }: PageProps<"/[locale]/help/[slug]">) {
+export default async function HelpArticlePage({ params, searchParams }: PageProps<"/[locale]/help/[slug]">) {
   const { locale, slug } = await params;
+  const { country } = await searchParams;
   setRequestLocale(locale as Locale);
   const state = pageGate(HELP_GATE);
   if (state === "hidden") notFound();
@@ -33,8 +35,8 @@ export default async function HelpArticlePage({ params }: PageProps<"/[locale]/h
   const html = article ? renderArticle(article) : "";
   if (!article || !html) notFound();
   const t = await getTranslations("help");
-  const ts = await getTranslations("safety");
-  const tc = await getTranslations("common");
+  const lines = slug === "get-help-now" && typeof country === "string" ? helplinesFor(country) : null;
+  const numbers = !!(lines?.helpline || lines?.emergency);
   // The link back to Help is chrome, so it sits after the article, outside
   // [data-content=article] (Web Tester, #23).
   return (
@@ -42,18 +44,12 @@ export default async function HelpArticlePage({ params }: PageProps<"/[locale]/h
       title={article.title}
       article
       draft={state === "draft"}
+      // Where the help button leads with no script running (#248), so the help is here too.
+      underTitle={numbers ? <HelpNowNumbers country={country as string} /> : undefined}
+      tightTop={numbers}
       after={
         <>
-        {/* Where the help button leads with no script running (#248), so the way to a helpline is here too. */}
-        {slug === "get-help-now" && (
-          <p className="mx-auto mt-6 max-w-2xl">
-            <a href={helplinesFor(null, locale).directoryUrl} target="_blank" rel="noopener noreferrer" data-testid="help-now-find-helpline" className="font-medium text-accent underline underline-offset-4">
-              {ts("safetyFindHelpline")}
-              {" "}
-              <span className="sr-only">{tc("opensInNewTab")}</span>
-            </a>
-          </p>
-        )}
+        {slug === "get-help-now" && <HelpNowLines />}
         <p className="mx-auto mt-6 max-w-2xl">
           <Link href="/help" data-testid="help-back" className="font-medium text-accent underline underline-offset-4">
             {t("helpTitle")}
