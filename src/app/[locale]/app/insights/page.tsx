@@ -14,13 +14,13 @@ import { aiShown, canReflect } from "@/lib/journal/ai";
 import { lastWeekStart, parseReportBody, type WeeklyReport as Report } from "@/lib/journal/report";
 import { getMe } from "@/lib/journal/me";
 import { patterns, patternsWindowStart } from "@/lib/journal/patterns";
-import { sixDaysAfter, yourWeek, type YourWeekMoment } from "@/lib/journal/yourWeek";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { YourWeekCard } from "./YourWeekCard";
 import { tabMetadata } from "../pageMeta";
 import { InsightsView } from "./InsightsView";
-import { MorePatternsCard, MorePatternsRow, PlusTabs, WeekLine, YearTab } from "./PlusInsights";
-import { insightsOffer, plusPriceLabel, readPlusView } from "@/lib/plus/view";
+import { MorePatternsCard, PlusTabs } from "./PlusInsights";
+import { InsightsExample } from "./InsightsExample";
+import { GetHelpNow } from "@/components/SafetyCard";
+import { readPlusView } from "@/lib/plus/view";
 import { isLongRange, longRangeStart, longSummary } from "@/lib/plus/longRange";
 import { morePatterns, moreWindowStart } from "@/lib/plus/morePatterns";
 import { periodLine, readCheckInsSince, readWrittenDays } from "@/lib/plus/insightsData";
@@ -54,18 +54,17 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
   // Patterns (no AI) use a fixed 90 days on every tab: where they're on,
   // the one read starts early enough for them too (still one request).
   const withPatterns = pageGate("patterns-live") !== "hidden";
-  const withYourWeek = pageGate("your-week-live") !== "hidden";
   const chartsStart = previousRangeStart(me.today, range);
   const patternsStart = patternsWindowStart(me.today);
   const more = pageGate("share-cards-more") !== "hidden";
   const shareOn = pageGate("share-cards") !== "hidden";
   const weekly = pageGate("weekly-report-live") !== "hidden";
   const weekStart = lastWeekStart(me.today);
-  const freeStart = [chartsStart, ...(withPatterns ? [patternsStart] : []), ...(withYourWeek ? [weekStart] : [])].sort()[0];
+  const freeStart = [chartsStart, ...(withPatterns ? [patternsStart] : [])].sort()[0];
   // The page's reads all need only `me`, so they start together (the Web Dev's LCP read, 12 Nov:
   // each one in turn cost a round trip to the database). Same reads, same results. Moodbow Plus's
   // view is one of them (decision 246): null when its row can't be read (then nothing about Plus).
-  const [checkIns, plus, milestone, stored, moments, requestHeaders] = await Promise.all([
+  const [checkIns, plus, milestone, stored, requestHeaders] = await Promise.all([
     supabase
       .from("check_ins")
       .select("local_date, mood, sleep_hours, stress, exercise_minutes")
@@ -76,11 +75,14 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
     weekly && canReflect(me)
       ? supabase.from("ai_reports").select("id, period_start, body, tier, created_at").eq("kind", "weekly").eq("period_start", weekStart).maybeSingle()
       : null,
-    // Your week: id and date only, never the body. A failed read: no moment.
-    withYourWeek ? supabase.from("entries").select("id, entry_date").eq("is_moment", true).gte("entry_date", weekStart).lte("entry_date", sixDaysAfter(weekStart)) : null,
     headers(),
   ]);
   // With Plus: Year and All time, and More patterns over the last 12 months (or all time on All time).
+  // Insights are Plus (spec "Insights become Plus", 14 Nov): without Plus (or with a payment that
+  // failed), the labelled example and nothing of theirs. A row that can't be read, or Plus off,
+  // shows their own Insights as before (ruling 5). The gate is here and on the route only, never in
+  // lib/journal/insights, which the appointment summary uses (ruling 2).
+  if (plus && plus.kind !== "plus") return <InsightsExample help={<GetHelpNow country={me.profile?.country} testId="insights-example-help" neutral icon />} />;
   const hasPlus = plus?.kind === "plus";
   const longRange = hasPlus && isLongRange(asked) ? asked : null;
   const moreWindow = longRange === "all" ? "all" : "year";
@@ -125,18 +127,7 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
     const initial: Report | null = row && body ? { id: row.id, week_start: row.period_start, body, tier: row.tier === "lite" ? "lite" : "full", created_at: row.created_at } : null;
     week = <WeeklyReport initial={initial} weekStart={weekStart} dateLocaleTag={dateLocaleTag} balance={me.credits?.balance ?? 0} country={me.profile?.country ?? null} />;
   }
-  // Your week (specs/your-week.md), no AI: today is the saved time zone's, from get_me.
-  let summary: React.ReactNode = null;
-  let hardWeek = false;
-  if (withYourWeek) {
-    const result = yourWeek(rows, me.today, (moments?.data ?? []) as YourWeekMoment[]);
-    if (result) summary = <YourWeekCard week={result} country={me.profile?.country} dateLocaleTag={dateLocaleTag} />;
-    // Plus's quiet line goes under Your week, never under a hard week's help offer.
-    hardWeek = result?.kind === "hard";
-  }
-  // Its locked items only for someone without Plus, none on a hard week. With
-  // Plus, the views are theirs and show on a hard week too, with no offer (UX).
-  const offer = insightsOffer(plus, hardWeek, plusPriceLabel(locale));
+  // Your week moved to Today, for everyone (ruling 1): its hard-week help never waits behind Plus.
   let long: React.ComponentProps<typeof InsightsView>["long"];
   if (longRange) {
     const firstCheckIn = rows.length > 0 ? rows[0].local_date : null;
@@ -157,20 +148,11 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
       today={me.today}
       range={range}
       share={share}
-      summary={
-        offer && summary ? (
-          <>
-            {summary}
-            <WeekLine offer={offer} />
-          </>
-        ) : (
-          summary
-        )
-      }
+      summary={null}
       week={week}
       patterns={withPatterns ? patterns(rows, me.today) : undefined}
-      plusTab={hasPlus ? <PlusTabs current={longRange} /> : offer && <YearTab offer={offer} />}
-      plusPatterns={hasPlus ? plusMore : offer && withPatterns && <MorePatternsRow offer={offer} />}
+      plusTab={hasPlus ? <PlusTabs current={longRange} /> : undefined}
+      plusPatterns={hasPlus ? plusMore : undefined}
       long={long}
     />
   );

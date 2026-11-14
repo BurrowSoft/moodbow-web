@@ -381,7 +381,10 @@
     "importMapSkip": "No importar",
     "importMapChoose": "Elige un estado de ánimo…",
     "importSkippedTooLong": "{count, plural, =1 {1 nota es demasiado larga para importarla.} other {# notas son demasiado largas para importarlas.}}",
-    "importStopped": "La importación se detuvo a medias. Todo lo anterior está guardado; importa el mismo archivo otra vez para terminar."
+    "importStopped": "La importación se detuvo a medias. Todo lo anterior está guardado; importa el mismo archivo otra vez para terminar.",
+    "pastReports": "Tus informes anteriores",
+    "pastReportsIntro": "Los informes semanales que Moodbow hizo para ti. Se quedan aquí para leerlos.",
+    "pastReportsWeek": "{start} – {end}"
   },
   "export": {
     "exportTitle": "Moodbow: tu diario",
@@ -477,7 +480,22 @@
     "yourWeekLookMixed": "Tu semana tuvo días buenos y días bajos.",
     "yourWeekMoment": "Un momento de esa semana: {date}",
     "yourWeekHard": "Esta semana pareció difícil.",
-    "yourWeekCaption": "Esto puede mostrar qué suele ir junto, no qué causa qué."
+    "yourWeekCaption": "Esto puede mostrar qué suele ir junto, no qué causa qué.",
+    "pairTag": "«{tag}»",
+    "pairWith": "Con {tag}",
+    "pairOther": "Otros días",
+    "pairSleepMore": "7 h o más",
+    "pairSleepLess": "Menos sueño",
+    "pairMoved": "Con movimiento",
+    "pairNotMoved": "Sin movimiento",
+    "pairStressLow": "Estrés bajo",
+    "pairStressHigh": "Estrés alto",
+    "pairWeekTitle": "Entre semana y fines de semana",
+    "pairWeekdays": "Entre semana",
+    "pairWeekends": "Fines de semana",
+    "pairWritingTitle": "Escritura",
+    "pairWrote": "Con escritura",
+    "pairNotWrote": "Sin escritura"
   },
   "share": {
     "shareButton": "Compartir",
@@ -703,6 +721,16 @@
     "offerStripBody": "Un precio más bajo para tu primer año, hasta el 31 de diciembre",
     "offerFirstYear": "Tu primer año: {offer}",
     "offerButton": "Mi primer año por {offer}",
-    "offerThen": "Después, {price} al año · se renueva automáticamente"
+    "offerThen": "Después, {price} al año · se renueva automáticamente",
+    "exampleStrip": "Un ejemplo del Resumen. Con Plus, aquí verás tus propios registros.",
+    "exampleWatermark": "EJEMPLO",
+    "exampleRanges": "Periodo del ejemplo",
+    "exampleSample": "{strip} {see}",
+    "exampleLabel": "Ejemplo",
+    "exampleWeekLine": "Bastante estable, con dos días buenos al final.",
+    "exampleTagWalk": "Paseo",
+    "exampleTagFriends": "Amigos",
+    "liftsTitle": "Lo que me levanta el ánimo",
+    "liftsRow": "Los días con la etiqueta «{tag}», tu estado de ánimo fue de {a} de 5 de media; los demás días, de {b}."
   }
 }
