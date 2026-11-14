@@ -142,7 +142,10 @@ export function LettersEditor({
             {t("empty")}
           </p>
         )}
+        {/* noValidate: a heads-up a shorter "Open it" no longer fits is over its field's max; the
+            editor's own line says so, not the browser's bubble (and Save isn't silently blocked). */}
         <form
+          noValidate
           className="mt-3 flex flex-col gap-3"
           onSubmit={(e) => {
             e.preventDefault();
