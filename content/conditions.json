@@ -76,7 +76,7 @@
     "what": "Help only (decision 212 pattern, UX 2026-11-04): import from another app (1.1 K) is in the app build people have (0.9.7; met on its publish, UX), so its Help article shows for app users ({pending:app_import|import_live}). Not import-live (the web's own import)."
   },
   "app-quick-checkin": {
-    "met": false,
+    "met": true,
     "what": "Help only (decision 212 pattern, UX 2026-11-12): the one-tap check-in from the daily reminder (1.2 §5, the app's QUICK_CHECKIN) is in the app build people have, so its Help article shows. App only: the web has no reminder of its own."
   },
   "app-app-lock": {
@@ -84,7 +84,7 @@
     "what": "Help only (decision 212): app lock (PIN, fingerprint or face; decision 188) is in the app build people have (0.9 closed test on), so its Help article shows. Not app-lock (the privacy text's clause, Vitor's)."
   },
   "app-today-help": {
-    "met": false,
+    "met": true,
     "what": "Help only (decision 212 pattern, UX & PM 2026-11-13): Today's standing help button (a lifebuoy named with meGetHelpNow, specs/1.2-features.md) is in the app build people have; the web's ships with it (#298, after the pilot). Gates the get-help-now article's line about it."
   },
   "app-share-cards": {
@@ -140,7 +140,7 @@
     "what": "1.1 A \"On this day\" (specs/1.1-features.md) is tested on both the app and the web; then the Timeline card shows on Production (UX: not tied to a release, may be in time for 1.0)."
   },
   "moment-recall-live": {
-    "met": false,
+    "met": true,
     "what": "Memories: the person chooses when a moment comes back (Vitor, 14 Nov; specs/1.3-offer-review-voice-taps.md \"Memories\"): each moment's \"Bring this back\" chips (1 month, 6 months, 1 year; all by default), and On this day keeps only the anniversaries kept. Needs moodbow-app migration 034 (entries.recall_months, entry_set_recall) on Production first: without it the column doesn't exist, so the web reads and writes it only while this is met (drafts on Preview and CI, against staging, which has 034)."
   },
   "patterns-live": {
@@ -220,31 +220,31 @@
     "what": "Italian is offered on the web: a native reader has read the UI, Help, dates and crisis list (it_reviewed, localization plan), with UX's go. Until then /it is a draft on test builds only."
   },
   "your-week-live": {
-    "met": false,
+    "met": true,
     "what": "Your week (specs/your-week.md): the rule-based card at the top of Insights, no AI, on the web. Met after the Web Tester's row."
   },
   "toolbox-live": {
-    "met": false,
+    "met": true,
     "what": "1.2: Things that help me (specs/1.2-features.md, content/toolbox.json): Me's list, the Today card after a low check-in, and a minute to breathe. Needs migration 025 on Production (Vitor), the Reviewer's read, the tester rows and Vitor's look."
   },
   "app-toolbox": {
-    "met": false,
+    "met": true,
     "what": "Help only (decision 212 pattern, UX 2026-11-12): Things that help me and the minute to breathe (1.2 §1) are in the app build people have, so its Help article shows. Not toolbox-live (the web's own switch)."
   },
   "grounding-live": {
-    "met": false,
+    "met": true,
     "what": "1.3 (specs/1.3-grounding-and-good-things.md): 5-4-3-2-1, Body scan and Name it in Me → Things that help me (content/toolbox.json, grounding). Ships after 1.2, with toolbox-live; the Reviewer's read, the tester rows and Vitor's look."
   },
   "app-grounding": {
-    "met": false,
+    "met": true,
     "what": "Help only (decision 212 pattern, 1.3 Ruling 8): the grounding exercises are in the app build people have, so their Help lines show ({pending:app_grounding|grounding_live}). Not grounding-live (the web's own switch)."
   },
   "good-things-live": {
-    "met": false,
+    "met": true,
     "what": "1.3 (specs/1.3-grounding-and-good-things.md): Three good things on the web, from Write and Me → Things that help me: the entry editor with three short fields, saving one ordinary entry through the normal save (Ruling 3). No evening prompt on the web (Ruling 9). Ships after 1.2; the Reviewer's read, the tester rows and Vitor's look."
   },
   "app-good-things": {
-    "met": false,
+    "met": true,
     "what": "Help only (decision 212 pattern): Three good things, with its evening reminder, is in the app build people have, so its Help lines show ({pending:app_good_things|good_things_live}); the reminder sentence is the app's alone. Not good-things-live (the web's own switch)."
   },
   "safety-plan-live": {
@@ -264,11 +264,11 @@
     "what": "Help only (decision 212 pattern, UX 2026-11-12): Letters to future me (1.2 §3) are in the app build people have, with the opening-day notification, so its Help article shows. Not letters-live (the web's own switch)."
   },
   "appointment-live": {
-    "met": false,
+    "met": true,
     "what": "1.2: For my appointment (specs/1.2-features.md §4, content/appointment.json): a printable summary of check-ins and starred entries, made in the browser, nothing stored or sent. Needs the Reviewer's read, the tester rows and Vitor's look."
   },
   "app-appointment": {
-    "met": false,
+    "met": true,
     "what": "Help only (decision 212 pattern, UX 2026-11-12): For my appointment (1.2 §4) is in the app build people have, with Share as PDF, so its Help article shows. Not appointment-live (the web's own switch, which brings Print)."
   },
   "test-only-unavailable-page": {
@@ -320,7 +320,7 @@
     "what": "1.1 F: Thai is offered on the web: the native reader has read the Thai UI, Help and dates (thai_reviewed, decision 193), with UX's go. Until then /th is a draft on test builds only (Preview, dev, CI) and Production is English only; the switcher, Me → Language, hreflang and the sitemap offer Thai only once met. The legal pages keep their own gates in every language."
   },
   "tags-live": {
-    "met": false,
+    "met": true,
     "what": "Tags on a check-in (UX, 11 Nov; free journal data): the person's own words, up to 5 a day, on Today's card and the day view, read by the crisis list on save. Needs the app's migration 029 (check_in_tags, set_check_in_tags, my_recent_tags) on Production, the export and import cases synced from the app, the privacy line (VITOR.md), the Reviewer's read and the tester rows. After the pilot."
   },
   "me-picture-live": {
