@@ -7,10 +7,12 @@ import { dialogButton } from "@/components/Dialog";
 import { Link } from "@/i18n/navigation";
 import type { PlusView } from "@/lib/plus/view";
 
-// Free rows, then what Plus adds (UX, 11 Nov: today's free ranges and
-// patterns stay free). The AI rows only while AI is shown.
-const FREE_ROWS = ["rowJournal", "rowHelp", "rowOwn", "rowRanges", "rowPatterns", "rowData"] as const;
-const PLUS_ROWS = ["rowYear", "rowMorePatterns", "rowReview", "rowThemes", "rowPdf"] as const;
+// Free rows, then what Plus adds: "your journal is free, Insights come with Plus" (Vitor, 14 Nov;
+// specs/1.3-offer-review-voice-taps.md §2). No AI rows in any comparison: the AI allowance rules
+// stay in the code, unadvertised. Nothing free today gets a lock (wording only). rowExtras: one row
+// for the prompt library, the other ways to breathe and more reminders (UX, 14 Nov), never one each.
+const FREE_ROWS = ["rowJournal", "rowTimeline", "rowHelp", "rowAppointment", "rowData"] as const;
+const PLUS_ROWS = ["rowInsights", "rowMorePatterns", "rowReview", "rowLetters", "rowExtras", "rowPdf", "rowThemes"] as const;
 
 function Tick({ label, plus }: { label: string; plus?: boolean }) {
   return (
@@ -33,7 +35,7 @@ function Lock({ label }: { label: string }) {
 // footer with the price and the one button never scrolls, so the action is
 // in view on landing at any size. No first-charge date, no countdown, no
 // pre-ticked box: Stripe's own page confirms the terms.
-export function PlusScreen({ view, price, aiShown, started }: { view: PlusView; price: string; aiShown: boolean; started: boolean }) {
+export function PlusScreen({ view, price, started }: { view: PlusView; price: string; started: boolean }) {
   const t = useTranslations("plus");
   const tt = useTranslations("today");
   const locale = useLocale();
@@ -77,8 +79,8 @@ export function PlusScreen({ view, price, aiShown, started }: { view: PlusView; 
     setBusy(false);
   };
 
-  const rows = [...FREE_ROWS, ...(aiShown ? (["rowAiFree"] as const) : [])].map((k) => ({ k, free: true }));
-  const plusRows = [...PLUS_ROWS, ...(aiShown ? (["rowAiPlus"] as const) : [])].map((k) => ({ k, free: false }));
+  const rows = FREE_ROWS.map((k) => ({ k, free: true }));
+  const plusRows = PLUS_ROWS.map((k) => ({ k, free: false }));
 
   // Large text (UX, 12 Nov, the Web Tester's long-language pass): when the whole footer would take
   // more than 40 % of the screen's height, the table was left a slit. Then the page scrolls as a
@@ -90,7 +92,11 @@ export function PlusScreen({ view, price, aiShown, started }: { view: PlusView; 
   const footer = useRef<HTMLDivElement>(null);
   const scroll = useRef<HTMLDivElement>(null);
   const [large, setLarge] = useState(false);
-  const sizeKey = () => `${window.innerWidth}x${window.innerHeight}:${getComputedStyle(document.documentElement).fontSize}`;
+  // Large mode, and even the compact pinned part would leave the content under 40 % (a short
+  // screen at large text): nothing is pinned, and the page is one scroll ending with the price,
+  // the renewal line and the button together (UX 12 Nov, specs/plus.md; the same rule as the app).
+  const [unpinned, setUnpinned] = useState(false);
+  const sizeKey =() => `${window.innerWidth}x${window.innerHeight}:${getComputedStyle(document.documentElement).fontSize}`;
   useLayoutEffect(() => {
     const root = screen.current;
     if (!root || typeof ResizeObserver === "undefined") return;
@@ -113,10 +119,18 @@ export function PlusScreen({ view, price, aiShown, started }: { view: PlusView; 
         window.removeEventListener("resize", check);
       };
     }
-    // In large mode: back to measuring the full footer when the screen or text size changes.
+    // In large mode: the compact pinned part over 60 % of the screen leaves the content under
+    // 40 %, so it unpins (measured while pinned; kept until the screen or text size changes).
+    const fits = () => {
+      if (!unpinned && (footer.current?.getBoundingClientRect().height ?? 0) > 0.6 * window.innerHeight) setUnpinned(true);
+    };
+    fits();
+    // Back to measuring the full footer when the screen or text size changes.
     const entered = sizeKey();
     const changed = () => {
-      if (sizeKey() !== entered) setLarge(false);
+      if (sizeKey() === entered) return;
+      setUnpinned(false);
+      setLarge(false);
     };
     const observer = new ResizeObserver(changed);
     observer.observe(root);
@@ -125,18 +139,37 @@ export function PlusScreen({ view, price, aiShown, started }: { view: PlusView; 
       observer.disconnect();
       window.removeEventListener("resize", changed);
     };
-  }, [large]);
+  }, [large, unpinned]);
   useEffect(() => {
     if (!large) return;
     const html = document.documentElement;
     html.dataset.tabsAside = "";
+    // Unpinned: the price is in the page's flow at the end; no room to keep under it.
+    if (unpinned) {
+      return () => {
+        delete html.dataset.tabsAside;
+      };
+    }
     // The pinned part is fixed at the bottom (UX, 12 Nov: on screen at every scroll position, the
     // site footer included), so the page keeps room under its end for it: the content and the
     // site footer scroll up clear of it, never under it.
     const body = document.body;
     const pinned = footer.current;
+    // The tap test (UX, 14 Nov, the Web Tester's #311 row): with the page scrolled to its end, Not
+    // now's centre must be above the pinned part, so a tap on it lands on Not now and never on the
+    // price or Start. When it can't come out from under it, nothing is pinned.
+    const tapTest = () => {
+      const notNow = screen.current?.querySelector<HTMLElement>('[data-testid="plus-rest"] [data-testid="plus-not-now"]');
+      if (!notNow || !pinned) return;
+      const box = notNow.getBoundingClientRect();
+      if (box.height === 0) return;
+      const end = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+      const centreAtEnd = box.top + window.scrollY + box.height / 2 - end;
+      if (centreAtEnd > window.innerHeight - pinned.getBoundingClientRect().height) setUnpinned(true);
+    };
     const room = () => {
       body.style.paddingBottom = pinned ? `${Math.ceil(pinned.getBoundingClientRect().height)}px` : "";
+      tapTest();
     };
     room();
     const observer = typeof ResizeObserver === "undefined" || !pinned ? null : new ResizeObserver(room);
@@ -146,7 +179,7 @@ export function PlusScreen({ view, price, aiShown, started }: { view: PlusView; 
       observer?.disconnect();
       body.style.paddingBottom = "";
     };
-  }, [large]);
+  }, [large, unpinned]);
 
   // The main action: what stays pinned at any size.
   const action = waiting ? (
@@ -162,18 +195,28 @@ export function PlusScreen({ view, price, aiShown, started }: { view: PlusView; 
     </>
   ) : (
     <>
-      {/* At large text the short price, one line: the button already names the free week. */}
+      {/* The words (UX, board 2): with the free week, "Try 7 days free" here and the price under
+          the button with the renewal; without it, the yearly price here. The same at every size. */}
       <p data-testid="plus-price" className={`font-medium ${large ? "leading-tight" : ""}`}>
-        {view.trial && !large ? t("footerTrial", { price }) : t("priceYear", { price })}
+        {view.trial ? t("trialFree") : t("priceYear", { price })}
       </p>
-      {/* In em, so it follows the footer's cap at large text (the same size as before otherwise). */}
-      <p data-testid="plus-renews" className={`text-[0.875em] text-muted ${large ? "leading-snug" : ""}`}>
-        {t("renews")}
-      </p>
-      {/* At large text its lines sit closer (de: three lines at 32 px), so the content keeps room. */}
+      {/* At large text its lines sit closer (de: three lines at 32 px), so the content keeps room.
+          The order (UX, the Web Tester's board comparison): the price, the button, the renewal
+          line under it, then where to cancel. */}
       <button type="button" data-testid="plus-start" disabled={busy} onClick={() => void go("/api/checkout/stripe")} className={`${dialogButton(true)} ${large ? "leading-tight" : ""}`}>
         {view.trial ? t("startTrial") : t("start")}
       </button>
+      {/* In em, so it follows the footer's cap at large text (the same size as before otherwise). */}
+      <p data-testid="plus-renews" className={`text-[0.875em] text-muted ${large ? "leading-snug" : ""}`}>
+        {view.trial ? t("renewsTrial", { price }) : t("renews")}
+      </p>
+      {/* Where to cancel (the Reviewer's ruling): here, or at the end of the content at large text,
+          where the pinned part keeps only the price, the button and the renewal. */}
+      {!large && (
+        <p data-testid="plus-cancel" className="text-[0.875em] text-muted">
+          {t("cancelWhere")}
+        </p>
+      )}
     </>
   );
   // Manage (or where to manage it) and Not now: in the footer, or at the end of the content.
@@ -190,6 +233,11 @@ export function PlusScreen({ view, price, aiShown, started }: { view: PlusView; 
           </p>
         )
       ) : null}
+      {!has && large && (
+        <p data-testid="plus-cancel" className="text-sm text-muted">
+          {t("cancelWhere")}
+        </p>
+      )}
       {!has && (
         <Link href="/app/me" data-testid="plus-not-now" className="inline-flex min-h-11 items-center justify-center text-sm font-medium text-accent underline underline-offset-4">
           {t("notNow")}
@@ -209,6 +257,7 @@ export function PlusScreen({ view, price, aiShown, started }: { view: PlusView; 
       ref={screen}
       data-testid="plus-screen"
       data-large={large || undefined}
+      data-unpinned={(large && unpinned) || undefined}
       className={
         large
           ? "flex flex-col"
@@ -281,7 +330,7 @@ export function PlusScreen({ view, price, aiShown, started }: { view: PlusView; 
           // At large text: pinned, its text capped at 32 px (the 2x target, decision 231) and
           // its spacing in px, so it takes as little of the screen as it can.
           className={`flex shrink-0 flex-col border-t border-border bg-surface px-[12px] text-center ${
-            large ? "fixed inset-x-0 bottom-0 z-20 gap-[8px] pt-[12px] pb-[8px] [font-size:min(1rem,max(10vw,32px))]" : "gap-2 pt-3 pb-2"
+            large ? `${unpinned ? "" : "fixed inset-x-0 bottom-0 z-20 "}gap-[8px] pt-[12px] pb-[8px] [font-size:min(1rem,max(10vw,32px))]` : "gap-2 pt-3 pb-2"
           }`}
         >
           {action}

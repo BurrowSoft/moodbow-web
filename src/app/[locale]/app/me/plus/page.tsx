@@ -8,7 +8,7 @@ import { SessionEnded } from "@/components/SessionEnded";
 import { pageGate } from "@/lib/conditions";
 import { currentUser } from "@/lib/journal/currentUser";
 import { getMe } from "@/lib/journal/me";
-import { plusAiRows, plusPriceLabel, readPlusView } from "@/lib/plus/view";
+import { plusPriceLabel, readPlusView } from "@/lib/plus/view";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { titledMetadata } from "../../pageMeta";
 import { PlusScreen } from "./PlusScreen";
@@ -37,7 +37,7 @@ export default async function PlusPage({ params, searchParams }: PageProps<"/[lo
   return (
     <section className="space-y-2">
       <BackLink href="/app/me" label={ta("navBackTo", { screen: ta("tabMe") })} testId="nav-back" />
-      <PlusScreen view={view} price={plusPriceLabel(locale)} aiShown={plusAiRows(me)} started={started} />
+      <PlusScreen view={view} price={plusPriceLabel(locale)} started={started} />
     </section>
   );
 }
