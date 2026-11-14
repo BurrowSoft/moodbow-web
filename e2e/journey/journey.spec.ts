@@ -84,7 +84,8 @@ test.describe("launch journeys", () => {
       await page.getByTestId("entry-save").click();
       await expect(page).toHaveURL(/\/app$/);
       await page.locator('[data-testid^="today-entry-"]').first().click();
-      await expect(page).toHaveURL(/\/app\/entries\/[0-9a-f-]{36}$/);
+      // Opened from Today: the link says so (audit B), so the nav keeps Today.
+      await expect(page).toHaveURL(/\/app\/entries\/[0-9a-f-]{36}\?from=%2Fapp$/);
       await expect(page.getByTestId("entry-body")).toContainText(ENTRY);
       await expect(page.getByTestId("entry-checkin")).toBeVisible();
 
@@ -324,7 +325,8 @@ test.describe("tonight's flows", () => {
       await page.getByTestId("entry-save").click();
       await expect(page).toHaveURL(/\/app$/);
       await page.locator('[data-testid^="today-entry-"]').first().click();
-      await expect(page).toHaveURL(/\/app\/entries\/[0-9a-f-]{36}$/);
+      // Opened from Today: the link says so (audit B), so the nav keeps Today.
+      await expect(page).toHaveURL(/\/app\/entries\/[0-9a-f-]{36}\?from=%2Fapp$/);
       await page.getByTestId("entry-more").click();
       await page.getByTestId("entry-menu-delete").click();
       await page.getByTestId("entry-delete-confirm").click();
@@ -1178,7 +1180,8 @@ test("large text, set in the browser: Today after a mood, calendar, day, entry a
     await page.getByTestId("entry-save").click();
     await expect(page).toHaveURL(/\/app$/);
     await page.locator('[data-testid^="today-entry-"]').first().click();
-    await expect(page).toHaveURL(/\/app\/entries\/[0-9a-f-]{36}$/);
+    // Opened from Today: the link says so (audit B), so the nav keeps Today.
+    await expect(page).toHaveURL(/\/app\/entries\/[0-9a-f-]{36}\?from=%2Fapp$/);
     const entry = new URL(page.url()).pathname;
 
     // A moment a month ago, with a check-in, so On this day shows with its mood in words.
@@ -3126,9 +3129,8 @@ test("letter reminders: labels whole at 390 and 320 px / 300 %, en and de, contr
     await page.locator("#email").fill(email);
     await page.locator("#password").fill(password);
     await page.locator("main form button[type=submit]").first().click();
-    // As #319's letters axe test: this base (before #314) lands a new account on Setup.
-    await expect(page).toHaveURL(/\/setup$/, { timeout: 20_000 });
-    await page.getByTestId("setup-done").click();
+    // Since #314 (fewer taps) sign-in lands on Today (audit trial).
+    await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     await grantPlusTrial(email);
     const cdp = await page.context().newCDPSession(page);
