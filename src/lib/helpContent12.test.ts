@@ -27,6 +27,15 @@ const ROWS: Row[] = [
     shows: "Making my surroundings safer",
     appOnly: ["Show my safety plan without unlocking", "opens without a connection"],
   },
+  // The web prints; the app shares a PDF.
+  {
+    slug: "appointment",
+    app: "app_appointment",
+    web: "appointment_live",
+    shows: "Nothing here is saved or sent",
+    appOnly: ["<strong>Share as PDF</strong>"],
+    webOnly: ["<strong>Print</strong>"],
+  },
 ];
 
 // Every language with its own Help folder, served or not yet.

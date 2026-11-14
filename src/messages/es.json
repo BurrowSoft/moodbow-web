@@ -627,5 +627,22 @@
     "leaveTitle": "¿Salir sin guardar?",
     "leave": "Salir",
     "keepEditing": "Seguir editando"
+  },
+  "appointment": {
+    "meRow": "Para mi cita",
+    "intro": "Un resumen que puedes imprimir o mostrar en una cita. Aquí no se guarda ni se envía nada.",
+    "show": "Mostrar",
+    "range2": "Últimas 2 semanas",
+    "range4": "Últimas 4 semanas",
+    "range12": "Últimas 12 semanas",
+    "count": "{n, plural, one {# registro} other {# registros}}",
+    "averages": "Promedios",
+    "starred": "Momentos",
+    "fullText": "Incluir el texto completo",
+    "talk": "De qué quiero hablar",
+    "talkHint": "Esto no se guarda.",
+    "print": "Imprimir",
+    "empty": "Aún no hay registros en este periodo.",
+    "footer": "Hecho por ti con tus propias entradas de Moodbow. No es una evaluación médica."
   }
 }
