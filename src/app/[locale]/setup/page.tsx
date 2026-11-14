@@ -56,7 +56,15 @@ export default async function SetupPage({ params }: PageProps<"/[locale]/setup">
       <SignedInMark />
       {/* Focus and tone only when AI was turned on at Consent (and AI is
           shown here), as on the app (r1 §M3). */}
-      <SetupForm askAi={canReflect(me)} />
+      <SetupForm
+        askAi={canReflect(me)}
+        initial={{
+          reminderOn: me.settings?.reminder_on ?? false,
+          reminderTime: me.settings?.reminder_time?.slice(0, 5) ?? "21:00",
+          tone: me.settings?.tone ?? "warm",
+          focus: me.settings?.focus_areas ?? [],
+        }}
+      />
     </PageShell>
   );
 }

@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { dialogButton } from "@/components/Dialog";
 import { Link } from "@/i18n/navigation";
 import { CHECKIN_SAVED_EVENT, isLowMood, type CheckInSavedDetail } from "@/lib/journal/checkInSaved";
+import { markSetupLaterDone, readSetupLaterDone } from "@/lib/journal/setupLater";
 import { PlusBanner } from "./me/PlusInMe";
 
 // Today's Plus card on first landing (1.3 §6): the same card as Me's, closed for the day on either.
@@ -26,28 +27,13 @@ export function TodayPlusCard({ trial, price, date }: { trial: boolean; price: s
 
 // Setup after first use (1.3 §6): offered once there's a check-in, while the reminder is still off
 // (the protective default). Gone for good on this device once it's closed or Setup is opened.
-export const SETUP_LATER_KEY = "moodbow.setupLaterDone";
 const noSubscribe = () => () => {};
-const readDone = () => {
-  try {
-    return window.localStorage.getItem(SETUP_LATER_KEY) === "1";
-  } catch {
-    return false;
-  }
-};
-export function markSetupLaterDone() {
-  try {
-    window.localStorage.setItem(SETUP_LATER_KEY, "1");
-  } catch {
-    // no storage: it comes back next visit, which is harmless
-  }
-}
 
 export function SetupLaterCard() {
   const t = useTranslations("today");
   const to = useTranslations("onboarding");
   // Hidden in the server's HTML (no storage there), so it never flashes for someone who closed it.
-  const done = useSyncExternalStore(noSubscribe, readDone, () => true);
+  const done = useSyncExternalStore(noSubscribe, readSetupLaterDone, () => true);
   const [closed, setClosed] = useState(false);
   if (done || closed) return null;
   return (

@@ -9,6 +9,7 @@ import { offeredLocales } from "@/i18n/routing";
 import { savedLanguageRoute } from "@/lib/savedLanguage";
 import { pageGate } from "@/lib/conditions";
 import { getMe, onboardingStep } from "@/lib/journal/me";
+import { PROTECTIVE_ONBOARDING } from "@/lib/journal/setupLater";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { JournalUnavailable } from "@/components/JournalUnavailable";
 import { isAuthOutage } from "@/lib/supabase/proxy";
@@ -49,7 +50,7 @@ export default async function AppLayout({ children, params }: LayoutProps<"/[loc
   // completed with protective defaults: the reminder off until they choose one; tone and focus
   // stay at their defaults; AI only as its own consent says. Today then offers Setup.
   if (step === "setup") {
-    const { error: setupError } = await supabase.rpc("complete_onboarding", { p_reminder_on: false, p_reminder_time: "21:00" });
+    const { error: setupError } = await supabase.rpc("complete_onboarding", PROTECTIVE_ONBOARDING);
     if (setupError) return <NextIntlClientProvider messages={await getMessages()}><JournalUnavailable standalone /></NextIntlClientProvider>;
   }
   // Their saved language wins in the journal, if it's offered (row RT4).

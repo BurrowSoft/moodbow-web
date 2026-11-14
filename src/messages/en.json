@@ -195,6 +195,7 @@
     "checkEmailResend": "Send it again",
     "errPasswordShort": "Use at least 8 characters",
     "errAgeRequired": "Moodbow is for people 18 and older",
+    "errConsentRequired": "Please tick the boxes above to create your account.",
     "errEmailTaken": "This email already has an account. Sign in instead?",
     "setupTitle": "Make it yours",
     "setupFocusTitle": "What would you like Moodbow to pay attention to?",

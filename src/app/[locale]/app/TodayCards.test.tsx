@@ -12,7 +12,8 @@ vi.mock("@/i18n/navigation", () => ({
     </a>
   ),
 }));
-const { SETUP_LATER_KEY, SetupLaterCard, TodayPlusCard } = await import("./TodayCards");
+import { SETUP_LATER_KEY } from "@/lib/journal/setupLater";
+const { SetupLaterCard, TodayPlusCard } = await import("./TodayCards");
 const wrap = (ui: ReactNode) => render(<NextIntlClientProvider locale="en" messages={messages}>{ui}</NextIntlClientProvider>);
 beforeEach(() => window.localStorage.clear());
 afterEach(cleanup);

@@ -704,7 +704,7 @@ test.describe("onboarding (signed out)", () => {
       await page.getByLabel("Email").fill("w0@example.invalid");
       await page.getByLabel("Password").fill("secret-123");
       await page.getByTestId("signup-submit").click();
-      await expect(page.getByTestId("signup-error")).toHaveText("Something went wrong. Please try again.");
+      await expect(page.getByTestId("signup-error")).toHaveText("Please tick the boxes above to create your account.");
       await page.getByLabel("Password").fill("secret-123");
       await page.getByTestId("consent-privacy").check();
       await page.getByTestId("consent-health").check();

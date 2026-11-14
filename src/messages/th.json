@@ -195,6 +195,7 @@
     "checkEmailResend": "ส่งอีกครั้ง",
     "errPasswordShort": "กรุณาใช้อย่างน้อย 8 ตัวอักษร",
     "errAgeRequired": "Moodbow สำหรับผู้ที่มีอายุ 18 ปีขึ้นไป",
+    "errConsentRequired": "ติ๊กช่องด้านบนเพื่อสร้างบัญชีของคุณ",
     "errEmailTaken": "อีเมลนี้มีบัญชีอยู่แล้ว เข้าสู่ระบบแทนไหม?",
     "setupTitle": "ปรับให้เป็นของคุณ",
     "setupFocusTitle": "อยากให้ Moodbow ใส่ใจเรื่องอะไรเป็นพิเศษ?",

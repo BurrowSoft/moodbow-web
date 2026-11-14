@@ -1588,5 +1588,10 @@
     "key": "today.setupLaterClose",
     "en": "Not now",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "onboarding.errConsentRequired",
+    "en": "Please tick the boxes above to create your account.",
+    "reason": "UX draft (native read pending)"
   }
 ]

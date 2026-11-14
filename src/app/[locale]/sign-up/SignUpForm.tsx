@@ -10,8 +10,8 @@ import { signUpFlow, type SignUpState } from "./actions";
 const ERROR_KEYS = {
   emailInvalid: ["auth", "errEmailInvalid"],
   passwordShort: ["onboarding", "errPasswordShort"],
-  // The browser keeps Create account off until the boxes are ticked; this is for the rest.
-  consentRequired: ["auth", "errGeneric"],
+  // The browser keeps Create account off until the boxes are ticked; this is for the rest (no JS).
+  consentRequired: ["onboarding", "errConsentRequired"],
   ageRequired: ["onboarding", "errAgeRequired"],
   emailTaken: ["onboarding", "errEmailTaken"],
   // Too many tries: the same words as Send it again's notice (UX).
