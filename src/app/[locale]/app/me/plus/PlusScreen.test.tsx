@@ -182,3 +182,28 @@ describe("PlusScreen: the close X and the Christmas offer (1.3)", () => {
     expect(footer.textContent).not.toMatch(/7 days|free|%|half/i);
   });
 });
+
+describe("PlusScreen: the footer's order, and the short screen (#271's unpin, restored)", () => {
+  it("the price, the button, the renewal line under it, then where to cancel", () => {
+    show({ kind: "free", trial: true });
+    const ids = [...screen.getByTestId("plus-footer").querySelectorAll("[data-testid]")].map((e) => e.getAttribute("data-testid"));
+    const order = ["plus-price", "plus-start", "plus-renews", "plus-cancel"].map((id) => ids.indexOf(id));
+    expect(order).toEqual([...order].sort((a, b) => a - b));
+    expect(order.every((i) => i >= 0)).toBe(true);
+  });
+  it("large text where even the pinned part would take over 60 % of the screen: nothing pinned (data-unpinned)", () => {
+    vi.stubGlobal("ResizeObserver", class { observe() {} disconnect() {} });
+    const heights: Record<string, number> = { "plus-footer": 400, "plus-scroll": 60 };
+    const rect = vi.spyOn(Element.prototype, "getBoundingClientRect").mockImplementation(function (this: Element) {
+      return { height: heights[this.getAttribute("data-testid") ?? ""] ?? 0 } as DOMRect;
+    });
+    vi.stubGlobal("innerHeight", 640);
+    const { unmount } = show({ kind: "free", trial: true });
+    expect(screen.getByTestId("plus-screen")).toHaveAttribute("data-unpinned");
+    expect(screen.getByTestId("plus-footer").className).not.toContain("fixed");
+    expect(document.body.style.paddingBottom).toBe("");
+    unmount();
+    rect.mockRestore();
+    vi.unstubAllGlobals();
+  });
+});

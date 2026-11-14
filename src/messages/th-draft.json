@@ -1600,6 +1600,16 @@
     "reason": "UX draft (native read pending)"
   },
   {
+    "key": "plus.todayCardTitle",
+    "en": "See your moods over time",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.todayCardTrial",
+    "en": "Try 7 days free. Then {price} a year.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
     "key": "plus.close",
     "en": "Close",
     "reason": "UX draft (native read pending)"

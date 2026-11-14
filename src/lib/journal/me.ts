@@ -1,3 +1,4 @@
+import { cache } from "react";
 import type { createSupabaseServerClient } from "@/lib/supabase/server";
 import { isDeadlineError } from "@/lib/supabase/deadline";
 import { POLICY_VERSIONS, REQUIRED_KINDS, type ConsentKind } from "@/lib/legalVersions";
@@ -29,9 +30,10 @@ export type Me = {
   ai_available?: boolean;
 };
 
-export async function getMe(supabase: Client): Promise<Me | null> {
-  return (await readMe(supabase)).me;
-}
+// Once per request render for the shared client (React's cache): the journal's layout and its page
+// both read it, and each read was a round trip (the Web Dev's LCP read, 12 Nov). readMe isn't
+// cached: the check-in save asks it fresh.
+export const getMe = cache(async (supabase: Client): Promise<Me | null> => (await readMe(supabase)).me);
 
 // getMe, also saying whether get_me never answered (a data deadline), for a
 // caller that handles a dropped connection itself (the check-in save).

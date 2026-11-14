@@ -15,13 +15,10 @@ import { EntryPreviews, type EntrySummary } from "./EntryPreviews";
 import { tabMetadata } from "./pageMeta";
 import { Link } from "@/i18n/navigation";
 import { pageGate } from "@/lib/conditions";
-import { loadMilestone } from "@/lib/share/milestoneData";
 import type { InsightRow } from "@/lib/journal/insights";
 import { lastWeekStart } from "@/lib/journal/report";
 import { sixDaysAfter, yourWeek, type YourWeekMoment } from "@/lib/journal/yourWeek";
 import { YourWeekCard } from "./insights/YourWeekCard";
-import { yearOnOffer } from "@/lib/share/year";
-import { MilestoneCard } from "./MilestoneCard";
 import { SecurityNoticeRead } from "./SecurityNoticeRead";
 import { JOURNAL_HEADING } from "@/lib/ui/journalLayout";
 import { isLowMood } from "@/lib/journal/checkInSaved";
@@ -53,29 +50,27 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
   const me = await getMe(supabase);
   if (!me) return <JournalUnavailable />;
 
-  const { data, error: checkInError } = await supabase
-    .from("check_ins")
-    .select("local_date, mood, sleep_hours, sleep_quality, exercise_minutes, stress, updated_at")
-    .eq("local_date", me.today)
-    .maybeSingle();
+  // Today's reads all need only `me`, so they start together (the Web Dev's LCP read, 12 Nov: each
+  // one in turn cost a round trip to the database). Same reads, same results.
+  // The milestone card moved to the top of Timeline's list (Vitor, 14 Nov).
+  const [checkIn, todaysEntries, requestHeaders] = await Promise.all([
+    supabase.from("check_ins").select("local_date, mood, sleep_hours, sleep_quality, exercise_minutes, stress, updated_at").eq("local_date", me.today).maybeSingle(),
+    // Today's entries, newest first (previews only; the editor loads the rest).
+    supabase.from("entries").select("id, body, is_moment, entry_date, created_at").eq("entry_date", me.today).order("created_at", { ascending: false }),
+    headers(),
+  ]);
+  const { data, error: checkInError } = checkIn;
+  const { data: entries, error: entriesError } = todaysEntries;
   // Today always keeps check-in and Write, with errors beside them (specs/next-release.md).
   // A failed read shows the empty card with its error: saving it can't overwrite anything,
   // as a save with no known version is insert-only, and a check-in already there opens the
   // conflict dialog. Not reachable here: no session, or no get_me, as that spec says.
   // The key: the card reads `initial` only when it mounts, so a Try again that brings the real
   // row needs a new card. Unsaved choices stay, in CheckInDraft.
-  // Today's entries, newest first (previews only; the editor loads the rest).
-  const { data: entries, error: entriesError } = await supabase
-    .from("entries")
-    .select("id, body, is_moment, entry_date, created_at")
-    .eq("entry_date", me.today)
-    .order("created_at", { ascending: false });
   const t = await getTranslations("today");
   const te = await getTranslations("entry");
   const timeZone = me.profile?.time_zone ?? "UTC";
-  const dateLocaleTag = dateLocale(locale, (await headers()).get("accept-language"), me.profile?.country ?? null);
-  // A milestone reached (decision 169): offered once, where the 1.1 share cards are on.
-  const milestone = pageGate("share-cards") !== "hidden" && pageGate("share-cards-more") !== "hidden" ? await loadMilestone(supabase) : null;
+  const dateLocaleTag = dateLocale(locale, requestHeaders.get("accept-language"), me.profile?.country ?? null);
   // Today's Plus card on first landing (1.3 §6 and the rulings): only for someone without Plus (never
   // with Plus, never past due), only when today's rows were read, and never on a day when anything
   // saved was flagged or was one of the two lowest faces. Help is always above it on the page.
@@ -97,8 +92,6 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
     hardWeek = week?.kind === "hard";
     if (week) yourWeekCard = <YourWeekCard week={week} country={me.profile?.country} dateLocaleTag={dateLocaleTag} />;
   }
-  // Share cards are Plus once Plus is on (ruling 6); a row that can't be read keeps them, as Insights.
-  const sharesOpen = !plus || plus.kind === "plus";
   const flaggedToday = (entries ?? []).some((e) => flagsCrisis(String((e as { body?: unknown }).body ?? ""), CRISIS_KEYWORDS));
   // Never under a hard week's help either (the rule Your week brought with it).
   const plusCard = plus?.kind === "free" && !hardWeek && !checkInError && !entriesError && !flaggedToday && !isLowMood((data as CheckIn | null)?.mood) ? plus : null;
@@ -133,14 +126,9 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
         </Link>
       </header>
       <CheckInCard key={checkInError ? "unread" : "read"} initial={(data as CheckIn | null) ?? null} uid={user.id} date={me.today} dateLocaleTag={dateLocaleTag} keepDraft loadFailed={Boolean(checkInError)} />
+      {/* Today's order (UX ruling 3): the check-in, the cards (Your week first: its hard-week help), the
+          entries, then Write last. */}
       {yourWeekCard}
-      <Link
-        href="/app/write"
-        data-testid="today-write"
-        className="inline-flex min-h-12 max-w-full items-center justify-center rounded-full bg-accent px-8 text-center font-medium text-on-accent hover:bg-accent-hover"
-      >
-        {te("writeButton")}
-      </Link>
       {plusCard && plusPage && <TodayPlusCard trial={plusCard.trial} price={plusPage.price} offer={plusPage.offer} date={me.today} />}
       {setupLater && <SetupLaterCard />}
       {entriesError && (
@@ -156,9 +144,13 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
           <EntryPreviews entries={entries as EntrySummary[]} testIdPrefix="today-entry" from="/app" timeZone={me.profile?.time_zone ?? "UTC"} dateLocaleTag={dateLocaleTag} />
         </section>
       )}
-      {/* Last on the page: it floats above the tab bar (decision 186), and the room
-          it needs is added after the footer, so its late arrival moves nothing. */}
-      {milestone && sharesOpen && <MilestoneCard n={milestone.n} colours={milestone.colours} uid={user.id} month={me.today.slice(0, 7)} dateLocaleTag={dateLocaleTag} year={pageGate("year-card") !== "hidden" ? yearOnOffer(me.today) : null} />}
+      <Link
+        href="/app/write"
+        data-testid="today-write"
+        className="inline-flex min-h-12 max-w-full items-center justify-center rounded-full bg-accent px-8 text-center font-medium text-on-accent hover:bg-accent-hover"
+      >
+        {te("writeButton")}
+      </Link>
     </section>
   );
 }
