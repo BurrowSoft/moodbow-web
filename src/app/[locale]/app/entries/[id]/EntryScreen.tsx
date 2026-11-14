@@ -4,6 +4,7 @@ import { JOURNAL_HEADING } from "@/lib/ui/journalLayout";
 import { startTransition, useActionState, useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { BackLink } from "@/components/BackLink";
+import { GetHelpNow } from "@/components/SafetyCard";
 import { Dialog, dialogButton } from "@/components/Dialog";
 import { useRouter } from "@/i18n/navigation";
 import type { CheckIn } from "@/lib/journal/checkIn";
@@ -180,6 +181,8 @@ function Screen({ entry: initial, checkIn, from, backLabel, dateLocaleTag, uid, 
       <div className="flex flex-wrap items-center gap-1">
         {/* While editing, the editor's top row holds Back (with Save). */}
         {mode.kind === "view" && <BackLink href={from} label={backLabel} testId="nav-back" />}
+        {/* Help everywhere (audit batch H): beside Back. While editing, the editor's own shows. */}
+        {mode.kind === "view" && <GetHelpNow country={country} testId="entry-help" neutral icon />}
         {mode.kind === "view" && (
           <div className="ml-auto flex min-w-0 flex-wrap items-center justify-end gap-1" data-testid="entry-actions">
             <button

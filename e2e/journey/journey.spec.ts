@@ -2069,3 +2069,26 @@ test("Three good things: large text on a 320 px phone, one ordinary entry on Tod
     await cleanup(email);
   }
 });
+
+// Help everywhere (audit batch H, UX and the Reviewer, 14 Nov): wherever someone writes their own
+// words or reads back their days, exactly one help control, and it opens the help card.
+test("help everywhere: writing, Three good things, a day and the Timeline each have one lifebuoy that opens the help card", async ({ page }) => {
+  test.setTimeout(120_000);
+  const email = newEmail();
+  try {
+    const password = await accountAtSetup(page, email);
+    const today = await journalToday(email, password);
+    const help = page.getByRole("link", { name: messages.me.meGetHelpNow });
+    for (const path of ["/app/write", "/app/write/good-things", `/app/timeline/${today}`, "/app/timeline"]) {
+      await page.goto(path);
+      await expect(help.first(), path).toBeVisible({ timeout: 15_000 });
+      await expect(help, `${path}: exactly one help control`).toHaveCount(1);
+      await help.click();
+      await expect(page.getByTestId("safety-card"), path).toBeVisible();
+      await page.keyboard.press("Escape");
+      await expect(page.getByTestId("safety-card"), path).toHaveCount(0);
+    }
+  } finally {
+    await cleanup(email);
+  }
+});
