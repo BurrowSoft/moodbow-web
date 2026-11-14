@@ -484,7 +484,22 @@
     "yourWeekLookMixed": "La tua settimana ha avuto giorni buoni e giorni bassi.",
     "yourWeekMoment": "Un momento di quella settimana: {date}",
     "yourWeekHard": "Sembra sia stata una settimana difficile.",
-    "yourWeekCaption": "Può mostrare cosa tende ad andare insieme, non cosa causa cosa."
+    "yourWeekCaption": "Può mostrare cosa tende ad andare insieme, non cosa causa cosa.",
+    "pairTag": "«{tag}»",
+    "pairWith": "Con {tag}",
+    "pairOther": "Altri giorni",
+    "pairSleepMore": "7 ore o più",
+    "pairSleepLess": "Meno sonno",
+    "pairMoved": "Con movimento",
+    "pairNotMoved": "Senza movimento",
+    "pairStressLow": "Stress basso",
+    "pairStressHigh": "Stress alto",
+    "pairWeekTitle": "Feriali e weekend",
+    "pairWeekdays": "Feriali",
+    "pairWeekends": "Weekend",
+    "pairWritingTitle": "Scrittura",
+    "pairWrote": "Con scrittura",
+    "pairNotWrote": "Senza scrittura"
   },
   "share": {
     "shareButton": "Condividi",
@@ -714,6 +729,12 @@
     "exampleStrip": "Un esempio di Andamento. Con Plus, qui vedi i tuoi check-in.",
     "exampleWatermark": "ESEMPIO",
     "exampleRanges": "Periodo dell'esempio",
-    "exampleSample": "{strip} {see}"
+    "exampleSample": "{strip} {see}",
+    "exampleLabel": "Esempio",
+    "exampleWeekLine": "Per lo più stabile, con due giorni buoni alla fine.",
+    "exampleTagWalk": "Passeggiata",
+    "exampleTagFriends": "Amici",
+    "liftsTitle": "Cosa mi fa stare bene",
+    "liftsRow": "Nei giorni con il tag «{tag}» il tuo umore è stato in media {a} su 5; negli altri giorni, {b}."
   }
 }

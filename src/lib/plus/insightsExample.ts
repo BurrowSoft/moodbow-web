@@ -37,3 +37,14 @@ export const INSIGHTS_EXAMPLE: Record<ExampleRange, ExampleCard[]> = {
     card("exercise_minutes", 24, 3, [20, 20, 25, 25, 30, 30, 35, 25, 20, 20, 20, 20]),
   ],
 };
+
+// Week (board 3, UX 14 Nov): Your week's 7 days (moods), and the colour-bar pairs of What lifts me
+// (two example tags, named through messages) and Patterns (sleep). Example numbers, never anyone's.
+export const WEEK_EXAMPLE = {
+  days: [3, 3, 2, 3, 3, 4, 5],
+  lifts: [
+    { tag: "exampleTagWalk", a: 4.1, b: 3.2 },
+    { tag: "exampleTagFriends", a: 4.0, b: 3.3 },
+  ],
+  sleep: { a: 3.8, b: 3.1 },
+} as const;

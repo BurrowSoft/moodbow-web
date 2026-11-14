@@ -484,7 +484,22 @@
     "yourWeekLookMixed": "Your week had good days and low ones.",
     "yourWeekMoment": "A moment from that week: {date}",
     "yourWeekHard": "This looked like a hard week.",
-    "yourWeekCaption": "This may show what tends to go together, not what causes what."
+    "yourWeekCaption": "This may show what tends to go together, not what causes what.",
+    "pairTag": "“{tag}”",
+    "pairWith": "With {tag}",
+    "pairOther": "Other days",
+    "pairSleepMore": "7+ hours",
+    "pairSleepLess": "Less sleep",
+    "pairMoved": "Moved",
+    "pairNotMoved": "Didn't move",
+    "pairStressLow": "Low stress",
+    "pairStressHigh": "High stress",
+    "pairWeekTitle": "Weekdays and weekends",
+    "pairWeekdays": "Weekdays",
+    "pairWeekends": "Weekends",
+    "pairWritingTitle": "Writing",
+    "pairWrote": "Wrote",
+    "pairNotWrote": "Didn't write"
   },
   "share": {
     "shareButton": "Share",
@@ -714,6 +729,12 @@
     "exampleStrip": "An example of Insights. With Plus, this shows your own check-ins.",
     "exampleWatermark": "EXAMPLE",
     "exampleRanges": "The example's range",
-    "exampleSample": "{strip} {see}"
+    "exampleSample": "{strip} {see}",
+    "exampleLabel": "Example",
+    "exampleWeekLine": "Mostly steady, with two good days at the end.",
+    "exampleTagWalk": "Walk",
+    "exampleTagFriends": "Friends",
+    "liftsTitle": "What lifts me",
+    "liftsRow": "On days with “{tag}”, your mood averaged {a} of 5; on other days, {b}."
   }
 }
