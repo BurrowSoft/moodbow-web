@@ -14,6 +14,7 @@ export type Me = {
   today: string;
   // user_settings (migration 001); reminder_time is "HH:MM:SS".
   settings?: {
+    bo_off?: boolean;
     reminder_on: boolean;
     reminder_time: string | null;
     // Plus: more daily reminders, "HH:MM:SS" each (migration 031); absent before it.

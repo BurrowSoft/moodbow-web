@@ -3,6 +3,7 @@
   "path": "supabase/contracts",
   "commit": "586c90e69cc3305fd2f80fa3b6613c91d5abd082",
   "sha256": {
+    "bo.md": "b6dbd3ff3158b4134ce92e4de0bc78dc1e010c4b27b62973c1d2f33747aca9fd",
     "colour-map.json": "2b861725dee87bd9e34f79a75fba0b0c26a3b5cab814b5aba1a8bc8f3c558269",
     "countries.json": "432a3ed32cda9f58746723e3b392a4e5e8299715b7ed0c339c3b98438ebbdc6c",
     "crisis-keywords.json": "63c3f72f96c9ac0e6870a7b4a363fdc4426cea153bbfb328c950bd1dd040bd99",

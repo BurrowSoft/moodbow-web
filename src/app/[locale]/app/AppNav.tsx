@@ -125,6 +125,7 @@ export function AppNav() {
   return (
     <nav
       ref={bar}
+      data-app-nav
       aria-label={t("appName")}
       data-keyboard={keyboard || undefined}
       data-testid="app-nav"
