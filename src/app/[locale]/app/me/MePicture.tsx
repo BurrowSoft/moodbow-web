@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { encodePicture, loadPicture, removePicture, savePicture } from "@/lib/me/picture";
+import { encodePicture, loadPicture, removeOtherPictures, removePicture, savePicture } from "@/lib/me/picture";
 import { onSignOut } from "@/lib/signOutSignal";
 
 // Me's big card (board 6b): the rainbow by default with the pencil badge; one button, "Choose a
@@ -24,6 +24,8 @@ export function MePicture({ uid }: { uid: string }) {
 
   useEffect(() => {
     let live = true;
+    // Someone else's picture from an earlier session in this browser never stays (the Reviewer).
+    void removeOtherPictures(uid);
     void loadPicture(uid).then((p) => live && p && show(p));
     const off = onSignOut((m) => {
       if (m.uid !== uid) return;

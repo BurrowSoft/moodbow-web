@@ -91,3 +91,12 @@ export const savePicture = async (uid: string, picture: Blob): Promise<boolean> 
 export const removePicture = async (uid: string): Promise<void> => {
   await run("readwrite", (s) => s.delete(uid));
 };
+// Everyone's (a session that ended: this browser may be someone else's next).
+export const clearPictures = async (): Promise<void> => {
+  await run("readwrite", (s) => s.clear());
+};
+// Every picture but this user's (another person signed in here before: theirs goes).
+export const removeOtherPictures = async (uid: string): Promise<void> => {
+  const keys = await run("readonly", (s) => s.getAllKeys());
+  for (const k of keys ?? []) if (k !== uid) await run("readwrite", (s) => s.delete(k));
+};

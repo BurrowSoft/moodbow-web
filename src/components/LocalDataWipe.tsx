@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { wipeCookieUid, wipeLocalData } from "@/lib/localData";
+import { removePicture } from "@/lib/me/picture";
 
 // After the account was deleted (the mb_wipe cookie, decision 85: set by the
 // proxy on account_gone, or by Me → Delete account): remove that user's
@@ -20,6 +21,8 @@ export function LocalDataWipe() {
     } catch {
       // storage unavailable: nothing was kept here either
     }
+    // Me's own picture (lib/me/picture) goes with them.
+    void removePicture(uid).catch(() => {});
     document.cookie = `mb_wipe=; Max-Age=0; Path=/; SameSite=Lax${location.protocol === "https:" ? "; Secure" : ""}`;
   }, [pathname]);
   return null;

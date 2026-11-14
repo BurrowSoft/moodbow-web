@@ -11,6 +11,9 @@ vi.mock("@/lib/me/picture", () => ({
   loadPicture: async (uid: string) => stored.get(uid) ?? null,
   savePicture: async (uid: string, b: Blob) => (stored.set(uid, b), true),
   removePicture: async (uid: string) => void stored.delete(uid),
+  removeOtherPictures: async (uid: string) => {
+    for (const k of [...stored.keys()]) if (k !== uid) stored.delete(k);
+  },
 }));
 let signedOut: ((m: { uid: string; mode: "keep" | "delete" }) => void) | null = null;
 vi.mock("@/lib/signOutSignal", () => ({ onSignOut: (h: typeof signedOut) => ((signedOut = h), () => (signedOut = null)) }));
@@ -56,6 +59,14 @@ describe("MePicture (board 6b): their own picture, this browser only", () => {
     await pick(new File(["x"], "notes.txt", { type: "text/plain" }));
     expect(screen.getByTestId("me-picture-failed")).toHaveTextContent(m.pictureFailed);
     expect(stored.size).toBe(0);
+  });
+  it("another person's picture left in this browser goes when Me opens (the Reviewer, #321)", async () => {
+    stored.set("someone-else", new Blob(["px"], { type: "image/jpeg" }));
+    show();
+    await screen.findByTestId("me-picture-choose");
+    await act(async () => {});
+    expect(stored.has("someone-else")).toBe(false);
+    expect(screen.queryByTestId("me-picture-img")).toBeNull();
   });
   it("kept from before: shown on landing; a sign-out (any tab) deletes it", async () => {
     stored.set("u1", new Blob(["px"], { type: "image/jpeg" }));
