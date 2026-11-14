@@ -76,7 +76,9 @@ export function InsightsExample({ help }: { help: React.ReactNode }) {
                 <span className="rounded-full border border-border px-2 py-0.5 text-sm text-text">{change(c)}</span>
               </span>
               <span className="mt-1 block text-sm text-muted">{average(c)}</span>
-              <span className="mt-3 flex h-16 items-end gap-1">
+              {/* Gaps in px, never rem: at 300 % the month's 30 bars with rem gaps were 113 px wider
+                  than a 320 px phone (the a11y sweep, #326). 4 px up to 13 bars, 2 px for 30. */}
+              <span className={`mt-3 flex h-16 items-end ${c.bars.length > 13 ? "gap-[2px]" : "gap-[4px]"}`}>
                 {c.bars.map((v, i) => {
                   const max = c.metric === "exercise_minutes" ? 60 : c.metric === "sleep_hours" ? 10 : 5;
                   return (

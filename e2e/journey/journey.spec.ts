@@ -2185,6 +2185,27 @@ test("Insights for a free person: the example, its watermark whole at 320 and 12
         await expect(page).toHaveURL(RegExp(`${route}/app/me/plus$`), { timeout: 15_000 });
       }
     }
+    // Every range at 300 % on a 320 px phone: nothing scrolls sideways (the a11y sweep, #326: the
+    // month's 30 bars with rem gaps were 113 px too wide). What sticks out is named.
+    await setProfileLocale(email, password, "en");
+    await page.setViewportSize({ width: 320, height: 640 });
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send("Page.setFontSizes", { fontSizes: { standard: 48, fixed: 39 } });
+    await page.goto("/app/insights");
+    await expect(page.getByTestId("insights-example")).toBeVisible({ timeout: 15_000 });
+    for (const range of ["week", "month", "3months", "year"]) {
+      await page.getByTestId(`insights-example-range-${range}`).click();
+      await expect(page.getByTestId(`insights-example-range-${range}`)).toHaveAttribute("aria-pressed", "true");
+      const wide = await page.evaluate(() => ({
+        overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        sticksOut: [...document.querySelectorAll("main *")]
+          .filter((e) => e.getBoundingClientRect().right > window.innerWidth + 0.5 && e.getBoundingClientRect().width > 1 && !e.classList.contains("sr-only"))
+          .slice(0, 4)
+          .map((e) => `${e.tagName.toLowerCase()}${e.getAttribute("data-testid") ? `[${e.getAttribute("data-testid")}]` : ""} ${Math.round(e.getBoundingClientRect().right)}`),
+      }));
+      expect.soft(wide, `${range} at 300 % on 320 px: nothing scrolls sideways`).toEqual({ overflow: 0, sticksOut: [] });
+    }
+    await cdp.send("Page.setFontSizes", { fontSizes: { standard: 16, fixed: 13 } });
   } finally {
     await cleanup(email);
   }
