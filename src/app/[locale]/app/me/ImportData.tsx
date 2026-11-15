@@ -365,7 +365,9 @@ function Preview({
                 data-testid={`import-mood-${i}`}
                 value={moodChoices[name] === undefined ? "" : String(moodChoices[name])}
                 onChange={(e) => onMood(name, e.target.value === "skip" ? "skip" : (Number(e.target.value) as Mood))}
-                className="min-h-11 rounded-full border border-border bg-bg px-3 text-text"
+                // min-w-0 / max-w-full: it shrinks within its row instead of growing to its longest
+                // option (320 px at 200 % in German overflowed; the Web Tester's L6 T4).
+                className="min-h-11 min-w-0 max-w-full rounded-full border border-border bg-bg px-3 text-text"
               >
                 <option value="" disabled>
                   {t("importMapChoose")}
