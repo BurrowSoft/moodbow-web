@@ -281,8 +281,8 @@ describe("Help → Want to talk to someone?: Today's lifebuoy", () => {
       expect(render(locale, false)).not.toContain(`<strong>${app.tabToday}</strong>`);
     });
   }
-  it("met with the 1.3.0 app build (help only)", () => {
-    expect(isPendingMet("app_today_help")).toBe(true);
+  it("waits for the app build (help only, not met yet)", () => {
+    expect(isPendingMet("app_today_help")).toBe(false);
   });
 });
 
