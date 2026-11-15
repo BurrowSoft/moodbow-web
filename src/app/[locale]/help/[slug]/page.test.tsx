@@ -12,7 +12,7 @@ vi.mock("@/i18n/navigation", () => ({ Link: "a" }));
 const build = vi.hoisted(() => ({ gate: "draft" as "draft" | "hidden" }));
 vi.mock("@/lib/conditions", async (orig) => ({ ...(await orig<typeof import("@/lib/conditions")>()), pageGate: () => build.gate }));
 
-const { default: HelpArticlePage, dynamicParams, generateStaticParams } = await import("./page");
+const { default: HelpArticlePage, generateStaticParams } = await import("./page");
 
 // Depth-first search through a React element tree for props matching `test`.
 function findProps(node: unknown, test: (p: Record<string, unknown>) => boolean): Record<string, unknown> | undefined {
@@ -39,10 +39,9 @@ describe("Help article page", () => {
     expect(findProps(shell.after, (p) => p["data-testid"] === "help-back")?.href).toBe("/help");
   });
 
-  // Any other slug is a routing-level 404 with the real not-found page, not notFound()'s bare
-  // error shell (the Web Tester, 15 Nov; e2e smoke "help 404" checks the raw HTML).
-  it("serves only the published articles; any other slug is a routing-level 404", () => {
-    expect(dynamicParams).toBe(false);
+  // Prerendered: the published articles only (the proxy 404s the rest: lib/helpGates.ts; e2e smoke
+  // "help 404" checks the raw HTML).
+  it("prerenders only the published articles", () => {
     const en = generateStaticParams().filter((p) => p.locale === "en").map((p) => p.slug);
     expect(en).toContain("check-ins");
     expect(en).toContain("get-help-now");

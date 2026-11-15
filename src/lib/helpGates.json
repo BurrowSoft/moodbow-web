@@ -1,0 +1,2025 @@
+{
+ "de": {
+  "ai-reflections": [
+   {
+    "ids": [
+     "ai_live"
+    ],
+    "then": true
+   }
+  ],
+  "app-icon": [
+   {
+    "ids": [
+     "app_icons"
+    ],
+    "then": true
+   }
+  ],
+  "app-lock": [
+   {
+    "ids": [
+     "app_app_lock"
+    ],
+    "then": true
+   }
+  ],
+  "appointment": [
+   {
+    "ids": [
+     "app_appointment",
+     "appointment_live"
+    ],
+    "then": true
+   }
+  ],
+  "backing-up": true,
+  "bo": [
+   {
+    "ids": [
+     "bo_live"
+    ],
+    "then": true
+   }
+  ],
+  "bring-this-back": [
+   {
+    "ids": [
+     "moment_recall_live"
+    ],
+    "then": true
+   }
+  ],
+  "calendar": [
+   {
+    "ids": [
+     "app_calendar"
+    ],
+    "then": true
+   }
+  ],
+  "check-ins": true,
+  "christmas-offer": [
+   {
+    "ids": [
+     "offer_live"
+    ],
+    "then": true
+   }
+  ],
+  "delete-account": true,
+  "entries": true,
+  "get-help-now": true,
+  "getting-started": true,
+  "import": [
+   {
+    "ids": [
+     "app_import",
+     "import_live"
+    ],
+    "then": true
+   }
+  ],
+  "insights": true,
+  "keyboard-shortcuts": [
+   {
+    "ids": [
+     "shortcuts_live"
+    ],
+    "then": true
+   }
+  ],
+  "letter-reminders": [
+   {
+    "ids": [
+     "app_letters",
+     "letters_live"
+    ],
+    "then": true
+   }
+  ],
+  "letters": [
+   {
+    "ids": [
+     "app_letters",
+     "letters_live"
+    ],
+    "then": true
+   }
+  ],
+  "me-picture": [
+   {
+    "ids": [
+     "me_picture_live",
+     "app_me_picture"
+    ],
+    "then": true
+   }
+  ],
+  "moments": true,
+  "moodbow-plus": [
+   {
+    "ids": [
+     "plus"
+    ],
+    "then": true
+   }
+  ],
+  "offline": true,
+  "on-this-day": [
+   {
+    "ids": [
+     "on_this_day_live"
+    ],
+    "then": true
+   }
+  ],
+  "one-tap-check-in": [
+   {
+    "ids": [
+     "app_quick_checkin"
+    ],
+    "then": true
+   }
+  ],
+  "patterns": [
+   {
+    "ids": [
+     "app_patterns",
+     "patterns_live"
+    ],
+    "then": true
+   }
+  ],
+  "pdf-journal": [
+   {
+    "ids": [
+     "plus"
+    ],
+    "then": true
+   }
+  ],
+  "pictures": [
+   {
+    "ids": [
+     "pictures_live",
+     "app_pictures"
+    ],
+    "then": true
+   }
+  ],
+  "privacy-and-data": true,
+  "reminders": [
+   {
+    "ids": [
+     "app_reminders"
+    ],
+    "then": true
+   }
+  ],
+  "safety-plan": [
+   {
+    "ids": [
+     "app_safety_plan",
+     "safety_plan_live"
+    ],
+    "then": true
+   }
+  ],
+  "search": [
+   {
+    "ids": [
+     "app_search"
+    ],
+    "then": true
+   }
+  ],
+  "share-card": [
+   {
+    "ids": [
+     "app_share_cards"
+    ],
+    "then": true
+   },
+   {
+    "ids": [
+     "app_share_cards_more"
+    ],
+    "then": true
+   },
+   {
+    "ids": [
+     "app_year_card"
+    ],
+    "then": true
+   }
+  ],
+  "sign-in": true,
+  "tags": [
+   {
+    "ids": [
+     "tags_live"
+    ],
+    "then": true
+   }
+  ],
+  "themes": [
+   {
+    "ids": [
+     "plus"
+    ],
+    "then": true
+   }
+  ],
+  "things-that-help": [
+   {
+    "ids": [
+     "app_toolbox",
+     "toolbox_live"
+    ],
+    "then": true
+   },
+   {
+    "ids": [
+     "app_grounding",
+     "grounding_live"
+    ],
+    "then": true
+   },
+   {
+    "ids": [
+     "app_good_things",
+     "good_things_live"
+    ],
+    "then": true
+   }
+  ],
+  "timeline": true,
+  "widget": [
+   {
+    "ids": [
+     "widget_live"
+    ],
+    "then": true
+   }
+  ],
+  "year-in-review": [
+   {
+    "ids": [
+     "plus"
+    ],
+    "then": true
+   }
+  ],
+  "your-week-today": [
+   {
+    "ids": [
+     "your_week_live"
+    ],
+    "then": true
+   }
+  ],
+  "your-week": [
+   {
+    "ids": [
+     "weekly_report_live"
+    ],
+    "then": true
+   }
+  ]
+ },
+ "en": {
+  "ai-reflections": [
+   {
+    "ids": [
+     "ai_live"
+    ],
+    "then": true
+   }
+  ],
+  "app-icon": [
+   {
+    "ids": [
+     "app_icons"
+    ],
+    "then": true
+   }
+  ],
+  "app-lock": [
+   {
+    "ids": [
+     "app_app_lock"
+    ],
+    "then": true
+   }
+  ],
+  "appointment": [
+   {
+    "ids": [
+     "app_appointment",
+     "appointment_live"
+    ],
+    "then": true
+   }
+  ],
+  "backing-up": true,
+  "bo": [
+   {
+    "ids": [
+     "bo_live"
+    ],
+    "then": true
+   }
+  ],
+  "bring-this-back": [
+   {
+    "ids": [
+     "moment_recall_live"
+    ],
+    "then": true
+   }
+  ],
+  "calendar": [
+   {
+    "ids": [
+     "app_calendar"
+    ],
+    "then": true
+   }
+  ],
+  "check-ins": true,
+  "christmas-offer": [
+   {
+    "ids": [
+     "offer_live"
+    ],
+    "then": true
+   }
+  ],
+  "delete-account": true,
+  "entries": true,
+  "get-help-now": true,
+  "getting-started": true,
+  "import": [
+   {
+    "ids": [
+     "app_import",
+     "import_live"
+    ],
+    "then": true
+   }
+  ],
+  "insights": true,
+  "keyboard-shortcuts": [
+   {
+    "ids": [
+     "shortcuts_live"
+    ],
+    "then": true
+   }
+  ],
+  "letter-reminders": [
+   {
+    "ids": [
+     "app_letters",
+     "letters_live"
+    ],
+    "then": true
+   }
+  ],
+  "letters": [
+   {
+    "ids": [
+     "app_letters",
+     "letters_live"
+    ],
+    "then": true
+   }
+  ],
+  "me-picture": [
+   {
+    "ids": [
+     "me_picture_live",
+     "app_me_picture"
+    ],
+    "then": true
+   }
+  ],
+  "moments": true,
+  "moodbow-plus": [
+   {
+    "ids": [
+     "plus"
+    ],
+    "then": true
+   }
+  ],
+  "offline": true,
+  "on-this-day": [
+   {
+    "ids": [
+     "on_this_day_live"
+    ],
+    "then": true
+   }
+  ],
+  "one-tap-check-in": [
+   {
+    "ids": [
+     "app_quick_checkin"
+    ],
+    "then": true
+   }
+  ],
+  "patterns": [
+   {
+    "ids": [
+     "app_patterns",
+     "patterns_live"
+    ],
+    "then": true
+   }
+  ],
+  "pdf-journal": [
+   {
+    "ids": [
+     "plus"
+    ],
+    "then": true
+   }
+  ],
+  "pictures": [
+   {
+    "ids": [
+     "pictures_live",
+     "app_pictures"
+    ],
+    "then": true
+   }
+  ],
+  "privacy-and-data": true,
+  "reminders": [
+   {
+    "ids": [
+     "app_reminders"
+    ],
+    "then": true
+   }
+  ],
+  "safety-plan": [
+   {
+    "ids": [
+     "app_safety_plan",
+     "safety_plan_live"
+    ],
+    "then": true
+   }
+  ],
+  "search": [
+   {
+    "ids": [
+     "app_search"
+    ],
+    "then": true
+   }
+  ],
+  "share-card": [
+   {
+    "ids": [
+     "app_share_cards"
+    ],
+    "then": true
+   },
+   {
+    "ids": [
+     "app_share_cards_more"
+    ],
+    "then": true
+   },
+   {
+    "ids": [
+     "app_year_card"
+    ],
+    "then": true
+   }
+  ],
+  "sign-in": true,
+  "tags": [
+   {
+    "ids": [
+     "tags_live"
+    ],
+    "then": true
+   }
+  ],
+  "themes": [
+   {
+    "ids": [
+     "plus"
+    ],
+    "then": true
+   }
+  ],
+  "things-that-help": [
+   {
+    "ids": [
+     "app_toolbox",
+     "toolbox_live"
+    ],
+    "then": true
+   },
+   {
+    "ids": [
+     "app_grounding",
+     "grounding_live"
+    ],
+    "then": true
+   },
+   {
+    "ids": [
+     "app_good_things",
+     "good_things_live"
+    ],
+    "then": true
+   }
+  ],
+  "timeline": true,
+  "widget": [
+   {
+    "ids": [
+     "widget_live"
+    ],
+    "then": true
+   }
+  ],
+  "year-in-review": [
+   {
+    "ids": [
+     "plus"
+    ],
+    "then": true
+   }
+  ],
+  "your-week-today": [
+   {
+    "ids": [
+     "your_week_live"
+    ],
+    "then": true
+   }
+  ],
+  "your-week": [
+   {
+    "ids": [
+     "weekly_report_live"
+    ],
+    "then": true
+   }
+  ]
+ },
+ "es": {
+  "ai-reflections": [
+   {
+    "ids": [
+     "ai_live"
+    ],
+    "then": true
+   }
+  ],
+  "app-icon": [
+   {
+    "ids": [
+     "app_icons"
+    ],
+    "then": true
+   }
+  ],
+  "app-lock": [
+   {
+    "ids": [
+     "app_app_lock"
+    ],
+    "then": true
+   }
+  ],
+  "appointment": [
+   {
+    "ids": [
+     "app_appointment",
+     "appointment_live"
+    ],
+    "then": true
+   }
+  ],
+  "backing-up": true,
+  "bo": [
+   {
+    "ids": [
+     "bo_live"
+    ],
+    "then": true
+   }
+  ],
+  "bring-this-back": [
+   {
+    "ids": [
+     "moment_recall_live"
+    ],
+    "then": true
+   }
+  ],
+  "calendar": [
+   {
+    "ids": [
+     "app_calendar"
+    ],
+    "then": true
+   }
+  ],
+  "check-ins": true,
+  "christmas-offer": [
+   {
+    "ids": [
+     "offer_live"
+    ],
+    "then": true
+   }
+  ],
+  "delete-account": true,
+  "entries": true,
+  "get-help-now": true,
+  "getting-started": true,
+  "import": [
+   {
+    "ids": [
+     "app_import",
+     "import_live"
+    ],
+    "then": true
+   }
+  ],
+  "insights": true,
+  "keyboard-shortcuts": [
+   {
+    "ids": [
+     "shortcuts_live"
+    ],
+    "then": true
+   }
+  ],
+  "letter-reminders": [
+   {
+    "ids": [
+     "app_letters",
+     "letters_live"
+    ],
+    "then": true
+   }
+  ],
+  "letters": [
+   {
+    "ids": [
+     "app_letters",
+     "letters_live"
+    ],
+    "then": true
+   }
+  ],
+  "me-picture": [
+   {
+    "ids": [
+     "me_picture_live",
+     "app_me_picture"
+    ],
+    "then": true
+   }
+  ],
+  "moments": true,
+  "moodbow-plus": [
+   {
+    "ids": [
+     "plus"
+    ],
+    "then": true
+   }
+  ],
+  "offline": true,
+  "on-this-day": [
+   {
+    "ids": [
+     "on_this_day_live"
+    ],
+    "then": true
+   }
+  ],
+  "one-tap-check-in": [
+   {
+    "ids": [
+     "app_quick_checkin"
+    ],
+    "then": true
+   }
+  ],
+  "patterns": [
+   {
+    "ids": [
+     "app_patterns",
+     "patterns_live"
+    ],
+    "then": true
+   }
+  ],
+  "pdf-journal": [
+   {
+    "ids": [
+     "plus"
+    ],
+    "then": true
+   }
+  ],
+  "pictures": [
+   {
+    "ids": [
+     "pictures_live",
+     "app_pictures"
+    ],
+    "then": true
+   }
+  ],
+  "privacy-and-data": true,
+  "reminders": [
+   {
+    "ids": [
+     "app_reminders"
+    ],
+    "then": true
+   }
+  ],
+  "safety-plan": [
+   {
+    "ids": [
+     "app_safety_plan",
+     "safety_plan_live"
+    ],
+    "then": true
+   }
+  ],
+  "search": [
+   {
+    "ids": [
+     "app_search"
+    ],
+    "then": true
+   }
+  ],
+  "share-card": [
+   {
+    "ids": [
+     "app_share_cards"
+    ],
+    "then": true
+   },
+   {
+    "ids": [
+     "app_share_cards_more"
+    ],
+    "then": true
+   },
+   {
+    "ids": [
+     "app_year_card"
+    ],
+    "then": true
+   }
+  ],
+  "sign-in": true,
+  "tags": [
+   {
+    "ids": [
+     "tags_live"
+    ],
+    "then": true
+   }
+  ],
+  "themes": [
+   {
+    "ids": [
+     "plus"
+    ],
+    "then": true
+   }
+  ],
+  "things-that-help": [
+   {
+    "ids": [
+     "app_toolbox",
+     "toolbox_live"
+    ],
+    "then": true
+   },
+   {
+    "ids": [
+     "app_grounding",
+     "grounding_live"
+    ],
+    "then": true
+   },
+   {
+    "ids": [
+     "app_good_things",
+     "good_things_live"
+    ],
+    "then": true
+   }
+  ],
+  "timeline": true,
+  "widget": [
+   {
+    "ids": [
+     "widget_live"
+    ],
+    "then": true
+   }
+  ],
+  "year-in-review": [
+   {
+    "ids": [
+     "plus"
+    ],
+    "then": true
+   }
+  ],
+  "your-week-today": [
+   {
+    "ids": [
+     "your_week_live"
+    ],
+    "then": true
+   }
+  ],
+  "your-week": [
+   {
+    "ids": [
+     "weekly_report_live"
+    ],
+    "then": true
+   }
+  ]
+ },
+ "fr": {
+  "ai-reflections": [
+   {
+    "ids": [
+     "ai_live"
+    ],
+    "then": true
+   }
+  ],
+  "app-icon": [
+   {
+    "ids": [
+     "app_icons"
+    ],
+    "then": true
+   }
+  ],
+  "app-lock": [
+   {
+    "ids": [
+     "app_app_lock"
+    ],
+    "then": true
+   }
+  ],
+  "appointment": [
+   {
+    "ids": [
+     "app_appointment",
+     "appointment_live"
+    ],
+    "then": true
+   }
+  ],
+  "backing-up": true,
+  "bo": [
+   {
+    "ids": [
+     "bo_live"
+    ],
+    "then": true
+   }
+  ],
+  "bring-this-back": [
+   {
+    "ids": [
+     "moment_recall_live"
+    ],
+    "then": true
+   }
+  ],
+  "calendar": [
+   {
+    "ids": [
+     "app_calendar"
+    ],
+    "then": true
+   }
+  ],
+  "check-ins": true,
+  "christmas-offer": [
+   {
+    "ids": [
+     "offer_live"
+    ],
+    "then": true
+   }
+  ],
+  "delete-account": true,
+  "entries": true,
+  "get-help-now": true,
+  "getting-started": true,
+  "import": [
+   {
+    "ids": [
+     "app_import",
+     "import_live"
+    ],
+    "then": true
+   }
+  ],
+  "insights": true,
+  "keyboard-shortcuts": [
+   {
+    "ids": [
+     "shortcuts_live"
+    ],
+    "then": true
+   }
+  ],
+  "letter-reminders": [
+   {
+    "ids": [
+     "app_letters",
+     "letters_live"
+    ],
+    "then": true
+   }
+  ],
+  "letters": [
+   {
+    "ids": [
+     "app_letters",
+     "letters_live"
+    ],
+    "then": true
+   }
+  ],
+  "me-picture": [
+   {
+    "ids": [
+     "me_picture_live",
+     "app_me_picture"
+    ],
+    "then": true
+   }
+  ],
+  "moments": true,
+  "moodbow-plus": [
+   {
+    "ids": [
+     "plus"
+    ],
+    "then": true
+   }
+  ],
+  "offline": true,
+  "on-this-day": [
+   {
+    "ids": [
+     "on_this_day_live"
+    ],
+    "then": true
+   }
+  ],
+  "one-tap-check-in": [
+   {
+    "ids": [
+     "app_quick_checkin"
+    ],
+    "then": true
+   }
+  ],
+  "patterns": [
+   {
+    "ids": [
+     "app_patterns",
+     "patterns_live"
+    ],
+    "then": true
+   }
+  ],
+  "pdf-journal": [
+   {
+    "ids": [
+     "plus"
+    ],
+    "then": true
+   }
+  ],
+  "pictures": [
+   {
+    "ids": [
+     "pictures_live",
+     "app_pictures"
+    ],
+    "then": true
+   }
+  ],
+  "privacy-and-data": true,
+  "reminders": [
+   {
+    "ids": [
+     "app_reminders"
+    ],
+    "then": true
+   }
+  ],
+  "safety-plan": [
+   {
+    "ids": [
+     "app_safety_plan",
+     "safety_plan_live"
+    ],
+    "then": true
+   }
+  ],
+  "search": [
+   {
+    "ids": [
+     "app_search"
+    ],
+    "then": true
+   }
+  ],
+  "share-card": [
+   {
+    "ids": [
+     "app_share_cards"
+    ],
+    "then": true
+   },
+   {
+    "ids": [
+     "app_share_cards_more"
+    ],
+    "then": true
+   },
+   {
+    "ids": [
+     "app_year_card"
+    ],
+    "then": true
+   }
+  ],
+  "sign-in": true,
+  "tags": [
+   {
+    "ids": [
+     "tags_live"
+    ],
+    "then": true
+   }
+  ],
+  "themes": [
+   {
+    "ids": [
+     "plus"
+    ],
+    "then": true
+   }
+  ],
+  "things-that-help": [
+   {
+    "ids": [
+     "app_toolbox",
+     "toolbox_live"
+    ],
+    "then": true
+   },
+   {
+    "ids": [
+     "app_grounding",
+     "grounding_live"
+    ],
+    "then": true
+   },
+   {
+    "ids": [
+     "app_good_things",
+     "good_things_live"
+    ],
+    "then": true
+   }
+  ],
+  "timeline": true,
+  "widget": [
+   {
+    "ids": [
+     "widget_live"
+    ],
+    "then": true
+   }
+  ],
+  "year-in-review": [
+   {
+    "ids": [
+     "plus"
+    ],
+    "then": true
+   }
+  ],
+  "your-week-today": [
+   {
+    "ids": [
+     "your_week_live"
+    ],
+    "then": true
+   }
+  ],
+  "your-week": [
+   {
+    "ids": [
+     "weekly_report_live"
+    ],
+    "then": true
+   }
+  ]
+ },
+ "it": {
+  "ai-reflections": [
+   {
+    "ids": [
+     "ai_live"
+    ],
+    "then": true
+   }
+  ],
+  "app-icon": [
+   {
+    "ids": [
+     "app_icons"
+    ],
+    "then": true
+   }
+  ],
+  "app-lock": [
+   {
+    "ids": [
+     "app_app_lock"
+    ],
+    "then": true
+   }
+  ],
+  "appointment": [
+   {
+    "ids": [
+     "app_appointment",
+     "appointment_live"
+    ],
+    "then": true
+   }
+  ],
+  "backing-up": true,
+  "bo": [
+   {
+    "ids": [
+     "bo_live"
+    ],
+    "then": true
+   }
+  ],
+  "bring-this-back": [
+   {
+    "ids": [
+     "moment_recall_live"
+    ],
+    "then": true
+   }
+  ],
+  "calendar": [
+   {
+    "ids": [
+     "app_calendar"
+    ],
+    "then": true
+   }
+  ],
+  "check-ins": true,
+  "christmas-offer": [
+   {
+    "ids": [
+     "offer_live"
+    ],
+    "then": true
+   }
+  ],
+  "delete-account": true,
+  "entries": true,
+  "get-help-now": true,
+  "getting-started": true,
+  "import": [
+   {
+    "ids": [
+     "app_import",
+     "import_live"
+    ],
+    "then": true
+   }
+  ],
+  "insights": true,
+  "keyboard-shortcuts": [
+   {
+    "ids": [
+     "shortcuts_live"
+    ],
+    "then": true
+   }
+  ],
+  "letter-reminders": [
+   {
+    "ids": [
+     "app_letters",
+     "letters_live"
+    ],
+    "then": true
+   }
+  ],
+  "letters": [
+   {
+    "ids": [
+     "app_letters",
+     "letters_live"
+    ],
+    "then": true
+   }
+  ],
+  "me-picture": [
+   {
+    "ids": [
+     "me_picture_live",
+     "app_me_picture"
+    ],
+    "then": true
+   }
+  ],
+  "moments": true,
+  "moodbow-plus": [
+   {
+    "ids": [
+     "plus"
+    ],
+    "then": true
+   }
+  ],
+  "offline": true,
+  "on-this-day": [
+   {
+    "ids": [
+     "on_this_day_live"
+    ],
+    "then": true
+   }
+  ],
+  "one-tap-check-in": [
+   {
+    "ids": [
+     "app_quick_checkin"
+    ],
+    "then": true
+   }
+  ],
+  "patterns": [
+   {
+    "ids": [
+     "app_patterns",
+     "patterns_live"
+    ],
+    "then": true
+   }
+  ],
+  "pdf-journal": [
+   {
+    "ids": [
+     "plus"
+    ],
+    "then": true
+   }
+  ],
+  "pictures": [
+   {
+    "ids": [
+     "pictures_live",
+     "app_pictures"
+    ],
+    "then": true
+   }
+  ],
+  "privacy-and-data": true,
+  "reminders": [
+   {
+    "ids": [
+     "app_reminders"
+    ],
+    "then": true
+   }
+  ],
+  "safety-plan": [
+   {
+    "ids": [
+     "app_safety_plan",
+     "safety_plan_live"
+    ],
+    "then": true
+   }
+  ],
+  "search": [
+   {
+    "ids": [
+     "app_search"
+    ],
+    "then": true
+   }
+  ],
+  "share-card": [
+   {
+    "ids": [
+     "app_share_cards"
+    ],
+    "then": true
+   },
+   {
+    "ids": [
+     "app_share_cards_more"
+    ],
+    "then": true
+   },
+   {
+    "ids": [
+     "app_year_card"
+    ],
+    "then": true
+   }
+  ],
+  "sign-in": true,
+  "tags": [
+   {
+    "ids": [
+     "tags_live"
+    ],
+    "then": true
+   }
+  ],
+  "themes": [
+   {
+    "ids": [
+     "plus"
+    ],
+    "then": true
+   }
+  ],
+  "things-that-help": [
+   {
+    "ids": [
+     "app_toolbox",
+     "toolbox_live"
+    ],
+    "then": true
+   },
+   {
+    "ids": [
+     "app_grounding",
+     "grounding_live"
+    ],
+    "then": true
+   },
+   {
+    "ids": [
+     "app_good_things",
+     "good_things_live"
+    ],
+    "then": true
+   }
+  ],
+  "timeline": true,
+  "widget": [
+   {
+    "ids": [
+     "widget_live"
+    ],
+    "then": true
+   }
+  ],
+  "year-in-review": [
+   {
+    "ids": [
+     "plus"
+    ],
+    "then": true
+   }
+  ],
+  "your-week-today": [
+   {
+    "ids": [
+     "your_week_live"
+    ],
+    "then": true
+   }
+  ],
+  "your-week": [
+   {
+    "ids": [
+     "weekly_report_live"
+    ],
+    "then": true
+   }
+  ]
+ },
+ "pt-br": {
+  "ai-reflections": [
+   {
+    "ids": [
+     "ai_live"
+    ],
+    "then": true
+   }
+  ],
+  "app-icon": [
+   {
+    "ids": [
+     "app_icons"
+    ],
+    "then": true
+   }
+  ],
+  "app-lock": [
+   {
+    "ids": [
+     "app_app_lock"
+    ],
+    "then": true
+   }
+  ],
+  "appointment": [
+   {
+    "ids": [
+     "app_appointment",
+     "appointment_live"
+    ],
+    "then": true
+   }
+  ],
+  "backing-up": true,
+  "bo": [
+   {
+    "ids": [
+     "bo_live"
+    ],
+    "then": true
+   }
+  ],
+  "bring-this-back": [
+   {
+    "ids": [
+     "moment_recall_live"
+    ],
+    "then": true
+   }
+  ],
+  "calendar": [
+   {
+    "ids": [
+     "app_calendar"
+    ],
+    "then": true
+   }
+  ],
+  "check-ins": true,
+  "christmas-offer": [
+   {
+    "ids": [
+     "offer_live"
+    ],
+    "then": true
+   }
+  ],
+  "delete-account": true,
+  "entries": true,
+  "get-help-now": true,
+  "getting-started": true,
+  "import": [
+   {
+    "ids": [
+     "app_import",
+     "import_live"
+    ],
+    "then": true
+   }
+  ],
+  "insights": true,
+  "keyboard-shortcuts": [
+   {
+    "ids": [
+     "shortcuts_live"
+    ],
+    "then": true
+   }
+  ],
+  "letter-reminders": [
+   {
+    "ids": [
+     "app_letters",
+     "letters_live"
+    ],
+    "then": true
+   }
+  ],
+  "letters": [
+   {
+    "ids": [
+     "app_letters",
+     "letters_live"
+    ],
+    "then": true
+   }
+  ],
+  "me-picture": [
+   {
+    "ids": [
+     "me_picture_live",
+     "app_me_picture"
+    ],
+    "then": true
+   }
+  ],
+  "moments": true,
+  "moodbow-plus": [
+   {
+    "ids": [
+     "plus"
+    ],
+    "then": true
+   }
+  ],
+  "offline": true,
+  "on-this-day": [
+   {
+    "ids": [
+     "on_this_day_live"
+    ],
+    "then": true
+   }
+  ],
+  "one-tap-check-in": [
+   {
+    "ids": [
+     "app_quick_checkin"
+    ],
+    "then": true
+   }
+  ],
+  "patterns": [
+   {
+    "ids": [
+     "app_patterns",
+     "patterns_live"
+    ],
+    "then": true
+   }
+  ],
+  "pdf-journal": [
+   {
+    "ids": [
+     "plus"
+    ],
+    "then": true
+   }
+  ],
+  "pictures": [
+   {
+    "ids": [
+     "pictures_live",
+     "app_pictures"
+    ],
+    "then": true
+   }
+  ],
+  "privacy-and-data": true,
+  "reminders": [
+   {
+    "ids": [
+     "app_reminders"
+    ],
+    "then": true
+   }
+  ],
+  "safety-plan": [
+   {
+    "ids": [
+     "app_safety_plan",
+     "safety_plan_live"
+    ],
+    "then": true
+   }
+  ],
+  "search": [
+   {
+    "ids": [
+     "app_search"
+    ],
+    "then": true
+   }
+  ],
+  "share-card": [
+   {
+    "ids": [
+     "app_share_cards"
+    ],
+    "then": true
+   },
+   {
+    "ids": [
+     "app_share_cards_more"
+    ],
+    "then": true
+   },
+   {
+    "ids": [
+     "app_year_card"
+    ],
+    "then": true
+   }
+  ],
+  "sign-in": true,
+  "tags": [
+   {
+    "ids": [
+     "tags_live"
+    ],
+    "then": true
+   }
+  ],
+  "themes": [
+   {
+    "ids": [
+     "plus"
+    ],
+    "then": true
+   }
+  ],
+  "things-that-help": [
+   {
+    "ids": [
+     "app_toolbox",
+     "toolbox_live"
+    ],
+    "then": true
+   },
+   {
+    "ids": [
+     "app_grounding",
+     "grounding_live"
+    ],
+    "then": true
+   },
+   {
+    "ids": [
+     "app_good_things",
+     "good_things_live"
+    ],
+    "then": true
+   }
+  ],
+  "timeline": true,
+  "widget": [
+   {
+    "ids": [
+     "widget_live"
+    ],
+    "then": true
+   }
+  ],
+  "year-in-review": [
+   {
+    "ids": [
+     "plus"
+    ],
+    "then": true
+   }
+  ],
+  "your-week-today": [
+   {
+    "ids": [
+     "your_week_live"
+    ],
+    "then": true
+   }
+  ],
+  "your-week": [
+   {
+    "ids": [
+     "weekly_report_live"
+    ],
+    "then": true
+   }
+  ]
+ },
+ "th": {
+  "ai-reflections": [
+   {
+    "ids": [
+     "ai_live"
+    ],
+    "then": true
+   }
+  ],
+  "app-icon": [
+   {
+    "ids": [
+     "app_icons"
+    ],
+    "then": true
+   }
+  ],
+  "app-lock": [
+   {
+    "ids": [
+     "app_app_lock"
+    ],
+    "then": true
+   }
+  ],
+  "appointment": [
+   {
+    "ids": [
+     "app_appointment",
+     "appointment_live"
+    ],
+    "then": true
+   }
+  ],
+  "backing-up": true,
+  "bo": [
+   {
+    "ids": [
+     "bo_live"
+    ],
+    "then": true
+   }
+  ],
+  "bring-this-back": [
+   {
+    "ids": [
+     "moment_recall_live"
+    ],
+    "then": true
+   }
+  ],
+  "calendar": [
+   {
+    "ids": [
+     "app_calendar"
+    ],
+    "then": true
+   }
+  ],
+  "check-ins": true,
+  "christmas-offer": [
+   {
+    "ids": [
+     "offer_live"
+    ],
+    "then": true
+   }
+  ],
+  "delete-account": true,
+  "entries": true,
+  "get-help-now": true,
+  "getting-started": true,
+  "import": [
+   {
+    "ids": [
+     "app_import",
+     "import_live"
+    ],
+    "then": true
+   }
+  ],
+  "insights": true,
+  "keyboard-shortcuts": [
+   {
+    "ids": [
+     "shortcuts_live"
+    ],
+    "then": true
+   }
+  ],
+  "letter-reminders": [
+   {
+    "ids": [
+     "app_letters",
+     "letters_live"
+    ],
+    "then": true
+   }
+  ],
+  "letters": [
+   {
+    "ids": [
+     "app_letters",
+     "letters_live"
+    ],
+    "then": true
+   }
+  ],
+  "me-picture": [
+   {
+    "ids": [
+     "me_picture_live",
+     "app_me_picture"
+    ],
+    "then": true
+   }
+  ],
+  "moments": true,
+  "moodbow-plus": [
+   {
+    "ids": [
+     "plus"
+    ],
+    "then": true
+   }
+  ],
+  "offline": true,
+  "on-this-day": [
+   {
+    "ids": [
+     "on_this_day_live"
+    ],
+    "then": true
+   }
+  ],
+  "one-tap-check-in": [
+   {
+    "ids": [
+     "app_quick_checkin"
+    ],
+    "then": true
+   }
+  ],
+  "patterns": [
+   {
+    "ids": [
+     "app_patterns",
+     "patterns_live"
+    ],
+    "then": true
+   }
+  ],
+  "pdf-journal": [
+   {
+    "ids": [
+     "plus"
+    ],
+    "then": true
+   }
+  ],
+  "pictures": [
+   {
+    "ids": [
+     "pictures_live",
+     "app_pictures"
+    ],
+    "then": true
+   }
+  ],
+  "privacy-and-data": true,
+  "reminders": [
+   {
+    "ids": [
+     "app_reminders"
+    ],
+    "then": true
+   }
+  ],
+  "safety-plan": [
+   {
+    "ids": [
+     "app_safety_plan",
+     "safety_plan_live"
+    ],
+    "then": true
+   }
+  ],
+  "search": [
+   {
+    "ids": [
+     "app_search"
+    ],
+    "then": true
+   }
+  ],
+  "share-card": [
+   {
+    "ids": [
+     "app_share_cards"
+    ],
+    "then": true
+   },
+   {
+    "ids": [
+     "app_share_cards_more"
+    ],
+    "then": true
+   },
+   {
+    "ids": [
+     "app_year_card"
+    ],
+    "then": true
+   }
+  ],
+  "sign-in": true,
+  "tags": [
+   {
+    "ids": [
+     "tags_live"
+    ],
+    "then": true
+   }
+  ],
+  "themes": [
+   {
+    "ids": [
+     "plus"
+    ],
+    "then": true
+   }
+  ],
+  "things-that-help": [
+   {
+    "ids": [
+     "app_toolbox",
+     "toolbox_live"
+    ],
+    "then": true
+   },
+   {
+    "ids": [
+     "app_grounding",
+     "grounding_live"
+    ],
+    "then": true
+   },
+   {
+    "ids": [
+     "app_good_things",
+     "good_things_live"
+    ],
+    "then": true
+   }
+  ],
+  "timeline": true,
+  "widget": [
+   {
+    "ids": [
+     "widget_live"
+    ],
+    "then": true
+   }
+  ],
+  "year-in-review": [
+   {
+    "ids": [
+     "plus"
+    ],
+    "then": true
+   }
+  ],
+  "your-week-today": [
+   {
+    "ids": [
+     "your_week_live"
+    ],
+    "then": true
+   }
+  ],
+  "your-week": [
+   {
+    "ids": [
+     "weekly_report_live"
+    ],
+    "then": true
+   }
+  ]
+ }
+}
