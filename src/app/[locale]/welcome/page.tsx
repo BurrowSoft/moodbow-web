@@ -1,13 +1,16 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
-import { getTranslations, setRequestLocale } from "next-intl/server";
+import { NextIntlClientProvider } from "next-intl";
+import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
+import { pickMessages } from "@/i18n/clientMessages";
 import type { Locale } from "@/i18n/routing";
 import { Logo } from "@/components/Logo";
 import { pageGate } from "@/lib/conditions";
 import { pageMetadata } from "@/lib/metadata";
 import { APP_STORE_URL, liveStores } from "@/lib/stores";
 import { PlayStoreLink } from "@/components/PlayStoreLink";
+import { GetHelpNow } from "@/components/SafetyCard";
 import { WelcomeSlides } from "./WelcomeSlides";
 
 // The first onboarding screen on the web (no Language step while one locale
@@ -33,7 +36,17 @@ export default async function WelcomePage({ params }: PageProps<"/[locale]/welco
   const storeLink = "font-medium text-accent underline underline-offset-4";
 
   return (
-    <main id="main" className="flex flex-1 flex-col items-center justify-center px-[24px] py-16 [overflow-wrap:anywhere]">
+    <main id="main" className="relative flex flex-1 flex-col items-center justify-center px-[24px] py-16 [overflow-wrap:anywhere]">
+      {/* Round 3, batch E: help before any account, as the app's pre-account screens have it (its
+          OnboardingPage's lifebuoy at the bar's end). The same quiet 48 px lifebuoy as Today's,
+          named "Want to talk to someone?": a real link to /help/get-help-now, opening the neutral
+          card once scripts run. No account yet, so the numbers follow this request's country. */}
+      <div className="absolute end-[16px] top-[16px]">
+        {/* The card's words ("me", "safety") aren't in the public pages' client messages: only here. */}
+        <NextIntlClientProvider locale={locale} messages={pickMessages(await getMessages(), ["common", "me", "safety"])}>
+          <GetHelpNow country={null} neutral icon testId="welcome-help" />
+        </NextIntlClientProvider>
+      </div>
       <div className="flex w-full max-w-[560px] flex-col items-center">
         <div className="mb-10 w-[120px]">
           <Logo variant="stacked" width={120} alt={tc("logoAlt")} />
