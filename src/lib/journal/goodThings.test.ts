@@ -72,8 +72,8 @@ describe("Help → Things that help me: Three good things", () => {
     });
   }
 
-  it("met on the web with the 1.3.0 release; the app's Help lines wait for the store release", () => {
+  it("met on the web and in the app (1.3.0 in the stores)", () => {
     expect(conditions["good-things-live"].met).toBe(true);
-    expect(conditions["app-good-things"].met).toBe(false);
+    expect(conditions["app-good-things"].met).toBe(true);
   });
 });
