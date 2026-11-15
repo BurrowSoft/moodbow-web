@@ -460,6 +460,24 @@ test.describe("404s are server-rendered (no JS)", () => {
       if (!path.startsWith("/es/")) expect(html).toContain("<title>Page not found · Moodbow</title>");
     });
   }
+
+  // An article's address is lowercase (UX, 15 Nov): capitals get a 308 to it, query kept.
+  test("help /help/Tags → 308 → /help/tags → 200", async ({ request }) => {
+    const res = await request.get("/help/Tags", { maxRedirects: 0 });
+    expect(res.status()).toBe(308);
+    expect(new URL(res.headers()["location"], "http://x").pathname).toBe("/help/tags");
+    const page = await request.get("/help/Tags");
+    expect(page.status()).toBe(200);
+    expect(page.url()).toMatch(/\/help\/tags$/);
+    expect(await page.text()).toContain("<title>Tags · Moodbow</title>");
+  });
+
+  test("help /es/help/Get-Help-Now?country=TH keeps the country", async ({ request }) => {
+    const res = await request.get("/es/help/Get-Help-Now?country=TH", { maxRedirects: 0 });
+    expect(res.status()).toBe(308);
+    const to = new URL(res.headers()["location"], "http://x");
+    expect(to.pathname + to.search).toBe("/es/help/get-help-now?country=TH");
+  });
 });
 
 // Auth email links (W5). Real tokens are tested on the Preview (staging);

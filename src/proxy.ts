@@ -52,6 +52,14 @@ export default async function proxy(req: NextRequest) {
       return withCsp(NextResponse.redirect(url, 307));
     }
   }
+  // A Help article's address is lowercase (content/help slugs): /help/Tags, /es/HELP/Tags/ go to
+  // /help/tags and /es/help/tags/ with a 308, keeping the language prefix and the query (UX, 15 Nov).
+  const helpCase = req.nextUrl.pathname.match(/^(\/[^/]+)?(\/help\/[^/]+\/?)$/i);
+  if (helpCase && /[A-Z]/.test(helpCase[2]) && (!helpCase[1] || (routing.locales as readonly string[]).some((l) => l.toLowerCase() === helpCase[1].slice(1).toLowerCase()))) {
+    const url = req.nextUrl.clone();
+    url.pathname = `${helpCase[1] ?? ""}${helpCase[2].toLowerCase()}`;
+    return withCsp(NextResponse.redirect(url, 308));
+  }
   const path = pagePath(req.nextUrl.pathname, routing.locales);
   // Gated pages that aren't live yet (content/conditions.json) are 404s on
   // Production; drafts elsewhere render normally (pageGate).
