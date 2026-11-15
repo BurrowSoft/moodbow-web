@@ -1,6 +1,6 @@
-import contract from "../../../content/safety-plan.json";
+import contract from "../../../content/contracts/safety-plan.json";
 
-// My safety plan (1.2; content/safety-plan.json, the rules both clients run).
+// My safety plan (1.2; content/contracts/safety-plan.json, synced from the app, the rules both clients run).
 export const SAFETY_PLAN_RULES = contract.rules;
 
 export type PlanText = "warning_signs" | "distractions" | "surroundings";

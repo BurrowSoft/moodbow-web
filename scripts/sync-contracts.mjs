@@ -16,7 +16,7 @@ import { join } from "node:path";
 
 const REPO = "BurrowSoft/moodbow-app";
 const DIR = "supabase/contracts";
-export const FILES = ["bo.md", "colour-map.json", "countries.json", "crisis-keywords.json", "export-csv.json", "export-text.md", "export_fixture.json", "export_fixture.txt", "get-help-label.json", "mood-faces.json", "on-this-day.json", "patterns.json", "prompts-library.json", "prompts.json", "reflect.md", "report.md", "search-fold.json", "share-cards.json", "toolbox.json", "what-lifts-me.json", "year-card.json", "your-week.json"];
+export const FILES = ["bo.md", "colour-map.json", "countries.json", "crisis-keywords.json", "export-csv.json", "export-text.md", "export_fixture.json", "export_fixture.txt", "get-help-label.json", "mood-faces.json", "on-this-day.json", "patterns.json", "prompts-library.json", "prompts.json", "reflect.md", "report.md", "safety-plan.json", "search-fold.json", "share-cards.json", "toolbox.json", "what-lifts-me.json", "year-card.json", "your-week.json"];
 
 // Files held at another app commit than the one synced, with why. Each is listed in SOURCE.json's
 // "held". Drop an entry once the app's master carries that file's version.
