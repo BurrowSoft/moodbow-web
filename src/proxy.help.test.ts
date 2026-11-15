@@ -28,12 +28,29 @@ const rewritten = (res: Response) => (res.headers.get("x-middleware-rewrite") ??
 describe("proxy on a Production build: Help articles", () => {
   it("a missing or unpublished article: 404, rewritten to the generic not-found page, in every language's path", async () => {
     for (const slug of ["no-such-article", "safety-plan", "letters"]) {
-      for (const path of [`/help/${slug}`, `/help/${slug}/`, `/fr/help/${slug}`, `/es/help/${slug}?country=TH`, `/pt-br/help/${slug}`, `/HELP/${slug.toUpperCase()}`]) {
+      for (const path of [`/help/${slug}`, `/help/${slug}/`, `/fr/help/${slug}`, `/es/help/${slug}?country=TH`, `/pt-br/help/${slug}`]) {
         const res = await go(path);
         expect(res.status, path).toBe(404);
         expect(rewritten(res), path).toBe(true);
       }
     }
+  });
+
+  // UX, 15 Nov (the Web Tester's #345 finding): an article's address is lowercase.
+  it("an address with capitals: 308 to the lowercase article, keeping the language prefix and the query", async () => {
+    const cases: [string, string][] = [
+      ["/help/Tags", "/help/tags"],
+      ["/HELP/TAGS/", "/help/tags/"],
+      ["/es/help/Get-Help-Now?country=TH", "/es/help/get-help-now?country=TH"],
+      ["/pt-br/Help/Safety-Plan", "/pt-br/help/safety-plan"],
+    ];
+    for (const [from, to] of cases) {
+      const res = await go(from);
+      expect(res.status, from).toBe(308);
+      expect(res.headers.get("location"), from).toBe(`https://www.moodbow.com${to}`);
+    }
+    // Already lowercase, or not a Help article: no redirect.
+    for (const path of ["/help/tags", "/help", "/Privacy", "/xx/help/Tags/more"]) expect((await go(path)).status, path).not.toBe(308);
   });
 
   it("a published article and the Help index render as before (no rewrite)", async () => {
