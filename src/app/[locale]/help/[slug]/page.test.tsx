@@ -10,7 +10,7 @@ vi.mock("next-intl/server", () => ({
 vi.mock("@/i18n/navigation", () => ({ Link: "a" }));
 vi.mock("@/lib/conditions", async (orig) => ({ ...(await orig<typeof import("@/lib/conditions")>()), pageGate: () => "draft" }));
 
-const { default: HelpArticlePage } = await import("./page");
+const { default: HelpArticlePage, dynamicParams, generateStaticParams } = await import("./page");
 
 // Depth-first search through a React element tree for props matching `test`.
 function findProps(node: unknown, test: (p: Record<string, unknown>) => boolean): Record<string, unknown> | undefined {
@@ -35,5 +35,17 @@ describe("Help article page", () => {
     expect(shell.article).toBe(true);
     expect(findProps(shell.children, (p) => p["data-testid"] === "help-back")).toBeUndefined();
     expect(findProps(shell.after, (p) => p["data-testid"] === "help-back")?.href).toBe("/help");
+  });
+
+  // Any other slug is a routing-level 404 with the real not-found page, not notFound()'s bare
+  // error shell (the Web Tester, 15 Nov; e2e smoke "help 404" checks the raw HTML).
+  it("serves only the published articles; any other slug is a routing-level 404", () => {
+    expect(dynamicParams).toBe(false);
+    const en = generateStaticParams().filter((p) => p.locale === "en").map((p) => p.slug);
+    expect(en).toContain("check-ins");
+    expect(en).toContain("get-help-now");
+    // Unmet on every build (safety-plan-live; letters also need Plus).
+    expect(en).not.toContain("safety-plan");
+    expect(en).not.toContain("letters");
   });
 });

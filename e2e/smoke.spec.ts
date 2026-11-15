@@ -445,6 +445,21 @@ test.describe("404s are server-rendered (no JS)", () => {
       await expect(page.getByText("This page doesn't exist or has moved.")).toBeVisible();
     });
   }
+
+  // A Help article that's missing or not out yet (safety-plan and letters are unmet on every
+  // build): the not-found page in the raw HTML, never Next's bare error shell (html
+  // id="__next_error__", no title, no h1; the Web Tester, 15 Nov).
+  for (const path of ["/help/no-such-article", "/help/safety-plan", "/help/letters", "/es/help/no-such-article", "/es/help/safety-plan"]) {
+    test(`help 404 ${path}`, async ({ request }) => {
+      const res = await request.get(path, { maxRedirects: 0 });
+      expect(res.status()).toBe(404);
+      const html = await res.text();
+      expect(html).not.toContain("__next_error__");
+      expect(html).toMatch(/<title>[^<]+ · Moodbow<\/title>/);
+      expect(html).toMatch(/<h1[^>]*>[^<]+<\/h1>/);
+      if (!path.startsWith("/es/")) expect(html).toContain("<title>Page not found · Moodbow</title>");
+    });
+  }
 });
 
 // Auth email links (W5). Real tokens are tested on the Preview (staging);
