@@ -58,8 +58,16 @@ describe.each(ROWS)("Help: $slug (1.2)", (row) => {
     for (const locale of LOCALES) expect(findArticle(locale, row.slug), locale).not.toBeNull();
   });
 
-  it("nothing at all while neither side has the feature: a 404, in every language", () => {
-    for (const locale of LOCALES) expect(render(locale, row, false, false), locale).toBe("");
+  it("nothing at all while every condition is off: a 404, in every language", () => {
+    for (const locale of LOCALES) expect(renderArticle(findArticle(locale, row.slug)!, () => false), locale).toBe("");
+  });
+
+  // An article can carry other features' paragraphs under their own ids (things-that-help has
+  // grounding and Three good things, met with 1.3.0), so with only this feature off the page may
+  // still be there, but never with this feature's text.
+  it("none of the feature's text while neither side has it", () => {
+    const html = render("en", row, false, false);
+    for (const text of [row.shows, ...(row.appOnly ?? []), ...(row.webOnly ?? [])]) expect(html, text).not.toContain(text);
   });
 
   it("shows with the app's build alone, with the app's lines", () => {
