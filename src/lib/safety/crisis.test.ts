@@ -87,3 +87,55 @@ describe.runIf(existsSync(CONTRACT))("the contract's fixture", () => {
     expect(CRISIS_KEYWORDS).not.toBeNull();
   });
 });
+
+// Version 4 (app #248, specs/i18n/safety-check-de-it-th.md): the same cases as the app's
+// test/crisis_matcher_test.dart "version 4: de, th, it" group, so both clients agree.
+describe("version 4: de, th, it", () => {
+  const flags = (text: string) => flagsCrisis(text, CRISIS_KEYWORDS);
+  const phrases = (lang: string) => CRISIS_KEYWORDS!.languages[lang].phrases;
+  const yes = (texts: string[]) => {
+    for (const t of texts) expect(flags(t), t).toBe(true);
+  };
+  const no = (texts: string[]) => {
+    for (const t of texts) expect(flags(t), t).toBe(false);
+  };
+
+  it("is version 4, with an Italian list", () => {
+    expect(CRISIS_KEYWORDS?.version).toBe(4);
+    expect(CRISIS_KEYWORDS?.languages.it.match).toBe("word");
+  });
+
+  it('de: the separable "umbringen" and "töten", in main clauses', () => {
+    yes(["Ich bringe mich um.", "ich bring mich um", "Ehrlich, ich will mich töten.", "ich will mich selbst toten", "ICH BRINGE MICH UM"]);
+    // "Das bringt mich um" is the idiom "that's killing me".
+    no(["Das bringt mich um, diese Hitze.", "Der Lärm bringt mich noch um.", "Ich bringe meine Mutter um acht zum Bahnhof.", "Wir töten die Zeit mit Karten."]);
+  });
+
+  it("th: คิดสั้น and ฆ่าตัวเอง, inside running text (substring)", () => {
+    expect(phrases("th")).toEqual(expect.arrayContaining(["คิดสั้น", "ฆ่าตัวเอง"]));
+    yes(["ช่วงนี้ฉันคิดสั้นบ่อยมาก", "อยากฆ่าตัวเองให้จบ ๆ ไป"]);
+    no(["วันนี้ฉันคิดถึงแม่มาก"]);
+  });
+
+  it("it: every phrase flags, alone and in a sentence", () => {
+    expect(phrases("it").length).toBeGreaterThan(0);
+    for (const p of phrases("it")) {
+      expect(flags(p), p).toBe(true);
+      expect(flags(`Oggi, ${p}. Basta.`), p).toBe(true);
+    }
+  });
+
+  it("it: the suicid and autolesion stems take every form", () => {
+    yes(["Penso al suicidio.", "ho pensieri suicidi", "un gesto autolesionistico", "Autolesione, di nuovo."]);
+  });
+
+  // UX's clear should-fix rows (15 Nov); "ein Ende" left out as too broad.
+  it("the should-fix rows: de, th, it", () => {
+    yes(["Ich will tot sein.", "ich will einfach nicht mehr aufwachen", "Ich denke über Freitod nach.", "Freitodgedanken, schon wieder", "บางทีก็ทำร้ายร่างกายตัวเองตอนเครียด", "ฉันไม่อยากอยู่บนโลกนี้อีกแล้ว", "Ogni sera penso di ammazzarmi."]);
+    no(["Die Batterie ist tot, ich will sie tauschen.", "Das ist allem ein Ende.", "Se non passo l’esame mi ammazzo."]);
+  });
+
+  it("it: everyday hyperbole stays quiet", () => {
+    no(["Questo lavoro mi sta uccidendo.", "Mia madre mi ammazza se vede la macchina.", "Se non passo l’esame mi ammazzo.", "Muoio dalla voglia di vedere il film.", "Domani vado a tagliarmi i capelli.", "Finalmente l’ho fatta finita con quel progetto."]);
+  });
+});

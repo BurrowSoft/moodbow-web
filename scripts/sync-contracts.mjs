@@ -22,7 +22,16 @@ export const FILES = ["bo.md", "colour-map.json", "countries.json", "crisis-keyw
 // "held". Drop an entry once the app's master carries that file's version.
 // toolbox.json: v2 (Plus breathing patterns, migration 030) is on the app's contracts/toolbox branch only (d6b9cd5); its
 // master (1.3.0) still has v1, which the web's Breathing has moved past.
-export const HELD = { "toolbox.json": "d6b9cd52a8cb56fd12dd404763bfda9358e619cc" };
+// export-csv.json, export-text.md, export_fixture.json: app #241's changes (pictures, letter
+// reminders) wait for the full re-sync after the pilot (UX, round 3: the Reviewer's #3-#5), so the
+// crisis-keywords v4 sync (app #248) moves only the crisis list; these stay at the previous pin.
+const PREVIOUS_PIN = "457f4396add9b06e1b10e67b22d9f5308fbdacfa";
+export const HELD = {
+  "toolbox.json": "d6b9cd52a8cb56fd12dd404763bfda9358e619cc",
+  "export-csv.json": PREVIOUS_PIN,
+  "export-text.md": PREVIOUS_PIN,
+  "export_fixture.json": PREVIOUS_PIN,
+};
 
 const gh = (path, accept) => execFileSync("gh", ["api", ...(accept ? ["-H", `Accept: ${accept}`] : []), path], { stdio: ["ignore", "pipe", "inherit"] });
 
