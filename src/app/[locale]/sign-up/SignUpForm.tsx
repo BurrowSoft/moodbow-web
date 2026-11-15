@@ -26,6 +26,10 @@ const noTimeZoneOnServer = () => "";
 const hydratedNow = () => true;
 const notHydrated = () => false;
 
+// Round 3, batch E (S3): every consent control is a target of at least 24 × 24 px (WCAG 2.5.8),
+// the boxes 24 px and the Read links at least 24 px tall, with the look unchanged otherwise.
+const LEGAL_LINK = "inline-flex min-h-[24px] items-center";
+
 // One consent box: its own, unticked, required (the action checks again).
 function Box({ name, label, checked, onChange, testId, describedBy, invalid }: { name: string; label: string; checked: boolean; onChange: (v: boolean) => void; testId: string; describedBy?: string; invalid?: boolean }) {
   return (
@@ -39,7 +43,7 @@ function Box({ name, label, checked, onChange, testId, describedBy, invalid }: {
         required
         aria-describedby={describedBy}
         aria-invalid={invalid ? true : undefined}
-        className="mt-[4px] h-[20px] w-[20px] shrink-0 accent-[var(--accent)]"
+        className="mt-[2px] h-[24px] w-[24px] shrink-0 accent-[var(--accent)]"
       />
       <span className="min-w-0">{label}</span>
     </label>
@@ -168,10 +172,10 @@ export function SignUpForm({ askAi = false, healthLink = false }: { askAi?: bool
         </div>
         <Box name="privacy" testId="consent-privacy" label={t("consentPrivacy")} checked={privacy} onChange={setPrivacy} describedBy={errorOn === "consent" ? "signup-error" : undefined} invalid={errorOn === "consent" && !privacy} />
         <p className={`flex flex-wrap gap-x-[24px] gap-y-[4px] px-[4px] ${smallText}`}>
-          <Link href="/terms" target="_blank" rel="noopener" data-testid="consent-read-terms" className={textLinkClass}>
+          <Link href="/terms" target="_blank" rel="noopener" data-testid="consent-read-terms" className={`${textLinkClass} ${LEGAL_LINK}`}>
             {t("consentReadTerms")} <span className="sr-only">{tc("opensInNewTab")}</span>
           </Link>
-          <Link href="/privacy" target="_blank" rel="noopener" data-testid="consent-read-privacy" className={textLinkClass}>
+          <Link href="/privacy" target="_blank" rel="noopener" data-testid="consent-read-privacy" className={`${textLinkClass} ${LEGAL_LINK}`}>
             {t("consentReadPrivacy")} <span className="sr-only">{tc("opensInNewTab")}</span>
           </Link>
         </p>
@@ -183,7 +187,7 @@ export function SignUpForm({ askAi = false, healthLink = false }: { askAi?: bool
         <Box name="health" testId="consent-health" label={t("consentHealth")} checked={health} onChange={setHealth} describedBy={errorOn === "consent" ? "signup-error" : undefined} invalid={errorOn === "consent" && !health} />
         {healthLink && (
           <p className={`px-[4px] ${smallText}`}>
-            <Link href="/consumer-health-data" target="_blank" rel="noopener" data-testid="consent-read-health" className={textLinkClass}>
+            <Link href="/consumer-health-data" target="_blank" rel="noopener" data-testid="consent-read-health" className={`${textLinkClass} ${LEGAL_LINK}`}>
               {tc("consumerHealthData")} <span className="sr-only">{tc("opensInNewTab")}</span>
             </Link>
           </p>
@@ -191,7 +195,7 @@ export function SignUpForm({ askAi = false, healthLink = false }: { askAi?: bool
         <Box name="age" testId="consent-age" label={t("ageConfirm")} checked={age} onChange={setAge} describedBy={errorOn === "age" ? "signup-error" : undefined} invalid={errorOn === "age"} />
         {askAi && (
           <label className="flex items-start gap-[12px] rounded-2xl border border-border bg-surface p-[16px] text-text">
-            <input type="checkbox" name="ai" data-testid="consent-ai" aria-describedby="consent-ai-body" className="mt-[4px] h-[20px] w-[20px] shrink-0 accent-[var(--accent)]" />
+            <input type="checkbox" name="ai" data-testid="consent-ai" aria-describedby="consent-ai-body" className="mt-[2px] h-[24px] w-[24px] shrink-0 accent-[var(--accent)]" />
             <span className="flex min-w-0 flex-col gap-[4px]">
               <span className="font-medium">{tai("consentAiTitle")}</span>
               <span id="consent-ai-body" aria-hidden="true" className={`text-muted ${smallText}`}>

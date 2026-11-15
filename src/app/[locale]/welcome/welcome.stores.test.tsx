@@ -24,6 +24,13 @@ vi.mock("@/lib/stores", async (importOriginal) => {
 vi.mock("next-intl/server", () => ({
   setRequestLocale: () => {},
   getTranslations: async (ns: keyof typeof messages) => (key: string) => (messages[ns] as Record<string, string>)[key],
+  getMessages: async () => messages,
+}));
+// The help card itself is SafetyCard's (its own tests); here, only that welcome places it.
+vi.mock("@/components/SafetyCard", () => ({
+  GetHelpNow: ({ testId, icon, neutral, country }: { testId: string; icon?: boolean; neutral?: boolean; country: string | null }) => (
+    <span data-testid={testId} data-icon={String(icon)} data-neutral={String(neutral)} data-country={String(country)} />
+  ),
 }));
 vi.mock("@/components/Logo", () => ({ Logo: () => null }));
 vi.mock("./WelcomeSlides", () => ({ WelcomeSlides: () => null }));
@@ -61,5 +68,19 @@ describe("Welcome's store line", () => {
     await renderWelcome();
     expect(screen.getByTestId("welcome-store-play")).toBeInTheDocument();
     expect(screen.getByTestId("welcome-store-appstore")).toHaveAttribute("href", "https://apps.apple.com/app/id123");
+  });
+});
+
+// Round 3, batch E (S3): help before any account on every slide, as the app's pre-account screens
+// have it. The page renders it outside the slides, so slides 1–3 all carry it (e2e checks each).
+describe("Welcome's help", () => {
+  it("the lifebuoy, neutral, with no account's country: the request's decides", async () => {
+    met = [];
+    await renderWelcome();
+    // The link itself (href, name, place, size) is GetHelpNow's: e2e smoke checks it on slides 1–3.
+    const help = screen.getByTestId("welcome-help");
+    expect(help).toHaveAttribute("data-icon", "true");
+    expect(help).toHaveAttribute("data-neutral", "true");
+    expect(help).toHaveAttribute("data-country", "null");
   });
 });

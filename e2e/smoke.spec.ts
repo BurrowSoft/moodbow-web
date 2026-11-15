@@ -621,7 +621,8 @@ test.describe("web journal (signed out)", () => {
 test.describe("help with no script at all", () => {
   test.use({ javaScriptEnabled: false });
   // Create account carries the consents now (1.3 §6): help before anything is agreed is there.
-  for (const [path, id] of [["/sign-in", "sign-in-get-help"], ["/forgot-password", "forgot-get-help"], ["/sign-up", "signup-get-help"]]) {
+  // Welcome too (round 3, batch E): its lifebuoy is a real link to the help page.
+  for (const [path, id] of [["/sign-in", "sign-in-get-help"], ["/forgot-password", "forgot-get-help"], ["/sign-up", "signup-get-help"], ["/welcome", "welcome-help"]]) {
     for (const language of ["", "/fr", "/es", "/pt-br"]) {
       test(`${language}${path}: the help button leads to a page with the way to a helpline`, async ({ page }) => {
         await page.goto(`${language}${path}`);
@@ -706,6 +707,44 @@ test.describe("onboarding (signed out)", () => {
     await expect(page).toHaveURL(/\/welcome\?slide=3$/);
     await page.getByTestId("welcome-start").click();
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Create your account");
+  });
+
+  // Round 3, batch E (S3): help before any account, as the app's pre-account screens have it: a
+  // quiet lifebuoy at the top right of every welcome slide, named with the shared help words.
+  test("welcome 1–3: the lifebuoy at the top right, named, leading to help; it opens the card", async ({ page }) => {
+    for (const slide of [1, 2, 3]) {
+      await page.goto(`/welcome?slide=${slide}`);
+      const help = page.getByTestId("welcome-help");
+      await expect(help, `slide ${slide}`).toHaveAttribute("href", "/help/get-help-now");
+      await expect(help).toHaveAttribute("aria-label", "Want to talk to someone?");
+      const box = (await help.boundingBox())!;
+      const width = page.viewportSize()!.width;
+      expect(box.x + box.width, `slide ${slide}: at the right`).toBeGreaterThan(width - 80);
+      expect(box.y, `slide ${slide}: at the top`).toBeLessThan(80);
+      expect(Math.min(box.width, box.height)).toBeGreaterThanOrEqual(24);
+    }
+    await page.getByTestId("welcome-help").click();
+    await expect(page.getByTestId("safety-card")).toBeVisible();
+    await page.getByTestId("safety-close").click();
+    await expect(page.getByTestId("safety-card")).toHaveCount(0);
+    await expect(page.getByTestId("welcome-slide-3")).toBeVisible();
+  });
+
+  // Round 3, batch E (S3, WCAG 2.5.8): each consent box and each Read link is a target of at
+  // least 24 × 24 px.
+  test("Create account: every consent control is at least 24 × 24 px", async ({ page }) => {
+    await page.goto("/sign-up");
+    const ids = ["consent-privacy", "consent-health", "consent-age", "consent-read-terms", "consent-read-privacy", "consent-read-health", "consent-ai"];
+    let measured = 0;
+    for (const id of ids) {
+      const control = page.getByTestId(id);
+      if ((await control.count()) === 0) continue;
+      const box = (await control.boundingBox())!;
+      expect(box.width, `${id} width`).toBeGreaterThanOrEqual(24);
+      expect(box.height, `${id} height`).toBeGreaterThanOrEqual(24);
+      measured++;
+    }
+    expect(measured).toBeGreaterThanOrEqual(5);
   });
 
   test("Create account: the summary above three separate unticked boxes, each with its link; the AI box optional", async ({ page }) => {
