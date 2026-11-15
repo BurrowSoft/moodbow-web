@@ -8,7 +8,9 @@ vi.mock("next-intl/server", () => ({
   getTranslations: async (ns: string) => (key: string) => `${ns}.${key}`,
 }));
 vi.mock("@/i18n/navigation", () => ({ Link: "a" }));
-vi.mock("@/lib/conditions", async (orig) => ({ ...(await orig<typeof import("@/lib/conditions")>()), pageGate: () => "draft" }));
+// A Preview or test build (drafts allowed) unless a test says otherwise.
+const build = vi.hoisted(() => ({ gate: "draft" as "draft" | "hidden" }));
+vi.mock("@/lib/conditions", async (orig) => ({ ...(await orig<typeof import("@/lib/conditions")>()), pageGate: () => build.gate }));
 
 const { default: HelpArticlePage, dynamicParams, generateStaticParams } = await import("./page");
 
@@ -47,5 +49,19 @@ describe("Help article page", () => {
     // Unmet on every build (safety-plan-live; letters also need Plus).
     expect(en).not.toContain("safety-plan");
     expect(en).not.toContain("letters");
+  });
+
+  // Previews keep what they had: pending blocks follow conditions only (isPendingMet), and the one
+  // draft-aware article, Bo's, follows pageGate("bo-live") as the page does (helpPageMet).
+  it("Bo's article is served on a draft build (Preview) and not on Production", () => {
+    const slugs = () => generateStaticParams().filter((p) => p.locale === "en").map((p) => p.slug);
+    try {
+      build.gate = "draft";
+      expect(slugs()).toContain("bo");
+      build.gate = "hidden";
+      expect(slugs()).not.toContain("bo");
+    } finally {
+      build.gate = "draft";
+    }
   });
 });
