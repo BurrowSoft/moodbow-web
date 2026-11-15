@@ -105,8 +105,8 @@ describe("Help → Things that help me: grounding", () => {
     });
   }
 
-  it("not met on either side yet (ships after 1.2)", () => {
-    expect(conditions["grounding-live"].met).toBe(false);
+  it("met on the web with the 1.3.0 release; the app's Help lines wait for the store release", () => {
+    expect(conditions["grounding-live"].met).toBe(true);
     expect(conditions["app-grounding"].met).toBe(false);
   });
 });
