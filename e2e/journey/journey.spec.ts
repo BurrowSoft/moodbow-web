@@ -581,6 +581,30 @@ test.describe("importing the same file again", () => {
     }
   });
 
+  // Round 3 (the Web Tester's L6 T4): the mood-mapping select grew to its longest option and pushed
+  // the page sideways at 320 px with text at 200 % (German, scrollWidth 362). Now it shrinks within its row.
+  test("the mood mapping fits a 320 px screen with text at 200 %: no sideways scroll", async ({ page }) => {
+    const email = newEmail();
+    const password = newPassword();
+    const cdp = await page.context().newCDPSession(page);
+    try {
+      await signedIn(page, email, password);
+      await page.setViewportSize({ width: 320, height: 800 });
+      await cdp.send("Page.setFontSizes", { fontSizes: { standard: 32, fixed: 26 } });
+      const daylio = ["full_date,date,weekday,time,mood,activities,note_title,note", "2026-10-10,x,x,9:00 am,sleepy,,,", "2026-10-11,x,x,9:00 am,a very long custom mood name,,,"].join("\n");
+      await page.getByTestId("import-file").setInputFiles({ name: "daylio.csv", mimeType: "text/csv", buffer: Buffer.from(daylio) });
+      await expect(page.getByTestId("import-moods")).toBeVisible();
+      expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth), "the page's sideways overflow").toBeLessThanOrEqual(0);
+      for (const select of await page.locator("[data-testid^=import-mood-]").all()) {
+        const box = (await select.boundingBox())!;
+        expect(box.x + box.width, "a mapping select inside the screen").toBeLessThanOrEqual(320);
+      }
+      await page.getByTestId("import-cancel").click();
+    } finally {
+      await cleanup(email);
+    }
+  });
+
   test("a file it couldn't read, and Cancel: the same file can be chosen again", async ({ page }) => {
     const email = newEmail();
     const password = newPassword();

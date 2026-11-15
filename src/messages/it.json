@@ -602,7 +602,7 @@
     "reflectAnswer": "Scrivi la tua risposta",
     "meAiOn": "Riflessioni e resoconti con l'AI",
     "consentAiTitle": "Riflessioni e resoconti con l'AI (facoltativi)",
-    "consentAiBody": "Per scrivere riflessioni e resoconti, Moodbow invia le tue pagine e i tuoi dati al nostro fornitore di AI, Anthropic (USA), solo quando serve. Non vengono usati per addestrare modelli di AI. Puoi disattivarlo quando vuoi in Profilo → AI.",
+    "consentAiBody": "Per scrivere riflessioni e resoconti, Moodbow invia le tue pagine e i tuoi check-in al nostro fornitore di AI, Anthropic (USA), solo quando serve. Non vengono usati per addestrare modelli di AI. Puoi disattivarlo quando vuoi in Profilo → AI.",
     "meAiOffHint": "L'AI è disattivata. Il diario funziona allo stesso modo, ma non riceverai riflessioni né resoconti.",
     "meTone": "Tono",
     "toneWarm": "Caloroso",

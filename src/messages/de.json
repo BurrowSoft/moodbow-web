@@ -602,7 +602,7 @@
     "reflectAnswer": "Deine Antwort schreiben",
     "meAiOn": "KI-Reflexionen und -Berichte",
     "consentAiTitle": "KI-Reflexionen und -Berichte (optional)",
-    "consentAiBody": "Um Reflexionen und Berichte zu schreiben, sendet Moodbow deine Einträge und Angaben nur bei Bedarf an unseren KI-Anbieter Anthropic (USA). Sie werden nicht zum Training von KI-Modellen verwendet. Du kannst das jederzeit unter Ich → KI ausschalten.",
+    "consentAiBody": "Um Reflexionen und Berichte zu schreiben, sendet Moodbow deine Einträge und Check-ins nur bei Bedarf an unseren KI-Anbieter Anthropic (USA). Sie werden nicht zum Training von KI-Modellen verwendet. Du kannst das jederzeit unter Ich → KI ausschalten.",
     "meAiOffHint": "KI ist aus. Dein Tagebuch funktioniert genauso, du bekommst nur keine Reflexionen oder Berichte.",
     "meTone": "Ton",
     "toneWarm": "Herzlich",
