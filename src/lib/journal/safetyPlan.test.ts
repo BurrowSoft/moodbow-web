@@ -1,13 +1,13 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import contract from "../../../content/safety-plan.json";
+import contract from "../../../content/contracts/safety-plan.json";
 import yourWeek from "../../../content/contracts/your-week.json";
 import { canCall, EMPTY_PLAN, parsePlan, personProblem, planHasContent, planTextTooLong, SAFETY_PLAN_RULES } from "./safetyPlan";
 
 const LANGUAGES = ["en", "fr", "es", "pt-br", "de", "it", "th"] as const;
 const messages = (l: string) => JSON.parse(readFileSync(`src/messages/${l}.json`, "utf8")) as Record<string, Record<string, string>>;
 
-describe("safety plan rules (content/safety-plan.json)", () => {
+describe("safety plan rules (content/contracts/safety-plan.json)", () => {
   it("are the contract's, as UX set them", () => {
     expect(SAFETY_PLAN_RULES).toEqual({ maxTextChars: 2000, maxPeoplePerSection: 10, maxNameChars: 100, maxPhoneChars: 40, callMinDigits: 3 });
     expect(contract.sections.map((s) => s.id)).toEqual(["warning_signs", "toolbox", "distractions", "people", "professionals", "surroundings"]);
