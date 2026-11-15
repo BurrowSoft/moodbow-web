@@ -12,9 +12,15 @@ import { findArticle, helpArticles, helpPageMet, renderArticle } from "@/lib/hel
 import { HELP_GATE } from "@/lib/helpGate";
 import { pageMetadata } from "@/lib/metadata";
 
+// The published articles, as the page shows them (helpPageMet: Bo's follows its own gate).
 export function generateStaticParams() {
-  return routing.locales.flatMap((locale) => helpArticles(locale).filter((a) => renderArticle(a) !== "").map((a) => ({ locale, slug: a.slug })));
+  return routing.locales.flatMap((locale) => helpArticles(locale).filter((a) => renderArticle(a, (id) => helpPageMet(id)) !== "").map((a) => ({ locale, slug: a.slug })));
 }
+
+// A missing or unpublished slug never reaches this page on a real request: the proxy sends it to
+// the not-found page first (lib/helpGates.ts), because a notFound() thrown here gets Next's bare
+// error shell (html id="__next_error__", no title; the Web Tester, 15 Nov). The notFound() calls
+// below stay as the fallback.
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/help/[slug]">): Promise<Metadata> {
   const { locale, slug } = await params;

@@ -8,9 +8,11 @@ vi.mock("next-intl/server", () => ({
   getTranslations: async (ns: string) => (key: string) => `${ns}.${key}`,
 }));
 vi.mock("@/i18n/navigation", () => ({ Link: "a" }));
-vi.mock("@/lib/conditions", async (orig) => ({ ...(await orig<typeof import("@/lib/conditions")>()), pageGate: () => "draft" }));
+// A Preview or test build (drafts allowed) unless a test says otherwise.
+const build = vi.hoisted(() => ({ gate: "draft" as "draft" | "hidden" }));
+vi.mock("@/lib/conditions", async (orig) => ({ ...(await orig<typeof import("@/lib/conditions")>()), pageGate: () => build.gate }));
 
-const { default: HelpArticlePage } = await import("./page");
+const { default: HelpArticlePage, generateStaticParams } = await import("./page");
 
 // Depth-first search through a React element tree for props matching `test`.
 function findProps(node: unknown, test: (p: Record<string, unknown>) => boolean): Record<string, unknown> | undefined {
@@ -35,5 +37,32 @@ describe("Help article page", () => {
     expect(shell.article).toBe(true);
     expect(findProps(shell.children, (p) => p["data-testid"] === "help-back")).toBeUndefined();
     expect(findProps(shell.after, (p) => p["data-testid"] === "help-back")?.href).toBe("/help");
+  });
+
+  // Prerendered: the published articles only (the proxy 404s the rest: lib/helpGates.ts; e2e smoke
+  // "help 404" checks the raw HTML).
+  it("prerenders only the published articles", () => {
+    const en = generateStaticParams().filter((p) => p.locale === "en").map((p) => p.slug);
+    expect(en).toContain("check-ins");
+    expect(en).toContain("get-help-now");
+    // The 1.3.0 web flips (#343).
+    for (const slug of ["things-that-help", "appointment", "your-week-today", "tags", "bring-this-back"]) expect(en, slug).toContain(slug);
+    // Unmet on every build: safety-plan-live; letters also need Plus; one-tap check-in waits for the
+    // app's store release (app-quick-checkin).
+    for (const slug of ["safety-plan", "letters", "one-tap-check-in"]) expect(en, slug).not.toContain(slug);
+  });
+
+  // Previews keep what they had: pending blocks follow conditions only (isPendingMet), and the one
+  // draft-aware article, Bo's, follows pageGate("bo-live") as the page does (helpPageMet).
+  it("Bo's article is served on a draft build (Preview) and not on Production", () => {
+    const slugs = () => generateStaticParams().filter((p) => p.locale === "en").map((p) => p.slug);
+    try {
+      build.gate = "draft";
+      expect(slugs()).toContain("bo");
+      build.gate = "hidden";
+      expect(slugs()).not.toContain("bo");
+    } finally {
+      build.gate = "draft";
+    }
   });
 });
