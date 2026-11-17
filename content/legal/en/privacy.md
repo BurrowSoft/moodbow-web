@@ -44,7 +44,7 @@ We don't collect your name, contacts{pending:safety_plan_live|app_safety_plan} (
 
 To show helplines near you when we don't know your country, we use the country your connection comes from, at that moment only; it isn't stored.
 
-{pending:web_analytics}**Visit counts (public website only):** we count visits to our public pages with a cookie-free tool from our host, Vercel: which page was opened, from what kind of device and country, and which of our campaign links brought you there, if any. It uses no cookies or identifiers, never runs in the web journal, never sees what you write, and can't tell who you are. The mobile app sends no analytics.{/pending}
+{pending:web_analytics}**Usage counts (website and web journal):** we count page views and button taps in aggregate, with a cookie-free tool from our host, Vercel, to see which parts of Moodbow are used: which page was opened or which button was tapped, from what kind of device and country, and which of our campaign links brought you there, if any. It uses no cookies and no lasting identifier (Vercel tells visitors apart with a code that changes every day and isn't kept), never sees what you write, how you feel or anything you enter, and can't tell who you are. If your browser sends Global Privacy Control or Do Not Track, nothing is counted. The mobile app sends no analytics.{/pending}
 
 ### 2. Why we use it, and on what legal basis
 | Purpose | Legal basis |
@@ -60,7 +60,7 @@ To show helplines near you when we don't know your country, we use the country y
 |---|---|---|
 | Supabase (on Amazon Web Services) | Database, accounts, file storage | Ireland (EU) |
 | Anthropic | AI reflections and reports, only if AI is on | USA |
-| Vercel | Hosting the website and web journal{pending:web_analytics}; counting visits to the public website (no cookies){/pending} | USA and global edge network |
+| Vercel | Hosting the website and web journal{pending:web_analytics}; counting page views and button taps (no cookies){/pending} | USA and global edge network |
 | Resend | Sending account emails (confirmation, password reset) | USA (company); emails are sent from Japan |
 | Sentry | Error and crash reports, with personal details removed | USA |
 {pending:purchases}| Google Play, Apple App Store | Payments for AI credits | Global |{/pending}
