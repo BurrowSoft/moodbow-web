@@ -51,7 +51,7 @@ export default async function PastReportsPage({ params }: PageProps<"/[locale]/a
       {/* Help first, beside Back (every page with journal content), hidden on paper. */}
       <div className="flex flex-wrap items-center gap-x-[12px] gap-y-[8px] print:hidden">
         <BackLink href="/app/me" label={ta("navBackTo", { screen: ta("tabMe") })} testId="nav-back" />
-        <GetHelpNow country={me?.profile?.country} testId="past-reports-get-help" neutral />
+        <GetHelpNow country={me?.profile?.country} testId="past-reports-get-help" counted neutral />
       </div>
       <h1 className={JOURNAL_HEADING} data-testid="past-reports-title">
         {t("pastReports")}

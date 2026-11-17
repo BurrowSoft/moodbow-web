@@ -105,7 +105,7 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
       <h1 className="sr-only">{t("tabMe")}</h1>
       {/* Get help now (M8): at the top, on its own, AI or not; not repeated
           under Help (decision 128). */}
-      <GetHelpNow country={me.profile?.country} testId="me-get-help" neutral />
+      <GetHelpNow country={me.profile?.country} testId="me-get-help" counted neutral />
       {/* The big card (board 6b): their own picture, this browser only. After help, which stays
           first on the web until Me follows board 1 (UX, F5). No App icon row on the web. */}
       {pageGate("me-picture-live") !== "hidden" && <MePicture uid={user.id} />}

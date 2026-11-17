@@ -102,7 +102,7 @@ export function PromptLibrary({ uid, country, hasPlus, onUse }: { uid: string; c
           {libraryText(prompt, language)}
         </p>
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-          <button type="button" data-testid="entry-library-use" onClick={use} className={LINK}>
+          <button type="button" data-testid="entry-library-use" data-count="prompt_used" onClick={use} className={LINK}>
             {t("libraryUse")}
           </button>
           <button type="button" data-testid="entry-library-another" onClick={another} className={LINK}>

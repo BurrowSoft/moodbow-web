@@ -13,6 +13,7 @@ import { graphemeCount, preview } from "@/lib/journal/entry";
 import { loadMonthCheckIns, loadYearCheckIns } from "./shareActions";
 import { YEAR_MIN_MONTHS, yearBands, yearFileName } from "@/lib/share/year";
 import type { MonthCheckIn } from "@/lib/share/moodbow";
+import { countTap } from "@/lib/analyticsEvents";
 
 // "My month's moodbow" (M10, specs/m10-share-card.md): preview first,
 // always. The card is drawn here in the browser from the month's moods and
@@ -90,6 +91,7 @@ export function ShareMonth({
   useEffect(() => clearSayLoading, [clearSayLoading]);
   const start = () => {
     setOpen(true);
+    countTap("share_month_opened");
     setType(types.includes(initialType) ? initialType : "moodbow");
     onOpen?.();
     setSayLoading(false);

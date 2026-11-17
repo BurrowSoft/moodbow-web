@@ -48,7 +48,7 @@ export default async function ToolboxPage({ params }: PageProps<"/[locale]/app/m
       {/* Help first, beside Back (UX's rule: every page with journal content), hidden on paper. */}
       <div className="flex flex-wrap items-center gap-x-[12px] gap-y-[8px] print:hidden">
         <BackLink href="/app/me" label={ta("navBackTo", { screen: ta("tabMe") })} testId="nav-back" />
-        <GetHelpNow country={me?.profile?.country} testId="toolbox-get-help" neutral />
+        <GetHelpNow country={me?.profile?.country} testId="toolbox-get-help" counted neutral />
       </div>
       <h1 className={JOURNAL_HEADING} data-testid="toolbox-title">
         {t("meRow")}

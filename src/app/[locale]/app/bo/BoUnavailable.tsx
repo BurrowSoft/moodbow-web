@@ -7,7 +7,7 @@ export function BoUnavailable({ country }: { country: string | null | undefined 
   return (
     <div className="flex flex-col items-center gap-4">
       <JournalUnavailable />
-      <GetHelpNow country={country} testId="bo-get-help" neutral />
+      <GetHelpNow country={country} testId="bo-get-help" counted neutral />
     </div>
   );
 }

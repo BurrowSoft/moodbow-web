@@ -22,7 +22,7 @@ export function SessionEnded() {
         {t("signinSubmit")}
       </Link>
       <div className="mt-4">
-        <GetHelpNow country={null} testId="session-ended-help" neutral />
+        <GetHelpNow country={null} testId="session-ended-help" counted neutral />
       </div>
     </section>
   );
