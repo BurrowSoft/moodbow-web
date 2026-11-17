@@ -1,6 +1,6 @@
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
-import { pickMessages } from "@/i18n/clientMessages";
+import { helpCardMessages } from "@/i18n/clientMessages";
 import { GetHelpNow } from "./SafetyCard";
 
 // Help on the signed-out account pages (decision 218): the helpline directory, as no country
@@ -8,7 +8,7 @@ import { GetHelpNow } from "./SafetyCard";
 // send them to. The wrapper holds the button under the safety card's cap, as on Consent.
 export async function SignedOutHelp({ testId }: { testId: string }) {
   return (
-    <NextIntlClientProvider messages={pickMessages(await getMessages(), ["me", "safety", "common"])}>
+    <NextIntlClientProvider messages={helpCardMessages(await getMessages())}>
       <div className="mt-[24px] [font-size:min(1rem,max(10vw,32px))] [&_a]:min-h-[44px] [&_button]:min-h-[44px]">
         <GetHelpNow country={null} testId={testId} counted neutral />
       </div>
