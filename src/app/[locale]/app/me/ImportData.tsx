@@ -12,6 +12,7 @@ import { flagsCrisis } from "@/lib/safety/crisis";
 import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
 import { existingNoteCounts, importCheckIns, importEntries } from "./importActions";
 import { useUntilLoaded } from "@/lib/ui/untilLoaded";
+import { countTap } from "@/lib/analyticsEvents";
 
 // Import from another journal (1.1 K, decision 189), in Me → Your data:
 // choose a file → it's read in this browser only → a preview (counts, what
@@ -181,6 +182,7 @@ export function ImportData({ uid, today, dateLocaleTag, country, tags = false }:
     text.current = null;
     running.current = false;
     setPhase({ kind: "done", ...summary() });
+    countTap("import_done");
   };
 
   const fmt = (d: string) => new Intl.DateTimeFormat(dateLocaleTag, { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(`${d}T12:00:00Z`));

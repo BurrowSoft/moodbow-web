@@ -25,6 +25,7 @@ import { TagsField } from "./TagsField";
 import { SafetyCard } from "@/components/SafetyCard";
 import { parseTags, tagsFlagCrisis } from "@/lib/journal/tags";
 import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
+import { countTap } from "@/lib/analyticsEvents";
 
 // The daily check-in (M4): mood required (5 labelled circles), then the
 // optional sleep / exercise / stress rows. After saving, a summary row with
@@ -486,6 +487,7 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
       return prev;
     }
     if (next.status === "saved") {
+      countTap("checkin_saved");
       // For what follows on Today (its Plus card hides after one of the two lowest faces).
       window.dispatchEvent(new CustomEvent(CHECKIN_SAVED_EVENT, { detail: { date: next.checkIn.local_date, mood: next.checkIn.mood } }));
       // The tags went with it, or the check-in is saved and they weren't (shown under the field).

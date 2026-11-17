@@ -12,6 +12,7 @@ import { wipeLocalData } from "@/lib/localData";
 import { EXPORT_WAIT_MS, withTimeout } from "@/lib/ui/withTimeout";
 import { deleteMyAccount, exportMyData, exportPictureUrls, type DeleteAccountState } from "./actions";
 import { removePicture } from "@/lib/me/picture";
+import { countTap } from "@/lib/analyticsEvents";
 
 type ExportFile = { kind: "txt" | "json" | "csv" | "zip"; name: string; url: string };
 const LINK_LABELS = { txt: "exportReadable", json: "exportData", csv: "exportCsv", zip: "exportZip" } as const;
@@ -120,6 +121,7 @@ export function YourData({ uid, csv = false, plusSource = null, pdf = null, pict
         }
         setFiles(next);
         setExportState("ready");
+        countTap("export_done");
       } catch {
         setExportState("error");
       }

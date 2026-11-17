@@ -59,7 +59,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
         {hasSecurityUpdate() && (
           <p className="mt-6 max-w-full rounded-2xl border border-border bg-surface p-[16px] text-center text-text [font-size:min(1rem,max(10vw,32px))] [overflow-wrap:anywhere]" data-testid="home-security">
             {tc("securityNotice")}{" "}
-            <Link href="/security" data-testid="home-security-link" className={storeLink}>
+            <Link href="/security" data-testid="home-security-link" data-count="cta_home_security" className={storeLink}>
               {tc("securityNoticeRead")}
             </Link>
           </p>
@@ -77,11 +77,12 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
             <Link
               href="/sign-up"
               data-testid="home-start"
+              data-count="cta_home_start"
               className="inline-flex min-h-[52px] w-full items-center justify-center rounded-full text-center sm:w-auto sm:min-w-[220px] bg-accent px-5 py-3.5 sm:px-8 [font-size:min(1rem,max(10vw,32px))] font-medium text-on-accent transition-opacity hover:bg-accent-hover"
             >
               {t("start")}
             </Link>
-            <Link href="/sign-in" data-testid="home-sign-in" className="min-h-11 content-center leading-[1.429] [font-size:min(0.875rem,max(8.75vw,28px))] font-medium text-accent underline underline-offset-4">
+            <Link href="/sign-in" data-testid="home-sign-in" data-count="cta_home_sign_in" className="min-h-11 content-center leading-[1.429] [font-size:min(0.875rem,max(8.75vw,28px))] font-medium text-accent underline underline-offset-4">
               {to("welcomeHaveAccount")}
             </Link>
           </div>
@@ -91,6 +92,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
               href={notifyMailto(t("notifySubject"))}
               aria-label={t("notifyAria")}
               data-testid="home-notify"
+              data-count="cta_home_notify"
               className="mt-9 inline-flex min-h-[52px] w-full items-center justify-center rounded-full text-center sm:w-auto sm:min-w-[200px] bg-accent px-5 py-3.5 sm:px-8 [font-size:min(1rem,max(10vw,32px))] font-medium text-on-accent transition-opacity hover:bg-accent-hover"
             >
               {t("notify")}
@@ -113,7 +115,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
                 )}
                 {stores.play && stores.appStore && <span aria-hidden="true"> · </span>}
                 {stores.appStore && (
-                  <a href={APP_STORE_URL!} data-testid="home-store-appstore" className={storeLink}>
+                  <a href={APP_STORE_URL!} data-testid="home-store-appstore" data-count="cta_store_appstore" className={storeLink}>
                     {t("storeAppStore")}
                   </a>
                 )}

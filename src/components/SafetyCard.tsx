@@ -144,7 +144,10 @@ export function SafetyCard({ country, onClose, neutral = false, where = null }: 
   );
 }
 
-// The help button (meGetHelpNow, "Want to talk to someone?", decision 153):
+// The help button (meGetHelpNow, "Want to talk to someone?", decision 153).
+// Its tap is the one help event counted (cta_help_open, specs/analytics.md);
+// the card showing by itself, and every helpline or call tap, never are.
+//
 // opens the card, at the top
 // of Me on its own and under a reflection that names it. A calm secondary
 // button, never red or alarming (decision 128). neutral: on Me, where
@@ -174,6 +177,7 @@ export function GetHelpNow({ country, testId, className, neutral, icon, where }:
           href={country ? `/help/get-help-now?country=${encodeURIComponent(country)}` : "/help/get-help-now"}
           prefetch={false}
           data-testid={testId}
+          data-count="cta_help_open"
           onClick={openCard}
           aria-label={name}
           title={name}
@@ -182,7 +186,7 @@ export function GetHelpNow({ country, testId, className, neutral, icon, where }:
           <LifebuoyIcon />
         </Link>
       ) : (
-        <Link href={country ? `/help/get-help-now?country=${encodeURIComponent(country)}` : "/help/get-help-now"} prefetch={false} data-testid={testId} onClick={openCard} className={className ?? `${dialogButton(false, false)} [font-size:min(1em,max(10vw,32px))]`}>
+        <Link href={country ? `/help/get-help-now?country=${encodeURIComponent(country)}` : "/help/get-help-now"} prefetch={false} data-testid={testId} data-count="cta_help_open" onClick={openCard} className={className ?? `${dialogButton(false, false)} [font-size:min(1em,max(10vw,32px))]`}>
           {name}
         </Link>
       )}

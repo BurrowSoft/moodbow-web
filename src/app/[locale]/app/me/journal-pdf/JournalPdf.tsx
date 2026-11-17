@@ -88,7 +88,7 @@ export function JournalPdf({
         </select>
       </fieldset>
       {period && days.length > 0 && (
-        <button type="button" data-testid="pdf-print" onClick={() => window.print()} className={dialogButton(true)}>
+        <button type="button" data-testid="pdf-print" data-count="journal_pdf_done" onClick={() => window.print()} className={dialogButton(true)}>
           {t("pdfButton")}
         </button>
       )}

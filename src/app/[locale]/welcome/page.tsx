@@ -68,7 +68,7 @@ export default async function WelcomePage({ params }: PageProps<"/[locale]/welco
             )}
             {stores.play && stores.appStore && <span aria-hidden="true"> · </span>}
             {stores.appStore && (
-              <a href={APP_STORE_URL!} data-testid="welcome-store-appstore" className={storeLink}>
+              <a href={APP_STORE_URL!} data-testid="welcome-store-appstore" data-count="cta_store_appstore" className={storeLink}>
                 {th("storeAppStore")}
               </a>
             )}

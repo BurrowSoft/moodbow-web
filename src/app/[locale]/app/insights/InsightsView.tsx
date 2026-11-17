@@ -102,6 +102,8 @@ export function InsightsView({
             key={r}
             href={r === "week" ? "/app/insights" : `/app/insights?range=${r}`}
             data-testid={`insights-range-${r}`}
+            data-count="insights_range"
+            data-count-range={r}
             aria-current={!long && r === range ? "page" : undefined}
             className={tab(!long && r === range)}
           >

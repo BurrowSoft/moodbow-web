@@ -17,6 +17,13 @@ describe("buildCsp (audit A1)", () => {
     expect(directive(buildCsp("n", ENV), "connect-src")).toEqual(["'self'", "https://abc.supabase.co", "wss://abc.supabase.co", "https://o123.ingest.sentry.io"]);
   });
 
+  it("usage counts need nothing more (specs/analytics.md): Vercel serves the script and takes the counts on our own origin (/_vercel/insights), so no third-party analytics origin is ever allowed", () => {
+    const csp = buildCsp("n", ENV);
+    expect(csp).not.toMatch(/vercel-scripts|vitals\.vercel|insights|analytics/i);
+    expect(directive(csp, "script-src")).toContain("'self'");
+    expect(directive(csp, "connect-src")).toContain("'self'");
+  });
+
   it("no framing, no plugins, base and forms only to us", () => {
     const csp = buildCsp("n", ENV);
     expect(directive(csp, "frame-ancestors")).toEqual(["'none'"]);

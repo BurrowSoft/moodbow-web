@@ -24,6 +24,7 @@ import { EntryPictures } from "./EntryPictures";
 import { deletePicture } from "./pictureActions";
 import type { RecallMonth } from "@/lib/journal/momentRecall";
 import { RecallChips } from "./RecallChips";
+import { countTap } from "@/lib/analyticsEvents";
 
 // The entry view (decision 151, the same layout as the app): a top bar with
 // Back, the ★ moment toggle, ✎ Edit entry and ⋯ (Delete only; board 20); the date; that day's
@@ -174,6 +175,7 @@ function Screen({ entry: initial, checkIn, from, backLabel, dateLocaleTag, uid, 
     try {
       const result = await saveEntry({ status: "idle" }, form);
       if (result.status === "saved") {
+        if (result.entry.is_moment) countTap("moment_saved");
         setEntry(result.entry);
       }
       else {

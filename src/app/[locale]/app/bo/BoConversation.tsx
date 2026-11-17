@@ -15,6 +15,7 @@ import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
 import { useKeyboardOpen } from "@/lib/ui/keyboardOpen";
 import { focusUnclaimed, markLeftBo, takeOpenedByButton } from "./boFocus";
 import { PRIMARY_SAVE } from "@/lib/ui/journalLayout";
+import { countTap } from "@/lib/analyticsEvents";
 
 const BO_HEADER_MOST = 0.25;
 // The usual save button, whose height doesn't grow with the text: at 300 % it took a quarter of
@@ -291,6 +292,8 @@ export function BoConversation({ initial, country, back, healthData = false, con
     // Send was off while it went, which dropped focus; back to the box, where the text is.
     requestAnimationFrame(() => box.current?.focus({ preventScroll: true }));
     if (answer.status === "ok") {
+      // Every reply alike (specs/analytics.md): never what was said, never whether the card opened.
+      countTap("bo_reply");
       // The country this message was checked with beats the last status's, none included: the
       // server's line then used Me's, and so does the card (Reviewer, 2026-11-09).
       setHelpCountry(answer.helpCountry ?? null);

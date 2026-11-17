@@ -14,7 +14,10 @@ vi.mock("@vercel/analytics/react", () => ({
     return null;
   },
 }));
-const { VisitCounts, SETTLE_LIMIT_MS } = await import("./VisitCounts");
+const { track } = vi.hoisted(() => ({ track: vi.fn() }));
+vi.mock("@vercel/analytics", async (original) => ({ ...(await original<typeof import("@vercel/analytics")>()), track }));
+const { VisitCounts, SETTLE_LIMIT_MS, browserSaysNo } = await import("./VisitCounts");
+const { countTap } = await import("@/lib/analyticsEvents");
 
 const last = () => seen[seen.length - 1];
 const add = (attr: string) => {
@@ -112,28 +115,89 @@ describe("VisitCounts", () => {
   });
 });
 
-describe("VisitCounts: public pages only (UX, the 1.0 launch item)", () => {
-  it("the journal (or a sign-in page) opened first: the script is never even loaded", async () => {
-    for (const p of ["/app", "/app/entries/3d6f1a2b-4c5d-4e6f-8a9b-0c1d2e3f4a5b", "/sign-in", "/th/app/me"]) {
+describe("VisitCounts: the journal counts too (UX Q2), the safety plan never", () => {
+  it("journal pages count by their route pattern, never the ids", async () => {
+    pathname = "/app/entries/3d6f1a2b-4c5d-4e6f-8a9b-0c1d2e3f4a5b";
+    params = { locale: "en", id: "3d6f1a2b-4c5d-4e6f-8a9b-0c1d2e3f4a5b" };
+    render(<VisitCounts />);
+    await flush();
+    expect(last().route).toBe("/app/entries/[id]");
+  });
+
+  it("the safety plan (any locale) and the auth email-link pages: never counted", async () => {
+    for (const p of ["/app/me/safety-plan", "/th/app/me/safety-plan", "/auth/confirm"]) {
       pathname = p;
       params = {};
       const view = render(<VisitCounts />);
       await flush();
+      expect(seen.every((x) => x.route === null && x.path === undefined), p).toBe(true);
       view.unmount();
     }
-    expect(seen).toEqual([]);
+  });
+});
+
+describe("VisitCounts: the browser's own no (UX Q8)", () => {
+  afterEach(() => {
+    Object.defineProperty(navigator, "globalPrivacyControl", { value: undefined, configurable: true });
+    Object.defineProperty(navigator, "doNotTrack", { value: null, configurable: true });
   });
 
-  it("a public page, then the journal: loaded once, but the journal is never counted", async () => {
-    pathname = "/";
-    params = {};
+  it("Global Privacy Control or Do Not Track: nothing renders, and taps stay off", async () => {
+    for (const [key, value] of [["globalPrivacyControl", true], ["doNotTrack", "1"]] as const) {
+      seen.length = 0;
+      track.mockClear();
+      Object.defineProperty(navigator, key, { value, configurable: true });
+      const view = render(<VisitCounts />);
+      await flush();
+      expect(seen, key).toEqual([]);
+      countTap("entry_saved");
+      expect(track, key).not.toHaveBeenCalled();
+      view.unmount();
+      Object.defineProperty(navigator, key, { value: key === "doNotTrack" ? null : undefined, configurable: true });
+    }
+  });
+
+  it("browserSaysNo reads both signals", () => {
+    expect(browserSaysNo({ globalPrivacyControl: true } as unknown as Navigator)).toBe(true);
+    expect(browserSaysNo({ doNotTrack: "1" } as unknown as Navigator)).toBe(true);
+    expect(browserSaysNo({ doNotTrack: "0" } as unknown as Navigator)).toBe(false);
+    expect(browserSaysNo({} as Navigator)).toBe(false);
+  });
+});
+
+describe("VisitCounts: taps", () => {
+  beforeEach(() => track.mockClear());
+
+  it("a tap on a data-count button sends its name only; off again once unmounted", async () => {
     const view = render(<VisitCounts />);
     await flush();
-    expect(last()).toEqual({ route: "/", path: "/" });
-    pathname = "/app/timeline";
-    view.rerender(<VisitCounts />);
+    const button = document.createElement("a");
+    button.setAttribute("data-count", "cta_home_start");
+    button.innerHTML = "<span>Start your journal</span>";
+    document.body.appendChild(button);
+    act(() => button.querySelector("span")!.dispatchEvent(new MouseEvent("click", { bubbles: true })));
+    expect(track).toHaveBeenCalledTimes(1);
+    expect(track).toHaveBeenCalledWith("cta_home_start");
+    view.unmount();
+    act(() => button.dispatchEvent(new MouseEvent("click", { bubbles: true })));
+    countTap("entry_saved");
+    expect(track).toHaveBeenCalledTimes(1);
+  });
+
+  it("a name off the list, or a choice outside its values: nothing", async () => {
+    render(<VisitCounts />);
     await flush();
-    expect(last()).toEqual({ route: null, path: undefined });
-    expect(seen.some((s) => s.path?.startsWith("/app"))).toBe(false);
+    const add2 = (attrs: Record<string, string>) => {
+      const el = document.createElement("button");
+      for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+      document.body.appendChild(el);
+      act(() => el.dispatchEvent(new MouseEvent("click", { bubbles: true })));
+    };
+    add2({ "data-count": "help_call_helpline" });
+    add2({ "data-count": "language_switch", "data-count-locale": "klingon" });
+    add2({ "data-count": "language_switch" });
+    expect(track).not.toHaveBeenCalled();
+    add2({ "data-count": "language_switch", "data-count-locale": "th" });
+    expect(track).toHaveBeenCalledWith("language_switch", { locale: "th" });
   });
 });

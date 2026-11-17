@@ -42,6 +42,7 @@ export function PrintMonth({ month, title, days, dateLocaleTag, country }: { mon
         <button
           type="button"
           data-testid="print-button"
+          data-count="print_month"
           onClick={() => window.print()}
           className="inline-flex min-h-11 items-center rounded-full border border-border px-4 text-sm font-medium text-text hover:bg-pill print:hidden"
         >

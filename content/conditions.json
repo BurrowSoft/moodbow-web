@@ -125,7 +125,7 @@
   },
   "web-analytics": {
     "met": false,
-    "what": "Vercel Web Analytics (cookie-free visit counts, decision 79) is enabled for the moodbow-web project by Vitor in Vercel. Flipping this shows the privacy policy's visit-count lines and loads the counter (with the URL scrubber, src/lib/analytics.ts) in the same deploy."
+    "what": "Vercel Web Analytics (cookie-free usage counts, decision 79; specs/analytics.md) is enabled for the moodbow-web project by Vitor in Vercel, and Vitor has approved the privacy policy's usage-count lines. Flipping this shows those lines and loads the counter on production (page views and the listed button taps, with the URL and event scrubber, src/lib/analytics.ts and src/lib/analyticsEvents.ts) in the same deploy."
   },
   "timeline-moments-rpc": {
     "met": true,

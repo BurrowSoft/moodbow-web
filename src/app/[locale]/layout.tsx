@@ -93,9 +93,11 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
             </div>
           </NextIntlClientProvider>
         </RequestCountryProvider>
-        {/* Cookie-free visit counts (decision 79): only once the privacy
-            policy says so, in the same deploy ("web-analytics"). */}
-        {conditionMet("web-analytics") && <VisitCounts />}
+        {/* Cookie-free usage counts (decision 79, specs/analytics.md): only
+            once the privacy policy says so, in the same deploy
+            ("web-analytics"), and only on production: previews and test
+            builds send nothing. */}
+        {conditionMet("web-analytics") && process.env.VERCEL_ENV === "production" && <VisitCounts />}
       </body>
     </html>
   );

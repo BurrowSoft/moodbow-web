@@ -7,6 +7,7 @@ import { GetHelpNow } from "@/components/SafetyCard";
 import { IN_PROGRESS_LIMIT_MS, IN_PROGRESS_RETRY_MS, REFLECT_CLIENT_DEADLINE_MS } from "@/lib/journal/reflect";
 import { isCrisis, weekRange, type ReportErrorKey, type ReportResult, type WeeklyReport as Report } from "@/lib/journal/report";
 import { deleteWeeklyReport, requestWeeklyReport } from "./reportActions";
+import { countTap } from "@/lib/analyticsEvents";
 
 type Phase = { kind: "idle" } | { kind: "loading" } | { kind: "error"; message: ReportErrorKey } | { kind: "offline" };
 
@@ -116,6 +117,7 @@ export function WeeklyReport({ initial, weekStart, weekLabel, dateLocaleTag, bal
       focusResult.current = document.activeElement === button.current;
       setReport(result.report);
       setSaid("reportReady");
+      countTap("weekly_report_done");
       if (result.balance !== null) {
         setCreditsOut(lastBalance.current > 0 && result.balance <= 0);
         lastBalance.current = result.balance;

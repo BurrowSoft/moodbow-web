@@ -1,11 +1,12 @@
 "use client";
 
-import { useActionState, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useActionState, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { AuthField, primaryButtonClass, textLinkClass } from "@/components/AuthField";
 import { FocusOnMount } from "@/components/FocusOnMount";
 import { signUpFlow, type SignUpState } from "./actions";
+import { countTap } from "@/lib/analyticsEvents";
 
 const ERROR_KEYS = {
   emailInvalid: ["auth", "errEmailInvalid"],
@@ -86,6 +87,11 @@ export function SignUpForm({ askAi = false, healthLink = false }: { askAi?: bool
     setAnswered(state);
     setResending(false);
   }
+  // Counted once, when the form was accepted (specs/analytics.md): a resend keeps this true.
+  const accepted = state.status === "checkEmail";
+  useEffect(() => {
+    if (accepted) countTap("signup_submitted");
+  }, [accepted]);
 
   if (state.status === "checkEmail") {
     const NOTICES = {
@@ -118,7 +124,7 @@ export function SignUpForm({ askAi = false, healthLink = false }: { askAi?: bool
         </form>
         <form action={action} onSubmit={() => setResending(true)}>
           <input type="hidden" name="intent" value="resend" />
-          <button type="submit" disabled={pending} data-testid="check-email-resend" className={textLinkClass}>
+          <button type="submit" disabled={pending} data-testid="check-email-resend" data-count="signup_resend" className={textLinkClass}>
             {t("checkEmailResend")}
           </button>
         </form>
