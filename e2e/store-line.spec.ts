@@ -27,9 +27,9 @@ for (const [route, locale] of [["", "en"], ["/pt-br", "pt-br"]] as const) {
           link.className = "font-medium text-accent underline underline-offset-4";
           link.textContent = play;
           line.append(link);
-          // The content column, where the page draws it (#350 put the help lifebuoy's
-          // absolute wrapper first in main, so "main > div" alone found that instead).
-          document.querySelector("main > div:not(.absolute)")!.append(line);
+          // The content column, where the page draws it: by its test id, never by the
+          // page's structure (#350's lifebuoy wrapper once broke a child selector here).
+          document.querySelector('[data-testid="welcome-column"]')!.append(line);
         },
         { getApp: h.storeGetApp, play: h.storeGooglePlay },
       );
