@@ -25,7 +25,7 @@ async function mount(page: Page, width: number, html: string, viewport = 320) {
 }
 
 const facesIn = (today: typeof messages.today) =>
-  Array.from({ length: 5 }, (_, i) => `<button type="button" role="radio" class="${MOOD_FACE}"><span class="h-9 w-9 shrink-0 rounded-full bg-accent"></span><span class="${MOOD_LABEL}">${today[`mood${i + 1}` as "mood1"]}</span></button>`).join("");
+  Array.from({ length: 5 }, (_, i) => `<button type="button" role="radio" class="${MOOD_FACE}"><span class="h-9 w-9 shrink-0 rounded-full bg-accent"></span><span class="${MOOD_LABEL}" data-testid="checkin-mood-label-${i + 1}">${today[`mood${i + 1}` as "mood1"]}</span></button>`).join("");
 const rowIn = (today: typeof messages.today) => `<div class="@container" id="row-box"><div class="${MOOD_ROW}" role="radiogroup">${facesIn(today)}</div></div>`;
 const moodRow = rowIn(messages.today);
 
@@ -39,7 +39,7 @@ async function oneRow(page: Page) {
   }
   // All five labels shown (UX, superseding decision 105), under their own face. A two-word label may
   // take two lines, "Muito / bem", but no word splits or spills (UX, the same rule as app #214).
-  const labels = await page.locator(`#row-box button > span:last-child`).evaluateAll((els) =>
+  const labels = await page.locator(`#row-box [data-testid^="checkin-mood-label-"]`).evaluateAll((els) =>
     els.map((e) => ({ h: e.getBoundingClientRect().height, line: parseFloat(getComputedStyle(e).lineHeight), scroll: e.scrollWidth, client: e.clientWidth })),
   );
   expect(labels).toHaveLength(5);

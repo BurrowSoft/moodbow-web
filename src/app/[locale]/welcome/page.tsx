@@ -48,7 +48,7 @@ export default async function WelcomePage({ params }: PageProps<"/[locale]/welco
           <GetHelpNow country={null} neutral icon testId="welcome-help" counted />
         </NextIntlClientProvider>
       </div>
-      <div className="flex w-full max-w-[560px] flex-col items-center">
+      <div className="flex w-full max-w-[560px] flex-col items-center" data-testid="welcome-column">
         <div className="mb-10 w-[120px]">
           <Logo variant="stacked" width={120} alt={tc("logoAlt")} />
         </div>
