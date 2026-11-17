@@ -1,5 +1,16 @@
 {
   "applinks": {
-    "details": []
+    "details": [
+      {
+        "appIDs": ["<TEAMID>.<bundleId>"],
+        "components": [
+          { "/": "/auth/*", "exclude": true, "comment": "Sign-in, sign-up and reset links stay in the browser that asked for them." },
+          { "/": "/*/auth/*", "exclude": true, "comment": "The same, with a locale prefix." },
+          { "/": "/email-confirmed", "exclude": true, "comment": "The confirmation page stays on the web." },
+          { "/": "/*/email-confirmed", "exclude": true, "comment": "The same, with a locale prefix." },
+          { "/": "/open/*", "comment": "The only paths the iPhone app opens." }
+        ]
+      }
+    ]
   }
 }
