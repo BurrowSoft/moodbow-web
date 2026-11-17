@@ -72,7 +72,7 @@ export default async function DayPage({ params }: PageProps<"/[locale]/app/timel
       {/* Help everywhere (audit batch H): the lifebuoy beside Back. */}
       <div className="flex items-center gap-1">
         <BackLink href="/app/timeline" label={await backLabel("/app/timeline", dateLocaleTag)} testId="nav-back" />
-        <GetHelpNow country={me.profile?.country} testId="day-help" neutral icon />
+        <GetHelpNow country={me.profile?.country} testId="day-help" counted neutral icon />
       </div>
       <h1 className={JOURNAL_HEADING} data-testid="day-date">
         {dateLine(date, dateLocaleTag)}

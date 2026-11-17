@@ -24,6 +24,7 @@ import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
 import { PRIMARY_SAVE } from "@/lib/ui/journalLayout";
 import { deleteEntry, getEntry, saveEntry, type DeleteState, type EntryState } from "./actions";
 import { PromptLibrary } from "./PromptLibrary";
+import { countTap } from "@/lib/analyticsEvents";
 
 // The entry editor (M4): a full-page text area, a date (today or earlier)
 // and "Mark as a moment". A draft is autosaved in this browser, per user and
@@ -487,6 +488,9 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
       return { status: "error", error: "generic" };
     }
     if (next.status === "saved") {
+      // Counted by name only (specs/analytics.md): never the text, the date or the mood.
+      countTap(goodThings ? "good_things_saved" : "entry_saved");
+      if (next.entry.is_moment && !(lastSaved.current?.is_moment ?? initial?.is_moment ?? false)) countTap("moment_saved");
       const sent: Draft = { id: String(form.get("id") ?? ""), body: String(form.get("body") ?? ""), date: String(form.get("entry_date") ?? ""), isMoment: form.get("is_moment") === "true", base: null };
       removeSentDraft(draftKey, sent);
       if (!mounted.current) return next;
@@ -635,7 +639,7 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
               own words (writing, editing an entry, Three good things). */}
           <span className="flex min-w-0 items-center gap-1">
             {back}
-            <GetHelpNow country={country} testId="editor-help" neutral icon />
+            <GetHelpNow country={country} testId="editor-help" counted neutral icon />
           </span>
           <button type="submit" data-testid="entry-save-top" disabled={cantSave} aria-disabled={busy || undefined} className={TOP_SAVE}>
             {t("entrySave")}

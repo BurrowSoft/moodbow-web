@@ -43,7 +43,7 @@ export function YearReviewView({
     <section className="space-y-6">
       <div className="flex flex-wrap items-center gap-x-[12px] gap-y-[8px]">
         <BackLink href="/app/insights" label={backLabel} testId="nav-back" />
-        <GetHelpNow country={country} testId="review-get-help" neutral />
+        <GetHelpNow country={country} testId="review-get-help" counted neutral />
       </div>
       <h1 className={JOURNAL_HEADING} data-testid="review-title">
         {soFar ? t("reviewTitleSoFar", { year }) : t("reviewTitle", { year })}

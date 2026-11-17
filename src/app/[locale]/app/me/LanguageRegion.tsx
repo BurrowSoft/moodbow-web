@@ -4,6 +4,8 @@ import { useRef, useState, useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { goToLanguage } from "@/lib/savedLanguage";
+import { countTap } from "@/lib/analyticsEvents";
+import type { Locale } from "@/i18n/routing";
 import { saveRegion, type AiSaveResult, type RegionField } from "./actions";
 import { useUntilLoaded } from "@/lib/ui/untilLoaded";
 
@@ -48,7 +50,10 @@ export function LanguageRegion({ initial, countries, zones, languages }: { initi
         return;
       }
       saved.current = { ...saved.current, [field]: next };
-      if (field === "locale" && next !== locale) goToLanguage(next, pathname);
+      if (field === "locale" && next !== locale) {
+        countTap("language_switch", { locale: next as Locale });
+        goToLanguage(next, pathname);
+      }
       else if (field === "time_zone") router.refresh();
     });
   };

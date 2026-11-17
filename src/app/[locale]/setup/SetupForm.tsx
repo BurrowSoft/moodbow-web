@@ -117,7 +117,7 @@ export function SetupForm({ askAi, initial }: { askAi: boolean; initial?: SetupI
           {ta("errGeneric")}
         </p>
       )}
-      <button type="submit" disabled={pending} data-testid="setup-done" className={primaryButtonClass}>
+      <button type="submit" disabled={pending} data-testid="setup-done" data-count="setup_done" className={primaryButtonClass}>
         {t("setupDone")}
       </button>
     </form>

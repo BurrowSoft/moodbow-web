@@ -10,6 +10,7 @@ import { SEARCH_DEBOUNCE_MS, searchTerm } from "@/lib/journal/search";
 import { dayLabel } from "@/lib/journal/timeline";
 import { onArrival } from "@/lib/ui/arrival";
 import { searchEntries, type SearchHit, type TagDayHit } from "./searchActions";
+import { countTap } from "@/lib/analyticsEvents";
 
 // Search your journal (1.1 L, decision 195): a magnifier at the top of the
 // Timeline opens a search field; while it's open the results replace the
@@ -33,6 +34,8 @@ export function TimelineSearch({ dateLocaleTag, children }: { dateLocaleTag: str
   const field = useRef<HTMLInputElement>(null);
   // Only the latest request's answer counts.
   const latest = useRef(0);
+  // One count per time the search is opened and answers (never the words; typing runs many searches).
+  const counted = useRef(false);
 
   const run = (q: string) => {
     const ask = ++latest.current;
@@ -41,14 +44,23 @@ export function TimelineSearch({ dateLocaleTag, children }: { dateLocaleTag: str
     searchEntries(q)
       .then((r) => {
         if (latest.current !== ask) return;
-        if (r.status === "ok") setState({ kind: "results", q, hits: r.hits, more: r.more, tagDays: r.tagDays ?? [] });
+        if (r.status === "ok") {
+          setState({ kind: "results", q, hits: r.hits, more: r.more, tagDays: r.tagDays ?? [] });
+          if (!counted.current) {
+            counted.current = true;
+            countTap("timeline_search_used");
+          }
+        }
         else failed();
       })
       .catch(failed);
   };
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      counted.current = false;
+      return;
+    }
     const q = searchTerm(text);
     const ask = ++latest.current;
     if (!q) {

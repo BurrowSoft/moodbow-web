@@ -186,7 +186,7 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
             {te("writeButton")}
           </Link>
         </div>
-        <GetHelpNow country={me.profile?.country} testId="today-help" neutral icon />
+        <GetHelpNow country={me.profile?.country} testId="today-help" counted neutral icon />
       </header>
       <CheckInCard key={checkInError ? "unread" : "read"} initial={(data as CheckIn | null) ?? null} uid={user.id} date={me.today} dateLocaleTag={dateLocaleTag} keepDraft loadFailed={Boolean(checkInError)} {...cardTags} country={me.profile?.country} />
       {/* Today's order (UX ruling, audit 14 Nov; the app and board 22): check-in → Your week (first,

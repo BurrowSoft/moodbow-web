@@ -138,7 +138,7 @@ export function AppointmentSummary({ today, rows, starred, dateLabels }: { today
         </section>
       </section>
 
-      <button type="button" data-testid="appointment-print" onClick={() => window.print()} className={`${dialogButton(true)} print:hidden`}>
+      <button type="button" data-testid="appointment-print" data-count="appointment_print" onClick={() => window.print()} className={`${dialogButton(true)} print:hidden`}>
         {t("print")}
       </button>
       <p data-testid="appointment-footer" className="border-t border-border pt-3 text-sm text-muted">
