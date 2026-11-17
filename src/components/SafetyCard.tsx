@@ -145,8 +145,11 @@ export function SafetyCard({ country, onClose, neutral = false, where = null }: 
 }
 
 // The help button (meGetHelpNow, "Want to talk to someone?", decision 153).
-// Its tap is the one help event counted (cta_help_open, specs/analytics.md);
-// the card showing by itself, and every helpline or call tap, never are.
+// Its tap is the one help event counted (cta_help_open, specs/analytics.md),
+// and only where the button is always there (counted, UX & PM + the Reviewer,
+// 17 Nov): one shown because of a crisis match or a hard week would tell, by its
+// page, that the match happened, so those never count. The card showing by
+// itself, and every helpline or call tap, never do.
 //
 // opens the card, at the top
 // of Me on its own and under a reflection that names it. A calm secondary
@@ -159,7 +162,8 @@ export function SafetyCard({ country, onClose, neutral = false, where = null }: 
 // icon: Today's standing help button (UX & PM, 13 Nov; specs/1.2-features.md): a lifebuoy, named
 // and titled with the same words, opening the same card. Quiet (no colour of its own, no banner) and
 // 48 px in px, so large text never makes it push Write out of Today's header.
-export function GetHelpNow({ country, testId, className, neutral, icon, where }: { country: string | null | undefined; testId: string; className?: string; neutral?: boolean; icon?: boolean; where?: string | null }) {
+export function GetHelpNow({ country, testId, className, neutral, icon, where, counted = false }: { country: string | null | undefined; testId: string; className?: string; neutral?: boolean; icon?: boolean; where?: string | null; counted?: boolean }) {
+  const count = counted ? "cta_help_open" : undefined;
   const t = useTranslations("me");
   const [open, setOpen] = useState(false);
   const close = useCallback(() => setOpen(false), []);
@@ -177,7 +181,7 @@ export function GetHelpNow({ country, testId, className, neutral, icon, where }:
           href={country ? `/help/get-help-now?country=${encodeURIComponent(country)}` : "/help/get-help-now"}
           prefetch={false}
           data-testid={testId}
-          data-count="cta_help_open"
+          data-count={count}
           onClick={openCard}
           aria-label={name}
           title={name}
@@ -186,7 +190,7 @@ export function GetHelpNow({ country, testId, className, neutral, icon, where }:
           <LifebuoyIcon />
         </Link>
       ) : (
-        <Link href={country ? `/help/get-help-now?country=${encodeURIComponent(country)}` : "/help/get-help-now"} prefetch={false} data-testid={testId} data-count="cta_help_open" onClick={openCard} className={className ?? `${dialogButton(false, false)} [font-size:min(1em,max(10vw,32px))]`}>
+        <Link href={country ? `/help/get-help-now?country=${encodeURIComponent(country)}` : "/help/get-help-now"} prefetch={false} data-testid={testId} data-count={count} onClick={openCard} className={className ?? `${dialogButton(false, false)} [font-size:min(1em,max(10vw,32px))]`}>
           {name}
         </Link>
       )}

@@ -222,7 +222,7 @@ function Screen({ entry: initial, checkIn, from, backLabel, dateLocaleTag, uid, 
         {/* While editing, the editor's top row holds Back (with Save). */}
         {mode.kind === "view" && <BackLink href={from} label={backLabel} testId="nav-back" />}
         {/* Help everywhere (audit batch H): beside Back. While editing, the editor's own shows. */}
-        {mode.kind === "view" && <GetHelpNow country={country} testId="entry-help" neutral icon />}
+        {mode.kind === "view" && <GetHelpNow country={country} testId="entry-help" counted neutral icon />}
         {mode.kind === "view" && (
           <div className="ml-auto flex min-w-0 flex-wrap items-center justify-end gap-1" data-testid="entry-actions">
             <button

@@ -639,7 +639,7 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
               own words (writing, editing an entry, Three good things). */}
           <span className="flex min-w-0 items-center gap-1">
             {back}
-            <GetHelpNow country={country} testId="editor-help" neutral icon />
+            <GetHelpNow country={country} testId="editor-help" counted neutral icon />
           </span>
           <button type="submit" data-testid="entry-save-top" disabled={cantSave} aria-disabled={busy || undefined} className={TOP_SAVE}>
             {t("entrySave")}

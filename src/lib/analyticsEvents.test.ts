@@ -33,6 +33,7 @@ describe("the event list", () => {
   it("every listed name is used somewhere (no dead names)", () => {
     const used = new Set([...ALL(/countTap\("([a-z0-9_]+)"/g), ...ALL(/data-count="([a-z0-9_]+)"/g), ...ALL(/count="([a-z0-9_]+)"/g), ...ALL(/\? "([a-z0-9_]+)" : "([a-z0-9_]+)"/g)].flatMap(({ m }) => m.slice(1)));
     used.add("cta_store_play"); // PlayStoreLink's default
+    for (const { m } of ALL(/counted \? "([a-z_]+)"/g)) used.add(m[1]); // GetHelpNow's opt-in
     for (const name of TAP_EVENTS) expect(used.has(name), name).toBe(true);
   });
 });
@@ -53,7 +54,7 @@ describe("no free text can be sent (the source)", () => {
 
   it("data-count is a listed literal (or PlayStoreLink's own prop), its choices only locale or range", () => {
     for (const { path, m } of ALL(/data-count="([^"]*)"/g).filter(({ path }) => path !== "lib/analyticsEvents.ts")) expect(isTapEvent(m[1]), `${path}: ${m[1]}`).toBe(true);
-    for (const { path } of ALL(/data-count=\{/g)) expect(path).toBe("components/PlayStoreLink.tsx");
+    for (const { path } of ALL(/data-count=\{/g)) expect(["components/PlayStoreLink.tsx", "components/SafetyCard.tsx"]).toContain(path);
     for (const { path, m } of ALL(/ count="([^"]*)"/g)) expect(isTapEvent(m[1]), `${path}: ${m[1]}`).toBe(true);
     for (const { path, m } of ALL(/data-count-([a-z]+)=/g)) {
       expect(["locale", "range"], `${path}: data-count-${m[1]}`).toContain(m[1]);
@@ -74,10 +75,13 @@ describe("no free text can be sent (the source)", () => {
       if (path === "lib/analyticsEvents.ts") continue;
       expect(off.test(path), path).toBe(false);
     }
-    // SafetyCard.tsx holds GetHelpNow: its two links are the only counted elements there.
+    // SafetyCard.tsx holds GetHelpNow: its two links are the only counted elements there, and
+    // only with counted (off by default).
     const card = FILES.find((f) => f.path === "components/SafetyCard.tsx")!.text;
-    expect([...card.matchAll(/data-count="([a-z_]+)"/g)].map((m) => m[1])).toEqual(["cta_help_open", "cta_help_open"]);
-    expect(card).not.toMatch(/countTap/);
+    expect([...card.matchAll(/data-count=\{([a-z]+)\}/g)].map((m) => m[1])).toEqual(["count", "count"]);
+    expect(card).toContain('const count = counted ? "cta_help_open" : undefined;');
+    expect(card).toContain("counted = false");
+    expect(card).not.toMatch(/countTap|data-count="/);
   });
 });
 
@@ -135,5 +139,44 @@ describe("countTap at run time", () => {
     countFromElement(null);
     countFromElement(document.createElement("div"));
     expect(track).toHaveBeenCalledTimes(1);
+  });
+});
+
+// The Reviewer's blocker on #353 and UX & PM's ruling (17 Nov): a help button shown only because
+// of a crisis match, a hard week or the Hard days prompts would tell, by its page, that the match
+// happened. Only the always-present ones count.
+describe("which help buttons count (cta_help_open)", () => {
+  const helpButtons = FILES.flatMap(({ path, text }) =>
+    [...text.matchAll(/<GetHelpNow\b([^>]*?)\/>/g)].map((m) => ({
+      path,
+      props: m[1],
+      testId: /testId=(?:"([^"]+)"|\{([a-zA-Z]+)\})/.exec(m[1])?.slice(1).find(Boolean) ?? "?",
+    })),
+  );
+  const counted = (b: { props: string }) => /\scounted(\s|=\{true\}|$)/.test(b.props);
+
+  const NEVER = ["import-get-help", "weekly-report-get-help", "reflect-get-help", "letter-open-help", "letter-help", "your-week-help", "past-report-get-help", "entry-library-help", "plan-get-help"];
+  const ALWAYS = [
+    "bo-get-help", "bo-get-help-typing", "bo-get-help-end", "editor-help", "entry-help", "insights-example-help", "insights-help", "review-get-help",
+    "appointment-get-help", "pdf-get-help", "letters-get-help", "me-get-help", "past-reports-get-help", "toolbox-get-help", "grounding-get-help",
+    "today-help", "print-get-help", "timeline-help", "day-help", "consent-get-help", "signup-get-help", "welcome-help",
+    "journal-unavailable-help", "session-ended-help",
+    // SignedOutHelp (sign-in, forgot password) passes its own testId through.
+    "testId",
+  ];
+
+  it("found them all, each on one of the two lists", () => {
+    expect(helpButtons.length).toBeGreaterThanOrEqual(35);
+    for (const b of helpButtons) expect([...NEVER, ...ALWAYS], `${b.path}: ${b.testId}`).toContain(b.testId);
+  });
+
+  it("a conditional one (crisis, hard week, hard days, the safety plan) never counts", () => {
+    const conditional = helpButtons.filter((b) => NEVER.includes(b.testId));
+    expect(new Set(conditional.map((b) => b.testId))).toEqual(new Set(NEVER));
+    for (const b of conditional) expect(counted(b), `${b.path}: ${b.testId}`).toBe(false);
+  });
+
+  it("an always-present one counts", () => {
+    for (const b of helpButtons.filter((x) => ALWAYS.includes(x.testId))) expect(counted(b), `${b.path}: ${b.testId}`).toBe(true);
   });
 });

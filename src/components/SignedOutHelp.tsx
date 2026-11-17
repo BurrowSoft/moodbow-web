@@ -10,7 +10,7 @@ export async function SignedOutHelp({ testId }: { testId: string }) {
   return (
     <NextIntlClientProvider messages={pickMessages(await getMessages(), ["me", "safety", "common"])}>
       <div className="mt-[24px] [font-size:min(1rem,max(10vw,32px))] [&_a]:min-h-[44px] [&_button]:min-h-[44px]">
-        <GetHelpNow country={null} testId={testId} neutral />
+        <GetHelpNow country={null} testId={testId} counted neutral />
       </div>
     </NextIntlClientProvider>
   );

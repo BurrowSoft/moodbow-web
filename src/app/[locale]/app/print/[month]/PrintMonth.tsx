@@ -34,7 +34,7 @@ export function PrintMonth({ month, title, days, dateLocaleTag, country }: { mon
       {/* Help on screen first, above a month of entries (the Reviewer, #273; UX):
           hidden on paper. */}
       <div className="mb-4 print:hidden">
-        <GetHelpNow country={country} testId="print-get-help" neutral />
+        <GetHelpNow country={country} testId="print-get-help" counted neutral />
       </div>
       <div className="flex flex-wrap items-center justify-between gap-4">
         {/* At most 36 px on a phone (decision 231) and never wider than the page (Web Tester, #274). */}

@@ -44,7 +44,7 @@ export default async function WelcomePage({ params }: PageProps<"/[locale]/welco
       <div className="absolute end-[16px] top-[16px]">
         {/* The card's words ("me", "safety") aren't in the public pages' client messages: only here. */}
         <NextIntlClientProvider locale={locale} messages={pickMessages(await getMessages(), ["common", "me", "safety"])}>
-          <GetHelpNow country={null} neutral icon testId="welcome-help" />
+          <GetHelpNow country={null} neutral icon testId="welcome-help" counted />
         </NextIntlClientProvider>
       </div>
       <div className="flex w-full max-w-[560px] flex-col items-center">

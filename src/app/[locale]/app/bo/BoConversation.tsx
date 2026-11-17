@@ -357,7 +357,7 @@ export function BoConversation({ initial, country, back, healthData = false, con
       <header ref={header} data-testid="bo-header" data-pinned={pinned ? "" : undefined} className={`flex flex-wrap items-center gap-x-[8px] gap-y-[4px] bg-bg py-[8px] ${pinned && !keyboard ? "sticky top-0 z-10" : ""}`}>
         {back && <div className="md:hidden">{back}</div>}
         <h1 ref={heading} tabIndex={-1} className="min-w-0 flex-1 font-medium leading-[1.33] text-text outline-none [font-size:min(1.5rem,max(10vw,24px,1rem))] [overflow-wrap:anywhere]">{t("screenLine")}</h1>
-        <GetHelpNow country={country} where={helpCountry} testId="bo-get-help" neutral />
+        <GetHelpNow country={country} where={helpCountry} testId="bo-get-help" counted neutral />
       </header>
       <p className="text-sm text-muted">
         {t("smallLine")}
@@ -452,7 +452,7 @@ export function BoConversation({ initial, country, back, healthData = false, con
           {keyboard && (
             <div ref={typingRow} data-testid="bo-typing-row" className="flex w-full flex-wrap items-center justify-between gap-x-[8px] gap-y-[2px]">
               <p className={`min-w-0 font-medium leading-tight text-text [overflow-wrap:anywhere] ${BO_END_TEXT}`}>{t("screenLine")}</p>
-              <GetHelpNow country={country} where={helpCountry} testId="bo-get-help-typing" className={BO_END_HELP} neutral />
+              <GetHelpNow country={country} where={helpCountry} testId="bo-get-help-typing" counted className={BO_END_HELP} neutral />
             </div>
           )}
           <textarea
@@ -520,7 +520,7 @@ export function BoConversation({ initial, country, back, healthData = false, con
           <p data-testid="bo-end-line" className={`min-w-0 font-medium leading-tight text-text [overflow-wrap:anywhere] ${BO_END_TEXT}`}>
             {t("screenLine")}
           </p>
-          <GetHelpNow country={country} where={helpCountry} testId="bo-get-help-end" className={BO_END_HELP} neutral />
+          <GetHelpNow country={country} where={helpCountry} testId="bo-get-help-end" counted className={BO_END_HELP} neutral />
         </div>
       )}
       {card && <SafetyCard country={country} where={helpCountry} onClose={closeCard} />}
