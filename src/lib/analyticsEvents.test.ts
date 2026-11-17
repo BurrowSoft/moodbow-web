@@ -155,9 +155,11 @@ describe("which help buttons count (cta_help_open)", () => {
   );
   const counted = (b: { props: string }) => /\scounted(\s|=\{true\}|$)/.test(b.props);
 
-  const NEVER = ["import-get-help", "weekly-report-get-help", "reflect-get-help", "letter-open-help", "letter-help", "your-week-help", "past-report-get-help", "entry-library-help", "plan-get-help"];
+  // Bo's typing and end rows sit inside the conversation, next to a crisis turn or after a crisis
+  // close (UX & PM's veto): never. Bo's header and Bo off count.
+  const NEVER = ["import-get-help", "weekly-report-get-help", "reflect-get-help", "letter-open-help", "letter-help", "your-week-help", "past-report-get-help", "entry-library-help", "plan-get-help", "bo-get-help-typing", "bo-get-help-end"];
   const ALWAYS = [
-    "bo-get-help", "bo-get-help-typing", "bo-get-help-end", "editor-help", "entry-help", "insights-example-help", "insights-help", "review-get-help",
+    "bo-get-help", "editor-help", "entry-help", "insights-example-help", "insights-help", "review-get-help",
     "appointment-get-help", "pdf-get-help", "letters-get-help", "me-get-help", "past-reports-get-help", "toolbox-get-help", "grounding-get-help",
     "today-help", "print-get-help", "timeline-help", "day-help", "consent-get-help", "signup-get-help", "welcome-help",
     "journal-unavailable-help", "session-ended-help",
