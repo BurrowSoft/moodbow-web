@@ -62,3 +62,20 @@ describe("Home's store line, with the App Store's id set", () => {
     expect(screen.getByTestId("home-stores").querySelector("a")).toBeNull();
   });
 });
+
+describe("Home's badges (UX & PM, 17 Nov): the official art from the App Store launch on", () => {
+  it("App Store live: badges, not text links, for both stores together", async () => {
+    met = ["play-live", "appstore-live"];
+    await renderHome();
+    expect(screen.getByTestId("home-badges")).toBeInTheDocument();
+    expect(screen.getByTestId("home-store-appstore").querySelector("img")).toHaveAttribute("src", "/badges/app-store-en.svg");
+    expect(screen.getByTestId("home-store-play").querySelector("img")).toHaveAttribute("src", "/badges/google-play-en.png");
+  });
+
+  it("Play alone: still the text link (the badges wait for the App Store)", async () => {
+    met = ["play-live"];
+    await renderHome();
+    expect(screen.queryByTestId("home-badges")).toBeNull();
+    expect(screen.getByTestId("home-store-play").querySelector("img")).toBeNull();
+  });
+});

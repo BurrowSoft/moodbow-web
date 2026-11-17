@@ -10,6 +10,7 @@ import { pageGate } from "@/lib/conditions";
 import { pageMetadata } from "@/lib/metadata";
 import { APP_STORE_URL, liveStores } from "@/lib/stores";
 import { PlayStoreLink } from "@/components/PlayStoreLink";
+import { StoreBadges } from "@/components/StoreBadges";
 import { GetHelpNow } from "@/components/SafetyCard";
 import { WelcomeSlides } from "./WelcomeSlides";
 
@@ -58,7 +59,12 @@ export default async function WelcomePage({ params }: PageProps<"/[locale]/welco
         {/* The app's stores, once each listing is public (decision 185, play-live / appstore-live):
             Home's words and links, on every device (the footer's button offers Play on Android
             phones only). Nothing before then: no "coming soon" on the way into the journal. */}
-        {(stores.play || stores.appStore) && (
+        {/* From the App Store launch, the official badges for both (UX & PM, 17 Nov). */}
+        {stores.appStore ? (
+          <div className="mt-10" data-testid="welcome-stores">
+            <StoreBadges stores={stores} locale={locale as Locale} labels={{ play: th("storeBadgePlay"), appStore: th("storeBadgeAppStore") }} testId="welcome" />
+          </div>
+        ) : stores.play && (
           <p className="mt-10 text-center leading-[1.429] [font-size:min(0.875rem,max(8.75vw,28px))] text-muted" data-testid="welcome-stores">
             {th("storeGetApp")}{" "}
             {stores.play && (
