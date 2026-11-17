@@ -34,7 +34,7 @@ export function StoreBadges({ stores, locale, labels, testId }: { stores: LiveSt
         </PlayStoreLink>
       )}
       {stores.appStore && APP_STORE_URL && (
-        <a href={APP_STORE_URL} data-testid={`${testId}-store-appstore`} className="inline-flex shrink-0 p-[10px]">
+        <a href={APP_STORE_URL} data-testid={`${testId}-store-appstore`} data-count="cta_store_appstore" className="inline-flex shrink-0 p-[10px]">
           {/* eslint-disable-next-line @next/next/no-img-element -- the brand's art as it is, no resizing pipeline */}
           <img src={appStoreBadge(locale)} alt={labels.appStore} width={APPLE_WIDTH[locale] ?? 120} height={APPLE_HEIGHT} className="block h-[40px] w-auto" />
         </a>

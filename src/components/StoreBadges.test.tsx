@@ -24,6 +24,9 @@ describe("StoreBadges", () => {
     expect(apple).toHaveAttribute("href", "https://apps.apple.com/app/id123");
     expect(apple.querySelector("img")).toHaveAttribute("src", "/badges/app-store-th.svg");
     expect(apple.querySelector("img")).toHaveAttribute("alt", "App Store");
+    // Counted as taps by name only (specs/analytics.md).
+    expect(apple).toHaveAttribute("data-count", "cta_store_appstore");
+    expect(screen.getByTestId("home-store-play")).toHaveAttribute("data-count", "cta_store_play");
     const play = screen.getByTestId("home-store-play");
     expect(play.getAttribute("href")).toMatch(/^https:\/\/play\.google\.com\/store\/apps\/details\?id=com\.burrowsoft\.moodbow/);
     expect(play.querySelector("img")).toHaveAttribute("src", "/badges/google-play-th.png");
