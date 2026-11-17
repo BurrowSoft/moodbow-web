@@ -16,7 +16,7 @@ vi.mock("@vercel/analytics/react", () => ({
 }));
 const { track } = vi.hoisted(() => ({ track: vi.fn() }));
 vi.mock("@vercel/analytics", async (original) => ({ ...(await original<typeof import("@vercel/analytics")>()), track }));
-const { VisitCounts, SETTLE_LIMIT_MS, browserSaysNo } = await import("./VisitCounts");
+const { VisitCounts, SETTLE_LIMIT_MS, browserSaysNo, draftOptedIn } = await import("./VisitCounts");
 const { countTap } = await import("@/lib/analyticsEvents");
 
 const last = () => seen[seen.length - 1];
@@ -199,5 +199,35 @@ describe("VisitCounts: taps", () => {
     expect(track).not.toHaveBeenCalled();
     add2({ "data-count": "language_switch", "data-count-locale": "th" });
     expect(track).toHaveBeenCalledWith("language_switch", { locale: "th" });
+  });
+});
+
+describe("VisitCounts: the draft counter on test builds (tester rows)", () => {
+  afterEach(() => {
+    window.history.replaceState(null, "", "/");
+    sessionStorage.clear();
+  });
+
+  it("off unless the tab opted in with ?analytics-draft=1, then kept for the tab", async () => {
+    const view = render(<VisitCounts draft />);
+    await flush();
+    expect(seen).toEqual([]);
+    view.unmount();
+    window.history.replaceState(null, "", "/help/getting-started?analytics-draft=1");
+    const on = render(<VisitCounts draft />);
+    await flush();
+    expect(last()).toEqual({ route: "/help/[slug]", path: pathname });
+    on.unmount();
+    window.history.replaceState(null, "", "/support");
+    seen.length = 0;
+    render(<VisitCounts draft />);
+    await flush();
+    expect(seen.length).toBeGreaterThan(0);
+  });
+
+  it("any other value: off", () => {
+    expect(draftOptedIn("?analytics-draft=yes")).toBe(false);
+    expect(draftOptedIn("")).toBe(false);
+    expect(draftOptedIn("?analytics-draft=1")).toBe(true);
   });
 });

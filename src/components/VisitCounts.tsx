@@ -26,13 +26,33 @@ export function browserSaysNo(nav: Navigator & { globalPrivacyControl?: boolean 
   return nav.globalPrivacyControl === true || nav.doNotTrack === "1";
 }
 
+// Test builds only (draft, UX & PM: a tester row before the merge): the
+// counter stays off unless the tab was opened with ?analytics-draft=1, kept
+// for the tab's later pages. Production never renders a draft counter (the
+// layout), and the scrubber drops the query like any other.
+export const DRAFT_PARAM = "analytics-draft";
+export function draftOptedIn(search: string = location.search): boolean {
+  if (new URLSearchParams(search).get(DRAFT_PARAM) === "1") {
+    try {
+      sessionStorage.setItem(DRAFT_PARAM, "1");
+    } catch {
+      // storage off: this page only
+    }
+    return true;
+  }
+  try {
+    return sessionStorage.getItem(DRAFT_PARAM) === "1";
+  } catch {
+    return false;
+  }
+}
+
 const noSubscribe = () => () => {};
-const browserSaysYes = () => !browserSaysNo();
 const notOnServer = () => false;
 
-export function VisitCounts() {
+export function VisitCounts({ draft = false }: { draft?: boolean }) {
   // Read in the browser only: the server's render (and hydration) has no counter.
-  const allowed = useSyncExternalStore(noSubscribe, browserSaysYes, notOnServer);
+  const allowed = useSyncExternalStore(noSubscribe, () => !browserSaysNo() && (!draft || draftOptedIn()), notOnServer);
   useEffect(() => {
     if (!allowed) return;
     setTapsOn(true);

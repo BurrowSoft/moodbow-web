@@ -13,7 +13,7 @@ import { CampaignLanding } from "@/components/CampaignLanding";
 import { VisitCounts } from "@/components/VisitCounts";
 import { THEME_PRE_PAINT } from "@/lib/appearance";
 import { PALETTE_PRE_PAINT } from "@/lib/plus/palettes";
-import { conditionMet } from "@/lib/conditions";
+import { conditionMet, draftsAllowed } from "@/lib/conditions";
 import { NONCE_HEADER } from "@/lib/csp";
 import { RequestCountryProvider } from "@/components/RequestCountry";
 import { usableCountry } from "@/lib/region/requestCountry";
@@ -95,9 +95,10 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
         </RequestCountryProvider>
         {/* Cookie-free usage counts (decision 79, specs/analytics.md): only
             once the privacy policy says so, in the same deploy
-            ("web-analytics"), and only on production: previews and test
-            builds send nothing. */}
-        {conditionMet("web-analytics") && process.env.VERCEL_ENV === "production" && <VisitCounts />}
+            ("web-analytics"), and only on production. A test build (a
+            Preview, CI) has a draft counter for tester rows, off unless the
+            tab opts in with ?analytics-draft=1; production never has it. */}
+        {conditionMet("web-analytics") && process.env.VERCEL_ENV === "production" ? <VisitCounts /> : draftsAllowed() ? <VisitCounts draft /> : null}
       </body>
     </html>
   );
