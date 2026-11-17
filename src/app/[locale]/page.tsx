@@ -9,6 +9,7 @@ import { pageMetadata } from "@/lib/metadata";
 import { notifyMailto } from "@/lib/site";
 import { APP_STORE_URL, liveStores } from "@/lib/stores";
 import { PlayStoreLink } from "@/components/PlayStoreLink";
+import { StoreBadges } from "@/components/StoreBadges";
 import { hasSecurityUpdate } from "@/lib/securityUpdate";
 import { jsonLdText, softwareApplication } from "@/lib/jsonLd";
 
@@ -99,10 +100,16 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
           </>
         )}
         {/* Per store, once its listing is live (decision 185): neutral text
-            links (the badge art waits for the listings), the other store's
-            "coming soon"; neither live, the joint line. */}
+            links, the other store's "coming soon"; neither live, the joint
+            line. From the App Store launch (appstore-live), the official
+            badges for both stores (UX & PM, 17 Nov; components/StoreBadges). */}
         <div className="mt-6 leading-[1.429] [font-size:min(0.875rem,max(8.75vw,28px))] text-muted" data-testid="home-stores">
-          {stores.play || stores.appStore ? (
+          {stores.appStore ? (
+            <>
+              <StoreBadges stores={stores} locale={locale as Locale} labels={{ play: t("storeGooglePlay"), appStore: t("storeAppStore") }} testId="home" />
+              {!stores.play && <p className="mt-1">{t("storeSoonPlay")}</p>}
+            </>
+          ) : stores.play ? (
             <>
               <p>
                 {t("storeGetApp")}{" "}
