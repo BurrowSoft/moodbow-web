@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
-import { pickMessages } from "@/i18n/clientMessages";
+import { helpCardMessages } from "@/i18n/clientMessages";
 import type { Locale } from "@/i18n/routing";
 import { Logo } from "@/components/Logo";
 import { pageGate } from "@/lib/conditions";
@@ -44,7 +44,7 @@ export default async function WelcomePage({ params }: PageProps<"/[locale]/welco
           card once scripts run. No account yet, so the numbers follow this request's country. */}
       <div className="absolute end-[16px] top-[16px]">
         {/* The card's words ("me", "safety") aren't in the public pages' client messages: only here. */}
-        <NextIntlClientProvider locale={locale} messages={pickMessages(await getMessages(), ["common", "me", "safety"])}>
+        <NextIntlClientProvider locale={locale} messages={helpCardMessages(await getMessages())}>
           <GetHelpNow country={null} neutral icon testId="welcome-help" counted />
         </NextIntlClientProvider>
       </div>

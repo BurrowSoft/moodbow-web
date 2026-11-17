@@ -3,7 +3,7 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 import { describe, expect, it } from "vitest";
 import messages from "@/messages/en.json";
-import { pickMessages, PUBLIC_CLIENT_NAMESPACES } from "./clientMessages";
+import { HELP_CARD_ME_KEYS, helpCardMessages, pickMessages, PUBLIC_CLIENT_NAMESPACES } from "./clientMessages";
 
 // The guard for perf fix 3: outside the journal only PUBLIC_CLIENT_NAMESPACES
 // reach the browser, so every client component that can render there must
@@ -49,6 +49,19 @@ describe("the messages sent outside the journal", () => {
       expect(importers.length, c).toBeGreaterThan(0);
       expect(importers.filter((f) => !f.startsWith(JOURNAL)).map((f) => relative(SRC, f).replaceAll(sep, "/")).filter((f) => !allowed.has(`${c}:${f}`)), c).toEqual([]);
     }
+  });
+
+  it("the help card's messages: safety, common and only the `me` strings the button uses (the Reviewer's LOW)", () => {
+    const picked = helpCardMessages(messages);
+    expect(Object.keys(picked).sort()).toEqual(["common", "me", "safety"]);
+    expect(Object.keys(picked.me as object)).toEqual([...HELP_CARD_ME_KEYS]);
+    for (const k of HELP_CARD_ME_KEYS) expect(messages.me, k).toHaveProperty(k);
+    // All of `me` was the bulk of what these pages sent for the card.
+    const before = JSON.stringify(pickMessages(messages, ["me", "safety", "common"])).length;
+    expect(JSON.stringify(picked).length).toBeLessThan(before / 2);
+    // And no public page builds its own card provider any more.
+    const own = all.filter((f) => /pickMessages\(await getMessages\(\), \[[^\]]*"me"/.test(readFileSync(f, "utf8")));
+    expect(own.map((f) => relative(SRC, f))).toEqual([]);
   });
 
   it("every listed namespace exists; pickMessages keeps only those", () => {
