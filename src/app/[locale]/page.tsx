@@ -108,7 +108,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
         <div className="mt-6 leading-[1.429] [font-size:min(0.875rem,max(8.75vw,28px))] text-muted" data-testid="home-stores">
           {stores.appStore ? (
             <>
-              <StoreBadges stores={stores} locale={locale as Locale} labels={{ play: t("storeGooglePlay"), appStore: t("storeAppStore") }} testId="home" />
+              <StoreBadges stores={stores} locale={locale as Locale} labels={{ play: t("storeBadgePlay"), appStore: t("storeBadgeAppStore") }} testId="home" />
               {!stores.play && <p className="mt-1">{t("storeSoonPlay")}</p>}
             </>
           ) : stores.play ? (

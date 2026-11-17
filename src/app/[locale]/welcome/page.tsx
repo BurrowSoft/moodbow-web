@@ -62,7 +62,7 @@ export default async function WelcomePage({ params }: PageProps<"/[locale]/welco
         {/* From the App Store launch, the official badges for both (UX & PM, 17 Nov). */}
         {stores.appStore ? (
           <div className="mt-10" data-testid="welcome-stores">
-            <StoreBadges stores={stores} locale={locale as Locale} labels={{ play: th("storeGooglePlay"), appStore: th("storeAppStore") }} testId="welcome" />
+            <StoreBadges stores={stores} locale={locale as Locale} labels={{ play: th("storeBadgePlay"), appStore: th("storeBadgeAppStore") }} testId="welcome" />
           </div>
         ) : stores.play && (
           <p className="mt-10 text-center leading-[1.429] [font-size:min(0.875rem,max(8.75vw,28px))] text-muted" data-testid="welcome-stores">

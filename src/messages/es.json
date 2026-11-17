@@ -53,6 +53,8 @@
     "storeGetApp": "Descarga la app:",
     "storeGooglePlay": "Google Play",
     "storeAppStore": "App Store",
+    "storeBadgeAppStore": "Consíguelo en el App Store",
+    "storeBadgePlay": "Disponible en Google Play",
     "storeSoonPlay": "Muy pronto en Google Play",
     "storeSoonAppStore": "Muy pronto en el App Store",
     "featureCheckInTitle": "Un registro de 10 segundos",
