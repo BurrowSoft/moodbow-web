@@ -53,9 +53,9 @@ export default async function SharedWeekPage({ params }: PageProps<"/[locale]/s"
   });
   return (
     <div className="mx-auto max-w-xl space-y-6 px-[16px] py-[32px]">
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
         <span className="font-semibold text-accent">{(await getTranslations("meta"))("siteName")}</span>
-        <Link href="/" data-testid="shared-what-is" className="inline-flex min-h-[44px] items-center text-sm font-medium text-accent underline underline-offset-4">
+        <Link href="/" data-testid="shared-what-is" className="inline-flex min-h-[44px] min-w-0 max-w-full items-center text-sm font-medium text-accent underline underline-offset-4 [overflow-wrap:anywhere]">
           {t("whatIs")}
         </Link>
       </div>
