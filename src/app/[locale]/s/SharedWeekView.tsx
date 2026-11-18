@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { MOOD_HEX } from "@/lib/share/moodbow";
+import { fill, WeekSummary } from "./WeekSummary";
 
 // The shared-week viewer (1.4 G; plans/PLAN-trusted-share.md §4; board 28b with UX's copy, 18 Nov).
 // - Nothing is fetched until "Show the week" is tapped (UX, the Reviewer's item 7), so link
@@ -31,7 +31,6 @@ export type SharedWeekStrings = {
 };
 type Week = { first_name: string | null; week_start: string; days: { date: string; mood: number | null }[]; check_ins: number; routine?: { name: string; percent: number | null }[]; weeks_available?: number };
 
-const fill = (template: string, values: Record<string, string>) => template.replace(/\{(\w+)\}/g, (_, k: string) => values[k] ?? "");
 
 function readToken(): string | null {
   const hash = window.location.hash.replace(/^#/, "");
@@ -78,10 +77,6 @@ export function SharedWeekView({ strings, locale, help, footer }: { strings: Sha
     void load(0, t);
   };
 
-  const dayFormat = new Intl.DateTimeFormat(locale, { weekday: "short", timeZone: "UTC" });
-  const dayLong = new Intl.DateTimeFormat(locale, { weekday: "long", timeZone: "UTC" });
-  const dateFormat = new Intl.DateTimeFormat(locale, { day: "numeric", month: "long", timeZone: "UTC" });
-  const at = (iso: string) => new Date(`${iso}T00:00:00Z`);
   const heading = week ? (week.first_name ? fill(strings.titleNamed, { name: week.first_name }) : strings.titleAnon) : strings.titleBefore;
 
   return (
@@ -107,34 +102,7 @@ export function SharedWeekView({ strings, locale, help, footer }: { strings: Sha
       )}
       {week && state !== "unavailable" && (
         <section aria-labelledby="shared-week-title" data-testid="shared-week" className="space-y-4 rounded-3xl bg-surface px-[18px] py-[18px]">
-          <h2 id="shared-week-title" className="text-base font-semibold text-text">
-            {fill(strings.weekOf, { date: dateFormat.format(at(week.week_start)) })}
-          </h2>
-          <ol className="grid grid-cols-7 gap-[6px]" data-testid="shared-days">
-            {week.days.map((d) => (
-              <li key={d.date} className="flex flex-col items-center gap-[4px]">
-                <span aria-hidden="true" className="text-xs text-muted">
-                  {dayFormat.format(at(d.date))}
-                </span>
-                <span
-                  aria-hidden="true"
-                  className={`block h-[32px] w-full rounded-lg ${d.mood === null ? "border border-dashed border-border" : ""}`}
-                  style={d.mood === null ? undefined : { backgroundColor: MOOD_HEX[d.mood - 1] }}
-                />
-                <span className="sr-only">{d.mood === null ? fill(strings.dayNone, { day: dayLong.format(at(d.date)) }) : `${dayLong.format(at(d.date))}: ${strings.moods[d.mood - 1]}`}</span>
-              </li>
-            ))}
-          </ol>
-          <p data-testid="shared-count" className="text-text">
-            {week.check_ins === 0 ? strings.none : strings.checkIns[Math.min(week.check_ins, 7)]}
-          </p>
-          {week.routine && week.routine.length > 0 && (
-            <ul className="space-y-1 text-text [overflow-wrap:anywhere]" data-testid="shared-routine">
-              {week.routine.map((r, i) => (
-                <li key={i}>{r.percent === null ? fill(strings.routineNotEnough, { name: r.name }) : fill(strings.routinePercent, { name: r.name, percent: String(r.percent) })}</li>
-              ))}
-            </ul>
-          )}
+          <WeekSummary week={week} strings={strings} locale={locale} headingId="shared-week-title" />
           <div className="flex flex-wrap justify-between gap-3">
             <button type="button" data-testid="shared-earlier" disabled={index >= (week.weeks_available ?? 3) || noEarlier || state === "loading"} onClick={() => void load(index + 1, null)} className="inline-flex min-h-[44px] items-center rounded-full border border-border px-[16px] font-medium text-text disabled:opacity-40">
               {strings.earlier}
