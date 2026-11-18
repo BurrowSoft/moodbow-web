@@ -39,7 +39,7 @@ import { readCardRoutine } from "@/lib/journal/routineData";
 import { GetHelpNow } from "@/components/SafetyCard";
 import { previewToday, previewTodayQuery } from "@/lib/journal/previewToday";
 import { reviewYear, yearCardIsNew, yearCardShows } from "@/lib/journal/yearReview";
-import { YearTodayCard } from "./year/YearLink";
+import { YearTodayCard } from "./year/YearTodayCard";
 
 // A stuck request ends here at the latest (UX, the timeout audit); each
 // data call gives up after 15 s on its own (lib/supabase/deadline).
@@ -223,7 +223,7 @@ export default async function TodayPage({ params, searchParams }: PageProps<"/[l
           so its hard-week help is high) → Plus card → setup/reminder offer → things that help →
           a letter → entries → Write last. */}
       {yourWeekCard}
-      {yearCard && <YearTodayCard year={yearCard.year} query={yearCard.query} isNew={yearCard.isNew} />}
+      {yearCard && <YearTodayCard uid={user.id} year={yearCard.year} query={yearCard.query} isNew={yearCard.isNew} />}
       {plusCard && plusPage && <TodayPlusCard trial={plusCard.trial} price={plusPage.price} offer={plusPage.offer} date={me.today} />}
       {setupLater && <SetupLaterCard />}
       {toolboxOn && <ToolboxCard uid={user.id} today={me.today} todayMood={(data as CheckIn | null)?.mood ?? null} items={toolbox} />}
