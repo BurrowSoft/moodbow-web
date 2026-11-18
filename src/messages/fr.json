@@ -564,7 +564,7 @@
     "pairWritingTitle": "Écriture",
     "pairWrote": "Avec écriture",
     "pairNotWrote": "Sans écriture",
-    "showedUp": "{count, plural, one {Vous avez été là # jour} other {Vous avez été là # jours}} {range, select, week {cette semaine} month {ce mois-ci} threeMonths {ces 3 derniers mois} year {ces 12 derniers mois} other {depuis vos débuts}}."
+    "showedUp": "{count, plural, one {Vous avez été là # jour} other {Vous avez été là # jours}} {range, select, week {ces 7 derniers jours} month {ces 30 derniers jours} threeMonths {ces 3 derniers mois} year {ces 12 derniers mois} other {depuis vos débuts}}."
   },
   "share": {
     "shareButton": "Partager",

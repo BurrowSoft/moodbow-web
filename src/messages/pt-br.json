@@ -564,7 +564,7 @@
     "pairWritingTitle": "Escrita",
     "pairWrote": "Com escrita",
     "pairNotWrote": "Sem escrita",
-    "showedUp": "{count, plural, one {Você apareceu em # dia} other {Você apareceu em # dias}} {range, select, week {nesta semana} month {neste mês} threeMonths {nos últimos 3 meses} year {nos últimos 12 meses} other {desde que começou}}."
+    "showedUp": "{count, plural, one {Você apareceu em # dia} other {Você apareceu em # dias}} {range, select, week {nos últimos 7 dias} month {nos últimos 30 dias} threeMonths {nos últimos 3 meses} year {nos últimos 12 meses} other {desde que começou}}."
   },
   "share": {
     "shareButton": "Compartilhar",

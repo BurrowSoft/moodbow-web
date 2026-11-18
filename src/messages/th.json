@@ -564,7 +564,7 @@
     "pairWritingTitle": "การเขียน",
     "pairWrote": "ได้เขียน",
     "pairNotWrote": "ไม่ได้เขียน",
-    "showedUp": "{count, plural, other {คุณมาบันทึก # วัน}}{range, select, week {ในสัปดาห์นี้} month {ในเดือนนี้} threeMonths {ใน 3 เดือนที่ผ่านมา} year {ใน 12 เดือนที่ผ่านมา} other {ตั้งแต่เริ่มใช้}}"
+    "showedUp": "{count, plural, other {คุณมาบันทึก # วัน}}{range, select, week {ใน 7 วันที่ผ่านมา} month {ใน 30 วันที่ผ่านมา} threeMonths {ใน 3 เดือนที่ผ่านมา} year {ใน 12 เดือนที่ผ่านมา} other {ตั้งแต่เริ่มใช้}}"
   },
   "share": {
     "shareButton": "แชร์",

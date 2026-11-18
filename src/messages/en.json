@@ -564,7 +564,7 @@
     "pairWritingTitle": "Writing",
     "pairWrote": "Wrote",
     "pairNotWrote": "Didn't write",
-    "showedUp": "{count, plural, one {You showed up on # day} other {You showed up on # days}} {range, select, week {this week} month {this month} threeMonths {in the last 3 months} year {in the last 12 months} other {since you started}}."
+    "showedUp": "{count, plural, one {You showed up on # day} other {You showed up on # days}} {range, select, week {in the last 7 days} month {in the last 30 days} threeMonths {in the last 3 months} year {in the last 12 months} other {since you started}}."
   },
   "share": {
     "shareButton": "Share",

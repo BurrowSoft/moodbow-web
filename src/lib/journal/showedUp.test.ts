@@ -5,10 +5,10 @@ import { describe, expect, it } from "vitest";
 import contract from "./showedUp.contract.json";
 import { SHOWED_UP_RANGES, showedUp, showedUpShown, windowStart } from "./showedUp";
 
-describe("Days you showed up: the app's contract (moodbow-app #252, f1d2a8d2)", () => {
+describe("Days you showed up: the app's contract (moodbow-app #252, copy fix 18 Nov: week and month rolling)", () => {
   it("is the app's file, byte for byte", () => {
     const bytes = readFileSync(join(__dirname, "showedUp.contract.json"));
-    expect(createHash("sha256").update(bytes).digest("hex")).toBe("2082ee8fe29bc6786ee3c1b2f5fc73d2ad181f9426c53c43aaede262a43685e2");
+    expect(createHash("sha256").update(bytes).digest("hex")).toBe("e2c29ac5c265f46d705d595269ef84cccb792b8d47ec8adaeb990378c3c4db8b");
   });
 
   it("names the same ranges", () => {

@@ -564,7 +564,7 @@
     "pairWritingTitle": "Escritura",
     "pairWrote": "Con escritura",
     "pairNotWrote": "Sin escritura",
-    "showedUp": "{count, plural, one {Volviste # día} other {Volviste # días}} {range, select, week {esta semana} month {este mes} threeMonths {en los últimos 3 meses} year {en los últimos 12 meses} other {desde que empezaste}}."
+    "showedUp": "{count, plural, one {Volviste # día} other {Volviste # días}} {range, select, week {en los últimos 7 días} month {en los últimos 30 días} threeMonths {en los últimos 3 meses} year {en los últimos 12 meses} other {desde que empezaste}}."
   },
   "share": {
     "shareButton": "Compartir",

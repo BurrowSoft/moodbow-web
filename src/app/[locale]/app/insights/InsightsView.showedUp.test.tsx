@@ -26,8 +26,8 @@ const view = (showedUp: { count: number; range: ShowedUpRange } | undefined, loc
 describe("Days you showed up on Insights (1.4 C)", () => {
   it("the shown range's count, in its words", () => {
     const cases: [number, ShowedUpRange, string][] = [
-      [1, "week", "You showed up on 1 day this week."],
-      [14, "month", "You showed up on 14 days this month."],
+      [1, "week", "You showed up on 1 day in the last 7 days."],
+      [14, "month", "You showed up on 14 days in the last 30 days."],
       [40, "threeMonths", "You showed up on 40 days in the last 3 months."],
       [200, "year", "You showed up on 200 days in the last 12 months."],
       [1200, "all", "You showed up on 1,200 days since you started."],
@@ -49,7 +49,7 @@ describe("Days you showed up on Insights (1.4 C)", () => {
 
   it("German puts the range first, as the app does", () => {
     view({ count: 14, range: "month" }, "de", de);
-    expect(screen.getByTestId("insights-showed-up").textContent).toBe("Diesen Monat warst du an 14 Tagen da.");
+    expect(screen.getByTestId("insights-showed-up").textContent).toBe("In den letzten 30 Tagen warst du an 14 Tagen da.");
   });
 
   it("no line while its condition is off", () => {

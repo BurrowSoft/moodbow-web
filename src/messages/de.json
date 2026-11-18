@@ -564,7 +564,7 @@
     "pairWritingTitle": "Schreiben",
     "pairWrote": "Geschrieben",
     "pairNotWrote": "Nicht geschrieben",
-    "showedUp": "{range, select, week {Diese Woche} month {Diesen Monat} threeMonths {In den letzten 3 Monaten} year {In den letzten 12 Monaten} other {Seit du angefangen hast,}} {count, plural, one {warst du an # Tag da} other {warst du an # Tagen da}}."
+    "showedUp": "{range, select, week {In den letzten 7 Tagen} month {In den letzten 30 Tagen} threeMonths {In den letzten 3 Monaten} year {In den letzten 12 Monaten} other {Seit du angefangen hast,}} {count, plural, one {warst du an # Tag da} other {warst du an # Tagen da}}."
   },
   "share": {
     "shareButton": "Teilen",

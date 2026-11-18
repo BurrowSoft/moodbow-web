@@ -3151,7 +3151,7 @@
   },
   {
     "key": "insights.showedUp",
-    "en": "{count, plural, one {You showed up on # day} other {You showed up on # days}} {range, select, week {this week} month {this month} threeMonths {in the last 3 months} year {in the last 12 months} other {since you started}}.",
+    "en": "{count, plural, one {You showed up on # day} other {You showed up on # days}} {range, select, week {in the last 7 days} month {in the last 30 days} threeMonths {in the last 3 months} year {in the last 12 months} other {since you started}}.",
     "reason": "UX draft (native read pending; the app's Thai, moodbow-app #252)"
   },
   {
