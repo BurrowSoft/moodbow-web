@@ -1057,7 +1057,8 @@
     "next": "Next",
     "position": "Screen {n} of {total}",
     "shareNote": "The image shows your colours and the number of days. Your entries, tags, moments and dates are never on it.",
-    "daysUnit": "{count, plural, one {day} other {days}}"
+    "daysUnit": "{count, plural, one {day} other {days}}",
+    "new": "New"
   },
   "sounds": {
     "title": "Calming sounds",

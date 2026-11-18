@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import contract from "./yearReview.contract.json";
-import { cardMonths, firstMiddleLast, insightsRowYear, monthMoods, yearCardOnToday, yearReview, YEAR_REVIEW_RULES, type YearReviewInput } from "./yearReview";
+import { cardMonths, firstMiddleLast, insightsRowYear, monthMoods, yearCardIsNew, yearCardOnToday, yearCardShows, yearReview, YEAR_REVIEW_RULES, type YearReviewInput } from "./yearReview";
 import type { InsightRow } from "./insights";
 import { yearBands } from "../share/year";
 import { MOOD_HEX } from "../share/moodbow";
@@ -34,6 +34,21 @@ describe("year review contract (draft for moodbow-app)", () => {
   for (const t of contract.onToday) {
     it(`Today's card on ${t.today}: ${t.shows}`, () => expect(yearCardOnToday(t.today)).toBe(t.shows));
   }
+
+  // UX, 19 Nov: never on a crisis-flagged day (help, not a look-back), nor when that can't be
+  // checked; a hard week alone doesn't hide it. "New" from 1 to 7 December only.
+  it("Today's card: hidden on a flagged day or an unchecked one; shown otherwise in its season", () => {
+    expect(yearCardShows("2026-12-03", false)).toBe(true);
+    expect(yearCardShows("2026-12-03", true)).toBe(false);
+    expect(yearCardShows("2026-12-03", null)).toBe(false);
+    expect(yearCardShows("2027-01-31", false)).toBe(true);
+    expect(yearCardShows("2026-11-30", false)).toBe(false);
+  });
+
+  it('"New" for the first week of December only', () => {
+    expect(["2026-12-01", "2026-12-07"].map(yearCardIsNew)).toEqual([true, true]);
+    expect(["2026-11-30", "2026-12-08", "2027-01-03"].map(yearCardIsNew)).toEqual([false, false, false]);
+  });
 });
 
 describe("year review safety", () => {

@@ -5,12 +5,18 @@ import { JOURNAL_CARD } from "@/lib/ui/journalLayout";
 // The ways into Your year in Moodbow (1.4 A): Today's card (1 December to 31 January) and the row at
 // the top of Insights (always, on the Plus view and the Free example alike). `query` carries a
 // Preview's ?today= to the page (lib/journal/previewToday); it's empty everywhere else.
-export async function YearTodayCard({ year, query }: { year: number; query: string }) {
+// isNew: a small "New" label its first week, 1 to 7 December (UX, 19 Nov), read before the title.
+export async function YearTodayCard({ year, query, isNew = false }: { year: number; query: string; isNew?: boolean }) {
   const t = await getTranslations("year");
   return (
     <section aria-labelledby="year-card-title" data-testid="year-today-card" className={JOURNAL_CARD}>
-      <h2 id="year-card-title" className="text-lg font-medium text-text">
-        {t("title")}
+      <h2 id="year-card-title" className="flex flex-wrap items-center gap-x-[8px] gap-y-[4px] text-lg font-medium text-text">
+        {isNew && (
+          <span data-testid="year-today-new" className="rounded-full border border-accent px-[8px] text-sm font-medium text-accent">
+            {t("new")}
+          </span>
+        )}
+        <span className="min-w-0 [overflow-wrap:anywhere]">{t("title")}</span>
       </h2>
       <p className="mt-1 text-muted">{t("todayLine", { year })}</p>
       <Link

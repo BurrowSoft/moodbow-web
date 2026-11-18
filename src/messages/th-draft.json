@@ -3378,5 +3378,10 @@
     "key": "today.lateNote",
     "en": "It's late. Rest matters too. If tonight feels heavy, help is one tap away.",
     "reason": "UX draft (native read pending; the app's Thai, moodbow-app #257 6d1ff0f6)"
+  },
+  {
+    "key": "year.new",
+    "en": "New",
+    "reason": "UX draft (native read pending; Web Dev first draft 19 Nov, for the Reviewer's check)"
   }
 ]

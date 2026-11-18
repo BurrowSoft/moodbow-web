@@ -1057,7 +1057,8 @@
     "next": "Avanti",
     "position": "Schermata {n} di {total}",
     "shareNote": "L'immagine mostra i tuoi colori e il numero di giorni. Le tue pagine, i tag, i momenti e le date non ci sono mai.",
-    "daysUnit": "{count, plural, one {giorno} other {giorni}}"
+    "daysUnit": "{count, plural, one {giorno} other {giorni}}",
+    "new": "Nuovo"
   },
   "sounds": {
     "title": "Suoni rilassanti",
