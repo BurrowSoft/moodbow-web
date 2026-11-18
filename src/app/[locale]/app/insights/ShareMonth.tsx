@@ -14,6 +14,11 @@ import { loadMonthCheckIns, loadYearCheckIns } from "./shareActions";
 import { YEAR_MIN_MONTHS, yearBands, yearFileName } from "@/lib/share/year";
 import type { MonthCheckIn } from "@/lib/share/moodbow";
 import { countTap } from "@/lib/analyticsEvents";
+import { pageGate } from "@/lib/conditions";
+
+// Days you showed up (1.4 C, showed-up-live): the cards' count line becomes "Showed up on n days",
+// one family with Insights' line (UX 18 Nov); before that, "n days journaled" as today.
+const daysKey = pageGate("showed-up-live") !== "hidden" ? "shareShowedUp" : "shareDaysJournaled";
 
 // "My month's moodbow" (M10, specs/m10-share-card.md): preview first,
 // always. The card is drawn here in the browser from the month's moods and
@@ -133,12 +138,12 @@ export function ShareMonth({
   const chartPoints = chart ? chart.moods.filter((m) => m !== null).length : 0;
   const card =
     type === "year" && yearCard && year !== null
-      ? { ready: yearOn, title: t("shareYearTitle", { year }), days: t("shareDaysJournaled", { n: yearCard.days }), colours: yearCard.colours, file: yearFileName(year), label: t("shareYear") }
+      ? { ready: yearOn, title: t("shareYearTitle", { year }), days: t(daysKey, { n: yearCard.days }), colours: yearCard.colours, file: yearFileName(year), label: t("shareYear") }
       : type === "chart" && chart
-      ? { ready: chartPoints >= MIN_POINTS, title: t(RANGE_KEYS[chart.range]), days: t("shareDaysJournaled", { n: chartPoints }), colours: [] as string[], file: `moodbow-chart-${chart.range}.png`, label: t("shareChart") }
+      ? { ready: chartPoints >= MIN_POINTS, title: t(RANGE_KEYS[chart.range]), days: t(daysKey, { n: chartPoints }), colours: [] as string[], file: `moodbow-chart-${chart.range}.png`, label: t("shareChart") }
       : type === "milestone" && milestone
         ? { ready: true, title: t("shareMilestoneText", { n: milestone.n }), days: "", colours: milestone.colours, file: `moodbow-${milestone.n}-days.png`, label: t("shareMilestone") }
-        : { ready: enough, title: formatMonth(month, dateLocaleTag), days: colours ? t("shareDaysJournaled", { n: colours.length }) : "", colours: colours ?? [], file: cardFileName(month), label: t("shareMoodbow") };
+        : { ready: enough, title: formatMonth(month, dateLocaleTag), days: colours ? t(daysKey, { n: colours.length }) : "", colours: colours ?? [], file: cardFileName(month), label: t("shareMoodbow") };
   // What the card draws, as one value: a redraw whenever any of it changes
   // (card itself is a new object each render, reviewer #72).
   const drawKey = [type, card.title, card.days, card.colours.join(), type === "chart" ? (chart?.moods.join() ?? "") : ""].join("|");

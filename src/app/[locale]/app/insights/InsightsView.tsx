@@ -1,4 +1,5 @@
 import { useLocale, useTranslations } from "next-intl";
+import type { ShowedUpRange } from "@/lib/journal/showedUp";
 import { Link } from "@/i18n/navigation";
 import { CHARTS, METRICS, summarize, type InsightRow, type Metric, type Range } from "@/lib/journal/insights";
 import type { Pattern, PatternId } from "@/lib/journal/patterns";
@@ -49,6 +50,7 @@ export function InsightsView({
   plusTab,
   plusPatterns,
   long,
+  showedUp,
 }: {
   rows: InsightRow[];
   today: string;
@@ -66,6 +68,9 @@ export function InsightsView({
   // point per month or quarter (lib/plus/longRange). periodLine: the first and
   // last period in the browser's own month or quarter names.
   long?: { range: LongRange; unit: Unit; periodLine: string; charts: Record<Metric, LongSummary> };
+  // Days you showed up (1.4 C, lib/journal/showedUp): the shown range's count, said as a count only,
+  // never a streak. Absent where its condition is off.
+  showedUp?: { count: number; range: ShowedUpRange };
 }) {
   const tp = useTranslations("plus");
   const t = useTranslations("insights");
@@ -112,6 +117,11 @@ export function InsightsView({
         ))}
         {plusTab}
       </nav>
+      {showedUp && (
+        <p data-testid="insights-showed-up" className="mt-4 text-text">
+          {t("showedUp", { count: showedUp.count, range: showedUp.range })}
+        </p>
+      )}
 
       {week}
 

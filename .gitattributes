@@ -1,3 +1,4 @@
 content/contracts/** -text
 src/lib/import/fixtures/import-cases.json -text
 public/badges/** -text
+src/lib/journal/showedUp.contract.json -text

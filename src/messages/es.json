@@ -563,7 +563,8 @@
     "pairWeekends": "Fines de semana",
     "pairWritingTitle": "Escritura",
     "pairWrote": "Con escritura",
-    "pairNotWrote": "Sin escritura"
+    "pairNotWrote": "Sin escritura",
+    "showedUp": "{count, plural, one {Volviste # día} other {Volviste # días}} {range, select, week {esta semana} month {este mes} threeMonths {en los últimos 3 meses} year {en los últimos 12 meses} other {desde que empezaste}}."
   },
   "share": {
     "shareButton": "Compartir",
@@ -597,7 +598,8 @@
     "shareLoading": "Preparando tu mes…",
     "shareFormat": "Formato",
     "shareTheme": "Tema",
-    "shareLineCount": "{count, plural, one {Queda # carácter} other {Quedan # caracteres}}"
+    "shareLineCount": "{count, plural, one {Queda # carácter} other {Quedan # caracteres}}",
+    "shareShowedUp": "{n, plural, =1{Presente 1 día} other{Presente # días}}"
   },
   "ai": {
     "meAi": "IA",

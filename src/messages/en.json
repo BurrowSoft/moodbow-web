@@ -563,7 +563,8 @@
     "pairWeekends": "Weekends",
     "pairWritingTitle": "Writing",
     "pairWrote": "Wrote",
-    "pairNotWrote": "Didn't write"
+    "pairNotWrote": "Didn't write",
+    "showedUp": "{count, plural, one {You showed up on # day} other {You showed up on # days}} {range, select, week {this week} month {this month} threeMonths {in the last 3 months} year {in the last 12 months} other {since you started}}."
   },
   "share": {
     "shareButton": "Share",
@@ -597,7 +598,8 @@
     "shareLoading": "Getting your month…",
     "shareFormat": "Format",
     "shareTheme": "Theme",
-    "shareLineCount": "{count, plural, one {# character left} other {# characters left}}"
+    "shareLineCount": "{count, plural, one {# character left} other {# characters left}}",
+    "shareShowedUp": "{n, plural, =1{Showed up on 1 day} other{Showed up on # days}}"
   },
   "ai": {
     "meAi": "AI",
