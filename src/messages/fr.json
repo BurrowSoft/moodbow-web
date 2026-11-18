@@ -467,7 +467,12 @@
     "exportStress": "Stress",
     "exportOfFive": "{value}/5",
     "exportReflectionOn": "Sur votre note du {date}",
-    "exportTags": "Étiquettes"
+    "exportTags": "Étiquettes",
+    "exportRoutine": "Routine",
+    "exportRoutineStarted": "depuis le {date}",
+    "exportRoutineInAppointment": "dans mon résumé pour le rendez-vous",
+    "exportRoutineTicked": "Jours cochés : {dates}",
+    "exportRoutineNoTicks": "Aucun jour coché pour l'instant"
   },
   "help": {
     "helpTitle": "Aide et FAQ",
@@ -779,6 +784,28 @@
     "nameItQuestion": "Que ressentez-vous en ce moment ?",
     "nameItSmaller": "Le nommer peut le rendre un peu plus petit.",
     "nameItThanks": "Merci de l'avoir nommé."
+  },
+  "routine": {
+    "title": "Routine",
+    "intro": "Jusqu'à 3 choses que vous aimeriez cocher chaque jour. Vous êtes la seule personne à les voir.",
+    "addHint": "Par exemple, médicaments du matin",
+    "add": "Ajouter",
+    "full": "C'est 3, le maximum pour l'instant.",
+    "duplicate": "Vous l'avez déjà.",
+    "options": "Options pour {item}",
+    "deleteConfirm": "Retirer",
+    "deleteTitle": "Retirer {name} ?",
+    "deleteBody": "Cela retire l'élément et les jours où vous l'avez coché.",
+    "inAppointment": "Afficher dans Pour mon rendez-vous",
+    "rowTitle": "Routine",
+    "rowEmpty": "Ajoutez jusqu'à 3 choses que vous faites presque tous les jours, comme vos médicaments du matin ou une marche.",
+    "rowSetUp": "Configurer",
+    "saveFailed": "Vos coches de routine n'ont pas été enregistrées. Réessayez.",
+    "patternShown": "Les jours où vous avez coché {name}, votre humeur était en moyenne de {a} sur 5. Les autres jours, {b}.",
+    "patternFootnote": "Cela peut montrer ce qui va souvent ensemble, pas ce qui cause quoi. Ne modifiez jamais un médicament sans en parler à votre médecin ou à votre pharmacien.",
+    "appointmentHeading": "Routine",
+    "appointmentShare": "{name} : une coche sur {percent} % des jours avec un bilan",
+    "appointmentNotEnough": "{name} : pas encore assez de jours"
   },
   "safetyPlan": {
     "title": "Mon plan de sécurité",

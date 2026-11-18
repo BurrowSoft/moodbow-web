@@ -34,6 +34,7 @@ import { flagsCrisis } from "@/lib/safety/crisis";
 import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
 import { SetupLaterCard, TodayPlusCard } from "./TodayCards";
 import { readCardTags } from "@/lib/journal/tagsData";
+import { readCardRoutine } from "@/lib/journal/routineData";
 import { GetHelpNow } from "@/components/SafetyCard";
 import { previewToday, previewTodayQuery } from "@/lib/journal/previewToday";
 import { reviewYear, yearCardOnToday } from "@/lib/journal/yearReview";
@@ -141,6 +142,8 @@ export default async function TodayPage({ params, searchParams }: PageProps<"/[l
 
   // Tags on the check-in (tags-live): the day's and the person's recent ones.
   const cardTags = await readCardTags(supabase, me.today);
+  // Routine on the check-in (routine-live): the items and the day's ticks.
+  const cardRoutine = await readCardRoutine(supabase, me.today);
   const toolbox = toolboxRead && !toolboxRead.error ? parseToolboxItems(toolboxRead.data) : null;
   // A letter from you (1.2), on its day: the oldest due one. Its text is matched here, before
   // anything renders, and stays on the server: the card gets a yes or no (the Reviewer's read).
@@ -195,7 +198,7 @@ export default async function TodayPage({ params, searchParams }: PageProps<"/[l
         </div>
         <GetHelpNow country={me.profile?.country} testId="today-help" counted neutral icon />
       </header>
-      <CheckInCard key={checkInError ? "unread" : "read"} initial={(data as CheckIn | null) ?? null} uid={user.id} date={me.today} dateLocaleTag={dateLocaleTag} keepDraft loadFailed={Boolean(checkInError)} {...cardTags} country={me.profile?.country} />
+      <CheckInCard key={checkInError ? "unread" : "read"} initial={(data as CheckIn | null) ?? null} uid={user.id} date={me.today} dateLocaleTag={dateLocaleTag} keepDraft loadFailed={Boolean(checkInError)} {...cardTags} {...cardRoutine} country={me.profile?.country} />
       {/* Today's order (UX ruling, audit 14 Nov; the app and board 22): check-in → Your week (first,
           so its hard-week help is high) → Plus card → setup/reminder offer → things that help →
           a letter → entries → Write last. */}

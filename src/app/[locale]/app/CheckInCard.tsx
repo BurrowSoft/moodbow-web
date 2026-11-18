@@ -22,6 +22,7 @@ import { saveCheckIn, type CheckInState } from "./actions";
 import { publishTodayMood } from "@/lib/journal/todayMood";
 import { useCheckInDraft } from "./CheckInDraft";
 import { TagsField } from "./TagsField";
+import { RoutineFailed, RoutineField, RoutineSummary, sameTicks, type CardRoutine } from "./RoutineField";
 import { SafetyCard } from "@/components/SafetyCard";
 import { parseTags, tagsFlagCrisis } from "@/lib/journal/tags";
 import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
@@ -157,7 +158,9 @@ function toFormData(fields: Fields, expectedUpdatedAt: string, date: string, fro
 // loadFailed: today's check-in couldn't be read, so the empty card comes with
 // its error and Try again, until this card holds a real row.
 // initialTags: the day's tags where tags are on (null: off); recentTags: the person's, for the picker.
-type Props = { initial: CheckIn | null; uid: string; date: string; dateLocaleTag: string; autoFocus?: boolean; keepDraft?: boolean; loadFailed?: boolean; initialTags?: string[] | null; recentTags?: string[]; country?: string | null };
+// routine (1.4 F, routine-live): the items that can be ticked on this day and the day's ticks
+// (item ids); null: off, or the read failed (no row).
+type Props = { initial: CheckIn | null; uid: string; date: string; dateLocaleTag: string; autoFocus?: boolean; keepDraft?: boolean; loadFailed?: boolean; initialTags?: string[] | null; recentTags?: string[]; country?: string | null; routine?: CardRoutine | null };
 
 // An offline copy the server refused ("rejected": e.g. a day that is in the
 // future for the account's zone). Never silent (decision 72): one notice per
@@ -297,8 +300,14 @@ export function CheckInCard(props: Props) {
   );
 }
 
-function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, autoFocus, keepDraft, loadFailed, initialTags = null, recentTags = [], country = null }: Props & { notify: Notify; announce: (text: string) => void }) {
+function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, autoFocus, keepDraft, loadFailed, initialTags = null, recentTags = [], country = null, routine = null }: Props & { notify: Notify; announce: (text: string) => void }) {
   const t = useTranslations("today");
+  // The day's routine ticks, as the tags: what's saved and what the form holds; sent only when
+  // they differ. They never queue offline: the failed line says so instead (UX, 19 Nov).
+  const [savedTicks, setSavedTicks] = useState<string[]>(routine?.ticks ?? []);
+  const [ticks, setTicks] = useState<string[]>(routine?.ticks ?? []);
+  const [routineFailed, setRoutineFailed] = useState(false);
+  const routineChanged = routine !== null && !sameTicks(ticks, savedTicks);
   // The day's tags: what's saved, and what the form holds now. Sent only when they differ.
   const tagsOn = initialTags !== null;
   const [savedTags, setSavedTags] = useState<string[]>(initialTags ?? []);
@@ -401,6 +410,8 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
       } catch {
         return { status: "error", error: "generic" };
       }
+      // The copy carries no routine ticks (they never queue): say so.
+      if (form.has("routine")) setRoutineFailed(true);
       setOffline(true);
       setEditing(false);
       return prev;
@@ -493,6 +504,14 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
       // The tags went with it, or the check-in is saved and they weren't (shown under the field).
       if (next.tags) setSavedTags(next.tags);
       setTagsFailed(next.tagsSaved === false);
+      // The same for the routine ticks; a synced offline copy carries none and changes nothing.
+      if (form.has("routine")) {
+        if (next.routine) {
+          setSavedTicks(next.routine);
+          setTicks(next.routine);
+        }
+        setRoutineFailed(next.routineSaved === false);
+      }
       setRow(next.checkIn);
       publishTodayMood(next.checkIn.local_date, next.checkIn.mood);
       setDraftBase(null);
@@ -538,11 +557,13 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
         setStorageFailed(true);
         return;
       }
+      if (routineChanged) setRoutineFailed(true);
       setOffline(true);
       setEditing(false);
       return;
     }
     const form = toFormData(fields, expected, cardDate, undefined, tagsChanged ? tags : undefined);
+    if (routineChanged) form.set("routine", JSON.stringify(ticks));
     window.clearTimeout(waitTimer.current);
     keptFor.current = null;
     waitTimer.current = window.setTimeout(() => {
@@ -760,6 +781,8 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
             {t("errGeneric")}
           </p>
         )}
+        {routine && <RoutineSummary items={routine.items} ticks={savedTicks} />}
+        {routineFailed && <RoutineFailed />}
         {/* Saved, the card turns into this summary: the help offer opened at Save stays open. */}
         {helpOpen && <SafetyCard country={country} onClose={() => setHelpOpen(false)} />}
         {chips.length > 0 && (
@@ -937,6 +960,17 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
           {t("errGeneric")}
         </p>
       )}
+      {routine && (
+        <RoutineField
+          items={routine.items}
+          ticks={ticks}
+          onChange={(next) => {
+            setTicks(next);
+            setRoutineFailed(false);
+          }}
+        />
+      )}
+      {routineFailed && <RoutineFailed />}
       {/* The profile's country, as the editor's card (the Reviewer, #278); none: the connection's. */}
       {helpOpen && <SafetyCard country={country} onClose={() => setHelpOpen(false)} />}
       {errorKey && (

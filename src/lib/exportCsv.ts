@@ -18,6 +18,10 @@ export const BOM = String.fromCharCode(0xfeff);
 
 // tags (UX, 11 Nov): the day's tags, joined by " | " (Daylio's separator), on each of its rows.
 export const CSV_COLUMNS = ["date", "mood", "mood_word", "sleep_hours", "sleep_quality", "movement_minutes", "stress", "moment", "tags", "note"] as const;
+// Routine (1.4 F; UX 18 Nov): one trailing column, only while the Routine flag is on (the existing
+// cases are the flag-off file, export-csv.json's routineCases the flag-on one): that day's ticked
+// item names in position order, joined and escaped as tags are.
+export const ROUTINE_COLUMN = "routine";
 
 // RFC 4180: a cell with a quote, a comma or a line break is quoted, quotes
 // doubled. Formula starts are neutralized first.
@@ -29,15 +33,18 @@ export function csvCell(value: string): string {
 // ASCII digits, "." decimals, no trailing ".0" (as the .txt).
 const num = (v: number | string | null) => (v === null || v === "" ? "" : String(Number(v)));
 
-export function renderExportCsv(doc: ExportDoc, t: Translate): string {
+export function renderExportCsv(doc: ExportDoc, t: Translate, { routine = false }: { routine?: boolean } = {}): string {
   const checkIns = new Map((doc.check_ins ?? []).map((c) => [c.local_date, c]));
   const entriesByDay = new Map<string, NonNullable<ExportDoc["entries"]>>();
   for (const e of doc.entries ?? []) entriesByDay.set(e.entry_date, [...(entriesByDay.get(e.entry_date) ?? []), e]);
   const tagsByDay = new Map<string, string[]>();
   for (const t of doc.check_in_tags ?? []) tagsByDay.set(t.local_date, [...(tagsByDay.get(t.local_date) ?? []), t.tag]);
   const dates = [...new Set([...checkIns.keys(), ...entriesByDay.keys()])].sort();
+  const routineByDay = new Map<string, string[]>();
+  for (const item of [...(doc.routine ?? [])].sort((a, b) => a.position - b.position))
+    for (const day of item.ticks ?? []) routineByDay.set(day, [...(routineByDay.get(day) ?? []), item.name]);
 
-  const lines = [CSV_COLUMNS.join(",")];
+  const lines = [(routine ? [...CSV_COLUMNS, ROUTINE_COLUMN] : CSV_COLUMNS).join(",")];
   for (const date of dates) {
     const c = checkIns.get(date);
     const day = c
@@ -46,7 +53,8 @@ export function renderExportCsv(doc: ExportDoc, t: Translate): string {
     const entries = entriesByDay.get(date) ?? [];
     const rows = entries.length ? entries.map((e) => [e.is_moment ? "yes" : "", e.body]) : [["", ""]];
     const tags = tagsCsvCell(tagsByDay.get(date) ?? []);
-    for (const [moment, note] of rows) lines.push([date, ...day, moment, tags, note].map(csvCell).join(","));
+    const ticked = routine ? [tagsCsvCell(routineByDay.get(date) ?? [])] : [];
+    for (const [moment, note] of rows) lines.push([date, ...day, moment, tags, note, ...ticked].map(csvCell).join(","));
   }
   return `${BOM}${lines.join("\r\n")}\r\n`;
 }
