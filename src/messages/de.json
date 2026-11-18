@@ -1028,5 +1028,26 @@
     "position": "Seite {n} von {total}",
     "shareNote": "Das Bild zeigt deine Farben und die Anzahl der Tage. Deine Einträge, Tags, Momente und Daten sind nie darauf.",
     "daysUnit": "{count, plural, one {Tag} other {Tage}}"
+  },
+  "shareView": {
+    "metaTitle": "Eine geteilte Woche",
+    "whatIs": "Was ist Moodbow?",
+    "titleBefore": "Eine Woche, mit dir geteilt",
+    "introBefore": "Eine schreibgeschützte Zusammenfassung der Check-ins einer Person. Sie zeigt nie etwas, das sie geschrieben hat.",
+    "show": "Woche anzeigen",
+    "titleNamed": "{name} hat die Woche mit dir geteilt",
+    "titleAnon": "Jemand hat die Woche mit dir geteilt",
+    "weekOf": "Woche vom {date}",
+    "checkIns": "{count, plural, one {# Check-in in dieser Woche} other {# Check-ins in dieser Woche}}",
+    "routinePercent": "{name}: an {percent} % der Tage mit Check-in abgehakt",
+    "routineNotEnough": "{name}: noch nicht genug Tage",
+    "earlier": "Frühere Woche",
+    "later": "Spätere Woche",
+    "none": "Noch keine Check-ins in dieser Woche.",
+    "unavailable": "Dieser Link ist nicht verfügbar. Vielleicht ist er abgelaufen oder wurde beendet.",
+    "loading": "Die Woche wird geladen…",
+    "dayNone": "{day}: kein Check-in",
+    "help": "Wenn du dir um jemanden Sorgen machst, <link>finde eine Beratungsstelle</link>.",
+    "footer": "Die Person, die diesen Link geteilt hat, kann ihn jederzeit beenden. Er wird nicht von Suchmaschinen erfasst. Er bleibt im Verlauf dieses Browsers; schließ den Tab, wenn du fertig bist."
   }
 }

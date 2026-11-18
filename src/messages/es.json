@@ -1028,5 +1028,26 @@
     "position": "Pantalla {n} de {total}",
     "shareNote": "La imagen muestra tus colores y el número de días. Tus entradas, etiquetas, momentos y fechas nunca aparecen en ella.",
     "daysUnit": "{count, plural, one {día} other {días}}"
+  },
+  "shareView": {
+    "metaTitle": "Una semana compartida",
+    "whatIs": "¿Qué es Moodbow?",
+    "titleBefore": "Una semana compartida contigo",
+    "introBefore": "Un resumen de solo lectura de los registros de una persona. Nunca muestra nada de lo que escribió.",
+    "show": "Ver la semana",
+    "titleNamed": "{name} compartió su semana contigo",
+    "titleAnon": "Alguien compartió su semana contigo",
+    "weekOf": "Semana del {date}",
+    "checkIns": "{count, plural, one {# registro esta semana} other {# registros esta semana}}",
+    "routinePercent": "{name}: marcado en el {percent} % de los días con registro",
+    "routineNotEnough": "{name}: aún no hay suficientes días",
+    "earlier": "Semana anterior",
+    "later": "Semana siguiente",
+    "none": "Aún no hay registros esta semana.",
+    "unavailable": "Este enlace no está disponible. Puede que haya terminado o se haya detenido.",
+    "loading": "Cargando la semana…",
+    "dayNone": "{day}: sin registro",
+    "help": "Si te preocupa alguien, <link>busca una línea de ayuda</link>.",
+    "footer": "La persona que compartió este enlace puede detenerlo en cualquier momento. No lo indexan los buscadores. Queda en el historial de este navegador; cierra la pestaña cuando termines."
   }
 }

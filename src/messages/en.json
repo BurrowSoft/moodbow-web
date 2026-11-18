@@ -1028,5 +1028,26 @@
     "position": "Screen {n} of {total}",
     "shareNote": "The image shows your colours and the number of days. Your entries, tags, moments and dates are never on it.",
     "daysUnit": "{count, plural, one {day} other {days}}"
+  },
+  "shareView": {
+    "metaTitle": "A shared week",
+    "whatIs": "What is Moodbow?",
+    "titleBefore": "A week shared with you",
+    "introBefore": "A read-only summary of someone's check-ins. It never shows anything they wrote.",
+    "show": "Show the week",
+    "titleNamed": "{name} shared their week with you",
+    "titleAnon": "Someone shared their week with you",
+    "weekOf": "Week of {date}",
+    "checkIns": "{count, plural, one {# check-in this week} other {# check-ins this week}}",
+    "routinePercent": "{name}: ticked on {percent}% of check-in days",
+    "routineNotEnough": "{name}: not enough days yet",
+    "earlier": "Earlier week",
+    "later": "Later week",
+    "none": "No check-ins yet this week.",
+    "unavailable": "This link isn't available. It may have ended or been stopped.",
+    "loading": "Loading the week…",
+    "dayNone": "{day}: no check-in",
+    "help": "If you're worried about someone, <link>find a helpline</link>.",
+    "footer": "This link can be stopped by the person who shared it at any time. It isn't indexed by search engines. It stays in this browser's history; close the tab when you're done."
   }
 }

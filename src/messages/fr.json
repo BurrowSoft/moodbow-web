@@ -1028,5 +1028,26 @@
     "position": "Écran {n} sur {total}",
     "shareNote": "L'image montre vos couleurs et le nombre de jours. Vos notes, étiquettes, moments forts et dates n'y figurent jamais.",
     "daysUnit": "{count, plural, one {jour} other {jours}}"
+  },
+  "shareView": {
+    "metaTitle": "Une semaine partagée",
+    "whatIs": "Qu'est-ce que Moodbow ?",
+    "titleBefore": "Une semaine partagée avec vous",
+    "introBefore": "Un résumé en lecture seule des bilans d'une personne. Il ne montre jamais ce qu'elle a écrit.",
+    "show": "Afficher la semaine",
+    "titleNamed": "{name} a partagé sa semaine avec vous",
+    "titleAnon": "Quelqu'un a partagé sa semaine avec vous",
+    "weekOf": "Semaine du {date}",
+    "checkIns": "{count, plural, one {# bilan cette semaine} other {# bilans cette semaine}}",
+    "routinePercent": "{name} : coché sur {percent} % des jours avec un bilan",
+    "routineNotEnough": "{name} : pas encore assez de jours",
+    "earlier": "Semaine précédente",
+    "later": "Semaine suivante",
+    "none": "Aucun bilan cette semaine pour l'instant.",
+    "unavailable": "Ce lien n'est pas disponible. Il a peut-être expiré ou été arrêté.",
+    "loading": "Chargement de la semaine…",
+    "dayNone": "{day} : pas de bilan",
+    "help": "Si vous vous inquiétez pour quelqu'un, <link>trouvez une ligne d'écoute</link>.",
+    "footer": "La personne qui a partagé ce lien peut l'arrêter à tout moment. Il n'est pas indexé par les moteurs de recherche. Il reste dans l'historique de ce navigateur ; fermez l'onglet quand vous avez terminé."
   }
 }

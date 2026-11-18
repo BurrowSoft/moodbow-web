@@ -21,6 +21,9 @@ const withoutLocale = (segments: string[]) => ((ALL_LOCALES as readonly string[]
 export function isCountedPage(pathname: string): boolean {
   const rest = withoutLocale(segmentsOf(pathname)).map((s) => s.toLowerCase());
   if (rest[0] === "auth") return false;
+  // A shared week (1.4 G): someone else's summary, opened by a person without an account. Never
+  // counted, not even its name (plans/PLAN-trusted-share.md §4).
+  if (rest[0] === "s") return false;
   if (rest[0] === "app" && rest[1] === "me" && rest[2] === "safety-plan") return false;
   return true;
 }
