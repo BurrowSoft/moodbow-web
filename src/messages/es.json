@@ -272,7 +272,8 @@
     "tagsTooLong": "Una etiqueta puede tener hasta 32 caracteres.",
     "setupLaterBody": "Tu recordatorio diario está desactivado. Puedes activarlo y elegir una hora cuando quieras.",
     "setupLaterOpen": "Configurar",
-    "setupLaterClose": "Ahora no"
+    "setupLaterClose": "Ahora no",
+    "lateNote": "Es tarde. Descansar también importa. Si esta noche se te hace pesada, la ayuda está a un toque."
   },
   "entry": {
     "writeButton": "Escribe sobre tu día",

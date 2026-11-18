@@ -272,7 +272,8 @@
     "tagsTooLong": "A tag can be up to 32 characters.",
     "setupLaterBody": "Your daily reminder is off. You can turn it on and choose a time whenever you like.",
     "setupLaterOpen": "Set it up",
-    "setupLaterClose": "Not now"
+    "setupLaterClose": "Not now",
+    "lateNote": "It's late. Rest matters too. If tonight feels heavy, help is one tap away."
   },
   "entry": {
     "writeButton": "Write about your day",

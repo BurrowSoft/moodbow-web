@@ -3373,5 +3373,10 @@
     "key": "sounds.unavailable",
     "en": "Calming sounds aren't available in this browser.",
     "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a, browser wording by the Web Dev)"
+  },
+  {
+    "key": "today.lateNote",
+    "en": "It's late. Rest matters too. If tonight feels heavy, help is one tap away.",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #257 6d1ff0f6)"
   }
 ]
