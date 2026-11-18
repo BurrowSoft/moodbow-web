@@ -3575,6 +3575,96 @@
     "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
   },
   {
+    "key": "sounds.title",
+    "en": "Calming sounds",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a)"
+  },
+  {
+    "key": "sounds.rain",
+    "en": "Rain",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a)"
+  },
+  {
+    "key": "sounds.waves",
+    "en": "Waves",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a)"
+  },
+  {
+    "key": "sounds.brown",
+    "en": "Brown noise",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a)"
+  },
+  {
+    "key": "sounds.hum",
+    "en": "Gentle hum",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a)"
+  },
+  {
+    "key": "sounds.timer",
+    "en": "Timer",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a)"
+  },
+  {
+    "key": "sounds.minutes",
+    "en": "{n} min",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a)"
+  },
+  {
+    "key": "sounds.untilStop",
+    "en": "Until I stop",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a)"
+  },
+  {
+    "key": "sounds.play",
+    "en": "Play",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a)"
+  },
+  {
+    "key": "sounds.pause",
+    "en": "Pause",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a)"
+  },
+  {
+    "key": "sounds.stop",
+    "en": "Stop",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a)"
+  },
+  {
+    "key": "sounds.left",
+    "en": "{n} min left",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a)"
+  },
+  {
+    "key": "sounds.untilStopped",
+    "en": "Until you stop",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a)"
+  },
+  {
+    "key": "sounds.lock",
+    "en": "Sound playing",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a)"
+  },
+  {
+    "key": "sounds.lockLeft",
+    "en": "Sound playing · {n} min left",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a)"
+  },
+  {
+    "key": "sounds.lockPaused",
+    "en": "Sound paused",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a)"
+  },
+  {
+    "key": "sounds.intro",
+    "en": "Made right here in your browser, so there's nothing to download. Use your device's volume.",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a, browser wording by the Web Dev)"
+  },
+  {
+    "key": "sounds.unavailable",
+    "en": "Calming sounds aren't available in this browser.",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a, browser wording by the Web Dev)"
+  },
+  {
     "key": "today.lateNote",
     "en": "It's late. Rest matters too. If tonight feels heavy, help is one tap away.",
     "reason": "UX draft (native read pending; the app's Thai, moodbow-app #257 6d1ff0f6)"

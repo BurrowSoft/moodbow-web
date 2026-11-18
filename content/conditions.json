@@ -354,5 +354,9 @@
   "routine-live": {
     "met": false,
     "what": "1.4 F Medication and routine (specs/1.4-features.md §F, plans/PLAN-routine.md, board 29): up to 3 items the person ticks in the check-in, under Tags; Me → Routine to add, rename, order, remove and opt each into For my appointment. Patterns show a routine line only when mood is higher on ticked days, always with the caution; the appointment shows % of check-in days ticked; export carries it. Item names are never counted or sent anywhere else. Needs the app's migration 038 on Production (Vitor's word plus the privacy line), the contracts on the app's master, the Reviewer's read and the Web Tester's rows."
+  },
+  "sounds-live": {
+    "met": false,
+    "what": "1.4 B Calming sounds (specs/1.4-features.md §B, UX 19 Nov; as moodbow-app #253): Me → Things that help me → Calming sounds, /app/me/toolbox/sounds. Rain, waves, brown noise and a gentle hum made in the browser (src/lib/sounds/synth.ts, the app's generators and seeds; no audio files), each a seamless loop played natively, so it plays on with the tab hidden. Timer 15/30/45/60 min or Until I stop, with the app's fades; a pause of 30 min stops it; it stops at sign-out. The Media Session shows only the neutral \"Sound playing\". Counted: sounds_opened only. For everyone. Before it's met: the Reviewer's read, the Web Tester's row (on real speakers or headphones) and the translations' check."
   }
 }

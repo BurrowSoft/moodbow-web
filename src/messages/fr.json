@@ -1120,5 +1120,25 @@
     "noteFirstView": "Votre lien de partage a été ouvert pour la première fois. Vous pouvez l'arrêter à tout moment dans Moi.",
     "noteSee": "Voir les liens",
     "noteGotIt": "J'ai compris"
+  },
+  "sounds": {
+    "title": "Sons apaisants",
+    "rain": "Pluie",
+    "waves": "Vagues",
+    "brown": "Bruit brun",
+    "hum": "Doux murmure",
+    "timer": "Minuteur",
+    "minutes": "{n} min",
+    "untilStop": "Jusqu'à ce que j'arrête",
+    "play": "Lecture",
+    "pause": "Pause",
+    "stop": "Arrêter",
+    "left": "Encore {n} min",
+    "untilStopped": "Jusqu'à ce que vous arrêtiez",
+    "lock": "Son en cours",
+    "lockLeft": "Son en cours · encore {n} min",
+    "lockPaused": "Son en pause",
+    "intro": "Créés directement dans votre navigateur : rien à télécharger. Utilisez le volume de votre appareil.",
+    "unavailable": "Les sons apaisants ne sont pas disponibles dans ce navigateur."
   }
 }

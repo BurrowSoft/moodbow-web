@@ -1120,5 +1120,25 @@
     "noteFirstView": "Il tuo link di condivisione è stato aperto per la prima volta. Puoi interromperlo in qualsiasi momento in Profilo.",
     "noteSee": "Vedi i link",
     "noteGotIt": "Ho capito"
+  },
+  "sounds": {
+    "title": "Suoni rilassanti",
+    "rain": "Pioggia",
+    "waves": "Onde",
+    "brown": "Rumore marrone",
+    "hum": "Mormorio leggero",
+    "timer": "Timer",
+    "minutes": "{n} min",
+    "untilStop": "Finché non lo fermo",
+    "play": "Riproduci",
+    "pause": "Pausa",
+    "stop": "Ferma",
+    "left": "Ancora {n} min",
+    "untilStopped": "Finché non lo fermi",
+    "lock": "Suono in riproduzione",
+    "lockLeft": "Suono in riproduzione · ancora {n} min",
+    "lockPaused": "Suono in pausa",
+    "intro": "Creati direttamente nel tuo browser, quindi non c'è niente da scaricare. Usa il volume del dispositivo.",
+    "unavailable": "I suoni rilassanti non sono disponibili in questo browser."
   }
 }
