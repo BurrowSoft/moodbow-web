@@ -34,8 +34,9 @@ export function lateNote(mood: number | null | undefined, savedAt: Date, zone: s
 }
 
 // The mark lives in this browser, per user, and goes at sign-out (the card's handler). Storage
-// unavailable: as no mark (showing it again is gentler than never).
-export const lateNoteKey = (uid: string) => `moodbow.lateNote.${uid}`;
+// unavailable: as no mark (showing it again is gentler than never). An mb:<kind>:<uid> key, so
+// every per-user wipe (localData.ts: a gone account, decision 85) takes it too (the Reviewer, #366).
+export const lateNoteKey = (uid: string) => `mb:lateNote:${uid}`;
 export function claimLateNote(uid: string, mood: number | null | undefined, savedAt: Date, zone: string | null | undefined): boolean {
   let mark: string | null = null;
   try {

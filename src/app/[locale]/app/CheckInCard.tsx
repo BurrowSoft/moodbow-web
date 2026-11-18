@@ -319,6 +319,7 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
   // The late-night note (1.4 D): judged at the moment the person saves, from the card only (online
   // or offline; a queued copy syncing later never shows it), once a night per user.
   const [lateShown, setLateShown] = useState(false);
+  const lateSaid = useRef(false);
   const savedAt = useRef<Date | null>(null);
   const maybeLateNote = (mood: number | null | undefined) => {
     if (lateNote && savedAt.current && claimLateNote(uid, mood, savedAt.current, lateNote.zone)) setLateShown(true);
@@ -756,7 +757,13 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
       return;
     }
     if (showsSummary) {
-      announce(offline ? t("checkinSavedOfflineWeb") : t("checkinSaved"));
+      // The late-night note (1.4 D) is said with it, in the card's own live region, which is there
+      // before the save (a region that appears with its text is often not read: the Reviewer, #366).
+      // Said once: a later save the same night leaves the line on screen but doesn't say it again.
+      const saved = offline ? t("checkinSavedOfflineWeb") : t("checkinSaved");
+      const sayLate = lateShown && !lateSaid.current;
+      if (sayLate) lateSaid.current = true;
+      announce(sayLate ? `${saved} ${t("lateNote")}` : saved);
       root.current?.querySelector<HTMLElement>("h2")?.focus();
     } else {
       announce("");

@@ -62,6 +62,19 @@ describe("CheckInCard: the late-night note", () => {
     expect(note).toHaveTextContent(messages.today.lateNote);
     expect(screen.getByTestId("late-note-get-help")).not.toHaveAttribute("data-count");
     expect(window.localStorage.getItem(lateNoteKey("u1"))).toBe("2026-11-19");
+    // Said in the card's live region, which was there before the save (the Reviewer, #366).
+    expect(screen.getByTestId("checkin-announce")).toHaveAttribute("role", "status");
+    expect(screen.getByTestId("checkin-announce")).toHaveTextContent(messages.today.lateNote);
+  });
+
+  it("the mark is an mb:<kind>:<uid> key: a gone account's wipe takes it (decision 85)", async () => {
+    const { wipeLocalData } = await import("@/lib/localData");
+    expect(lateNoteKey("u1")).toBe("mb:lateNote:u1");
+    window.localStorage.setItem(lateNoteKey("u1"), "2026-11-19");
+    window.localStorage.setItem(lateNoteKey("u2"), "2026-11-19");
+    wipeLocalData(window.localStorage, "u1");
+    expect(window.localStorage.getItem(lateNoteKey("u1"))).toBeNull();
+    expect(window.localStorage.getItem(lateNoteKey("u2"))).toBe("2026-11-19");
   });
 
   it("once a night: a second low save the same night shows nothing", async () => {
@@ -72,6 +85,7 @@ describe("CheckInCard: the late-night note", () => {
     pick(1);
     await save();
     expect(screen.queryByTestId("checkin-late-note")).toBeNull();
+    expect(screen.getByTestId("checkin-announce").textContent).not.toContain(messages.today.lateNote);
   });
 
   it("not for mood 3, not at noon, not where it's off", async () => {
