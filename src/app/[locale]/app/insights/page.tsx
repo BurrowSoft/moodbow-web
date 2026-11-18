@@ -13,7 +13,7 @@ import { yearOnOffer } from "@/lib/share/year";
 import { aiShown, canReflect } from "@/lib/journal/ai";
 import { lastWeekStart, parseReportBody, weekRange, type WeeklyReport as Report } from "@/lib/journal/report";
 import { getMe } from "@/lib/journal/me";
-import { patterns, patternsWindowStart } from "@/lib/journal/patterns";
+import { patterns, patternsWindowStart, routineLines } from "@/lib/journal/patterns";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { tabMetadata } from "../pageMeta";
 import { InsightsView } from "./InsightsView";
@@ -32,6 +32,7 @@ import { WeeklyReport } from "./WeeklyReport";
 import { INSIGHTS_TAB_RANGE, showedUpShown } from "@/lib/journal/showedUp";
 import { previewToday, previewTodayQuery } from "@/lib/journal/previewToday";
 import { loadInsightsRowYear } from "@/lib/journal/yearReviewData";
+import { readRoutineWithTicks } from "@/lib/journal/routineData";
 import { YearInsightsRow } from "../year/YearLink";
 
 // The weekly report runs in this page's functions and waits up to 45 s
@@ -75,7 +76,7 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
   // Production).
   const yearToday = previewToday((await searchParams).today, me.today);
   const yearOn = pageGate("year-review-live") !== "hidden";
-  const [checkIns, plus, milestone, stored, requestHeaders, rowYear] = await Promise.all([
+  const [checkIns, plus, milestone, stored, requestHeaders, rowYear, routineItems] = await Promise.all([
     supabase
       .from("check_ins")
       .select("local_date, mood, sleep_hours, stress, exercise_minutes")
@@ -88,6 +89,8 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
       : null,
     headers(),
     yearOn ? loadInsightsRowYear(supabase, yearToday).catch(() => null) : null,
+    // 1.4 F (routine-live): the items and their ticks over the patterns window.
+    withPatterns ? readRoutineWithTicks(supabase, patternsStart, me.today).catch(() => null) : null,
   ]);
   // With Plus: Year and All time, and More patterns over the last 12 months (or all time on All time).
   // Insights are Plus (spec "Insights become Plus", 14 Nov): without Plus (or with a payment that
@@ -190,6 +193,7 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
       summary={null}
       week={week}
       patterns={withPatterns ? patterns(rows, me.today) : undefined}
+      routinePatterns={withPatterns && routineItems ? routineLines(rows, me.today, routineItems) : undefined}
       plusTab={hasPlus ? <PlusTabs current={longRange} /> : undefined}
       plusPatterns={hasPlus ? plusMore : undefined}
       long={long}

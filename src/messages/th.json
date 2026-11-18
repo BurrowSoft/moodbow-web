@@ -800,7 +800,12 @@
     "rowTitle": "Routine",
     "rowEmpty": "Add up to 3 things you do most days, like Morning meds or a walk.",
     "rowSetUp": "Set up",
-    "saveFailed": "Your routine ticks weren't saved. Try again."
+    "saveFailed": "Your routine ticks weren't saved. Try again.",
+    "patternShown": "On days you ticked {name}, your mood averaged {a} of 5. On other days, {b}.",
+    "patternFootnote": "This may show what tends to go together, not what causes what. Never change a medication without talking to your doctor or pharmacist.",
+    "appointmentHeading": "Routine",
+    "appointmentShare": "{name}: ticked on {percent}% of check-in days",
+    "appointmentNotEnough": "{name}: not enough days yet"
   },
   "safetyPlan": {
     "title": "แผนความปลอดภัยของฉัน",

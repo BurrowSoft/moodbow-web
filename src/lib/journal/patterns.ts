@@ -103,6 +103,14 @@ export function routinePatterns(rows: InsightRow[], today: string, items: readon
   });
 }
 
+// What Insights shows (1.4 F): only the "shown" lines, in position order, each with its name and
+// the two moods. Hidden and not-enough items leave no trace at all.
+export type RoutineLine = { id: string; name: string; a: number; b: number };
+export function routineLines(rows: InsightRow[], today: string, items: readonly (RoutineItem & { name: string })[]): RoutineLine[] {
+  const names = new Map(items.map((i) => [i.id, i.name]));
+  return routinePatterns(rows, today, items).flatMap((p) => (p.state === "shown" ? [{ id: p.id, name: names.get(p.id) ?? "", a: p.a.mood, b: p.b.mood }] : []));
+}
+
 // The first day the Insights page must load so the patterns have their
 // whole window (the charts' own range may be shorter: Week, Month).
 export const patternsWindowStart = (today: string) => rangeDays(today, "3months")[0];
