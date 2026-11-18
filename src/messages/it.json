@@ -468,7 +468,12 @@
     "exportStress": "Stress",
     "exportOfFive": "{value}/5",
     "exportReflectionOn": "Sulla tua pagina del {date}",
-    "exportTags": "Tag"
+    "exportTags": "Tag",
+    "exportRoutine": "Routine",
+    "exportRoutineStarted": "dal {date}",
+    "exportRoutineInAppointment": "nel mio riepilogo per l'appuntamento",
+    "exportRoutineTicked": "Giorni spuntati: {dates}",
+    "exportRoutineNoTicks": "Nessun giorno spuntato finora"
   },
   "help": {
     "helpTitle": "Aiuto e domande frequenti",
@@ -780,6 +785,28 @@
     "nameItQuestion": "Cosa senti in questo momento?",
     "nameItSmaller": "Dargli un nome può renderlo un po' più piccolo.",
     "nameItThanks": "Grazie di avergli dato un nome."
+  },
+  "routine": {
+    "title": "Routine",
+    "intro": "Fino a 3 cose che vorresti spuntare ogni giorno. Le vedi solo tu.",
+    "addHint": "Per esempio, farmaci del mattino",
+    "add": "Aggiungi",
+    "full": "Sono 3, il massimo per ora.",
+    "duplicate": "Ce l'hai già.",
+    "options": "Opzioni per {item}",
+    "deleteConfirm": "Rimuovi",
+    "deleteTitle": "Rimuovere {name}?",
+    "deleteBody": "Questo rimuove l'elemento e i giorni in cui l'hai spuntato.",
+    "inAppointment": "Mostra in Per il mio appuntamento",
+    "rowTitle": "Routine",
+    "rowEmpty": "Aggiungi fino a 3 cose che fai quasi ogni giorno, come i farmaci del mattino o una camminata.",
+    "rowSetUp": "Imposta",
+    "saveFailed": "Le spunte della routine non sono state salvate. Riprova.",
+    "patternShown": "Nei giorni in cui hai spuntato {name}, il tuo umore medio è stato {a} su 5. Negli altri giorni, {b}.",
+    "patternFootnote": "Questo può mostrare cosa tende ad andare insieme, non cosa causa cosa. Non cambiare mai un farmaco senza parlarne con il tuo medico o farmacista.",
+    "appointmentHeading": "Routine",
+    "appointmentShare": "{name}: spunta nel {percent}% dei giorni con check-in",
+    "appointmentNotEnough": "{name}: non ci sono ancora abbastanza giorni"
   },
   "safetyPlan": {
     "title": "Il mio piano di sicurezza",

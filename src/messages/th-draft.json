@@ -3030,6 +3030,31 @@
     "reason": "UX draft (native read pending)"
   },
   {
+    "key": "export.exportRoutine",
+    "en": "Routine",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "export.exportRoutineStarted",
+    "en": "started {date}",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "export.exportRoutineInAppointment",
+    "en": "in my appointment summary",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "export.exportRoutineTicked",
+    "en": "Ticked: {dates}",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "export.exportRoutineNoTicks",
+    "en": "Not ticked yet",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
     "key": "year.title",
     "en": "Your year in Moodbow",
     "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for UX to check)"
@@ -3158,6 +3183,106 @@
     "key": "share.shareShowedUp",
     "en": "{n, plural, =1{Showed up on 1 day} other{Showed up on # days}}",
     "reason": "UX draft (native read pending; the app's Thai, moodbow-app #252)"
+  },
+  {
+    "key": "routine.title",
+    "en": "Routine",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.intro",
+    "en": "Up to 3 things you'd like to tick off each day. Only you see them.",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.addHint",
+    "en": "For example, Morning meds",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.add",
+    "en": "Add",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.full",
+    "en": "That's 3, the most for now.",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.duplicate",
+    "en": "You already have that one.",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.options",
+    "en": "Options for {item}",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.deleteConfirm",
+    "en": "Remove",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.deleteTitle",
+    "en": "Remove {name}?",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.deleteBody",
+    "en": "This removes the item and the days you ticked it.",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.inAppointment",
+    "en": "Show in For my appointment",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.rowTitle",
+    "en": "Routine",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.rowEmpty",
+    "en": "Add up to 3 things you do most days, like Morning meds or a walk.",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.rowSetUp",
+    "en": "Set up",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.saveFailed",
+    "en": "Your routine ticks weren't saved. Try again.",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.patternShown",
+    "en": "On days you ticked {name}, your mood averaged {a} of 5. On other days, {b}.",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.patternFootnote",
+    "en": "This may show what tends to go together, not what causes what. Never change a medication without talking to your doctor or pharmacist.",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.appointmentHeading",
+    "en": "Routine",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.appointmentShare",
+    "en": "{name}: ticked on {percent}% of check-in days",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.appointmentNotEnough",
+    "en": "{name}: not enough days yet",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
   },
   {
     "key": "today.lateNote",

@@ -468,7 +468,12 @@
     "exportStress": "Stress",
     "exportOfFive": "{value}/5",
     "exportReflectionOn": "Zu deinem Eintrag vom {date}",
-    "exportTags": "Tags"
+    "exportTags": "Tags",
+    "exportRoutine": "Routine",
+    "exportRoutineStarted": "begonnen am {date}",
+    "exportRoutineInAppointment": "in meiner Zusammenfassung für den Termin",
+    "exportRoutineTicked": "Abgehakt: {dates}",
+    "exportRoutineNoTicks": "Noch nicht abgehakt"
   },
   "help": {
     "helpTitle": "Hilfe & FAQ",
@@ -780,6 +785,28 @@
     "nameItQuestion": "Was fühlst du gerade?",
     "nameItSmaller": "Es zu benennen kann es ein bisschen kleiner machen.",
     "nameItThanks": "Danke, dass du es benannt hast."
+  },
+  "routine": {
+    "title": "Routine",
+    "intro": "Bis zu 3 Dinge, die du jeden Tag abhaken möchtest. Nur du siehst sie.",
+    "addHint": "Zum Beispiel Medikamente am Morgen",
+    "add": "Hinzufügen",
+    "full": "Das sind 3, mehr geht im Moment nicht.",
+    "duplicate": "Das hast du schon.",
+    "options": "Optionen für {item}",
+    "deleteConfirm": "Entfernen",
+    "deleteTitle": "{name} entfernen?",
+    "deleteBody": "Damit werden der Eintrag und die Tage entfernt, an denen du ihn abgehakt hast.",
+    "inAppointment": "In Für meinen Termin zeigen",
+    "rowTitle": "Routine",
+    "rowEmpty": "Füge bis zu 3 Dinge hinzu, die du an den meisten Tagen machst, etwa Medikamente am Morgen oder einen Spaziergang.",
+    "rowSetUp": "Einrichten",
+    "saveFailed": "Deine Routine-Häkchen wurden nicht gespeichert. Versuch es noch einmal.",
+    "patternShown": "An Tagen, an denen du {name} abgehakt hast, lag deine Stimmung im Schnitt bei {a} von 5. An anderen Tagen bei {b}.",
+    "patternFootnote": "Das kann zeigen, was oft zusammen auftritt, nicht was was verursacht. Ändere ein Medikament nie, ohne mit deiner Ärztin, deinem Arzt oder in der Apotheke zu sprechen.",
+    "appointmentHeading": "Routine",
+    "appointmentShare": "{name}: an {percent} % der Check-in-Tage abgehakt",
+    "appointmentNotEnough": "{name}: noch nicht genug Tage"
   },
   "safetyPlan": {
     "title": "Mein Sicherheitsplan",
