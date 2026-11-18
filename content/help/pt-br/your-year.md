@@ -19,4 +19,4 @@ Se os humores baixos ocuparam boa parte do seu ano, as telas de momentos, do que
 
 Ele é calculado a partir dos seus check-ins com regras fixas, sem IA, e nada novo é guardado. Ele nunca lê o que você escreve.
 
-**Compartilhar seu ano** cria uma imagem com as cores do seu ano, o número de dias em que você apareceu e o ano. Suas anotações, tags, momentos e datas nunca aparecem nela; você pode adicionar uma linha sua, se quiser. Ela só é compartilhada se você quiser, pelas opções de compartilhamento do seu celular ou navegador.{/pending}
+**Compartilhar seu ano** cria uma imagem com as cores do seu ano, o número de dias em que você apareceu e o ano. Suas anotações, tags, momentos e datas nunca aparecem nela; você pode adicionar uma linha sua, se quiser. Ela só é compartilhada se você escolher, pelas opções de compartilhamento do seu celular ou navegador.{/pending}
