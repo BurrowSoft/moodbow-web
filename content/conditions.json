@@ -342,5 +342,9 @@
   "mood-prompts-live": {
     "met": false,
     "what": "1.4 E Prompts that follow your mood (specs/1.4-features.md §E, UX 18 Nov; the cases in src/lib/journal/moodPrompts.contract.json, for moodbow-app supabase/contracts/mood-prompts.json): on Write, above an empty entry, today's check-in mood picks the library group (1-2 hard-days with its help, 3 noticing, 4-5 gratitude). Free: one prompt a day, Another back to the daily list; Plus: the group from its saved place. Never on a day an entry or tag is crisis-flagged. No new analytics. Before it's met: the contract on the app's master, the Reviewer's read and the Web Tester's row."
+  },
+  "routine-live": {
+    "met": false,
+    "what": "1.4 F Medication and routine (specs/1.4-features.md §F, plans/PLAN-routine.md, board 29): up to 3 items the person ticks in the check-in, under Tags; Me → Routine to add, rename, order, remove and opt each into For my appointment. Patterns show a routine line only when mood is higher on ticked days, always with the caution; the appointment shows % of check-in days ticked; export carries it. Item names are never counted or sent anywhere else. Needs the app's migration 038 on Production (Vitor's word plus the privacy line), the contracts on the app's master, the Reviewer's read and the Web Tester's rows."
   }
 }

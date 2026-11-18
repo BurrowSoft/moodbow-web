@@ -4,13 +4,14 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import type { CheckIn } from "@/lib/journal/checkIn";
 import { CheckInCard } from "../../CheckInCard";
+import type { CardRoutine } from "../../RoutineField";
 
 // A past day's check-in in the day view: the card itself when there is one;
 // otherwise "No check-in this day" and "Add a check-in", which opens it.
-export function DayCheckIn({ initial, uid, date, dateLocaleTag, initialTags = null, recentTags = [], country = null }: { initial: CheckIn | null; uid: string; date: string; dateLocaleTag: string; initialTags?: string[] | null; recentTags?: string[]; country?: string | null }) {
+export function DayCheckIn({ initial, uid, date, dateLocaleTag, initialTags = null, recentTags = [], country = null, routine = null }: { initial: CheckIn | null; uid: string; date: string; dateLocaleTag: string; initialTags?: string[] | null; recentTags?: string[]; country?: string | null; routine?: CardRoutine | null }) {
   const t = useTranslations("timeline");
   const [adding, setAdding] = useState(false);
-  if (initial || adding) return <CheckInCard initial={initial} uid={uid} date={date} dateLocaleTag={dateLocaleTag} autoFocus={adding} initialTags={initialTags} recentTags={recentTags} country={country} />;
+  if (initial || adding) return <CheckInCard initial={initial} uid={uid} date={date} dateLocaleTag={dateLocaleTag} autoFocus={adding} initialTags={initialTags} recentTags={recentTags} country={country} routine={routine} />;
   return (
     <div className="rounded-3xl border border-dashed border-border p-[24px]" data-testid="day-no-checkin">
       <p className="text-muted">{t("dayNoCheckin")}</p>

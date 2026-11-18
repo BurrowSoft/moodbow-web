@@ -785,6 +785,23 @@
     "nameItSmaller": "การตั้งชื่อให้ความรู้สึกอาจทำให้มันเล็กลงได้บ้าง",
     "nameItThanks": "ขอบคุณที่ตั้งชื่อให้มัน"
   },
+  "routine": {
+    "title": "Routine",
+    "intro": "Up to 3 things you'd like to tick off each day. Only you see them.",
+    "addHint": "For example, Morning meds",
+    "add": "Add",
+    "full": "That's 3, the most for now.",
+    "duplicate": "You already have that one.",
+    "options": "Options for {item}",
+    "deleteConfirm": "Remove",
+    "deleteTitle": "Remove {name}?",
+    "deleteBody": "This removes the item and the days you ticked it.",
+    "inAppointment": "Show in For my appointment",
+    "rowTitle": "Routine",
+    "rowEmpty": "Add up to 3 things you do most days, like Morning meds or a walk.",
+    "rowSetUp": "Set up",
+    "saveFailed": "Your routine ticks weren't saved. Try again."
+  },
   "safetyPlan": {
     "title": "แผนความปลอดภัยของฉัน",
     "intro": "กรอกไว้ในวันที่ใจเย็นกว่า เพื่อให้มีไว้ตอนที่คุณต้องการ ทุกส่วนไม่บังคับ มีแค่คุณที่เห็น",

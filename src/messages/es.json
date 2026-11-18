@@ -785,6 +785,23 @@
     "nameItSmaller": "Ponerle nombre puede hacerlo un poco más pequeño.",
     "nameItThanks": "Gracias por ponerle nombre."
   },
+  "routine": {
+    "title": "Routine",
+    "intro": "Up to 3 things you'd like to tick off each day. Only you see them.",
+    "addHint": "For example, Morning meds",
+    "add": "Add",
+    "full": "That's 3, the most for now.",
+    "duplicate": "You already have that one.",
+    "options": "Options for {item}",
+    "deleteConfirm": "Remove",
+    "deleteTitle": "Remove {name}?",
+    "deleteBody": "This removes the item and the days you ticked it.",
+    "inAppointment": "Show in For my appointment",
+    "rowTitle": "Routine",
+    "rowEmpty": "Add up to 3 things you do most days, like Morning meds or a walk.",
+    "rowSetUp": "Set up",
+    "saveFailed": "Your routine ticks weren't saved. Try again."
+  },
   "safetyPlan": {
     "title": "Mi plan de seguridad",
     "intro": "Complétalo un día más tranquilo, para que esté aquí cuando lo necesites. Cada parte es opcional. Solo tú puedes verlo.",
