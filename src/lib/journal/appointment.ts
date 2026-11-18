@@ -42,3 +42,25 @@ export function starredIn(rows: unknown, days: string[]): StarredEntry[] {
     .filter((r): r is StarredEntry => typeof r?.id === "string" && typeof r?.body === "string" && typeof r?.entry_date === "string" && days.includes(r.entry_date))
     .sort((a, b) => (a.entry_date === b.entry_date ? a.id.localeCompare(b.id) : a.entry_date < b.entry_date ? -1 : 1));
 }
+
+// Routine (1.4 F; content/appointment.json routineCases, UX 18 Nov): only the items the person opted
+// in; none, no section (null). Per item, in position order, of the range's check-in days on or
+// after its started_on: the share ticked, a whole number (halves up, by integers); fewer than
+// routineMinDays such days, "not enough days yet". Never a mood comparison (UX's medication
+// safety ruling).
+export type AppointmentRoutineItem = { id: string; position: number; in_appointment: boolean; started_on: string; ticks: readonly string[] };
+export type AppointmentRoutineLine = { id: string; state: "percent"; percent: number } | { id: string; state: "not_enough" };
+
+export function routineSection(checkInDays: readonly string[], days: string[], items: readonly AppointmentRoutineItem[]): AppointmentRoutineLine[] | null {
+  const range = new Set(days);
+  const inRange = [...new Set(checkInDays)].filter((d) => range.has(d));
+  const opted = items.filter((i) => i.in_appointment).sort((a, b) => a.position - b.position);
+  if (opted.length === 0) return null;
+  return opted.map((item) => {
+    const counted = inRange.filter((d) => d >= item.started_on);
+    if (counted.length < APPOINTMENT_RULES.routineMinDays) return { id: item.id, state: "not_enough" };
+    const ticks = new Set(item.ticks);
+    const ticked = counted.filter((d) => ticks.has(d)).length;
+    return { id: item.id, state: "percent", percent: Math.floor((ticked * 200 + counted.length) / (counted.length * 2)) };
+  });
+}
