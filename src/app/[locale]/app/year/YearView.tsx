@@ -32,7 +32,7 @@ export async function YearView({ review, country, dateLocaleTag, share, morePlus
           {help}
         </header>
         <p data-testid="year-not-enough" className={`${JOURNAL_CARD} text-text`}>
-          {t("notEnough", { count: review.days })}
+          {t("notEnough", { year: review.year, count: review.days })}
         </p>
       </section>
     );
@@ -42,8 +42,8 @@ export async function YearView({ review, country, dateLocaleTag, share, morePlus
   const monthName = (i: number) => month.format(new Date(Date.UTC(review.year, i, 1)));
   const moodName = (m: number) => tt(`mood${m}` as "mood1");
 
-  const coloured = review.screens.find((s) => s.screen === "colours");
-  const canShare = share && coloured?.screen === "colours" && coloured.months.filter((m) => m !== null).length >= YEAR_MIN_MONTHS;
+  // The Year card keeps its own rule (5 check-ins a month, 3 months), whatever the strip shows.
+  const canShare = share && review.cardMonths >= YEAR_MIN_MONTHS;
 
   const body = (s: YearScreen) => {
     switch (s.screen) {
@@ -72,7 +72,10 @@ export async function YearView({ review, country, dateLocaleTag, share, morePlus
           <>
             <h2 tabIndex={-1} className={H2}>{t("daysTitle")}</h2>
             {/* The big number (board 27) repeats the line's count, so screen readers hear the line only. */}
-            <p aria-hidden="true" className="mt-4 text-[64px] leading-none font-bold text-text">{s.days}</p>
+            <p aria-hidden="true" className="mt-4 flex flex-wrap items-baseline gap-x-[8px]">
+              <span className="text-[64px] leading-none font-bold text-text">{s.days}</span>
+              <span className="text-[16px] text-muted">{t("daysUnit", { count: s.days })}</span>
+            </p>
             <p className="mt-4 text-[15px] leading-normal text-text" data-testid="year-days">{t("daysLine", { count: s.days })}</p>
           </>
         );
@@ -125,7 +128,8 @@ export async function YearView({ review, country, dateLocaleTag, share, morePlus
             <h2 tabIndex={-1} className={H2}>{t("hardTitle")}</h2>
             <p className="mt-2 text-text" data-testid="year-hard">{t("hardLine")}</p>
             <div className="mt-3">
-              <GetHelpNow country={country} testId="year-hard-help" neutral />
+              {/* An outline button, as on board 27b. */}
+              <GetHelpNow country={country} testId="year-hard-help" neutral className="inline-flex min-h-[48px] w-full items-center justify-center rounded-full border-[1.5px] border-text px-[20px] text-center font-medium text-text hover:bg-pill [overflow-wrap:anywhere]" />
             </div>
           </>
         );

@@ -1010,7 +1010,7 @@
     "coloursTitle": "Seu ano em cores",
     "coloursLine": "A cada mês, os humores que você registrou.",
     "monthMood": "{month}: {mood}",
-    "monthFaint": "{month}: poucos dias registrados",
+    "monthFaint": "{month}: nenhum dia registrado",
     "daysTitle": "Os dias em que você apareceu",
     "daysLine": "{count, plural, one {Você apareceu em # dia} other {Você apareceu em # dias}} este ano.",
     "momentsTitle": "Seus momentos",
@@ -1021,11 +1021,12 @@
     "hardLine": "Este ano pediu muito de você. Você continuou aparecendo.",
     "closing": "Obrigado por reservar esse tempo para você este ano.",
     "morePlus": "Ver mais do seu ano",
-    "notEnough": "Seu ano no Moodbow aparece depois de 30 dias registrados. Você está em {count}.",
+    "notEnough": "Seu ano de {year} no Moodbow aparece depois de 30 dias registrados naquele ano. Você está em {count}.",
     "share": "Compartilhar seu ano",
     "previous": "Anterior",
     "next": "Próximo",
     "position": "Tela {n} de {total}",
-    "shareNote": "A imagem mostra suas cores e o número de dias. Suas anotações, tags, momentos e datas nunca aparecem nela."
+    "shareNote": "A imagem mostra suas cores e o número de dias. Suas anotações, tags, momentos e datas nunca aparecem nela.",
+    "daysUnit": "{count, plural, one {dia} other {dias}}"
   }
 }

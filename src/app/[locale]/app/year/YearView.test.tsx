@@ -95,7 +95,7 @@ describe("YearView", () => {
 
   it("not enough days: the line with the count, and the help", async () => {
     await view(reviewOf(4));
-    expect(screen.getByTestId("year-not-enough").textContent).toBe('notEnough {"count":28}');
+    expect(screen.getByTestId("year-not-enough").textContent).toBe('notEnough {"year":2026,"count":28}');
     expect(screen.getByTestId("year-help")).toBeTruthy();
     expect(screen.queryByTestId("year-carousel")).toBeNull();
   });

@@ -1010,7 +1010,7 @@
     "coloursTitle": "Il tuo anno a colori",
     "coloursLine": "Ogni mese, gli umori che hai registrato.",
     "monthMood": "{month}: {mood}",
-    "monthFaint": "{month}: pochi giorni registrati",
+    "monthFaint": "{month}: nessun giorno registrato",
     "daysTitle": "I giorni in cui c'eri",
     "daysLine": "{count, plural, one {Hai registrato # giorno} other {Hai registrato # giorni}} quest'anno.",
     "momentsTitle": "I tuoi momenti",
@@ -1021,11 +1021,12 @@
     "hardLine": "Quest'anno ti ha chiesto molto. Hai continuato a tornare.",
     "closing": "Grazie per aver dedicato del tempo a te quest'anno.",
     "morePlus": "Scopri di più sul tuo anno",
-    "notEnough": "Il tuo anno in Moodbow appare dopo 30 giorni registrati. Sei a {count}.",
+    "notEnough": "Il tuo {year} in Moodbow appare dopo 30 giorni registrati in quell'anno. Sei a {count}.",
     "share": "Condividi il tuo anno",
     "previous": "Indietro",
     "next": "Avanti",
     "position": "Schermata {n} di {total}",
-    "shareNote": "L'immagine mostra i tuoi colori e il numero di giorni. Le tue pagine, i tag, i momenti e le date non ci sono mai."
+    "shareNote": "L'immagine mostra i tuoi colori e il numero di giorni. Le tue pagine, i tag, i momenti e le date non ci sono mai.",
+    "daysUnit": "{count, plural, one {giorno} other {giorni}}"
   }
 }

@@ -1,7 +1,7 @@
 {
-  "version": 1,
+  "version": 2,
   "draft": "Web Dev 18 Nov 2026 (UX rulings 18 Nov). Moves to moodbow-app supabase/contracts when the Mobile Dev starts A on the app.",
-  "about": "Your year in Moodbow (1.4 A). Year: December → this year; January → the year just ended; else the newest complete year with 30 days, else last year. A day counts with a mood 1-5 (one per date, the first). Under 30 days: notEnough. Hard = Your week v2 (low 1-2 on more than half, or no 4-5 and low on at least half): colours, days, hard, closing. Otherwise colours (month mode, ties higher, under 5 = null), days, moments (if any in the year: count + the first, middle (floor((n-1)/2) from 0) and last dates, date order then id; all under 4), helped (if any: up to 3 Things that help me by position; tags only when on: the 3 tags on the most good days, at least 3 each, case-insensitive, ties by the lowercased tag in code-point order, shown as typed most recently), pattern (Patterns' sides, 5 a side, rounded gap ≥ 1.0 in the expected direction, largest, ties in sleep/movement/stress order), closing. checkIns are [date, mood, sleep_hours, exercise_minutes, stress].",
+  "about": "Your year in Moodbow (1.4 A). Year: December → this year; January → the year just ended; else the newest complete year with 30 days, else last year. A day counts with a mood 1-5 (one per date, the first). Under 30 days: notEnough. Hard = Your week v2 (low 1-2 on more than half, or no 4-5 and low on at least half): colours, days, hard, closing. Otherwise colours (each month's most frequent mood, ties higher, from 1 check-in; a month with none = null; UX 18 Nov), days, moments (if any in the year: count + the first, middle (floor((n-1)/2) from 0) and last dates, date order then id; all under 4), helped (if any: up to 3 Things that help me by position; tags only when on: the 3 tags on the most good days, at least 3 each, case-insensitive, ties by the lowercased tag in code-point order, shown as typed most recently), pattern (Patterns' sides, 5 a side, rounded gap ≥ 1.0 in the expected direction, largest, ties in sleep/movement/stress order), closing. cardMonths (ready only): months with 5 or more check-ins, the Year card's own rule; Share is offered at 3 or more. insightsRow (each case): December and January, always the year on offer (fixed); otherwise the newest complete year with 30 days, or null (no row on Insights). checkIns are [date, mood, sleep_hours, exercise_minutes, stress].",
   "rules": {
     "minDays": 30,
     "maxMoments": 3,
@@ -485,6 +485,7 @@
         "state": "ready",
         "hard": false,
         "days": 40,
+        "cardMonths": 2,
         "screens": [
           {
             "screen": "colours",
@@ -537,7 +538,8 @@
             "screen": "closing"
           }
         ]
-      }
+      },
+      "insightsRow": 2026
     },
     {
       "name": "B hard: low on 16 of 30; moments, helps and tags are never shown, no pattern",
@@ -829,6 +831,7 @@
         "state": "ready",
         "hard": true,
         "days": 30,
+        "cardMonths": 1,
         "screens": [
           {
             "screen": "colours",
@@ -858,7 +861,8 @@
             "screen": "closing"
           }
         ]
-      }
+      },
+      "insightsRow": 2026
     },
     {
       "name": "C hard by v2: no good day at all and low on exactly half; a tie month goes to the higher mood",
@@ -1083,6 +1087,7 @@
         "state": "ready",
         "hard": true,
         "days": 30,
+        "cardMonths": 1,
         "screens": [
           {
             "screen": "colours",
@@ -1112,7 +1117,8 @@
             "screen": "closing"
           }
         ]
-      }
+      },
+      "insightsRow": 2026
     },
     {
       "name": "D tags off, no moments, no helps; stress goes the unexpected way, so no pattern",
@@ -1337,6 +1343,7 @@
         "state": "ready",
         "hard": false,
         "days": 30,
+        "cardMonths": 1,
         "screens": [
           {
             "screen": "colours",
@@ -1363,7 +1370,8 @@
             "screen": "closing"
           }
         ]
-      }
+      },
+      "insightsRow": 2026
     },
     {
       "name": "E not enough: 30 rows but one mood is 0 and one day twice, so 28 days; no complete year has 30, so last year",
@@ -1867,7 +1875,8 @@
         "year": 2026,
         "state": "notEnough",
         "days": 28
-      }
+      },
+      "insightsRow": null
     },
     {
       "name": "F outside Dec/Jan: last year has 10 days, so the newest complete year with 30 (2025)",
@@ -2162,6 +2171,7 @@
         "state": "ready",
         "hard": false,
         "days": 30,
+        "cardMonths": 1,
         "screens": [
           {
             "screen": "colours",
@@ -2188,7 +2198,8 @@
             "screen": "closing"
           }
         ]
-      }
+      },
+      "insightsRow": 2025
     },
     {
       "name": "G January is always the year just ended, even when an earlier year has enough",
@@ -2482,7 +2493,8 @@
         "year": 2026,
         "state": "notEnough",
         "days": 10
-      }
+      },
+      "insightsRow": 2026
     },
     {
       "name": "H seven moments: the first, the middle (number 3 from 0) and the last",
@@ -2736,6 +2748,7 @@
         "state": "ready",
         "hard": false,
         "days": 30,
+        "cardMonths": 1,
         "screens": [
           {
             "screen": "colours",
@@ -2771,7 +2784,282 @@
             "screen": "closing"
           }
         ]
-      }
+      },
+      "insightsRow": 2026
+    },
+    {
+      "name": "I a month with 1-4 check-ins is coloured (its own mode); the share card's months still need 5",
+      "today": "2026-12-15",
+      "checkIns": [
+        [
+          "2026-03-01",
+          4,
+          null,
+          null,
+          null
+        ],
+        [
+          "2026-03-02",
+          4,
+          null,
+          null,
+          null
+        ],
+        [
+          "2026-03-03",
+          4,
+          null,
+          null,
+          null
+        ],
+        [
+          "2026-03-04",
+          4,
+          null,
+          null,
+          null
+        ],
+        [
+          "2026-03-05",
+          4,
+          null,
+          null,
+          null
+        ],
+        [
+          "2026-03-06",
+          4,
+          null,
+          null,
+          null
+        ],
+        [
+          "2026-03-07",
+          4,
+          null,
+          null,
+          null
+        ],
+        [
+          "2026-03-08",
+          4,
+          null,
+          null,
+          null
+        ],
+        [
+          "2026-03-09",
+          4,
+          null,
+          null,
+          null
+        ],
+        [
+          "2026-03-10",
+          4,
+          null,
+          null,
+          null
+        ],
+        [
+          "2026-03-11",
+          4,
+          null,
+          null,
+          null
+        ],
+        [
+          "2026-03-12",
+          4,
+          null,
+          null,
+          null
+        ],
+        [
+          "2026-03-13",
+          4,
+          null,
+          null,
+          null
+        ],
+        [
+          "2026-03-14",
+          4,
+          null,
+          null,
+          null
+        ],
+        [
+          "2026-03-15",
+          4,
+          null,
+          null,
+          null
+        ],
+        [
+          "2026-03-16",
+          4,
+          null,
+          null,
+          null
+        ],
+        [
+          "2026-03-17",
+          4,
+          null,
+          null,
+          null
+        ],
+        [
+          "2026-03-18",
+          4,
+          null,
+          null,
+          null
+        ],
+        [
+          "2026-03-19",
+          4,
+          null,
+          null,
+          null
+        ],
+        [
+          "2026-03-20",
+          4,
+          null,
+          null,
+          null
+        ],
+        [
+          "2026-03-21",
+          4,
+          null,
+          null,
+          null
+        ],
+        [
+          "2026-03-22",
+          4,
+          null,
+          null,
+          null
+        ],
+        [
+          "2026-03-23",
+          4,
+          null,
+          null,
+          null
+        ],
+        [
+          "2026-03-24",
+          4,
+          null,
+          null,
+          null
+        ],
+        [
+          "2026-03-25",
+          4,
+          null,
+          null,
+          null
+        ],
+        [
+          "2026-03-26",
+          4,
+          null,
+          null,
+          null
+        ],
+        [
+          "2026-03-27",
+          4,
+          null,
+          null,
+          null
+        ],
+        [
+          "2026-03-28",
+          4,
+          null,
+          null,
+          null
+        ],
+        [
+          "2026-03-29",
+          4,
+          null,
+          null,
+          null
+        ],
+        [
+          "2026-03-30",
+          4,
+          null,
+          null,
+          null
+        ],
+        [
+          "2026-04-01",
+          2,
+          null,
+          null,
+          null
+        ],
+        [
+          "2026-04-02",
+          2,
+          null,
+          null,
+          null
+        ],
+        [
+          "2026-05-01",
+          5,
+          null,
+          null,
+          null
+        ]
+      ],
+      "moments": [],
+      "helps": [],
+      "tags": null,
+      "expect": {
+        "year": 2026,
+        "state": "ready",
+        "hard": false,
+        "days": 33,
+        "cardMonths": 1,
+        "screens": [
+          {
+            "screen": "colours",
+            "months": [
+              null,
+              null,
+              4,
+              2,
+              5,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "screen": "days",
+            "days": 33
+          },
+          {
+            "screen": "closing"
+          }
+        ]
+      },
+      "insightsRow": 2026
     }
   ]
 }

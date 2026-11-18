@@ -1010,7 +1010,7 @@
     "coloursTitle": "Dein Jahr in Farben",
     "coloursLine": "Jeden Monat die Stimmungen, die du eingetragen hast.",
     "monthMood": "{month}: {mood}",
-    "monthFaint": "{month}: nicht genug Tage eingetragen",
+    "monthFaint": "{month}: keine Tage eingetragen",
     "daysTitle": "Tage, an denen du da warst",
     "daysLine": "{count, plural, one {Du warst in diesem Jahr an # Tag da.} other {Du warst in diesem Jahr an # Tagen da.}}",
     "momentsTitle": "Deine Momente",
@@ -1021,11 +1021,12 @@
     "hardLine": "Dieses Jahr hat dir viel abverlangt. Du warst trotzdem immer wieder da.",
     "closing": "Danke, dass du dieses Jahr für dich da warst.",
     "morePlus": "Mehr von deinem Jahr ansehen",
-    "notEnough": "Dein Jahr in Moodbow erscheint, sobald du an 30 Tagen eingetragen hast. Du bist bei {count}.",
+    "notEnough": "Dein Jahr {year} in Moodbow erscheint, sobald du in diesem Jahr an 30 Tagen eingetragen hast. Du bist bei {count}.",
     "share": "Dein Jahr teilen",
     "previous": "Zurück",
     "next": "Weiter",
     "position": "Seite {n} von {total}",
-    "shareNote": "Das Bild zeigt deine Farben und die Anzahl der Tage. Deine Einträge, Tags, Momente und Daten sind nie darauf."
+    "shareNote": "Das Bild zeigt deine Farben und die Anzahl der Tage. Deine Einträge, Tags, Momente und Daten sind nie darauf.",
+    "daysUnit": "{count, plural, one {Tag} other {Tage}}"
   }
 }

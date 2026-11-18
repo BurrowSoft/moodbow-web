@@ -60,9 +60,9 @@ export function YearCarousel({ screens, labels, footer }: { screens: { id: strin
               <path d="M15 6l-6 6 6 6" />
             </svg>
           </button>
-          <span aria-hidden="true" className="flex items-center gap-1.5">
+          <span aria-hidden="true" className="flex min-w-0 flex-wrap items-center justify-center gap-[6px]">
             {screens.map((s, i) => (
-              <span key={s.id} className={`block h-2 rounded-full ${i === at ? "w-5 bg-accent" : "w-2 bg-border"}`} />
+              <span key={s.id} className={`block h-[8px] rounded-full ${i === at ? "w-[20px] bg-accent" : "w-[8px] bg-border"}`} />
             ))}
           </span>
           <button type="button" data-testid="year-next" aria-label={labels.next} onClick={() => go(at + 1, true)} disabled={at === total - 1} className={`${ROUND} bg-accent text-on-accent`}>

@@ -1010,7 +1010,7 @@
     "coloursTitle": "Tu año en colores",
     "coloursLine": "Cada mes, los estados de ánimo que registraste.",
     "monthMood": "{month}: {mood}",
-    "monthFaint": "{month}: no hay suficientes días registrados",
+    "monthFaint": "{month}: ningún día registrado",
     "daysTitle": "Los días que volviste",
     "daysLine": "{count, plural, one {Volviste # día} other {Volviste # días}} este año.",
     "momentsTitle": "Tus momentos",
@@ -1021,11 +1021,12 @@
     "hardLine": "Este año te pidió mucho. Y aun así, seguiste volviendo.",
     "closing": "Gracias por darte este espacio este año.",
     "morePlus": "Ver más de tu año",
-    "notEnough": "Tu año en Moodbow aparece cuando hayas registrado 30 días. Llevas {count}.",
+    "notEnough": "Tu año {year} en Moodbow aparece cuando hayas registrado 30 días de ese año. Llevas {count}.",
     "share": "Compartir tu año",
     "previous": "Anterior",
     "next": "Siguiente",
     "position": "Pantalla {n} de {total}",
-    "shareNote": "La imagen muestra tus colores y el número de días. Tus entradas, etiquetas, momentos y fechas nunca aparecen en ella."
+    "shareNote": "La imagen muestra tus colores y el número de días. Tus entradas, etiquetas, momentos y fechas nunca aparecen en ella.",
+    "daysUnit": "{count, plural, one {día} other {días}}"
   }
 }

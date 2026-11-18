@@ -1010,7 +1010,7 @@
     "coloursTitle": "Votre année en couleurs",
     "coloursLine": "Chaque mois, les humeurs que vous avez notées.",
     "monthMood": "{month} : {mood}",
-    "monthFaint": "{month} : pas assez de jours notés",
+    "monthFaint": "{month} : aucun jour noté",
     "daysTitle": "Les jours où vous étiez là",
     "daysLine": "{count, plural, one {Vous avez été là # jour} other {Vous avez été là # jours}} cette année.",
     "momentsTitle": "Vos moments forts",
@@ -1021,11 +1021,12 @@
     "hardLine": "Cette année vous a beaucoup demandé. Vous avez continué à revenir.",
     "closing": "Merci d'avoir été là pour vous cette année.",
     "morePlus": "Voir plus de votre année",
-    "notEnough": "Votre année dans Moodbow apparaît après 30 jours notés. Vous en êtes à {count}.",
+    "notEnough": "Votre année {year} dans Moodbow apparaît après 30 jours notés cette année-là. Vous en êtes à {count}.",
     "share": "Partager votre année",
     "previous": "Précédent",
     "next": "Suivant",
     "position": "Écran {n} sur {total}",
-    "shareNote": "L'image montre vos couleurs et le nombre de jours. Vos notes, étiquettes, moments forts et dates n'y figurent jamais."
+    "shareNote": "L'image montre vos couleurs et le nombre de jours. Vos notes, étiquettes, moments forts et dates n'y figurent jamais.",
+    "daysUnit": "{count, plural, one {jour} other {jours}}"
   }
 }

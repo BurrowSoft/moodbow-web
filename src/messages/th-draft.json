@@ -3061,7 +3061,7 @@
   },
   {
     "key": "year.monthFaint",
-    "en": "{month}: not enough check-ins",
+    "en": "{month}: no check-ins",
     "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for UX to check)"
   },
   {
@@ -3116,7 +3116,7 @@
   },
   {
     "key": "year.notEnough",
-    "en": "Your year in Moodbow appears once you've checked in on 30 days. You're on {count}.",
+    "en": "Your year in Moodbow for {year} appears once you've checked in on 30 days that year. You're on {count}.",
     "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for UX to check)"
   },
   {
@@ -3143,5 +3143,10 @@
     "key": "year.shareNote",
     "en": "The image shows your colours and the number of days. Your entries, tags, moments and dates are never on it.",
     "reason": "UX draft (native read pending; the Reviewer's AI check 18 Nov)"
+  },
+  {
+    "key": "year.daysUnit",
+    "en": "{count, plural, one {day} other {days}}",
+    "reason": "UX draft (native read pending; the app's Thai)"
   }
 ]

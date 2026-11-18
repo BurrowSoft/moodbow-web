@@ -15,8 +15,11 @@ import { flagsCrisis, type CrisisKeywords } from "../safety/crisis";
 // - hard (Your week's v2 rule, exactly): low on more than half, or no good day at all and low on
 //   at least half. Then the moments, helped and pattern screens are replaced by one kind line
 //   with the help offer, and there is no pattern sentence;
-// - colours: each month's most frequent mood, ties to the higher; under 5 check-ins: faint (null),
-//   the same months as the Year card (share/year.ts) that the share image draws;
+// - colours: each month's most frequent mood, ties to the higher, from 1 check-in; a month with
+//   none is empty (null) (UX, 18 Nov). cardMonths counts the months with 5 or more, the Year
+//   card's own rule (share/year.ts), which offers the share at 3;
+// - Insights' row (insightsRowYear): December and January, always the year on offer; otherwise
+//   only when a complete year has 30 days, naming the newest such year;
 // - moments: the count, and the dates of the first, middle and last moment of the year (date
 //   order, two on a day by id; the middle of n is number floor((n-1)/2) from 0); all of them
 //   under 4. No screen at 0;
@@ -54,7 +57,7 @@ export type YearScreen =
 
 export type YearReview =
   | { year: number; state: "notEnough"; days: number }
-  | { year: number; state: "ready"; hard: boolean; days: number; screens: YearScreen[] };
+  | { year: number; state: "ready"; hard: boolean; days: number; cardMonths: number; screens: YearScreen[] };
 
 export type YearReviewInput = {
   today: string;
@@ -77,7 +80,19 @@ export function reviewYear(today: string, rows: InsightRow[] = []): number {
   if (fixed !== null) return fixed;
   const last = Number(today.slice(0, 4)) - 1;
   const years = [...new Set(rows.map((r) => Number(r.local_date?.slice(0, 4))))].filter((y) => Number.isInteger(y) && y <= last).sort((a, b) => b - a);
-  return years.find((y) => yearRows(rows, y).length >= YEAR_REVIEW_RULES.minDays) ?? last;
+  return qualifyingYear(rows, last) ?? last;
+}
+
+// The newest year up to `last` with 30 days, or null.
+function qualifyingYear(rows: InsightRow[], last: number): number | null {
+  const years = [...new Set(rows.map((r) => Number(r.local_date?.slice(0, 4))))].filter((y) => Number.isInteger(y) && y <= last).sort((a, b) => b - a);
+  return years.find((y) => yearRows(rows, y).length >= YEAR_REVIEW_RULES.minDays) ?? null;
+}
+
+// The year Insights' row names, or null for no row (UX, 18 Nov): December and January always (the
+// page then says how many days are still to come); otherwise only a year the page would show.
+export function insightsRowYear(today: string, rows: InsightRow[]): number | null {
+  return yearOnOffer(today) ?? qualifyingYear(rows, Number(today.slice(0, 4)) - 1);
 }
 // The card on Today: 1 December to 31 January (the profile's date).
 export const yearCardOnToday = (today: string): boolean => yearOnOffer(today) !== null;
@@ -97,11 +112,18 @@ function yearRows(rows: InsightRow[], year: number): InsightRow[] {
   return out;
 }
 
-export function monthMoods(rows: InsightRow[]): (number | null)[] {
+const monthCounts = (rows: InsightRow[]) => {
   const counts = Array.from({ length: 12 }, () => [0, 0, 0, 0, 0]);
   for (const r of rows) counts[Number(r.local_date.slice(5, 7)) - 1][r.mood - 1]++;
-  return counts.map((byMood) => {
-    if (byMood.reduce((a, b) => a + b, 0) < MIN_CHECK_INS) return null;
+  return counts;
+};
+
+// The months the Year card colours: 5 check-ins or more (MIN_CHECK_INS).
+export const cardMonths = (rows: InsightRow[]): number => monthCounts(rows).filter((byMood) => byMood.reduce((a, b) => a + b, 0) >= MIN_CHECK_INS).length;
+
+export function monthMoods(rows: InsightRow[]): (number | null)[] {
+  return monthCounts(rows).map((byMood) => {
+    if (byMood.reduce((a, b) => a + b, 0) === 0) return null;
     let best = 0;
     for (let m = 1; m < 5; m++) if (byMood[m] >= byMood[best]) best = m;
     return best + 1;
@@ -181,5 +203,5 @@ export function yearReview(input: YearReviewInput): YearReview {
     if (pattern) screens.push({ screen: "pattern", template: PATTERN_TEMPLATE[pattern] });
   }
   screens.push({ screen: "closing" });
-  return { year, state: "ready", hard, days, screens };
+  return { year, state: "ready", hard, days, cardMonths: cardMonths(rows), screens };
 }

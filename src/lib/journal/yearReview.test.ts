@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import contract from "./yearReview.contract.json";
-import { firstMiddleLast, monthMoods, yearCardOnToday, yearReview, YEAR_REVIEW_RULES, type YearReviewInput } from "./yearReview";
+import { cardMonths, firstMiddleLast, insightsRowYear, monthMoods, yearCardOnToday, yearReview, YEAR_REVIEW_RULES, type YearReviewInput } from "./yearReview";
 import type { InsightRow } from "./insights";
 import { yearBands } from "../share/year";
 import { MOOD_HEX } from "../share/moodbow";
@@ -27,6 +27,7 @@ describe("year review contract (draft for moodbow-app)", () => {
   for (const c of contract.cases) {
     it(c.name, () => {
       expect(yearReview(inputOf(c))).toEqual(c.expect);
+      expect(insightsRowYear(c.today, rowsOf(c.checkIns as Tuple[]))).toBe(c.insightsRow);
     });
   }
 
@@ -99,13 +100,17 @@ describe("year review tags and the crisis matcher", () => {
 });
 
 describe("year review details", () => {
-  it("the months match the Year card's bands, so the share image is the same year", () => {
-    const rows = rowsOf(contract.cases[0].checkIns as Tuple[]).filter((r) => r.local_date.startsWith("2026-"));
-    const bands = yearBands(rows, 2026, "light").colours;
-    monthMoods(rows).forEach((m, i) => {
-      if (m === null) expect(MOOD_HEX).not.toContain(bands[i]);
-      else expect(bands[i]).toBe(MOOD_HEX[m - 1]);
+  it("cardMonths is the Year card's own count; a month the card leaves faint can still have a colour here", () => {
+    const c = contract.cases.find((x) => x.name.startsWith("I "))!;
+    const rows = rowsOf(c.checkIns as Tuple[]);
+    const card = yearBands(rows, 2026, "light");
+    expect(cardMonths(rows)).toBe(card.colouredMonths);
+    const moods = monthMoods(rows);
+    moods.forEach((m, i) => {
+      if (MOOD_HEX.includes(card.colours[i])) expect(card.colours[i]).toBe(MOOD_HEX[m! - 1]);
     });
+    expect(moods[3]).toBe(2);
+    expect(MOOD_HEX).not.toContain(card.colours[3]);
   });
 
   it("first, middle and last", () => {

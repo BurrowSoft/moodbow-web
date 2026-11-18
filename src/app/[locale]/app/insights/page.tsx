@@ -30,7 +30,7 @@ import { periodLine, readCheckInsSince, readWrittenDays } from "@/lib/plus/insig
 import { ShareMonth } from "./ShareMonth";
 import { WeeklyReport } from "./WeeklyReport";
 import { previewToday, previewTodayQuery } from "@/lib/journal/previewToday";
-import { reviewYear } from "@/lib/journal/yearReview";
+import { loadInsightsRowYear } from "@/lib/journal/yearReviewData";
 import { YearInsightsRow } from "../year/YearLink";
 
 // The weekly report runs in this page's functions and waits up to 45 s
@@ -70,7 +70,11 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
   // The page's reads all need only `me`, so they start together (the Web Dev's LCP read, 12 Nov:
   // each one in turn cost a round trip to the database). Same reads, same results. Moodbow Plus's
   // view is one of them (decision 246): null when its row can't be read (then nothing about Plus).
-  const [checkIns, plus, milestone, stored, requestHeaders] = await Promise.all([
+  // Your year in Moodbow's row (1.4 A): read with the rest. A Preview's ?today= stands in (never on
+  // Production).
+  const yearToday = previewToday((await searchParams).today, me.today);
+  const yearOn = pageGate("year-review-live") !== "hidden";
+  const [checkIns, plus, milestone, stored, requestHeaders, rowYear] = await Promise.all([
     supabase
       .from("check_ins")
       .select("local_date, mood, sleep_hours, stress, exercise_minutes")
@@ -82,17 +86,16 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
       ? supabase.from("ai_reports").select("id, period_start, body, tier, created_at").eq("kind", "weekly").eq("period_start", weekStart).maybeSingle()
       : null,
     headers(),
+    yearOn ? loadInsightsRowYear(supabase, yearToday).catch(() => null) : null,
   ]);
   // With Plus: Year and All time, and More patterns over the last 12 months (or all time on All time).
   // Insights are Plus (spec "Insights become Plus", 14 Nov): without Plus (or with a payment that
   // failed), the labelled example and nothing of theirs. A row that can't be read, or Plus off,
   // shows their own Insights as before (ruling 5). The gate is here and on the route only, never in
   // lib/journal/insights, which the appointment summary uses (ruling 2).
-  // Your year in Moodbow's row (1.4 A), for everyone: its year from the profile's today alone (in
-  // February to November the page itself finds the newest year with enough days; the row names
-  // last year). A Preview's ?today= stands in (never on Production).
-  const yearToday = previewToday((await searchParams).today, me.today);
-  const yearRow = pageGate("year-review-live") !== "hidden" ? <YearInsightsRow year={reviewYear(yearToday)} query={previewTodayQuery(yearToday, me.today)} /> : undefined;
+  // Your year in Moodbow's row (1.4 A), for everyone: December and January always; otherwise only
+  // when a complete year has 30 days, naming the year the page will show (UX, 18 Nov).
+  const yearRow = rowYear !== null ? <YearInsightsRow year={rowYear} query={previewTodayQuery(yearToday, me.today)} /> : undefined;
   if (plus && plus.kind !== "plus") return <InsightsExample yearRow={yearRow} help={<GetHelpNow country={me.profile?.country} testId="insights-example-help" counted neutral icon />} />;
   const hasPlus = plus?.kind === "plus";
   const longRange = hasPlus && isLongRange(asked) ? asked : null;
