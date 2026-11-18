@@ -27,6 +27,10 @@ const wait = (ms: number) => new Promise((done) => setTimeout(done, ms));
 // On a test build only (a Preview, dev, CI; never Production, where draftsAllowed() is false): two
 // non-secret headers say which step answered, so a Preview's "unavailable" can be traced (the Web
 // Tester's #363 row). Never the token, the hash or the key: a reason code and the database's host.
+// The Reviewer's rule: they only ever name INFRASTRUCTURE steps (bad-token, no-key, no-url,
+// rpc:<code>, parse, ok). Everything the database decides (unknown, revoked, expired, capped,
+// consents, the flag) stays one "db-unavailable". Never add a database-level reason, or the
+// uniform answer is gone on Previews.
 type Trace = { reason: string; host?: string };
 async function answer(started: number, body: SharedWeek, trace: Trace): Promise<NextResponse> {
   const left = RESPONSE_FLOOR_MS - (Date.now() - started);
