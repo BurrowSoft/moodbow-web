@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { pageGate } from "@/lib/conditions";
+import { draftsAllowed, pageGate } from "@/lib/conditions";
 import { readSharedWeek } from "@/lib/plus/serviceRole";
 import { parseSharedWeek, RESPONSE_FLOOR_MS, tokenHash, weekAsked, type SharedWeek } from "@/lib/share/trustedShare";
 
@@ -24,10 +24,19 @@ const MAX_BODY = 256;
 const UNAVAILABLE: SharedWeek = { status: "unavailable" };
 const wait = (ms: number) => new Promise((done) => setTimeout(done, ms));
 
-async function answer(started: number, body: SharedWeek): Promise<NextResponse> {
+// On a test build only (a Preview, dev, CI; never Production, where draftsAllowed() is false): two
+// non-secret headers say which step answered, so a Preview's "unavailable" can be traced (the Web
+// Tester's #363 row). Never the token, the hash or the key: a reason code and the database's host.
+type Trace = { reason: string; host?: string };
+async function answer(started: number, body: SharedWeek, trace: Trace): Promise<NextResponse> {
   const left = RESPONSE_FLOOR_MS - (Date.now() - started);
   if (left > 0) await wait(left);
-  return NextResponse.json(body, { headers: HEADERS });
+  const headers: Record<string, string> = { ...HEADERS };
+  if (draftsAllowed()) {
+    headers["X-Share-Reason"] = trace.reason;
+    if (trace.host) headers["X-Share-Db-Host"] = trace.host;
+  }
+  return NextResponse.json(body, { headers });
 }
 
 export async function POST(request: Request): Promise<NextResponse> {
@@ -41,7 +50,11 @@ export async function POST(request: Request): Promise<NextResponse> {
     input = {};
   }
   const hash = tokenHash(input?.token);
-  if (!hash) return answer(started, UNAVAILABLE);
-  const read = await readSharedWeek(hash, weekAsked(input?.week)).catch(() => ({ ok: false as const }));
-  return answer(started, read.ok ? parseSharedWeek(read.value) : UNAVAILABLE);
+  if (!hash) return answer(started, UNAVAILABLE, { reason: "bad-token" });
+  const read = await readSharedWeek(hash, weekAsked(input?.week)).catch(() => ({ ok: false as const, reason: "threw", host: undefined }));
+  if (!read.ok) return answer(started, UNAVAILABLE, { reason: read.reason, host: read.host });
+  const parsed = parseSharedWeek(read.value);
+  // The database said unavailable, or it said ok in a shape we don't pass on.
+  const said = (read.value as { status?: unknown } | null)?.status;
+  return answer(started, parsed, { reason: parsed.status === "ok" ? "ok" : said === "ok" ? "parse" : "db-unavailable", host: read.host });
 }

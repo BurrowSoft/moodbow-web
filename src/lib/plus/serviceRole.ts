@@ -142,9 +142,20 @@ export async function failPictureQueue(rows: Pick<QueuedPicture, "id" | "attempt
 // Share with someone I trust (1.4 G, migration 040): the viewer's read, which the database grants to
 // service_role only (the Reviewer's blocker 1). Only /api/share/view calls it, with the token's
 // sha256 already made (lib/share/trustedShare); the raw token never comes here.
-export async function readSharedWeek(tokenHashHex: string, week: number): Promise<Result<unknown>> {
+// reason (test builds only, never a secret): which step failed, so a Preview can tell a missing
+// client from an error the database or PostgREST returned (its code, e.g. "PGRST202"), and which
+// project the client talks to (the URL's host, never the key).
+export type SharedWeekRead = { ok: true; value: unknown; host: string } | { ok: false; reason: string; host: string };
+export async function readSharedWeek(tokenHashHex: string, week: number): Promise<SharedWeekRead> {
   const client = db();
-  if (!client) return fail;
+  const host = (() => {
+    try {
+      return new URL(process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").host;
+    } catch {
+      return "none";
+    }
+  })();
+  if (!client) return { ok: false, reason: process.env.SUPABASE_SERVICE_ROLE_KEY?.trim() ? "no-url" : "no-key", host };
   const { data, error } = await client.rpc("share_view", { p_token_hash: tokenHashHex, p_week: week });
-  return error ? fail : { ok: true, value: data };
+  return error ? { ok: false, reason: `rpc:${error.code ?? "unknown"}`, host } : { ok: true, value: data, host };
 }
