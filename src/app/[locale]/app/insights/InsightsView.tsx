@@ -118,7 +118,7 @@ export function InsightsView({
         {plusTab}
       </nav>
       {showedUp && (
-        <p data-testid="insights-showed-up" className="mt-4 text-text">
+        <p data-testid="insights-showed-up" className="mt-4 text-sm text-muted [overflow-wrap:anywhere]">
           {t("showedUp", { count: showedUp.count, range: showedUp.range })}
         </p>
       )}
