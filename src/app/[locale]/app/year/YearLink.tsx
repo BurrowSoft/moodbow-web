@@ -17,7 +17,7 @@ export async function YearTodayCard({ year, query }: { year: number; query: stri
         href={`/app/year${query}`}
         data-count="year_review_open"
         data-testid="year-today-open"
-        className="mt-3 inline-flex min-h-11 items-center justify-center rounded-full bg-accent px-6 font-medium text-on-accent hover:bg-accent-hover"
+        className="mt-3 inline-flex min-h-11 items-center justify-center rounded-full bg-accent px-[24px] font-medium text-on-accent hover:bg-accent-hover"
       >
         {t("open")}
       </Link>
@@ -32,10 +32,10 @@ export async function YearInsightsRow({ year, query }: { year: number; query: st
       href={`/app/year${query}`}
       data-count="year_review_open"
       data-testid="year-insights-row"
-      className="flex min-h-12 items-center justify-between gap-3 rounded-2xl border border-border bg-surface px-4 py-3 text-text hover:border-accent"
+      className="flex min-h-12 flex-wrap items-center justify-between gap-x-[12px] gap-y-[4px] rounded-2xl border border-border bg-surface px-[16px] py-[12px] text-text hover:border-accent"
     >
-      <span className="font-medium">{t("title")}</span>
-      <span className="text-sm text-muted">{year}</span>
+      <span className="min-w-0 flex-1 font-medium [overflow-wrap:anywhere]">{t("title")}</span>
+      <span className="shrink-0 text-sm text-muted">{year}</span>
     </Link>
   );
 }

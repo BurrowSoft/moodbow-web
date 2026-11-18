@@ -15,7 +15,7 @@ const H2 = "text-[22px] leading-tight font-semibold text-text focus:outline-none
 // Your year in Moodbow (1.4 A): the screens from lib/journal/yearReview, server-rendered from the
 // person's own rows. Help is under every screen (counted: it's always there). A hard year's own
 // help sits in its line and is never counted, as it would tell which kind of year it was. The
-// share is the 1.1 J Year card alone, with no line of the person's own; offered when the card
+// share is the 1.1 J Year card alone (the person may add their own line; UX 18 Nov); offered when the card
 // would draw (3 coloured months) and share cards are on. Plus people get a quiet way to the Plus
 // Year in review on the last screen; nobody gets an upsell here.
 export async function YearView({ review, country, dateLocaleTag, share, morePlus }: { review: YearReview; country: string | null | undefined; dateLocaleTag: string; share: boolean; morePlus: boolean }) {
@@ -57,10 +57,10 @@ export async function YearView({ review, country, dateLocaleTag, share, morePlus
                 <li key={i} className="flex flex-col items-center gap-1">
                   <span
                     aria-hidden="true"
-                    className={`block h-10 w-full rounded-xl ${m === null ? "border border-dashed border-border" : ""}`}
+                    className={`block h-[40px] w-full rounded-xl ${m === null ? "border border-dashed border-border" : ""}`}
                     style={m === null ? undefined : { backgroundColor: MOOD_HEX[m - 1] }}
                   />
-                  <span aria-hidden="true" className="text-xs text-muted">{monthName(i)}</span>
+                  <span aria-hidden="true" className="max-w-full text-center leading-tight text-muted [font-size:min(0.75rem,max(6vw,12px))] [overflow-wrap:anywhere]">{monthName(i)}</span>
                   <span className="sr-only">{m === null ? t("monthFaint", { month: monthName(i) }) : t("monthMood", { month: monthName(i), mood: moodName(m) })}</span>
                 </li>
               ))}
@@ -93,7 +93,7 @@ export async function YearView({ review, country, dateLocaleTag, share, morePlus
           <>
             <h2 tabIndex={-1} className={H2}>{t("helpedTitle")}</h2>
             {s.helps.length > 0 && (
-              <ul className="mt-2 list-disc space-y-1 ps-5 text-text [overflow-wrap:anywhere]" data-testid="year-helps">
+              <ul className="mt-2 list-disc space-y-1 ps-[20px] text-text [overflow-wrap:anywhere]" data-testid="year-helps">
                 {s.helps.map((h, i) => (
                   <li key={i}>{h}</li>
                 ))}
@@ -104,7 +104,7 @@ export async function YearView({ review, country, dateLocaleTag, share, morePlus
                 <h3 className="mt-4 font-medium text-text">{t("tagsTitle")}</h3>
                 <ul className="mt-2 flex flex-wrap gap-2" data-testid="year-tags">
                   {s.tags.map((tag) => (
-                    <li key={tag} className="rounded-full bg-pill px-3 py-1 text-sm text-text [overflow-wrap:anywhere]">{tag}</li>
+                    <li key={tag} className="rounded-full bg-pill px-[12px] py-[4px] text-sm text-text [overflow-wrap:anywhere]">{tag}</li>
                   ))}
                 </ul>
               </>

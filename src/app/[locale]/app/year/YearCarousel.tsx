@@ -9,7 +9,7 @@ import { useRef, useState, type ReactNode } from "react";
 // open is never counted or stored. The position is also a polite live region, and a button (never
 // a swipe) moves focus to the new screen's heading.
 const SWIPE_PX = 50;
-const ROUND = "inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full disabled:opacity-40";
+const ROUND = "inline-flex h-[48px] w-[48px] shrink-0 items-center justify-center rounded-full disabled:opacity-40";
 
 export function YearCarousel({ screens, labels, footer }: { screens: { id: string; node: ReactNode }[]; labels: { previous: string; next: string; region: string; positions: string[] }; footer?: ReactNode }) {
   const [at, setAt] = useState(0);
