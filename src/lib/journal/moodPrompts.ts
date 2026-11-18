@@ -10,7 +10,7 @@ import { PROMPTS, daysSinceEpoch, type Prompt } from "./prompts";
 // - Free: one prompt a day, the group's [dayNumber(today) mod length]; "Another" falls back to the
 //   daily list from the day's own prompt on, never a second group prompt (no list unlocked);
 // - Plus: the group from the person's saved place on this device (the library's), "Another"
-//   stepping on and saving it;
+//   stepping on and saving it, kept within the group's length;
 // - hard-days keeps its help (the library's "help"), never counted. No new analytics.
 export const MOOD_GROUP: Record<1 | 2 | 3 | 4 | 5, LibraryGroupId> = { 1: "hard-days", 2: "hard-days", 3: "noticing", 4: "gratitude", 5: "gratitude" };
 
@@ -33,7 +33,7 @@ export function moodPrompt({ today, mood, flagged, plus, place = 0, another = 0 
   const id = moodGroup(mood);
   if (id === null) return { source: "daily", prompt: PROMPTS[mod(day + another, PROMPTS.length)], help: false };
   const group = groupOf(id);
-  if (plus) return { source: "group", group: id, prompt: group.prompts[mod(place + another, group.prompts.length)], help: group.help, savedPlace: place + another };
+  if (plus) return { source: "group", group: id, prompt: group.prompts[mod(place + another, group.prompts.length)], help: group.help, savedPlace: mod(place + another, group.prompts.length) };
   if (another === 0) return { source: "group", group: id, prompt: group.prompts[mod(day, group.prompts.length)], help: group.help };
   return { source: "daily", prompt: PROMPTS[mod(day + another - 1, PROMPTS.length)], help: false };
 }
