@@ -30,7 +30,8 @@ describe("Routine patterns on Insights (1.4 F, UX's safety ruling)", () => {
     ]);
     expect(screen.getAllByTestId("insights-routine-pattern").map((l) => l.textContent)).toEqual([
       "On days you ticked Morning meds, your mood averaged 3.8 of 5. On other days, 3.1.",
-      "On days you ticked Walk outside, your mood averaged 4 of 5. On other days, 3.",
+      // One decimal, as the factor lines.
+      "On days you ticked Walk outside, your mood averaged 4.0 of 5. On other days, 3.0.",
     ]);
     expect(screen.getAllByTestId("insights-routine-footnote")).toHaveLength(1);
     expect(screen.getByTestId("insights-routine-footnote")).toHaveTextContent(messages.routine.patternFootnote);

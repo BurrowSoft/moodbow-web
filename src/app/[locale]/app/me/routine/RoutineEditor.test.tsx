@@ -99,7 +99,8 @@ describe("RoutineEditor (1.4 F, board 29)", () => {
     expect(dialog).toHaveTextContent(m.deleteBody);
     fireEvent.click(screen.getByTestId("routine-remove-cancel"));
     expect(remove).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByTestId("routine-more"));
+    expect(screen.queryByTestId("routine-remove-dialog")).toBeNull();
+    // The row's actions stay open after Cancel.
     fireEvent.click(screen.getByTestId("routine-remove"));
     remove.mockReturnValueOnce(ok([]));
     await act(async () => fireEvent.click(screen.getByTestId("routine-remove-confirm")));
