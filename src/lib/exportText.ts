@@ -22,6 +22,8 @@ export type ExportDoc = {
   entries?: EntryRow[];
   // Tags on a check-in (the app's migration 029): each day's, in the order added.
   check_in_tags?: { local_date: string; tag: string }[];
+  // 1.4 F (the app's migration 038): the person's routine items, by position, each with its ticked days.
+  routine?: { name: string; position: number; in_appointment: boolean; started_on: string; created_at?: string; ticks: string[] }[];
   // 1.2 (the app's migrations 025, 026, 027): each in the server's order, never re-sorted.
   things_that_help?: { text: string }[];
   safety_plan?: {
