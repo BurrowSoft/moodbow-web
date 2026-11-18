@@ -63,6 +63,18 @@ describe("calming sounds: the loop", () => {
     }
   });
 
+  // The Web Tester's #367 S3: what is played is the whole minute's loop, folded (brown peaked at
+  // 0.919 at 48 kHz). Every sound's real loop, at both usual rates, stays at 0.9 or less and audible.
+  it("the loop the player plays (60 s at 44.1 and 48 kHz): peak ≤ 0.9, RMS > 0.02", async () => {
+    for (const sr of [44100, 48000]) {
+      for (const id of SOUND_IDS) {
+        const { peak, rms } = stats(await renderLoop(id, sr, { yieldEvery: 0 }));
+        expect(peak, `${id} ${sr} peak`).toBeLessThanOrEqual(0.9);
+        expect(rms, `${id} ${sr} rms`).toBeGreaterThan(0.02);
+      }
+    }
+  }, 60000);
+
   it("gives the page back while it renders", async () => {
     let pauses = 0;
     await renderLoop("hum", 8000, { seconds: 2, fade: 0.5, yieldEvery: 4000, pause: async () => void pauses++ });

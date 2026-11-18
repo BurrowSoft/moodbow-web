@@ -78,7 +78,9 @@ function pinkNoise(seed: number): Gen {
 const MAKERS: Record<SoundId, (sr: number) => Gen> = {
   brown: () => {
     const n = brownNoise(7);
-    return () => n() * 0.6;
+    // A soft limit (UX, 19 Nov, both clients): brown noise wanders, and over long runs went above
+    // the 0.9 ceiling; 0.9·tanh(x/0.9) leaves the quiet parts as they were and bends the peaks under.
+    return () => 0.9 * Math.tanh((n() * 0.6) / 0.9);
   },
   // A bed of filtered pink noise and many small drops (short, decaying, band-passed bursts).
   rain: (sr) => {
@@ -166,5 +168,15 @@ export async function renderLoop(id: SoundId, sampleRate: number, { seconds = LO
     const k = (i + 0.5) / x;
     out[i] = out[i] * Math.sin((k * Math.PI) / 2) + tail[i] * Math.cos((k * Math.PI) / 2);
   }
+  // The app's ceiling (peaks at 0.9 or less) on what is actually played: over a whole minute, brown
+  // noise can wander above it, and the fold adds two stretches together (the Web Tester, #367: 0.919
+  // at 48 kHz). One gain for the whole loop, so the sound itself doesn't change.
+  let peak = 0;
+  for (let i = 0; i < n; i++) peak = Math.max(peak, Math.abs(out[i]));
+  if (peak > PEAK_LIMIT) {
+    const scale = PEAK_LIMIT / peak;
+    for (let i = 0; i < n; i++) out[i] *= scale;
+  }
   return out;
 }
+export const PEAK_LIMIT = 0.9;
