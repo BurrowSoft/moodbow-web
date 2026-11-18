@@ -1039,7 +1039,7 @@
     "titleAnon": "Alguien compartió su semana contigo",
     "weekOf": "Semana del {date}",
     "checkIns": "{count, plural, one {# registro esta semana} other {# registros esta semana}}",
-    "routinePercent": "{name}: marcado en el {percent} % de los días con registro",
+    "routinePercent": "{name}: marcas en el {percent} % de los días con registro",
     "routineNotEnough": "{name}: aún no hay suficientes días",
     "earlier": "Semana anterior",
     "later": "Semana siguiente",

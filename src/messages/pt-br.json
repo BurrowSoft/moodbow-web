@@ -1039,7 +1039,7 @@
     "titleAnon": "Alguém compartilhou a semana com você",
     "weekOf": "Semana de {date}",
     "checkIns": "{count, plural, one {# check-in nesta semana} other {# check-ins nesta semana}}",
-    "routinePercent": "{name}: marcado em {percent}% dos dias com check-in",
+    "routinePercent": "{name}: marcações em {percent}% dos dias com check-in",
     "routineNotEnough": "{name}: ainda não há dias suficientes",
     "earlier": "Semana anterior",
     "later": "Semana seguinte",
@@ -1047,7 +1047,7 @@
     "unavailable": "Este link não está disponível. Ele pode ter terminado ou sido interrompido.",
     "loading": "Carregando a semana…",
     "dayNone": "{day}: sem check-in",
-    "help": "Se você está preocupado com alguém, <link>encontre uma linha de apoio</link>.",
+    "help": "Se você se preocupa com alguém, <link>encontre uma linha de apoio</link>.",
     "footer": "Quem compartilhou este link pode interrompê-lo a qualquer momento. Ele não é indexado por mecanismos de busca. Ele fica no histórico deste navegador; feche a aba quando terminar."
   }
 }
