@@ -3383,5 +3383,10 @@
     "key": "routine.appointmentNotEnough",
     "en": "{name}: not enough days yet",
     "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "today.lateNote",
+    "en": "It's late. Rest matters too. If tonight feels heavy, help is one tap away.",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #257 6d1ff0f6)"
   }
 ]

@@ -347,6 +347,10 @@
     "met": false,
     "what": "1.4 G Share with someone I trust (plans/PLAN-trusted-share.md, passed by the Reviewer 18 Nov; moodbow-app migration 040): /s (the viewer, no account; nothing loads before \"Show the week\") and /api/share/view (the only caller of share_view, with the service role; the token hashed in the route). Hides the UI only: the real off switch is app_config share_enabled in the database (Vitor's on Production). Before it's met: Me → Share and the Today note, the Reviewer's read, the Web Tester's rows, Vitor's privacy line, legal basis and MHMDA wording."
   },
+  "late-note-live": {
+    "met": false,
+    "what": "1.4 D Gentle late-night note (specs/1.4-features.md §D, UX 19 Nov; the cases in src/lib/journal/lateNote.contract.json, for moodbow-app supabase/contracts/late-note.json): a check-in the person saves from the card between 00:00 and 04:59 in their profile's zone, with mood 1 or 2, shows one line under the saved check-in with Get help now, at most once a night per user. Never a notification, nothing on the server, never counted. A safety copy: before it's met, the clinician's read (the safety-plan G1 pack), the Reviewer's read and the Web Tester's row."
+  },
   "routine-live": {
     "met": false,
     "what": "1.4 F Medication and routine (specs/1.4-features.md §F, plans/PLAN-routine.md, board 29): up to 3 items the person ticks in the check-in, under Tags; Me → Routine to add, rename, order, remove and opt each into For my appointment. Patterns show a routine line only when mood is higher on ticked days, always with the caution; the appointment shows % of check-in days ticked; export carries it. Item names are never counted or sent anywhere else. Needs the app's migration 038 on Production (Vitor's word plus the privacy line), the contracts on the app's master, the Reviewer's read and the Web Tester's rows."
