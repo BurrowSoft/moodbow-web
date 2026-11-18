@@ -9,6 +9,7 @@ import { pageGate } from "@/lib/conditions";
 import { pageMetadata } from "@/lib/metadata";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { SignInForm } from "./SignInForm";
+import { NoSessionTracesClear } from "@/components/NoSessionTracesClear";
 
 // Behind web-journal-live (the proxy 404s it on Production until then).
 export const dynamic = "force-dynamic";
@@ -54,6 +55,8 @@ export default async function SignInPage({ params, searchParams }: PageProps<"/[
       )}
       <SignInForm />
       <SignedOutHelp testId="sign-in-get-help" />
+      {/* A session the server ended (or any visit with nobody signed in): the traces go. */}
+      <NoSessionTracesClear />
     </PageShell>
   );
 }

@@ -41,6 +41,18 @@ export function wipeLocalKinds(storage: Storage, uid: string, kinds: readonly st
   for (const key of keysOf(storage, uid, kinds)) storage.removeItem(key);
 }
 
+// With nobody signed in (the session ended, or the sign-in page): these kinds go for every user,
+// since the server signed them out without this page knowing who (UX, #366).
+export const NO_SESSION_TRACE_KINDS = ["lateNote"] as const;
+export function wipeKindsForEveryone(storage: Storage, kinds: readonly string[]): void {
+  const keys: string[] = [];
+  for (let i = 0; i < storage.length; i++) {
+    const parts = storage.key(i)?.split(":");
+    if (parts && parts[0] === "mb" && kinds.includes(parts[1])) keys.push(parts.join(":"));
+  }
+  for (const key of keys) storage.removeItem(key);
+}
+
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 // The uid named by the proxy's mb_wipe cookie (lib/supabase/proxy.ts), if any.
