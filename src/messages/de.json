@@ -1057,7 +1057,8 @@
     "next": "Weiter",
     "position": "Seite {n} von {total}",
     "shareNote": "Das Bild zeigt deine Farben und die Anzahl der Tage. Deine Einträge, Tags, Momente und Daten sind nie darauf.",
-    "daysUnit": "{count, plural, one {Tag} other {Tage}}"
+    "daysUnit": "{count, plural, one {Tag} other {Tage}}",
+    "new": "Neu"
   },
   "sounds": {
     "title": "Beruhigende Klänge",

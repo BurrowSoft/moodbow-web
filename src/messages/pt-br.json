@@ -1057,7 +1057,8 @@
     "next": "Próximo",
     "position": "Tela {n} de {total}",
     "shareNote": "A imagem mostra suas cores e o número de dias. Suas anotações, tags, momentos e datas nunca aparecem nela.",
-    "daysUnit": "{count, plural, one {dia} other {dias}}"
+    "daysUnit": "{count, plural, one {dia} other {dias}}",
+    "new": "Novo"
   },
   "sounds": {
     "title": "Sons calmantes",

@@ -31,14 +31,15 @@ import { isLowMood } from "@/lib/journal/checkInSaved";
 import { readPlusPage } from "@/lib/plus/page";
 import { withTimeout } from "@/lib/ui/withTimeout";
 import { flagsCrisis } from "@/lib/safety/crisis";
+import { tagsFlagCrisis } from "@/lib/journal/tags";
 import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
 import { SetupLaterCard, TodayPlusCard } from "./TodayCards";
 import { readCardTags } from "@/lib/journal/tagsData";
 import { readCardRoutine } from "@/lib/journal/routineData";
 import { GetHelpNow } from "@/components/SafetyCard";
 import { previewToday, previewTodayQuery } from "@/lib/journal/previewToday";
-import { reviewYear, yearCardOnToday } from "@/lib/journal/yearReview";
-import { YearTodayCard } from "./year/YearLink";
+import { reviewYear, yearCardIsNew, yearCardShows } from "@/lib/journal/yearReview";
+import { YearTodayCard } from "./year/YearTodayCard";
 
 // A stuck request ends here at the latest (UX, the timeout audit); each
 // data call gives up after 15 s on its own (lib/supabase/deadline).
@@ -135,13 +136,20 @@ export default async function TodayPage({ params, searchParams }: PageProps<"/[l
   const plusCard = plus?.kind === "free" && !hardWeek && !checkInError && !entriesError && !flaggedToday && !isLowMood((data as CheckIn | null)?.mood) ? plus : null;
   // Setup after first use (1.3 §6): offered once there's a check-in, while the reminder is still off.
   const setupLater = Boolean(data) && me.settings?.reminder_on === false;
-  // Your year in Moodbow (1.4 A): 1 December to 31 January, for everyone; nothing read for it here.
-  // A Preview's ?today= stands in for the date (never on Production).
-  const yearToday = previewToday((await searchParams)?.today, me.today);
-  const yearCard = pageGate("year-review-live") !== "hidden" && yearCardOnToday(yearToday) ? { year: reviewYear(yearToday), query: previewTodayQuery(yearToday, me.today) } : null;
-
   // Tags on the check-in (tags-live): the day's and the person's recent ones.
   const cardTags = await readCardTags(supabase, me.today);
+
+  // Your year in Moodbow (1.4 A): 1 December to 31 January, for everyone, never on a day an entry or
+  // a tag is crisis-flagged (UX, 19 Nov: help, not a look-back), and not when that can't be checked
+  // (an unread entries or tags read). "New" its first week. A Preview's ?today= stands in for the
+  // date (never on Production).
+  const yearToday = previewToday((await searchParams)?.today, me.today);
+  const tagsUnread = pageGate("tags-live") !== "hidden" && cardTags.initialTags === null;
+  const flaggedForYear = entriesError || tagsUnread ? null : flaggedToday || tagsFlagCrisis(cardTags.initialTags ?? [], CRISIS_KEYWORDS);
+  const yearCard =
+    pageGate("year-review-live") !== "hidden" && yearCardShows(yearToday, flaggedForYear)
+      ? { year: reviewYear(yearToday), query: previewTodayQuery(yearToday, me.today), isNew: yearCardIsNew(yearToday) }
+      : null;
   // Routine on the check-in (routine-live): the items and the day's ticks.
   const cardRoutine = await readCardRoutine(supabase, me.today);
   const toolbox = toolboxRead && !toolboxRead.error ? parseToolboxItems(toolboxRead.data) : null;
@@ -215,7 +223,7 @@ export default async function TodayPage({ params, searchParams }: PageProps<"/[l
           so its hard-week help is high) → Plus card → setup/reminder offer → things that help →
           a letter → entries → Write last. */}
       {yourWeekCard}
-      {yearCard && <YearTodayCard year={yearCard.year} query={yearCard.query} />}
+      {yearCard && <YearTodayCard uid={user.id} year={yearCard.year} query={yearCard.query} isNew={yearCard.isNew} />}
       {plusCard && plusPage && <TodayPlusCard trial={plusCard.trial} price={plusPage.price} offer={plusPage.offer} date={me.today} />}
       {setupLater && <SetupLaterCard />}
       {toolboxOn && <ToolboxCard uid={user.id} today={me.today} todayMood={(data as CheckIn | null)?.mood ?? null} items={toolbox} />}

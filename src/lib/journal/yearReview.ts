@@ -96,6 +96,12 @@ export function insightsRowYear(today: string, rows: InsightRow[]): number | nul
 }
 // The card on Today: 1 December to 31 January (the profile's date).
 export const yearCardOnToday = (today: string): boolean => yearOnOffer(today) !== null;
+// ...but never on a day the crisis matcher flagged (an entry or a tag that day): Today shows help
+// then, not a look-back (UX, 19 Nov). A hard week alone doesn't hide it: the year's own screens
+// meet a hard year gently. flagged null: couldn't be checked, so hidden (fails closed).
+export const yearCardShows = (today: string, flagged: boolean | null): boolean => yearCardOnToday(today) && flagged === false;
+// Its "New" label: the first week it's there, 1 to 7 December (UX, 19 Nov).
+export const yearCardIsNew = (today: string): boolean => today.slice(5, 7) === "12" && Number(today.slice(8, 10)) <= 7;
 
 const validMood = (m: unknown): m is number => typeof m === "number" && Number.isInteger(m) && m >= 1 && m <= 5;
 

@@ -1057,7 +1057,8 @@
     "next": "Suivant",
     "position": "Écran {n} sur {total}",
     "shareNote": "L'image montre vos couleurs et le nombre de jours. Vos notes, étiquettes, moments forts et dates n'y figurent jamais.",
-    "daysUnit": "{count, plural, one {jour} other {jours}}"
+    "daysUnit": "{count, plural, one {jour} other {jours}}",
+    "new": "Nouveau"
   },
   "sounds": {
     "title": "Sons apaisants",

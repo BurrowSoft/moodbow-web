@@ -1057,7 +1057,8 @@
     "next": "Siguiente",
     "position": "Pantalla {n} de {total}",
     "shareNote": "La imagen muestra tus colores y el número de días. Tus entradas, etiquetas, momentos y fechas nunca aparecen en ella.",
-    "daysUnit": "{count, plural, one {día} other {días}}"
+    "daysUnit": "{count, plural, one {día} other {días}}",
+    "new": "Nuevo"
   },
   "sounds": {
     "title": "Sonidos relajantes",
