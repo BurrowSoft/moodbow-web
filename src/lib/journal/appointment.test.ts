@@ -10,8 +10,8 @@ const messages = (l: string) => JSON.parse(readFileSync(`src/messages/${l}.json`
 const row = (local_date: string, mood: number, more: Partial<InsightRow> = {}): InsightRow => ({ local_date, mood, sleep_hours: null, stress: null, exercise_minutes: null, ...more });
 
 describe("appointment rules (content/appointment.json)", () => {
-  it("are the contract's: 2, 4 or 12 weeks, 4 by default, first lines of 120", () => {
-    expect(APPOINTMENT_RULES).toEqual({ rangeWeeks: [2, 4, 12], defaultWeeks: 4, firstLineChars: 120 });
+  it("are the contract's: 2, 4 or 12 weeks, 4 by default, first lines of 120, routine from 5 days", () => {
+    expect(APPOINTMENT_RULES).toEqual({ rangeWeeks: [2, 4, 12], defaultWeeks: 4, firstLineChars: 120, routineMinDays: 5 });
   });
 
   it("the range ends today, oldest first", () => {

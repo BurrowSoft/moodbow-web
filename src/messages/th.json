@@ -467,7 +467,12 @@
     "exportStress": "ความเครียด",
     "exportOfFive": "{value}/5",
     "exportReflectionOn": "สำหรับบันทึกวันที่ {date}",
-    "exportTags": "แท็ก"
+    "exportTags": "แท็ก",
+    "exportRoutine": "กิจวัตร",
+    "exportRoutineStarted": "เริ่ม {date}",
+    "exportRoutineInAppointment": "อยู่ในสรุปสำหรับนัดหมายของฉัน",
+    "exportRoutineTicked": "ทำแล้ว: {dates}",
+    "exportRoutineNoTicks": "ยังไม่ได้ทำ"
   },
   "help": {
     "helpTitle": "ความช่วยเหลือและคำถามที่พบบ่อย",
@@ -779,6 +784,28 @@
     "nameItQuestion": "ตอนนี้คุณรู้สึกอย่างไร",
     "nameItSmaller": "การตั้งชื่อให้ความรู้สึกอาจทำให้มันเล็กลงได้บ้าง",
     "nameItThanks": "ขอบคุณที่ตั้งชื่อให้มัน"
+  },
+  "routine": {
+    "title": "กิจวัตร",
+    "intro": "สูงสุด 3 อย่างที่คุณอยากติ๊กทุกวัน มีแค่คุณที่เห็น",
+    "addHint": "เช่น ยาตอนเช้า",
+    "add": "เพิ่ม",
+    "full": "ครบ 3 อย่างแล้ว ซึ่งเป็นจำนวนสูงสุดตอนนี้",
+    "duplicate": "คุณมีอันนี้อยู่แล้ว",
+    "options": "ตัวเลือกสำหรับ {item}",
+    "deleteConfirm": "ลบ",
+    "deleteTitle": "ลบ {name} ไหม",
+    "deleteBody": "การลบจะเอารายการนี้และวันที่คุณติ๊กไว้ออกไปด้วย",
+    "inAppointment": "แสดงใน สำหรับนัดหมายของฉัน",
+    "rowTitle": "กิจวัตร",
+    "rowEmpty": "เพิ่มได้สูงสุด 3 อย่างที่คุณทำแทบทุกวัน เช่น ยาตอนเช้า หรือการเดินเล่น",
+    "rowSetUp": "ตั้งค่า",
+    "saveFailed": "ยังไม่ได้บันทึกกิจวัตรที่ทำ ลองอีกครั้ง",
+    "patternShown": "ในวันที่คุณทำ {name} อารมณ์ของคุณเฉลี่ยอยู่ที่ {a} จาก 5 ส่วนวันอื่นๆ อยู่ที่ {b}",
+    "patternFootnote": "สิ่งนี้อาจช่วยให้เห็นว่าอะไรมักเกิดขึ้นคู่กัน แต่ไม่ได้บอกว่าอะไรเป็นสาเหตุของอะไร อย่าเปลี่ยนยาโดยไม่ปรึกษาแพทย์หรือเภสัชกรของคุณ",
+    "appointmentHeading": "กิจวัตร",
+    "appointmentShare": "{name}: ทำ {percent}% ของวันที่เช็กอิน",
+    "appointmentNotEnough": "{name}: ยังมีวันไม่พอ"
   },
   "safetyPlan": {
     "title": "แผนความปลอดภัยของฉัน",

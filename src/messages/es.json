@@ -467,7 +467,12 @@
     "exportStress": "Estrés",
     "exportOfFive": "{value}/5",
     "exportReflectionOn": "Sobre tu entrada del {date}",
-    "exportTags": "Etiquetas"
+    "exportTags": "Etiquetas",
+    "exportRoutine": "Rutina",
+    "exportRoutineStarted": "desde el {date}",
+    "exportRoutineInAppointment": "en mi resumen para la cita",
+    "exportRoutineTicked": "Días marcados: {dates}",
+    "exportRoutineNoTicks": "Ningún día marcado todavía"
   },
   "help": {
     "helpTitle": "Ayuda y preguntas frecuentes",
@@ -779,6 +784,28 @@
     "nameItQuestion": "¿Qué sientes ahora mismo?",
     "nameItSmaller": "Ponerle nombre puede hacerlo un poco más pequeño.",
     "nameItThanks": "Gracias por ponerle nombre."
+  },
+  "routine": {
+    "title": "Rutina",
+    "intro": "Hasta 3 cosas que te gustaría marcar cada día. Solo tú las ves.",
+    "addHint": "Por ejemplo, medicación de la mañana",
+    "add": "Añadir",
+    "full": "Son 3, el máximo por ahora.",
+    "duplicate": "Ya tienes esa.",
+    "options": "Opciones para {item}",
+    "deleteConfirm": "Quitar",
+    "deleteTitle": "¿Quitar {name}?",
+    "deleteBody": "Esto quita el elemento y los días en que lo marcaste.",
+    "inAppointment": "Mostrar en Para mi cita",
+    "rowTitle": "Rutina",
+    "rowEmpty": "Añade hasta 3 cosas que haces casi todos los días, como la medicación de la mañana o un paseo.",
+    "rowSetUp": "Configurar",
+    "saveFailed": "No se guardaron tus marcas de rutina. Inténtalo de nuevo.",
+    "patternShown": "Los días en que marcaste {name}, tu ánimo promedió {a} de 5. Los demás días, {b}.",
+    "patternFootnote": "Esto puede mostrar qué suele ir junto, no qué causa qué. Nunca cambies un medicamento sin hablar con tu médico o farmacéutico.",
+    "appointmentHeading": "Rutina",
+    "appointmentShare": "{name}: marcas en el {percent} % de los días con registro",
+    "appointmentNotEnough": "{name}: aún no hay suficientes días"
   },
   "safetyPlan": {
     "title": "Mi plan de seguridad",

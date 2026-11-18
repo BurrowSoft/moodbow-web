@@ -346,5 +346,9 @@
   "trusted-share-live": {
     "met": false,
     "what": "1.4 G Share with someone I trust (plans/PLAN-trusted-share.md, passed by the Reviewer 18 Nov; moodbow-app migration 040): /s (the viewer, no account; nothing loads before \"Show the week\") and /api/share/view (the only caller of share_view, with the service role; the token hashed in the route). Hides the UI only: the real off switch is app_config share_enabled in the database (Vitor's on Production). Before it's met: Me → Share and the Today note, the Reviewer's read, the Web Tester's rows, Vitor's privacy line, legal basis and MHMDA wording."
+  },
+  "routine-live": {
+    "met": false,
+    "what": "1.4 F Medication and routine (specs/1.4-features.md §F, plans/PLAN-routine.md, board 29): up to 3 items the person ticks in the check-in, under Tags; Me → Routine to add, rename, order, remove and opt each into For my appointment. Patterns show a routine line only when mood is higher on ticked days, always with the caution; the appointment shows % of check-in days ticked; export carries it. Item names are never counted or sent anywhere else. Needs the app's migration 038 on Production (Vitor's word plus the privacy line), the contracts on the app's master, the Reviewer's read and the Web Tester's rows."
   }
 }
