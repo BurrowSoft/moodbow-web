@@ -272,7 +272,8 @@
     "tagsTooLong": "Une étiquette peut faire jusqu'à 32 caractères.",
     "setupLaterBody": "Votre rappel quotidien est désactivé. Vous pouvez l'activer et choisir une heure quand vous voulez.",
     "setupLaterOpen": "Configurer",
-    "setupLaterClose": "Pas maintenant"
+    "setupLaterClose": "Pas maintenant",
+    "lateNote": "Il est tard. Le repos compte aussi. Si cette nuit vous semble lourde, l'aide est à portée de main."
   },
   "entry": {
     "writeButton": "Raconter votre journée",

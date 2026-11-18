@@ -272,7 +272,8 @@
     "tagsTooLong": "Uma tag pode ter até 32 caracteres.",
     "setupLaterBody": "Seu lembrete diário está desligado. Você pode ligá-lo e escolher um horário quando quiser.",
     "setupLaterOpen": "Configurar",
-    "setupLaterClose": "Agora não"
+    "setupLaterClose": "Agora não",
+    "lateNote": "Já é tarde. Descansar também importa. Se esta noite estiver pesada, a ajuda está a um toque."
   },
   "entry": {
     "writeButton": "Escreva sobre o seu dia",
