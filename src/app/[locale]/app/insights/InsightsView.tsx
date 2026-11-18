@@ -49,6 +49,7 @@ export function InsightsView({
   plusTab,
   plusPatterns,
   long,
+  yearRow,
 }: {
   rows: InsightRow[];
   today: string;
@@ -66,6 +67,8 @@ export function InsightsView({
   // point per month or quarter (lib/plus/longRange). periodLine: the first and
   // last period in the browser's own month or quarter names.
   long?: { range: LongRange; unit: Unit; periodLine: string; charts: Record<Metric, LongSummary> };
+  // Your year in Moodbow's row (1.4 A, year-review-live), at the top.
+  yearRow?: React.ReactNode;
 }) {
   const tp = useTranslations("plus");
   const t = useTranslations("insights");
@@ -95,6 +98,7 @@ export function InsightsView({
           {help}
         </div>
       </div>
+      {yearRow && <div className="mt-4">{yearRow}</div>}
       {summary}
       <nav aria-label={t("insightsTitle")} className="mt-4 flex flex-wrap gap-2">
         {RANGE_TABS.map(({ range: r, key }) => (
