@@ -17,6 +17,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { JOURNAL_HEADING } from "@/lib/ui/journalLayout";
 import { titledMetadata } from "../../pageMeta";
 import { AppointmentSummary } from "./AppointmentSummary";
+import { readRoutineWithTicks } from "@/lib/journal/routineData";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/app/me/appointment">): Promise<Metadata> {
   const { locale } = await params;
@@ -38,9 +39,11 @@ export default async function AppointmentPage({ params }: PageProps<"/[locale]/a
   const me = await getMe(supabase);
   if (!me) return <JournalUnavailable />;
   const days = weeksDays(me.today, 12);
-  const [checkIns, moments] = await Promise.all([
+  const [checkIns, moments, routine] = await Promise.all([
     supabase.from("check_ins").select("local_date, mood, sleep_hours, stress, exercise_minutes").gte("local_date", days[0]).lte("local_date", me.today),
     supabase.from("entries").select("id, entry_date, body").eq("is_moment", true).gte("entry_date", days[0]).lte("entry_date", me.today),
+    // 1.4 F (routine-live): the items and their ticks over the 12 weeks; null: no section.
+    readRoutineWithTicks(supabase, days[0], me.today).catch(() => null),
   ]);
   const t = await getTranslations("appointment");
   const ta = await getTranslations("app");
@@ -58,7 +61,7 @@ export default async function AppointmentPage({ params }: PageProps<"/[locale]/a
       <h1 className={`${JOURNAL_HEADING} max-sm:[font-size:min(1.875rem,max(11.25vw,36px))]`} data-testid="appointment-title">
         {t("meRow")}
       </h1>
-      {checkIns.error || moments.error ? <JournalUnavailable /> : <AppointmentSummary today={me.today} rows={(checkIns.data ?? []) as InsightRow[]} starred={starred} dateLabels={dateLabels} />}
+      {checkIns.error || moments.error ? <JournalUnavailable /> : <AppointmentSummary today={me.today} rows={(checkIns.data ?? []) as InsightRow[]} starred={starred} dateLabels={dateLabels} routine={routine} />}
     </section>
   );
 }

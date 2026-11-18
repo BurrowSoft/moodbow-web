@@ -467,7 +467,12 @@
     "exportStress": "Stress",
     "exportOfFive": "{value}/5",
     "exportReflectionOn": "On your entry of {date}",
-    "exportTags": "Tags"
+    "exportTags": "Tags",
+    "exportRoutine": "Routine",
+    "exportRoutineStarted": "started {date}",
+    "exportRoutineInAppointment": "in my appointment summary",
+    "exportRoutineTicked": "Ticked: {dates}",
+    "exportRoutineNoTicks": "Not ticked yet"
   },
   "help": {
     "helpTitle": "Help & FAQ",
@@ -779,6 +784,28 @@
     "nameItQuestion": "What are you feeling right now?",
     "nameItSmaller": "Naming it can make it a little smaller.",
     "nameItThanks": "Thanks for naming it."
+  },
+  "routine": {
+    "title": "Routine",
+    "intro": "Up to 3 things you'd like to tick off each day. Only you see them.",
+    "addHint": "For example, Morning meds",
+    "add": "Add",
+    "full": "That's 3, the most for now.",
+    "duplicate": "You already have that one.",
+    "options": "Options for {item}",
+    "deleteConfirm": "Remove",
+    "deleteTitle": "Remove {name}?",
+    "deleteBody": "This removes the item and the days you ticked it.",
+    "inAppointment": "Show in For my appointment",
+    "rowTitle": "Routine",
+    "rowEmpty": "Add up to 3 things you do most days, like Morning meds or a walk.",
+    "rowSetUp": "Set up",
+    "saveFailed": "Your routine ticks weren't saved. Try again.",
+    "patternShown": "On days you ticked {name}, your mood averaged {a} of 5. On other days, {b}.",
+    "patternFootnote": "This may show what tends to go together, not what causes what. Never change a medication without talking to your doctor or pharmacist.",
+    "appointmentHeading": "Routine",
+    "appointmentShare": "{name}: ticked on {percent}% of check-in days",
+    "appointmentNotEnough": "{name}: not enough days yet"
   },
   "safetyPlan": {
     "title": "My safety plan",
