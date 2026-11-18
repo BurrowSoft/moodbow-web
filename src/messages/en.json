@@ -1058,5 +1058,25 @@
     "position": "Screen {n} of {total}",
     "shareNote": "The image shows your colours and the number of days. Your entries, tags, moments and dates are never on it.",
     "daysUnit": "{count, plural, one {day} other {days}}"
+  },
+  "sounds": {
+    "title": "Calming sounds",
+    "rain": "Rain",
+    "waves": "Waves",
+    "brown": "Brown noise",
+    "hum": "Gentle hum",
+    "timer": "Timer",
+    "minutes": "{n} min",
+    "untilStop": "Until I stop",
+    "play": "Play",
+    "pause": "Pause",
+    "stop": "Stop",
+    "left": "{n} min left",
+    "untilStopped": "Until you stop",
+    "lock": "Sound playing",
+    "lockLeft": "Sound playing · {n} min left",
+    "lockPaused": "Sound paused",
+    "intro": "Made right here in your browser, so there's nothing to download. Use your device's volume.",
+    "unavailable": "Calming sounds aren't available in this browser."
   }
 }

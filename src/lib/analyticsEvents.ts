@@ -55,6 +55,9 @@ export const TAP_EVENTS = [
   "year_review_open",
   "year_review_share",
   "year_review_more_plus",
+  // Calming sounds (1.4 B, UX 19 Nov): opening the page, once a visit. Never which sound, the
+  // timer, or how long it played.
+  "sounds_opened",
 ] as const;
 export type TapEvent = (typeof TAP_EVENTS)[number];
 

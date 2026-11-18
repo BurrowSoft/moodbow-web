@@ -1058,5 +1058,25 @@
     "position": "Pantalla {n} de {total}",
     "shareNote": "La imagen muestra tus colores y el número de días. Tus entradas, etiquetas, momentos y fechas nunca aparecen en ella.",
     "daysUnit": "{count, plural, one {día} other {días}}"
+  },
+  "sounds": {
+    "title": "Sonidos relajantes",
+    "rain": "Lluvia",
+    "waves": "Olas",
+    "brown": "Ruido marrón",
+    "hum": "Murmullo suave",
+    "timer": "Temporizador",
+    "minutes": "{n} min",
+    "untilStop": "Hasta que lo pare",
+    "play": "Reproducir",
+    "pause": "Pausa",
+    "stop": "Detener",
+    "left": "Quedan {n} min",
+    "untilStopped": "Hasta que lo detengas",
+    "lock": "Sonido en reproducción",
+    "lockLeft": "Sonido en reproducción · quedan {n} min",
+    "lockPaused": "Sonido en pausa",
+    "intro": "Se crean en tu navegador, así que no hay nada que descargar. Usa el volumen de tu dispositivo.",
+    "unavailable": "Los sonidos relajantes no están disponibles en este navegador."
   }
 }
