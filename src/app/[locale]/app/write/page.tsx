@@ -61,6 +61,23 @@ export default async function WritePage({ params, searchParams }: PageProps<"/[l
   // appears while writing (UX, 12 Nov): no lock or sheet on this page.
   let library: boolean | undefined;
   if (promptDate && pageGate("plus") !== "hidden") library = (await readPlusView(supabase, user.id))?.kind === "plus";
+  // Prompts that follow your mood (1.4 E, mood-prompts-live; specs/1.4-features.md §E): the prompt
+  // day's check-in mood. A tag that day the crisis matcher flags means no prompt at all, as an
+  // entry does; a tags read that fails, too (fails closed). A mood that can't be read: none (the
+  // day's prompt as before). Plus as the library reads it (no Plus flag: nobody has it).
+  let moodPrompt: { mood: number | null; plus: boolean } | undefined;
+  if (promptDate && pageGate("mood-prompts-live") !== "hidden") {
+    const [checkIn, tags] = await Promise.all([
+      supabase.from("check_ins").select("mood").eq("local_date", promptDate),
+      pageGate("tags-live") !== "hidden" ? supabase.from("check_in_tags").select("tag").eq("local_date", promptDate) : null,
+    ]);
+    const flaggedTag = tags !== null && (tags.error || (tags.data ?? []).some((t) => flagsCrisis(String((t as { tag?: unknown }).tag ?? ""), CRISIS_KEYWORDS)));
+    if (flaggedTag) promptDate = null;
+    else {
+      const mood = checkIn.error ? null : (((checkIn.data ?? []) as { mood?: unknown }[])[0]?.mood ?? null);
+      moodPrompt = { mood: typeof mood === "number" ? mood : null, plus: library === true };
+    }
+  }
   return (
     <EntryEditor
       initial={null}
@@ -71,7 +88,8 @@ export default async function WritePage({ params, searchParams }: PageProps<"/[l
       country={me.profile?.country}
       backTo={from}
       promptDate={promptDate}
-      library={library}
+      library={promptDate ? library : undefined}
+      moodPrompt={promptDate ? moodPrompt : undefined}
       back={<BackLink href={from} label={await backLabel(from, tag)} testId="nav-back" />}
       // Three good things (1.3, Ruling 9): offered from Write, a plain new entry only.
       goodThingsHref={pageGate("good-things-live") !== "hidden" ? "/app/write/good-things" : null}
