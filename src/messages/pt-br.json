@@ -467,7 +467,12 @@
     "exportStress": "Estresse",
     "exportOfFive": "{value}/5",
     "exportReflectionOn": "Sobre sua anotação de {date}",
-    "exportTags": "Tags"
+    "exportTags": "Tags",
+    "exportRoutine": "Rotina",
+    "exportRoutineStarted": "começou em {date}",
+    "exportRoutineInAppointment": "no meu resumo para a consulta",
+    "exportRoutineTicked": "Marcada: {dates}",
+    "exportRoutineNoTicks": "Ainda não marcada"
   },
   "help": {
     "helpTitle": "Ajuda e perguntas frequentes",

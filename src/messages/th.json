@@ -467,7 +467,12 @@
     "exportStress": "ความเครียด",
     "exportOfFive": "{value}/5",
     "exportReflectionOn": "สำหรับบันทึกวันที่ {date}",
-    "exportTags": "แท็ก"
+    "exportTags": "แท็ก",
+    "exportRoutine": "กิจวัตร",
+    "exportRoutineStarted": "เริ่ม {date}",
+    "exportRoutineInAppointment": "อยู่ในสรุปสำหรับนัดหมายของฉัน",
+    "exportRoutineTicked": "ทำแล้ว: {dates}",
+    "exportRoutineNoTicks": "ยังไม่ได้ทำ"
   },
   "help": {
     "helpTitle": "ความช่วยเหลือและคำถามที่พบบ่อย",

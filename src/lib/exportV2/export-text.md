@@ -1,0 +1,136 @@
+# Readable export (`moodbow-journal-YYYY-MM-DD.txt`)
+
+`export_my_data()` returns JSON (`format: moodbow-export`, `format_version: 1`). Me → Export gives the user that JSON **and** this readable text, rendered on the device/browser from the same JSON. App and web must produce **byte-identical** text: both test that rendering `export_fixture.json` gives `export_fixture.txt` exactly.
+
+## Files (decision 107)
+- `moodbow-journal-YYYY-MM-DD.txt` (this text) and `moodbow-export-YYYY-MM-DD.json` (the JSON as returned).
+- `YYYY-MM-DD` = `exported_at` as a date in the **profile's time zone** (`profile.time_zone` in the JSON; UTC if it's missing or unknown). It's the user's local day, so an export at 06:30 in Bangkok is named for that day, not the UTC day before.
+- Only the filenames use the local date. The `Exported:` header line inside the file stays **UTC** (below).
+- The app shares both files in one share sheet and deletes the temp files when the sheet closes; the web offers two download links.
+
+## Encoding
+- UTF-8, no BOM, `\n` line endings, and exactly one `\n` at the end of the file.
+- In bodies (entries, reflections), `\r\n` and `\r` become `\n`. Then trailing **blank lines** are removed; a blank line is one that is empty or holds only spaces and tabs. **Leading** blank lines are kept, as are spaces at the end of a non-blank line. Nothing else changes (no wrapping, no trimming inside).
+- Numbers always use ASCII digits and `.` as the decimal separator, whatever the language (`7.5`, never `7,5`). A whole number has no `.0`.
+
+## Versions
+Render only `format: "moodbow-export"` with `format_version: 1`. For anything else, a renderer refuses: no partial text. The client then offers the JSON alone.
+
+## Order and sections
+Render in the JSON's array order (the server already sorts it: check-ins by date, entries by date then created_at, things that help by position, routine items by position (each item's ticks ascending), the plan's people by section (people, then professionals) then position, letters by written_on then created_at, reflections and memories by created_at). Never re-sort.
+
+1. The header (always).
+2. **Check-ins** (`check_ins`).
+3. **Entries** (`entries`).
+4. **Things that help me** (`things_that_help`, 1.2, migration 025).
+5. **Routine** (`routine`, 1.4, migration 038).
+6. **My safety plan** (`safety_plan`, 1.2, migration 026).
+7. **Letters to future me** (`letters`, 1.2, migration 027).
+8. **AI reflections** (`ai_reflections`).
+9. **What Moodbow remembers** (`ai_memories`).
+
+A section with no items is left out entirely, heading included. There's exactly one blank line between blocks (header → section, section → section), and none at the very end.
+
+`ai_reports` aren't in the text in format 1: their `body` is structured and M9 defines how to read it. They stay in the JSON. Profile, settings, consents, usage and credits are also JSON only.
+
+## Header
+```
+{exportTitle}
+{exportExported(when)}
+{exportAccount(email)}
+{exportPrivateNote}
+```
+The account line is `{exportAccountNotBackedUp}` instead when `account.email` is null, missing or blank after trimming: an account started without an email (decision 216). Never `Account: ` with nothing after it.
+
+`when` = `exported_at` **converted to UTC** (whatever offset it carries), as `YYYY-MM-DD HH:MM UTC`: 24 h, zero-padded, seconds and fractions **truncated, not rounded** (`20:15:59.9` → `20:15`).
+
+## Check-ins
+The heading `{exportCheckins}`, then one line per check-in:
+`{local_date}` then each present field, joined by ` · ` (space, U+00B7, space), in this order:
+- always: `{exportField(label: exportMood, value: exportMoodValue(label: mood<n>, value: n))}` → `Mood: Good (4/5)`
+- if `sleep_hours`: `{exportField(exportSleep, …)}`, where the value is `sleepHours(h)` (`7`, `7.5`: no trailing `.0`). If there's also `sleep_quality`: `{exportSleepValue(hours: sleepHours(h), quality: sleepPoor|sleepOkay|sleepGood)}` → `Sleep: 7.5 h, Good`
+- if only `sleep_quality` (no hours): `Sleep: Good`
+- if `exercise_minutes` is not null (0 counts): `Movement: ` (exportExercise) + `exerciseNone` (0) | `exercise90` (90) | `exerciseMinutes(n)`
+- if `stress`: `Stress: ` + `exportOfFive(n)` → `Stress: 2/5`
+- if the day has tags (`check_in_tags` with that `local_date`, 029): `{exportField(label: exportTags, value: the tags joined by ", ")}`, in the order they were added → `Tags: Walk, Friends`
+
+## Entries
+The heading `{exportEntries}`, then one block per entry, with a blank line between blocks:
+```
+{entry_date}[ · ★ {momentBadge}]
+{body}
+```
+
+## Things that help me
+The heading `{exportThingsThatHelp}`, then one line per item: `- {text}`. The text is as stored, on one line: it can't hold a line break, and a client that finds one renders it as a space. The key is translated in fr, es and pt-BR; de, it and th are drafts behind their gate (UX, 2026-11-09).
+
+## Routine
+The heading `{exportRoutine}`, then for each item two lines. First `- {name} · {exportRoutineStarted}`, followed by ` · {exportRoutineInAppointment}` only when `in_appointment` is true. Then, indented two spaces, `{exportRoutineTicked}` with every tick as ISO dates joined by `, `, or `{exportRoutineNoTicks}` when there are none. The name is as stored, on one line: a line break found is shown as a space. The section only appears when the person has items (UX, 18 Nov), and it never shows a mood or a pattern (UX's medication safety ruling).
+
+## My safety plan
+The heading `{exportSafetyPlan}`, then, in this order, each part that has something in it (an empty part is left out, heading included):
+- `{exportPlanWarningSigns}`, then `warning_signs` as a body;
+- `{exportPlanDistractions}`, then `distractions` as a body;
+- `{exportPlanPeople}`, then one line per person in `people` with section `people`: `- {name}`, or `- {name} · {phone}` with a phone;
+- `{exportPlanProfessionals}`, the same for section `professionals`;
+- `{exportPlanSurroundings}`, then `surroundings` as a body.
+
+Bodies follow the Encoding rules, as entries do. There's one blank line between parts. The section is left out entirely when `safety_plan` is null or every part is empty. The toolbox list isn't repeated here: it has its own section. The helpline isn't in the export: it's read live, and it isn't the person's data. The six keys are drafts pending the clinician's read, in the same words as the plan's own headings (specs/1.2-features.md, "Safety plan headings, all languages").
+
+## Letters to future me
+The heading `{exportLetters}`, then one block per letter, in the JSON's order, with a blank line between blocks:
+```
+{written_on}[ {exportLetterLocked(date: opens_on)}]
+{body}
+```
+The marker shows while `opened_at` is null. The export is the person's own copy, so a locked letter's text is in it, marked. The body follows the Encoding rules, as entries' do. `{date}` is ISO `YYYY-MM-DD`. Clients read `opens_on` from the data and never compute it: a month after 31 January is 28 or 29 February on the server.
+
+## AI reflections
+The heading `{exportReflections}`, then one block per reflection, with a blank line between blocks:
+```
+{exportReflectionOn(date)}
+{body}
+```
+`date` = the `entry_date` of the entry whose `id` = `entry_id`. If that entry is no longer in the export: `created_at`'s UTC date.
+
+## What Moodbow remembers
+The heading `{exportMemories}`, then one line per memory: `- {fact}`.
+
+## Keys (en; approved by UX & PM 2026-10-19)
+| Key | en |
+|---|---|
+| exportTitle | Moodbow: your journal |
+| exportExported | Exported: {when} |
+| exportAccount | Account: {email} |
+| exportAccountNotBackedUp | Account: not backed up yet |
+| exportPrivateNote | This file holds your private journal. Keep it somewhere safe. |
+| exportCheckins | Check-ins |
+| exportEntries | Entries |
+| exportReflections | AI reflections |
+| exportMemories | What Moodbow remembers |
+| exportThingsThatHelp | Things that help me |
+| exportRoutine | Routine |
+| exportRoutineStarted | started {date} |
+| exportRoutineInAppointment | in my appointment summary |
+| exportRoutineTicked | Ticked: {dates} |
+| exportRoutineNoTicks | Not ticked yet |
+| exportSafetyPlan | My safety plan |
+| exportPlanWarningSigns | Warning signs |
+| exportPlanDistractions | People and places that take my mind off things |
+| exportPlanPeople | People I can ask for help |
+| exportPlanProfessionals | Professionals and services |
+| exportPlanSurroundings | Making my surroundings safer |
+| exportLetters | Letters to future me |
+| exportLetterLocked | (locked until {date}) |
+| exportField | {label}: {value} |
+| exportMood | Mood |
+| exportMoodValue | {label} ({value}/5) |
+| exportSleep | Sleep |
+| exportSleepValue | {hours}, {quality} |
+| exportExercise | Movement (decision 158) |
+| exportStress | Stress |
+| exportTags | Tags |
+| exportOfFive | {value}/5 |
+| exportReflectionOn | On your entry of {date} |
+
+These reuse the existing keys mood1–mood5, sleepHours, sleepPoor/Okay/Good, exerciseNone, exercise90, exerciseMinutes and momentBadge. The dates are ISO `YYYY-MM-DD` in every language: unambiguous, and identical on both clients.

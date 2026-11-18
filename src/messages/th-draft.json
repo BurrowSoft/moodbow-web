@@ -3028,5 +3028,30 @@
     "key": "bo.boOff",
     "en": "Bo is turned off. You can turn it back on in Me.",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "export.exportRoutine",
+    "en": "Routine",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "export.exportRoutineStarted",
+    "en": "started {date}",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "export.exportRoutineInAppointment",
+    "en": "in my appointment summary",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "export.exportRoutineTicked",
+    "en": "Ticked: {dates}",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "export.exportRoutineNoTicks",
+    "en": "Not ticked yet",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
   }
 ]

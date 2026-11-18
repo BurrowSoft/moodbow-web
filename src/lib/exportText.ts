@@ -116,6 +116,19 @@ export function renderExportText(doc: ExportDoc, t: Translate): string {
   const helps = doc.things_that_help ?? [];
   if (helps.length > 0) blocks.push([t("export.exportThingsThatHelp"), ...helps.map((h) => `- ${h.text.replace(/\r\n|\r|\n/g, " ")}`)].join("\n"));
 
+  // 1.4 Routine (038; UX 18 Nov): only when there are items, in the server's order (position). Each
+  // item on one line (a line break in a name shows as a space), its start date and, if opted in,
+  // the appointment note; then every ticked day, or "Not ticked yet". Never a mood or a pattern.
+  const routine = doc.routine ?? [];
+  if (routine.length > 0) {
+    const items = routine.map((r) => {
+      const head = [`- ${r.name.replace(/\r\n|\r|\n/g, " ")}`, t("export.exportRoutineStarted", { date: r.started_on }), ...(r.in_appointment ? [t("export.exportRoutineInAppointment")] : [])].join(" · ");
+      const ticks = r.ticks ?? [];
+      return `${head}\n  ${ticks.length > 0 ? t("export.exportRoutineTicked", { dates: ticks.join(", ") }) : t("export.exportRoutineNoTicks")}`;
+    });
+    blocks.push([t("export.exportRoutine"), ...items].join("\n"));
+  }
+
   // 1.2 My safety plan (026): each part that has something in it, in the plan's order. The
   // toolbox list has its own section; the helpline is read live and isn't the person's data.
   const plan = doc.safety_plan;

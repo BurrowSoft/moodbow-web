@@ -467,7 +467,12 @@
     "exportStress": "Stress",
     "exportOfFive": "{value}/5",
     "exportReflectionOn": "Sur votre note du {date}",
-    "exportTags": "Étiquettes"
+    "exportTags": "Étiquettes",
+    "exportRoutine": "Routine",
+    "exportRoutineStarted": "commencée le {date}",
+    "exportRoutineInAppointment": "dans mon résumé pour le rendez-vous",
+    "exportRoutineTicked": "Cochée : {dates}",
+    "exportRoutineNoTicks": "Pas encore cochée"
   },
   "help": {
     "helpTitle": "Aide et FAQ",
