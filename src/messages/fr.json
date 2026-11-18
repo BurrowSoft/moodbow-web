@@ -1080,5 +1080,25 @@
     "help": "Si vous vous inquiétez pour quelqu'un, <link>trouvez une ligne d'écoute</link>.",
     "footer": "La personne qui a partagé ce lien peut l'arrêter à tout moment. Il n'est pas indexé par les moteurs de recherche. Il reste dans l'historique de ce navigateur ; fermez l'onglet quand vous avez terminé.",
     "noToken": "Pour revoir la semaine, ouvrez le lien qu'on vous a envoyé."
+  },
+  "sounds": {
+    "title": "Sons apaisants",
+    "rain": "Pluie",
+    "waves": "Vagues",
+    "brown": "Bruit brun",
+    "hum": "Doux murmure",
+    "timer": "Minuteur",
+    "minutes": "{n} min",
+    "untilStop": "Jusqu'à ce que j'arrête",
+    "play": "Lecture",
+    "pause": "Pause",
+    "stop": "Arrêter",
+    "left": "Encore {n} min",
+    "untilStopped": "Jusqu'à ce que vous arrêtiez",
+    "lock": "Son en cours",
+    "lockLeft": "Son en cours · encore {n} min",
+    "lockPaused": "Son en pause",
+    "intro": "Créés directement dans votre navigateur : rien à télécharger. Utilisez le volume de votre appareil.",
+    "unavailable": "Les sons apaisants ne sont pas disponibles dans ce navigateur."
   }
 }

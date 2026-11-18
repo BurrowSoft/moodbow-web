@@ -1080,5 +1080,25 @@
     "help": "Se você se preocupa com alguém, <link>encontre uma linha de apoio</link>.",
     "footer": "Quem compartilhou este link pode interrompê-lo a qualquer momento. Ele não é indexado por mecanismos de busca. Ele fica no histórico deste navegador; feche a aba quando terminar.",
     "noToken": "Para ver a semana de novo, abra o link que você recebeu."
+  },
+  "sounds": {
+    "title": "Sons calmantes",
+    "rain": "Chuva",
+    "waves": "Ondas",
+    "brown": "Ruído marrom",
+    "hum": "Murmúrio suave",
+    "timer": "Timer",
+    "minutes": "{n} min",
+    "untilStop": "Até eu parar",
+    "play": "Tocar",
+    "pause": "Pausar",
+    "stop": "Parar",
+    "left": "Faltam {n} min",
+    "untilStopped": "Até você parar",
+    "lock": "Som tocando",
+    "lockLeft": "Som tocando · faltam {n} min",
+    "lockPaused": "Som pausado",
+    "intro": "Criados no seu navegador, então não há nada para baixar. Use o volume do seu dispositivo.",
+    "unavailable": "Os sons calmantes não estão disponíveis neste navegador."
   }
 }

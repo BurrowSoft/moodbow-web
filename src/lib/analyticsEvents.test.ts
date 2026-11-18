@@ -160,7 +160,7 @@ describe("which help buttons count (cta_help_open)", () => {
   const NEVER = ["import-get-help", "weekly-report-get-help", "reflect-get-help", "letter-open-help", "letter-help", "your-week-help", "past-report-get-help", "entry-library-help", "plan-get-help", "bo-get-help-typing", "bo-get-help-end", "year-hard-help", "entry-prompt-help", "late-note-get-help"];
   const ALWAYS = [
     "bo-get-help", "editor-help", "entry-help", "insights-example-help", "insights-help", "review-get-help",
-    "appointment-get-help", "pdf-get-help", "letters-get-help", "me-get-help", "past-reports-get-help", "toolbox-get-help", "routine-get-help", "grounding-get-help",
+    "appointment-get-help", "pdf-get-help", "letters-get-help", "me-get-help", "past-reports-get-help", "toolbox-get-help", "routine-get-help", "grounding-get-help", "sounds-get-help",
     "today-help", "print-get-help", "timeline-help", "day-help", "consent-get-help", "signup-get-help", "welcome-help",
     "journal-unavailable-help", "session-ended-help", "year-help",
     // SignedOutHelp (sign-in, forgot password) passes its own testId through.

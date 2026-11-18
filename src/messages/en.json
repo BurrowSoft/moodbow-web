@@ -1080,5 +1080,25 @@
     "help": "If you're worried about someone, <link>find a helpline</link>.",
     "footer": "This link can be stopped by the person who shared it at any time. It isn't indexed by search engines. It stays in this browser's history; close the tab when you're done.",
     "noToken": "To see the week again, open the link you were sent."
+  },
+  "sounds": {
+    "title": "Calming sounds",
+    "rain": "Rain",
+    "waves": "Waves",
+    "brown": "Brown noise",
+    "hum": "Gentle hum",
+    "timer": "Timer",
+    "minutes": "{n} min",
+    "untilStop": "Until I stop",
+    "play": "Play",
+    "pause": "Pause",
+    "stop": "Stop",
+    "left": "{n} min left",
+    "untilStopped": "Until you stop",
+    "lock": "Sound playing",
+    "lockLeft": "Sound playing · {n} min left",
+    "lockPaused": "Sound paused",
+    "intro": "Made right here in your browser, so there's nothing to download. Use your device's volume.",
+    "unavailable": "Calming sounds aren't available in this browser."
   }
 }

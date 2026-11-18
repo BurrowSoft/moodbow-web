@@ -1080,5 +1080,25 @@
     "help": "Wenn Sie sich um jemanden Sorgen machen, <link>finden Sie ein Hilfetelefon</link>.",
     "footer": "Die Person, die diesen Link geteilt hat, kann ihn jederzeit beenden. Er wird nicht von Suchmaschinen erfasst. Er bleibt im Verlauf dieses Browsers; schließen Sie den Tab, wenn Sie fertig sind.",
     "noToken": "Um die Woche noch einmal zu sehen, öffnen Sie den Link, den Sie bekommen haben."
+  },
+  "sounds": {
+    "title": "Beruhigende Klänge",
+    "rain": "Regen",
+    "waves": "Wellen",
+    "brown": "Braunes Rauschen",
+    "hum": "Sanftes Summen",
+    "timer": "Timer",
+    "minutes": "{n} Min.",
+    "untilStop": "Bis ich aufhöre",
+    "play": "Abspielen",
+    "pause": "Pause",
+    "stop": "Stopp",
+    "left": "Noch {n} Min.",
+    "untilStopped": "Bis du aufhörst",
+    "lock": "Klang läuft",
+    "lockLeft": "Klang läuft · noch {n} Min.",
+    "lockPaused": "Klang pausiert",
+    "intro": "Direkt in deinem Browser erzeugt, also nichts zum Herunterladen. Nutze die Lautstärke deines Geräts.",
+    "unavailable": "Beruhigende Klänge sind in diesem Browser nicht verfügbar."
   }
 }

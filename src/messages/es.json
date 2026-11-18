@@ -1080,5 +1080,25 @@
     "help": "Si le preocupa alguien, <link>busque una línea de ayuda</link>.",
     "footer": "La persona que compartió este enlace puede detenerlo en cualquier momento. No lo indexan los buscadores. Queda en el historial de este navegador; cierre la pestaña cuando termine.",
     "noToken": "Para volver a ver la semana, abra el enlace que le enviaron."
+  },
+  "sounds": {
+    "title": "Sonidos relajantes",
+    "rain": "Lluvia",
+    "waves": "Olas",
+    "brown": "Ruido marrón",
+    "hum": "Murmullo suave",
+    "timer": "Temporizador",
+    "minutes": "{n} min",
+    "untilStop": "Hasta que lo pare",
+    "play": "Reproducir",
+    "pause": "Pausa",
+    "stop": "Detener",
+    "left": "Quedan {n} min",
+    "untilStopped": "Hasta que lo detengas",
+    "lock": "Sonido en reproducción",
+    "lockLeft": "Sonido en reproducción · quedan {n} min",
+    "lockPaused": "Sonido en pausa",
+    "intro": "Se crean en tu navegador, así que no hay nada que descargar. Usa el volumen de tu dispositivo.",
+    "unavailable": "Los sonidos relajantes no están disponibles en este navegador."
   }
 }

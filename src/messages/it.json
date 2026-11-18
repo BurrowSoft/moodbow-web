@@ -1080,5 +1080,25 @@
     "help": "Se sei in pensiero per qualcuno, <link>trova un servizio di ascolto</link>.",
     "footer": "La persona che ha condiviso questo link può interromperlo in qualsiasi momento. Non viene indicizzato dai motori di ricerca. Resta nella cronologia di questo browser; chiudi la scheda quando hai finito.",
     "noToken": "Per rivedere la settimana, apri il link che hai ricevuto."
+  },
+  "sounds": {
+    "title": "Suoni rilassanti",
+    "rain": "Pioggia",
+    "waves": "Onde",
+    "brown": "Rumore marrone",
+    "hum": "Mormorio leggero",
+    "timer": "Timer",
+    "minutes": "{n} min",
+    "untilStop": "Finché non lo fermo",
+    "play": "Riproduci",
+    "pause": "Pausa",
+    "stop": "Ferma",
+    "left": "Ancora {n} min",
+    "untilStopped": "Finché non lo fermi",
+    "lock": "Suono in riproduzione",
+    "lockLeft": "Suono in riproduzione · ancora {n} min",
+    "lockPaused": "Suono in pausa",
+    "intro": "Creati direttamente nel tuo browser, quindi non c'è niente da scaricare. Usa il volume del dispositivo.",
+    "unavailable": "I suoni rilassanti non sono disponibili in questo browser."
   }
 }
