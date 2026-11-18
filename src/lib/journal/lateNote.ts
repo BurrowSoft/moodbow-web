@@ -1,3 +1,4 @@
+import { localKey } from "@/lib/localData";
 import contract from "./lateNote.contract.json";
 
 // The gentle late-night note (1.4 D, specs/1.4-features.md §D; late-note-live; the cases in
@@ -36,7 +37,9 @@ export function lateNote(mood: number | null | undefined, savedAt: Date, zone: s
 // The mark lives in this browser, per user, and goes at sign-out (the card's handler). Storage
 // unavailable: as no mark (showing it again is gentler than never). An mb:<kind>:<uid> key, so
 // every per-user wipe (localData.ts: a gone account, decision 85) takes it too (the Reviewer, #366).
-export const lateNoteKey = (uid: string) => `mb:lateNote:${uid}`;
+// Removed by every deliberate sign-out with the other traces (localData's SIGN_OUT_TRACE_KINDS,
+// the Web Tester's #366 S2), not only by the card's listener, which hears other tabs.
+export const lateNoteKey = (uid: string) => localKey("lateNote", uid);
 export function claimLateNote(uid: string, mood: number | null | undefined, savedAt: Date, zone: string | null | undefined): boolean {
   let mark: string | null = null;
   try {
