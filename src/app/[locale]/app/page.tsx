@@ -205,7 +205,19 @@ export default async function TodayPage({ params, searchParams }: PageProps<"/[l
         </div>
         <GetHelpNow country={me.profile?.country} testId="today-help" counted neutral icon />
       </header>
-      <CheckInCard key={checkInError ? "unread" : "read"} initial={(data as CheckIn | null) ?? null} uid={user.id} date={me.today} dateLocaleTag={dateLocaleTag} keepDraft loadFailed={Boolean(checkInError)} {...cardTags} {...cardRoutine} country={me.profile?.country} />
+      <CheckInCard
+        key={checkInError ? "unread" : "read"}
+        initial={(data as CheckIn | null) ?? null}
+        uid={user.id}
+        date={me.today}
+        dateLocaleTag={dateLocaleTag}
+        keepDraft
+        loadFailed={Boolean(checkInError)}
+        {...cardTags}
+        {...cardRoutine}
+        country={me.profile?.country}
+        lateNote={pageGate("late-note-live") !== "hidden" ? { zone: me.profile?.time_zone ?? null } : null}
+      />
       {/* Today's order (UX ruling, audit 14 Nov; the app and board 22): check-in → Your week (first,
           so its hard-week help is high) → Plus card → setup/reminder offer → things that help →
           a letter → entries → Write last. */}
