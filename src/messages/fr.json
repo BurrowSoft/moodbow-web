@@ -1004,5 +1004,31 @@
     "liftsRow": "Les jours avec l'étiquette « {tag} », votre humeur était en moyenne de {a} sur 5 ; les autres jours, de {b}.",
     "liftsFooter": "Des tendances, pas des causes. Ceci n'est visible que par vous.",
     "liftsNone": "Continuez à ajouter des étiquettes à vos journées. Les tendances apparaissent au bout de quelques semaines."
+  },
+  "year": {
+    "title": "Votre année dans Moodbow",
+    "todayLine": "Un regard sur {year}, rien que pour vous.",
+    "open": "Ouvrir",
+    "coloursTitle": "Votre année en couleurs",
+    "coloursLine": "Chaque mois, les humeurs que vous avez notées.",
+    "monthMood": "{month} : {mood}",
+    "monthFaint": "{month} : aucun jour noté",
+    "daysTitle": "Les jours où vous étiez là",
+    "daysLine": "{count, plural, one {Vous avez été là # jour} other {Vous avez été là # jours}} cette année.",
+    "momentsTitle": "Vos moments forts",
+    "momentsLine": "{count, plural, one {Vous avez marqué # moment fort} other {Vous avez marqué # moments forts}}.",
+    "helpedTitle": "Ce qui vous aide",
+    "tagsTitle": "Les bons jours, vous avez souvent choisi ces étiquettes :",
+    "hardTitle": "Votre année",
+    "hardLine": "Cette année vous a beaucoup demandé. Vous avez continué à revenir.",
+    "closing": "Merci d'avoir été là pour vous cette année.",
+    "morePlus": "Voir plus de votre année",
+    "notEnough": "Votre année {year} dans Moodbow apparaît après 30 jours avec un bilan cette année-là. Vous en êtes à {count}.",
+    "share": "Partager votre année",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "position": "Écran {n} sur {total}",
+    "shareNote": "L'image montre vos couleurs et le nombre de jours. Vos notes, étiquettes, moments forts et dates n'y figurent jamais.",
+    "daysUnit": "{count, plural, one {jour} other {jours}}"
   }
 }

@@ -51,6 +51,7 @@ export function InsightsView({
   plusPatterns,
   long,
   showedUp,
+  yearRow,
 }: {
   rows: InsightRow[];
   today: string;
@@ -71,6 +72,8 @@ export function InsightsView({
   // Days you showed up (1.4 C, lib/journal/showedUp): the shown range's count, said as a count only,
   // never a streak. Absent where its condition is off.
   showedUp?: { count: number; range: ShowedUpRange };
+  // Your year in Moodbow's row (1.4 A, year-review-live), at the top.
+  yearRow?: React.ReactNode;
 }) {
   const tp = useTranslations("plus");
   const t = useTranslations("insights");
@@ -100,6 +103,7 @@ export function InsightsView({
           {help}
         </div>
       </div>
+      {yearRow && <div className="mt-4">{yearRow}</div>}
       {summary}
       <nav aria-label={t("insightsTitle")} className="mt-4 flex flex-wrap gap-2">
         {RANGE_TABS.map(({ range: r, key }) => (

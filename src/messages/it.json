@@ -1004,5 +1004,31 @@
     "liftsRow": "Nei giorni con il tag «{tag}» il tuo umore è stato in media {a} su 5; negli altri giorni, {b}.",
     "liftsFooter": "Andamenti, non cause. Solo tu puoi vederlo.",
     "liftsNone": "Continua ad aggiungere tag alle tue giornate. Gli andamenti compaiono dopo qualche settimana."
+  },
+  "year": {
+    "title": "Il tuo anno in Moodbow",
+    "todayLine": "Uno sguardo al {year}, solo per te.",
+    "open": "Apri",
+    "coloursTitle": "Il tuo anno a colori",
+    "coloursLine": "Ogni mese, gli umori che hai registrato.",
+    "monthMood": "{month}: {mood}",
+    "monthFaint": "{month}: nessun giorno registrato",
+    "daysTitle": "I giorni in cui c'eri",
+    "daysLine": "{count, plural, one {Hai registrato # giorno} other {Hai registrato # giorni}} quest'anno.",
+    "momentsTitle": "I tuoi momenti",
+    "momentsLine": "{count, plural, one {Hai segnato # momento} other {Hai segnato # momenti}}.",
+    "helpedTitle": "Ciò che ti aiuta",
+    "tagsTitle": "Nei giorni buoni hai usato spesso questi tag:",
+    "hardTitle": "Il tuo anno",
+    "hardLine": "Quest'anno ti ha chiesto molto. Hai continuato a tornare.",
+    "closing": "Grazie per aver dedicato del tempo a te quest'anno.",
+    "morePlus": "Scopri di più sul tuo anno",
+    "notEnough": "Il tuo {year} in Moodbow appare dopo 30 giorni registrati in quell'anno. Sei a {count}.",
+    "share": "Condividi il tuo anno",
+    "previous": "Indietro",
+    "next": "Avanti",
+    "position": "Schermata {n} di {total}",
+    "shareNote": "L'immagine mostra i tuoi colori e il numero di giorni. Le tue pagine, i tag, i momenti e le date non ci sono mai.",
+    "daysUnit": "{count, plural, one {giorno} other {giorni}}"
   }
 }

@@ -48,6 +48,10 @@ export function ShareMonth({
   year = null,
   initialType = "moodbow",
   onOpen,
+  yearOnly = false,
+  buttonText,
+  buttonClassName,
+  yearNote,
 }: {
   month: string;
   dateLocaleTag: string;
@@ -59,6 +63,12 @@ export function ShareMonth({
   year?: number | null;
   initialType?: CardType;
   onOpen?: () => void;
+  // Your year in Moodbow (1.4 A): the Year card alone, counted as year_review_share. The person's
+  // own optional line stays (UX's ruling, 18 Nov); yearNote says what the image holds.
+  yearOnly?: boolean;
+  yearNote?: string;
+  buttonText?: string;
+  buttonClassName?: string;
 }) {
   const t = useTranslations("share");
   const tt = useTranslations("today");
@@ -69,7 +79,7 @@ export function ShareMonth({
   const [theme, setTheme] = useState<CardTheme>("light");
   const yearCard = year !== null && yearRows ? yearBands(yearRows, year, theme) : null;
   const yearOn = !!yearCard && yearCard.colouredMonths >= YEAR_MIN_MONTHS;
-  const types: CardType[] = ["moodbow", ...(chart ? (["chart"] as const) : []), ...(milestone ? (["milestone"] as const) : []), ...(yearOn ? (["year"] as const) : [])];
+  const types: CardType[] = yearOnly ? ["year"] : ["moodbow", ...(chart ? (["chart"] as const) : []), ...(milestone ? (["milestone"] as const) : []), ...(yearOn ? (["year"] as const) : [])];
   const [type, setType] = useState<CardType>(initialType);
   const [colours, setColours] = useState<string[] | null>(null);
   const [failed, setFailed] = useState(false);
@@ -96,8 +106,9 @@ export function ShareMonth({
   useEffect(() => clearSayLoading, [clearSayLoading]);
   const start = () => {
     setOpen(true);
-    countTap("share_month_opened");
-    setType(types.includes(initialType) ? initialType : "moodbow");
+    if (yearOnly) countTap("year_review_share");
+    else countTap("share_month_opened");
+    setType(yearOnly ? "year" : types.includes(initialType) ? initialType : "moodbow");
     onOpen?.();
     setSayLoading(false);
     clearSayLoading();
@@ -113,15 +124,17 @@ export function ShareMonth({
     setTheme(chosen === "dark" || chosen === "light" ? chosen : window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light");
     const probe = typeof File !== "undefined" ? new File([""], cardFileName(month), { type: "image/png" }) : null;
     setCanShareFiles(!!probe && typeof navigator.canShare === "function" && navigator.canShare({ files: [probe] }));
-    loadMonthCheckIns(month)
-      .then((r) => (r.status === "ok" ? setColours(monthBands(r.checkIns, month)) : setFailed(true)))
-      .catch(() => setFailed(true));
-    // The year's moods, for its card (a failed read just means no Year type).
+    if (!yearOnly)
+      loadMonthCheckIns(month)
+        .then((r) => (r.status === "ok" ? setColours(monthBands(r.checkIns, month)) : setFailed(true)))
+        .catch(() => setFailed(true));
+    // The year's moods, for its card (a failed read just means no Year type; with yearOnly, the
+    // error line).
     setYearRows(null);
     if (year !== null)
       loadYearCheckIns(year)
-        .then((r) => r.status === "ok" && setYearRows(r.checkIns))
-        .catch(() => undefined);
+        .then((r) => (r.status === "ok" ? setYearRows(r.checkIns) : yearOnly && setFailed(true)))
+        .catch(() => yearOnly && setFailed(true));
   };
   const close = useCallback(() => {
     clearSayLoading();
@@ -129,6 +142,8 @@ export function ShareMonth({
   }, [clearSayLoading]);
 
   const enough = colours !== null && colours.length >= MIN_CHECK_INS;
+  // What's still loading: the month (its card), or, with yearOnly, the year.
+  const loading = yearOnly ? yearRows === null : type === "moodbow" && colours === null;
   const maxChars = LAYOUT[format].line.maxChars;
   // Characters left, as people see them; never below 0 after a switch to the
   // shorter square limit (the card draws only the first maxChars).
@@ -137,7 +152,7 @@ export function ShareMonth({
   // chart card draws the line instead), and the file's name.
   const chartPoints = chart ? chart.moods.filter((m) => m !== null).length : 0;
   const card =
-    type === "year" && yearCard && year !== null
+    (type === "year" || yearOnly) && yearCard && year !== null
       ? { ready: yearOn, title: t("shareYearTitle", { year }), days: t(daysKey, { n: yearCard.days }), colours: yearCard.colours, file: yearFileName(year), label: t("shareYear") }
       : type === "chart" && chart
       ? { ready: chartPoints >= MIN_POINTS, title: t(RANGE_KEYS[chart.range]), days: t(daysKey, { n: chartPoints }), colours: [] as string[], file: `moodbow-chart-${chart.range}.png`, label: t("shareChart") }
@@ -226,9 +241,9 @@ export function ShareMonth({
         type="button"
         data-testid={testId}
         onClick={start}
-        className={asLink ? "inline-flex min-h-11 items-center text-sm font-medium text-accent underline underline-offset-4" : dialogButton()}
+        className={buttonClassName ?? (asLink ? "inline-flex min-h-11 items-center text-sm font-medium text-accent underline underline-offset-4" : dialogButton())}
       >
-        {t(label ?? "shareButton")}
+        {buttonText ?? t(label ?? "shareButton")}
       </button>
       {open && (
         <Dialog title={t("shareTitle")} onCancel={close} testId="share-dialog">
@@ -236,9 +251,13 @@ export function ShareMonth({
             {/* Always there while the dialog is open, filled while loading, so
                 it's announced (review of #46). */}
             <p role="status" className="sr-only" data-testid="share-loading">
-              {sayLoading && type === "moodbow" && colours === null && !failed ? t("shareLoading") : null}
+              {sayLoading && loading && !failed ? t("shareLoading") : null}
             </p>
-            {types.length > 1 ? (
+            {yearOnly ? (
+              <h3 className="font-medium text-text" data-testid="share-type-year">
+                {t("shareYear")}
+              </h3>
+            ) : types.length > 1 ? (
               <div className="flex flex-wrap gap-2" role="group" aria-label={t("shareCardType")}>
                 {types.map((k) => (
                   <button key={k} type="button" data-testid={`share-type-${k}`} aria-pressed={type === k} onClick={() => setType(k)} className={choice(type === k)}>
@@ -251,11 +270,11 @@ export function ShareMonth({
                 {t("shareMoodbow")}
               </h3>
             )}
-            {type === "moodbow" && failed ? (
+            {(type === "moodbow" || yearOnly) && failed ? (
               <p role="alert" className="font-medium text-accent">
                 {tt("errGeneric")}
               </p>
-            ) : type === "moodbow" && colours === null ? (
+            ) : loading ? (
               <span className="block h-6 w-6 animate-spin rounded-full border-2 border-border border-t-accent motion-reduce:animate-none" aria-hidden="true" />
             ) : !card.ready ? (
               <p data-testid="share-not-enough" className="text-muted">
@@ -315,6 +334,11 @@ export function ShareMonth({
                 <p role="status" className="sr-only" data-testid="share-line-count-announce">
                   {left === 10 || left === 0 ? t("shareLineCount", { count: left }) : null}
                 </p>
+                {yearOnly && yearNote && (
+                  <p data-testid="share-year-note" className="leading-[1.429] [font-size:min(0.875rem,max(8.75vw,28px))] text-muted">
+                    {yearNote}
+                  </p>
+                )}
                 <p className="leading-[1.429] [font-size:min(0.875rem,max(8.75vw,28px))] text-muted">{t("sharePrivacyNote")}</p>
                 {encodeFailed && (
                   <p role="alert" data-testid="share-encode-failed" className="font-medium text-accent">

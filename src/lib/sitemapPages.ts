@@ -31,6 +31,7 @@ const APP_GATED: PageEntry[] = [
   app({ path: "/app/me/toolbox", gate: "toolbox-live" }),
   app({ path: "/app/print", gate: "print-live", prefix: true }),
   app({ path: "/app/write/good-things", gate: "good-things-live", prefix: true }),
+  app({ path: "/app/year", gate: "year-review-live", prefix: true }),
 ];
 
 const PAGES: PageEntry[] = [
