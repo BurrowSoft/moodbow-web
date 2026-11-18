@@ -21,9 +21,10 @@ function rng(seed: number): Gen {
   };
 }
 
-// An RBJ biquad: low-pass or band-pass.
+// An RBJ biquad: low-pass or band-pass. The frequency is kept below the rate's Nyquist limit (at a
+// low sample rate, rain's 6 kHz would otherwise be past it, and the filter would blow up to NaN).
 function biquad(sr: number, type: "lp" | "bp", fc: number, q: number): (x: number) => number {
-  const w = (2 * Math.PI * fc) / sr;
+  const w = (2 * Math.PI * Math.min(fc, sr * 0.45)) / sr;
   const c = Math.cos(w);
   const al = Math.sin(w) / (2 * q);
   const [b0, b1, b2] = type === "lp" ? [(1 - c) / 2, 1 - c, (1 - c) / 2] : [al, 0, -al];
