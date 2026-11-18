@@ -49,9 +49,10 @@ const reply = (body: unknown) => fetchMock.mockResolvedValueOnce({ ok: true, jso
 const sent = (call: number) => JSON.parse(fetchMock.mock.calls[call][1].body as string) as { token: string; week: number };
 
 describe("SharedWeekView", () => {
-  it("nothing is fetched until Show the week is tapped", () => {
+  it("on load: the fragment is cleared at once (the Reviewer, #363), and nothing is fetched until Show the week", () => {
     renderIt();
     expect(screen.getByTestId("shared-title").textContent).toBe("A week shared with you");
+    expect(replaceState).toHaveBeenCalledTimes(1);
     expect(fetchMock).not.toHaveBeenCalled();
   });
 

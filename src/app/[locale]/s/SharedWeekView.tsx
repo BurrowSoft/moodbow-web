@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { MOOD_HEX } from "@/lib/share/moodbow";
 
 // The shared-week viewer (1.4 G; plans/PLAN-trusted-share.md §4; board 28b with UX's copy, 18 Nov).
@@ -46,11 +46,17 @@ export function SharedWeekView({ strings, locale, help, footer }: { strings: Sha
   // Week 0's start: an arrow's answer with this start means that earlier week doesn't exist (it's
   // before the link's creation), so share_view gave week 0 back.
   const [week0Start, setWeek0Start] = useState<string | null>(null);
-  // The token, kept in memory once read; the fragment is cleared from the address bar.
-  const [token, setToken] = useState<string | null>(null);
+  // The token: read from the fragment ON MOUNT and the fragment cleared at once (the Reviewer, #363),
+  // so it's out of the address bar and screenshots before anything is tapped. It's kept in memory
+  // only; nothing is fetched until "Show the week".
+  const token = useRef<string | null>(null);
+  useEffect(() => {
+    token.current = readToken();
+    if (window.location.hash) window.history.replaceState(null, "", window.location.pathname + window.location.search);
+  }, []);
 
-  const load = async (to: number, known: string | null) => {
-    const t = known ?? token;
+  const load = async (to: number) => {
+    const t = token.current;
     if (!t) return setState("unavailable");
     setState("loading");
     try {
@@ -71,12 +77,7 @@ export function SharedWeekView({ strings, locale, help, footer }: { strings: Sha
     }
   };
 
-  const start = () => {
-    const t = readToken();
-    if (typeof window !== "undefined" && window.location.hash) window.history.replaceState(null, "", window.location.pathname + window.location.search);
-    setToken(t);
-    void load(0, t);
-  };
+  const start = () => void load(0);
 
   const dayFormat = new Intl.DateTimeFormat(locale, { weekday: "short", timeZone: "UTC" });
   const dayLong = new Intl.DateTimeFormat(locale, { weekday: "long", timeZone: "UTC" });
@@ -136,7 +137,7 @@ export function SharedWeekView({ strings, locale, help, footer }: { strings: Sha
             </ul>
           )}
           <div className="flex flex-wrap justify-between gap-3">
-            <button type="button" data-testid="shared-earlier" disabled={index >= (week.weeks_available ?? 3) || noEarlier || state === "loading"} onClick={() => void load(index + 1, null)} className="inline-flex min-h-[44px] items-center rounded-full border border-border px-[16px] font-medium text-text disabled:opacity-40">
+            <button type="button" data-testid="shared-earlier" disabled={index >= (week.weeks_available ?? 3) || noEarlier || state === "loading"} onClick={() => void load(index + 1)} className="inline-flex min-h-[44px] items-center rounded-full border border-border px-[16px] font-medium text-text disabled:opacity-40">
               {strings.earlier}
             </button>
             <button
@@ -145,7 +146,7 @@ export function SharedWeekView({ strings, locale, help, footer }: { strings: Sha
               disabled={index === 0 || state === "loading"}
               onClick={() => {
                 setNoEarlier(false);
-                void load(index - 1, null);
+                void load(index - 1);
               }}
               className="inline-flex min-h-[44px] items-center rounded-full border border-border px-[16px] font-medium text-text disabled:opacity-40"
             >
