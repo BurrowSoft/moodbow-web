@@ -1,25 +1,13 @@
 {
   "version": 1,
-  "about": "For my appointment (specs/1.2-features.md §4, UX 2026-11-09; the Reviewer's read). TEMPORARY HOME, as content/toolbox.json: it moves to the app repo's supabase/contracts when the app ports it (decision 99), where it's a PDF made on the device. A summary of the last rangeWeeks weeks, ending today in the saved zone: the number of check-ins (never \"of N days\": that's a missed-days count), the average and small chart for each of mood, sleep, stress and movement (Insights' own rules: a day without a value doesn't count, at least 3 to show), and the starred entries as their date and first line (cut at firstLineChars on a word boundary, with …). An entry's full text only where the person ticks it, none ticked at the start. Never included: neverIncluded. An optional box, What I want to talk about, isn't saved. Nothing is stored or sent by us; the ticks and the box live in the page's memory only. Every string is checked against diagnosisWords (your-week.json's lists), the footer and headings included. Routine (1.4 F, PLAN-routine.md §5, UX 18 Nov): a Routine section with only the items the person opted in (in_appointment); with none, no section (expect null). Per item, in position order, of the range's check-in days on or after its started_on: the share with its tick, as a whole number, halves up (state percent); fewer than rules.routineMinDays such days: state not_enough (\"not enough days yet\"). Never a mood comparison for routine (UX's medication safety ruling). routineCases: {today, weeks, checkIns: [dates], routine: [{id, position, in_appointment, started_on, ticks}], expect}.",
+  "about": "For my appointment (specs/1.2-features.md §4, UX 2026-11-09; the Reviewer's read). Its home since the app port (decision 99): the web syncs it from here with scripts/sync-contracts.mjs. On the app it's a PDF made on the phone (package pdf), shared through the share sheet as appointment-summary.pdf (no name, no dates) and swept from the phone like Export's files. A summary of the last rangeWeeks weeks, ending today in the saved zone: the number of check-ins (never \"of N days\": that's a missed-days count), the average and small chart for each of mood, sleep, stress and movement (Insights' own rules: a day without a value doesn't count, at least 3 to show), and the starred entries as their date and first line (cut at firstLineChars on a word boundary, with …). An entry's full text only where the person ticks it, none ticked at the start. Never included: neverIncluded. An optional box, What I want to talk about, isn't saved. Nothing is stored or sent by us; the ticks and the box live in the page's memory only. Every string is checked against diagnosisWords (your-week.json's lists), the footer and headings included. Routine (1.4 F, PLAN-routine.md §5, UX 18 Nov): a Routine section with only the items the person opted in (in_appointment); with none, no section (expect null). Per item, in position order, of the range's check-in days on or after its started_on: the share with its tick, as a whole number, halves up (state percent); fewer than rules.routineMinDays such days: state not_enough (\"not enough days yet\"). Never a mood comparison for routine (UX's medication safety ruling). routineCases: {today, weeks, checkIns: [dates], routine: [{id, position, in_appointment, started_on, ticks}], expect}.",
   "rules": {
-    "rangeWeeks": [
-      2,
-      4,
-      12
-    ],
+    "rangeWeeks": [2, 4, 12],
     "defaultWeeks": 4,
     "firstLineChars": 120,
     "routineMinDays": 5
   },
-  "neverIncluded": [
-    "letters",
-    "safety_plan",
-    "toolbox_items",
-    "bo_messages",
-    "ai_reflections",
-    "ai_reports",
-    "ai_memories"
-  ],
+  "neverIncluded": ["letters", "safety_plan", "toolbox_items", "bo_messages", "ai_reflections", "ai_reports", "ai_memories"],
   "routineCases": [
     {
       "name": "one opted-in item: 15 of 20 check-in days ticked is 75",

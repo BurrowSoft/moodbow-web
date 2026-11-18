@@ -31,7 +31,7 @@ Render in the JSON's array order (the server already sorts it: check-ins by date
 
 A section with no items is left out entirely, heading included. There's exactly one blank line between blocks (header → section, section → section), and none at the very end.
 
-`ai_reports` aren't in the text in format 1: their `body` is structured and M9 defines how to read it. They stay in the JSON. Profile, settings, consents, usage and credits are also JSON only.
+`ai_reports` aren't in the text in format 1: their `body` is structured and M9 defines how to read it. They stay in the JSON. Profile, settings, consents, usage, credits and Moodbow Plus (`plus`, migration 030: the entitlements row's source, status and dates, or null) are also JSON only.
 
 ## Header
 ```
