@@ -469,10 +469,10 @@
     "exportReflectionOn": "Sur votre note du {date}",
     "exportTags": "Étiquettes",
     "exportRoutine": "Routine",
-    "exportRoutineStarted": "commencée le {date}",
+    "exportRoutineStarted": "depuis le {date}",
     "exportRoutineInAppointment": "dans mon résumé pour le rendez-vous",
-    "exportRoutineTicked": "Cochée : {dates}",
-    "exportRoutineNoTicks": "Pas encore cochée"
+    "exportRoutineTicked": "Jours cochés : {dates}",
+    "exportRoutineNoTicks": "Aucun jour coché pour l'instant"
   },
   "help": {
     "helpTitle": "Aide et FAQ",

@@ -469,10 +469,10 @@
     "exportReflectionOn": "Sulla tua pagina del {date}",
     "exportTags": "Tag",
     "exportRoutine": "Routine",
-    "exportRoutineStarted": "iniziata il {date}",
+    "exportRoutineStarted": "dal {date}",
     "exportRoutineInAppointment": "nel mio riepilogo per l'appuntamento",
-    "exportRoutineTicked": "Spuntata: {dates}",
-    "exportRoutineNoTicks": "Non ancora spuntata"
+    "exportRoutineTicked": "Giorni spuntati: {dates}",
+    "exportRoutineNoTicks": "Nessun giorno spuntato finora"
   },
   "help": {
     "helpTitle": "Aiuto e domande frequenti",

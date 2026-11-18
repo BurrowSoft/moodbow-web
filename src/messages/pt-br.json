@@ -471,8 +471,8 @@
     "exportRoutine": "Rotina",
     "exportRoutineStarted": "começou em {date}",
     "exportRoutineInAppointment": "no meu resumo para a consulta",
-    "exportRoutineTicked": "Marcada: {dates}",
-    "exportRoutineNoTicks": "Ainda não marcada"
+    "exportRoutineTicked": "Dias marcados: {dates}",
+    "exportRoutineNoTicks": "Nenhum dia marcado ainda"
   },
   "help": {
     "helpTitle": "Ajuda e perguntas frequentes",
