@@ -336,7 +336,7 @@
     "what": "1.4 A Your year in Moodbow (specs/1.4-features.md, UX rulings 18 Nov; the rules in src/lib/journal/yearReview.contract.json): /app/year for everyone, the Today card from 1 December to 31 January and the link row at the top of Insights. Fixed rules, nothing new stored; the share image is the 1.1 J Year card. Target: live on 1 December. Before it's met: the en copy and its fr/es/pt-BR translations, the Help article, the storybook board, the Reviewer's read and the Web Tester's row (a Preview's ?today= stands in for December)."
   },
   "showed-up-live": {
-    "met": false,
+    "met": true,
     "what": "1.4 C Days you showed up (specs/1.4-features.md, UX 18 Nov; the rules in src/lib/journal/showedUp.contract.json, the app's supabase/contracts/showed-up.json): a count only, never a streak, a chain or a reminder not to break one. On Insights, the shown tab's count (week, month, 3 months, and with Plus year and all time); on the share cards, \"Showed up on n days\" instead of \"n days journaled\". For everyone. Before it's met: the Reviewer's read, the storybook board and the Web Tester's row."
   }
 }
