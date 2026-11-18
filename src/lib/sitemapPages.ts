@@ -26,6 +26,7 @@ const APP_GATED: PageEntry[] = [
   app({ path: "/app/me/letters", gates: ["letters-live", "plus"], prefix: true }),
   app({ path: "/app/me/appointment", gate: "appointment-live", prefix: true }),
   app({ path: "/app/me/safety-plan", gate: "safety-plan-live", prefix: true }),
+  app({ path: "/app/me/share", gate: "trusted-share-live", prefix: true }),
   // The grounding exercises below the toolbox need both; the toolbox page itself only its own.
   app({ path: "/app/me/toolbox", gates: ["toolbox-live", "grounding-live"], prefix: "children" }),
   app({ path: "/app/me/toolbox", gate: "toolbox-live" }),

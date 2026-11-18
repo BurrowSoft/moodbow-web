@@ -35,6 +35,8 @@ import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
 import { SetupLaterCard, TodayPlusCard } from "./TodayCards";
 import { readCardTags } from "@/lib/journal/tagsData";
 import { GetHelpNow } from "@/components/SafetyCard";
+import { parseShareLinks, shareNotes, SHARE_LINK_COLUMNS } from "@/lib/share/shareLinks";
+import { ShareNotes } from "./ShareNotes";
 import { previewToday, previewTodayQuery } from "@/lib/journal/previewToday";
 import { reviewYear, yearCardOnToday } from "@/lib/journal/yearReview";
 import { YearTodayCard } from "./year/YearLink";
@@ -84,7 +86,10 @@ export default async function TodayPage({ params, searchParams }: PageProps<"/[l
   // Letters (1.2): read with the rest; the body stays on the server (below).
   // Letters wait for Plus (lettersGate); the card on the day never asks about Plus itself.
   const lettersOn = lettersGate() !== "hidden";
-  const [checkIn, todaysEntries, requestHeaders, plusPage, weekRead, momentsRead, toolboxRead, planHas, lettersRead] = await Promise.all([
+  // Share your week (1.4 G): the notes about a link created or first opened (UX's coercion defence),
+  // read with the rest. A failed read shows no note this time, and the next Today tries again.
+  const shareOn = pageGate("trusted-share-live") !== "hidden";
+  const [checkIn, todaysEntries, requestHeaders, plusPage, weekRead, momentsRead, toolboxRead, planHas, lettersRead, shareRead] = await Promise.all([
     supabase.from("check_ins").select("local_date, mood, sleep_hours, sleep_quality, exercise_minutes, stress, updated_at").eq("local_date", me.today).maybeSingle(),
     // Today's entries, newest first (previews only; the editor loads the rest).
     supabase.from("entries").select("id, body, is_moment, entry_date, created_at").eq("entry_date", me.today).order("created_at", { ascending: false }),
@@ -96,7 +101,9 @@ export default async function TodayPage({ params, searchParams }: PageProps<"/[l
     toolboxOn ? supabase.from("toolbox_items").select("id, text, position").order("position") : null,
     planOn ? safetyPlanHasContent().catch(() => false) : false,
     lettersOn ? supabase.from("letters").select("id, body, written_on, opens_on, card_from, opened_at") : null,
+    shareOn ? supabase.from("share_links").select(SHARE_LINK_COLUMNS) : null,
   ]);
+  const shareNotesToShow = shareRead && !shareRead.error ? shareNotes(parseShareLinks(shareRead.data)) : [];
   const { data, error: checkInError } = checkIn;
   const { data: entries, error: entriesError } = todaysEntries;
   // Today always keeps check-in and Write, with errors beside them (specs/next-release.md).
@@ -199,6 +206,9 @@ export default async function TodayPage({ params, searchParams }: PageProps<"/[l
       {/* Today's order (UX ruling, audit 14 Nov; the app and board 22): check-in → Your week (first,
           so its hard-week help is high) → Plus card → setup/reminder offer → things that help →
           a letter → entries → Write last. */}
+      {/* Right under the check-in, before anything else: someone may have made a link on this
+          account (UX). */}
+      {shareNotesToShow.length > 0 && <ShareNotes notes={shareNotesToShow} />}
       {yourWeekCard}
       {yearCard && <YearTodayCard year={yearCard.year} query={yearCard.query} />}
       {plusCard && plusPage && <TodayPlusCard trial={plusCard.trial} price={plusPage.price} offer={plusPage.offer} date={me.today} />}
