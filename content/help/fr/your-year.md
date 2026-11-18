@@ -4,7 +4,7 @@ summary: Un regard doux sur votre année, à partir de vos propres bilans.
 topic: Your journal
 fr-draft: true
 ---
-{pending:year_review_live}**Votre année dans Moodbow** revient sur votre année en quelques écrans courts. Du 1er décembre au 31 janvier, elle est dans **Aujourd'hui**, et en janvier elle montre l'année qui vient de finir. Vous pouvez toujours l'ouvrir depuis **Statistiques**. Elle est pour tout le monde, avec ou sans Plus.
+{pending:year_review_live}**Votre année dans Moodbow** revient sur votre année en quelques écrans courts. Du 1er décembre au 31 janvier, elle est dans **Aujourd'hui**, et en janvier elle montre l'année qui vient de finir. Vous pouvez toujours l'ouvrir depuis **Statistiques**.{pending:plus} Elle est pour tout le monde, avec ou sans Plus.{/pending}
 
 Elle apparaît une fois que vous avez fait le point au moins 30 jours dans l'année.
 

@@ -4,7 +4,7 @@ summary: Um olhar gentil para o seu ano, feito com os seus próprios check-ins.
 topic: Your journal
 pt-BR-draft: true
 ---
-{pending:year_review_live}**Seu ano no Moodbow** relembra o seu ano em algumas telas curtas. De 1º de dezembro a 31 de janeiro ele fica em **Hoje**, e em janeiro mostra o ano que acabou de terminar. Você sempre pode abri-lo em **Insights**. É para todo mundo, com ou sem Plus.
+{pending:year_review_live}**Seu ano no Moodbow** relembra o seu ano em algumas telas curtas. De 1º de dezembro a 31 de janeiro ele fica em **Hoje**, e em janeiro mostra o ano que acabou de terminar. Você sempre pode abri-lo em **Insights**.{pending:plus} É para todo mundo, com ou sem Plus.{/pending}
 
 Ele aparece depois que você fez check-in em pelo menos 30 dias naquele ano.
 

@@ -4,7 +4,7 @@ summary: Una mirada tranquila a tu año, hecha con tus propios registros.
 topic: Your journal
 es-draft: true
 ---
-{pending:year_review_live}**Tu año en Moodbow** repasa tu año en unas pocas pantallas cortas. Del 1 de diciembre al 31 de enero está en **Hoy**, y en enero muestra el año que acaba de terminar. Siempre puedes abrirlo desde **Resumen**. Es para todo el mundo, con Plus o sin él.
+{pending:year_review_live}**Tu año en Moodbow** repasa tu año en unas pocas pantallas cortas. Del 1 de diciembre al 31 de enero está en **Hoy**, y en enero muestra el año que acaba de terminar. Siempre puedes abrirlo desde **Resumen**.{pending:plus} Es para todo el mundo, con Plus o sin él.{/pending}
 
 Aparece cuando hayas hecho tu registro al menos 30 días ese año.
 
