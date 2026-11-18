@@ -29,6 +29,10 @@ import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
 import { periodLine, readCheckInsSince, readWrittenDays } from "@/lib/plus/insightsData";
 import { ShareMonth } from "./ShareMonth";
 import { WeeklyReport } from "./WeeklyReport";
+import { INSIGHTS_TAB_RANGE, showedUpShown } from "@/lib/journal/showedUp";
+import { previewToday, previewTodayQuery } from "@/lib/journal/previewToday";
+import { loadInsightsRowYear } from "@/lib/journal/yearReviewData";
+import { YearInsightsRow } from "../year/YearLink";
 
 // The weekly report runs in this page's functions and waits up to 45 s
 // (REFLECT_SERVER_DEADLINE_MS): the page allows 60, as the entry page does.
@@ -67,7 +71,11 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
   // The page's reads all need only `me`, so they start together (the Web Dev's LCP read, 12 Nov:
   // each one in turn cost a round trip to the database). Same reads, same results. Moodbow Plus's
   // view is one of them (decision 246): null when its row can't be read (then nothing about Plus).
-  const [checkIns, plus, milestone, stored, requestHeaders] = await Promise.all([
+  // Your year in Moodbow's row (1.4 A): read with the rest. A Preview's ?today= stands in (never on
+  // Production).
+  const yearToday = previewToday((await searchParams).today, me.today);
+  const yearOn = pageGate("year-review-live") !== "hidden";
+  const [checkIns, plus, milestone, stored, requestHeaders, rowYear] = await Promise.all([
     supabase
       .from("check_ins")
       .select("local_date, mood, sleep_hours, stress, exercise_minutes")
@@ -79,13 +87,17 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
       ? supabase.from("ai_reports").select("id, period_start, body, tier, created_at").eq("kind", "weekly").eq("period_start", weekStart).maybeSingle()
       : null,
     headers(),
+    yearOn ? loadInsightsRowYear(supabase, yearToday).catch(() => null) : null,
   ]);
   // With Plus: Year and All time, and More patterns over the last 12 months (or all time on All time).
   // Insights are Plus (spec "Insights become Plus", 14 Nov): without Plus (or with a payment that
   // failed), the labelled example and nothing of theirs. A row that can't be read, or Plus off,
   // shows their own Insights as before (ruling 5). The gate is here and on the route only, never in
   // lib/journal/insights, which the appointment summary uses (ruling 2).
-  if (plus && plus.kind !== "plus") return <InsightsExample help={<GetHelpNow country={me.profile?.country} testId="insights-example-help" counted neutral icon />} />;
+  // Your year in Moodbow's row (1.4 A), for everyone: December and January always; otherwise only
+  // when a complete year has 30 days, naming the year the page will show (UX, 18 Nov).
+  const yearRow = rowYear !== null ? <YearInsightsRow year={rowYear} query={previewTodayQuery(yearToday, me.today)} /> : undefined;
+  if (plus && plus.kind !== "plus") return <InsightsExample yearRow={yearRow} help={<GetHelpNow country={me.profile?.country} testId="insights-example-help" counted neutral icon />} />;
   const hasPlus = plus?.kind === "plus";
   const longRange = hasPlus && isLongRange(asked) ? asked : null;
   const moreWindow = longRange === "all" ? "all" : "year";
@@ -139,6 +151,12 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
     const { unit, periods } = longSummary(rows, me.today, longRange, "mood", firstCheckIn);
     long = { range: longRange, unit, periodLine: periodLine(periods[0].start, periods[periods.length - 1].end, dateLocaleTag), charts };
   }
+  // Days you showed up (1.4 C, showed-up-live): the shown tab's count from the rows already read,
+  // which always cover it (the free read starts at the range before; Plus's long reads go further).
+  const shownRange = INSIGHTS_TAB_RANGE[longRange ?? range];
+  // At 0 days there's no line at all (UX, 18 Nov).
+  const shownCount = pageGate("showed-up-live") !== "hidden" ? showedUpShown(rows, me.today)[shownRange] : "hidden";
+  const showedUpLine = shownCount === "hidden" ? undefined : { count: shownCount, range: shownRange };
   let plusMore: React.ReactNode = null;
   if (hasPlus && withPatterns) {
     const written = await readWrittenDays(supabase, moreWindowStart(moreWindow, me.today), me.today);
@@ -175,6 +193,8 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
       plusTab={hasPlus ? <PlusTabs current={longRange} /> : undefined}
       plusPatterns={hasPlus ? plusMore : undefined}
       long={long}
+      showedUp={showedUpLine}
+      yearRow={yearRow}
     />
   );
 }

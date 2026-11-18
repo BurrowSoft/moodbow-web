@@ -568,7 +568,8 @@
     "pairWeekends": "Weekends",
     "pairWritingTitle": "Writing",
     "pairWrote": "Wrote",
-    "pairNotWrote": "Didn't write"
+    "pairNotWrote": "Didn't write",
+    "showedUp": "{count, plural, one {You showed up on # day} other {You showed up on # days}} {range, select, week {in the last 7 days} month {in the last 30 days} threeMonths {in the last 3 months} year {in the last 12 months} other {since you started}}."
   },
   "share": {
     "shareButton": "Share",
@@ -602,7 +603,8 @@
     "shareLoading": "Getting your month…",
     "shareFormat": "Format",
     "shareTheme": "Theme",
-    "shareLineCount": "{count, plural, one {# character left} other {# characters left}}"
+    "shareLineCount": "{count, plural, one {# character left} other {# characters left}}",
+    "shareShowedUp": "{n, plural, =1{Showed up on 1 day} other{Showed up on # days}}"
   },
   "ai": {
     "meAi": "AI",
@@ -1007,5 +1009,31 @@
     "liftsRow": "On days with “{tag}”, your mood averaged {a} of 5; on other days, {b}.",
     "liftsFooter": "Patterns, not causes. Only you can see this.",
     "liftsNone": "Keep tagging your days. Patterns show up after a few weeks."
+  },
+  "year": {
+    "title": "Your year in Moodbow",
+    "todayLine": "A look back at {year}, just for you.",
+    "open": "Open",
+    "coloursTitle": "Your year in colours",
+    "coloursLine": "Each month, the moods you checked in with.",
+    "monthMood": "{month}: {mood}",
+    "monthFaint": "{month}: no check-ins",
+    "daysTitle": "Days you showed up",
+    "daysLine": "{count, plural, one {You showed up on # day} other {You showed up on # days}} this year.",
+    "momentsTitle": "Your moments",
+    "momentsLine": "{count, plural, one {You marked # moment} other {You marked # moments}}.",
+    "helpedTitle": "Things that help you",
+    "tagsTitle": "On good days you often tagged",
+    "hardTitle": "Your year",
+    "hardLine": "This year asked a lot of you. You kept showing up.",
+    "closing": "Thank you for showing up for yourself this year.",
+    "morePlus": "See more of your year",
+    "notEnough": "Your year in Moodbow for {year} appears once you've checked in on 30 days that year. You're on {count}.",
+    "share": "Share your year",
+    "previous": "Previous",
+    "next": "Next",
+    "position": "Screen {n} of {total}",
+    "shareNote": "The image shows your colours and the number of days. Your entries, tags, moments and dates are never on it.",
+    "daysUnit": "{count, plural, one {day} other {days}}"
   }
 }

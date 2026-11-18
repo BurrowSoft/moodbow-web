@@ -50,6 +50,11 @@ export const TAP_EVENTS = [
   "appointment_print",
   "timeline_search_used",
   "insights_range",
+  // Your year in Moodbow (1.4 A): opening it, sharing the Year card, Plus's deeper page. Never
+  // which screens were seen or how far someone swiped (UX 18 Nov).
+  "year_review_open",
+  "year_review_share",
+  "year_review_more_plus",
 ] as const;
 export type TapEvent = (typeof TAP_EVENTS)[number];
 
