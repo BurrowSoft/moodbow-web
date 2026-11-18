@@ -52,6 +52,14 @@ export function linkState(link: ShareLink, now: Date): LinkState {
 
 export const activeLinks = (links: ShareLink[], now: Date) => links.filter((l) => linkState(l, now) === "active");
 
+// Me's always-visible line (the coercion defence): the number of active links, or null when the
+// count couldn't be read. Then Me shows the row without the line, and never "0 active" (the
+// Reviewer, #364): a failed read must not look like reassurance. The next visit reads again.
+export function activeShareLine(read: { count: number | null; error: unknown } | null): number | null {
+  if (!read || read.error || typeof read.count !== "number") return null;
+  return read.count > 0 ? read.count : null;
+}
+
 // Today's notes (UX, the coercion defence): a link's creation while created_seen_at is null, and its
 // first view while view_count >= 1 and first_view_seen_at is null. Shown on whichever device comes
 // next, since the database keeps the "seen". The newest of each; a stopped or ended link still

@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
-import { activeLinks, linkState, parseShareLinks, shareNotes, SHARE_LINK_COLUMNS, shareUrl } from "./shareLinks";
+import { activeLinks, activeShareLine, linkState, parseShareLinks, shareNotes, SHARE_LINK_COLUMNS, shareUrl } from "./shareLinks";
 
 const NOW = new Date("2026-11-18T12:00:00Z");
 const row = (over: Record<string, unknown> = {}) => ({
@@ -53,6 +53,14 @@ describe("share links (1.4 G)", () => {
 
   it("a stopped link still gets its note: the person should know", () => {
     expect(shareNotes(parseShareLinks([row({ created_seen_at: null, revoked_at: "2026-11-11T00:00:00Z" })]))).toEqual([{ kind: "created", id: "a" }]);
+  });
+
+  it("Me's line: the active count, or nothing; a failed read never says 0 active (the Reviewer, #364)", () => {
+    expect(activeShareLine({ count: 2, error: null })).toBe(2);
+    expect(activeShareLine({ count: 0, error: null })).toBeNull();
+    expect(activeShareLine({ count: null, error: { message: "boom" } })).toBeNull();
+    expect(activeShareLine({ count: 3, error: { message: "boom" } })).toBeNull();
+    expect(activeShareLine(null)).toBeNull();
   });
 
   it("the viewer's address carries the token in the fragment only", () => {

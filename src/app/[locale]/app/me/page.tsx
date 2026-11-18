@@ -28,6 +28,7 @@ import { readPlusPage } from "@/lib/plus/page";
 import { withTimeout } from "@/lib/ui/withTimeout";
 import { extraReminders } from "@/lib/plus/view";
 import { PlusInMe } from "./PlusInMe";
+import { activeShareLine } from "@/lib/share/shareLinks";
 import { MePicture } from "./MePicture";
 import { lettersGate } from "@/lib/plus/letters";
 import { LockedItem, PlusLock } from "../PlusSheet";
@@ -85,7 +86,7 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
     lettersOn && plusOn ? supabase.from("letters").select("id", { count: "exact", head: true }) : null,
     shareOn ? supabase.from("share_links").select("id", { count: "exact", head: true }).is("revoked_at", null).gt("expires_at", new Date().toISOString()) : null,
   ]);
-  const activeShareCount = activeShares && !activeShares.error ? (activeShares.count ?? 0) : 0;
+  const activeShareCount = activeShareLine(activeShares);
   const plus = plusPage?.view ?? null;
   const pastReports = plus && plus.kind !== "plus" ? (reports?.count ?? 0) > 0 : false;
   const lettersLocked = lettersOn && plus !== null && plus.kind !== "plus";
@@ -172,7 +173,7 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
             </Link>
           </h2>
           {/* While any link is active, always said here (UX, the coercion defence). */}
-          {activeShareCount > 0 && (
+          {activeShareCount !== null && (
             <p data-testid="me-share-active" className="mt-2 rounded-2xl bg-pill px-[14px] py-[10px] text-sm text-text">
               {(await getTranslations("shareMe"))("activeLine", { count: activeShareCount })}
             </p>
