@@ -29,6 +29,7 @@ import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
 import { periodLine, readCheckInsSince, readWrittenDays } from "@/lib/plus/insightsData";
 import { ShareMonth } from "./ShareMonth";
 import { WeeklyReport } from "./WeeklyReport";
+import { INSIGHTS_TAB_RANGE, showedUpShown } from "@/lib/journal/showedUp";
 import { previewToday, previewTodayQuery } from "@/lib/journal/previewToday";
 import { loadInsightsRowYear } from "@/lib/journal/yearReviewData";
 import { YearInsightsRow } from "../year/YearLink";
@@ -150,6 +151,12 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
     const { unit, periods } = longSummary(rows, me.today, longRange, "mood", firstCheckIn);
     long = { range: longRange, unit, periodLine: periodLine(periods[0].start, periods[periods.length - 1].end, dateLocaleTag), charts };
   }
+  // Days you showed up (1.4 C, showed-up-live): the shown tab's count from the rows already read,
+  // which always cover it (the free read starts at the range before; Plus's long reads go further).
+  const shownRange = INSIGHTS_TAB_RANGE[longRange ?? range];
+  // At 0 days there's no line at all (UX, 18 Nov).
+  const shownCount = pageGate("showed-up-live") !== "hidden" ? showedUpShown(rows, me.today)[shownRange] : "hidden";
+  const showedUpLine = shownCount === "hidden" ? undefined : { count: shownCount, range: shownRange };
   let plusMore: React.ReactNode = null;
   if (hasPlus && withPatterns) {
     const written = await readWrittenDays(supabase, moreWindowStart(moreWindow, me.today), me.today);
@@ -186,6 +193,7 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
       plusTab={hasPlus ? <PlusTabs current={longRange} /> : undefined}
       plusPatterns={hasPlus ? plusMore : undefined}
       long={long}
+      showedUp={showedUpLine}
       yearRow={yearRow}
     />
   );
