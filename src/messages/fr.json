@@ -1021,7 +1021,7 @@
     "hardLine": "Cette année vous a beaucoup demandé. Vous avez continué à revenir.",
     "closing": "Merci d'avoir été là pour vous cette année.",
     "morePlus": "Voir plus de votre année",
-    "notEnough": "Votre année {year} dans Moodbow apparaît après 30 jours notés cette année-là. Vous en êtes à {count}.",
+    "notEnough": "Votre année {year} dans Moodbow apparaît après 30 jours avec un bilan cette année-là. Vous en êtes à {count}.",
     "share": "Partager votre année",
     "previous": "Précédent",
     "next": "Suivant",
