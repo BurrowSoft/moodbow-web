@@ -1050,6 +1050,7 @@
     "loading": "Die Woche wird geladen…",
     "dayNone": "{day}: kein Check-in",
     "help": "Wenn Sie sich um jemanden Sorgen machen, <link>finden Sie ein Hilfetelefon</link>.",
-    "footer": "Die Person, die diesen Link geteilt hat, kann ihn jederzeit beenden. Er wird nicht von Suchmaschinen erfasst. Er bleibt im Verlauf dieses Browsers; schließen Sie den Tab, wenn Sie fertig sind."
+    "footer": "Die Person, die diesen Link geteilt hat, kann ihn jederzeit beenden. Er wird nicht von Suchmaschinen erfasst. Er bleibt im Verlauf dieses Browsers; schließen Sie den Tab, wenn Sie fertig sind.",
+    "noToken": "Um die Woche noch einmal zu sehen, öffnen Sie den Link, den Sie bekommen haben."
   }
 }

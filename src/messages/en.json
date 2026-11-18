@@ -1050,6 +1050,7 @@
     "loading": "Loading the week…",
     "dayNone": "{day}: no check-in",
     "help": "If you're worried about someone, <link>find a helpline</link>.",
-    "footer": "This link can be stopped by the person who shared it at any time. It isn't indexed by search engines. It stays in this browser's history; close the tab when you're done."
+    "footer": "This link can be stopped by the person who shared it at any time. It isn't indexed by search engines. It stays in this browser's history; close the tab when you're done.",
+    "noToken": "To see the week again, open the link you were sent."
   }
 }

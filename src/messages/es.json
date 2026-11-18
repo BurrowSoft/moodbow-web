@@ -1050,6 +1050,7 @@
     "loading": "Cargando la semana…",
     "dayNone": "{day}: sin registro",
     "help": "Si le preocupa alguien, <link>busque una línea de ayuda</link>.",
-    "footer": "La persona que compartió este enlace puede detenerlo en cualquier momento. No lo indexan los buscadores. Queda en el historial de este navegador; cierre la pestaña cuando termine."
+    "footer": "La persona que compartió este enlace puede detenerlo en cualquier momento. No lo indexan los buscadores. Queda en el historial de este navegador; cierre la pestaña cuando termine.",
+    "noToken": "Para volver a ver la semana, abra el enlace que le enviaron."
   }
 }

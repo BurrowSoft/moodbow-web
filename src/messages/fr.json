@@ -1050,6 +1050,7 @@
     "loading": "Chargement de la semaine…",
     "dayNone": "{day} : pas de bilan",
     "help": "Si vous vous inquiétez pour quelqu'un, <link>trouvez une ligne d'écoute</link>.",
-    "footer": "La personne qui a partagé ce lien peut l'arrêter à tout moment. Il n'est pas indexé par les moteurs de recherche. Il reste dans l'historique de ce navigateur ; fermez l'onglet quand vous avez terminé."
+    "footer": "La personne qui a partagé ce lien peut l'arrêter à tout moment. Il n'est pas indexé par les moteurs de recherche. Il reste dans l'historique de ce navigateur ; fermez l'onglet quand vous avez terminé.",
+    "noToken": "Pour revoir la semaine, ouvrez le lien qu'on vous a envoyé."
   }
 }

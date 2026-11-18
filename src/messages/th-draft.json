@@ -3253,5 +3253,10 @@
     "key": "shareView.footer",
     "en": "This link can be stopped by the person who shared it at any time. It isn't indexed by search engines. It stays in this browser's history; close the tab when you're done.",
     "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareView.noToken",
+    "en": "To see the week again, open the link you were sent.",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
   }
 ]

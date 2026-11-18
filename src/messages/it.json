@@ -1050,6 +1050,7 @@
     "loading": "Caricamento della settimana…",
     "dayNone": "{day}: nessun check-in",
     "help": "Se sei in pensiero per qualcuno, <link>trova un servizio di ascolto</link>.",
-    "footer": "La persona che ha condiviso questo link può interromperlo in qualsiasi momento. Non viene indicizzato dai motori di ricerca. Resta nella cronologia di questo browser; chiudi la scheda quando hai finito."
+    "footer": "La persona che ha condiviso questo link può interromperlo in qualsiasi momento. Non viene indicizzato dai motori di ricerca. Resta nella cronologia di questo browser; chiudi la scheda quando hai finito.",
+    "noToken": "Per rivedere la settimana, apri il link che hai ricevuto."
   }
 }

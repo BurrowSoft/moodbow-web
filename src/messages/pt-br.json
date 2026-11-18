@@ -1050,6 +1050,7 @@
     "loading": "Carregando a semana…",
     "dayNone": "{day}: sem check-in",
     "help": "Se você se preocupa com alguém, <link>encontre uma linha de apoio</link>.",
-    "footer": "Quem compartilhou este link pode interrompê-lo a qualquer momento. Ele não é indexado por mecanismos de busca. Ele fica no histórico deste navegador; feche a aba quando terminar."
+    "footer": "Quem compartilhou este link pode interrompê-lo a qualquer momento. Ele não é indexado por mecanismos de busca. Ele fica no histórico deste navegador; feche a aba quando terminar.",
+    "noToken": "Para ver a semana de novo, abra o link que você recebeu."
   }
 }

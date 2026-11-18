@@ -25,6 +25,7 @@ export type SharedWeekStrings = {
   later: string;
   none: string;
   unavailable: string;
+  noToken: string; // after a reload, or a link without its token: the token is gone from this page
   loading: string;
   dayNone: string; // with {day}
   moods: string[]; // mood 1..5 labels, index 0..4
@@ -39,7 +40,7 @@ function readToken(): string | null {
 }
 
 export function SharedWeekView({ strings, locale, help, footer }: { strings: SharedWeekStrings; locale: string; help: ReactNode; footer: ReactNode }) {
-  const [state, setState] = useState<"before" | "loading" | "ok" | "unavailable">("before");
+  const [state, setState] = useState<"before" | "loading" | "ok" | "unavailable" | "noToken">("before");
   const [week, setWeek] = useState<Week | null>(null);
   const [index, setIndex] = useState(0);
   const [noEarlier, setNoEarlier] = useState(false);
@@ -57,7 +58,7 @@ export function SharedWeekView({ strings, locale, help, footer }: { strings: Sha
 
   const load = async (to: number) => {
     const t = token.current;
-    if (!t) return setState("unavailable");
+    if (!t) return setState("noToken");
     setState("loading");
     try {
       const res = await fetch("/api/share/view", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token: t, week: to }), cache: "no-store" });
@@ -101,6 +102,11 @@ export function SharedWeekView({ strings, locale, help, footer }: { strings: Sha
       <p role="status" className="sr-only">
         {state === "loading" ? strings.loading : ""}
       </p>
+      {state === "noToken" && (
+        <p data-testid="shared-no-token" className="rounded-3xl bg-surface px-[18px] py-[18px] text-text">
+          {strings.noToken}
+        </p>
+      )}
       {state === "unavailable" && (
         <p data-testid="shared-unavailable" className="rounded-3xl bg-surface px-[18px] py-[18px] text-text">
           {strings.unavailable}
