@@ -1002,5 +1002,31 @@
     "liftsRow": "Nos dias com a tag \"{tag}\", seu humor ficou em média em {a} de 5; nos outros dias, em {b}.",
     "liftsFooter": "Padrões, não causas. Só você pode ver isto.",
     "liftsNone": "Continue marcando seus dias com tags. Os padrões aparecem depois de algumas semanas."
+  },
+  "year": {
+    "title": "Seu ano no Moodbow",
+    "todayLine": "Um olhar sobre {year}, só para você.",
+    "open": "Abrir",
+    "coloursTitle": "Seu ano em cores",
+    "coloursLine": "A cada mês, os humores que você registrou.",
+    "monthMood": "{month}: {mood}",
+    "monthFaint": "{month}: nenhum dia registrado",
+    "daysTitle": "Os dias em que você apareceu",
+    "daysLine": "{count, plural, one {Você apareceu em # dia} other {Você apareceu em # dias}} este ano.",
+    "momentsTitle": "Seus momentos",
+    "momentsLine": "{count, plural, one {Você marcou # momento} other {Você marcou # momentos}}.",
+    "helpedTitle": "O que ajuda você",
+    "tagsTitle": "Nos dias bons, você usou muito estas tags:",
+    "hardTitle": "Seu ano",
+    "hardLine": "Este ano pediu muito de você. Você continuou aparecendo.",
+    "closing": "Obrigado por reservar esse tempo para você este ano.",
+    "morePlus": "Ver mais do seu ano",
+    "notEnough": "Seu ano de {year} no Moodbow aparece depois de 30 dias registrados naquele ano. Você está em {count}.",
+    "share": "Compartilhar seu ano",
+    "previous": "Anterior",
+    "next": "Próximo",
+    "position": "Tela {n} de {total}",
+    "shareNote": "A imagem mostra suas cores e o número de dias. Suas anotações, tags, momentos e datas nunca aparecem nela.",
+    "daysUnit": "{count, plural, one {dia} other {dias}}"
   }
 }
