@@ -64,7 +64,7 @@ const countMoods = (rows: InsightRow[], moods: readonly number[]) => rows.filter
 
 // Hard (contract v2, UX 14 Nov): a low mood on more than half; or, with no good day at all, on at
 // least half (2,2,3,3 is hard; 2,2,4,4 isn't). It only ever adds help, never removes it.
-function isHard(rows: InsightRow[]): boolean {
+export function isHard(rows: InsightRow[]): boolean {
   const low = countMoods(rows, YOUR_WEEK_RULES.lowMoods);
   const good = countMoods(rows, YOUR_WEEK_RULES.goodMoods);
   return low * 2 > rows.length || (good === 0 && low * 2 >= rows.length);

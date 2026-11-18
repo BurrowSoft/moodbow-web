@@ -35,6 +35,9 @@ import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
 import { SetupLaterCard, TodayPlusCard } from "./TodayCards";
 import { readCardTags } from "@/lib/journal/tagsData";
 import { GetHelpNow } from "@/components/SafetyCard";
+import { previewToday, previewTodayQuery } from "@/lib/journal/previewToday";
+import { reviewYear, yearCardOnToday } from "@/lib/journal/yearReview";
+import { YearTodayCard } from "./year/YearLink";
 
 // A stuck request ends here at the latest (UX, the timeout audit); each
 // data call gives up after 15 s on its own (lib/supabase/deadline).
@@ -53,7 +56,7 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/app">): 
 // get_me().today (the user's local date from the database), never the
 // browser's or the server's clock. The layout has already checked the
 // session, consents and onboarding.
-export default async function TodayPage({ params }: PageProps<"/[locale]/app">) {
+export default async function TodayPage({ params, searchParams }: PageProps<"/[locale]/app">) {
   const { locale } = await params;
   setRequestLocale(locale as Locale);
   const supabase = await createSupabaseServerClient();
@@ -131,6 +134,10 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
   const plusCard = plus?.kind === "free" && !hardWeek && !checkInError && !entriesError && !flaggedToday && !isLowMood((data as CheckIn | null)?.mood) ? plus : null;
   // Setup after first use (1.3 §6): offered once there's a check-in, while the reminder is still off.
   const setupLater = Boolean(data) && me.settings?.reminder_on === false;
+  // Your year in Moodbow (1.4 A): 1 December to 31 January, for everyone; nothing read for it here.
+  // A Preview's ?today= stands in for the date (never on Production).
+  const yearToday = previewToday((await searchParams)?.today, me.today);
+  const yearCard = pageGate("year-review-live") !== "hidden" && yearCardOnToday(yearToday) ? { year: reviewYear(yearToday), query: previewTodayQuery(yearToday, me.today) } : null;
 
   // Tags on the check-in (tags-live): the day's and the person's recent ones.
   const cardTags = await readCardTags(supabase, me.today);
@@ -193,6 +200,7 @@ export default async function TodayPage({ params }: PageProps<"/[locale]/app">) 
           so its hard-week help is high) → Plus card → setup/reminder offer → things that help →
           a letter → entries → Write last. */}
       {yourWeekCard}
+      {yearCard && <YearTodayCard year={yearCard.year} query={yearCard.query} />}
       {plusCard && plusPage && <TodayPlusCard trial={plusCard.trial} price={plusPage.price} offer={plusPage.offer} date={me.today} />}
       {setupLater && <SetupLaterCard />}
       {toolboxOn && <ToolboxCard uid={user.id} today={me.today} todayMood={(data as CheckIn | null)?.mood ?? null} items={toolbox} />}

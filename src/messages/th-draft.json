@@ -3028,5 +3028,120 @@
     "key": "bo.boOff",
     "en": "Bo is turned off. You can turn it back on in Me.",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "year.title",
+    "en": "Your year in Moodbow",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for UX to check)"
+  },
+  {
+    "key": "year.todayLine",
+    "en": "A look back at {year}, just for you.",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for UX to check)"
+  },
+  {
+    "key": "year.open",
+    "en": "Open",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for UX to check)"
+  },
+  {
+    "key": "year.coloursTitle",
+    "en": "Your year in colours",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for UX to check)"
+  },
+  {
+    "key": "year.coloursLine",
+    "en": "Each month, the moods you checked in with.",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for UX to check)"
+  },
+  {
+    "key": "year.monthMood",
+    "en": "{month}: {mood}",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for UX to check)"
+  },
+  {
+    "key": "year.monthFaint",
+    "en": "{month}: not enough check-ins",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for UX to check)"
+  },
+  {
+    "key": "year.daysTitle",
+    "en": "Days you showed up",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for UX to check)"
+  },
+  {
+    "key": "year.daysLine",
+    "en": "{count, plural, one {You showed up on # day} other {You showed up on # days}} this year.",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for UX to check)"
+  },
+  {
+    "key": "year.momentsTitle",
+    "en": "Your moments",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for UX to check)"
+  },
+  {
+    "key": "year.momentsLine",
+    "en": "{count, plural, one {You marked # moment} other {You marked # moments}}.",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for UX to check)"
+  },
+  {
+    "key": "year.helpedTitle",
+    "en": "Things that help you",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for UX to check)"
+  },
+  {
+    "key": "year.tagsTitle",
+    "en": "On good days you often tagged",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for UX to check)"
+  },
+  {
+    "key": "year.hardTitle",
+    "en": "Your year",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for UX to check)"
+  },
+  {
+    "key": "year.hardLine",
+    "en": "This year asked a lot of you. You kept showing up.",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for UX to check)"
+  },
+  {
+    "key": "year.closing",
+    "en": "Thank you for showing up for yourself this year.",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for UX to check)"
+  },
+  {
+    "key": "year.morePlus",
+    "en": "See more of your year",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for UX to check)"
+  },
+  {
+    "key": "year.notEnough",
+    "en": "Your year in Moodbow appears once you've checked in on 30 days. You're on {count}.",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for UX to check)"
+  },
+  {
+    "key": "year.share",
+    "en": "Share your year",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for UX to check)"
+  },
+  {
+    "key": "year.previous",
+    "en": "Previous",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for UX to check)"
+  },
+  {
+    "key": "year.next",
+    "en": "Next",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for UX to check)"
+  },
+  {
+    "key": "year.position",
+    "en": "Screen {n} of {total}",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for UX to check)"
+  },
+  {
+    "key": "year.shareNote",
+    "en": "The image shows your colours and the number of days. Your entries, tags, moments and dates are never on it.",
+    "reason": "UX draft (native read pending; the Reviewer's AI check 18 Nov)"
   }
 ]

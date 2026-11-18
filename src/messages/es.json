@@ -1002,5 +1002,30 @@
     "liftsRow": "Los días con la etiqueta «{tag}», tu estado de ánimo fue de {a} de 5 de media; los demás días, de {b}.",
     "liftsFooter": "Patrones, no causas. Solo tú puedes ver esto.",
     "liftsNone": "Sigue etiquetando tus días. Los patrones aparecen después de unas semanas."
+  },
+  "year": {
+    "title": "Tu año en Moodbow",
+    "todayLine": "Una mirada a {year}, solo para ti.",
+    "open": "Abrir",
+    "coloursTitle": "Tu año en colores",
+    "coloursLine": "Cada mes, los estados de ánimo que registraste.",
+    "monthMood": "{month}: {mood}",
+    "monthFaint": "{month}: no hay suficientes días registrados",
+    "daysTitle": "Los días que volviste",
+    "daysLine": "{count, plural, one {Volviste # día} other {Volviste # días}} este año.",
+    "momentsTitle": "Tus momentos",
+    "momentsLine": "{count, plural, one {Marcaste # momento} other {Marcaste # momentos}}.",
+    "helpedTitle": "Lo que te ayuda",
+    "tagsTitle": "En los días buenos, usaste a menudo estas etiquetas:",
+    "hardTitle": "Tu año",
+    "hardLine": "Este año te pidió mucho. Y aun así, seguiste volviendo.",
+    "closing": "Gracias por darte este espacio este año.",
+    "morePlus": "Ver más de tu año",
+    "notEnough": "Tu año en Moodbow aparece cuando hayas registrado 30 días. Llevas {count}.",
+    "share": "Compartir tu año",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "position": "Pantalla {n} de {total}",
+    "shareNote": "La imagen muestra tus colores y el número de días. Tus entradas, etiquetas, momentos y fechas nunca aparecen en ella."
   }
 }

@@ -286,6 +286,14 @@
     ],
     "then": true
    }
+  ],
+  "your-year": [
+   {
+    "ids": [
+     "year_review_live"
+    ],
+    "then": true
+   }
   ]
  },
  "en": {
@@ -572,6 +580,14 @@
    {
     "ids": [
      "weekly_report_live"
+    ],
+    "then": true
+   }
+  ],
+  "your-year": [
+   {
+    "ids": [
+     "year_review_live"
     ],
     "then": true
    }
@@ -864,6 +880,14 @@
     ],
     "then": true
    }
+  ],
+  "your-year": [
+   {
+    "ids": [
+     "year_review_live"
+    ],
+    "then": true
+   }
   ]
  },
  "fr": {
@@ -1150,6 +1174,14 @@
    {
     "ids": [
      "weekly_report_live"
+    ],
+    "then": true
+   }
+  ],
+  "your-year": [
+   {
+    "ids": [
+     "year_review_live"
     ],
     "then": true
    }
@@ -1442,6 +1474,14 @@
     ],
     "then": true
    }
+  ],
+  "your-year": [
+   {
+    "ids": [
+     "year_review_live"
+    ],
+    "then": true
+   }
   ]
  },
  "pt-br": {
@@ -1731,6 +1771,14 @@
     ],
     "then": true
    }
+  ],
+  "your-year": [
+   {
+    "ids": [
+     "year_review_live"
+    ],
+    "then": true
+   }
   ]
  },
  "th": {
@@ -2017,6 +2065,14 @@
    {
     "ids": [
      "weekly_report_live"
+    ],
+    "then": true
+   }
+  ],
+  "your-year": [
+   {
+    "ids": [
+     "year_review_live"
     ],
     "then": true
    }

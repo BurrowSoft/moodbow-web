@@ -1002,5 +1002,30 @@
     "liftsRow": "An Tagen mit dem Tag „{tag}“ lag deine Stimmung im Schnitt bei {a} von 5, an anderen Tagen bei {b}.",
     "liftsFooter": "Muster, keine Ursachen. Nur du kannst das sehen.",
     "liftsNone": "Vergib weiter Tags für deine Tage. Muster zeigen sich nach ein paar Wochen."
+  },
+  "year": {
+    "title": "Dein Jahr in Moodbow",
+    "todayLine": "Ein Rückblick auf {year}, nur für dich.",
+    "open": "Öffnen",
+    "coloursTitle": "Dein Jahr in Farben",
+    "coloursLine": "Jeden Monat die Stimmungen, die du eingetragen hast.",
+    "monthMood": "{month}: {mood}",
+    "monthFaint": "{month}: nicht genug Tage eingetragen",
+    "daysTitle": "Tage, an denen du da warst",
+    "daysLine": "{count, plural, one {Du warst in diesem Jahr an # Tag da.} other {Du warst in diesem Jahr an # Tagen da.}}",
+    "momentsTitle": "Deine Momente",
+    "momentsLine": "{count, plural, one {Du hast # Moment markiert} other {Du hast # Momente markiert}}.",
+    "helpedTitle": "Was dir hilft",
+    "tagsTitle": "An guten Tagen hast du oft diese Tags gewählt:",
+    "hardTitle": "Dein Jahr",
+    "hardLine": "Dieses Jahr hat dir viel abverlangt. Du warst trotzdem immer wieder da.",
+    "closing": "Danke, dass du dieses Jahr für dich da warst.",
+    "morePlus": "Mehr von deinem Jahr ansehen",
+    "notEnough": "Dein Jahr in Moodbow erscheint, sobald du an 30 Tagen eingetragen hast. Du bist bei {count}.",
+    "share": "Dein Jahr teilen",
+    "previous": "Zurück",
+    "next": "Weiter",
+    "position": "Seite {n} von {total}",
+    "shareNote": "Das Bild zeigt deine Farben und die Anzahl der Tage. Deine Einträge, Tags, Momente und Daten sind nie darauf."
   }
 }

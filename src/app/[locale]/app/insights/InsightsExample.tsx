@@ -23,7 +23,9 @@ const RANGE_LABEL: Record<ExampleRange, [ns: "insights" | "plus", key: string]> 
 };
 const TITLE: Record<ExampleCard["metric"], string> = { mood: "chartMood", sleep_hours: "chartSleep", stress: "chartStress", exercise_minutes: "chartExercise" };
 
-export function InsightsExample({ help }: { help: React.ReactNode }) {
+// yearRow: Your year in Moodbow's row (1.4 A): the person's own, for everyone, so it's above the
+// example's strip and outside the example's cards.
+export function InsightsExample({ help, yearRow }: { help: React.ReactNode; yearRow?: React.ReactNode }) {
   const t = useTranslations("insights");
   const tp = useTranslations("plus");
   const locale = useLocale();
@@ -46,6 +48,7 @@ export function InsightsExample({ help }: { help: React.ReactNode }) {
         <h1 className={JOURNAL_HEADING}>{t("insightsTitle")}</h1>
         {help}
       </div>
+      {yearRow}
       {/* The dark strip with the gold See Plus, first (board 3 v58), in every theme. */}
       <div data-testid="insights-example-strip" className="flex flex-wrap items-center gap-3 rounded-2xl bg-[#2B2438] px-[16px] py-[12px] text-white">
         <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F2C66D" strokeWidth="2" strokeLinecap="round" className="shrink-0">
