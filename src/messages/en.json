@@ -563,7 +563,8 @@
     "pairWeekends": "Weekends",
     "pairWritingTitle": "Writing",
     "pairWrote": "Wrote",
-    "pairNotWrote": "Didn't write"
+    "pairNotWrote": "Didn't write",
+    "showedUp": "{count, plural, one {You showed up on # day} other {You showed up on # days}} {range, select, week {in the last 7 days} month {in the last 30 days} threeMonths {in the last 3 months} year {in the last 12 months} other {since you started}}."
   },
   "share": {
     "shareButton": "Share",
@@ -597,7 +598,8 @@
     "shareLoading": "Getting your month…",
     "shareFormat": "Format",
     "shareTheme": "Theme",
-    "shareLineCount": "{count, plural, one {# character left} other {# characters left}}"
+    "shareLineCount": "{count, plural, one {# character left} other {# characters left}}",
+    "shareShowedUp": "{n, plural, =1{Showed up on 1 day} other{Showed up on # days}}"
   },
   "ai": {
     "meAi": "AI",
@@ -1048,7 +1050,8 @@
     "loading": "Loading the week…",
     "dayNone": "{day}: no check-in",
     "help": "If you're worried about someone, <link>find a helpline</link>.",
-    "footer": "This link can be stopped by the person who shared it at any time. It isn't indexed by search engines. It stays in this browser's history; close the tab when you're done."
+    "footer": "This link can be stopped by the person who shared it at any time. It isn't indexed by search engines. It stays in this browser's history; close the tab when you're done.",
+    "noToken": "To see the week again, open the link you were sent."
   },
   "shareMe": {
     "rowTitle": "Share your week",

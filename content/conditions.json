@@ -335,6 +335,14 @@
     "met": false,
     "what": "1.4 A Your year in Moodbow (specs/1.4-features.md, UX rulings 18 Nov; the rules in src/lib/journal/yearReview.contract.json): /app/year for everyone, the Today card from 1 December to 31 January and the link row at the top of Insights. Fixed rules, nothing new stored; the share image is the 1.1 J Year card. Target: live on 1 December. Before it's met: the en copy and its fr/es/pt-BR translations, the Help article, the storybook board, the Reviewer's read and the Web Tester's row (a Preview's ?today= stands in for December)."
   },
+  "showed-up-live": {
+    "met": false,
+    "what": "1.4 C Days you showed up (specs/1.4-features.md, UX 18 Nov; the rules in src/lib/journal/showedUp.contract.json, the app's supabase/contracts/showed-up.json): a count only, never a streak, a chain or a reminder not to break one. On Insights, the shown tab's count (week, month, 3 months, and with Plus year and all time); on the share cards, \"Showed up on n days\" instead of \"n days journaled\". For everyone. Before it's met: the Reviewer's read, the storybook board and the Web Tester's row."
+  },
+  "mood-prompts-live": {
+    "met": false,
+    "what": "1.4 E Prompts that follow your mood (specs/1.4-features.md §E, UX 18 Nov; the cases in src/lib/journal/moodPrompts.contract.json, for moodbow-app supabase/contracts/mood-prompts.json): on Write, above an empty entry, today's check-in mood picks the library group (1-2 hard-days with its help, 3 noticing, 4-5 gratitude). Free: one prompt a day, Another back to the daily list; Plus: the group from its saved place. Never on a day an entry or tag is crisis-flagged. No new analytics. Before it's met: the contract on the app's master, the Reviewer's read and the Web Tester's row."
+  },
   "trusted-share-live": {
     "met": false,
     "what": "1.4 G Share with someone I trust (plans/PLAN-trusted-share.md, passed by the Reviewer 18 Nov; moodbow-app migration 040): /s (the viewer, no account; nothing loads before \"Show the week\") and /api/share/view (the only caller of share_view, with the service role; the token hashed in the route). Hides the UI only: the real off switch is app_config share_enabled in the database (Vitor's on Production). Before it's met: Me → Share and the Today note, the Reviewer's read, the Web Tester's rows, Vitor's privacy line, legal basis and MHMDA wording."

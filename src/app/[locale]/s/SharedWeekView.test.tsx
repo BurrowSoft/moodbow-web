@@ -18,6 +18,7 @@ const strings: SharedWeekStrings = {
   later: "Later week",
   none: "No check-ins yet this week.",
   unavailable: "This link isn't available.",
+  noToken: "To see the week again, open the link you were sent.",
   loading: "Loading",
   dayNone: "{day}: no check-in",
   moods: ["Awful", "Bad", "Okay", "Good", "Great"],
@@ -49,9 +50,10 @@ const reply = (body: unknown) => fetchMock.mockResolvedValueOnce({ ok: true, jso
 const sent = (call: number) => JSON.parse(fetchMock.mock.calls[call][1].body as string) as { token: string; week: number };
 
 describe("SharedWeekView", () => {
-  it("nothing is fetched until Show the week is tapped", () => {
+  it("on load: the fragment is cleared at once (the Reviewer, #363), and nothing is fetched until Show the week", () => {
     renderIt();
     expect(screen.getByTestId("shared-title").textContent).toBe("A week shared with you");
+    expect(replaceState).toHaveBeenCalledTimes(1);
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
@@ -96,16 +98,22 @@ describe("SharedWeekView", () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
-  it("unavailable, or no token at all: the one unavailable line", async () => {
+  it("unavailable: the one unavailable line", async () => {
     reply({ status: "unavailable" });
     renderIt();
     await act(async () => fireEvent.click(screen.getByTestId("shared-show")));
     await waitFor(() => expect(screen.getByTestId("shared-unavailable")).toBeTruthy());
-    cleanup();
+  });
+
+  // UX: the token leaves the address bar on load, so a reload has none. That says what to do, never
+  // "unavailable", and nothing is fetched.
+  it("after a reload (no token): open the link you were sent, no fetch", async () => {
     window.location.hash = "";
     renderIt();
     await act(async () => fireEvent.click(screen.getByTestId("shared-show")));
-    expect(screen.getByTestId("shared-unavailable")).toBeTruthy();
+    expect(screen.getByTestId("shared-no-token").textContent).toBe(strings.noToken);
+    expect(screen.queryByTestId("shared-unavailable")).toBeNull();
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it("no first name: Someone; days have words for screen readers; never any text of theirs", async () => {

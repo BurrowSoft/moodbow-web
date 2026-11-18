@@ -3150,6 +3150,16 @@
     "reason": "UX draft (native read pending; the app's Thai)"
   },
   {
+    "key": "insights.showedUp",
+    "en": "{count, plural, one {You showed up on # day} other {You showed up on # days}} {range, select, week {in the last 7 days} month {in the last 30 days} threeMonths {in the last 3 months} year {in the last 12 months} other {since you started}}.",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #252)"
+  },
+  {
+    "key": "share.shareShowedUp",
+    "en": "{n, plural, =1{Showed up on 1 day} other{Showed up on # days}}",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #252)"
+  },
+  {
     "key": "shareView.metaTitle",
     "en": "A shared week",
     "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
@@ -3242,6 +3252,11 @@
   {
     "key": "shareView.footer",
     "en": "This link can be stopped by the person who shared it at any time. It isn't indexed by search engines. It stays in this browser's history; close the tab when you're done.",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareView.noToken",
+    "en": "To see the week again, open the link you were sent.",
     "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
   },
   {

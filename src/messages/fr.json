@@ -563,7 +563,8 @@
     "pairWeekends": "Week-ends",
     "pairWritingTitle": "Écriture",
     "pairWrote": "Avec écriture",
-    "pairNotWrote": "Sans écriture"
+    "pairNotWrote": "Sans écriture",
+    "showedUp": "{count, plural, one {Vous avez été là # jour} other {Vous avez été là # jours}} {range, select, week {ces 7 derniers jours} month {ces 30 derniers jours} threeMonths {ces 3 derniers mois} year {ces 12 derniers mois} other {depuis vos débuts}}."
   },
   "share": {
     "shareButton": "Partager",
@@ -597,7 +598,8 @@
     "shareLoading": "Préparation de votre mois…",
     "shareFormat": "Format",
     "shareTheme": "Thème",
-    "shareLineCount": "{count, plural, one {# caractère restant} other {# caractères restants}}"
+    "shareLineCount": "{count, plural, one {# caractère restant} other {# caractères restants}}",
+    "shareShowedUp": "{n, plural, =1{1 jour de présence} other{# jours de présence}}"
   },
   "ai": {
     "meAi": "IA",
@@ -1048,7 +1050,8 @@
     "loading": "Chargement de la semaine…",
     "dayNone": "{day} : pas de bilan",
     "help": "Si vous vous inquiétez pour quelqu'un, <link>trouvez une ligne d'écoute</link>.",
-    "footer": "La personne qui a partagé ce lien peut l'arrêter à tout moment. Il n'est pas indexé par les moteurs de recherche. Il reste dans l'historique de ce navigateur ; fermez l'onglet quand vous avez terminé."
+    "footer": "La personne qui a partagé ce lien peut l'arrêter à tout moment. Il n'est pas indexé par les moteurs de recherche. Il reste dans l'historique de ce navigateur ; fermez l'onglet quand vous avez terminé.",
+    "noToken": "Pour revoir la semaine, ouvrez le lien qu'on vous a envoyé."
   },
   "shareMe": {
     "rowTitle": "Partager votre semaine",

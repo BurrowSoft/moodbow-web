@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { fill, WeekSummary } from "./WeekSummary";
 
 // The shared-week viewer (1.4 G; plans/PLAN-trusted-share.md §4; board 28b with UX's copy, 18 Nov).
@@ -25,6 +25,7 @@ export type SharedWeekStrings = {
   later: string;
   none: string;
   unavailable: string;
+  noToken: string; // after a reload, or a link without its token: the token is gone from this page
   loading: string;
   dayNone: string; // with {day}
   moods: string[]; // mood 1..5 labels, index 0..4
@@ -38,19 +39,27 @@ function readToken(): string | null {
 }
 
 export function SharedWeekView({ strings, locale, help, footer }: { strings: SharedWeekStrings; locale: string; help: ReactNode; footer: ReactNode }) {
-  const [state, setState] = useState<"before" | "loading" | "ok" | "unavailable">("before");
+  const [state, setState] = useState<"before" | "loading" | "ok" | "unavailable" | "noToken">("before");
   const [week, setWeek] = useState<Week | null>(null);
   const [index, setIndex] = useState(0);
   const [noEarlier, setNoEarlier] = useState(false);
   // Week 0's start: an arrow's answer with this start means that earlier week doesn't exist (it's
   // before the link's creation), so share_view gave week 0 back.
   const [week0Start, setWeek0Start] = useState<string | null>(null);
-  // The token, kept in memory once read; the fragment is cleared from the address bar.
-  const [token, setToken] = useState<string | null>(null);
+  // The token: read from the fragment ON MOUNT and the fragment cleared at once (the Reviewer, #363),
+  // so it's out of the address bar and screenshots before anything is tapped. It's kept in memory
+  // only; nothing is fetched until "Show the week".
+  const token = useRef<string | null>(null);
+  useEffect(() => {
+    // Once only: React's StrictMode runs this twice in development, and the second run would read
+    // the hash already cleared (the Reviewer).
+    if (token.current === null) token.current = readToken();
+    if (window.location.hash) window.history.replaceState(null, "", window.location.pathname + window.location.search);
+  }, []);
 
-  const load = async (to: number, known: string | null) => {
-    const t = known ?? token;
-    if (!t) return setState("unavailable");
+  const load = async (to: number) => {
+    const t = token.current;
+    if (!t) return setState("noToken");
     setState("loading");
     try {
       const res = await fetch("/api/share/view", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token: t, week: to }), cache: "no-store" });
@@ -70,12 +79,7 @@ export function SharedWeekView({ strings, locale, help, footer }: { strings: Sha
     }
   };
 
-  const start = () => {
-    const t = readToken();
-    if (typeof window !== "undefined" && window.location.hash) window.history.replaceState(null, "", window.location.pathname + window.location.search);
-    setToken(t);
-    void load(0, t);
-  };
+  const start = () => void load(0);
 
   const heading = week ? (week.first_name ? fill(strings.titleNamed, { name: week.first_name }) : strings.titleAnon) : strings.titleBefore;
 
@@ -95,6 +99,11 @@ export function SharedWeekView({ strings, locale, help, footer }: { strings: Sha
       <p role="status" className="sr-only">
         {state === "loading" ? strings.loading : ""}
       </p>
+      {state === "noToken" && (
+        <p data-testid="shared-no-token" className="rounded-3xl bg-surface px-[18px] py-[18px] text-text">
+          {strings.noToken}
+        </p>
+      )}
       {state === "unavailable" && (
         <p data-testid="shared-unavailable" className="rounded-3xl bg-surface px-[18px] py-[18px] text-text">
           {strings.unavailable}
@@ -104,7 +113,7 @@ export function SharedWeekView({ strings, locale, help, footer }: { strings: Sha
         <section aria-labelledby="shared-week-title" data-testid="shared-week" className="space-y-4 rounded-3xl bg-surface px-[18px] py-[18px]">
           <WeekSummary week={week} strings={strings} locale={locale} headingId="shared-week-title" />
           <div className="flex flex-wrap justify-between gap-3">
-            <button type="button" data-testid="shared-earlier" disabled={index >= (week.weeks_available ?? 3) || noEarlier || state === "loading"} onClick={() => void load(index + 1, null)} className="inline-flex min-h-[44px] items-center rounded-full border border-border px-[16px] font-medium text-text disabled:opacity-40">
+            <button type="button" data-testid="shared-earlier" disabled={index >= (week.weeks_available ?? 3) || noEarlier || state === "loading"} onClick={() => void load(index + 1)} className="inline-flex min-h-[44px] items-center rounded-full border border-border px-[16px] font-medium text-text disabled:opacity-40">
               {strings.earlier}
             </button>
             <button
@@ -113,7 +122,7 @@ export function SharedWeekView({ strings, locale, help, footer }: { strings: Sha
               disabled={index === 0 || state === "loading"}
               onClick={() => {
                 setNoEarlier(false);
-                void load(index - 1, null);
+                void load(index - 1);
               }}
               className="inline-flex min-h-[44px] items-center rounded-full border border-border px-[16px] font-medium text-text disabled:opacity-40"
             >

@@ -39,6 +39,7 @@ export default async function SharedWeekPage({ params }: PageProps<"/[locale]/s"
     later: t("later"),
     none: t("none"),
     unavailable: t("unavailable"),
+    noToken: t("noToken"),
     loading: t("loading"),
     dayNone: t.raw("dayNone") as string,
     moods: [1, 2, 3, 4, 5].map((m) => tt(`mood${m}` as "mood1")),

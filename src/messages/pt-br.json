@@ -563,7 +563,8 @@
     "pairWeekends": "Fins de semana",
     "pairWritingTitle": "Escrita",
     "pairWrote": "Com escrita",
-    "pairNotWrote": "Sem escrita"
+    "pairNotWrote": "Sem escrita",
+    "showedUp": "{count, plural, one {Você apareceu em # dia} other {Você apareceu em # dias}} {range, select, week {nos últimos 7 dias} month {nos últimos 30 dias} threeMonths {nos últimos 3 meses} year {nos últimos 12 meses} other {desde que começou}}."
   },
   "share": {
     "shareButton": "Compartilhar",
@@ -597,7 +598,8 @@
     "shareLoading": "Preparando o seu mês…",
     "shareFormat": "Formato",
     "shareTheme": "Tema",
-    "shareLineCount": "{count, plural, one {Resta # caractere} other {Restam # caracteres}}"
+    "shareLineCount": "{count, plural, one {Resta # caractere} other {Restam # caracteres}}",
+    "shareShowedUp": "{n, plural, =1{Apareceu em 1 dia} other{Apareceu em # dias}}"
   },
   "ai": {
     "meAi": "IA",
@@ -1048,7 +1050,8 @@
     "loading": "Carregando a semana…",
     "dayNone": "{day}: sem check-in",
     "help": "Se você se preocupa com alguém, <link>encontre uma linha de apoio</link>.",
-    "footer": "Quem compartilhou este link pode interrompê-lo a qualquer momento. Ele não é indexado por mecanismos de busca. Ele fica no histórico deste navegador; feche a aba quando terminar."
+    "footer": "Quem compartilhou este link pode interrompê-lo a qualquer momento. Ele não é indexado por mecanismos de busca. Ele fica no histórico deste navegador; feche a aba quando terminar.",
+    "noToken": "Para ver a semana de novo, abra o link que você recebeu."
   },
   "shareMe": {
     "rowTitle": "Compartilhar sua semana",

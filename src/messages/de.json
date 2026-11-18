@@ -563,7 +563,8 @@
     "pairWeekends": "Wochenenden",
     "pairWritingTitle": "Schreiben",
     "pairWrote": "Geschrieben",
-    "pairNotWrote": "Nicht geschrieben"
+    "pairNotWrote": "Nicht geschrieben",
+    "showedUp": "{range, select, week {In den letzten 7 Tagen} month {In den letzten 30 Tagen} threeMonths {In den letzten 3 Monaten} year {In den letzten 12 Monaten} other {Seit du angefangen hast,}} {count, plural, one {warst du an # Tag da} other {warst du an # Tagen da}}."
   },
   "share": {
     "shareButton": "Teilen",
@@ -597,7 +598,8 @@
     "shareLoading": "Dein Monat wird geladen …",
     "shareFormat": "Format",
     "shareTheme": "Design",
-    "shareLineCount": "{count, plural, one {# Zeichen übrig} other {# Zeichen übrig}}"
+    "shareLineCount": "{count, plural, one {# Zeichen übrig} other {# Zeichen übrig}}",
+    "shareShowedUp": "{n, plural, =1{An 1 Tag da} other{An # Tagen da}}"
   },
   "ai": {
     "meAi": "KI",
@@ -1048,7 +1050,8 @@
     "loading": "Die Woche wird geladen…",
     "dayNone": "{day}: kein Check-in",
     "help": "Wenn Sie sich um jemanden Sorgen machen, <link>finden Sie ein Hilfetelefon</link>.",
-    "footer": "Die Person, die diesen Link geteilt hat, kann ihn jederzeit beenden. Er wird nicht von Suchmaschinen erfasst. Er bleibt im Verlauf dieses Browsers; schließen Sie den Tab, wenn Sie fertig sind."
+    "footer": "Die Person, die diesen Link geteilt hat, kann ihn jederzeit beenden. Er wird nicht von Suchmaschinen erfasst. Er bleibt im Verlauf dieses Browsers; schließen Sie den Tab, wenn Sie fertig sind.",
+    "noToken": "Um die Woche noch einmal zu sehen, öffnen Sie den Link, den Sie bekommen haben."
   },
   "shareMe": {
     "rowTitle": "Deine Woche teilen",
