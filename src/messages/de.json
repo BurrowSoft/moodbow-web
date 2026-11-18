@@ -272,7 +272,8 @@
     "tagsTooLong": "Ein Tag darf bis zu 32 Zeichen haben.",
     "setupLaterBody": "Deine tägliche Erinnerung ist aus. Du kannst sie jederzeit einschalten und eine Uhrzeit wählen.",
     "setupLaterOpen": "Einrichten",
-    "setupLaterClose": "Nicht jetzt"
+    "setupLaterClose": "Nicht jetzt",
+    "lateNote": "Es ist spät. Ruhe ist auch wichtig. Wenn sich diese Nacht schwer anfühlt, ist Hilfe nur einen Fingertipp entfernt."
   },
   "entry": {
     "writeButton": "Über deinen Tag schreiben",

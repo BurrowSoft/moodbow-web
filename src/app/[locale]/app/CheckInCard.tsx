@@ -22,7 +22,8 @@ import { saveCheckIn, type CheckInState } from "./actions";
 import { publishTodayMood } from "@/lib/journal/todayMood";
 import { useCheckInDraft } from "./CheckInDraft";
 import { TagsField } from "./TagsField";
-import { SafetyCard } from "@/components/SafetyCard";
+import { GetHelpNow, SafetyCard } from "@/components/SafetyCard";
+import { claimLateNote, lateNoteKey } from "@/lib/journal/lateNote";
 import { parseTags, tagsFlagCrisis } from "@/lib/journal/tags";
 import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
 import { countTap } from "@/lib/analyticsEvents";
@@ -157,7 +158,8 @@ function toFormData(fields: Fields, expectedUpdatedAt: string, date: string, fro
 // loadFailed: today's check-in couldn't be read, so the empty card comes with
 // its error and Try again, until this card holds a real row.
 // initialTags: the day's tags where tags are on (null: off); recentTags: the person's, for the picker.
-type Props = { initial: CheckIn | null; uid: string; date: string; dateLocaleTag: string; autoFocus?: boolean; keepDraft?: boolean; loadFailed?: boolean; initialTags?: string[] | null; recentTags?: string[]; country?: string | null };
+// lateNote (1.4 D, late-note-live): the profile's time zone for the late-night note; null: off.
+type Props = { initial: CheckIn | null; uid: string; date: string; dateLocaleTag: string; autoFocus?: boolean; keepDraft?: boolean; loadFailed?: boolean; initialTags?: string[] | null; recentTags?: string[]; country?: string | null; lateNote?: { zone: string | null } | null };
 
 // An offline copy the server refused ("rejected": e.g. a day that is in the
 // future for the account's zone). Never silent (decision 72): one notice per
@@ -297,7 +299,15 @@ export function CheckInCard(props: Props) {
   );
 }
 
-function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, autoFocus, keepDraft, loadFailed, initialTags = null, recentTags = [], country = null }: Props & { notify: Notify; announce: (text: string) => void }) {
+function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, autoFocus, keepDraft, loadFailed, initialTags = null, recentTags = [], country = null, lateNote = null }: Props & { notify: Notify; announce: (text: string) => void }) {
+  // The late-night note (1.4 D): judged at the moment the person saves, from the card only (online
+  // or offline; a queued copy syncing later never shows it), once a night per user.
+  const [lateShown, setLateShown] = useState(false);
+  const savedAt = useRef<Date | null>(null);
+  const maybeLateNote = (mood: number | null | undefined) => {
+    if (lateNote && savedAt.current && claimLateNote(uid, mood, savedAt.current, lateNote.zone)) setLateShown(true);
+    savedAt.current = null;
+  };
   const t = useTranslations("today");
   // The day's tags: what's saved, and what the form holds now. Sent only when they differ.
   const tagsOn = initialTags !== null;
@@ -345,6 +355,12 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
       onSignOut(({ uid: who, mode }) => {
         if (who !== uid) return;
         signedOut.current = true;
+        // The late-night note's mark is no journal data to keep: it goes at any sign-out.
+        try {
+          window.localStorage.removeItem(lateNoteKey(uid));
+        } catch {
+          // storage unavailable
+        }
         if (mode === "delete") for (const { key } of readAllPending(uid)) removePending(key);
       }),
     [uid],
@@ -401,6 +417,8 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
       } catch {
         return { status: "error", error: "generic" };
       }
+      // Kept in this browser, as saving offline: the person is here, so the late note can show.
+      maybeLateNote(pendingFromForm(form).fields.mood);
       setOffline(true);
       setEditing(false);
       return prev;
@@ -493,6 +511,8 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
       // The tags went with it, or the check-in is saved and they weren't (shown under the field).
       if (next.tags) setSavedTags(next.tags);
       setTagsFailed(next.tagsSaved === false);
+      // The person's own save (never a queued copy syncing later): the late-night note may show.
+      if (form.get("from_pending") !== "1") maybeLateNote(next.checkIn.mood);
       setRow(next.checkIn);
       publishTodayMood(next.checkIn.local_date, next.checkIn.mood);
       setDraftBase(null);
@@ -530,14 +550,18 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
     setStorageFailed(false);
     // The crisis list reads the tags, as it reads writing (UX): help is offered, the save goes on.
     if (tagsChanged && tagsFlagCrisis(tags, CRISIS_KEYWORDS)) setHelpOpen(true);
+    // The moment of the person's save, for the late-night note (judged when it's kept or saved).
+    savedAt.current = new Date();
     if (!navigator.onLine) {
       try {
         putPending(pendingKey(uid, cardDate), JSON.stringify({ fields, expected, date: cardDate, ...(tagsChanged ? { tags } : {}) } satisfies Pending));
       } catch {
         // storage unavailable: nothing was kept, so don't say it was saved
         setStorageFailed(true);
+        savedAt.current = null;
         return;
       }
+      maybeLateNote(fields.mood);
       setOffline(true);
       setEditing(false);
       return;
@@ -553,6 +577,7 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
         return;
       }
       keptFor.current = form;
+      maybeLateNote(fields.mood);
       setOffline(true);
       setEditing(false);
     }, SAVE_WAIT_MS);
@@ -759,6 +784,14 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
           <p role="alert" data-testid="checkin-tags-failed" className="mt-2 text-sm font-medium text-accent">
             {t("errGeneric")}
           </p>
+        )}
+        {/* 1.4 D: one soft line, with the help button; its tap is never counted (it'd say a low
+            mood late at night). */}
+        {lateShown && (
+          <div data-testid="checkin-late-note" className="mt-3 flex flex-col items-start gap-2">
+            <p className="text-sm text-text">{t("lateNote")}</p>
+            <GetHelpNow country={country} testId="late-note-get-help" neutral />
+          </div>
         )}
         {/* Saved, the card turns into this summary: the help offer opened at Save stays open. */}
         {helpOpen && <SafetyCard country={country} onClose={() => setHelpOpen(false)} />}

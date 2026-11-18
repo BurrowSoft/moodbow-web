@@ -342,5 +342,9 @@
   "mood-prompts-live": {
     "met": false,
     "what": "1.4 E Prompts that follow your mood (specs/1.4-features.md §E, UX 18 Nov; the cases in src/lib/journal/moodPrompts.contract.json, for moodbow-app supabase/contracts/mood-prompts.json): on Write, above an empty entry, today's check-in mood picks the library group (1-2 hard-days with its help, 3 noticing, 4-5 gratitude). Free: one prompt a day, Another back to the daily list; Plus: the group from its saved place. Never on a day an entry or tag is crisis-flagged. No new analytics. Before it's met: the contract on the app's master, the Reviewer's read and the Web Tester's row."
+  },
+  "late-note-live": {
+    "met": false,
+    "what": "1.4 D Gentle late-night note (specs/1.4-features.md §D, UX 19 Nov; the cases in src/lib/journal/lateNote.contract.json, for moodbow-app supabase/contracts/late-note.json): a check-in the person saves from the card between 00:00 and 04:59 in their profile's zone, with mood 1 or 2, shows one line under the saved check-in with Get help now, at most once a night per user. Never a notification, nothing on the server, never counted. A safety copy: before it's met, the clinician's read (the safety-plan G1 pack), the Reviewer's read and the Web Tester's row."
   }
 }

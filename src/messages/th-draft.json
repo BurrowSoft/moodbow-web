@@ -3158,5 +3158,10 @@
     "key": "share.shareShowedUp",
     "en": "{n, plural, =1{Showed up on 1 day} other{Showed up on # days}}",
     "reason": "UX draft (native read pending; the app's Thai, moodbow-app #252)"
+  },
+  {
+    "key": "today.lateNote",
+    "en": "It's late. Rest matters too. If tonight feels heavy, help is one tap away.",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #257 6d1ff0f6)"
   }
 ]
