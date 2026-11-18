@@ -166,11 +166,14 @@ export async function renderLoop(id: SoundId, sampleRate: number, { seconds = LO
   }
   for (let i = 0; i < x; i++) {
     const k = (i + 0.5) / x;
-    out[i] = out[i] * Math.sin((k * Math.PI) / 2) + tail[i] * Math.cos((k * Math.PI) / 2);
+    // Two stretches added can go past the ceiling: the same soft limit as brown's, in this window
+    // only (the Mobile Dev, #253; nearly linear at normal levels, so it's inaudible).
+    const y = out[i] * Math.sin((k * Math.PI) / 2) + tail[i] * Math.cos((k * Math.PI) / 2);
+    out[i] = PEAK_LIMIT * Math.tanh(y / PEAK_LIMIT);
   }
-  // The app's ceiling (peaks at 0.9 or less) on what is actually played: over a whole minute, brown
-  // noise can wander above it, and the fold adds two stretches together (the Web Tester, #367: 0.919
-  // at 48 kHz). One gain for the whole loop, so the sound itself doesn't change.
+  // The app's ceiling (peaks at 0.9 or less) on what is actually played (the Web Tester, #367: brown
+  // reached 0.919 at 48 kHz before its limiter). With brown limited and the fold limited this is a
+  // backstop that shouldn't fire: one gain for the whole loop, so the sound itself doesn't change.
   let peak = 0;
   for (let i = 0; i < n; i++) peak = Math.max(peak, Math.abs(out[i]));
   if (peak > PEAK_LIMIT) {
