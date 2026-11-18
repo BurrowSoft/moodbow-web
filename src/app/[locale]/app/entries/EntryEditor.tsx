@@ -629,7 +629,7 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
   // the day's list. The page has already left out a flagged day (no promptDate at all).
   const shownPrompt = showPrompt
     ? moodPrompt
-      ? moodPromptFor({ today: promptDate!, mood: moodPrompt.mood, flagged: false, plus: moodPrompt.plus, place: moodPlace, another: moodPrompt.plus ? 0 : promptStep })
+      ? moodPromptFor({ today: promptDate!, mood: moodPrompt.mood, flagged: false, plus: moodPrompt.plus, place: moodPlace, another: moodPrompt.plus && moodGroupId ? 0 : promptStep })
       : ({ source: "daily", prompt: promptFor(promptDate!, promptStep), help: false } as const)
     : null;
   const promptHelp = !chosenPrompt && shownPrompt?.source === "group" && shownPrompt.help;

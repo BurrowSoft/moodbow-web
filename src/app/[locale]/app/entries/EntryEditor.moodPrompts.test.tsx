@@ -72,6 +72,18 @@ describe("the editor's mood prompt", () => {
     expect(JSON.parse(window.localStorage.getItem(LIBRARY_PLACE_KEY)!).u1.gratitude).toBe(0);
   });
 
+  // The Web Tester's #362 row: with Plus and no check-in, Another stepped nothing (the group's own
+  // place was used though there's no group).
+  it("Plus, no check-in today: Another steps through the daily list, as Free", () => {
+    renderIt({ mood: null, plus: true });
+    expect(screen.getByTestId("entry-prompt-text")).toHaveTextContent(daily("prompt16"));
+    fireEvent.click(screen.getByTestId("entry-prompt-another"));
+    expect(screen.getByTestId("entry-prompt-text")).toHaveTextContent(daily("prompt17"));
+    fireEvent.click(screen.getByTestId("entry-prompt-another"));
+    expect(screen.getByTestId("entry-prompt-text")).toHaveTextContent(daily("prompt18"));
+    expect(window.localStorage.getItem(LIBRARY_PLACE_KEY)).toBeNull();
+  });
+
   it("off (no moodPrompt): the day's prompt even with a check-in", () => {
     renderIt(undefined);
     expect(screen.getByTestId("entry-prompt-text")).toHaveTextContent(daily("prompt16"));
