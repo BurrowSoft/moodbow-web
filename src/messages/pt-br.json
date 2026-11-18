@@ -1057,5 +1057,25 @@
     "position": "Tela {n} de {total}",
     "shareNote": "A imagem mostra suas cores e o número de dias. Suas anotações, tags, momentos e datas nunca aparecem nela.",
     "daysUnit": "{count, plural, one {dia} other {dias}}"
+  },
+  "sounds": {
+    "title": "Sons calmantes",
+    "rain": "Chuva",
+    "waves": "Ondas",
+    "brown": "Ruído marrom",
+    "hum": "Murmúrio suave",
+    "timer": "Timer",
+    "minutes": "{n} min",
+    "untilStop": "Até eu parar",
+    "play": "Tocar",
+    "pause": "Pausar",
+    "stop": "Parar",
+    "left": "Faltam {n} min",
+    "untilStopped": "Até você parar",
+    "lock": "Som tocando",
+    "lockLeft": "Som tocando · faltam {n} min",
+    "lockPaused": "Som pausado",
+    "intro": "Criados no seu navegador, então não há nada para baixar. Use o volume do seu dispositivo.",
+    "unavailable": "Os sons calmantes não estão disponíveis neste navegador."
   }
 }

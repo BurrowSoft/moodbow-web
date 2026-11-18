@@ -1057,5 +1057,25 @@
     "position": "Schermata {n} di {total}",
     "shareNote": "L'immagine mostra i tuoi colori e il numero di giorni. Le tue pagine, i tag, i momenti e le date non ci sono mai.",
     "daysUnit": "{count, plural, one {giorno} other {giorni}}"
+  },
+  "sounds": {
+    "title": "Suoni rilassanti",
+    "rain": "Pioggia",
+    "waves": "Onde",
+    "brown": "Rumore marrone",
+    "hum": "Mormorio leggero",
+    "timer": "Timer",
+    "minutes": "{n} min",
+    "untilStop": "Finché non lo fermo",
+    "play": "Riproduci",
+    "pause": "Pausa",
+    "stop": "Ferma",
+    "left": "Ancora {n} min",
+    "untilStopped": "Finché non lo fermi",
+    "lock": "Suono in riproduzione",
+    "lockLeft": "Suono in riproduzione · ancora {n} min",
+    "lockPaused": "Suono in pausa",
+    "intro": "Creati direttamente nel tuo browser, quindi non c'è niente da scaricare. Usa il volume del dispositivo.",
+    "unavailable": "I suoni rilassanti non sono disponibili in questo browser."
   }
 }

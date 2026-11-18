@@ -27,6 +27,8 @@ const APP_GATED: PageEntry[] = [
   app({ path: "/app/me/appointment", gate: "appointment-live", prefix: true }),
   app({ path: "/app/me/safety-plan", gate: "safety-plan-live", prefix: true }),
   app({ path: "/app/me/routine", gate: "routine-live", prefix: true }),
+  // Calming sounds (1.4 B): before the grounding rule, which would otherwise gate it on grounding.
+  app({ path: "/app/me/toolbox/sounds", gates: ["toolbox-live", "sounds-live"], prefix: true }),
   // The grounding exercises below the toolbox need both; the toolbox page itself only its own.
   app({ path: "/app/me/toolbox", gates: ["toolbox-live", "grounding-live"], prefix: "children" }),
   app({ path: "/app/me/toolbox", gate: "toolbox-live" }),
