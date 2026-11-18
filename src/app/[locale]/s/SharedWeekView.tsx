@@ -52,7 +52,9 @@ export function SharedWeekView({ strings, locale, help, footer }: { strings: Sha
   // only; nothing is fetched until "Show the week".
   const token = useRef<string | null>(null);
   useEffect(() => {
-    token.current = readToken();
+    // Once only: React's StrictMode runs this twice in development, and the second run would read
+    // the hash already cleared (the Reviewer).
+    if (token.current === null) token.current = readToken();
     if (window.location.hash) window.history.replaceState(null, "", window.location.pathname + window.location.search);
   }, []);
 
