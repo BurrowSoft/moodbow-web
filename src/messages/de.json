@@ -563,7 +563,8 @@
     "pairWeekends": "Wochenenden",
     "pairWritingTitle": "Schreiben",
     "pairWrote": "Geschrieben",
-    "pairNotWrote": "Nicht geschrieben"
+    "pairNotWrote": "Nicht geschrieben",
+    "showedUp": "{range, select, week {In den letzten 7 Tagen} month {In den letzten 30 Tagen} threeMonths {In den letzten 3 Monaten} year {In den letzten 12 Monaten} other {Seit du angefangen hast,}} {count, plural, one {warst du an # Tag da} other {warst du an # Tagen da}}."
   },
   "share": {
     "shareButton": "Teilen",
@@ -597,7 +598,8 @@
     "shareLoading": "Dein Monat wird geladen …",
     "shareFormat": "Format",
     "shareTheme": "Design",
-    "shareLineCount": "{count, plural, one {# Zeichen übrig} other {# Zeichen übrig}}"
+    "shareLineCount": "{count, plural, one {# Zeichen übrig} other {# Zeichen übrig}}",
+    "shareShowedUp": "{n, plural, =1{An 1 Tag da} other{An # Tagen da}}"
   },
   "ai": {
     "meAi": "KI",
