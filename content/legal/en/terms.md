@@ -9,7 +9,7 @@
 ## Moodbow Terms of Use
 Last updated: 2 October 2026
 
-These terms are an agreement between you and Vitor Ribeiro Carvalho, trading as BurrowSoft (297 Moo 1, Baan Sanian, Mueang Nan, Nan 55000, Thailand) about using Moodbow, the app and the website moodbow.com. By creating an account you agree to them.
+These terms are an agreement between you and Vitor Carvalho, trading as BurrowSoft (297 Moo 1, Baan Sanian, Mueang Nan, Nan 55000, Thailand) about using Moodbow, the app and the website moodbow.com. By creating an account you agree to them.
 
 ### What Moodbow is, and isn't
 Moodbow is a private journal that helps you notice patterns in your mood, sleep and habits. It is **not** medical care, therapy or a diagnosis, and it isn't a crisis service. The AI's reflections are suggestions to think about, not professional advice. If you're in danger or thinking about harming yourself, contact your local emergency number or a crisis line right away; Moodbow lists some in Me → Want to talk to someone?.
@@ -44,7 +44,7 @@ Don't misuse Moodbow: no attempts to access other people's data, break or overlo
 The journal (writing, check-ins, timeline, charts, export) is free. We may change features over time and will tell you in advance about changes that matter.
 
 ### Ending
-You can delete your account at any time in Me → Delete account. We may end the service or close accounts with reasonable notice, except in cases of serious misuse. If we ever shut Moodbow down, we'll give you time to export your data first.
+You can delete your account in Me → Delete account. We may end the service or close accounts with reasonable notice, except in cases of serious misuse. If we ever shut Moodbow down, we'll give you time to export your data first.
 
 ### Liability
 We work hard to keep Moodbow running and your data safe, but we provide it "as is". To the extent the law allows, we aren't liable for indirect losses, or for decisions you make based on AI content. Nothing here limits rights you have under consumer law that can't be limited.

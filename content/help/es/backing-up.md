@@ -18,4 +18,6 @@ Puedes empezar a usar Moodbow en la app sin correo. Tu diario se guarda en una c
 
 **Diarios sin correo:** si nunca añades un correo y no abres la app con conexión a internet durante 12 meses, eliminamos ese diario. Si las notificaciones de Moodbow están activadas, te avisa un mes antes.
 
+Tu diario solo se abre con la sesión de este teléfono. Si se pierde, por ejemplo al eliminar la app, restaurar o cambiar de teléfono, o por un fallo técnico, no se puede recuperar. Añadir un correo te protege de esto.
+
 Sin correo no hay **Cerrar sesión** en **Yo**, porque no podrías volver a entrar. **Eliminar cuenta** funciona como siempre.
