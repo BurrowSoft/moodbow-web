@@ -143,33 +143,36 @@ describe("PlusInMe: a pending cancel (cancel_at)", () => {
     expect(screen.getByTestId("me-plus-ends")).toHaveTextContent("ends 26 November");
   });
 
-  // The date's own spaces are no-break spaces (it never splits across lines); written here with plain ones.
-  const nb = (s: string) => s.split(" ").join(String.fromCharCode(0xa0));
-
   it("each language's own date (the strings say the rest): de 26. November, fr 26 novembre, es and pt-BR with de", () => {
     const iso = "2026-11-26T16:44:00Z";
     const now = NOW.getTime();
-    expect(endsOnLabel(iso, "de-DE", "Europe/Berlin", now)).toBe(nb("26. November"));
-    expect(endsOnLabel(iso, "fr-FR", "Europe/Paris", now)).toBe(nb("26 novembre"));
-    expect(endsOnLabel(iso, "es-ES", "Europe/Madrid", now)).toBe(nb("26 de noviembre"));
-    expect(endsOnLabel(iso, "pt-BR", "America/Sao_Paulo", now)).toBe(nb("26 de novembro"));
-    expect(endsOnLabel("2027-01-02T10:00:00Z", "en-GB", "UTC", now)).toBe(nb("2 January 2027"));
+    expect(endsOnLabel(iso, "de-DE", "Europe/Berlin", now)).toBe("26. November");
+    expect(endsOnLabel(iso, "fr-FR", "Europe/Paris", now)).toBe("26 novembre");
+    expect(endsOnLabel(iso, "es-ES", "Europe/Madrid", now)).toBe("26 de noviembre");
+    expect(endsOnLabel(iso, "pt-BR", "America/Sao_Paulo", now)).toBe("26 de novembro");
+    expect(endsOnLabel("2027-01-02T10:00:00Z", "en-GB", "UTC", now)).toBe("2 January 2027");
   });
 
-  // UX, 20 Nov (the Tester at de 360/200: "26." / "November"): the date never splits; only the line's "·" parts wrap.
-  it("the date never splits: no plain space left in de, fr or en (Intl's own no-break spaces kept as they are)", () => {
-    const now = NOW.getTime();
-    for (const [tag, zone] of [["de-DE", "Europe/Berlin"], ["fr-FR", "Europe/Paris"], ["en-GB", "Europe/London"]] as const) {
-      for (const iso of ["2026-11-26T16:44:00Z", "2027-11-19T08:00:00Z"]) {
-        const label = endsOnLabel(iso, tag, zone, now);
-        expect(label, `${tag} ${iso}`).not.toContain(" ");
-        expect(label.length, `${tag} ${iso}`).toBeGreaterThan(4);
-      }
-    }
+  // UX, 20 Nov (the Web Tester, de 360/200 and 320/300): the date is one inline-block with plain spaces. It moves to
+  // the next line whole when it fits there and wraps only at its own spaces when it can't, never inside a word.
+  // (No-break spaces made it one unbreakable run that the browser cut mid-word.)
+  it("the date sits whole in its own inline-block, plain spaces, no hyphens, no cut words; the sentence reads as before", () => {
+    showIn({ kind: "plus", source: "stripe", daysLeft: null, endsAt: "2027-11-19T08:00:00Z" }, "de-DE", "Europe/Berlin");
+    const date = screen.getByTestId("me-plus-date");
+    expect(date.textContent).toBe("19. November 2027");
+    expect(date.textContent).not.toContain(String.fromCharCode(0xa0));
+    expect(date.className).toContain("inline-block");
+    expect(date.className).toContain("[hyphens:manual]");
+    expect(date.className).toContain("[overflow-wrap:normal]");
+    expect(screen.getByTestId("me-plus-ends").textContent).toBe("Plus · ends 19. November 2027 · won't renew");
+    cleanup();
+    showIn({ kind: "plus", source: "stripe", daysLeft: 6, endsAt: "2026-11-26T16:44:00Z" });
+    expect(screen.getByTestId("me-plus-trial-ends").textContent).toBe("Plus trial · ends 26 November · won't renew");
+    expect(screen.getByTestId("me-plus-date").textContent).toBe("26 November");
   });
 
   it("a zone this runtime doesn't know: UTC, never a crash", () => {
-    expect(endsOnLabel("2026-11-26T23:30:00Z", "en-GB", "Mars/Olympus", NOW.getTime())).toBe(nb("26 November"));
+    expect(endsOnLabel("2026-11-26T23:30:00Z", "en-GB", "Mars/Olympus", NOW.getTime())).toBe("26 November");
   });
 
   it("a failed payment comes first: the card line, not the won't-renew line", () => {

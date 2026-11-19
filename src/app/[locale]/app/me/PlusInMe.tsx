@@ -21,10 +21,8 @@ import { SAVE_WAIT_MS } from "@/lib/ui/withTimeout";
 // Paid Plus that renews shows nothing here.
 
 // The won't-renew date: day and month in the person's own format and time zone (the server and the browser format it
-// the same way), with the year when it isn't this one; UTC for a zone this runtime doesn't know. Its spaces are
-// no-break spaces, so the date never splits across lines ("26." / "November" at de 360/200, UX 20 Nov); the line
-// still wraps between its "·" parts.
-const NBSP = String.fromCharCode(0xa0);
+// the same way), with the year when it isn't this one; UTC for a zone this runtime doesn't know. Plain spaces:
+// DateInLine keeps it whole on a line (UX 20 Nov) without making it unbreakable.
 export function endsOnLabel(iso: string, dateLocaleTag: string, timeZone: string, now = Date.now()): string {
   let zone = timeZone;
   try {
@@ -34,8 +32,26 @@ export function endsOnLabel(iso: string, dateLocaleTag: string, timeZone: string
   }
   const at = new Date(iso);
   const year = (d: Date) => new Intl.DateTimeFormat("en", { year: "numeric", timeZone: zone }).format(d);
-  const label = new Intl.DateTimeFormat(dateLocaleTag, { day: "numeric", month: "long", ...(year(at) === year(new Date(now)) ? {} : { year: "numeric" }), timeZone: zone }).format(at);
-  return label.split(" ").join(NBSP);
+  return new Intl.DateTimeFormat(dateLocaleTag, { day: "numeric", month: "long", ...(year(at) === year(new Date(now)) ? {} : { year: "numeric" }), timeZone: zone }).format(at);
+}
+
+// The won't-renew line with its date as one inline-block (UX 20 Nov; the Web Tester at de 360/200 and 320/300): the
+// date moves to the next line whole when it fits there, and only when it can't fit any line does it wrap, at its
+// own spaces, never inside a word (no-break spaces made it one unbreakable run, which the browser then cut
+// mid-word): overflow-wrap normal and no hyphens on it. The message keeps its {date}: a token stands in for it,
+// then the date goes in.
+const DATE_TOKEN = "@@date@@";
+function DateInLine({ text, date }: { text: string; date: string }) {
+  const [before, after = ""] = text.split(DATE_TOKEN);
+  return (
+    <>
+      {before}
+      <span data-testid="me-plus-date" className="inline-block [hyphens:manual] [overflow-wrap:normal]">
+        {date}
+      </span>
+      {after}
+    </>
+  );
 }
 
 const CLOSED_KEY = "moodbow.plusBannerClosed";
@@ -101,7 +117,9 @@ export function PlusInMe({
       return (
         <section aria-label={t("label")} data-testid="me-plus-ends" className="flex items-center gap-2 rounded-2xl bg-pill p-[16px]">
           <Arcs />
-          <p className="min-w-0 flex-1 font-medium">{t("endsWontRenew", { date: ends })}</p>
+          <p className="min-w-0 flex-1 font-medium">
+            <DateInLine text={t("endsWontRenew", { date: DATE_TOKEN })} date={ends} />
+          </p>
         </section>
       );
     }
@@ -113,7 +131,7 @@ export function PlusInMe({
           {ends ? (
             // A trial that won't turn into a paid year: when it ends, in place of the counter.
             <h2 id="me-plus-trial" data-testid="me-plus-trial-ends" className="min-w-0 flex-1 font-medium">
-              {t("trialEndsWontRenew", { date: ends })}
+              <DateInLine text={t("trialEndsWontRenew", { date: DATE_TOKEN })} date={ends} />
             </h2>
           ) : (
             <>
