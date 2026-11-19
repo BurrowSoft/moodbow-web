@@ -5,7 +5,7 @@ import type { Locale } from "@/i18n/routing";
 import { Link } from "@/i18n/navigation";
 import { PageShell } from "@/components/PageShell";
 import { draftsAllowed, pageGate } from "@/lib/conditions";
-import { legalLocale, legalSource, renderLegal, comingPolicyMet } from "@/lib/legalContent";
+import { legalDate, legalLocale, legalSource, renderLegal, comingPolicyMet } from "@/lib/legalContent";
 import { pageMetadata } from "@/lib/metadata";
 import { POLICY_NOTICE_CONDITION, policyNoticeDate } from "@/lib/journal/policyNotice";
 import { dateInSentence, dateLocale } from "@/lib/journal/today";
@@ -37,7 +37,8 @@ export default async function ComingPrivacyPage({ params }: PageProps<"/[locale]
   const date = id && policyNoticeDate(id);
   const t = await getTranslations("legal");
   const textLocale = legalLocale(locale, "privacy");
-  const { title, html } = renderLegal(legalSource("privacy", textLocale), comingPolicyMet);
+  // The What changed block names the same day as the line above it (none for an undated notice).
+  const { title, html } = renderLegal(legalSource("privacy", textLocale), comingPolicyMet, date ? legalDate(date, textLocale) : null);
   const tag = dateLocale(locale, (await headers()).get("accept-language"), null);
   return (
     <PageShell title={title} draft={!id} article notice={textLocale !== locale ? t("legalEnglishOnly") : undefined}>
