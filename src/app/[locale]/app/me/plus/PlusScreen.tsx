@@ -112,6 +112,9 @@ export function PlusScreen({ view, price, offer = null, started }: { view: PlusV
   // screen at large text): nothing is pinned, and the page is one scroll ending with the price,
   // the renewal line and the button together (UX 12 Nov, specs/plus.md; the same rule as the app).
   const [unpinned, setUnpinned] = useState(false);
+  // Large text where the page is a 13em column (UX, 20 Nov): nothing pinned, and the price, the renewal line and Start
+  // also right under the title, so they're in view on landing; the same block still ends the page.
+  const [narrow, setNarrow] = useState(false);
   const sizeKey =() => `${window.innerWidth}x${window.innerHeight}:${getComputedStyle(document.documentElement).fontSize}`;
   useLayoutEffect(() => {
     const root = screen.current;
@@ -121,7 +124,10 @@ export function PlusScreen({ view, price, offer = null, started }: { view: PlusV
       // footer is one button, but at 300 % the box itself is small).
       const check = () => {
         // Large text where the page is a 13em column: large mode, and unpinned below (UX, 20 Nov).
-        if (narrowLargeText()) return setLarge(true);
+        if (narrowLargeText()) {
+          setNarrow(true);
+          return setLarge(true);
+        }
         const height = footer.current?.getBoundingClientRect().height ?? 0;
         const table = scroll.current?.getBoundingClientRect().height ?? 0;
         // Nothing laid out yet (or no layout at all): nothing to judge.
@@ -142,7 +148,9 @@ export function PlusScreen({ view, price, offer = null, started }: { view: PlusV
     // Where the page is a 13em column it never pins: the price and its button sit at the end of
     // the page instead of covering 40 % of it (UX, 20 Nov, the Web Tester's fr/pt-BR sweep).
     const fits = () => {
-      if (!unpinned && (narrowLargeText() || (footer.current?.getBoundingClientRect().height ?? 0) > 0.6 * window.innerHeight)) setUnpinned(true);
+      const isNarrow = narrowLargeText();
+      setNarrow(isNarrow);
+      if (!unpinned && (isNarrow || (footer.current?.getBoundingClientRect().height ?? 0) > 0.6 * window.innerHeight)) setUnpinned(true);
     };
     fits();
     // Back to measuring the full footer when the screen or text size changes.
@@ -150,6 +158,7 @@ export function PlusScreen({ view, price, offer = null, started }: { view: PlusV
     const changed = () => {
       if (sizeKey() === entered) return;
       setUnpinned(false);
+      setNarrow(false);
       setLarge(false);
     };
     const observer = new ResizeObserver(changed);
@@ -201,74 +210,82 @@ export function PlusScreen({ view, price, offer = null, started }: { view: PlusV
     };
   }, [large, unpinned]);
 
-  // The main action: what stays pinned at any size.
-  const action = waiting ? (
-    <p role="status" data-testid="plus-waiting" className="font-medium">
-      {waitedLong ? t("onItsWay") : t("starting")}
-    </p>
-  ) : has ? null : view.kind === "past_due" ? (
-    <>
-      <p className="text-[0.875em]">{t("pastDue")}</p>
-      <button type="button" data-testid="plus-update-card" disabled={busy} onClick={() => void go("/api/billing/portal")} className={dialogButton(true)}>
-        {t("updateCard")}
-      </button>
-    </>
-  ) : offer ? (
-    <>
-      {/* The Christmas strip carries the offer's name (no kicker above the title). */}
-      <div data-testid="plus-offer-strip" className={`flex items-center gap-[12px] rounded-2xl px-[12px] py-[8px] text-left ${FESTIVE_CARD}`}>
-        <Tree />
-        <span className="min-w-0 flex-1">
-          <span className="block font-medium text-[#F3D27A]">{t("offerLabel")}</span>
-          <span className="block text-[0.875em]">{t("offerStripBody")}</span>
-        </span>
-        <Lights />
-      </div>
-      {/* Dropped on small screens and at large text: the button already says it (Vitor). */}
-      {!large && (
-        <p data-testid="plus-price" className="font-medium">
-          {t("offerFirstYear", { offer: offer.firstYear })}
-        </p>
-      )}
-      <button type="button" data-testid="plus-start" disabled={busy} onClick={() => void go("/api/checkout/stripe")} className={`${dialogButton(true)} ${large ? "leading-tight" : ""}`}>
-        {t("offerButton", { offer: offer.firstYear })}
-      </button>
-      {/* The renewal, at body size, right under the button (the ruling). */}
-      <p data-testid="plus-renews" className={large ? "leading-snug" : ""}>
-        {t("offerThen", { price: offer.price })}
+  // The main action: what stays pinned at any size. top: its copy under the title where large text makes the page a
+  // 13em column (UX, 20 Nov: in view on landing, and never Start without the price and the renewal line next to it),
+  // with its own test ids, and no second live region (the end copy's status is the one announced).
+  const actionBlock = (top = false) => {
+    const id = (name: string) => `plus-${top ? "top-" : ""}${name}`;
+    return waiting ? (
+      <p role={top ? undefined : "status"} data-testid={id("waiting")} className="font-medium">
+        {waitedLong ? t("onItsWay") : t("starting")}
       </p>
-      {!large && (
-        <p data-testid="plus-cancel" className="text-[0.875em] text-muted">
-          {t("cancelWhere")}
+    ) : has ? null : view.kind === "past_due" ? (
+      <>
+        <p className="text-[0.875em]">{t("pastDue")}</p>
+        <button type="button" data-testid={id("update-card")} disabled={busy} onClick={() => void go("/api/billing/portal")} className={dialogButton(true)}>
+          {t("updateCard")}
+        </button>
+      </>
+    ) : offer ? (
+      <>
+        {/* The Christmas strip carries the offer's name (no kicker above the title). */}
+        <div data-testid={id("offer-strip")} className={`flex items-center gap-[12px] rounded-2xl px-[12px] py-[8px] text-left ${FESTIVE_CARD}`}>
+          <Tree />
+          <span className="min-w-0 flex-1">
+            <span className="block font-medium text-[#F3D27A]">{t("offerLabel")}</span>
+            <span className="block text-[0.875em]">{t("offerStripBody")}</span>
+          </span>
+          <Lights />
+        </div>
+        {/* Dropped on small screens and at large text: the button already says it (Vitor). */}
+        {!large && (
+          <p data-testid={id("price")} className="font-medium">
+            {t("offerFirstYear", { offer: offer.firstYear })}
+          </p>
+        )}
+        <button type="button" data-testid={id("start")} disabled={busy} onClick={() => void go("/api/checkout/stripe")} className={`${dialogButton(true)} ${large ? "leading-tight" : ""}`}>
+          {t("offerButton", { offer: offer.firstYear })}
+        </button>
+        {/* The renewal, at body size, right under the button (the ruling). */}
+        <p data-testid={id("renews")} className={large ? "leading-snug" : ""}>
+          {t("offerThen", { price: offer.price })}
         </p>
-      )}
-    </>
-  ) : (
-    <>
-      {/* The words (UX, board 2): with the free week, "Try 7 days free" here and the price under
-          the button with the renewal; without it, the yearly price here. The same at every size. */}
-      <p data-testid="plus-price" className={`font-medium ${large ? "leading-tight" : ""}`}>
-        {view.trial ? t("trialFree") : t("priceYear", { price })}
-      </p>
-      {/* At large text its lines sit closer (de: three lines at 32 px), so the content keeps room.
-          The order (UX, the Web Tester's board comparison): the price, the button, the renewal
-          line under it, then where to cancel. */}
-      <button type="button" data-testid="plus-start" disabled={busy} onClick={() => void go("/api/checkout/stripe")} className={`${dialogButton(true)} ${large ? "leading-tight" : ""}`}>
-        {view.trial ? t("startTrial") : t("start")}
-      </button>
-      {/* In em, so it follows the footer's cap at large text (the same size as before otherwise). */}
-      <p data-testid="plus-renews" className={`text-[0.875em] text-muted ${large ? "leading-snug" : ""}`}>
-        {view.trial ? t("renewsTrial", { price }) : t("renews")}
-      </p>
-      {/* Where to cancel (the Reviewer's ruling): here, or at the end of the content at large text,
-          where the pinned part keeps only the price, the button and the renewal. */}
-      {!large && (
-        <p data-testid="plus-cancel" className="text-[0.875em] text-muted">
-          {t("cancelWhere")}
+        {!large && (
+          <p data-testid={id("cancel")} className="text-[0.875em] text-muted">
+            {t("cancelWhere")}
+          </p>
+        )}
+      </>
+    ) : (
+      <>
+        {/* The words (UX, board 2): with the free week, "Try 7 days free" here and the price under
+            the button with the renewal; without it, the yearly price here. The same at every size. */}
+        <p data-testid={id("price")} className={`font-medium ${large ? "leading-tight" : ""}`}>
+          {view.trial ? t("trialFree") : t("priceYear", { price })}
         </p>
-      )}
-    </>
-  );
+        {/* At large text its lines sit closer (de: three lines at 32 px), so the content keeps room.
+            The order (UX, the Web Tester's board comparison): the price, the button, the renewal
+            line under it, then where to cancel. */}
+        <button type="button" data-testid={id("start")} disabled={busy} onClick={() => void go("/api/checkout/stripe")} className={`${dialogButton(true)} ${large ? "leading-tight" : ""}`}>
+          {view.trial ? t("startTrial") : t("start")}
+        </button>
+        {/* In em, so it follows the footer's cap at large text (the same size as before otherwise). */}
+        <p data-testid={id("renews")} className={`text-[0.875em] text-muted ${large ? "leading-snug" : ""}`}>
+          {view.trial ? t("renewsTrial", { price }) : t("renews")}
+        </p>
+        {/* Where to cancel (the Reviewer's ruling): here, or at the end of the content at large text,
+            where the pinned part keeps only the price, the button and the renewal. */}
+        {!large && (
+          <p data-testid={id("cancel")} className="text-[0.875em] text-muted">
+            {t("cancelWhere")}
+          </p>
+        )}
+      </>
+    );
+  };
+  const action = actionBlock();
+  // Its copy under the title (UX, 20 Nov): large text in a 13em column, nothing pinned, for someone who can start.
+  const topAction = large && unpinned && narrow ? actionBlock(true) : null;
   // Manage (or where to manage it) and Not now: in the footer, or at the end of the content.
   const rest = (
     <>
@@ -322,7 +339,9 @@ export function PlusScreen({ view, price, offer = null, started }: { view: PlusV
         aria-label={large ? undefined : t("tableCaption")}
         className={large ? "space-y-3 pb-3" : "min-h-0 flex-1 space-y-3 overflow-y-scroll pb-3 [scrollbar-width:thin]"}
       >
-        <div className="relative space-y-1 pr-[48px]">
+        {/* Decision 231's cap in em on the lead (the title has its own), so at large text the price, the renewal line
+            and Start under it are in view on landing (UX, 20 Nov); text-sm in rem was 42 px at 300 %. */}
+        <div className="relative space-y-1 pr-[48px] [font-size:min(1em,max(10vw,32px))]">
           {/* Close (all sizes, offer or not): on the title's row, where Back was; Not now and the
               browser's Back still leave too (UX, 14 Nov). */}
           <Link href="/app/me" aria-label={t("close")} data-testid="plus-close" className="absolute top-0 right-0 inline-flex h-11 w-11 items-center justify-center rounded-full text-muted">
@@ -345,8 +364,16 @@ export function PlusScreen({ view, price, offer = null, started }: { view: PlusV
           >
             {has ? t("titleHas") : t("title")}
           </h1>
-          <p className="text-sm text-muted">{t("lead")}</p>
+          <p className="text-[0.875em] text-muted">{t("lead")}</p>
         </div>
+        {/* UX, 20 Nov (#410): "under the 13em breakpoint, no pinned footer. Instead an offer block (price, the
+            renewal line, Start) sits right after the title/lead, before the feature table, so it's in view on landing
+            at 320/300. The same block repeats at the end; never Start without the price and renewal next to it." */}
+        {topAction && (
+          <div data-testid="plus-offer-top" className="flex flex-col gap-[8px] rounded-2xl bg-surface px-[12px] py-[12px] text-center [font-size:min(1rem,max(10vw,32px))]">
+            {topAction}
+          </div>
+        )}
         {/* At about 22em wide or narrower each row stacks, its name on its own line and Free and Plus named under
             it (globals.css, [data-plus-table]); the explicit roles keep it a table for screen readers then. */}
         <table data-testid="plus-table" data-plus-table="" role="table" className="w-full border-collapse overflow-hidden rounded-2xl bg-surface text-sm">

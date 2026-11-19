@@ -550,35 +550,50 @@ test("large text at 300 %: a help number wider than the line wraps between its d
 });
 
 // UX, 20 Nov (option A, the Web Tester's fr/pt-BR sweep at 320 px / 300 %: "Ajo / uter / une / not / e",
-// "donnée / s", "d'icône / s", "novembr / e", "montren / t", "Mood / bow", "support@mood / bow.com"). A break inside a
-// word that the 8 3 3 rule can't have made (a word under 8 letters, or under 3 letters on a side of the break) is an
-// emergency break: the word cut without a hyphen. None is allowed in the components that were fixed.
+// "donnée / s", "d'icône / s", "novembr / e", "montren / t", "Mood / bow", "support@mood / bow.com"): no word cut
+// without a hyphen. A word broken across lines is either hyphenated (the browser draws the hyphen) or cut (an
+// emergency break: it can't fit a line, so overflow-wrap breaks it bare). Laid out again with hyphenation off, a
+// hyphenated word that fits a line goes whole to the next one, so a break that disappears was a hyphen. A word that
+// stays broken can't fit a line at all: a break there is a cut unless the 8 3 3 rule could have hyphenated it, i.e.
+// the word has 8+ letters, 3+ before the break and 2+ after (Chrome's own hyphens leave 2: "supprim-er", "Novemb-er";
+// every cut the sweep found left 1 or was under 8 letters).
 async function cutWords(page: Page, roots: string): Promise<string[]> {
   return page.evaluate((selector) => {
-    const out: string[] = [];
     const letters = (s: string) => s.replace(/[^\p{L}]/gu, "").length;
+    const words: { node: Text; start: number; word: string }[] = [];
     for (const root of document.querySelectorAll(selector)) {
       const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
       for (let node = walker.nextNode() as Text | null; node; node = walker.nextNode() as Text | null) {
         const parent = node.parentElement;
         if (!parent || parent.closest(".sr-only") || getComputedStyle(parent).display === "none") continue;
         // A hyphen, a dash or a slash is a place a line may end anyway.
-        for (const m of node.data.matchAll(/[^\s \-–—/]+/g)) {
-          const word = m[0];
-          const tops = [...word].map((_, c) => {
-            const range = document.createRange();
-            range.setStart(node, m.index + c);
-            range.setEnd(node, m.index + c + 1);
-            return Math.round(range.getBoundingClientRect().top);
-          });
-          for (let c = 1; c < word.length; c++) {
-            if (tops[c] === tops[c - 1]) continue;
-            const before = letters(word.slice(0, c)), after = letters(word) - before;
-            if (letters(word) < 8 || before < 3 || after < 3) out.push(`${word.slice(0, c)} / ${word.slice(c)}`);
-          }
-        }
+        for (const m of node.data.matchAll(/[^\s \-–—/]+/g)) words.push({ node, start: m.index, word: m[0] });
       }
     }
+    // Where each word's characters change line, as offsets into the word.
+    const breaks = ({ node, start, word }: { node: Text; start: number; word: string }) => {
+      const tops = [...word].map((_, c) => {
+        const range = document.createRange();
+        range.setStart(node, start + c);
+        range.setEnd(node, start + c + 1);
+        return Math.round(range.getBoundingClientRect().top);
+      });
+      return tops.flatMap((top, c) => (c > 0 && top !== tops[c - 1] ? [c] : []));
+    };
+    const asShown = words.map(breaks);
+    const off = document.createElement("style");
+    off.textContent = "* { hyphens: manual !important; }";
+    document.head.append(off);
+    const unhyphenated = words.map(breaks);
+    off.remove();
+    const out: string[] = [];
+    words.forEach(({ word }, i) => {
+      if (unhyphenated[i].length === 0) return; // it fits a line: any break shown is a hyphen
+      for (const c of asShown[i]) {
+        const before = letters(word.slice(0, c)), after = letters(word) - before;
+        if (letters(word) < 8 || before < 3 || after < 2) out.push(`${word.slice(0, c)} / ${word.slice(c)}`);
+      }
+    });
     return out;
   }, roots);
 }

@@ -164,7 +164,8 @@ describe("the support address", () => {
       </p>,
     );
     expect(container.textContent).toBe(SUPPORT_EMAIL);
-    expect(container.querySelector("p")!.innerHTML).toBe(`support@<wbr><span class="${KEEP_TOGETHER_CLASS}">moodbow.com</span>`);
+    // No no-wrap on the domain: it may still give way on a 160 px page rather than push it sideways (#410's CI).
+    expect(container.querySelector("p")!.innerHTML).toBe("support@<wbr>moodbow.com");
   });
   it("goes in where a message names it, and nowhere else", () => {
     const { container } = render(<p>{withSupportAddress(`Écrivez à ${SUPPORT_EMAIL}.`)}</p>);
@@ -174,7 +175,7 @@ describe("the support address", () => {
   });
   it("in HTML: in the text, never in a mailto: link's address", () => {
     const html = `<p>Email <a href="mailto:${SUPPORT_EMAIL}">${SUPPORT_EMAIL}</a> or ${SUPPORT_EMAIL}.</p>`;
-    const shown = `support@<wbr><span class="${KEEP_TOGETHER_CLASS}">moodbow.com</span>`;
+    const shown = "support@<wbr>moodbow.com";
     expect(supportAddressHtml(html)).toBe(`<p>Email <a href="mailto:${SUPPORT_EMAIL}">${shown}</a> or ${shown}.</p>`);
   });
   it("every legal page and Help article that shows the address shows it that way", () => {
