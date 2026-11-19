@@ -885,11 +885,11 @@ test.describe("the saved language in the journal", () => {
   });
 
   test("a saved language that isn't offered keeps the route", async ({ page }) => {
-    test.skip(conditions["de-offered-live"].met, "needs German not offered");
+    test.skip(conditions["it-offered-live"].met, "needs Italian not offered");
     const email = newEmail();
     const password = newPassword();
     try {
-      await signedUpUnconfirmed(email, password, { locale: "de" });
+      await signedUpUnconfirmed(email, password, { locale: "it" });
       await confirmEmail(email);
       await page.goto("/sign-in");
       await signInForm(page, email, password);
