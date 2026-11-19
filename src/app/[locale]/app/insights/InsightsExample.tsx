@@ -83,7 +83,7 @@ export function InsightsExample({ help, yearRow }: { help: React.ReactNode; year
             <span key={c.metric} data-testid={`insights-example-${c.metric}`} className={`block min-w-0 [overflow-wrap:anywhere] ${JOURNAL_CARD}`}>
               <span className="flex flex-wrap items-baseline justify-between gap-2">
                 <span className="min-w-0 font-medium text-text">{t(TITLE[c.metric])}</span>
-                <span className="rounded-full border border-border px-2 py-0.5 text-sm text-text">{change(c)}</span>
+                <span className="rounded-full border border-border px-[8px] py-0.5 text-sm text-text">{change(c)}</span>
               </span>
               <span className="mt-1 block text-sm text-muted">{average(c)}</span>
               {/* Gaps in px, never rem: at 300 % the month's 30 bars with rem gaps were 113 px wider

@@ -20,7 +20,7 @@ export function SessionEnded() {
       <div role="alert" data-alert="heading">
         <h1 className="text-lg font-medium text-text">{t("sessionEndedTitle")}</h1>
       </div>
-      <Link href="/sign-in" data-testid="session-ended-sign-in" className="mt-6 inline-flex min-h-12 items-center rounded-full border border-border px-6 font-medium text-accent">
+      <Link href="/sign-in" data-testid="session-ended-sign-in" className="mt-6 inline-flex min-h-12 items-center rounded-full border border-border px-[24px] font-medium text-accent">
         {t("signinSubmit")}
       </Link>
       <div className="mt-4">

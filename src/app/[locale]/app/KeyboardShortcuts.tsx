@@ -95,7 +95,7 @@ export function KeyboardShortcuts({ search }: { search: boolean }) {
         type="button"
         data-testid="shortcuts-close"
         onClick={close}
-        className="mt-4 inline-flex min-h-11 items-center rounded-full border border-border px-4 text-sm font-medium hover:bg-pill"
+        className="mt-4 inline-flex min-h-11 items-center rounded-full border border-border px-[16px] text-sm font-medium hover:bg-pill"
       >
         {ts("safetyClose")}
       </button>

@@ -10,7 +10,7 @@ import { completeSetup, type SetupState } from "./actions";
 // A focus area: a multi-select chip (UX: chips for multi-select), the same
 // look as Me → AI.
 const chip = (on: boolean) =>
-  `inline-flex min-h-12 items-center rounded-full border px-4 text-sm font-medium ${on ? "border-accent bg-pill text-accent" : "border-border text-muted hover:bg-pill"}`;
+  `inline-flex min-h-12 items-center rounded-full border px-[16px] text-sm font-medium ${on ? "border-accent bg-pill text-accent" : "border-border text-muted hover:bg-pill"}`;
 
 // Set up (M3, r1 "Make it yours"), web version. askAi: AI was turned on at
 // Consent (and AI is shown on the web): focus areas (chips) and tone (a
