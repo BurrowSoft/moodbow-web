@@ -72,7 +72,6 @@ To show helplines near you when we don't know your country, we use the country y
 | Vercel | Hosting the website and web journal{pending:web_analytics}; counting page views and button taps (no cookies){/pending} | USA and global edge network |
 | Resend | Sending account emails (confirmation, password reset) | USA (company); emails are sent from Japan |
 | Sentry | Error and crash reports, with personal details removed | USA |
-{pending:purchases}| Google Play, Apple App Store | Payments for AI credits | Global |{/pending}
 {pending:plus}| Google Play, Apple App Store | Payments for Moodbow Plus | Global |{/pending}
 {pending:plus}| Stripe | Payments and receipts for Moodbow Plus | USA |{/pending}
 {pending:wear}| Google (Wear OS Data Layer, part of Google Play services) | Carrying a watch check-in (a mood value only, no text) from your watch to your phone, only if you use the watch app | Global |{/pending}
