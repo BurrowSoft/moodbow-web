@@ -7,6 +7,7 @@ import { AuthField, primaryButtonClass, textLinkClass } from "@/components/AuthF
 import { FocusOnMount } from "@/components/FocusOnMount";
 import { signUpFlow, type SignUpState } from "./actions";
 import { countTap } from "@/lib/analyticsEvents";
+import { CONSENT_NOTICE_CLASS } from "@/lib/legalVersions";
 
 const ERROR_KEYS = {
   emailInvalid: ["auth", "errEmailInvalid"],
@@ -176,6 +177,10 @@ export function SignUpForm({ askAi = false, healthLink = false }: { askAi?: bool
             {t("passwordHint")}
           </p>
         </div>
+        {/* Who keeps what, right above the boxes, never collapsed (decisions 224, 226; as on Consent). */}
+        <p data-testid="consent-notice" className={CONSENT_NOTICE_CLASS}>
+          {t("consentNotice")}
+        </p>
         <Box name="privacy" testId="consent-privacy" label={t("consentPrivacy")} checked={privacy} onChange={setPrivacy} describedBy={errorOn === "consent" ? "signup-error" : undefined} invalid={errorOn === "consent" && !privacy} />
         <p className={`flex flex-wrap gap-x-[24px] gap-y-[4px] px-[4px] ${smallText}`}>
           <Link href="/terms" target="_blank" rel="noopener" data-testid="consent-read-terms" className={`${textLinkClass} ${LEGAL_LINK}`}>

@@ -97,7 +97,7 @@ test("large text: Create account's heading and consent boxes keep their words wh
       await page.goto(`${language}/sign-up`);
       const split = await page.evaluate(() => {
         const out: string[] = [];
-        const roots = [document.querySelector("h1"), ...document.querySelectorAll("form label span"), document.querySelector("form button[type=submit]")];
+        const roots = [document.querySelector("h1"), document.querySelector("[data-testid=consent-notice]"), ...document.querySelectorAll("form label span"), document.querySelector("form button[type=submit]")];
         for (const root of roots) {
           if (!root) continue;
           const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
