@@ -14,7 +14,7 @@ pt-BR-draft: true
 
 {pending:lifts_live}**O que me faz bem** compara seu humor nos dias com uma tag e nos dias sem ela, quando uma tag já foi usada em pelo menos 5 dias. Mostra padrões, não causas, e nunca mostra algumas tags, como as sobre álcool ou pular refeições.{/pending}
 
-**A semana grátis:** o Plus pode começar com 7 dias grátis, uma vez por pessoa, quando a semana grátis for oferecida a você. É você quem começa, em **Perfil → Moodbow Plus**, depois de ver o preço anual. Se você assinar pelo Google Play ou pela App Store, a loja decide quem recebe a semana grátis.
+**A semana grátis:** o Plus pode começar com 7 dias grátis, uma vez por pessoa, quando a semana grátis for oferecida a você. É você quem começa, em **Perfil → Moodbow Plus**, depois de ver o preço anual. Se você assinar pelo Google Play ou pela App Store, a loja decide quem recebe a semana grátis. Depois da semana grátis, o Plus vira uma assinatura anual que renova todo ano até você cancelar. Durante a semana grátis, o Perfil mostra quantos dias faltam.
 
 **Cancelar:** você pode cancelar quando quiser e fica com o Plus até o fim do período pago. Se você cancelar durante a semana grátis, não será cobrado.
 {pending:plus}- Comprado na web: **Perfil → Moodbow Plus → Gerenciar o Plus**.{/pending}

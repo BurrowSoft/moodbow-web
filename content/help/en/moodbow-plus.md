@@ -13,7 +13,7 @@ topic: Privacy & account
 
 {pending:lifts_live}**What lifts me** compares your mood on days with a tag to days without it, once a tag has been used on at least 5 days. It shows patterns, not causes, and it never shows some tags, such as ones about alcohol or skipping meals.{/pending}
 
-**The free week:** Plus can start with 7 days free, once per person, when the free week is offered to you. You start it yourself, from **Me → Moodbow Plus**, after seeing the yearly price. If you subscribe in Google Play or the App Store, the store decides who gets the free week.
+**The free week:** Plus can start with 7 days free, once per person, when the free week is offered to you. You start it yourself, from **Me → Moodbow Plus**, after seeing the yearly price. If you subscribe in Google Play or the App Store, the store decides who gets the free week. After the free week, Plus becomes a yearly subscription and renews each year until you cancel. During the free week, Me shows how many days are left.
 
 **Cancel:** you can cancel at any time, and you keep Plus until the end of the time you've paid for. If you cancel during the free week, you won't be charged.
 {pending:plus}- Bought on the web: **Me → Moodbow Plus → Manage Plus**.{/pending}

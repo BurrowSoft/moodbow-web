@@ -14,7 +14,7 @@ es-draft: true
 
 {pending:lifts_live}**Lo que me levanta el ánimo** compara tu estado de ánimo los días con una etiqueta y los días sin ella, cuando una etiqueta se ha usado al menos 5 días. Muestra patrones, no causas, y nunca muestra algunas etiquetas, como las de alcohol o saltarse comidas.{/pending}
 
-**La semana gratis:** Plus puede empezar con 7 días gratis, una vez por persona, cuando se te ofrece la semana gratis. La empiezas tú, desde **Yo → Moodbow Plus**, después de ver el precio anual. Si te suscribes en Google Play o en el App Store, la tienda decide quién recibe la semana gratis.
+**La semana gratis:** Plus puede empezar con 7 días gratis, una vez por persona, cuando se te ofrece la semana gratis. La empiezas tú, desde **Yo → Moodbow Plus**, después de ver el precio anual. Si te suscribes en Google Play o en el App Store, la tienda decide quién recibe la semana gratis. Después de la semana gratis, Plus se convierte en una suscripción anual que se renueva cada año hasta que la canceles. Durante la semana gratis, Yo muestra cuántos días quedan.
 
 **Cancelar:** puedes cancelar cuando quieras, y conservas Plus hasta el final del periodo pagado. Si cancelas durante la semana gratis, no se te cobrará.
 {pending:plus}- Comprado en la web: **Yo → Moodbow Plus → Gestionar Plus**.{/pending}

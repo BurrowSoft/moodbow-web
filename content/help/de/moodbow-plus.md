@@ -14,7 +14,7 @@ de-draft: true
 
 {pending:lifts_live}**Was mir guttut** vergleicht deine Stimmung an Tagen mit einem Tag und an Tagen ohne ihn, sobald du einen Tag an mindestens 5 Tagen verwendet hast. Es zeigt Muster, keine Ursachen, und manche Tags zeigt es nie, etwa zu Alkohol oder ausgelassenen Mahlzeiten.{/pending}
 
-**Die kostenlose Woche:** Plus kann mit 7 kostenlosen Tagen beginnen, einmal pro Person, wenn dir die kostenlose Woche angeboten wird. Du startest es selbst, unter **Ich → Moodbow Plus**, nachdem du den Jahrespreis gesehen hast. Wenn du über Google Play oder den App Store abonnierst, entscheidet der Store, wer die kostenlose Woche bekommt.
+**Die kostenlose Woche:** Plus kann mit 7 kostenlosen Tagen beginnen, einmal pro Person, wenn dir die kostenlose Woche angeboten wird. Du startest es selbst, unter **Ich → Moodbow Plus**, nachdem du den Jahrespreis gesehen hast. Wenn du über Google Play oder den App Store abonnierst, entscheidet der Store, wer die kostenlose Woche bekommt. Nach der kostenlosen Woche wird Plus ein Jahresabo, das sich jedes Jahr verlängert, bis du kündigst. Während der kostenlosen Woche zeigt Ich, wie viele Tage noch übrig sind.
 
 **Kündigen:** du kannst jederzeit kündigen und behältst Plus bis zum Ende des bezahlten Zeitraums. Wenn du in der kostenlosen Woche kündigst, wird nichts abgebucht.
 {pending:plus}- Im Web gekauft: **Ich → Moodbow Plus → Plus verwalten**.{/pending}
