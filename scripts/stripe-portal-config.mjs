@@ -3,9 +3,10 @@
 // Prints the configuration's id and the mode, nothing else. Run once per mode, with that mode's key in
 // STRIPE_SECRET_KEY (from a file or the shell, never typed into the command, never printed):
 //   node scripts/stripe-portal-config.mjs           test mode: sk_test_ or rk_test_
-//   node scripts/stripe-portal-config.mjs --live    live mode: sk_live_ or rk_live_
-// Safe to run again: an active configuration tagged metadata.app = moodbow is reused, never made twice.
-// A restricted key needs "Customer portal" write. No packages: Node's own fetch.
+//   node scripts/stripe-portal-config.mjs --live    live mode: sk_live_ or rk_live_ (a live Stripe object:
+//                                                   Vitor's to run, or on his typed go)
+// Safe to run again: an active configuration tagged metadata.app = moodbow is brought up to these settings in place
+// (same id), never made twice. A restricted key needs "Customer portal" write. No packages: Node's own fetch.
 
 const API = "https://api.stripe.com/v1/billing_portal/configurations";
 const VERSION = "2026-05-27.dahlia"; // as src/lib/plus/stripe.ts
@@ -21,7 +22,9 @@ if (isTest && wantLive) fail("--live with a test key");
 const mode = isLive ? "live" : "test";
 
 // What the portal lets people do (UX, as Vitor's own portal settings): change the card, see invoices, cancel at the
-// end of the period with the reasons survey, edit their name, email and address; no plan switching, no phone.
+// end of the period with the reasons survey, edit their name and email; no plan switching, no phone. Not the
+// address: with Stripe Tax off nothing needs it, and the privacy policy names only what the card form asks for
+// (the Reviewer, 21 Nov).
 const SETTINGS = [
   ["business_profile[headline]", "Moodbow Plus"],
   ["business_profile[privacy_policy_url]", "https://www.moodbow.com/privacy"],
@@ -37,7 +40,7 @@ const SETTINGS = [
     r,
   ]),
   ["features[customer_update][enabled]", "true"],
-  ...["name", "email", "address"].map((u, i) => [`features[customer_update][allowed_updates][${i}]`, u]),
+  ...["name", "email"].map((u, i) => [`features[customer_update][allowed_updates][${i}]`, u]),
   ["metadata[app]", APP],
 ];
 
@@ -46,12 +49,10 @@ function fail(why) {
   process.exit(1);
 }
 
-async function stripe(method, url, body) {
+async function stripe(method, url, body, idempotencyKey) {
   const headers = { Authorization: `Bearer ${key}`, "Stripe-Version": VERSION };
-  if (body) {
-    headers["Content-Type"] = "application/x-www-form-urlencoded";
-    headers["Idempotency-Key"] = `moodbow-portal-config-${mode}-v1`;
-  }
+  if (body) headers["Content-Type"] = "application/x-www-form-urlencoded";
+  if (idempotencyKey) headers["Idempotency-Key"] = idempotencyKey;
   const res = await fetch(url, { method, headers, body });
   const json = await res.json().catch(() => ({}));
   if (!res.ok) {
@@ -63,20 +64,21 @@ async function stripe(method, url, body) {
   return json;
 }
 
-// Already made: reused. Only ours is ever looked at by its tag; nothing of anyone else's is printed.
+// One of ours already: brought up to SETTINGS in place, so its id (STRIPE_PORTAL_CONFIG_ID) stays. Only ours is ever
+// picked, by its tag; nothing of anyone else's is printed.
+let ours = null;
 let after = null;
 for (;;) {
   const page = await stripe("GET", `${API}?active=true&limit=100${after ? `&starting_after=${after}` : ""}`);
-  const ours = page.data.find((c) => c.metadata?.app === APP);
-  if (ours) {
-    console.log(`${ours.id} (${mode}, already there)`);
-    process.exit(0);
-  }
-  if (!page.has_more || page.data.length === 0) break;
+  ours = page.data.find((c) => c.metadata?.app === APP) ?? null;
+  if (ours || !page.has_more || page.data.length === 0) break;
   after = page.data.at(-1).id;
 }
 
-const made = await stripe("POST", API, new URLSearchParams(SETTINGS));
-if (made.livemode !== isLive) fail("Stripe answered in the other mode");
-if (made.is_default) fail(`${made.id} came back as the default configuration: check it in the Dashboard`);
-console.log(`${made.id} (${mode})`);
+const saved = ours
+  ? await stripe("POST", `${API}/${ours.id}`, new URLSearchParams(SETTINGS))
+  : await stripe("POST", API, new URLSearchParams(SETTINGS), `moodbow-portal-config-${mode}-v2`);
+if (saved.livemode !== isLive) fail("Stripe answered in the other mode");
+if (saved.is_default) fail(`${saved.id} is the default configuration: check it in the Dashboard`);
+const editable = saved.features?.customer_update?.allowed_updates ?? [];
+console.log(`${saved.id} (${mode}, ${ours ? "updated in place" : "made"}; people can edit: ${editable.join(", ") || "nothing"})`);
