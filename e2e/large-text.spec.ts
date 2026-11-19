@@ -230,9 +230,10 @@ test("large text: a legal page's words stay whole on a 320 px phone, and normal 
         const size = (css: string) => getComputedStyle(document.querySelector(css)!).fontSize;
         return { split: out, body: size(".legal-prose p"), section: size(".legal-prose h2"), overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth, hyphens: getComputedStyle(document.querySelector(".legal-prose p")!).hyphens };
       });
-      // Decision 231 at normal size and at 200 %: whole words, no hyphens. Only 300 % on a 320 px
-      // phone (under 9em wide) hyphenates.
-      expect.soft(measured.hyphens, `${route} at ${percent} %`).toBe(percent === 300 ? "auto" : "manual");
+      // Decision 231 at normal size: whole words, no hyphens. At 200 % and 300 % a 320 px phone is a
+      // 10em column or narrower, where the legal pages hyphenate long words in every language (UX,
+      // 20 Nov, after /es/terms cut "Responsabilid / ad" at 200 %).
+      expect.soft(measured.hyphens, `${route} at ${percent} %`).toBe(percent === 100 ? "manual" : "auto");
       expect.soft(measured.split, `${route} at ${percent} %`).toEqual([]);
       expect.soft(measured.overflow, `${route} at ${percent} %`).toBe(0);
       if (percent === 100) expect.soft([measured.body, measured.section], route).toEqual(["16px", "20px"]);
@@ -423,7 +424,7 @@ test("<html lang> is the page's language in every locale", async ({ page }) => {
 // the public pages, words stay whole (decision 231), since a browser hyphenates at a line's end
 // even when the word would fit on the next line. The journal needs a session, so its markup is
 // put on a public page here; the Web Tester's pass reads the real pages.
-test("the journal's headings, labels and buttons hyphenate at 300 % on a 320 px phone; not at 100 % or 200 %, nor on public pages", async ({ page, browserName }, testInfo) => {
+test("every page hyphenates long words from a 10em column (200 % and 300 % on a 320 px phone), never at 100 %", async ({ page, browserName }, testInfo) => {
   test.skip(browserName !== "chromium" || testInfo.project.name !== "desktop", "Page.setFontSizes is Chromium's; once is enough");
   const cdp = await page.context().newCDPSession(page);
   await page.setViewportSize({ width: 320, height: 640 });
@@ -442,14 +443,15 @@ test("the journal's headings, labels and buttons hyphenate at 300 % on a 320 px 
     });
   for (const [percent, expected] of [
     [100, "manual"],
-    [200, "manual"],
+    [200, "auto 7 3 3"],
     [300, "auto 7 3 3"],
   ] as const) {
     await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
     await page.goto("/fr/consent");
     const got = await styles();
     expect(got.journal, `${percent} %`).toEqual(["h2", "label", "button"].map((tag) => `${tag} ${expected}`));
-    expect(got.consentHeading, `Consent's heading at ${percent} %`).toBe("manual");
+    // One rule everywhere (UX, 20 Nov): the public pages too.
+    expect(got.consentHeading, `Consent's heading at ${percent} %`).toBe(expected);
   }
 });
 
