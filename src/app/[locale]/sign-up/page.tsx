@@ -13,6 +13,7 @@ import { askAiConsent } from "@/lib/journal/ai";
 import { pageMetadata } from "@/lib/metadata";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { legalLocale } from "@/lib/legalContent";
+import { wholeNames } from "@/lib/wholeNames";
 import { SignUpForm } from "./SignUpForm";
 
 // Create account (M3, after Consent). Behind web-journal-live.
@@ -42,8 +43,8 @@ export default async function SignUpPage({ params }: PageProps<"/[locale]/sign-u
       {/* Someone who started in the app without an email (decision 216):
           the web has no anonymous sessions, so they back up there first. */}
       {pageGate("anon-start-live") !== "hidden" && (
-        <p data-testid="auth-started-in-app" className="text-muted">
-          {ta("startedInApp")}
+        <p data-testid="auth-started-in-app" data-hyphenate className="text-muted">
+          {wholeNames(ta("startedInApp"))}
         </p>
       )}
       {/* Help first, as on Consent (UX, 19 Nov): someone who needs help never has to get past a form.
