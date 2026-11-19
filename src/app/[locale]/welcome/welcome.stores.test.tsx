@@ -24,6 +24,13 @@ vi.mock("@/lib/stores", async (importOriginal) => {
 vi.mock("next-intl/server", () => ({
   setRequestLocale: () => {},
   getTranslations: async (ns: keyof typeof messages) => (key: string) => (messages[ns] as Record<string, string>)[key],
+  getMessages: async () => messages,
+}));
+// The help card itself is SafetyCard's (its own tests); here, only that welcome places it.
+vi.mock("@/components/SafetyCard", () => ({
+  GetHelpNow: ({ testId, icon, neutral, country }: { testId: string; icon?: boolean; neutral?: boolean; country: string | null }) => (
+    <span data-testid={testId} data-icon={String(icon)} data-neutral={String(neutral)} data-country={String(country)} />
+  ),
 }));
 vi.mock("@/components/Logo", () => ({ Logo: () => null }));
 vi.mock("./WelcomeSlides", () => ({ WelcomeSlides: () => null }));
@@ -56,10 +63,27 @@ describe("Welcome's store line", () => {
     expect(screen.queryByTestId("welcome-store-appstore")).toBeNull();
   });
 
-  it("both public: both links", async () => {
+  it("both public: both links, as the official badges (UX & PM, 17 Nov)", async () => {
     met = ["play-live", "appstore-live"];
     await renderWelcome();
     expect(screen.getByTestId("welcome-store-play")).toBeInTheDocument();
     expect(screen.getByTestId("welcome-store-appstore")).toHaveAttribute("href", "https://apps.apple.com/app/id123");
+    expect(screen.getByTestId("welcome-badges")).toBeInTheDocument();
+    expect(screen.getByTestId("welcome-store-appstore").querySelector("img")).toHaveAttribute("src", "/badges/app-store-en.svg");
+    expect(screen.getByTestId("welcome-store-play").querySelector("img")).toHaveAttribute("src", "/badges/google-play-en.png");
+  });
+});
+
+// Round 3, batch E (S3): help before any account on every slide, as the app's pre-account screens
+// have it. The page renders it outside the slides, so slides 1–3 all carry it (e2e checks each).
+describe("Welcome's help", () => {
+  it("the lifebuoy, neutral, with no account's country: the request's decides", async () => {
+    met = [];
+    await renderWelcome();
+    // The link itself (href, name, place, size) is GetHelpNow's: e2e smoke checks it on slides 1–3.
+    const help = screen.getByTestId("welcome-help");
+    expect(help).toHaveAttribute("data-icon", "true");
+    expect(help).toHaveAttribute("data-neutral", "true");
+    expect(help).toHaveAttribute("data-country", "null");
   });
 });

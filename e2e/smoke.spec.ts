@@ -445,6 +445,39 @@ test.describe("404s are server-rendered (no JS)", () => {
       await expect(page.getByText("This page doesn't exist or has moved.")).toBeVisible();
     });
   }
+
+  // A Help article that's missing or not out yet (safety-plan and letters are unmet on every
+  // build): the not-found page in the raw HTML, never Next's bare error shell (html
+  // id="__next_error__", no title, no h1; the Web Tester, 15 Nov).
+  for (const path of ["/help/no-such-article", "/help/safety-plan", "/help/letters", "/es/help/no-such-article", "/es/help/safety-plan"]) {
+    test(`help 404 ${path}`, async ({ request }) => {
+      const res = await request.get(path, { maxRedirects: 0 });
+      expect(res.status()).toBe(404);
+      const html = await res.text();
+      expect(html).not.toContain("__next_error__");
+      expect(html).toMatch(/<title>[^<]+ · Moodbow<\/title>/);
+      expect(html).toMatch(/<h1[^>]*>[^<]+<\/h1>/);
+      if (!path.startsWith("/es/")) expect(html).toContain("<title>Page not found · Moodbow</title>");
+    });
+  }
+
+  // An article's address is lowercase (UX, 15 Nov): capitals get a 308 to it, query kept.
+  test("help /help/Tags → 308 → /help/tags → 200", async ({ request }) => {
+    const res = await request.get("/help/Tags", { maxRedirects: 0 });
+    expect(res.status()).toBe(308);
+    expect(new URL(res.headers()["location"], "http://x").pathname).toBe("/help/tags");
+    const page = await request.get("/help/Tags");
+    expect(page.status()).toBe(200);
+    expect(page.url()).toMatch(/\/help\/tags$/);
+    expect(await page.text()).toContain("<title>Tags · Moodbow</title>");
+  });
+
+  test("help /es/help/Get-Help-Now?country=TH keeps the country", async ({ request }) => {
+    const res = await request.get("/es/help/Get-Help-Now?country=TH", { maxRedirects: 0 });
+    expect(res.status()).toBe(308);
+    const to = new URL(res.headers()["location"], "http://x");
+    expect(to.pathname + to.search).toBe("/es/help/get-help-now?country=TH");
+  });
 });
 
 // Auth email links (W5). Real tokens are tested on the Preview (staging);
@@ -588,7 +621,8 @@ test.describe("web journal (signed out)", () => {
 test.describe("help with no script at all", () => {
   test.use({ javaScriptEnabled: false });
   // Create account carries the consents now (1.3 §6): help before anything is agreed is there.
-  for (const [path, id] of [["/sign-in", "sign-in-get-help"], ["/forgot-password", "forgot-get-help"], ["/sign-up", "signup-get-help"]]) {
+  // Welcome too (round 3, batch E): its lifebuoy is a real link to the help page.
+  for (const [path, id] of [["/sign-in", "sign-in-get-help"], ["/forgot-password", "forgot-get-help"], ["/sign-up", "signup-get-help"], ["/welcome", "welcome-help"]]) {
     for (const language of ["", "/fr", "/es", "/pt-br"]) {
       test(`${language}${path}: the help button leads to a page with the way to a helpline`, async ({ page }) => {
         await page.goto(`${language}${path}`);
@@ -673,6 +707,44 @@ test.describe("onboarding (signed out)", () => {
     await expect(page).toHaveURL(/\/welcome\?slide=3$/);
     await page.getByTestId("welcome-start").click();
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Create your account");
+  });
+
+  // Round 3, batch E (S3): help before any account, as the app's pre-account screens have it: a
+  // quiet lifebuoy at the top right of every welcome slide, named with the shared help words.
+  test("welcome 1–3: the lifebuoy at the top right, named, leading to help; it opens the card", async ({ page }) => {
+    for (const slide of [1, 2, 3]) {
+      await page.goto(`/welcome?slide=${slide}`);
+      const help = page.getByTestId("welcome-help");
+      await expect(help, `slide ${slide}`).toHaveAttribute("href", "/help/get-help-now");
+      await expect(help).toHaveAttribute("aria-label", "Want to talk to someone?");
+      const box = (await help.boundingBox())!;
+      const width = page.viewportSize()!.width;
+      expect(box.x + box.width, `slide ${slide}: at the right`).toBeGreaterThan(width - 80);
+      expect(box.y, `slide ${slide}: at the top`).toBeLessThan(80);
+      expect(Math.min(box.width, box.height)).toBeGreaterThanOrEqual(24);
+    }
+    await page.getByTestId("welcome-help").click();
+    await expect(page.getByTestId("safety-card")).toBeVisible();
+    await page.getByTestId("safety-close").click();
+    await expect(page.getByTestId("safety-card")).toHaveCount(0);
+    await expect(page.getByTestId("welcome-slide-3")).toBeVisible();
+  });
+
+  // Round 3, batch E (S3, WCAG 2.5.8): each consent box and each Read link is a target of at
+  // least 24 × 24 px.
+  test("Create account: every consent control is at least 24 × 24 px", async ({ page }) => {
+    await page.goto("/sign-up");
+    const ids = ["consent-privacy", "consent-health", "consent-age", "consent-read-terms", "consent-read-privacy", "consent-read-health", "consent-ai"];
+    let measured = 0;
+    for (const id of ids) {
+      const control = page.getByTestId(id);
+      if ((await control.count()) === 0) continue;
+      const box = (await control.boundingBox())!;
+      expect(box.width, `${id} width`).toBeGreaterThanOrEqual(24);
+      expect(box.height, `${id} height`).toBeGreaterThanOrEqual(24);
+      measured++;
+    }
+    expect(measured).toBeGreaterThanOrEqual(5);
   });
 
   test("Create account: the summary above three separate unticked boxes, each with its link; the AI box optional", async ({ page }) => {

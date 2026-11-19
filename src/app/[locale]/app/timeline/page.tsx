@@ -182,7 +182,7 @@ export default async function TimelinePage({ params, searchParams }: PageProps<"
         <h1 id="timeline-title" tabIndex={-1} className={`${JOURNAL_HEADING} min-w-0 flex-1 focus:outline-none`}>
           {t("timelineTitle")}
         </h1>
-        <GetHelpNow country={me.profile?.country} testId="timeline-help" neutral icon />
+        <GetHelpNow country={me.profile?.country} testId="timeline-help" counted neutral icon />
       </header>
       {/* Search (1.1 L), when shown: while it's open its results replace
           everything below the title (the list or the calendar). */}

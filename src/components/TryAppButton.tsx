@@ -33,21 +33,21 @@ export function TryAppButton({ journal, stores }: { journal: boolean; stores: Li
   const className = BUTTON;
   if (phone === "android" && stores.play) {
     return (
-      <PlayStoreLink className={className} testId="try-app">
+      <PlayStoreLink className={className} testId="try-app" count="cta_try_app">
         {t("tryApp")}
       </PlayStoreLink>
     );
   }
   if (phone === "ios" && stores.appStore && APP_STORE_URL) {
     return (
-      <a href={APP_STORE_URL} data-testid="try-app" className={className}>
+      <a href={APP_STORE_URL} data-testid="try-app" data-count="cta_try_app" className={className}>
         {t("tryApp")}
       </a>
     );
   }
   if (!journal) return null;
   return (
-    <Link href="/welcome" data-testid="try-app" className={className}>
+    <Link href="/welcome" data-testid="try-app" data-count="cta_try_app" className={className}>
       {t("tryApp")}
     </Link>
   );

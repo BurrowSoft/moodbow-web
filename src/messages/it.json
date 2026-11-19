@@ -53,6 +53,8 @@
     "storeGetApp": "Scarica l'app:",
     "storeGooglePlay": "Google Play",
     "storeAppStore": "App Store",
+    "storeBadgeAppStore": "Scarica su App Store",
+    "storeBadgePlay": "Disponibile su Google Play",
     "storeSoonPlay": "Presto su Google Play",
     "storeSoonAppStore": "Presto sull'App Store",
     "featureCheckInTitle": "Un check-in in 10 secondi",
@@ -270,7 +272,8 @@
     "tagsTooLong": "Un tag può avere fino a 32 caratteri.",
     "setupLaterBody": "Il tuo promemoria giornaliero è disattivato. Puoi attivarlo e scegliere un orario quando vuoi.",
     "setupLaterOpen": "Configura",
-    "setupLaterClose": "Non ora"
+    "setupLaterClose": "Non ora",
+    "lateNote": "È tardi. Anche il riposo conta. Se stanotte ti pesa, l'aiuto è a un tocco di distanza."
   },
   "entry": {
     "writeButton": "Scrivi della tua giornata",
@@ -465,7 +468,12 @@
     "exportStress": "Stress",
     "exportOfFive": "{value}/5",
     "exportReflectionOn": "Sulla tua pagina del {date}",
-    "exportTags": "Tag"
+    "exportTags": "Tag",
+    "exportRoutine": "Routine",
+    "exportRoutineStarted": "dal {date}",
+    "exportRoutineInAppointment": "nel mio riepilogo per l'appuntamento",
+    "exportRoutineTicked": "Giorni spuntati: {dates}",
+    "exportRoutineNoTicks": "Nessun giorno spuntato finora"
   },
   "help": {
     "helpTitle": "Aiuto e domande frequenti",
@@ -561,7 +569,8 @@
     "pairWeekends": "Weekend",
     "pairWritingTitle": "Scrittura",
     "pairWrote": "Con scrittura",
-    "pairNotWrote": "Senza scrittura"
+    "pairNotWrote": "Senza scrittura",
+    "showedUp": "{count, plural, one {Hai registrato # giorno} other {Hai registrato # giorni}} {range, select, week {negli ultimi 7 giorni} month {negli ultimi 30 giorni} threeMonths {negli ultimi 3 mesi} year {negli ultimi 12 mesi} other {da quando hai iniziato}}."
   },
   "share": {
     "shareButton": "Condividi",
@@ -595,14 +604,15 @@
     "shareLoading": "Sto preparando il tuo mese…",
     "shareFormat": "Formato",
     "shareTheme": "Tema",
-    "shareLineCount": "{count, plural, one {# carattere rimasto} other {# caratteri rimasti}}"
+    "shareLineCount": "{count, plural, one {# carattere rimasto} other {# caratteri rimasti}}",
+    "shareShowedUp": "{n, plural, =1{1 giorno registrato} other{# giorni registrati}}"
   },
   "ai": {
     "meAi": "AI",
     "reflectAnswer": "Scrivi la tua risposta",
     "meAiOn": "Riflessioni e resoconti con l'AI",
     "consentAiTitle": "Riflessioni e resoconti con l'AI (facoltativi)",
-    "consentAiBody": "Per scrivere riflessioni e resoconti, Moodbow invia le tue pagine e i tuoi dati al nostro fornitore di AI, Anthropic (USA), solo quando serve. Non vengono usati per addestrare modelli di AI. Puoi disattivarlo quando vuoi in Profilo → AI.",
+    "consentAiBody": "Per scrivere riflessioni e resoconti, Moodbow invia le tue pagine e i tuoi check-in al nostro fornitore di AI, Anthropic (USA), solo quando serve. Non vengono usati per addestrare modelli di AI. Puoi disattivarlo quando vuoi in Profilo → AI.",
     "meAiOffHint": "L'AI è disattivata. Il diario funziona allo stesso modo, ma non riceverai riflessioni né resoconti.",
     "meTone": "Tono",
     "toneWarm": "Caloroso",
@@ -775,6 +785,28 @@
     "nameItQuestion": "Cosa senti in questo momento?",
     "nameItSmaller": "Dargli un nome può renderlo un po' più piccolo.",
     "nameItThanks": "Grazie di avergli dato un nome."
+  },
+  "routine": {
+    "title": "Routine",
+    "intro": "Fino a 3 cose che vorresti spuntare ogni giorno. Le vedi solo tu.",
+    "addHint": "Per esempio, farmaci del mattino",
+    "add": "Aggiungi",
+    "full": "Sono 3, il massimo per ora.",
+    "duplicate": "Ce l'hai già.",
+    "options": "Opzioni per {item}",
+    "deleteConfirm": "Rimuovi",
+    "deleteTitle": "Rimuovere {name}?",
+    "deleteBody": "Questo rimuove l'elemento e i giorni in cui l'hai spuntato.",
+    "inAppointment": "Mostra in Per il mio appuntamento",
+    "rowTitle": "Routine",
+    "rowEmpty": "Aggiungi fino a 3 cose che fai quasi ogni giorno, come i farmaci del mattino o una camminata.",
+    "rowSetUp": "Imposta",
+    "saveFailed": "Le spunte della routine non sono state salvate. Riprova.",
+    "patternShown": "Nei giorni in cui hai spuntato {name}, il tuo umore medio è stato {a} su 5. Negli altri giorni, {b}.",
+    "patternFootnote": "Questo può mostrare cosa tende ad andare insieme, non cosa causa cosa. Non cambiare mai un farmaco senza parlarne con il tuo medico o farmacista.",
+    "appointmentHeading": "Routine",
+    "appointmentShare": "{name}: spunta nel {percent}% dei giorni con check-in",
+    "appointmentNotEnough": "{name}: non ci sono ancora abbastanza giorni"
   },
   "safetyPlan": {
     "title": "Il mio piano di sicurezza",
@@ -1000,5 +1032,52 @@
     "liftsRow": "Nei giorni con il tag «{tag}» il tuo umore è stato in media {a} su 5; negli altri giorni, {b}.",
     "liftsFooter": "Andamenti, non cause. Solo tu puoi vederlo.",
     "liftsNone": "Continua ad aggiungere tag alle tue giornate. Gli andamenti compaiono dopo qualche settimana."
+  },
+  "year": {
+    "title": "Il tuo anno in Moodbow",
+    "todayLine": "Uno sguardo al {year}, solo per te.",
+    "open": "Apri",
+    "coloursTitle": "Il tuo anno a colori",
+    "coloursLine": "Ogni mese, gli umori che hai registrato.",
+    "monthMood": "{month}: {mood}",
+    "monthFaint": "{month}: nessun giorno registrato",
+    "daysTitle": "I giorni in cui c'eri",
+    "daysLine": "{count, plural, one {Hai registrato # giorno} other {Hai registrato # giorni}} quest'anno.",
+    "momentsTitle": "I tuoi momenti",
+    "momentsLine": "{count, plural, one {Hai segnato # momento} other {Hai segnato # momenti}}.",
+    "helpedTitle": "Ciò che ti aiuta",
+    "tagsTitle": "Nei giorni buoni hai usato spesso questi tag:",
+    "hardTitle": "Il tuo anno",
+    "hardLine": "Quest'anno ti ha chiesto molto. Hai continuato a tornare.",
+    "closing": "Grazie per aver dedicato del tempo a te quest'anno.",
+    "morePlus": "Scopri di più sul tuo anno",
+    "notEnough": "Il tuo {year} in Moodbow appare dopo 30 giorni registrati in quell'anno. Sei a {count}.",
+    "share": "Condividi il tuo anno",
+    "previous": "Indietro",
+    "next": "Avanti",
+    "position": "Schermata {n} di {total}",
+    "shareNote": "L'immagine mostra i tuoi colori e il numero di giorni. Le tue pagine, i tag, i momenti e le date non ci sono mai.",
+    "daysUnit": "{count, plural, one {giorno} other {giorni}}",
+    "new": "Nuovo"
+  },
+  "sounds": {
+    "title": "Suoni rilassanti",
+    "rain": "Pioggia",
+    "waves": "Onde",
+    "brown": "Rumore marrone",
+    "hum": "Mormorio leggero",
+    "timer": "Timer",
+    "minutes": "{n} min",
+    "untilStop": "Finché non lo fermo",
+    "play": "Riproduci",
+    "pause": "Pausa",
+    "stop": "Ferma",
+    "left": "Ancora {n} min",
+    "untilStopped": "Finché non lo fermi",
+    "lock": "Suono in riproduzione",
+    "lockLeft": "Suono in riproduzione · ancora {n} min",
+    "lockPaused": "Suono in pausa",
+    "intro": "Creati direttamente nel tuo browser, quindi non c'è niente da scaricare. Usa il volume del dispositivo.",
+    "unavailable": "I suoni rilassanti non sono disponibili in questo browser."
   }
 }

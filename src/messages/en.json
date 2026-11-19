@@ -53,6 +53,8 @@
     "storeGetApp": "Get the app:",
     "storeGooglePlay": "Google Play",
     "storeAppStore": "App Store",
+    "storeBadgeAppStore": "Download on the App Store",
+    "storeBadgePlay": "Get it on Google Play",
     "storeSoonPlay": "Coming soon to Google Play",
     "storeSoonAppStore": "Coming soon to the App Store",
     "featureCheckInTitle": "A 10-second check-in",
@@ -270,7 +272,8 @@
     "tagsTooLong": "A tag can be up to 32 characters.",
     "setupLaterBody": "Your daily reminder is off. You can turn it on and choose a time whenever you like.",
     "setupLaterOpen": "Set it up",
-    "setupLaterClose": "Not now"
+    "setupLaterClose": "Not now",
+    "lateNote": "It's late. Rest matters too. If tonight feels heavy, help is one tap away."
   },
   "entry": {
     "writeButton": "Write about your day",
@@ -465,7 +468,12 @@
     "exportStress": "Stress",
     "exportOfFive": "{value}/5",
     "exportReflectionOn": "On your entry of {date}",
-    "exportTags": "Tags"
+    "exportTags": "Tags",
+    "exportRoutine": "Routine",
+    "exportRoutineStarted": "started {date}",
+    "exportRoutineInAppointment": "in my appointment summary",
+    "exportRoutineTicked": "Ticked: {dates}",
+    "exportRoutineNoTicks": "Not ticked yet"
   },
   "help": {
     "helpTitle": "Help & FAQ",
@@ -561,7 +569,8 @@
     "pairWeekends": "Weekends",
     "pairWritingTitle": "Writing",
     "pairWrote": "Wrote",
-    "pairNotWrote": "Didn't write"
+    "pairNotWrote": "Didn't write",
+    "showedUp": "{count, plural, one {You showed up on # day} other {You showed up on # days}} {range, select, week {in the last 7 days} month {in the last 30 days} threeMonths {in the last 3 months} year {in the last 12 months} other {since you started}}."
   },
   "share": {
     "shareButton": "Share",
@@ -595,7 +604,8 @@
     "shareLoading": "Getting your month…",
     "shareFormat": "Format",
     "shareTheme": "Theme",
-    "shareLineCount": "{count, plural, one {# character left} other {# characters left}}"
+    "shareLineCount": "{count, plural, one {# character left} other {# characters left}}",
+    "shareShowedUp": "{n, plural, =1{Showed up on 1 day} other{Showed up on # days}}"
   },
   "ai": {
     "meAi": "AI",
@@ -776,6 +786,28 @@
     "nameItSmaller": "Naming it can make it a little smaller.",
     "nameItThanks": "Thanks for naming it."
   },
+  "routine": {
+    "title": "Routine",
+    "intro": "Up to 3 things you'd like to tick off each day. Only you see them.",
+    "addHint": "For example, Morning meds",
+    "add": "Add",
+    "full": "That's 3, the most for now.",
+    "duplicate": "You already have that one.",
+    "options": "Options for {item}",
+    "deleteConfirm": "Remove",
+    "deleteTitle": "Remove {name}?",
+    "deleteBody": "This removes the item and the days you ticked it.",
+    "inAppointment": "Show in For my appointment",
+    "rowTitle": "Routine",
+    "rowEmpty": "Add up to 3 things you do most days, like Morning meds or a walk.",
+    "rowSetUp": "Set up",
+    "saveFailed": "Your routine ticks weren't saved. Try again.",
+    "patternShown": "On days you ticked {name}, your mood averaged {a} of 5. On other days, {b}.",
+    "patternFootnote": "This may show what tends to go together, not what causes what. Never change a medication without talking to your doctor or pharmacist.",
+    "appointmentHeading": "Routine",
+    "appointmentShare": "{name}: ticked on {percent}% of check-in days",
+    "appointmentNotEnough": "{name}: not enough days yet"
+  },
   "safetyPlan": {
     "title": "My safety plan",
     "intro": "Fill this in on a calmer day, so it's here when you need it. Every part is optional. Only you can see it.",
@@ -884,7 +916,7 @@
     "plusOnly": "Plus only",
     "rowJournal": "Your journal: check-ins and entries, no limit",
     "rowTimeline": "Timeline: list, calendar, moments, memories and search",
-    "rowHelp": "Help, safety plan, toolbox, grounding",
+    "rowHelp": "Help, safety plan, Things that help me and its exercises",
     "rowOwn": "Letters, appointment summary",
     "rowRanges": "Your week, month and 3 months",
     "rowPatterns": "Patterns over the last 3 months",
@@ -1000,5 +1032,52 @@
     "liftsRow": "On days with “{tag}”, your mood averaged {a} of 5; on other days, {b}.",
     "liftsFooter": "Patterns, not causes. Only you can see this.",
     "liftsNone": "Keep tagging your days. Patterns show up after a few weeks."
+  },
+  "year": {
+    "title": "Your year in Moodbow",
+    "todayLine": "A look back at {year}, just for you.",
+    "open": "Open",
+    "coloursTitle": "Your year in colours",
+    "coloursLine": "Each month, the moods you checked in with.",
+    "monthMood": "{month}: {mood}",
+    "monthFaint": "{month}: no check-ins",
+    "daysTitle": "Days you showed up",
+    "daysLine": "{count, plural, one {You showed up on # day} other {You showed up on # days}} this year.",
+    "momentsTitle": "Your moments",
+    "momentsLine": "{count, plural, one {You marked # moment} other {You marked # moments}}.",
+    "helpedTitle": "Things that help you",
+    "tagsTitle": "On good days you often tagged",
+    "hardTitle": "Your year",
+    "hardLine": "This year asked a lot of you. You kept showing up.",
+    "closing": "Thank you for showing up for yourself this year.",
+    "morePlus": "See more of your year",
+    "notEnough": "Your year in Moodbow for {year} appears once you've checked in on 30 days that year. You're on {count}.",
+    "share": "Share your year",
+    "previous": "Previous",
+    "next": "Next",
+    "position": "Screen {n} of {total}",
+    "shareNote": "The image shows your colours and the number of days. Your entries, tags, moments and dates are never on it.",
+    "daysUnit": "{count, plural, one {day} other {days}}",
+    "new": "New"
+  },
+  "sounds": {
+    "title": "Calming sounds",
+    "rain": "Rain",
+    "waves": "Waves",
+    "brown": "Brown noise",
+    "hum": "Gentle hum",
+    "timer": "Timer",
+    "minutes": "{n} min",
+    "untilStop": "Until I stop",
+    "play": "Play",
+    "pause": "Pause",
+    "stop": "Stop",
+    "left": "{n} min left",
+    "untilStopped": "Until you stop",
+    "lock": "Sound playing",
+    "lockLeft": "Sound playing · {n} min left",
+    "lockPaused": "Sound paused",
+    "intro": "Made right here in your browser, so there's nothing to download. Use your device's volume.",
+    "unavailable": "Calming sounds aren't available in this browser."
   }
 }

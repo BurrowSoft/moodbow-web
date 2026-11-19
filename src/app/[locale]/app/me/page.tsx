@@ -105,7 +105,7 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
       <h1 className="sr-only">{t("tabMe")}</h1>
       {/* Get help now (M8): at the top, on its own, AI or not; not repeated
           under Help (decision 128). */}
-      <GetHelpNow country={me.profile?.country} testId="me-get-help" neutral />
+      <GetHelpNow country={me.profile?.country} testId="me-get-help" counted neutral />
       {/* The big card (board 6b): their own picture, this browser only. After help, which stays
           first on the web until Me follows board 1 (UX, F5). No App icon row on the web. */}
       {pageGate("me-picture-live") !== "hidden" && <MePicture uid={user.id} />}
@@ -137,6 +137,16 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
           <h2 id="me-toolbox" className="text-lg font-medium text-text">
             <Link href="/app/me/toolbox" data-testid="me-toolbox" className={link}>
               {(await getTranslations("toolbox"))("meRow")}
+            </Link>
+          </h2>
+        </section>
+      )}
+      {/* 1.4 F Routine: its own page; no subtitle (the app's strings). */}
+      {pageGate("routine-live") !== "hidden" && (
+        <section aria-labelledby="me-routine" className="rounded-3xl border border-border bg-surface p-[24px]">
+          <h2 id="me-routine" className="text-lg font-medium text-text">
+            <Link href="/app/me/routine" data-testid="me-routine" className={link}>
+              {(await getTranslations("routine"))("title")}
             </Link>
           </h2>
         </section>
@@ -186,7 +196,7 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
         languages={offeredLocales().map((code): [string, string] => [code, tc(`languageNames.${code}`)])}
       />
       <Appearance shortcuts={pageGate("shortcuts-live") !== "hidden"} palette={plus?.kind === "plus" && plus.until ? { until: plus.until } : plus?.kind === "past_due" ? { pastDue: true } : plus ? { locked: true } : null} />
-      <YourData credits={me.credits?.balance ?? 0} uid={user.id} csv={pageGate("export-csv-live") !== "hidden"} ai={conditionMet("ai-live")} plusSource={plus?.kind === "plus" ? plus.source : plus?.kind === "past_due" ? "stripe" : null} pdf={plus?.kind === "plus" ? "plus" : plus ? "locked" : null} pictures={pageGate("pictures-live") !== "hidden"} />
+      <YourData credits={me.credits?.balance ?? 0} uid={user.id} csv={pageGate("export-csv-live") !== "hidden"} ai={conditionMet("ai-live")} plusSource={plus?.kind === "plus" ? plus.source : plus?.kind === "past_due" ? "stripe" : null} pdf={plus?.kind === "plus" ? "plus" : plus ? "locked" : null} pictures={pageGate("pictures-live") !== "hidden"} routine={pageGate("routine-live") !== "hidden"} />
       {/* Import from another app (1.1 K), with Your data, where it's on. */}
       {pageGate("import-live") !== "hidden" && (
         <ImportData uid={user.id} today={me.today} dateLocaleTag={dateLocale(locale, (await headers()).get("accept-language"), me.profile?.country ?? null)} country={me.profile?.country} tags={pageGate("tags-live") !== "hidden"} />

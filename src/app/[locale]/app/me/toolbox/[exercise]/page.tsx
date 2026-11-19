@@ -47,7 +47,7 @@ export default async function GroundingPage({ params }: PageProps<"/[locale]/app
           scroll the page, and help has to stay in view on every step. */}
       <div data-testid="grounding-top" className="sticky top-[env(safe-area-inset-top)] z-10 -mx-[4px] flex flex-wrap items-center justify-between gap-x-[12px] gap-y-[8px] bg-bg px-[4px] py-[4px] print:hidden">
         <BackLink href="/app/me/toolbox" label={ta("navBackTo", { screen: t("meRow") })} testId="nav-back" />
-        <GetHelpNow country={me?.profile?.country} testId="grounding-get-help" neutral icon />
+        <GetHelpNow country={me?.profile?.country} testId="grounding-get-help" counted neutral icon />
       </div>
       <h1 className={JOURNAL_HEADING} data-testid="grounding-title">
         {t(TITLE[exercise])}

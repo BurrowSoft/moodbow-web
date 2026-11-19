@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { dialogButton } from "@/components/Dialog";
-import { APPOINTMENT_RULES, checkInCount, firstLine, rangeAverage, starredIn, weeksDays, type StarredEntry, type Weeks } from "@/lib/journal/appointment";
+import { APPOINTMENT_RULES, checkInCount, firstLine, rangeAverage, routineSection, starredIn, weeksDays, type AppointmentRoutineItem, type StarredEntry, type Weeks } from "@/lib/journal/appointment";
 import { CHARTS, METRICS, type InsightRow, type Metric } from "@/lib/journal/insights";
 import { segment } from "@/lib/ui/journalLayout";
 import { Chart } from "../../insights/Chart";
@@ -15,8 +15,23 @@ const RANGE_KEY: Record<Weeks, "range2" | "range4" | "range12"> = { 2: "range2",
 // where ticked (none at the start), and the box. Nothing is stored or sent: the ticks and
 // the box live in this page's memory only. Never letters, the plan, the toolbox or Bo: the
 // page reads check-ins and starred entries, nothing else.
-export function AppointmentSummary({ today, rows, starred, dateLabels }: { today: string; rows: InsightRow[]; starred: StarredEntry[]; dateLabels: Record<string, string> }) {
+// routine (1.4 F, routine-live): the person's items with their ticks over the 12 weeks; null: off
+// or unreadable (no section). Only opted-in items show, % of the range's check-in days ticked.
+export function AppointmentSummary({
+  today,
+  rows,
+  starred,
+  dateLabels,
+  routine = null,
+}: {
+  today: string;
+  rows: InsightRow[];
+  starred: StarredEntry[];
+  dateLabels: Record<string, string>;
+  routine?: (AppointmentRoutineItem & { name: string })[] | null;
+}) {
   const t = useTranslations("appointment");
+  const tr = useTranslations("routine");
   const ti = useTranslations("insights");
   const tt = useTranslations("today");
   const [weeks, setWeeks] = useState<Weeks>(APPOINTMENT_RULES.defaultWeeks as Weeks);
@@ -26,6 +41,8 @@ export function AppointmentSummary({ today, rows, starred, dateLabels }: { today
   const days = weeksDays(today, weeks);
   const count = checkInCount(rows, days);
   const entries = starredIn(starred, days);
+  const routineLines = routine ? routineSection(rows.map((r) => r.local_date), days, routine) : null;
+  const routineNames = new Map((routine ?? []).map((i) => [i.id, i.name]));
   const valueText = (metric: Metric, v: number) =>
     metric === "mood" || metric === "stress"
       ? ti("chartAverageOfFive", { value: oneDecimal.format(v) })
@@ -84,6 +101,24 @@ export function AppointmentSummary({ today, rows, starred, dateLabels }: { today
           </section>
         )}
 
+        {routineLines && (
+          <section aria-labelledby="appointment-routine" data-testid="appointment-routine" className="break-inside-avoid">
+            <h3 id="appointment-routine" className="font-medium text-text">
+              {tr("appointmentHeading")}
+            </h3>
+            <ul className="mt-2 space-y-1 text-text">
+              {routineLines.map((line) => {
+                const name = routineNames.get(line.id) ?? "";
+                return (
+                  <li key={line.id} data-testid="appointment-routine-line" className="[overflow-wrap:anywhere]">
+                    {line.state === "percent" ? tr("appointmentShare", { name, percent: line.percent }) : tr("appointmentNotEnough", { name })}
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        )}
+
         {entries.length > 0 && (
           <section aria-labelledby="appointment-starred">
             <h3 id="appointment-starred" className="font-medium text-text">
@@ -138,7 +173,7 @@ export function AppointmentSummary({ today, rows, starred, dateLabels }: { today
         </section>
       </section>
 
-      <button type="button" data-testid="appointment-print" onClick={() => window.print()} className={`${dialogButton(true)} print:hidden`}>
+      <button type="button" data-testid="appointment-print" data-count="appointment_print" onClick={() => window.print()} className={`${dialogButton(true)} print:hidden`}>
         {t("print")}
       </button>
       <p data-testid="appointment-footer" className="border-t border-border pt-3 text-sm text-muted">

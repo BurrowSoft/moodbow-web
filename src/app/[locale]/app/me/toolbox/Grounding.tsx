@@ -181,6 +181,17 @@ export function GroundingLinks() {
   );
 }
 
+// Calming sounds (1.4 B, sounds-live): its own page. The tap is the one thing counted
+// (sounds_opened); never which sound or for how long.
+export function CalmingSoundsLink() {
+  const t = useTranslations("sounds");
+  return (
+    <Link href={`${TOOLBOX}/sounds`} data-testid="toolbox-sounds" data-count="sounds_opened" className={button()}>
+      {t("title")}
+    </Link>
+  );
+}
+
 // Three good things (1.3, good-things-live), from the list too (Ruling 9): the entry editor's own
 // screen, with Back to here.
 export function GoodThingsLink() {

@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "rules": "specs/crisis-keywords-1.0.md",
   "languages": {
     "en": {
@@ -68,11 +68,13 @@
     },
     "de": {
       "match": "word",
-      "stems": ["suizid", "selbstmord", "selbstverletz", "lebensmud", "lebensmued"],
+      "stems": ["suizid", "selbstmord", "selbstverletz", "lebensmud", "lebensmued", "freitod"],
       "phrases": [
         "ich will mich umbringen", "mich selbst umbringen", "mich umbringen", "mir das leben nehmen",
         "ich will sterben", "will nicht mehr leben", "möchte nicht mehr leben", "moechte nicht mehr leben",
-        "mich selbst verletzen", "mich ritzen", "ritze mich"
+        "mich selbst verletzen", "mich ritzen", "ritze mich",
+        "bringe mich um", "bring mich um", "mich töten", "mich selbst töten",
+        "will tot sein", "nicht mehr aufwachen"
       ]
     },
     "fr": {
@@ -102,7 +104,27 @@
       "match": "substring",
       "phrases": [
         "ฆ่าตัวตาย", "อยากตาย", "ไม่อยากอยู่แล้ว", "ไม่อยากมีชีวิตอยู่",
-        "จบชีวิต", "ทำร้ายตัวเอง", "กรีดแขน", "กรีดข้อมือ", "ไม่อยากตื่นขึ้นมา"
+        "จบชีวิต", "ทำร้ายตัวเอง", "กรีดแขน", "กรีดข้อมือ", "ไม่อยากตื่นขึ้นมา",
+        "คิดสั้น", "ฆ่าตัวเอง",
+        "ทำร้ายร่างกายตัวเอง", "ไม่อยากอยู่บนโลกนี้"
+      ]
+    },
+    "it": {
+      "match": "word",
+      "stems": ["suicid", "autolesion"],
+      "phrases": [
+        "suicidio", "suicidarmi", "mi voglio suicidare", "voglio suicidarmi",
+        "pensieri suicidi", "tentato il suicidio", "voglio uccidermi", "mi voglio uccidere",
+        "voglio ammazzarmi", "mi voglio ammazzare", "pensato di uccidermi", "pensato di ammazzarmi",
+        "togliermi la vita", "mettere fine alla mia vita", "porre fine alla mia vita", "voglio farla finita",
+        "pensato di farla finita", "pensando di farla finita", "farla finita con la vita", "voglio morire",
+        "vorrei morire", "voglio solo morire", "vorrei solo morire", "vorrei essere morto",
+        "vorrei essere morta", "non voglio più vivere", "non voglio vivere", "non ho più voglia di vivere",
+        "non ha senso vivere", "non voglio più svegliarmi", "non mi voglio più svegliare", "stanco di vivere",
+        "stanca di vivere", "starebbero meglio senza di me", "meglio se non ci fossi", "farmi del male",
+        "mi faccio del male", "autolesionismo", "autolesionista", "tagliarmi i polsi",
+        "tagliarmi le vene", "mi taglio le braccia", "prendere tutte le pillole", "prendere tutte le pastiglie",
+        "di ammazzarmi"
       ]
     }
   },
@@ -156,7 +178,11 @@
       "Quero matar-me.",
       "Pensei em tomar todos os remédios.",
       "ไม่อยากอยู่แล้ว เหนื่อยมาก คิดว่าจะจบชีวิตตัวเอง",
-      "วันนี้อยากตายมาก"
+      "วันนี้อยากตายมาก",
+      "Ich bringe mich um, wenn das so weitergeht.", "manchmal denke ich nur noch: ich bring mich um", "Ich will mich töten.", "ich will mich selbst toten",
+      "ช่วงนี้ฉันคิดสั้นบ่อยมาก", "อยากฆ่าตัวเองให้จบ ๆ ไป", "Non voglio più vivere così.", "Stasera vorrei solo morire",
+      "Ultimamente ho pensato di farla finita", "Mi faccio del male quando è troppo", "non ho piu voglia di vivere", "Ho pensato al suicidio tutta la settimana.",
+      "Ich will tot sein.", "Am liebsten würde ich nie mehr... ich will einfach nicht mehr aufwachen", "Ich denke über Freitod nach.", "บางทีก็ทำร้ายร่างกายตัวเองตอนเครียด", "ฉันไม่อยากอยู่บนโลกนี้อีกแล้ว", "Ogni sera penso di ammazzarmi."
     ],
     "should_not_flag": [
       "This deadline is killing me.",
@@ -190,7 +216,11 @@
       "Vou cortar o cabelo amanhã.",
       "A minha mãe vai matar-me.",
       "Quero viver na praia.",
-      "วันนี้ไปเดินเล่นที่สวนกับเพื่อน อากาศดีมาก"
+      "วันนี้ไปเดินเล่นที่สวนกับเพื่อน อากาศดีมาก",
+      "Das bringt mich um, diese Hitze.", "Ich bringe meine Mutter um acht zum Bahnhof.", "วันนี้ฉันคิดถึงแม่มาก", "Questo lavoro mi sta uccidendo.",
+      "Mia madre mi ammazza se vede la macchina.", "Muoio dalla voglia di vedere il film.", "Domani vado a tagliarmi i capelli.", "Sono morta dalle risate allo spettacolo.",
+      "Finalmente l'ho fatta finita con quel progetto.",
+      "Se non passo l’esame mi ammazzo.", "Die Batterie ist tot, ich will sie tauschen."
     ]
   }
 }

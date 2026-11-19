@@ -18,7 +18,7 @@ const HEADING = "text-lg font-medium text-text max-sm:[font-size:min(1.125rem,ma
 
 type Apply = (call: Promise<PlanResult>) => Promise<boolean>;
 
-// My safety plan (1.2; content/safety-plan.json): six parts, every one optional, in the
+// My safety plan (1.2; content/contracts/safety-plan.json): six parts, every one optional, in the
 // standard order. The texts save with their own Save; people save as they're added or
 // changed. Leaving with an unsaved text asks first. Section 2 is the toolbox list itself;
 // section 5 shows the country's helpline, read live and never stored.

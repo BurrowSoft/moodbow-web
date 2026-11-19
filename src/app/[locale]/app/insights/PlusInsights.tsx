@@ -19,7 +19,7 @@ export function PlusTabs({ current }: { current: LongRange | null }) {
         ["year", t("tabYear")],
         ["all", t("tabAllTime")],
       ] as const).map(([r, label]) => (
-        <Link key={r} href={`/app/insights?range=${r}`} data-testid={`insights-range-${r}`} aria-current={current === r ? "page" : undefined} className={segment(current === r)}>
+        <Link key={r} href={`/app/insights?range=${r}`} data-testid={`insights-range-${r}`} data-count="insights_range" data-count-range={r} aria-current={current === r ? "page" : undefined} className={segment(current === r)}>
           {label}
         </Link>
       ))}

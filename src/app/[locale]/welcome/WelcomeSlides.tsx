@@ -67,15 +67,15 @@ export function WelcomeSlides() {
       </div>
       <div className="mt-10 flex w-full flex-col items-center gap-4">
         {last ? (
-          <Link href="/sign-up" data-testid="welcome-start" className={`${primaryButtonClass} max-sm:[font-size:min(1rem,max(10vw,32px))]`}>
+          <Link href="/sign-up" data-testid="welcome-start" data-count="welcome_start" className={`${primaryButtonClass} max-sm:[font-size:min(1rem,max(10vw,32px))]`}>
             {t("welcomeStart")}
           </Link>
         ) : (
           <>
-            <a data-testid="welcome-next" {...slideLink(slide + 1)} className={`${primaryButtonClass} max-sm:[font-size:min(1rem,max(10vw,32px))]`}>
+            <a data-testid="welcome-next" data-count="welcome_next" {...slideLink(slide + 1)} className={`${primaryButtonClass} max-sm:[font-size:min(1rem,max(10vw,32px))]`}>
               {t("welcomeNext")}
             </a>
-            <a data-testid="welcome-skip" {...slideLink(SLIDES.length - 1)} className={`${textLinkClass} max-sm:[font-size:min(1rem,max(10vw,32px))]`}>
+            <a data-testid="welcome-skip" data-count="welcome_skip" {...slideLink(SLIDES.length - 1)} className={`${textLinkClass} max-sm:[font-size:min(1rem,max(10vw,32px))]`}>
               {t("welcomeSkip")}
             </a>
           </>
@@ -91,7 +91,7 @@ export function WelcomeSlides() {
           </a>
         )}
         {/* A 44 px tall tap area (Web Tester batch E). mt-1 plus the 12 px above a 20 px line keeps the text where mt-4 had it. */}
-        <Link href="/sign-in" data-testid="welcome-have-account" className={`${textLinkClass} mt-1 inline-flex min-h-11 items-center text-sm max-sm:[font-size:min(0.875rem,max(8.75vw,28px))]`}>
+        <Link href="/sign-in" data-testid="welcome-have-account" data-count="welcome_have_account" className={`${textLinkClass} mt-1 inline-flex min-h-11 items-center text-sm max-sm:[font-size:min(0.875rem,max(8.75vw,28px))]`}>
           {t("welcomeHaveAccount")}
         </Link>
       </div>

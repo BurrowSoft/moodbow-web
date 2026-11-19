@@ -24,6 +24,9 @@ import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
 import { PRIMARY_SAVE } from "@/lib/ui/journalLayout";
 import { deleteEntry, getEntry, saveEntry, type DeleteState, type EntryState } from "./actions";
 import { PromptLibrary } from "./PromptLibrary";
+import { moodGroup, moodPrompt as moodPromptFor } from "@/lib/journal/moodPrompts";
+import { readPlace, savePlace, LIBRARY } from "@/lib/journal/promptLibrary";
+import { countTap } from "@/lib/analyticsEvents";
 
 // The entry editor (M4): a full-page text area, a date (today or earlier)
 // and "Mark as a moment". A draft is autosaved in this browser, per user and
@@ -130,6 +133,9 @@ type Props = {
   // Plus (all five groups), false without it or where Plus can't be read (the free group only;
   // no lock or sheet while writing, UX); absent: not offered at all (the Plus flag).
   library?: boolean;
+  // Prompts that follow your mood (1.4 E, mood-prompts-live): the prompt day's check-in mood (null:
+  // none yet) and whether this person has Plus. Absent: the day's prompt as before.
+  moodPrompt?: { mood: number | null; plus: boolean };
 };
 
 const noSubscribe = () => () => {};
@@ -142,13 +148,17 @@ export function EntryEditor(props: Props) {
   return <Editor key={inBrowser ? "browser" : "server"} {...props} restore={inBrowser} />;
 }
 
-function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app", start, onLeave, restore, promptDate, back, goodThings = false, goodThingsHref, library }: Props & { restore: boolean }) {
+function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app", start, onLeave, restore, promptDate, back, goodThings = false, goodThingsHref, library, moodPrompt }: Props & { restore: boolean }) {
   const t = useTranslations("entry");
   const language = useLocale();
   // "Another" steps through the list from the day's prompt.
   const [promptStep, setPromptStep] = useState(0);
   // A prompt chosen from the library: shown where the day's prompt is, until "Another".
   const [chosenPrompt, setChosenPrompt] = useState<string | null>(null);
+  // With Plus, the mood's group from its saved place on this device (the library's), read once in
+  // the browser (restore); Free uses the day's own prompt and promptStep.
+  const moodGroupId = moodPrompt ? moodGroup(moodPrompt.mood) : null;
+  const [moodPlace, setMoodPlace] = useState(() => (restore && moodPrompt?.plus && moodGroupId ? readPlace(uid, moodGroupId) : 0));
   const tt = useTranslations("today");
   const router = useRouter();
   const announce = useAnnounce();
@@ -487,6 +497,9 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
       return { status: "error", error: "generic" };
     }
     if (next.status === "saved") {
+      // Counted by name only (specs/analytics.md): never the text, the date or the mood.
+      countTap(goodThings ? "good_things_saved" : "entry_saved");
+      if (next.entry.is_moment && !(lastSaved.current?.is_moment ?? initial?.is_moment ?? false)) countTap("moment_saved");
       const sent: Draft = { id: String(form.get("id") ?? ""), body: String(form.get("body") ?? ""), date: String(form.get("entry_date") ?? ""), isMoment: form.get("is_moment") === "true", base: null };
       removeSentDraft(draftKey, sent);
       if (!mounted.current) return next;
@@ -612,6 +625,14 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
   const conflict = dialog && typeof dialog === "object" ? dialog.conflict : undefined;
 
   const showPrompt = !!promptDate && fields.date === promptDate && fields.body.trim() === "";
+  // What the prompt line shows (lib/journal/moodPrompts): the mood's group where it applies, else
+  // the day's list. The page has already left out a flagged day (no promptDate at all).
+  const shownPrompt = showPrompt
+    ? moodPrompt
+      ? moodPromptFor({ today: promptDate!, mood: moodPrompt.mood, flagged: false, plus: moodPrompt.plus, place: moodPlace, another: moodPrompt.plus && moodGroupId ? 0 : promptStep })
+      : ({ source: "daily", prompt: promptFor(promptDate!, promptStep), help: false } as const)
+    : null;
+  const promptHelp = !chosenPrompt && shownPrompt?.source === "group" && shownPrompt.help;
   return (
     <form
       className="flex min-h-[70dvh] flex-col gap-4"
@@ -635,7 +656,7 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
               own words (writing, editing an entry, Three good things). */}
           <span className="flex min-w-0 items-center gap-1">
             {back}
-            <GetHelpNow country={country} testId="editor-help" neutral icon />
+            <GetHelpNow country={country} testId="editor-help" counted neutral icon />
           </span>
           <button type="submit" data-testid="entry-save-top" disabled={cantSave} aria-disabled={busy || undefined} className={TOP_SAVE}>
             {t("entrySave")}
@@ -680,7 +701,7 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
       {showPrompt && (
         <p className={`flex flex-wrap items-baseline gap-x-3 gap-y-1 text-muted ${CAPPED}`} data-testid="entry-prompt">
           <span id="entry-prompt-text" data-testid="entry-prompt-text" className="min-w-0 [overflow-wrap:anywhere]">
-            {chosenPrompt ?? promptText(promptFor(promptDate!, promptStep), language)}
+            {chosenPrompt ?? (shownPrompt && shownPrompt.source !== "none" ? promptText(shownPrompt.prompt, language) : null)}
           </span>
           <button
             type="button"
@@ -688,7 +709,13 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
             onClick={() => {
               // Back to the day's list: the chosen one goes, and the next of the day's comes.
               if (chosenPrompt) setChosenPrompt(null);
-              setPromptStep((n) => n + 1);
+              // Plus with a mood: the next in the mood's group, its place saved (as the library does).
+              if (moodPrompt?.plus && moodGroupId) {
+                const length = LIBRARY.find((g) => g.id === moodGroupId)!.prompts.length;
+                const next = (moodPlace + 1) % length;
+                savePlace(uid, moodGroupId, next);
+                setMoodPlace(next);
+              } else setPromptStep((n) => n + 1);
             }}
             className="min-h-11 font-medium text-accent underline underline-offset-4"
           >
@@ -696,6 +723,7 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
           </button>
         </p>
       )}
+      {showPrompt && promptHelp && <GetHelpNow country={country} testId="entry-prompt-help" neutral />}
       {showPrompt && library !== undefined && <PromptLibrary uid={uid} country={country} hasPlus={library} onUse={setChosenPrompt} />}
       {goodThings ? (
         <div {...untilLoaded} className="flex flex-col gap-4" data-testid="good-things-fields">

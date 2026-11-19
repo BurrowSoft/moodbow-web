@@ -53,6 +53,8 @@
     "storeGetApp": "Télécharger l'app :",
     "storeGooglePlay": "Google Play",
     "storeAppStore": "App Store",
+    "storeBadgeAppStore": "Télécharger dans l'App Store",
+    "storeBadgePlay": "Disponible sur Google Play",
     "storeSoonPlay": "Bientôt sur Google Play",
     "storeSoonAppStore": "Bientôt sur l'App Store",
     "featureCheckInTitle": "Un bilan en 10 secondes",
@@ -270,7 +272,8 @@
     "tagsTooLong": "Une étiquette peut faire jusqu'à 32 caractères.",
     "setupLaterBody": "Votre rappel quotidien est désactivé. Vous pouvez l'activer et choisir une heure quand vous voulez.",
     "setupLaterOpen": "Configurer",
-    "setupLaterClose": "Pas maintenant"
+    "setupLaterClose": "Pas maintenant",
+    "lateNote": "Il est tard. Le repos compte aussi. Si cette nuit vous semble lourde, l'aide est à portée de main."
   },
   "entry": {
     "writeButton": "Raconter votre journée",
@@ -465,7 +468,12 @@
     "exportStress": "Stress",
     "exportOfFive": "{value}/5",
     "exportReflectionOn": "Sur votre note du {date}",
-    "exportTags": "Étiquettes"
+    "exportTags": "Étiquettes",
+    "exportRoutine": "Routine",
+    "exportRoutineStarted": "depuis le {date}",
+    "exportRoutineInAppointment": "dans mon résumé pour le rendez-vous",
+    "exportRoutineTicked": "Jours cochés : {dates}",
+    "exportRoutineNoTicks": "Aucun jour coché pour l'instant"
   },
   "help": {
     "helpTitle": "Aide et FAQ",
@@ -561,7 +569,8 @@
     "pairWeekends": "Week-ends",
     "pairWritingTitle": "Écriture",
     "pairWrote": "Avec écriture",
-    "pairNotWrote": "Sans écriture"
+    "pairNotWrote": "Sans écriture",
+    "showedUp": "{count, plural, one {Vous avez été là # jour} other {Vous avez été là # jours}} {range, select, week {ces 7 derniers jours} month {ces 30 derniers jours} threeMonths {ces 3 derniers mois} year {ces 12 derniers mois} other {depuis vos débuts}}."
   },
   "share": {
     "shareButton": "Partager",
@@ -595,7 +604,8 @@
     "shareLoading": "Préparation de votre mois…",
     "shareFormat": "Format",
     "shareTheme": "Thème",
-    "shareLineCount": "{count, plural, one {# caractère restant} other {# caractères restants}}"
+    "shareLineCount": "{count, plural, one {# caractère restant} other {# caractères restants}}",
+    "shareShowedUp": "{n, plural, =1{1 jour de présence} other{# jours de présence}}"
   },
   "ai": {
     "meAi": "IA",
@@ -727,7 +737,7 @@
     "moveUp": "Monter",
     "moveDown": "Descendre",
     "deleted": "Supprimé.",
-    "undo": "Rétablir",
+    "undo": "Annuler",
     "limitCount": "Vous pouvez garder jusqu'à 20 choses ici.",
     "limitLength": "120 caractères maximum.",
     "cardTitle": "Ce qui vous aide",
@@ -775,6 +785,28 @@
     "nameItQuestion": "Que ressentez-vous en ce moment ?",
     "nameItSmaller": "Le nommer peut le rendre un peu plus petit.",
     "nameItThanks": "Merci de l'avoir nommé."
+  },
+  "routine": {
+    "title": "Routine",
+    "intro": "Jusqu'à 3 choses que vous aimeriez cocher chaque jour. Vous êtes la seule personne à les voir.",
+    "addHint": "Par exemple, médicaments du matin",
+    "add": "Ajouter",
+    "full": "C'est 3, le maximum pour l'instant.",
+    "duplicate": "Vous l'avez déjà.",
+    "options": "Options pour {item}",
+    "deleteConfirm": "Retirer",
+    "deleteTitle": "Retirer {name} ?",
+    "deleteBody": "Cela retire l'élément et les jours où vous l'avez coché.",
+    "inAppointment": "Afficher dans Pour mon rendez-vous",
+    "rowTitle": "Routine",
+    "rowEmpty": "Ajoutez jusqu'à 3 choses que vous faites presque tous les jours, comme vos médicaments du matin ou une marche.",
+    "rowSetUp": "Configurer",
+    "saveFailed": "Vos coches de routine n'ont pas été enregistrées. Réessayez.",
+    "patternShown": "Les jours où vous avez coché {name}, votre humeur était en moyenne de {a} sur 5. Les autres jours, {b}.",
+    "patternFootnote": "Cela peut montrer ce qui va souvent ensemble, pas ce qui cause quoi. Ne modifiez jamais un médicament sans en parler à votre médecin ou à votre pharmacien.",
+    "appointmentHeading": "Routine",
+    "appointmentShare": "{name} : une coche sur {percent} % des jours avec un bilan",
+    "appointmentNotEnough": "{name} : pas encore assez de jours"
   },
   "safetyPlan": {
     "title": "Mon plan de sécurité",
@@ -884,7 +916,7 @@
     "plusOnly": "Plus uniquement",
     "rowJournal": "Votre journal : bilans et notes, sans limite",
     "rowTimeline": "Chronologie : liste, calendrier, moments forts, souvenirs et recherche",
-    "rowHelp": "Aide, plan de sécurité, boîte à outils, ancrage",
+    "rowHelp": "Aide, plan de sécurité, Ce qui m'aide et ses exercices",
     "rowOwn": "Lettres, résumé pour un rendez-vous",
     "rowRanges": "Votre semaine, mois et 3 mois",
     "rowPatterns": "Tendances sur les 3 derniers mois",
@@ -1000,5 +1032,52 @@
     "liftsRow": "Les jours avec l'étiquette « {tag} », votre humeur était en moyenne de {a} sur 5 ; les autres jours, de {b}.",
     "liftsFooter": "Des tendances, pas des causes. Ceci n'est visible que par vous.",
     "liftsNone": "Continuez à ajouter des étiquettes à vos journées. Les tendances apparaissent au bout de quelques semaines."
+  },
+  "year": {
+    "title": "Votre année dans Moodbow",
+    "todayLine": "Un regard sur {year}, rien que pour vous.",
+    "open": "Ouvrir",
+    "coloursTitle": "Votre année en couleurs",
+    "coloursLine": "Chaque mois, les humeurs que vous avez notées.",
+    "monthMood": "{month} : {mood}",
+    "monthFaint": "{month} : aucun jour noté",
+    "daysTitle": "Les jours où vous étiez là",
+    "daysLine": "{count, plural, one {Vous avez été là # jour} other {Vous avez été là # jours}} cette année.",
+    "momentsTitle": "Vos moments forts",
+    "momentsLine": "{count, plural, one {Vous avez marqué # moment fort} other {Vous avez marqué # moments forts}}.",
+    "helpedTitle": "Ce qui vous aide",
+    "tagsTitle": "Les bons jours, vous avez souvent choisi ces étiquettes :",
+    "hardTitle": "Votre année",
+    "hardLine": "Cette année vous a beaucoup demandé. Vous avez continué à revenir.",
+    "closing": "Merci d'avoir été là pour vous cette année.",
+    "morePlus": "Voir plus de votre année",
+    "notEnough": "Votre année {year} dans Moodbow apparaît après 30 jours avec un bilan cette année-là. Vous en êtes à {count}.",
+    "share": "Partager votre année",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "position": "Écran {n} sur {total}",
+    "shareNote": "L'image montre vos couleurs et le nombre de jours. Vos notes, étiquettes, moments forts et dates n'y figurent jamais.",
+    "daysUnit": "{count, plural, one {jour} other {jours}}",
+    "new": "Nouveau"
+  },
+  "sounds": {
+    "title": "Sons apaisants",
+    "rain": "Pluie",
+    "waves": "Vagues",
+    "brown": "Bruit brun",
+    "hum": "Doux murmure",
+    "timer": "Minuteur",
+    "minutes": "{n} min",
+    "untilStop": "Jusqu'à ce que j'arrête",
+    "play": "Lecture",
+    "pause": "Pause",
+    "stop": "Arrêter",
+    "left": "Encore {n} min",
+    "untilStopped": "Jusqu'à ce que vous arrêtiez",
+    "lock": "Son en cours",
+    "lockLeft": "Son en cours · encore {n} min",
+    "lockPaused": "Son en pause",
+    "intro": "Créés directement dans votre navigateur : rien à télécharger. Utilisez le volume de votre appareil.",
+    "unavailable": "Les sons apaisants ne sont pas disponibles dans ce navigateur."
   }
 }

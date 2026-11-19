@@ -53,6 +53,8 @@
     "storeGetApp": "Descarga la app:",
     "storeGooglePlay": "Google Play",
     "storeAppStore": "App Store",
+    "storeBadgeAppStore": "Consíguelo en el App Store",
+    "storeBadgePlay": "Disponible en Google Play",
     "storeSoonPlay": "Muy pronto en Google Play",
     "storeSoonAppStore": "Muy pronto en el App Store",
     "featureCheckInTitle": "Un registro de 10 segundos",
@@ -270,7 +272,8 @@
     "tagsTooLong": "Una etiqueta puede tener hasta 32 caracteres.",
     "setupLaterBody": "Tu recordatorio diario está desactivado. Puedes activarlo y elegir una hora cuando quieras.",
     "setupLaterOpen": "Configurar",
-    "setupLaterClose": "Ahora no"
+    "setupLaterClose": "Ahora no",
+    "lateNote": "Es tarde. Descansar también importa. Si esta noche se te hace pesada, la ayuda está a un toque."
   },
   "entry": {
     "writeButton": "Escribe sobre tu día",
@@ -465,7 +468,12 @@
     "exportStress": "Estrés",
     "exportOfFive": "{value}/5",
     "exportReflectionOn": "Sobre tu entrada del {date}",
-    "exportTags": "Etiquetas"
+    "exportTags": "Etiquetas",
+    "exportRoutine": "Rutina",
+    "exportRoutineStarted": "desde el {date}",
+    "exportRoutineInAppointment": "en mi resumen para la cita",
+    "exportRoutineTicked": "Días marcados: {dates}",
+    "exportRoutineNoTicks": "Ningún día marcado todavía"
   },
   "help": {
     "helpTitle": "Ayuda y preguntas frecuentes",
@@ -561,7 +569,8 @@
     "pairWeekends": "Fines de semana",
     "pairWritingTitle": "Escritura",
     "pairWrote": "Con escritura",
-    "pairNotWrote": "Sin escritura"
+    "pairNotWrote": "Sin escritura",
+    "showedUp": "{count, plural, one {Volviste # día} other {Volviste # días}} {range, select, week {en los últimos 7 días} month {en los últimos 30 días} threeMonths {en los últimos 3 meses} year {en los últimos 12 meses} other {desde que empezaste}}."
   },
   "share": {
     "shareButton": "Compartir",
@@ -595,7 +604,8 @@
     "shareLoading": "Preparando tu mes…",
     "shareFormat": "Formato",
     "shareTheme": "Tema",
-    "shareLineCount": "{count, plural, one {Queda # carácter} other {Quedan # caracteres}}"
+    "shareLineCount": "{count, plural, one {Queda # carácter} other {Quedan # caracteres}}",
+    "shareShowedUp": "{n, plural, =1{Presente 1 día} other{Presente # días}}"
   },
   "ai": {
     "meAi": "IA",
@@ -776,6 +786,28 @@
     "nameItSmaller": "Ponerle nombre puede hacerlo un poco más pequeño.",
     "nameItThanks": "Gracias por ponerle nombre."
   },
+  "routine": {
+    "title": "Rutina",
+    "intro": "Hasta 3 cosas que te gustaría marcar cada día. Solo tú las ves.",
+    "addHint": "Por ejemplo, medicación de la mañana",
+    "add": "Añadir",
+    "full": "Son 3, el máximo por ahora.",
+    "duplicate": "Ya tienes esa.",
+    "options": "Opciones para {item}",
+    "deleteConfirm": "Quitar",
+    "deleteTitle": "¿Quitar {name}?",
+    "deleteBody": "Esto quita el elemento y los días en que lo marcaste.",
+    "inAppointment": "Mostrar en Para mi cita",
+    "rowTitle": "Rutina",
+    "rowEmpty": "Añade hasta 3 cosas que haces casi todos los días, como la medicación de la mañana o un paseo.",
+    "rowSetUp": "Configurar",
+    "saveFailed": "No se guardaron tus marcas de rutina. Inténtalo de nuevo.",
+    "patternShown": "Los días en que marcaste {name}, tu ánimo promedió {a} de 5. Los demás días, {b}.",
+    "patternFootnote": "Esto puede mostrar qué suele ir junto, no qué causa qué. Nunca cambies un medicamento sin hablar con tu médico o farmacéutico.",
+    "appointmentHeading": "Rutina",
+    "appointmentShare": "{name}: marcas en el {percent} % de los días con registro",
+    "appointmentNotEnough": "{name}: aún no hay suficientes días"
+  },
   "safetyPlan": {
     "title": "Mi plan de seguridad",
     "intro": "Complétalo un día más tranquilo, para que esté aquí cuando lo necesites. Cada parte es opcional. Solo tú puedes verlo.",
@@ -884,7 +916,7 @@
     "plusOnly": "Solo Plus",
     "rowJournal": "Tu diario: registros y entradas, sin límite",
     "rowTimeline": "Cronología: lista, calendario, momentos, recuerdos y búsqueda",
-    "rowHelp": "Ayuda, plan de seguridad, caja de herramientas, anclaje",
+    "rowHelp": "Ayuda, plan de seguridad, Lo que me ayuda y sus ejercicios",
     "rowOwn": "Cartas, resumen para tu cita",
     "rowRanges": "Tu semana, mes y 3 meses",
     "rowPatterns": "Patrones de los últimos 3 meses",
@@ -1000,5 +1032,52 @@
     "liftsRow": "Los días con la etiqueta «{tag}», tu estado de ánimo fue de {a} de 5 de media; los demás días, de {b}.",
     "liftsFooter": "Patrones, no causas. Solo tú puedes ver esto.",
     "liftsNone": "Sigue etiquetando tus días. Los patrones aparecen después de unas semanas."
+  },
+  "year": {
+    "title": "Tu año en Moodbow",
+    "todayLine": "Una mirada a {year}, solo para ti.",
+    "open": "Abrir",
+    "coloursTitle": "Tu año en colores",
+    "coloursLine": "Cada mes, los estados de ánimo que registraste.",
+    "monthMood": "{month}: {mood}",
+    "monthFaint": "{month}: ningún día registrado",
+    "daysTitle": "Los días que volviste",
+    "daysLine": "{count, plural, one {Volviste # día} other {Volviste # días}} este año.",
+    "momentsTitle": "Tus momentos",
+    "momentsLine": "{count, plural, one {Marcaste # momento} other {Marcaste # momentos}}.",
+    "helpedTitle": "Lo que te ayuda",
+    "tagsTitle": "En los días buenos, usaste a menudo estas etiquetas:",
+    "hardTitle": "Tu año",
+    "hardLine": "Este año te pidió mucho. Y aun así, seguiste volviendo.",
+    "closing": "Gracias por darte este espacio este año.",
+    "morePlus": "Ver más de tu año",
+    "notEnough": "Tu año {year} en Moodbow aparece cuando hayas registrado 30 días ese año. Llevas {count}.",
+    "share": "Compartir tu año",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "position": "Pantalla {n} de {total}",
+    "shareNote": "La imagen muestra tus colores y el número de días. Tus entradas, etiquetas, momentos y fechas nunca aparecen en ella.",
+    "daysUnit": "{count, plural, one {día} other {días}}",
+    "new": "Nuevo"
+  },
+  "sounds": {
+    "title": "Sonidos relajantes",
+    "rain": "Lluvia",
+    "waves": "Olas",
+    "brown": "Ruido marrón",
+    "hum": "Murmullo suave",
+    "timer": "Temporizador",
+    "minutes": "{n} min",
+    "untilStop": "Hasta que lo pare",
+    "play": "Reproducir",
+    "pause": "Pausa",
+    "stop": "Detener",
+    "left": "Quedan {n} min",
+    "untilStopped": "Hasta que lo detengas",
+    "lock": "Sonido en reproducción",
+    "lockLeft": "Sonido en reproducción · quedan {n} min",
+    "lockPaused": "Sonido en pausa",
+    "intro": "Se crean en tu navegador, así que no hay nada que descargar. Usa el volumen de tu dispositivo.",
+    "unavailable": "Los sonidos relajantes no están disponibles en este navegador."
   }
 }

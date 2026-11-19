@@ -12,6 +12,7 @@ import { flagsCrisis } from "@/lib/safety/crisis";
 import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
 import { existingNoteCounts, importCheckIns, importEntries } from "./importActions";
 import { useUntilLoaded } from "@/lib/ui/untilLoaded";
+import { countTap } from "@/lib/analyticsEvents";
 
 // Import from another journal (1.1 K, decision 189), in Me → Your data:
 // choose a file → it's read in this browser only → a preview (counts, what
@@ -181,6 +182,7 @@ export function ImportData({ uid, today, dateLocaleTag, country, tags = false }:
     text.current = null;
     running.current = false;
     setPhase({ kind: "done", ...summary() });
+    countTap("import_done");
   };
 
   const fmt = (d: string) => new Intl.DateTimeFormat(dateLocaleTag, { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(`${d}T12:00:00Z`));
@@ -365,7 +367,9 @@ function Preview({
                 data-testid={`import-mood-${i}`}
                 value={moodChoices[name] === undefined ? "" : String(moodChoices[name])}
                 onChange={(e) => onMood(name, e.target.value === "skip" ? "skip" : (Number(e.target.value) as Mood))}
-                className="min-h-11 rounded-full border border-border bg-bg px-3 text-text"
+                // min-w-0 / max-w-full: it shrinks within its row instead of growing to its longest
+                // option (320 px at 200 % in German overflowed; the Web Tester's L6 T4).
+                className="min-h-11 min-w-0 max-w-full rounded-full border border-border bg-bg px-3 text-text"
               >
                 <option value="" disabled>
                   {t("importMapChoose")}

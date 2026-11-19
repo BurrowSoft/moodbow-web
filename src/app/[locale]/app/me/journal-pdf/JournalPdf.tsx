@@ -50,7 +50,7 @@ export function JournalPdf({
           (the Reviewer, #273); the printed copy keeps its last line. */}
       <div className="flex flex-wrap items-center gap-x-[12px] gap-y-[8px]">
         <BackLink href="/app/me" label={backLabel} testId="nav-back" />
-        <GetHelpNow country={country} testId="pdf-get-help" neutral />
+        <GetHelpNow country={country} testId="pdf-get-help" counted neutral />
       </div>
       <h1 className="text-2xl font-medium tracking-tight [overflow-wrap:anywhere] max-sm:[font-size:min(1.5rem,max(11.25vw,36px))]">{t("rowPdf")}</h1>
       <p className="text-text">{t("pdfIntro")}</p>
@@ -88,7 +88,7 @@ export function JournalPdf({
         </select>
       </fieldset>
       {period && days.length > 0 && (
-        <button type="button" data-testid="pdf-print" onClick={() => window.print()} className={dialogButton(true)}>
+        <button type="button" data-testid="pdf-print" data-count="journal_pdf_done" onClick={() => window.print()} className={dialogButton(true)}>
           {t("pdfButton")}
         </button>
       )}
