@@ -141,7 +141,10 @@
   },
   "legal": {
     "hiddenTitle": "Pas encore affiché : chaque bloc apparaît quand sa fonction est en ligne (versions de test uniquement)",
-    "legalEnglishOnly": "Cette page est disponible en anglais."
+    "legalEnglishOnly": "Cette page est disponible en anglais.",
+    "nextApplies": "Ces changements s'appliquent le {date}. D'ici là, notre politique actuelle s'applique.",
+    "nextAppliesNoDate": "Ces changements ne s'appliquent pas encore. D'ici là, notre politique actuelle s'applique.",
+    "nextCurrent": "Lire la politique actuelle"
   },
   "auth": {
     "signinTitle": "Bon retour",
@@ -221,7 +224,13 @@
     "retry": "Réessayer",
     "tryAgain": "Réessayer",
     "slowLoading": "Cela prend plus de temps que d'habitude…",
-    "navBackTo": "Retour à {screen}"
+    "navBackTo": "Retour à {screen}",
+    "policyNoticeTitle": "Notre Politique de confidentialité change",
+    "policyNoticeBody": "Si vous le faites, Stripe, Google Play ou l'App Store se charge du paiement.",
+    "policyNoticeApplies": "À partir du {date}, vous pourrez vous abonner à Moodbow Plus.",
+    "policyNoticeSoon": "Bientôt, vous pourrez vous abonner à Moodbow Plus.",
+    "policyNoticeRead": "Voir ce qui change",
+    "policyNoticeDismiss": "Compris"
   },
   "today": {
     "greetMorning": "Bonjour",
