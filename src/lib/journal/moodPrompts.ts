@@ -2,7 +2,7 @@ import { LIBRARY, type LibraryGroup, type LibraryGroupId } from "./promptLibrary
 import { PROMPTS, daysSinceEpoch, type Prompt } from "./prompts";
 
 // Prompts that follow your mood (1.4 E; specs/1.4-features.md §E, UX 18 Nov; the cases in
-// moodPrompts.contract.json, which the Mobile Dev moves into moodbow-app's supabase/contracts):
+// content/contracts/mood-prompts.json, synced from moodbow-app's supabase/contracts):
 // - a day the crisis matcher flagged (an entry or a tag): no prompt at all (the page decides);
 // - no check-in today: prompts.json's daily prompt, "Another" stepping through the daily list;
 // - today's check-in mood (its current value, so an edit later that day moves the group):
