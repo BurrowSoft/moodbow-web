@@ -19,7 +19,7 @@ export async function HelpNowNumbers({ country }: { country: string | undefined 
       {helpline && (
         <p>
           <a href={telHref(helpline.dial)} data-testid="help-now-call-helpline" className={`${link} ${helpLineSize(helpline.display)}`}>
-            <HelpNumberText text={t("safetyCall", { name: helpline.name, number: helpline.display })} number={helpline.display} />
+            <HelpNumberText text={t("safetyCall", { name: helpline.name, number: helpline.display })} number={helpline.display} name={helpline.name} />
           </a>
         </p>
       )}

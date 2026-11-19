@@ -58,11 +58,29 @@
     "then": true
    }
   ],
+  "calming-sounds": [
+   {
+    "ids": [
+     "sounds_live",
+     "app_sounds"
+    ],
+    "then": true
+   }
+  ],
   "check-ins": true,
   "christmas-offer": [
    {
     "ids": [
      "offer_live"
+    ],
+    "then": true
+   }
+  ],
+  "days-you-showed-up": [
+   {
+    "ids": [
+     "showed_up_live",
+     "app_showed_up"
     ],
     "then": true
    }
@@ -117,10 +135,20 @@
    }
   ],
   "moments": true,
+  "mood-prompts": [
+   {
+    "ids": [
+     "mood_prompts_live",
+     "app_mood_prompts"
+    ],
+    "then": true
+   }
+  ],
   "moodbow-plus": [
    {
     "ids": [
-     "plus"
+     "plus",
+     "app_plus"
     ],
     "then": true
    }
@@ -154,7 +182,8 @@
   "pdf-journal": [
    {
     "ids": [
-     "plus"
+     "plus",
+     "app_plus"
     ],
     "then": true
    }
@@ -173,6 +202,15 @@
    {
     "ids": [
      "app_reminders"
+    ],
+    "then": true
+   }
+  ],
+  "routine": [
+   {
+    "ids": [
+     "app_routine",
+     "routine_live"
     ],
     "then": true
    }
@@ -214,6 +252,15 @@
     "then": true
    }
   ],
+  "share-your-week": [
+   {
+    "ids": [
+     "trusted_share_live",
+     "app_trusted_share"
+    ],
+    "then": true
+   }
+  ],
   "sign-in": true,
   "tags": [
    {
@@ -226,7 +273,8 @@
   "themes": [
    {
     "ids": [
-     "plus"
+     "plus",
+     "app_plus"
     ],
     "then": true
    }
@@ -255,6 +303,14 @@
    }
   ],
   "timeline": true,
+  "voice-entries": [
+   {
+    "ids": [
+     "app_voice"
+    ],
+    "then": true
+   }
+  ],
   "widget": [
    {
     "ids": [
@@ -266,7 +322,8 @@
   "year-in-review": [
    {
     "ids": [
-     "plus"
+     "plus",
+     "app_plus"
     ],
     "then": true
    }
@@ -355,11 +412,29 @@
     "then": true
    }
   ],
+  "calming-sounds": [
+   {
+    "ids": [
+     "sounds_live",
+     "app_sounds"
+    ],
+    "then": true
+   }
+  ],
   "check-ins": true,
   "christmas-offer": [
    {
     "ids": [
      "offer_live"
+    ],
+    "then": true
+   }
+  ],
+  "days-you-showed-up": [
+   {
+    "ids": [
+     "showed_up_live",
+     "app_showed_up"
     ],
     "then": true
    }
@@ -414,10 +489,20 @@
    }
   ],
   "moments": true,
+  "mood-prompts": [
+   {
+    "ids": [
+     "mood_prompts_live",
+     "app_mood_prompts"
+    ],
+    "then": true
+   }
+  ],
   "moodbow-plus": [
    {
     "ids": [
-     "plus"
+     "plus",
+     "app_plus"
     ],
     "then": true
    }
@@ -451,7 +536,8 @@
   "pdf-journal": [
    {
     "ids": [
-     "plus"
+     "plus",
+     "app_plus"
     ],
     "then": true
    }
@@ -470,6 +556,15 @@
    {
     "ids": [
      "app_reminders"
+    ],
+    "then": true
+   }
+  ],
+  "routine": [
+   {
+    "ids": [
+     "app_routine",
+     "routine_live"
     ],
     "then": true
    }
@@ -511,6 +606,15 @@
     "then": true
    }
   ],
+  "share-your-week": [
+   {
+    "ids": [
+     "trusted_share_live",
+     "app_trusted_share"
+    ],
+    "then": true
+   }
+  ],
   "sign-in": true,
   "tags": [
    {
@@ -523,7 +627,8 @@
   "themes": [
    {
     "ids": [
-     "plus"
+     "plus",
+     "app_plus"
     ],
     "then": true
    }
@@ -552,6 +657,14 @@
    }
   ],
   "timeline": true,
+  "voice-entries": [
+   {
+    "ids": [
+     "app_voice"
+    ],
+    "then": true
+   }
+  ],
   "widget": [
    {
     "ids": [
@@ -563,7 +676,8 @@
   "year-in-review": [
    {
     "ids": [
-     "plus"
+     "plus",
+     "app_plus"
     ],
     "then": true
    }
@@ -652,11 +766,29 @@
     "then": true
    }
   ],
+  "calming-sounds": [
+   {
+    "ids": [
+     "sounds_live",
+     "app_sounds"
+    ],
+    "then": true
+   }
+  ],
   "check-ins": true,
   "christmas-offer": [
    {
     "ids": [
      "offer_live"
+    ],
+    "then": true
+   }
+  ],
+  "days-you-showed-up": [
+   {
+    "ids": [
+     "showed_up_live",
+     "app_showed_up"
     ],
     "then": true
    }
@@ -711,10 +843,20 @@
    }
   ],
   "moments": true,
+  "mood-prompts": [
+   {
+    "ids": [
+     "mood_prompts_live",
+     "app_mood_prompts"
+    ],
+    "then": true
+   }
+  ],
   "moodbow-plus": [
    {
     "ids": [
-     "plus"
+     "plus",
+     "app_plus"
     ],
     "then": true
    }
@@ -748,7 +890,8 @@
   "pdf-journal": [
    {
     "ids": [
-     "plus"
+     "plus",
+     "app_plus"
     ],
     "then": true
    }
@@ -767,6 +910,15 @@
    {
     "ids": [
      "app_reminders"
+    ],
+    "then": true
+   }
+  ],
+  "routine": [
+   {
+    "ids": [
+     "app_routine",
+     "routine_live"
     ],
     "then": true
    }
@@ -808,6 +960,15 @@
     "then": true
    }
   ],
+  "share-your-week": [
+   {
+    "ids": [
+     "trusted_share_live",
+     "app_trusted_share"
+    ],
+    "then": true
+   }
+  ],
   "sign-in": true,
   "tags": [
    {
@@ -820,7 +981,8 @@
   "themes": [
    {
     "ids": [
-     "plus"
+     "plus",
+     "app_plus"
     ],
     "then": true
    }
@@ -849,6 +1011,14 @@
    }
   ],
   "timeline": true,
+  "voice-entries": [
+   {
+    "ids": [
+     "app_voice"
+    ],
+    "then": true
+   }
+  ],
   "widget": [
    {
     "ids": [
@@ -860,7 +1030,8 @@
   "year-in-review": [
    {
     "ids": [
-     "plus"
+     "plus",
+     "app_plus"
     ],
     "then": true
    }
@@ -949,11 +1120,29 @@
     "then": true
    }
   ],
+  "calming-sounds": [
+   {
+    "ids": [
+     "sounds_live",
+     "app_sounds"
+    ],
+    "then": true
+   }
+  ],
   "check-ins": true,
   "christmas-offer": [
    {
     "ids": [
      "offer_live"
+    ],
+    "then": true
+   }
+  ],
+  "days-you-showed-up": [
+   {
+    "ids": [
+     "showed_up_live",
+     "app_showed_up"
     ],
     "then": true
    }
@@ -1008,10 +1197,20 @@
    }
   ],
   "moments": true,
+  "mood-prompts": [
+   {
+    "ids": [
+     "mood_prompts_live",
+     "app_mood_prompts"
+    ],
+    "then": true
+   }
+  ],
   "moodbow-plus": [
    {
     "ids": [
-     "plus"
+     "plus",
+     "app_plus"
     ],
     "then": true
    }
@@ -1045,7 +1244,8 @@
   "pdf-journal": [
    {
     "ids": [
-     "plus"
+     "plus",
+     "app_plus"
     ],
     "then": true
    }
@@ -1064,6 +1264,15 @@
    {
     "ids": [
      "app_reminders"
+    ],
+    "then": true
+   }
+  ],
+  "routine": [
+   {
+    "ids": [
+     "app_routine",
+     "routine_live"
     ],
     "then": true
    }
@@ -1105,6 +1314,15 @@
     "then": true
    }
   ],
+  "share-your-week": [
+   {
+    "ids": [
+     "trusted_share_live",
+     "app_trusted_share"
+    ],
+    "then": true
+   }
+  ],
   "sign-in": true,
   "tags": [
    {
@@ -1117,7 +1335,8 @@
   "themes": [
    {
     "ids": [
-     "plus"
+     "plus",
+     "app_plus"
     ],
     "then": true
    }
@@ -1146,6 +1365,14 @@
    }
   ],
   "timeline": true,
+  "voice-entries": [
+   {
+    "ids": [
+     "app_voice"
+    ],
+    "then": true
+   }
+  ],
   "widget": [
    {
     "ids": [
@@ -1157,7 +1384,8 @@
   "year-in-review": [
    {
     "ids": [
-     "plus"
+     "plus",
+     "app_plus"
     ],
     "then": true
    }
@@ -1246,11 +1474,29 @@
     "then": true
    }
   ],
+  "calming-sounds": [
+   {
+    "ids": [
+     "sounds_live",
+     "app_sounds"
+    ],
+    "then": true
+   }
+  ],
   "check-ins": true,
   "christmas-offer": [
    {
     "ids": [
      "offer_live"
+    ],
+    "then": true
+   }
+  ],
+  "days-you-showed-up": [
+   {
+    "ids": [
+     "showed_up_live",
+     "app_showed_up"
     ],
     "then": true
    }
@@ -1305,10 +1551,20 @@
    }
   ],
   "moments": true,
+  "mood-prompts": [
+   {
+    "ids": [
+     "mood_prompts_live",
+     "app_mood_prompts"
+    ],
+    "then": true
+   }
+  ],
   "moodbow-plus": [
    {
     "ids": [
-     "plus"
+     "plus",
+     "app_plus"
     ],
     "then": true
    }
@@ -1342,7 +1598,8 @@
   "pdf-journal": [
    {
     "ids": [
-     "plus"
+     "plus",
+     "app_plus"
     ],
     "then": true
    }
@@ -1361,6 +1618,15 @@
    {
     "ids": [
      "app_reminders"
+    ],
+    "then": true
+   }
+  ],
+  "routine": [
+   {
+    "ids": [
+     "app_routine",
+     "routine_live"
     ],
     "then": true
    }
@@ -1402,6 +1668,15 @@
     "then": true
    }
   ],
+  "share-your-week": [
+   {
+    "ids": [
+     "trusted_share_live",
+     "app_trusted_share"
+    ],
+    "then": true
+   }
+  ],
   "sign-in": true,
   "tags": [
    {
@@ -1414,7 +1689,8 @@
   "themes": [
    {
     "ids": [
-     "plus"
+     "plus",
+     "app_plus"
     ],
     "then": true
    }
@@ -1443,6 +1719,14 @@
    }
   ],
   "timeline": true,
+  "voice-entries": [
+   {
+    "ids": [
+     "app_voice"
+    ],
+    "then": true
+   }
+  ],
   "widget": [
    {
     "ids": [
@@ -1454,7 +1738,8 @@
   "year-in-review": [
    {
     "ids": [
-     "plus"
+     "plus",
+     "app_plus"
     ],
     "then": true
    }
@@ -1543,11 +1828,29 @@
     "then": true
    }
   ],
+  "calming-sounds": [
+   {
+    "ids": [
+     "sounds_live",
+     "app_sounds"
+    ],
+    "then": true
+   }
+  ],
   "check-ins": true,
   "christmas-offer": [
    {
     "ids": [
      "offer_live"
+    ],
+    "then": true
+   }
+  ],
+  "days-you-showed-up": [
+   {
+    "ids": [
+     "showed_up_live",
+     "app_showed_up"
     ],
     "then": true
    }
@@ -1602,10 +1905,20 @@
    }
   ],
   "moments": true,
+  "mood-prompts": [
+   {
+    "ids": [
+     "mood_prompts_live",
+     "app_mood_prompts"
+    ],
+    "then": true
+   }
+  ],
   "moodbow-plus": [
    {
     "ids": [
-     "plus"
+     "plus",
+     "app_plus"
     ],
     "then": true
    }
@@ -1639,7 +1952,8 @@
   "pdf-journal": [
    {
     "ids": [
-     "plus"
+     "plus",
+     "app_plus"
     ],
     "then": true
    }
@@ -1658,6 +1972,15 @@
    {
     "ids": [
      "app_reminders"
+    ],
+    "then": true
+   }
+  ],
+  "routine": [
+   {
+    "ids": [
+     "app_routine",
+     "routine_live"
     ],
     "then": true
    }
@@ -1699,6 +2022,15 @@
     "then": true
    }
   ],
+  "share-your-week": [
+   {
+    "ids": [
+     "trusted_share_live",
+     "app_trusted_share"
+    ],
+    "then": true
+   }
+  ],
   "sign-in": true,
   "tags": [
    {
@@ -1711,7 +2043,8 @@
   "themes": [
    {
     "ids": [
-     "plus"
+     "plus",
+     "app_plus"
     ],
     "then": true
    }
@@ -1740,6 +2073,14 @@
    }
   ],
   "timeline": true,
+  "voice-entries": [
+   {
+    "ids": [
+     "app_voice"
+    ],
+    "then": true
+   }
+  ],
   "widget": [
    {
     "ids": [
@@ -1751,7 +2092,8 @@
   "year-in-review": [
    {
     "ids": [
-     "plus"
+     "plus",
+     "app_plus"
     ],
     "then": true
    }
@@ -1840,11 +2182,29 @@
     "then": true
    }
   ],
+  "calming-sounds": [
+   {
+    "ids": [
+     "sounds_live",
+     "app_sounds"
+    ],
+    "then": true
+   }
+  ],
   "check-ins": true,
   "christmas-offer": [
    {
     "ids": [
      "offer_live"
+    ],
+    "then": true
+   }
+  ],
+  "days-you-showed-up": [
+   {
+    "ids": [
+     "showed_up_live",
+     "app_showed_up"
     ],
     "then": true
    }
@@ -1899,10 +2259,20 @@
    }
   ],
   "moments": true,
+  "mood-prompts": [
+   {
+    "ids": [
+     "mood_prompts_live",
+     "app_mood_prompts"
+    ],
+    "then": true
+   }
+  ],
   "moodbow-plus": [
    {
     "ids": [
-     "plus"
+     "plus",
+     "app_plus"
     ],
     "then": true
    }
@@ -1936,7 +2306,8 @@
   "pdf-journal": [
    {
     "ids": [
-     "plus"
+     "plus",
+     "app_plus"
     ],
     "then": true
    }
@@ -1955,6 +2326,15 @@
    {
     "ids": [
      "app_reminders"
+    ],
+    "then": true
+   }
+  ],
+  "routine": [
+   {
+    "ids": [
+     "app_routine",
+     "routine_live"
     ],
     "then": true
    }
@@ -1996,6 +2376,15 @@
     "then": true
    }
   ],
+  "share-your-week": [
+   {
+    "ids": [
+     "trusted_share_live",
+     "app_trusted_share"
+    ],
+    "then": true
+   }
+  ],
   "sign-in": true,
   "tags": [
    {
@@ -2008,7 +2397,8 @@
   "themes": [
    {
     "ids": [
-     "plus"
+     "plus",
+     "app_plus"
     ],
     "then": true
    }
@@ -2037,6 +2427,14 @@
    }
   ],
   "timeline": true,
+  "voice-entries": [
+   {
+    "ids": [
+     "app_voice"
+    ],
+    "then": true
+   }
+  ],
   "widget": [
    {
     "ids": [
@@ -2048,7 +2446,8 @@
   "year-in-review": [
    {
     "ids": [
-     "plus"
+     "plus",
+     "app_plus"
     ],
     "then": true
    }

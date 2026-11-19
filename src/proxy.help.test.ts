@@ -27,7 +27,7 @@ const rewritten = (res: Response) => (res.headers.get("x-middleware-rewrite") ??
 
 describe("proxy on a Production build: Help articles", () => {
   it("a missing or unpublished article: 404, rewritten to the generic not-found page, in every language's path", async () => {
-    for (const slug of ["no-such-article", "safety-plan", "letters"]) {
+    for (const slug of ["no-such-article", "ai-reflections"]) {
       for (const path of [`/help/${slug}`, `/help/${slug}/`, `/fr/help/${slug}`, `/es/help/${slug}?country=TH`, `/pt-br/help/${slug}`]) {
         const res = await go(path);
         expect(res.status, path).toBe(404);

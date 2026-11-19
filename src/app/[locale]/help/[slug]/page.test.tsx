@@ -47,9 +47,9 @@ describe("Help article page", () => {
     expect(en).toContain("get-help-now");
     // The 1.3.0 web flips (#343).
     for (const slug of ["things-that-help", "appointment", "your-week-today", "tags", "bring-this-back"]) expect(en, slug).toContain(slug);
-    // Unmet on every build: safety-plan-live; letters also need Plus; one-tap check-in waits for the
-    // app's store release (app-quick-checkin).
-    for (const slug of ["safety-plan", "letters", "one-tap-check-in"]) expect(en, slug).not.toContain(slug);
+    // Unmet through the 1.4.0 release: ai-live (AI stays off). The launch flips publish safety-plan,
+    // letters and one-tap-check-in.
+    for (const slug of ["ai-reflections"]) expect(en, slug).not.toContain(slug);
   });
 
   // Previews keep what they had: pending blocks follow conditions only (isPendingMet), and the one

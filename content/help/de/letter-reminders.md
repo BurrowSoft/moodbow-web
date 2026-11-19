@@ -12,4 +12,4 @@ Erinnerungen kommen in der Moodbow-App auf deinem Handy an, auch für Briefe, di
 
 Erinnerungen folgen ihren eigenen Schaltern, nicht deiner täglichen Check-in-Erinnerung. Wenn du einen Brief früher öffnest, fallen seine Erinnerungen weg, und wenn du ihn löschst, werden sie entfernt.
 
-{pending:plus}Briefe gehören zu **Moodbow Plus**. Erinnerungen für Briefe, die du schon geschrieben hast, kommen weiter, mit oder ohne Plus.{/pending}{/pending}
+{pending:plus|app_plus}Briefe gehören zu **Moodbow Plus**. Erinnerungen für Briefe, die du schon geschrieben hast, kommen weiter, mit oder ohne Plus.{/pending}{/pending}

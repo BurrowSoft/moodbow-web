@@ -8,7 +8,7 @@ Toque em **Escreva sobre o seu dia** para começar uma anotação. Escreva o qua
 
 {pending:app_writing_prompts}Quando uma anotação nova está vazia, o Moodbow pode sugerir uma pergunta gentil para começar; toque em **Outra** para ver uma diferente, ou simplesmente comece a escrever.{/pending}
 
-{pending:app_voice}**Falar em vez disso** (no app, em celulares que conseguem fazer isso): toque nele ao escrever e fale; seu celular transforma suas palavras em texto no próprio celular. Sua voz nunca sai do seu celular; só o texto que você mantém é salvo, como qualquer anotação. Se o seu celular não consegue fazer isso, o botão não aparece.{/pending}
+{pending:app_voice}**Falar em vez de digitar** (no app, em celulares que conseguem fazer isso): toque no microfone no espaço de escrita e fale; seu celular transforma suas palavras em texto no próprio celular. Sua voz nunca sai do seu celular; só o texto que você mantém é salvo, como qualquer anotação. Se o seu celular não consegue fazer isso, o microfone não aparece.{/pending}
 
 Abra uma anotação para lê-la. Para mudar, toque no texto (ou em ⋯ → **Editar anotação**); para acrescentar algo, toque em **Continuar esta anotação…** no final.
 

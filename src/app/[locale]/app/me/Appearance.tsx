@@ -7,6 +7,7 @@ import { readShortcutsOn, writeShortcutsOn } from "@/lib/shortcuts";
 import { applyPalette, PALETTES, PALETTE_KEY, readPalette, refreshPaletteUntil, writePalette, type Palette } from "@/lib/plus/palettes";
 import { LockedItem } from "../PlusSheet";
 import { useUntilLoaded } from "@/lib/ui/untilLoaded";
+import { SWITCH_CONTROL, SWITCH_LABEL, SWITCH_ROW } from "@/lib/ui/switchRow";
 
 const LABELS = { system: "themeSystem", light: "themeLight", dark: "themeDark" } as const;
 const PALETTE_LABELS = { dusk: "paletteDusk", sunrise: "paletteSunrise", sea: "paletteSea" } as const;
@@ -83,14 +84,14 @@ export function Appearance({ shortcuts = false, palette = null }: { shortcuts?: 
         <div className="mt-4 space-y-2">
           {/* At least 24 px (audit D polish, as the letter radios); the whole label still picks it. */}
           {THEMES.map((option) => (
-            <label key={option} className="flex min-h-11 items-center gap-3 text-text">
+            <label key={option} className="flex min-h-11 items-center gap-[12px] text-text">
               <input
                 type="radio"
                 name="me-appearance"
                 data-testid={`me-theme-${option}`}
                 checked={theme === option}
                 onChange={() => choose(option)}
-                className="h-6 w-6 shrink-0 accent-[var(--color-accent)]"
+                className="h-[24px] w-[24px] shrink-0 accent-[var(--color-accent)]"
               />
               <span className="min-w-0 [overflow-wrap:anywhere]">{t(LABELS[option])}</span>
             </label>
@@ -102,14 +103,14 @@ export function Appearance({ shortcuts = false, palette = null }: { shortcuts?: 
           <legend className="max-w-full font-medium text-text [overflow-wrap:anywhere]">{tp("paletteLegend")}</legend>
           <div className="mt-3 space-y-2">
             {([null, ...PALETTES] as const).map((option) => (
-              <label key={option ?? "default"} className="flex min-h-11 items-center gap-3 text-text">
+              <label key={option ?? "default"} className="flex min-h-11 items-center gap-[12px] text-text">
                 <input
                   type="radio"
                   name="me-palette"
                   data-testid={`me-palette-${option ?? "default"}`}
                   checked={chosenPalette === option}
                   onChange={() => choosePalette(option)}
-                  className="h-6 w-6 shrink-0 accent-[var(--color-accent)]"
+                  className="h-[24px] w-[24px] shrink-0 accent-[var(--color-accent)]"
                 />
                 <span className="min-w-0 [overflow-wrap:anywhere]">{option ? tp(PALETTE_LABELS[option]) : tp("paletteDefault")}</span>
               </label>
@@ -135,12 +136,12 @@ export function Appearance({ shortcuts = false, palette = null }: { shortcuts?: 
             aria-describedby="me-shortcuts-hint"
             data-testid="me-shortcuts"
             onClick={toggleShortcuts}
-            className="flex min-h-11 w-full items-center justify-between gap-4 rounded-xl text-left text-text"
+            className={`${SWITCH_ROW} min-h-11 w-full rounded-xl text-left text-text`}
           >
-            <span className="min-w-0 [overflow-wrap:anywhere]">{t("shortcutsEnabled")}</span>
+            <span className={SWITCH_LABEL}>{t("shortcutsEnabled")}</span>
             <span
               aria-hidden="true"
-              className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full border border-border transition-colors ${shortcutsOn ? "bg-accent" : "bg-pill"}`}
+              className={`${SWITCH_CONTROL} relative inline-flex h-7 w-12 items-center rounded-full border border-border transition-colors ${shortcutsOn ? "bg-accent" : "bg-pill"}`}
             >
               <span className={`inline-block h-5 w-5 rounded-full bg-surface shadow transition-transform ${shortcutsOn ? "translate-x-6" : "translate-x-1"}`} />
             </span>

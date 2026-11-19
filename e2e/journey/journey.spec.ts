@@ -1895,6 +1895,26 @@ test("large text: the Plus screen at 300 % on a 320 px phone, free and in the fr
     await expect(page).toHaveURL(/\/app\/me$/, { timeout: 15_000 });
     await expect(page.getByTestId("app-nav")).toBeVisible({ timeout: 15_000 });
     expect(await page.evaluate(() => document.documentElement.hasAttribute("data-tabs-aside"))).toBe(false);
+    // Normal size never hyphenates (UX, 20 Nov: "Kos- / ten- / los" at 100 % on 390 px, de). The wide table's Free and
+    // Plus headings take their own width, on one line, and the feature names give up the room.
+    await cdp.send("Page.setFontSizes", { fontSizes: { standard: 16, fixed: 13 } });
+    for (const width of [390, 360]) {
+      await page.setViewportSize({ width, height: 800 });
+      await page.goto("/de/app/me/plus");
+      await expect(page.getByTestId("plus-table")).toBeVisible({ timeout: 15_000 });
+      const headings = await page.evaluate(() =>
+        [...document.querySelectorAll('[data-testid="plus-table"] thead th')].slice(1).map((th) => {
+          const range = document.createRange();
+          range.selectNodeContents(th);
+          const lines = new Set([...range.getClientRects()].map((r) => Math.round(r.top))).size;
+          return { text: (th.textContent ?? "").trim(), hyphens: getComputedStyle(th).hyphens, lines };
+        }),
+      );
+      expect(headings, `de at ${width} px, 100 %: Free and Plus whole, never hyphenated`).toEqual([
+        { text: "Kostenlos", hyphens: "manual", lines: 1 },
+        { text: "Plus", hyphens: "manual", lines: 1 },
+      ]);
+    }
   } finally {
     await cleanup(email);
   }
@@ -3246,11 +3266,16 @@ test("letter reminders: labels whole at 390 and 320 px / 300 %, en and de, contr
           const apart = time.left >= label.right - 0.5 || time.top >= label.bottom - 0.5;
           return !apart;
         }).length;
-        // What sticks out past the right edge, named, so a failure says which part.
+        // What sticks out past the right edge, named, so a failure says which part, with its text and what decides
+        // whether its words may break (the Reviewer, #388/#389: it was "Monaten", 7 letters, under the 8-letter rule).
         const sticksOut = [...document.querySelectorAll("main *")]
           .filter((e) => e.getBoundingClientRect().right > window.innerWidth + 0.5 && e.getBoundingClientRect().width > 1 && !e.classList.contains("sr-only"))
           .slice(0, 4)
-          .map((e) => `${e.tagName.toLowerCase()}${e.getAttribute("data-testid") ? `[${e.getAttribute("data-testid")}]` : ""} ${Math.round(e.getBoundingClientRect().right)}`);
+          .map((e) => {
+            const s = getComputedStyle(e) as CSSStyleDeclaration & { hyphenateLimitChars?: string };
+            const what = `"${(e.textContent ?? "").trim().slice(0, 30)}" hyphens ${s.hyphens} ${s.hyphenateLimitChars ?? ""}, white-space ${s.whiteSpace}, lang ${e.closest("[lang]")?.getAttribute("lang")}`;
+            return `${e.tagName.toLowerCase()}${e.getAttribute("data-testid") ? `[${e.getAttribute("data-testid")}]` : ""} ${Math.round(e.getBoundingClientRect().right)} ${what}`;
+          });
         return { clipped, overlaps, sticksOut, overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth };
       });
     for (const [route, saved] of [["", "en"], ["/de", "de"]] as const) {

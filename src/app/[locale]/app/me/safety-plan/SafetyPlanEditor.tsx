@@ -347,7 +347,7 @@ function Helpline({ country }: { country: string | null | undefined }) {
       <p className="text-sm font-medium text-text">{t("helpline")}</p>
       {lines.helpline ? (
         <a href={telHref(lines.helpline.dial)} data-testid="plan-helpline-call" className={link}>
-          <HelpNumberText text={ts("safetyCall", { name: lines.helpline.name, number: lines.helpline.display })} number={lines.helpline.display} />
+          <HelpNumberText text={ts("safetyCall", { name: lines.helpline.name, number: lines.helpline.display })} number={lines.helpline.display} name={lines.helpline.name} />
         </a>
       ) : (
         <a href={telHref(lines.emergency!.dial)} data-testid="plan-emergency-call" className={link}>

@@ -152,13 +152,13 @@ export function PlusBanner({ trial, price, offer = null, id, tryId, compact = fa
         aria-label={t("bannerClose")}
         data-testid={`${id}-close`}
         onClick={close}
-        className={`absolute top-2 right-2 inline-flex h-11 w-11 items-center justify-center rounded-full ${offer ? "text-white" : "text-muted"}`}
+        className={`absolute top-2 right-2 inline-flex h-[44px] w-[44px] items-center justify-center rounded-full ${offer ? "text-white" : "text-muted"}`}
       >
         <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
           <path d="M6 6l12 12M18 6L6 18" />
         </svg>
       </button>
-      <div className="flex items-center gap-2 pr-12">
+      <div className="flex items-center gap-2 pr-[48px]">
         {offer ? (
           <>
             {compact && <Tree />}
@@ -169,7 +169,7 @@ export function PlusBanner({ trial, price, offer = null, id, tryId, compact = fa
         )}
         <span className={`text-sm font-medium tracking-wide uppercase ${offer ? "text-[#F3D27A]" : "text-accent"}`}>{offer ? t("offerLabel") : t("label")}</span>
       </div>
-      <h2 id={id} className="pr-12 text-lg font-medium leading-snug">
+      <h2 id={id} className="pr-[48px] text-lg font-medium leading-snug">
         {offer ? t("offerBannerTitle", { offer: offer.firstYear }) : t("bannerTitle")}
       </h2>
       {!(offer && compact) && <p>{offer ? t("offerBannerBody") : t("bannerBody")}</p>}
