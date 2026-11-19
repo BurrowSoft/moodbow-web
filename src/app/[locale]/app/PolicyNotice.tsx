@@ -34,6 +34,9 @@ export function PolicyNotice({ id, date }: { id: string; date: string | null }) 
           data-testid="policy-notice-dismiss"
           onClick={() => {
             setShown(false);
+            // The card goes with its button: focus to Today's heading, not the page (the Web
+            // Tester on #377; as the Year card's Not now, #368).
+            document.getElementById("today-title")?.focus();
             void dismissPolicyNotice(id)
               .then(({ changed }) => {
                 // Once, on this click only: no error and no loop.

@@ -86,6 +86,20 @@ describe("PolicyNotice", () => {
     expect(dismiss).toHaveBeenCalledTimes(1);
     expect(dismiss).toHaveBeenCalledWith("2026-12-01-plus");
   });
+  it("Got it: focus goes to Today's heading, never to the page (as the Year card's Not now)", () => {
+    const title = document.createElement("h1");
+    title.id = "today-title";
+    title.tabIndex = -1;
+    document.body.append(title);
+    try {
+      open();
+      screen.getByTestId("policy-notice-dismiss").focus();
+      fireEvent.click(screen.getByTestId("policy-notice-dismiss"));
+      expect(document.activeElement).toBe(title);
+    } finally {
+      title.remove();
+    }
+  });
   it("the notice changed underneath: the page reads it again, once, with no error", async () => {
     dismiss.mockResolvedValueOnce({ ok: false, changed: true });
     open();
