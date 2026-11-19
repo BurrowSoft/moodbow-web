@@ -15,6 +15,7 @@ import { isAuthOutage } from "@/lib/supabase/proxy";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { askAiConsent } from "@/lib/journal/ai";
 import { CONSENT_NOTICE_CLASS } from "@/lib/legalVersions";
+import { wholeNames } from "@/lib/wholeNames";
 import { offeredLocales } from "@/i18n/routing";
 import { savedLanguageRoute } from "@/lib/savedLanguage";
 import { SavedLanguageRedirect } from "../app/SavedLanguageRedirect";
@@ -78,7 +79,7 @@ export default async function ConsentPage({ params }: PageProps<"/[locale]/conse
       {/* Who keeps what, above the boxes and never collapsed, so nobody consents with it off screen
           (decisions 224, 226). Small print: CONSENT_NOTICE_CLASS. */}
       <p data-testid="consent-notice" data-hyphenate className={CONSENT_NOTICE_CLASS}>
-        {t("consentNotice")}
+        {wholeNames(t("consentNotice"))}
       </p>
       <ConsentForm askAge={askAge} askAi={askAiConsent()} showBack={!user && !outage} legalInEnglish={legalLocale(locale, "privacy") !== locale || legalLocale(locale, "terms") !== locale} />
     </PageShell>

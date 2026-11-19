@@ -691,6 +691,9 @@ test.describe("onboarding (signed out)", () => {
     const n = (await notice.boundingBox())!;
     const box = (await page.getByTestId("consent-privacy").boundingBox())!;
     expect(n.y).toBeLessThan(box.y);
+    // Names never hyphenate (UX, 19 Nov), whatever the hyphen rule around them says.
+    expect(await notice.locator(".whole-name").allTextContents()).toEqual(["Moodbow", "Vitor Carvalho", "BurrowSoft"]);
+    expect(await notice.locator(".whole-name").evaluateAll((els) => els.map((el) => getComputedStyle(el).hyphens))).toEqual(["manual", "manual", "manual"]);
     // Help first, as on Consent (UX, 19 Nov): before the form, the notice and the boxes.
     const help = (await page.getByTestId("signup-get-help").boundingBox())!;
     const email = (await page.getByLabel("Email").boundingBox())!;
