@@ -193,7 +193,7 @@
   },
   "legal-es-approved": {
     "met": false,
-    "what": "Vitor has approved the Spanish privacy policy and Terms (decisions 220, 221). Then /es/privacy and /es/terms show them; until then, English under its line, as for other languages. Drafts show on Preview."
+    "what": "Vitor has approved the Spanish Terms (decisions 220, 221). Then /es/terms shows them; until then, English under its line, as for other languages. Drafts show on Preview. The Spanish privacy policy follows via #374 (its catch-up with the current English), which adds privacy to TRANSLATED in src/lib/legalContent.ts; until then /es/privacy stays English even with this met."
   },
   "consent-language-live": {
     "met": true,
