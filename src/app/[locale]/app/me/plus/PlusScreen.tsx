@@ -349,10 +349,12 @@ export function PlusScreen({ view, price, offer = null, started }: { view: PlusV
               <th scope="col" role="columnheader" className="px-[12px] py-2 text-left font-medium">
                 <span className="sr-only">{t("colFeature")}</span>
               </th>
-              <th scope="col" role="columnheader" className="w-[3.5em] px-1 py-2 font-medium hyphens-auto [overflow-wrap:anywhere]">
+              {/* Free and Plus take their own width, whole and never hyphenated (UX, 20 Nov: "Kos- / ten- / los" in a
+                  3.5em column at 100 % on 390 px, de); the feature names give up the room. Stacked, this row goes. */}
+              <th scope="col" role="columnheader" className="w-px whitespace-nowrap px-[6px] py-2 font-medium">
                 {t("colFree")}
               </th>
-              <th scope="col" role="columnheader" className="w-[3.5em] px-1 py-2 font-medium text-accent hyphens-auto [overflow-wrap:anywhere]">
+              <th scope="col" role="columnheader" className="w-px whitespace-nowrap px-[6px] py-2 font-medium text-accent">
                 {t("colPlus")}
               </th>
             </tr>

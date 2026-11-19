@@ -1895,6 +1895,26 @@ test("large text: the Plus screen at 300 % on a 320 px phone, free and in the fr
     await expect(page).toHaveURL(/\/app\/me$/, { timeout: 15_000 });
     await expect(page.getByTestId("app-nav")).toBeVisible({ timeout: 15_000 });
     expect(await page.evaluate(() => document.documentElement.hasAttribute("data-tabs-aside"))).toBe(false);
+    // Normal size never hyphenates (UX, 20 Nov: "Kos- / ten- / los" at 100 % on 390 px, de). The wide table's Free and
+    // Plus headings take their own width, on one line, and the feature names give up the room.
+    await cdp.send("Page.setFontSizes", { fontSizes: { standard: 16, fixed: 13 } });
+    for (const width of [390, 360]) {
+      await page.setViewportSize({ width, height: 800 });
+      await page.goto("/de/app/me/plus");
+      await expect(page.getByTestId("plus-table")).toBeVisible({ timeout: 15_000 });
+      const headings = await page.evaluate(() =>
+        [...document.querySelectorAll('[data-testid="plus-table"] thead th')].slice(1).map((th) => {
+          const range = document.createRange();
+          range.selectNodeContents(th);
+          const lines = new Set([...range.getClientRects()].map((r) => Math.round(r.top))).size;
+          return { text: (th.textContent ?? "").trim(), hyphens: getComputedStyle(th).hyphens, lines };
+        }),
+      );
+      expect(headings, `de at ${width} px, 100 %: Free and Plus whole, never hyphenated`).toEqual([
+        { text: "Kostenlos", hyphens: "manual", lines: 1 },
+        { text: "Plus", hyphens: "manual", lines: 1 },
+      ]);
+    }
   } finally {
     await cleanup(email);
   }

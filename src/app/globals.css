@@ -140,19 +140,20 @@ body {
 
 /* Large text, everywhere (UX, 20 Nov): in every language, every page (the journal, the public and
    legal pages, Consent and sign-up), a long word breaks with a hyphen in the page's language
-   (<html lang>) instead of being cut mid-word, but only once the page is a 10em column or narrower
-   (a 320 px phone from 200 %). Only words of 8 letters or more (HYPHEN_MIN in wholeNames.tsx), with
-   at least 3 on each side. So "Moodbow", "Google Play", "App Store", "Stripe" (every name word under 8)
-   can never hyphenate, wrapped or not ("MOOD- / BOW" on Me's Plus banner, the Web Tester on #388),
-   while 8+ letter words still do: an 11-letter minimum left German's "hinzufügen" whole in the
-   letter reminders' narrow row at 300 %, and it pushed the page sideways. The names with a longer
-   word (LONG_NAMES: Vitor Carvalho, BurrowSoft, Anthropic, Supabase, JavaScript, Bluetooth) are
-   wrapped wherever they render (wholeNames.test).
-   Short words such as "parler" stay whole. Above 10em words stay whole (decision 231). One rule
+   (<html lang>) instead of being cut mid-word, but only once the page is a 13em column or narrower
+   (UX, 20 Nov: 200 % on phones up to ~416 px; at 10em, 360 px at 200 % cut "Datenschutzerkl / ärung"
+   bare). Only words of 8 letters or more (HYPHEN_MIN in wholeNames.tsx), with at least 3 on each
+   side. So "Moodbow", "Google Play", "App Store", "Stripe" (every name word under 8) can never
+   hyphenate, wrapped or not ("MOOD- / BOW" on Me's Plus banner, the Web Tester on #388), while 8+
+   letter words still do (an 11-letter minimum was tried and dropped; the letter's months choices,
+   whose "Monaten" has 7, take 7 themselves: LettersEditor). The names with a longer word
+   (LONG_NAMES: Vitor Carvalho, BurrowSoft, Anthropic, Supabase, JavaScript, Bluetooth,
+   TelefonSeelsorge) are wrapped wherever they render (wholeNames.test).
+   Short words such as "parler" stay whole. Above 13em words stay whole (decision 231). One rule
    instead of page by page: the Web Tester found "Responsabilid / ad" (/es/terms) and
    "Zusammenfassun / g" (the Routine intro, the share consent) at 200 %. `hyphens` is inherited, so
    the body carries it to all text. */
-@media (max-width: 10em) {
+@media (max-width: 13em) {
   body {
     hyphens: auto;
     hyphenate-limit-chars: 8 3 3;
@@ -177,21 +178,17 @@ a[href^="tel:"] {
 }
 /* Me → Plus's comparison at large text (UX, 20 Nov, the Web Tester's S2): from about 22em wide (a 320 px phone at
    100 %, any phone at 200 %) the two tick columns, 3.5em each, left the row names a few letters ("T / agebuch" at
-   300 %). There each row stacks: its name on a full-width line, then Free and Plus under it, each named (data-label,
-   the column's own heading, which is kept for screen readers but out of sight). The markup's explicit roles keep it a
-   table for them. */
+   300 %). There each row stacks: its name on a full-width line, then Free and Plus under it, each named by its own
+   column's heading (data-label), so the heading row goes: a visually hidden one still laid out its full width off
+   the page (journeys: "tr 372" at 300 %), and a screen reader would read "Free, Free, included". The markup's
+   explicit roles keep it a table for screen readers; each cell says its column and what it means. */
 @media (max-width: 22em) {
   [data-plus-table],
   [data-plus-table] tbody {
     display: block;
   }
   [data-plus-table] thead {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
+    display: none;
   }
   [data-plus-table] tbody tr {
     display: flex;
@@ -226,7 +223,7 @@ a[href^="tel:"] {
    own line rather than being cut ("TelefonSeelsor / ge" on the safety plan at 200 %). At large text an ordinary long
    word in a name hyphenates like the page's text (es "…del Departa- / mento…"), never the number or the verb; a brand
    name (.whole-name) doesn't, and breaks only at the soft hyphen at its compound boundary ("Telefon- / Seelsorge"). */
-@media (max-width: 10em) {
+@media (max-width: 13em) {
   [data-help-name] {
     hyphens: auto;
   }
