@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { AuthField, primaryButtonClass, textLinkClass } from "@/components/AuthField";
 import { FocusOnMount } from "@/components/FocusOnMount";
@@ -59,12 +59,11 @@ function Box({ name, label, checked, onChange, testId, describedBy, invalid }: {
 // three lines, above the boxes; Terms and Privacy, health data, and 18+, each its own unticked box
 // with its link (opened in a new tab, so what's typed stays); AI only where it's asked, optional.
 // Create account stays off until the required boxes are ticked, once the page runs.
-export function SignUpForm({ askAi = false, healthLink = false }: { askAi?: boolean; healthLink?: boolean }) {
+export function SignUpForm({ askAi = false, healthLink = false, legalInEnglish = false }: { askAi?: boolean; healthLink?: boolean; legalInEnglish?: boolean }) {
   const t = useTranslations("onboarding");
   const ta = useTranslations("auth");
   const tai = useTranslations("ai");
   const tc = useTranslations("common");
-  const locale = useLocale();
   const [privacy, setPrivacy] = useState(false);
   const [health, setHealth] = useState(false);
   const [age, setAge] = useState(false);
@@ -190,7 +189,8 @@ export function SignUpForm({ askAi = false, healthLink = false }: { askAi?: bool
             {t("consentReadPrivacy")} <span className="sr-only">{tc("opensInNewTab")}</span>
           </Link>
         </p>
-        {locale !== "en" && (
+        {/* Said only where the Terms and Privacy Policy really are in English here (as on Consent). */}
+        {legalInEnglish && (
           <p data-testid="consent-legal-english" className={`px-[4px] text-muted ${smallText}`}>
             {t("consentLegalEnglish")}
           </p>
