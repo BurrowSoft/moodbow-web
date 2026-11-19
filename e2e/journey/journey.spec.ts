@@ -849,7 +849,7 @@ test.describe("the saved language in the journal", () => {
     }
   });
 
-  test("the language cookie can't be written: it stops with a link, and doesn't reload forever", async ({ browser }) => {
+  test("the language cookie can't be written: the page in this language, with help and a notice, and no reload forever", async ({ browser }) => {
     const context = await browser.newContext({ locale: "fr-FR" });
     const page = await context.newPage();
     // As a privacy extension does: this one cookie never sticks.
@@ -869,15 +869,22 @@ test.describe("the saved language in the journal", () => {
       await confirmEmail(email);
       await page.goto("/sign-in");
       await signInForm(page, email, password);
-      // Today follows the saved language too, so that's where it stops now (Setup comes after first use).
-      await expect(page.getByTestId("saved-language-link")).toBeVisible({ timeout: 20_000 });
+      // Today follows the saved language too (Setup comes after first use). The move can't stick, so after one try
+      // it settles here, never on a bare link (#401, UX 20 Nov): Today in this address's language, usable, Get help
+      // there, and a notice in theirs offering it.
+      const notice = page.getByTestId("saved-language-notice");
+      await expect(notice).toBeVisible({ timeout: 20_000 });
       await settled(page, "/fr/app", "fr");
-      // Held back for 2 s on the way; here it must really show, reduced motion or not.
-      await expect(page.getByTestId("saved-language-link")).toHaveCSS("opacity", "1");
-      // The link gets them there: the server sets the cookie on that load.
-      await page.getByTestId("saved-language-link").click();
+      await expect(page.getByTestId("checkin-card")).toBeVisible();
+      await expect(page.getByTestId("today-help")).toBeVisible();
+      await expect(notice).toHaveAttribute("role", "status");
+      await expect(notice.locator("p")).toHaveAttribute("lang", "en");
+      await expect(notice).toContainText("Your journal is set to English.");
+      // The notice's link gets them there: the server sets the cookie on that load.
+      await page.getByTestId("saved-language-switch").click();
       await settled(page, "/app", "en");
       await today(page);
+      await expect(page.getByTestId("saved-language-notice")).toHaveCount(0);
     } finally {
       await cleanup(email);
       await context.close();

@@ -26,6 +26,10 @@
       "de": "Deutsch",
       "it": "Italiano"
     },
+    "savedLanguageSetTo": "บันทึกของคุณตั้งเป็นภาษา{language}",
+    "savedLanguageContinue": "ไปต่อเป็นภาษา{language}",
+    "savedLanguageSwitch": "เปลี่ยนเป็นภาษา{language}",
+    "savedLanguageStay": "ใช้ภาษา{language}ต่อ",
     "burrowsoftProduct": "ผลิตภัณฑ์ของ BurrowSoft",
     "burrowsoftAria": "ผลิตภัณฑ์ของ BurrowSoft ไปที่ burrowsoft.com",
     "copyright": "© 2026 BurrowSoft",
