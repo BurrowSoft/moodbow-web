@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import contract from "./moodPrompts.contract.json";
+import contract from "../../../content/contracts/mood-prompts.json";
 import { MOOD_GROUP, moodGroup, moodPrompt, type MoodPromptInput } from "./moodPrompts";
 
 type Case = MoodPromptInput & { name: string; now?: string; zone?: string; expect: { source: string; group?: string; prompt?: string; help?: boolean; savedPlace?: number } };
