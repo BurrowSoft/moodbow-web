@@ -195,8 +195,10 @@ describe("signUpFlow", () => {
     expect(arg.options.data.time_zone).toBe("Asia/Bangkok");
     expect(arg.options.data.consents.map((c: { kind: string }) => c.kind)).toEqual(["privacy", "terms", "health_data", "age_18"]);
     expect(arg.options.data).not.toHaveProperty("country");
-    // Each with this build's version, as Consent records them (POLICY_VERSIONS).
-    expect(arg.options.data.consents.slice(0, 3)).toEqual(grantedAtConsent());
+    // Each with this build's version, as Consent records them (POLICY_VERSIONS), and the language
+    // they were given in (locale, stored by the app's 020 in consents.locale).
+    expect(arg.options.data.consents.slice(0, 3)).toEqual(withLanguage(grantedAtConsent(), "en"));
+    expect(arg.options.data.consents.every((c: { locale?: string }) => c.locale === "en")).toBe(true);
   });
 
   it("a bad time zone is sent as null (the DB falls back to UTC)", async () => {
