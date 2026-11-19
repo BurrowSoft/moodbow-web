@@ -1,12 +1,14 @@
 <!--
   Spanish of content/legal/en/privacy.md. Wording is Vitor's, as in English. AI translation, checked
   by back-translation, a script and the Code Reviewer; no native lawyer has read it.
-  en-sha256: 6ad2d326599bc8756e3a6e1962ad789075008ccbf811027335efd377ed5e94f4
+  en-sha256: 8c7d743a0bb38a705ff24733917e5780a5a2ce498b2ea666342257bef4d08424
   It's the English this translates: legalSpanish.test.ts fails if the English changes, until the
   Spanish follows and this is updated. Shows on Production only once legal-es-approved is met.
 -->
 ## Política de privacidad de Moodbow
 Última actualización: 19 de noviembre de 2026
+
+{pending:plus}**Qué ha cambiado{dated} el {notice_date}{/dated}:** ahora puedes suscribirte a Moodbow Plus. Si lo haces, Google Play, el App Store o Stripe se encargan del pago, y guardamos una referencia de tu suscripción y sus fechas (§1, «Compras de Moodbow Plus»). Stripe es nuevo en nuestra lista de proveedores (§3). No ha cambiado nada más en cómo usamos tu diario.{/pending}
 
 Moodbow es un diario privado creado por Vitor Carvalho, que opera como BurrowSoft (297 Moo 1, Baan Sanian, Mueang Nan, Nan 55000, Tailandia), «nosotros» en esta política. La escribimos para que se lea, no para que se pase por alto. Si algo no queda claro, escribe a support@moodbow.com.
 
