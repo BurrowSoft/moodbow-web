@@ -8,7 +8,7 @@ es-draft: true
 
 **Gratis:** registros y tu diario sin límite, la Cronología, el calendario y la búsqueda, la ayuda y tu plan de seguridad, Lo que me ayuda y sus ejercicios (5-4-3-2-1, Escaneo corporal, Ponle nombre), el resumen para tu cita, exportar, importar y eliminar.
 
-**Plus añade:** el Resumen (semana, mes, 3 meses, tu año y todo el historial), los patrones y Lo que me levanta el ánimo, el resumen del año, las cartas para mi yo del futuro, más temas (e iconos en la app), un PDF cuidado de tu diario, una biblioteca de preguntas para escribir, más formas de respirar en **Lo que me ayuda** y más recordatorios. Las preguntas de «Días difíciles» de la biblioteca de preguntas son gratis para todos.
+**Plus añade:** el Resumen (semana, mes, 3 meses, tu año y todo el historial), los patrones y Lo que me levanta el ánimo, el resumen del año, las cartas para mi yo del futuro, más temas (e iconos en la app), un PDF cuidado de tu diario y una biblioteca de preguntas para escribir. Las preguntas de «Días difíciles» de la biblioteca de preguntas son gratis para todos.{pending:plus} En la web, Plus también añade más formas de respirar en **Lo que me ayuda** y más recordatorios.{/pending}
 
 **Más patrones** puede incluir tus propias etiquetas, cuando empieces a usarlas.
 

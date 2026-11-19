@@ -8,4 +8,4 @@ it-draft: true
 
 Il promemoria arriva sul telefono, dall'app Moodbow. Se le notifiche di Moodbow sono disattivate nelle impostazioni del telefono, attivale lì.
 
-{pending:plus|app_plus}Con Moodbow Plus puoi aggiungere fino a 2 altri orari al giorno, ad almeno un'ora di distanza, con **Aggiungi un altro orario**. Dopo il check-in, gli altri promemoria di quel giorno non arrivano.{/pending}{/pending}
+{pending:plus}Con Moodbow Plus puoi aggiungere fino a 2 altri orari al giorno, ad almeno un'ora di distanza, con **Aggiungi un altro orario**. Dopo il check-in, gli altri promemoria di quel giorno non arrivano.{/pending}{/pending}

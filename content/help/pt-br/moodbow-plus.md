@@ -8,7 +8,7 @@ pt-BR-draft: true
 
 **Grátis:** check-ins e seu diário sem limite, a Linha do tempo, o calendário e a busca, a ajuda e seu plano de segurança, O que me ajuda e seus exercícios (5-4-3-2-1, Escaneamento corporal, Dê um nome), o resumo para a consulta, exportar, importar e apagar.
 
-**O Plus acrescenta:** os Insights (semana, mês, 3 meses, seu ano e todo o histórico), os padrões e O que me faz bem, a retrospectiva do ano, as cartas para o meu eu do futuro, mais temas (e ícones no app), um PDF caprichado do seu diário, uma biblioteca de perguntas para escrever, mais formas de respirar em **O que me ajuda** e mais lembretes. As perguntas de "Dias difíceis" da biblioteca de perguntas são grátis para todos.
+**O Plus acrescenta:** os Insights (semana, mês, 3 meses, seu ano e todo o histórico), os padrões e O que me faz bem, a retrospectiva do ano, as cartas para o meu eu do futuro, mais temas (e ícones no app), um PDF caprichado do seu diário e uma biblioteca de perguntas para escrever. As perguntas de "Dias difíceis" da biblioteca de perguntas são grátis para todos.{pending:plus} Na web, o Plus também acrescenta mais formas de respirar em **O que me ajuda** e mais lembretes.{/pending}
 
 **Mais padrões** pode incluir suas próprias tags, quando você começar a usá-las.
 

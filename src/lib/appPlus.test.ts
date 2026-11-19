@@ -1,6 +1,6 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { findArticle, renderArticle } from "./helpContent";
+import { findArticle, helpArticles, renderArticle } from "./helpContent";
 import { isPendingMet, renderLegal } from "./legalContent";
 
 // legal/app-plus (UX, 20 Nov): the app can sell Moodbow Plus (Google Play, 1.4.0) before the web's own `plus`. Every line
@@ -11,11 +11,15 @@ const WEB = new Set(["plus", "offer_live"]);
 const today = (id: string) => isPendingMet(id);
 const appOnly = (id: string) => id === "app_plus" || (!WEB.has(id) && isPendingMet(id));
 const web = (id: string) => id === "plus" || isPendingMet(id);
-const text = (html: string) => html.replace(/<[^>]+>/g, "");
+const text = (html: string) => html.replace(/<[^>]+>/g, "").split("&#39;").join("'").split("&quot;").join('"').split("&amp;").join("&");
 const legal = (locale: string, slug: string, met: (id: string) => boolean) => text(renderLegal(readFileSync(`content/legal/${locale}/${slug}.md`, "utf8"), met, null).html);
 
 // Help's web-only bullet in Moodbow Plus, per language: how it starts, and the Manage Plus it names (only there).
 const HELP_WEB = { en: "Bought on the web", es: "Comprado en la web", fr: "Acheté sur le web", de: "Im Web gekauft", it: "Acquistato sul web", "pt-br": "Comprado na web", th: "ซื้อบนเว็บ" };
+// What the 1.4.0 app doesn't have (the Reviewer, #400, checked against moodbow-app 4eb6a58f): the extra daily reminder
+// times (reminders.md) and Plus's breathing patterns and extra reminders (Moodbow Plus's "On the web, Plus also adds").
+const REMINDERS_WEB = { en: "With Moodbow Plus, you c", es: "Con Moodbow Plus, puedes", fr: "Avec Moodbow Plus, vous", de: "Mit Moodbow Plus kannst", it: "Con Moodbow Plus puoi", "pt-br": "Com o Moodbow Plus, voc", th: "ด้วย Moodbow Plus" };
+const ALSO_ON_WEB = { en: " On the web, Plus also adds", es: " En la web, Plus también añade", fr: " Sur le web, Plus ajoute aussi", de: " Im Web gibt Plus außerdem", it: " Sul web, Plus aggiunge anche", "pt-br": " Na web, o Plus também acrescenta", th: " บนเว็บ Plus ยังเพิ่ม" };
 const MANAGE_PLUS = { en: "Manage Plus", es: "Gestionar Plus", fr: "Gérer Plus", de: "Plus verwalten", it: "Gestisci Plus", "pt-br": "Gerenciar o Plus", th: "จัดการ Plus" };
 
 describe("Plus in the app before the web's (app_plus alone)", () => {
@@ -67,13 +71,37 @@ describe("Plus in the app before the web's (app_plus alone)", () => {
     }
   });
 
+  it("with app_plus alone, Help promises nothing the app lacks: no extra reminder times, no Plus breathing", () => {
+    const reminders = findArticle("en", "reminders")!, plus = findArticle("en", "moodbow-plus")!;
+    expect(text(renderArticle(reminders, appOnly))).not.toContain("Add another time");
+    expect(text(renderArticle(reminders, web))).toContain("Add another time");
+    expect(text(renderArticle(plus, appOnly))).not.toContain("ways to breathe");
+    expect(text(renderArticle(plus, appOnly))).toContain("a designed PDF of your journal and a prompt library to write from.");
+    expect(text(renderArticle(plus, web))).toContain("On the web, Plus also adds more ways to breathe in Things that help me, and more reminders.");
+    // And in every language, every web-only block of every Help article stays out of the app's render.
+    for (const locale of Object.keys(HELP_WEB)) {
+      for (const article of helpArticles(locale)) {
+        for (const m of article.source.matchAll(/\{pending:plus\}((?:(?!\{pending:)[\s\S])*?)\{\/pending\}/g)) {
+          const snippet = m[1].split("**").join("").replace(/^- /, "").trim().slice(0, 24);
+          if (snippet.length < 3) continue;
+          expect(text(renderArticle(article, appOnly)), `${locale}/${article.slug}: "${snippet}" with app_plus alone`).not.toContain(snippet);
+          expect(text(renderArticle(article, web)), `${locale}/${article.slug}: "${snippet}" with the web's plus`).toContain(snippet);
+        }
+      }
+    }
+  });
+
   it("every Plus line in the Terms, the privacy policy and Help shows with app_plus too, except the known web-only parts", () => {
     const WEB_ONLY = [
       "- Bought on moodbow.com: Me → Moodbow Plus → Manage Plus",
       "**A payment that fails.**",
       "- Comprada en moodbow.com: Yo → Moodbow Plus → Gestionar Plus",
       "**Un pago que falla.**",
+      // Privacy's "reminder time{s}" (en "time|s", es "hora|s"): several reminder times are the web's only.
+      "s{/pending}",
       ...Object.values(HELP_WEB).map((b) => `- ${b}`),
+      ...Object.values(REMINDERS_WEB),
+      ...Object.values(ALSO_ON_WEB),
     ];
     let webOnly = 0;
     for (const kind of ["legal", "help"]) {
@@ -90,7 +118,8 @@ describe("Plus in the app before the web's (app_plus alone)", () => {
         }
       }
     }
-    // The Terms' two parts in en and es, and Help's bullet in 7 languages.
-    expect(webOnly).toBe(11);
+    // The Terms' two parts and privacy's reminder times in en and es; in 7 languages, Help's Manage Plus bullet, the extra
+    // reminder times and Moodbow Plus's "also on the web".
+    expect(webOnly).toBe(2 * 3 + 7 * 3);
   });
 });

@@ -1,7 +1,7 @@
 <!--
   Spanish of content/legal/en/privacy.md. Wording is Vitor's, as in English. AI translation, checked
   by back-translation, a script and the Code Reviewer; no native lawyer has read it.
-  en-sha256: 89f62b1d31ad29ad26ee70b7e657576139243d20d3a0b50e5084762ecf1539cc
+  en-sha256: 42df4ca27fd1c107c68c1449fc6943721423e2392644c75750528800c977db94
   It's the English this translates: legalSpanish.test.ts fails if the English changes, until the
   Spanish follows and this is updated. Shows on Production only once legal-es-approved is met.
 -->
@@ -34,7 +34,7 @@ Moodbow es un diario privado creado por Vitor Carvalho, que opera como BurrowSof
 {pending:safety_plan_live|app_safety_plan}**Tu plan de seguridad:** el plan que escribes. Puede incluir los nombres y los números de teléfono de las personas y los servicios que elijas anotar. Se guardan con tu diario, protegidos de la misma forma, se incluyen cuando exportas tus datos y se eliminan cuando los eliminas. Moodbow nunca los contacta: una llamada solo ocurre si tocas un número, a través del marcador de tu propio teléfono.{/pending}
 {pending:pictures_live|app_pictures}**Fotos en tus momentos (Moodbow Plus):** si añades fotos a un momento, se guardan con tu diario en el almacenamiento de nuestro proveedor de base de datos en la UE, solo tú puedes verlas y se incluyen cuando exportas tus datos. La ubicación y otros datos ocultos se quitan antes de subirlas. Cuando eliminas una foto, su entrada o tu cuenta, desaparece de Moodbow de inmediato; durante un minuto como máximo, una copia que hubieras abierto puede seguir siendo accesible desde tu propia cuenta, y nadie más puede acceder a ella. Los archivos eliminados se quitan de nuestro almacenamiento activo en el plazo de un día.{/pending}
 {pending:wear}**Reloj:** un estado de ánimo que tocas en el reloj se guarda como cualquier registro de un toque. El reloj no guarda nada y nunca se conecta a nuestros servidores.{/pending}
-**Tus ajustes:** idioma, país, zona horaria, hora{pending:plus|app_plus}s{/pending} del recordatorio y tus opciones de IA (activada o desactivada, tono, áreas de enfoque).
+**Tus ajustes:** idioma, país, zona horaria, hora{pending:plus}s{/pending} del recordatorio y tus opciones de IA (activada o desactivada, tono, áreas de enfoque).
 **Contenido de IA (solo si la IA está activada):** las reflexiones y los informes que la IA escribe para ti{pending:ai_memory}, y los datos breves que Moodbow recuerda sobre ti, que puedes ver, editar y eliminar en Yo → Lo que Moodbow recuerda{/pending}.
 **Uso de la IA:** por cada solicitud a la IA, la función, el modelo, el número de tokens, el costo y los créditos usados. No el texto de tus entradas ni el de la respuesta de la IA.
 {pending:plus|app_plus}**Compras de Moodbow Plus:** si te suscribes a Moodbow Plus, Google Play, el App Store o Stripe se encargan del pago. Stripe recibe tu dirección de correo para enviarte los recibos y tu país de facturación (y, cuando el impuesto lo necesita, tu código postal) para calcular el impuesto, y guarda sus propios registros. Nosotros guardamos una referencia de cliente y de suscripción, su estado, cuándo {pending:plus_grace_live}empieza y {/pending}termina el periodo actual y cuándo empezó una prueba gratuita, nunca los datos de tu tarjeta.{/pending}

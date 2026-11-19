@@ -8,4 +8,4 @@ fr-draft: true
 
 Le rappel arrive sur votre téléphone, depuis l'app Moodbow. Si les notifications de Moodbow sont désactivées dans les réglages de votre téléphone, activez-les là.
 
-{pending:plus|app_plus}Avec Moodbow Plus, vous pouvez ajouter jusqu'à 2 autres heures par jour, à au moins une heure d'écart, avec **Ajouter une autre heure**. Une fois votre bilan fait, les autres rappels du jour ne sont pas envoyés.{/pending}{/pending}
+{pending:plus}Avec Moodbow Plus, vous pouvez ajouter jusqu'à 2 autres heures par jour, à au moins une heure d'écart, avec **Ajouter une autre heure**. Une fois votre bilan fait, les autres rappels du jour ne sont pas envoyés.{/pending}{/pending}
