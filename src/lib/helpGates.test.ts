@@ -41,8 +41,9 @@ describe("helpGates.json (the proxy's list of published Help articles)", () => {
     expect(helpArticlePublished("en", "check-ins")).toBe(true);
     expect(helpArticlePublished("es", "get-help-now")).toBe(true);
     expect(helpArticlePublished("en", "no-such-article")).toBe(false);
-    // Unmet on every build: safety-plan-live; letters also need Plus.
-    expect(helpArticlePublished("en", "safety-plan")).toBe(false);
-    expect(helpArticlePublished("fr", "letters")).toBe(false);
+    // Unmet through the 1.4.0 release: ai-live (AI stays off). safety-plan, letters and one-tap-check-in
+    // publish with the launch flips, so they're no examples of "not out yet" any more.
+    expect(helpArticlePublished("en", "ai-reflections")).toBe(false);
+    expect(helpArticlePublished("fr", "ai-reflections")).toBe(false);
   });
 });
