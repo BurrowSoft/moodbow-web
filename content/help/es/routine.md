@@ -3,7 +3,7 @@ title: Medicación y rutina
 summary: Marca hasta 3 cosas que haces casi todos los días, como la medicación de la mañana o un paseo.
 topic: Your journal
 ---
-{pending:app_routine|routine_live}La **Rutina** es una lista corta de cosas que te gustaría marcar cada día: tu medicación, un paseo, un ejercicio de terapia. Es opcional. Solo tú la ves, a menos que elijas ponerla en el resumen para tu cita{pending:trusted_share_live} o en un enlace que compartas{/pending}.
+{pending:app_routine|routine_live}La **Rutina** es una lista corta de cosas que te gustaría marcar cada día: tu medicación, un paseo, un ejercicio de terapia. Es opcional. Solo tú la ves, a menos que elijas ponerla en el resumen para tu cita{pending:trusted_share_live|app_trusted_share} o en un enlace que compartas{/pending}.
 
 **Configurar:** en **Yo → Rutina**, escribe un nombre, como **Medicación de la mañana**, y toca **Añadir**. Puedes tener hasta 3 elementos, de hasta 40 caracteres cada uno. El menú junto a un elemento tiene **Editar**, **Subir** y **Bajar**.
 

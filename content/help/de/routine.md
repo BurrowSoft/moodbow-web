@@ -3,7 +3,7 @@ title: Medikamente und Routine
 summary: Hake bis zu 3 Dinge ab, die du an den meisten Tagen machst, etwa deine Medikamente am Morgen oder einen Spaziergang.
 topic: Your journal
 ---
-{pending:app_routine|routine_live}Die **Routine** ist eine kurze Liste mit Dingen, die du jeden Tag abhaken möchtest: deine Medikamente, ein Spaziergang, eine Übung aus der Therapie. Sie ist optional. Nur du siehst sie, außer du zeigst sie in der Zusammenfassung für deinen Termin{pending:trusted_share_live} oder in einem Link, den du teilst{/pending}.
+{pending:app_routine|routine_live}Die **Routine** ist eine kurze Liste mit Dingen, die du jeden Tag abhaken möchtest: deine Medikamente, ein Spaziergang, eine Übung aus der Therapie. Sie ist optional. Nur du siehst sie, außer du zeigst sie in der Zusammenfassung für deinen Termin{pending:trusted_share_live|app_trusted_share} oder in einem Link, den du teilst{/pending}.
 
 **Einrichten:** Gib unter **Ich → Routine** einen Namen ein, zum Beispiel **Medikamente am Morgen**, und tippe auf **Hinzufügen**. Du kannst bis zu 3 Einträge haben, jeden mit bis zu 40 Zeichen. Das Menü neben einem Eintrag hat **Bearbeiten**, **Nach oben** und **Nach unten**.
 

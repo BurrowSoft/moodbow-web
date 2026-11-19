@@ -3,7 +3,7 @@ title: Médicaments et routine
 summary: Cochez jusqu'à 3 choses que vous faites presque tous les jours, comme vos médicaments du matin ou une marche.
 topic: Your journal
 ---
-{pending:app_routine|routine_live}La **Routine** est une courte liste de choses que vous aimeriez cocher chaque jour : vos médicaments, une marche, un exercice de thérapie. Elle est facultative. Vous êtes la seule personne à la voir, sauf si vous choisissez de l'ajouter au résumé pour votre rendez-vous{pending:trusted_share_live} ou à un lien que vous partagez{/pending}.
+{pending:app_routine|routine_live}La **Routine** est une courte liste de choses que vous aimeriez cocher chaque jour : vos médicaments, une marche, un exercice de thérapie. Elle est facultative. Vous êtes la seule personne à la voir, sauf si vous choisissez de l'ajouter au résumé pour votre rendez-vous{pending:trusted_share_live|app_trusted_share} ou à un lien que vous partagez{/pending}.
 
 **Configurer :** dans **Moi → Routine**, tapez un nom, par exemple **Médicaments du matin**, et appuyez sur **Ajouter**. Vous pouvez avoir jusqu'à 3 éléments, de 40 caractères maximum chacun. Le menu à côté d'un élément propose **Modifier**, **Monter** et **Descendre**.
 

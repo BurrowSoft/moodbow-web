@@ -3,7 +3,7 @@ title: Medication and routine
 summary: Tick off up to 3 things you do most days, like your morning meds or a walk.
 topic: Your journal
 ---
-{pending:app_routine|routine_live}**Routine** is a short list of things you'd like to tick off each day: your medication, a walk, a therapy exercise. It's optional. Only you see it, unless you choose to put it in your appointment summary{pending:trusted_share_live} or in a link you share{/pending}.
+{pending:app_routine|routine_live}**Routine** is a short list of things you'd like to tick off each day: your medication, a walk, a therapy exercise. It's optional. Only you see it, unless you choose to put it in your appointment summary{pending:trusted_share_live|app_trusted_share} or in a link you share{/pending}.
 
 **Set it up:** in **Me → Routine**, type a name, such as **Morning meds**, and tap **Add**. You can have up to 3, each up to 40 characters. The menu beside an item has **Edit**, **Move up** and **Move down**.
 

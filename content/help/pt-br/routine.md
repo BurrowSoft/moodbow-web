@@ -3,7 +3,7 @@ title: Remédios e rotina
 summary: Marque até 3 coisas que você faz quase todo dia, como o remédio da manhã ou uma caminhada.
 topic: Your journal
 ---
-{pending:app_routine|routine_live}A **Rotina** é uma lista curta de coisas que você gostaria de marcar todo dia: seu remédio, uma caminhada, um exercício da terapia. Ela é opcional. Só você vê, a não ser que escolha incluí-la no resumo para a sua consulta{pending:trusted_share_live} ou num link que você compartilhar{/pending}.
+{pending:app_routine|routine_live}A **Rotina** é uma lista curta de coisas que você gostaria de marcar todo dia: seu remédio, uma caminhada, um exercício da terapia. Ela é opcional. Só você vê, a não ser que escolha incluí-la no resumo para a sua consulta{pending:trusted_share_live|app_trusted_share} ou num link que você compartilhar{/pending}.
 
 **Configurar:** em **Perfil → Rotina**, digite um nome, como **Remédio da manhã**, e toque em **Adicionar**. Você pode ter até 3 itens, cada um com até 40 caracteres. O menu ao lado de um item tem **Editar**, **Mover para cima** e **Mover para baixo**.
 

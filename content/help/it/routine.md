@@ -3,7 +3,7 @@ title: Farmaci e routine
 summary: Spunta fino a 3 cose che fai quasi ogni giorno, come i farmaci del mattino o una camminata.
 topic: Your journal
 ---
-{pending:app_routine|routine_live}La **Routine** è una breve lista di cose che vorresti spuntare ogni giorno: i tuoi farmaci, una camminata, un esercizio di terapia. È facoltativa. La vedi solo tu, a meno che tu non scelga di metterla nel riepilogo per il tuo appuntamento{pending:trusted_share_live} o in un link che condividi{/pending}.
+{pending:app_routine|routine_live}La **Routine** è una breve lista di cose che vorresti spuntare ogni giorno: i tuoi farmaci, una camminata, un esercizio di terapia. È facoltativa. La vedi solo tu, a meno che tu non scelga di metterla nel riepilogo per il tuo appuntamento{pending:trusted_share_live|app_trusted_share} o in un link che condividi{/pending}.
 
 **Impostare:** in **Profilo → Routine**, scrivi un nome, come **Farmaci del mattino**, e tocca **Aggiungi**. Puoi avere fino a 3 elementi, ognuno fino a 40 caratteri. Il menu accanto a un elemento ha **Modifica**, **Sposta su** e **Sposta giù**.
 
