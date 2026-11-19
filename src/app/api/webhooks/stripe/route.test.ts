@@ -32,6 +32,7 @@ beforeEach(() => {
   configured = true;
   serviceRole = true;
   vi.stubEnv("STRIPE_WEBHOOK_SECRET", "whsec_test_not_real");
+  vi.stubEnv("STRIPE_PLUS_PRICE_ID", "price_1, price_old");
   sync.mockResolvedValue({ kind: "written" });
 });
 afterEach(() => {
@@ -46,6 +47,23 @@ describe("POST /api/webhooks/stripe", () => {
     expect(res.status).toBe(200);
     expect(constructEvent).toHaveBeenCalledWith('{"raw":true}', "t=1,v1=good", "whsec_test_not_real");
     expect(sync.mock.calls[0][0]).toBe("sub_1");
+    // Every price of ours, so only Moodbow's subscriptions are ever written (ours.ts).
+    expect(sync.mock.calls[0][1].prices).toEqual(["price_1", "price_old"]);
+  });
+
+  it("not Moodbow's (the account is shared with SolvyMed): 200, nothing reported, only the event's type logged", async () => {
+    const debug = vi.spyOn(console, "debug").mockImplementation(() => {});
+    try {
+      constructEvent.mockReturnValue(event("customer.subscription.updated", { id: "sub_solvymed", customer: "cus_solvymed", metadata: { patient: "p1" } }));
+      sync.mockResolvedValue({ kind: "skipped", reason: "foreign" });
+      const res = await post();
+      expect(res.status).toBe(200);
+      expect(await res.json()).toEqual({ ok: true });
+      expect(captureMessage).not.toHaveBeenCalled();
+      expect(debug.mock.calls).toEqual([["[stripe-webhook] not Moodbow's: customer.subscription.updated"]]);
+    } finally {
+      debug.mockRestore();
+    }
   });
 
   it("no signature, or a bad one: refused, nothing synced; a bad one is reported", async () => {
@@ -81,15 +99,18 @@ describe("POST /api/webhooks/stripe", () => {
     expect(captureMessage.mock.calls[0][0]).toBe("Stripe webhook: other_store_grants");
   });
 
-  it("not set up (no secret, no Stripe key, no service role): 503, never a guess", async () => {
-    for (const setup of [() => vi.stubEnv("STRIPE_WEBHOOK_SECRET", ""), () => (configured = false), () => (serviceRole = false)]) {
+  it("not set up (no secret, no Stripe key, no service role, no price of ours): 503, never a guess", async () => {
+    const setups = [() => vi.stubEnv("STRIPE_WEBHOOK_SECRET", ""), () => (configured = false), () => (serviceRole = false), () => vi.stubEnv("STRIPE_PLUS_PRICE_ID", " , ")];
+    for (const setup of setups) {
       vi.stubEnv("STRIPE_WEBHOOK_SECRET", "whsec_test_not_real");
+      vi.stubEnv("STRIPE_PLUS_PRICE_ID", "price_1");
       configured = true;
       serviceRole = true;
       setup();
       expect((await post()).status).toBe(503);
     }
     expect(constructEvent).not.toHaveBeenCalled();
+    expect(sync).not.toHaveBeenCalled();
   });
 
   it("Plus switched off: still synced, so a cancellation after people paid is never lost (Reviewer, #270)", async () => {
