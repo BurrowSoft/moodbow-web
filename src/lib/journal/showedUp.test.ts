@@ -2,12 +2,12 @@ import { readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import contract from "./showedUp.contract.json";
+import contract from "../../../content/contracts/showed-up.json";
 import { SHOWED_UP_RANGES, showedUp, showedUpShown, windowStart } from "./showedUp";
 
 describe("Days you showed up: the app's contract (moodbow-app #252, copy fix 18 Nov: week and month rolling)", () => {
   it("is the app's file, byte for byte", () => {
-    const bytes = readFileSync(join(__dirname, "showedUp.contract.json"));
+    const bytes = readFileSync(join(__dirname, "..", "..", "..", "content", "contracts", "showed-up.json"));
     expect(createHash("sha256").update(bytes).digest("hex")).toBe("e2c29ac5c265f46d705d595269ef84cccb792b8d47ec8adaeb990378c3c4db8b");
   });
 

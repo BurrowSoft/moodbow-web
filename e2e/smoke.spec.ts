@@ -225,6 +225,16 @@ test.describe("language: the offered ones, and Thai as a draft (thai-offered-liv
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("เริ่มต้นใช้ Moodbow");
   });
 
+  test("/privacy/next on a draft build: the coming text, a line about it, a way to today's, not indexed", async ({ page }) => {
+    const res = await page.goto("/privacy/next");
+    expect(res?.status()).toBe(200);
+    await expect(page.getByTestId("privacy-next-line")).toBeVisible();
+    await expect(page.getByTestId("privacy-next-current")).toHaveAttribute("href", "/privacy");
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
+    // The coming text is the policy with Moodbow Plus in (COMING_POLICY), which /privacy hides today.
+    await expect(page.locator(".legal-prose")).toContainText("Moodbow Plus purchases");
+  });
+
   test("/th/privacy: the English text under the Thai line, as /privacy is (draft or live)", async ({ page }) => {
     const res = await page.goto("/th/privacy");
     expect(res?.status()).toBe(200);
@@ -691,6 +701,16 @@ test.describe("onboarding (signed out)", () => {
     const n = (await notice.boundingBox())!;
     const box = (await page.getByTestId("consent-privacy").boundingBox())!;
     expect(n.y).toBeLessThan(box.y);
+    // Names never hyphenate (UX, 19 Nov), whatever the hyphen rule around them says.
+    expect(await notice.locator(".whole-name").allTextContents()).toEqual(["Moodbow", "Vitor Carvalho", "BurrowSoft"]);
+    expect(await notice.locator(".whole-name").evaluateAll((els) => els.map((el) => getComputedStyle(el).hyphens))).toEqual(["manual", "manual", "manual"]);
+    // Help first, as on Consent (UX, 19 Nov): before the form, the notice and the boxes.
+    const help = (await page.getByTestId("signup-get-help").boundingBox())!;
+    const email = (await page.getByLabel("Email").boundingBox())!;
+    expect(help.y).toBeLessThan(email.y);
+    // Create account's boxes are 24 px (#350). Consent's now match; Consent needs a signed-in account,
+    // so ConsentForm.test checks its size.
+    expect(box.width).toBe(24);
     // 0.6875rem: 11px at the default root size, and it follows the root (rem, not px).
     expect(await notice.evaluate((el) => getComputedStyle(el).fontSize)).toBe("11px");
     await page.evaluate(() => (document.documentElement.style.fontSize = "32px"));

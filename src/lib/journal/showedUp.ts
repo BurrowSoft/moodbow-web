@@ -1,6 +1,6 @@
 // Days you showed up (1.4 C, specs/1.4-features.md; UX 18 Nov): how many days had a check-in in a
 // window, said kindly. Never a streak, a chain, a gap or a "don't break it": only a count. The
-// rules are the app's, in showedUp.contract.json (moodbow-app supabase/contracts/showed-up.json,
+// rules are the app's, in content/contracts/showed-up.json (synced from moodbow-app supabase/contracts/showed-up.json,
 // PR #252 at f1d2a8d2; it moves to content/contracts with a SOURCE.json pin once that's on master):
 // - a day is a check-in with a mood 1-5, one per date (the profile's local dates);
 // - windows end today, and later rows are ignored;

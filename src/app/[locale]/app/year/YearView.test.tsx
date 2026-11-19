@@ -1,6 +1,6 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import contract from "@/lib/journal/yearReview.contract.json";
+import contract from "../../../../../content/contracts/year-review.json";
 import { yearReview, type YearReview } from "@/lib/journal/yearReview";
 import type { InsightRow } from "@/lib/journal/insights";
 import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";

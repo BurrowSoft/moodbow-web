@@ -60,7 +60,7 @@ export function PlusInMe({ view, price, offer = null }: { view: PlusView; price:
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
 
-  if (view.kind === "plus") {
+  if (view.kind === "plus" && !view.paymentFailed) {
     if (view.daysLeft === null) return null;
     const day = 7 - view.daysLeft + 1;
     return (
@@ -83,7 +83,9 @@ export function PlusInMe({ view, price, offer = null }: { view: PlusView; price:
     );
   }
 
-  if (view.kind === "past_due") {
+  // A failed Stripe renewal: the same card inside the 7-day grace (Plus still on, UX 19 Nov) and
+  // after it (Plus paused), "Your last payment didn't go through. Update your card to keep Plus."
+  if (view.kind === "past_due" || (view.kind === "plus" && view.paymentFailed)) {
     const portal = async () => {
       setBusy(true);
       setFailed(false);
@@ -113,6 +115,7 @@ export function PlusInMe({ view, price, offer = null }: { view: PlusView; price:
     );
   }
 
+  if (view.kind !== "free") return null;
   return <PlusBanner trial={view.trial} price={price} offer={offer} id="me-plus-banner" tryId="me-plus-try" />;
 }
 

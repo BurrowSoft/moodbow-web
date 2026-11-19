@@ -32,7 +32,7 @@ describe("offerActive: its own switch, with Plus, inside the window", () => {
 });
 
 describe("offerEligible: no previous subscription (the ruling)", () => {
-  const base = { status: "canceled", current_period_end: null, trial_started_at: null, store_subscription_id: null };
+  const base = { source: "stripe" as const, status: "canceled", current_period_end: null, current_period_start: null, trial_started_at: null, store_subscription_id: null };
   it("no row, or a row that never had one: yes", () => {
     expect(offerEligible(null)).toBe(true);
     expect(offerEligible(base)).toBe(true);

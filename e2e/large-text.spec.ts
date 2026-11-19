@@ -86,6 +86,50 @@ test("Create account's consent boxes keep the page's own size on a wide screen: 
 // "J'a / cc / ep / te", and French's heading "commence / r" (Web Tester, on #233): this is the page
 // people have to be able to read. Word by word: a line may end between words, and inside one only
 // if the word alone is wider than its line, as German's "Datenschutzerklärung" is at 320 px.
+// Product and company names never split (UX, 19 Nov; the Web Tester's "Mood- / bow" on #379): on
+// Create account at 300 % on a 320 px phone, where its text hyphenates, every name in the list is
+// wrapped, never hyphenates, and no word of it runs onto a second line. Consent shares the wrapping
+// (ConsentForm, its notice) and needs a signed-in account, so its unit tests cover it.
+test("large text: Create account's product and company names stay whole at 300 % on a 320 px phone", async ({ page, browserName }, testInfo) => {
+  test.skip(browserName !== "chromium" || testInfo.project.name !== "desktop", "Page.setFontSizes is Chromium's; once is enough");
+  test.setTimeout(120_000);
+  const NAMES = ["Vitor Carvalho", "BurrowSoft", "Moodbow", "Anthropic", "Stripe", "Google Play", "App Store"];
+  const cdp = await page.context().newCDPSession(page);
+  await page.setViewportSize({ width: 320, height: 640 });
+  await cdp.send("Page.setFontSizes", { fontSizes: { standard: 48, fixed: 39 } });
+  for (const language of LANGUAGES.filter((l) => l !== "/th")) {
+    await page.goto(`${language}/sign-up`);
+    await page.evaluate(() => document.fonts.ready);
+    const found = await page.evaluate((names) => {
+      const scope = [...document.querySelectorAll("[data-hyphenate]")];
+      const text = scope.map((el) => el.textContent ?? "").join(" ");
+      const wrapped = [...document.querySelectorAll("[data-hyphenate] .whole-name")];
+      const count = (s: string, n: string) => s.split(n).length - 1;
+      const split: string[] = [];
+      for (const el of wrapped) {
+        if (getComputedStyle(el).hyphens !== "manual") split.push(`${el.textContent}: hyphens ${getComputedStyle(el).hyphens}`);
+        // Word by word: a two-word name may wrap between its words, never inside one.
+        const node = el.firstChild as Text | null;
+        if (!node) continue;
+        let at = 0;
+        for (const word of node.data.split(" ")) {
+          const range = document.createRange();
+          range.setStart(node, at);
+          range.setEnd(node, at + word.length);
+          if (range.getClientRects().length > 1) split.push(`${word} split across lines`);
+          at += word.length + 1;
+        }
+      }
+      return {
+        unwrapped: names.filter((n) => count(text, n) !== wrapped.filter((el) => el.textContent === n).length),
+        split,
+      };
+    }, NAMES);
+    expect.soft(found.unwrapped, `${language || "/en"}: every name wrapped`).toEqual([]);
+    expect.soft(found.split, `${language || "/en"}: no name split`).toEqual([]);
+  }
+});
+
 test("large text: Create account's heading and consent boxes keep their words whole, on a 320 px phone and on a wide screen", async ({ page, browserName }, testInfo) => {
   test.skip(browserName !== "chromium" || testInfo.project.name !== "desktop", "Page.setFontSizes is Chromium's; once is enough");
   test.setTimeout(180_000);
@@ -97,11 +141,15 @@ test("large text: Create account's heading and consent boxes keep their words wh
       await page.goto(`${language}/sign-up`);
       const split = await page.evaluate(() => {
         const out: string[] = [];
-        const roots = [document.querySelector("h1"), document.querySelector("[data-testid=consent-notice]"), ...document.querySelectorAll("form label span"), document.querySelector("form button[type=submit]")];
+        // The summary list and "Started in the app?" too (UX, 19 Nov: "Stimmu / ng" at 300 %).
+        const roots = [document.querySelector("h1"), document.querySelector("[data-testid=consent-notice]"), ...document.querySelectorAll("form label span"), document.querySelector("form button[type=submit]"), ...document.querySelectorAll("[data-testid=signup-summary] li"), document.querySelector("[data-testid=auth-started-in-app]")];
         for (const root of roots) {
           if (!root) continue;
           const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
           for (let node = walker.nextNode() as Text | null; node; node = walker.nextNode() as Text | null) {
+            // Whole, or split with a hyphen at really large text (UX, 19 Nov: the journal's rule, only
+            // under 9em wide). The browser draws the hyphen, so a split counts as one where it hyphenates.
+            if (getComputedStyle(node.parentElement!).hyphens === "auto") continue;
             for (const m of node.data.matchAll(/[^\s\-–]+/g)) {
               const range = document.createRange();
               range.setStart(node, m.index);
@@ -162,6 +210,8 @@ test("large text: a legal page's words stay whole on a 320 px phone, and normal 
           if (!root) continue;
           const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
           for (let node = walker.nextNode() as Text | null; node; node = walker.nextNode() as Text | null) {
+            // Whole, or split with a hyphen at really large text (UX, 19 Nov), as on Create account.
+            if (getComputedStyle(node.parentElement!).hyphens === "auto") continue;
             for (const m of node.data.matchAll(/[^\s\-–]+/g)) {
               const range = document.createRange();
               range.setStart(node, m.index);
@@ -178,8 +228,11 @@ test("large text: a legal page's words stay whole on a 320 px phone, and normal 
           }
         }
         const size = (css: string) => getComputedStyle(document.querySelector(css)!).fontSize;
-        return { split: out, body: size(".legal-prose p"), section: size(".legal-prose h2"), overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth };
+        return { split: out, body: size(".legal-prose p"), section: size(".legal-prose h2"), overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth, hyphens: getComputedStyle(document.querySelector(".legal-prose p")!).hyphens };
       });
+      // Decision 231 at normal size and at 200 %: whole words, no hyphens. Only 300 % on a 320 px
+      // phone (under 9em wide) hyphenates.
+      expect.soft(measured.hyphens, `${route} at ${percent} %`).toBe(percent === 300 ? "auto" : "manual");
       expect.soft(measured.split, `${route} at ${percent} %`).toEqual([]);
       expect.soft(measured.overflow, `${route} at ${percent} %`).toBe(0);
       if (percent === 100) expect.soft([measured.body, measured.section], route).toEqual(["16px", "20px"]);
