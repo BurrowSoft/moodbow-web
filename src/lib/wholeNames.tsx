@@ -76,10 +76,12 @@ export function wholeNamesHtml(html: string, names: readonly string[] = WHOLE_NA
 // public pages): a line may end only after its "@", and the domain stays whole (it fits a 320 px line at 300 %). The
 // text is unchanged (a <wbr> and a no-wrap span), so copying it gives the plain address.
 const [SUPPORT_LOCAL, SUPPORT_DOMAIN] = SUPPORT_EMAIL.split("@");
+const SUPPORT_LOCAL_AT = `${SUPPORT_LOCAL}@`;
 export function SupportAddress() {
   return (
     <>
-      {SUPPORT_LOCAL}@<wbr />
+      {SUPPORT_LOCAL_AT}
+      <wbr />
       <span className={KEEP_TOGETHER_CLASS}>{SUPPORT_DOMAIN}</span>
     </>
   );
