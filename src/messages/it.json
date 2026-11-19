@@ -815,7 +815,7 @@
     "patternShown": "Nei giorni in cui hai spuntato {name}, il tuo umore medio è stato {a} su 5. Negli altri giorni, {b}.",
     "patternFootnote": "Questo può mostrare cosa tende ad andare insieme, non cosa causa cosa. Non cambiare mai un farmaco senza parlarne con il tuo medico o farmacista.",
     "appointmentHeading": "Routine",
-    "appointmentShare": "{name}: spunta nel {percent}% dei giorni con check-in",
+    "appointmentShare": "{name}: {percent}% dei giorni con check-in",
     "appointmentNotEnough": "{name}: non ci sono ancora abbastanza giorni"
   },
   "safetyPlan": {
@@ -1080,7 +1080,7 @@
     "titleAnon": "Una settimana condivisa con te",
     "weekOf": "Settimana del {date}",
     "checkIns": "{count, plural, one {# check-in questa settimana} other {# check-in questa settimana}}",
-    "routinePercent": "{name}: spunta nel {percent}% dei giorni con check-in",
+    "routinePercent": "{name}: {percent}% dei giorni con check-in",
     "routineNotEnough": "{name}: non ci sono ancora abbastanza giorni",
     "earlier": "Settimana precedente",
     "later": "Settimana successiva",
