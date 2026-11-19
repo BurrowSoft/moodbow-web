@@ -16,13 +16,12 @@ const PAGES: { slug: LegalSlug; gate: ConditionId }[] = [
 ];
 
 describe("Spanish, page by page, behind its approval", () => {
-  it("terms: Spanish once approved, or as a draft on a test build; English on Production until then", () => {
-    expect(legalLocale("es", "terms", () => "live")).toBe("es");
-    expect(legalLocale("es", "terms", () => "draft")).toBe("es");
-    expect(legalLocale("es", "terms", () => "hidden")).toBe("en");
-  });
-  it("privacy stays English until its catch-up is approved, even with the Spanish switch on", () => {
-    expect(legalLocale("es", "privacy", () => "live")).toBe("en");
+  it("privacy and terms: Spanish once approved, or as a draft on a test build; English on Production until then", () => {
+    for (const slug of ["privacy", "terms"] as const) {
+      expect(legalLocale("es", slug, () => "live")).toBe("es");
+      expect(legalLocale("es", slug, () => "draft")).toBe("es");
+      expect(legalLocale("es", slug, () => "hidden")).toBe("en");
+    }
   });
   it("Consumer Health Data stays English, approved or not", () => {
     expect(legalLocale("es", "consumer-health-data", () => "live")).toBe("en");
