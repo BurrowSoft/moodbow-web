@@ -1,5 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { daysUntil, DEFAULT_REMINDERS, headsUpFits, opensOn, remindersValid } from "./letterReminders";
+import contract from "../../../content/contracts/letters.json";
+import { daysUntil, DEFAULT_REMINDERS, headsUpFits, MAX_HEADS_UPS, opensOn, QUICK_DAYS, remindersValid } from "./letterReminders";
+
+// The app's letters contract (content/contracts/letters.json, synced): the same limits both clients use.
+describe("letter reminders: the app's contract", () => {
+  it("the same number of heads-ups, quick choices and default", () => {
+    expect(MAX_HEADS_UPS).toBe(contract.rules.reminders.maxHeadsUps);
+    expect([...QUICK_DAYS]).toEqual(contract.rules.reminders.quickDays);
+    expect(DEFAULT_REMINDERS).toEqual(contract.rules.reminders.default);
+  });
+});
 
 const TODAY = "2026-11-14";
 const r = (days_before: number, time = "09:00", on = true) => ({ days_before, time, on });

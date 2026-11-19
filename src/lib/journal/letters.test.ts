@@ -6,7 +6,7 @@ const LANGUAGES = ["en", "fr", "es", "pt-br", "de", "it", "th"] as const;
 const strings = (l: string) => (JSON.parse(readFileSync(`src/messages/${l}.json`, "utf8")) as { letters: Record<string, string> }).letters;
 const row = (over: Partial<LetterRow>): LetterRow => ({ id: "a", body: "Dear me,", written_on: "2026-10-09", opens_on: "2026-11-09", card_from: null, opened_at: null, ...over });
 
-describe("letters rules (content/letters.json)", () => {
+describe("letters rules (content/contracts/letters.json)", () => {
   it("are the contract's: 1, 3, 6 or 12 months; a week for Not now", () => {
     expect(LETTER_RULES).toEqual({ monthChoices: [1, 3, 6, 12], maxChars: 20000, notNowDays: 7 });
     expect([0, 1, 2, 3, 6, 12, 24, "1"].map(isLetterMonths)).toEqual([false, true, false, true, true, true, false, false]);

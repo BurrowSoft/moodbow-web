@@ -20,16 +20,9 @@ export const FILES = ["appointment.json", "bo.md", "colour-map.json", "countries
 
 // Files held at another app commit than the one synced, with why. Each is listed in SOURCE.json's
 // "held". Drop an entry once the app's master carries that file's version.
-// export-csv.json, export-text.md, export_fixture.json: app #241's changes (pictures, letter
-// reminders) need the web's export code first (UX, 19 Nov: a feature PR right after the 1.3.2
-// re-sync); before that they waited for the full re-sync after the pilot (UX, round 3: the Reviewer's #3-#5), so the
-// crisis-keywords v4 sync (app #248) moves only the crisis list; these stay at the previous pin.
-const PREVIOUS_PIN = "457f4396add9b06e1b10e67b22d9f5308fbdacfa";
-export const HELD = {
-  "export-csv.json": PREVIOUS_PIN,
-  "export-text.md": PREVIOUS_PIN,
-  "export_fixture.json": PREVIOUS_PIN,
-};
+// None held now: the export set (pictures, letter reminders, Plus; app #241, 030, 033, 035) follows
+// app master since the web's export renders it (UX, 19 Nov).
+export const HELD = {};
 
 const gh = (path, accept) => execFileSync("gh", ["api", ...(accept ? ["-H", `Accept: ${accept}`] : []), path], { stdio: ["ignore", "pipe", "inherit"] });
 
