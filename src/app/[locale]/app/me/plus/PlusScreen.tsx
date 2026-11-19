@@ -247,7 +247,7 @@ export function PlusScreen({ view, price, offer = null, started }: { view: PlusV
           {t("offerButton", { offer: offer.firstYear })}
         </button>
         {/* The renewal, at body size, right under the button (the ruling). */}
-        <p data-testid={id("renews")} className={large ? "leading-snug" : ""}>
+        <p data-testid={id("renews")} className={large ? (top ? "leading-tight" : "leading-snug") : ""}>
           {t("offerThen", { price: offer.price })}
         </p>
         {!large && (
@@ -270,7 +270,8 @@ export function PlusScreen({ view, price, offer = null, started }: { view: PlusV
           {view.trial ? t("startTrial") : t("start")}
         </button>
         {/* In em, so it follows the footer's cap at large text (the same size as before otherwise). */}
-        <p data-testid={id("renews")} className={`text-[0.875em] text-muted ${large ? "leading-snug" : ""}`}>
+        {/* Under the title its lines sit a little closer still, so the three are in view on landing (#410's CI, de). */}
+        <p data-testid={id("renews")} className={`text-[0.875em] text-muted ${large ? (top ? "leading-tight" : "leading-snug") : ""}`}>
           {view.trial ? t("renewsTrial", { price }) : t("renews")}
         </p>
         {/* Where to cancel (the Reviewer's ruling): here, or at the end of the content at large text,
@@ -371,9 +372,10 @@ export function PlusScreen({ view, price, offer = null, started }: { view: PlusV
             renewal line, Start) sits right after the title/lead, before the feature table, so it's in view on landing
             at 320/300. The same block repeats at the end; never Start without the price and renewal next to it." */}
         {topAction && (
-          // The page's full width and no box of its own, so its lines are as few as they can be (de's renewal line
-          // was under the fold at 320 × 640 / 300 % with 12 px padding and 8 px gaps, #410's CI).
-          <div data-testid="plus-offer-top" className="flex flex-col gap-[4px] text-center [font-size:min(1rem,max(10vw,32px))]">
+          // The page's full width and no panel, so its lines are as few as they can be (de's renewal line was under the
+          // fold at 320 × 640 / 300 % with 12 px padding and 8 px gaps, #410's CI); a thin rule above and below keeps it
+          // apart from the lead and the table (UX, 20 Nov).
+          <div data-testid="plus-offer-top" className="flex flex-col gap-[4px] border-y border-border py-[4px] text-center [font-size:min(1rem,max(10vw,32px))]">
             {topAction}
           </div>
         )}
