@@ -3,7 +3,21 @@ import { render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { helpArticles, renderArticle } from "./helpContent";
 import { renderLegal } from "./legalContent";
-import { HYPHEN_MIN, KEEP_TOGETHER_CLASS, LONG_NAMES, wholeNames, wholeNamesHtml, WHOLE_NAME_CLASS } from "./wholeNames";
+import { HYPHEN_MIN, KEEP_TOGETHER_CLASS, LONG_NAMES, wholeNames, wholeNamesHtml, WHOLE_NAME_CLASS, WHOLE_NAMES } from "./wholeNames";
+
+const LOCALES = ["en", "es", "fr", "de", "it", "pt-br", "th"];
+const walk = (o: Record<string, unknown>, p: string[] = []): [string, string][] =>
+  Object.entries(o).flatMap(([k, v]) => (v && typeof v === "object" ? walk(v as Record<string, unknown>, [...p, k]) : [[[...p, k].join("."), String(v)] as [string, string]]));
+const messagesOf = (locale: string) => walk(JSON.parse(readFileSync(`src/messages/${locale}.json`, "utf8")));
+// What the markdown pages show, as written (content/legal and content/help, <locale>/<page>.md), comments left out.
+const markdownSources = (): [string, string][] =>
+  ["legal", "help"].flatMap((kind) =>
+    readdirSync(`content/${kind}`).flatMap((locale) =>
+      readdirSync(`content/${kind}/${locale}`)
+        .filter((f) => f.endsWith(".md"))
+        .map((f) => [`${kind}/${locale}/${f}`, readFileSync(`content/${kind}/${locale}/${f}`, "utf8").replace(/<!--[\s\S]*?-->/g, "")] as [string, string]),
+    ),
+  );
 
 // Names stay whole everywhere the global large-text rule reaches (UX, 20 Nov, after "MOOD- / BOW" on Me's Plus banner).
 // globals.css hyphenates only words of HYPHEN_MIN letters or more: a name whose words are all shorter can't break, wrapped
@@ -16,7 +30,7 @@ describe("names stay whole at large text", () => {
   });
 
   it("short names are safe by length; exactly these need wrapping", () => {
-    expect([...LONG_NAMES]).toEqual(["Vitor Carvalho", "BurrowSoft", "Anthropic", "Supabase", "JavaScript"]);
+    expect([...LONG_NAMES]).toEqual(["Vitor Carvalho", "BurrowSoft", "Anthropic", "Supabase", "JavaScript", "Bluetooth"]);
     for (const word of ["Moodbow", "Plus", "AI", "Lite", "Stripe", "Google", "Play", "App", "Store"]) expect(word.length, word).toBeLessThan(HYPHEN_MIN);
   });
 
@@ -33,12 +47,31 @@ describe("names stay whole at large text", () => {
       "meta.description": "metadata only",
       "common.burrowsoftAria": "an aria-label only",
     };
-    const walk = (o: Record<string, unknown>, p: string[] = []): [string, string][] =>
-      Object.entries(o).flatMap(([k, v]) => (v && typeof v === "object" ? walk(v as Record<string, unknown>, [...p, k]) : [[[...p, k].join("."), String(v)] as [string, string]]));
-    for (const locale of ["en", "es", "fr", "de", "it", "pt-br", "th"]) {
-      const messages = JSON.parse(readFileSync(`src/messages/${locale}.json`, "utf8"));
-      for (const [key, value] of walk(messages)) if (LONG_NAMES.some((n) => value.includes(n))) expect(Object.keys(WRAPPED), `${locale}: ${key}`).toContain(key);
+    for (const locale of LOCALES) {
+      for (const [key, value] of messagesOf(locale)) if (LONG_NAMES.some((n) => value.includes(n))) expect(Object.keys(WRAPPED), `${locale}: ${key}`).toContain(key);
     }
+  });
+
+  // Brands stay whole too (UX, 20 Nov: Bluetooth, and any trademark met later, such as WhatsApp or Instagram). So a known
+  // trademark of HYPHEN_MIN+ letters, or any camel-case word that long (BurrowSoft, JavaScript), that a message or a
+  // markdown page shows is on WHOLE_NAMES, which the legal pages and Help wrap, and the test above makes messages wrap.
+  it("every brand of 8+ letters a page shows is on WHOLE_NAMES", () => {
+    const TRADEMARKS = ["Anthropic", "BurrowSoft", "Supabase", "JavaScript", "Bluetooth", "WhatsApp", "Instagram", "Facebook", "Snapchat", "LinkedIn", "Pinterest", "Telegram", "Cloudflare", "ElevenLabs", "Microsoft", "Mastercard", "HealthKit"];
+    // Camel case: a capital right after a small letter, inside one word. Not a name in ICU or markup: a word right after
+    // "{", "<" or "/" (an argument, a tag) or right before " {" (a select key, as "threeMonths {") is left out.
+    const CAMEL = /(?<![{</\p{L}])\p{L}*\p{Ll}\p{Lu}\p{L}*(?!\p{L}|\s*\{)/gu;
+    const listed = new Set(WHOLE_NAMES.flatMap((n) => n.split(" ")));
+    const shown: [string, string][] = [...LOCALES.flatMap((l) => messagesOf(l).map(([k, v]) => [`${l}: ${k}`, v] as [string, string])), ...markdownSources()];
+    expect(shown.length).toBeGreaterThan(1000);
+    const missing = new Set<string>();
+    for (const [where, text] of shown) {
+      const brands = [...TRADEMARKS.filter((w) => text.includes(w)), ...[...text.matchAll(CAMEL)].map((m) => m[0])];
+      for (const word of brands) if (word.length >= HYPHEN_MIN && !listed.has(word)) missing.add(`${word} (${where})`);
+    }
+    expect([...missing]).toEqual([]);
+    // The check itself: a camel-case brand is found, an ICU select key and a tag name are not.
+    expect("Share on WhatsApp now".match(CAMEL)).toEqual(["WhatsApp"]);
+    expect("{range, select, threeMonths {these months}} <helpLink>Help</helpLink>".match(CAMEL)).toBeNull();
   });
 
   it("Help wraps only the long names (the short ones read as plain text)", () => {

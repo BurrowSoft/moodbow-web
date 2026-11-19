@@ -4,9 +4,11 @@ import { Fragment, type ReactNode } from "react";
 // every page the large-text hyphen rule reaches, which is all of them). A name is wrapped in a span that
 // turns hyphenation off for it. Case-sensitive, so "moodbow.com" and support@moodbow.com are left alone.
 // The text itself never changes.
-// Product and company names (UX, 19 Nov), and the two other names with 8+ letters that pages show:
-// Supabase (the legal pages' processors) and JavaScript (the journal's no-script line).
-export const WHOLE_NAMES = ["Vitor Carvalho", "BurrowSoft", "Moodbow", "Anthropic", "Stripe", "Google Play", "App Store", "Supabase", "JavaScript"] as const;
+// Product and company names (UX, 19 Nov), and every other brand with 8+ letters that pages show (UX, 20 Nov: any
+// trademark, e.g. WhatsApp or Instagram if they ever appear): Supabase (the legal pages' processors), JavaScript (the
+// journal's no-script line), Bluetooth (/privacy). wholeNames.test fails on a known trademark or a camel-case word of
+// HYPHEN_MIN+ letters that isn't here.
+export const WHOLE_NAMES = ["Vitor Carvalho", "BurrowSoft", "Moodbow", "Anthropic", "Stripe", "Google Play", "App Store", "Supabase", "JavaScript", "Bluetooth"] as const;
 // The global large-text rule (globals.css) hyphenates only words of HYPHEN_MIN letters or more. A name whose words are all
 // shorter can never break, wrapped or not ("Moodbow", "Google Play"…). The LONG_NAMES have a word that long, so they're
 // wrapped wherever they render (wholeNames.test checks every message that holds one).

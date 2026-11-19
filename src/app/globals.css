@@ -146,8 +146,8 @@ body {
    can never hyphenate, wrapped or not ("MOOD- / BOW" on Me's Plus banner, the Web Tester on #388),
    while 8+ letter words still do: an 11-letter minimum left German's "hinzufügen" whole in the
    letter reminders' narrow row at 300 %, and it pushed the page sideways. The names with a longer
-   word (LONG_NAMES: Vitor Carvalho, BurrowSoft, Anthropic, Supabase, JavaScript) are wrapped
-   wherever they render (wholeNames.test).
+   word (LONG_NAMES: Vitor Carvalho, BurrowSoft, Anthropic, Supabase, JavaScript, Bluetooth) are
+   wrapped wherever they render (wholeNames.test).
    Short words such as "parler" stay whole. Above 10em words stay whole (decision 231). One rule
    instead of page by page: the Web Tester found "Responsabilid / ad" (/es/terms) and
    "Zusammenfassun / g" (the Routine intro, the share consent) at 200 %. `hyphens` is inherited, so
