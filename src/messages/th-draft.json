@@ -3743,5 +3743,10 @@
     "key": "common.savedLanguageStay",
     "en": "Stay in {language}",
     "reason": "UX draft (Web Dev Thai of the saved-language notice, #401, 20 Nov; native read pending)"
+  },
+  {
+    "key": "common.languageNameInSentence",
+    "en": "English",
+    "reason": "UX draft (native read pending)"
   }
 ]

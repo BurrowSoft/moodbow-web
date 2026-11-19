@@ -26,6 +26,7 @@
       "de": "Deutsch",
       "it": "Italiano"
     },
+    "languageNameInSentence": "italiano",
     "savedLanguageSetTo": "Il tuo diario è in {language}.",
     "savedLanguageContinue": "Continua in {language}",
     "savedLanguageSwitch": "Passa a {language}",

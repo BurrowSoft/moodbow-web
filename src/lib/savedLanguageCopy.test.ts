@@ -51,9 +51,10 @@ describe("savedLanguageCopy (#401): the move's words in their language, the stay
           expect(value, `${target} on ${here}: ${key}`).toBeTruthy();
           expect(value, `${target} on ${here}: ${key}`).not.toContain("{");
         }
-        // The language's own name, in whatever case its sentence writes it.
-        const name = at(target, `common.languageNames.${target}`).toLocaleLowerCase(target);
-        for (const key of ["setTo", "continueIn", "switchTo"] as const) expect(copy[key].toLocaleLowerCase(target), `${target}: ${key}`).toContain(name);
+        // The language's own name as it writes it inside a sentence; the page's own for Stay.
+        const name = at(target, "common.languageNameInSentence");
+        for (const key of ["setTo", "continueIn", "switchTo"] as const) expect(copy[key], `${target}: ${key}`).toContain(name);
+        expect(copy.stay, `${here}: stay`).toContain(at(here, "common.languageNameInSentence"));
       }
     }
   });

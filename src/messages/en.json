@@ -26,6 +26,7 @@
       "de": "Deutsch",
       "it": "Italiano"
     },
+    "languageNameInSentence": "English",
     "savedLanguageSetTo": "Your journal is set to {language}.",
     "savedLanguageContinue": "Continue in {language}",
     "savedLanguageSwitch": "Switch to {language}",

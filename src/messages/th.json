@@ -26,6 +26,7 @@
       "de": "Deutsch",
       "it": "Italiano"
     },
+    "languageNameInSentence": "ไทย",
     "savedLanguageSetTo": "บันทึกของคุณตั้งเป็นภาษา{language}",
     "savedLanguageContinue": "ไปต่อเป็นภาษา{language}",
     "savedLanguageSwitch": "เปลี่ยนเป็นภาษา{language}",

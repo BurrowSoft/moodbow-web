@@ -26,6 +26,7 @@
       "de": "Deutsch",
       "it": "Italiano"
     },
+    "languageNameInSentence": "Deutsch",
     "savedLanguageSetTo": "Dein Tagebuch ist auf {language} eingestellt.",
     "savedLanguageContinue": "Weiter auf {language}",
     "savedLanguageSwitch": "Zu {language} wechseln",
