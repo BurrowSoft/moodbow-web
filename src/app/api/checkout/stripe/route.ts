@@ -126,6 +126,13 @@ export async function POST(req: Request): Promise<Response> {
         metadata: { user_id: user.id, checkout_key: k, locale, ...(offer ? { offer: "christmas" } : {}) },
         client_reference_id: user.id,
         ...(row?.store_customer_id ? { customer: row.store_customer_id } : { customer_email: user.email }),
+        // Stripe Tax (only if Vitor chooses it; UX's recommendation, 19 Nov): VAT/GST worked out from where the person is.
+        // Checkout asks for the address only where the tax needs it, and a returning customer's
+        // address is saved back to them so renewals are taxed the same way. The Price's
+        // tax_behavior (Vitor's, in the Dashboard) decides whether the shown price includes it.
+        automatic_tax: { enabled: true },
+        billing_address_collection: "auto",
+        ...(row?.store_customer_id ? { customer_update: { address: "auto", name: "auto" } } : {}),
         locale: stripeLocale(locale),
         success_url: `${back}?started=1`,
         cancel_url: back,
