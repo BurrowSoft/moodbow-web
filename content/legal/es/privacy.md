@@ -1,12 +1,12 @@
 <!--
   Spanish of content/legal/en/privacy.md. Wording is Vitor's, as in English. AI translation, checked
   by back-translation, a script and the Code Reviewer; no native lawyer has read it.
-  en-sha256: 026e153d349e9e40b2f8a4603f097635e50d03af9037ac085d42d7ff62eabe78
+  en-sha256: 6ad2d326599bc8756e3a6e1962ad789075008ccbf811027335efd377ed5e94f4
   It's the English this translates: legalSpanish.test.ts fails if the English changes, until the
   Spanish follows and this is updated. Shows on Production only once legal-es-approved is met.
 -->
 ## Política de privacidad de Moodbow
-Última actualización: 15 de noviembre de 2026
+Última actualización: 19 de noviembre de 2026
 
 Moodbow es un diario privado creado por Vitor Carvalho, que opera como BurrowSoft (297 Moo 1, Baan Sanian, Mueang Nan, Nan 55000, Tailandia), «nosotros» en esta política. La escribimos para que se lea, no para que se pase por alto. Si algo no queda claro, escribe a support@moodbow.com.
 
@@ -33,7 +33,7 @@ Moodbow es un diario privado creado por Vitor Carvalho, que opera como BurrowSof
 **Tus ajustes:** idioma, país, zona horaria, hora{pending:plus}s{/pending} del recordatorio y tus opciones de IA (activada o desactivada, tono, áreas de enfoque).
 **Contenido de IA (solo si la IA está activada):** las reflexiones y los informes que la IA escribe para ti{pending:ai_memory}, y los datos breves que Moodbow recuerda sobre ti, que puedes ver, editar y eliminar en Yo → Lo que Moodbow recuerda{/pending}.
 **Uso de la IA:** por cada solicitud a la IA, la función, el modelo, el número de tokens, el costo y los créditos usados. No el texto de tus entradas ni el de la respuesta de la IA.
-{pending:plus}**Compras de Moodbow Plus:** si te suscribes a Moodbow Plus, Google Play, el App Store o Stripe se encargan del pago. Stripe recibe tu dirección de correo para enviarte los recibos y guarda sus propios registros. Nosotros guardamos una referencia de cliente y de suscripción, su estado, cuándo termina el periodo actual y cuándo empezó una prueba gratuita, nunca los datos de tu tarjeta.{/pending}
+{pending:plus}**Compras de Moodbow Plus:** si te suscribes a Moodbow Plus, Google Play, el App Store o Stripe se encargan del pago. Stripe recibe tu dirección de correo para enviarte los recibos y guarda sus propios registros. Nosotros guardamos una referencia de cliente y de suscripción, su estado, cuándo {pending:plus_grace_live}empieza y {/pending}termina el periodo actual y cuándo empezó una prueba gratuita, nunca los datos de tu tarjeta.{/pending}
 **Informes de errores:** si la app o el sitio web fallan o se produce otro error, se envía un informe técnico (tipo de dispositivo, versión de la app o del navegador, el error) a nuestro proveedor de seguimiento de errores. Antes de que se envíe, quitamos los datos que te identifican y cualquier texto que hayas escrito, y el proveedor no guarda tu dirección IP.
 
 **Cookies y almacenamiento en tu dispositivo:** el sitio web usa solo las cookies que necesita para funcionar: una que mantiene tu sesión iniciada, otra que recuerda el idioma que elegiste, otra que recuerda la vista de lista o de calendario y, durante un minuto después de que eliminas tu cuenta, otra que le indica a tu navegador que borre sus copias. También guarda en tu navegador algunas preferencias de visualización, como el aspecto claro u oscuro y las tarjetas que ya cerraste. Ninguna de ellas te rastrea entre sitios ni se usa para publicidad o analítica.
@@ -71,7 +71,6 @@ Para mostrarte líneas de ayuda cerca de ti cuando no sabemos tu país, usamos e
 | Vercel | Alojamiento del sitio web y del diario web{pending:web_analytics}; recuento de vistas de página y toques de botones (sin cookies){/pending} | Estados Unidos y red global de servidores |
 | Resend | Envío de correos de la cuenta (confirmación, restablecimiento de contraseña) | Estados Unidos (empresa); los correos se envían desde Japón |
 | Sentry | Informes de errores y fallos, una vez quitados los datos que te identifican | Estados Unidos |
-{pending:purchases}| Google Play, Apple App Store | Pagos de créditos de IA | Global |{/pending}
 {pending:plus}| Google Play, Apple App Store | Pagos de Moodbow Plus | Global |{/pending}
 {pending:plus}| Stripe | Pagos y recibos de Moodbow Plus | Estados Unidos |{/pending}
 {pending:wear}| Google (Wear OS Data Layer, parte de los servicios de Google Play) | Llevar un registro del reloj (solo un valor de estado de ánimo, sin texto) de tu reloj a tu teléfono, solo si usas la app del reloj | Global |{/pending}

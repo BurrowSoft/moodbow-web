@@ -7,7 +7,7 @@
   (src/lib/legalContent.test.ts).
 -->
 ## Moodbow Terms of Use
-Last updated: 2 October 2026
+Last updated: 19 November 2026
 
 These terms are an agreement between you and Vitor Carvalho, trading as BurrowSoft (297 Moo 1, Baan Sanian, Mueang Nan, Nan 55000, Thailand) about using Moodbow, the app and the website moodbow.com. By creating an account you agree to them.
 

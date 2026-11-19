@@ -7,7 +7,7 @@
   (src/lib/legalContent.test.ts).
 -->
 ## Moodbow Privacy Policy
-Last updated: 15 November 2026
+Last updated: 19 November 2026
 
 Moodbow is a private journal made by Vitor Carvalho, trading as BurrowSoft (297 Moo 1, Baan Sanian, Mueang Nan, Nan 55000, Thailand), "we" in this policy. We wrote this to be read, not skimmed past. If anything is unclear, email support@moodbow.com.
 
@@ -34,7 +34,7 @@ Moodbow is a private journal made by Vitor Carvalho, trading as BurrowSoft (297 
 **Your settings:** language, country, time zone, reminder time{pending:plus}s{/pending}, and your AI choices (on or off, tone, focus areas).
 **AI content (only if AI is on):** the reflections and reports the AI writes for you{pending:ai_memory}, and the short facts Moodbow remembers about you, which you can see, edit and delete in Me → What Moodbow remembers{/pending}.
 **AI usage:** for each AI request, the feature, the model, the number of tokens, the cost and the credits used. Not the text of your entries or of the AI's answer.
-{pending:plus}**Moodbow Plus purchases:** if you subscribe to Moodbow Plus, Google Play, the App Store or Stripe handles the payment. Stripe receives your email address to send receipts and keeps its own records. We keep a customer and subscription reference, its status, when the current period ends and when a free trial started, never your card details.{/pending}
+{pending:plus}**Moodbow Plus purchases:** if you subscribe to Moodbow Plus, Google Play, the App Store or Stripe handles the payment. Stripe receives your email address to send receipts and keeps its own records. We keep a customer and subscription reference, its status, when the current period {pending:plus_grace_live}starts and {/pending}ends and when a free trial started, never your card details.{/pending}
 **Error reports:** if the app or website crashes or another error happens, a technical report (device type, app or browser version, the error) is sent to our error-tracking provider. We remove personal details and any text you've written before it's sent, and the provider doesn't store your IP address.
 
 **Cookies and storage on your device:** the website uses only the cookies it needs to work: one that keeps you signed in, one that remembers the language you chose, one that remembers list or calendar view, and, for a minute after you delete your account, one that tells your browser to clear its copies. It also keeps a few display choices in your browser, such as light or dark appearance and the cards you've already closed. None of them track you across sites or are used for advertising or analytics.
@@ -72,7 +72,6 @@ To show helplines near you when we don't know your country, we use the country y
 | Vercel | Hosting the website and web journal{pending:web_analytics}; counting page views and button taps (no cookies){/pending} | USA and global edge network |
 | Resend | Sending account emails (confirmation, password reset) | USA (company); emails are sent from Japan |
 | Sentry | Error and crash reports, with personal details removed | USA |
-{pending:purchases}| Google Play, Apple App Store | Payments for AI credits | Global |{/pending}
 {pending:plus}| Google Play, Apple App Store | Payments for Moodbow Plus | Global |{/pending}
 {pending:plus}| Stripe | Payments and receipts for Moodbow Plus | USA |{/pending}
 {pending:wear}| Google (Wear OS Data Layer, part of Google Play services) | Carrying a watch check-in (a mood value only, no text) from your watch to your phone, only if you use the watch app | Global |{/pending}
