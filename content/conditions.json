@@ -193,7 +193,7 @@
   },
   "legal-es-approved": {
     "met": false,
-    "what": "Vitor has approved the Spanish Terms (decisions 220, 221). Then /es/terms shows them; until then, English under its line, as for other languages. Drafts show on Preview. The Spanish privacy policy follows via #374 (its catch-up with the current English), which adds privacy to TRANSLATED in src/lib/legalContent.ts; until then /es/privacy stays English even with this met."
+    "what": "Vitor has approved the Spanish privacy policy and Terms (decisions 220, 221; the privacy catch-up with the current English in #374). Then /es/privacy and /es/terms show them; until then, English under its line, as for other languages. Drafts show on Preview."
   },
   "consent-language-live": {
     "met": true,
@@ -290,6 +290,10 @@
   "plus": {
     "met": false,
     "what": "Moodbow Plus (decision 246, specs/plus.md, docs/plus-entitlements.md): the yearly subscription with 7 free days, on the web through Stripe. Off until everything ships, and not before the pilot is published. Before it's met: the entitlements migration on Production, Vitor's prices, Stripe keys, webhook endpoint, CRON_SECRET and service role key on Production, his terms and privacy text, the Reviewer's read and the tester rows on test-mode Stripe."
+  },
+  "plus-grace-live": {
+    "met": false,
+    "what": "The past_due grace is live (moodbow-app 041 on prod AND the web grace PR deployed, so the Stripe sync writes entitlements.current_period_start). Then the privacy policy's Moodbow Plus purchases line says we keep when the current period starts as well as when it ends (en and es). Met only after both; never before, or the policy would say we keep something we don't yet."
   },
   "policy-notice-live": {
     "met": false,

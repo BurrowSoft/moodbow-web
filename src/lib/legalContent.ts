@@ -78,8 +78,7 @@ export function todos(source: string): string[] {
 // The translations that exist, page by page, each behind its own approval. Consumer Health Data
 // stays English in every language.
 const TRANSLATED: Partial<Record<string, { condition: ConditionId; slugs: readonly LegalSlug[] }>> = {
-  // Privacy joins once its catch-up with the current English is approved (UX 19 Nov, option a).
-  es: { condition: "legal-es-approved", slugs: ["terms"] },
+  es: { condition: "legal-es-approved", slugs: ["privacy", "terms"] },
 };
 
 // The language a page's legal text is in: its own where it has been translated and approved
