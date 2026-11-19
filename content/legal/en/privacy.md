@@ -29,7 +29,6 @@ Moodbow is a private journal made by Vitor Ribeiro Carvalho, trading as BurrowSo
 **Your settings:** language, country, time zone, reminder time{pending:plus}s{/pending}, and your AI choices (on or off, tone, focus areas).
 **AI content (only if AI is on):** the reflections and reports the AI writes for you{pending:ai_memory}, and the short facts Moodbow remembers about you, which you can see, edit and delete in Me → What Moodbow remembers{/pending}.
 **AI usage:** for each AI request, the feature, the model, the number of tokens, the cost and the credits used. Not the text of your entries or of the AI's answer.
-{pending:purchases}**Purchases:** if you buy AI credits, Google Play or the App Store handles the payment. We receive a purchase reference and the number of credits, never your card details.{/pending}
 {pending:plus}**Moodbow Plus purchases:** if you subscribe to Moodbow Plus, Google Play, the App Store or Stripe handles the payment. Stripe receives your email address to send receipts and keeps its own records. We keep a customer and subscription reference, its status, when the current period ends and when a free trial started, never your card details.{/pending}
 **Error reports:** if the app or website crashes or another error happens, a technical report (device type, app or browser version, the error) is sent to our error-tracking provider. We remove personal details and any text you've written before it's sent, and the provider doesn't store your IP address.
 
