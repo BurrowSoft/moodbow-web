@@ -141,19 +141,20 @@ body {
 /* Large text, everywhere (UX, 20 Nov): in every language, every page (the journal, the public and
    legal pages, Consent and sign-up), a long word breaks with a hyphen in the page's language
    (<html lang>) instead of being cut mid-word, but only once the page is a 10em column or narrower
-   (a 320 px phone from 200 %). Only words of 11 letters or more, with at least 3 on each side: the
-   words that really overflowed were 13 to 20 letters ("Responsabilidad", "Zusammenfassung",
-   "Datenschutzerklärung"), shorter ones fit a 10em column whole, and no name has a word that long
-   (the longest is "BurrowSoft", 10), so a name can never hyphenate anywhere, wrapped or not ("MOOD- /
-   BOW" on Me's Plus banner, the Web Tester on #388; wholeNames.test guards the names list). Short
-   words such as "parler" stay whole. Above 10em words stay whole (decision 231). One rule
+   (a 320 px phone from 200 %). Only words of 8 letters or more (HYPHEN_MIN in wholeNames.tsx), with
+   at least 3 on each side. So "Moodbow", "Google Play", "App Store", "Stripe" (every name word under 8)
+   can never hyphenate, wrapped or not ("MOOD- / BOW" on Me's Plus banner, the Web Tester on #388),
+   while 8+ letter words still do: an 11-letter minimum left German's "hinzufügen" whole in the
+   letter reminders' narrow row at 300 %, and it pushed the page sideways. The names with a longer
+   word (Anthropic, BurrowSoft, Vitor Carvalho) are wrapped wherever they render (wholeNames.test).
+   Short words such as "parler" stay whole. Above 10em words stay whole (decision 231). One rule
    instead of page by page: the Web Tester found "Responsabilid / ad" (/es/terms) and
    "Zusammenfassun / g" (the Routine intro, the share consent) at 200 %. `hyphens` is inherited, so
    the body carries it to all text. */
 @media (max-width: 10em) {
   body {
     hyphens: auto;
-    hyphenate-limit-chars: 11 3 3;
+    hyphenate-limit-chars: 8 3 3;
   }
 }
 /* What stays whole at any size: names (wrapped by src/lib/wholeNames.tsx: "Vitor Carvalho",

@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { FOCUS_AREAS, FOCUS_KEYS, TONE_KEYS, TONES, type FocusArea, type Tone } from "@/lib/journal/ai";
 import { recordAiWithdrawal, saveFocusAreas, saveTone, setAiEnabled, type AiSaveResult, type AiSwitchResult } from "./actions";
 import { useUntilLoaded } from "@/lib/ui/untilLoaded";
+import { wholeNames } from "@/lib/wholeNames";
 
 type Values = { on: boolean; tone: Tone; focus: FocusArea[] };
 type Field = keyof Values;
@@ -80,7 +81,7 @@ export function AiSettings({ initial, credits }: { initial: Values; credits: { b
         />
       </label>
       <p className="mt-2 text-sm text-muted" data-testid="me-ai-consent">
-        {t("consentAiBody")}
+        {wholeNames(t("consentAiBody"))}
       </p>
 
       {!values.on ? (
