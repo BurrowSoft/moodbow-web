@@ -290,7 +290,8 @@ describe("the What changed block's date", () => {
 describe("the 1.4.0 privacy lines", () => {
   const source = legalSource("privacy", "en");
   const IDS = ["routine_live", "app_routine", "trusted_share_live", "app_trusted_share", "app_voice"];
-  const words = (html: string) => html.split('<span class="whole-name">').join("").split("</span>").join("");
+  // As text: the name spans out, and the renderer's &#39; back to an apostrophe.
+  const words = (html: string) => html.split('<span class="whole-name">').join("").split("</span>").join("").split("&#39;").join("'");
   const without = words(renderLegal(source, (id) => !IDS.includes(id) && id !== "plus" && isPendingMet(id)).html);
   const appOnly = words(renderLegal(source, (id) => ["app_routine", "app_trusted_share", "app_voice", "plus"].includes(id) || isPendingMet(id), null).html);
 
