@@ -21,9 +21,10 @@ import { SAVE_WAIT_MS } from "@/lib/ui/withTimeout";
 // Paid Plus that renews shows nothing here.
 
 // The won't-renew date: day and month in the person's own format and time zone (the server and the browser format it
-// the same way), with the year when it isn't this one; UTC for a zone this runtime doesn't know. Plain spaces:
-// DateInLine keeps it whole on a line (UX 20 Nov) without making it unbreakable.
-export function endsOnLabel(iso: string, dateLocaleTag: string, timeZone: string, now = Date.now()): string {
+// the same way), with the year when it isn't this one; UTC for a zone this runtime doesn't know. month: the long name,
+// or the short one that large text shows (DateInLine). Plain spaces: DateInLine keeps it whole on a line (UX 20 Nov)
+// without making it unbreakable.
+export function endsOnLabel(iso: string, dateLocaleTag: string, timeZone: string, now = Date.now(), month: "long" | "short" = "long"): string {
   let zone = timeZone;
   try {
     new Intl.DateTimeFormat("en", { timeZone: zone });
@@ -32,23 +33,37 @@ export function endsOnLabel(iso: string, dateLocaleTag: string, timeZone: string
   }
   const at = new Date(iso);
   const year = (d: Date) => new Intl.DateTimeFormat("en", { year: "numeric", timeZone: zone }).format(d);
-  return new Intl.DateTimeFormat(dateLocaleTag, { day: "numeric", month: "long", ...(year(at) === year(new Date(now)) ? {} : { year: "numeric" }), timeZone: zone }).format(at);
+  return new Intl.DateTimeFormat(dateLocaleTag, { day: "numeric", month, ...(year(at) === year(new Date(now)) ? {} : { year: "numeric" }), timeZone: zone }).format(at);
 }
+
+// Both forms of the won't-renew date, from the same moment (DateInLine shows one).
+const endsOn = (iso: string, dateLocaleTag: string, timeZone: string, now = Date.now()) => ({
+  long: endsOnLabel(iso, dateLocaleTag, timeZone, now),
+  short: endsOnLabel(iso, dateLocaleTag, timeZone, now, "short"),
+});
 
 // The won't-renew line with its date as one inline-block (UX 20 Nov; the Web Tester at de 360/200 and 320/300): the
 // date moves to the next line whole when it fits there, and only when it can't fit any line does it wrap, at its
 // own spaces, never cut inside a word (no-break spaces made it one unbreakable run, which the browser then cut
-// mid-word): overflow-wrap normal. A single word wider than the line (at 320 px / 300 %: "noviembre", "November")
-// hyphenates like the rest of the card (the large-text hyphens: auto, inherited), never runs past it. The message
-// keeps its {date}: a token stands in for it, then the date goes in.
+// mid-word): overflow-wrap normal. The date is there twice (UX's ruling, 20 Nov, after the Web Tester at en 320 px /
+// 300 %: Chrome never hyphenates a capitalised English word, so "November" ran past the card): the long month, and
+// the short one ("Nov 19, 2027", "19. Nov. 2027", "19 nov 2027") where large text makes the page a 13em column or
+// narrower, the hyphen rule's own query (globals.css, [data-date-form]). There no word of the date is too long for a
+// line, in any language, so nothing needs a hyphen. The other form is display: none, so a screen reader hears only the
+// one on screen. The message keeps its {date}: a token stands in for it, then the date goes in.
 const DATE_TOKEN = "@@date@@";
-function DateInLine({ text, date }: { text: string; date: string }) {
+function DateInLine({ text, date }: { text: string; date: { long: string; short: string } }) {
   const [before, after = ""] = text.split(DATE_TOKEN);
   return (
     <>
       {before}
       <span data-testid="me-plus-date" className="inline-block [overflow-wrap:normal]">
-        {date}
+        <span data-date-form="long" data-testid="me-plus-date-long">
+          {date.long}
+        </span>
+        <span data-date-form="short" data-testid="me-plus-date-short">
+          {date.short}
+        </span>
       </span>
       {after}
     </>
@@ -111,7 +126,7 @@ export function PlusInMe({
   const [failed, setFailed] = useState(false);
 
   if (view.kind === "plus" && !view.paymentFailed) {
-    const ends = view.endsAt ? endsOnLabel(view.endsAt, dateLocaleTag, timeZone) : null;
+    const ends = view.endsAt ? endsOn(view.endsAt, dateLocaleTag, timeZone) : null;
     if (view.daysLeft === null) {
       if (!ends) return null;
       // Paid Plus that won't renew: when it ends, so the cancel visibly worked.

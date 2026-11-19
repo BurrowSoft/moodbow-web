@@ -229,6 +229,23 @@ a[href^="tel:"] {
   }
 }
 
+/* The won't-renew date in Me (PlusInMe's DateInLine; UX's ruling, 20 Nov, after the Web Tester at en 320 px / 300 %:
+   Chrome never hyphenates a capitalised English word, so "November" ran past the card): it is there twice, the month
+   long ("19 November 2027") and short ("19 Nov 2027"). The short one shows only where the hyphen rule above applies,
+   with the same query, so no word of the date is too long for a line in any language. display: none, so a screen
+   reader hears only the one on screen. */
+[data-date-form="short"] {
+  display: none;
+}
+@media (max-width: 13em) {
+  [data-date-form="long"] {
+    display: none;
+  }
+  [data-date-form="short"] {
+    display: inline;
+  }
+}
+
 /* Browsers size a fieldset to its content: its rows couldn't wrap at large text. */
 fieldset {
   min-width: 0;
