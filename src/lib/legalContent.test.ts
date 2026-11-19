@@ -253,6 +253,13 @@ describe("the What changed block's date", () => {
     expect(legalDate("2026-12-01", "es")).toBe("1 de diciembre de 2026");
   });
 
+  it("the Spanish block names the same day, in Spanish, or none", () => {
+    const es = legalSource("privacy", "es");
+    expect(words(renderLegal(es, plusMet, legalDate("2026-12-01", "es")).html)).toContain("<strong>Qué ha cambiado el 1 de diciembre de 2026:</strong> ahora puedes suscribirte a Moodbow Plus.");
+    expect(words(renderLegal(es, plusMet, null).html)).toContain("<strong>Qué ha cambiado:</strong> ahora puedes suscribirte a Moodbow Plus.");
+    expect(needsNoticeDate(es, plusUnmet)).toBe(false);
+  });
+
   it("dated and undated blocks; a stray marker is an error, not text", () => {
     const text = "Changed{dated} on {notice_date}{/dated}{undated}, soon{/undated}.";
     expect(applyNoticeDate(text, "2 May 2027")).toBe("Changed on 2 May 2027.");
