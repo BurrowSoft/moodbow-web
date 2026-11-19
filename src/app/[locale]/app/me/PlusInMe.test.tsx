@@ -171,6 +171,20 @@ describe("PlusInMe: a pending cancel (cancel_at)", () => {
     expect(screen.getByTestId("me-plus-date").textContent).toBe("26 November");
   });
 
+  // The span goes in where the message's {date} is: every locale's two lines must have it exactly once, or the
+  // split would drop or repeat part of the sentence (the Reviewer, 20 Nov). This fails before any such translation ships.
+  it("every locale's won't-renew lines have {date} exactly once", async () => {
+    const { IntlMessageFormat } = await import("intl-messageformat");
+    const TOKEN = "@@date@@";
+    for (const locale of ["en", "fr", "es", "pt-br", "de", "it", "th"]) {
+      const plus = ((await import(`@/messages/${locale}.json`)) as { default: { plus: Record<string, string> } }).default.plus;
+      for (const key of ["trialEndsWontRenew", "endsWontRenew"]) {
+        const text = new IntlMessageFormat(plus[key], locale).format({ date: TOKEN }) as string;
+        expect(text.split(TOKEN).length - 1, `${locale} plus.${key}`).toBe(1);
+      }
+    }
+  });
+
   it("a zone this runtime doesn't know: UTC, never a crash", () => {
     expect(endsOnLabel("2026-11-26T23:30:00Z", "en-GB", "Mars/Olympus", NOW.getTime())).toBe("26 November");
   });
