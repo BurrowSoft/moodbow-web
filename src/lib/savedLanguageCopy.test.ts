@@ -16,7 +16,7 @@ describe("savedLanguageCopy (#401): the move's words in their language, the stay
       setTo: "Your journal is set to English.",
       continueIn: "Continue in English",
       switchTo: "Switch to English",
-      stay: "Ficar em Português",
+      stay: "Ficar em português",
       close: at("pt-br", "safety.safetyClose"),
     });
   });
@@ -25,7 +25,21 @@ describe("savedLanguageCopy (#401): the move's words in their language, the stay
     const copy = savedLanguageCopy("de", "fr", of);
     expect(copy.setTo).toBe("Dein Tagebuch ist auf Deutsch eingestellt.");
     expect(copy.continueIn).toBe("Weiter auf Deutsch");
-    expect(copy.stay).toBe("Rester en Français");
+    expect(copy.stay).toBe("Rester en français");
+  });
+
+  // UX, 20 Nov: inside a sentence Portuguese, Spanish and French write their language in lower case; German (a noun)
+  // and English keep the capital.
+  it("a language's name inside a sentence: lower case in pt, es and fr, capitalised in de and en", () => {
+    expect(savedLanguageCopy("pt-br", "en", of)).toMatchObject({ setTo: "Seu diário está em português.", continueIn: "Continuar em português", switchTo: "Mudar para português" });
+    expect(savedLanguageCopy("es", "en", of)).toMatchObject({ setTo: "Tu diario está en español.", continueIn: "Continuar en español", switchTo: "Cambiar a español" });
+    expect(savedLanguageCopy("fr", "en", of)).toMatchObject({ setTo: "Votre journal est en français.", continueIn: "Continuer en français", switchTo: "Passer en français" });
+    expect(savedLanguageCopy("en", "pt-br", of).stay).toBe("Ficar em português");
+    expect(savedLanguageCopy("en", "es", of).stay).toBe("Quedarme en español");
+    expect(savedLanguageCopy("en", "fr", of).stay).toBe("Rester en français");
+    expect(savedLanguageCopy("en", "de", of).stay).toBe("Auf Deutsch bleiben");
+    expect(savedLanguageCopy("de", "en", of).continueIn).toBe("Weiter auf Deutsch");
+    expect(savedLanguageCopy("en", "de", of).setTo).toBe("Your journal is set to English.");
   });
 
   it("every pair of languages: each string there, its name filled in", () => {
@@ -37,8 +51,9 @@ describe("savedLanguageCopy (#401): the move's words in their language, the stay
           expect(value, `${target} on ${here}: ${key}`).toBeTruthy();
           expect(value, `${target} on ${here}: ${key}`).not.toContain("{");
         }
-        const name = at(target, `common.languageNames.${target}`);
-        for (const key of ["setTo", "continueIn", "switchTo"] as const) expect(copy[key], `${target}: ${key}`).toContain(name);
+        // The language's own name, in whatever case its sentence writes it.
+        const name = at(target, `common.languageNames.${target}`).toLocaleLowerCase(target);
+        for (const key of ["setTo", "continueIn", "switchTo"] as const) expect(copy[key].toLocaleLowerCase(target), `${target}: ${key}`).toContain(name);
       }
     }
   });

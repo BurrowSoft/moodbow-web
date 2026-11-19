@@ -16,7 +16,7 @@ vi.mock("./me/actions", () => ({ saveRegion: (...a: unknown[]) => saveRegion(...
 const { SavedLanguageGate, MOVE_WAIT_MS } = await import("./SavedLanguageGate");
 
 // English saved, a Portuguese address (the CI case of #401, the other way round).
-const COPY = { lang: "en", setTo: "Your journal is set to English.", continueIn: "Continue in English", switchTo: "Switch to English", stay: "Ficar em Português", close: "Fechar" };
+const COPY = { lang: "en", setTo: "Your journal is set to English.", continueIn: "Continue in English", switchTo: "Switch to English", stay: "Ficar em português", close: "Fechar" };
 const PAGE = "Hoje";
 const gate = (props: { standalone?: boolean } = {}) =>
   render(
@@ -53,7 +53,7 @@ describe("SavedLanguageGate: never a bare link (#401)", () => {
     // Held back 2 s, so a move that goes at once doesn't flash them.
     expect(words).toHaveAttribute("data-after-wait");
     expect(screen.getByTestId("saved-language-stay")).toHaveAttribute("data-after-wait");
-    expect(screen.getByTestId("saved-language-stay").textContent).toBe("Ficar em Português");
+    expect(screen.getByTestId("saved-language-stay").textContent).toBe("Ficar em português");
     // Not mounted while the move is pending: nothing on it happens for a page nobody saw.
     expect(screen.queryByTestId("page")).toBeNull();
   });
