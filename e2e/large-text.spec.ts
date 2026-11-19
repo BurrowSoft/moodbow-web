@@ -230,9 +230,10 @@ test("large text: a legal page's words stay whole on a 320 px phone, and normal 
         const size = (css: string) => getComputedStyle(document.querySelector(css)!).fontSize;
         return { split: out, body: size(".legal-prose p"), section: size(".legal-prose h2"), overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth, hyphens: getComputedStyle(document.querySelector(".legal-prose p")!).hyphens };
       });
-      // Decision 231 at normal size and at 200 %: whole words, no hyphens. Only 300 % on a 320 px
-      // phone (under 9em wide) hyphenates.
-      expect.soft(measured.hyphens, `${route} at ${percent} %`).toBe(percent === 300 ? "auto" : "manual");
+      // Decision 231 at normal size: whole words, no hyphens. At 200 % and 300 % a 320 px phone is a
+      // 10em column or narrower, where the legal pages hyphenate long words in every language (UX,
+      // 20 Nov, after /es/terms cut "Responsabilid / ad" at 200 %).
+      expect.soft(measured.hyphens, `${route} at ${percent} %`).toBe(percent === 100 ? "manual" : "auto");
       expect.soft(measured.split, `${route} at ${percent} %`).toEqual([]);
       expect.soft(measured.overflow, `${route} at ${percent} %`).toBe(0);
       if (percent === 100) expect.soft([measured.body, measured.section], route).toEqual(["16px", "20px"]);

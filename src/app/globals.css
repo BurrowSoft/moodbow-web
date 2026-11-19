@@ -152,19 +152,14 @@ body {
     hyphens: auto;
     hyphenate-limit-chars: 7 3 3;
   }
-  /* The same rule for the legal pages' body text (UX, 19 Nov): only at really large text, so
-     decision 231's whole words stand at normal sizes, and a long German word
-     ("Datenschutzerklärung") breaks with a hyphen at 300 % instead of mid-word. */
-  .legal-prose :is(p, li, td, h2, h3) {
-    hyphens: auto;
-    hyphenate-limit-chars: 7 3 3;
-  }
 }
-/* Consent and Create account from a 10em column (UX, 19 Nov, the Web Tester's S3): their column is
-   about 10em at 200 % on a 320 px phone, where German otherwise split a word mid-way. The legal
-   pages stay at 9em (/de/privacy at 200 % is clean). */
+/* Consent, Create account and the legal pages' body text from a 10em column (UX, 19 Nov for Consent;
+   20 Nov for the legal pages, in every language, after the Web Tester's S3 on /es/terms cut
+   "Responsabilid / ad" with no hyphen): their column is about 10em at 200 % on a 320 px phone. Only at
+   really large text, so decision 231's whole words stand at normal sizes; a long word (7+ letters, 3+
+   on each side) breaks with a hyphen instead of mid-word. */
 @media (max-width: 10em) {
-  :is([data-hyphenate], [data-hyphenate] :is(p, li, label, legend, span)) {
+  :is([data-hyphenate], [data-hyphenate] :is(p, li, label, legend, span), .legal-prose :is(p, li, td, h2, h3)) {
     hyphens: auto;
     hyphenate-limit-chars: 7 3 3;
   }
