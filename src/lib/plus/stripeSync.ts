@@ -2,6 +2,7 @@ import type Stripe from "stripe";
 import { hasPlus, type EntitlementRow } from "./entitlements";
 import { entitlementStatus, isLive } from "./stripe";
 import type { EntitlementWrite } from "./serviceRole";
+import { isOurs } from "./ours";
 
 // The Stripe webhook's write (docs/plus-entitlements.md), SolvyMed's live-state
 // sync. It writes the subscription's CURRENT state as Stripe reports it, never
@@ -13,6 +14,8 @@ import type { EntitlementWrite } from "./serviceRole";
 
 type Result<T> = { ok: true; value: T } | { ok: false };
 export type SyncDeps = {
+  // Our prices (ours.ts): a subscription that isn't Moodbow's (the account is shared with SolvyMed) is never written.
+  prices: readonly string[];
   retrieve: (id: string) => Promise<Stripe.Subscription | null>;
   read: (userId: string) => Promise<Result<EntitlementRow | null>>;
   insert: (userId: string, row: EntitlementWrite) => Promise<Result<boolean>>;
@@ -20,16 +23,18 @@ export type SyncDeps = {
 };
 export type SyncOutcome =
   | { kind: "written" }
-  | { kind: "skipped"; reason: "no_user" | "no_period_end" | "other_store_grants" | "older_subscription" | "unknown_subscription" }
+  | { kind: "skipped"; reason: "foreign" | "no_user" | "no_period_end" | "other_store_grants" | "older_subscription" | "unknown_subscription" }
   | { kind: "retry"; reason: "stripe" | "db" | "still_changing" };
 
 const iso = (s: number | null | undefined) => (s ? new Date(s * 1000).toISOString() : null);
 const id = (ref: string | { id: string } | null | undefined) => (typeof ref === "string" ? ref : (ref?.id ?? null));
 
-export type Desired = { kind: "skip"; reason: "no_user" | "no_period_end" } | { kind: "write"; userId: string; live: boolean; row: EntitlementWrite };
+export type Desired = { kind: "skip"; reason: "foreign" | "no_user" | "no_period_end" } | { kind: "write"; userId: string; live: boolean; row: EntitlementWrite };
 
-// What the row should say for this subscription right now.
-export function desiredFor(sub: Stripe.Subscription): Desired {
+// What the row should say for this subscription right now. Not Moodbow's (no app=moodbow tag, or none of our
+// prices: the account is shared with SolvyMed): nothing, before anything else is read from it.
+export function desiredFor(sub: Stripe.Subscription, prices: readonly string[]): Desired {
+  if (!isOurs(sub, prices)) return { kind: "skip", reason: "foreign" };
   const userId = sub.metadata?.user_id;
   if (!userId) return { kind: "skip", reason: "no_user" };
   const item = sub.items?.data?.[0];
@@ -88,7 +93,7 @@ export async function syncSubscription(subId: string, deps: SyncDeps): Promise<S
       return { kind: "retry", reason: "stripe" };
     }
     if (!sub) return { kind: "skipped", reason: "unknown_subscription" };
-    const desired = desiredFor(sub);
+    const desired = desiredFor(sub, deps.prices);
     if (desired.kind === "skip") return { kind: "skipped", reason: desired.reason };
     const fingerprint = JSON.stringify(desired.row);
     if (written === fingerprint) return { kind: "written" };

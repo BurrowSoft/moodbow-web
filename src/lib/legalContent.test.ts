@@ -307,6 +307,7 @@ describe("the 1.4.0 privacy lines", () => {
   it("say what the code does: the link keeps a one-way code, a voice entry no recording, Stripe the billing country", () => {
     expect(appOnly).toContain("We keep only a one-way code made from the link's key, so we can't rebuild the link.");
     expect(appOnly).toContain("Moodbow makes no recording, keeps no audio and sends none anywhere.");
-    expect(appOnly).toContain("your billing country (and, where the tax needs it, your postcode) to work out the tax");
+    expect(appOnly).toContain("Stripe receives your card details, your email address to send receipts and, where the card form asks for them, your billing country and postcode, to take the payment");
+    expect(appOnly).not.toContain("to work out the tax");
   });
 });

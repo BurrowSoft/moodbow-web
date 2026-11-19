@@ -1,7 +1,7 @@
 <!--
   Spanish of content/legal/en/privacy.md. Wording is Vitor's, as in English. AI translation, checked
   by back-translation, a script and the Code Reviewer; no native lawyer has read it.
-  en-sha256: 42df4ca27fd1c107c68c1449fc6943721423e2392644c75750528800c977db94
+  en-sha256: 0cf976611de7e7d3834957325ef1bb6c3940b473f7149c1564a2829e602ea5a8
   It's the English this translates: legalSpanish.test.ts fails if the English changes, until the
   Spanish follows and this is updated. Shows on Production only once legal-es-approved is met.
 -->
@@ -37,7 +37,7 @@ Moodbow es un diario privado creado por Vitor Carvalho, que opera como BurrowSof
 **Tus ajustes:** idioma, país, zona horaria, hora{pending:plus}s{/pending} del recordatorio y tus opciones de IA (activada o desactivada, tono, áreas de enfoque).
 **Contenido de IA (solo si la IA está activada):** las reflexiones y los informes que la IA escribe para ti{pending:ai_memory}, y los datos breves que Moodbow recuerda sobre ti, que puedes ver, editar y eliminar en Yo → Lo que Moodbow recuerda{/pending}.
 **Uso de la IA:** por cada solicitud a la IA, la función, el modelo, el número de tokens, el costo y los créditos usados. No el texto de tus entradas ni el de la respuesta de la IA.
-{pending:plus|app_plus}**Compras de Moodbow Plus:** si te suscribes a Moodbow Plus, Google Play, el App Store o Stripe se encargan del pago. Stripe recibe tu dirección de correo para enviarte los recibos y tu país de facturación (y, cuando el impuesto lo necesita, tu código postal) para calcular el impuesto, y guarda sus propios registros. Nosotros guardamos una referencia de cliente y de suscripción, su estado, cuándo {pending:plus_grace_live}empieza y {/pending}termina el periodo actual y cuándo empezó una prueba gratuita, nunca los datos de tu tarjeta.{/pending}
+{pending:plus|app_plus}**Compras de Moodbow Plus:** si te suscribes a Moodbow Plus, Google Play, el App Store o Stripe se encargan del pago. Stripe recibe los datos de tu tarjeta, tu dirección de correo para enviarte los recibos y, cuando el formulario de la tarjeta los pide, tu país de facturación y tu código postal, para procesar el pago, y guarda sus propios registros. Nosotros guardamos una referencia de cliente y de suscripción, su estado, cuándo {pending:plus_grace_live}empieza y {/pending}termina el periodo actual y cuándo empezó una prueba gratuita, nunca los datos de tu tarjeta.{/pending}
 **Informes de errores:** si la app o el sitio web fallan o se produce otro error, se envía un informe técnico (tipo de dispositivo, versión de la app o del navegador, el error) a nuestro proveedor de seguimiento de errores. Antes de que se envíe, quitamos los datos que te identifican y cualquier texto que hayas escrito, y el proveedor no guarda tu dirección IP.
 
 **Cookies y almacenamiento en tu dispositivo:** el sitio web usa solo las cookies que necesita para funcionar: una que mantiene tu sesión iniciada, otra que recuerda el idioma que elegiste, otra que recuerda la vista de lista o de calendario y, durante un minuto después de que eliminas tu cuenta, otra que le indica a tu navegador que borre sus copias. También guarda en tu navegador algunas preferencias de visualización, como el aspecto claro u oscuro y las tarjetas que ya cerraste. Ninguna de ellas te rastrea entre sitios ni se usa para publicidad o analítica.

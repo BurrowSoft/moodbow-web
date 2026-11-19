@@ -5,13 +5,14 @@ import type { EntitlementRow } from "./entitlements";
 import { desiredFor, subscriptionIdOf, syncSubscription, type SyncDeps } from "./stripeSync";
 
 const T = 1_800_000_000; // seconds
-const sub = (over: Partial<Stripe.Subscription> & { periodEnd?: number | null; periodStart?: number | null } = {}): Stripe.Subscription => {
+const PRICES = ["price_1"];
+const sub =(over: Partial<Stripe.Subscription> & { periodEnd?: number | null; periodStart?: number | null } = {}): Stripe.Subscription => {
   const { periodEnd = T + 365 * 86_400, periodStart = T, ...rest } = over;
   return {
     id: "sub_1",
     status: "active",
     customer: "cus_1",
-    metadata: { user_id: "u1" },
+    metadata: { user_id: "u1", app: "moodbow" },
     trial_start: null,
     trial_end: null,
     items: { data: [{ current_period_end: periodEnd, current_period_start: periodStart, price: { id: "price_1" } }] },
@@ -37,6 +38,7 @@ function fakes(stripeStates: Record<string, Stripe.Subscription[]>, start: Entit
   let stored = start;
   const reads: Record<string, number> = {};
   const deps: SyncDeps = {
+    prices: PRICES,
     retrieve: vi.fn(async (id: string) => {
       const list = stripeStates[id];
       if (!list) return null;
@@ -60,7 +62,7 @@ function fakes(stripeStates: Record<string, Stripe.Subscription[]>, start: Entit
 
 describe("desiredFor: the row a subscription should give", () => {
   it("a trial: trialing until the trial's end, the person from the subscription's metadata", () => {
-    const d = desiredFor(sub({ status: "trialing", trial_start: T, trial_end: T + 7 * 86_400, periodEnd: T + 7 * 86_400 }));
+    const d = desiredFor(sub({ status: "trialing", trial_start: T, trial_end: T + 7 * 86_400, periodEnd: T + 7 * 86_400 }), PRICES);
     expect(d).toEqual({
       kind: "write",
       userId: "u1",
@@ -79,14 +81,41 @@ describe("desiredFor: the row a subscription should give", () => {
     });
   });
   it("writes when the current period started (041's grace runs from it), null when Stripe has none", () => {
-    const failed = desiredFor(sub({ status: "past_due", periodStart: T - 2 * 86_400, periodEnd: T + 363 * 86_400 }));
+    const failed = desiredFor(sub({ status: "past_due", periodStart: T - 2 * 86_400, periodEnd: T + 363 * 86_400 }), PRICES);
     expect(failed.kind === "write" && failed.row.current_period_start).toBe(iso(T - 2 * 86_400));
-    const none = desiredFor(sub({ periodStart: null }));
+    const none = desiredFor(sub({ periodStart: null }), PRICES);
     expect(none.kind === "write" && none.row.current_period_start).toBeNull();
   });
   it("no person, or live with no period end: nothing written", () => {
-    expect(desiredFor(sub({ metadata: {} }))).toEqual({ kind: "skip", reason: "no_user" });
-    expect(desiredFor(sub({ periodEnd: null }))).toEqual({ kind: "skip", reason: "no_period_end" });
+    expect(desiredFor(sub({ metadata: { app: "moodbow" } }), PRICES)).toEqual({ kind: "skip", reason: "no_user" });
+    expect(desiredFor(sub({ periodEnd: null }), PRICES)).toEqual({ kind: "skip", reason: "no_period_end" });
+  });
+  it("ours at any of several prices", () => {
+    expect(desiredFor(sub(), ["price_0", "price_1"]).kind).toBe("write");
+  });
+});
+
+describe("not Moodbow's (the account is shared with SolvyMed): nothing read, nothing written", () => {
+  const otherPrice = { data: [{ current_period_end: T + 365 * 86_400, current_period_start: T, price: { id: "price_solvymed" } }] } as unknown as Stripe.Subscription["items"];
+  const cases: [string, Stripe.Subscription][] = [
+    ["no app tag", sub({ metadata: { user_id: "u1" } })],
+    ["SolvyMed's tag", sub({ metadata: { user_id: "u1", app: "solvymed" } })],
+    ["our tag on a price that isn't ours", sub({ items: otherPrice })],
+    ["no items", sub({ items: { data: [] } as unknown as Stripe.Subscription["items"] })],
+  ];
+  it("each is skipped as foreign before anything else, and the table is never read", async () => {
+    for (const [name, s] of cases) {
+      expect(desiredFor(s, PRICES), name).toEqual({ kind: "skip", reason: "foreign" });
+      const { deps, now } = fakes({ sub_1: [s] }, row());
+      expect(await syncSubscription("sub_1", deps), name).toEqual({ kind: "skipped", reason: "foreign" });
+      expect(deps.read, name).not.toHaveBeenCalled();
+      expect(deps.insert, name).not.toHaveBeenCalled();
+      expect(deps.update, name).not.toHaveBeenCalled();
+      expect(now(), name).toEqual(row());
+    }
+  });
+  it("with no price of ours set, nothing is ours", () => {
+    expect(desiredFor(sub(), [])).toEqual({ kind: "skip", reason: "foreign" });
   });
 });
 
@@ -149,7 +178,7 @@ describe("syncSubscription: the live state, never the payload", () => {
 
   it("unknown to Stripe, or naming nobody: skipped, never retried", async () => {
     expect(await syncSubscription("sub_x", fakes({}, null).deps)).toEqual({ kind: "skipped", reason: "unknown_subscription" });
-    expect(await syncSubscription("sub_1", fakes({ sub_1: [sub({ metadata: {} })] }, null).deps)).toEqual({ kind: "skipped", reason: "no_user" });
+    expect(await syncSubscription("sub_1", fakes({ sub_1: [sub({ metadata: { app: "moodbow" } })] }, null).deps)).toEqual({ kind: "skipped", reason: "no_user" });
   });
 });
 

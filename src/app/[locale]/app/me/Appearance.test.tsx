@@ -109,11 +109,12 @@ describe("Me → Appearance: keyboard shortcuts (1.1 O, WCAG 2.1.4)", () => {
 });
 
 describe("Me → Appearance: the theme radios are at least 24 px (audit D polish)", () => {
-  it("each radio h-6 w-6, inside a label that still picks it", () => {
+  // 24 px at any text size (UX, 20 Nov): a 1.5rem radio was 72 px at 300 % and left "Dunkel" no room ("Dunk / el").
+  it("each radio 24 px, inside a label that still picks it", () => {
     renderIt();
     for (const option of ["system", "light", "dark"]) {
       const radio = screen.getByTestId(`me-theme-${option}`);
-      expect(radio.className.split(" ")).toEqual(expect.arrayContaining(["h-6", "w-6", "shrink-0"]));
+      expect(radio.className.split(" ")).toEqual(expect.arrayContaining(["h-[24px]", "w-[24px]", "shrink-0"]));
       expect(radio.closest("label")).not.toBeNull();
     }
   });

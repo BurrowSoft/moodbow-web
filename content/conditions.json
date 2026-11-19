@@ -296,8 +296,8 @@
     "what": "The past_due grace is live (moodbow-app 041 on prod AND the web grace PR deployed, so the Stripe sync writes entitlements.current_period_start). Then the privacy policy's Moodbow Plus purchases line says we keep when the current period starts as well as when it ends (en and es). Met only after both; never before, or the policy would say we keep something we don't yet."
   },
   "policy-notice-live": {
-    "met": false,
-    "what": "The one-time privacy-change notice (policy §8; gate G0 in plans/CHECKLIST-plus-launch.md): Today's card and /privacy/next (the policy as it will read once Plus is on, COMING_POLICY in src/lib/legalContent.ts). Shows only with this met AND app_config.policy_notice_id set on prod (moodbow-app 019; e.g. \"2026-12-01-plus\", the date the change applies). Met on Vitor's word, at least 7 days before plus is met (he can shorten it), after he has approved the Plus policy text and its What changed block."
+    "met": true,
+    "what": "The one-time privacy-change notice (policy §8; gate G0 in plans/CHECKLIST-plus-launch.md): Today's card and /privacy/next (the policy as it will read once Plus is on, COMING_POLICY in src/lib/legalContent.ts). Shows only with this met AND app_config.policy_notice_id set on prod (moodbow-app 019; Vitor's one-row write). Vitor, 20 Nov: the notice goes out while Stripe is set up, with no fixed wait; an undated id gives \"Soon, you can subscribe…\", a dated one (\"2026-12-01-plus\") names the day. It must be on prod before plus is met."
   },
   "offer-live": {
     "met": false,

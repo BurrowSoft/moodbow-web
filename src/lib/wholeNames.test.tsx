@@ -30,7 +30,7 @@ describe("names stay whole at large text", () => {
   });
 
   it("short names are safe by length; exactly these need wrapping", () => {
-    expect([...LONG_NAMES]).toEqual(["Vitor Carvalho", "BurrowSoft", "Anthropic", "Supabase", "JavaScript", "Bluetooth"]);
+    expect([...LONG_NAMES]).toEqual(["Vitor Carvalho", "BurrowSoft", "Anthropic", "Supabase", "JavaScript", "Bluetooth", "TelefonSeelsorge"]);
     for (const word of ["Moodbow", "Plus", "AI", "Lite", "Stripe", "Google", "Play", "App", "Store"]) expect(word.length, word).toBeLessThan(HYPHEN_MIN);
   });
 
