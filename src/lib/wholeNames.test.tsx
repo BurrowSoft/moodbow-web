@@ -1,6 +1,8 @@
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
+import { helpArticles, renderArticle } from "./helpContent";
+import { renderLegal } from "./legalContent";
 import { HYPHEN_MIN, KEEP_TOGETHER_CLASS, LONG_NAMES, wholeNames, wholeNamesHtml, WHOLE_NAME_CLASS } from "./wholeNames";
 
 // Names stay whole everywhere the global large-text rule reaches (UX, 20 Nov, after "MOOD- / BOW" on Me's Plus banner).
@@ -13,8 +15,8 @@ describe("names stay whole at large text", () => {
     expect(min).toBe(HYPHEN_MIN);
   });
 
-  it("short names are safe by length; exactly three need wrapping", () => {
-    expect([...LONG_NAMES]).toEqual(["Vitor Carvalho", "BurrowSoft", "Anthropic"]);
+  it("short names are safe by length; exactly these need wrapping", () => {
+    expect([...LONG_NAMES]).toEqual(["Vitor Carvalho", "BurrowSoft", "Anthropic", "Supabase", "JavaScript"]);
     for (const word of ["Moodbow", "Plus", "AI", "Lite", "Stripe", "Google", "Play", "App", "Store"]) expect(word.length, word).toBeLessThan(HYPHEN_MIN);
   });
 
@@ -27,6 +29,7 @@ describe("names stay whole at large text", () => {
       "bo.consentBody": "BoConsent",
       "bo.journalSwitchNote": "BoMeRow",
       "bo.pictureConsentBody": "BoConversation",
+      "me.meNoScript": "app/layout (the no-script line)",
       "meta.description": "metadata only",
       "common.burrowsoftAria": "an aria-label only",
     };
@@ -40,6 +43,28 @@ describe("names stay whole at large text", () => {
 
   it("Help wraps only the long names (the short ones read as plain text)", () => {
     expect(wholeNamesHtml("<p>Moodbow uses Anthropic.</p>", LONG_NAMES)).toBe(`<p>Moodbow uses <span class="${WHOLE_NAME_CLASS}">Anthropic</span>.</p>`);
+  });
+
+  it("every legal page and Help article wraps each long name it shows (every pending block shown)", () => {
+    const pages: [string, string][] = [];
+    for (const locale of readdirSync("content/legal")) {
+      for (const file of readdirSync(`content/legal/${locale}`).filter((f) => f.endsWith(".md"))) {
+        pages.push([`legal/${locale}/${file}`, renderLegal(readFileSync(`content/legal/${locale}/${file}`, "utf8"), () => true, null).html]);
+      }
+    }
+    for (const locale of readdirSync("content/help")) {
+      for (const article of helpArticles(locale)) pages.push([`help/${locale}/${article.slug}`, renderArticle(article, () => true)]);
+    }
+    expect(pages.length).toBeGreaterThan(20);
+    for (const [where, html] of pages) {
+      const text = html.replace(/<[^>]+>/g, "");
+      for (const name of LONG_NAMES) {
+        const wrapped = html.split(`<span class="${WHOLE_NAME_CLASS}">${name}</span>`).length - 1;
+        // Each long word of the name, counted in the page's text, is inside a wrapped name: so a name broken over two
+        // lines of the markdown ("Vitor" / "Carvalho") fails here too.
+        for (const word of name.split(" ").filter((w) => w.length >= HYPHEN_MIN)) expect(text.split(word).length - 1, `${where}: ${word}`).toBe(wrapped);
+      }
+    }
   });
 });
 
