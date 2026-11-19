@@ -2371,6 +2371,32 @@ test("Insights for a free person: the example, its watermark whole at 320 and 12
       }));
       expect.soft(wide, `${range} at 300 % on 320 px: nothing scrolls sideways`).toEqual({ overflow: 0, sticksOut: [] });
     }
+    // The example strip at large text (UX, 20 Nov; the Web Tester: at 360 px / 200 %, de, its words had 16 px, one
+    // letter a line, beside "Plus ansehen"): the words take at least 60 % of the strip, and no line is one letter.
+    await setProfileLocale(email, password, "de");
+    for (const [width, standard] of [[360, 32], [320, 48]] as const) {
+      await page.setViewportSize({ width, height: 800 });
+      await cdp.send("Page.setFontSizes", { fontSizes: { standard, fixed: (13 * standard) / 16 } });
+      await page.goto("/de/app/insights");
+      await expect(page.getByTestId("insights-example-strip")).toBeVisible({ timeout: 15_000 });
+      const strip = await page.evaluate(() => {
+        const box = document.querySelector('[data-testid="insights-example-strip"]')!;
+        const p = document.querySelector('[data-testid="insights-example-strip-text"]')!;
+        const text = p.firstChild as Text;
+        const lines = new Map<number, string>();
+        for (let i = 0; i < text.length; i++) {
+          const range = document.createRange();
+          range.setStart(text, i);
+          range.setEnd(text, i + 1);
+          const rect = range.getClientRects()[0];
+          if (rect) lines.set(Math.round(rect.top), (lines.get(Math.round(rect.top)) ?? "") + text.data[i]);
+        }
+        return { share: p.getBoundingClientRect().width / box.getBoundingClientRect().width, lines: [...lines.values()].map((l) => l.trim()) };
+      });
+      const at = `de at ${width} px, ${(standard / 16) * 100} %`;
+      expect(strip.share, `${at}: the words' share of the strip`).toBeGreaterThanOrEqual(0.6);
+      expect(strip.lines.filter((l) => l.replace(/[^\p{L}]/gu, "").length < 2), `${at}: no line of one letter (${JSON.stringify(strip.lines)})`).toEqual([]);
+    }
     await cdp.send("Page.setFontSizes", { fontSizes: { standard: 16, fixed: 13 } });
   } finally {
     await cleanup(email);
