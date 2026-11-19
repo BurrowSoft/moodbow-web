@@ -92,7 +92,25 @@ describe("POST /api/checkout/stripe", () => {
     expect(p.cancel_url).toBe(`${ORIGIN}/es/app/me/plus`);
   });
 
-  it("Stripe Tax: automatic tax on, the address asked only where needed; a new customer gets no customer_update", async () => {
+  // Stripe Tax is off unless STRIPE_AUTOMATIC_TAX=1 (UX, 20 Nov): Stripe doesn't offer it to a Thailand-based business,
+  // and with it on every Checkout Session on this account fails.
+  it("no STRIPE_AUTOMATIC_TAX: no automatic tax, no address asked for it, nothing saved back", async () => {
+    entitlement = { data: row({ store_customer_id: "cus_9" }), error: null };
+    await post();
+    const p = createParams();
+    expect(p).not.toHaveProperty("automatic_tax");
+    expect(p).not.toHaveProperty("billing_address_collection");
+    expect(p).not.toHaveProperty("customer_update");
+  });
+
+  it("STRIPE_AUTOMATIC_TAX set to anything but 1: still off", async () => {
+    vi.stubEnv("STRIPE_AUTOMATIC_TAX", "true");
+    await post();
+    expect(createParams()).not.toHaveProperty("automatic_tax");
+  });
+
+  it("STRIPE_AUTOMATIC_TAX=1: automatic tax on, the address asked only where needed; a new customer gets no customer_update", async () => {
+    vi.stubEnv("STRIPE_AUTOMATIC_TAX", "1");
     await post();
     const p = createParams();
     expect(p.automatic_tax).toEqual({ enabled: true });
@@ -100,7 +118,8 @@ describe("POST /api/checkout/stripe", () => {
     expect(p.customer_update).toBeUndefined();
   });
 
-  it("Stripe Tax for a returning customer: the address and name Checkout collects are saved back to them", async () => {
+  it("STRIPE_AUTOMATIC_TAX=1, a returning customer: the address and name Checkout collects are saved back to them", async () => {
+    vi.stubEnv("STRIPE_AUTOMATIC_TAX", "1");
     entitlement = { data: row({ store_customer_id: "cus_9" }), error: null };
     await post();
     const p = createParams();
