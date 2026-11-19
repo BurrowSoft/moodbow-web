@@ -23,6 +23,7 @@ import { KeyboardShortcuts } from "./KeyboardShortcuts";
 import { NavProgress } from "@/components/NavProgress";
 import { SavedLanguageRedirect } from "./SavedLanguageRedirect";
 import { APP_MAIN_GUTTER } from "@/lib/ui/journalLayout";
+import { wholeNames } from "@/lib/wholeNames";
 
 // The signed-in web journal. Behind web-journal-live: the proxy 404s /app on
 // Production until it's met; this check is the backstop. Signed-out visitors
@@ -97,7 +98,7 @@ export default async function AppLayout({ children, params }: LayoutProps<"/[loc
                   {t("meGetHelpNow")}
                 </Link>
               </p>
-              <p data-testid="app-noscript-journal" className="text-muted">{t("meNoScript")}</p>
+              <p data-testid="app-noscript-journal" className="text-muted">{wholeNames(t("meNoScript"))}</p>
             </div>
           </noscript>
           {/* Per user: another account signing in starts empty (#9765 M-01). */}

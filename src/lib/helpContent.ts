@@ -55,7 +55,7 @@ export function helpArticles(locale: string): HelpArticle[] {
 // The article as Production shows it: unmet pending blocks removed.
 export function renderArticle(article: HelpArticle, met: (id: string) => boolean = isPendingMet): string {
   const { text } = applyPending(stripComments(article.source), met);
-  // The long names (a word of HYPHEN_MIN+ letters: Anthropic, BurrowSoft, Vitor Carvalho) never hyphenate at large text.
+  // The long names (LONG_NAMES: a word of HYPHEN_MIN+ letters, such as Anthropic) never hyphenate at large text.
   return text.trim() ? wholeNamesHtml(marked.parse(text.trim(), { async: false, gfm: true }) as string, LONG_NAMES) : "";
 }
 
