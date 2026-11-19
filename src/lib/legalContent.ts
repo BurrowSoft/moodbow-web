@@ -58,6 +58,13 @@ export function applyPending(source: string, met: (id: string) => boolean = isPe
   return { text, hidden };
 }
 
+// The legal text as it will read once the noticed change applies (the policy's §8): the pending
+// ids in COMING are in, everything else as it is today. Now: Moodbow Plus (its purchases, Stripe,
+// the stores' rows, the payment-records bullet). Change it with the next noticed change.
+export const COMING_POLICY: readonly string[] = ["plus"];
+export const comingPolicyMet = (id: string) => COMING_POLICY.includes(id) || (pendingKnown(id) && isPendingMet(id));
+const pendingKnown = (id: string) => conditionForPending(id) in (conditions as Record<string, unknown>);
+
 // HTML comments (the file header) are notes for editors, never published.
 export function stripComments(source: string): string {
   return source.replace(/<!--[\s\S]*?-->\n?/g, "");

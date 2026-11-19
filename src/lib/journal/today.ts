@@ -84,6 +84,11 @@ export function dateLine(localDate: string, dateLocaleTag: string): string {
   return withFirst(new Intl.DateTimeFormat(dateLocaleTag, { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).formatToParts(date), dateLocaleTag);
 }
 
+// A date with no weekday, for a sentence: "1er décembre 2026".
+export function dateInSentence(localDate: string, dateLocaleTag: string): string {
+  return withFirst(new Intl.DateTimeFormat(dateLocaleTag, { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).formatToParts(new Date(`${localDate}T12:00:00Z`)), dateLocaleTag);
+}
+
 export function dateRangeLine(start: string, end: string, dateLocaleTag: string): string {
   const format = new Intl.DateTimeFormat(dateLocaleTag, { day: "numeric", month: "long", timeZone: "UTC" });
   return withFirst(format.formatRangeToParts(new Date(`${start}T00:00:00Z`), new Date(`${end}T00:00:00Z`)), dateLocaleTag);
