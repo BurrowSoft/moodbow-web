@@ -3,7 +3,7 @@
 import { useActionState, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { AuthField, primaryButtonClass, textLinkClass } from "@/components/AuthField";
+import { AuthField, primaryButtonClass, standaloneLinkClass, textLinkClass } from "@/components/AuthField";
 import { FocusOnMount } from "@/components/FocusOnMount";
 import { signUpFlow, type SignUpState } from "./actions";
 import { countTap } from "@/lib/analyticsEvents";
@@ -228,7 +228,7 @@ export function SignUpForm({ askAi = false, healthLink = false, legalInEnglish =
         </button>
       </form>
       <p>
-        <Link href="/sign-in" data-testid="signup-to-signin" className={textLinkClass}>
+        <Link href="/sign-in" data-testid="signup-to-signin" className={standaloneLinkClass}>
           {wholeNames(t("signupHaveAccount"))}
         </Link>
       </p>

@@ -7,6 +7,7 @@ import { conditionMet } from "@/lib/conditions";
 import { pageMetadata } from "@/lib/metadata";
 import { SUPPORT_EMAIL } from "@/lib/site";
 import { SupportAddress } from "@/lib/wholeNames";
+import { standaloneLinkClass } from "@/components/AuthField";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/support">): Promise<Metadata> {
   const { locale } = await params;
@@ -35,7 +36,7 @@ export default async function SupportPage({ params }: PageProps<"/[locale]/suppo
       </p>
       {conditionMet("delete-account-live") && (
         <p>
-          <Link href="/account-deletion" className="font-medium text-accent underline underline-offset-4">
+          <Link href="/account-deletion" data-testid="support-account-deletion" className={standaloneLinkClass}>
             {t("deleteLink")}
           </Link>
         </p>
