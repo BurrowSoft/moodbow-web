@@ -3,6 +3,7 @@ import path from "node:path";
 import { marked } from "marked";
 import conditions from "../../content/conditions.json";
 import { pageGate, type ConditionId, type PageGate } from "./conditions";
+import { wholeNamesHtml } from "./wholeNames";
 
 // The privacy policy and terms (W3) live as Markdown per locale:
 // content/legal/<locale>/<slug>.md, copied from UX & PM's specs. Long-form
@@ -110,7 +111,8 @@ export function renderLegal(source: string, met: (id: string) => boolean = isPen
     .replace(/^### /gm, "## ")
     .replace(TODO, (t) => `<mark class="legal-todo">${t}</mark>`);
   const html = marked.parse(body, { async: false, gfm: true }) as string;
-  return { title, html: scrollableTables(html), hidden };
+  // Names never hyphenate (UX, 19 Nov), even where the large-text hyphen rule is on.
+  return { title, html: scrollableTables(wholeNamesHtml(html)), hidden };
 }
 
 // A wide table scrolls sideways on a phone, so its scroller must be
