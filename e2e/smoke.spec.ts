@@ -684,6 +684,19 @@ test.describe("onboarding (signed out)", () => {
     await expect(page.getByTestId("home-security")).toHaveCount(0);
   });
 
+  test("Create account: who keeps what is right above the boxes, in small print that still scales", async ({ page }) => {
+    await page.goto("/sign-up");
+    const notice = page.getByTestId("consent-notice");
+    await expect(notice).toContainText("Moodbow is run by Vitor Carvalho");
+    const n = (await notice.boundingBox())!;
+    const box = (await page.getByTestId("consent-privacy").boundingBox())!;
+    expect(n.y).toBeLessThan(box.y);
+    // 0.6875rem: 11px at the default root size, and it follows the root (rem, not px).
+    expect(await notice.evaluate((el) => getComputedStyle(el).fontSize)).toBe("11px");
+    await page.evaluate(() => (document.documentElement.style.fontSize = "32px"));
+    expect(await notice.evaluate((el) => getComputedStyle(el).fontSize)).toBe("22px");
+  });
+
   test("Create account: help is there before anything's agreed, and it opens the card", async ({ page }) => {
     await page.goto("/sign-up");
     await page.getByTestId("signup-get-help").click();

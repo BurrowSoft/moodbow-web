@@ -1,5 +1,6 @@
 // @vitest-environment node
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { withLanguage } from "@/lib/legalVersions";
 import { CONSENT_COOKIE, grantedAtConsent } from "@/lib/onboardingConsent";
 import { onboardingStep } from "@/lib/journal/me";
 import { POLICY_VERSIONS } from "@/lib/legalVersions";
@@ -106,7 +107,7 @@ describe("giveConsent: the optional AI box (r1 §M3)", () => {
     aiGate = "live";
     me({ age_18: { version: "1", granted: true } });
     await redirected(giveConsent(idle, form({ privacy: "on", health: "on", ai: "on" })));
-    expect(rpc).toHaveBeenCalledWith("record_consents", { p_items: grantedAtConsent(true) });
+    expect(rpc).toHaveBeenCalledWith("record_consents", { p_items: withLanguage(grantedAtConsent(true), "en") });
   });
 });
 
@@ -142,7 +143,7 @@ describe("giveConsent", () => {
     signedIn();
     me({ age_18: { version: "1", granted: true } });
     expect(await redirected(giveConsent(idle, form({ privacy: "on", health: "on" })))).toEqual({ redirect: "/app" });
-    expect(rpc).toHaveBeenCalledWith("record_consents", { p_items: grantedAtConsent() });
+    expect(rpc).toHaveBeenCalledWith("record_consents", { p_items: withLanguage(grantedAtConsent(), "en") });
 
     rpc.mockReset();
     me({});

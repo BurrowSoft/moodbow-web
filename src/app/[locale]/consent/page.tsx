@@ -14,6 +14,7 @@ import { pageMetadata } from "@/lib/metadata";
 import { isAuthOutage } from "@/lib/supabase/proxy";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { askAiConsent } from "@/lib/journal/ai";
+import { CONSENT_NOTICE_CLASS } from "@/lib/legalVersions";
 import { offeredLocales } from "@/i18n/routing";
 import { savedLanguageRoute } from "@/lib/savedLanguage";
 import { SavedLanguageRedirect } from "../app/SavedLanguageRedirect";
@@ -66,14 +67,19 @@ export default async function ConsentPage({ params }: PageProps<"/[locale]/conse
           {ta("errGeneric")}
         </p>
       )}
-      <ConsentForm askAge={askAge} askAi={askAiConsent()} showBack={!user && !outage} />
-      {/* Help is never behind a consent, new or asked again: the card and its words only
-          come to this page, which the root layout doesn't send them to. */}
+      {/* Help first (UX): it's never behind a consent, new or asked again. The card and its
+          words only come to this page, which the root layout doesn't send them to. */}
       <NextIntlClientProvider messages={helpCardMessages(await getMessages())}>
-        <div className="mt-[24px] [font-size:min(1rem,max(10vw,32px))] [&_a]:min-h-[44px] [&_button]:min-h-[44px]">
+        <div className="[font-size:min(1rem,max(10vw,32px))] [&_a]:min-h-[44px] [&_button]:min-h-[44px]">
           <GetHelpNow country={country} testId="consent-get-help" counted neutral />
         </div>
       </NextIntlClientProvider>
+      {/* Who keeps what, above the boxes and never collapsed, so nobody consents with it off screen
+          (decisions 224, 226). Small print: CONSENT_NOTICE_CLASS. */}
+      <p data-testid="consent-notice" className={CONSENT_NOTICE_CLASS}>
+        {t("consentNotice")}
+      </p>
+      <ConsentForm askAge={askAge} askAi={askAiConsent()} showBack={!user && !outage} />
     </PageShell>
   );
 }
