@@ -25,6 +25,15 @@ export function openAppIntent(production: boolean, fallback: string): string {
   return `intent://app/me/backup#Intent;scheme=moodbow;package=${pkg};S.browser_fallback_url=${encodeURIComponent(fallback)};end`;
 }
 
+// The same screen from an iPhone (UX & PM, 17 Nov): the app's custom scheme,
+// a plain link. TODO(ios): the Mobile Dev confirms the scheme and path the
+// iPhone app handles (after 1.3.1). Not a universal link: iOS keeps a tap on
+// a link to our own domain in Safari, and the app claims only /open/* (never
+// /auth/* or /email-confirmed, so web sign-ups stay in the browser; see
+// public/.well-known/apple-app-site-association). If the app isn't there,
+// Safari says it can't open the link, so the page keeps its line under it.
+export const IOS_OPEN_URL = "moodbow://app/me/backup";
+
 // Where a missing app falls back (UX, after #138 on prod): the Play listing
 // only once it's public (play-live); before that it's "item not found" for
 // anyone outside the closed test, so the confirmed page itself, without the

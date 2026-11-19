@@ -4,11 +4,14 @@ import { useEffect, useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
 import { classifyAuthLink, type AuthLinkResult } from "@/lib/authLink";
 import { STATUS_BUTTON } from "@/components/statusButton";
-import { openAppFallback, openAppIntent } from "@/lib/stores";
+import { IOS_OPEN_URL, openAppFallback, openAppIntent } from "@/lib/stores";
+import { isIos } from "@/lib/safety/helplines";
 import { ContinueCountdown } from "./ContinueCountdown";
 
 // An Android browser: the only place an intent:// link can open the app.
 const onAndroid = () => /Android/i.test(navigator.userAgent);
+// An iPhone or iPad: the custom scheme, once the iPhone app is in the App Store (iosLive).
+const onIos = () => isIos(navigator.userAgent, navigator.maxTouchPoints);
 const notOnServer = () => false;
 // This deployment's origin, for the fallback's absolute URL. Only the origin:
 // the path comes from the server (openApp.path), since window.location can
@@ -46,10 +49,11 @@ const COPY = {
 // appMissing: back here as that link's fallback (the app didn't open):
 // neither the button nor the app line, only the confirmation (UX: a web-only
 // account isn't backing anything up).
-export function EmailConfirmedMessage({ fromQuery, continueTo, openApp = null, appMissing = false }: { fromQuery: AuthLinkResult; continueTo: string | null; openApp?: { production: boolean; playLive: boolean; path: string } | null; appMissing?: boolean }) {
+export function EmailConfirmedMessage({ fromQuery, continueTo, openApp = null, appMissing = false }: { fromQuery: AuthLinkResult; continueTo: string | null; openApp?: { production: boolean; playLive: boolean; iosLive?: boolean; path: string } | null; appMissing?: boolean }) {
   const t = useTranslations("emailConfirmed");
   const fromHash = useSyncExternalStore(subscribe, readHash, noHashOnServer);
   const android = useSyncExternalStore(subscribe, onAndroid, notOnServer);
+  const ios = useSyncExternalStore(subscribe, onIos, notOnServer);
   const origin = useSyncExternalStore(subscribe, thisOrigin, noOriginOnServer);
   const result: AuthLinkResult = fromHash === "error" ? "error" : fromQuery;
 
@@ -82,6 +86,16 @@ export function EmailConfirmedMessage({ fromQuery, continueTo, openApp = null, a
           <a href={openAppIntent(openApp.production, openAppFallback(openApp.playLive, `${origin}${openApp.path}`))} data-testid="email-confirmed-open-app" className={`mt-9 ${STATUS_BUTTON}`}>
             {t("emailConfirmedOpenApp")}
           </a>
+        ) : openApp?.iosLive && ios ? (
+          <>
+            {/* The custom scheme has no fallback of its own: the line stays under it. */}
+            <a href={IOS_OPEN_URL} data-testid="email-confirmed-open-app" className={`mt-9 ${STATUS_BUTTON}`}>
+              {t("emailConfirmedOpenApp")}
+            </a>
+            <p data-testid="email-confirmed-ios-line" className="mt-4 [font-size:min(1rem,max(10vw,32px))] leading-relaxed text-muted sm:text-[1.0625rem]">
+              {t("emailConfirmedDesktopLine")}
+            </p>
+          </>
         ) : (
           <p data-testid="email-confirmed-app-line" className="mt-4 [font-size:min(1rem,max(10vw,32px))] font-medium leading-relaxed text-text sm:text-[1.0625rem]">
             {t("emailConfirmedDesktopLine")}
