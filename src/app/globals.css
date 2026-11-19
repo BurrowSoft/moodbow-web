@@ -152,6 +152,13 @@ body {
     hyphens: auto;
     hyphenate-limit-chars: 7 3 3;
   }
+  /* The same rule for the body text of Consent, Create account and the legal pages (UX, 19 Nov):
+     only at really large text, so decision 231's whole words stand at normal sizes, and a long
+     German word ("Datenschutzerklärung") breaks with a hyphen at 300 % instead of mid-word. */
+  :is([data-hyphenate], [data-hyphenate] :is(p, li, label, legend, span), .legal-prose :is(p, li, td, h2, h3)) {
+    hyphens: auto;
+    hyphenate-limit-chars: 7 3 3;
+  }
 }
 
 /* A call link's name may break anywhere rather than push the page sideways: a long name such

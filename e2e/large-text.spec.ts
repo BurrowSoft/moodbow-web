@@ -102,6 +102,9 @@ test("large text: Create account's heading and consent boxes keep their words wh
           if (!root) continue;
           const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
           for (let node = walker.nextNode() as Text | null; node; node = walker.nextNode() as Text | null) {
+            // Whole, or split with a hyphen at really large text (UX, 19 Nov: the journal's rule, only
+            // under 9em wide). The browser draws the hyphen, so a split counts as one where it hyphenates.
+            if (getComputedStyle(node.parentElement!).hyphens === "auto") continue;
             for (const m of node.data.matchAll(/[^\s\-–]+/g)) {
               const range = document.createRange();
               range.setStart(node, m.index);
@@ -162,6 +165,8 @@ test("large text: a legal page's words stay whole on a 320 px phone, and normal 
           if (!root) continue;
           const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
           for (let node = walker.nextNode() as Text | null; node; node = walker.nextNode() as Text | null) {
+            // Whole, or split with a hyphen at really large text (UX, 19 Nov), as on Create account.
+            if (getComputedStyle(node.parentElement!).hyphens === "auto") continue;
             for (const m of node.data.matchAll(/[^\s\-–]+/g)) {
               const range = document.createRange();
               range.setStart(node, m.index);
@@ -178,8 +183,11 @@ test("large text: a legal page's words stay whole on a 320 px phone, and normal 
           }
         }
         const size = (css: string) => getComputedStyle(document.querySelector(css)!).fontSize;
-        return { split: out, body: size(".legal-prose p"), section: size(".legal-prose h2"), overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth };
+        return { split: out, body: size(".legal-prose p"), section: size(".legal-prose h2"), overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth, hyphens: getComputedStyle(document.querySelector(".legal-prose p")!).hyphens };
       });
+      // Decision 231 at normal size and at 200 %: whole words, no hyphens. Only 300 % on a 320 px
+      // phone (under 9em wide) hyphenates.
+      expect.soft(measured.hyphens, `${route} at ${percent} %`).toBe(percent === 300 ? "auto" : "manual");
       expect.soft(measured.split, `${route} at ${percent} %`).toEqual([]);
       expect.soft(measured.overflow, `${route} at ${percent} %`).toBe(0);
       if (percent === 100) expect.soft([measured.body, measured.section], route).toEqual(["16px", "20px"]);

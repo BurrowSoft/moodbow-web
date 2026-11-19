@@ -77,7 +77,7 @@ export default async function ConsentPage({ params }: PageProps<"/[locale]/conse
       </NextIntlClientProvider>
       {/* Who keeps what, above the boxes and never collapsed, so nobody consents with it off screen
           (decisions 224, 226). Small print: CONSENT_NOTICE_CLASS. */}
-      <p data-testid="consent-notice" className={CONSENT_NOTICE_CLASS}>
+      <p data-testid="consent-notice" data-hyphenate className={CONSENT_NOTICE_CLASS}>
         {t("consentNotice")}
       </p>
       <ConsentForm askAge={askAge} askAi={askAiConsent()} showBack={!user && !outage} legalInEnglish={legalLocale(locale, "privacy") !== locale || legalLocale(locale, "terms") !== locale} />
