@@ -46,7 +46,7 @@ export default async function SignUpPage({ params }: PageProps<"/[locale]/sign-u
           {ta("startedInApp")}
         </p>
       )}
-      <SignUpForm askAi={askAiConsent()} healthLink={conditionMet("consumer-health-data-approved")} legalInEnglish={legalLocale(locale, "privacy") !== locale} />
+      <SignUpForm askAi={askAiConsent()} healthLink={conditionMet("consumer-health-data-approved")} legalInEnglish={legalLocale(locale, "privacy") !== locale || legalLocale(locale, "terms") !== locale} />
       {/* Help is never behind a consent, as on Consent: its card and words come only to this page. */}
       <NextIntlClientProvider messages={helpCardMessages(await getMessages())}>
         <div className="mt-[24px] [font-size:min(1rem,max(10vw,32px))] [&_a]:min-h-[44px] [&_button]:min-h-[44px]">

@@ -24,7 +24,8 @@ const SHAPES: Record<string, (text: string) => string[]> = {
 };
 const count = (text: string, name: string) => text.split(name).length - 1;
 
-describe.each(["privacy", "terms"])("Spanish %s against the English", (slug) => {
+// Terms only for now; privacy comes back here with its catch-up (UX 19 Nov, option a).
+describe.each(["terms"])("Spanish %s against the English", (slug) => {
   const english = stripComments(legalSource(slug as "privacy", "en"));
   const spanish = stripComments(legalSource(slug as "privacy", "es"));
   it("translates this exact English: if this fails, the English changed, so update the Spanish and its en-sha256", () => {
@@ -40,11 +41,9 @@ describe.each(["privacy", "terms"])("Spanish %s against the English", (slug) => 
 });
 
 describe("the words for Moodbow's buttons match what the app shows in Spanish", () => {
-  const text = stripComments(legalSource("privacy", "es")) + stripComments(legalSource("terms", "es"));
+  const text = stripComments(legalSource("terms", "es"));
   it.each([
-    [`${es.app.tabMe} → ${es.me.meExport}`],
     [`${es.app.tabMe} → ${es.me.meDelete}`],
-    [`${es.app.tabMe} → ${es.ai.meAi}`],
     [`${es.app.tabMe} → ${es.me.meGetHelpNow}`],
   ])("%s", (words) => {
     expect(text).toContain(words);

@@ -80,7 +80,7 @@ export default async function ConsentPage({ params }: PageProps<"/[locale]/conse
       <p data-testid="consent-notice" className={CONSENT_NOTICE_CLASS}>
         {t("consentNotice")}
       </p>
-      <ConsentForm askAge={askAge} askAi={askAiConsent()} showBack={!user && !outage} legalInEnglish={legalLocale(locale, "privacy") !== locale} />
+      <ConsentForm askAge={askAge} askAi={askAiConsent()} showBack={!user && !outage} legalInEnglish={legalLocale(locale, "privacy") !== locale || legalLocale(locale, "terms") !== locale} />
     </PageShell>
   );
 }
