@@ -58,11 +58,29 @@
     "then": true
    }
   ],
+  "calming-sounds": [
+   {
+    "ids": [
+     "sounds_live",
+     "app_sounds"
+    ],
+    "then": true
+   }
+  ],
   "check-ins": true,
   "christmas-offer": [
    {
     "ids": [
      "offer_live"
+    ],
+    "then": true
+   }
+  ],
+  "days-you-showed-up": [
+   {
+    "ids": [
+     "showed_up_live",
+     "app_showed_up"
     ],
     "then": true
    }
@@ -117,6 +135,15 @@
    }
   ],
   "moments": true,
+  "mood-prompts": [
+   {
+    "ids": [
+     "mood_prompts_live",
+     "app_mood_prompts"
+    ],
+    "then": true
+   }
+  ],
   "moodbow-plus": [
    {
     "ids": [
@@ -177,6 +204,15 @@
     "then": true
    }
   ],
+  "routine": [
+   {
+    "ids": [
+     "app_routine",
+     "routine_live"
+    ],
+    "then": true
+   }
+  ],
   "safety-plan": [
    {
     "ids": [
@@ -210,6 +246,15 @@
    {
     "ids": [
      "app_year_card"
+    ],
+    "then": true
+   }
+  ],
+  "share-your-week": [
+   {
+    "ids": [
+     "trusted_share_live",
+     "app_trusted_share"
     ],
     "then": true
    }
@@ -255,6 +300,14 @@
    }
   ],
   "timeline": true,
+  "voice-entries": [
+   {
+    "ids": [
+     "app_voice"
+    ],
+    "then": true
+   }
+  ],
   "widget": [
    {
     "ids": [
@@ -355,11 +408,29 @@
     "then": true
    }
   ],
+  "calming-sounds": [
+   {
+    "ids": [
+     "sounds_live",
+     "app_sounds"
+    ],
+    "then": true
+   }
+  ],
   "check-ins": true,
   "christmas-offer": [
    {
     "ids": [
      "offer_live"
+    ],
+    "then": true
+   }
+  ],
+  "days-you-showed-up": [
+   {
+    "ids": [
+     "showed_up_live",
+     "app_showed_up"
     ],
     "then": true
    }
@@ -414,6 +485,15 @@
    }
   ],
   "moments": true,
+  "mood-prompts": [
+   {
+    "ids": [
+     "mood_prompts_live",
+     "app_mood_prompts"
+    ],
+    "then": true
+   }
+  ],
   "moodbow-plus": [
    {
     "ids": [
@@ -474,6 +554,15 @@
     "then": true
    }
   ],
+  "routine": [
+   {
+    "ids": [
+     "app_routine",
+     "routine_live"
+    ],
+    "then": true
+   }
+  ],
   "safety-plan": [
    {
     "ids": [
@@ -507,6 +596,15 @@
    {
     "ids": [
      "app_year_card"
+    ],
+    "then": true
+   }
+  ],
+  "share-your-week": [
+   {
+    "ids": [
+     "trusted_share_live",
+     "app_trusted_share"
     ],
     "then": true
    }
@@ -552,6 +650,14 @@
    }
   ],
   "timeline": true,
+  "voice-entries": [
+   {
+    "ids": [
+     "app_voice"
+    ],
+    "then": true
+   }
+  ],
   "widget": [
    {
     "ids": [
@@ -652,11 +758,29 @@
     "then": true
    }
   ],
+  "calming-sounds": [
+   {
+    "ids": [
+     "sounds_live",
+     "app_sounds"
+    ],
+    "then": true
+   }
+  ],
   "check-ins": true,
   "christmas-offer": [
    {
     "ids": [
      "offer_live"
+    ],
+    "then": true
+   }
+  ],
+  "days-you-showed-up": [
+   {
+    "ids": [
+     "showed_up_live",
+     "app_showed_up"
     ],
     "then": true
    }
@@ -711,6 +835,15 @@
    }
   ],
   "moments": true,
+  "mood-prompts": [
+   {
+    "ids": [
+     "mood_prompts_live",
+     "app_mood_prompts"
+    ],
+    "then": true
+   }
+  ],
   "moodbow-plus": [
    {
     "ids": [
@@ -771,6 +904,15 @@
     "then": true
    }
   ],
+  "routine": [
+   {
+    "ids": [
+     "app_routine",
+     "routine_live"
+    ],
+    "then": true
+   }
+  ],
   "safety-plan": [
    {
     "ids": [
@@ -804,6 +946,15 @@
    {
     "ids": [
      "app_year_card"
+    ],
+    "then": true
+   }
+  ],
+  "share-your-week": [
+   {
+    "ids": [
+     "trusted_share_live",
+     "app_trusted_share"
     ],
     "then": true
    }
@@ -849,6 +1000,14 @@
    }
   ],
   "timeline": true,
+  "voice-entries": [
+   {
+    "ids": [
+     "app_voice"
+    ],
+    "then": true
+   }
+  ],
   "widget": [
    {
     "ids": [
@@ -949,11 +1108,29 @@
     "then": true
    }
   ],
+  "calming-sounds": [
+   {
+    "ids": [
+     "sounds_live",
+     "app_sounds"
+    ],
+    "then": true
+   }
+  ],
   "check-ins": true,
   "christmas-offer": [
    {
     "ids": [
      "offer_live"
+    ],
+    "then": true
+   }
+  ],
+  "days-you-showed-up": [
+   {
+    "ids": [
+     "showed_up_live",
+     "app_showed_up"
     ],
     "then": true
    }
@@ -1008,6 +1185,15 @@
    }
   ],
   "moments": true,
+  "mood-prompts": [
+   {
+    "ids": [
+     "mood_prompts_live",
+     "app_mood_prompts"
+    ],
+    "then": true
+   }
+  ],
   "moodbow-plus": [
    {
     "ids": [
@@ -1068,6 +1254,15 @@
     "then": true
    }
   ],
+  "routine": [
+   {
+    "ids": [
+     "app_routine",
+     "routine_live"
+    ],
+    "then": true
+   }
+  ],
   "safety-plan": [
    {
     "ids": [
@@ -1101,6 +1296,15 @@
    {
     "ids": [
      "app_year_card"
+    ],
+    "then": true
+   }
+  ],
+  "share-your-week": [
+   {
+    "ids": [
+     "trusted_share_live",
+     "app_trusted_share"
     ],
     "then": true
    }
@@ -1146,6 +1350,14 @@
    }
   ],
   "timeline": true,
+  "voice-entries": [
+   {
+    "ids": [
+     "app_voice"
+    ],
+    "then": true
+   }
+  ],
   "widget": [
    {
     "ids": [
@@ -1246,11 +1458,29 @@
     "then": true
    }
   ],
+  "calming-sounds": [
+   {
+    "ids": [
+     "sounds_live",
+     "app_sounds"
+    ],
+    "then": true
+   }
+  ],
   "check-ins": true,
   "christmas-offer": [
    {
     "ids": [
      "offer_live"
+    ],
+    "then": true
+   }
+  ],
+  "days-you-showed-up": [
+   {
+    "ids": [
+     "showed_up_live",
+     "app_showed_up"
     ],
     "then": true
    }
@@ -1305,6 +1535,15 @@
    }
   ],
   "moments": true,
+  "mood-prompts": [
+   {
+    "ids": [
+     "mood_prompts_live",
+     "app_mood_prompts"
+    ],
+    "then": true
+   }
+  ],
   "moodbow-plus": [
    {
     "ids": [
@@ -1365,6 +1604,15 @@
     "then": true
    }
   ],
+  "routine": [
+   {
+    "ids": [
+     "app_routine",
+     "routine_live"
+    ],
+    "then": true
+   }
+  ],
   "safety-plan": [
    {
     "ids": [
@@ -1398,6 +1646,15 @@
    {
     "ids": [
      "app_year_card"
+    ],
+    "then": true
+   }
+  ],
+  "share-your-week": [
+   {
+    "ids": [
+     "trusted_share_live",
+     "app_trusted_share"
     ],
     "then": true
    }
@@ -1443,6 +1700,14 @@
    }
   ],
   "timeline": true,
+  "voice-entries": [
+   {
+    "ids": [
+     "app_voice"
+    ],
+    "then": true
+   }
+  ],
   "widget": [
    {
     "ids": [
@@ -1543,11 +1808,29 @@
     "then": true
    }
   ],
+  "calming-sounds": [
+   {
+    "ids": [
+     "sounds_live",
+     "app_sounds"
+    ],
+    "then": true
+   }
+  ],
   "check-ins": true,
   "christmas-offer": [
    {
     "ids": [
      "offer_live"
+    ],
+    "then": true
+   }
+  ],
+  "days-you-showed-up": [
+   {
+    "ids": [
+     "showed_up_live",
+     "app_showed_up"
     ],
     "then": true
    }
@@ -1602,6 +1885,15 @@
    }
   ],
   "moments": true,
+  "mood-prompts": [
+   {
+    "ids": [
+     "mood_prompts_live",
+     "app_mood_prompts"
+    ],
+    "then": true
+   }
+  ],
   "moodbow-plus": [
    {
     "ids": [
@@ -1662,6 +1954,15 @@
     "then": true
    }
   ],
+  "routine": [
+   {
+    "ids": [
+     "app_routine",
+     "routine_live"
+    ],
+    "then": true
+   }
+  ],
   "safety-plan": [
    {
     "ids": [
@@ -1695,6 +1996,15 @@
    {
     "ids": [
      "app_year_card"
+    ],
+    "then": true
+   }
+  ],
+  "share-your-week": [
+   {
+    "ids": [
+     "trusted_share_live",
+     "app_trusted_share"
     ],
     "then": true
    }
@@ -1740,6 +2050,14 @@
    }
   ],
   "timeline": true,
+  "voice-entries": [
+   {
+    "ids": [
+     "app_voice"
+    ],
+    "then": true
+   }
+  ],
   "widget": [
    {
     "ids": [
@@ -1840,11 +2158,29 @@
     "then": true
    }
   ],
+  "calming-sounds": [
+   {
+    "ids": [
+     "sounds_live",
+     "app_sounds"
+    ],
+    "then": true
+   }
+  ],
   "check-ins": true,
   "christmas-offer": [
    {
     "ids": [
      "offer_live"
+    ],
+    "then": true
+   }
+  ],
+  "days-you-showed-up": [
+   {
+    "ids": [
+     "showed_up_live",
+     "app_showed_up"
     ],
     "then": true
    }
@@ -1899,6 +2235,15 @@
    }
   ],
   "moments": true,
+  "mood-prompts": [
+   {
+    "ids": [
+     "mood_prompts_live",
+     "app_mood_prompts"
+    ],
+    "then": true
+   }
+  ],
   "moodbow-plus": [
    {
     "ids": [
@@ -1959,6 +2304,15 @@
     "then": true
    }
   ],
+  "routine": [
+   {
+    "ids": [
+     "app_routine",
+     "routine_live"
+    ],
+    "then": true
+   }
+  ],
   "safety-plan": [
    {
     "ids": [
@@ -1992,6 +2346,15 @@
    {
     "ids": [
      "app_year_card"
+    ],
+    "then": true
+   }
+  ],
+  "share-your-week": [
+   {
+    "ids": [
+     "trusted_share_live",
+     "app_trusted_share"
     ],
     "then": true
    }
@@ -2037,6 +2400,14 @@
    }
   ],
   "timeline": true,
+  "voice-entries": [
+   {
+    "ids": [
+     "app_voice"
+    ],
+    "then": true
+   }
+  ],
   "widget": [
    {
     "ids": [
