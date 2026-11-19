@@ -92,6 +92,25 @@ describe("POST /api/webhooks/stripe", () => {
     expect(JSON.stringify(captureMessage.mock.calls)).not.toContain("a@b.c");
   });
 
+  it("the person deleted their account and Stripe has ended the subscription (Delete account cancels it first): 200, nothing reported", async () => {
+    constructEvent.mockReturnValue(event("customer.subscription.deleted", { id: "sub_1" }));
+    sync.mockResolvedValue({ kind: "skipped", reason: "user_gone", live: false });
+    const res = await post();
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ ok: true });
+    expect(captureMessage).not.toHaveBeenCalled();
+  });
+
+  it("the person is gone but Stripe still runs the subscription: 200, and one report (someone could be charged with no account)", async () => {
+    constructEvent.mockReturnValue(event("customer.subscription.updated", { id: "sub_1" }));
+    sync.mockResolvedValue({ kind: "skipped", reason: "user_gone", live: true });
+    expect((await post()).status).toBe(200);
+    expect(captureMessage).toHaveBeenCalledTimes(1);
+    const [message, opts] = captureMessage.mock.calls[0];
+    expect(message).toBe("Stripe webhook: user_gone_live");
+    expect(opts.tags).toEqual({ stripe_webhook_failure: "user_gone_live", stripe_event_type: "customer.subscription.updated", stripe_event_id: "evt_1" });
+  });
+
   it("another store's Plus still grants: 200 (retrying can't change it), reported", async () => {
     constructEvent.mockReturnValue(event("customer.subscription.deleted", { id: "sub_1" }));
     sync.mockResolvedValue({ kind: "skipped", reason: "other_store_grants" });

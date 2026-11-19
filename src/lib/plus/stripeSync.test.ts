@@ -176,6 +176,24 @@ describe("syncSubscription: the live state, never the payload", () => {
     expect(await syncSubscription("sub_1", second.deps)).toEqual({ kind: "retry", reason: "db" });
   });
 
+  it("the person deleted their account (the insert's foreign key refuses): user_gone, never retried; live says if Stripe still runs it", async () => {
+    const gone = vi.fn(async () => ({ ok: true as const, value: "user_gone" as const }));
+    const ended = fakes({ sub_1: [sub({ status: "canceled" })] }, null);
+    ended.deps.insert = gone;
+    expect(await syncSubscription("sub_1", ended.deps)).toEqual({ kind: "skipped", reason: "user_gone", live: false });
+    expect(gone).toHaveBeenCalledTimes(1);
+    expect(ended.deps.update).not.toHaveBeenCalled();
+    const running = fakes({ sub_1: [sub()] }, null);
+    running.deps.insert = gone;
+    expect(await syncSubscription("sub_1", running.deps)).toEqual({ kind: "skipped", reason: "user_gone", live: true });
+  });
+
+  it("any other failed insert is still a retry (a 500): only a missing person is final", async () => {
+    const f = fakes({ sub_1: [sub()] }, null);
+    f.deps.insert = vi.fn(async () => ({ ok: false as const }));
+    expect(await syncSubscription("sub_1", f.deps)).toEqual({ kind: "retry", reason: "db" });
+  });
+
   it("unknown to Stripe, or naming nobody: skipped, never retried", async () => {
     expect(await syncSubscription("sub_x", fakes({}, null).deps)).toEqual({ kind: "skipped", reason: "unknown_subscription" });
     expect(await syncSubscription("sub_1", fakes({ sub_1: [sub({ metadata: { app: "moodbow" } })] }, null).deps)).toEqual({ kind: "skipped", reason: "no_user" });

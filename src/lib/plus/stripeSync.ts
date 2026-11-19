@@ -18,12 +18,14 @@ export type SyncDeps = {
   prices: readonly string[];
   retrieve: (id: string) => Promise<Stripe.Subscription | null>;
   read: (userId: string) => Promise<Result<EntitlementRow | null>>;
-  insert: (userId: string, row: EntitlementWrite) => Promise<Result<boolean>>;
+  insert: (userId: string, row: EntitlementWrite) => Promise<Result<boolean | "user_gone">>;
   update: (userId: string, seen: Pick<EntitlementRow, "source" | "store_subscription_id">, row: EntitlementWrite) => Promise<Result<boolean>>;
 };
 export type SyncOutcome =
   | { kind: "written" }
   | { kind: "skipped"; reason: "foreign" | "no_user" | "no_period_end" | "other_store_grants" | "older_subscription" | "unknown_subscription" }
+  // The person's account is gone (deleted): nothing to write. live: Stripe still has the subscription running.
+  | { kind: "skipped"; reason: "user_gone"; live: boolean }
   | { kind: "retry"; reason: "stripe" | "db" | "still_changing" };
 
 const iso = (s: number | null | undefined) => (s ? new Date(s * 1000).toISOString() : null);
@@ -107,6 +109,8 @@ export async function syncSubscription(subId: string, deps: SyncDeps): Promise<S
     if (!row) {
       const done = await deps.insert(desired.userId, next);
       if (!done.ok) return { kind: "retry", reason: "db" };
+      // The account was deleted (its row went with it): retrying can't change that.
+      if (done.value === "user_gone") return { kind: "skipped", reason: "user_gone", live: desired.live };
       if (!done.value) continue; // a row appeared meanwhile: read again
     } else {
       // Another store's Plus that still grants is never ended by a Stripe event.
