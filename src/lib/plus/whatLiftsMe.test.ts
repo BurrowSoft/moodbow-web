@@ -160,7 +160,8 @@ describe("strings", () => {
   });
 });
 
-// It ships with 1.3, not with the Plus stack (UX 14 Nov): its own switch, unmet for now.
-it("lifts-live is its own switch, not met yet", () => {
-  expect(conditions["lifts-live"].met).toBe(false);
+// Its own switch (UX 14 Nov), met in the Plus launch group (UX 20 Nov): never on without Plus itself.
+it("lifts-live is its own switch, met only together with plus", () => {
+  expect(conditions["lifts-live"].met).toBe(true);
+  expect(conditions["plus"].met).toBe(true);
 });
