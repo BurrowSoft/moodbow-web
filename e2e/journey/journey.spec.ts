@@ -3246,11 +3246,16 @@ test("letter reminders: labels whole at 390 and 320 px / 300 %, en and de, contr
           const apart = time.left >= label.right - 0.5 || time.top >= label.bottom - 0.5;
           return !apart;
         }).length;
-        // What sticks out past the right edge, named, so a failure says which part.
+        // What sticks out past the right edge, named, so a failure says which part, with its text and what decides
+        // whether its words may break (the Reviewer, #388/#389: it was "Monaten", 7 letters, under the 8-letter rule).
         const sticksOut = [...document.querySelectorAll("main *")]
           .filter((e) => e.getBoundingClientRect().right > window.innerWidth + 0.5 && e.getBoundingClientRect().width > 1 && !e.classList.contains("sr-only"))
           .slice(0, 4)
-          .map((e) => `${e.tagName.toLowerCase()}${e.getAttribute("data-testid") ? `[${e.getAttribute("data-testid")}]` : ""} ${Math.round(e.getBoundingClientRect().right)}`);
+          .map((e) => {
+            const s = getComputedStyle(e) as CSSStyleDeclaration & { hyphenateLimitChars?: string };
+            const what = `"${(e.textContent ?? "").trim().slice(0, 30)}" hyphens ${s.hyphens} ${s.hyphenateLimitChars ?? ""}, white-space ${s.whiteSpace}, lang ${e.closest("[lang]")?.getAttribute("lang")}`;
+            return `${e.tagName.toLowerCase()}${e.getAttribute("data-testid") ? `[${e.getAttribute("data-testid")}]` : ""} ${Math.round(e.getBoundingClientRect().right)} ${what}`;
+          });
         return { clipped, overlaps, sticksOut, overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth };
       });
     for (const [route, saved] of [["", "en"], ["/de", "de"]] as const) {

@@ -74,6 +74,20 @@ describe("names stay whole at large text", () => {
     expect("{range, select, threeMonths {these months}} <helpLink>Help</helpLink>".match(CAMEL)).toBeNull();
   });
 
+  // The one place words of 7 letters may hyphenate too: the letter's "Open in" choices ("In 3 Monaten" at 300 % on a 320 px
+  // phone, LettersEditor). A 7-letter name ("Moodbow") would hyphenate there, so none may hold one.
+  it("the letter's months choices, which hyphenate from 7 letters, hold no name", () => {
+    const shortNames = WHOLE_NAMES.flatMap((n) => n.split(" ")).filter((w) => w.length >= 7);
+    for (const locale of LOCALES) {
+      const letters = JSON.parse(readFileSync(`src/messages/${locale}.json`, "utf8")).letters as Record<string, string>;
+      for (const key of ["in1", "in3", "in6", "in12"]) {
+        expect(letters[key], `${locale}: letters.${key}`).toBeTruthy();
+        for (const name of shortNames) expect(letters[key], `${locale}: letters.${key}`).not.toContain(name);
+      }
+    }
+    expect(readFileSync("src/app/[locale]/app/me/letters/LettersEditor.tsx", "utf8")).toContain("[hyphenate-limit-chars:7_3_3]");
+  });
+
   it("Help wraps only the long names (the short ones read as plain text)", () => {
     expect(wholeNamesHtml("<p>Moodbow uses Anthropic.</p>", LONG_NAMES)).toBe(`<p>Moodbow uses <span class="${WHOLE_NAME_CLASS}">Anthropic</span>.</p>`);
   });

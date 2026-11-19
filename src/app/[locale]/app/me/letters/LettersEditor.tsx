@@ -163,10 +163,13 @@ export function LettersEditor({
           <fieldset className="flex flex-wrap gap-x-4 gap-y-2">
             <legend className="mb-1 font-medium text-text">{t("openLabel")}</legend>
             {(LETTER_RULES.monthChoices as LetterMonths[]).map((m) => (
-              <label key={m} className="flex min-h-11 items-center gap-2 text-text">
+              <label key={m} className="flex min-h-11 items-center gap-[8px] text-text">
                 {/* At least 24 px (audit D polish); the whole label still picks it. */}
                 <input type="radio" name="letter-months" value={m} checked={months === m} onChange={() => setMonths(m)} data-testid={`letter-months-${m}`} className="h-6 w-6 shrink-0 accent-accent" />
-                {t(MONTHS_KEY[m])}
+                {/* At 300 % on a 320 px phone the section's column is about 270 px, and German's "Monaten" (7 letters, under
+                    the global rule's 8) didn't fit beside the radio: 16 px sideways (journeys, #388/#389). Here, and only
+                    here, words of 7 letters may hyphenate as well ("Mona-ten"): the choices hold no name (wholeNames.test). */}
+                <span className="min-w-0 [hyphenate-limit-chars:7_3_3]">{t(MONTHS_KEY[m])}</span>
               </label>
             ))}
           </fieldset>
