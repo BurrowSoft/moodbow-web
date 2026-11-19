@@ -5,16 +5,26 @@ import { decide } from "../../scripts/vercel-ignore.mjs";
 
 // Which pushes build a Vercel deployment (scripts/vercel-ignore.mjs, vercel.json's ignoreCommand; UX, 20 Nov: Build
 // CPU was most of November's bill). Exit 1 builds, exit 0 skips; this checks the decision behind the exit code.
-const preview = (files: string[] | null, ref = "fix/something") => decide({ env: "preview", ref, files });
+const preview = (files: string[] | null, ref = "fix/something", pr = "389") => decide({ env: "preview", ref, pr, files });
 
 describe("vercel-ignore", () => {
   it("is vercel.json's ignoreCommand", () => {
     expect(JSON.parse(readFileSync("vercel.json", "utf8")).ignoreCommand).toBe("node scripts/vercel-ignore.mjs");
   });
 
-  it("always builds Production, master, preview/* and test/plus-walk, whatever changed", () => {
-    expect(decide({ env: "production", ref: "master", files: ["e2e/smoke.spec.ts"] }).build).toBe(true);
-    for (const ref of ["master", "preview/abc123", "test/plus-walk"]) expect(preview(["docs/a.md"], ref).build, ref).toBe(true);
+  it("always builds Production, master, preview/* and test/plus-walk, whatever changed, PR or not", () => {
+    expect(decide({ env: "production", ref: "master", pr: "", files: ["e2e/smoke.spec.ts"] }).build).toBe(true);
+    for (const ref of ["master", "preview/abc123", "test/plus-walk"]) expect(preview(["docs/a.md"], ref, "").build, ref).toBe(true);
+  });
+
+  it("skips a branch with no open pull request, even with code changes (UX, 20 Nov)", () => {
+    const d = preview(["src/app/globals.css"], "fix/something", "");
+    expect(d.build).toBe(false);
+    expect(d.why).toBe("no open pull request for this branch (open one, then push or redeploy)");
+  });
+
+  it("builds a PR branch's first deployment rather than guess from the parent (the Web Tester's burst case)", () => {
+    expect(preview(null)).toEqual({ build: true, why: "the branch's first deployment, or its last one isn't in this clone" });
   });
 
   it("builds a Preview when something that ships changed", () => {
