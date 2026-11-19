@@ -6,6 +6,11 @@ import { Fragment, type ReactNode } from "react";
 // support@moodbow.com are left alone. The text itself never changes.
 // Product and company names (UX, 19 Nov).
 export const WHOLE_NAMES = ["Vitor Carvalho", "BurrowSoft", "Moodbow", "Anthropic", "Stripe", "Google Play", "App Store"] as const;
+// The global large-text rule (globals.css) hyphenates only words of HYPHEN_MIN letters or more. A name whose words are all
+// shorter can never break, wrapped or not ("Moodbow", "Google Play"…). The LONG_NAMES have a word that long, so they're
+// wrapped wherever they render (wholeNames.test checks every message that holds one).
+export const HYPHEN_MIN = 8;
+export const LONG_NAMES: readonly string[] = WHOLE_NAMES.filter((n) => n.split(" ").some((w) => w.length >= HYPHEN_MIN));
 // globals.css: :is([data-hyphenate], .legal-prose) .whole-name { hyphens: manual } (outranks the rule that turns hyphens on).
 export const WHOLE_NAME_CLASS = "whole-name";
 
@@ -52,9 +57,11 @@ export function wholeNames(text: string): ReactNode {
 
 // For rendered HTML (the legal pages): only in text between tags, never inside a tag or an
 // attribute (a link's address keeps its words).
-export function wholeNamesHtml(html: string): string {
+// names: a subset to wrap (Help wraps only LONG_NAMES; its tests read the short names as plain text).
+export function wholeNamesHtml(html: string, names: readonly string[] = WHOLE_NAMES): string {
+  const pattern = names === WHOLE_NAMES ? NAME : new RegExp(`(${names.join("|")})`, "g");
   return html
     .split(/(<[^>]*>)/)
-    .map((part) => (part.startsWith("<") ? part : part.replace(NAME, `<span class="${WHOLE_NAME_CLASS}">$1</span>`)))
+    .map((part) => (part.startsWith("<") ? part : part.replace(pattern, `<span class="${WHOLE_NAME_CLASS}">$1</span>`)))
     .join("");
 }

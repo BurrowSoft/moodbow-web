@@ -3,6 +3,7 @@
 import { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Dialog, dialogButton } from "@/components/Dialog";
+import { wholeNames } from "@/lib/wholeNames";
 import { GetHelpNow, SafetyCard } from "@/components/SafetyCard";
 import { BoConsent } from "./BoConsent";
 import { BoReply } from "./BoReply";
@@ -498,7 +499,7 @@ export function BoConversation({ initial, country, back, healthData = false, con
         </form>
       )}
       {pictureConsent === "asking" && (
-        <Dialog title={t("pictureConsentTitle")} details={<p data-testid="bo-picture-consent-body" className="whitespace-pre-line text-text">{t("pictureConsentBody")}</p>} onCancel={closePictureConsent} testId="bo-picture-consent">
+        <Dialog title={t("pictureConsentTitle")} details={<p data-testid="bo-picture-consent-body" className="whitespace-pre-line text-text">{wholeNames(t("pictureConsentBody"))}</p>} onCancel={closePictureConsent} testId="bo-picture-consent">
           <button type="button" data-testid="bo-picture-consent-decline" onClick={closePictureConsent} className={dialogButton()}>
             {t("consentDecline")}
           </button>
