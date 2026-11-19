@@ -47,6 +47,9 @@ export function desiredFor(sub: Stripe.Subscription): Desired {
       status: entitlementStatus(sub.status),
       trial_ends_at: iso(sub.trial_end),
       current_period_end: periodEnd,
+      // The past_due grace runs from here (041): Stripe opens the new period before it tries the
+      // invoice, so a failed renewal's end is already a month or a year ahead.
+      current_period_start: iso(item?.current_period_start),
       trial_started_at: iso(sub.trial_start),
       store_customer_id: id(sub.customer),
       store_subscription_id: sub.id,

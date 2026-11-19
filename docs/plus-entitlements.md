@@ -32,11 +32,17 @@ store notification finds its row.
   web.
 - **Writes are the server's only:** the web's Stripe webhook and checkout (with
   the service role, below), and later the stores' notification functions.
-- **Has Plus** = `status in ('trialing','active') and current_period_end > now()`.
+- **Has Plus** = `status in ('trialing','active') and current_period_end > now()`,
+  **or** a Stripe renewal that failed less than 7 days ago:
+  `source = 'stripe' and status = 'past_due' and current_period_start + 7 days > now()`
+  (moodbow-app 041, UX 19 Nov; Stripe opens the new period before it tries the
+  invoice, so the grace runs from the period's start, never its end).
   One SQL function, `has_plus(uid)` (stable, SECURITY DEFINER, `search_path`
-  pinned), so the app, the web and any server feature check the same rule.
-  `past_due`, `paused`, `canceled` and `expired` never grant (SolvyMed's rule:
-  a failed renewal cuts Plus at once; a successful retry brings it back).
+  pinned), so the app, the web and any server feature check the same rule; the
+  cases are in content/contracts/plus-entitlement.json (vendored from the app).
+  A Play or Apple `past_due` never grants (the store gave its own grace first);
+  `paused`, `canceled` and `expired` never grant. Inside the grace, Me says
+  "Your last payment didn't go through. Update your card to keep Plus."
 
 ## Stripe status → `status`
 
