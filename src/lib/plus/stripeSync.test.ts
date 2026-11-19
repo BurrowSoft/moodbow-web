@@ -77,8 +77,21 @@ describe("desiredFor: the row a subscription should give", () => {
         store_customer_id: "cus_1",
         store_subscription_id: "sub_1",
         store_product_id: "price_1",
+        cancel_at: null,
       },
     });
+  });
+  // 042, display only: Me's "won't renew" line. The portal (2026-05 API) sets cancel_at; older paths set
+  // cancel_at_period_end, so it's the period's end; un-cancelled, nothing.
+  it("cancel_at: Stripe's when set, else the period end when it cancels at the period end, else null", () => {
+    const portal = desiredFor(sub({ status: "trialing", trial_end: T + 7 * 86_400, periodEnd: T + 7 * 86_400, cancel_at: T + 7 * 86_400, cancel_at_period_end: false }), PRICES);
+    expect(portal.kind === "write" && portal.row.cancel_at).toBe(iso(T + 7 * 86_400));
+    const atPeriodEnd = desiredFor(sub({ cancel_at: null, cancel_at_period_end: true }), PRICES);
+    expect(atPeriodEnd.kind === "write" && atPeriodEnd.row.cancel_at).toBe(iso(T + 365 * 86_400));
+    const renews = desiredFor(sub({ cancel_at: null, cancel_at_period_end: false }), PRICES);
+    expect(renews.kind === "write" && renews.row.cancel_at).toBeNull();
+    // Plus itself doesn't change: the status and the period still decide.
+    expect(portal.kind === "write" && portal.live).toBe(true);
   });
   it("writes when the current period started (041's grace runs from it), null when Stripe has none", () => {
     const failed = desiredFor(sub({ status: "past_due", periodStart: T - 2 * 86_400, periodEnd: T + 363 * 86_400 }), PRICES);
@@ -144,6 +157,16 @@ describe("syncSubscription: the live state, never the payload", () => {
     const { deps, now } = fakes({ sub_2: [sub({ id: "sub_2" })] }, row({ status: "canceled" }));
     expect(await syncSubscription("sub_2", deps)).toEqual({ kind: "written" });
     expect(now()).toMatchObject({ status: "active", store_subscription_id: "sub_2" });
+  });
+
+  it("a cancel in the portal, then an un-cancel: the row's cancel_at follows, Plus unchanged", async () => {
+    const ends = T + 7 * 86_400;
+    const cancelled = fakes({ sub_1: [sub({ status: "trialing", trial_end: ends, periodEnd: ends, cancel_at: ends })] }, row({ status: "trialing" }));
+    expect(await syncSubscription("sub_1", cancelled.deps)).toEqual({ kind: "written" });
+    expect(cancelled.now()).toMatchObject({ status: "trialing", cancel_at: iso(ends) });
+    const resumed = fakes({ sub_1: [sub({ status: "trialing", trial_end: ends, periodEnd: ends, cancel_at: null })] }, cancelled.now());
+    expect(await syncSubscription("sub_1", resumed.deps)).toEqual({ kind: "written" });
+    expect(resumed.now()?.cancel_at).toBeNull();
   });
 
   it("past_due is written, and cuts Plus", async () => {

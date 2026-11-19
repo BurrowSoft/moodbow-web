@@ -12,7 +12,7 @@ vi.mock("@/i18n/navigation", () => ({
     </a>
   ),
 }));
-const { PlusInMe } = await import("./PlusInMe");
+const { PlusInMe, endsOnLabel } = await import("./PlusInMe");
 const m = messages.plus;
 
 const show = (view: PlusView) =>
@@ -89,9 +89,10 @@ describe("PlusInMe: the trial counter and a failed renewal", () => {
     vi.unstubAllGlobals();
   });
 
-  it("past_due: the state line and Update card, no offer", () => {
+  it("past_due after the grace: Plus is off, so the line says get it back, never keep it (UX, sw14 6b); Update card, no offer", () => {
     show({ kind: "past_due" });
-    expect(screen.getByTestId("me-plus-past-due")).toHaveTextContent(m.pastDue);
+    expect(screen.getByTestId("me-plus-past-due-line")).toHaveTextContent("Your last payment didn't go through. Update your card to get Plus back.");
+    expect(screen.getByTestId("me-plus-past-due")).not.toHaveTextContent("keep Plus");
     expect(screen.getByTestId("me-plus-update-card")).toHaveTextContent(m.updateCard);
     expect(screen.queryByTestId("me-plus-banner")).toBeNull();
   });
@@ -101,6 +102,64 @@ describe("PlusInMe: the trial counter and a failed renewal", () => {
     expect(screen.getByTestId("me-plus-update-card")).toHaveTextContent(m.updateCard);
     expect(screen.queryByTestId("me-plus-trial")).toBeNull();
     expect(screen.queryByTestId("me-plus-banner")).toBeNull();
+  });
+});
+
+// 042, UX 20 Nov (sw14): after a cancel in the portal, Me says when Plus ends and that it won't renew, so the
+// cancel visibly worked. The date is in the person's own format and zone.
+describe("PlusInMe: a pending cancel (cancel_at)", () => {
+  const NOW = new Date("2026-11-20T09:00:00Z");
+  const showIn = (view: PlusView, dateLocaleTag = "en-GB", timeZone = "Asia/Bangkok") =>
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <PlusInMe view={view} price="US$59.99" dateLocaleTag={dateLocaleTag} timeZone={timeZone} />
+      </NextIntlClientProvider>,
+    );
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(NOW);
+  });
+
+  it("a trial that won't renew: when it ends, in place of the counter; the 7 segments stay", () => {
+    showIn({ kind: "plus", source: "stripe", daysLeft: 6, endsAt: "2026-11-26T16:44:00Z" });
+    expect(screen.getByTestId("me-plus-trial-ends")).toHaveTextContent("Plus trial · ends 26 November · won't renew");
+    expect(screen.queryByTestId("me-plus-days-left")).toBeNull();
+    expect(screen.getByRole("img", { name: "Day 2 of 7" })).toBeInTheDocument();
+  });
+
+  it("paid Plus that won't renew: its own line, with the year when it isn't this one", () => {
+    showIn({ kind: "plus", source: "stripe", daysLeft: null, endsAt: "2027-11-19T17:14:38Z" });
+    expect(screen.getByTestId("me-plus-ends")).toHaveTextContent("Plus · ends 19 November 2027 · won't renew");
+    expect(screen.queryByTestId("me-plus-trial")).toBeNull();
+  });
+
+  it("the day is the person's: late in UTC is the next day in Bangkok, the same day in New York", () => {
+    const view: PlusView = { kind: "plus", source: "stripe", daysLeft: null, endsAt: "2026-11-26T20:00:00Z" };
+    showIn(view, "en-GB", "Asia/Bangkok");
+    expect(screen.getByTestId("me-plus-ends")).toHaveTextContent("ends 27 November");
+    cleanup();
+    showIn(view, "en-GB", "America/New_York");
+    expect(screen.getByTestId("me-plus-ends")).toHaveTextContent("ends 26 November");
+  });
+
+  it("each language's own date (the strings say the rest): de 26. November, fr 26 novembre, es and pt-BR with de", () => {
+    const iso = "2026-11-26T16:44:00Z";
+    const now = NOW.getTime();
+    expect(endsOnLabel(iso, "de-DE", "Europe/Berlin", now)).toBe("26. November");
+    expect(endsOnLabel(iso, "fr-FR", "Europe/Paris", now)).toBe("26 novembre");
+    expect(endsOnLabel(iso, "es-ES", "Europe/Madrid", now)).toBe("26 de noviembre");
+    expect(endsOnLabel(iso, "pt-BR", "America/Sao_Paulo", now)).toBe("26 de novembro");
+    expect(endsOnLabel("2027-01-02T10:00:00Z", "en-GB", "UTC", now)).toBe("2 January 2027");
+  });
+
+  it("a zone this runtime doesn't know: UTC, never a crash", () => {
+    expect(endsOnLabel("2026-11-26T23:30:00Z", "en-GB", "Mars/Olympus", NOW.getTime())).toBe("26 November");
+  });
+
+  it("a failed payment comes first: the card line, not the won't-renew line", () => {
+    showIn({ kind: "plus", source: "stripe", daysLeft: null, paymentFailed: true, endsAt: "2026-11-26T16:44:00Z" });
+    expect(screen.getByTestId("me-plus-past-due")).toHaveTextContent(m.pastDue);
+    expect(screen.queryByTestId("me-plus-ends")).toBeNull();
   });
 });
 

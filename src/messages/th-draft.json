@@ -3748,5 +3748,20 @@
     "key": "common.languageNameInSentence",
     "en": "English",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "plus.trialEndsWontRenew",
+    "en": "Plus trial · ends {date} · won't renew",
+    "reason": "UX draft (Web Dev Thai of the won't-renew and past-grace lines, 20 Nov; native read pending)"
+  },
+  {
+    "key": "plus.endsWontRenew",
+    "en": "Plus · ends {date} · won't renew",
+    "reason": "UX draft (Web Dev Thai of the won't-renew and past-grace lines, 20 Nov; native read pending)"
+  },
+  {
+    "key": "plus.pastDueLapsed",
+    "en": "Your last payment didn't go through. Update your card to get Plus back.",
+    "reason": "UX draft (Web Dev Thai of the won't-renew and past-grace lines, 20 Nov; native read pending)"
   }
 ]

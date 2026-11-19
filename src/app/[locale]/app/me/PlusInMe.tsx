@@ -14,8 +14,25 @@ import { SAVE_WAIT_MS } from "@/lib/ui/withTimeout";
 // - free: the banner; its close hides it for the rest of that day only;
 // - the free week running: "Plus trial · {n} days left", 7 segments (the only
 //   place the counter shows; no reminder, no first-charge date);
-// - a failed renewal: the state line and Update card, only while it fails.
-// Plus without a trial shows nothing here.
+// - a pending cancel (042's cancel_at, UX 20 Nov, so a cancel in the portal visibly worked): "Plus trial · ends
+//   {date} · won't renew" in place of the counter, or "Plus · ends {date} · won't renew" for paid Plus;
+// - a failed renewal: the state line and Update card, only while it fails ("to keep Plus" inside the 7-day grace,
+//   "to get Plus back" after it).
+// Paid Plus that renews shows nothing here.
+
+// The won't-renew date: day and month in the person's own format and time zone (the server and the browser format it
+// the same way), with the year when it isn't this one; UTC for a zone this runtime doesn't know.
+export function endsOnLabel(iso: string, dateLocaleTag: string, timeZone: string, now = Date.now()): string {
+  let zone = timeZone;
+  try {
+    new Intl.DateTimeFormat("en", { timeZone: zone });
+  } catch {
+    zone = "UTC";
+  }
+  const at = new Date(iso);
+  const year = (d: Date) => new Intl.DateTimeFormat("en", { year: "numeric", timeZone: zone }).format(d);
+  return new Intl.DateTimeFormat(dateLocaleTag, { day: "numeric", month: "long", ...(year(at) === year(new Date(now)) ? {} : { year: "numeric" }), timeZone: zone }).format(at);
+}
 
 const CLOSED_KEY = "moodbow.plusBannerClosed";
 const localDay = () => {
@@ -50,7 +67,19 @@ function Arcs() {
   );
 }
 
-export function PlusInMe({ view, price, offer = null }: { view: PlusView; price: string; offer?: PlusOfferPrices | null }) {
+export function PlusInMe({
+  view,
+  price,
+  offer = null,
+  dateLocaleTag = "en-GB",
+  timeZone = "UTC",
+}: {
+  view: PlusView;
+  price: string;
+  offer?: PlusOfferPrices | null;
+  dateLocaleTag?: string;
+  timeZone?: string;
+}) {
   const t = useTranslations("plus");
   const tt = useTranslations("today");
   const locale = useLocale();
@@ -61,18 +90,37 @@ export function PlusInMe({ view, price, offer = null }: { view: PlusView; price:
   const [failed, setFailed] = useState(false);
 
   if (view.kind === "plus" && !view.paymentFailed) {
-    if (view.daysLeft === null) return null;
+    const ends = view.endsAt ? endsOnLabel(view.endsAt, dateLocaleTag, timeZone) : null;
+    if (view.daysLeft === null) {
+      if (!ends) return null;
+      // Paid Plus that won't renew: when it ends, so the cancel visibly worked.
+      return (
+        <section aria-label={t("label")} data-testid="me-plus-ends" className="flex items-center gap-2 rounded-2xl bg-pill p-[16px]">
+          <Arcs />
+          <p className="min-w-0 flex-1 font-medium">{t("endsWontRenew", { date: ends })}</p>
+        </section>
+      );
+    }
     const day = 7 - view.daysLeft + 1;
     return (
       <section aria-labelledby="me-plus-trial" data-testid="me-plus-trial" className="space-y-3 rounded-2xl bg-pill p-[16px]">
         <div className="flex flex-wrap items-center gap-2">
           <Arcs />
-          <h2 id="me-plus-trial" className="flex-1 font-medium">
-            {t("trialTitle")}
-          </h2>
-          <span data-testid="me-plus-days-left" className="font-medium text-accent">
-            {t("trialLeft", { n: view.daysLeft })}
-          </span>
+          {ends ? (
+            // A trial that won't turn into a paid year: when it ends, in place of the counter.
+            <h2 id="me-plus-trial" data-testid="me-plus-trial-ends" className="min-w-0 flex-1 font-medium">
+              {t("trialEndsWontRenew", { date: ends })}
+            </h2>
+          ) : (
+            <>
+              <h2 id="me-plus-trial" className="flex-1 font-medium">
+                {t("trialTitle")}
+              </h2>
+              <span data-testid="me-plus-days-left" className="font-medium text-accent">
+                {t("trialLeft", { n: view.daysLeft })}
+              </span>
+            </>
+          )}
         </div>
         <div role="img" aria-label={t("trialDay", { day })} className="grid grid-cols-7 gap-1">
           {Array.from({ length: 7 }, (_, i) => (
@@ -83,8 +131,9 @@ export function PlusInMe({ view, price, offer = null }: { view: PlusView; price:
     );
   }
 
-  // A failed Stripe renewal: the same card inside the 7-day grace (Plus still on, UX 19 Nov) and
-  // after it (Plus paused), "Your last payment didn't go through. Update your card to keep Plus."
+  // A failed Stripe renewal: the same card inside the 7-day grace (Plus still on, UX 19 Nov), "Your last payment didn't
+  // go through. Update your card to keep Plus.", and after it (Plus off) "… Update your card to get Plus back."
+  // (UX, sw14 6b: never "keep" a Plus that's already off).
   if (view.kind === "past_due" || (view.kind === "plus" && view.paymentFailed)) {
     const portal = async () => {
       setBusy(true);
@@ -102,7 +151,7 @@ export function PlusInMe({ view, price, offer = null }: { view: PlusView; price:
     };
     return (
       <section aria-label={t("label")} data-testid="me-plus-past-due" className="space-y-3 rounded-2xl bg-pill p-[16px]">
-        <p>{t("pastDue")}</p>
+        <p data-testid="me-plus-past-due-line">{view.kind === "past_due" ? t("pastDueLapsed") : t("pastDue")}</p>
         <button type="button" data-testid="me-plus-update-card" disabled={busy} onClick={() => void portal()} className={dialogButton(true)}>
           {t("updateCard")}
         </button>

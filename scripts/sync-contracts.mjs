@@ -23,8 +23,9 @@ export const FILES = ["appointment.json", "bo.md", "colour-map.json", "countries
 // The export set (pictures, letter reminders, Plus; app #241, 030, 033, 035) follows app master since the web's
 // export renders it (UX, 19 Nov). Still held:
 export const HELD = {
-  // plus-entitlement.json: 041's past_due grace (moodbow-app #262), not on app master until it merges.
-  "plus-entitlement.json": "a1fdedea7c957b8f4178a9bde4bb0f8433e0c3c0",
+  // plus-entitlement.json v2: 042's cancel_at, the won't-renew line (moodbow-app #275), on top of 041's past_due grace;
+  // not on app master until #275 merges.
+  "plus-entitlement.json": "2f173f06a4c6d03f098386ec8bd906c298654a7d",
 };
 
 const gh = (path, accept) => execFileSync("gh", ["api", ...(accept ? ["-H", `Accept: ${accept}`] : []), path], { stdio: ["ignore", "pipe", "inherit"] });

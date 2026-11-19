@@ -3,7 +3,7 @@
   "path": "supabase/contracts",
   "commit": "ad85869d27174a80e755f47413e60ac3ad3294a5",
   "held": {
-    "plus-entitlement.json": "a1fdedea7c957b8f4178a9bde4bb0f8433e0c3c0"
+    "plus-entitlement.json": "2f173f06a4c6d03f098386ec8bd906c298654a7d"
   },
   "sha256": {
     "appointment.json": "846e82793fc22aa997768bb64c14697e1c4ca1a3e2e2298b4a7ac60d4c18df3e",
@@ -22,7 +22,7 @@
     "mood-prompts.json": "4431f90ebadf13e8ba24454ff1d5a43c23fe5668c234245f3956000d82fd6202",
     "on-this-day.json": "2f65c169138ea5733032a82ab64f4a9dc57b64c0017af0d6ecf3fe5547361ee9",
     "patterns.json": "898ba229c3cfe8c39b914e9d3aa11fa097816842657b014cff4b013374839fd7",
-    "plus-entitlement.json": "dc501c88a264007da6d7285df39e5f781f9eed67cf3a1092ec15880461e32873",
+    "plus-entitlement.json": "f4ba8b7956f68149117022408002e4a724a5d9ed96e1463e9bd6351fb49db03e",
     "prompts-library.json": "e5eb7a727ed8f7c05a18f6de3f58aac6b03d6af8f41d5546d15e457b295c9768",
     "prompts.json": "eb4ca6d9dda842844133623b20ee016ade21db38c64ad657aa6a9c76cb89328c",
     "reflect.md": "a09f7e2b20172f6de1c13f659b2c13bae7f6b8b2d1f8f4bc3ac748bf016b0039",

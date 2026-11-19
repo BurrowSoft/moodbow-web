@@ -14,6 +14,7 @@ const row = (over: Partial<EntitlementRow> = {}): EntitlementRow => ({
   store_customer_id: "cus_1",
   store_subscription_id: "sub_1",
   store_product_id: "price_1",
+  cancel_at: null,
   ...over,
 });
 
@@ -64,5 +65,16 @@ describe("parseEntitlement", () => {
     expect(parseEntitlement({ ...row(), user_id: 1 })).toBeNull();
     expect(parseEntitlement(null)).toBeNull();
     expect(parseEntitlement({ ...row(), trial_ends_at: 5 })).toEqual(row({ trial_ends_at: null }));
+  });
+
+  // 042: the pending cancel, display only. A row read before the column existed (or a malformed value) has none.
+  it("cancel_at: read as given, absent or malformed is null, and Plus never depends on it", () => {
+    const ends = at(NOW + 7 * DAY);
+    expect(parseEntitlement(row({ cancel_at: ends }))?.cancel_at).toBe(ends);
+    const { cancel_at: _gone, ...before042 } = row();
+    void _gone;
+    expect(parseEntitlement(before042)?.cancel_at).toBeNull();
+    expect(parseEntitlement({ ...row(), cancel_at: 5 })?.cancel_at).toBeNull();
+    expect(hasPlus(row({ cancel_at: at(NOW - DAY) }), NOW)).toBe(true);
   });
 });

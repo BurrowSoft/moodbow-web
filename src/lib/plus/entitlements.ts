@@ -21,9 +21,13 @@ export type EntitlementRow = {
   store_customer_id: string | null;
   store_subscription_id: string | null;
   store_product_id: string | null;
+  // When Plus stops because the subscription won't renew, a pending cancel (moodbow-app 042, the contract's
+  // cancel_at); null when it renews. Display only: hasPlus never reads it (Me's "won't renew" line).
+  cancel_at?: string | null;
 };
 
-export const ENTITLEMENT_COLUMNS = "user_id, source, status, trial_ends_at, current_period_end, current_period_start, trial_started_at, store_customer_id, store_subscription_id, store_product_id";
+// cancel_at (042) must be on the database before this ships: the select names it.
+export const ENTITLEMENT_COLUMNS = "user_id, source, status, trial_ends_at, current_period_end, current_period_start, trial_started_at, store_customer_id, store_subscription_id, store_product_id, cancel_at";
 
 // The past_due grace, from the app's contract (content/contracts/plus-entitlement.json, vendored
 // byte for byte from moodbow-app 041): 7 days, absolute, from the period's start.
@@ -73,5 +77,6 @@ export function parseEntitlement(data: unknown): EntitlementRow | null {
     store_customer_id: s(r.store_customer_id),
     store_subscription_id: s(r.store_subscription_id),
     store_product_id: s(r.store_product_id),
+    cancel_at: s(r.cancel_at),
   };
 }

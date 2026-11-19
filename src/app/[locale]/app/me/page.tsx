@@ -88,6 +88,10 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
   ]);
   const activeShareCount = activeShareLine(activeShares);
   const plus = plusPage?.view ?? null;
+  // The won't-renew line's date (042): in the person's own zone and date format, the same on the server and in the
+  // browser (no hydration mismatch).
+  const plusDateTag = dateLocale(locale, (await headers()).get("accept-language"), me.profile?.country ?? null);
+  const plusTimeZone = me.profile?.time_zone ?? "UTC";
   const pastReports = plus && plus.kind !== "plus" ? (reports?.count ?? 0) > 0 : false;
   const lettersLocked = lettersOn && plus !== null && plus.kind !== "plus";
   const hasLetters = lettersLocked ? (letterCount?.count ?? 1) > 0 : true;
@@ -116,7 +120,7 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
           first on the web until Me follows board 1 (UX, F5). No App icon row on the web. */}
       {pageGate("me-picture-live") !== "hidden" && <MePicture uid={user.id} />}
       {/* Moodbow Plus (decision 246): always after help, never in front of it. */}
-      {plusPage && <PlusInMe view={plusPage.view} price={plusPage.price} offer={plusPage.offer} />}
+      {plusPage && <PlusInMe view={plusPage.view} price={plusPage.price} offer={plusPage.offer} dateLocaleTag={plusDateTag} timeZone={plusTimeZone} />}
 
       {aiShown(me) && (
         <AiSettings
