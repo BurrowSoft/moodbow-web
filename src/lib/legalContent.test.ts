@@ -201,8 +201,11 @@ describe("renderLegal (the real privacy text, nothing met)", () => {
   });
 
   it("drops unmet pending blocks exactly as Production would, and lists them", () => {
-    expect(page.html).not.toContain("Google Play, Apple App Store");
-    expect(page.html).not.toContain("What Moodbow remembers");
+    // Compared as words: the names are wrapped in spans so they never hyphenate (wholeNames).
+    const words = page.html.split('<span class="whole-name">').join("").split("</span>").join("");
+    expect(words).toContain("Anthropic");
+    expect(words).not.toContain("Google Play, Apple App Store");
+    expect(words).not.toContain("What Moodbow remembers");
     expect(page.html).not.toContain("{pending");
     expect(page.hidden.map((h) => h.id)).toEqual(expect.arrayContaining(["plus", "ai_memory", "backup_retention", "app_app_lock", "app_share_cards"]));
   });

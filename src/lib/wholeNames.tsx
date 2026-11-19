@@ -4,7 +4,8 @@ import { Fragment, type ReactNode } from "react";
 // Where the large-text hyphen rule is on (Consent, Create account, the legal pages), each name is
 // wrapped in a span that turns hyphenation off for it. Case-sensitive, so "moodbow.com" and
 // support@moodbow.com are left alone. The text itself never changes.
-export const WHOLE_NAMES = ["Vitor Carvalho", "BurrowSoft", "Moodbow"] as const;
+// Product and company names (UX, 19 Nov).
+export const WHOLE_NAMES = ["Vitor Carvalho", "BurrowSoft", "Moodbow", "Anthropic", "Stripe", "Google Play", "App Store"] as const;
 // globals.css: :is([data-hyphenate], .legal-prose) .whole-name { hyphens: manual } (outranks the rule that turns hyphens on).
 export const WHOLE_NAME_CLASS = "whole-name";
 
