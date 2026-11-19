@@ -167,26 +167,25 @@ describe("the support address", () => {
     // No no-wrap on the domain: it may still give way on a 160 px page rather than push it sideways (#410's CI).
     expect(container.querySelector("p")!.innerHTML).toBe("support@<wbr>moodbow.com");
   });
-  it("goes in where a message names it, and nowhere else; its full stop in the same block (UX, 20 Nov)", () => {
+  it("goes in where a message names it, and nowhere else", () => {
     const { container } = render(<p>{withSupportAddress(`Écrivez à ${SUPPORT_EMAIL}.`)}</p>);
     expect(container.textContent).toBe(`Écrivez à ${SUPPORT_EMAIL}.`);
     expect(container.querySelectorAll("wbr")).toHaveLength(1);
-    const block = container.querySelector("span")!;
-    expect(block.className).toBe(WHOLE_UNIT_CLASS);
-    expect(block.textContent).toBe(`${SUPPORT_EMAIL}.`);
     expect(withSupportAddress("No address here")).toBe("No address here");
   });
-  it("in HTML: a mailto: link and its punctuation in one block, the link's address untouched; the text unchanged", () => {
+  it("in HTML: in the text, never in a mailto: link's address; the text unchanged", () => {
     const html = `<p>email <a href="mailto:${SUPPORT_EMAIL}">${SUPPORT_EMAIL}</a>. We answer, or ${SUPPORT_EMAIL} too</p>`;
     const shown = "support@<wbr>moodbow.com";
-    expect(supportAddressHtml(html)).toBe(`<p>email <span class="${WHOLE_UNIT_CLASS}"><a href="mailto:${SUPPORT_EMAIL}">${shown}</a>.</span> We answer, or ${shown} too</p>`);
+    expect(supportAddressHtml(html)).toBe(`<p>email <a href="mailto:${SUPPORT_EMAIL}">${shown}</a>. We answer, or ${shown} too</p>`);
     // Markup only: the text a reader sees (or copies) is the same.
     const text = (h: string) => h.replace(/<[^>]*>/g, "");
     expect(text(supportAddressHtml(html))).toBe(text(html));
   });
-  it("/privacy's own sentence: the address and its full stop together (the Web Tester: \". We answer…\" had started a line)", () => {
+  // UX, 20 Nov: gluing the full stop to the address was reverted (in this list item "moodbow.com." can't fit a 320 px
+  // line at 300 %, so the "." got a line of its own); a line may start with ". We answer…", the accepted minor case.
+  it("/privacy's own sentence: the address breaks only after its @, its full stop as written", () => {
     const { html } = renderLegal(readFileSync("content/legal/en/privacy.md", "utf8"), () => true, null);
-    expect(html).toContain(`<span class="${WHOLE_UNIT_CLASS}"><a href="mailto:${SUPPORT_EMAIL}">support@<wbr>moodbow.com</a>.</span> We answer within 10 days.`);
+    expect(html).toContain(`<a href="mailto:${SUPPORT_EMAIL}">support@<wbr>moodbow.com</a>. We answer within 10 days.`);
   });
   it("keepWhole: the word to type stays whole (UX, 20 Nov: \"SUPPRI- / MER\"), exact and case-sensitive", () => {
     const { container } = render(<p>{keepWhole("ouvrez Moi → Supprimer le compte, tapez SUPPRIMER, puis confirmez.", ["SUPPRIMER", "DELETE"])}</p>);
