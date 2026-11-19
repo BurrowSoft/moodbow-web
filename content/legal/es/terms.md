@@ -1,12 +1,12 @@
 <!--
   Spanish of content/legal/en/terms.md. Wording is Vitor's, as in English. AI translation, checked
   by back-translation, a script and the Code Reviewer; no native lawyer has read it.
-  en-sha256: c74a581acec78cfdea04187fd92be3dbddebc4a8436ee330bbf85a07fa066d1d
+  en-sha256: 8f106424c75aab260f73bb7881722d398927ec1f3b59a05586e99edacfaf87bb
   It's the English this translates: legalSpanish.test.ts fails if the English changes, until the
   Spanish follows and this is updated. Shows on Production only once legal-es-approved is met.
 -->
 ## Términos de uso de Moodbow
-Última actualización: 2 de octubre de 2026
+Última actualización: 19 de noviembre de 2026
 
 Estos términos son un acuerdo entre tú y Vitor Carvalho, que opera como BurrowSoft (297 Moo 1, Baan Sanian, Mueang Nan, Nan 55000, Tailandia), sobre el uso de Moodbow, la app y el sitio web moodbow.com. Al crear una cuenta, los aceptas.
 

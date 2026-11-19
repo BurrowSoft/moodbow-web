@@ -23,7 +23,7 @@ export function lettersGate(gate: (id: ConditionId) => PageGate = pageGate): Pag
 export type LetterWrite = "plus" | "lapsed_once" | "locked";
 export const LAPSED_DRAFT_MS = 24 * 60 * 60 * 1000;
 
-export function letterWrite(row: Pick<EntitlementRow, "status" | "current_period_end"> | null, wroteSinceLapse: boolean, now = Date.now()): LetterWrite {
+export function letterWrite(row: Pick<EntitlementRow, "source" | "status" | "current_period_end" | "current_period_start"> | null, wroteSinceLapse: boolean, now = Date.now()): LetterWrite {
   if (hasPlus(row, now)) return "plus";
   const end = row?.current_period_end ? new Date(row.current_period_end).getTime() : NaN;
   if (Number.isFinite(end) && end <= now && now - end < LAPSED_DRAFT_MS && !wroteSinceLapse) return "lapsed_once";

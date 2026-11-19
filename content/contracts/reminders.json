@@ -1,0 +1,9 @@
+{
+  "$comment": "Plus, More reminders (migration 031; specs/plus-more-reminders.md; UX 12 Nov). The rules both clients and update_extra_reminders run. user_settings.extra_reminder_times (get_me's settings) holds up to maxExtra whole-minute times, sorted, each at least minGapMinutes from reminder_time and from each other, measured around midnight. errors: update_extra_reminders' exception messages, in the order it checks them. Adding needs Plus (has_plus, 028); a list that is a subset of the stored one never does. A new reminder_time drops the extras within minGapMinutes of it: compare the list before and after update_settings and show removedLine once per removed time. Ids: the phone's notification block for the extras.",
+  "maxExtra": 2,
+  "minGapMinutes": 60,
+  "errors": ["invalid", "too_many", "plus_required", "too_close"],
+  "removedLineKey": "reminderExtraRemoved",
+  "removedLineEn": "Removed your {time} reminder: it was within an hour of your new time.",
+  "notificationIds": { "from": 218000, "to": 218999 }
+}

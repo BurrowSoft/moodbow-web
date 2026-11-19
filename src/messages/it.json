@@ -141,7 +141,10 @@
   },
   "legal": {
     "hiddenTitle": "Non ancora visibile: ogni sezione appare quando la sua funzione è attiva (solo versioni di prova)",
-    "legalEnglishOnly": "Questa pagina è disponibile in inglese."
+    "legalEnglishOnly": "Questa pagina è disponibile in inglese.",
+    "nextApplies": "Queste modifiche si applicano dal {date}. Fino ad allora vale la nostra informativa attuale.",
+    "nextAppliesNoDate": "Queste modifiche non si applicano ancora. Fino ad allora vale la nostra informativa attuale.",
+    "nextCurrent": "Leggi l'informativa attuale"
   },
   "auth": {
     "signinTitle": "Che bello rivederti",
@@ -221,7 +224,13 @@
     "retry": "Riprova",
     "tryAgain": "Riprova",
     "slowLoading": "Ci vuole più del solito…",
-    "navBackTo": "Torna a {screen}"
+    "navBackTo": "Torna a {screen}",
+    "policyNoticeTitle": "La nostra Informativa sulla privacy sta cambiando",
+    "policyNoticeBody": "Se lo fai, il pagamento è gestito da Stripe, Google Play o dall'App Store.",
+    "policyNoticeApplies": "Dal {date} potrai abbonarti a Moodbow Plus.",
+    "policyNoticeSoon": "Presto potrai abbonarti a Moodbow Plus.",
+    "policyNoticeRead": "Scopri cosa cambia",
+    "policyNoticeDismiss": "Ho capito"
   },
   "today": {
     "greetMorning": "Buongiorno",

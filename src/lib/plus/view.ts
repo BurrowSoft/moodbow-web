@@ -1,6 +1,6 @@
 import { parseExtraTimes } from "@/lib/journal/extraReminders";
 import type { createSupabaseServerClient } from "@/lib/supabase/server";
-import { ENTITLEMENT_COLUMNS, hasPlus, parseEntitlement, trialAvailable, trialDaysLeft, type EntitlementRow, type PlusSource } from "./entitlements";
+import { ENTITLEMENT_COLUMNS, hasPlus, inPaymentGrace, parseEntitlement, trialAvailable, trialDaysLeft, type EntitlementRow, type PlusSource } from "./entitlements";
 
 // What a page shows about Moodbow Plus (decision 246), from the person's own
 // entitlements row (RLS: read own only). Pure apart from readPlusView.
@@ -8,13 +8,14 @@ import { ENTITLEMENT_COLUMNS, hasPlus, parseEntitlement, trialAvailable, trialDa
 export type PlusView =
   // No Plus: offered with the free week (trial) or, once it was used, without.
   | { kind: "free"; trial: boolean }
-  // Plus, from whichever store; daysLeft only while the free week runs.
-  | { kind: "plus"; source: PlusSource; daysLeft: number | null; until?: string }
-  // A Stripe renewal failed: Plus is paused until the card is fixed (a state, not a reminder).
+  // Plus, from whichever store; daysLeft only while the free week runs. paymentFailed: a Stripe
+  // renewal failed and Plus is kept by the 7-day grace (041), so Me asks for the card.
+  | { kind: "plus"; source: PlusSource; daysLeft: number | null; until?: string; paymentFailed?: true }
+  // A Stripe renewal failed and the grace is over: Plus is paused until the card is fixed.
   | { kind: "past_due" };
 
 export function plusView(row: EntitlementRow | null, now = Date.now()): PlusView {
-  if (row && hasPlus(row, now)) return { kind: "plus", source: row.source, daysLeft: trialDaysLeft(row, now), ...(row.current_period_end ? { until: row.current_period_end } : {}) };
+  if (row && hasPlus(row, now)) return { kind: "plus", source: row.source, daysLeft: trialDaysLeft(row, now), ...(row.current_period_end ? { until: row.current_period_end } : {}), ...(inPaymentGrace(row, now) ? { paymentFailed: true as const } : {}) };
   if (row?.source === "stripe" && row.status === "past_due") return { kind: "past_due" };
   return { kind: "free", trial: trialAvailable(row) };
 }

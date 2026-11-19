@@ -9,7 +9,7 @@ const row = (over: Partial<EntitlementRow> = {}): EntitlementRow => ({
   source: "stripe",
   status: "active",
   trial_ends_at: null,
-  current_period_end: at(NOW + 300 * DAY),
+  current_period_end: at(NOW + 300 * DAY), current_period_start: null,
   trial_started_at: null,
   store_customer_id: "cus_1",
   store_subscription_id: "sub_1",

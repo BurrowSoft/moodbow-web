@@ -13,8 +13,11 @@ export type Me = {
   has_required_consents: boolean;
   today: string;
   // user_settings (migration 001); reminder_time is "HH:MM:SS".
+  // The current privacy notice, from the server's config; null when there isn't one.
+  policy_notice_id?: string | null;
   settings?: {
     bo_off?: boolean;
+    policy_notice_seen?: string | null;
     reminder_on: boolean;
     reminder_time: string | null;
     // Plus: more daily reminders, "HH:MM:SS" each (migration 031); absent before it.

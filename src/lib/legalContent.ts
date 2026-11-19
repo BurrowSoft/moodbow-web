@@ -3,6 +3,7 @@ import path from "node:path";
 import { marked } from "marked";
 import conditions from "../../content/conditions.json";
 import { pageGate, type ConditionId, type PageGate } from "./conditions";
+import { wholeNamesHtml } from "./wholeNames";
 
 // The privacy policy and terms (W3) live as Markdown per locale:
 // content/legal/<locale>/<slug>.md, copied from UX & PM's specs. Long-form
@@ -58,6 +59,13 @@ export function applyPending(source: string, met: (id: string) => boolean = isPe
   return { text, hidden };
 }
 
+// The legal text as it will read once the noticed change applies (the policy's §8): the pending
+// ids in COMING are in, everything else as it is today. Now: Moodbow Plus (its purchases, Stripe,
+// the stores' rows, the payment-records bullet). Change it with the next noticed change.
+export const COMING_POLICY: readonly string[] = ["plus"];
+export const comingPolicyMet = (id: string) => COMING_POLICY.includes(id) || (pendingKnown(id) && isPendingMet(id));
+const pendingKnown = (id: string) => conditionForPending(id) in (conditions as Record<string, unknown>);
+
 // HTML comments (the file header) are notes for editors, never published.
 export function stripComments(source: string): string {
   return source.replace(/<!--[\s\S]*?-->\n?/g, "");
@@ -103,7 +111,8 @@ export function renderLegal(source: string, met: (id: string) => boolean = isPen
     .replace(/^### /gm, "## ")
     .replace(TODO, (t) => `<mark class="legal-todo">${t}</mark>`);
   const html = marked.parse(body, { async: false, gfm: true }) as string;
-  return { title, html: scrollableTables(html), hidden };
+  // Names never hyphenate (UX, 19 Nov), even where the large-text hyphen rule is on.
+  return { title, html: scrollableTables(wholeNamesHtml(html)), hidden };
 }
 
 // A wide table scrolls sideways on a phone, so its scroller must be

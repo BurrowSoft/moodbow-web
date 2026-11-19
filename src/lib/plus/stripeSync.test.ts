@@ -5,8 +5,8 @@ import type { EntitlementRow } from "./entitlements";
 import { desiredFor, subscriptionIdOf, syncSubscription, type SyncDeps } from "./stripeSync";
 
 const T = 1_800_000_000; // seconds
-const sub = (over: Partial<Stripe.Subscription> & { periodEnd?: number | null } = {}): Stripe.Subscription => {
-  const { periodEnd = T + 365 * 86_400, ...rest } = over;
+const sub = (over: Partial<Stripe.Subscription> & { periodEnd?: number | null; periodStart?: number | null } = {}): Stripe.Subscription => {
+  const { periodEnd = T + 365 * 86_400, periodStart = T, ...rest } = over;
   return {
     id: "sub_1",
     status: "active",
@@ -14,7 +14,7 @@ const sub = (over: Partial<Stripe.Subscription> & { periodEnd?: number | null } 
     metadata: { user_id: "u1" },
     trial_start: null,
     trial_end: null,
-    items: { data: [{ current_period_end: periodEnd, price: { id: "price_1" } }] },
+    items: { data: [{ current_period_end: periodEnd, current_period_start: periodStart, price: { id: "price_1" } }] },
     ...rest,
   } as unknown as Stripe.Subscription;
 };
@@ -24,7 +24,7 @@ const row = (over: Partial<EntitlementRow> = {}): EntitlementRow => ({
   source: "stripe",
   status: "active",
   trial_ends_at: null,
-  current_period_end: iso(T + 365 * 86_400),
+  current_period_end: iso(T + 365 * 86_400), current_period_start: null,
   trial_started_at: null,
   store_customer_id: "cus_1",
   store_subscription_id: "sub_1",
@@ -70,12 +70,19 @@ describe("desiredFor: the row a subscription should give", () => {
         status: "trialing",
         trial_ends_at: iso(T + 7 * 86_400),
         current_period_end: iso(T + 7 * 86_400),
+        current_period_start: iso(T),
         trial_started_at: iso(T),
         store_customer_id: "cus_1",
         store_subscription_id: "sub_1",
         store_product_id: "price_1",
       },
     });
+  });
+  it("writes when the current period started (041's grace runs from it), null when Stripe has none", () => {
+    const failed = desiredFor(sub({ status: "past_due", periodStart: T - 2 * 86_400, periodEnd: T + 363 * 86_400 }));
+    expect(failed.kind === "write" && failed.row.current_period_start).toBe(iso(T - 2 * 86_400));
+    const none = desiredFor(sub({ periodStart: null }));
+    expect(none.kind === "write" && none.row.current_period_start).toBeNull();
   });
   it("no person, or live with no period end: nothing written", () => {
     expect(desiredFor(sub({ metadata: {} }))).toEqual({ kind: "skip", reason: "no_user" });
