@@ -443,8 +443,8 @@ test("every page hyphenates long words from a 10em column (200 % and 300 % on a 
     });
   for (const [percent, expected] of [
     [100, "manual"],
-    [200, "auto 7 3 3"],
-    [300, "auto 7 3 3"],
+    [200, "auto 11 3 3"],
+    [300, "auto 11 3 3"],
   ] as const) {
     await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
     await page.goto("/fr/consent");
