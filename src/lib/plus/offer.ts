@@ -9,10 +9,14 @@ import { hasPlus, type EntitlementRow } from "./entitlements";
 export type OfferEnv = { vercelEnv?: string; offerPreview?: string };
 const buildEnv = (): OfferEnv => ({ vercelEnv: process.env.VERCEL_ENV, offerPreview: process.env.OFFER_PREVIEW });
 
-// December, UTC. OFFER_PREVIEW=1 opens it on a Preview deployment only, for the testers; Production
-// (and every other build) ignores it.
+// December 2026, UTC: the dates the Terms promise (1 December 2026 to 1 January 2027 00:00 UTC). Another
+// December is a new offer, with its own terms and Vitor's word, so it never reopens by itself (the Reviewer,
+// 20 Nov). OFFER_PREVIEW=1 opens it on a Preview deployment only, for the testers; Production (and every
+// other build) ignores it.
+export const OFFER_YEAR = 2026;
 export function offerWindowOpen(now: number = Date.now(), env: OfferEnv = buildEnv()): boolean {
-  if (new Date(now).getUTCMonth() === 11) return true;
+  const d = new Date(now);
+  if (d.getUTCFullYear() === OFFER_YEAR && d.getUTCMonth() === 11) return true;
   return env.vercelEnv === "preview" && env.offerPreview === "1";
 }
 
