@@ -1,12 +1,14 @@
 "use client";
 
 import { useActionState, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { AuthField, primaryButtonClass, textLinkClass } from "@/components/AuthField";
 import { FocusOnMount } from "@/components/FocusOnMount";
 import { signUpFlow, type SignUpState } from "./actions";
 import { countTap } from "@/lib/analyticsEvents";
+import { CONSENT_NOTICE_CLASS } from "@/lib/legalVersions";
+import { wholeNames } from "@/lib/wholeNames";
 
 const ERROR_KEYS = {
   emailInvalid: ["auth", "errEmailInvalid"],
@@ -46,7 +48,7 @@ function Box({ name, label, checked, onChange, testId, describedBy, invalid }: {
         aria-invalid={invalid ? true : undefined}
         className="mt-[2px] h-[24px] w-[24px] shrink-0 accent-[var(--accent)]"
       />
-      <span className="min-w-0">{label}</span>
+      <span className="min-w-0">{wholeNames(label)}</span>
     </label>
   );
 }
@@ -58,12 +60,11 @@ function Box({ name, label, checked, onChange, testId, describedBy, invalid }: {
 // three lines, above the boxes; Terms and Privacy, health data, and 18+, each its own unticked box
 // with its link (opened in a new tab, so what's typed stays); AI only where it's asked, optional.
 // Create account stays off until the required boxes are ticked, once the page runs.
-export function SignUpForm({ askAi = false, healthLink = false }: { askAi?: boolean; healthLink?: boolean }) {
+export function SignUpForm({ askAi = false, healthLink = false, legalInEnglish = false }: { askAi?: boolean; healthLink?: boolean; legalInEnglish?: boolean }) {
   const t = useTranslations("onboarding");
   const ta = useTranslations("auth");
   const tai = useTranslations("ai");
   const tc = useTranslations("common");
-  const locale = useLocale();
   const [privacy, setPrivacy] = useState(false);
   const [health, setHealth] = useState(false);
   const [age, setAge] = useState(false);
@@ -103,8 +104,8 @@ export function SignUpForm({ askAi = false, healthLink = false }: { askAi?: bool
     const notice = state.notice ? ta(NOTICES[state.notice]) : null;
     return (
       <div className="space-y-6" data-testid="check-email">
-        <FocusOnMount className="text-2xl font-medium text-text">{t("checkEmailTitle")}</FocusOnMount>
-        <p>{t("checkEmailBody", { email: state.email })}</p>
+        <FocusOnMount className="text-2xl font-medium text-text">{wholeNames(t("checkEmailTitle"))}</FocusOnMount>
+        <p>{wholeNames(t("checkEmailBody", { email: state.email }))}</p>
         {/* "Sent again" goes in a region that's always there (so it's
             announced); a problem is an alert. */}
         <p role="status" className="font-medium text-text empty:hidden" data-testid={state.notice === "resent" ? "check-email-notice" : undefined}>
@@ -119,13 +120,13 @@ export function SignUpForm({ askAi = false, healthLink = false }: { askAi?: bool
           <input type="hidden" name="intent" value="confirmed" />
           <input type="hidden" name="password" value={password} />
           <button type="submit" disabled={pending} data-testid="check-email-confirmed" className={primaryButtonClass}>
-            {t("checkEmailConfirmed")}
+            {wholeNames(t("checkEmailConfirmed"))}
           </button>
         </form>
         <form action={action} onSubmit={() => setResending(true)}>
           <input type="hidden" name="intent" value="resend" />
           <button type="submit" disabled={pending} data-testid="check-email-resend" data-count="signup_resend" className={textLinkClass}>
-            {t("checkEmailResend")}
+            {wholeNames(t("checkEmailResend"))}
           </button>
         </form>
       </div>
@@ -139,12 +140,12 @@ export function SignUpForm({ askAi = false, healthLink = false }: { askAi?: bool
   const smallText = "leading-[1.429] [font-size:min(0.875rem,max(8.75vw,28px))]";
   return (
     <div className="space-y-6">
-      <ul data-testid="signup-summary" className="list-disc space-y-1 ps-5 text-muted">
-        <li>{t("welcome1Body")}</li>
-        <li>{t("welcome2Body")}</li>
-        <li>{t("welcome3BodyNoAi")}</li>
+      <ul data-testid="signup-summary" data-hyphenate className="list-disc space-y-1 ps-5 text-muted">
+        <li>{wholeNames(t("welcome1Body"))}</li>
+        <li>{wholeNames(t("welcome2Body"))}</li>
+        <li>{wholeNames(t("welcome3BodyNoAi"))}</li>
       </ul>
-      <form action={action} noValidate className="space-y-5 max-sm:[font-size:min(1rem,max(10vw,32px))]">
+      <form action={action} noValidate data-hyphenate className="space-y-5 max-sm:[font-size:min(1rem,max(10vw,32px))]">
         <input type="hidden" name="intent" value="signup" />
         <input type="hidden" name="time_zone" value={timeZone} />
         <AuthField
@@ -157,7 +158,7 @@ export function SignUpForm({ askAi = false, healthLink = false }: { askAi?: bool
         />
         <div>
           <label htmlFor="password" className="block text-sm font-medium text-text">
-            {ta("passwordLabel")}
+            {wholeNames(ta("passwordLabel"))}
           </label>
           <input
             ref={passwordField}
@@ -173,28 +174,33 @@ export function SignUpForm({ askAi = false, healthLink = false }: { askAi?: bool
             className="mt-2 block w-full rounded-2xl border border-border bg-surface px-4 py-3 text-base text-text outline-none focus-visible:border-accent"
           />
           <p id="password-hint" className="mt-1 text-sm">
-            {t("passwordHint")}
+            {wholeNames(t("passwordHint"))}
           </p>
         </div>
+        {/* Who keeps what, right above the boxes, never collapsed (decisions 224, 226; as on Consent). */}
+        <p data-testid="consent-notice" className={CONSENT_NOTICE_CLASS}>
+          {wholeNames(t("consentNotice"))}
+        </p>
         <Box name="privacy" testId="consent-privacy" label={t("consentPrivacy")} checked={privacy} onChange={setPrivacy} describedBy={errorOn === "consent" ? "signup-error" : undefined} invalid={errorOn === "consent" && !privacy} />
         <p className={`flex flex-wrap gap-x-[24px] gap-y-[4px] px-[4px] ${smallText}`}>
           <Link href="/terms" target="_blank" rel="noopener" data-testid="consent-read-terms" className={`${textLinkClass} ${LEGAL_LINK}`}>
-            {t("consentReadTerms")} <span className="sr-only">{tc("opensInNewTab")}</span>
+            {wholeNames(t("consentReadTerms"))} <span className="sr-only">{wholeNames(tc("opensInNewTab"))}</span>
           </Link>
           <Link href="/privacy" target="_blank" rel="noopener" data-testid="consent-read-privacy" className={`${textLinkClass} ${LEGAL_LINK}`}>
-            {t("consentReadPrivacy")} <span className="sr-only">{tc("opensInNewTab")}</span>
+            {wholeNames(t("consentReadPrivacy"))} <span className="sr-only">{wholeNames(tc("opensInNewTab"))}</span>
           </Link>
         </p>
-        {locale !== "en" && (
+        {/* Said only where the Terms and Privacy Policy really are in English here (as on Consent). */}
+        {legalInEnglish && (
           <p data-testid="consent-legal-english" className={`px-[4px] text-muted ${smallText}`}>
-            {t("consentLegalEnglish")}
+            {wholeNames(t("consentLegalEnglish"))}
           </p>
         )}
         <Box name="health" testId="consent-health" label={t("consentHealth")} checked={health} onChange={setHealth} describedBy={errorOn === "consent" ? "signup-error" : undefined} invalid={errorOn === "consent" && !health} />
         {healthLink && (
           <p className={`px-[4px] ${smallText}`}>
             <Link href="/consumer-health-data" target="_blank" rel="noopener" data-testid="consent-read-health" className={`${textLinkClass} ${LEGAL_LINK}`}>
-              {tc("consumerHealthData")} <span className="sr-only">{tc("opensInNewTab")}</span>
+              {wholeNames(tc("consumerHealthData"))} <span className="sr-only">{wholeNames(tc("opensInNewTab"))}</span>
             </Link>
           </p>
         )}
@@ -203,9 +209,9 @@ export function SignUpForm({ askAi = false, healthLink = false }: { askAi?: bool
           <label className="flex items-start gap-[12px] rounded-2xl border border-border bg-surface p-[16px] text-text">
             <input type="checkbox" name="ai" data-testid="consent-ai" aria-describedby="consent-ai-body" className="mt-[2px] h-[24px] w-[24px] shrink-0 accent-[var(--accent)]" />
             <span className="flex min-w-0 flex-col gap-[4px]">
-              <span className="font-medium">{tai("consentAiTitle")}</span>
+              <span className="font-medium">{wholeNames(tai("consentAiTitle"))}</span>
               <span id="consent-ai-body" aria-hidden="true" className={`text-muted ${smallText}`}>
-                {tai("consentAiBody")}
+                {wholeNames(tai("consentAiBody"))}
               </span>
             </span>
           </label>
@@ -216,12 +222,12 @@ export function SignUpForm({ askAi = false, healthLink = false }: { askAi?: bool
           </p>
         )}
         <button type="submit" disabled={pending || (hydrated && !(privacy && health && age))} data-testid="signup-submit" className={primaryButtonClass}>
-          {t("signupSubmit")}
+          {wholeNames(t("signupSubmit"))}
         </button>
       </form>
       <p>
         <Link href="/sign-in" data-testid="signup-to-signin" className={textLinkClass}>
-          {t("signupHaveAccount")}
+          {wholeNames(t("signupHaveAccount"))}
         </Link>
       </p>
     </div>

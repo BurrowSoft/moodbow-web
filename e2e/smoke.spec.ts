@@ -225,6 +225,16 @@ test.describe("language: the offered ones, and Thai as a draft (thai-offered-liv
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("เริ่มต้นใช้ Moodbow");
   });
 
+  test("/privacy/next on a draft build: the coming text, a line about it, a way to today's, not indexed", async ({ page }) => {
+    const res = await page.goto("/privacy/next");
+    expect(res?.status()).toBe(200);
+    await expect(page.getByTestId("privacy-next-line")).toBeVisible();
+    await expect(page.getByTestId("privacy-next-current")).toHaveAttribute("href", "/privacy");
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
+    // The coming text is the policy with Moodbow Plus in (COMING_POLICY), which /privacy hides today.
+    await expect(page.locator(".legal-prose")).toContainText("Moodbow Plus purchases");
+  });
+
   test("/th/privacy: the English text under the Thai line, as /privacy is (draft or live)", async ({ page }) => {
     const res = await page.goto("/th/privacy");
     expect(res?.status()).toBe(200);
@@ -278,7 +288,7 @@ test.describe("the live legal pages and account deletion (decision 164)", () => 
     await page.goto("/privacy");
     const article = page.locator('[data-content="article"]');
     await expect(article.getByRole("heading", { level: 2, name: "The short version" })).toBeVisible();
-    await expect(article.getByText("Last updated: 15 November 2026")).toBeVisible();
+    await expect(article.getByText("Last updated: 19 November 2026")).toBeVisible();
     // Every cookie the website sets, as the policy names them (the full-app audit, round 1, item 1).
     await expect(article).toContainText("one that keeps you signed in, one that remembers the language you chose, one that remembers list or calendar view, and, for a minute after you delete your account, one that tells your browser to clear its copies.");
     // The help card's country fallback, as the policy says it (decision 245, #269).
@@ -311,10 +321,10 @@ test.describe("the live legal pages and account deletion (decision 164)", () => 
     // Sign-up is reached through Consent.
     await page.goto("/consumer-health-data");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Moodbow: Consumer Health Data Privacy Policy");
-    await expect(page.locator('[data-content="article"]')).toContainText("We answer within 45 days");
+    await expect(page.locator('[data-content="article"]')).toContainText("We answer within 10 days");
     await page.goto("/fr/consumer-health-data");
     await expect(page.getByTestId("page-notice")).toHaveText(fr.legal.legalEnglishOnly);
-    await expect(page.locator('[data-content="article"]')).toContainText("We answer within 45 days");
+    await expect(page.locator('[data-content="article"]')).toContainText("We answer within 10 days");
   });
 
   test("the footer links only live pages: account deletion, and the legal pages once live", async ({ page }) => {
@@ -684,6 +694,29 @@ test.describe("onboarding (signed out)", () => {
     await expect(page.getByTestId("home-security")).toHaveCount(0);
   });
 
+  test("Create account: who keeps what is right above the boxes, in small print that still scales", async ({ page }) => {
+    await page.goto("/sign-up");
+    const notice = page.getByTestId("consent-notice");
+    await expect(notice).toContainText("Moodbow is run by Vitor Carvalho");
+    const n = (await notice.boundingBox())!;
+    const box = (await page.getByTestId("consent-privacy").boundingBox())!;
+    expect(n.y).toBeLessThan(box.y);
+    // Names never hyphenate (UX, 19 Nov), whatever the hyphen rule around them says.
+    expect(await notice.locator(".whole-name").allTextContents()).toEqual(["Moodbow", "Vitor Carvalho", "BurrowSoft"]);
+    expect(await notice.locator(".whole-name").evaluateAll((els) => els.map((el) => getComputedStyle(el).hyphens))).toEqual(["manual", "manual", "manual"]);
+    // Help first, as on Consent (UX, 19 Nov): before the form, the notice and the boxes.
+    const help = (await page.getByTestId("signup-get-help").boundingBox())!;
+    const email = (await page.getByLabel("Email").boundingBox())!;
+    expect(help.y).toBeLessThan(email.y);
+    // Create account's boxes are 24 px (#350). Consent's now match; Consent needs a signed-in account,
+    // so ConsentForm.test checks its size.
+    expect(box.width).toBe(24);
+    // 0.6875rem: 11px at the default root size, and it follows the root (rem, not px).
+    expect(await notice.evaluate((el) => getComputedStyle(el).fontSize)).toBe("11px");
+    await page.evaluate(() => (document.documentElement.style.fontSize = "32px"));
+    expect(await notice.evaluate((el) => getComputedStyle(el).fontSize)).toBe("22px");
+  });
+
   test("Create account: help is there before anything's agreed, and it opens the card", async ({ page }) => {
     await page.goto("/sign-up");
     await page.getByTestId("signup-get-help").click();
@@ -702,7 +735,7 @@ test.describe("onboarding (signed out)", () => {
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("See your patterns");
     await page.getByTestId("welcome-skip").click();
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Private, and yours");
-    await expect(page.getByText("Only you can read your journal, and you can delete everything at any time in Me.")).toBeVisible();
+    await expect(page.getByText("Your journal is private to your account, and you can delete everything in Me.")).toBeVisible();
     await expect(page.getByTestId("welcome-skip")).toHaveCount(0);
     await expect(page).toHaveURL(/\/welcome\?slide=3$/);
     await page.getByTestId("welcome-start").click();

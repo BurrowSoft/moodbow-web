@@ -1,10 +1,11 @@
 "use client";
 
 import { useActionState, useState, useSyncExternalStore } from "react";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { primaryButtonClass, textLinkClass } from "@/components/AuthField";
 import { BackLink } from "@/components/BackLink";
+import { wholeNames } from "@/lib/wholeNames";
 import { giveConsent, type ConsentState } from "./actions";
 
 const noSubscribe = () => () => {};
@@ -19,9 +20,9 @@ function Checkbox({ name, label, checked, onChange, testId }: { name: string; la
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
         required
-        className="mt-[4px] h-[20px] w-[20px] shrink-0 accent-[var(--accent)]"
+        className="mt-[2px] h-[24px] w-[24px] shrink-0 accent-[var(--accent)]"
       />
-      <span className="min-w-0">{label}</span>
+      <span className="min-w-0">{wholeNames(label)}</span>
     </label>
   );
 }
@@ -32,12 +33,11 @@ function Checkbox({ name, label, checked, onChange, testId }: { name: string; la
 // check, then the server's. askAi: the optional AI box (r1 §M3), never
 // required and never pre-ticked; hidden while this build doesn't show AI.
 // showBack: new accounts only (Back → Welcome slide 3, the privacy promise).
-export function ConsentForm({ askAge, askAi = false, showBack }: { askAge: boolean; askAi?: boolean; showBack: boolean }) {
+export function ConsentForm({ askAge, askAi = false, showBack, legalInEnglish = false }: { askAge: boolean; askAi?: boolean; showBack: boolean; legalInEnglish?: boolean }) {
   const tai = useTranslations("ai");
   const t = useTranslations("onboarding");
   const ta = useTranslations("auth");
   const tc = useTranslations("common");
-  const locale = useLocale();
   const [state, action, pending] = useActionState<ConsentState, FormData>(giveConsent, { status: "idle" });
   const [privacy, setPrivacy] = useState(false);
   const [health, setHealth] = useState(false);
@@ -49,36 +49,36 @@ export function ConsentForm({ askAge, askAi = false, showBack }: { askAge: boole
     // Below the wide layout (rem-based, so large text counts as narrow), type stops growing at about
     // 200 % (decision 231): at 300 % it was 48 px, with "J'accepte" over four lines (Web Tester). A long
     // word may still split. Nothing is cut off: the page still scrolls, and pinch zoom stays on.
-    <form action={action} className="space-y-[16px] max-sm:[font-size:min(1rem,max(10vw,32px))]">
+    <form action={action} data-hyphenate className="space-y-[16px] max-sm:[font-size:min(1rem,max(10vw,32px))]">
       <Checkbox name="privacy" testId="consent-privacy" label={t("consentPrivacy")} checked={privacy} onChange={setPrivacy} />
       {/* Each link is a 44 px tall tap area (Web Tester batch E), so wrapped rows need no gap of their own. */}
       <p className="flex flex-wrap gap-x-[24px] px-[4px] leading-[1.429] [font-size:min(0.875rem,max(8.75vw,28px))]">
         <Link href="/terms" target="_blank" rel="noopener" data-testid="consent-read-terms" className={`${textLinkClass} inline-flex min-h-11 items-center`}>
-          {t("consentReadTerms")}
+          {wholeNames(t("consentReadTerms"))}
           {" "}
-          <span className="sr-only">{tc("opensInNewTab")}</span>
+          <span className="sr-only">{wholeNames(tc("opensInNewTab"))}</span>
         </Link>
         <Link href="/privacy" target="_blank" rel="noopener" data-testid="consent-read-privacy" className={`${textLinkClass} inline-flex min-h-11 items-center`}>
-          {t("consentReadPrivacy")}
+          {wholeNames(t("consentReadPrivacy"))}
           {" "}
-          <span className="sr-only">{tc("opensInNewTab")}</span>
+          <span className="sr-only">{wholeNames(tc("opensInNewTab"))}</span>
         </Link>
       </p>
-      {/* The legal pages are in English for now, as on the app (UX 2026-11-05). */}
-      {locale !== "en" && (
+      {/* Said only where the Terms and Privacy Policy really are in English here. */}
+      {legalInEnglish && (
         <p data-testid="consent-legal-english" className="px-[4px] text-muted leading-[1.429] [font-size:min(0.875rem,max(8.75vw,28px))]">
-          {t("consentLegalEnglish")}
+          {wholeNames(t("consentLegalEnglish"))}
         </p>
       )}
       <Checkbox name="health" testId="consent-health" label={t("consentHealth")} checked={health} onChange={setHealth} />
       {askAge && <Checkbox name="age" testId="consent-age" label={t("ageConfirm")} checked={age} onChange={setAge} />}
       {askAi && (
         <label className="flex items-start gap-[12px] rounded-2xl border border-border bg-surface p-[16px] text-text">
-          <input type="checkbox" name="ai" data-testid="consent-ai" aria-describedby="consent-ai-body" className="mt-[4px] h-[20px] w-[20px] shrink-0 accent-[var(--accent)]" />
+          <input type="checkbox" name="ai" data-testid="consent-ai" aria-describedby="consent-ai-body" className="mt-[2px] h-[24px] w-[24px] shrink-0 accent-[var(--accent)]" />
           <span className="flex min-w-0 flex-col gap-[4px]">
-            <span className="font-medium">{tai("consentAiTitle")}</span>
+            <span className="font-medium">{wholeNames(tai("consentAiTitle"))}</span>
             <span id="consent-ai-body" aria-hidden="true" className="text-muted leading-[1.429] [font-size:min(0.875rem,max(8.75vw,28px))]">
-              {tai("consentAiBody")}
+              {wholeNames(tai("consentAiBody"))}
             </span>
           </span>
         </label>
@@ -90,7 +90,7 @@ export function ConsentForm({ askAge, askAi = false, showBack }: { askAge: boole
       )}
       <div className="flex flex-wrap items-center gap-[24px] pt-[8px]">
         <button type="submit" data-testid="consent-continue" data-count="consent_continue" disabled={(hydrated && !ready) || pending} className={`${primaryButtonClass} max-sm:[font-size:min(1rem,max(10vw,32px))]`}>
-          {t("consentContinue")}
+          {wholeNames(t("consentContinue"))}
         </button>
         {showBack && <BackLink href="/welcome?slide=3" label={t("back")} testId="consent-back" />}
       </div>

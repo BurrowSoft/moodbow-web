@@ -2,6 +2,8 @@ import fs from "node:fs";
 import path from "node:path";
 import { marked } from "marked";
 import conditions from "../../content/conditions.json";
+import { pageGate, type ConditionId, type PageGate } from "./conditions";
+import { wholeNamesHtml } from "./wholeNames";
 
 // The privacy policy and terms (W3) live as Markdown per locale:
 // content/legal/<locale>/<slug>.md, copied from UX & PM's specs. Long-form
@@ -57,6 +59,13 @@ export function applyPending(source: string, met: (id: string) => boolean = isPe
   return { text, hidden };
 }
 
+// The legal text as it will read once the noticed change applies (the policy's §8): the pending
+// ids in COMING are in, everything else as it is today. Now: Moodbow Plus (its purchases, Stripe,
+// the stores' rows, the payment-records bullet). Change it with the next noticed change.
+export const COMING_POLICY: readonly string[] = ["plus"];
+export const comingPolicyMet = (id: string) => COMING_POLICY.includes(id) || (pendingKnown(id) && isPendingMet(id));
+const pendingKnown = (id: string) => conditionForPending(id) in (conditions as Record<string, unknown>);
+
 // HTML comments (the file header) are notes for editors, never published.
 export function stripComments(source: string): string {
   return source.replace(/<!--[\s\S]*?-->\n?/g, "");
@@ -66,10 +75,18 @@ export function todos(source: string): string[] {
   return stripComments(source).match(TODO) ?? [];
 }
 
-// The language a page's legal text is in: its own where content/legal has
-// it, else English (Thai, 1.1 F: English text under legalEnglishOnly).
-export function legalLocale(locale: string): string {
-  return fs.existsSync(path.join(LEGAL_DIR, locale)) ? locale : "en";
+// The translations that exist, page by page, each behind its own approval. Consumer Health Data
+// stays English in every language.
+const TRANSLATED: Partial<Record<string, { condition: ConditionId; slugs: readonly LegalSlug[] }>> = {
+  // Privacy joins once its catch-up with the current English is approved (UX 19 Nov, option a).
+  es: { condition: "legal-es-approved", slugs: ["terms"] },
+};
+
+// The language a page's legal text is in: its own where it has been translated and approved
+// (Previews show drafts), else English (1.1 F: English text under legalEnglishOnly).
+export function legalLocale(locale: string, slug: LegalSlug, gate: (id: ConditionId) => PageGate = pageGate): string {
+  const own = TRANSLATED[locale];
+  return own && own.slugs.includes(slug) && gate(own.condition) !== "hidden" ? locale : "en";
 }
 
 export function legalSource(slug: LegalSlug, locale: string): string {
@@ -94,7 +111,8 @@ export function renderLegal(source: string, met: (id: string) => boolean = isPen
     .replace(/^### /gm, "## ")
     .replace(TODO, (t) => `<mark class="legal-todo">${t}</mark>`);
   const html = marked.parse(body, { async: false, gfm: true }) as string;
-  return { title, html: scrollableTables(html), hidden };
+  // Names never hyphenate (UX, 19 Nov), even where the large-text hyphen rule is on.
+  return { title, html: scrollableTables(wholeNamesHtml(html)), hidden };
 }
 
 // A wide table scrolls sideways on a phone, so its scroller must be

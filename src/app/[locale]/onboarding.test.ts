@@ -1,5 +1,6 @@
 // @vitest-environment node
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { withLanguage } from "@/lib/legalVersions";
 import { CONSENT_COOKIE, grantedAtConsent } from "@/lib/onboardingConsent";
 import { onboardingStep } from "@/lib/journal/me";
 import { POLICY_VERSIONS } from "@/lib/legalVersions";
@@ -106,7 +107,7 @@ describe("giveConsent: the optional AI box (r1 §M3)", () => {
     aiGate = "live";
     me({ age_18: { version: "1", granted: true } });
     await redirected(giveConsent(idle, form({ privacy: "on", health: "on", ai: "on" })));
-    expect(rpc).toHaveBeenCalledWith("record_consents", { p_items: grantedAtConsent(true) });
+    expect(rpc).toHaveBeenCalledWith("record_consents", { p_items: withLanguage(grantedAtConsent(true), "en") });
   });
 });
 
@@ -142,7 +143,7 @@ describe("giveConsent", () => {
     signedIn();
     me({ age_18: { version: "1", granted: true } });
     expect(await redirected(giveConsent(idle, form({ privacy: "on", health: "on" })))).toEqual({ redirect: "/app" });
-    expect(rpc).toHaveBeenCalledWith("record_consents", { p_items: grantedAtConsent() });
+    expect(rpc).toHaveBeenCalledWith("record_consents", { p_items: withLanguage(grantedAtConsent(), "en") });
 
     rpc.mockReset();
     me({});
@@ -194,8 +195,10 @@ describe("signUpFlow", () => {
     expect(arg.options.data.time_zone).toBe("Asia/Bangkok");
     expect(arg.options.data.consents.map((c: { kind: string }) => c.kind)).toEqual(["privacy", "terms", "health_data", "age_18"]);
     expect(arg.options.data).not.toHaveProperty("country");
-    // Each with this build's version, as Consent records them (POLICY_VERSIONS).
-    expect(arg.options.data.consents.slice(0, 3)).toEqual(grantedAtConsent());
+    // Each with this build's version, as Consent records them (POLICY_VERSIONS), and the language
+    // they were given in (locale, stored by the app's 020 in consents.locale).
+    expect(arg.options.data.consents.slice(0, 3)).toEqual(withLanguage(grantedAtConsent(), "en"));
+    expect(arg.options.data.consents.every((c: { locale?: string }) => c.locale === "en")).toBe(true);
   });
 
   it("a bad time zone is sent as null (the DB falls back to UTC)", async () => {

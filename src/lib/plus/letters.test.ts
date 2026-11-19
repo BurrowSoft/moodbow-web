@@ -20,19 +20,19 @@ describe("lettersGate: letters exist only with both switches (letters wait for P
 
 describe("letterWrite: the server's check on saving a new letter", () => {
   it("Plus, trialing or active inside its period: write", () => {
-    expect(letterWrite({ status: "trialing", current_period_end: at(86_400_000) }, false, NOW)).toBe("plus");
-    expect(letterWrite({ status: "active", current_period_end: at(1) }, true, NOW)).toBe("plus");
+    expect(letterWrite({ source: "stripe" as const, current_period_start: null, status: "trialing", current_period_end: at(86_400_000) }, false, NOW)).toBe("plus");
+    expect(letterWrite({ source: "stripe" as const, current_period_start: null, status: "active", current_period_end: at(1) }, true, NOW)).toBe("plus");
   });
   it("no row, never Plus, past_due or canceled long ago: locked", () => {
     expect(letterWrite(null, false, NOW)).toBe("locked");
-    expect(letterWrite({ status: "past_due", current_period_end: at(-LAPSED_DRAFT_MS - 1) }, false, NOW)).toBe("locked");
-    expect(letterWrite({ status: "canceled", current_period_end: null }, false, NOW)).toBe("locked");
+    expect(letterWrite({ source: "stripe" as const, current_period_start: null, status: "past_due", current_period_end: at(-LAPSED_DRAFT_MS - 1) }, false, NOW)).toBe("locked");
+    expect(letterWrite({ source: "stripe" as const, current_period_start: null, status: "canceled", current_period_end: null }, false, NOW)).toBe("locked");
   });
   it("Plus ended in the last 24 hours: one save of the draft in progress, and only one", () => {
-    const lapsed = { status: "canceled", current_period_end: at(-60_000) };
+    const lapsed = { source: "stripe" as const, current_period_start: null, status: "canceled", current_period_end: at(-60_000) };
     expect(letterWrite(lapsed, false, NOW)).toBe("lapsed_once");
     expect(letterWrite(lapsed, true, NOW)).toBe("locked");
-    expect(letterWrite({ status: "active", current_period_end: at(-LAPSED_DRAFT_MS + 1) }, false, NOW)).toBe("lapsed_once");
-    expect(letterWrite({ status: "active", current_period_end: at(-LAPSED_DRAFT_MS) }, false, NOW)).toBe("locked");
+    expect(letterWrite({ source: "stripe" as const, current_period_start: null, status: "active", current_period_end: at(-LAPSED_DRAFT_MS + 1) }, false, NOW)).toBe("lapsed_once");
+    expect(letterWrite({ source: "stripe" as const, current_period_start: null, status: "active", current_period_end: at(-LAPSED_DRAFT_MS) }, false, NOW)).toBe("locked");
   });
 });

@@ -2,6 +2,8 @@
 // One row per person, whichever store sold Plus; written only by the server,
 // each person reads their own (RLS). Pure: safe on the server and the client.
 
+import contract from "../../../content/contracts/plus-entitlement.json";
+
 export const PLUS_SOURCES = ["stripe", "play", "apple"] as const;
 export type PlusSource = (typeof PLUS_SOURCES)[number];
 export const TRIAL_DAYS = 7;
@@ -12,24 +14,40 @@ export type EntitlementRow = {
   status: string;
   trial_ends_at: string | null;
   current_period_end: string | null;
+  // When the current billing period started (moodbow-app 041): a failed Stripe renewal's 7-day
+  // grace runs from here, since Stripe opens the new period before it tries the invoice.
+  current_period_start: string | null;
   trial_started_at: string | null;
   store_customer_id: string | null;
   store_subscription_id: string | null;
   store_product_id: string | null;
 };
 
-export const ENTITLEMENT_COLUMNS = "user_id, source, status, trial_ends_at, current_period_end, trial_started_at, store_customer_id, store_subscription_id, store_product_id";
+export const ENTITLEMENT_COLUMNS = "user_id, source, status, trial_ends_at, current_period_end, current_period_start, trial_started_at, store_customer_id, store_subscription_id, store_product_id";
 
-// The one rule, as has_plus() in SQL: trialing or active, inside its period.
-// past_due, paused, canceled and expired never grant.
-export function hasPlus(row: Pick<EntitlementRow, "status" | "current_period_end"> | null, now = Date.now()): boolean {
-  if (!row || (row.status !== "trialing" && row.status !== "active") || !row.current_period_end) return false;
-  return new Date(row.current_period_end).getTime() > now;
+// The past_due grace, from the app's contract (content/contracts/plus-entitlement.json, vendored
+// byte for byte from moodbow-app 041): 7 days, absolute, from the period's start.
+export const PAST_DUE_GRACE_MS = contract.past_due_grace_seconds * 1000;
+
+type PlusFields = Pick<EntitlementRow, "source" | "status" | "current_period_end" | "current_period_start">;
+
+// The one rule, as has_plus() in SQL (041; the contract's rule): trialing or active inside its
+// period; or a Stripe renewal that failed (past_due) less than 7 days after its period started.
+// A store's past_due never grants (the store gave its own grace first); a null start never
+// grants; paused, canceled and expired never grant.
+export function hasPlus(row: PlusFields | null, now = Date.now()): boolean {
+  if (!row) return false;
+  if ((row.status === "trialing" || row.status === "active") && row.current_period_end) return new Date(row.current_period_end).getTime() > now;
+  if (row.source === "stripe" && row.status === "past_due" && row.current_period_start) return now < new Date(row.current_period_start).getTime() + PAST_DUE_GRACE_MS;
+  return false;
 }
+
+// Plus kept by the grace only: a failed Stripe renewal still inside its 7 days (Me says so).
+export const inPaymentGrace = (row: PlusFields | null, now = Date.now()): boolean => !!row && row.status === "past_due" && hasPlus(row, now);
 
 // The trial counter in Me ("Plus trial · {n} days left"): whole days left,
 // rounded up, 1 to 7; null outside a running trial.
-export function trialDaysLeft(row: Pick<EntitlementRow, "status" | "trial_ends_at" | "current_period_end"> | null, now = Date.now()): number | null {
+export function trialDaysLeft(row: (PlusFields & Pick<EntitlementRow, "trial_ends_at">) | null, now = Date.now()): number | null {
   if (!row || row.status !== "trialing" || !row.trial_ends_at || !hasPlus(row, now)) return null;
   const ms = new Date(row.trial_ends_at).getTime() - now;
   if (ms <= 0) return null;
@@ -49,6 +67,7 @@ export function parseEntitlement(data: unknown): EntitlementRow | null {
     source: r.source as PlusSource,
     status: r.status,
     trial_ends_at: s(r.trial_ends_at),
+    current_period_start: s(r.current_period_start),
     current_period_end: s(r.current_period_end),
     trial_started_at: s(r.trial_started_at),
     store_customer_id: s(r.store_customer_id),

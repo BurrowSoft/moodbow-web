@@ -66,7 +66,7 @@
     "featureInsightsTitle": "Descubre qué suele ir de la mano en tus días",
     "featureInsightsBody": "Gráficos de la semana, el mes y 3 meses.",
     "privateTitle": "Privado desde el diseño",
-    "privateBody": "Solo tú puedes leer tu diario. Exporta o borra todo cuando quieras."
+    "privateBody": "Tu diario es privado y está vinculado a tu cuenta. Exporta o elimina todo en Yo."
   },
   "support": {
     "title": "Soporte",
@@ -141,7 +141,10 @@
   },
   "legal": {
     "hiddenTitle": "Aún no se muestra: cada bloque aparece cuando su función está activa (solo versiones de prueba)",
-    "legalEnglishOnly": "Esta página está disponible en inglés."
+    "legalEnglishOnly": "Esta página está disponible en inglés.",
+    "nextApplies": "Estos cambios se aplican el {date}. Hasta entonces, se aplica nuestra política actual.",
+    "nextAppliesNoDate": "Estos cambios aún no se aplican. Hasta entonces, se aplica nuestra política actual.",
+    "nextCurrent": "Leer la política actual"
   },
   "auth": {
     "signinTitle": "Hola de nuevo",
@@ -173,12 +176,13 @@
     "welcome2Title": "Descubre tus patrones",
     "welcome2Body": "Tu cronología y tus gráficos muestran qué suele ir de la mano de tus días buenos y de tus días difíciles.",
     "welcome3Title": "Privado y tuyo",
-    "welcome3BodyNoAi": "Solo tú puedes leer tu diario, y puedes borrarlo todo cuando quieras en Yo.",
+    "welcome3BodyNoAi": "Tu diario es privado y está vinculado a tu cuenta, y puedes borrarlo todo en Yo.",
     "welcomeNext": "Siguiente",
     "welcomeSkip": "Omitir",
     "welcomeStart": "Empezar",
     "welcomeHaveAccount": "Ya tengo una cuenta",
     "consentTitle": "Antes de empezar",
+    "consentNotice": "Moodbow lo gestiona Vitor Carvalho, que opera como BurrowSoft, en Tailandia. Conservamos tu diario, incluidos datos sensibles como tu estado de ánimo y tu salud, para hacer funcionar tu cuenta y mostrártelo. No lo vendemos ni lo usamos para publicidad. Puedes cambiarlo o eliminarlo en Yo. La Política de privacidad tiene los detalles.",
     "consentPrivacy": "Acepto los Términos y la Política de privacidad",
     "consentHealth": "Acepto que Moodbow guarde y procese mi diario, que puede incluir información sobre mi salud y mi bienestar, para prestar el servicio.",
     "consentReadTerms": "Leer los Términos",
@@ -220,7 +224,13 @@
     "retry": "Reintentar",
     "tryAgain": "Reintentar",
     "slowLoading": "Está tardando más de lo normal…",
-    "navBackTo": "Volver a {screen}"
+    "navBackTo": "Volver a {screen}",
+    "policyNoticeTitle": "Nuestra Política de privacidad cambia",
+    "policyNoticeBody": "Si lo haces, Stripe, Google Play o el App Store se encargan del pago.",
+    "policyNoticeApplies": "A partir del {date}, podrás suscribirte a Moodbow Plus.",
+    "policyNoticeSoon": "Pronto podrás suscribirte a Moodbow Plus.",
+    "policyNoticeRead": "Ver qué cambia",
+    "policyNoticeDismiss": "Entendido"
   },
   "today": {
     "greetMorning": "Buenos días",

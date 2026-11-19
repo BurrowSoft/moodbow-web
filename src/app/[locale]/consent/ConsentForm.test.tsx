@@ -24,13 +24,13 @@ const renderIt = (askAi: boolean) =>
   );
 
 describe("ConsentForm: the legal pages are in English", () => {
-  it("said in any other language, not in English", () => {
+  it("said where they are, not where they aren't", () => {
     const view = renderIt(false);
     expect(screen.queryByTestId("consent-legal-english")).toBeNull();
     view.unmount();
     render(
       <NextIntlClientProvider locale="fr" messages={fr}>
-        <ConsentForm askAge={false} showBack={false} />
+        <ConsentForm askAge={false} showBack={false} legalInEnglish />
       </NextIntlClientProvider>,
     );
     expect(screen.getByTestId("consent-legal-english")).toHaveTextContent(fr.onboarding.consentLegalEnglish);
@@ -63,6 +63,17 @@ describe("ConsentForm: the legal links are 44 px tap areas", () => {
     renderIt(false);
     for (const id of ["consent-read-terms", "consent-read-privacy"]) {
       expect(screen.getByTestId(id).className.split(" ")).toEqual(expect.arrayContaining(["inline-flex", "min-h-11", "items-center"]));
+    }
+  });
+});
+
+describe("ConsentForm: the boxes", () => {
+  it("are 24 px, as Create account's (#350; UX, 19 Nov)", () => {
+    renderIt(true);
+    for (const id of ["consent-privacy", "consent-health", "consent-ai"]) {
+      const box = screen.getByTestId(id);
+      expect(box.className, id).toContain("h-[24px]");
+      expect(box.className, id).toContain("w-[24px]");
     }
   });
 });

@@ -2224,6 +2224,15 @@ test("large text, set in the browser: Write is in Today's first view at 320 px, 
       await cdp.send("Page.setFontSizes", { fontSizes: { standard: Math.round((16 * percent) / 100), fixed: Math.round((13 * percent) / 100) } });
       await page.goto("/app");
       await expect(page.getByTestId("checkin-card"), where).toBeVisible();
+      // A privacy-change notice out (app_config.policy_notice_id, e.g. on staging during a Tester row,
+      // or on the day Plus is announced) sits above the header until it's dismissed: Got it first, then
+      // measure Today as everyone sees it afterwards (UX, 19 Nov). Once per account, so only the first
+      // size meets it.
+      const notice = page.getByTestId("policy-notice");
+      if ((await notice.count()) > 0) {
+        await page.getByTestId("policy-notice-dismiss").click();
+        await expect(notice, where).toHaveCount(0);
+      }
       // The card's own Write is always there, after it.
       await expect(page.getByTestId("today-write"), where).toHaveCount(1);
       const top = page.getByTestId("today-write-top");

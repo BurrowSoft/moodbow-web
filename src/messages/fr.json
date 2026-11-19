@@ -66,7 +66,7 @@
     "featureInsightsTitle": "Voyez ce qui va de pair dans vos journées",
     "featureInsightsBody": "Graphiques sur une semaine, un mois et 3 mois.",
     "privateTitle": "Privé dès la conception",
-    "privateBody": "Votre journal n'est lisible que par vous. Exportez ou supprimez tout, à tout moment."
+    "privateBody": "Votre journal est privé et lié à votre compte. Exportez ou supprimez tout dans Moi."
   },
   "support": {
     "title": "Assistance",
@@ -141,7 +141,10 @@
   },
   "legal": {
     "hiddenTitle": "Pas encore affiché : chaque bloc apparaît quand sa fonction est en ligne (versions de test uniquement)",
-    "legalEnglishOnly": "Cette page est disponible en anglais."
+    "legalEnglishOnly": "Cette page est disponible en anglais.",
+    "nextApplies": "Ces changements s'appliquent le {date}. D'ici là, notre politique actuelle s'applique.",
+    "nextAppliesNoDate": "Ces changements ne s'appliquent pas encore. D'ici là, notre politique actuelle s'applique.",
+    "nextCurrent": "Lire la politique actuelle"
   },
   "auth": {
     "signinTitle": "Bon retour",
@@ -173,12 +176,13 @@
     "welcome2Title": "Voyez vos tendances",
     "welcome2Body": "Votre chronologie et vos graphiques montrent ce qui va souvent de pair avec vos bonnes journées et vos journées difficiles.",
     "welcome3Title": "Privé, et rien qu'à vous",
-    "welcome3BodyNoAi": "Votre journal n'est lisible que par vous, et vous pouvez tout supprimer à tout moment dans Moi.",
+    "welcome3BodyNoAi": "Votre journal est privé et lié à votre compte, et vous pouvez tout supprimer dans Moi.",
     "welcomeNext": "Suivant",
     "welcomeSkip": "Passer",
     "welcomeStart": "Commencer",
     "welcomeHaveAccount": "J'ai déjà un compte",
     "consentTitle": "Avant de commencer",
+    "consentNotice": "Moodbow est géré par Vitor Carvalho, exerçant sous le nom de BurrowSoft, en Thaïlande. Nous conservons votre journal, y compris des données sensibles comme votre humeur et votre santé, pour faire fonctionner votre compte et vous le montrer. Nous ne le vendons pas et ne l'utilisons pas pour la publicité. Vous pouvez le modifier ou le supprimer dans Moi. La Politique de confidentialité donne tous les détails.",
     "consentPrivacy": "J'accepte les Conditions et la Politique de confidentialité",
     "consentHealth": "J'accepte que Moodbow conserve et traite mon journal, qui peut contenir des informations sur ma santé et mon bien-être, afin de fournir le service.",
     "consentReadTerms": "Lire les Conditions",
@@ -220,7 +224,13 @@
     "retry": "Réessayer",
     "tryAgain": "Réessayer",
     "slowLoading": "Cela prend plus de temps que d'habitude…",
-    "navBackTo": "Retour à {screen}"
+    "navBackTo": "Retour à {screen}",
+    "policyNoticeTitle": "Notre Politique de confidentialité change",
+    "policyNoticeBody": "Si vous le faites, Stripe, Google Play ou l'App Store se charge du paiement.",
+    "policyNoticeApplies": "À partir du {date}, vous pourrez vous abonner à Moodbow Plus.",
+    "policyNoticeSoon": "Bientôt, vous pourrez vous abonner à Moodbow Plus.",
+    "policyNoticeRead": "Voir ce qui change",
+    "policyNoticeDismiss": "Compris"
   },
   "today": {
     "greetMorning": "Bonjour",

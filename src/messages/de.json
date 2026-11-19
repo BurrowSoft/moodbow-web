@@ -66,7 +66,7 @@
     "featureInsightsTitle": "Sieh, was in deinen Tagen zusammengehört",
     "featureInsightsBody": "Diagramme für Woche, Monat und 3 Monate.",
     "privateTitle": "Privat von Grund auf",
-    "privateBody": "Nur du kannst dein Tagebuch lesen. Exportiere oder lösche alles, jederzeit."
+    "privateBody": "Dein Tagebuch ist privat und an dein Konto gebunden. Exportiere oder lösche alles unter Ich."
   },
   "support": {
     "title": "Support",
@@ -141,7 +141,10 @@
   },
   "legal": {
     "hiddenTitle": "Noch nicht sichtbar: Jeder Abschnitt erscheint, sobald seine Funktion live ist (nur Test-Builds)",
-    "legalEnglishOnly": "Diese Seite ist auf Englisch verfügbar."
+    "legalEnglishOnly": "Diese Seite ist auf Englisch verfügbar.",
+    "nextApplies": "Diese Änderungen gelten ab dem {date}. Bis dahin gilt unsere aktuelle Erklärung.",
+    "nextAppliesNoDate": "Diese Änderungen gelten noch nicht. Bis dahin gilt unsere aktuelle Erklärung.",
+    "nextCurrent": "Aktuelle Erklärung lesen"
   },
   "auth": {
     "signinTitle": "Willkommen zurück",
@@ -173,12 +176,13 @@
     "welcome2Title": "Erkenne deine Muster",
     "welcome2Body": "Dein Verlauf und deine Diagramme zeigen, was oft mit deinen guten und deinen schweren Tagen zusammenhängt.",
     "welcome3Title": "Privat und nur für dich",
-    "welcome3BodyNoAi": "Nur du kannst dein Tagebuch lesen, und du kannst unter Ich jederzeit alles löschen.",
+    "welcome3BodyNoAi": "Dein Tagebuch ist privat und an dein Konto gebunden, und du kannst unter Ich alles löschen.",
     "welcomeNext": "Weiter",
     "welcomeSkip": "Überspringen",
     "welcomeStart": "Los geht’s",
     "welcomeHaveAccount": "Ich habe schon ein Konto",
     "consentTitle": "Bevor du startest",
+    "consentNotice": "Moodbow wird von Vitor Carvalho betrieben, tätig als BurrowSoft, in Thailand. Wir bewahren dein Tagebuch auf, einschließlich sensibler Daten wie deiner Stimmung und Gesundheit, um dein Konto zu betreiben und es dir anzuzeigen. Wir verkaufen es nicht und nutzen es nicht für Werbung. Du kannst es unter Ich ändern oder löschen. Die Datenschutzerklärung enthält die Details.",
     "consentPrivacy": "Ich stimme den Nutzungsbedingungen und der Datenschutzerklärung zu",
     "consentHealth": "Ich stimme zu, dass Moodbow mein Tagebuch, das Angaben zu meiner Gesundheit und meinem Wohlbefinden enthalten kann, speichert und verarbeitet, um den Dienst bereitzustellen.",
     "consentReadTerms": "Nutzungsbedingungen lesen",
@@ -220,7 +224,13 @@
     "retry": "Wiederholen",
     "tryAgain": "Wiederholen",
     "slowLoading": "Dauert länger als sonst …",
-    "navBackTo": "Zurück zu {screen}"
+    "navBackTo": "Zurück zu {screen}",
+    "policyNoticeTitle": "Unsere Datenschutzerklärung ändert sich",
+    "policyNoticeBody": "Wenn du das tust, übernimmt Stripe, Google Play oder der App Store die Zahlung.",
+    "policyNoticeApplies": "Ab dem {date} kannst du Moodbow Plus abonnieren.",
+    "policyNoticeSoon": "Bald kannst du Moodbow Plus abonnieren.",
+    "policyNoticeRead": "Sieh dir die Änderungen an",
+    "policyNoticeDismiss": "Verstanden"
   },
   "today": {
     "greetMorning": "Guten Morgen",
