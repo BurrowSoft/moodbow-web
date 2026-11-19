@@ -6,6 +6,7 @@ import { boCanTurnOn } from "@/lib/journal/bo";
 import { forgetBoStatus, useBoStatus } from "./useBoStatus";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useUntilLoaded } from "@/lib/ui/untilLoaded";
+import { wholeNames } from "@/lib/wholeNames";
 import { setBoReadsJournal, turnBoOff } from "./actions";
 import { ClearBo } from "./ClearBo";
 
@@ -76,7 +77,7 @@ export function BoMeRow({ hasConversation, readsJournal, consented, canTurnOn, t
             <input type="checkbox" role="switch" data-testid="me-bo-journal" aria-describedby="me-bo-journal-note" checked={reads} onChange={(e) => void toggle(e.target.checked)} className="h-5 w-5 shrink-0 accent-[var(--accent)]" />
           </label>
           <p id="me-bo-journal-note" data-testid="me-bo-journal-note" className="mt-1 text-sm text-muted">
-            {t("journalSwitchNote")}
+            {wholeNames(t("journalSwitchNote"))}
           </p>
         </>
       )}

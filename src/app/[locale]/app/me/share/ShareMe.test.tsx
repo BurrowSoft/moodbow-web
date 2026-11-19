@@ -81,7 +81,8 @@ describe("Me → Share your week", () => {
     renderIt();
     expect((screen.getByTestId("share-item-meds") as HTMLInputElement).checked).toBe(true);
     expect((screen.getByTestId("share-item-walk") as HTMLInputElement).checked).toBe(false);
-    await waitFor(() => expect(screen.getByTestId("preview-title").textContent).toBe("Sam shared their week with you"));
+    // The preview shows the page as the person it's for will see it: greeted by their own name (UX, 20 Nov).
+    await waitFor(() => expect(screen.getByTestId("preview-title").textContent).toBe("Hi Sam, here's a week shared with you"));
     expect(previewShare).toHaveBeenLastCalledWith({ firstName: "", routineItemIds: ["meds"], expiryDays: 30 });
     expect(screen.getByTestId("preview-count").textContent).toBe("2 check-ins this week");
     expect(screen.getByTestId("share-consent").textContent).toBe(m.consent);

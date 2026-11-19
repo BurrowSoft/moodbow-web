@@ -6,6 +6,7 @@ import { Link } from "@/i18n/navigation";
 import { PRIMARY_SAVE } from "@/lib/ui/journalLayout";
 import { giveBoConsent } from "./actions";
 import { forgetBoStatus } from "./useBoStatus";
+import { wholeNames } from "@/lib/wholeNames";
 
 // Bo's first open, for anyone without a current AI consent. The body is the English
 // draft (specs/bo-legal-drafts.md), marked as a placeholder in every language until
@@ -33,7 +34,7 @@ export function BoConsent({ onGiven }: { onGiven: () => void }) {
         {t("consentTitle")}
       </h2>
       <p data-testid="bo-consent-body" className="whitespace-pre-line text-text">
-        {t("consentBody")}
+        {wholeNames(t("consentBody"))}
       </p>
       {failed && (
         <p role="alert" data-testid="bo-consent-failed" className="text-text">

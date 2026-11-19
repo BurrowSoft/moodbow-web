@@ -3,6 +3,7 @@ import path from "node:path";
 import { marked } from "marked";
 import { applyPending, isPendingMet, stripComments } from "./legalContent";
 import { pageGate } from "./conditions";
+import { LONG_NAMES, wholeNamesHtml } from "./wholeNames";
 
 // Help & FAQ articles (item 8): content/help/<locale>/<slug>.md, copied
 // verbatim from UX & PM's specs/help (long-form text in content files,
@@ -54,7 +55,8 @@ export function helpArticles(locale: string): HelpArticle[] {
 // The article as Production shows it: unmet pending blocks removed.
 export function renderArticle(article: HelpArticle, met: (id: string) => boolean = isPendingMet): string {
   const { text } = applyPending(stripComments(article.source), met);
-  return text.trim() ? (marked.parse(text.trim(), { async: false, gfm: true }) as string) : "";
+  // The long names (LONG_NAMES: a word of HYPHEN_MIN+ letters, such as Anthropic) never hyphenate at large text.
+  return text.trim() ? wholeNamesHtml(marked.parse(text.trim(), { async: false, gfm: true }) as string, LONG_NAMES) : "";
 }
 
 // What a Help page shows on this build. Bo's article follows Bo's own gate, so it can be

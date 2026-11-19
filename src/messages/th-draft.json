@@ -3216,13 +3216,13 @@
   },
   {
     "key": "shareView.titleNamed",
-    "en": "{name} shared their week with you",
-    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+    "en": "Hi {name}, here's a week shared with you",
+    "reason": "UX draft (native read pending)"
   },
   {
     "key": "shareView.titleAnon",
-    "en": "Someone shared their week with you",
-    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+    "en": "A week shared with you",
+    "reason": "UX draft (native read pending)"
   },
   {
     "key": "shareView.weekOf",
@@ -3486,8 +3486,8 @@
   },
   {
     "key": "routine.intro",
-    "en": "Up to 3 things you'd like to tick off each day. Only you see them.",
-    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+    "en": "Up to 3 things you'd like to tick off each day. Only you see them, unless you add them to your appointment summary or to a week you share.",
+    "reason": "UX draft (native read pending)"
   },
   {
     "key": "routine.addHint",
