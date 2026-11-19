@@ -8,7 +8,9 @@ const row = (over: Partial<LetterRow>): LetterRow => ({ id: "a", body: "Dear me,
 
 describe("letters rules (content/contracts/letters.json)", () => {
   it("are the contract's: 1, 3, 6 or 12 months; a week for Not now", () => {
-    expect(LETTER_RULES).toEqual({ monthChoices: [1, 3, 6, 12], maxChars: 20000, notNowDays: 7 });
+    // The app's contract also carries the reminders block (letterReminders.test checks it).
+    expect(LETTER_RULES).toMatchObject({ monthChoices: [1, 3, 6, 12], maxChars: 20000, notNowDays: 7 });
+    expect(Object.keys(LETTER_RULES).sort()).toEqual(["maxChars", "monthChoices", "notNowDays", "reminders"]);
     expect([0, 1, 2, 3, 6, 12, 24, "1"].map(isLetterMonths)).toEqual([false, true, false, true, true, true, false, false]);
   });
 
