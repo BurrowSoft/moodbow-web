@@ -226,7 +226,7 @@
     "slowLoading": "ใช้เวลานานกว่าปกติ…",
     "navBackTo": "กลับไปที่{screen}",
     "policyNoticeTitle": "นโยบายความเป็นส่วนตัวของเรากำลังจะเปลี่ยน",
-    "policyNoticeBody": "หากสมัคร Stripe, Google Play หรือ App Store จะดูแลการชำระเงิน",
+    "policyNoticeBody": "หากคุณสมัคร การชำระเงินจะดำเนินการโดย Stripe, Google Play หรือ App Store",
     "policyNoticeApplies": "ตั้งแต่ {date} คุณจะสมัคร Moodbow Plus ได้",
     "policyNoticeSoon": "อีกไม่นาน คุณจะสมัคร Moodbow Plus ได้",
     "policyNoticeRead": "ดูสิ่งที่เปลี่ยนแปลง",
