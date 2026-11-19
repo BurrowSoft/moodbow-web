@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import contract from "./yearReview.contract.json";
+import contract from "../../../content/contracts/year-review.json";
 import { cardMonths, firstMiddleLast, insightsRowYear, monthMoods, yearCardIsNew, yearCardOnToday, yearCardShows, yearReview, YEAR_REVIEW_RULES, type YearReviewInput } from "./yearReview";
 import type { InsightRow } from "./insights";
 import { yearBands } from "../share/year";
