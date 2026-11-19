@@ -4,7 +4,7 @@ summary: Speichere einen Monat oder ein Jahr deines Tagebuchs als PDF.
 topic: Privacy & account
 de-draft: true
 ---
-{pending:plus}Mit Moodbow Plus setzt **Ich → Gestaltetes PDF deines Tagebuchs** einen Monat oder ein Jahr deines Tagebuchs als PDF: ein Deckblatt, dann der Check-in und die Einträge jedes Tages, jeder Monat auf einer neuen Seite.
+{pending:plus|app_plus}Mit Moodbow Plus setzt **Ich → Gestaltetes PDF deines Tagebuchs** einen Monat oder ein Jahr deines Tagebuchs als PDF: ein Deckblatt, dann der Check-in und die Einträge jedes Tages, jeder Monat auf einer neuen Seite.
 
 Wähl **Ein Monat** oder **Ein Jahr**, dann **Als PDF speichern oder drucken**. Das Druckfenster deines Browsers öffnet sich, wo du „Als PDF speichern“ wählen oder drucken kannst.
 

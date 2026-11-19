@@ -11,4 +11,4 @@ La prima volta, Moodbow spiega cosa succede, poi il telefono ti chiede se Moodbo
 
 **Niente microfono?** Moodbow lo mostra solo sui telefoni che possono trasformare la voce in testo sul telefono stesso, nella lingua che usi in Moodbow. Su Android serve Android 12 o successivo. Se qualcosa non va, per esempio se la lingua non è scaricata sul telefono, Moodbow dice **La voce non è disponibile su questo telefono in questo momento.**
 
-La dettatura è per tutti{pending:plus}, con o senza Plus{/pending}. C'è solo nell'app: sul web, la funzione vocale di un browser invierebbe la tua voce ai server di chi l'ha creato, quindi lì Moodbow non la offre.{/pending}
+La dettatura è per tutti{pending:plus|app_plus}, con o senza Plus{/pending}. C'è solo nell'app: sul web, la funzione vocale di un browser invierebbe la tua voce ai server di chi l'ha creato, quindi lì Moodbow non la offre.{/pending}

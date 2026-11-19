@@ -15,4 +15,4 @@ Moodbow crée les sons pendant la lecture, sur votre téléphone ou dans votre n
 
 Si votre téléphone ou votre navigateur ne peut pas créer les sons, Moodbow vous le dit. Moodbow n'enregistre pas quel son vous écoutez ni combien de temps. **Envie de parler à quelqu'un ?** est aussi sur cet écran.
 
-Les sons apaisants sont pour tout le monde{pending:plus}, avec ou sans Plus{/pending}.{/pending}
+Les sons apaisants sont pour tout le monde{pending:plus|app_plus}, avec ou sans Plus{/pending}.{/pending}

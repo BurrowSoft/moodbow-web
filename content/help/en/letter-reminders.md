@@ -11,4 +11,4 @@ Reminders arrive in the Moodbow app on your phone, also for letters you write on
 
 Reminders follow their own switches, not your daily check-in reminder. Opening a letter early cancels its reminders, and deleting it removes them.
 
-{pending:plus}Letters are part of **Moodbow Plus**. Reminders for letters you've already written keep coming, Plus or not.{/pending}{/pending}
+{pending:plus|app_plus}Letters are part of **Moodbow Plus**. Reminders for letters you've already written keep coming, Plus or not.{/pending}{/pending}

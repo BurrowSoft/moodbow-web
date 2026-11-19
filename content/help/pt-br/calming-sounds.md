@@ -15,4 +15,4 @@ O Moodbow cria os sons enquanto eles tocam, no seu celular ou no seu navegador, 
 
 Se o seu celular ou navegador não conseguir criar os sons, o Moodbow avisa. O Moodbow não registra qual som você toca nem por quanto tempo. **Quer conversar com alguém?** também está nesta tela.
 
-Os sons calmantes são para todo mundo{pending:plus}, com ou sem Plus{/pending}.{/pending}
+Os sons calmantes são para todo mundo{pending:plus|app_plus}, com ou sem Plus{/pending}.{/pending}

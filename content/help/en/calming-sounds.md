@@ -15,4 +15,4 @@ Moodbow makes the sounds as they play, on your phone or in your browser, so ther
 
 If your phone or browser can't make the sounds, Moodbow says so. Moodbow doesn't record which sound you play or for how long. **Want to talk to someone?** is on this screen too.
 
-Calming sounds are for everyone{pending:plus}, Plus or not{/pending}.{/pending}
+Calming sounds are for everyone{pending:plus|app_plus}, Plus or not{/pending}.{/pending}

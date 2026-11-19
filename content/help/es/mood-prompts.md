@@ -10,6 +10,6 @@ topic: Your journal
 
 Si cambias tu registro más tarde ese día, la pregunta sigue al nuevo ánimo. Sin registro, ves la pregunta habitual del día.
 
-La pregunta es solo una sugerencia: no se añade a tu entrada, y puedes empezar a escribir sin más. Tienes una pregunta para tu ánimo cada día, y **Otra** pasa a las preguntas habituales del día.{pending:plus} Con Moodbow Plus, **Otra** trae más preguntas para el mismo ánimo de la biblioteca de preguntas, y sigue donde lo dejaste en este dispositivo.{/pending}
+La pregunta es solo una sugerencia: no se añade a tu entrada, y puedes empezar a escribir sin más. Tienes una pregunta para tu ánimo cada día, y **Otra** pasa a las preguntas habituales del día.{pending:plus|app_plus} Con Moodbow Plus, **Otra** trae más preguntas para el mismo ánimo de la biblioteca de preguntas, y sigue donde lo dejaste en este dispositivo.{/pending}
 
 Si algo que has escrito o etiquetado ese día suena a que podrías necesitar apoyo, Moodbow no muestra ninguna pregunta ese día.{/pending}

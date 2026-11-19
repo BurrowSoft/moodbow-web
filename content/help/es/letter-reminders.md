@@ -12,4 +12,4 @@ Los recordatorios llegan en la app Moodbow de tu teléfono, también para las ca
 
 Los recordatorios siguen sus propios interruptores, no tu recordatorio diario. Si abres una carta antes de tiempo, se cancelan sus recordatorios, y si la borras, se eliminan.
 
-{pending:plus}Las cartas son parte de **Moodbow Plus**. Los recordatorios de las cartas que ya escribiste siguen llegando, con Plus o sin él.{/pending}{/pending}
+{pending:plus|app_plus}Las cartas son parte de **Moodbow Plus**. Los recordatorios de las cartas que ya escribiste siguen llegando, con Plus o sin él.{/pending}{/pending}

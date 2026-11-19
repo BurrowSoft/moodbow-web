@@ -12,4 +12,4 @@ I promemoria arrivano nell'app Moodbow sul tuo telefono, anche per le lettere ch
 
 I promemoria seguono i loro interruttori, non il promemoria giornaliero. Se apri una lettera prima del tempo, i suoi promemoria si annullano, e se la elimini vengono rimossi.
 
-{pending:plus}Le lettere fanno parte di **Moodbow Plus**. I promemoria delle lettere che hai già scritto continuano ad arrivare, con o senza Plus.{/pending}{/pending}
+{pending:plus|app_plus}Le lettere fanno parte di **Moodbow Plus**. I promemoria delle lettere che hai già scritto continuano ad arrivare, con o senza Plus.{/pending}{/pending}

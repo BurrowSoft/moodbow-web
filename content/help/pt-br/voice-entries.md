@@ -11,4 +11,4 @@ Na primeira vez, o Moodbow explica o que acontece, e depois seu celular pergunta
 
 **Sem microfone?** O Moodbow só mostra o microfone em celulares que conseguem transformar fala em texto no próprio celular, no idioma que você usa no Moodbow. No Android, isso exige Android 12 ou mais recente. Se algo der errado, por exemplo se o idioma não estiver baixado no seu celular, o Moodbow mostra **A voz não está disponível neste celular agora.**
 
-As anotações por voz são para todo mundo{pending:plus}, com ou sem Plus{/pending}. Elas existem só no app: na web, o recurso de voz de um navegador enviaria sua voz para os servidores de quem o fez, então o Moodbow não oferece isso lá.{/pending}
+As anotações por voz são para todo mundo{pending:plus|app_plus}, com ou sem Plus{/pending}. Elas existem só no app: na web, o recurso de voz de um navegador enviaria sua voz para os servidores de quem o fez, então o Moodbow não oferece isso lá.{/pending}

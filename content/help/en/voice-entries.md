@@ -11,4 +11,4 @@ The first time, Moodbow explains what happens, then your phone asks whether Mood
 
 **No microphone?** Moodbow shows it only on phones that can turn speech into text on the phone itself, in the language you use in Moodbow. On Android, that needs Android 12 or later. If something goes wrong, for example the language isn't downloaded on your phone, Moodbow says **Voice isn't available on this phone right now.**
 
-Voice entries are for everyone{pending:plus}, Plus or not{/pending}. They're only in the app: on the web, a browser's speech feature would send your voice to its maker's servers, so Moodbow doesn't offer it there.{/pending}
+Voice entries are for everyone{pending:plus|app_plus}, Plus or not{/pending}. They're only in the app: on the web, a browser's speech feature would send your voice to its maker's servers, so Moodbow doesn't offer it there.{/pending}

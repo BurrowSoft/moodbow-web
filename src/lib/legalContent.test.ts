@@ -206,7 +206,8 @@ describe("renderLegal (the real privacy text, nothing met)", () => {
     expect(words).not.toContain("Google Play, Apple App Store");
     expect(words).not.toContain("What Moodbow remembers");
     expect(page.html).not.toContain("{pending");
-    expect(page.hidden.map((h) => h.id)).toEqual(expect.arrayContaining(["plus", "ai_memory", "backup_retention", "app_app_lock", "app_share_cards"]));
+    // Plus's lines show with the web's or the app's Plus (legal/app-plus), so their blocks are "plus|app_plus".
+    expect(page.hidden.map((h) => h.id)).toEqual(expect.arrayContaining(["plus|app_plus", "ai_memory", "backup_retention", "app_app_lock", "app_share_cards"]));
   });
 
   it("highlights facts still to confirm (if any come back)", () => {

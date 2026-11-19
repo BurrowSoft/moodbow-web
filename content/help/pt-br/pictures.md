@@ -6,7 +6,7 @@ pt-BR-draft: true
 ---
 {pending:pictures_live|app_pictures}Quando você marca uma anotação como momento (★), pode adicionar até 3 fotos a ela. Abra a anotação e toque no quadro da câmera. Você escolhe as fotos com o seletor do seu celular ou navegador, então o Moodbow nunca pede acesso à sua galeria.
 
-{pending:plus}Adicionar fotos faz parte do **Moodbow Plus**. As fotos que você já adicionou são sempre suas, com ou sem Plus: você pode ver, exportar e apagar quando quiser.{/pending}
+{pending:plus|app_plus}Adicionar fotos faz parte do **Moodbow Plus**. As fotos que você já adicionou são sempre suas, com ou sem Plus: você pode ver, exportar e apagar quando quiser.{/pending}
 
 Antes de enviar uma foto, o Moodbow a deixa menor e remove os dados ocultos, como o lugar onde foi tirada. Ela fica guardada com o seu diário, visível só para você. A IA do Moodbow nunca vê suas fotos, e elas nunca aparecem nos cards para compartilhar, no widget, na tela de bloqueio nem nas notificações.
 

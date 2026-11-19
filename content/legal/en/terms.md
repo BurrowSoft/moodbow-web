@@ -33,7 +33,7 @@ Don't misuse Moodbow: no attempts to access other people's data, break or overlo
 ### The journal is free
 The journal (writing, check-ins, the timeline, help and export) is free. We may change features over time and will tell you in advance about changes that matter.
 
-{pending:plus}
+{pending:plus|app_plus}
 ### Moodbow Plus
 Moodbow Plus is an optional yearly subscription that adds features for going deeper. What it includes is listed in the app and on moodbow.com, and it may change over time. The journal itself, help and control of your data stay free.
 
@@ -46,12 +46,12 @@ Moodbow Plus is an optional yearly subscription that adds features for going dee
 **Automatic renewal.** Plus renews automatically every year until you cancel. Before each yearly renewal of a subscription bought on moodbow.com, we email you a reminder.
 
 **Cancelling.** You can cancel at any time, and you keep Plus until the end of the period you've paid for. If you cancel during the free week, you're never charged.
-- Bought on moodbow.com: Me → Moodbow Plus → Manage Plus, which opens our payment provider's page (Stripe).
+{pending:plus}- Bought on moodbow.com: Me → Moodbow Plus → Manage Plus, which opens our payment provider's page (Stripe).{/pending}
 - Bought in the app: in Google Play or the App Store, under your subscriptions. Deleting the app doesn't cancel it.
 
 **Refunds.** If you subscribed on moodbow.com, you can ask for a full refund of any payment within 14 days of being charged, for any reason: email support@moodbow.com. If you live in the EU or the UK, this also covers your legal right to withdraw from the contract within 14 days. After that, payments aren't refunded, except where the law says otherwise. For purchases in Google Play or the App Store, the store's refund rules apply, and you ask the store.
 
-**A payment that fails.** If a renewal payment on moodbow.com fails, you keep Plus for up to 7 days while the payment is tried again, and you can update your card in Manage Plus. If it still fails, the subscription ends. Store purchases follow the store's own rules.
+{pending:plus}**A payment that fails.** If a renewal payment on moodbow.com fails, you keep Plus for up to 7 days while the payment is tried again, and you can update your card in Manage Plus. If it still fails, the subscription ends. Store purchases follow the store's own rules.{/pending}
 
 **If Plus ends.** When Plus ends (cancelled, not renewed, refunded or unpaid), everything you wrote stays and the free journal keeps working. Plus features lock again. Nothing is deleted, and Export my data still includes everything.
 

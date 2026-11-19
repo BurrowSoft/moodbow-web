@@ -15,4 +15,4 @@ Moodbow erzeugt die Klänge beim Abspielen, auf deinem Handy oder in deinem Brow
 
 Wenn dein Handy oder Browser die Klänge nicht erzeugen kann, sagt Moodbow dir das. Moodbow speichert nicht, welchen Klang du abspielst oder wie lange. **Möchtest du mit jemandem reden?** ist auch auf diesem Bildschirm.
 
-Beruhigende Klänge sind für alle da{pending:plus}, mit oder ohne Plus{/pending}.{/pending}
+Beruhigende Klänge sind für alle da{pending:plus|app_plus}, mit oder ohne Plus{/pending}.{/pending}

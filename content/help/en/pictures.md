@@ -5,7 +5,7 @@ topic: Your journal
 ---
 {pending:pictures_live|app_pictures}When you star an entry as a moment (★), you can add up to 3 pictures to it. Open the entry and tap the camera tile. You choose them with your phone's or browser's own photo picker, so Moodbow never asks for your photo library.
 
-{pending:plus}Adding pictures is part of **Moodbow Plus**. The pictures you've already added are always yours, Plus or not: you can see them, export them and delete them at any time.{/pending}
+{pending:plus|app_plus}Adding pictures is part of **Moodbow Plus**. The pictures you've already added are always yours, Plus or not: you can see them, export them and delete them at any time.{/pending}
 
 Before a picture is uploaded, Moodbow makes it smaller and removes its hidden details, such as where it was taken. It's stored with your journal, visible only to you. Moodbow's AI never sees your pictures, and they're never in share cards, the widget, the lock screen or notifications.
 
