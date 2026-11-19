@@ -25,6 +25,8 @@ export async function POST(req: Request): Promise<Response> {
   if (!sameOrigin(req)) return no("generic", 403);
   const price = process.env.STRIPE_PLUS_PRICE_ID?.trim();
   if (!price || !stripeConfigured()) return no("not_configured", 503);
+  // Stripe Tax, only if this is exactly "1" (unset: off; see the session below).
+  const automaticTax = process.env.STRIPE_AUTOMATIC_TAX?.trim() === "1";
 
   const supabase = await createSupabaseServerClient();
   if (!supabase) return no("generic", 503);
@@ -126,13 +128,14 @@ export async function POST(req: Request): Promise<Response> {
         metadata: { user_id: user.id, checkout_key: k, locale, ...(offer ? { offer: "christmas" } : {}) },
         client_reference_id: user.id,
         ...(row?.store_customer_id ? { customer: row.store_customer_id } : { customer_email: user.email }),
-        // Stripe Tax (only if Vitor chooses it; UX's recommendation, 19 Nov): VAT/GST worked out from where the person is.
-        // Checkout asks for the address only where the tax needs it, and a returning customer's
-        // address is saved back to them so renewals are taxed the same way. The Price's
-        // tax_behavior (Vitor's, in the Dashboard) decides whether the shown price includes it.
-        automatic_tax: { enabled: true },
-        billing_address_collection: "auto",
-        ...(row?.store_customer_id ? { customer_update: { address: "auto", name: "auto" } } : {}),
+        // Stripe Tax only where it can run: off unless STRIPE_AUTOMATIC_TAX=1 (UX, 20 Nov). Stripe doesn't offer it
+        // to a Thailand-based business (its supported countries have Thailand only as a destination for remote
+        // sellers), and on this account every Checkout Session with it on fails. Prices stay tax-inclusive either way.
+        // With it on: VAT/GST worked out from where the person is, Checkout asks for the address only where the tax
+        // needs it, and a returning customer's address is saved back to them so renewals are taxed the same way.
+        ...(automaticTax
+          ? { automatic_tax: { enabled: true }, billing_address_collection: "auto" as const, ...(row?.store_customer_id ? { customer_update: { address: "auto" as const, name: "auto" as const } } : {}) }
+          : {}),
         locale: stripeLocale(locale),
         success_url: `${back}?started=1`,
         cancel_url: back,
