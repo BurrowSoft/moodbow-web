@@ -168,6 +168,36 @@ describe("PlusScreen: the table scrolls, the footer never does", () => {
     vi.stubGlobal("fetch", fetchMock);
   });
 
+  // UX, 20 Nov (the Web Tester's fr/pt-BR sweep): where large text makes the page a 13em column (the hyphen rule's
+  // query), the price and its button sit at the end of the page, never pinned over 40 % of it, even where the
+  // compact part alone would have stayed pinned (300 of 640: under 60 %).
+  it("large text on a narrow screen (a 13em column): never pinned; the page ends with the price, the renewal line and the button", () => {
+    vi.stubGlobal("ResizeObserver", class { observe() {} disconnect() {} });
+    const heights: Record<string, number> = { "plus-footer": 300, "plus-scroll": 60 };
+    const rect = vi.spyOn(Element.prototype, "getBoundingClientRect").mockImplementation(function (this: Element) {
+      return { height: heights[this.getAttribute("data-testid") ?? ""] ?? 0 } as DOMRect;
+    });
+    vi.stubGlobal("innerHeight", 640);
+    const queries: string[] = [];
+    vi.stubGlobal("matchMedia", (query: string) => {
+      queries.push(query);
+      return { matches: query === "(max-width: 13em)", media: query } as MediaQueryList;
+    });
+    show({ kind: "free", trial: true });
+    const root = screen.getByTestId("plus-screen");
+    const footer = screen.getByTestId("plus-footer");
+    expect(queries).toContain("(max-width: 13em)");
+    expect(root).toHaveAttribute("data-large");
+    expect(root).toHaveAttribute("data-unpinned");
+    expect(footer.className).not.toContain("fixed");
+    expect(document.body.style.paddingBottom).toBe("");
+    for (const id of ["plus-price", "plus-renews", "plus-start"]) expect(within(footer).getByTestId(id)).toBeTruthy();
+    expect(root.lastElementChild).toBe(footer);
+    rect.mockRestore();
+    vi.unstubAllGlobals();
+    vi.stubGlobal("fetch", fetchMock);
+  });
+
   it("large text with Plus: nothing pinned; Manage at the end of the content", () => {
     vi.stubGlobal("ResizeObserver", class { observe() {} disconnect() {} });
     const heights: Record<string, number> = { "plus-footer": 205, "plus-scroll": 83 };

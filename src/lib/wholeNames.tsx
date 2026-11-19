@@ -1,4 +1,5 @@
 import { Fragment, type ReactNode } from "react";
+import { SUPPORT_EMAIL } from "@/lib/site";
 
 // Names never hyphenate (UX, 19 Nov: "Car-valho", "Bur-rowSoft" at large text read as mistakes; 20 Nov: on
 // every page the large-text hyphen rule reaches, which is all of them). A name is wrapped in a span that
@@ -68,5 +69,33 @@ export function wholeNamesHtml(html: string, names: readonly string[] = WHOLE_NA
   return html
     .split(/(<[^>]*>)/)
     .map((part) => (part.startsWith("<") ? part : part.replace(pattern, `<span class="${WHOLE_NAME_CLASS}">$1</span>`)))
+    .join("");
+}
+
+// The support address at large text (UX, 20 Nov, the Web Tester's fr/pt-BR sweep: "support@mood / bow.com" on six
+// public pages): a line may end only after its "@", and the domain stays whole (it fits a 320 px line at 300 %). The
+// text is unchanged (a <wbr> and a no-wrap span), so copying it gives the plain address.
+const [SUPPORT_LOCAL, SUPPORT_DOMAIN] = SUPPORT_EMAIL.split("@");
+export function SupportAddress() {
+  return (
+    <>
+      {SUPPORT_LOCAL}@<wbr />
+      <span className={KEEP_TOGETHER_CLASS}>{SUPPORT_DOMAIN}</span>
+    </>
+  );
+}
+// A message that names the address as plain text ({email}): the address in its place.
+export function withSupportAddress(text: string): ReactNode {
+  const parts = text.split(SUPPORT_EMAIL);
+  if (parts.length === 1) return text;
+  return parts.flatMap((part, i) => (i === 0 ? [part] : [<SupportAddress key={i} />, part]));
+}
+// The same in rendered HTML (the legal pages, Help's articles): only in text between tags, so a mailto: link's
+// address stays as it is.
+export function supportAddressHtml(html: string): string {
+  const shown = `${SUPPORT_LOCAL}@<wbr><span class="${KEEP_TOGETHER_CLASS}">${SUPPORT_DOMAIN}</span>`;
+  return html
+    .split(/(<[^>]*>)/)
+    .map((part) => (part.startsWith("<") ? part : part.split(SUPPORT_EMAIL).join(shown)))
     .join("");
 }

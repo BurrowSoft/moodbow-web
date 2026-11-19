@@ -9,6 +9,7 @@ import { signUpFlow, type SignUpState } from "./actions";
 import { countTap } from "@/lib/analyticsEvents";
 import { CONSENT_NOTICE_CLASS } from "@/lib/legalVersions";
 import { wholeNames } from "@/lib/wholeNames";
+import { LARGE_TEXT_CAP } from "@/lib/ui/largeText";
 
 const ERROR_KEYS = {
   emailInvalid: ["auth", "errEmailInvalid"],
@@ -140,7 +141,8 @@ export function SignUpForm({ askAi = false, healthLink = false, legalInEnglish =
   const smallText = "leading-[1.429] [font-size:min(0.875rem,max(8.75vw,28px))]";
   return (
     <div className="space-y-6">
-      <ul data-testid="signup-summary" data-hyphenate className="list-disc space-y-1 ps-5 text-muted">
+      {/* Decision 231's cap, as the form under it (UX, 20 Nov: "montren / t" at fr 320 px / 300 %). */}
+      <ul data-testid="signup-summary" data-hyphenate className={`list-disc space-y-1 ps-5 text-muted ${LARGE_TEXT_CAP}`}>
         <li>{wholeNames(t("welcome1Body"))}</li>
         <li>{wholeNames(t("welcome2Body"))}</li>
         <li>{wholeNames(t("welcome3BodyNoAi"))}</li>

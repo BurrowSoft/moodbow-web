@@ -1,5 +1,9 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import countries from "../content/contracts/countries.json";
+import fr from "../src/messages/fr.json";
+import pt from "../src/messages/pt-br.json";
+import { dialogButton } from "../src/lib/ui/dialogButton";
+import { BO_HEADING, DAY_ADD_ENTRY, LOCKED_ROW_LABEL, ME_LOCKED_ROW, WEEK_DAY, WEEK_DAY_LABEL, WEEK_DAYS, WEEK_HEADING, WEEK_SUMMARY } from "../src/lib/ui/largeText";
 
 // The browser's own text setting on a 320 px phone, on the pages someone with large
 // text needs first. Sign in's button scrolled /sign-in sideways by up to 194 px (Web
@@ -543,4 +547,99 @@ test("large text at 300 %: a help number wider than the line wraps between its d
   expect(result.right).toBeLessThanOrEqual(320);
   expect(result.groupLines).toEqual([1, 1, 1, 1]);
   expect(result.bracketsWithNumber).toBe(true);
+});
+
+// UX, 20 Nov (option A, the Web Tester's fr/pt-BR sweep at 320 px / 300 %: "Ajo / uter / une / not / e",
+// "donnée / s", "d'icône / s", "novembr / e", "montren / t", "Mood / bow", "support@mood / bow.com"). A break inside a
+// word that the 8 3 3 rule can't have made (a word under 8 letters, or under 3 letters on a side of the break) is an
+// emergency break: the word cut without a hyphen. None is allowed in the components that were fixed.
+async function cutWords(page: Page, roots: string): Promise<string[]> {
+  return page.evaluate((selector) => {
+    const out: string[] = [];
+    const letters = (s: string) => s.replace(/[^\p{L}]/gu, "").length;
+    for (const root of document.querySelectorAll(selector)) {
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+      for (let node = walker.nextNode() as Text | null; node; node = walker.nextNode() as Text | null) {
+        const parent = node.parentElement;
+        if (!parent || parent.closest(".sr-only") || getComputedStyle(parent).display === "none") continue;
+        // A hyphen, a dash or a slash is a place a line may end anyway.
+        for (const m of node.data.matchAll(/[^\s \-–—/]+/g)) {
+          const word = m[0];
+          const tops = [...word].map((_, c) => {
+            const range = document.createRange();
+            range.setStart(node, m.index + c);
+            range.setEnd(node, m.index + c + 1);
+            return Math.round(range.getBoundingClientRect().top);
+          });
+          for (let c = 1; c < word.length; c++) {
+            if (tops[c] === tops[c - 1]) continue;
+            const before = letters(word.slice(0, c)), after = letters(word) - before;
+            if (letters(word) < 8 || before < 3 || after < 3) out.push(`${word.slice(0, c)} / ${word.slice(c)}`);
+          }
+        }
+      }
+    }
+    return out;
+  }, roots);
+}
+// Pages a session opens: the same classes on a public page in that language (the app's stylesheet, <html lang>).
+async function mountIn(page: Page, language: string, width: number, html: string) {
+  await page.goto(language);
+  await page.evaluate(([w, inner]) => (document.body.innerHTML = `<div id="probe" style="width:${w}px">${inner}</div>`), [String(width), html] as const);
+}
+
+test("large text at 320 px / 300 %: no word in the fixed components is cut without a hyphen, in French and Portuguese", async ({ page, browserName }, testInfo) => {
+  test.skip(browserName !== "chromium" || testInfo.project.name !== "desktop", "Page.setFontSizes is Chromium's; once is enough");
+  test.setTimeout(180_000);
+  const cdp = await page.context().newCDPSession(page);
+  await page.setViewportSize({ width: 320, height: 640 });
+  await cdp.send("Page.setFontSizes", { fontSizes: { standard: 48, fixed: 39 } });
+  // Each component at the width it has on its page (the app's 16 px gutters; a Me card's 16 px padding; Share's 18 px).
+  for (const [language, m] of [["/fr", fr], ["/pt-br", pt]] as const) {
+    const days = Array.from({ length: 7 }, (_, i) => new Date(Date.UTC(2026, 10, 16 + i)));
+    const short = new Intl.DateTimeFormat(language.slice(1), { weekday: "short", timeZone: "UTC" });
+    const narrow = new Intl.DateTimeFormat(language.slice(1), { weekday: "narrow", timeZone: "UTC" });
+    const week = `<div class="${WEEK_SUMMARY}"><h2 class="${WEEK_HEADING}">${m.shareView.weekOf.replace("{date}", new Intl.DateTimeFormat(language.slice(1), { day: "numeric", month: "long", timeZone: "UTC" }).format(days[0]))}</h2><ol class="${WEEK_DAYS}">${days
+      .map((d) => `<li class="${WEEK_DAY}"><span aria-hidden="true" data-day-label class="${WEEK_DAY_LABEL}"><span data-day-form="short">${short.format(d)}</span><span data-day-form="narrow">${narrow.format(d)}</span></span><span class="block h-[32px] w-full rounded-lg border border-dashed"></span></li>`)
+      .join("")}</ol></div>`;
+    const mounted: [string, number, string][] = [
+      ["the day page's Add a note", 288, `<a href="#" class="${DAY_ADD_ENTRY}">${m.timeline.dayAddEntry}</a>`],
+      ["Me's export button", 256, `<button type="button" class="${dialogButton()}">${m.me.meExport}</button>`],
+      ["Me → Appearance's locked row", 256, `<a href="#" class="${ME_LOCKED_ROW}"><span class="${LOCKED_ROW_LABEL}">${m.plus.rowThemes}</span><svg width="16" height="16" aria-hidden="true"></svg></a>`],
+      ["Share's week", 252, week],
+      ["Bo's heading", 288, `<header class="flex flex-wrap items-center gap-x-[8px] gap-y-[4px]"><h1 class="${BO_HEADING}">${m.bo.screenLine.replace("Moodbow", '<span class="whole-name">Moodbow</span>')}</h1><a href="#" class="inline-flex min-h-11 items-center rounded-full border px-[16px]">Help</a></header>`],
+    ];
+    for (const [name, width, html] of mounted) {
+      await mountIn(page, language, width, html);
+      const where = `${language} ${name}`;
+      expect(await page.evaluate(() => getComputedStyle(document.documentElement).fontSize), where).toBe("48px");
+      expect.soft(await cutWords(page, "#probe"), where).toEqual([]);
+      expect.soft(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth), where).toBe(0);
+    }
+    // Share's days: one letter each here (globals.css, [data-day-form]), side by side, none over the next.
+    await mountIn(page, language, 252, week);
+    const labels = await page.evaluate(() => [...document.querySelectorAll("[data-day-label]")].map((s) => [s.getBoundingClientRect().left, s.getBoundingClientRect().right, s.textContent, getComputedStyle(s.querySelector('[data-day-form="short"]')!).display]));
+    expect.soft(labels.map((l) => l[3]), `${language} short forms hidden`).toEqual(Array(7).fill("none"));
+    for (let i = 1; i < labels.length; i++) expect.soft(labels[i][0] as number, `${language} day ${i + 1} after day ${i}`).toBeGreaterThanOrEqual(labels[i - 1][1] as number);
+    // Public pages, as they are.
+    for (const [path, roots] of [["/sign-up", "[data-testid=signup-summary]"], ["/help", "article h1 + div p, article section h2"], ["/support", "article"], ["/account-deletion", "article"]] as const) {
+      await page.goto(`${language}${path}`);
+      expect.soft(await cutWords(page, roots), `${language}${path}`).toEqual([]);
+      expect.soft(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth), `${language}${path}`).toBe(0);
+    }
+  }
+  // At the normal size the short day names are back.
+  await cdp.send("Page.setFontSizes", { fontSizes: { standard: 16, fixed: 13 } });
+  await mountIn(page, "/fr", 252, `<span data-day-form="short">lun.</span><span data-day-form="narrow">L</span>`);
+  expect(await page.evaluate(() => [...document.querySelectorAll("[data-day-form]")].map((s) => getComputedStyle(s).display))).toEqual(["inline", "none"]);
+});
+
+// UX, 20 Nov: /account-deletion is a help page, not legal text: French in French, no "in English" line.
+test("/fr/account-deletion: the French page, no English notice", async ({ page }) => {
+  await page.goto("/fr/account-deletion");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(fr.accountDeletion.title);
+  await expect(page.getByTestId("page-notice")).toHaveCount(0);
+  await expect(page.locator("article")).not.toHaveAttribute("lang", "en");
+  // The address may end a line only after its "@".
+  await expect(page.locator('article a[href^="mailto:"] wbr')).toHaveCount(1);
 });

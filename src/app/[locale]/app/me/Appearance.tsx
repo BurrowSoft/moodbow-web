@@ -8,6 +8,7 @@ import { applyPalette, PALETTES, PALETTE_KEY, readPalette, refreshPaletteUntil, 
 import { LockedItem } from "../PlusSheet";
 import { useUntilLoaded } from "@/lib/ui/untilLoaded";
 import { SWITCH_CONTROL, SWITCH_LABEL, SWITCH_ROW } from "@/lib/ui/switchRow";
+import { ME_LOCKED_ROW } from "@/lib/ui/largeText";
 
 const LABELS = { system: "themeSystem", light: "themeLight", dark: "themeDark" } as const;
 const PALETTE_LABELS = { dusk: "paletteDusk", sunrise: "paletteSunrise", sea: "paletteSea" } as const;
@@ -124,7 +125,7 @@ export function Appearance({ shortcuts = false, palette = null }: { shortcuts?: 
         </p>
       )}
       {palette && !until && !pastDue && (
-        <LockedItem label={tp("rowThemes")} testId="me-palettes" className="mt-6 flex min-h-11 w-full items-center justify-between gap-3 border-t border-border pt-4 text-left font-medium text-text" />
+        <LockedItem label={tp("rowThemes")} testId="me-palettes" className={ME_LOCKED_ROW} />
       )}
       {shortcuts && (
         <div className="mt-6 border-t border-border pt-4">

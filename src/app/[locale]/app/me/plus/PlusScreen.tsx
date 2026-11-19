@@ -15,6 +15,9 @@ import { countTap } from "@/lib/analyticsEvents";
 // specs/1.3-offer-review-voice-taps.md §2). No AI rows in any comparison: the AI allowance rules
 // stay in the code, unadvertised. Nothing free today gets a lock (wording only). rowExtras: one row
 // for the prompt library, the other ways to breathe and more reminders (UX, 14 Nov), never one each.
+// Large text on a narrow screen: the page is a 13em column or narrower (the hyphen rule's query, globals.css).
+const narrowLargeText = () => typeof window !== "undefined" && window.matchMedia?.("(max-width: 13em)").matches === true;
+
 const FREE_ROWS = ["rowJournal", "rowTimeline", "rowHelp", "rowAppointment", "rowData"] as const;
 const PLUS_ROWS = ["rowInsights", "rowMorePatterns", "rowReview", "rowLetters", "rowExtras", "rowPdf", "rowThemes"] as const;
 
@@ -117,6 +120,8 @@ export function PlusScreen({ view, price, offer = null, started }: { view: PlusV
       // The footer over 40 % of the screen, or the table left under a third of it (a member's
       // footer is one button, but at 300 % the box itself is small).
       const check = () => {
+        // Large text where the page is a 13em column: large mode, and unpinned below (UX, 20 Nov).
+        if (narrowLargeText()) return setLarge(true);
         const height = footer.current?.getBoundingClientRect().height ?? 0;
         const table = scroll.current?.getBoundingClientRect().height ?? 0;
         // Nothing laid out yet (or no layout at all): nothing to judge.
@@ -134,8 +139,10 @@ export function PlusScreen({ view, price, offer = null, started }: { view: PlusV
     }
     // In large mode: the compact pinned part over 60 % of the screen leaves the content under
     // 40 %, so it unpins (measured while pinned; kept until the screen or text size changes).
+    // Where the page is a 13em column it never pins: the price and its button sit at the end of
+    // the page instead of covering 40 % of it (UX, 20 Nov, the Web Tester's fr/pt-BR sweep).
     const fits = () => {
-      if (!unpinned && (footer.current?.getBoundingClientRect().height ?? 0) > 0.6 * window.innerHeight) setUnpinned(true);
+      if (!unpinned && (narrowLargeText() || (footer.current?.getBoundingClientRect().height ?? 0) > 0.6 * window.innerHeight)) setUnpinned(true);
     };
     fits();
     // Back to measuring the full footer when the screen or text size changes.

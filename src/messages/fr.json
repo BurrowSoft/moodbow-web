@@ -87,7 +87,7 @@
     "steps": "Dans l'app ou sur le web : ouvrez Moi → Supprimer le compte, tapez SUPPRIMER, puis confirmez.",
     "what": "Nous supprimons tout ce qui se trouve dans votre compte, dont vos notes, vos bilans et vos réglages, ainsi que vos identifiants de connexion.",
     "backups": "Les copies dans nos sauvegardes chiffrées sont effacées automatiquement sous {days} jours.",
-    "noAccess": "Impossible de vous connecter ? Écrivez à <support>{email}</support> depuis l'adresse utilisée à l'inscription, et nous le supprimerons pour vous."
+    "noAccess": "Impossible de vous connecter ? Écrivez à <support>{email}</support> depuis l'adresse utilisée à l'inscription, et nous le supprimerons pour vous."
   },
   "emailConfirmed": {
     "metaTitle": "E-mail confirmé",
@@ -492,7 +492,13 @@
   },
   "help": {
     "helpTitle": "Aide et FAQ",
-    "helpIntro": "Les réponses aux questions fréquentes sur Moodbow. Vous ne trouvez pas ce qu'il vous faut ? Écrivez à {email}."
+    "helpIntro": "Les réponses aux questions fréquentes sur Moodbow. Vous ne trouvez pas ce qu'il vous faut ? Écrivez à {email}.",
+    "topicBasics": "Les bases",
+    "topicJournal": "Votre journal",
+    "topicSettings": "Réglages",
+    "topicAi": "IA",
+    "topicPrivacy": "Confidentialité et compte",
+    "topicHelp": "Aide"
   },
   "timeline": {
     "onThisDayMonth": "Il y a un mois",

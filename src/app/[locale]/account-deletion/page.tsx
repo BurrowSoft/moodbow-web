@@ -6,20 +6,18 @@ import { PageShell } from "@/components/PageShell";
 import { conditionMet, pageGate } from "@/lib/conditions";
 import { pageMetadata } from "@/lib/metadata";
 import { BACKUP_RETENTION_DAYS, SUPPORT_EMAIL } from "@/lib/site";
+import { SupportAddress } from "@/lib/wholeNames";
+import { accountDeletionTextLocale } from "@/lib/accountDeletion";
 
 // Google Play's account-deletion URL. The steps are only true once
 // Me → Delete account ships on the app and the web ("delete-account-live").
 const GATE = "delete-account-live" as const;
 
-// It states data-retention policy and is the address Play's Data safety
-// form points to, so it's treated as legal (UX, #112): in English on every
-// language's page, under that language's legalEnglishOnly line, with the
-// same gate. (th.json keeps accountDeletion only for key parity; unused.)
-const ACCOUNT_DELETION_TEXT_LOCALE = "en";
+// Its words: each live language's own (a help page, UX 20 Nov); see accountDeletionTextLocale.
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/account-deletion">): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale: ACCOUNT_DELETION_TEXT_LOCALE, namespace: "accountDeletion" });
+  const t = await getTranslations({ locale: accountDeletionTextLocale(locale), namespace: "accountDeletion" });
   return pageMetadata({
     locale: locale as Locale,
     path: "/account-deletion",
@@ -34,9 +32,10 @@ export default async function AccountDeletionPage({ params }: PageProps<"/[local
   setRequestLocale(locale as Locale);
   const gate = pageGate(GATE);
   if (gate === "hidden") notFound();
-  const t = await getTranslations({ locale: ACCOUNT_DELETION_TEXT_LOCALE, namespace: "accountDeletion" });
+  const textLocale = accountDeletionTextLocale(locale);
+  const t = await getTranslations({ locale: textLocale, namespace: "accountDeletion" });
   const tl = await getTranslations("legal");
-  const english = locale !== ACCOUNT_DELETION_TEXT_LOCALE;
+  const english = textLocale !== locale;
   // Text = enforcement: the backups line needs the confirmed number.
   const backupDays = conditionMet("backup-retention") ? BACKUP_RETENTION_DAYS : null;
 
@@ -46,7 +45,7 @@ export default async function AccountDeletionPage({ params }: PageProps<"/[local
       draft={gate === "draft"}
       article
       notice={english ? tl("legalEnglishOnly") : undefined}
-      lang={english ? ACCOUNT_DELETION_TEXT_LOCALE : undefined}
+      lang={english ? textLocale : undefined}
     >
       <p>{t("intro")}</p>
       <p className="rounded-2xl border border-border bg-surface px-5 py-4 font-medium text-text">{t("steps")}</p>
@@ -55,9 +54,10 @@ export default async function AccountDeletionPage({ params }: PageProps<"/[local
       <p>
         {t.rich("noAccess", {
           email: SUPPORT_EMAIL,
-          support: (chunks) => (
+          // The tag holds only {email} in every language: the address, breaking only after its "@" (UX, 20 Nov).
+          support: () => (
             <a href={`mailto:${SUPPORT_EMAIL}`} className="font-medium text-accent underline underline-offset-4">
-              {chunks}
+              <SupportAddress />
             </a>
           ),
         })}
