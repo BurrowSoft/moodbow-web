@@ -1616,7 +1616,7 @@
   },
   {
     "key": "plus.rowInsights",
-    "en": "Insights: week, month, 3 months, your year",
+    "en": "Insights: week, month, 3 months and year",
     "reason": "UX draft (native read pending)"
   },
   {
@@ -1686,7 +1686,7 @@
   },
   {
     "key": "plus.offerBannerBody",
-    "en": "Deeper insights for the year ahead: your year, patterns, What lifts me, letters to future me and more.",
+    "en": "Deeper insights for the year ahead: yearly charts, patterns, What lifts me, letters to future me and more.",
     "reason": "UX draft (native read pending)"
   },
   {
@@ -2571,7 +2571,7 @@
   },
   {
     "key": "plus.rowYear",
-    "en": "Your year and all time",
+    "en": "Year and all time",
     "reason": "UX draft (native read pending)"
   },
   {
