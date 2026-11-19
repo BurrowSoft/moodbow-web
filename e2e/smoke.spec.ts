@@ -910,3 +910,17 @@ test("sign-in shows the notice for why the session ended (decisions 68 + 70)", a
   await page.goto("/sign-in");
   await expect(page.getByTestId("signed-out-notice")).toHaveCount(0);
 });
+
+// A text link on its own line is at least 24 px tall (WCAG 2.5.8; UX, 20 Nov: the Web Tester measured 23 px at 100 %).
+// Me's links use the same class (lib/ui/linkTargets.test.ts); they need a session.
+test("standalone text links are at least 24 px tall at the normal size", async ({ page }) => {
+  for (const [path, testId] of [
+    ["/support", "support-account-deletion"],
+    ["/sign-up", "signup-to-signin"],
+    ["/help/getting-started", "help-back"],
+  ] as const) {
+    await page.goto(path);
+    const height = await page.getByTestId(testId).evaluate((el) => el.getBoundingClientRect().height);
+    expect(height, path).toBeGreaterThanOrEqual(24);
+  }
+});
