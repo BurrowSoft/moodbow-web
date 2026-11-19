@@ -17,6 +17,13 @@ describe("buildCsp (audit A1)", () => {
     expect(directive(buildCsp("n", ENV), "connect-src")).toEqual(["'self'", "https://abc.supabase.co", "wss://abc.supabase.co", "https://o123.ingest.sentry.io"]);
   });
 
+  it("usage counts need nothing more (specs/analytics.md): Vercel serves the script and takes the counts on our own origin (/_vercel/insights), so no third-party analytics origin is ever allowed", () => {
+    const csp = buildCsp("n", ENV);
+    expect(csp).not.toMatch(/vercel-scripts|vitals\.vercel|insights|analytics/i);
+    expect(directive(csp, "script-src")).toContain("'self'");
+    expect(directive(csp, "connect-src")).toContain("'self'");
+  });
+
   it("no framing, no plugins, base and forms only to us", () => {
     const csp = buildCsp("n", ENV);
     expect(directive(csp, "frame-ancestors")).toEqual(["'none'"]);
@@ -26,8 +33,11 @@ describe("buildCsp (audit A1)", () => {
     expect(directive(csp, "frame-src")).toEqual(["'none'"]);
   });
 
-  it("the share card's canvas: images from data: and blob:", () => {
-    expect(directive(buildCsp("n", ENV), "img-src")).toEqual(["'self'", "data:", "blob:"]);
+  it("images: the share card's canvas (data:, blob:) and the project's own Supabase storage for the pictures, exactly", () => {
+    expect(directive(buildCsp("n", ENV), "img-src")).toEqual(["'self'", "data:", "blob:", "https://abc.supabase.co"]);
+    expect(buildCsp("n", ENV)).not.toContain("*.supabase.co");
+    // No Supabase configured: no storage origin.
+    expect(directive(buildCsp("n", {}), "img-src")).toEqual(["'self'", "data:", "blob:"]);
   });
 
   it("no report-uri: a report would carry the page's full address (an auth token on /auth/confirm) past our scrubbing", () => {

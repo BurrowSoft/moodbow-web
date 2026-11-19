@@ -31,7 +31,7 @@ export function JournalUnavailable({ standalone = false }: { standalone?: boolea
       data-testid="journal-unavailable"
     >
       {/* Help is there whatever failed, and first; the country may be what couldn't be read. */}
-      <GetHelpNow country={null} testId="journal-unavailable-help" neutral />
+      <GetHelpNow country={null} testId="journal-unavailable-help" counted neutral />
       {/* The page's heading too: when the journal can't load, this is all
           the page has (a11y pass). */}
       <div role="alert" data-alert="heading" className="mt-[max(8px,calc(32px-1rem))]">

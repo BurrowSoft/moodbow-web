@@ -1,13 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { useParams, usePathname } from "next/navigation";
 import { computeRoute } from "@vercel/analytics";
 import { Analytics } from "@vercel/analytics/react";
-import { isPublicPage, NOT_FOUND_MARK, scrubEvent } from "@/lib/analytics";
+import { isCountedPage, NOT_FOUND_MARK, scrubEvent } from "@/lib/analytics";
+import { countFromElement, setTapsOn } from "@/lib/analyticsEvents";
 
-// Vercel Web Analytics with the URL scrubber (lib/analytics.ts). Rendered
-// only when the "web-analytics" condition is met (the locale layout).
+// Vercel Web Analytics with the URL and event scrubber (lib/analytics.ts).
+// Rendered only when the "web-analytics" condition is met, on production (the
+// locale layout). Page views and button taps, in aggregate (specs/analytics.md).
 //
 // A page view is sent once the page has arrived, not on the URL change:
 // a loading boundary may stream first, and a missing page's "not found"
@@ -19,29 +21,69 @@ import { isPublicPage, NOT_FOUND_MARK, scrubEvent } from "@/lib/analytics";
 export const SETTLE_LIMIT_MS = 30_000;
 const LOADING = "[data-loading-boundary]";
 
-export function VisitCounts() {
+// The browser's own "don't track me" (UX & PM, Q8): nothing loads at all.
+export function browserSaysNo(nav: Navigator & { globalPrivacyControl?: boolean } = navigator): boolean {
+  return nav.globalPrivacyControl === true || nav.doNotTrack === "1";
+}
+
+// Test builds only (draft, UX & PM: a tester row before the merge): the
+// counter stays off unless the tab was opened with ?analytics-draft=1, kept
+// for the tab's later pages. Production never renders a draft counter (the
+// layout), and the scrubber drops the query like any other.
+export const DRAFT_PARAM = "analytics-draft";
+export function draftOptedIn(search: string = location.search): boolean {
+  if (new URLSearchParams(search).get(DRAFT_PARAM) === "1") {
+    try {
+      sessionStorage.setItem(DRAFT_PARAM, "1");
+    } catch {
+      // storage off: this page only
+    }
+    return true;
+  }
+  try {
+    return sessionStorage.getItem(DRAFT_PARAM) === "1";
+  } catch {
+    return false;
+  }
+}
+
+const noSubscribe = () => () => {};
+const notOnServer = () => false;
+
+export function VisitCounts({ draft = false }: { draft?: boolean }) {
+  // Read in the browser only: the server's render (and hydration) has no counter.
+  const allowed = useSyncExternalStore(noSubscribe, () => !browserSaysNo() && (!draft || draftOptedIn()), notOnServer);
+  useEffect(() => {
+    if (!allowed) return;
+    setTapsOn(true);
+    // Taps on server-rendered buttons (data-count, lib/analyticsEvents).
+    const onClick = (e: MouseEvent) => countFromElement(e.target instanceof Element ? e.target : null);
+    document.addEventListener("click", onClick, true);
+    return () => {
+      setTapsOn(false);
+      document.removeEventListener("click", onClick, true);
+    };
+  }, [allowed]);
+  return allowed ? <Counter /> : null;
+}
+
+function Counter() {
   const path = usePathname();
   const params = useParams();
-  // Public pages only (UX, 1.0 launch): the script isn't even loaded until a
-  // public page has been shown, so opening the journal or a sign-in page
-  // first never injects it; once loaded (a public page, then the journal),
-  // nothing is counted there (route null, and scrubEvent drops it).
-  const isPublic = isPublicPage(path);
   // How the last page settled: counted (its route) or not (null, a
-  // not-found page or no arrival). It only counts for the page it names.
+  // not-found page, a page never counted, or no arrival). It only counts for
+  // the page it names.
   const [arrived, setArrived] = useState<{ path: string; route: string | null } | null>(null);
-  const [loaded, setLoaded] = useState(isPublic);
-  const counted = isPublic && arrived !== null && arrived.path === path && arrived.route !== null ? arrived : null;
+  const counted = arrived !== null && arrived.path === path && arrived.route !== null ? arrived : null;
 
   useEffect(() => {
-    const route = computeRoute(path, params as Record<string, string | string[]> | null);
+    const route = isCountedPage(path) ? computeRoute(path, params as Record<string, string | string[]> | null) : null;
     let done = false;
     const settle = () => {
       if (done || document.querySelector(LOADING)) return;
       done = true;
       stop();
       setArrived({ path, route: document.querySelector(`[${NOT_FOUND_MARK}]`) ? null : route });
-      if (isPublicPage(path)) setLoaded(true);
     };
     const observer = new MutationObserver(settle);
     const timer = window.setTimeout(() => {
@@ -64,7 +106,7 @@ export function VisitCounts() {
   }, [path]);
 
   // route null (not undefined) until then: the script's own tracking stays
-  // off and only these page views are sent.
-  if (!loaded && !isPublic) return null;
+  // off and only these page views are sent. The path builds the address the
+  // script sends, and beforeSend scrubs it (ids, dates, queries).
   return <Analytics framework="next" beforeSend={scrubEvent} route={counted?.route ?? null} path={counted?.path} />;
 }

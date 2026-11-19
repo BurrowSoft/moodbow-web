@@ -29,7 +29,9 @@ function keysOf(storage: Storage, uid: string, kinds: readonly string[]): string
 export const UNSYNCED_KINDS = ["draft-entry", "pending-checkin"] as const;
 // Removed on every deliberate sign-out: a usage trace with no text worth
 // keeping. milestone-seen stays (no text, and no re-offer of the card).
-export const SIGN_OUT_TRACE_KINDS = ["on-this-day-hidden"] as const;
+// lateNote (1.4 D): the night the late-night note last showed; on a shared browser it would tell
+// the next person this user saved a low mood late (the Web Tester, #366).
+export const SIGN_OUT_TRACE_KINDS = ["on-this-day-hidden", "toolbox-card-hidden", "letter-card-hidden", "lateNote"] as const;
 
 export function hasLocalKinds(storage: Storage, uid: string, kinds: readonly string[]): boolean {
   return keysOf(storage, uid, kinds).length > 0;
@@ -37,6 +39,18 @@ export function hasLocalKinds(storage: Storage, uid: string, kinds: readonly str
 
 export function wipeLocalKinds(storage: Storage, uid: string, kinds: readonly string[]): void {
   for (const key of keysOf(storage, uid, kinds)) storage.removeItem(key);
+}
+
+// With nobody signed in (the session ended, or the sign-in page): these kinds go for every user,
+// since the server signed them out without this page knowing who (UX, #366).
+export const NO_SESSION_TRACE_KINDS = ["lateNote"] as const;
+export function wipeKindsForEveryone(storage: Storage, kinds: readonly string[]): void {
+  const keys: string[] = [];
+  for (let i = 0; i < storage.length; i++) {
+    const parts = storage.key(i)?.split(":");
+    if (parts && parts[0] === "mb" && kinds.includes(parts[1])) keys.push(parts.join(":"));
+  }
+  for (const key of keys) storage.removeItem(key);
 }
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;

@@ -48,7 +48,7 @@ describe("SignInForm", () => {
     expect(screen.queryByTestId("signin-error")).toBeNull();
     expect(screen.queryByRole("button", { name: a.checkEmailResend })).toBeNull();
     expect(screen.getByRole("link", { name: a.signinForgot })).toHaveAttribute("href", "/forgot-password");
-    expect(screen.getByTestId("signin-to-signup")).toHaveAttribute("href", "/welcome");
+    expect(screen.getByTestId("signin-to-signup")).toHaveAttribute("href", "/sign-up");
   });
 
   for (const [error, key] of [
@@ -131,14 +131,36 @@ describe("ForgotPasswordForm", () => {
 });
 
 describe("SignUpForm", () => {
-  it("idle: the fields, the browser's time zone, an unchecked age box, the link to sign in; no error", () => {
+  it("idle: the summary, the fields, the browser's time zone, three unticked boxes, the link to sign in; no error", () => {
     wrap(<SignUpForm />);
     expect(hidden("intent")).toBe("signup");
     expect(hidden("time_zone")).toBe(Intl.DateTimeFormat().resolvedOptions().timeZone);
-    expect(screen.getByTestId("signup-age")).not.toBeChecked();
+    expect(screen.getByTestId("signup-summary")).toHaveTextContent(messages.onboarding.welcome1Body);
+    for (const id of ["consent-privacy", "consent-health", "consent-age"]) expect(screen.getByTestId(id)).not.toBeChecked();
+    expect(screen.queryByTestId("consent-ai")).toBeNull();
+    expect(screen.queryByTestId("consent-read-health")).toBeNull();
     expect(screen.queryByTestId("signup-error")).toBeNull();
     expect(screen.getByTestId("signup-to-signin")).toHaveAttribute("href", "/sign-in");
-    expect(screen.getByTestId("signup-submit")).toBeEnabled();
+  });
+
+  it("Create account waits for all three required boxes; the AI box never counts (1.3 §6)", () => {
+    wrap(<SignUpForm askAi healthLink />);
+    const submit = screen.getByTestId("signup-submit");
+    expect(submit).toBeDisabled();
+    fireEvent.click(screen.getByTestId("consent-privacy"));
+    fireEvent.click(screen.getByTestId("consent-health"));
+    expect(submit).toBeDisabled();
+    fireEvent.click(screen.getByTestId("consent-ai"));
+    expect(submit).toBeDisabled();
+    fireEvent.click(screen.getByTestId("consent-age"));
+    expect(submit).toBeEnabled();
+    // Each with its link, opened in a new tab so what's typed stays.
+    for (const [id, href] of [["consent-read-terms", "/terms"], ["consent-read-privacy", "/privacy"], ["consent-read-health", "/consumer-health-data"]]) {
+      expect(screen.getByTestId(id)).toHaveAttribute("href", href);
+      expect(screen.getByTestId(id)).toHaveAttribute("target", "_blank");
+    }
+    // The summary lines come before the first box.
+    expect(screen.getByTestId("signup-summary").compareDocumentPosition(screen.getByTestId("consent-privacy")) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
   it("too many tries: the rate-limit message (the same as Send it again's), tied to no field (UX)", () => {
@@ -149,12 +171,11 @@ describe("SignUpForm", () => {
     expect(screen.getByLabelText(a.emailLabel)).not.toHaveAttribute("aria-invalid");
   });
 
-  it("an error keeps the email and the age box; a failure is the generic message (no field)", () => {
+  it("an error keeps the email; a failure is the generic message (no field)", () => {
     state = { status: "error", error: "generic", email: "a@b.co", age: true };
     wrap(<SignUpForm />);
     expect(screen.getByTestId("signup-error")).toHaveTextContent(a.errGeneric);
     expect(screen.getByLabelText(a.emailLabel)).toHaveValue("a@b.co");
-    expect(screen.getByTestId("signup-age")).toBeChecked();
     expect(screen.getByLabelText(a.emailLabel)).not.toHaveAttribute("aria-invalid");
   });
 

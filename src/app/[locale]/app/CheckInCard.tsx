@@ -4,6 +4,7 @@ import { startTransition, useActionState, useCallback, useEffect, useId, useRef,
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { EXERCISE_MINUTES, MOODS, SLEEP_HOURS, SLEEP_QUALITIES, SLEEP_START, STRESS_LEVELS, type CheckIn, type SleepQuality } from "@/lib/journal/checkIn";
+import { CHECKIN_SAVED_EVENT } from "@/lib/journal/checkInSaved";
 import { dateLine } from "@/lib/journal/today";
 import { valueHex } from "@/lib/journal/valueColours";
 import { localKey } from "@/lib/localData";
@@ -18,7 +19,15 @@ import { MoodFace } from "@/components/MoodFace";
 import { onArrival } from "@/lib/ui/arrival";
 import { useUntilLoaded } from "@/lib/ui/untilLoaded";
 import { saveCheckIn, type CheckInState } from "./actions";
+import { publishTodayMood } from "@/lib/journal/todayMood";
 import { useCheckInDraft } from "./CheckInDraft";
+import { TagsField } from "./TagsField";
+import { RoutineFailed, RoutineField, RoutineSummary, sameTicks, type CardRoutine } from "./RoutineField";
+import { GetHelpNow, SafetyCard } from "@/components/SafetyCard";
+import { claimLateNote, lateNoteKey } from "@/lib/journal/lateNote";
+import { parseTags, tagsFlagCrisis } from "@/lib/journal/tags";
+import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
+import { countTap } from "@/lib/analyticsEvents";
 
 // The daily check-in (M4): mood required (5 labelled circles), then the
 // optional sleep / exercise / stress rows. After saving, a summary row with
@@ -45,7 +54,9 @@ const pendingKey = (uid: string, date: string) => localKey("pending-checkin", ui
 
 // The pending copy names its own day: synced after midnight, it must still
 // land on the day it was made, not on the new today.
-type Pending = { fields: Fields; expected: string; date: string };
+// tags: the day's tags when they changed with this save (UX, 11 Nov); they
+// travel with the copy, so offline and Keep mine lose nothing.
+type Pending = { fields: Fields; expected: string; date: string; tags?: string[] };
 
 const isPending = (p: Pending | null): p is Pending =>
   !!p && typeof p.date === "string" && typeof p.expected === "string" && typeof p.fields?.mood === "number";
@@ -93,6 +104,7 @@ function pendingFromForm(form: FormData): Pending {
     },
     expected: text("expected_updated_at"),
     date: text("local_date"),
+    ...(form.has("tags") ? { tags: parseTags(form.get("tags")) ?? [] } : {}),
   };
 }
 
@@ -117,10 +129,10 @@ export async function syncCheckIn(form: FormData, ms: number): Promise<CheckInSt
 }
 
 export function pendingForms(uid: string): { key: string; form: FormData }[] {
-  return readAllPending(uid).map(({ key, pending }) => ({ key, form: toFormData(pending.fields, pending.expected, pending.date, key) }));
+  return readAllPending(uid).map(({ key, pending }) => ({ key, form: toFormData(pending.fields, pending.expected, pending.date, key, pending.tags) }));
 }
 
-function toFormData(fields: Fields, expectedUpdatedAt: string, date: string, fromPending?: string): FormData {
+function toFormData(fields: Fields, expectedUpdatedAt: string, date: string, fromPending?: string, tags?: string[]): FormData {
   const form = new FormData();
   form.set("local_date", date);
   form.set("mood", String(fields.mood ?? ""));
@@ -129,6 +141,8 @@ function toFormData(fields: Fields, expectedUpdatedAt: string, date: string, fro
   form.set("exercise_minutes", fields.exercise);
   form.set("stress", fields.stress);
   form.set("expected_updated_at", expectedUpdatedAt);
+  // Only when the day's tags changed: saveCheckIn then sets them after the check-in.
+  if (tags) form.set("tags", JSON.stringify(tags));
   // from_pending tells the action it's a synced copy; pending_key which one
   // to remove once it's answered.
   if (fromPending) {
@@ -144,7 +158,24 @@ function toFormData(fields: Fields, expectedUpdatedAt: string, date: string, fro
 // (CheckInDraft, in memory only, #9765 M-01).
 // loadFailed: today's check-in couldn't be read, so the empty card comes with
 // its error and Try again, until this card holds a real row.
-type Props = { initial: CheckIn | null; uid: string; date: string; dateLocaleTag: string; autoFocus?: boolean; keepDraft?: boolean; loadFailed?: boolean };
+// initialTags: the day's tags where tags are on (null: off); recentTags: the person's, for the picker.
+// routine (1.4 F, routine-live): the items that can be ticked on this day and the day's ticks
+// (item ids); null: off, or the read failed (no row).
+// lateNote (1.4 D, late-note-live): the profile's time zone for the late-night note; null: off.
+type Props = {
+  initial: CheckIn | null;
+  uid: string;
+  date: string;
+  dateLocaleTag: string;
+  autoFocus?: boolean;
+  keepDraft?: boolean;
+  loadFailed?: boolean;
+  initialTags?: string[] | null;
+  recentTags?: string[];
+  country?: string | null;
+  routine?: CardRoutine | null;
+  lateNote?: { zone: string | null } | null;
+};
 
 // An offline copy the server refused ("rejected": e.g. a day that is in the
 // future for the account's zone). Never silent (decision 72): one notice per
@@ -156,7 +187,7 @@ type Notice = { date: string; kind: "rejected" };
 // (decision 209): both are shown, and nothing is dropped until the person
 // chooses. key: the pending copy holding "mine" meanwhile (none if this
 // browser can't store one).
-type Conflict = { date: string; mine: Fields; theirs: CheckIn; key: string | null };
+type Conflict = { date: string; mine: Fields; mineTags?: string[]; theirs: CheckIn; key: string | null };
 
 // A check-in's values as the conflict dialog and checkInChips show them.
 const valuesOf = (f: Fields) => ({
@@ -284,8 +315,30 @@ export function CheckInCard(props: Props) {
   );
 }
 
-function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, autoFocus, keepDraft, loadFailed }: Props & { notify: Notify; announce: (text: string) => void }) {
+function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, autoFocus, keepDraft, loadFailed, initialTags = null, recentTags = [], country = null, routine = null, lateNote = null }: Props & { notify: Notify; announce: (text: string) => void }) {
+  // The late-night note (1.4 D): judged at the moment the person saves, from the card only (online
+  // or offline; a queued copy syncing later never shows it), once a night per user.
+  const [lateShown, setLateShown] = useState(false);
+  const lateSaid = useRef(false);
+  const savedAt = useRef<Date | null>(null);
+  const maybeLateNote = (mood: number | null | undefined) => {
+    if (lateNote && savedAt.current && claimLateNote(uid, mood, savedAt.current, lateNote.zone)) setLateShown(true);
+    savedAt.current = null;
+  };
   const t = useTranslations("today");
+  // The day's routine ticks, as the tags: what's saved and what the form holds; sent only when
+  // they differ. They never queue offline: the failed line says so instead (UX, 19 Nov).
+  const [savedTicks, setSavedTicks] = useState<string[]>(routine?.ticks ?? []);
+  const [ticks, setTicks] = useState<string[]>(routine?.ticks ?? []);
+  const [routineFailed, setRoutineFailed] = useState(false);
+  const routineChanged = routine !== null && !sameTicks(ticks, savedTicks);
+  // The day's tags: what's saved, and what the form holds now. Sent only when they differ.
+  const tagsOn = initialTags !== null;
+  const [savedTags, setSavedTags] = useState<string[]>(initialTags ?? []);
+  const [tags, setTags] = useState<string[]>(initialTags ?? []);
+  const [tagsFailed, setTagsFailed] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
+  const tagsChanged = tagsOn && JSON.stringify(tags) !== JSON.stringify(savedTags);
   const locale = useLocale();
   const slot = useCheckInDraft<{ fields: Fields; basedOn: string }>();
   const drafts = keepDraft ? slot : null;
@@ -325,6 +378,12 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
       onSignOut(({ uid: who, mode }) => {
         if (who !== uid) return;
         signedOut.current = true;
+        // The late-night note's mark is no journal data to keep: it goes at any sign-out.
+        try {
+          window.localStorage.removeItem(lateNoteKey(uid));
+        } catch {
+          // storage unavailable
+        }
         if (mode === "delete") for (const { key } of readAllPending(uid)) removePending(key);
       }),
     [uid],
@@ -381,6 +440,10 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
       } catch {
         return { status: "error", error: "generic" };
       }
+      // The copy carries no routine ticks (they never queue): say so.
+      if (form.has("routine")) setRoutineFailed(true);
+      // Kept in this browser, as saving offline: the person is here, so the late note can show.
+      maybeLateNote(pendingFromForm(form).fields.mood);
       setOffline(true);
       setEditing(false);
       return prev;
@@ -436,7 +499,7 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
       // copy simply becomes a new check-in on the next sync.
       if (next.status === "error" && (next.error === "conflict" || next.error === "stale")) {
         const mine = pendingFromForm(form);
-        if (next.checkIn) addConflict({ date, mine: mine.fields, theirs: next.checkIn, key });
+        if (next.checkIn) addConflict({ date, mine: mine.fields, mineTags: mine.tags, theirs: next.checkIn, key });
         else {
           try {
             putPending(key, JSON.stringify({ ...mine, expected: "" } satisfies Pending));
@@ -461,13 +524,30 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
       } catch {
         kept = false;
       }
-      addConflict({ date: mine.date, mine: mine.fields, theirs: next.checkIn, key: kept ? key : null });
+      addConflict({ date: mine.date, mine: mine.fields, mineTags: mine.tags, theirs: next.checkIn, key: kept ? key : null });
       setOffline(false);
       setEditing(true);
       return prev;
     }
     if (next.status === "saved") {
+      countTap("checkin_saved");
+      // For what follows on Today (its Plus card hides after one of the two lowest faces).
+      window.dispatchEvent(new CustomEvent(CHECKIN_SAVED_EVENT, { detail: { date: next.checkIn.local_date, mood: next.checkIn.mood } }));
+      // The tags went with it, or the check-in is saved and they weren't (shown under the field).
+      if (next.tags) setSavedTags(next.tags);
+      setTagsFailed(next.tagsSaved === false);
+      // The same for the routine ticks; a synced offline copy carries none and changes nothing.
+      if (form.has("routine")) {
+        if (next.routine) {
+          setSavedTicks(next.routine);
+          setTicks(next.routine);
+        }
+        setRoutineFailed(next.routineSaved === false);
+      }
+      // The person's own save (never a queued copy syncing later): the late-night note may show.
+      if (form.get("from_pending") !== "1") maybeLateNote(next.checkIn.mood);
       setRow(next.checkIn);
+      publishTodayMood(next.checkIn.local_date, next.checkIn.mood);
       setDraftBase(null);
       setFields(fromRow(next.checkIn));
       setEditing(false);
@@ -489,7 +569,7 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
       for (const { key, pending: saved } of readAllPending(uid)) {
         if (flushing.current.has(key)) continue;
         flushing.current.add(key);
-        startTransition(() => action(toFormData(saved.fields, saved.expected, saved.date, key)));
+        startTransition(() => action(toFormData(saved.fields, saved.expected, saved.date, key, saved.tags)));
       }
     };
     flush();
@@ -501,19 +581,27 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
     event.preventDefault();
     if (fields.mood === null) return;
     setStorageFailed(false);
+    // The crisis list reads the tags, as it reads writing (UX): help is offered, the save goes on.
+    if (tagsChanged && tagsFlagCrisis(tags, CRISIS_KEYWORDS)) setHelpOpen(true);
+    // The moment of the person's save, for the late-night note (judged when it's kept or saved).
+    savedAt.current = new Date();
     if (!navigator.onLine) {
       try {
-        putPending(pendingKey(uid, cardDate), JSON.stringify({ fields, expected, date: cardDate } satisfies Pending));
+        putPending(pendingKey(uid, cardDate), JSON.stringify({ fields, expected, date: cardDate, ...(tagsChanged ? { tags } : {}) } satisfies Pending));
       } catch {
         // storage unavailable: nothing was kept, so don't say it was saved
         setStorageFailed(true);
+        savedAt.current = null;
         return;
       }
+      if (routineChanged) setRoutineFailed(true);
+      maybeLateNote(fields.mood);
       setOffline(true);
       setEditing(false);
       return;
     }
-    const form = toFormData(fields, expected, cardDate);
+    const form = toFormData(fields, expected, cardDate, undefined, tagsChanged ? tags : undefined);
+    if (routineChanged) form.set("routine", JSON.stringify(ticks));
     window.clearTimeout(waitTimer.current);
     keptFor.current = null;
     waitTimer.current = window.setTimeout(() => {
@@ -524,6 +612,7 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
         return;
       }
       keptFor.current = form;
+      maybeLateNote(fields.mood);
       setOffline(true);
       setEditing(false);
     }, SAVE_WAIT_MS);
@@ -539,13 +628,13 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
       // first with the new lock), so a dropped request loses nothing.
       if (c.key) {
         try {
-          putPending(c.key, JSON.stringify({ fields: c.mine, expected: c.theirs.updated_at, date: c.date } satisfies Pending));
+          putPending(c.key, JSON.stringify({ fields: c.mine, expected: c.theirs.updated_at, date: c.date, ...(c.mineTags ? { tags: c.mineTags } : {}) } satisfies Pending));
         } catch {
           // storage unavailable: the request below still goes
         }
         flushing.current.add(c.key);
       }
-      const form = toFormData(c.mine, c.theirs.updated_at, c.date, c.key ?? undefined);
+      const form = toFormData(c.mine, c.theirs.updated_at, c.date, c.key ?? undefined, c.mineTags);
       resolving.current.set(c.date, form);
       startTransition(() => action(form));
       return;
@@ -668,7 +757,13 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
       return;
     }
     if (showsSummary) {
-      announce(offline ? t("checkinSavedOfflineWeb") : t("checkinSaved"));
+      // The late-night note (1.4 D) is said with it, in the card's own live region, which is there
+      // before the save (a region that appears with its text is often not read: the Reviewer, #366).
+      // Said once: a later save the same night leaves the line on screen but doesn't say it again.
+      const saved = offline ? t("checkinSavedOfflineWeb") : t("checkinSaved");
+      const sayLate = lateShown && !lateSaid.current;
+      if (sayLate) lateSaid.current = true;
+      announce(sayLate ? `${saved} ${t("lateNote")}` : saved);
       root.current?.querySelector<HTMLElement>("h2")?.focus();
     } else {
       announce("");
@@ -717,6 +812,32 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
             {t("checkinEdit")}
           </button>
         </div>
+        {tagsOn && savedTags.length > 0 && (
+          <ul className="mt-3 flex flex-wrap gap-2" data-testid="checkin-summary-tags" aria-label={t("tagsLabel")}>
+            {savedTags.map((tag) => (
+              <li key={tag} className="inline-flex max-w-full items-center rounded-full border border-border px-3 py-1 text-sm text-text [overflow-wrap:anywhere]">
+                {tag}
+              </li>
+            ))}
+          </ul>
+        )}
+        {tagsFailed && (
+          <p role="alert" data-testid="checkin-tags-failed" className="mt-2 text-sm font-medium text-accent">
+            {t("errGeneric")}
+          </p>
+        )}
+        {routine && <RoutineSummary items={routine.items} ticks={savedTicks} />}
+        {routineFailed && <RoutineFailed />}
+        {/* 1.4 D: one soft line, with the help button; its tap is never counted (it'd say a low
+            mood late at night). */}
+        {lateShown && (
+          <div data-testid="checkin-late-note" className="mt-3 flex flex-col items-start gap-2">
+            <p className="text-sm text-text">{t("lateNote")}</p>
+            <GetHelpNow country={country} testId="late-note-get-help" neutral />
+          </div>
+        )}
+        {/* Saved, the card turns into this summary: the help offer opened at Save stays open. */}
+        {helpOpen && <SafetyCard country={country} onClose={() => setHelpOpen(false)} />}
         {chips.length > 0 && (
           <ul className="mt-3 flex flex-wrap gap-2" data-testid="checkin-summary-chips">
             {chips.map(({ label, hex }) => (
@@ -877,6 +998,34 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
         </div>
       )}
 
+      {tagsOn && (
+        <TagsField
+          tags={tags}
+          recent={recentTags}
+          onChange={(next) => {
+            setTags(next);
+            setTagsFailed(false);
+          }}
+        />
+      )}
+      {tagsFailed && (
+        <p role="alert" data-testid="checkin-tags-failed" className="mt-2 text-sm font-medium text-accent">
+          {t("errGeneric")}
+        </p>
+      )}
+      {routine && (
+        <RoutineField
+          items={routine.items}
+          ticks={ticks}
+          onChange={(next) => {
+            setTicks(next);
+            setRoutineFailed(false);
+          }}
+        />
+      )}
+      {routineFailed && <RoutineFailed />}
+      {/* The profile's country, as the editor's card (the Reviewer, #278); none: the connection's. */}
+      {helpOpen && <SafetyCard country={country} onClose={() => setHelpOpen(false)} />}
       {errorKey && (
         <p role="alert" data-testid="checkin-error" className="mt-4 font-medium text-accent">
           {t(errorKey)}

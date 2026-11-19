@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { marked } from "marked";
 import { applyPending, isPendingMet, stripComments } from "./legalContent";
+import { pageGate } from "./conditions";
 
 // Help & FAQ articles (item 8): content/help/<locale>/<slug>.md, copied
 // verbatim from UX & PM's specs/help (long-form text in content files,
@@ -55,6 +56,10 @@ export function renderArticle(article: HelpArticle, met: (id: string) => boolean
   const { text } = applyPending(stripComments(article.source), met);
   return text.trim() ? (marked.parse(text.trim(), { async: false, gfm: true }) as string) : "";
 }
+
+// What a Help page shows on this build. Bo's article follows Bo's own gate, so it can be
+// read on a Preview with the screen that links to it; everything else, its condition.
+export const helpPageMet = (id: string, build?: Parameters<typeof pageGate>[1]) => (id === "bo_live" ? pageGate("bo-live", build) !== "hidden" : isPendingMet(id));
 
 // The published articles, grouped by topic in TOPICS order.
 export function helpIndex(locale: string, met: (id: string) => boolean = isPendingMet): { topic: Topic; articles: HelpArticle[] }[] {

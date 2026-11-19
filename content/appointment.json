@@ -1,0 +1,644 @@
+{
+  "version": 1,
+  "about": "For my appointment (specs/1.2-features.md §4, UX 2026-11-09; the Reviewer's read). Its home since the app port (decision 99): the web syncs it from here with scripts/sync-contracts.mjs. On the app it's a PDF made on the phone (package pdf), shared through the share sheet as appointment-summary.pdf (no name, no dates) and swept from the phone like Export's files. A summary of the last rangeWeeks weeks, ending today in the saved zone: the number of check-ins (never \"of N days\": that's a missed-days count), the average and small chart for each of mood, sleep, stress and movement (Insights' own rules: a day without a value doesn't count, at least 3 to show), and the starred entries as their date and first line (cut at firstLineChars on a word boundary, with …). An entry's full text only where the person ticks it, none ticked at the start. Never included: neverIncluded. An optional box, What I want to talk about, isn't saved. Nothing is stored or sent by us; the ticks and the box live in the page's memory only. Every string is checked against diagnosisWords (your-week.json's lists), the footer and headings included. Routine (1.4 F, PLAN-routine.md §5, UX 18 Nov): a Routine section with only the items the person opted in (in_appointment); with none, no section (expect null). Per item, in position order, of the range's check-in days on or after its started_on: the share with its tick, as a whole number, halves up (state percent); fewer than rules.routineMinDays such days: state not_enough (\"not enough days yet\"). Never a mood comparison for routine (UX's medication safety ruling). routineCases: {today, weeks, checkIns: [dates], routine: [{id, position, in_appointment, started_on, ticks}], expect}.",
+  "rules": {
+    "rangeWeeks": [2, 4, 12],
+    "defaultWeeks": 4,
+    "firstLineChars": 120,
+    "routineMinDays": 5
+  },
+  "neverIncluded": ["letters", "safety_plan", "toolbox_items", "bo_messages", "ai_reflections", "ai_reports", "ai_memories"],
+  "routineCases": [
+    {
+      "name": "one opted-in item: 15 of 20 check-in days ticked is 75",
+      "today": "2026-11-04",
+      "weeks": 4,
+      "checkIns": [
+        "2026-10-16",
+        "2026-10-17",
+        "2026-10-18",
+        "2026-10-19",
+        "2026-10-20",
+        "2026-10-21",
+        "2026-10-22",
+        "2026-10-23",
+        "2026-10-24",
+        "2026-10-25",
+        "2026-10-26",
+        "2026-10-27",
+        "2026-10-28",
+        "2026-10-29",
+        "2026-10-30",
+        "2026-10-31",
+        "2026-11-01",
+        "2026-11-02",
+        "2026-11-03",
+        "2026-11-04"
+      ],
+      "routine": [
+        {
+          "id": "meds",
+          "position": 0,
+          "in_appointment": true,
+          "started_on": "2026-09-01",
+          "ticks": [
+            "2026-10-16",
+            "2026-10-17",
+            "2026-10-18",
+            "2026-10-19",
+            "2026-10-20",
+            "2026-10-21",
+            "2026-10-22",
+            "2026-10-23",
+            "2026-10-24",
+            "2026-10-25",
+            "2026-10-26",
+            "2026-10-27",
+            "2026-10-28",
+            "2026-10-29",
+            "2026-10-30"
+          ]
+        }
+      ],
+      "expect": [
+        {
+          "id": "meds",
+          "state": "percent",
+          "percent": 75
+        }
+      ]
+    },
+    {
+      "name": "no item opted in: no section at all",
+      "today": "2026-11-04",
+      "weeks": 4,
+      "checkIns": [
+        "2026-10-16",
+        "2026-10-17",
+        "2026-10-18",
+        "2026-10-19",
+        "2026-10-20",
+        "2026-10-21",
+        "2026-10-22",
+        "2026-10-23",
+        "2026-10-24",
+        "2026-10-25",
+        "2026-10-26",
+        "2026-10-27",
+        "2026-10-28",
+        "2026-10-29",
+        "2026-10-30",
+        "2026-10-31",
+        "2026-11-01",
+        "2026-11-02",
+        "2026-11-03",
+        "2026-11-04"
+      ],
+      "routine": [
+        {
+          "id": "meds",
+          "position": 0,
+          "in_appointment": false,
+          "started_on": "2026-09-01",
+          "ticks": [
+            "2026-10-16",
+            "2026-10-17",
+            "2026-10-18",
+            "2026-10-19",
+            "2026-10-20",
+            "2026-10-21",
+            "2026-10-22",
+            "2026-10-23",
+            "2026-10-24",
+            "2026-10-25",
+            "2026-10-26",
+            "2026-10-27",
+            "2026-10-28",
+            "2026-10-29",
+            "2026-10-30",
+            "2026-10-31",
+            "2026-11-01",
+            "2026-11-02",
+            "2026-11-03",
+            "2026-11-04"
+          ]
+        }
+      ],
+      "expect": null
+    },
+    {
+      "name": "no items at all: no section",
+      "today": "2026-11-04",
+      "weeks": 4,
+      "checkIns": [
+        "2026-10-16",
+        "2026-10-17",
+        "2026-10-18",
+        "2026-10-19",
+        "2026-10-20",
+        "2026-10-21",
+        "2026-10-22",
+        "2026-10-23",
+        "2026-10-24",
+        "2026-10-25",
+        "2026-10-26",
+        "2026-10-27",
+        "2026-10-28",
+        "2026-10-29",
+        "2026-10-30",
+        "2026-10-31",
+        "2026-11-01",
+        "2026-11-02",
+        "2026-11-03",
+        "2026-11-04"
+      ],
+      "routine": [],
+      "expect": null
+    },
+    {
+      "name": "an item not opted in is left out; the opted one stays",
+      "today": "2026-11-04",
+      "weeks": 4,
+      "checkIns": [
+        "2026-10-16",
+        "2026-10-17",
+        "2026-10-18",
+        "2026-10-19",
+        "2026-10-20",
+        "2026-10-21",
+        "2026-10-22",
+        "2026-10-23",
+        "2026-10-24",
+        "2026-10-25",
+        "2026-10-26",
+        "2026-10-27",
+        "2026-10-28",
+        "2026-10-29",
+        "2026-10-30",
+        "2026-10-31",
+        "2026-11-01",
+        "2026-11-02",
+        "2026-11-03",
+        "2026-11-04"
+      ],
+      "routine": [
+        {
+          "id": "walk",
+          "position": 0,
+          "in_appointment": false,
+          "started_on": "2026-09-01",
+          "ticks": [
+            "2026-10-16",
+            "2026-10-17",
+            "2026-10-18",
+            "2026-10-19",
+            "2026-10-20",
+            "2026-10-21",
+            "2026-10-22",
+            "2026-10-23",
+            "2026-10-24",
+            "2026-10-25",
+            "2026-10-26",
+            "2026-10-27",
+            "2026-10-28",
+            "2026-10-29",
+            "2026-10-30",
+            "2026-10-31",
+            "2026-11-01",
+            "2026-11-02",
+            "2026-11-03",
+            "2026-11-04"
+          ]
+        },
+        {
+          "id": "meds",
+          "position": 1,
+          "in_appointment": true,
+          "started_on": "2026-09-01",
+          "ticks": [
+            "2026-10-16",
+            "2026-10-17",
+            "2026-10-18",
+            "2026-10-19",
+            "2026-10-20",
+            "2026-10-21",
+            "2026-10-22",
+            "2026-10-23",
+            "2026-10-24",
+            "2026-10-25"
+          ]
+        }
+      ],
+      "expect": [
+        {
+          "id": "meds",
+          "state": "percent",
+          "percent": 50
+        }
+      ]
+    },
+    {
+      "name": "started in the range: only its days count (2 of 5 is 40)",
+      "today": "2026-11-04",
+      "weeks": 4,
+      "checkIns": [
+        "2026-10-16",
+        "2026-10-17",
+        "2026-10-18",
+        "2026-10-19",
+        "2026-10-20",
+        "2026-10-21",
+        "2026-10-22",
+        "2026-10-23",
+        "2026-10-24",
+        "2026-10-25",
+        "2026-10-26",
+        "2026-10-27",
+        "2026-10-28",
+        "2026-10-29",
+        "2026-10-30",
+        "2026-10-31",
+        "2026-11-01",
+        "2026-11-02",
+        "2026-11-03",
+        "2026-11-04"
+      ],
+      "routine": [
+        {
+          "id": "meds",
+          "position": 0,
+          "in_appointment": true,
+          "started_on": "2026-10-31",
+          "ticks": [
+            "2026-10-31",
+            "2026-11-02"
+          ]
+        }
+      ],
+      "expect": [
+        {
+          "id": "meds",
+          "state": "percent",
+          "percent": 40
+        }
+      ]
+    },
+    {
+      "name": "fewer than 5 check-in days since it started: not enough days yet",
+      "today": "2026-11-04",
+      "weeks": 4,
+      "checkIns": [
+        "2026-10-16",
+        "2026-10-17",
+        "2026-10-18",
+        "2026-10-19",
+        "2026-10-20",
+        "2026-10-21",
+        "2026-10-22",
+        "2026-10-23",
+        "2026-10-24",
+        "2026-10-25",
+        "2026-10-26",
+        "2026-10-27",
+        "2026-10-28",
+        "2026-10-29",
+        "2026-10-30",
+        "2026-10-31",
+        "2026-11-01",
+        "2026-11-02",
+        "2026-11-03",
+        "2026-11-04"
+      ],
+      "routine": [
+        {
+          "id": "meds",
+          "position": 0,
+          "in_appointment": true,
+          "started_on": "2026-11-01",
+          "ticks": [
+            "2026-11-01"
+          ]
+        }
+      ],
+      "expect": [
+        {
+          "id": "meds",
+          "state": "not_enough"
+        }
+      ]
+    },
+    {
+      "name": "rounding: 1 of 6 is 16.7, so 17; 2 of 6 is 33.3, so 33",
+      "today": "2026-11-04",
+      "weeks": 4,
+      "checkIns": [
+        "2026-10-30",
+        "2026-10-31",
+        "2026-11-01",
+        "2026-11-02",
+        "2026-11-03",
+        "2026-11-04"
+      ],
+      "routine": [
+        {
+          "id": "one",
+          "position": 0,
+          "in_appointment": true,
+          "started_on": "2026-10-30",
+          "ticks": [
+            "2026-10-30"
+          ]
+        },
+        {
+          "id": "two",
+          "position": 1,
+          "in_appointment": true,
+          "started_on": "2026-10-30",
+          "ticks": [
+            "2026-10-30",
+            "2026-10-31"
+          ]
+        }
+      ],
+      "expect": [
+        {
+          "id": "one",
+          "state": "percent",
+          "percent": 17
+        },
+        {
+          "id": "two",
+          "state": "percent",
+          "percent": 33
+        }
+      ]
+    },
+    {
+      "name": "rounding: 1 of 8 is 12.5, halves up to 13",
+      "today": "2026-11-04",
+      "weeks": 4,
+      "checkIns": [
+        "2026-10-28",
+        "2026-10-29",
+        "2026-10-30",
+        "2026-10-31",
+        "2026-11-01",
+        "2026-11-02",
+        "2026-11-03",
+        "2026-11-04"
+      ],
+      "routine": [
+        {
+          "id": "meds",
+          "position": 0,
+          "in_appointment": true,
+          "started_on": "2026-10-28",
+          "ticks": [
+            "2026-10-30"
+          ]
+        }
+      ],
+      "expect": [
+        {
+          "id": "meds",
+          "state": "percent",
+          "percent": 13
+        }
+      ]
+    },
+    {
+      "name": "rounding: 5 of 6 is 83.3, so 83",
+      "today": "2026-11-04",
+      "weeks": 4,
+      "checkIns": [
+        "2026-10-30",
+        "2026-10-31",
+        "2026-11-01",
+        "2026-11-02",
+        "2026-11-03",
+        "2026-11-04"
+      ],
+      "routine": [
+        {
+          "id": "six",
+          "position": 0,
+          "in_appointment": true,
+          "started_on": "2026-10-30",
+          "ticks": [
+            "2026-10-30",
+            "2026-10-31",
+            "2026-11-01",
+            "2026-11-02",
+            "2026-11-03"
+          ]
+        }
+      ],
+      "expect": [
+        {
+          "id": "six",
+          "state": "percent",
+          "percent": 83
+        }
+      ]
+    },
+    {
+      "name": "two opted items in position order; ticks with no check-in that day count for nothing",
+      "today": "2026-11-04",
+      "weeks": 4,
+      "checkIns": [
+        "2026-10-16",
+        "2026-10-17",
+        "2026-10-18",
+        "2026-10-19",
+        "2026-10-20",
+        "2026-10-21",
+        "2026-10-22",
+        "2026-10-23",
+        "2026-10-24",
+        "2026-10-25",
+        "2026-10-26",
+        "2026-10-27",
+        "2026-10-28",
+        "2026-10-29",
+        "2026-10-30",
+        "2026-10-31",
+        "2026-11-01",
+        "2026-11-02",
+        "2026-11-03",
+        "2026-11-04"
+      ],
+      "routine": [
+        {
+          "id": "b",
+          "position": 1,
+          "in_appointment": true,
+          "started_on": "2026-09-01",
+          "ticks": [
+            "2026-10-01",
+            "2026-10-10",
+            "2026-10-16",
+            "2026-10-17",
+            "2026-10-18",
+            "2026-10-19",
+            "2026-10-20"
+          ]
+        },
+        {
+          "id": "a",
+          "position": 0,
+          "in_appointment": true,
+          "started_on": "2026-09-01",
+          "ticks": [
+            "2026-10-16",
+            "2026-10-17",
+            "2026-10-18",
+            "2026-10-19",
+            "2026-10-20",
+            "2026-10-21",
+            "2026-10-22",
+            "2026-10-23",
+            "2026-10-24",
+            "2026-10-25",
+            "2026-10-26",
+            "2026-10-27",
+            "2026-10-28",
+            "2026-10-29",
+            "2026-10-30",
+            "2026-10-31",
+            "2026-11-01",
+            "2026-11-02",
+            "2026-11-03",
+            "2026-11-04"
+          ]
+        }
+      ],
+      "expect": [
+        {
+          "id": "a",
+          "state": "percent",
+          "percent": 100
+        },
+        {
+          "id": "b",
+          "state": "percent",
+          "percent": 25
+        }
+      ]
+    },
+    {
+      "name": "the range: 2 weeks counts only its 14 days",
+      "today": "2026-11-04",
+      "weeks": 2,
+      "checkIns": [
+        "2026-10-16",
+        "2026-10-17",
+        "2026-10-18",
+        "2026-10-19",
+        "2026-10-20",
+        "2026-10-21",
+        "2026-10-22",
+        "2026-10-23",
+        "2026-10-24",
+        "2026-10-25",
+        "2026-10-26",
+        "2026-10-27",
+        "2026-10-28",
+        "2026-10-29",
+        "2026-10-30",
+        "2026-10-31",
+        "2026-11-01",
+        "2026-11-02",
+        "2026-11-03",
+        "2026-11-04"
+      ],
+      "routine": [
+        {
+          "id": "meds",
+          "position": 0,
+          "in_appointment": true,
+          "started_on": "2026-09-01",
+          "ticks": [
+            "2026-10-16",
+            "2026-10-17",
+            "2026-10-18",
+            "2026-10-19",
+            "2026-10-20",
+            "2026-10-21",
+            "2026-10-22",
+            "2026-10-23",
+            "2026-10-24",
+            "2026-10-25",
+            "2026-10-26",
+            "2026-10-27",
+            "2026-10-28"
+          ]
+        }
+      ],
+      "expect": [
+        {
+          "id": "meds",
+          "state": "percent",
+          "percent": 50
+        }
+      ]
+    },
+    {
+      "name": "check-ins outside the range (before it, after today) are ignored",
+      "today": "2026-11-04",
+      "weeks": 2,
+      "checkIns": [
+        "2026-10-01",
+        "2026-10-16",
+        "2026-10-17",
+        "2026-10-18",
+        "2026-10-19",
+        "2026-10-20",
+        "2026-10-21",
+        "2026-10-22",
+        "2026-10-23",
+        "2026-10-24",
+        "2026-10-25",
+        "2026-10-26",
+        "2026-10-27",
+        "2026-10-28",
+        "2026-10-29",
+        "2026-10-30",
+        "2026-10-31",
+        "2026-11-01",
+        "2026-11-02",
+        "2026-11-03",
+        "2026-11-04",
+        "2026-11-05"
+      ],
+      "routine": [
+        {
+          "id": "meds",
+          "position": 0,
+          "in_appointment": true,
+          "started_on": "2026-09-01",
+          "ticks": [
+            "2026-10-01",
+            "2026-11-05",
+            "2026-10-26",
+            "2026-10-27",
+            "2026-10-28",
+            "2026-10-29",
+            "2026-10-30",
+            "2026-10-31",
+            "2026-11-01",
+            "2026-11-02",
+            "2026-11-03",
+            "2026-11-04"
+          ]
+        }
+      ],
+      "expect": [
+        {
+          "id": "meds",
+          "state": "percent",
+          "percent": 71
+        }
+      ]
+    }
+  ]
+}

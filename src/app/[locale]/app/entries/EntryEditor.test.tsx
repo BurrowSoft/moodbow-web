@@ -15,7 +15,15 @@ vi.mock("./actions", () => ({
   deleteEntry: (...args: unknown[]) => deleteEntry(...args),
   getEntry: (...args: unknown[]) => getEntry(...args),
 }));
-vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push }) }));
+// Link: the help card's own links (the lifebuoy beside Back, audit batch H).
+vi.mock("@/i18n/navigation", () => ({
+  useRouter: () => ({ push }),
+  Link: ({ href, children, ...rest }: { href: string; children: React.ReactNode }) => (
+    <a href={href} {...rest}>
+      {children}
+    </a>
+  ),
+}));
 // The crisis list: none by default (as until the contract is synced).
 let keywords: { version: number; languages: Record<string, { match: "word" | "substring"; phrases: string[] }> } | null = null;
 vi.mock("@/lib/safety/keywords", () => ({
@@ -61,6 +69,18 @@ beforeEach(() => {
   window.localStorage.clear();
 });
 afterEach(cleanup);
+
+// Help everywhere (audit batch H): one lifebuoy beside Back, and it opens the help card.
+describe("EntryEditor: help", () => {
+  it("exactly one help control, named as everywhere, opening the help card", () => {
+    renderEditor();
+    const help = screen.getAllByRole("link", { name: messages.me.meGetHelpNow });
+    expect(help).toHaveLength(1);
+    expect(screen.getByTestId("entry-top-row")).toContainElement(help[0]);
+    fireEvent.click(help[0]);
+    expect(screen.getByTestId("safety-card")).toBeInTheDocument();
+  });
+});
 
 describe("EntryEditor: a new entry", () => {
   it("Save waits for text; a save sends the draft's id and today, then goes back to Today", async () => {

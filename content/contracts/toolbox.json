@@ -1,0 +1,121 @@
+{
+  "version": 2,
+  "about": "Things that help me (specs/1.2-features.md, UX 2026-11-09; the Reviewer's read specs/1.2-features-read.md). Its home since the app port (decision 99): the web syncs it from here with scripts/sync-contracts.mjs. The person's own short list, plain text, in their own order: at most maxItems, each at most maxChars characters (counted as the server counts them, char_length), never blank. Stored in toolbox_items (migration 025, specs/toolbox-server-draft.md), written only through toolbox_add, toolbox_update, toolbox_delete and toolbox_move. No AI reads it, and nothing about it goes to analytics. The Today card shows when the latest check-in saved today, in the saved time zone, has a mood in lowMoods; a later one today outside them removes it. Not now hides it for that calendar day on that device only. If a help offer shows on Today too, help comes first: the card never pushes one down. Breathing: patterns, in list order (specs/plus-breathing-draft.md, UX 2026-11-12). Each is cycles of its steps, a step being \"in\", \"out\" or \"hold\" with its seconds; a hold is at most 4 s, and a pattern totals 55-65 s. Exactly one is free, today's 4 in, 6 out, and it is first; without Plus it is the only one shown, with no lock and no mention of the others. With Plus, a short choice of all of them, the last one used remembered on the device (today's again once Plus ends). It ends on its own, with no sound and no health claims, Stop is always on screen, and the dizzy line shows on every pattern. With reduced motion, the step's name and the seconds left count down in words instead of the circle (\"Hold\" too); during a hold the circle keeps its size.",
+  "rules": {
+    "maxItems": 20,
+    "maxChars": 120,
+    "lowMoods": [
+      1,
+      2
+    ]
+  },
+  "patterns": [
+    {
+      "id": "even-4-6",
+      "plus": false,
+      "steps": [
+        ["in", 4],
+        ["out", 6]
+      ],
+      "cycles": 6
+    },
+    {
+      "id": "box",
+      "plus": true,
+      "steps": [
+        ["in", 4],
+        ["hold", 4],
+        ["out", 4],
+        ["hold", 4]
+      ],
+      "cycles": 4
+    },
+    {
+      "id": "even-5",
+      "plus": true,
+      "steps": [
+        ["in", 5],
+        ["out", 5]
+      ],
+      "cycles": 6
+    }
+  ],
+  "claimWords": {
+    "en": [
+      "calm",
+      "anxiety",
+      "anxious",
+      "stress",
+      "panic",
+      "heal",
+      "cure",
+      "therapy",
+      "treatment",
+      "exercise",
+      "symptom"
+    ],
+    "fr": [
+      "calm",
+      "anxi",
+      "stress",
+      "panique",
+      "guéri",
+      "thérap",
+      "traitement",
+      "exercice",
+      "symptôme"
+    ],
+    "es": [
+      "calm",
+      "ansi",
+      "estrés",
+      "pánico",
+      "cura",
+      "terap",
+      "tratamiento",
+      "ejercicio",
+      "síntoma"
+    ],
+    "pt-br": [
+      "calm",
+      "ansi",
+      "estresse",
+      "pânico",
+      "cura",
+      "terap",
+      "tratamento",
+      "exercício",
+      "sintoma"
+    ],
+    "de": [
+      "beruhig",
+      "angst",
+      "stress",
+      "panik",
+      "heil",
+      "therap",
+      "behandlung",
+      "übung",
+      "symptom"
+    ],
+    "it": [
+      "calm",
+      "ansi",
+      "stress",
+      "panico",
+      "guari",
+      "terap",
+      "trattamento",
+      "esercizio",
+      "sintomo"
+    ],
+    "th": [
+      "สงบ",
+      "วิตกกังวล",
+      "ความเครียด",
+      "รักษา",
+      "บำบัด",
+      "อาการ"
+    ]
+  }
+}

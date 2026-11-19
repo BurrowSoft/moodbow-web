@@ -9,6 +9,7 @@ import getHelpLabel from "../../../../../content/contracts/get-help-label.json";
 import { IN_PROGRESS_LIMIT_MS, IN_PROGRESS_RETRY_MS, REFLECT_CLIENT_DEADLINE_MS, type Reflection, type ReflectErrorKey, type ReflectResult } from "@/lib/journal/reflect";
 import { normalizeForCrisis } from "@/lib/safety/crisis";
 import { deleteReflection, reflectOnEntry } from "./reflectActions";
+import { countTap } from "@/lib/analyticsEvents";
 
 type Phase =
   | { kind: "idle" }
@@ -130,6 +131,7 @@ export function ReflectPanel({ entryId, initial, balance, country, onAnswer }: P
       focusResult.current = document.activeElement === reflectButton.current;
       setReflection(result.reflection);
       setSaid("reflectReady");
+      countTap("reflect_done");
       if (result.balance !== null) {
         setCreditsOut(lastBalance.current > 0 && result.balance <= 0);
         lastBalance.current = result.balance;

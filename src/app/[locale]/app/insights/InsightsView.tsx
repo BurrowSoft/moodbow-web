@@ -1,9 +1,12 @@
 import { useLocale, useTranslations } from "next-intl";
+import type { ShowedUpRange } from "@/lib/journal/showedUp";
 import { Link } from "@/i18n/navigation";
-import { METRICS, summarize, type InsightRow, type Metric, type Range } from "@/lib/journal/insights";
-import type { Pattern, PatternId } from "@/lib/journal/patterns";
-import type { ValueKey } from "@/lib/journal/valueColours";
+import { CHARTS, METRICS, summarize, type InsightRow, type Metric, type Range } from "@/lib/journal/insights";
+import type { Pattern, PatternId, RoutineLine } from "@/lib/journal/patterns";
+import { MoodPair } from "@/components/MoodPair";
+import { PATTERN_PAIR } from "@/lib/journal/patternPair";
 import { JOURNAL_HEADING, segment } from "@/lib/ui/journalLayout";
+import type { LongRange, LongSummary, Unit } from "@/lib/plus/longRange";
 import { Chart } from "./Chart";
 
 const RANGE_TABS: { range: Range; key: "rangeWeek" | "rangeMonth" | "range3Months" }[] = [
@@ -11,12 +14,6 @@ const RANGE_TABS: { range: Range; key: "rangeWeek" | "rangeMonth" | "range3Month
   { range: "month", key: "rangeMonth" },
   { range: "3months", key: "range3Months" },
 ];
-const CHARTS: Record<Metric, { title: "chartMood" | "chartSleep" | "chartStress" | "chartExercise"; kind: "line" | "bars"; min: number; max: number; colourKey: ValueKey }> = {
-  mood: { title: "chartMood", kind: "line", min: 1, max: 5, colourKey: "mood" },
-  sleep: { title: "chartSleep", kind: "bars", min: 0, max: 12, colourKey: "sleep_hours" },
-  stress: { title: "chartStress", kind: "line", min: 1, max: 5, colourKey: "stress" },
-  exercise: { title: "chartExercise", kind: "bars", min: 0, max: 90, colourKey: "exercise_minutes" },
-};
 // Too few days: how many more, per chart (#9765 S-02, the same as the app).
 const NEED_MORE: Record<Metric, "insightsNeedMore" | "insightsNeedMoreSleep" | "insightsNeedMoreStress" | "insightsNeedMoreMovement"> = {
   mood: "insightsNeedMore",
@@ -46,23 +43,48 @@ export function InsightsView({
   today,
   range,
   share,
+  help,
   summary,
   week,
   patterns,
+  routinePatterns,
+  plusTab,
+  plusPatterns,
+  long,
+  showedUp,
+  yearRow,
 }: {
   rows: InsightRow[];
   today: string;
   range: Range;
   share?: React.ReactNode;
+  // help: the lifebuoy by the title (audit batch H).
+  help?: React.ReactNode;
   summary?: React.ReactNode;
   week?: React.ReactNode;
   patterns?: Pattern[];
+  // 1.4 F: the routine lines to show (higher on ticked days only), where routine-live is on.
+  routinePatterns?: RoutineLine[];
+  // Moodbow Plus's locked Year tab and More patterns row, for someone without Plus.
+  plusTab?: React.ReactNode;
+  plusPatterns?: React.ReactNode;
+  // Moodbow Plus's Year or All time (someone with Plus): the same charts, one
+  // point per month or quarter (lib/plus/longRange). periodLine: the first and
+  // last period in the browser's own month or quarter names.
+  long?: { range: LongRange; unit: Unit; periodLine: string; charts: Record<Metric, LongSummary> };
+  // Days you showed up (1.4 C, lib/journal/showedUp): the shown range's count, said as a count only,
+  // never a streak. Absent where its condition is off.
+  showedUp?: { count: number; range: ShowedUpRange };
+  // Your year in Moodbow's row (1.4 A, year-review-live), at the top.
+  yearRow?: React.ReactNode;
 }) {
+  const tp = useTranslations("plus");
   const t = useTranslations("insights");
   const tt = useTranslations("today");
   // Always one decimal for mood, stress and sleep ("4.0", "↑ 1.0": the
   // precision stays visible), whole minutes for exercise; same as the app.
   const oneDecimal = new Intl.NumberFormat(useLocale(), { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  const signedDecimal = new Intl.NumberFormat(useLocale(), { minimumFractionDigits: 1, maximumFractionDigits: 1, signDisplay: "exceptZero" });
   // A value with its unit: "7.0 h", "35 min", or the bare number (1–5).
   const withUnit = (metric: Metric, v: number) =>
     metric === "sleep"
@@ -77,8 +99,14 @@ export function InsightsView({
     <section>
       <div className="flex flex-wrap items-center justify-between gap-4">
         <h1 className={`min-w-0 ${JOURNAL_HEADING}`}>{t("insightsTitle")}</h1>
-        {share}
+        {/* Help everywhere (audit batch H): the lifebuoy by the title, on every range, as on the
+            example; the screen's one help control. */}
+        <div className="flex flex-wrap items-center gap-2">
+          {share}
+          {help}
+        </div>
       </div>
+      {yearRow && <div className="mt-4">{yearRow}</div>}
       {summary}
       <nav aria-label={t("insightsTitle")} className="mt-4 flex flex-wrap gap-2">
         {RANGE_TABS.map(({ range: r, key }) => (
@@ -86,20 +114,36 @@ export function InsightsView({
             key={r}
             href={r === "week" ? "/app/insights" : `/app/insights?range=${r}`}
             data-testid={`insights-range-${r}`}
-            aria-current={r === range ? "page" : undefined}
-            className={tab(r === range)}
+            data-count="insights_range"
+            data-count-range={r}
+            aria-current={!long && r === range ? "page" : undefined}
+            className={tab(!long && r === range)}
           >
             {t(key)}
           </Link>
         ))}
+        {plusTab}
       </nav>
+      {showedUp && (
+        <p data-testid="insights-showed-up" className="mt-4 text-sm text-muted [overflow-wrap:anywhere]">
+          {t("showedUp", { count: showedUp.count, range: showedUp.range })}
+        </p>
+      )}
 
       {week}
 
+      {long && (
+        <div className="mt-6 space-y-1" data-testid="insights-long-heading">
+          <p className="font-medium text-text">{long.range === "year" ? tp("yearSubtitle") : long.unit === "quarter" ? tp("allSubtitleQuarter") : tp("allSubtitleMonth")}</p>
+          <p className="text-sm text-muted" data-testid="insights-long-period">
+            {long.periodLine}
+          </p>
+        </div>
+      )}
       <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2">
         {METRICS.map((metric) => {
           const chart = CHARTS[metric];
-          const s = summarize(rows, today, range, metric);
+          const s = long ? { ...long.charts[metric], missing: 0 } : summarize(rows, today, range, metric);
           const titleId = `chart-${metric}-title`;
           const summaryId = `chart-${metric}-summary`;
           return (
@@ -110,7 +154,7 @@ export function InsightsView({
               {s.enough && s.average !== null ? (
                 <>
                   <div className="mt-3">
-                    <Chart kind={chart.kind} points={s.points} min={chart.min} max={chart.max} labelledBy={`${titleId} ${summaryId}`} colourKey={chart.colourKey} gradientId={`chart-${metric}-gradient`} dots={range === "3months" ? "isolated" : "all"} />
+                    <Chart kind={chart.kind} points={s.points} min={chart.min} max={chart.max} labelledBy={`${titleId} ${summaryId}`} colourKey={chart.colourKey} gradientId={`chart-${metric}-gradient`} dots={!long && range === "3months" ? "isolated" : "all"} />
                   </div>
                   <div id={summaryId} className="mt-3 space-y-1 text-sm">
                     <p className="font-medium text-text" data-testid={`insights-average-${metric}`}>
@@ -120,24 +164,34 @@ export function InsightsView({
                     </p>
                     {s.change !== null && (
                       <p className="text-muted" data-testid={`insights-change-${metric}`}>
-                        {s.change === 0
-                          ? t("chartNoChange", { range })
-                          : t(s.change > 0 ? "chartChangeUp" : "chartChangeDown", { value: withUnit(metric, Math.abs(s.change)), range })}
+                        {long
+                          ? s.change === 0
+                            ? tp("longChangeSame")
+                            : tp(s.change > 0 ? "longChangeUp" : "longChangeDown", { value: withUnit(metric, Math.abs(s.change)) })
+                          : s.change === 0
+                            ? t("chartNoChange", { range })
+                            : t(s.change > 0 ? "chartChangeUp" : "chartChangeDown", { value: withUnit(metric, Math.abs(s.change)), range })}
                       </p>
                     )}
                   </div>
                 </>
               ) : (
                 <p className="mt-3 text-sm text-muted" data-testid={`insights-not-enough-${metric}`}>
-                  {t(NEED_MORE[metric], { count: s.missing })}
+                  {long ? tp("longNotEnough") : t(NEED_MORE[metric], { count: s.missing })}
                 </p>
               )}
             </section>
           );
         })}
       </div>
+      {long && (
+        <p className="mt-3 text-xs text-muted" data-testid="insights-long-footnote">
+          {long.unit === "quarter" ? tp("longFootnoteQuarter") : tp("longFootnoteMonth")}
+        </p>
+      )}
 
-      {patterns && <Patterns patterns={patterns} format={(v) => number.format(v)} />}
+      {patterns && <Patterns patterns={patterns} routine={routinePatterns} format={(v) => number.format(v)} signed={(v) => signedDecimal.format(v)} />}
+      {plusPatterns}
     </section>
   );
 }
@@ -146,28 +200,57 @@ export function InsightsView({
 // order (sleep, movement, stress), never sorted by size; a pattern without
 // enough days is left out; nothing to show is one line. Descriptive, never
 // causal: the footnote says so under the sentences.
-function Patterns({ patterns, format }: { patterns: Pattern[]; format: (v: number) => string }) {
+// Routine (1.4 F, routine-live): only the lines where mood was higher on ticked days, under the
+// factor lines, with their own caution once below them (an item can be a medication: UX's
+// safety ruling, 18 Nov). Never a lower or "about the same" line.
+function Patterns({ patterns, routine = [], format, signed }: { patterns: Pattern[]; routine?: RoutineLine[]; format: (v: number) => string; signed: (v: number) => string }) {
   const t = useTranslations("insights");
+  const tr = useTranslations("routine");
   const visible = patterns.filter((p) => p.state !== "not_enough");
+  const routineList =
+    routine.length > 0 ? (
+      <>
+        <ul className="mt-3 space-y-3 text-sm text-text" data-testid="insights-routine-patterns">
+          {routine.map((r) => (
+            <li key={r.id} data-testid="insights-routine-pattern" className="[overflow-wrap:anywhere]">
+              {tr("patternShown", { name: r.name, a: format(r.a), b: format(r.b) })}
+            </li>
+          ))}
+        </ul>
+        <p className="mt-3 text-xs text-muted" data-testid="insights-routine-footnote">
+          {tr("patternFootnote")}
+        </p>
+      </>
+    ) : null;
   return (
     <section data-testid="insights-patterns" aria-labelledby="patterns-title" className="mt-6 rounded-3xl border border-border bg-surface p-[20px]">
       <h2 id="patterns-title" className="text-lg font-medium text-text">
         {t("patternsTitle")}
       </h2>
-      <p className="text-sm text-muted">{t("patternsSubtitle")}</p>
+      <p className="text-sm text-muted">
+        {t("patternsSubtitle")}
+        <span className="ms-[8px] text-xs">{t("moodScale")}</span>
+      </p>
       {visible.length > 0 ? (
         <>
-          <ul className="mt-3 space-y-2 text-sm text-text">
-            {visible.map((p) => (
-              <li key={p.id} data-testid={`insights-pattern-${p.id}`} data-state={p.state}>
-                {t(PATTERN_TEXT[p.id][p.state], { a: format(p.a.mood), b: format(p.b.mood) })}
-              </li>
-            ))}
+          <ul className="mt-3 space-y-3 text-sm text-text">
+            {visible.map((p) => {
+              const sentence = t(PATTERN_TEXT[p.id][p.state], { a: format(p.a.mood), b: format(p.b.mood) });
+              return (
+                <li key={p.id} data-testid={`insights-pattern-${p.id}`} data-state={p.state}>
+                  {/* Board 3's layout (UX, 14 Nov): the sentence is the image's name, not shown. */}
+                  <MoodPair sentence={sentence} title={t(PATTERN_PAIR[p.id].title)} labels={[t(PATTERN_PAIR[p.id].a), t(PATTERN_PAIR[p.id].b)]} a={p.a.mood} b={p.b.mood} format={format} signed={signed} testId={`insights-pattern-${p.id}-bars`} />
+                </li>
+              );
+            })}
           </ul>
           <p className="mt-3 text-xs text-muted" data-testid="insights-patterns-footnote">
             {t("patternsFootnote")}
           </p>
+          {routineList}
         </>
+      ) : routineList ? (
+        routineList
       ) : (
         <p className="mt-3 text-sm text-muted" data-testid="insights-patterns-none">
           {t("patternsNone")}

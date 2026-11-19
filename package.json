@@ -25,11 +25,13 @@
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.117.2",
     "@vercel/analytics": "2.0.1",
+    "fflate": "0.8.3",
     "marked": "^18.0.14",
     "next": "^16.3.8",
     "next-intl": "^4.14.8",
     "react": "^19.2.8",
-    "react-dom": "^19.2.8"
+    "react-dom": "^19.2.8",
+    "stripe": "22.2.1"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.10.1",

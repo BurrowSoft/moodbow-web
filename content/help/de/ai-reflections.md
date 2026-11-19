@@ -1,6 +1,6 @@
 ---
-title: KI-Reflexionen und Credits
-summary: So funktioniert „Mit Moodbow reflektieren“, und das sind Credits.
+title: KI-Reflexionen
+summary: So funktioniert „Mit Moodbow reflektieren“, und das ist Moodbow AI Lite.
 topic: AI
 de-draft: true
 ---
@@ -8,6 +8,6 @@ de-draft: true
 
 **KI ein- oder ausschalten:** KI ist freiwillig und braucht deine Einwilligung. Du schaltest sie unter **Ich → KI** ein oder aus. Für eine Reflexion sendet Moodbow diesen Eintrag und die Werte deiner letzten Check-ins an unseren KI-Anbieter Anthropic. Sie werden nicht zum Training von KI-Modellen verwendet.
 
-**Credits:** Neue Konten bekommen nach der Bestätigung ihrer E-Mail kostenlose Credits für die volle Moodbow AI. Wenn sie aufgebraucht sind, macht Moodbow mit **Moodbow AI Lite** weiter, einem einfacheren Modell mit kürzeren Antworten und einem täglichen Kontingent. Dein Guthaben findest du unter **Ich → KI**.
+**Moodbow AI Lite:** Wenn die volle Moodbow AI nicht verfügbar ist, macht Moodbow mit **Moodbow AI Lite** weiter, einem einfacheren Modell mit kürzeren Antworten und einem täglichen Kontingent.
 
 Die KI von Moodbow ist keine Therapeutin und gibt keinen medizinischen Rat. Wenn es dir schlecht geht, nutze **Möchtest du mit jemandem reden?**.{/pending}

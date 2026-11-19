@@ -4,6 +4,7 @@ import { routing } from "./i18n/routing";
 import { conditionMet } from "./lib/conditions";
 import { buildCsp, newNonce, NONCE_HEADER } from "./lib/csp";
 import { canonicalEmailConfirmedSearch } from "./lib/authLink";
+import { helpArticlePublished } from "./lib/helpGates";
 import { isHiddenPage, pagePath } from "./lib/sitemapPages";
 import { AUTH_OUTAGE_HEADER } from "./lib/supabase/deadline";
 import { actionWithoutSession, authCookieNames, authCookieUid, needsSession, refreshSession, signedInOnly, WIPE_COOKIE, WIPE_COOKIE_OPTIONS } from "./lib/supabase/proxy";
@@ -51,10 +52,24 @@ export default async function proxy(req: NextRequest) {
       return withCsp(NextResponse.redirect(url, 307));
     }
   }
+  // A Help article's address is lowercase (content/help slugs): /help/Tags, /es/HELP/Tags/ go to
+  // /help/tags and /es/help/tags/ with a 308, keeping the language prefix and the query (UX, 15 Nov).
+  const helpCase = req.nextUrl.pathname.match(/^(\/[^/]+)?(\/help\/[^/]+\/?)$/i);
+  if (helpCase && /[A-Z]/.test(helpCase[2]) && (!helpCase[1] || (routing.locales as readonly string[]).some((l) => l.toLowerCase() === helpCase[1].slice(1).toLowerCase()))) {
+    const url = req.nextUrl.clone();
+    url.pathname = `${helpCase[1] ?? ""}${helpCase[2].toLowerCase()}`;
+    return withCsp(NextResponse.redirect(url, 308));
+  }
   const path = pagePath(req.nextUrl.pathname, routing.locales);
   // Gated pages that aren't live yet (content/conditions.json) are 404s on
   // Production; drafts elsewhere render normally (pageGate).
-  if (isHiddenPage(path)) {
+  // A Help article that's missing or not out yet (nothing left once its unmet blocks go): the
+  // same routing-level 404, so the not-found page renders with its title and h1 (the Web Tester,
+  // 15 Nov). The page's own notFound() would get the bare error shell.
+  const helpSlug = path.match(/^\/help\/([^/]+)\/?$/)?.[1];
+  const firstSegment = req.nextUrl.pathname.split("/")[1]?.toLowerCase() ?? "";
+  const requestLocale = (routing.locales as readonly string[]).find((l) => l.toLowerCase() === firstSegment) ?? routing.defaultLocale;
+  if (isHiddenPage(path) || (helpSlug !== undefined && !helpArticlePublished(requestLocale, helpSlug))) {
     const url = req.nextUrl.clone();
     url.pathname = NOT_FOUND_PATH;
     // The not-found page renders too: it needs this request's nonce (reviewer #69).

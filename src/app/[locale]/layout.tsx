@@ -12,7 +12,8 @@ import { LocalDataWipe } from "@/components/LocalDataWipe";
 import { CampaignLanding } from "@/components/CampaignLanding";
 import { VisitCounts } from "@/components/VisitCounts";
 import { THEME_PRE_PAINT } from "@/lib/appearance";
-import { conditionMet } from "@/lib/conditions";
+import { PALETTE_PRE_PAINT } from "@/lib/plus/palettes";
+import { conditionMet, draftsAllowed } from "@/lib/conditions";
 import { NONCE_HEADER } from "@/lib/csp";
 import { RequestCountryProvider } from "@/components/RequestCountry";
 import { usableCountry } from "@/lib/region/requestCountry";
@@ -70,7 +71,8 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
     <html lang={locale} className={fontVariables} suppressHydrationWarning>
       <head>
         {/* Me → Appearance on this device (decision 133), before first paint. */}
-        <script nonce={nonce} dangerouslySetInnerHTML={{ __html: THEME_PRE_PAINT }} />
+        {/* Plus's palette too, only until the date Plus runs to (lib/plus/palettes). */}
+        <script nonce={nonce} dangerouslySetInnerHTML={{ __html: `${THEME_PRE_PAINT}${PALETTE_PRE_PAINT}` }} />
       </head>
       <body className="flex min-h-dvh flex-col font-sans">
         <a
@@ -91,9 +93,12 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
             </div>
           </NextIntlClientProvider>
         </RequestCountryProvider>
-        {/* Cookie-free visit counts (decision 79): only once the privacy
-            policy says so, in the same deploy ("web-analytics"). */}
-        {conditionMet("web-analytics") && <VisitCounts />}
+        {/* Cookie-free usage counts (decision 79, specs/analytics.md): only
+            once the privacy policy says so, in the same deploy
+            ("web-analytics"), and only on production. A test build (a
+            Preview, CI) has a draft counter for tester rows, off unless the
+            tab opts in with ?analytics-draft=1; production never has it. */}
+        {conditionMet("web-analytics") && process.env.VERCEL_ENV === "production" ? <VisitCounts /> : draftsAllowed() ? <VisitCounts draft /> : null}
       </body>
     </html>
   );

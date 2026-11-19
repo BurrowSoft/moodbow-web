@@ -25,7 +25,8 @@ test.describe("home", () => {
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Your month, as a rainbow");
     // The web journal is live (launch step): Start and Sign in, no Coming
     // soon and no Get notified.
-    await expect(page.getByTestId("home-start")).toHaveAttribute("href", "/welcome");
+    // Start goes straight to Create account (1.3 §6).
+    await expect(page.getByTestId("home-start")).toHaveAttribute("href", "/sign-up");
     await expect(page.getByTestId("home-sign-in")).toHaveAttribute("href", "/sign-in");
     await expect(page.getByTestId("home-coming-soon")).toHaveCount(0);
     await expect(page.getByTestId("home-notify")).toHaveCount(0);
@@ -277,7 +278,9 @@ test.describe("the live legal pages and account deletion (decision 164)", () => 
     await page.goto("/privacy");
     const article = page.locator('[data-content="article"]');
     await expect(article.getByRole("heading", { level: 2, name: "The short version" })).toBeVisible();
-    await expect(article.getByText("Last updated: 11 November 2026")).toBeVisible();
+    await expect(article.getByText("Last updated: 15 November 2026")).toBeVisible();
+    // Every cookie the website sets, as the policy names them (the full-app audit, round 1, item 1).
+    await expect(article).toContainText("one that keeps you signed in, one that remembers the language you chose, one that remembers list or calendar view, and, for a minute after you delete your account, one that tells your browser to clear its copies.");
     // The help card's country fallback, as the policy says it (decision 245, #269).
     await expect(article).toContainText("To show helplines near you when we don't know your country, we use the country your connection comes from, at that moment only; it isn't stored.");
     await expect(article).not.toContainText("Google Play, Apple App Store");
@@ -442,6 +445,39 @@ test.describe("404s are server-rendered (no JS)", () => {
       await expect(page.getByText("This page doesn't exist or has moved.")).toBeVisible();
     });
   }
+
+  // A Help article that's missing or not out yet (safety-plan and letters are unmet on every
+  // build): the not-found page in the raw HTML, never Next's bare error shell (html
+  // id="__next_error__", no title, no h1; the Web Tester, 15 Nov).
+  for (const path of ["/help/no-such-article", "/help/safety-plan", "/help/letters", "/es/help/no-such-article", "/es/help/safety-plan"]) {
+    test(`help 404 ${path}`, async ({ request }) => {
+      const res = await request.get(path, { maxRedirects: 0 });
+      expect(res.status()).toBe(404);
+      const html = await res.text();
+      expect(html).not.toContain("__next_error__");
+      expect(html).toMatch(/<title>[^<]+ · Moodbow<\/title>/);
+      expect(html).toMatch(/<h1[^>]*>[^<]+<\/h1>/);
+      if (!path.startsWith("/es/")) expect(html).toContain("<title>Page not found · Moodbow</title>");
+    });
+  }
+
+  // An article's address is lowercase (UX, 15 Nov): capitals get a 308 to it, query kept.
+  test("help /help/Tags → 308 → /help/tags → 200", async ({ request }) => {
+    const res = await request.get("/help/Tags", { maxRedirects: 0 });
+    expect(res.status()).toBe(308);
+    expect(new URL(res.headers()["location"], "http://x").pathname).toBe("/help/tags");
+    const page = await request.get("/help/Tags");
+    expect(page.status()).toBe(200);
+    expect(page.url()).toMatch(/\/help\/tags$/);
+    expect(await page.text()).toContain("<title>Tags · Moodbow</title>");
+  });
+
+  test("help /es/help/Get-Help-Now?country=TH keeps the country", async ({ request }) => {
+    const res = await request.get("/es/help/Get-Help-Now?country=TH", { maxRedirects: 0 });
+    expect(res.status()).toBe(308);
+    const to = new URL(res.headers()["location"], "http://x");
+    expect(to.pathname + to.search).toBe("/es/help/get-help-now?country=TH");
+  });
 });
 
 // Auth email links (W5). Real tokens are tested on the Preview (staging);
@@ -584,7 +620,9 @@ test.describe("web journal (signed out)", () => {
 // #248: help is on the safety path, so it can't wait for the page's scripts, or need them at all.
 test.describe("help with no script at all", () => {
   test.use({ javaScriptEnabled: false });
-  for (const [path, id] of [["/sign-in", "sign-in-get-help"], ["/forgot-password", "forgot-get-help"], ["/consent", "consent-get-help"]]) {
+  // Create account carries the consents now (1.3 §6): help before anything is agreed is there.
+  // Welcome too (round 3, batch E): its lifebuoy is a real link to the help page.
+  for (const [path, id] of [["/sign-in", "sign-in-get-help"], ["/forgot-password", "forgot-get-help"], ["/sign-up", "signup-get-help"], ["/welcome", "welcome-help"]]) {
     for (const language of ["", "/fr", "/es", "/pt-br"]) {
       test(`${language}${path}: the help button leads to a page with the way to a helpline`, async ({ page }) => {
         await page.goto(`${language}${path}`);
@@ -596,6 +634,33 @@ test.describe("help with no script at all", () => {
       });
     }
   }
+});
+
+test.describe("the help page's numbers, with no script at all", () => {
+  test.use({ javaScriptEnabled: false });
+  test("a country on the list gets its numbers and the directory, in the page's language", async ({ page }) => {
+    await page.goto("/fr/help/get-help-now?country=TH");
+    await expect(page.getByTestId("help-now-call-helpline")).toHaveAttribute("href", "tel:1323");
+    await expect(page.getByTestId("help-now-call-emergency")).toHaveAttribute("href", "tel:1669");
+    await expect(page.getByTestId("help-now-find-helpline")).toBeVisible();
+    // Directly under the heading, above the article.
+    const y = async (css: string) => (await page.locator(css).boundingBox())!.y;
+    expect(await y("h1")).toBeLessThan(await y("[data-testid=help-now-numbers]"));
+    expect(await y("[data-testid=help-now-numbers]")).toBeLessThan(await y("[data-content=article]"));
+  });
+  for (const query of ["", "?country=XX", "?country=%3Cscript%3E", "?country=TH&country=GB"]) {
+    test(`/help/get-help-now${query}: no numbers, and the directory`, async ({ page }) => {
+      await page.goto(`/help/get-help-now${query}`);
+      await expect(page.getByTestId("help-now-call-helpline")).toHaveCount(0);
+      await expect(page.getByTestId("help-now-call-emergency")).toHaveCount(0);
+      await expect(page.getByTestId("help-now-find-helpline")).toBeVisible();
+    });
+  }
+  test("another Help article doesn't show them", async ({ page }) => {
+    await page.goto("/help/backing-up?country=TH");
+    await expect(page.getByTestId("help-now-lines")).toHaveCount(0);
+    await expect(page.getByTestId("help-now-numbers")).toHaveCount(0);
+  });
 });
 
 // Onboarding (W0 part 2), signed out, no Supabase env. The account-creating
@@ -619,9 +684,9 @@ test.describe("onboarding (signed out)", () => {
     await expect(page.getByTestId("home-security")).toHaveCount(0);
   });
 
-  test("Consent: help is there before anything's agreed, and it opens the card", async ({ page }) => {
-    await page.goto("/consent");
-    await page.getByTestId("consent-get-help").click();
+  test("Create account: help is there before anything's agreed, and it opens the card", async ({ page }) => {
+    await page.goto("/sign-up");
+    await page.getByTestId("signup-get-help").click();
     await expect(page.getByTestId("safety-card")).toBeVisible();
     await expect(page.getByTestId("safety-find-helpline")).toBeVisible();
     await page.getByTestId("safety-close").click();
@@ -629,7 +694,7 @@ test.describe("onboarding (signed out)", () => {
     await expect(page.getByTestId("consent-privacy")).toBeVisible();
   });
 
-  test("welcome: Next, Skip to slide 3, Get started → Consent; Back from Consent → slide 3", async ({ page }) => {
+  test("welcome: Next, Skip to slide 3, Get started → Create account", async ({ page }) => {
     await page.goto("/welcome");
     await expect(page.getByTestId("welcome-slide-1")).toBeVisible();
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("A private journal for your days");
@@ -641,27 +706,66 @@ test.describe("onboarding (signed out)", () => {
     await expect(page.getByTestId("welcome-skip")).toHaveCount(0);
     await expect(page).toHaveURL(/\/welcome\?slide=3$/);
     await page.getByTestId("welcome-start").click();
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Before you start");
-    await page.getByTestId("consent-back").click();
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Private, and yours");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Create your account");
   });
 
-  test("browser Back from Consent lands on slide 3 too", async ({ page }) => {
-    await page.goto("/welcome");
-    await page.getByTestId("welcome-skip").click();
-    await page.getByTestId("welcome-start").click();
-    await expect(page).toHaveURL(/\/consent$/);
-    await page.goBack();
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Private, and yours");
+  // Round 3, batch E (S3): help before any account, as the app's pre-account screens have it: a
+  // quiet lifebuoy at the top right of every welcome slide, named with the shared help words.
+  test("welcome 1–3: the lifebuoy at the top right, named, leading to help; it opens the card", async ({ page }) => {
+    for (const slide of [1, 2, 3]) {
+      await page.goto(`/welcome?slide=${slide}`);
+      const help = page.getByTestId("welcome-help");
+      await expect(help, `slide ${slide}`).toHaveAttribute("href", "/help/get-help-now");
+      await expect(help).toHaveAttribute("aria-label", "Want to talk to someone?");
+      const box = (await help.boundingBox())!;
+      const width = page.viewportSize()!.width;
+      expect(box.x + box.width, `slide ${slide}: at the right`).toBeGreaterThan(width - 80);
+      expect(box.y, `slide ${slide}: at the top`).toBeLessThan(80);
+      expect(Math.min(box.width, box.height)).toBeGreaterThanOrEqual(24);
+    }
+    await page.getByTestId("welcome-help").click();
+    await expect(page.getByTestId("safety-card")).toBeVisible();
+    await page.getByTestId("safety-close").click();
+    await expect(page.getByTestId("safety-card")).toHaveCount(0);
+    await expect(page.getByTestId("welcome-slide-3")).toBeVisible();
   });
 
-  test("consent: Continue only with both boxes; the AI box optional; then Create account", async ({ page }) => {
-    await page.goto("/consent");
-    const cont = page.getByTestId("consent-continue");
+  // Round 3, batch E (S3, WCAG 2.5.8): each consent box and each Read link is a target of at
+  // least 24 × 24 px.
+  test("Create account: every consent control is at least 24 × 24 px", async ({ page }) => {
+    await page.goto("/sign-up");
+    const ids = ["consent-privacy", "consent-health", "consent-age", "consent-read-terms", "consent-read-privacy", "consent-read-health", "consent-ai"];
+    let measured = 0;
+    for (const id of ids) {
+      const control = page.getByTestId(id);
+      if ((await control.count()) === 0) continue;
+      const box = (await control.boundingBox())!;
+      expect(box.width, `${id} width`).toBeGreaterThanOrEqual(24);
+      expect(box.height, `${id} height`).toBeGreaterThanOrEqual(24);
+      measured++;
+    }
+    expect(measured).toBeGreaterThanOrEqual(5);
+  });
+
+  test("Create account: the summary above three separate unticked boxes, each with its link; the AI box optional", async ({ page }) => {
+    await page.goto("/sign-up");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Create your account");
+    const summary = page.getByTestId("signup-summary");
+    await expect(summary).toContainText("Log your mood, sleep and movement in seconds");
+    // The summary lines sit above the boxes; help is on the page, as on Consent.
+    const summaryBox = (await summary.boundingBox())!;
+    expect(summaryBox.y).toBeLessThan((await page.getByTestId("consent-privacy").boundingBox())!.y);
+    await expect(page.getByTestId("signup-get-help")).toBeVisible();
+    await expect(page.getByTestId("consent-read-terms")).toHaveAttribute("target", "_blank");
+    await expect(page.getByTestId("consent-read-privacy")).toHaveAttribute("target", "_blank");
+    const cont = page.getByTestId("signup-submit");
+    for (const id of ["consent-privacy", "consent-health", "consent-age"]) await expect(page.getByTestId(id)).not.toBeChecked();
     await expect(cont).toBeDisabled();
     await page.getByTestId("consent-privacy").check();
     await expect(cont).toBeDisabled();
     await page.getByTestId("consent-health").check();
+    await expect(cont).toBeDisabled();
+    await page.getByTestId("consent-age").check();
     // This build shows drafts, so ai-live is a draft and the optional AI box
     // is there (#60; hidden on Production until ai-live is met): unticked,
     // never required, and Continue doesn't wait for it.
@@ -670,9 +774,6 @@ test.describe("onboarding (signed out)", () => {
     await expect(ai).not.toBeChecked();
     await expect(page.getByText("AI reflections and reports (optional)")).toBeVisible();
     await expect(cont).toBeEnabled();
-    await cont.click();
-    await expect(page).toHaveURL(/\/sign-up$/);
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Create your account");
     await expect(page.getByRole("contentinfo").locator('a[href$="/consumer-health-data"]'), "sign-up has the health data link").toBeVisible();
   });
 
@@ -681,7 +782,7 @@ test.describe("onboarding (signed out)", () => {
   test.describe("without JavaScript", () => {
     test.use({ javaScriptEnabled: false });
 
-    test("welcome → consent → sign-up, and the form answers", async ({ page }) => {
+    test("welcome → Create account, and the form answers", async ({ page }) => {
       await page.goto("/welcome");
       await page.getByTestId("welcome-next").click();
       await expect(page.getByRole("heading", { level: 1 })).toHaveText("See your patterns");
@@ -690,19 +791,9 @@ test.describe("onboarding (signed out)", () => {
       await page.getByTestId("welcome-skip").click();
       await expect(page.getByRole("heading", { level: 1 })).toHaveText("Private, and yours");
       await page.getByTestId("welcome-start").click();
-      await expect(page.getByRole("heading", { level: 1 })).toHaveText("Before you start");
-
-      // Continue is enabled without JS; the browser's required check stops
-      // an incomplete form (no request is sent).
-      const cont = page.getByTestId("consent-continue");
-      await expect(cont).toBeEnabled();
-      await cont.click();
-      await expect(page).toHaveURL(/\/consent$/);
-      await page.getByTestId("consent-privacy").check();
-      await page.getByTestId("consent-health").check();
-      await cont.click();
-      await expect(page).toHaveURL(/\/sign-up$/);
       await expect(page.getByRole("heading", { level: 1 })).toHaveText("Create your account");
+      // Create account is enabled without JS: the server checks every box.
+      await expect(page.getByTestId("signup-submit")).toBeEnabled();
 
       // A native POST: the server answers with the page (here: no Supabase,
       // so it fails closed with the validation message first).
@@ -711,6 +802,16 @@ test.describe("onboarding (signed out)", () => {
       const [response] = await Promise.all([page.waitForResponse((r) => r.request().method() === "POST"), page.getByTestId("signup-submit").click()]);
       expect(response.status()).toBeLessThan(500);
       await expect(page.getByTestId("signup-error")).toHaveText("Enter a valid email");
+      // A valid email and password, but no boxes: the server refuses (the browser didn't stop it).
+      await page.getByLabel("Email").fill("w0@example.invalid");
+      await page.getByLabel("Password").fill("secret-123");
+      await page.getByTestId("signup-submit").click();
+      await expect(page.getByTestId("signup-error")).toHaveText("Please tick the boxes above to create your account.");
+      await page.getByLabel("Password").fill("secret-123");
+      await page.getByTestId("consent-privacy").check();
+      await page.getByTestId("consent-health").check();
+      await page.getByTestId("signup-submit").click();
+      await expect(page.getByTestId("signup-error")).toHaveText("Moodbow is for people 18 and older");
     });
 
     test("sign-in: a native POST, and the server answers (then fails closed)", async ({ page }) => {
@@ -730,17 +831,16 @@ test.describe("onboarding (signed out)", () => {
     });
   });
 
-  test("sign-up without consent → Consent", async ({ page }) => {
-    await page.goto("/sign-up");
-    await expect(page).toHaveURL(/\/consent$/);
+  test("Consent signed out → Create account (its boxes are there now)", async ({ page }) => {
+    await page.goto("/consent");
+    await expect(page).toHaveURL(/\/sign-up$/);
   });
 
   test("sign-up validation, then fail closed without Supabase", async ({ page }) => {
-    await page.goto("/consent");
+    await page.goto("/sign-up");
     await page.getByTestId("consent-privacy").check();
     await page.getByTestId("consent-health").check();
-    await page.getByTestId("consent-continue").click();
-    await expect(page).toHaveURL(/\/sign-up$/);
+    await page.getByTestId("consent-age").check();
     // Decision 216: live since anon-start-live (0.9.4).
     await expect(page.getByTestId("auth-started-in-app")).toHaveText("Started in the app? Back up your journal there first, then sign in here with that email.");
     await page.getByLabel("Email").fill("nope");
@@ -753,18 +853,15 @@ test.describe("onboarding (signed out)", () => {
     await expect(page.getByTestId("signup-error")).toHaveText("Use at least 8 characters");
     await page.getByLabel("Password").fill("secret-123");
     await page.getByTestId("signup-submit").click();
-    await expect(page.getByTestId("signup-error")).toHaveText("Moodbow is for people 18 and older");
-    await page.getByTestId("signup-age").check();
-    await page.getByTestId("signup-submit").click();
     await expect(page.getByTestId("signup-error")).toHaveText("Something went wrong. Please try again.");
   });
 
-  test("sign-in links to Create account (Welcome); setup needs a session", async ({ page }) => {
+  test("sign-in links to Create account; setup needs a session", async ({ page }) => {
     await page.goto("/sign-in");
     // Decision 216: live since anon-start-live (0.9.4).
     await expect(page.getByTestId("auth-started-in-app")).toHaveText("Started in the app? Back up your journal there first, then sign in here with that email.");
     await page.getByTestId("signin-to-signup").click();
-    await expect(page).toHaveURL(/\/welcome$/);
+    await expect(page).toHaveURL(/\/sign-up$/);
     await page.goto("/setup");
     await expect(page).toHaveURL(/\/sign-in$/);
   });

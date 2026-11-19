@@ -136,13 +136,13 @@ export function AiSettings({ initial, credits }: { initial: Values; credits: { b
         </>
       )}
 
-      <div className="mt-6 border-t border-border pt-4" data-testid="me-ai-credits">
-        <h3 className="text-sm font-medium text-text">{t("creditsTitle")}</h3>
-        <p className="mt-1 text-text">{t("creditsBalance", { credits: credits.balance })}</p>
-        {/* At a balance of 0, the steady Lite state (creditsOut is only the
-            one-time notice when they run out; m9 spec, decision 122). */}
-        {credits.balance <= 0 && <p className="mt-1 text-sm text-muted">{t("creditsLiteNow")}</p>}
-      </div>
+      {/* No credits product any more (14 Nov): no balance shown. The steady Lite state stays, as
+          the server's switch does (creditsOut is only the one-time notice; decision 122). */}
+      {credits.balance <= 0 && (
+        <p className="mt-6 border-t border-border pt-4 text-sm text-muted" data-testid="me-ai-lite">
+          {t("creditsLiteNow")}
+        </p>
+      )}
 
       {failed && !pending && (
         <div className="mt-4">

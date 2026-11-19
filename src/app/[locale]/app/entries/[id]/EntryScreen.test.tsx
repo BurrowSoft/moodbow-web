@@ -18,6 +18,9 @@ vi.mock("../actions", () => ({
   getEntry: (...args: unknown[]) => getEntry(...args),
 }));
 vi.mock("../reflectActions", () => ({ reflectOnEntry: vi.fn(), deleteReflection: vi.fn() }));
+const deletePicture = vi.fn(async (_id: string) => ({ status: "ok" as const }));
+vi.mock("./pictureActions", () => ({ deletePicture: (id: string) => deletePicture(id) }));
+vi.mock("@/lib/journal/pictureEncode", () => ({ encodeForUpload: vi.fn() }));
 vi.mock("@/i18n/navigation", () => ({
   useRouter: () => ({ push, refresh }),
   Link: ({ href, children, ...rest }: { href: string; children: ReactNode }) => (
@@ -35,11 +38,12 @@ const BACK = "Back to Timeline";
 const m = messages.entry;
 const today = messages.today;
 
-const renderIt = (over: { checkIn?: CheckIn | null; reflect?: boolean } = {}) =>
+const renderIt = (over: { checkIn?: CheckIn | null; reflect?: boolean; entry?: Entry; recall?: (1 | 6 | 12)[] } = {}) =>
   render(
     <NextIntlClientProvider locale="en" messages={messages}>
       <EntryScreen
-        entry={ENTRY}
+        entry={over.entry ?? ENTRY}
+        recall={over.recall}
         checkIn={over.checkIn === undefined ? CHECK_IN : over.checkIn}
         from="/app/timeline"
         backLabel={BACK}
@@ -68,6 +72,20 @@ afterEach(() => {
 });
 
 describe("EntryScreen: the view", () => {
+  it("help everywhere (audit batch H): exactly one help control, beside Back, opening the help card; editing shows the editor's one instead", () => {
+    renderIt();
+    const help = screen.getAllByRole("link", { name: messages.me.meGetHelpNow });
+    expect(help).toHaveLength(1);
+    expect(before(screen.getByTestId("nav-back"), help[0])).toBe(true);
+    expect(before(help[0], screen.getByTestId("entry-moment-toggle"))).toBe(true);
+    fireEvent.click(help[0]);
+    expect(screen.getByTestId("safety-card")).toBeInTheDocument();
+    cleanup();
+    renderIt();
+    fireEvent.click(screen.getByTestId("entry-view-edit"));
+    expect(screen.getAllByRole("link", { name: messages.me.meGetHelpNow })).toHaveLength(1);
+  });
+
   it("top bar, date, the day's check-in, the text, Reflect, Add to this entry: in that order, also for the keyboard", () => {
     renderIt({ reflect: true });
     const back = screen.getByTestId("nav-back");
@@ -75,6 +93,8 @@ describe("EntryScreen: the view", () => {
     expect(back).toHaveAttribute("href", "/app/timeline");
     const star = screen.getByRole("button", { name: m.entryMoment });
     expect(star).toHaveAttribute("aria-pressed", "false");
+    const editBtn = screen.getByRole("button", { name: m.entryEditTitle });
+    expect(editBtn).toHaveAttribute("data-testid", "entry-view-edit");
     const more = screen.getByRole("button", { name: m.entryMoreActions });
     expect(more).toHaveAttribute("aria-expanded", "false");
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Thursday, October 1, 2026");
@@ -84,7 +104,7 @@ describe("EntryScreen: the view", () => {
     expect(strip).toHaveTextContent("30 min");
     expect(strip).toHaveTextContent("Stress 2 of 5");
     expect(screen.getByTestId("entry-body").textContent).toBe(ENTRY.body);
-    const order = [back, star, more, screen.getByTestId("entry-date"), strip, screen.getByTestId("entry-body"), screen.getByTestId("reflect-panel"), screen.getByTestId("entry-add-more")];
+    const order = [back, star, editBtn, more, screen.getByTestId("entry-date"), strip, screen.getByTestId("entry-body"), screen.getByTestId("reflect-panel"), screen.getByTestId("entry-add-more")];
     order.slice(1).forEach((el, i) => expect(before(order[i], el)).toBe(true));
     expect(screen.getByTestId("entry-add-more")).toHaveTextContent(m.entryAddMore);
     // Viewing isn't editing: no text area until asked.
@@ -124,20 +144,56 @@ describe("EntryScreen: the view", () => {
     expect(screen.queryByTestId("entry-text")).toBeNull();
   });
 
-  it("⋯ opens Edit entry and Delete; Escape closes it and focus goes back to ⋯", () => {
+  it("Bring this back in: the card on every moment, under the text; none on an entry that isn't one; never in ⋯ (board 20, UX 14 Nov)", () => {
+    const { unmount } = renderIt({ entry: { ...ENTRY, is_moment: true }, recall: [1, 12] });
+    const card = screen.getByTestId("entry-recall");
+    expect(before(screen.getByTestId("entry-body"), card)).toBe(true);
+    expect(screen.getByTestId("entry-recall-6")).toHaveAttribute("aria-pressed", "false");
+    expect(screen.queryByTestId("entry-menu-recall")).toBeNull();
+    unmount();
+    renderIt({ recall: [1, 6, 12] });
+    expect(screen.queryByTestId("entry-recall")).toBeNull();
+    // Recall off (moment-recall-live): no card either.
+    cleanup();
+    renderIt({ entry: { ...ENTRY, is_moment: true } });
+    expect(screen.queryByTestId("entry-recall")).toBeNull();
+  });
+
+  it("starring shows the card straight away, and it stays", async () => {
+    vi.useFakeTimers();
+    try {
+      saveEntry.mockResolvedValueOnce({ status: "saved", entry: { ...ENTRY, is_moment: true, updated_at: "2026-10-02T09:00:00Z" } });
+      renderIt({ recall: [1, 6, 12] });
+      await act(async () => fireEvent.click(screen.getByTestId("entry-moment-toggle")));
+      expect(screen.getByTestId("entry-recall")).toBeInTheDocument();
+      await act(async () => vi.advanceTimersByTimeAsync(10_000));
+      expect(screen.getByTestId("entry-recall")).toBeInTheDocument();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("✎ Edit entry: one tap to the editor, caret at the end (board 20)", () => {
+    renderIt();
+    fireEvent.click(screen.getByTestId("entry-view-edit"));
+    expect(text()).toHaveFocus();
+    expect(text().value).toBe(ENTRY.body);
+    expect(text().selectionStart).toBe(ENTRY.body.length);
+  });
+
+  it("⋯ holds Delete only; Escape closes it and focus goes back to ⋯", () => {
     renderIt();
     const more = screen.getByTestId("entry-more");
-    expect(screen.getByTestId("entry-menu-edit")).not.toBeVisible();
+    expect(screen.getByTestId("entry-menu-delete")).not.toBeVisible();
     fireEvent.click(more);
     expect(more).toHaveAttribute("aria-expanded", "true");
-    expect(screen.getByRole("button", { name: m.entryEditTitle })).toBeVisible();
-    fireEvent.keyDown(screen.getByTestId("entry-menu-edit"), { key: "Escape" });
+    expect(screen.getByTestId("entry-menu-delete")).toBeVisible();
+    const items = document.getElementById("entry-menu")!.querySelectorAll("button");
+    expect([...items].map((b) => b.textContent)).toEqual([m.entryDelete]);
+    expect(screen.queryByTestId("entry-menu-edit")).toBeNull();
+    fireEvent.keyDown(screen.getByTestId("entry-menu-delete"), { key: "Escape" });
     expect(more).toHaveAttribute("aria-expanded", "false");
     expect(more).toHaveFocus();
-    fireEvent.click(more);
-    fireEvent.click(screen.getByTestId("entry-menu-edit"));
-    expect(text()).toHaveFocus();
-    expect(text().selectionStart).toBe(ENTRY.body.length);
   });
 
   it("Cancel goes back to the view, focus on the date; Back still goes where the entry was opened from", async () => {
@@ -247,5 +303,56 @@ describe("EntryScreen: the strip as in the mockups (decision 161)", () => {
     expect(strip).toHaveTextContent(today.mood4);
     // 7.5 h sleep → gold, 30 min → gold, stress 2 → orange.
     expect([...strip.querySelectorAll("li [data-value-colour]")].map((d) => d.getAttribute("data-value-colour"))).toEqual(["#F3C24F", "#F3C24F", "#F4A77A"]);
+  });
+});
+
+// Pictures (035): unstarring a moment with pictures asks first (spec): keep them, or delete them.
+describe("EntryScreen: unstarring a moment with pictures", () => {
+  const MOMENT: Entry = { ...ENTRY, is_moment: true };
+  const PIC = { id: "p1", width: 2048, height: 1536, created_at: "2026-10-01T20:00:00Z", full: "https://signed.example/p1.jpg", thumb: "https://signed.example/p1_t.jpg" };
+  const show = () =>
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <EntryScreen entry={MOMENT} checkIn={null} from="/app/timeline" backLabel={BACK} dateLocaleTag="en-US" uid="u1" today="2026-10-02" reflect={null} pictures={{ list: [PIC], plus: true }} />
+      </NextIntlClientProvider>,
+    );
+  beforeEach(() => deletePicture.mockClear());
+
+  it("the pictures show under the text; the ★ asks keep or delete before anything is saved", () => {
+    show();
+    expect(screen.getByTestId("entry-pictures")).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId("entry-moment-toggle"));
+    expect(screen.getByTestId("entry-moment-pictures")).toHaveTextContent(m.momentPicturesTitle);
+    expect(saveEntry).not.toHaveBeenCalled();
+  });
+
+  it("Keep them: unstarred, the pictures stay (viewable, removable; nothing new to add)", async () => {
+    saveEntry.mockResolvedValue({ status: "saved", entry: { ...MOMENT, is_moment: false, updated_at: "2026-10-01T21:00:00Z" } });
+    show();
+    fireEvent.click(screen.getByTestId("entry-moment-toggle"));
+    await act(async () => fireEvent.click(screen.getByTestId("unstar-keep-pictures")));
+    expect(sent().is_moment).toBe("false");
+    expect(deletePicture).not.toHaveBeenCalled();
+    expect(screen.getByTestId("entry-picture")).toBeInTheDocument();
+    expect(screen.queryByTestId("entry-picture-add")).toBeNull();
+  });
+
+  it("Delete them: each picture goes, then it's unstarred", async () => {
+    saveEntry.mockResolvedValue({ status: "saved", entry: { ...MOMENT, is_moment: false, updated_at: "2026-10-01T21:00:00Z" } });
+    show();
+    fireEvent.click(screen.getByTestId("entry-moment-toggle"));
+    await act(async () => fireEvent.click(screen.getByTestId("unstar-delete-pictures")));
+    expect(deletePicture).toHaveBeenCalledWith("p1");
+    expect(sent().is_moment).toBe("false");
+    expect(screen.queryByTestId("entry-picture")).toBeNull();
+  });
+
+  it("a picture that won't delete: still a moment, and it says so", async () => {
+    deletePicture.mockResolvedValueOnce({ status: "error" } as never);
+    show();
+    fireEvent.click(screen.getByTestId("entry-moment-toggle"));
+    await act(async () => fireEvent.click(screen.getByTestId("unstar-delete-pictures")));
+    expect(saveEntry).not.toHaveBeenCalled();
+    expect(screen.getByTestId("entry-moment-error")).toBeInTheDocument();
   });
 });

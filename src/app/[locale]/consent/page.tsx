@@ -4,7 +4,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 import { redirect } from "@/i18n/navigation";
-import { pickMessages } from "@/i18n/clientMessages";
+import { helpCardMessages } from "@/i18n/clientMessages";
 import { PageShell } from "@/components/PageShell";
 import { GetHelpNow } from "@/components/SafetyCard";
 import { SignedInMark } from "@/components/SignedInMark";
@@ -42,6 +42,8 @@ export default async function ConsentPage({ params }: PageProps<"/[locale]/conse
   // with the generic error (its Continue answers the same until Auth is
   // back), never the new-account flow's Back to Welcome.
   const outage = !user && isAuthOutage(error);
+  // A new account's boxes are on Create account now (1.3 §6).
+  if (!user && !outage) redirect({ href: "/sign-up", locale });
   let askAge = false;
   let country: string | null | undefined = null;
   if (supabase && user) {
@@ -67,9 +69,9 @@ export default async function ConsentPage({ params }: PageProps<"/[locale]/conse
       <ConsentForm askAge={askAge} askAi={askAiConsent()} showBack={!user && !outage} />
       {/* Help is never behind a consent, new or asked again: the card and its words only
           come to this page, which the root layout doesn't send them to. */}
-      <NextIntlClientProvider messages={pickMessages(await getMessages(), ["me", "safety", "common"])}>
+      <NextIntlClientProvider messages={helpCardMessages(await getMessages())}>
         <div className="mt-[24px] [font-size:min(1rem,max(10vw,32px))] [&_a]:min-h-[44px] [&_button]:min-h-[44px]">
-          <GetHelpNow country={country} testId="consent-get-help" neutral />
+          <GetHelpNow country={country} testId="consent-get-help" counted neutral />
         </div>
       </NextIntlClientProvider>
     </PageShell>

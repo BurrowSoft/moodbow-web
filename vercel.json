@@ -3,5 +3,10 @@
   "framework": "nextjs",
   "installCommand": "npm ci",
   "buildCommand": "npm run build",
-  "outputDirectory": ".next"
+  "outputDirectory": ".next",
+  "crons": [
+    { "path": "/api/cron/stripe-reconcile", "schedule": "17 9 * * *" },
+    { "path": "/api/cron/stripe-cancel-queue", "schedule": "47 9 * * *" },
+    { "path": "/api/cron/picture-deletions", "schedule": "7 10 * * *" }
+  ]
 }

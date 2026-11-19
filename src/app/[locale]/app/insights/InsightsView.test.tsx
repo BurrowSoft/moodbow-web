@@ -31,6 +31,19 @@ const thisWeek = [
 const lastWeek = [row("2026-09-20", 3, { stress: 2 }), row("2026-09-22", 4, { stress: 2 }), row("2026-09-24", 4, { stress: 2 })];
 
 describe("InsightsView", () => {
+  it("help everywhere (audit batch H): the help slot sits on the title row, after the title", () => {
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <InsightsView rows={[]} today="2026-10-02" range="month" help={<span data-testid="insights-help" />} />
+      </NextIntlClientProvider>,
+    );
+    const title = screen.getByRole("heading", { level: 1 });
+    const help = screen.getByTestId("insights-help");
+    expect(title.parentElement).toContainElement(help);
+    expect(title.compareDocumentPosition(help) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(help.compareDocumentPosition(screen.getByTestId("insights-range-week")) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
   it("range tabs (Week current), with the spec's test ids", () => {
     renderView([]);
     expect(screen.getByTestId("insights-range-week")).toHaveAttribute("aria-current", "page");
@@ -140,8 +153,14 @@ describe("InsightsView: Patterns", () => {
     const card = screen.getByTestId("insights-patterns");
     expect(within(card).getByRole("heading", { name: messages.insights.patternsTitle })).toBeInTheDocument();
     expect(card).toHaveTextContent(messages.insights.patternsSubtitle);
-    expect(screen.getByTestId("insights-pattern-sleep")).toHaveTextContent("On days after 7 or more hours of sleep, your mood averaged 4.0 of 5. After less sleep, 3.4.");
-    expect(screen.getByTestId("insights-pattern-stress")).toHaveTextContent("On low- and high-stress days, your mood was about the same (3.5 and 3.2 of 5).");
+    // Board 3 (UX, 14 Nov): the sentence is the bars' image name; shown are the title and the row labels.
+    const named = (id: string) => within(screen.getByTestId(id)).getByRole("img");
+    expect(named("insights-pattern-sleep")).toHaveAccessibleName("On days after 7 or more hours of sleep, your mood averaged 4.0 of 5. After less sleep, 3.4.");
+    expect(named("insights-pattern-stress")).toHaveAccessibleName("On low- and high-stress days, your mood was about the same (3.5 and 3.2 of 5).");
+    const i = messages.insights;
+    expect(screen.getByTestId("insights-pattern-sleep")).toHaveTextContent(`${i.chartSleep}+0.6${i.pairSleepMore}4.0${i.pairSleepLess}3.4`);
+    expect(screen.getByTestId("insights-pattern-stress")).toHaveTextContent(`${i.chartStress}+0.3${i.pairStressLow}3.5${i.pairStressHigh}3.2`);
+    expect(screen.getByTestId("insights-pattern-sleep").textContent).not.toContain("averaged");
     expect(screen.queryByTestId("insights-pattern-movement")).toBeNull();
     expect(within(card).getAllByRole("listitem").map((li) => li.getAttribute("data-testid"))).toEqual(["insights-pattern-sleep", "insights-pattern-stress"]);
     expect(screen.getByTestId("insights-patterns-footnote")).toHaveTextContent(messages.insights.patternsFootnote);
@@ -158,5 +177,39 @@ describe("InsightsView: Patterns", () => {
   it("off (patterns-live hidden): no card", () => {
     renderPatterns(undefined);
     expect(screen.queryByTestId("insights-patterns")).toBeNull();
+  });
+});
+
+describe("InsightsView: Plus's Year and All time (someone with Plus)", () => {
+  const charts = {
+    mood: { points: [3, null, 4], enough: true, average: 3.5, change: 0.5 },
+    sleep: { points: [null, null, null], enough: false, average: null, change: null },
+    stress: { points: [2, 2, 2], enough: true, average: 2, change: 0 },
+    exercise: { points: [20, 30, 10], enough: true, average: 20, change: null },
+  };
+  const renderLong = (range: "year" | "all", unit: "month" | "quarter") =>
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <InsightsView rows={[]} today="2026-11-11" range="week" long={{ range, unit, periodLine: "Dec 2025 – Nov 2026", charts }} />
+      </NextIntlClientProvider>,
+    );
+
+  it("Year: its subtitle and months, the year-before line, a not-enough chart, and the footnote; no free tab is current", () => {
+    renderLong("year", "month");
+    const p = messages.plus;
+    expect(screen.getByTestId("insights-long-heading")).toHaveTextContent(p.yearSubtitle);
+    expect(screen.getByTestId("insights-long-period")).toHaveTextContent("Dec 2025 – Nov 2026");
+    expect(screen.getByTestId("insights-change-mood")).toHaveTextContent("Up 0.5 vs the year before");
+    expect(screen.getByTestId("insights-change-stress")).toHaveTextContent(p.longChangeSame);
+    expect(screen.queryByTestId("insights-change-exercise")).toBeNull();
+    expect(screen.getByTestId("insights-not-enough-sleep")).toHaveTextContent(p.longNotEnough);
+    expect(screen.getByTestId("insights-long-footnote")).toHaveTextContent(p.longFootnoteMonth);
+    expect(screen.getByTestId("insights-range-week")).not.toHaveAttribute("aria-current");
+  });
+
+  it("All time by quarter: its subtitle and footnote", () => {
+    renderLong("all", "quarter");
+    expect(screen.getByTestId("insights-long-heading")).toHaveTextContent(messages.plus.allSubtitleQuarter);
+    expect(screen.getByTestId("insights-long-footnote")).toHaveTextContent(messages.plus.longFootnoteQuarter);
   });
 });

@@ -5,6 +5,8 @@ import messages from "@/messages/en.json";
 
 const saveReminder = vi.fn();
 vi.mock("./actions", () => ({ saveReminder: (...a: unknown[]) => saveReminder(...a) }));
+// The Plus sheet's link (more reminders, behind Plus) needs Next's router outside a test.
+vi.mock("@/i18n/navigation", () => ({ Link: ({ children, href }: { children: React.ReactNode; href: string }) => <a href={href}>{children}</a> }));
 const { Reminder } = await import("./Reminder");
 
 const renderIt = (on = true, time = "21:00") =>

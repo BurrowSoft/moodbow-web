@@ -2,7 +2,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { ALL_LOCALES, routing } from "@/i18n/routing";
-import { findArticle, helpArticles, helpIndex, parseArticle, renderArticle, TOPICS } from "./helpContent";
+import { findArticle, helpArticles, helpIndex, helpPageMet, parseArticle, renderArticle, TOPICS } from "./helpContent";
 import { isPendingMet, pendingIds } from "./legalContent";
 import { isHiddenPage } from "./sitemapPages";
 
@@ -231,6 +231,21 @@ describe("Help is public, scoped to what's live (decision 212)", () => {
 
 // A journal with no email can't be opened again after signing out: Forgot PIN's advice
 // must not reach those people without the warning (UX).
+describe("Help → Bo", () => {
+  const article = () => findArticle("en", "bo")!;
+  it("a 404 on Production until bo-live; published with it", () => {
+    expect(renderArticle(article())).toBe("");
+    expect(renderArticle(article(), () => true)).toContain("Talk to Bo");
+  });
+  it("through the page's own gate: nothing on Production, and readable on a Preview", () => {
+    expect(renderArticle(article(), (id) => helpPageMet(id, { vercelEnv: "production" }))).toBe("");
+    expect(renderArticle(article(), (id) => helpPageMet(id, { vercelEnv: "preview" }))).toContain("Talk to Bo");
+  });
+  it("isn't in the Help index until then", () => {
+    expect(helpIndex("en").flatMap((g) => g.articles.map((a) => a.slug))).not.toContain("bo");
+  });
+});
+
 describe("Help → App lock: no email, no signing out", () => {
   it.each([
     ["en", "don't sign out"],
@@ -244,5 +259,43 @@ describe("Help → App lock: no email, no signing out", () => {
     expect(readFileSync(`content/help/${language}/app-lock.md`, "utf8")).toContain(warning);
     // Face ID or a fingerprint still opens it, so that comes before "we can't get you back in".
     expect(readFileSync(`content/help/${language}/app-lock.md`, "utf8")).toContain("Face ID");
+  });
+});
+
+// Today's standing help (UX & PM, 13 Nov; #298): "Want to talk to someone?" says where it is, in
+// every language, named with that language's own UI strings. A help-only id (decision 212
+// pattern): the line waits for the app build people have, and the web's ships with it.
+describe("Help → Want to talk to someone?: Today's lifebuoy", () => {
+  const ui = (locale: string) => JSON.parse(readFileSync(`src/messages/${locale}.json`, "utf8")) as { app: { tabToday: string }; me: { meGetHelpNow: string } };
+  const text = (html: string) => html.replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&amp;/g, "&");
+  const render = (locale: string, on: boolean) => text(renderArticle(findArticle(locale, "get-help-now")!, (id) => (id === "app_today_help" ? on : isPendingMet(id))));
+  for (const locale of ["en", "de", "es", "fr", "it", "pt-br", "th"]) {
+    it(`${locale}: the button's name and Today's tab, exactly as the UI says them, once it's met`, () => {
+      const { app, me } = ui(locale);
+      const shown = render(locale, true);
+      expect(shown).toContain(`<strong>${app.tabToday}</strong>`);
+      // The button's name: the same string as its aria-label and title (GetHelpNow icon).
+      expect(shown).toContain(`<strong>${me.meGetHelpNow}</strong>`);
+      expect(render(locale, false)).not.toContain(`<strong>${me.meGetHelpNow}</strong>`);
+      expect(readFileSync(`content/help/${locale}/get-help-now.md`, "utf8")).toContain(`{pending:app_today_help}`);
+      expect(render(locale, false)).not.toContain(`<strong>${app.tabToday}</strong>`);
+    });
+  }
+  it("waits for the app build (help only, not met yet)", () => {
+    expect(isPendingMet("app_today_help")).toBe(false);
+  });
+});
+
+// 1.3.0 ships with Plus off (decision 255): no help text may name Plus while plus is unmet, even with
+// every free feature on. The Plus features' own conditions stay off with it.
+describe("Help with Plus off: no article names Plus", () => {
+  const PLUS_ONLY = new Set(["plus", "offer_live", "letters_live", "app_letters", "pictures_live", "app_pictures", "lifts_live", "app_icons"]);
+  it.each(ALL_LOCALES)("%s", (language) => {
+    for (const a of helpArticles(language)) {
+      const text = renderArticle(a, (id) => !PLUS_ONLY.has(id));
+      if (text.trim() === "") continue; // an article with nothing left is a 404
+      // French "Plus de…" / "Plus d'…" means "more", not the product.
+      expect(text, `${language}/${a.slug}`).not.toMatch(/\bPlus\b(?! de\b| d['’])/);
+    }
   });
 });
