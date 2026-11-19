@@ -3,9 +3,6 @@
   "path": "supabase/contracts",
   "commit": "ad85869d27174a80e755f47413e60ac3ad3294a5",
   "held": {
-    "export-csv.json": "457f4396add9b06e1b10e67b22d9f5308fbdacfa",
-    "export-text.md": "457f4396add9b06e1b10e67b22d9f5308fbdacfa",
-    "export_fixture.json": "457f4396add9b06e1b10e67b22d9f5308fbdacfa",
     "plus-entitlement.json": "a1fdedea7c957b8f4178a9bde4bb0f8433e0c3c0"
   },
   "sha256": {
@@ -15,9 +12,9 @@
     "countries.json": "432a3ed32cda9f58746723e3b392a4e5e8299715b7ed0c339c3b98438ebbdc6c",
     "crisis-keywords.json": "02678e9247d2876c87f916ced5c82a150e3b811c35009b1b2eff0e7a1b63e23b",
     "errors.md": "745e881de4ae8accc939f79bc8df4054c20d89822da5e5c1674eaa9d511dbd3d",
-    "export-csv.json": "11b4d9fd98373885b043db022b39b65cc1e29b9636bb64ec0ba67b3ea660db46",
-    "export-text.md": "c5be89893140a0bbfe56224dd31dd6d151551a45d89fe6fd6a2c0508c2957a0c",
-    "export_fixture.json": "779b70727ce44c1575c8e5337a06b2250d6a33a0ef71b0bd260a18ee215e9429",
+    "export-csv.json": "ee2e332aab26f2e33b04cf3e80b4f6f38cf66557b4bbc0e89f845d5b74c2e902",
+    "export-text.md": "5428aaea3febec6976b621e8b0e2ccab7b10301fdd5289ab9b351a76b3556af3",
+    "export_fixture.json": "8e7bed8c843f7994f67c3bb878bf0744a3012b985030f070fdeeaeeef29d4b29",
     "export_fixture.txt": "6242e9ba451e45f634843e4c707bdfda72141102d30b11ac9914dcc5632f776e",
     "get-help-label.json": "b9e82a25653c3cbfc3744b651554c71380a3cc755add91102e585a3681936d9c",
     "letters.json": "ecbf403aca14aebf148ad0837b96b499405708b06340cf99134155e0920436cb",
