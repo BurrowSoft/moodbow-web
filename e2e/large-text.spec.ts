@@ -93,7 +93,7 @@ test("Create account's consent boxes keep the page's own size on a wide screen: 
 test("large text: Create account's product and company names stay whole at 300 % on a 320 px phone", async ({ page, browserName }, testInfo) => {
   test.skip(browserName !== "chromium" || testInfo.project.name !== "desktop", "Page.setFontSizes is Chromium's; once is enough");
   test.setTimeout(120_000);
-  const NAMES = ["Vitor Carvalho", "BurrowSoft", "Moodbow", "Anthropic", "Stripe", "Google Play", "App Store", "Supabase", "JavaScript"];
+  const NAMES = ["Vitor Carvalho", "BurrowSoft", "Moodbow", "Anthropic", "Stripe", "Google Play", "App Store", "Supabase", "JavaScript", "Bluetooth"];
   const cdp = await page.context().newCDPSession(page);
   await page.setViewportSize({ width: 320, height: 640 });
   await cdp.send("Page.setFontSizes", { fontSizes: { standard: 48, fixed: 39 } });
