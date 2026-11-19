@@ -8,7 +8,7 @@ fr-draft: true
 
 **Gratuit :** les bilans et votre journal sans limite, la Chronologie, le calendrier et la recherche, l'aide et votre plan de sécurité, Ce qui m'aide et ses exercices (5-4-3-2-1, Scan corporel, Le nommer), le résumé pour un rendez-vous, l'export, l'import et la suppression.
 
-**Plus ajoute :** les Statistiques (semaine, mois, 3 mois, votre année et tout l'historique), les tendances et Ce qui me fait du bien, le bilan de l'année, les lettres à mon futur moi, plus de thèmes (et d'icônes dans l'app), un PDF soigné de votre journal et une bibliothèque de questions pour écrire. Les questions « Jours difficiles » de la bibliothèque de questions sont gratuites pour tous.{pending:plus} Sur le web, Plus ajoute aussi plus de façons de respirer dans **Ce qui m'aide** et plus de rappels.{/pending}
+**Plus ajoute :** les Statistiques (semaine, mois, 3 mois, année et tout l'historique), les tendances et Ce qui me fait du bien, le bilan de l'année, les lettres à mon futur moi, plus de thèmes (et d'icônes dans l'app), un PDF soigné de votre journal et une bibliothèque de questions pour écrire. Les questions « Jours difficiles » de la bibliothèque de questions sont gratuites pour tous.{pending:plus} Sur le web, Plus ajoute aussi plus de façons de respirer dans **Ce qui m'aide** et plus de rappels.{/pending}
 
 **Plus de tendances** peut inclure vos propres étiquettes, dès que vous les utilisez.
 
