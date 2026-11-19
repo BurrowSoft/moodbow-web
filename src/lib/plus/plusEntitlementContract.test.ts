@@ -9,11 +9,14 @@ type Case = { name: string; source: string | null; status: string | null; period
 const NOW = Date.UTC(2026, 11, 15, 12, 0, 0);
 const at = (offset: number | null) => (offset === null ? null : new Date(NOW + offset * 1000).toISOString());
 
-describe("plus-entitlement contract (041)", () => {
-  it("is the contract this code implements: version 1, a 7-day grace", () => {
+describe("plus-entitlement contract (041, 042)", () => {
+  it("is the contract this code implements: version 2, a 7-day grace, and cancel_at for display only", () => {
     expect(contract.contract).toBe("plus-entitlement");
-    expect(contract.version).toBe(1);
+    expect(contract.version).toBe(2);
     expect(PAST_DUE_GRACE_MS).toBe(604_800_000);
+    // 042: the won't-renew line reads cancel_at; the rule (and so hasPlus) never does.
+    expect(contract.cancel_at).toMatch(/display only/i);
+    expect(contract.rule).not.toMatch(/cancel_at/);
   });
 
   it.each((contract.cases as Case[]).map((c) => [c.name, c] as const))("%s", (_name, c) => {
