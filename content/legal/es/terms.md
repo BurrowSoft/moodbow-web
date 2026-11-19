@@ -24,16 +24,6 @@ Todo lo que escribes y registras sigue siendo tuyo. Solo nos das el permiso nece
 - La IA es opcional y necesita tu consentimiento por separado.
 - La IA puede equivocarse, ser incompleta o no ser útil. No confíes en ella para decisiones médicas, legales o financieras.
 - Moodbow da a todas las personas una cantidad diaria gratuita de Moodbow AI Lite, un modelo más sencillo con respuestas más cortas. El tamaño de la cantidad gratuita puede cambiar.
-- {pending:starter_credits}Las cuentas nuevas reciben créditos iniciales gratuitos para el Moodbow AI completo después de confirmar su correo.{/pending}
-{/pending}
-
-{pending:purchases}
-### Créditos de IA
-- Puedes comprar créditos para el Moodbow AI completo en la app, a través de Google Play o el App Store. Sus términos se aplican al pago.
-- Los créditos se gastan a medida que usas las funciones de IA. La cantidad usada depende de la solicitud; la app muestra tu saldo y tu historial.
-- Los créditos no tienen valor en efectivo, no se pueden transferir y se pierden cuando eliminas tu cuenta (la app te avisa antes).
-- Los reembolsos se gestionan a través de Google Play o el App Store, según sus reglas y la ley de tu país. Si se reembolsa una compra, sus créditos se retiran, aunque eso deje tu saldo por debajo de cero; hasta que tu saldo sea superior a cero, usas Moodbow AI Lite.
-- Cuando te quedas sin créditos, Moodbow sigue funcionando, con Moodbow AI Lite.
 {/pending}
 
 ### Uso aceptable
