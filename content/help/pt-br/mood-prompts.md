@@ -10,6 +10,6 @@ topic: Your journal
 
 Se você mudar o check-in mais tarde naquele dia, a pergunta acompanha o novo humor. Sem check-in, você recebe a pergunta habitual do dia.
 
-A pergunta é só uma sugestão: ela não entra na sua anotação, e você pode simplesmente começar a escrever. Você recebe uma pergunta para o seu humor por dia, e **Outra** passa para as perguntas habituais do dia.{pending:plus} Com o Moodbow Plus, **Outra** traz mais perguntas para o mesmo humor da biblioteca de perguntas, continuando de onde você parou neste aparelho.{/pending}
+A pergunta é só uma sugestão: ela não entra na sua anotação, e você pode simplesmente começar a escrever. Você recebe uma pergunta para o seu humor por dia, e **Outra** passa para as perguntas habituais do dia.{pending:plus|app_plus} Com o Moodbow Plus, **Outra** traz mais perguntas para o mesmo humor da biblioteca de perguntas, continuando de onde você parou neste aparelho.{/pending}
 
 Se algo que você escreveu ou marcou com tag naquele dia parecer que você pode precisar de apoio, o Moodbow não mostra nenhuma pergunta naquele dia.{/pending}

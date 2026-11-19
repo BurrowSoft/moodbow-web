@@ -11,4 +11,4 @@ La primera vez, Moodbow te explica qué pasa, y luego tu teléfono pregunta si M
 
 **¿Sin micrófono?** Moodbow solo lo muestra en los teléfonos que pueden convertir la voz en texto en el propio teléfono, en el idioma que usas en Moodbow. En Android, hace falta Android 12 o posterior. Si algo falla, por ejemplo si el idioma no está descargado en tu teléfono, Moodbow dice **La voz no está disponible en este teléfono ahora mismo.**
 
-Las entradas por voz son para todo el mundo{pending:plus}, con Plus o sin él{/pending}. Solo están en la app: en la web, la función de voz de un navegador enviaría tu voz a los servidores de su fabricante, así que Moodbow no la ofrece ahí.{/pending}
+Las entradas por voz son para todo el mundo{pending:plus|app_plus}, con Plus o sin él{/pending}. Solo están en la app: en la web, la función de voz de un navegador enviaría tu voz a los servidores de su fabricante, así que Moodbow no la ofrece ahí.{/pending}

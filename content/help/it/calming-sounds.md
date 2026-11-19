@@ -15,4 +15,4 @@ Moodbow crea i suoni mentre li ascolti, sul telefono o nel browser, quindi non c
 
 Se il tuo telefono o browser non può creare i suoni, Moodbow te lo dice. Moodbow non registra quale suono ascolti né per quanto tempo. **Vuoi parlare con qualcuno?** è anche in questa schermata.
 
-I suoni rilassanti sono per tutti{pending:plus}, con o senza Plus{/pending}.{/pending}
+I suoni rilassanti sono per tutti{pending:plus|app_plus}, con o senza Plus{/pending}.{/pending}

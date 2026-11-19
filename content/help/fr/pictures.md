@@ -6,7 +6,7 @@ fr-draft: true
 ---
 {pending:pictures_live|app_pictures}Quand vous marquez une note comme moment fort (★), vous pouvez y ajouter jusqu'à 3 photos. Ouvrez la note et touchez la case avec l'appareil photo. Vous les choisissez avec le sélecteur de photos de votre téléphone ou de votre navigateur : Moodbow ne demande jamais l'accès à votre photothèque.
 
-{pending:plus}Ajouter des photos fait partie de **Moodbow Plus**. Les photos déjà ajoutées restent toujours à vous, avec ou sans Plus : vous pouvez les voir, les exporter et les supprimer à tout moment.{/pending}
+{pending:plus|app_plus}Ajouter des photos fait partie de **Moodbow Plus**. Les photos déjà ajoutées restent toujours à vous, avec ou sans Plus : vous pouvez les voir, les exporter et les supprimer à tout moment.{/pending}
 
 Avant l'envoi d'une photo, Moodbow la réduit et retire ses informations cachées, comme le lieu où elle a été prise. Elle est enregistrée avec votre journal, visible par vous seul·e. L'IA de Moodbow ne voit jamais vos photos, et elles n'apparaissent jamais dans les cartes à partager, dans le widget, sur l'écran de verrouillage ni dans les notifications.
 

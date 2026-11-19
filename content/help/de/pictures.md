@@ -6,7 +6,7 @@ de-draft: true
 ---
 {pending:pictures_live|app_pictures}Wenn du einen Eintrag als Moment markierst (★), kannst du bis zu 3 Fotos hinzufügen. Öffne den Eintrag und tippe auf die Kachel mit der Kamera. Du wählst die Fotos mit der Fotoauswahl deines Handys oder Browsers aus, deshalb fragt Moodbow nie nach deiner Fotomediathek.
 
-{pending:plus}Fotos hinzufügen gehört zu **Moodbow Plus**. Fotos, die du schon hinzugefügt hast, bleiben immer deine, mit oder ohne Plus: Du kannst sie jederzeit ansehen, exportieren und löschen.{/pending}
+{pending:plus|app_plus}Fotos hinzufügen gehört zu **Moodbow Plus**. Fotos, die du schon hinzugefügt hast, bleiben immer deine, mit oder ohne Plus: Du kannst sie jederzeit ansehen, exportieren und löschen.{/pending}
 
 Bevor ein Foto hochgeladen wird, macht Moodbow es kleiner und entfernt versteckte Angaben, zum Beispiel wo es aufgenommen wurde. Es wird mit deinem Tagebuch gespeichert und ist nur für dich sichtbar. Die KI von Moodbow sieht deine Fotos nie, und sie erscheinen nie auf Teilen-Karten, im Widget, auf dem Sperrbildschirm oder in Benachrichtigungen.
 

@@ -6,7 +6,7 @@ es-draft: true
 ---
 {pending:pictures_live|app_pictures}Cuando marcas una entrada como momento (★), puedes añadirle hasta 3 fotos. Abre la entrada y toca el recuadro de la cámara. Las eliges con el selector de fotos de tu teléfono o navegador, así que Moodbow nunca pide acceso a tu galería.
 
-{pending:plus}Añadir fotos es parte de **Moodbow Plus**. Las fotos que ya añadiste siempre son tuyas, con Plus o sin él: puedes verlas, exportarlas y borrarlas cuando quieras.{/pending}
+{pending:plus|app_plus}Añadir fotos es parte de **Moodbow Plus**. Las fotos que ya añadiste siempre son tuyas, con Plus o sin él: puedes verlas, exportarlas y borrarlas cuando quieras.{/pending}
 
 Antes de subir una foto, Moodbow la hace más pequeña y le quita los datos ocultos, como el lugar donde se tomó. Se guarda con tu diario y solo tú puedes verla. La IA de Moodbow nunca ve tus fotos, y nunca aparecen en las tarjetas para compartir, en el widget, en la pantalla de bloqueo ni en las notificaciones.
 

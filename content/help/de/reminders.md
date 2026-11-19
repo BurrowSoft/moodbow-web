@@ -8,4 +8,4 @@ de-draft: true
 
 Die Erinnerung selbst kommt auf dein Handy, von der Moodbow-App. Wenn Mitteilungen für Moodbow in den Einstellungen deines Handys aus sind, schalte sie dort ein.
 
-{pending:plus}Mit Moodbow Plus kannst du mit **Weitere Uhrzeit hinzufügen** bis zu 2 weitere Uhrzeiten am Tag festlegen, mindestens eine Stunde auseinander. Nach deinem Check-in fallen die restlichen Erinnerungen des Tages weg.{/pending}{/pending}
+{pending:plus|app_plus}Mit Moodbow Plus kannst du mit **Weitere Uhrzeit hinzufügen** bis zu 2 weitere Uhrzeiten am Tag festlegen, mindestens eine Stunde auseinander. Nach deinem Check-in fallen die restlichen Erinnerungen des Tages weg.{/pending}{/pending}

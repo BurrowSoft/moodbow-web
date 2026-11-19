@@ -11,4 +11,4 @@ Beim ersten Mal erklärt Moodbow, was passiert, dann fragt dein Handy, ob Moodbo
 
 **Kein Mikrofon?** Moodbow zeigt es nur auf Handys, die Gesprochenes direkt auf dem Handy in Text umwandeln können, und zwar in der Sprache, die du in Moodbow nutzt. Auf Android braucht das Android 12 oder neuer. Wenn etwas nicht klappt, zum Beispiel weil die Sprache auf deinem Handy nicht heruntergeladen ist, sagt Moodbow **Sprache ist auf diesem Handy gerade nicht verfügbar.**
 
-Einträge per Sprache gibt es für alle{pending:plus}, mit oder ohne Plus{/pending}. Das gibt es nur in der App: Im Web würde die Sprachfunktion eines Browsers deine Stimme an die Server seines Herstellers senden, deshalb bietet Moodbow sie dort nicht an.{/pending}
+Einträge per Sprache gibt es für alle{pending:plus|app_plus}, mit oder ohne Plus{/pending}. Das gibt es nur in der App: Im Web würde die Sprachfunktion eines Browsers deine Stimme an die Server seines Herstellers senden, deshalb bietet Moodbow sie dort nicht an.{/pending}

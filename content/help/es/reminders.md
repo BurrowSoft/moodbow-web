@@ -8,4 +8,4 @@ es-draft: true
 
 El recordatorio llega a tu teléfono, desde la app de Moodbow. Si las notificaciones de Moodbow están desactivadas en los ajustes de tu teléfono, actívalas allí.
 
-{pending:plus}Con Moodbow Plus, puedes añadir hasta 2 horas más al día, con al menos una hora de diferencia, con **Añadir otra hora**. Cuando haces tu registro, los demás recordatorios de ese día no se envían.{/pending}{/pending}
+{pending:plus|app_plus}Con Moodbow Plus, puedes añadir hasta 2 horas más al día, con al menos una hora de diferencia, con **Añadir otra hora**. Cuando haces tu registro, los demás recordatorios de ese día no se envían.{/pending}{/pending}

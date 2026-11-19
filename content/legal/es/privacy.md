@@ -1,14 +1,14 @@
 <!--
   Spanish of content/legal/en/privacy.md. Wording is Vitor's, as in English. AI translation, checked
   by back-translation, a script and the Code Reviewer; no native lawyer has read it.
-  en-sha256: 17f1fd11ca5edb4cfbec8d9d2b6f4bb8e0e43714dffcae855b5c63746ef10805
+  en-sha256: 89f62b1d31ad29ad26ee70b7e657576139243d20d3a0b50e5084762ecf1539cc
   It's the English this translates: legalSpanish.test.ts fails if the English changes, until the
   Spanish follows and this is updated. Shows on Production only once legal-es-approved is met.
 -->
 ## Política de privacidad de Moodbow
 Última actualización: 19 de noviembre de 2026
 
-{pending:plus}**Qué ha cambiado{dated} el {notice_date}{/dated}:** ahora puedes suscribirte a Moodbow Plus. Si lo haces, Google Play, el App Store o Stripe se encargan del pago, y guardamos una referencia de tu suscripción y sus fechas (§1, «Compras de Moodbow Plus»). Stripe es nuevo en nuestra lista de proveedores (§3). No ha cambiado nada más en cómo usamos tu diario.{/pending}
+{pending:plus|app_plus}**Qué ha cambiado{dated} el {notice_date}{/dated}:** ahora puedes suscribirte a Moodbow Plus. Si lo haces, Google Play, el App Store o Stripe se encargan del pago, y guardamos una referencia de tu suscripción y sus fechas (§1, «Compras de Moodbow Plus»). Stripe es nuevo en nuestra lista de proveedores (§3). No ha cambiado nada más en cómo usamos tu diario.{/pending}
 
 Moodbow es un diario privado creado por Vitor Carvalho, que opera como BurrowSoft (297 Moo 1, Baan Sanian, Mueang Nan, Nan 55000, Tailandia), «nosotros» en esta política. La escribimos para que se lea, no para que se pase por alto. Si algo no queda claro, escribe a support@moodbow.com.
 
@@ -34,10 +34,10 @@ Moodbow es un diario privado creado por Vitor Carvalho, que opera como BurrowSof
 {pending:safety_plan_live|app_safety_plan}**Tu plan de seguridad:** el plan que escribes. Puede incluir los nombres y los números de teléfono de las personas y los servicios que elijas anotar. Se guardan con tu diario, protegidos de la misma forma, se incluyen cuando exportas tus datos y se eliminan cuando los eliminas. Moodbow nunca los contacta: una llamada solo ocurre si tocas un número, a través del marcador de tu propio teléfono.{/pending}
 {pending:pictures_live|app_pictures}**Fotos en tus momentos (Moodbow Plus):** si añades fotos a un momento, se guardan con tu diario en el almacenamiento de nuestro proveedor de base de datos en la UE, solo tú puedes verlas y se incluyen cuando exportas tus datos. La ubicación y otros datos ocultos se quitan antes de subirlas. Cuando eliminas una foto, su entrada o tu cuenta, desaparece de Moodbow de inmediato; durante un minuto como máximo, una copia que hubieras abierto puede seguir siendo accesible desde tu propia cuenta, y nadie más puede acceder a ella. Los archivos eliminados se quitan de nuestro almacenamiento activo en el plazo de un día.{/pending}
 {pending:wear}**Reloj:** un estado de ánimo que tocas en el reloj se guarda como cualquier registro de un toque. El reloj no guarda nada y nunca se conecta a nuestros servidores.{/pending}
-**Tus ajustes:** idioma, país, zona horaria, hora{pending:plus}s{/pending} del recordatorio y tus opciones de IA (activada o desactivada, tono, áreas de enfoque).
+**Tus ajustes:** idioma, país, zona horaria, hora{pending:plus|app_plus}s{/pending} del recordatorio y tus opciones de IA (activada o desactivada, tono, áreas de enfoque).
 **Contenido de IA (solo si la IA está activada):** las reflexiones y los informes que la IA escribe para ti{pending:ai_memory}, y los datos breves que Moodbow recuerda sobre ti, que puedes ver, editar y eliminar en Yo → Lo que Moodbow recuerda{/pending}.
 **Uso de la IA:** por cada solicitud a la IA, la función, el modelo, el número de tokens, el costo y los créditos usados. No el texto de tus entradas ni el de la respuesta de la IA.
-{pending:plus}**Compras de Moodbow Plus:** si te suscribes a Moodbow Plus, Google Play, el App Store o Stripe se encargan del pago. Stripe recibe tu dirección de correo para enviarte los recibos y tu país de facturación (y, cuando el impuesto lo necesita, tu código postal) para calcular el impuesto, y guarda sus propios registros. Nosotros guardamos una referencia de cliente y de suscripción, su estado, cuándo {pending:plus_grace_live}empieza y {/pending}termina el periodo actual y cuándo empezó una prueba gratuita, nunca los datos de tu tarjeta.{/pending}
+{pending:plus|app_plus}**Compras de Moodbow Plus:** si te suscribes a Moodbow Plus, Google Play, el App Store o Stripe se encargan del pago. Stripe recibe tu dirección de correo para enviarte los recibos y tu país de facturación (y, cuando el impuesto lo necesita, tu código postal) para calcular el impuesto, y guarda sus propios registros. Nosotros guardamos una referencia de cliente y de suscripción, su estado, cuándo {pending:plus_grace_live}empieza y {/pending}termina el periodo actual y cuándo empezó una prueba gratuita, nunca los datos de tu tarjeta.{/pending}
 **Informes de errores:** si la app o el sitio web fallan o se produce otro error, se envía un informe técnico (tipo de dispositivo, versión de la app o del navegador, el error) a nuestro proveedor de seguimiento de errores. Antes de que se envíe, quitamos los datos que te identifican y cualquier texto que hayas escrito, y el proveedor no guarda tu dirección IP.
 
 **Cookies y almacenamiento en tu dispositivo:** el sitio web usa solo las cookies que necesita para funcionar: una que mantiene tu sesión iniciada, otra que recuerda el idioma que elegiste, otra que recuerda la vista de lista o de calendario y, durante un minuto después de que eliminas tu cuenta, otra que le indica a tu navegador que borre sus copias. También guarda en tu navegador algunas preferencias de visualización, como el aspecto claro u oscuro y las tarjetas que ya cerraste. Ninguna de ellas te rastrea entre sitios ni se usa para publicidad o analítica.
@@ -78,13 +78,13 @@ Para mostrarte líneas de ayuda cerca de ti cuando no sabemos tu país, usamos e
 | Vercel | Alojamiento del sitio web y del diario web{pending:web_analytics}; recuento de vistas de página y toques de botones (sin cookies){/pending} | Estados Unidos y red global de servidores |
 | Resend | Envío de correos de la cuenta (confirmación, restablecimiento de contraseña) | Estados Unidos (empresa); los correos se envían desde Japón |
 | Sentry | Informes de errores y fallos, una vez quitados los datos que te identifican | Estados Unidos |
-{pending:plus}| Google Play, Apple App Store | Pagos de Moodbow Plus | Global |{/pending}
-{pending:plus}| Stripe | Pagos y recibos de Moodbow Plus | Estados Unidos |{/pending}
+{pending:plus|app_plus}| Google Play, Apple App Store | Pagos de Moodbow Plus | Global |{/pending}
+{pending:plus|app_plus}| Stripe | Pagos y recibos de Moodbow Plus | Estados Unidos |{/pending}
 {pending:wear}| Google (Wear OS Data Layer, parte de los servicios de Google Play) | Llevar un registro del reloj (solo un valor de estado de ánimo, sin texto) de tu reloj a tu teléfono, solo si usas la app del reloj | Global |{/pending}
 
 {pending:wear}Los registros del reloj normalmente van directamente de tu reloj a tu teléfono por Bluetooth. Si los dos no están conectados directamente, Google puede retransmitir el mensaje a través de sus servidores, cifrado de extremo a extremo para que Google no pueda leerlo. Allí no se guarda nada.{/pending}
 
-{pending:wear|plus|purchases}Los servicios de Google Play se rigen por [la propia política de privacidad de Google](https://policies.google.com/privacy).{/pending}
+{pending:wear|plus|app_plus|purchases}Los servicios de Google Play se rigen por [la propia política de privacidad de Google](https://policies.google.com/privacy).{/pending}
 
 Cada proveedor puede usar tus datos solo para prestarnos su servicio. Anthropic no usa los datos enviados a través de su API para entrenar sus modelos, y los elimina tras un periodo breve (30 días como máximo) durante el que los conserva para vigilar la seguridad y los abusos.
 Cuando los datos salen de tu país (por ejemplo, de la UE a Estados Unidos), nos basamos en el acuerdo de tratamiento de datos de cada proveedor y en sus garantías para la transferencia de datos, como las Cláusulas Contractuales Tipo de la UE o el Marco de Privacidad de Datos UE–EE. UU.
@@ -94,7 +94,7 @@ Nunca vendemos tus datos y nunca los compartimos con anunciantes.
 ### 4. Cuánto tiempo lo conservamos
 - Todo se conserva hasta que lo elimines o elimines tu cuenta, salvo que esta política indique otra cosa.
 - **Eliminar tu cuenta** quita de inmediato tu diario, tus registros, tu contenido de IA, tus ajustes, tu historial de créditos y tus datos de acceso de nuestra base de datos activa.
-{pending:plus}- Los registros de pago que guardan Stripe, Google Play o el App Store siguen sus propias reglas; eliminar tu cuenta de Moodbow cancela una suscripción web y quita nuestra copia. Una suscripción de Google Play o del App Store hay que cancelarla allí; eliminar tu cuenta no la detiene.{/pending}
+{pending:plus|app_plus}- Los registros de pago que guardan Stripe, Google Play o el App Store siguen sus propias reglas; eliminar tu cuenta de Moodbow cancela una suscripción web y quita nuestra copia. Una suscripción de Google Play o del App Store hay que cancelarla allí; eliminar tu cuenta no la detiene.{/pending}
 - Los datos en nuestras copias de seguridad cifradas desaparecen automáticamente en un plazo de {pending:backup_retention}8{/pending} días.
 - Nuestro proveedor de seguimiento de errores conserva los informes de errores y fallos hasta 90 días.
 - Los registros técnicos de nuestros proveedores (alojamiento, base de datos, entrega de correos) se conservan solo durante un periodo limitado que fija cada proveedor, y después se eliminan.

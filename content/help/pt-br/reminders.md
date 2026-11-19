@@ -8,4 +8,4 @@ pt-BR-draft: true
 
 O lembrete chega no seu celular, pelo app do Moodbow. Se as notificações do Moodbow estiverem desativadas nas configurações do celular, ative-as lá.
 
-{pending:plus}Com o Moodbow Plus, você pode adicionar até 2 horários a mais por dia, com pelo menos uma hora de diferença, em **Adicionar outro horário**. Depois que você faz o check-in, os outros lembretes daquele dia não são enviados.{/pending}{/pending}
+{pending:plus|app_plus}Com o Moodbow Plus, você pode adicionar até 2 horários a mais por dia, com pelo menos uma hora de diferença, em **Adicionar outro horário**. Depois que você faz o check-in, os outros lembretes daquele dia não são enviados.{/pending}{/pending}

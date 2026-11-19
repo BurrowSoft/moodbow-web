@@ -4,7 +4,7 @@ summary: Lo que es gratis, lo que añade Plus, la semana gratis y cómo cancelar
 topic: Privacy & account
 es-draft: true
 ---
-{pending:plus}Tu diario es gratis. El Resumen viene con Plus. La ayuda y tus datos son gratis para todos, siempre.
+{pending:plus|app_plus}Tu diario es gratis. El Resumen viene con Plus. La ayuda y tus datos son gratis para todos, siempre.
 
 **Gratis:** registros y tu diario sin límite, la Cronología, el calendario y la búsqueda, la ayuda y tu plan de seguridad, Lo que me ayuda y sus ejercicios (5-4-3-2-1, Escaneo corporal, Ponle nombre), el resumen para tu cita, exportar, importar y eliminar.
 
@@ -14,10 +14,10 @@ es-draft: true
 
 {pending:lifts_live}**Lo que me levanta el ánimo** compara tu estado de ánimo los días con una etiqueta y los días sin ella, cuando una etiqueta se ha usado al menos 5 días. Muestra patrones, no causas, y nunca muestra algunas etiquetas, como las de alcohol o saltarse comidas.{/pending}
 
-**La semana gratis:** Plus empieza con 7 días gratis, una vez por persona. Después de los 7 días se convierte en una suscripción anual que se renueva cada año hasta que la canceles. Solo la empiezas tú, desde **Yo → Moodbow Plus**. Durante la semana gratis, Yo muestra cuántos días quedan.
+**La semana gratis:** Plus puede empezar con 7 días gratis, una vez por persona, cuando se te ofrece la semana gratis. La empiezas tú, desde **Yo → Moodbow Plus**, después de ver el precio anual. Si te suscribes en Google Play o en el App Store, la tienda decide quién recibe la semana gratis.
 
 **Cancelar:** puedes cancelar cuando quieras, y conservas Plus hasta el final del periodo pagado. Si cancelas durante la semana gratis, no se te cobrará.
-- Comprado en la web: **Yo → Moodbow Plus → Gestionar Plus**.
+{pending:plus}- Comprado en la web: **Yo → Moodbow Plus → Gestionar Plus**.{/pending}
 - Si tienes Plus a través de Google Play o la App Store, cancélalo allí, en tus suscripciones. Borrar la app no lo cancela.
 
 **Si Plus termina:** todo lo que escribiste se queda, y todas las funciones gratis siguen funcionando. Las vistas de Plus se bloquean de nuevo y tu tema vuelve al predeterminado. No se borra nada.

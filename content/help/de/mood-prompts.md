@@ -10,6 +10,6 @@ topic: Your journal
 
 Wenn du deinen Check-in später am Tag änderst, folgt die Frage der neuen Stimmung. Ohne Check-in bekommst du die übliche Frage des Tages.
 
-Die Frage ist nur ein Vorschlag: Sie wird nicht in deinen Eintrag übernommen, und du kannst einfach anfangen zu schreiben. Du bekommst jeden Tag eine Frage zu deiner Stimmung, und **Andere Frage** geht weiter zu den üblichen Fragen des Tages.{pending:plus} Mit Moodbow Plus bringt **Andere Frage** weitere Fragen zur selben Stimmung aus der Fragensammlung und macht auf diesem Gerät dort weiter, wo du aufgehört hast.{/pending}
+Die Frage ist nur ein Vorschlag: Sie wird nicht in deinen Eintrag übernommen, und du kannst einfach anfangen zu schreiben. Du bekommst jeden Tag eine Frage zu deiner Stimmung, und **Andere Frage** geht weiter zu den üblichen Fragen des Tages.{pending:plus|app_plus} Mit Moodbow Plus bringt **Andere Frage** weitere Fragen zur selben Stimmung aus der Fragensammlung und macht auf diesem Gerät dort weiter, wo du aufgehört hast.{/pending}
 
 Wenn etwas, das du an diesem Tag in einem Eintrag oder Tag geschrieben hast, so klingt, als bräuchtest du Unterstützung, zeigt Moodbow an diesem Tag keine Frage.{/pending}

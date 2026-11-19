@@ -10,6 +10,6 @@ topic: Your journal
 
 If you change your check-in later that day, the prompt follows the new mood. With no check-in, you get the day's usual prompt.
 
-The prompt is only a suggestion: it isn't added to your entry, and you can just start writing. You get one prompt for your mood each day, and **Another** moves on to the day's usual prompts.{pending:plus} With Moodbow Plus, **Another** brings more prompts for the same mood from the prompt library, picking up where you left off on this device.{/pending}
+The prompt is only a suggestion: it isn't added to your entry, and you can just start writing. You get one prompt for your mood each day, and **Another** moves on to the day's usual prompts.{pending:plus|app_plus} With Moodbow Plus, **Another** brings more prompts for the same mood from the prompt library, picking up where you left off on this device.{/pending}
 
 If something you've written or tagged that day sounds like you might need support, Moodbow shows no prompt that day.{/pending}

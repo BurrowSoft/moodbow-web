@@ -7,4 +7,4 @@ topic: Settings
 
 The reminder itself arrives on your phone, from the Moodbow app. If notifications are off for Moodbow in your phone's settings, turn them on there.
 
-{pending:plus}With Moodbow Plus, you can add up to 2 more times a day, at least an hour apart, with **Add another time**. After you check in, the rest of that day's reminders are skipped.{/pending}{/pending}
+{pending:plus|app_plus}With Moodbow Plus, you can add up to 2 more times a day, at least an hour apart, with **Add another time**. After you check in, the rest of that day's reminders are skipped.{/pending}{/pending}

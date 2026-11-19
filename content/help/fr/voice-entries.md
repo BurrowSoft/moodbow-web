@@ -11,4 +11,4 @@ La première fois, Moodbow explique ce qui se passe, puis votre téléphone dema
 
 **Pas de micro ?** Moodbow ne l'affiche que sur les téléphones qui peuvent transformer la voix en texte sur le téléphone lui-même, dans la langue que vous utilisez dans Moodbow. Sur Android, il faut Android 12 ou une version plus récente. En cas de problème, par exemple si la langue n'est pas téléchargée sur votre téléphone, Moodbow affiche **La voix n'est pas disponible sur ce téléphone pour le moment.**
 
-Dicter vos notes, c'est pour tout le monde{pending:plus}, avec ou sans Plus{/pending}. C'est seulement dans l'app : sur le web, la fonction vocale d'un navigateur enverrait votre voix aux serveurs de son éditeur, alors Moodbow ne la propose pas.{/pending}
+Dicter vos notes, c'est pour tout le monde{pending:plus|app_plus}, avec ou sans Plus{/pending}. C'est seulement dans l'app : sur le web, la fonction vocale d'un navigateur enverrait votre voix aux serveurs de son éditeur, alors Moodbow ne la propose pas.{/pending}

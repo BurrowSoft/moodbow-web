@@ -12,4 +12,4 @@ Les rappels arrivent dans l'app Moodbow sur votre téléphone, y compris pour le
 
 Les rappels suivent leurs propres interrupteurs, pas votre rappel quotidien. Ouvrir une lettre en avance annule ses rappels, et la supprimer les retire.
 
-{pending:plus}Les lettres font partie de **Moodbow Plus**. Les rappels des lettres déjà écrites continuent d'arriver, avec ou sans Plus.{/pending}{/pending}
+{pending:plus|app_plus}Les lettres font partie de **Moodbow Plus**. Les rappels des lettres déjà écrites continuent d'arriver, avec ou sans Plus.{/pending}{/pending}

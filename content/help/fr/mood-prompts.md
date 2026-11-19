@@ -10,6 +10,6 @@ topic: Your journal
 
 Si vous changez votre bilan plus tard dans la journée, la question suit la nouvelle humeur. Sans bilan, vous avez la question habituelle du jour.
 
-La question n'est qu'une suggestion : elle n'est pas ajoutée à votre note, et vous pouvez simplement commencer à écrire. Vous avez une question liée à votre humeur par jour, et **Une autre** passe aux questions habituelles du jour.{pending:plus} Avec Moodbow Plus, **Une autre** propose d'autres questions pour la même humeur, tirées de la bibliothèque de questions, en reprenant là où vous en étiez sur cet appareil.{/pending}
+La question n'est qu'une suggestion : elle n'est pas ajoutée à votre note, et vous pouvez simplement commencer à écrire. Vous avez une question liée à votre humeur par jour, et **Une autre** passe aux questions habituelles du jour.{pending:plus|app_plus} Avec Moodbow Plus, **Une autre** propose d'autres questions pour la même humeur, tirées de la bibliothèque de questions, en reprenant là où vous en étiez sur cet appareil.{/pending}
 
 Si quelque chose que vous avez écrit ou mis en étiquette ce jour-là laisse penser que vous pourriez avoir besoin de soutien, Moodbow n'affiche aucune question ce jour-là.{/pending}

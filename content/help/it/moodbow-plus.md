@@ -4,7 +4,7 @@ summary: Cosa è gratis, cosa aggiunge Plus, la settimana gratis e come annullar
 topic: Privacy & account
 it-draft: true
 ---
-{pending:plus}Il tuo diario è gratis. L'Andamento è incluso in Plus. L'aiuto e i tuoi dati sono gratis per tutti, sempre.
+{pending:plus|app_plus}Il tuo diario è gratis. L'Andamento è incluso in Plus. L'aiuto e i tuoi dati sono gratis per tutti, sempre.
 
 **Gratis:** check-in e il tuo diario senza limiti, la Cronologia, il calendario e la ricerca, l'aiuto e il tuo piano di sicurezza, ciò che ti aiuta e gli esercizi di radicamento, il riepilogo per l'appuntamento, esportare, importare ed eliminare.
 
@@ -14,10 +14,10 @@ it-draft: true
 
 {pending:lifts_live}**Cosa mi fa stare bene** confronta il tuo umore nei giorni con un tag e in quelli senza, quando un tag è stato usato in almeno 5 giorni. Mostra andamenti, non cause, e non mostra mai alcuni tag, come quelli sull'alcol o sul saltare i pasti.{/pending}
 
-**La settimana gratis:** Plus inizia con 7 giorni gratis, una volta per persona. Dopo i 7 giorni diventa un abbonamento annuale che si rinnova ogni anno finché non lo annulli. Lo avvii solo tu, da **Profilo → Moodbow Plus**. Durante la settimana gratis, Profilo mostra quanti giorni mancano.
+**La settimana gratis:** Plus può iniziare con 7 giorni gratis, una volta per persona, quando ti viene offerta la settimana gratis. Lo avvii tu, da **Profilo → Moodbow Plus**, dopo aver visto il prezzo annuale. Se ti abboni su Google Play o sull'App Store, è lo store a decidere chi riceve la settimana gratis.
 
 **Annullare:** puoi annullare quando vuoi e tieni Plus fino alla fine del periodo pagato. Se annulli durante la settimana gratis, non ti verrà addebitato nulla.
-- Acquistato sul web: **Profilo → Moodbow Plus → Gestisci Plus**.
+{pending:plus}- Acquistato sul web: **Profilo → Moodbow Plus → Gestisci Plus**.{/pending}
 - Se hai Plus tramite Google Play o l'App Store, annullalo lì, tra i tuoi abbonamenti. Eliminare l'app non lo annulla.
 
 **Se Plus finisce:** tutto ciò che hai scritto resta e tutte le funzioni gratuite continuano a funzionare. Le viste Plus si bloccano di nuovo e il tuo tema torna a quello predefinito. Non viene eliminato nulla.
