@@ -156,14 +156,16 @@ describe("PlusInMe: a pending cancel (cancel_at)", () => {
   // UX, 20 Nov (the Web Tester, de 360/200 and 320/300): the date is one inline-block with plain spaces. It moves to
   // the next line whole when it fits there and wraps only at its own spaces when it can't, never inside a word.
   // (No-break spaces made it one unbreakable run that the browser cut mid-word.)
-  it("the date sits whole in its own inline-block, plain spaces, no hyphens, no cut words; the sentence reads as before", () => {
+  // A word wider than the line on its own (320 px / 300 %: "noviembre") hyphenates like the card, never runs past it:
+  // the span keeps the inherited large-text hyphens, never hyphens: manual (the Web Tester, 20 Nov).
+  it("the date sits whole in its own inline-block, plain spaces, no cut words, hyphens inherited; the sentence reads as before", () => {
     showIn({ kind: "plus", source: "stripe", daysLeft: null, endsAt: "2027-11-19T08:00:00Z" }, "de-DE", "Europe/Berlin");
     const date = screen.getByTestId("me-plus-date");
     expect(date.textContent).toBe("19. November 2027");
     expect(date.textContent).not.toContain(String.fromCharCode(0xa0));
     expect(date.className).toContain("inline-block");
-    expect(date.className).toContain("[hyphens:manual]");
     expect(date.className).toContain("[overflow-wrap:normal]");
+    expect(date.className).not.toMatch(/hyphens/);
     expect(screen.getByTestId("me-plus-ends").textContent).toBe("Plus · ends 19. November 2027 · won't renew");
     cleanup();
     showIn({ kind: "plus", source: "stripe", daysLeft: 6, endsAt: "2026-11-26T16:44:00Z" });

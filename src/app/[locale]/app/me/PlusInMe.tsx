@@ -37,16 +37,17 @@ export function endsOnLabel(iso: string, dateLocaleTag: string, timeZone: string
 
 // The won't-renew line with its date as one inline-block (UX 20 Nov; the Web Tester at de 360/200 and 320/300): the
 // date moves to the next line whole when it fits there, and only when it can't fit any line does it wrap, at its
-// own spaces, never inside a word (no-break spaces made it one unbreakable run, which the browser then cut
-// mid-word): overflow-wrap normal and no hyphens on it. The message keeps its {date}: a token stands in for it,
-// then the date goes in.
+// own spaces, never cut inside a word (no-break spaces made it one unbreakable run, which the browser then cut
+// mid-word): overflow-wrap normal. A single word wider than the line (at 320 px / 300 %: "noviembre", "November")
+// hyphenates like the rest of the card (the large-text hyphens: auto, inherited), never runs past it. The message
+// keeps its {date}: a token stands in for it, then the date goes in.
 const DATE_TOKEN = "@@date@@";
 function DateInLine({ text, date }: { text: string; date: string }) {
   const [before, after = ""] = text.split(DATE_TOKEN);
   return (
     <>
       {before}
-      <span data-testid="me-plus-date" className="inline-block [hyphens:manual] [overflow-wrap:normal]">
+      <span data-testid="me-plus-date" className="inline-block [overflow-wrap:normal]">
         {date}
       </span>
       {after}
