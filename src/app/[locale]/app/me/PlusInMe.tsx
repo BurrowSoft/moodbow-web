@@ -21,7 +21,10 @@ import { SAVE_WAIT_MS } from "@/lib/ui/withTimeout";
 // Paid Plus that renews shows nothing here.
 
 // The won't-renew date: day and month in the person's own format and time zone (the server and the browser format it
-// the same way), with the year when it isn't this one; UTC for a zone this runtime doesn't know.
+// the same way), with the year when it isn't this one; UTC for a zone this runtime doesn't know. Its spaces are
+// no-break spaces, so the date never splits across lines ("26." / "November" at de 360/200, UX 20 Nov); the line
+// still wraps between its "·" parts.
+const NBSP = String.fromCharCode(0xa0);
 export function endsOnLabel(iso: string, dateLocaleTag: string, timeZone: string, now = Date.now()): string {
   let zone = timeZone;
   try {
@@ -31,7 +34,8 @@ export function endsOnLabel(iso: string, dateLocaleTag: string, timeZone: string
   }
   const at = new Date(iso);
   const year = (d: Date) => new Intl.DateTimeFormat("en", { year: "numeric", timeZone: zone }).format(d);
-  return new Intl.DateTimeFormat(dateLocaleTag, { day: "numeric", month: "long", ...(year(at) === year(new Date(now)) ? {} : { year: "numeric" }), timeZone: zone }).format(at);
+  const label = new Intl.DateTimeFormat(dateLocaleTag, { day: "numeric", month: "long", ...(year(at) === year(new Date(now)) ? {} : { year: "numeric" }), timeZone: zone }).format(at);
+  return label.split(" ").join(NBSP);
 }
 
 const CLOSED_KEY = "moodbow.plusBannerClosed";

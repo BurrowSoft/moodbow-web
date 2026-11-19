@@ -143,18 +143,33 @@ describe("PlusInMe: a pending cancel (cancel_at)", () => {
     expect(screen.getByTestId("me-plus-ends")).toHaveTextContent("ends 26 November");
   });
 
+  // The date's own spaces are no-break spaces (it never splits across lines); written here with plain ones.
+  const nb = (s: string) => s.split(" ").join(String.fromCharCode(0xa0));
+
   it("each language's own date (the strings say the rest): de 26. November, fr 26 novembre, es and pt-BR with de", () => {
     const iso = "2026-11-26T16:44:00Z";
     const now = NOW.getTime();
-    expect(endsOnLabel(iso, "de-DE", "Europe/Berlin", now)).toBe("26. November");
-    expect(endsOnLabel(iso, "fr-FR", "Europe/Paris", now)).toBe("26 novembre");
-    expect(endsOnLabel(iso, "es-ES", "Europe/Madrid", now)).toBe("26 de noviembre");
-    expect(endsOnLabel(iso, "pt-BR", "America/Sao_Paulo", now)).toBe("26 de novembro");
-    expect(endsOnLabel("2027-01-02T10:00:00Z", "en-GB", "UTC", now)).toBe("2 January 2027");
+    expect(endsOnLabel(iso, "de-DE", "Europe/Berlin", now)).toBe(nb("26. November"));
+    expect(endsOnLabel(iso, "fr-FR", "Europe/Paris", now)).toBe(nb("26 novembre"));
+    expect(endsOnLabel(iso, "es-ES", "Europe/Madrid", now)).toBe(nb("26 de noviembre"));
+    expect(endsOnLabel(iso, "pt-BR", "America/Sao_Paulo", now)).toBe(nb("26 de novembro"));
+    expect(endsOnLabel("2027-01-02T10:00:00Z", "en-GB", "UTC", now)).toBe(nb("2 January 2027"));
+  });
+
+  // UX, 20 Nov (the Tester at de 360/200: "26." / "November"): the date never splits; only the line's "·" parts wrap.
+  it("the date never splits: no plain space left in de, fr or en (Intl's own no-break spaces kept as they are)", () => {
+    const now = NOW.getTime();
+    for (const [tag, zone] of [["de-DE", "Europe/Berlin"], ["fr-FR", "Europe/Paris"], ["en-GB", "Europe/London"]] as const) {
+      for (const iso of ["2026-11-26T16:44:00Z", "2027-11-19T08:00:00Z"]) {
+        const label = endsOnLabel(iso, tag, zone, now);
+        expect(label, `${tag} ${iso}`).not.toContain(" ");
+        expect(label.length, `${tag} ${iso}`).toBeGreaterThan(4);
+      }
+    }
   });
 
   it("a zone this runtime doesn't know: UTC, never a crash", () => {
-    expect(endsOnLabel("2026-11-26T23:30:00Z", "en-GB", "Mars/Olympus", NOW.getTime())).toBe("26 November");
+    expect(endsOnLabel("2026-11-26T23:30:00Z", "en-GB", "Mars/Olympus", NOW.getTime())).toBe(nb("26 November"));
   });
 
   it("a failed payment comes first: the card line, not the won't-renew line", () => {
