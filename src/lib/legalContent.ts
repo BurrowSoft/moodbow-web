@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { marked } from "marked";
 import conditions from "../../content/conditions.json";
+import { pageGate, type ConditionId, type PageGate } from "./conditions";
 
 // The privacy policy and terms (W3) live as Markdown per locale:
 // content/legal/<locale>/<slug>.md, copied from UX & PM's specs. Long-form
@@ -66,10 +67,17 @@ export function todos(source: string): string[] {
   return stripComments(source).match(TODO) ?? [];
 }
 
-// The language a page's legal text is in: its own where content/legal has
-// it, else English (Thai, 1.1 F: English text under legalEnglishOnly).
-export function legalLocale(locale: string): string {
-  return fs.existsSync(path.join(LEGAL_DIR, locale)) ? locale : "en";
+// The translations that exist, page by page, each behind its own approval. Consumer Health Data
+// stays English in every language.
+const TRANSLATED: Partial<Record<string, { condition: ConditionId; slugs: readonly LegalSlug[] }>> = {
+  es: { condition: "legal-es-approved", slugs: ["privacy", "terms"] },
+};
+
+// The language a page's legal text is in: its own where it has been translated and approved
+// (Previews show drafts), else English (1.1 F: English text under legalEnglishOnly).
+export function legalLocale(locale: string, slug: LegalSlug, gate: (id: ConditionId) => PageGate = pageGate): string {
+  const own = TRANSLATED[locale];
+  return own && own.slugs.includes(slug) && gate(own.condition) !== "hidden" ? locale : "en";
 }
 
 export function legalSource(slug: LegalSlug, locale: string): string {

@@ -24,13 +24,13 @@ const renderIt = (askAi: boolean) =>
   );
 
 describe("ConsentForm: the legal pages are in English", () => {
-  it("said in any other language, not in English", () => {
+  it("said where they are, not where they aren't", () => {
     const view = renderIt(false);
     expect(screen.queryByTestId("consent-legal-english")).toBeNull();
     view.unmount();
     render(
       <NextIntlClientProvider locale="fr" messages={fr}>
-        <ConsentForm askAge={false} showBack={false} />
+        <ConsentForm askAge={false} showBack={false} legalInEnglish />
       </NextIntlClientProvider>,
     );
     expect(screen.getByTestId("consent-legal-english")).toHaveTextContent(fr.onboarding.consentLegalEnglish);
