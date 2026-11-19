@@ -196,7 +196,8 @@ describe("renderLegal (the real privacy text, nothing met)", () => {
 
   it("renders the tables and strips the source comment", () => {
     expect(page.html).toContain("<table>");
-    expect(page.html).toContain("Supabase (on Amazon Web Services)");
+    // The processor's name wrapped whole (wholeNames: 8+ letters).
+    expect(page.html).toContain('<span class="whole-name">Supabase</span> (on Amazon Web Services)');
     expect(page.html).not.toContain("Source: specs/");
   });
 
