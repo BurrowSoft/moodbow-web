@@ -144,7 +144,7 @@ export function SignUpForm({ askAi = false, healthLink = false, legalInEnglish =
         <li>{t("welcome2Body")}</li>
         <li>{t("welcome3BodyNoAi")}</li>
       </ul>
-      <form action={action} noValidate className="space-y-5 max-sm:[font-size:min(1rem,max(10vw,32px))]">
+      <form action={action} noValidate data-hyphenate className="space-y-5 max-sm:[font-size:min(1rem,max(10vw,32px))]">
         <input type="hidden" name="intent" value="signup" />
         <input type="hidden" name="time_zone" value={timeZone} />
         <AuthField

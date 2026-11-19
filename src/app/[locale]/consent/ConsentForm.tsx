@@ -19,7 +19,7 @@ function Checkbox({ name, label, checked, onChange, testId }: { name: string; la
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
         required
-        className="mt-[4px] h-[20px] w-[20px] shrink-0 accent-[var(--accent)]"
+        className="mt-[2px] h-[24px] w-[24px] shrink-0 accent-[var(--accent)]"
       />
       <span className="min-w-0">{label}</span>
     </label>
@@ -48,7 +48,7 @@ export function ConsentForm({ askAge, askAi = false, showBack, legalInEnglish = 
     // Below the wide layout (rem-based, so large text counts as narrow), type stops growing at about
     // 200 % (decision 231): at 300 % it was 48 px, with "J'accepte" over four lines (Web Tester). A long
     // word may still split. Nothing is cut off: the page still scrolls, and pinch zoom stays on.
-    <form action={action} className="space-y-[16px] max-sm:[font-size:min(1rem,max(10vw,32px))]">
+    <form action={action} data-hyphenate className="space-y-[16px] max-sm:[font-size:min(1rem,max(10vw,32px))]">
       <Checkbox name="privacy" testId="consent-privacy" label={t("consentPrivacy")} checked={privacy} onChange={setPrivacy} />
       {/* Each link is a 44 px tall tap area (Web Tester batch E), so wrapped rows need no gap of their own. */}
       <p className="flex flex-wrap gap-x-[24px] px-[4px] leading-[1.429] [font-size:min(0.875rem,max(8.75vw,28px))]">
@@ -73,7 +73,7 @@ export function ConsentForm({ askAge, askAi = false, showBack, legalInEnglish = 
       {askAge && <Checkbox name="age" testId="consent-age" label={t("ageConfirm")} checked={age} onChange={setAge} />}
       {askAi && (
         <label className="flex items-start gap-[12px] rounded-2xl border border-border bg-surface p-[16px] text-text">
-          <input type="checkbox" name="ai" data-testid="consent-ai" aria-describedby="consent-ai-body" className="mt-[4px] h-[20px] w-[20px] shrink-0 accent-[var(--accent)]" />
+          <input type="checkbox" name="ai" data-testid="consent-ai" aria-describedby="consent-ai-body" className="mt-[2px] h-[24px] w-[24px] shrink-0 accent-[var(--accent)]" />
           <span className="flex min-w-0 flex-col gap-[4px]">
             <span className="font-medium">{tai("consentAiTitle")}</span>
             <span id="consent-ai-body" aria-hidden="true" className="text-muted leading-[1.429] [font-size:min(0.875rem,max(8.75vw,28px))]">

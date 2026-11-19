@@ -46,13 +46,14 @@ export default async function SignUpPage({ params }: PageProps<"/[locale]/sign-u
           {ta("startedInApp")}
         </p>
       )}
-      <SignUpForm askAi={askAiConsent()} healthLink={conditionMet("consumer-health-data-approved")} legalInEnglish={legalLocale(locale, "privacy") !== locale || legalLocale(locale, "terms") !== locale} />
-      {/* Help is never behind a consent, as on Consent: its card and words come only to this page. */}
+      {/* Help first, as on Consent (UX, 19 Nov): someone who needs help never has to get past a form.
+          Its card and words come only to this page. */}
       <NextIntlClientProvider messages={helpCardMessages(await getMessages())}>
-        <div className="mt-[24px] [font-size:min(1rem,max(10vw,32px))] [&_a]:min-h-[44px] [&_button]:min-h-[44px]">
+        <div className="[font-size:min(1rem,max(10vw,32px))] [&_a]:min-h-[44px] [&_button]:min-h-[44px]">
           <GetHelpNow country={null} testId="signup-get-help" counted neutral />
         </div>
       </NextIntlClientProvider>
+      <SignUpForm askAi={askAiConsent()} healthLink={conditionMet("consumer-health-data-approved")} legalInEnglish={legalLocale(locale, "privacy") !== locale || legalLocale(locale, "terms") !== locale} />
     </PageShell>
   );
 }

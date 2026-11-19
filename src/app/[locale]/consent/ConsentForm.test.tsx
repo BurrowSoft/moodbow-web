@@ -66,3 +66,14 @@ describe("ConsentForm: the legal links are 44 px tap areas", () => {
     }
   });
 });
+
+describe("ConsentForm: the boxes", () => {
+  it("are 24 px, as Create account's (#350; UX, 19 Nov)", () => {
+    renderIt(true);
+    for (const id of ["consent-privacy", "consent-health", "consent-ai"]) {
+      const box = screen.getByTestId(id);
+      expect(box.className, id).toContain("h-[24px]");
+      expect(box.className, id).toContain("w-[24px]");
+    }
+  });
+});

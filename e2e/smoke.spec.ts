@@ -691,6 +691,13 @@ test.describe("onboarding (signed out)", () => {
     const n = (await notice.boundingBox())!;
     const box = (await page.getByTestId("consent-privacy").boundingBox())!;
     expect(n.y).toBeLessThan(box.y);
+    // Help first, as on Consent (UX, 19 Nov): before the form, the notice and the boxes.
+    const help = (await page.getByTestId("signup-get-help").boundingBox())!;
+    const email = (await page.getByLabel("Email").boundingBox())!;
+    expect(help.y).toBeLessThan(email.y);
+    // Create account's boxes are 24 px (#350). Consent's now match; Consent needs a signed-in account,
+    // so ConsentForm.test checks its size.
+    expect(box.width).toBe(24);
     // 0.6875rem: 11px at the default root size, and it follows the root (rem, not px).
     expect(await notice.evaluate((el) => getComputedStyle(el).fontSize)).toBe("11px");
     await page.evaluate(() => (document.documentElement.style.fontSize = "32px"));
