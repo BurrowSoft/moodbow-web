@@ -221,4 +221,20 @@ describe("renderLegal (the real privacy text, nothing met)", () => {
     expect(terms.html).not.toContain("AI credits");
     expect(terms.html).toContain("<strong>not</strong> medical care");
   });
+
+  // The 1.4.0 legal pack, G1: the Plus terms show only with plus, the Christmas offer only with
+  // offer-live as well, and the free journal no longer promises charts (Insights is Plus).
+  it("terms: the Moodbow Plus section only with plus, its Christmas offer only with offer-live too", () => {
+    const source = legalSource("terms", "en");
+    const words = (html: string) => html.split('<span class="whole-name">').join("").split("</span>").join("");
+    const off = words(renderLegal(source, () => false).html);
+    const plus = words(renderLegal(source, (id) => id === "plus").html);
+    const offer = words(renderLegal(source, (id) => id === "plus" || id === "offer_live").html);
+    expect(off).not.toContain("Moodbow Plus");
+    expect(off).toContain("The journal (writing, check-ins, the timeline, help and export) is free.");
+    expect(plus).toContain("<strong>The free week.</strong>");
+    expect(plus).toContain("<strong>Refunds.</strong>");
+    expect(plus).not.toContain("The Christmas offer");
+    expect(offer).toContain("<strong>The Christmas offer.</strong>");
+  });
 });
