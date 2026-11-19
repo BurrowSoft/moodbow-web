@@ -23,7 +23,7 @@ export function offerActive(gate: (id: ConditionId) => PageGate = pageGate, now:
 
 // Who it's for (the ruling: "the server checks there's no previous subscription"): no Plus now, and
 // never a subscription or a free week before, on any store. A row that can't be read never gets here.
-export function offerEligible(row: Pick<EntitlementRow, "status" | "current_period_end" | "trial_started_at" | "store_subscription_id"> | null, now: number = Date.now()): boolean {
+export function offerEligible(row: Pick<EntitlementRow, "source" | "status" | "current_period_end" | "current_period_start" | "trial_started_at" | "store_subscription_id"> | null, now: number = Date.now()): boolean {
   if (!row) return true;
   return !hasPlus(row, now) && !row.trial_started_at && !row.store_subscription_id;
 }

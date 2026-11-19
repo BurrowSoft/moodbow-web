@@ -16,7 +16,7 @@ import { join } from "node:path";
 
 const REPO = "BurrowSoft/moodbow-app";
 const DIR = "supabase/contracts";
-export const FILES = ["appointment.json", "bo.md", "colour-map.json", "countries.json", "crisis-keywords.json", "errors.md", "export-csv.json", "export-text.md", "export_fixture.json", "export_fixture.txt", "get-help-label.json", "letters.json", "mood-faces.json", "mood-prompts.json", "on-this-day.json", "patterns.json", "prompts-library.json", "prompts.json", "reflect.md", "reminders.json", "report.md", "safety-plan.json", "search-fold.json", "share-cards.json", "showed-up.json", "toolbox.json", "what-lifts-me.json", "year-card.json", "year-review.json", "your-week.json"];
+export const FILES = ["appointment.json", "bo.md", "colour-map.json", "countries.json", "crisis-keywords.json", "errors.md", "export-csv.json", "export-text.md", "export_fixture.json", "export_fixture.txt", "get-help-label.json", "letters.json", "mood-faces.json", "mood-prompts.json", "on-this-day.json", "patterns.json", "plus-entitlement.json", "prompts-library.json", "prompts.json", "reflect.md", "reminders.json", "report.md", "safety-plan.json", "search-fold.json", "share-cards.json", "showed-up.json", "toolbox.json", "what-lifts-me.json", "year-card.json", "year-review.json", "your-week.json"];
 
 // Files held at another app commit than the one synced, with why. Each is listed in SOURCE.json's
 // "held". Drop an entry once the app's master carries that file's version.
@@ -29,6 +29,8 @@ export const HELD = {
   "export-csv.json": PREVIOUS_PIN,
   "export-text.md": PREVIOUS_PIN,
   "export_fixture.json": PREVIOUS_PIN,
+  // plus-entitlement.json: 041's past_due grace (moodbow-app #262), not on app master until it merges.
+  "plus-entitlement.json": "a1fdedea7c957b8f4178a9bde4bb0f8433e0c3c0",
 };
 
 const gh = (path, accept) => execFileSync("gh", ["api", ...(accept ? ["-H", `Accept: ${accept}`] : []), path], { stdio: ["ignore", "pipe", "inherit"] });

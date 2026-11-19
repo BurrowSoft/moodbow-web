@@ -37,7 +37,9 @@ export function reconcile(subs: StripeSubLite[], rows: EntitlementRow[], nowMs =
   for (const r of rows) {
     if (!hasPlus(r, nowMs)) continue;
     const s = r.store_subscription_id ? byId.get(r.store_subscription_id) : undefined;
-    if (!s || !live(s.status)) out.push({ kind: "plus_without_payment", userId: r.user_id, subscriptionId: r.store_subscription_id, stripeStatus: s?.status ?? null });
+    // Inside the past_due grace (041), Stripe says past_due while Stripe retries: that's in step.
+    const inStep = s && (live(s.status) || (s.status === "past_due" && r.status === "past_due"));
+    if (!inStep) out.push({ kind: "plus_without_payment", userId: r.user_id, subscriptionId: r.store_subscription_id, stripeStatus: s?.status ?? null });
   }
   return out;
 }

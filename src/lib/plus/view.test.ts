@@ -11,6 +11,7 @@ const row = (over: Partial<EntitlementRow> = {}): EntitlementRow => ({
   status: "active",
   trial_ends_at: null,
   current_period_end: at(NOW + 300 * DAY),
+  current_period_start: null,
   trial_started_at: at(NOW - 400 * DAY),
   store_customer_id: "cus_1",
   store_subscription_id: "sub_1",
@@ -29,6 +30,12 @@ describe("plusView: what a page shows about Plus", () => {
   });
   it("a failed Stripe renewal: the card state, not an offer", () => {
     expect(plusView(row({ status: "past_due" }), NOW)).toEqual({ kind: "past_due" });
+  });
+  it("inside the 7-day grace (041): still Plus, and Me asks for the card; after it, the card state", () => {
+    expect(plusView(row({ status: "past_due", current_period_start: at(NOW - 2 * DAY) }), NOW)).toMatchObject({ kind: "plus", source: "stripe", paymentFailed: true });
+    expect(plusView(row({ status: "past_due", current_period_start: at(NOW - 8 * DAY) }), NOW)).toEqual({ kind: "past_due" });
+    expect(plusView(row({ source: "play", status: "past_due", current_period_start: at(NOW - 2 * DAY) }), NOW)).toMatchObject({ kind: "free" });
+    expect(plusView(row(), NOW)).not.toHaveProperty("paymentFailed");
   });
   it("ended, with the free week used: free, without the trial", () => {
     expect(plusView(row({ status: "canceled" }), NOW)).toEqual({ kind: "free", trial: false });
