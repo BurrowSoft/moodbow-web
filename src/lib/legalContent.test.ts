@@ -284,3 +284,26 @@ describe("the What changed block's date", () => {
     expect(() => applyNoticeDate("Open {dated} block.", "2 May 2027")).toThrow();
   });
 });
+
+// The 1.4.0 legal pack (specs/legal-pack-1.4.md, G1c/G3/G4/G5): each line only once its feature is out on the web or in
+// the app ("web|app" gates), and Stripe's billing country with Plus.
+describe("the 1.4.0 privacy lines", () => {
+  const source = legalSource("privacy", "en");
+  const IDS = ["routine_live", "app_routine", "trusted_share_live", "app_trusted_share", "app_voice"];
+  const words = (html: string) => html.split('<span class="whole-name">').join("").split("</span>").join("");
+  const without = words(renderLegal(source, (id) => !IDS.includes(id) && id !== "plus" && isPendingMet(id)).html);
+  const appOnly = words(renderLegal(source, (id) => ["app_routine", "app_trusted_share", "app_voice", "plus"].includes(id) || isPendingMet(id), null).html);
+
+  it("show with their feature on either client, and not before", () => {
+    for (const line of ["<strong>Your routine:</strong>", "<strong>Weeks you share:</strong>", "Sharing a summary of your week with someone you choose", "<strong>Speaking instead of typing (app):</strong>"]) {
+      expect(without, line).not.toContain(line);
+      expect(appOnly, line).toContain(line);
+    }
+  });
+
+  it("say what the code does: the link keeps a one-way code, a voice entry no recording, Stripe the billing country", () => {
+    expect(appOnly).toContain("We keep only a one-way code made from the link's key, so we can't rebuild the link.");
+    expect(appOnly).toContain("Moodbow makes no recording, keeps no audio and sends none anywhere.");
+    expect(appOnly).toContain("your billing country (and, where the tax needs it, your postcode) to work out the tax");
+  });
+});
