@@ -1617,7 +1617,7 @@
   {
     "key": "plus.rowInsights",
     "en": "Insights: week, month, 3 months and year",
-    "reason": "UX draft (native read pending)"
+    "reason": "UX draft (native read pending; the app's Thai, #274: 3 เดือน และรายปี)"
   },
   {
     "key": "plus.cancelWhere",
