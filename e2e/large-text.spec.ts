@@ -418,12 +418,12 @@ test("<html lang> is the page's language in every locale", async ({ page }) => {
   }
 });
 
-// Headings, labels and buttons hyphenate (only words of 7 letters or more, 3 on each side), so
-// a long word breaks with a hyphen at large text instead of mid-word with none.
-// Only in the journal (whose text isn't capped), and only at really large text: below it, and on
-// the public pages, words stay whole (decision 231), since a browser hyphenates at a line's end
-// even when the word would fit on the next line. The journal needs a session, so its markup is
-// put on a public page here; the Web Tester's pass reads the real pages.
+// One rule on every page (UX, 20 Nov: the journal, the public and legal pages, Consent and
+// sign-up): only words of 8 letters or more hyphenate (HYPHEN_MIN), 3 on each side, so a long
+// word breaks with a hyphen at large text instead of mid-word with none. Only from a 10em column
+// (a 320 px phone from 200 %): wider than that words stay whole (decision 231), since a browser
+// hyphenates at a line's end even when the word would fit on the next line. The journal needs a
+// session, so its markup is put on a public page here; the Web Tester's pass reads the real pages.
 test("every page hyphenates long words from a 10em column (200 % and 300 % on a 320 px phone), never at 100 %", async ({ page, browserName }, testInfo) => {
   test.skip(browserName !== "chromium" || testInfo.project.name !== "desktop", "Page.setFontSizes is Chromium's; once is enough");
   const cdp = await page.context().newCDPSession(page);
@@ -443,8 +443,8 @@ test("every page hyphenates long words from a 10em column (200 % and 300 % on a 
     });
   for (const [percent, expected] of [
     [100, "manual"],
-    [200, "auto 11 3 3"],
-    [300, "auto 11 3 3"],
+    [200, "auto 8 3 3"],
+    [300, "auto 8 3 3"],
   ] as const) {
     await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
     await page.goto("/fr/consent");

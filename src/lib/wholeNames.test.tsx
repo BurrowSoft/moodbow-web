@@ -1,18 +1,45 @@
 import { readFileSync } from "node:fs";
 import { render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { KEEP_TOGETHER_CLASS, wholeNames, wholeNamesHtml, WHOLE_NAME_CLASS, WHOLE_NAMES } from "./wholeNames";
+import { HYPHEN_MIN, KEEP_TOGETHER_CLASS, LONG_NAMES, wholeNames, wholeNamesHtml, WHOLE_NAME_CLASS } from "./wholeNames";
 
-// The global large-text rule (globals.css) only hyphenates words of `hyphenate-limit-chars`' first number of letters or
-// more. Every word of every name is shorter, so a name can never hyphenate anywhere, wrapped or not (UX, 20 Nov: "MOOD- /
-// BOW" on Me's Plus banner). A longer name would need that number raised, or the name wrapped wherever it shows.
-describe("no name is long enough for the large-text hyphen rule", () => {
-  it("every word of every name, and of the products' names, is shorter than the rule's minimum", () => {
+// Names stay whole everywhere the global large-text rule reaches (UX, 20 Nov, after "MOOD- / BOW" on Me's Plus banner).
+// globals.css hyphenates only words of HYPHEN_MIN letters or more: a name whose words are all shorter can't break, wrapped
+// or not. The LONG_NAMES have a longer word, so they're wrapped wherever they render, and every message holding one is
+// listed below with where.
+describe("names stay whole at large text", () => {
+  it("globals.css and HYPHEN_MIN agree", () => {
     const min = Number(readFileSync("src/app/globals.css", "utf8").match(/hyphenate-limit-chars:\s*(\d+)\s+\d+\s+\d+/)?.[1]);
-    expect(min).toBeGreaterThan(0);
-    for (const name of [...WHOLE_NAMES, "Moodbow Plus", "Moodbow AI Lite"]) {
-      for (const word of name.split(/\s+/)) expect(word.length, `${word} (in "${name}") against ${min}`).toBeLessThan(min);
+    expect(min).toBe(HYPHEN_MIN);
+  });
+
+  it("short names are safe by length; exactly three need wrapping", () => {
+    expect([...LONG_NAMES]).toEqual(["Vitor Carvalho", "BurrowSoft", "Anthropic"]);
+    for (const word of ["Moodbow", "Plus", "AI", "Lite", "Stripe", "Google", "Play", "App", "Store"]) expect(word.length, word).toBeLessThan(HYPHEN_MIN);
+  });
+
+  it("every message holding a long name is rendered through wholeNames, or never shown as page text", () => {
+    const WRAPPED: Record<string, string> = {
+      "common.burrowsoftProduct": "Footer",
+      "common.copyright": "Footer",
+      "onboarding.consentNotice": "consent/page, sign-up/page",
+      "ai.consentAiBody": "AiSettings, ConsentForm, SignUpForm",
+      "bo.consentBody": "BoConsent",
+      "bo.journalSwitchNote": "BoMeRow",
+      "bo.pictureConsentBody": "BoConversation",
+      "meta.description": "metadata only",
+      "common.burrowsoftAria": "an aria-label only",
+    };
+    const walk = (o: Record<string, unknown>, p: string[] = []): [string, string][] =>
+      Object.entries(o).flatMap(([k, v]) => (v && typeof v === "object" ? walk(v as Record<string, unknown>, [...p, k]) : [[[...p, k].join("."), String(v)] as [string, string]]));
+    for (const locale of ["en", "es", "fr", "de", "it", "pt-br", "th"]) {
+      const messages = JSON.parse(readFileSync(`src/messages/${locale}.json`, "utf8"));
+      for (const [key, value] of walk(messages)) if (LONG_NAMES.some((n) => value.includes(n))) expect(Object.keys(WRAPPED), `${locale}: ${key}`).toContain(key);
     }
+  });
+
+  it("Help wraps only the long names (the short ones read as plain text)", () => {
+    expect(wholeNamesHtml("<p>Moodbow uses Anthropic.</p>", LONG_NAMES)).toBe(`<p>Moodbow uses <span class="${WHOLE_NAME_CLASS}">Anthropic</span>.</p>`);
   });
 });
 
