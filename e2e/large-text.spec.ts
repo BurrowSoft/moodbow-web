@@ -551,12 +551,14 @@ test("large text at 300 %: a help number wider than the line wraps between its d
 
 // UX, 20 Nov (option A, the Web Tester's fr/pt-BR sweep at 320 px / 300 %: "Ajo / uter / une / not / e",
 // "donnée / s", "d'icône / s", "novembr / e", "montren / t", "Mood / bow", "support@mood / bow.com"): no word cut
-// without a hyphen. A word broken across lines is either hyphenated (the browser draws the hyphen) or cut (an
-// emergency break: it can't fit a line, so overflow-wrap breaks it bare). Laid out again with hyphenation off, a
-// hyphenated word that fits a line goes whole to the next one, so a break that disappears was a hyphen. A word that
-// stays broken can't fit a line at all: a break there is a cut unless the 8 3 3 rule could have hyphenated it, i.e.
-// the word has 8+ letters, 3+ before the break and 2+ after (Chrome's own hyphens leave 2: "supprim-er", "Novemb-er";
-// every cut the sweep found left 1 or was under 8 letters).
+// without a hyphen. And the bar, verbatim: "UX (20 Nov night): with 8 3 3, Chromium may leave 2 letters after a
+// hyphen (engine behaviour, 4-before/2-after); accepted. The test fails on any break WITHOUT a hyphen, and on any
+// break leaving fewer than 2 letters on either side." (Measured on Chromium 153: at 8 3 3 it breaks "supprim-er",
+// "Novemb-er", never with fewer than 4 before.)
+// A break with a hyphen or without: laid out again with hyphenation off (hyphens: manual), a word that fits a line goes
+// whole to the next one, so its break was a hyphen. A word that can't fit a line stays broken: where its break falls at
+// the same place, the browser only ran out of room there (a cut); a hyphen falls earlier, since the hyphen needs room
+// too. A soft hyphen (U+00AD) right before a break is a hyphen too.
 async function cutWords(page: Page, roots: string): Promise<string[]> {
   return page.evaluate((selector) => {
     const letters = (s: string) => s.replace(/[^\p{L}]/gu, "").length;
@@ -588,10 +590,12 @@ async function cutWords(page: Page, roots: string): Promise<string[]> {
     off.remove();
     const out: string[] = [];
     words.forEach(({ word }, i) => {
-      if (unhyphenated[i].length === 0) return; // it fits a line: any break shown is a hyphen
       for (const c of asShown[i]) {
         const before = letters(word.slice(0, c)), after = letters(word) - before;
-        if (letters(word) < 8 || before < 3 || after < 2) out.push(`${word.slice(0, c)} / ${word.slice(c)}`);
+        const softHyphen = word[c - 1] === String.fromCharCode(0xad);
+        const hyphen = softHyphen || unhyphenated[i].length === 0 || !unhyphenated[i].includes(c);
+        if (!hyphen) out.push(`${word.slice(0, c)} / ${word.slice(c)} (no hyphen)`);
+        else if (before < 2 || after < 2) out.push(`${word.slice(0, c)} / ${word.slice(c)} (under 2 letters)`);
       }
     });
     return out;
@@ -639,6 +643,8 @@ test("large text at 320 px / 300 %: no word in the fixed components is cut witho
     // Public pages, as they are.
     for (const [path, roots] of [["/sign-up", "[data-testid=signup-summary]"], ["/help", "article h1 + div p, article section h2"], ["/support", "article"], ["/account-deletion", "article"]] as const) {
       await page.goto(`${language}${path}`);
+      // The rule is live under 13em: the 8-letter minimum holds, only Chromium's "after" part bends (the Reviewer).
+      expect(await page.evaluate((sel) => getComputedStyle(document.querySelector(`${sel} p, ${sel} li`) ?? document.querySelector(sel)!).getPropertyValue("hyphenate-limit-chars"), roots.split(",")[0]), `${language}${path}: hyphenate-limit-chars`).toBe("8 3 3");
       expect.soft(await cutWords(page, roots), `${language}${path}`).toEqual([]);
       expect.soft(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth), `${language}${path}`).toBe(0);
     }
