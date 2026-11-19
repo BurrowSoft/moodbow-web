@@ -66,6 +66,13 @@ export async function POST(req: Request): Promise<Response> {
     console.debug(`[stripe-webhook] not Moodbow's: ${event.type}`);
     return Response.json({ ok: true });
   }
+  // The person deleted their account (Delete account, web or app, cancels the subscription first, then Stripe tells us):
+  // nothing to write, so a 200, never a retry. Reported only if Stripe still has it running: someone could then be
+  // charged with no account (the cancel queue should be ending it).
+  if (outcome.kind === "skipped" && outcome.reason === "user_gone") {
+    if (outcome.live) report("user_gone_live", event);
+    return Response.json({ ok: true });
+  }
   if (outcome.kind === "retry") {
     report(`sync_${outcome.reason}`, event);
     return Response.json({ error: outcome.reason }, { status: 500 });

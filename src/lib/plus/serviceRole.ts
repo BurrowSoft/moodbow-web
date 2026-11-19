@@ -36,15 +36,19 @@ export async function readEntitlement(userId: string): Promise<Result<Entitlemen
 }
 
 // A new row (none yet for this person). false when one appeared meanwhile:
-// the caller reads again.
-export async function insertEntitlement(userId: string, row: EntitlementWrite): Promise<Result<boolean>> {
+// the caller reads again. "user_gone" when the person no longer exists: the
+// row's foreign key to auth.users refused it (Postgres 23503) because their
+// account was deleted, and Delete account had cancelled the subscription Stripe
+// is now telling us about (sw14, 20 Nov). Not a failure: nothing can be written.
+export async function insertEntitlement(userId: string, row: EntitlementWrite): Promise<Result<boolean | "user_gone">> {
   const client = db();
   if (!client) return fail;
   const { data, error } = await client
     .from("entitlements")
     .upsert({ user_id: userId, ...row, updated_at: new Date().toISOString() }, { onConflict: "user_id", ignoreDuplicates: true })
     .select("user_id");
-  return error ? fail : { ok: true, value: (data?.length ?? 0) > 0 };
+  if (error) return error.code === "23503" ? { ok: true, value: "user_gone" } : fail;
+  return { ok: true, value: (data?.length ?? 0) > 0 };
 }
 
 // Updates the row only while it still holds what the caller read (its source
