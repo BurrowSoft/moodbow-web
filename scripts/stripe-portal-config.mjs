@@ -75,6 +75,8 @@ for (;;) {
   after = page.data.at(-1).id;
 }
 
+// The account's default is SolvyMed's: even tagged as ours by mistake, it is never written (the Reviewer, 21 Nov).
+if (ours?.is_default) fail(`${ours.id} is tagged app=${APP} but is the account's default configuration: nothing changed`);
 const saved = ours
   ? await stripe("POST", `${API}/${ours.id}`, new URLSearchParams(SETTINGS))
   : await stripe("POST", API, new URLSearchParams(SETTINGS), `moodbow-portal-config-${mode}-v2`);
