@@ -1060,6 +1060,28 @@
     "daysUnit": "{count, plural, one {giorno} other {giorni}}",
     "new": "Nuovo"
   },
+  "shareView": {
+    "metaTitle": "Una settimana condivisa",
+    "whatIs": "Cos'è Moodbow?",
+    "titleBefore": "Una settimana condivisa con te",
+    "introBefore": "Un riepilogo in sola lettura dei check-in di una persona. Non mostra mai nulla di ciò che ha scritto.",
+    "show": "Mostra la settimana",
+    "titleNamed": "{name} ha condiviso la sua settimana con te",
+    "titleAnon": "Qualcuno ha condiviso la sua settimana con te",
+    "weekOf": "Settimana del {date}",
+    "checkIns": "{count, plural, one {# check-in questa settimana} other {# check-in questa settimana}}",
+    "routinePercent": "{name}: spunta nel {percent}% dei giorni con check-in",
+    "routineNotEnough": "{name}: non ci sono ancora abbastanza giorni",
+    "earlier": "Settimana precedente",
+    "later": "Settimana successiva",
+    "none": "Nessun check-in questa settimana per ora.",
+    "unavailable": "Questo link non è disponibile. Potrebbe essere scaduto o essere stato interrotto.",
+    "loading": "Caricamento della settimana…",
+    "dayNone": "{day}: nessun check-in",
+    "help": "Se sei in pensiero per qualcuno, <link>trova un servizio di ascolto</link>.",
+    "footer": "La persona che ha condiviso questo link può interromperlo in qualsiasi momento. Non viene indicizzato dai motori di ricerca. Resta nella cronologia di questo browser; chiudi la scheda quando hai finito.",
+    "noToken": "Per rivedere la settimana, apri il link che hai ricevuto."
+  },
   "sounds": {
     "title": "Suoni rilassanti",
     "rain": "Pioggia",

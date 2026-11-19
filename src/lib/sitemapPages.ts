@@ -45,6 +45,9 @@ const PAGES: PageEntry[] = [
   { path: "/terms", gate: "terms-text-approved" },
   { path: "/consumer-health-data", gate: "consumer-health-data-approved" },
   { path: "/account-deletion", gate: "delete-account-live" },
+  // A week someone shared (1.4 G): a 404 until trusted-share-live, and never in the sitemap
+  // (noindex; a link only ever reaches someone through its owner).
+  { path: "/s", gate: "trusted-share-live", sitemap: false },
   // Test only, never met: a 404 on Production before the signed-in area's own checks.
   app({ path: "/app/test", gate: "test-only-unavailable-page", prefix: true }),
   ...APP_GATED,

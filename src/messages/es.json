@@ -1060,6 +1060,28 @@
     "daysUnit": "{count, plural, one {día} other {días}}",
     "new": "Nuevo"
   },
+  "shareView": {
+    "metaTitle": "Una semana compartida",
+    "whatIs": "¿Qué es Moodbow?",
+    "titleBefore": "Una semana compartida con usted",
+    "introBefore": "Un resumen de solo lectura de los registros de una persona. Nunca muestra nada de lo que escribió.",
+    "show": "Ver la semana",
+    "titleNamed": "{name} compartió su semana con usted",
+    "titleAnon": "Alguien compartió su semana con usted",
+    "weekOf": "Semana del {date}",
+    "checkIns": "{count, plural, one {# registro esta semana} other {# registros esta semana}}",
+    "routinePercent": "{name}: marcas en el {percent} % de los días con registro",
+    "routineNotEnough": "{name}: aún no hay suficientes días",
+    "earlier": "Semana anterior",
+    "later": "Semana siguiente",
+    "none": "Aún no hay registros esta semana.",
+    "unavailable": "Este enlace no está disponible. Puede que haya terminado o se haya detenido.",
+    "loading": "Cargando la semana…",
+    "dayNone": "{day}: sin registro",
+    "help": "Si le preocupa alguien, <link>busque una línea de ayuda</link>.",
+    "footer": "La persona que compartió este enlace puede detenerlo en cualquier momento. No lo indexan los buscadores. Queda en el historial de este navegador; cierre la pestaña cuando termine.",
+    "noToken": "Para volver a ver la semana, abra el enlace que le enviaron."
+  },
   "sounds": {
     "title": "Sonidos relajantes",
     "rain": "Lluvia",

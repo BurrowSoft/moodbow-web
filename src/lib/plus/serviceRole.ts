@@ -5,8 +5,8 @@ import { ENTITLEMENT_COLUMNS, parseEntitlement, type EntitlementRow } from "./en
 // Stripe webhook and its crons have no signed-in person, so they write as the
 // server. Everything else on the web uses the person's own session and RLS
 // (lib/supabase/server.ts). Limits:
-// - Imported only by src/app/api/webhooks/stripe and src/app/api/cron/*
-//   (serviceRole.imports.test.ts fails on any other importer).
+// - Imported only by src/app/api/webhooks/stripe, src/app/api/cron/* and (1.4 G, the Reviewer's
+//   blocker 1) src/app/api/share/view (serviceRole.imports.test.ts fails on any other importer).
 // - It reaches entitlements, stripe_cancel_queue and (035) picture_deletions plus the
 //   entry-pictures bucket's queued files, through the functions below; the client itself
 //   is never exported.
@@ -137,4 +137,25 @@ export async function failPictureQueue(rows: Pick<QueuedPicture, "id" | "attempt
   if (!client) return;
   const at = new Date().toISOString();
   for (const r of rows) await client.from("picture_deletions").update({ attempts: r.attempts + 1, last_failed_at: at }).eq("id", r.id);
+}
+
+// Share with someone I trust (1.4 G, migration 040): the viewer's read, which the database grants to
+// service_role only (the Reviewer's blocker 1). Only /api/share/view calls it, with the token's
+// sha256 already made (lib/share/trustedShare); the raw token never comes here.
+// reason (test builds only, never a secret): which step failed, so a Preview can tell a missing
+// client from an error the database or PostgREST returned (its code, e.g. "PGRST202"), and which
+// project the client talks to (the URL's host, never the key).
+export type SharedWeekRead = { ok: true; value: unknown; host: string } | { ok: false; reason: string; host: string };
+export async function readSharedWeek(tokenHashHex: string, week: number): Promise<SharedWeekRead> {
+  const client = db();
+  const host = (() => {
+    try {
+      return new URL(process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").host;
+    } catch {
+      return "none";
+    }
+  })();
+  if (!client) return { ok: false, reason: process.env.SUPABASE_SERVICE_ROLE_KEY?.trim() ? "no-url" : "no-key", host };
+  const { data, error } = await client.rpc("share_view", { p_token_hash: tokenHashHex, p_week: week });
+  return error ? { ok: false, reason: `rpc:${error.code ?? "unknown"}`, host } : { ok: true, value: data, host };
 }

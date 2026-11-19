@@ -3185,6 +3185,106 @@
     "reason": "UX draft (native read pending; the app's Thai, moodbow-app #252)"
   },
   {
+    "key": "shareView.metaTitle",
+    "en": "A shared week",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareView.whatIs",
+    "en": "What is Moodbow?",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareView.titleBefore",
+    "en": "A week shared with you",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareView.introBefore",
+    "en": "A read-only summary of someone's check-ins. It never shows anything they wrote.",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareView.show",
+    "en": "Show the week",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareView.titleNamed",
+    "en": "{name} shared their week with you",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareView.titleAnon",
+    "en": "Someone shared their week with you",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareView.weekOf",
+    "en": "Week of {date}",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareView.checkIns",
+    "en": "{count, plural, one {# check-in this week} other {# check-ins this week}}",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareView.routinePercent",
+    "en": "{name}: ticked on {percent}% of check-in days",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareView.routineNotEnough",
+    "en": "{name}: not enough days yet",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareView.earlier",
+    "en": "Earlier week",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareView.later",
+    "en": "Later week",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareView.none",
+    "en": "No check-ins yet this week.",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareView.unavailable",
+    "en": "This link isn't available. It may have ended or been stopped.",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareView.loading",
+    "en": "Loading the week…",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareView.dayNone",
+    "en": "{day}: no check-in",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareView.help",
+    "en": "If you're worried about someone, <link>find a helpline</link>.",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareView.footer",
+    "en": "This link can be stopped by the person who shared it at any time. It isn't indexed by search engines. It stays in this browser's history; close the tab when you're done.",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareView.noToken",
+    "en": "To see the week again, open the link you were sent.",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
     "key": "routine.title",
     "en": "Routine",
     "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
