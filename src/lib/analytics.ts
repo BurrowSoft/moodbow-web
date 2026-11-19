@@ -25,6 +25,9 @@ export function isCountedPage(pathname: string): boolean {
   // counted, not even its name (plans/PLAN-trusted-share.md §4).
   if (rest[0] === "s") return false;
   if (rest[0] === "app" && rest[1] === "me" && rest[2] === "safety-plan") return false;
+  // Me → Share your week (1.4 G; UX, the Reviewer): it speaks of a therapist, so a visit could hint
+  // at therapy, as the safety plan's could. Never counted.
+  if (rest[0] === "app" && rest[1] === "me" && rest[2] === "share") return false;
   return true;
 }
 

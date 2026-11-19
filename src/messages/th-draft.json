@@ -3285,6 +3285,196 @@
     "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
   },
   {
+    "key": "shareMe.rowTitle",
+    "en": "Share your week",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.activeLine",
+    "en": "{count, plural, one {# active share link} other {# active share links}}. Anyone with a link can see your weeks until it ends or you stop it.",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.title",
+    "en": "Share your week",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.intro",
+    "en": "Make a private link for someone you trust, like your therapist or a friend. They see your mood colours and how many check-ins, never what you write.",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.listTitle",
+    "en": "Your links",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.linkNamed",
+    "en": "For {name}",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.linkNumbered",
+    "en": "Link {n}",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.ends",
+    "en": "Ends {date}",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.opened",
+    "en": "{count, plural, =0 {Not opened yet} one {Opened once} other {Opened # times}}",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.routineIncluded",
+    "en": "{items} included",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.ended",
+    "en": "Ended",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.stopped",
+    "en": "Stopped",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.stop",
+    "en": "Stop sharing",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.stopConfirm",
+    "en": "Stop sharing this link? It stops working at once.",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.stopYes",
+    "en": "Stop sharing",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.stopNo",
+    "en": "Keep it",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.newTitle",
+    "en": "New link",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.nameLabel",
+    "en": "Their first name (optional)",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.nameHint",
+    "en": "Shown at the top of their page. Leave it empty for no name.",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.routineLabel",
+    "en": "Include from your routine",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.endsLabel",
+    "en": "Ends after",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.ends7",
+    "en": "7 days",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.ends30",
+    "en": "30 days",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.ends90",
+    "en": "90 days",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.previewTitle",
+    "en": "What they'll see",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.previewLine",
+    "en": "They'll see your weeks from today on: mood colours, how many check-ins, and the routine items you choose. Never what you write, your tags or moments.",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.consent",
+    "en": "By creating this link you agree to share this summary with whoever has it. You can stop it any time.",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.create",
+    "en": "Create link",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.limit",
+    "en": "You have 3 active links. Stop one to make another.",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.createdTitle",
+    "en": "Your link is ready",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.createdLine",
+    "en": "Copy it now: for your privacy we can't show it again. Make a new link if you lose it.",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.copy",
+    "en": "Copy link",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.copied",
+    "en": "Copied",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.done",
+    "en": "Done",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.noteCreated",
+    "en": "You created a share link. If this wasn't you, you can stop it in Me.",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.noteFirstView",
+    "en": "Your share link was opened for the first time. You can stop it any time in Me.",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.noteSee",
+    "en": "See links",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.noteGotIt",
+    "en": "Got it",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
     "key": "routine.title",
     "en": "Routine",
     "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
