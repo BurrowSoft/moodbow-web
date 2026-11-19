@@ -29,16 +29,19 @@ Moodbow is a private journal made by Vitor Carvalho, trading as BurrowSoft (297 
 {pending:toolbox_live|app_toolbox}**Things that help you:** the list you keep in Me → Things that help me.{/pending}
 {pending:letters_live|app_letters}**Letters to future you:** the letters you write, the day each one opens, and when you asked to be reminded of them.{/pending}
 {pending:safety_plan_live|app_safety_plan}**Your safety plan:** the plan you write. It can include the names and phone numbers of people and services you choose to list. They're stored with your journal, protected the same way, included when you export your data and deleted when you delete it. Moodbow never contacts them: a call only happens if you tap a number, through your phone's own dialer.{/pending}
+{pending:pictures_live|app_pictures}**Pictures in your moments (Moodbow Plus):** If you add pictures to a moment, they're stored with your journal in our database provider's storage in the EU, visible only to you, and included when you export your data. Location and other hidden details are removed before upload. When you delete a picture, its entry or your account, it disappears from Moodbow straight away; for up to a minute a copy you'd opened may still be reachable from your own account, and no one else can reach it. Deleted files are removed from our live storage within a day.{/pending}
+{pending:wear}**Watch:** A mood you tap on the watch is saved like any one-tap check-in. The watch stores nothing and never contacts our servers.{/pending}
 **Your settings:** language, country, time zone, reminder time{pending:plus}s{/pending}, and your AI choices (on or off, tone, focus areas).
 **AI content (only if AI is on):** the reflections and reports the AI writes for you{pending:ai_memory}, and the short facts Moodbow remembers about you, which you can see, edit and delete in Me → What Moodbow remembers{/pending}.
 **AI usage:** for each AI request, the feature, the model, the number of tokens, the cost and the credits used. Not the text of your entries or of the AI's answer.
-{pending:purchases}**Purchases:** if you buy AI credits, Google Play or the App Store handles the payment. We receive a purchase reference and the number of credits, never your card details.{/pending}
 {pending:plus}**Moodbow Plus purchases:** if you subscribe to Moodbow Plus, Google Play, the App Store or Stripe handles the payment. Stripe receives your email address to send receipts and keeps its own records. We keep a customer and subscription reference, its status, when the current period ends and when a free trial started, never your card details.{/pending}
 **Error reports:** if the app or website crashes or another error happens, a technical report (device type, app or browser version, the error) is sent to our error-tracking provider. We remove personal details and any text you've written before it's sent, and the provider doesn't store your IP address.
 
 **Cookies and storage on your device:** the website uses only the cookies it needs to work: one that keeps you signed in, one that remembers the language you chose, one that remembers list or calendar view, and, for a minute after you delete your account, one that tells your browser to clear its copies. It also keeps a few display choices in your browser, such as light or dark appearance and the cards you've already closed. None of them track you across sites or are used for advertising or analytics.
 
 **What stays only on your device:** unsent drafts{pending:app_app_lock}, your app-lock PIN{/pending}{pending:app_share_cards}, and the share cards you create. Share cards are made on your device and only leave it if you share them yourself{/pending}.
+
+{pending:me_picture_live|app_me_picture}**Your picture in Me:** {pending:me_picture_live}If you choose a picture for Me on the website, it's kept only in this browser, never sent to us, and removed when you sign out, delete your account, or remove it. {/pending}{pending:app_me_picture}If you choose a picture for Me in the app, it's kept on your phone (and in your phone's own backup, if you use one), never sent to us, and removed when you sign out, remove it, or delete the app's data. {/pending}Location and other hidden details are removed from the picture when you choose it.{/pending}
 
 **Technical logs:** like almost every online service, our hosting providers record IP addresses, the page requested, and device or browser information when you connect, for security and to fix problems. They keep these logs for a limited time (see §4). We also keep daily totals of AI use (how many reflections were made that day and what they cost us), with no link to any person, so we can keep costs under control.
 
@@ -48,7 +51,7 @@ We don't collect your name, contacts{pending:safety_plan_live|app_safety_plan} (
 
 To show helplines near you when we don't know your country, we use the country your connection comes from, at that moment only; it isn't stored.
 
-{pending:web_analytics}**Visit counts (public website only):** we count visits to our public pages with a cookie-free tool from our host, Vercel: which page was opened, from what kind of device and country, and which of our campaign links brought you there, if any. It uses no cookies or identifiers, never runs in the web journal, never sees what you write, and can't tell who you are. The mobile app sends no analytics.{/pending}
+{pending:web_analytics}**Usage counts (website and web journal):** we count page views and button taps in aggregate, with a cookie-free tool from our host, Vercel, to see which parts of Moodbow are used: which page was opened or which button was tapped, from what kind of device and country, and which of our campaign links brought you there, if any. It uses no cookies and no lasting identifier (Vercel tells visitors apart with a code that changes every day and isn't kept), never sees what you write, how you feel or anything you enter, and can't tell who you are. If your browser sends Global Privacy Control or Do Not Track, nothing is counted. The mobile app sends no analytics.{/pending}
 
 {pending:play_live}**Campaign links to Google Play:** if you came from one of our campaign links and follow our link to Google Play, the link tells Google Play which campaign it was, and Google sees that with your install. We only see totals for each campaign, never who.{/pending}
 
@@ -66,12 +69,17 @@ To show helplines near you when we don't know your country, we use the country y
 |---|---|---|
 | Supabase (on Amazon Web Services) | Database, accounts, file storage | Ireland (EU) |
 | Anthropic | AI reflections and reports, only if AI is on | USA |
-| Vercel | Hosting the website and web journal{pending:web_analytics}; counting visits to the public website (no cookies){/pending} | USA and global edge network |
+| Vercel | Hosting the website and web journal{pending:web_analytics}; counting page views and button taps (no cookies){/pending} | USA and global edge network |
 | Resend | Sending account emails (confirmation, password reset) | USA (company); emails are sent from Japan |
 | Sentry | Error and crash reports, with personal details removed | USA |
 {pending:purchases}| Google Play, Apple App Store | Payments for AI credits | Global |{/pending}
 {pending:plus}| Google Play, Apple App Store | Payments for Moodbow Plus | Global |{/pending}
 {pending:plus}| Stripe | Payments and receipts for Moodbow Plus | USA |{/pending}
+{pending:wear}| Google (Wear OS Data Layer, part of Google Play services) | Carrying a watch check-in (a mood value only, no text) from your watch to your phone, only if you use the watch app | Global |{/pending}
+
+{pending:wear}Watch check-ins normally go straight from your watch to your phone over Bluetooth. If the two aren't directly connected, Google may relay the message through its servers, encrypted end to end so Google can't read it. Nothing is stored there.{/pending}
+
+{pending:wear|plus|purchases}Google Play services runs under [Google's own privacy policy](https://policies.google.com/privacy).{/pending}
 
 Each provider may use your data only to provide its service to us. Anthropic doesn't use data sent through its API to train its models, and it deletes it after a short period (at most 30 days) that it keeps for safety and abuse monitoring.
 When data goes outside your country (for example from the EU to the USA), we rely on each provider's data-processing agreement and its data-transfer safeguards, such as the EU Standard Contractual Clauses or the EU–US Data Privacy Framework.
