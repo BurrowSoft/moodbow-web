@@ -128,7 +128,8 @@ describe("PlusInMe: a pending cancel (cancel_at)", () => {
   });
 
   it("paid Plus that won't renew: its own line, with the year when it isn't this one", () => {
-    showIn({ kind: "plus", source: "stripe", daysLeft: null, endsAt: "2027-11-19T17:14:38Z" });
+    // 08:00 UTC is 15:00 in Bangkok, the same day.
+    showIn({ kind: "plus", source: "stripe", daysLeft: null, endsAt: "2027-11-19T08:00:00Z" });
     expect(screen.getByTestId("me-plus-ends")).toHaveTextContent("Plus · ends 19 November 2027 · won't renew");
     expect(screen.queryByTestId("me-plus-trial")).toBeNull();
   });
