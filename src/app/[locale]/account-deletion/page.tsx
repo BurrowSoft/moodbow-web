@@ -48,7 +48,8 @@ export default async function AccountDeletionPage({ params }: PageProps<"/[local
       lang={english ? textLocale : undefined}
     >
       <p>{t("intro")}</p>
-      <p className="rounded-2xl border border-border bg-surface px-5 py-4 font-medium text-text">{t("steps")}</p>
+      {/* Padding in px (UX, 20 Nov, #410's CI): px-5 in rem was 60 px a side at 300 %, leaving "SUPPRIMER," no line. */}
+      <p className="rounded-2xl border border-border bg-surface px-[20px] py-[16px] font-medium text-text">{t("steps")}</p>
       <p>{t("what")}</p>
       {backupDays !== null && <p data-testid="backups-line">{t("backups", { days: backupDays })}</p>}
       <p>

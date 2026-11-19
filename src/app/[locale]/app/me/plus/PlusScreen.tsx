@@ -337,11 +337,12 @@ export function PlusScreen({ view, price, offer = null, started }: { view: PlusV
         // Its own scroll area (a Tab stop, named) only while the footer splits the screen.
         tabIndex={large ? undefined : 0}
         aria-label={large ? undefined : t("tableCaption")}
-        className={large ? "space-y-3 pb-3" : "min-h-0 flex-1 space-y-3 overflow-y-scroll pb-3 [scrollbar-width:thin]"}
+        // At large text its spacing in px (#410's CI: 36 px of rem gaps pushed de's renewal line under the fold).
+        className={large ? "space-y-[12px] pb-[12px]" : "min-h-0 flex-1 space-y-3 overflow-y-scroll pb-3 [scrollbar-width:thin]"}
       >
         {/* Decision 231's cap in em on the lead (the title has its own), so at large text the price, the renewal line
             and Start under it are in view on landing (UX, 20 Nov); text-sm in rem was 42 px at 300 %. */}
-        <div className="relative space-y-1 pr-[48px] [font-size:min(1em,max(10vw,32px))]">
+        <div className={`relative ${large ? "space-y-[4px]" : "space-y-1"} pr-[48px] [font-size:min(1em,max(10vw,32px))]`}>
           {/* Close (all sizes, offer or not): on the title's row, where Back was; Not now and the
               browser's Back still leave too (UX, 14 Nov). */}
           <Link href="/app/me" aria-label={t("close")} data-testid="plus-close" className="absolute top-0 right-0 inline-flex h-11 w-11 items-center justify-center rounded-full text-muted">
@@ -370,7 +371,9 @@ export function PlusScreen({ view, price, offer = null, started }: { view: PlusV
             renewal line, Start) sits right after the title/lead, before the feature table, so it's in view on landing
             at 320/300. The same block repeats at the end; never Start without the price and renewal next to it." */}
         {topAction && (
-          <div data-testid="plus-offer-top" className="flex flex-col gap-[8px] rounded-2xl bg-surface px-[12px] py-[12px] text-center [font-size:min(1rem,max(10vw,32px))]">
+          // The page's full width and no box of its own, so its lines are as few as they can be (de's renewal line
+          // was under the fold at 320 × 640 / 300 % with 12 px padding and 8 px gaps, #410's CI).
+          <div data-testid="plus-offer-top" className="flex flex-col gap-[4px] text-center [font-size:min(1rem,max(10vw,32px))]">
             {topAction}
           </div>
         )}
