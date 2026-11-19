@@ -87,7 +87,7 @@
     "steps": "En la app o en la web: abre Yo → Eliminar cuenta, escribe ELIMINAR y confirma.",
     "what": "Eliminamos todo lo que hay en tu cuenta, incluidas tus entradas, registros y ajustes, y tus datos de inicio de sesión.",
     "backups": "Las copias en nuestras copias de seguridad cifradas se borran automáticamente en un plazo de {days} días.",
-    "noAccess": "¿No puedes iniciar sesión? Escribe a <support>{email}</support> desde el correo con el que te registraste y la eliminaremos por ti."
+    "noAccess": "¿No puedes iniciar sesión? Escribe a <support>{email}</support> desde el correo con el que te registraste y la eliminaremos por ti."
   },
   "emailConfirmed": {
     "metaTitle": "Correo confirmado",
@@ -492,7 +492,13 @@
   },
   "help": {
     "helpTitle": "Ayuda y preguntas frecuentes",
-    "helpIntro": "Respuestas a preguntas frecuentes sobre cómo usar Moodbow. ¿No encuentras lo que buscas? Escribe a {email}."
+    "helpIntro": "Respuestas a preguntas frecuentes sobre cómo usar Moodbow. ¿No encuentras lo que buscas? Escribe a {email}.",
+    "topicBasics": "Lo básico",
+    "topicJournal": "Tu diario",
+    "topicSettings": "Ajustes",
+    "topicAi": "IA",
+    "topicPrivacy": "Privacidad y cuenta",
+    "topicHelp": "Ayuda"
   },
   "timeline": {
     "onThisDayMonth": "Hace un mes",

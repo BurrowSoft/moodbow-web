@@ -136,7 +136,5 @@ export function Dialog({
   );
 }
 
-export const dialogButton = (primary = false, hyphens = true) =>
-  `inline-flex min-h-11 max-w-full items-center justify-center rounded-full px-[20px] text-center font-medium ${hyphens ? "hyphens-auto" : ""} [overflow-wrap:anywhere] ${
-    primary ? "bg-accent text-on-accent hover:bg-accent-hover" : "border border-border text-text hover:bg-pill"
-  }`;
+// The buttons' classes live in lib/ui/dialogButton.ts (decision 231's cap at large text; e2e builds them too).
+export { dialogButton } from "@/lib/ui/dialogButton";

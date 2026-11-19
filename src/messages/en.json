@@ -87,7 +87,7 @@
     "steps": "In the app or on the web: open Me → Delete account, type DELETE, and confirm.",
     "what": "We delete everything in your account, including your entries, check-ins and settings, and your sign-in details.",
     "backups": "Copies in our encrypted backups are removed automatically within {days} days.",
-    "noAccess": "Can't sign in? Email <support>{email}</support> from the address you signed up with and we'll delete it for you."
+    "noAccess": "Can't sign in? Email <support>{email}</support> from the address you signed up with and we'll delete it for you."
   },
   "emailConfirmed": {
     "metaTitle": "Email confirmed",
@@ -492,7 +492,13 @@
   },
   "help": {
     "helpTitle": "Help & FAQ",
-    "helpIntro": "Answers to common questions about using Moodbow. Can't find what you need? Email {email}."
+    "helpIntro": "Answers to common questions about using Moodbow. Can't find what you need? Email {email}.",
+    "topicBasics": "Basics",
+    "topicJournal": "Your journal",
+    "topicSettings": "Settings",
+    "topicAi": "AI",
+    "topicPrivacy": "Privacy & account",
+    "topicHelp": "Help"
   },
   "timeline": {
     "onThisDayMonth": "A month ago",

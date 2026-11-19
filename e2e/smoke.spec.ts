@@ -244,7 +244,9 @@ test.describe("language: the offered ones, and Thai as a draft (thai-offered-liv
     await expect(page.getByTestId("draft-banner")).toHaveCount(LEGAL ? 0 : 1);
   });
 
-  test("/th/account-deletion: treated as legal: the English page under the Thai line (UX, #112)", async ({ page }) => {
+  // A help page now (UX, 20 Nov), in each live language's words; Thai isn't live yet, so it stays the English page under
+  // the Thai line until it goes live (/fr/account-deletion is French: large-text.spec.ts).
+  test("/th/account-deletion: Thai not live yet: the English page under the Thai line", async ({ page }) => {
     const res = await page.goto("/th/account-deletion");
     expect(res?.status()).toBe(200);
     await expect(page.getByTestId("page-notice")).toHaveText("หน้านี้มีให้อ่านเป็นภาษาอังกฤษ");

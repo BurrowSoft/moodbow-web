@@ -87,7 +87,7 @@
     "steps": "In der App oder im Web: Öffne Ich → Konto löschen, gib LÖSCHEN ein und bestätige.",
     "what": "Wir löschen alles in deinem Konto, auch deine Einträge, Check-ins und Einstellungen, sowie deine Anmeldedaten.",
     "backups": "Kopien in unseren verschlüsselten Backups werden innerhalb von {days} Tagen automatisch entfernt.",
-    "noAccess": "Du kannst dich nicht anmelden? Schreib an <support>{email}</support>, und zwar von der Adresse, mit der du dich registriert hast. Dann löschen wir das Konto für dich."
+    "noAccess": "Du kannst dich nicht anmelden? Schreib an <support>{email}</support>, und zwar von der Adresse, mit der du dich registriert hast. Dann löschen wir das Konto für dich."
   },
   "emailConfirmed": {
     "metaTitle": "E-Mail bestätigt",
@@ -492,7 +492,13 @@
   },
   "help": {
     "helpTitle": "Hilfe & FAQ",
-    "helpIntro": "Antworten auf häufige Fragen zu Moodbow. Nicht gefunden, was du suchst? Schreib an {email}."
+    "helpIntro": "Antworten auf häufige Fragen zu Moodbow. Nicht gefunden, was du suchst? Schreib an {email}.",
+    "topicBasics": "Grundlagen",
+    "topicJournal": "Dein Tagebuch",
+    "topicSettings": "Einstellungen",
+    "topicAi": "KI",
+    "topicPrivacy": "Datenschutz und Konto",
+    "topicHelp": "Hilfe"
   },
   "timeline": {
     "onThisDayMonth": "Vor einem Monat",

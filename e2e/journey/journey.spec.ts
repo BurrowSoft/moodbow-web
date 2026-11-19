@@ -1734,10 +1734,13 @@ test("large text, set in the browser: Print this month stays inside a 320 px pho
 });
 
 // The Plus screen at 300 % on a 320 × 640 phone (the Web Tester's long-language pass, UX 12 Nov):
-// the table had a 36 px slit under a footer of 1,009 px. Now the page scrolls as a whole, the
-// phone bar steps aside, and only the price, the renewal line and the button stay pinned: the
-// content gets at least 40 % of the screen, and the price, the renewal line and the button are in view on
-// landing. With Plus nothing is pinned, and Manage is at the end. Leaving gives the bar back.
+// the table had a 36 px slit under a footer of 1,009 px. The page scrolls as a whole and the phone
+// bar steps aside. UX, 20 Nov (#410), for large text where the page is a 13em column (320 px at
+// 200 % and 300 %): "under the 13em breakpoint, no pinned footer. Instead an offer block (price, the
+// renewal line, Start) sits right after the title/lead, before the feature table, so it's in view on
+// landing at 320/300. The same block repeats at the end; never Start without the price and renewal
+// next to it. Normal size unchanged." With Plus there's no offer, and Manage is at the end. Leaving
+// gives the bar back.
 test("large text: the Plus screen at 300 % on a 320 px phone, free and in the free week, en and de", async ({ page, browserName }) => {
   test.setTimeout(240_000);
   test.skip(browserName !== "chromium", "Page.setFontSizes is Chromium's");
@@ -1776,50 +1779,38 @@ test("large text: the Plus screen at 300 % on a 320 px phone, free and in the fr
       }));
       expect(wide, `${route || "/en"}: nothing scrolls sideways`).toEqual({ overflow: 0, sticksOut: [] });
     };
-    for (const [route, saved] of [["", "en"], ["/de", "de"]] as const) {
+    // UX, 20 Nov (the fr re-check): "Test: fr/en/de/pt-BR all have the renewal line's bottom ≤ 640 on landing."
+    // The profile keeps pt-br as "pt" (routing.dataLocale).
+    for (const [route, saved] of [["", "en"], ["/de", "de"], ["/fr", "fr"], ["/pt-br", "pt"]] as const) {
       await setProfileLocale(email, password, saved);
       await open(route);
-      // Free: the pinned footer leaves the content at least 40 % of the screen.
-      const sizes = await page.evaluate(() => {
-        const h = (id: string) => Math.round(document.querySelector(`[data-testid="${id}"]`)?.getBoundingClientRect().height ?? -1);
-        return { footer: h("plus-footer"), price: h("plus-price"), renews: h("plus-renews"), button: h("plus-start"), viewport: window.innerHeight };
+      // Free, a 13em column: nothing pinned (UX, 20 Nov, above).
+      await expect(page.getByTestId("plus-screen")).toHaveAttribute("data-unpinned", "true");
+      expect(await page.getByTestId("plus-footer").evaluate((el) => getComputedStyle(el).position), `${saved}: nothing pinned`).not.toBe("fixed");
+      // On landing: the whole title, and under it the price, the renewal line and Start, all in view.
+      const landing = await page.evaluate(() => {
+        const box = (id: string) => document.querySelector(`[data-testid="${id}"]`)!.getBoundingClientRect();
+        return { title: [Math.round(box("plus-title").top), Math.round(box("plus-title").bottom)], offerTop: Math.round(box("plus-offer-top").top), offerBottom: Math.round(box("plus-offer-top").bottom), viewport: window.innerHeight };
       });
-      const top = await page.getByTestId("plus-footer").evaluate((el) => el.getBoundingClientRect().top / window.innerHeight);
-      console.log(`Plus screen at 300 %, ${saved}, free: content ${Math.round(top * 100)} % of the screen; ${JSON.stringify(sizes)}`);
-      // UX, 12 Nov, from the first run's numbers (46 % in en): at least 40 % for the content, the
-      // table scrolling, rather than squeezing the renewal disclosure out of the pinned part.
-      expect(top, `${saved}: the content takes ${Math.round(top * 100)} % of the screen`).toBeGreaterThanOrEqual(0.4);
-      expect(await inView("plus-price"), `${saved}: the price on landing`).toBe(true);
-      expect(await inView("plus-renews"), `${saved}: the renewal line on landing`).toBe(true);
-      expect(await inView("plus-start"), `${saved}: the button on landing`).toBe(true);
-      // The whole title in view on landing, above the pinned part, never behind it (UX, 12 Nov: de
-      // had it at 304 px under a pinned part starting at 276).
-      const title = await page.evaluate(() => {
-        const t = document.querySelector('[data-testid="plus-title"]')!.getBoundingClientRect();
-        const pinnedTop = document.querySelector('[data-testid="plus-footer"]')!.getBoundingClientRect().top;
-        return { top: Math.round(t.top), bottom: Math.round(t.bottom), pinnedTop: Math.round(pinnedTop) };
-      });
-      console.log(`Plus screen at 300 %, ${saved}, free: the title ${JSON.stringify(title)}`);
-      expect(title.top, `${saved}: the title's top on screen`).toBeGreaterThanOrEqual(0);
-      expect(title.bottom, `${saved}: the title above the pinned part`).toBeLessThanOrEqual(title.pinnedTop);
+      console.log(`Plus screen at 300 %, ${saved}, free: on landing ${JSON.stringify(landing)}`);
+      expect(landing.title[0], `${saved}: the title's top on screen`).toBeGreaterThanOrEqual(0);
+      expect(landing.title[1], `${saved}: the title above the offer`).toBeLessThanOrEqual(landing.offerTop);
+      expect(await inView("plus-top-price"), `${saved}: the price on landing`).toBe(true);
+      expect(await inView("plus-top-renews"), `${saved}: the renewal line on landing`).toBe(true);
+      expect(await inView("plus-top-start"), `${saved}: the button on landing`).toBe(true);
+      // Before the feature table.
+      expect(await page.evaluate(() => document.querySelector('[data-testid="plus-offer-top"]')!.getBoundingClientRect().bottom <= document.querySelector('[data-testid="plus-table"]')!.getBoundingClientRect().top + 0.5), `${saved}: the offer before the table`).toBe(true);
       await expect(page.getByTestId("plus-footer").getByTestId("plus-not-now")).toHaveCount(0);
-      // At the very end of the page: the pinned part still on screen, and Not now and the site's
-      // footer above it, not under it.
-      await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+      // The same block ends the Plus screen, after Not now: scrolled to, all three are in view at once.
+      expect(await page.getByTestId("plus-screen").evaluate((el) => el.lastElementChild?.getAttribute("data-testid")), `${saved}: the price block ends the Plus screen`).toBe("plus-footer");
+      await page.getByTestId("plus-footer").evaluate((el) => el.scrollIntoView({ block: "start" }));
       await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))));
-      const end = await page.evaluate(() => {
-        const box = (sel: string) => document.querySelector(sel)?.getBoundingClientRect();
-        const pinned = box('[data-testid="plus-footer"]')!;
-        const notNow = box('[data-testid="plus-rest"] [data-testid="plus-not-now"]')!;
-        // The site's own footer: the page's last <footer>.
-        const siteFooter = [...document.querySelectorAll("footer")].at(-1)?.getBoundingClientRect();
-        return {
-          pinnedOnScreen: pinned.top >= 0 && pinned.bottom <= window.innerHeight + 0.5,
-          notNowAbove: notNow.bottom <= pinned.top + 0.5,
-          siteFooterAbove: !siteFooter || siteFooter.bottom <= pinned.top + 0.5,
-        };
+      for (const id of ["plus-price", "plus-renews", "plus-start"]) expect(await inView(id), `${saved}, at the end: ${id} in view`).toBe(true);
+      const order = await page.evaluate(() => {
+        const top = (sel: string) => document.querySelector(sel)!.getBoundingClientRect().top;
+        return { notNowFirst: top('[data-testid="plus-rest"] [data-testid="plus-not-now"]') < top('[data-testid="plus-price"]') };
       });
-      expect(end, `${saved}: at the very end`).toEqual({ pinnedOnScreen: true, notNowAbove: true, siteFooterAbove: true });
+      expect(order, `${saved}: Not now before the end block`).toEqual({ notNowFirst: true });
       await page.evaluate(() => window.scrollTo(0, 0));
     }
     // A short screen (320 × 480) at 300 %: the compact pinned part would leave the content under
@@ -1831,6 +1822,8 @@ test("large text: the Plus screen at 300 % on a 320 px phone, free and in the fr
       await open(route);
       await expect(page.getByTestId("plus-screen")).toHaveAttribute("data-unpinned", "true");
       expect(await page.getByTestId("plus-footer").evaluate((el) => getComputedStyle(el).position), `${saved}: not pinned`).not.toBe("fixed");
+      // The offer under the title as well (UX, 20 Nov: a 13em column).
+      await expect(page.getByTestId("plus-offer-top").getByTestId("plus-top-start")).toBeVisible();
       // The three together at the end of the Plus content (the site's own footer follows the page,
       // as everywhere): scrolled to, all three are on screen at once.
       await page.getByTestId("plus-footer").evaluate((el) => el.scrollIntoView({ block: "start" }));
@@ -1846,8 +1839,9 @@ test("large text: the Plus screen at 300 % on a 320 px phone, free and in the fr
       await page.evaluate(() => window.scrollTo(0, 0));
     }
     // 200 % on 320 × 640 (UX 12 Nov, after the app's Plus screen gave its list too little room
-    // there): free, en and de, whichever layout the page picks, the content above the price keeps
-    // at least 40 % of the screen, with the price, the renewal line and the button in view on landing.
+    // there): free, en and de, the price, the renewal line and the button in view on landing. A
+    // 320 px phone at 200 % is a 10em column, so since UX's 20 Nov ruling (#410, quoted above) nothing
+    // is pinned there either: the offer sits under the title and again at the end.
     await page.setViewportSize({ width: 320, height: 640 });
     await cdp.send("Page.setFontSizes", { fontSizes: { standard: 32, fixed: 26 } });
     for (const [route, saved] of [["", "en"], ["/de", "de"]] as const) {
@@ -1857,20 +1851,20 @@ test("large text: the Plus screen at 300 % on a 320 px phone, free and in the fr
       expect(await page.evaluate(() => getComputedStyle(document.documentElement).fontSize), `${saved}: the text really is at 200 %`).toBe("32px");
       await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))));
       const at200 = await page.evaluate(() => {
-        const footer = document.querySelector('[data-testid="plus-footer"]')!.getBoundingClientRect();
         const root = document.querySelector('[data-testid="plus-screen"]')!;
+        const offer = document.querySelector('[data-testid="plus-offer-top"]')?.getBoundingClientRect();
         return {
           large: root.hasAttribute("data-large"),
           unpinned: root.hasAttribute("data-unpinned"),
-          content: Math.round((footer.top / window.innerHeight) * 100),
-          footer: Math.round(footer.height),
+          offerBottom: offer ? Math.round(offer.bottom) : null,
+          footerPosition: getComputedStyle(document.querySelector('[data-testid="plus-footer"]')!).position,
           viewport: window.innerHeight,
         };
       });
       console.log(`Plus screen at 200 %, ${saved}, free: ${JSON.stringify(at200)}`);
-      expect(at200.unpinned, `${saved} at 200 %: still pinned on a 640 px screen`).toBe(false);
-      expect(at200.content, `${saved} at 200 %: the content takes ${at200.content} % of the screen`).toBeGreaterThanOrEqual(40);
-      for (const id of ["plus-price", "plus-renews", "plus-start"]) expect(await inView(id), `${saved} at 200 %: ${id} on landing`).toBe(true);
+      expect(at200.unpinned, `${saved} at 200 %: a 10em column, nothing pinned`).toBe(true);
+      expect(at200.footerPosition, `${saved} at 200 %: the end block not fixed`).not.toBe("fixed");
+      for (const id of ["plus-top-price", "plus-top-renews", "plus-top-start"]) expect(await inView(id), `${saved} at 200 %: ${id} on landing`).toBe(true);
     }
     await cdp.send("Page.setFontSizes", { fontSizes: { standard: 48, fixed: 39 } });
     // Not now really taps Not now on the short screen (the Web Tester, #311: when it stayed pinned

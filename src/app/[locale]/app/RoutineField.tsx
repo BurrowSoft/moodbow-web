@@ -69,7 +69,7 @@ export function RoutineSummary({ items, ticks }: { items: CardRoutine["items"]; 
   return (
     <ul className="mt-3 flex flex-wrap gap-2" data-testid="checkin-summary-routine" aria-label={t("rowTitle")}>
       {ticked.map((item) => (
-        <li key={item.id} className="inline-flex max-w-full items-center gap-[6px] rounded-full border border-border px-3 py-1 text-sm text-text [overflow-wrap:anywhere]">
+        <li key={item.id} className="inline-flex max-w-full items-center gap-[6px] rounded-full border border-border px-[12px] py-1 text-sm text-text [overflow-wrap:anywhere]">
           <Tick />
           {item.name}
         </li>

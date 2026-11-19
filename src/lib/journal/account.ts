@@ -15,6 +15,9 @@ const DELETE_WORDS: Record<string, string[]> = {
   th: ["ลบ"],
 };
 const fold = (s: string) => foldForSearch(s.trim()).text;
+// The words a language's text tells people to type, as written there (its own first, then DELETE): /account-deletion
+// keeps them whole on a line (UX, 20 Nov: "SUPPRI- / MER" is a word people must type exactly).
+export const deleteWordsFor = (locale: string): string[] => [...(DELETE_WORDS[locale.toLowerCase()] ?? []), DELETE_WORD];
 // ö → oe etc. before the fold: the German way to type without umlauts, so
 // LÖSCHEN, LOESCHEN and LOSCHEN all work.
 const digraphs = (s: string) => fold(s.toLowerCase().replaceAll("ä", "ae").replaceAll("ö", "oe").replaceAll("ü", "ue"));

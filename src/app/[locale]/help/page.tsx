@@ -6,9 +6,10 @@ import { notFound } from "next/navigation";
 import { PageShell } from "@/components/PageShell";
 import { HELP_GATE } from "@/lib/helpGate";
 import { pageGate } from "@/lib/conditions";
-import { helpIndex } from "@/lib/helpContent";
+import { helpIndex, TOPIC_MESSAGE_KEYS } from "@/lib/helpContent";
 import { pageMetadata } from "@/lib/metadata";
 import { SUPPORT_EMAIL } from "@/lib/site";
+import { withSupportAddress } from "@/lib/wholeNames";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/help">): Promise<Metadata> {
   const { locale } = await params;
@@ -29,11 +30,11 @@ export default async function HelpPage({ params }: PageProps<"/[locale]/help">) 
   const t = await getTranslations("help");
   return (
     <PageShell capTitle title={t("helpTitle")} draft={state === "draft"}>
-      <p>{t("helpIntro", { email: SUPPORT_EMAIL })}</p>
+      <p>{withSupportAddress(t("helpIntro", { email: SUPPORT_EMAIL }))}</p>
       {helpIndex(locale).map(({ topic, articles }) => (
         <section key={topic} aria-labelledby={topicId(topic)} className="pt-4">
           <h2 id={topicId(topic)} className="font-medium leading-[1.556] text-text [font-size:min(1.125rem,max(11vw,35px))]">
-            {topic}
+            {t(TOPIC_MESSAGE_KEYS[topic])}
           </h2>
           <ul className="mt-3 space-y-3">
             {articles.map((a) => (

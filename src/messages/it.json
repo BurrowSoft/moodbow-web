@@ -87,7 +87,7 @@
     "steps": "Nell'app o sul web: apri Profilo → Elimina account, scrivi ELIMINA e conferma.",
     "what": "Eliminiamo tutto ciò che c'è nel tuo account, comprese le tue pagine, i check-in e le impostazioni, e i tuoi dati di accesso.",
     "backups": "Le copie nei nostri backup cifrati vengono rimosse automaticamente entro {days} giorni.",
-    "noAccess": "Non riesci ad accedere? Scrivi a <support>{email}</support> dall'indirizzo usato per la registrazione e lo elimineremo noi."
+    "noAccess": "Non riesci ad accedere? Scrivi a <support>{email}</support> dall'indirizzo usato per la registrazione e lo elimineremo noi."
   },
   "emailConfirmed": {
     "metaTitle": "Email confermata",
@@ -492,7 +492,13 @@
   },
   "help": {
     "helpTitle": "Aiuto e domande frequenti",
-    "helpIntro": "Risposte alle domande più comuni su Moodbow. Non trovi quello che cerchi? Scrivi a {email}."
+    "helpIntro": "Risposte alle domande più comuni su Moodbow. Non trovi quello che cerchi? Scrivi a {email}.",
+    "topicBasics": "Le basi",
+    "topicJournal": "Il tuo diario",
+    "topicSettings": "Impostazioni",
+    "topicAi": "AI",
+    "topicPrivacy": "Privacy e account",
+    "topicHelp": "Aiuto"
   },
   "timeline": {
     "onThisDayMonth": "Un mese fa",

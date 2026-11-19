@@ -704,7 +704,7 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
       return { ...f, sleepHours: String(next) };
     });
   const chip = (active: boolean) =>
-    `inline-flex min-h-12 max-w-full items-center justify-center gap-2 rounded-full border px-4 text-center text-sm font-medium [overflow-wrap:anywhere] ${active ? "border-accent bg-pill text-accent" : "border-border text-text hover:bg-pill"}`;
+    `inline-flex min-h-12 max-w-full items-center justify-center gap-[8px] rounded-full border px-[16px] text-center text-sm font-medium [overflow-wrap:anywhere] ${active ? "border-accent bg-pill text-accent" : "border-border text-text hover:bg-pill"}`;
   const errorKey = storageFailed
     ? "errGeneric"
     : state.status === "error"
@@ -815,7 +815,7 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
         {tagsOn && savedTags.length > 0 && (
           <ul className="mt-3 flex flex-wrap gap-2" data-testid="checkin-summary-tags" aria-label={t("tagsLabel")}>
             {savedTags.map((tag) => (
-              <li key={tag} className="inline-flex max-w-full items-center rounded-full border border-border px-3 py-1 text-sm text-text [overflow-wrap:anywhere]">
+              <li key={tag} className="inline-flex max-w-full items-center rounded-full border border-border px-[12px] py-1 text-sm text-text [overflow-wrap:anywhere]">
                 {tag}
               </li>
             ))}
@@ -841,7 +841,7 @@ function Card({ initial, uid, date: cardDate, dateLocaleTag, notify, announce, a
         {chips.length > 0 && (
           <ul className="mt-3 flex flex-wrap gap-2" data-testid="checkin-summary-chips">
             {chips.map(({ label, hex }) => (
-              <li key={label} className="inline-flex items-center gap-2 rounded-full bg-pill px-3 py-1 text-sm text-text">
+              <li key={label} className="inline-flex items-center gap-[8px] rounded-full bg-pill px-[12px] py-1 text-sm text-text">
                 <ValueDot hex={hex} />
                 {label}
               </li>
