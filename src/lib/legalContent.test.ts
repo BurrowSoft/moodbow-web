@@ -6,7 +6,7 @@ import { ALL_LOCALES, routing } from "@/i18n/routing";
 import messages from "@/messages/en.json";
 import thMessages from "@/messages/th.json";
 import { conditionMet, type ConditionId } from "./conditions";
-import { applyPending, isPendingMet, legalLocale, legalSource, pendingIds, renderLegal, scrollableTables, todos, type LegalSlug } from "./legalContent";
+import { applyNoticeDate, applyPending, isPendingMet, legalDate, legalLocale, legalSource, needsNoticeDate, pendingIds, renderLegal, scrollableTables, todos, type LegalSlug } from "./legalContent";
 import { BACKUP_RETENTION_DAYS } from "./site";
 
 const PAGES: { slug: LegalSlug; gate: ConditionId }[] = [
@@ -220,5 +220,45 @@ describe("renderLegal (the real privacy text, nothing met)", () => {
     expect(terms.html).not.toContain("AI features");
     expect(terms.html).not.toContain("AI credits");
     expect(terms.html).toContain("<strong>not</strong> medical care");
+  });
+});
+
+// #378: the What changed block names the day from the notice id, the same day Today's card and
+// /privacy/next give, or no day at all for an undated notice. Never a typed date that could drift.
+describe("the What changed block's date", () => {
+  const source = legalSource("privacy", "en");
+  const plusMet = (id: string) => id === "plus" || isPendingMet(id);
+  const plusUnmet = (id: string) => id !== "plus" && isPendingMet(id);
+  const words = (html: string) => html.split('<span class="whole-name">').join("").split("</span>").join("");
+  const markers = /\{\/?(?:dated|undated|notice_date)\}/;
+
+  it("names the notice's day, or reads without one, and leaves no marker", () => {
+    const dated = words(renderLegal(source, plusMet, legalDate("2026-12-01", "en")).html);
+    const undated = words(renderLegal(source, plusMet, null).html);
+    expect(dated).toContain("<strong>What changed on 1 December 2026:</strong> you can now subscribe to Moodbow Plus.");
+    expect(undated).toContain("<strong>What changed:</strong> you can now subscribe to Moodbow Plus.");
+    expect(dated).not.toMatch(markers);
+    expect(undated).not.toMatch(markers);
+  });
+
+  it("is looked up only where the block shows, and can't render without its date", () => {
+    expect(needsNoticeDate(source, plusMet)).toBe(true);
+    expect(needsNoticeDate(source, plusUnmet)).toBe(false);
+    expect(needsNoticeDate(source)).toBe(conditionMet("plus"));
+    expect(() => renderLegal(source, plusMet)).toThrow(/notice date/);
+    expect(words(renderLegal(source, plusUnmet).html)).not.toContain("What changed");
+  });
+
+  it("writes the day as the legal text writes dates, in the text's own language", () => {
+    expect(legalDate("2026-12-01", "en")).toBe("1 December 2026");
+    expect(legalDate("2026-12-01", "es")).toBe("1 de diciembre de 2026");
+  });
+
+  it("dated and undated blocks; a stray marker is an error, not text", () => {
+    const text = "Changed{dated} on {notice_date}{/dated}{undated}, soon{/undated}.";
+    expect(applyNoticeDate(text, "2 May 2027")).toBe("Changed on 2 May 2027.");
+    expect(applyNoticeDate(text, null)).toBe("Changed, soon.");
+    expect(() => applyNoticeDate("On {notice_date}.", "2 May 2027")).toThrow();
+    expect(() => applyNoticeDate("Open {dated} block.", "2 May 2027")).toThrow();
   });
 });

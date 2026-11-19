@@ -9,7 +9,7 @@
 ## Moodbow Privacy Policy
 Last updated: 19 November 2026
 
-{pending:plus}**What changed on 1 December 2026:** you can now subscribe to Moodbow Plus. If you do, Google Play, the App Store or Stripe handles the payment, and we keep a reference to your subscription and its dates (§1, "Moodbow Plus purchases"). Stripe is new in our list of providers (§3). Nothing else about how we use your journal has changed.{/pending}
+{pending:plus}**What changed{dated} on {notice_date}{/dated}:** you can now subscribe to Moodbow Plus. If you do, Google Play, the App Store or Stripe handles the payment, and we keep a reference to your subscription and its dates (§1, "Moodbow Plus purchases"). Stripe is new in our list of providers (§3). Nothing else about how we use your journal has changed.{/pending}
 
 Moodbow is a private journal made by Vitor Carvalho, trading as BurrowSoft (297 Moo 1, Baan Sanian, Mueang Nan, Nan 55000, Thailand), "we" in this policy. We wrote this to be read, not skimmed past. If anything is unclear, email support@moodbow.com.
 
