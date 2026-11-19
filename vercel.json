@@ -4,6 +4,7 @@
   "installCommand": "npm ci",
   "buildCommand": "npm run build",
   "outputDirectory": ".next",
+  "ignoreCommand": "node scripts/vercel-ignore.mjs",
   "crons": [
     { "path": "/api/cron/stripe-reconcile", "schedule": "17 9 * * *" },
     { "path": "/api/cron/stripe-cancel-queue", "schedule": "47 9 * * *" },
