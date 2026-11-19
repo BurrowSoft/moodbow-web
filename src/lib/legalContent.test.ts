@@ -99,9 +99,11 @@ describe("legal content files", () => {
     const source = legalSource("privacy", "en");
     const heading = "Using Moodbow without an email:";
     const met = (on: boolean) => (id: string) => (id === "anon_start_live" ? on : isPendingMet(id));
-    expect(renderLegal(source, met(false)).html).not.toContain(heading);
-    expect(renderLegal(source, met(true)).html.split(heading)).toHaveLength(2);
-    expect(renderLegal(source).html.includes(heading)).toBe(conditionMet("anon-start-live"));
+    // The names are wrapped so they never hyphenate (wholeNames); the words are the same.
+    const words = (html: string) => html.split('<span class="whole-name">').join("").split("</span>").join("");
+    expect(words(renderLegal(source, met(false)).html)).not.toContain(heading);
+    expect(words(renderLegal(source, met(true)).html).split(heading)).toHaveLength(2);
+    expect(words(renderLegal(source).html).includes(heading)).toBe(conditionMet("anon-start-live"));
   });
 
   it("a journal with no email: the policy says it can be lost and can't be returned, only once that start is live", () => {
@@ -199,8 +201,11 @@ describe("renderLegal (the real privacy text, nothing met)", () => {
   });
 
   it("drops unmet pending blocks exactly as Production would, and lists them", () => {
-    expect(page.html).not.toContain("Google Play, Apple App Store");
-    expect(page.html).not.toContain("What Moodbow remembers");
+    // Compared as words: the names are wrapped in spans so they never hyphenate (wholeNames).
+    const words = page.html.split('<span class="whole-name">').join("").split("</span>").join("");
+    expect(words).toContain("Anthropic");
+    expect(words).not.toContain("Google Play, Apple App Store");
+    expect(words).not.toContain("What Moodbow remembers");
     expect(page.html).not.toContain("{pending");
     expect(page.hidden.map((h) => h.id)).toEqual(expect.arrayContaining(["plus", "ai_memory", "backup_retention", "app_app_lock", "app_share_cards"]));
   });
