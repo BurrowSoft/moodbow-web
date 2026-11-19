@@ -141,7 +141,8 @@ test("large text: Create account's heading and consent boxes keep their words wh
       await page.goto(`${language}/sign-up`);
       const split = await page.evaluate(() => {
         const out: string[] = [];
-        const roots = [document.querySelector("h1"), document.querySelector("[data-testid=consent-notice]"), ...document.querySelectorAll("form label span"), document.querySelector("form button[type=submit]")];
+        // The summary list and "Started in the app?" too (UX, 19 Nov: "Stimmu / ng" at 300 %).
+        const roots = [document.querySelector("h1"), document.querySelector("[data-testid=consent-notice]"), ...document.querySelectorAll("form label span"), document.querySelector("form button[type=submit]"), ...document.querySelectorAll("[data-testid=signup-summary] li"), document.querySelector("[data-testid=auth-started-in-app]")];
         for (const root of roots) {
           if (!root) continue;
           const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);

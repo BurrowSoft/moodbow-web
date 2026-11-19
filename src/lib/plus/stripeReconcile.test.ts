@@ -10,7 +10,7 @@ const row = (over: Partial<EntitlementRow> = {}): EntitlementRow => ({
   source: "stripe",
   status: "active",
   trial_ends_at: null,
-  current_period_end: new Date(NOW + 86_400_000).toISOString(),
+  current_period_end: new Date(NOW + 86_400_000).toISOString(), current_period_start: null,
   trial_started_at: null,
   store_customer_id: "cus_1",
   store_subscription_id: "sub_1",
@@ -33,6 +33,11 @@ describe("reconcile: Stripe against the rows, read-only", () => {
   it("Plus without payment: the stored subscription isn't live, or Stripe doesn't have it", () => {
     expect(reconcile([sub({ status: "canceled" })], [row()], NOW)).toEqual([{ kind: "plus_without_payment", userId: "u1", subscriptionId: "sub_1", stripeStatus: "canceled" }]);
     expect(reconcile([], [row()], NOW)).toEqual([{ kind: "plus_without_payment", userId: "u1", subscriptionId: "sub_1", stripeStatus: null }]);
+  });
+  it("inside the past_due grace (041): Stripe past_due and the row past_due are in step", () => {
+    const grace = row({ status: "past_due", current_period_start: new Date(NOW - 2 * 86_400_000).toISOString() });
+    expect(reconcile([sub({ status: "past_due" })], [grace], NOW)).toEqual([]);
+    expect(reconcile([sub({ status: "canceled" })], [grace], NOW)).toEqual([{ kind: "plus_without_payment", userId: "u1", subscriptionId: "sub_1", stripeStatus: "canceled" }]);
   });
   it("a live subscription naming nobody", () => {
     expect(reconcile([sub({ userId: null })], [], NOW)).toEqual([{ kind: "no_user", subscriptionId: "sub_1", stripeStatus: "active" }]);

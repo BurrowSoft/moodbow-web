@@ -92,6 +92,23 @@ describe("POST /api/checkout/stripe", () => {
     expect(p.cancel_url).toBe(`${ORIGIN}/es/app/me/plus`);
   });
 
+  it("Stripe Tax: automatic tax on, the address asked only where needed; a new customer gets no customer_update", async () => {
+    await post();
+    const p = createParams();
+    expect(p.automatic_tax).toEqual({ enabled: true });
+    expect(p.billing_address_collection).toBe("auto");
+    expect(p.customer_update).toBeUndefined();
+  });
+
+  it("Stripe Tax for a returning customer: the address and name Checkout collects are saved back to them", async () => {
+    entitlement = { data: row({ store_customer_id: "cus_9" }), error: null };
+    await post();
+    const p = createParams();
+    expect(p.customer).toBe("cus_9");
+    expect(p.automatic_tax).toEqual({ enabled: true });
+    expect(p.customer_update).toEqual({ address: "auto", name: "auto" });
+  });
+
   it("the currency the page showed is the one charged: the session carries it (the Reviewer, #315)", async () => {
     await post();
     expect(createParams().currency).toBe("eur");

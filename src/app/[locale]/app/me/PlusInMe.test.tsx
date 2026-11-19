@@ -95,6 +95,13 @@ describe("PlusInMe: the trial counter and a failed renewal", () => {
     expect(screen.getByTestId("me-plus-update-card")).toHaveTextContent(m.updateCard);
     expect(screen.queryByTestId("me-plus-banner")).toBeNull();
   });
+  it("inside the 7-day grace (041): Plus still on, the same line and Update card (UX, 19 Nov)", () => {
+    show({ kind: "plus", source: "stripe", daysLeft: null, paymentFailed: true });
+    expect(screen.getByTestId("me-plus-past-due")).toHaveTextContent("Your last payment didn't go through. Update your card to keep Plus.");
+    expect(screen.getByTestId("me-plus-update-card")).toHaveTextContent(m.updateCard);
+    expect(screen.queryByTestId("me-plus-trial")).toBeNull();
+    expect(screen.queryByTestId("me-plus-banner")).toBeNull();
+  });
 });
 
 describe("PlusInMe: the Christmas offer's banner (1.3)", () => {
