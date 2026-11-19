@@ -2,9 +2,22 @@ import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { PageShell } from "./PageShell";
 import { pageGate, type ConditionId } from "@/lib/conditions";
-import { legalLocale, legalSource, renderLegal, type LegalSlug } from "@/lib/legalContent";
+import { isPendingMet, legalDate, legalLocale, legalSource, needsNoticeDate, renderLegal, type LegalSlug } from "@/lib/legalContent";
+import { policyNoticeDate } from "@/lib/journal/policyNotice";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 type Props = { slug: LegalSlug; locale: string; gate: ConditionId };
+
+// The What changed block's day, from the notice that's out (the same server value as Today's
+// card and /privacy/next), in the text's language; null when the notice has no date or can't be
+// read, and the block then reads without one.
+async function noticeDateFor(textLocale: string): Promise<string | null> {
+  const supabase = await createSupabaseServerClient();
+  const answer = supabase ? await supabase.rpc("policy_notice_current") : { data: null };
+  const id = typeof answer.data === "string" && answer.data !== "" ? answer.data : null;
+  const day = id && policyNoticeDate(id);
+  return day ? legalDate(day, textLocale) : null;
+}
 
 // The privacy policy or terms from content/legal/<locale>/<slug>.md. The
 // article shows exactly what Production would show (unmet pending blocks
@@ -19,7 +32,11 @@ export async function LegalArticle({ slug, locale, gate }: Props) {
   const state = pageGate(gate);
   if (state === "hidden") notFound();
   const textLocale = legalLocale(locale, slug);
-  const { title, html, hidden } = renderLegal(legalSource(slug, textLocale));
+  const source = legalSource(slug, textLocale);
+  // Only a text that shows the What changed block reads the notice (so the page stays static
+  // until then).
+  const noticeDate = needsNoticeDate(source) ? await noticeDateFor(textLocale) : undefined;
+  const { title, html, hidden } = renderLegal(source, isPendingMet, noticeDate);
   const t = await getTranslations("legal");
   const english = textLocale !== locale;
 
