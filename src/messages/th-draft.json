@@ -3682,46 +3682,46 @@
   {
     "key": "app.policyNoticeTitle",
     "en": "Our Privacy Policy is changing",
-    "reason": "Web Dev draft (privacy-change notice, 19 Nov; native read pending)"
+    "reason": "UX draft (Web Dev Thai of the privacy-change notice, 19 Nov; native read pending)"
   },
   {
     "key": "app.policyNoticeApplies",
     "en": "From {date}, you can subscribe to Moodbow Plus.",
-    "reason": "Web Dev draft (privacy-change notice, 19 Nov; native read pending)"
+    "reason": "UX draft (Web Dev Thai of the privacy-change notice, 19 Nov; native read pending)"
   },
   {
     "key": "app.policyNoticeSoon",
     "en": "Soon, you can subscribe to Moodbow Plus.",
-    "reason": "Web Dev draft (privacy-change notice, 19 Nov; native read pending)"
+    "reason": "UX draft (Web Dev Thai of the privacy-change notice, 19 Nov; native read pending)"
   },
   {
     "key": "app.policyNoticeBody",
     "en": "If you do, Stripe, Google Play or the App Store handles the payment.",
-    "reason": "Web Dev draft (privacy-change notice, 19 Nov; native read pending)"
+    "reason": "UX draft (Web Dev Thai of the privacy-change notice, 19 Nov; native read pending)"
   },
   {
     "key": "app.policyNoticeRead",
     "en": "See what changes",
-    "reason": "Web Dev draft (privacy-change notice, 19 Nov; native read pending)"
+    "reason": "UX draft (Web Dev Thai of the privacy-change notice, 19 Nov; native read pending)"
   },
   {
     "key": "app.policyNoticeDismiss",
     "en": "Got it",
-    "reason": "Web Dev draft (privacy-change notice, 19 Nov; native read pending)"
+    "reason": "UX draft (Web Dev Thai of the privacy-change notice, 19 Nov; native read pending)"
   },
   {
     "key": "legal.nextApplies",
     "en": "These changes apply on {date}. Until then, our current policy applies.",
-    "reason": "Web Dev draft (privacy-change notice, 19 Nov; native read pending)"
+    "reason": "UX draft (Web Dev Thai of the privacy-change notice, 19 Nov; native read pending)"
   },
   {
     "key": "legal.nextAppliesNoDate",
     "en": "These changes aren't in effect yet. Until then, our current policy applies.",
-    "reason": "Web Dev draft (privacy-change notice, 19 Nov; native read pending)"
+    "reason": "UX draft (Web Dev Thai of the privacy-change notice, 19 Nov; native read pending)"
   },
   {
     "key": "legal.nextCurrent",
     "en": "Read the current policy",
-    "reason": "Web Dev draft (privacy-change notice, 19 Nov; native read pending)"
+    "reason": "UX draft (Web Dev Thai of the privacy-change notice, 19 Nov; native read pending)"
   }
 ]
