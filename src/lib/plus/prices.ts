@@ -1,3 +1,4 @@
+import { sellingPrice } from "./ours";
 import { getStripe, stripeConfigured } from "./stripe";
 import { plusPriceLabel } from "./view";
 import { TimedOut, withTimeout } from "@/lib/ui/withTimeout";
@@ -54,7 +55,8 @@ export async function plusDeal(country: string | null | undefined, withOffer: bo
   const key = `${wanted}:${withOffer}`;
   const hit = cache.get(key);
   if (hit && Date.now() - hit.at < TTL_MS) return hit.value;
-  const priceId = process.env.STRIPE_PLUS_PRICE_ID?.trim();
+  // The price checkout sells: the first of STRIPE_PLUS_PRICE_ID (ours.ts).
+  const priceId = sellingPrice();
   if (!priceId || !stripeConfigured()) return null;
   let value: PlusDeal | null;
   try {

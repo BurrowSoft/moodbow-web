@@ -29,14 +29,36 @@ beforeEach(() => {
   gate = "draft";
   user = { id: "u1" };
   entitlement = { data: stripeRow, error: null };
-  retrieveSub.mockResolvedValue({ id: "sub_1", customer: "cus_1", metadata: { user_id: "u1" } });
+  retrieveSub.mockResolvedValue({ id: "sub_1", customer: "cus_1", metadata: { user_id: "u1", app: "moodbow" } });
+  vi.stubEnv("STRIPE_PORTAL_CONFIG_ID", "bpc_moodbow");
 });
-afterEach(() => vi.clearAllMocks());
+afterEach(() => {
+  vi.unstubAllEnvs();
+  vi.clearAllMocks();
+});
 
 describe("POST /api/billing/portal", () => {
   it("their own Stripe subscription: the portal for its customer, in their language, back to Plus", async () => {
     expect(await (await post()).json()).toEqual({ url: "https://billing.stripe.test/p" });
-    expect(portalCreate).toHaveBeenCalledWith({ customer: "cus_1", locale: "pt-BR", return_url: `${ORIGIN}/pt-br/app/me/plus` });
+    // Moodbow's own portal configuration, never the account's default (SolvyMed's).
+    expect(portalCreate).toHaveBeenCalledWith({ customer: "cus_1", configuration: "bpc_moodbow", locale: "pt-BR", return_url: `${ORIGIN}/pt-br/app/me/plus` });
+  });
+
+  it("no STRIPE_PORTAL_CONFIG_ID: portal_unavailable before anything is read, never the default portal", async () => {
+    vi.stubEnv("STRIPE_PORTAL_CONFIG_ID", " ");
+    const res = await post();
+    expect(res.status).toBe(503);
+    expect(await res.json()).toEqual({ code: "portal_unavailable" });
+    expect(retrieveSub).not.toHaveBeenCalled();
+    expect(portalCreate).not.toHaveBeenCalled();
+  });
+
+  it("a subscription that isn't Moodbow's (no app tag, or SolvyMed's): nothing to manage", async () => {
+    retrieveSub.mockResolvedValueOnce({ id: "sub_1", customer: "cus_1", metadata: { user_id: "u1" } });
+    expect((await post()).status).toBe(404);
+    retrieveSub.mockResolvedValueOnce({ id: "sub_1", customer: "cus_1", metadata: { user_id: "u1", app: "solvymed" } });
+    expect((await post()).status).toBe(404);
+    expect(portalCreate).not.toHaveBeenCalled();
   });
 
   it("Plus from a store, no row, or a subscription that isn't theirs: nothing to manage, never someone else's portal", async () => {

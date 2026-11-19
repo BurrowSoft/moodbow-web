@@ -3,6 +3,7 @@ import type Stripe from "stripe";
 import { getStripe, retrieveSubscriptionOrNull, stripeConfigured } from "@/lib/plus/stripe";
 import { insertEntitlement, readEntitlement, serviceRoleConfigured, updateEntitlement } from "@/lib/plus/serviceRole";
 import { subscriptionIdOf, syncSubscription, type SyncOutcome } from "@/lib/plus/stripeSync";
+import { allowedPrices } from "@/lib/plus/ours";
 
 // Stripe → the entitlements row (Moodbow Plus, decision 246). Vitor makes the
 // endpoint in the Stripe Dashboard for checkout.session.completed,
@@ -27,7 +28,9 @@ function report(reason: string, event?: { id: string; type: string }) {
 
 export async function POST(req: Request): Promise<Response> {
   const secret = process.env.STRIPE_WEBHOOK_SECRET?.trim();
-  if (!secret || !stripeConfigured() || !serviceRoleConfigured()) {
+  // No price of ours set: nothing could be told apart from SolvyMed's, so nothing is acknowledged (Stripe retries).
+  const prices = allowedPrices();
+  if (!secret || !stripeConfigured() || !serviceRoleConfigured() || prices.length === 0) {
     report("not_configured");
     return Response.json({ error: "not_configured" }, { status: 503 });
   }
@@ -47,6 +50,7 @@ export async function POST(req: Request): Promise<Response> {
   let outcome: SyncOutcome;
   try {
     outcome = await syncSubscription(subId, {
+      prices,
       retrieve: retrieveSubscriptionOrNull,
       read: readEntitlement,
       insert: insertEntitlement,
@@ -55,6 +59,12 @@ export async function POST(req: Request): Promise<Response> {
   } catch {
     report("handler_threw", event);
     return Response.json({ error: "failed" }, { status: 500 });
+  }
+  // Not Moodbow's: the account is shared with SolvyMed (Vitor, 20 Nov), so their events come here too. A 200 and
+  // nothing else: no write, no retry, no report, and nothing of theirs logged but the event's type.
+  if (outcome.kind === "skipped" && outcome.reason === "foreign") {
+    console.debug(`[stripe-webhook] not Moodbow's: ${event.type}`);
+    return Response.json({ ok: true });
   }
   if (outcome.kind === "retry") {
     report(`sync_${outcome.reason}`, event);

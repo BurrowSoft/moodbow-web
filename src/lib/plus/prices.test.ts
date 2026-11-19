@@ -30,6 +30,12 @@ describe("prices from Stripe, never typed in (the Reviewer's ruling)", () => {
     expect(await readPlusPrices("JP", "en", true)).toEqual({ year: formatPrice(9599, "jpy", "en"), firstYear: formatPrice(4799, "jpy", "en") });
     expect(prices.retrieve).toHaveBeenCalledWith("price_1", { expand: ["currency_options"] });
   });
+  it("several prices of ours (STRIPE_PLUS_PRICE_ID, comma-separated): the one shown is the one sold, the first", async () => {
+    vi.stubEnv("STRIPE_PLUS_PRICE_ID", " price_new , price_old");
+    await readPlusPrices("FR", "fr", false);
+    expect(prices.retrieve).toHaveBeenCalledTimes(1);
+    expect(prices.retrieve).toHaveBeenCalledWith("price_new", { expand: ["currency_options"] });
+  });
   it("no offer asked, or no coupon amount for that currency: no first-year price", async () => {
     expect((await readPlusPrices("FR", "en", false)).firstYear).toBeNull();
     expect(coupons.retrieve).not.toHaveBeenCalled();

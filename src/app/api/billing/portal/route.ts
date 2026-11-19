@@ -2,6 +2,7 @@ import type Stripe from "stripe";
 import { pageGate } from "@/lib/conditions";
 import { pageOrigin, sameOrigin } from "@/lib/http/sameOrigin";
 import { ENTITLEMENT_COLUMNS, parseEntitlement } from "@/lib/plus/entitlements";
+import { STRIPE_APP } from "@/lib/plus/ours";
 import { getStripe, isRouteLocale, retrieveSubscriptionOrNull, stripeConfigured, stripeLocale } from "@/lib/plus/stripe";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -18,6 +19,10 @@ export async function POST(req: Request): Promise<Response> {
   if (pageGate("plus") === "hidden") return new Response(null, { status: 404 });
   if (!sameOrigin(req)) return no("generic", 403);
   if (!stripeConfigured()) return no("not_configured", 503);
+  // Moodbow's own portal configuration (scripts/stripe-portal-config.mjs), never the account's default: the account
+  // is shared with SolvyMed, whose default it is. Unset: no portal at all.
+  const configuration = process.env.STRIPE_PORTAL_CONFIG_ID?.trim();
+  if (!configuration) return no("portal_unavailable", 503);
   const supabase = await createSupabaseServerClient();
   if (!supabase) return no("generic", 503);
   const { data: auth, error: authError } = await supabase.auth.getUser();
@@ -35,9 +40,9 @@ export async function POST(req: Request): Promise<Response> {
   let customer: string;
   try {
     const live = await retrieveSubscriptionOrNull(row.store_subscription_id);
-    // Unknown to Stripe, or not this person's: nothing to manage, and never a
-    // portal for someone else's customer.
-    if (!live || live.metadata?.user_id !== user.id) return no("no_subscription", 404);
+    // Unknown to Stripe, not this person's, or not Moodbow's (ours.ts): nothing
+    // to manage, and never a portal for someone else's customer.
+    if (!live || live.metadata?.user_id !== user.id || live.metadata?.app !== STRIPE_APP) return no("no_subscription", 404);
     customer = typeof live.customer === "string" ? live.customer : live.customer.id;
   } catch {
     return no("check_failed", 503);
@@ -45,12 +50,13 @@ export async function POST(req: Request): Promise<Response> {
   try {
     const portal = await getStripe().billingPortal.sessions.create({
       customer,
+      configuration,
       locale: stripeLocale(locale) as Stripe.BillingPortal.SessionCreateParams.Locale,
       return_url: `${pageOrigin(req)}${locale === "en" ? "" : `/${locale}`}/app/me/plus`,
     });
     return Response.json({ url: portal.url });
   } catch {
-    // Most likely the portal isn't set up in the Dashboard for this mode.
+    // Most likely STRIPE_PORTAL_CONFIG_ID names no configuration in this mode.
     return no("portal_unavailable", 503);
   }
 }

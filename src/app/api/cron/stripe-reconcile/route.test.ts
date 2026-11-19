@@ -14,6 +14,7 @@ let gate: "hidden" | "draft" | "live" = "hidden";
 const pageGate = vi.fn(() => gate);
 vi.mock("@/lib/conditions", () => ({ pageGate: () => pageGate() }));
 vi.mock("@sentry/nextjs", () => ({ captureMessage: vi.fn() }));
+const { captureMessage } = await import("@sentry/nextjs");
 const { GET } = await import("./route");
 
 const get = (auth: string | null) => GET(new Request("https://www.moodbow.com/api/cron/stripe-reconcile", { headers: auth ? { authorization: auth } : {} }));
@@ -56,5 +57,48 @@ describe("GET /api/cron/stripe-reconcile: only Vercel Cron's secret", () => {
     expect(await (await get("Bearer cron-test")).json()).toEqual({ skipped: "plus_off" });
     expect(getStripe).not.toHaveBeenCalled();
     expect(readStripeEntitlements).not.toHaveBeenCalled();
+  });
+});
+
+describe("GET /api/cron/stripe-reconcile with Plus on: Moodbow's subscriptions only (the account is shared with SolvyMed)", () => {
+  const LONG_AGO = 1_700_000_000; // past the webhook's grace hour
+  const sub = (id: string, metadata: Record<string, string>, price: string) => ({ id, status: "active", created: LONG_AGO, metadata, items: { data: [{ price: { id: price } }] } });
+  const listing = (...subs: object[]) =>
+    (async function* () {
+      yield* subs;
+    })();
+
+  beforeEach(() => {
+    gate = "live";
+    vi.stubEnv("CRON_SECRET", "cron-test");
+    vi.stubEnv("STRIPE_PLUS_PRICE_ID", "price_ours");
+    vi.spyOn(console, "log").mockImplementation(() => {});
+  });
+  afterEach(() => vi.mocked(console.log).mockRestore());
+
+  it("SolvyMed's are counted, never compared, never named; ours still are", async () => {
+    list.mockReturnValue(
+      listing(
+        sub("sub_ours", { app: "moodbow", user_id: "u1" }, "price_ours"),
+        sub("sub_solvymed", { user_id: "their_user_1" }, "price_theirs"),
+        sub("sub_tagged_elsewhere", { app: "solvymed", user_id: "their_user_2" }, "price_ours"),
+      ),
+    );
+    readStripeEntitlements.mockResolvedValue({ ok: true, value: [] });
+    const body = await (await get("Bearer cron-test")).json();
+    expect(body.counts).toEqual({ stripe: 1, foreign: 2, rows: 0 });
+    expect(body.mismatches).toEqual([expect.objectContaining({ kind: "paying_without_plus", userId: "u1", subscriptionId: "sub_ours" })]);
+    const calls = vi.mocked(captureMessage).mock.calls;
+    expect(calls[0][1]).toMatchObject({ extra: { counts: { stripe: 1, foreign: 2, rows: 0 } } });
+    const everything = JSON.stringify([body, calls, vi.mocked(console.log).mock.calls]);
+    for (const theirs of ["sub_solvymed", "sub_tagged_elsewhere", "their_user", "price_theirs"]) expect(everything).not.toContain(theirs);
+  });
+
+  it("no price of ours set: 503 before Stripe is listed", async () => {
+    vi.stubEnv("STRIPE_PLUS_PRICE_ID", "");
+    const res = await get("Bearer cron-test");
+    expect(res.status).toBe(503);
+    expect(await res.json()).toEqual({ error: "not_configured" });
+    expect(list).not.toHaveBeenCalled();
   });
 });
