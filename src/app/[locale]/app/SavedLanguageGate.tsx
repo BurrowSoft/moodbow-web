@@ -76,10 +76,10 @@ export function SavedLanguageGate({
           {/* Help first, at once, in this page's language (decision 135). */}
           {helpMessages ? (
             <NextIntlClientProvider locale={here} messages={helpMessages}>
-              <GetHelpNow country={country} testId="saved-language-help" neutral />
+              <GetHelpNow country={country} testId="saved-language-help" neutral counted />
             </NextIntlClientProvider>
           ) : (
-            <GetHelpNow country={country} testId="saved-language-help" neutral />
+            <GetHelpNow country={country} testId="saved-language-help" neutral counted />
           )}
           {/* Held back for 2 s, so a move that goes at once doesn't flash it (CSS, so it shows without JavaScript). */}
           <p lang={copy.lang} data-after-wait className="text-text">
