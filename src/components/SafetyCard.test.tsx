@@ -8,6 +8,7 @@ import fr from "@/messages/fr.json";
 import ptBr from "@/messages/pt-br.json";
 import { helpLineSize, helplinesFor, isIos, telHref } from "@/lib/safety/helplines";
 import { GetHelpNow, SafetyCard } from "./SafetyCard";
+import { helpCardMessages } from "@/i18n/clientMessages";
 import { Dialog } from "@/components/Dialog";
 // My safety plan (1.2): whether it has content, asked once the card is open.
 let planHas: boolean | "never" = false;
@@ -458,5 +459,31 @@ describe("SafetyCard: where the person is, then Me's (Bo's help_country)", () =>
     expect(screen.getByTestId("safety-call-helpline")).toHaveAttribute("href", "tel:1323");
     expect(screen.queryByTestId("safety-country")).toBeNull();
     expect(screen.queryByTestId("safety-also")).toBeNull();
+  });
+});
+
+// Public pages send the button and its card only helpCardMessages (safety, common and the one
+// `me` string; the Reviewer's LOW): every string they show must be in it, in every language.
+describe("GetHelpNow with only helpCardMessages (public pages)", () => {
+  it.each([
+    ["en", messages],
+    ["es", es],
+    ["fr", fr],
+    ["pt-br", ptBr],
+  ] as const)("%s: the button and its open card, with and without a country, ask for nothing missing", (locale, all) => {
+    for (const country of ["TH", null] as const) {
+      for (const icon of [true, false]) {
+        const errors: string[] = [];
+        const view = render(
+          <NextIntlClientProvider locale={locale} messages={helpCardMessages(all)} onError={(e) => errors.push(e.message)}>
+            <GetHelpNow country={country} testId="public-help" icon={icon} neutral />
+          </NextIntlClientProvider>,
+        );
+        fireEvent.click(screen.getByTestId("public-help"));
+        expect(screen.getByTestId("safety-card")).toBeInTheDocument();
+        expect(errors, `${locale} ${country} icon=${icon}`).toEqual([]);
+        view.unmount();
+      }
+    }
   });
 });

@@ -21,6 +21,7 @@ import { EntryPreviews, type EntrySummary } from "../../EntryPreviews";
 import { tabMetadata, titledMetadata } from "../../pageMeta";
 import { DayCheckIn } from "./DayCheckIn";
 import { readCardTags } from "@/lib/journal/tagsData";
+import { readCardRoutine } from "@/lib/journal/routineData";
 
 // A stuck request ends here at the latest (UX, the timeout audit); each
 // data call gives up after 15 s on its own (lib/supabase/deadline).
@@ -72,12 +73,12 @@ export default async function DayPage({ params }: PageProps<"/[locale]/app/timel
       {/* Help everywhere (audit batch H): the lifebuoy beside Back. */}
       <div className="flex items-center gap-1">
         <BackLink href="/app/timeline" label={await backLabel("/app/timeline", dateLocaleTag)} testId="nav-back" />
-        <GetHelpNow country={me.profile?.country} testId="day-help" neutral icon />
+        <GetHelpNow country={me.profile?.country} testId="day-help" counted neutral icon />
       </div>
       <h1 className={JOURNAL_HEADING} data-testid="day-date">
         {dateLine(date, dateLocaleTag)}
       </h1>
-      <DayCheckIn initial={(checkIn as CheckIn | null) ?? null} uid={user.id} date={date} dateLocaleTag={dateLocaleTag} {...(await readCardTags(supabase, date))} country={me.profile?.country} />
+      <DayCheckIn initial={(checkIn as CheckIn | null) ?? null} uid={user.id} date={date} dateLocaleTag={dateLocaleTag} {...(await readCardTags(supabase, date))} {...(await readCardRoutine(supabase, date))} country={me.profile?.country} />
       {entriesError ? (
         <p role="alert" data-testid="day-entries-error" className="font-medium text-accent">
           {tt("errGeneric")}

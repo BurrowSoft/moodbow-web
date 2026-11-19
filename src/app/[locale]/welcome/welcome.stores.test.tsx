@@ -63,11 +63,14 @@ describe("Welcome's store line", () => {
     expect(screen.queryByTestId("welcome-store-appstore")).toBeNull();
   });
 
-  it("both public: both links", async () => {
+  it("both public: both links, as the official badges (UX & PM, 17 Nov)", async () => {
     met = ["play-live", "appstore-live"];
     await renderWelcome();
     expect(screen.getByTestId("welcome-store-play")).toBeInTheDocument();
     expect(screen.getByTestId("welcome-store-appstore")).toHaveAttribute("href", "https://apps.apple.com/app/id123");
+    expect(screen.getByTestId("welcome-badges")).toBeInTheDocument();
+    expect(screen.getByTestId("welcome-store-appstore").querySelector("img")).toHaveAttribute("src", "/badges/app-store-en.svg");
+    expect(screen.getByTestId("welcome-store-play").querySelector("img")).toHaveAttribute("src", "/badges/google-play-en.png");
   });
 });
 

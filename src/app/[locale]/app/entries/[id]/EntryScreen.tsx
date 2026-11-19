@@ -24,6 +24,7 @@ import { EntryPictures } from "./EntryPictures";
 import { deletePicture } from "./pictureActions";
 import type { RecallMonth } from "@/lib/journal/momentRecall";
 import { RecallChips } from "./RecallChips";
+import { countTap } from "@/lib/analyticsEvents";
 
 // The entry view (decision 151, the same layout as the app): a top bar with
 // Back, the ★ moment toggle, ✎ Edit entry and ⋯ (Delete only; board 20); the date; that day's
@@ -174,6 +175,7 @@ function Screen({ entry: initial, checkIn, from, backLabel, dateLocaleTag, uid, 
     try {
       const result = await saveEntry({ status: "idle" }, form);
       if (result.status === "saved") {
+        if (result.entry.is_moment) countTap("moment_saved");
         setEntry(result.entry);
       }
       else {
@@ -220,7 +222,7 @@ function Screen({ entry: initial, checkIn, from, backLabel, dateLocaleTag, uid, 
         {/* While editing, the editor's top row holds Back (with Save). */}
         {mode.kind === "view" && <BackLink href={from} label={backLabel} testId="nav-back" />}
         {/* Help everywhere (audit batch H): beside Back. While editing, the editor's own shows. */}
-        {mode.kind === "view" && <GetHelpNow country={country} testId="entry-help" neutral icon />}
+        {mode.kind === "view" && <GetHelpNow country={country} testId="entry-help" counted neutral icon />}
         {mode.kind === "view" && (
           <div className="ml-auto flex min-w-0 flex-wrap items-center justify-end gap-1" data-testid="entry-actions">
             <button

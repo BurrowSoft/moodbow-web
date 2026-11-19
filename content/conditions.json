@@ -125,7 +125,7 @@
   },
   "web-analytics": {
     "met": false,
-    "what": "Vercel Web Analytics (cookie-free visit counts, decision 79) is enabled for the moodbow-web project by Vitor in Vercel. Flipping this shows the privacy policy's visit-count lines and loads the counter (with the URL scrubber, src/lib/analytics.ts) in the same deploy."
+    "what": "Vercel Web Analytics (cookie-free usage counts, decision 79; specs/analytics.md) is enabled for the moodbow-web project by Vitor in Vercel, and Vitor has approved the privacy policy's usage-count lines. Flipping this shows those lines and loads the counter on production (page views and the listed button taps, with the URL and event scrubber, src/lib/analytics.ts and src/lib/analyticsEvents.ts) in the same deploy."
   },
   "timeline-moments-rpc": {
     "met": true,
@@ -330,5 +330,29 @@
   "pictures-live": {
     "met": false,
     "what": "1.3 Pictures for moments (035; spec \"Pictures for moments\" and \"Pictures 035: build rulings\"): up to 3 pictures on a moment (Plus to add; viewing, export and deleting always), re-encoded in the browser (no EXIF), private bucket, signed URLs of 5 minutes. Needs moodbow-app 035 on Production AND the picture-deletions cron running on Production (vercel.json; CRON_SECRET is Vitor's): until it runs, deleted pictures' files are not removed. Also Vitor's privacy line, store labels and the storage cost. While it is unmet (or turned off again), pictures already added are still in Export my data and are deleted with their entry or the account, but there is no screen to view or remove a single picture."
+  },
+  "year-review-live": {
+    "met": false,
+    "what": "1.4 A Your year in Moodbow (specs/1.4-features.md, UX rulings 18 Nov; the rules in src/lib/journal/yearReview.contract.json): /app/year for everyone, the Today card from 1 December to 31 January and the link row at the top of Insights. Fixed rules, nothing new stored; the share image is the 1.1 J Year card. Target: live on 1 December. Before it's met: the en copy and its fr/es/pt-BR translations, the Help article, the storybook board, the Reviewer's read and the Web Tester's row (a Preview's ?today= stands in for December)."
+  },
+  "showed-up-live": {
+    "met": false,
+    "what": "1.4 C Days you showed up (specs/1.4-features.md, UX 18 Nov; the rules in src/lib/journal/showedUp.contract.json, the app's supabase/contracts/showed-up.json): a count only, never a streak, a chain or a reminder not to break one. On Insights, the shown tab's count (week, month, 3 months, and with Plus year and all time); on the share cards, \"Showed up on n days\" instead of \"n days journaled\". For everyone. Before it's met: the Reviewer's read, the storybook board and the Web Tester's row."
+  },
+  "mood-prompts-live": {
+    "met": false,
+    "what": "1.4 E Prompts that follow your mood (specs/1.4-features.md §E, UX 18 Nov; the cases in src/lib/journal/moodPrompts.contract.json, for moodbow-app supabase/contracts/mood-prompts.json): on Write, above an empty entry, today's check-in mood picks the library group (1-2 hard-days with its help, 3 noticing, 4-5 gratitude). Free: one prompt a day, Another back to the daily list; Plus: the group from its saved place. Never on a day an entry or tag is crisis-flagged. No new analytics. Before it's met: the contract on the app's master, the Reviewer's read and the Web Tester's row."
+  },
+  "late-note-live": {
+    "met": false,
+    "what": "1.4 D Gentle late-night note (specs/1.4-features.md §D, UX 19 Nov; the cases in src/lib/journal/lateNote.contract.json, for moodbow-app supabase/contracts/late-note.json): a check-in the person saves from the card between 00:00 and 04:59 in their profile's zone, with mood 1 or 2, shows one line under the saved check-in with Get help now, at most once a night per user. Never a notification, nothing on the server, never counted. A safety copy: before it's met, the clinician's read (the safety-plan G1 pack), the Reviewer's read and the Web Tester's row."
+  },
+  "routine-live": {
+    "met": false,
+    "what": "1.4 F Medication and routine (specs/1.4-features.md §F, plans/PLAN-routine.md, board 29): up to 3 items the person ticks in the check-in, under Tags; Me → Routine to add, rename, order, remove and opt each into For my appointment. Patterns show a routine line only when mood is higher on ticked days, always with the caution; the appointment shows % of check-in days ticked; export carries it. Item names are never counted or sent anywhere else. Needs the app's migration 038 on Production (Vitor's word plus the privacy line), the contracts on the app's master, the Reviewer's read and the Web Tester's rows."
+  },
+  "sounds-live": {
+    "met": false,
+    "what": "1.4 B Calming sounds (specs/1.4-features.md §B, UX 19 Nov; as moodbow-app #253): Me → Things that help me → Calming sounds, /app/me/toolbox/sounds. Rain, waves, brown noise and a gentle hum made in the browser (src/lib/sounds/synth.ts, the app's generators and seeds; no audio files), each a seamless loop played natively, so it plays on with the tab hidden. Timer 15/30/45/60 min or Until I stop, with the app's fades; a pause of 30 min stops it; it stops at sign-out. The Media Session shows only the neutral \"Sound playing\". Counted: sounds_opened only. For everyone. Before it's met: the Reviewer's read, the Web Tester's row (on real speakers or headphones) and the translations' check."
   }
 }

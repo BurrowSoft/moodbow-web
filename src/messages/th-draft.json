@@ -3028,5 +3028,360 @@
     "key": "bo.boOff",
     "en": "Bo is turned off. You can turn it back on in Me.",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "export.exportRoutine",
+    "en": "Routine",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "export.exportRoutineStarted",
+    "en": "started {date}",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "export.exportRoutineInAppointment",
+    "en": "in my appointment summary",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "export.exportRoutineTicked",
+    "en": "Ticked: {dates}",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "export.exportRoutineNoTicks",
+    "en": "Not ticked yet",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "year.title",
+    "en": "Your year in Moodbow",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for UX to check)"
+  },
+  {
+    "key": "year.todayLine",
+    "en": "A look back at {year}, just for you.",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for UX to check)"
+  },
+  {
+    "key": "year.open",
+    "en": "Open",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for UX to check)"
+  },
+  {
+    "key": "year.coloursTitle",
+    "en": "Your year in colours",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for UX to check)"
+  },
+  {
+    "key": "year.coloursLine",
+    "en": "Each month, the moods you checked in with.",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for UX to check)"
+  },
+  {
+    "key": "year.monthMood",
+    "en": "{month}: {mood}",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for UX to check)"
+  },
+  {
+    "key": "year.monthFaint",
+    "en": "{month}: no check-ins",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for UX to check)"
+  },
+  {
+    "key": "year.daysTitle",
+    "en": "Days you showed up",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for UX to check)"
+  },
+  {
+    "key": "year.daysLine",
+    "en": "{count, plural, one {You showed up on # day} other {You showed up on # days}} this year.",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for UX to check)"
+  },
+  {
+    "key": "year.momentsTitle",
+    "en": "Your moments",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for UX to check)"
+  },
+  {
+    "key": "year.momentsLine",
+    "en": "{count, plural, one {You marked # moment} other {You marked # moments}}.",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for UX to check)"
+  },
+  {
+    "key": "year.helpedTitle",
+    "en": "Things that help you",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for UX to check)"
+  },
+  {
+    "key": "year.tagsTitle",
+    "en": "On good days you often tagged",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for UX to check)"
+  },
+  {
+    "key": "year.hardTitle",
+    "en": "Your year",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for UX to check)"
+  },
+  {
+    "key": "year.hardLine",
+    "en": "This year asked a lot of you. You kept showing up.",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for UX to check)"
+  },
+  {
+    "key": "year.closing",
+    "en": "Thank you for showing up for yourself this year.",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for UX to check)"
+  },
+  {
+    "key": "year.morePlus",
+    "en": "See more of your year",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for UX to check)"
+  },
+  {
+    "key": "year.notEnough",
+    "en": "Your year in Moodbow for {year} appears once you've checked in on 30 days that year. You're on {count}.",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for UX to check)"
+  },
+  {
+    "key": "year.share",
+    "en": "Share your year",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for UX to check)"
+  },
+  {
+    "key": "year.previous",
+    "en": "Previous",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for UX to check)"
+  },
+  {
+    "key": "year.next",
+    "en": "Next",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for UX to check)"
+  },
+  {
+    "key": "year.position",
+    "en": "Screen {n} of {total}",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for UX to check)"
+  },
+  {
+    "key": "year.shareNote",
+    "en": "The image shows your colours and the number of days. Your entries, tags, moments and dates are never on it.",
+    "reason": "UX draft (native read pending; the Reviewer's AI check 18 Nov)"
+  },
+  {
+    "key": "year.daysUnit",
+    "en": "{count, plural, one {day} other {days}}",
+    "reason": "UX draft (native read pending; the app's Thai)"
+  },
+  {
+    "key": "insights.showedUp",
+    "en": "{count, plural, one {You showed up on # day} other {You showed up on # days}} {range, select, week {in the last 7 days} month {in the last 30 days} threeMonths {in the last 3 months} year {in the last 12 months} other {since you started}}.",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #252)"
+  },
+  {
+    "key": "share.shareShowedUp",
+    "en": "{n, plural, =1{Showed up on 1 day} other{Showed up on # days}}",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #252)"
+  },
+  {
+    "key": "routine.title",
+    "en": "Routine",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.intro",
+    "en": "Up to 3 things you'd like to tick off each day. Only you see them.",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.addHint",
+    "en": "For example, Morning meds",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.add",
+    "en": "Add",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.full",
+    "en": "That's 3, the most for now.",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.duplicate",
+    "en": "You already have that one.",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.options",
+    "en": "Options for {item}",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.deleteConfirm",
+    "en": "Remove",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.deleteTitle",
+    "en": "Remove {name}?",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.deleteBody",
+    "en": "This removes the item and the days you ticked it.",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.inAppointment",
+    "en": "Show in For my appointment",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.rowTitle",
+    "en": "Routine",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.rowEmpty",
+    "en": "Add up to 3 things you do most days, like Morning meds or a walk.",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.rowSetUp",
+    "en": "Set up",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.saveFailed",
+    "en": "Your routine ticks weren't saved. Try again.",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.patternShown",
+    "en": "On days you ticked {name}, your mood averaged {a} of 5. On other days, {b}.",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.patternFootnote",
+    "en": "This may show what tends to go together, not what causes what. Never change a medication without talking to your doctor or pharmacist.",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.appointmentHeading",
+    "en": "Routine",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.appointmentShare",
+    "en": "{name}: ticked on {percent}% of check-in days",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.appointmentNotEnough",
+    "en": "{name}: not enough days yet",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "sounds.title",
+    "en": "Calming sounds",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a)"
+  },
+  {
+    "key": "sounds.rain",
+    "en": "Rain",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a)"
+  },
+  {
+    "key": "sounds.waves",
+    "en": "Waves",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a)"
+  },
+  {
+    "key": "sounds.brown",
+    "en": "Brown noise",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a)"
+  },
+  {
+    "key": "sounds.hum",
+    "en": "Gentle hum",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a)"
+  },
+  {
+    "key": "sounds.timer",
+    "en": "Timer",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a)"
+  },
+  {
+    "key": "sounds.minutes",
+    "en": "{n} min",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a)"
+  },
+  {
+    "key": "sounds.untilStop",
+    "en": "Until I stop",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a)"
+  },
+  {
+    "key": "sounds.play",
+    "en": "Play",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a)"
+  },
+  {
+    "key": "sounds.pause",
+    "en": "Pause",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a)"
+  },
+  {
+    "key": "sounds.stop",
+    "en": "Stop",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a)"
+  },
+  {
+    "key": "sounds.left",
+    "en": "{n} min left",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a)"
+  },
+  {
+    "key": "sounds.untilStopped",
+    "en": "Until you stop",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a)"
+  },
+  {
+    "key": "sounds.lock",
+    "en": "Sound playing",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a)"
+  },
+  {
+    "key": "sounds.lockLeft",
+    "en": "Sound playing · {n} min left",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a)"
+  },
+  {
+    "key": "sounds.lockPaused",
+    "en": "Sound paused",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a)"
+  },
+  {
+    "key": "sounds.intro",
+    "en": "Made right here in your browser, so there's nothing to download. Use your device's volume.",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a, browser wording by the Web Dev)"
+  },
+  {
+    "key": "sounds.unavailable",
+    "en": "Calming sounds aren't available in this browser.",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a, browser wording by the Web Dev)"
+  },
+  {
+    "key": "today.lateNote",
+    "en": "It's late. Rest matters too. If tonight feels heavy, help is one tap away.",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #257 6d1ff0f6)"
+  },
+  {
+    "key": "year.new",
+    "en": "New",
+    "reason": "UX draft (native read pending; Web Dev first draft 19 Nov, for the Reviewer's check)"
   }
 ]

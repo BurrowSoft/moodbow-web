@@ -89,7 +89,7 @@ export function ConsentForm({ askAge, askAi = false, showBack }: { askAge: boole
         </p>
       )}
       <div className="flex flex-wrap items-center gap-[24px] pt-[8px]">
-        <button type="submit" data-testid="consent-continue" disabled={(hydrated && !ready) || pending} className={`${primaryButtonClass} max-sm:[font-size:min(1rem,max(10vw,32px))]`}>
+        <button type="submit" data-testid="consent-continue" data-count="consent_continue" disabled={(hydrated && !ready) || pending} className={`${primaryButtonClass} max-sm:[font-size:min(1rem,max(10vw,32px))]`}>
           {t("consentContinue")}
         </button>
         {showBack && <BackLink href="/welcome?slide=3" label={t("back")} testId="consent-back" />}

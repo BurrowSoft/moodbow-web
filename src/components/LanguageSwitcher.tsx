@@ -32,6 +32,8 @@ export function LanguageSwitcher() {
             locale={l}
             lang={l}
             hrefLang={l}
+            data-count="language_switch"
+            data-count-locale={l}
             className="inline-flex min-h-12 max-w-full items-center rounded-full px-[12px] font-medium text-accent underline-offset-4 hover:underline"
           >
             {t(`languageNames.${l}`)}

@@ -3,13 +3,14 @@ import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
-import { pickMessages } from "@/i18n/clientMessages";
+import { helpCardMessages } from "@/i18n/clientMessages";
 import type { Locale } from "@/i18n/routing";
 import { Logo } from "@/components/Logo";
 import { pageGate } from "@/lib/conditions";
 import { pageMetadata } from "@/lib/metadata";
 import { APP_STORE_URL, liveStores } from "@/lib/stores";
 import { PlayStoreLink } from "@/components/PlayStoreLink";
+import { StoreBadges } from "@/components/StoreBadges";
 import { GetHelpNow } from "@/components/SafetyCard";
 import { WelcomeSlides } from "./WelcomeSlides";
 
@@ -43,11 +44,11 @@ export default async function WelcomePage({ params }: PageProps<"/[locale]/welco
           card once scripts run. No account yet, so the numbers follow this request's country. */}
       <div className="absolute end-[16px] top-[16px]">
         {/* The card's words ("me", "safety") aren't in the public pages' client messages: only here. */}
-        <NextIntlClientProvider locale={locale} messages={pickMessages(await getMessages(), ["common", "me", "safety"])}>
-          <GetHelpNow country={null} neutral icon testId="welcome-help" />
+        <NextIntlClientProvider locale={locale} messages={helpCardMessages(await getMessages())}>
+          <GetHelpNow country={null} neutral icon testId="welcome-help" counted />
         </NextIntlClientProvider>
       </div>
-      <div className="flex w-full max-w-[560px] flex-col items-center">
+      <div className="flex w-full max-w-[560px] flex-col items-center" data-testid="welcome-column">
         <div className="mb-10 w-[120px]">
           <Logo variant="stacked" width={120} alt={tc("logoAlt")} />
         </div>
@@ -58,7 +59,12 @@ export default async function WelcomePage({ params }: PageProps<"/[locale]/welco
         {/* The app's stores, once each listing is public (decision 185, play-live / appstore-live):
             Home's words and links, on every device (the footer's button offers Play on Android
             phones only). Nothing before then: no "coming soon" on the way into the journal. */}
-        {(stores.play || stores.appStore) && (
+        {/* From the App Store launch, the official badges for both (UX & PM, 17 Nov). */}
+        {stores.appStore ? (
+          <div className="mt-10" data-testid="welcome-stores">
+            <StoreBadges stores={stores} locale={locale as Locale} labels={{ play: th("storeBadgePlay"), appStore: th("storeBadgeAppStore") }} testId="welcome" />
+          </div>
+        ) : stores.play && (
           <p className="mt-10 text-center leading-[1.429] [font-size:min(0.875rem,max(8.75vw,28px))] text-muted" data-testid="welcome-stores">
             {th("storeGetApp")}{" "}
             {stores.play && (
@@ -68,7 +74,7 @@ export default async function WelcomePage({ params }: PageProps<"/[locale]/welco
             )}
             {stores.play && stores.appStore && <span aria-hidden="true"> · </span>}
             {stores.appStore && (
-              <a href={APP_STORE_URL!} data-testid="welcome-store-appstore" className={storeLink}>
+              <a href={APP_STORE_URL!} data-testid="welcome-store-appstore" data-count="cta_store_appstore" className={storeLink}>
                 {th("storeAppStore")}
               </a>
             )}

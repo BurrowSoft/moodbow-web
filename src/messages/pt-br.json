@@ -53,6 +53,8 @@
     "storeGetApp": "Baixe o app:",
     "storeGooglePlay": "Google Play",
     "storeAppStore": "App Store",
+    "storeBadgeAppStore": "Baixar na App Store",
+    "storeBadgePlay": "Disponível no Google Play",
     "storeSoonPlay": "Em breve no Google Play",
     "storeSoonAppStore": "Em breve na App Store",
     "featureCheckInTitle": "Um check-in de 10 segundos",
@@ -270,7 +272,8 @@
     "tagsTooLong": "Uma tag pode ter até 32 caracteres.",
     "setupLaterBody": "Seu lembrete diário está desligado. Você pode ligá-lo e escolher um horário quando quiser.",
     "setupLaterOpen": "Configurar",
-    "setupLaterClose": "Agora não"
+    "setupLaterClose": "Agora não",
+    "lateNote": "Já é tarde. Descansar também importa. Se esta noite estiver pesada, a ajuda está a um toque."
   },
   "entry": {
     "writeButton": "Escreva sobre o seu dia",
@@ -465,7 +468,12 @@
     "exportStress": "Estresse",
     "exportOfFive": "{value}/5",
     "exportReflectionOn": "Sobre sua anotação de {date}",
-    "exportTags": "Tags"
+    "exportTags": "Tags",
+    "exportRoutine": "Rotina",
+    "exportRoutineStarted": "começou em {date}",
+    "exportRoutineInAppointment": "no meu resumo para a consulta",
+    "exportRoutineTicked": "Dias marcados: {dates}",
+    "exportRoutineNoTicks": "Nenhum dia marcado ainda"
   },
   "help": {
     "helpTitle": "Ajuda e perguntas frequentes",
@@ -561,7 +569,8 @@
     "pairWeekends": "Fins de semana",
     "pairWritingTitle": "Escrita",
     "pairWrote": "Com escrita",
-    "pairNotWrote": "Sem escrita"
+    "pairNotWrote": "Sem escrita",
+    "showedUp": "{count, plural, one {Você apareceu em # dia} other {Você apareceu em # dias}} {range, select, week {nos últimos 7 dias} month {nos últimos 30 dias} threeMonths {nos últimos 3 meses} year {nos últimos 12 meses} other {desde que começou}}."
   },
   "share": {
     "shareButton": "Compartilhar",
@@ -595,7 +604,8 @@
     "shareLoading": "Preparando o seu mês…",
     "shareFormat": "Formato",
     "shareTheme": "Tema",
-    "shareLineCount": "{count, plural, one {Resta # caractere} other {Restam # caracteres}}"
+    "shareLineCount": "{count, plural, one {Resta # caractere} other {Restam # caracteres}}",
+    "shareShowedUp": "{n, plural, =1{Apareceu em 1 dia} other{Apareceu em # dias}}"
   },
   "ai": {
     "meAi": "IA",
@@ -775,6 +785,28 @@
     "nameItQuestion": "O que você está sentindo agora?",
     "nameItSmaller": "Dar um nome pode deixar isso um pouco menor.",
     "nameItThanks": "Que bom que você deu um nome."
+  },
+  "routine": {
+    "title": "Rotina",
+    "intro": "Até 3 coisas que você gostaria de marcar todo dia. Só você vê.",
+    "addHint": "Por exemplo, remédio da manhã",
+    "add": "Adicionar",
+    "full": "São 3, o máximo por enquanto.",
+    "duplicate": "Você já tem essa.",
+    "options": "Opções para {item}",
+    "deleteConfirm": "Remover",
+    "deleteTitle": "Remover {name}?",
+    "deleteBody": "Isso remove o item e os dias em que você o marcou.",
+    "inAppointment": "Mostrar em Para minha consulta",
+    "rowTitle": "Rotina",
+    "rowEmpty": "Adicione até 3 coisas que você faz quase todo dia, como o remédio da manhã ou uma caminhada.",
+    "rowSetUp": "Configurar",
+    "saveFailed": "Suas marcações da rotina não foram salvas. Tente de novo.",
+    "patternShown": "Nos dias em que você marcou {name}, seu humor ficou em média {a} de 5. Nos outros dias, {b}.",
+    "patternFootnote": "Isto pode mostrar o que costuma andar junto, não o que causa o quê. Nunca mude um medicamento sem falar com seu médico ou farmacêutico.",
+    "appointmentHeading": "Rotina",
+    "appointmentShare": "{name}: marcações em {percent}% dos dias com check-in",
+    "appointmentNotEnough": "{name}: ainda não há dias suficientes"
   },
   "safetyPlan": {
     "title": "Meu plano de segurança",
@@ -1000,5 +1032,52 @@
     "liftsRow": "Nos dias com a tag \"{tag}\", seu humor ficou em média em {a} de 5; nos outros dias, em {b}.",
     "liftsFooter": "Padrões, não causas. Só você pode ver isto.",
     "liftsNone": "Continue marcando seus dias com tags. Os padrões aparecem depois de algumas semanas."
+  },
+  "year": {
+    "title": "Seu ano no Moodbow",
+    "todayLine": "Um olhar sobre {year}, só para você.",
+    "open": "Abrir",
+    "coloursTitle": "Seu ano em cores",
+    "coloursLine": "A cada mês, os humores que você registrou.",
+    "monthMood": "{month}: {mood}",
+    "monthFaint": "{month}: nenhum dia registrado",
+    "daysTitle": "Os dias em que você apareceu",
+    "daysLine": "{count, plural, one {Você apareceu em # dia} other {Você apareceu em # dias}} este ano.",
+    "momentsTitle": "Seus momentos",
+    "momentsLine": "{count, plural, one {Você marcou # momento} other {Você marcou # momentos}}.",
+    "helpedTitle": "O que ajuda você",
+    "tagsTitle": "Nos dias bons, você usou muito estas tags:",
+    "hardTitle": "Seu ano",
+    "hardLine": "Este ano pediu muito de você. Você continuou aparecendo.",
+    "closing": "Obrigado por reservar esse tempo para você este ano.",
+    "morePlus": "Ver mais do seu ano",
+    "notEnough": "Seu ano de {year} no Moodbow aparece depois de 30 dias registrados naquele ano. Você está em {count}.",
+    "share": "Compartilhar seu ano",
+    "previous": "Anterior",
+    "next": "Próximo",
+    "position": "Tela {n} de {total}",
+    "shareNote": "A imagem mostra suas cores e o número de dias. Suas anotações, tags, momentos e datas nunca aparecem nela.",
+    "daysUnit": "{count, plural, one {dia} other {dias}}",
+    "new": "Novo"
+  },
+  "sounds": {
+    "title": "Sons calmantes",
+    "rain": "Chuva",
+    "waves": "Ondas",
+    "brown": "Ruído marrom",
+    "hum": "Murmúrio suave",
+    "timer": "Timer",
+    "minutes": "{n} min",
+    "untilStop": "Até eu parar",
+    "play": "Tocar",
+    "pause": "Pausar",
+    "stop": "Parar",
+    "left": "Faltam {n} min",
+    "untilStopped": "Até você parar",
+    "lock": "Som tocando",
+    "lockLeft": "Som tocando · faltam {n} min",
+    "lockPaused": "Som pausado",
+    "intro": "Criados no seu navegador, então não há nada para baixar. Use o volume do seu dispositivo.",
+    "unavailable": "Os sons calmantes não estão disponíveis neste navegador."
   }
 }

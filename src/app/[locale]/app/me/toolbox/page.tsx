@@ -15,7 +15,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { JOURNAL_HEADING } from "@/lib/ui/journalLayout";
 import { titledMetadata } from "../../pageMeta";
 import { ToolboxBreatheOnly, ToolboxEditor } from "./ToolboxEditor";
-import { GoodThingsLink, GroundingLinks } from "./Grounding";
+import { CalmingSoundsLink, GoodThingsLink, GroundingLinks } from "./Grounding";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/app/me/toolbox">): Promise<Metadata> {
   const { locale } = await params;
@@ -48,7 +48,7 @@ export default async function ToolboxPage({ params }: PageProps<"/[locale]/app/m
       {/* Help first, beside Back (UX's rule: every page with journal content), hidden on paper. */}
       <div className="flex flex-wrap items-center gap-x-[12px] gap-y-[8px] print:hidden">
         <BackLink href="/app/me" label={ta("navBackTo", { screen: ta("tabMe") })} testId="nav-back" />
-        <GetHelpNow country={me?.profile?.country} testId="toolbox-get-help" neutral />
+        <GetHelpNow country={me?.profile?.country} testId="toolbox-get-help" counted neutral />
       </div>
       <h1 className={JOURNAL_HEADING} data-testid="toolbox-title">
         {t("meRow")}
@@ -64,6 +64,7 @@ export default async function ToolboxPage({ params }: PageProps<"/[locale]/app/m
       {/* 1.3: grounding, next to breathing; it needs no data either. */}
       {pageGate("grounding-live") !== "hidden" && <GroundingLinks />}
       {pageGate("good-things-live") !== "hidden" && <GoodThingsLink />}
+      {pageGate("sounds-live") !== "hidden" && <CalmingSoundsLink />}
     </section>
   );
 }

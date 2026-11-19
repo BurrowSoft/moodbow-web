@@ -15,6 +15,7 @@ import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
 import { useKeyboardOpen } from "@/lib/ui/keyboardOpen";
 import { focusUnclaimed, markLeftBo, takeOpenedByButton } from "./boFocus";
 import { PRIMARY_SAVE } from "@/lib/ui/journalLayout";
+import { countTap } from "@/lib/analyticsEvents";
 
 const BO_HEADER_MOST = 0.25;
 // The usual save button, whose height doesn't grow with the text: at 300 % it took a quarter of
@@ -291,6 +292,8 @@ export function BoConversation({ initial, country, back, healthData = false, con
     // Send was off while it went, which dropped focus; back to the box, where the text is.
     requestAnimationFrame(() => box.current?.focus({ preventScroll: true }));
     if (answer.status === "ok") {
+      // Every reply alike (specs/analytics.md): never what was said, never whether the card opened.
+      countTap("bo_reply");
       // The country this message was checked with beats the last status's, none included: the
       // server's line then used Me's, and so does the card (Reviewer, 2026-11-09).
       setHelpCountry(answer.helpCountry ?? null);
@@ -354,7 +357,7 @@ export function BoConversation({ initial, country, back, healthData = false, con
       <header ref={header} data-testid="bo-header" data-pinned={pinned ? "" : undefined} className={`flex flex-wrap items-center gap-x-[8px] gap-y-[4px] bg-bg py-[8px] ${pinned && !keyboard ? "sticky top-0 z-10" : ""}`}>
         {back && <div className="md:hidden">{back}</div>}
         <h1 ref={heading} tabIndex={-1} className="min-w-0 flex-1 font-medium leading-[1.33] text-text outline-none [font-size:min(1.5rem,max(10vw,24px,1rem))] [overflow-wrap:anywhere]">{t("screenLine")}</h1>
-        <GetHelpNow country={country} where={helpCountry} testId="bo-get-help" neutral />
+        <GetHelpNow country={country} where={helpCountry} testId="bo-get-help" counted neutral />
       </header>
       <p className="text-sm text-muted">
         {t("smallLine")}

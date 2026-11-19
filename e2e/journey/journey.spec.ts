@@ -998,7 +998,7 @@ test.describe("the tab bar in every language", () => {
           await page.goto(`${route}/app`);
           await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
           // A label's lines: one per word at most; a broken word adds one.
-          const labels = await page.locator('a[data-testid^="tab-"] > span:last-child').evaluateAll((spans) =>
+          const labels = await page.locator('a[data-testid^="tab-"] [data-tab-label]').evaluateAll((spans) =>
             spans.filter((span) => getComputedStyle(span).display !== "none").map((span) => {
               const range = document.createRange();
               range.selectNodeContents(span);

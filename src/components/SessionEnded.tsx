@@ -2,6 +2,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { GetHelpNow } from "./SafetyCard";
 import { PicturesClear } from "./PicturesClear";
+import { NoSessionTracesClear } from "./NoSessionTracesClear";
 
 // Shown by a journal page when there's no session any more, reached by moving
 // between tabs: the shared layout, which would send them to sign-in, doesn't
@@ -15,6 +16,7 @@ export function SessionEnded() {
   return (
     <section className="flex flex-1 flex-col items-center justify-center px-6 py-16 text-center" data-testid="session-ended">
       <PicturesClear />
+      <NoSessionTracesClear />
       <div role="alert" data-alert="heading">
         <h1 className="text-lg font-medium text-text">{t("sessionEndedTitle")}</h1>
       </div>
@@ -22,7 +24,7 @@ export function SessionEnded() {
         {t("signinSubmit")}
       </Link>
       <div className="mt-4">
-        <GetHelpNow country={null} testId="session-ended-help" neutral />
+        <GetHelpNow country={null} testId="session-ended-help" counted neutral />
       </div>
     </section>
   );

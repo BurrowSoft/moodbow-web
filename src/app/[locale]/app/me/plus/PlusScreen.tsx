@@ -9,6 +9,7 @@ import type { PlusOfferPrices } from "@/lib/plus/page";
 import type { PlusView } from "@/lib/plus/view";
 import { FESTIVE_CARD, Lights, Tree } from "../../PlusSheet";
 import { SAVE_WAIT_MS } from "@/lib/ui/withTimeout";
+import { countTap } from "@/lib/analyticsEvents";
 
 // Free rows, then what Plus adds: "your journal is free, Insights come with Plus" (Vitor, 14 Nov;
 // specs/1.3-offer-review-voice-taps.md §2). No AI rows in any comparison: the AI allowance rules
@@ -64,6 +65,13 @@ export function PlusScreen({ view, price, offer = null, started }: { view: PlusV
       clearTimeout(long);
     };
   }, [waiting, router]);
+  // Counted by name only (specs/analytics.md, the app's names): the screen opened, and back
+  // from Stripe with Plus on. Never the price, the plan or the offer.
+  const purchased = started && has;
+  useEffect(() => {
+    if (waiting) return;
+    countTap(purchased ? "plus_purchased" : "plus_opened");
+  }, [purchased, waiting]);
 
   const go = async (path: "/api/checkout/stripe" | "/api/billing/portal") => {
     if (busy) return;

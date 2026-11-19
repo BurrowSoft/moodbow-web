@@ -1,7 +1,8 @@
 import { useLocale, useTranslations } from "next-intl";
+import type { ShowedUpRange } from "@/lib/journal/showedUp";
 import { Link } from "@/i18n/navigation";
 import { CHARTS, METRICS, summarize, type InsightRow, type Metric, type Range } from "@/lib/journal/insights";
-import type { Pattern, PatternId } from "@/lib/journal/patterns";
+import type { Pattern, PatternId, RoutineLine } from "@/lib/journal/patterns";
 import { MoodPair } from "@/components/MoodPair";
 import { PATTERN_PAIR } from "@/lib/journal/patternPair";
 import { JOURNAL_HEADING, segment } from "@/lib/ui/journalLayout";
@@ -46,9 +47,12 @@ export function InsightsView({
   summary,
   week,
   patterns,
+  routinePatterns,
   plusTab,
   plusPatterns,
   long,
+  showedUp,
+  yearRow,
 }: {
   rows: InsightRow[];
   today: string;
@@ -59,6 +63,8 @@ export function InsightsView({
   summary?: React.ReactNode;
   week?: React.ReactNode;
   patterns?: Pattern[];
+  // 1.4 F: the routine lines to show (higher on ticked days only), where routine-live is on.
+  routinePatterns?: RoutineLine[];
   // Moodbow Plus's locked Year tab and More patterns row, for someone without Plus.
   plusTab?: React.ReactNode;
   plusPatterns?: React.ReactNode;
@@ -66,6 +72,11 @@ export function InsightsView({
   // point per month or quarter (lib/plus/longRange). periodLine: the first and
   // last period in the browser's own month or quarter names.
   long?: { range: LongRange; unit: Unit; periodLine: string; charts: Record<Metric, LongSummary> };
+  // Days you showed up (1.4 C, lib/journal/showedUp): the shown range's count, said as a count only,
+  // never a streak. Absent where its condition is off.
+  showedUp?: { count: number; range: ShowedUpRange };
+  // Your year in Moodbow's row (1.4 A, year-review-live), at the top.
+  yearRow?: React.ReactNode;
 }) {
   const tp = useTranslations("plus");
   const t = useTranslations("insights");
@@ -95,6 +106,7 @@ export function InsightsView({
           {help}
         </div>
       </div>
+      {yearRow && <div className="mt-4">{yearRow}</div>}
       {summary}
       <nav aria-label={t("insightsTitle")} className="mt-4 flex flex-wrap gap-2">
         {RANGE_TABS.map(({ range: r, key }) => (
@@ -102,6 +114,8 @@ export function InsightsView({
             key={r}
             href={r === "week" ? "/app/insights" : `/app/insights?range=${r}`}
             data-testid={`insights-range-${r}`}
+            data-count="insights_range"
+            data-count-range={r}
             aria-current={!long && r === range ? "page" : undefined}
             className={tab(!long && r === range)}
           >
@@ -110,6 +124,11 @@ export function InsightsView({
         ))}
         {plusTab}
       </nav>
+      {showedUp && (
+        <p data-testid="insights-showed-up" className="mt-4 text-sm text-muted [overflow-wrap:anywhere]">
+          {t("showedUp", { count: showedUp.count, range: showedUp.range })}
+        </p>
+      )}
 
       {week}
 
@@ -171,7 +190,7 @@ export function InsightsView({
         </p>
       )}
 
-      {patterns && <Patterns patterns={patterns} format={(v) => number.format(v)} signed={(v) => signedDecimal.format(v)} />}
+      {patterns && <Patterns patterns={patterns} routine={routinePatterns} format={(v) => number.format(v)} signed={(v) => signedDecimal.format(v)} />}
       {plusPatterns}
     </section>
   );
@@ -181,9 +200,28 @@ export function InsightsView({
 // order (sleep, movement, stress), never sorted by size; a pattern without
 // enough days is left out; nothing to show is one line. Descriptive, never
 // causal: the footnote says so under the sentences.
-function Patterns({ patterns, format, signed }: { patterns: Pattern[]; format: (v: number) => string; signed: (v: number) => string }) {
+// Routine (1.4 F, routine-live): only the lines where mood was higher on ticked days, under the
+// factor lines, with their own caution once below them (an item can be a medication: UX's
+// safety ruling, 18 Nov). Never a lower or "about the same" line.
+function Patterns({ patterns, routine = [], format, signed }: { patterns: Pattern[]; routine?: RoutineLine[]; format: (v: number) => string; signed: (v: number) => string }) {
   const t = useTranslations("insights");
+  const tr = useTranslations("routine");
   const visible = patterns.filter((p) => p.state !== "not_enough");
+  const routineList =
+    routine.length > 0 ? (
+      <>
+        <ul className="mt-3 space-y-3 text-sm text-text" data-testid="insights-routine-patterns">
+          {routine.map((r) => (
+            <li key={r.id} data-testid="insights-routine-pattern" className="[overflow-wrap:anywhere]">
+              {tr("patternShown", { name: r.name, a: format(r.a), b: format(r.b) })}
+            </li>
+          ))}
+        </ul>
+        <p className="mt-3 text-xs text-muted" data-testid="insights-routine-footnote">
+          {tr("patternFootnote")}
+        </p>
+      </>
+    ) : null;
   return (
     <section data-testid="insights-patterns" aria-labelledby="patterns-title" className="mt-6 rounded-3xl border border-border bg-surface p-[20px]">
       <h2 id="patterns-title" className="text-lg font-medium text-text">
@@ -209,7 +247,10 @@ function Patterns({ patterns, format, signed }: { patterns: Pattern[]; format: (
           <p className="mt-3 text-xs text-muted" data-testid="insights-patterns-footnote">
             {t("patternsFootnote")}
           </p>
+          {routineList}
         </>
+      ) : routineList ? (
+        routineList
       ) : (
         <p className="mt-3 text-sm text-muted" data-testid="insights-patterns-none">
           {t("patternsNone")}

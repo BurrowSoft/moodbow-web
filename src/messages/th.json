@@ -53,6 +53,8 @@
     "storeGetApp": "ดาวน์โหลดแอป:",
     "storeGooglePlay": "Google Play",
     "storeAppStore": "App Store",
+    "storeBadgeAppStore": "ดาวน์โหลดได้ที่ App Store",
+    "storeBadgePlay": "ดาวน์โหลดที่ Google Play",
     "storeSoonPlay": "เร็วๆ นี้บน Google Play",
     "storeSoonAppStore": "เร็วๆ นี้บน App Store",
     "featureCheckInTitle": "บันทึกอารมณ์ใน 10 วินาที",
@@ -270,7 +272,8 @@
     "tagsTooLong": "แท็กยาวได้สูงสุด 32 ตัวอักษร",
     "setupLaterBody": "การแจ้งเตือนรายวันของคุณปิดอยู่ คุณเปิดและเลือกเวลาได้ทุกเมื่อ",
     "setupLaterOpen": "ตั้งค่า",
-    "setupLaterClose": "ไว้ทีหลัง"
+    "setupLaterClose": "ไว้ทีหลัง",
+    "lateNote": "ดึกแล้ว การพักผ่อนก็สำคัญนะ ถ้าคืนนี้รู้สึกหนักใจ ความช่วยเหลืออยู่แค่แตะเดียว"
   },
   "entry": {
     "writeButton": "เขียนเล่าเรื่องราววันนี้",
@@ -465,7 +468,12 @@
     "exportStress": "ความเครียด",
     "exportOfFive": "{value}/5",
     "exportReflectionOn": "สำหรับบันทึกวันที่ {date}",
-    "exportTags": "แท็ก"
+    "exportTags": "แท็ก",
+    "exportRoutine": "กิจวัตร",
+    "exportRoutineStarted": "เริ่ม {date}",
+    "exportRoutineInAppointment": "อยู่ในสรุปสำหรับนัดหมายของฉัน",
+    "exportRoutineTicked": "ทำแล้ว: {dates}",
+    "exportRoutineNoTicks": "ยังไม่ได้ทำ"
   },
   "help": {
     "helpTitle": "ความช่วยเหลือและคำถามที่พบบ่อย",
@@ -561,7 +569,8 @@
     "pairWeekends": "วันหยุดสุดสัปดาห์",
     "pairWritingTitle": "การเขียน",
     "pairWrote": "ได้เขียน",
-    "pairNotWrote": "ไม่ได้เขียน"
+    "pairNotWrote": "ไม่ได้เขียน",
+    "showedUp": "{count, plural, other {คุณมาบันทึก # วัน}}{range, select, week {ใน 7 วันที่ผ่านมา} month {ใน 30 วันที่ผ่านมา} threeMonths {ใน 3 เดือนที่ผ่านมา} year {ใน 12 เดือนที่ผ่านมา} other {ตั้งแต่เริ่มใช้}}"
   },
   "share": {
     "shareButton": "แชร์",
@@ -595,7 +604,8 @@
     "shareLoading": "กำลังเตรียมเดือนของคุณ…",
     "shareFormat": "รูปแบบ",
     "shareTheme": "ธีม",
-    "shareLineCount": "เหลืออีก {count} ตัวอักษร"
+    "shareLineCount": "เหลืออีก {count} ตัวอักษร",
+    "shareShowedUp": "มาบันทึก {n, number} วัน"
   },
   "ai": {
     "meAi": "AI",
@@ -775,6 +785,28 @@
     "nameItQuestion": "ตอนนี้คุณรู้สึกอย่างไร",
     "nameItSmaller": "การตั้งชื่อให้ความรู้สึกอาจทำให้มันเล็กลงได้บ้าง",
     "nameItThanks": "ขอบคุณที่ตั้งชื่อให้มัน"
+  },
+  "routine": {
+    "title": "กิจวัตร",
+    "intro": "สูงสุด 3 อย่างที่คุณอยากติ๊กทุกวัน มีแค่คุณที่เห็น",
+    "addHint": "เช่น ยาตอนเช้า",
+    "add": "เพิ่ม",
+    "full": "ครบ 3 อย่างแล้ว ซึ่งเป็นจำนวนสูงสุดตอนนี้",
+    "duplicate": "คุณมีอันนี้อยู่แล้ว",
+    "options": "ตัวเลือกสำหรับ {item}",
+    "deleteConfirm": "ลบ",
+    "deleteTitle": "ลบ {name} ไหม",
+    "deleteBody": "การลบจะเอารายการนี้และวันที่คุณติ๊กไว้ออกไปด้วย",
+    "inAppointment": "แสดงใน สำหรับนัดหมายของฉัน",
+    "rowTitle": "กิจวัตร",
+    "rowEmpty": "เพิ่มได้สูงสุด 3 อย่างที่คุณทำแทบทุกวัน เช่น ยาตอนเช้า หรือการเดินเล่น",
+    "rowSetUp": "ตั้งค่า",
+    "saveFailed": "ยังไม่ได้บันทึกกิจวัตรที่ทำ ลองอีกครั้ง",
+    "patternShown": "ในวันที่คุณทำ {name} อารมณ์ของคุณเฉลี่ยอยู่ที่ {a} จาก 5 ส่วนวันอื่นๆ อยู่ที่ {b}",
+    "patternFootnote": "สิ่งนี้อาจช่วยให้เห็นว่าอะไรมักเกิดขึ้นคู่กัน แต่ไม่ได้บอกว่าอะไรเป็นสาเหตุของอะไร อย่าเปลี่ยนยาโดยไม่ปรึกษาแพทย์หรือเภสัชกรของคุณ",
+    "appointmentHeading": "กิจวัตร",
+    "appointmentShare": "{name}: ทำ {percent}% ของวันที่เช็กอิน",
+    "appointmentNotEnough": "{name}: ยังมีวันไม่พอ"
   },
   "safetyPlan": {
     "title": "แผนความปลอดภัยของฉัน",
@@ -1000,5 +1032,52 @@
     "liftsRow": "ในวันที่มีแท็ก \"{tag}\" อารมณ์ของคุณเฉลี่ย {a} จาก 5 ส่วนวันอื่นๆ เฉลี่ย {b}",
     "liftsFooter": "เป็นรูปแบบ ไม่ใช่สาเหตุ มีแค่คุณที่เห็นสิ่งนี้",
     "liftsNone": "ติดแท็กให้วันของคุณต่อไป รูปแบบจะเริ่มเห็นหลังผ่านไปสองสามสัปดาห์"
+  },
+  "year": {
+    "title": "ปีของคุณใน Moodbow",
+    "todayLine": "ย้อนดูปี {year} สำหรับคุณโดยเฉพาะ",
+    "open": "เปิด",
+    "coloursTitle": "สีสันของปีคุณ",
+    "coloursLine": "อารมณ์ที่คุณบันทึกในแต่ละเดือน",
+    "monthMood": "{month}: {mood}",
+    "monthFaint": "{month}: ไม่มีบันทึก",
+    "daysTitle": "วันที่คุณมาบันทึก",
+    "daysLine": "{count, plural, other {ปีนี้คุณมาบันทึก # วัน}}",
+    "momentsTitle": "ช่วงเวลาสำคัญของคุณ",
+    "momentsLine": "{count, plural, other {คุณทำเครื่องหมายช่วงเวลาสำคัญ # ครั้ง}}",
+    "helpedTitle": "สิ่งที่ช่วยคุณ",
+    "tagsTitle": "ในวันที่ดี คุณมักใช้แท็กเหล่านี้",
+    "hardTitle": "ปีของคุณ",
+    "hardLine": "ปีนี้เรียกร้องจากคุณมาก แต่คุณก็ยังกลับมาเสมอ",
+    "closing": "ขอบคุณที่ดูแลตัวเองตลอดปีนี้",
+    "morePlus": "ดูปีของคุณเพิ่มเติม",
+    "notEnough": "ปี {year} ของคุณใน Moodbow จะปรากฏเมื่อคุณบันทึกครบ 30 วันในปีนั้น ตอนนี้คุณบันทึกแล้ว {count} วัน",
+    "share": "แชร์ปีของคุณ",
+    "previous": "ก่อนหน้า",
+    "next": "ถัดไป",
+    "position": "หน้าจอ {n} จาก {total}",
+    "shareNote": "ภาพนี้แสดงสีของคุณและจำนวนวัน บันทึก แท็ก ช่วงเวลาสำคัญ และวันที่ของคุณจะไม่อยู่ในภาพนี้เลย",
+    "daysUnit": "{count, plural, other {วัน}}",
+    "new": "ใหม่"
+  },
+  "sounds": {
+    "title": "เสียงผ่อนคลาย",
+    "rain": "เสียงฝน",
+    "waves": "เสียงคลื่น",
+    "brown": "เสียงสีน้ำตาล",
+    "hum": "เสียงฮัมเบาๆ",
+    "timer": "ตั้งเวลา",
+    "minutes": "{n} นาที",
+    "untilStop": "จนกว่าจะหยุด",
+    "play": "เล่น",
+    "pause": "หยุดชั่วคราว",
+    "stop": "หยุด",
+    "left": "เหลือ {n} นาที",
+    "untilStopped": "จนกว่าคุณจะหยุด",
+    "lock": "กำลังเล่นเสียง",
+    "lockLeft": "กำลังเล่นเสียง · เหลือ {n} นาที",
+    "lockPaused": "เสียงหยุดชั่วคราว",
+    "intro": "สร้างขึ้นในเบราว์เซอร์ของคุณโดยตรง จึงไม่ต้องดาวน์โหลดอะไร ใช้ระดับเสียงของอุปกรณ์ได้เลย",
+    "unavailable": "เสียงผ่อนคลายใช้ไม่ได้ในเบราว์เซอร์นี้"
   }
 }

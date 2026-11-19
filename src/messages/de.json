@@ -53,6 +53,8 @@
     "storeGetApp": "Hol dir die App:",
     "storeGooglePlay": "Google Play",
     "storeAppStore": "App Store",
+    "storeBadgeAppStore": "Laden im App Store",
+    "storeBadgePlay": "Jetzt bei Google Play",
     "storeSoonPlay": "Bald bei Google Play",
     "storeSoonAppStore": "Bald im App Store",
     "featureCheckInTitle": "Ein Check-in in 10 Sekunden",
@@ -270,7 +272,8 @@
     "tagsTooLong": "Ein Tag darf bis zu 32 Zeichen haben.",
     "setupLaterBody": "Deine tägliche Erinnerung ist aus. Du kannst sie jederzeit einschalten und eine Uhrzeit wählen.",
     "setupLaterOpen": "Einrichten",
-    "setupLaterClose": "Nicht jetzt"
+    "setupLaterClose": "Nicht jetzt",
+    "lateNote": "Es ist spät. Ruhe ist auch wichtig. Wenn sich diese Nacht schwer anfühlt, ist Hilfe nur einen Fingertipp entfernt."
   },
   "entry": {
     "writeButton": "Über deinen Tag schreiben",
@@ -465,7 +468,12 @@
     "exportStress": "Stress",
     "exportOfFive": "{value}/5",
     "exportReflectionOn": "Zu deinem Eintrag vom {date}",
-    "exportTags": "Tags"
+    "exportTags": "Tags",
+    "exportRoutine": "Routine",
+    "exportRoutineStarted": "begonnen am {date}",
+    "exportRoutineInAppointment": "in meiner Zusammenfassung für den Termin",
+    "exportRoutineTicked": "Abgehakt: {dates}",
+    "exportRoutineNoTicks": "Noch nicht abgehakt"
   },
   "help": {
     "helpTitle": "Hilfe & FAQ",
@@ -561,7 +569,8 @@
     "pairWeekends": "Wochenenden",
     "pairWritingTitle": "Schreiben",
     "pairWrote": "Geschrieben",
-    "pairNotWrote": "Nicht geschrieben"
+    "pairNotWrote": "Nicht geschrieben",
+    "showedUp": "{range, select, week {In den letzten 7 Tagen} month {In den letzten 30 Tagen} threeMonths {In den letzten 3 Monaten} year {In den letzten 12 Monaten} other {Seit du angefangen hast,}} {count, plural, one {warst du an # Tag da} other {warst du an # Tagen da}}."
   },
   "share": {
     "shareButton": "Teilen",
@@ -595,7 +604,8 @@
     "shareLoading": "Dein Monat wird geladen …",
     "shareFormat": "Format",
     "shareTheme": "Design",
-    "shareLineCount": "{count, plural, one {# Zeichen übrig} other {# Zeichen übrig}}"
+    "shareLineCount": "{count, plural, one {# Zeichen übrig} other {# Zeichen übrig}}",
+    "shareShowedUp": "{n, plural, =1{An 1 Tag da} other{An # Tagen da}}"
   },
   "ai": {
     "meAi": "KI",
@@ -775,6 +785,28 @@
     "nameItQuestion": "Was fühlst du gerade?",
     "nameItSmaller": "Es zu benennen kann es ein bisschen kleiner machen.",
     "nameItThanks": "Danke, dass du es benannt hast."
+  },
+  "routine": {
+    "title": "Routine",
+    "intro": "Bis zu 3 Dinge, die du jeden Tag abhaken möchtest. Nur du siehst sie.",
+    "addHint": "Zum Beispiel Medikamente am Morgen",
+    "add": "Hinzufügen",
+    "full": "Das sind 3, mehr geht im Moment nicht.",
+    "duplicate": "Das hast du schon.",
+    "options": "Optionen für {item}",
+    "deleteConfirm": "Entfernen",
+    "deleteTitle": "{name} entfernen?",
+    "deleteBody": "Damit werden der Eintrag und die Tage entfernt, an denen du ihn abgehakt hast.",
+    "inAppointment": "In Für meinen Termin zeigen",
+    "rowTitle": "Routine",
+    "rowEmpty": "Füge bis zu 3 Dinge hinzu, die du an den meisten Tagen machst, etwa Medikamente am Morgen oder einen Spaziergang.",
+    "rowSetUp": "Einrichten",
+    "saveFailed": "Deine Routine-Häkchen wurden nicht gespeichert. Versuch es noch einmal.",
+    "patternShown": "An Tagen, an denen du {name} abgehakt hast, lag deine Stimmung im Schnitt bei {a} von 5. An anderen Tagen bei {b}.",
+    "patternFootnote": "Das kann zeigen, was oft zusammen auftritt, nicht was was verursacht. Ändere ein Medikament nie, ohne mit deiner Ärztin, deinem Arzt oder in der Apotheke zu sprechen.",
+    "appointmentHeading": "Routine",
+    "appointmentShare": "{name}: an {percent} % der Check-in-Tage abgehakt",
+    "appointmentNotEnough": "{name}: noch nicht genug Tage"
   },
   "safetyPlan": {
     "title": "Mein Sicherheitsplan",
@@ -1000,5 +1032,52 @@
     "liftsRow": "An Tagen mit dem Tag „{tag}“ lag deine Stimmung im Schnitt bei {a} von 5, an anderen Tagen bei {b}.",
     "liftsFooter": "Muster, keine Ursachen. Nur du kannst das sehen.",
     "liftsNone": "Vergib weiter Tags für deine Tage. Muster zeigen sich nach ein paar Wochen."
+  },
+  "year": {
+    "title": "Dein Jahr in Moodbow",
+    "todayLine": "Ein Rückblick auf {year}, nur für dich.",
+    "open": "Öffnen",
+    "coloursTitle": "Dein Jahr in Farben",
+    "coloursLine": "Jeden Monat die Stimmungen, die du eingetragen hast.",
+    "monthMood": "{month}: {mood}",
+    "monthFaint": "{month}: keine Tage eingetragen",
+    "daysTitle": "Tage, an denen du da warst",
+    "daysLine": "{count, plural, one {Du warst in diesem Jahr an # Tag da.} other {Du warst in diesem Jahr an # Tagen da.}}",
+    "momentsTitle": "Deine Momente",
+    "momentsLine": "{count, plural, one {Du hast # Moment markiert} other {Du hast # Momente markiert}}.",
+    "helpedTitle": "Was dir hilft",
+    "tagsTitle": "An guten Tagen hast du oft diese Tags gewählt:",
+    "hardTitle": "Dein Jahr",
+    "hardLine": "Dieses Jahr hat dir viel abverlangt. Du warst trotzdem immer wieder da.",
+    "closing": "Danke, dass du dieses Jahr für dich da warst.",
+    "morePlus": "Mehr von deinem Jahr ansehen",
+    "notEnough": "Dein Jahr {year} in Moodbow erscheint, sobald du in dem Jahr an 30 Tagen eingetragen hast. Du bist bei {count}.",
+    "share": "Dein Jahr teilen",
+    "previous": "Zurück",
+    "next": "Weiter",
+    "position": "Seite {n} von {total}",
+    "shareNote": "Das Bild zeigt deine Farben und die Anzahl der Tage. Deine Einträge, Tags, Momente und Daten sind nie darauf.",
+    "daysUnit": "{count, plural, one {Tag} other {Tage}}",
+    "new": "Neu"
+  },
+  "sounds": {
+    "title": "Beruhigende Klänge",
+    "rain": "Regen",
+    "waves": "Wellen",
+    "brown": "Braunes Rauschen",
+    "hum": "Sanftes Summen",
+    "timer": "Timer",
+    "minutes": "{n} Min.",
+    "untilStop": "Bis ich aufhöre",
+    "play": "Abspielen",
+    "pause": "Pause",
+    "stop": "Stopp",
+    "left": "Noch {n} Min.",
+    "untilStopped": "Bis du aufhörst",
+    "lock": "Klang läuft",
+    "lockLeft": "Klang läuft · noch {n} Min.",
+    "lockPaused": "Klang pausiert",
+    "intro": "Direkt in deinem Browser erzeugt, also nichts zum Herunterladen. Nutze die Lautstärke deines Geräts.",
+    "unavailable": "Beruhigende Klänge sind in diesem Browser nicht verfügbar."
   }
 }
