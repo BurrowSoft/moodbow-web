@@ -88,18 +88,52 @@ export function SupportAddress() {
     </>
   );
 }
-// A message that names the address as plain text ({email}): the address in its place.
+// Kept whole on a line (UX, 20 Nov: the address with its full stop, the word to type on /account-deletion): one
+// inline block, so it moves to the next line whole when the rest of this one can't hold it, and its hyphens are off.
+// Never no-wrap: where no line can hold it (a 160 px page at 200 % zoom), it may still give way rather than push the
+// page sideways (#410's CI, /privacy). Inside, the address still breaks after its "@".
+export const WHOLE_UNIT_CLASS = "inline-block max-w-full [overflow-wrap:anywhere] [hyphens:manual]";
+const TRAILING = /^[.,;:!?)]+/;
+// A message that names the address as plain text ({email}): the address in its place, with the punctuation right
+// after it in the same block (UX, 20 Nov: ". We answer…" had started a line).
 export function withSupportAddress(text: string): ReactNode {
   const parts = text.split(SUPPORT_EMAIL);
   if (parts.length === 1) return text;
-  return parts.flatMap((part, i) => (i === 0 ? [part] : [<SupportAddress key={i} />, part]));
+  return parts.flatMap((part, i) => {
+    if (i === 0) return [part];
+    const punct = part.match(TRAILING)?.[0] ?? "";
+    return [
+      <span key={i} className={WHOLE_UNIT_CLASS}>
+        <SupportAddress />
+        {punct}
+      </span>,
+      part.slice(punct.length),
+    ];
+  });
 }
-// The same in rendered HTML (the legal pages, Help's articles): only in text between tags, so a mailto: link's
-// address stays as it is.
+// The same in rendered HTML (the legal pages, Help's articles). A mailto: link and the punctuation right after it go in
+// one block (markup only, the text unchanged); the address elsewhere in text gets its <wbr>. Never inside a tag.
+const MAILTO_LINK = new RegExp(`(<a [^>]*href="mailto:${SUPPORT_EMAIL.replace(/\./g, "\\.")}"[^>]*>)${SUPPORT_EMAIL.replace(/\./g, "\\.")}(</a>)([.,;:!?)]*)`, "g");
 export function supportAddressHtml(html: string): string {
   const shown = `${SUPPORT_LOCAL_AT}<wbr>${SUPPORT_DOMAIN}`;
-  return html
+  const linked = html.replace(MAILTO_LINK, (_, open: string, close: string, punct: string) => `<span class="${WHOLE_UNIT_CLASS}">${open}${shown}${close}${punct}</span>`);
+  return linked
     .split(/(<[^>]*>)/)
     .map((part) => (part.startsWith("<") ? part : part.split(SUPPORT_EMAIL).join(shown)))
     .join("");
+}
+// Words that must stay whole on a line, wherever they are in a text (exact, case-sensitive).
+export function keepWhole(text: string, words: readonly string[]): ReactNode {
+  const found = words.filter((w) => w && text.includes(w));
+  if (!found.length) return text;
+  const pattern = new RegExp(`(${found.map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`, "g");
+  return text.split(pattern).map((part, i) =>
+    i % 2 === 1 ? (
+      <span key={i} className={WHOLE_UNIT_CLASS}>
+        {part}
+      </span>
+    ) : (
+      part
+    ),
+  );
 }

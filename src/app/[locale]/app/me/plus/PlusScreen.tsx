@@ -366,18 +366,27 @@ export function PlusScreen({ view, price, offer = null, started }: { view: PlusV
           >
             {has ? t("titleHas") : t("title")}
           </h1>
-          <p className="text-[0.875em] text-muted">{t("lead")}</p>
+          {!topAction && <p className="text-[0.875em] text-muted">{t("lead")}</p>}
         </div>
         {/* UX, 20 Nov (#410): "under the 13em breakpoint, no pinned footer. Instead an offer block (price, the
             renewal line, Start) sits right after the title/lead, before the feature table, so it's in view on landing
-            at 320/300. The same block repeats at the end; never Start without the price and renewal next to it." */}
+            at 320/300. The same block repeats at the end; never Start without the price and renewal next to it." And
+            after the Web Tester's fr re-check (the renewal line at 545–650 of 640): "under 13em the top order becomes
+            title → offer block (price, Start, renewal) → lead → table." */}
         {topAction && (
-          // The page's full width and no panel, so its lines are as few as they can be (de's renewal line was under the
-          // fold at 320 × 640 / 300 % with 12 px padding and 8 px gaps, #410's CI); a thin rule above and below keeps it
-          // apart from the lead and the table (UX, 20 Nov).
-          <div data-testid="plus-offer-top" className="flex flex-col gap-[4px] border-y border-border py-[4px] text-center [font-size:min(1rem,max(10vw,32px))]">
-            {topAction}
-          </div>
+          <>
+            {/* The page's full width and no panel, so its lines are as few as they can be (#410's CI); a thin rule
+                above and below keeps it apart from the lead and the table (UX, 20 Nov). */}
+            <div data-testid="plus-offer-top" className="flex flex-col gap-[4px] border-y border-border py-[4px] text-center [font-size:min(1rem,max(10vw,32px))]">
+              {topAction}
+            </div>
+            {/* The lead, after the offer: the same cap and size as in the header. */}
+            <div className="[font-size:min(1em,max(10vw,32px))]">
+              <p data-testid="plus-lead" className="text-[0.875em] text-muted">
+                {t("lead")}
+              </p>
+            </div>
+          </>
         )}
         {/* At about 22em wide or narrower each row stacks, its name on its own line and Free and Plus named under
             it (globals.css, [data-plus-table]); the explicit roles keep it a table for screen readers then. */}

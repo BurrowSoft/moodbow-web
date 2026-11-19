@@ -6,7 +6,8 @@ import { PageShell } from "@/components/PageShell";
 import { conditionMet, pageGate } from "@/lib/conditions";
 import { pageMetadata } from "@/lib/metadata";
 import { BACKUP_RETENTION_DAYS, SUPPORT_EMAIL } from "@/lib/site";
-import { SupportAddress } from "@/lib/wholeNames";
+import { keepWhole, SupportAddress } from "@/lib/wholeNames";
+import { deleteWordsFor } from "@/lib/journal/account";
 import { accountDeletionTextLocale } from "@/lib/accountDeletion";
 
 // Google Play's account-deletion URL. The steps are only true once
@@ -49,7 +50,10 @@ export default async function AccountDeletionPage({ params }: PageProps<"/[local
     >
       <p>{t("intro")}</p>
       {/* Padding in px (UX, 20 Nov, #410's CI): px-5 in rem was 60 px a side at 300 %, leaving "SUPPRIMER," no line. */}
-      <p className="rounded-2xl border border-border bg-surface px-[20px] py-[16px] font-medium text-text">{t("steps")}</p>
+      {/* The word to type stays whole on a line (UX, 20 Nov: "SUPPRI- / MER", "ELIMI- / NAR"): people must type it. */}
+      <p data-testid="account-deletion-steps" className="rounded-2xl border border-border bg-surface px-[20px] py-[16px] font-medium text-text">
+        {keepWhole(t("steps"), deleteWordsFor(textLocale))}
+      </p>
       <p>{t("what")}</p>
       {backupDays !== null && <p data-testid="backups-line">{t("backups", { days: backupDays })}</p>}
       <p>

@@ -201,8 +201,13 @@ describe("PlusScreen: the table scrolls, the footer never does", () => {
     for (const id of ["plus-top-price", "plus-top-renews", "plus-top-start"]) expect(within(top).getByTestId(id)).toBeTruthy();
     expect(within(top).getByTestId("plus-top-price")).toHaveTextContent(within(footer).getByTestId("plus-price").textContent!);
     expect(within(top).getByTestId("plus-top-renews")).toHaveTextContent(within(footer).getByTestId("plus-renews").textContent!);
+    // UX, 20 Nov (the fr re-check): title → offer → lead → table.
+    const lead = screen.getByTestId("plus-lead");
+    expect(lead).toHaveTextContent(m.lead);
     expect(screen.getByTestId("plus-title").compareDocumentPosition(top) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-    expect(top.compareDocumentPosition(screen.getByTestId("plus-table")) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(top.compareDocumentPosition(lead) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(lead.compareDocumentPosition(screen.getByTestId("plus-table")) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(screen.getAllByText(m.lead)).toHaveLength(1);
     rect.mockRestore();
     vi.unstubAllGlobals();
     vi.stubGlobal("fetch", fetchMock);

@@ -1779,7 +1779,9 @@ test("large text: the Plus screen at 300 % on a 320 px phone, free and in the fr
       }));
       expect(wide, `${route || "/en"}: nothing scrolls sideways`).toEqual({ overflow: 0, sticksOut: [] });
     };
-    for (const [route, saved] of [["", "en"], ["/de", "de"]] as const) {
+    // UX, 20 Nov (the fr re-check): "Test: fr/en/de/pt-BR all have the renewal line's bottom ≤ 640 on landing."
+    // The profile keeps pt-br as "pt" (routing.dataLocale).
+    for (const [route, saved] of [["", "en"], ["/de", "de"], ["/fr", "fr"], ["/pt-br", "pt"]] as const) {
       await setProfileLocale(email, password, saved);
       await open(route);
       // Free, a 13em column: nothing pinned (UX, 20 Nov, above).

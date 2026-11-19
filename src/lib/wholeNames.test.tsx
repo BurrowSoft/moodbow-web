@@ -3,7 +3,7 @@ import { render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { helpArticles, renderArticle } from "./helpContent";
 import { renderLegal } from "./legalContent";
-import { HYPHEN_MIN, KEEP_TOGETHER_CLASS, LONG_NAMES, SupportAddress, supportAddressHtml, wholeNames, wholeNamesHtml, withSupportAddress, WHOLE_NAME_CLASS, WHOLE_NAMES } from "./wholeNames";
+import { HYPHEN_MIN, keepWhole, KEEP_TOGETHER_CLASS, LONG_NAMES, SupportAddress, supportAddressHtml, wholeNames, wholeNamesHtml, withSupportAddress, WHOLE_NAME_CLASS, WHOLE_NAMES, WHOLE_UNIT_CLASS } from "./wholeNames";
 import { SUPPORT_EMAIL } from "./site";
 
 const LOCALES = ["en", "es", "fr", "de", "it", "pt-br", "th"];
@@ -167,16 +167,32 @@ describe("the support address", () => {
     // No no-wrap on the domain: it may still give way on a 160 px page rather than push it sideways (#410's CI).
     expect(container.querySelector("p")!.innerHTML).toBe("support@<wbr>moodbow.com");
   });
-  it("goes in where a message names it, and nowhere else", () => {
+  it("goes in where a message names it, and nowhere else; its full stop in the same block (UX, 20 Nov)", () => {
     const { container } = render(<p>{withSupportAddress(`Écrivez à ${SUPPORT_EMAIL}.`)}</p>);
     expect(container.textContent).toBe(`Écrivez à ${SUPPORT_EMAIL}.`);
     expect(container.querySelectorAll("wbr")).toHaveLength(1);
+    const block = container.querySelector("span")!;
+    expect(block.className).toBe(WHOLE_UNIT_CLASS);
+    expect(block.textContent).toBe(`${SUPPORT_EMAIL}.`);
     expect(withSupportAddress("No address here")).toBe("No address here");
   });
-  it("in HTML: in the text, never in a mailto: link's address", () => {
-    const html = `<p>Email <a href="mailto:${SUPPORT_EMAIL}">${SUPPORT_EMAIL}</a> or ${SUPPORT_EMAIL}.</p>`;
+  it("in HTML: a mailto: link and its punctuation in one block, the link's address untouched; the text unchanged", () => {
+    const html = `<p>email <a href="mailto:${SUPPORT_EMAIL}">${SUPPORT_EMAIL}</a>. We answer, or ${SUPPORT_EMAIL} too</p>`;
     const shown = "support@<wbr>moodbow.com";
-    expect(supportAddressHtml(html)).toBe(`<p>Email <a href="mailto:${SUPPORT_EMAIL}">${shown}</a> or ${shown}.</p>`);
+    expect(supportAddressHtml(html)).toBe(`<p>email <span class="${WHOLE_UNIT_CLASS}"><a href="mailto:${SUPPORT_EMAIL}">${shown}</a>.</span> We answer, or ${shown} too</p>`);
+    // Markup only: the text a reader sees (or copies) is the same.
+    const text = (h: string) => h.replace(/<[^>]*>/g, "");
+    expect(text(supportAddressHtml(html))).toBe(text(html));
+  });
+  it("/privacy's own sentence: the address and its full stop together (the Web Tester: \". We answer…\" had started a line)", () => {
+    const { html } = renderLegal(readFileSync("content/legal/en/privacy.md", "utf8"), () => true, null);
+    expect(html).toContain(`<span class="${WHOLE_UNIT_CLASS}"><a href="mailto:${SUPPORT_EMAIL}">support@<wbr>moodbow.com</a>.</span> We answer within 10 days.`);
+  });
+  it("keepWhole: the word to type stays whole (UX, 20 Nov: \"SUPPRI- / MER\"), exact and case-sensitive", () => {
+    const { container } = render(<p>{keepWhole("ouvrez Moi → Supprimer le compte, tapez SUPPRIMER, puis confirmez.", ["SUPPRIMER", "DELETE"])}</p>);
+    expect([...container.querySelectorAll("span")].map((s) => [s.textContent, s.className])).toEqual([["SUPPRIMER", WHOLE_UNIT_CLASS]]);
+    expect(container.textContent).toBe("ouvrez Moi → Supprimer le compte, tapez SUPPRIMER, puis confirmez.");
+    expect(keepWhole("nothing to keep", ["DELETE"])).toBe("nothing to keep");
   });
   it("every legal page and Help article that shows the address shows it that way", () => {
     for (const locale of LOCALES) {

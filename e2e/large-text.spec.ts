@@ -647,6 +647,15 @@ test("large text at 320 px / 300 %: no word in the fixed components is cut witho
       expect(await page.evaluate((sel) => getComputedStyle(document.querySelector(`${sel} p, ${sel} li`) ?? document.querySelector(sel)!).getPropertyValue("hyphenate-limit-chars"), roots.split(",")[0]), `${language}${path}: hyphenate-limit-chars`).toBe("8 3 3");
       expect.soft(await cutWords(page, roots), `${language}${path}`).toEqual([]);
       expect.soft(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth), `${language}${path}`).toBe(0);
+      // The word people must type is never broken, not even with a hyphen (UX, 20 Nov: "SUPPRI- / MER").
+      if (path === "/account-deletion") {
+        const word = language === "/fr" ? "SUPPRIMER" : "APAGAR";
+        const lines = await page.evaluate((w) => {
+          const span = [...document.querySelectorAll("[data-testid=account-deletion-steps] span")].find((e) => e.textContent === w);
+          return span ? new Set([...span.getClientRects()].map((r) => Math.round(r.top))).size : 0;
+        }, word);
+        expect.soft(lines, `${language}/account-deletion: ${word} on one line`).toBe(1);
+      }
     }
   }
   // At the normal size the short day names are back.
