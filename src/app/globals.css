@@ -234,8 +234,9 @@ fieldset {
   min-width: 0;
 }
 
-/* The saved language's fallback link (SavedLanguageRedirect): only if the move
-   hasn't happened after 2 s, so a normal move shows no lone link on the way. On
+/* The saved language's words and its stay (SavedLanguageGate, #401): only if the
+   move hasn't happened after 2 s, so a normal move shows no flash of them on the
+   way (Get help shows at once). On
    purpose not under prefers-reduced-motion: there's no motion, only a wait, and
    turning this animation off would change when the link appears. Visible by
    default: anything that stops the animation leaves it showing, never hidden for

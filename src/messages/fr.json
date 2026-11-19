@@ -26,6 +26,11 @@
       "de": "Deutsch",
       "it": "Italiano"
     },
+    "languageNameInSentence": "français",
+    "savedLanguageSetTo": "Votre journal est en {language}.",
+    "savedLanguageContinue": "Continuer en {language}",
+    "savedLanguageSwitch": "Passer en {language}",
+    "savedLanguageStay": "Rester en {language}",
     "burrowsoftProduct": "Un produit BurrowSoft",
     "burrowsoftAria": "Un produit BurrowSoft. Visiter burrowsoft.com",
     "copyright": "© 2026 BurrowSoft",

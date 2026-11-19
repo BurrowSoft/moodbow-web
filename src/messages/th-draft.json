@@ -3723,5 +3723,30 @@
     "key": "legal.nextCurrent",
     "en": "Read the current policy",
     "reason": "UX draft (Web Dev Thai of the privacy-change notice, 19 Nov; native read pending)"
+  },
+  {
+    "key": "common.savedLanguageSetTo",
+    "en": "Your journal is set to {language}.",
+    "reason": "UX draft (Web Dev Thai of the saved-language notice, #401, 20 Nov; native read pending)"
+  },
+  {
+    "key": "common.savedLanguageContinue",
+    "en": "Continue in {language}",
+    "reason": "UX draft (Web Dev Thai of the saved-language notice, #401, 20 Nov; native read pending)"
+  },
+  {
+    "key": "common.savedLanguageSwitch",
+    "en": "Switch to {language}",
+    "reason": "UX draft (Web Dev Thai of the saved-language notice, #401, 20 Nov; native read pending)"
+  },
+  {
+    "key": "common.savedLanguageStay",
+    "en": "Stay in {language}",
+    "reason": "UX draft (Web Dev Thai of the saved-language notice, #401, 20 Nov; native read pending)"
+  },
+  {
+    "key": "common.languageNameInSentence",
+    "en": "English",
+    "reason": "UX draft (native read pending)"
   }
 ]

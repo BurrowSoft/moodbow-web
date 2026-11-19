@@ -26,6 +26,11 @@
       "de": "Deutsch",
       "it": "Italiano"
     },
+    "languageNameInSentence": "italiano",
+    "savedLanguageSetTo": "Il tuo diario è in {language}.",
+    "savedLanguageContinue": "Continua in {language}",
+    "savedLanguageSwitch": "Passa a {language}",
+    "savedLanguageStay": "Resta in {language}",
     "burrowsoftProduct": "Un prodotto BurrowSoft",
     "burrowsoftAria": "Un prodotto BurrowSoft. Visita burrowsoft.com",
     "copyright": "© 2026 BurrowSoft",

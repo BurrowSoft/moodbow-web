@@ -26,6 +26,11 @@
       "de": "Deutsch",
       "it": "Italiano"
     },
+    "languageNameInSentence": "Deutsch",
+    "savedLanguageSetTo": "Dein Tagebuch ist auf {language} eingestellt.",
+    "savedLanguageContinue": "Weiter auf {language}",
+    "savedLanguageSwitch": "Zu {language} wechseln",
+    "savedLanguageStay": "Auf {language} bleiben",
     "burrowsoftProduct": "Ein Produkt von BurrowSoft",
     "burrowsoftAria": "Ein Produkt von BurrowSoft. Besuche burrowsoft.com",
     "copyright": "© 2026 BurrowSoft",

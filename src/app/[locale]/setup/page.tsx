@@ -15,7 +15,9 @@ import { JournalUnavailable } from "@/components/JournalUnavailable";
 import { isAuthOutage } from "@/lib/supabase/proxy";
 import { offeredLocales } from "@/i18n/routing";
 import { savedLanguageRoute } from "@/lib/savedLanguage";
-import { SavedLanguageRedirect } from "../app/SavedLanguageRedirect";
+import { languageGateCopy } from "@/lib/savedLanguageGate.server";
+import { helpCardMessages } from "@/i18n/clientMessages";
+import { SavedLanguageGate } from "../app/SavedLanguageGate";
 import { SetupForm } from "./SetupForm";
 
 // Set up (M3): signed in, consents current, not onboarded yet. Behind
@@ -47,11 +49,12 @@ export default async function SetupPage({ params }: PageProps<"/[locale]/setup">
   // Onboarded already (protective defaults, 1.3 §6): Setup stays open to choose a reminder, tone and focus.
   // Their saved language, as in the journal: an email link may have brought them
   // here in another one (Vitor's French sign-up, 2026-11-06).
+  // Never a bare link (#401): the gate around the page.
   const language = savedLanguageRoute(me.profile?.locale, locale, offeredLocales());
-  if (language) return <SavedLanguageRedirect locale={language} />;
+  const languageCopy = language ? await languageGateCopy(language, locale) : null;
 
   const t = await getTranslations("onboarding");
-  return (
+  const page = (
     <PageShell title={t("setupTitle")}>
       <SignedInMark />
       {/* Focus and tone only when AI was turned on at Consent (and AI is
@@ -66,5 +69,12 @@ export default async function SetupPage({ params }: PageProps<"/[locale]/setup">
         }}
       />
     </PageShell>
+  );
+  return language && languageCopy ? (
+    <SavedLanguageGate target={language} here={locale} copy={languageCopy} country={me.profile?.country} standalone helpMessages={helpCardMessages(await getMessages())}>
+      {page}
+    </SavedLanguageGate>
+  ) : (
+    page
   );
 }
