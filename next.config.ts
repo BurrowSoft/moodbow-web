@@ -42,6 +42,18 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      // A week someone shared (1.4 G; plans/PLAN-trusted-share.md §4): never cached, never
+      // indexed, and no referrer at all (its links go only to our home page and Help). After the
+      // site-wide entry, so its Referrer-Policy wins. /s has no no-JS form (the strict-origin note
+      // above). The API route sets the same on its own answers.
+      ...["/s", "/:locale/s"].map((source) => ({
+        source,
+        headers: [
+          { key: "Cache-Control", value: "no-store" },
+          { key: "Referrer-Policy", value: "no-referrer" },
+          { key: "X-Robots-Tag", value: "noindex, nofollow" },
+        ],
+      })),
       // Images linked from emails (public/email): the path never changes, since
       // sent emails keep pointing at it. 30 days of caching; a new logo would
       // replace the file in place.

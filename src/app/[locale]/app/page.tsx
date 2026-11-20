@@ -8,7 +8,9 @@ import { SessionEnded } from "@/components/SessionEnded";
 import { currentUser } from "@/lib/journal/currentUser";
 import type { CheckIn } from "@/lib/journal/checkIn";
 import { getMe } from "@/lib/journal/me";
-import { dateLine, dateLocale, greetingKey, localHour } from "@/lib/journal/today";
+import { POLICY_NOTICE_CONDITION, policyNoticeDate, policyNoticeToShow } from "@/lib/journal/policyNotice";
+import { dateInSentence, dateLine, dateLocale, greetingKey, localHour } from "@/lib/journal/today";
+import { PolicyNotice } from "./PolicyNotice";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { CheckInCard } from "./CheckInCard";
 import { EntryPreviews, type EntrySummary } from "./EntryPreviews";
@@ -31,13 +33,17 @@ import { isLowMood } from "@/lib/journal/checkInSaved";
 import { readPlusPage } from "@/lib/plus/page";
 import { withTimeout } from "@/lib/ui/withTimeout";
 import { flagsCrisis } from "@/lib/safety/crisis";
+import { tagsFlagCrisis } from "@/lib/journal/tags";
 import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
 import { SetupLaterCard, TodayPlusCard } from "./TodayCards";
 import { readCardTags } from "@/lib/journal/tagsData";
+import { readCardRoutine } from "@/lib/journal/routineData";
 import { GetHelpNow } from "@/components/SafetyCard";
+import { parseShareLinks, shareNotes, SHARE_LINK_COLUMNS } from "@/lib/share/shareLinks";
+import { ShareNotes } from "./ShareNotes";
 import { previewToday, previewTodayQuery } from "@/lib/journal/previewToday";
-import { reviewYear, yearCardOnToday } from "@/lib/journal/yearReview";
-import { YearTodayCard } from "./year/YearLink";
+import { reviewYear, yearCardIsNew, yearCardShows } from "@/lib/journal/yearReview";
+import { YearTodayCard } from "./year/YearTodayCard";
 
 // A stuck request ends here at the latest (UX, the timeout audit); each
 // data call gives up after 15 s on its own (lib/supabase/deadline).
@@ -84,7 +90,10 @@ export default async function TodayPage({ params, searchParams }: PageProps<"/[l
   // Letters (1.2): read with the rest; the body stays on the server (below).
   // Letters wait for Plus (lettersGate); the card on the day never asks about Plus itself.
   const lettersOn = lettersGate() !== "hidden";
-  const [checkIn, todaysEntries, requestHeaders, plusPage, weekRead, momentsRead, toolboxRead, planHas, lettersRead] = await Promise.all([
+  // Share your week (1.4 G): the notes about a link created or first opened (UX's coercion defence),
+  // read with the rest. A failed read shows no note this time, and the next Today tries again.
+  const shareOn = pageGate("trusted-share-live") !== "hidden";
+  const [checkIn, todaysEntries, requestHeaders, plusPage, weekRead, momentsRead, toolboxRead, planHas, lettersRead, shareRead] = await Promise.all([
     supabase.from("check_ins").select("local_date, mood, sleep_hours, sleep_quality, exercise_minutes, stress, updated_at").eq("local_date", me.today).maybeSingle(),
     // Today's entries, newest first (previews only; the editor loads the rest).
     supabase.from("entries").select("id, body, is_moment, entry_date, created_at").eq("entry_date", me.today).order("created_at", { ascending: false }),
@@ -96,7 +105,9 @@ export default async function TodayPage({ params, searchParams }: PageProps<"/[l
     toolboxOn ? supabase.from("toolbox_items").select("id, text, position").order("position") : null,
     planOn ? safetyPlanHasContent().catch(() => false) : false,
     lettersOn ? supabase.from("letters").select("id, body, written_on, opens_on, card_from, opened_at") : null,
+    shareOn ? supabase.from("share_links").select(SHARE_LINK_COLUMNS) : null,
   ]);
+  const shareNotesToShow = shareRead && !shareRead.error ? shareNotes(parseShareLinks(shareRead.data)) : [];
   const { data, error: checkInError } = checkIn;
   const { data: entries, error: entriesError } = todaysEntries;
   // Today always keeps check-in and Write, with errors beside them (specs/next-release.md).
@@ -134,13 +145,22 @@ export default async function TodayPage({ params, searchParams }: PageProps<"/[l
   const plusCard = plus?.kind === "free" && !hardWeek && !checkInError && !entriesError && !flaggedToday && !isLowMood((data as CheckIn | null)?.mood) ? plus : null;
   // Setup after first use (1.3 §6): offered once there's a check-in, while the reminder is still off.
   const setupLater = Boolean(data) && me.settings?.reminder_on === false;
-  // Your year in Moodbow (1.4 A): 1 December to 31 January, for everyone; nothing read for it here.
-  // A Preview's ?today= stands in for the date (never on Production).
-  const yearToday = previewToday((await searchParams)?.today, me.today);
-  const yearCard = pageGate("year-review-live") !== "hidden" && yearCardOnToday(yearToday) ? { year: reviewYear(yearToday), query: previewTodayQuery(yearToday, me.today) } : null;
-
   // Tags on the check-in (tags-live): the day's and the person's recent ones.
   const cardTags = await readCardTags(supabase, me.today);
+
+  // Your year in Moodbow (1.4 A): 1 December to 31 January, for everyone, never on a day an entry or
+  // a tag is crisis-flagged (UX, 19 Nov: help, not a look-back), and not when that can't be checked
+  // (an unread entries or tags read). "New" its first week. A Preview's ?today= stands in for the
+  // date (never on Production).
+  const yearToday = previewToday((await searchParams)?.today, me.today);
+  const tagsUnread = pageGate("tags-live") !== "hidden" && cardTags.initialTags === null;
+  const flaggedForYear = entriesError || tagsUnread ? null : flaggedToday || tagsFlagCrisis(cardTags.initialTags ?? [], CRISIS_KEYWORDS);
+  const yearCard =
+    pageGate("year-review-live") !== "hidden" && yearCardShows(yearToday, flaggedForYear)
+      ? { year: reviewYear(yearToday), query: previewTodayQuery(yearToday, me.today), isNew: yearCardIsNew(yearToday) }
+      : null;
+  // Routine on the check-in (routine-live): the items and the day's ticks.
+  const cardRoutine = await readCardRoutine(supabase, me.today);
   const toolbox = toolboxRead && !toolboxRead.error ? parseToolboxItems(toolboxRead.data) : null;
   // A letter from you (1.2), on its day: the oldest due one. Its text is matched here, before
   // anything renders, and stays on the server: the card gets a yes or no (the Reviewer's read).
@@ -162,11 +182,17 @@ export default async function TodayPage({ params, searchParams }: PageProps<"/[l
     }
   }
 
+  // The notice of a privacy change, here and not everywhere: Today comes after consent and
+  // setup, so it never meets someone on their first screen (UX, Reviewer).
+  const noticeId = pageGate(POLICY_NOTICE_CONDITION) !== "hidden" ? policyNoticeToShow(me) : null;
+  const noticeDate = noticeId && policyNoticeDate(noticeId);
+
   return (
     <section className="space-y-8">
       <Suspense fallback={null}>
         <SecurityNoticeRead supabase={supabase} uid={user.id} />
       </Suspense>
+      {noticeId && <PolicyNotice key={noticeId} id={noticeId} date={noticeDate ? dateInSentence(noticeDate, dateLocaleTag) : null} />}
       {/* Today's standing help (UX & PM, 13 Nov): a quiet lifebuoy at the header's end, always
           there whatever the cards show, opening Me's help card. A fixed 48 px, so at large text
           it takes no more room and Write under the date stays in the first view. */}
@@ -195,12 +221,27 @@ export default async function TodayPage({ params, searchParams }: PageProps<"/[l
         </div>
         <GetHelpNow country={me.profile?.country} testId="today-help" counted neutral icon />
       </header>
-      <CheckInCard key={checkInError ? "unread" : "read"} initial={(data as CheckIn | null) ?? null} uid={user.id} date={me.today} dateLocaleTag={dateLocaleTag} keepDraft loadFailed={Boolean(checkInError)} {...cardTags} country={me.profile?.country} />
+      <CheckInCard
+        key={checkInError ? "unread" : "read"}
+        initial={(data as CheckIn | null) ?? null}
+        uid={user.id}
+        date={me.today}
+        dateLocaleTag={dateLocaleTag}
+        keepDraft
+        loadFailed={Boolean(checkInError)}
+        {...cardTags}
+        {...cardRoutine}
+        country={me.profile?.country}
+        lateNote={pageGate("late-note-live") !== "hidden" ? { zone: me.profile?.time_zone ?? null } : null}
+      />
       {/* Today's order (UX ruling, audit 14 Nov; the app and board 22): check-in → Your week (first,
           so its hard-week help is high) → Plus card → setup/reminder offer → things that help →
           a letter → entries → Write last. */}
+      {/* Right under the check-in, before anything else: someone may have made a link on this
+          account (UX). */}
+      {shareNotesToShow.length > 0 && <ShareNotes notes={shareNotesToShow} />}
       {yourWeekCard}
-      {yearCard && <YearTodayCard year={yearCard.year} query={yearCard.query} />}
+      {yearCard && <YearTodayCard uid={user.id} year={yearCard.year} query={yearCard.query} isNew={yearCard.isNew} />}
       {plusCard && plusPage && <TodayPlusCard trial={plusCard.trial} price={plusPage.price} offer={plusPage.offer} date={me.today} />}
       {setupLater && <SetupLaterCard />}
       {toolboxOn && <ToolboxCard uid={user.id} today={me.today} todayMood={(data as CheckIn | null)?.mood ?? null} items={toolbox} />}
@@ -222,7 +263,7 @@ export default async function TodayPage({ params, searchParams }: PageProps<"/[l
       <Link
         href="/app/write"
         data-testid="today-write"
-        className="inline-flex min-h-12 max-w-full items-center justify-center rounded-full bg-accent px-8 text-center font-medium text-on-accent hover:bg-accent-hover"
+        className="inline-flex min-h-12 max-w-full items-center justify-center rounded-full bg-accent px-[32px] text-center font-medium text-on-accent hover:bg-accent-hover"
       >
         {te("writeButton")}
       </Link>

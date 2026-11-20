@@ -8,7 +8,7 @@ Tocca **Scrivi della tua giornata** per iniziare una pagina. Scrivi quanto vuoi,
 
 {pending:app_writing_prompts}Quando una nuova pagina è vuota, Moodbow può proporti una domanda delicata da cui partire; tocca **Un'altra** per cambiarla, oppure inizia semplicemente a scrivere.{/pending}
 
-{pending:app_voice}**Parla invece** (nell'app, sui telefoni che lo permettono): toccalo mentre scrivi e parla; il telefono trasforma le tue parole in testo, sul telefono stesso. La tua voce non lascia mai il telefono; viene salvato solo il testo che tieni, come ogni pagina. Se il telefono non può farlo, il pulsante non compare.{/pending}
+{pending:app_voice}**Parla invece di scrivere** (nell'app, sui telefoni che lo permettono): tocca il microfono nello spazio di scrittura e parla; il telefono trasforma le tue parole in testo, sul telefono stesso. La tua voce non lascia mai il telefono; viene salvato solo il testo che tieni, come ogni pagina. Se il telefono non può farlo, il microfono non compare.{/pending}
 
 Apri una pagina per rileggerla. Per modificarla, tocca il testo (oppure ⋯ → **Modifica pagina**); per aggiungere altro, tocca **Aggiungi a questa pagina…** in fondo.
 

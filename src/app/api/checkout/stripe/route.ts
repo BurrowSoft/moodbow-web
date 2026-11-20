@@ -3,12 +3,13 @@ import { pageGate } from "@/lib/conditions";
 import { pageOrigin, sameOrigin } from "@/lib/http/sameOrigin";
 import { ENTITLEMENT_COLUMNS, hasPlus, parseEntitlement, TRIAL_DAYS, trialAvailable } from "@/lib/plus/entitlements";
 import { offerActive, offerEligible } from "@/lib/plus/offer";
+import { sellingPrice, STRIPE_APP } from "@/lib/plus/ours";
 import { plusDeal } from "@/lib/plus/prices";
 import { getStripe, isLive, isRouteLocale, needsCardFix, retrieveSubscriptionOrNull, stripeConfigured, stripeLocale } from "@/lib/plus/stripe";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 // "Start my 7-day free trial" (Moodbow Plus, decision 246): a Stripe Checkout
-// for the one yearly price, STRIPE_PLUS_PRICE_ID, which Vitor makes in the
+// for the one yearly price, the first of STRIPE_PLUS_PRICE_ID (ours.ts), which Vitor makes in the
 // Dashboard with its currency_options. The web never sends an amount. Seven
 // free days, once per person, then the yearly charge automatically, unless
 // cancelled first; Stripe's own page confirms the terms. Answers { url } to go
@@ -23,8 +24,10 @@ const no = (code: string, status: number) => Response.json({ code }, { status })
 export async function POST(req: Request): Promise<Response> {
   if (pageGate("plus") === "hidden") return new Response(null, { status: 404 });
   if (!sameOrigin(req)) return no("generic", 403);
-  const price = process.env.STRIPE_PLUS_PRICE_ID?.trim();
+  const price = sellingPrice();
   if (!price || !stripeConfigured()) return no("not_configured", 503);
+  // Stripe Tax, only if this is exactly "1" (unset: off; see the session below).
+  const automaticTax = process.env.STRIPE_AUTOMATIC_TAX?.trim() === "1";
 
   const supabase = await createSupabaseServerClient();
   if (!supabase) return no("generic", 503);
@@ -118,14 +121,23 @@ export async function POST(req: Request): Promise<Response> {
         payment_method_collection: "always",
         subscription_data: {
           // The webhook gets the Subscription, not the Session: its metadata
-          // is how it finds the person.
-          metadata: { user_id: user.id },
+          // is how it finds the person, and app tells it's Moodbow's (the account
+          // is shared with SolvyMed; ours.ts).
+          metadata: { user_id: user.id, app: STRIPE_APP },
           ...(trial ? { trial_period_days: TRIAL_DAYS, trial_settings: { end_behavior: { missing_payment_method: "cancel" } } } : {}),
         },
         ...(coupon ? { discounts: [{ coupon }] } : {}),
-        metadata: { user_id: user.id, checkout_key: k, locale, ...(offer ? { offer: "christmas" } : {}) },
+        metadata: { user_id: user.id, app: STRIPE_APP, checkout_key: k, locale, ...(offer ? { offer: "christmas" } : {}) },
         client_reference_id: user.id,
         ...(row?.store_customer_id ? { customer: row.store_customer_id } : { customer_email: user.email }),
+        // Stripe Tax only where it can run: off unless STRIPE_AUTOMATIC_TAX=1 (UX, 20 Nov). Stripe doesn't offer it
+        // to a Thailand-based business (its supported countries have Thailand only as a destination for remote
+        // sellers), and on this account every Checkout Session with it on fails. Prices stay tax-inclusive either way.
+        // With it on: VAT/GST worked out from where the person is, Checkout asks for the address only where the tax
+        // needs it, and a returning customer's address is saved back to them so renewals are taxed the same way.
+        ...(automaticTax
+          ? { automatic_tax: { enabled: true }, billing_address_collection: "auto" as const, ...(row?.store_customer_id ? { customer_update: { address: "auto" as const, name: "auto" as const } } : {}) }
+          : {}),
         locale: stripeLocale(locale),
         success_url: `${back}?started=1`,
         cancel_url: back,

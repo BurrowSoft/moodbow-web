@@ -3,6 +3,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import messages from "@/messages/en.json";
 import { localKey } from "@/lib/localData";
+import { lateNoteKey } from "@/lib/journal/lateNote";
 
 const signOut = vi.fn();
 // The sync goes through fetch (/api/check-in-sync), never the saveCheckIn
@@ -79,6 +80,18 @@ describe("Me → Sign out (UX & PM 2026-11-03, option C)", () => {
     expect(broadcastSignOut).toHaveBeenCalledWith({ uid: UID, mode: "keep" });
     expect(has(HIDDEN)).toBe(false);
     expect(has(SEEN)).toBe(true);
+  });
+
+  // 1.4 D (the Web Tester's #366 S2): a sign-out from Me, with no Today card mounted to hear it,
+  // still removes the late-night note's mark; another user's stays.
+  it("drops the late-night note's mark (this user's only)", async () => {
+    window.localStorage.setItem(lateNoteKey(UID), "2026-11-19");
+    window.localStorage.setItem(lateNoteKey("someone-else"), "2026-11-19");
+    renderIt();
+    signOutPressed();
+    await waitFor(() => expect(broadcastSignOut).toHaveBeenCalledTimes(1));
+    expect(window.localStorage.getItem(lateNoteKey(UID))).toBeNull();
+    expect(window.localStorage.getItem(lateNoteKey("someone-else"))).toBe("2026-11-19");
   });
 
   it("a check-in saved offline gets one try first: synced, nothing is left to ask about", async () => {

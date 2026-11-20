@@ -21,6 +21,8 @@ import { EntryPreviews, type EntrySummary } from "../../EntryPreviews";
 import { tabMetadata, titledMetadata } from "../../pageMeta";
 import { DayCheckIn } from "./DayCheckIn";
 import { readCardTags } from "@/lib/journal/tagsData";
+import { readCardRoutine } from "@/lib/journal/routineData";
+import { DAY_ADD_ENTRY } from "@/lib/ui/largeText";
 
 // A stuck request ends here at the latest (UX, the timeout audit); each
 // data call gives up after 15 s on its own (lib/supabase/deadline).
@@ -77,7 +79,7 @@ export default async function DayPage({ params }: PageProps<"/[locale]/app/timel
       <h1 className={JOURNAL_HEADING} data-testid="day-date">
         {dateLine(date, dateLocaleTag)}
       </h1>
-      <DayCheckIn initial={(checkIn as CheckIn | null) ?? null} uid={user.id} date={date} dateLocaleTag={dateLocaleTag} {...(await readCardTags(supabase, date))} country={me.profile?.country} />
+      <DayCheckIn initial={(checkIn as CheckIn | null) ?? null} uid={user.id} date={date} dateLocaleTag={dateLocaleTag} {...(await readCardTags(supabase, date))} {...(await readCardRoutine(supabase, date))} country={me.profile?.country} />
       {entriesError ? (
         <p role="alert" data-testid="day-entries-error" className="font-medium text-accent">
           {tt("errGeneric")}
@@ -88,7 +90,8 @@ export default async function DayPage({ params }: PageProps<"/[locale]/app/timel
       <Link
         href={withOrigin(`/app/write?date=${date}`, `/app/timeline/${date}`)}
         data-testid="day-add-entry"
-        className="inline-flex min-h-12 max-w-full items-center justify-center rounded-full bg-pill px-8 text-center font-medium text-accent max-[9em]:hyphens-auto max-[9em]:[hyphenate-limit-chars:7_3_3] [overflow-wrap:anywhere] hover:brightness-95"
+        // px padding and decision 231's cap (UX, 20 Nov; lib/ui/largeText.ts).
+        className={DAY_ADD_ENTRY}
       >
         {t("dayAddEntry")}
       </Link>

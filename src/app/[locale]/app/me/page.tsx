@@ -28,9 +28,11 @@ import { readPlusPage } from "@/lib/plus/page";
 import { withTimeout } from "@/lib/ui/withTimeout";
 import { extraReminders } from "@/lib/plus/view";
 import { PlusInMe } from "./PlusInMe";
+import { activeShareLine } from "@/lib/share/shareLinks";
 import { MePicture } from "./MePicture";
 import { lettersGate } from "@/lib/plus/letters";
 import { LockedItem, PlusLock } from "../PlusSheet";
+import { standaloneLinkClass } from "@/components/AuthField";
 
 // The export (export_my_data may take 30 s: lib/supabase/deadline) and the
 // import batches run in this page's functions: 60, so their own clean error
@@ -64,7 +66,8 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
   const t = await getTranslations("app");
   const tm = await getTranslations("me");
   const tc = await getTranslations("common");
-  const link = "font-medium text-accent underline underline-offset-4";
+  // Me's links each stand on their own line: at least 24 px tall (standaloneLinkClass).
+  const link = standaloneLinkClass;
   // Me's reads in one round (audit batch D, UX 14 Nov): one after another they could pass
   // maxDuration and take the help row, export and delete with them. Plus is capped as on Today:
   // past it, nothing about Plus (null), never an offer to someone who may pay.
@@ -76,12 +79,21 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
   // Their count joins the same round too (audit D, the PLAN's #312 day-of rule).
   const plusOn = pageGate("plus") !== "hidden";
   const lettersOn = lettersGate() !== "hidden";
-  const [plusPage, reports, letterCount] = await Promise.all([
+  // Share your week (1.4 G): the number of active links, in the same round, for the always-visible
+  // line (UX, the coercion defence). A failed read shows the row without the line.
+  const shareOn = pageGate("trusted-share-live") !== "hidden";
+  const [plusPage, reports, letterCount, activeShares] = await Promise.all([
     plusOn ? withTimeout(readPlusPage(supabase, user.id, me.profile?.country, locale), PLUS_ON_ME_MS).catch(() => null) : null,
     plusOn ? supabase.from("ai_reports").select("id", { count: "exact", head: true }).eq("kind", "weekly") : null,
     lettersOn && plusOn ? supabase.from("letters").select("id", { count: "exact", head: true }) : null,
+    shareOn ? supabase.from("share_links").select("id", { count: "exact", head: true }).is("revoked_at", null).gt("expires_at", new Date().toISOString()) : null,
   ]);
+  const activeShareCount = activeShareLine(activeShares);
   const plus = plusPage?.view ?? null;
+  // The won't-renew line's date (042): in the person's own zone and date format, the same on the server and in the
+  // browser (no hydration mismatch).
+  const plusDateTag = dateLocale(locale, (await headers()).get("accept-language"), me.profile?.country ?? null);
+  const plusTimeZone = me.profile?.time_zone ?? "UTC";
   const pastReports = plus && plus.kind !== "plus" ? (reports?.count ?? 0) > 0 : false;
   const lettersLocked = lettersOn && plus !== null && plus.kind !== "plus";
   const hasLetters = lettersLocked ? (letterCount?.count ?? 1) > 0 : true;
@@ -110,7 +122,7 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
           first on the web until Me follows board 1 (UX, F5). No App icon row on the web. */}
       {pageGate("me-picture-live") !== "hidden" && <MePicture uid={user.id} />}
       {/* Moodbow Plus (decision 246): always after help, never in front of it. */}
-      {plusPage && <PlusInMe view={plusPage.view} price={plusPage.price} offer={plusPage.offer} />}
+      {plusPage && <PlusInMe view={plusPage.view} price={plusPage.price} offer={plusPage.offer} dateLocaleTag={plusDateTag} timeZone={plusTimeZone} />}
 
       {aiShown(me) && (
         <AiSettings
@@ -141,6 +153,16 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
           </h2>
         </section>
       )}
+      {/* 1.4 F Routine: its own page; no subtitle (the app's strings). */}
+      {pageGate("routine-live") !== "hidden" && (
+        <section aria-labelledby="me-routine" className="rounded-3xl border border-border bg-surface p-[24px]">
+          <h2 id="me-routine" className="text-lg font-medium text-text">
+            <Link href="/app/me/routine" data-testid="me-routine" className={link}>
+              {(await getTranslations("routine"))("title")}
+            </Link>
+          </h2>
+        </section>
+      )}
       {pageGate("safety-plan-live") !== "hidden" && (
         <section aria-labelledby="me-safety-plan" className="rounded-3xl border border-border bg-surface p-[24px]">
           <h2 id="me-safety-plan" className="text-lg font-medium text-text">
@@ -157,6 +179,21 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
               {(await getTranslations("appointment"))("meRow")}
             </Link>
           </h2>
+        </section>
+      )}
+      {shareOn && (
+        <section aria-labelledby="me-share" className="rounded-3xl border border-border bg-surface p-[24px]">
+          <h2 id="me-share" className="text-lg font-medium text-text">
+            <Link href="/app/me/share" data-testid="me-share" className={link}>
+              {(await getTranslations("shareMe"))("rowTitle")}
+            </Link>
+          </h2>
+          {/* While any link is active, always said here (UX, the coercion defence). */}
+          {activeShareCount !== null && (
+            <p data-testid="me-share-active" className="mt-2 rounded-2xl bg-pill px-[14px] py-[10px] text-sm text-text">
+              {(await getTranslations("shareMe"))("activeLine", { count: activeShareCount })}
+            </p>
+          )}
         </section>
       )}
       {lettersOn && (
@@ -186,7 +223,7 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
         languages={offeredLocales().map((code): [string, string] => [code, tc(`languageNames.${code}`)])}
       />
       <Appearance shortcuts={pageGate("shortcuts-live") !== "hidden"} palette={plus?.kind === "plus" && plus.until ? { until: plus.until } : plus?.kind === "past_due" ? { pastDue: true } : plus ? { locked: true } : null} />
-      <YourData credits={me.credits?.balance ?? 0} uid={user.id} csv={pageGate("export-csv-live") !== "hidden"} ai={conditionMet("ai-live")} plusSource={plus?.kind === "plus" ? plus.source : plus?.kind === "past_due" ? "stripe" : null} pdf={plus?.kind === "plus" ? "plus" : plus ? "locked" : null} pictures={pageGate("pictures-live") !== "hidden"} />
+      <YourData credits={me.credits?.balance ?? 0} uid={user.id} csv={pageGate("export-csv-live") !== "hidden"} ai={conditionMet("ai-live")} plusSource={plus?.kind === "plus" ? plus.source : plus?.kind === "past_due" ? "stripe" : null} pdf={plus?.kind === "plus" ? "plus" : plus ? "locked" : null} pictures={pageGate("pictures-live") !== "hidden"} routine={pageGate("routine-live") !== "hidden"} />
       {/* Import from another app (1.1 K), with Your data, where it's on. */}
       {pageGate("import-live") !== "hidden" && (
         <ImportData uid={user.id} today={me.today} dateLocaleTag={dateLocale(locale, (await headers()).get("accept-language"), me.profile?.country ?? null)} country={me.profile?.country} tags={pageGate("tags-live") !== "hidden"} />

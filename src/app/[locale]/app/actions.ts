@@ -5,11 +5,17 @@ import { redirect } from "@/i18n/navigation";
 import { checkInErrorAction, parseCheckIn, sameCheckIn, type CheckIn, type CheckInError } from "@/lib/journal/checkIn";
 import { readMe } from "@/lib/journal/me";
 import { parseTags } from "@/lib/journal/tags";
+import { parseRoutineTicks } from "@/lib/journal/routine";
+import { pageGate } from "@/lib/conditions";
 import { isDeadlineError } from "@/lib/supabase/deadline";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
-// tags / tagsSaved: only when the save carried the day's tags (they changed).
-export type CheckInState = { status: "idle" } | { status: "saved"; checkIn: CheckIn; tags?: string[]; tagsSaved?: false } | { status: "error"; error: CheckInError; checkIn?: CheckIn };
+// tags / tagsSaved: only when the save carried the day's tags (they changed); routine /
+// routineSaved the same for the day's routine ticks (1.4 F).
+export type CheckInState =
+  | { status: "idle" }
+  | { status: "saved"; checkIn: CheckIn; tags?: string[]; tagsSaved?: false; routine?: string[]; routineSaved?: false }
+  | { status: "error"; error: CheckInError; checkIn?: CheckIn };
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 const COLUMNS = "local_date, mood, sleep_hours, sleep_quality, exercise_minutes, stress, updated_at";
@@ -25,17 +31,28 @@ const COLUMNS = "local_date, mood, sleep_hours, sleep_quality, exercise_minutes,
 // (set_check_in_tags replaces the day's). The check-in stays saved if the
 // tags fail; the card says so under the field. Offline copies and Keep mine
 // carry them too, through this same function (api/check-in-sync).
+// The day's routine ticks (1.4 F, routine-live) the same way, after the tags: set_routine_ticks
+// replaces the day's (it needs the check-in just saved). Off: the field is ignored.
 export async function saveCheckIn(prev: CheckInState, form: FormData): Promise<CheckInState> {
   const tags = form.has("tags") ? parseTags(form.get("tags")) : undefined;
   if (tags === null) return { status: "error", error: "invalid" };
+  const ticks = form.has("routine") && pageGate("routine-live") !== "hidden" ? parseRoutineTicks(form.get("routine")) : undefined;
+  if (ticks === null) return { status: "error", error: "invalid" };
   const result = await saveCheckInValues(prev, form);
-  if (result.status !== "saved" || tags === undefined) return result;
+  if (result.status !== "saved" || (tags === undefined && ticks === undefined)) return result;
   const supabase = await createSupabaseServerClient();
-  if (!supabase) return { ...result, tagsSaved: false };
-  const { data, error } = await supabase.rpc("set_check_in_tags", { p_date: result.checkIn.local_date, p_tags: tags });
-  if (error) return { ...result, tagsSaved: false };
-  const saved = ((data ?? []) as { tag?: unknown }[]).map((r) => r.tag).filter((t): t is string => typeof t === "string");
-  return { ...result, tags: saved };
+  let out: CheckInState & { status: "saved" } = result;
+  if (tags !== undefined) {
+    const { data, error } = supabase ? await supabase.rpc("set_check_in_tags", { p_date: result.checkIn.local_date, p_tags: tags }) : { data: null, error: true };
+    if (error) out = { ...out, tagsSaved: false };
+    else out = { ...out, tags: ((data ?? []) as { tag?: unknown }[]).map((r) => r.tag).filter((t): t is string => typeof t === "string") };
+  }
+  if (ticks !== undefined) {
+    const { data, error } = supabase ? await supabase.rpc("set_routine_ticks", { p_date: result.checkIn.local_date, p_item_ids: ticks }) : { data: null, error: true };
+    if (error) out = { ...out, routineSaved: false };
+    else out = { ...out, routine: ((data ?? []) as { item_id?: unknown }[]).map((r) => r.item_id).filter((id): id is string => typeof id === "string") };
+  }
+  return out;
 }
 
 async function saveCheckInValues(_prev: CheckInState, form: FormData): Promise<CheckInState> {
@@ -88,4 +105,16 @@ async function saveCheckInValues(_prev: CheckInState, form: FormData): Promise<C
     return { status: "error", error: action.error };
   }
   return { status: "saved", checkIn: data as CheckIn };
+}
+
+// The privacy notice was seen, once, across devices. A failure blocks nothing: it just comes
+// back next time. invalid_value means the current notice changed under this one, so the
+// page reads it again (the app's #194).
+export async function dismissPolicyNotice(id: string): Promise<{ ok: boolean; changed?: boolean }> {
+  if (typeof id !== "string" || id === "") return { ok: false };
+  const supabase = await createSupabaseServerClient();
+  if (!supabase) return { ok: false };
+  const { error } = await supabase.rpc("policy_notice_seen", { p_id: id });
+  if (!error) return { ok: true };
+  return { ok: false, changed: error.message.includes("invalid_value") };
 }

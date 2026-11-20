@@ -216,7 +216,7 @@
   },
   {
     "key": "home.privateBody",
-    "en": "Only you can read your journal. Export or delete everything, anytime.",
+    "en": "Your journal is private to your account. Export or delete everything in Me.",
     "reason": "UX draft (native read pending)"
   },
   {
@@ -466,7 +466,7 @@
   },
   {
     "key": "onboarding.welcome3BodyNoAi",
-    "en": "Only you can read your journal, and you can delete everything at any time in Me.",
+    "en": "Your journal is private to your account, and you can delete everything in Me.",
     "reason": "UX draft (native read pending)"
   },
   {
@@ -1012,6 +1012,11 @@
   {
     "key": "consumerHealthData.description",
     "en": "How Moodbow handles data that may be consumer health data.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "onboarding.consentNotice",
+    "en": "Moodbow is run by Vitor Carvalho, trading as BurrowSoft, Thailand. We keep your journal, including sensitive data such as your mood and health, to run your account and show it back to you. We don't sell it or use it for ads. You can change or delete it in Me. The Privacy Policy has the details.",
     "reason": "UX draft (native read pending)"
   },
   {
@@ -1611,8 +1616,8 @@
   },
   {
     "key": "plus.rowInsights",
-    "en": "Insights: week, month, 3 months, your year",
-    "reason": "UX draft (native read pending)"
+    "en": "Insights: week, month, 3 months and year",
+    "reason": "UX draft (native read pending; the app's Thai, #274: 3 เดือน และรายปี)"
   },
   {
     "key": "plus.cancelWhere",
@@ -1681,7 +1686,7 @@
   },
   {
     "key": "plus.offerBannerBody",
-    "en": "Deeper insights for the year ahead: your year, patterns, What lifts me, letters to future me and more.",
+    "en": "Deeper insights for the year ahead: yearly charts, patterns, What lifts me, letters to future me and more.",
     "reason": "UX draft (native read pending)"
   },
   {
@@ -2566,7 +2571,7 @@
   },
   {
     "key": "plus.rowYear",
-    "en": "Your year and all time",
+    "en": "Year and all time",
     "reason": "UX draft (native read pending)"
   },
   {
@@ -3030,6 +3035,31 @@
     "reason": "UX draft (native read pending)"
   },
   {
+    "key": "export.exportRoutine",
+    "en": "Routine",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "export.exportRoutineStarted",
+    "en": "started {date}",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "export.exportRoutineInAppointment",
+    "en": "in my appointment summary",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "export.exportRoutineTicked",
+    "en": "Ticked: {dates}",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "export.exportRoutineNoTicks",
+    "en": "Not ticked yet",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
     "key": "year.title",
     "en": "Your year in Moodbow",
     "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for UX to check)"
@@ -3158,5 +3188,610 @@
     "key": "share.shareShowedUp",
     "en": "{n, plural, =1{Showed up on 1 day} other{Showed up on # days}}",
     "reason": "UX draft (native read pending; the app's Thai, moodbow-app #252)"
+  },
+  {
+    "key": "shareView.metaTitle",
+    "en": "A shared week",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareView.whatIs",
+    "en": "What is Moodbow?",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareView.titleBefore",
+    "en": "A week shared with you",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareView.introBefore",
+    "en": "A read-only summary of someone's check-ins. It never shows anything they wrote.",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareView.show",
+    "en": "Show the week",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareView.titleNamed",
+    "en": "Hi {name}, here's a week shared with you",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "shareView.titleAnon",
+    "en": "A week shared with you",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "shareView.weekOf",
+    "en": "Week of {date}",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareView.checkIns",
+    "en": "{count, plural, one {# check-in this week} other {# check-ins this week}}",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareView.routinePercent",
+    "en": "{name}: ticked on {percent}% of check-in days",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareView.routineNotEnough",
+    "en": "{name}: not enough days yet",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareView.earlier",
+    "en": "Earlier week",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareView.later",
+    "en": "Later week",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareView.none",
+    "en": "No check-ins yet this week.",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareView.unavailable",
+    "en": "This link isn't available. It may have ended or been stopped.",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareView.loading",
+    "en": "Loading the week…",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareView.dayNone",
+    "en": "{day}: no check-in",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareView.help",
+    "en": "If you're worried about someone, <link>find a helpline</link>.",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareView.footer",
+    "en": "This link can be stopped by the person who shared it at any time. It isn't indexed by search engines. It stays in this browser's history; close the tab when you're done.",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareView.noToken",
+    "en": "To see the week again, open the link you were sent.",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.rowTitle",
+    "en": "Share your week",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.activeLine",
+    "en": "{count, plural, one {# active share link} other {# active share links}}. Anyone with a link can see your weeks until it ends or you stop it.",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.title",
+    "en": "Share your week",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.intro",
+    "en": "Make a private link for someone you trust, like your therapist or a friend. They see your mood colours and how many check-ins, never what you write.",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.listTitle",
+    "en": "Your links",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.linkNamed",
+    "en": "For {name}",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.linkNumbered",
+    "en": "Link {n}",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.ends",
+    "en": "Ends {date}",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.opened",
+    "en": "{count, plural, =0 {Not opened yet} one {Opened once} other {Opened # times}}",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.routineIncluded",
+    "en": "{items} included",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.ended",
+    "en": "Ended",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.stopped",
+    "en": "Stopped",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.stop",
+    "en": "Stop sharing",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.stopConfirm",
+    "en": "Stop sharing this link? It stops working at once.",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.stopYes",
+    "en": "Stop sharing",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.stopNo",
+    "en": "Keep it",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.newTitle",
+    "en": "New link",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.nameLabel",
+    "en": "Their first name (optional)",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.nameHint",
+    "en": "Shown at the top of their page. Leave it empty for no name.",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.routineLabel",
+    "en": "Include from your routine",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.endsLabel",
+    "en": "Ends after",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.ends7",
+    "en": "7 days",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.ends30",
+    "en": "30 days",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.ends90",
+    "en": "90 days",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.previewTitle",
+    "en": "What they'll see",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.previewLine",
+    "en": "They'll see your weeks from today on: mood colours, how many check-ins, and the routine items you choose. Never what you write, your tags or moments.",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.consent",
+    "en": "By creating this link you agree to share this summary with whoever has it. You can stop it any time.",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.create",
+    "en": "Create link",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.limit",
+    "en": "You have 3 active links. Stop one to make another.",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.createdTitle",
+    "en": "Your link is ready",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.createdLine",
+    "en": "Copy it now: for your privacy we can't show it again. Make a new link if you lose it.",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.copy",
+    "en": "Copy link",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.copied",
+    "en": "Copied",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.done",
+    "en": "Done",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.noteCreated",
+    "en": "You created a share link. If this wasn't you, you can stop it in Me.",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.noteFirstView",
+    "en": "Your share link was opened for the first time. You can stop it any time in Me.",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.noteSee",
+    "en": "See links",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "shareMe.noteGotIt",
+    "en": "Got it",
+    "reason": "UX draft (native read pending; Web Dev first draft 18 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "routine.title",
+    "en": "Routine",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.intro",
+    "en": "Up to 3 things you'd like to tick off each day. Only you see them, unless you add them to your appointment summary or to a week you share.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "routine.addHint",
+    "en": "For example, Morning meds",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.add",
+    "en": "Add",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.full",
+    "en": "That's 3, the most for now.",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.duplicate",
+    "en": "You already have that one.",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.options",
+    "en": "Options for {item}",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.deleteConfirm",
+    "en": "Remove",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.deleteTitle",
+    "en": "Remove {name}?",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.deleteBody",
+    "en": "This removes the item and the days you ticked it.",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.inAppointment",
+    "en": "Show in For my appointment",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.rowTitle",
+    "en": "Routine",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.rowEmpty",
+    "en": "Add up to 3 things you do most days, like Morning meds or a walk.",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.rowSetUp",
+    "en": "Set up",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.saveFailed",
+    "en": "Your routine ticks weren't saved. Try again.",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.patternShown",
+    "en": "On days you ticked {name}, your mood averaged {a} of 5. On other days, {b}.",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.patternFootnote",
+    "en": "This may show what tends to go together, not what causes what. Never change a medication without talking to your doctor or pharmacist.",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.appointmentHeading",
+    "en": "Routine",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.appointmentShare",
+    "en": "{name}: ticked on {percent}% of check-in days",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "routine.appointmentNotEnough",
+    "en": "{name}: not enough days yet",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app feat/routine-app 055e0700)"
+  },
+  {
+    "key": "sounds.title",
+    "en": "Calming sounds",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a)"
+  },
+  {
+    "key": "sounds.rain",
+    "en": "Rain",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a)"
+  },
+  {
+    "key": "sounds.waves",
+    "en": "Waves",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a)"
+  },
+  {
+    "key": "sounds.brown",
+    "en": "Brown noise",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a)"
+  },
+  {
+    "key": "sounds.hum",
+    "en": "Gentle hum",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a)"
+  },
+  {
+    "key": "sounds.timer",
+    "en": "Timer",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a)"
+  },
+  {
+    "key": "sounds.minutes",
+    "en": "{n} min",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a)"
+  },
+  {
+    "key": "sounds.untilStop",
+    "en": "Until I stop",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a)"
+  },
+  {
+    "key": "sounds.play",
+    "en": "Play",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a)"
+  },
+  {
+    "key": "sounds.pause",
+    "en": "Pause",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a)"
+  },
+  {
+    "key": "sounds.stop",
+    "en": "Stop",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a)"
+  },
+  {
+    "key": "sounds.left",
+    "en": "{n} min left",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a)"
+  },
+  {
+    "key": "sounds.untilStopped",
+    "en": "Until you stop",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a)"
+  },
+  {
+    "key": "sounds.lock",
+    "en": "Sound playing",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a)"
+  },
+  {
+    "key": "sounds.lockLeft",
+    "en": "Sound playing · {n} min left",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a)"
+  },
+  {
+    "key": "sounds.lockPaused",
+    "en": "Sound paused",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a)"
+  },
+  {
+    "key": "sounds.intro",
+    "en": "Made right here in your browser, so there's nothing to download. Use your device's volume.",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a, browser wording by the Web Dev)"
+  },
+  {
+    "key": "sounds.unavailable",
+    "en": "Calming sounds aren't available in this browser.",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #253 b6e8e79a, browser wording by the Web Dev)"
+  },
+  {
+    "key": "today.lateNote",
+    "en": "It's late. Rest matters too. If tonight feels heavy, help is one tap away.",
+    "reason": "UX draft (native read pending; the app's Thai, moodbow-app #257 6d1ff0f6)"
+  },
+  {
+    "key": "year.new",
+    "en": "New",
+    "reason": "UX draft (native read pending; Web Dev first draft 19 Nov, for the Reviewer's check)"
+  },
+  {
+    "key": "app.policyNoticeTitle",
+    "en": "Our Privacy Policy is changing",
+    "reason": "UX draft (Web Dev Thai of the privacy-change notice, 19 Nov; native read pending)"
+  },
+  {
+    "key": "app.policyNoticeApplies",
+    "en": "From {date}, you can subscribe to Moodbow Plus.",
+    "reason": "UX draft (Web Dev Thai of the privacy-change notice, 19 Nov; native read pending)"
+  },
+  {
+    "key": "app.policyNoticeSoon",
+    "en": "Soon, you can subscribe to Moodbow Plus.",
+    "reason": "UX draft (Web Dev Thai of the privacy-change notice, 19 Nov; native read pending)"
+  },
+  {
+    "key": "app.policyNoticeBody",
+    "en": "If you do, Stripe, Google Play or the App Store handles the payment.",
+    "reason": "UX draft (Web Dev Thai of the privacy-change notice, 19 Nov; native read pending)"
+  },
+  {
+    "key": "app.policyNoticeRead",
+    "en": "See what changes",
+    "reason": "UX draft (Web Dev Thai of the privacy-change notice, 19 Nov; native read pending)"
+  },
+  {
+    "key": "app.policyNoticeDismiss",
+    "en": "Got it",
+    "reason": "UX draft (Web Dev Thai of the privacy-change notice, 19 Nov; native read pending)"
+  },
+  {
+    "key": "legal.nextApplies",
+    "en": "These changes apply on {date}. Until then, our current policy applies.",
+    "reason": "UX draft (Web Dev Thai of the privacy-change notice, 19 Nov; native read pending)"
+  },
+  {
+    "key": "legal.nextAppliesNoDate",
+    "en": "These changes aren't in effect yet. Until then, our current policy applies.",
+    "reason": "UX draft (Web Dev Thai of the privacy-change notice, 19 Nov; native read pending)"
+  },
+  {
+    "key": "legal.nextCurrent",
+    "en": "Read the current policy",
+    "reason": "UX draft (Web Dev Thai of the privacy-change notice, 19 Nov; native read pending)"
+  },
+  {
+    "key": "common.savedLanguageSetTo",
+    "en": "Your journal is set to {language}.",
+    "reason": "UX draft (Web Dev Thai of the saved-language notice, #401, 20 Nov; native read pending)"
+  },
+  {
+    "key": "common.savedLanguageContinue",
+    "en": "Continue in {language}",
+    "reason": "UX draft (Web Dev Thai of the saved-language notice, #401, 20 Nov; native read pending)"
+  },
+  {
+    "key": "common.savedLanguageSwitch",
+    "en": "Switch to {language}",
+    "reason": "UX draft (Web Dev Thai of the saved-language notice, #401, 20 Nov; native read pending)"
+  },
+  {
+    "key": "common.savedLanguageStay",
+    "en": "Stay in {language}",
+    "reason": "UX draft (Web Dev Thai of the saved-language notice, #401, 20 Nov; native read pending)"
+  },
+  {
+    "key": "common.languageNameInSentence",
+    "en": "English",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "help.topicBasics",
+    "en": "Basics",
+    "reason": "UX draft (Web Dev Thai of Help's topic names, 20 Nov; native read pending)"
+  },
+  {
+    "key": "help.topicJournal",
+    "en": "Your journal",
+    "reason": "UX draft (Web Dev Thai of Help's topic names, 20 Nov; native read pending)"
+  },
+  {
+    "key": "help.topicSettings",
+    "en": "Settings",
+    "reason": "UX draft (Web Dev Thai of Help's topic names, 20 Nov; native read pending)"
+  },
+  {
+    "key": "help.topicAi",
+    "en": "AI",
+    "reason": "UX draft (Web Dev Thai of Help's topic names, 20 Nov; native read pending)"
+  },
+  {
+    "key": "help.topicPrivacy",
+    "en": "Privacy & account",
+    "reason": "UX draft (Web Dev Thai of Help's topic names, 20 Nov; native read pending)"
+  },
+  {
+    "key": "help.topicHelp",
+    "en": "Help",
+    "reason": "UX draft (Web Dev Thai of Help's topic names, 20 Nov; native read pending)"
+  },
+  {
+    "key": "plus.trialEndsWontRenew",
+    "en": "Plus trial · ends {date} · won't renew",
+    "reason": "UX draft (Web Dev Thai of the won't-renew and past-grace lines, 20 Nov; native read pending)"
+  },
+  {
+    "key": "plus.endsWontRenew",
+    "en": "Plus · ends {date} · won't renew",
+    "reason": "UX draft (Web Dev Thai of the won't-renew and past-grace lines, 20 Nov; native read pending)"
+  },
+  {
+    "key": "plus.pastDueLapsed",
+    "en": "Your last payment didn't go through. Update your card to get Plus back.",
+    "reason": "UX draft (Web Dev Thai of the won't-renew and past-grace lines, 20 Nov; native read pending)"
   }
 ]

@@ -1,6 +1,6 @@
-import letters from "../../../content/letters.json";
+import letters from "../../../content/contracts/letters.json";
 
-// Letters to future me (1.2; content/letters.json, the rules both clients run).
+// Letters to future me (1.2; content/contracts/letters.json, synced from the app: the rules both clients run).
 export const LETTER_RULES = letters.rules;
 export type LetterMonths = 1 | 3 | 6 | 12;
 

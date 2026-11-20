@@ -7,9 +7,9 @@
   (src/lib/legalContent.test.ts).
 -->
 ## Moodbow Terms of Use
-Last updated: 2 October 2026
+Last updated: 20 November 2026
 
-These terms are an agreement between you and Vitor Ribeiro Carvalho, trading as BurrowSoft (297 Moo 1, Baan Sanian, Mueang Nan, Nan 55000, Thailand) about using Moodbow, the app and the website moodbow.com. By creating an account you agree to them.
+These terms are an agreement between you and Vitor Carvalho, trading as BurrowSoft (297 Moo 1, Baan Sanian, Mueang Nan, Nan 55000, Thailand) about using Moodbow, the app and the website moodbow.com. By creating an account you agree to them.
 
 ### What Moodbow is, and isn't
 Moodbow is a private journal that helps you notice patterns in your mood, sleep and habits. It is **not** medical care, therapy or a diagnosis, and it isn't a crisis service. The AI's reflections are suggestions to think about, not professional advice. If you're in danger or thinking about harming yourself, contact your local emergency number or a crisis line right away; Moodbow lists some in Me → Want to talk to someone?.
@@ -25,26 +25,47 @@ Everything you write and log stays yours. You give us only the permission needed
 - AI is optional and needs your separate consent.
 - AI can be wrong, incomplete or unhelpful. Don't rely on it for medical, legal or financial decisions.
 - Moodbow gives everyone a free daily allowance of Moodbow AI Lite, a simpler model with shorter answers. The size of the free allowance may change.
-- {pending:starter_credits}New accounts get free starter credits for the full Moodbow AI after confirming their email.{/pending}
-{/pending}
-
-{pending:purchases}
-### AI credits
-- You can buy credits for the full Moodbow AI in the app, through Google Play or the App Store. Their terms apply to the payment.
-- Credits are used up as you use AI features. The number used depends on the request; the app shows your balance and history.
-- Credits have no cash value, can't be transferred, and are lost when you delete your account (the app warns you first).
-- Refunds go through Google Play or the App Store, under their rules and your local law. If a purchase is refunded, its credits are removed, even if that takes your balance below zero; until your balance is above zero you use Moodbow AI Lite.
-- When you run out of credits, Moodbow keeps working, with Moodbow AI Lite.
 {/pending}
 
 ### Fair use
 Don't misuse Moodbow: no attempts to access other people's data, break or overload the service, reverse-engineer it, or use it for anything illegal. We may limit or close accounts that do, and we'll tell you why unless the law prevents it.
 
 ### The journal is free
-The journal (writing, check-ins, timeline, charts, export) is free. We may change features over time and will tell you in advance about changes that matter.
+The journal (writing, check-ins, the timeline, help and export) is free. We may change features over time and will tell you in advance about changes that matter.
+
+{pending:plus|app_plus}
+### Moodbow Plus
+Moodbow Plus is an optional yearly subscription that adds features for going deeper. What it includes is listed in the app and on moodbow.com, and it may change over time. The journal itself, help and control of your data stay free.
+
+**The price.** You see the yearly price, in your currency, before you subscribe. It includes VAT, GST or sales tax where the law requires it.
+
+**The free week.** Plus starts with 7 days free, once per person on moodbow.com; in Google Play or the App Store, the store decides who gets a free trial. You start it yourself, after seeing the yearly price. Unless you cancel before the 7 days end, your first year is charged when the free week ends.
+
+{pending:offer_live}**The Christmas offer.** From 1 December 2026 until 1 January 2027 at 00:00 UTC, if you've never had Plus or its free week and the offer is shown to you, you can have your first year at the lower price shown, instead of the free week. It's charged when you subscribe. After that first year, Plus renews at the normal yearly price shown to you at the time, unless you cancel.{/pending}
+
+**Automatic renewal.** Plus renews automatically every year until you cancel. Before each yearly renewal of a subscription bought on moodbow.com, we email you a reminder.
+
+**Cancelling.** You can cancel at any time, and you keep Plus until the end of the period you've paid for. If you cancel during the free week, you're never charged.
+{pending:plus}- Bought on moodbow.com: Me → Moodbow Plus → Manage Plus, which opens our payment provider's page (Stripe).{/pending}
+- Bought in the app: in Google Play or the App Store, under your subscriptions. Deleting the app doesn't cancel it.
+
+**Refunds.** If you subscribed on moodbow.com, you can ask for a full refund of any payment within 14 days of being charged, for any reason: email support@moodbow.com. If you live in the EU or the UK, this also covers your legal right to withdraw from the contract within 14 days. After that, payments aren't refunded, except where the law says otherwise. For purchases in Google Play or the App Store, the store's refund rules apply, and you ask the store.
+
+{pending:plus}**A payment that fails.** If a renewal payment on moodbow.com fails, you keep Plus for up to 7 days while the payment is tried again, and you can update your card in Manage Plus. If it still fails, the subscription ends. Store purchases follow the store's own rules.{/pending}
+
+**If Plus ends.** When Plus ends (cancelled, not renewed, refunded or unpaid), everything you wrote stays and the free journal keeps working. Plus features lock again. Nothing is deleted, and Export my data still includes everything.
+
+**Deleting your account.** Deleting your account cancels a subscription bought on moodbow.com straight away; the 14-day refund above still applies. It doesn't cancel a subscription bought in Google Play or the App Store: cancel it there too.
+
+**Price changes.** We may change the yearly price. A new price applies from your next renewal, never to a year you've already paid for, and we'll tell you at least 30 days before, so you can cancel first. In Google Play and the App Store, the store's rules on price changes apply.
+
+**Store purchases.** If you subscribe in Google Play or the App Store, that store also handles billing, renewal and cancellation under its own terms.
+
+**If we stop offering Plus,** you keep it until the end of the period you've paid for.
+{/pending}
 
 ### Ending
-You can delete your account at any time in Me → Delete account. We may end the service or close accounts with reasonable notice, except in cases of serious misuse. If we ever shut Moodbow down, we'll give you time to export your data first.
+You can delete your account in Me → Delete account. We may end the service or close accounts with reasonable notice, except in cases of serious misuse. If we ever shut Moodbow down, we'll give you time to export your data first.
 
 ### Liability
 We work hard to keep Moodbow running and your data safe, but we provide it "as is". To the extent the law allows, we aren't liable for indirect losses, or for decisions you make based on AI content. Nothing here limits rights you have under consumer law that can't be limited.

@@ -16,21 +16,18 @@ import { join } from "node:path";
 
 const REPO = "BurrowSoft/moodbow-app";
 const DIR = "supabase/contracts";
-export const FILES = ["bo.md", "colour-map.json", "countries.json", "crisis-keywords.json", "export-csv.json", "export-text.md", "export_fixture.json", "export_fixture.txt", "get-help-label.json", "mood-faces.json", "on-this-day.json", "patterns.json", "prompts-library.json", "prompts.json", "reflect.md", "report.md", "safety-plan.json", "search-fold.json", "share-cards.json", "toolbox.json", "what-lifts-me.json", "year-card.json", "your-week.json"];
+export const FILES = ["appointment.json", "bo.md", "colour-map.json", "countries.json", "crisis-keywords.json", "errors.md", "export-csv.json", "export-text.md", "export_fixture.json", "export_fixture.txt", "get-help-label.json", "letters.json", "mood-faces.json", "mood-prompts.json", "on-this-day.json", "patterns.json", "plus-entitlement.json", "prompts-library.json", "prompts.json", "reflect.md", "reminders.json", "report.md", "safety-plan.json", "search-fold.json", "share-cards.json", "showed-up.json", "toolbox.json", "what-lifts-me.json", "year-card.json", "year-review.json", "your-week.json"];
 
 // Files held at another app commit than the one synced, with why. Each is listed in SOURCE.json's
 // "held". Drop an entry once the app's master carries that file's version.
-// toolbox.json: v2 (Plus breathing patterns, migration 030) is on the app's contracts/toolbox branch only (d6b9cd5); its
-// master (1.3.0) still has v1, which the web's Breathing has moved past.
-// export-csv.json, export-text.md, export_fixture.json: app #241's changes (pictures, letter
-// reminders) wait for the full re-sync after the pilot (UX, round 3: the Reviewer's #3-#5), so the
-// crisis-keywords v4 sync (app #248) moves only the crisis list; these stay at the previous pin.
-const PREVIOUS_PIN = "457f4396add9b06e1b10e67b22d9f5308fbdacfa";
+// The export set (pictures, letter reminders, Plus; app #241, 030, 033, 035) follows app master since the web's
+// export renders it (UX, 19 Nov). Still held:
 export const HELD = {
-  "toolbox.json": "d6b9cd52a8cb56fd12dd404763bfda9358e619cc",
-  "export-csv.json": PREVIOUS_PIN,
-  "export-text.md": PREVIOUS_PIN,
-  "export_fixture.json": PREVIOUS_PIN,
+  // plus-entitlement.json v2: 042's cancel_at, the won't-renew line (moodbow-app #275), on top of 041's past_due grace.
+  // On app master since #275's merge (2a2c5812, byte-identical to its 2f173f06). Held there, not synced with the rest,
+  // until the web re-syncs the other contracts app master changed since ad85869d (appointment, export-csv, export-text,
+  // the export fixtures, patterns; late-note added): a change of their own, not #409's.
+  "plus-entitlement.json": "2a2c5812e37564505f633b9d4e3da71e5fc212f9",
 };
 
 const gh = (path, accept) => execFileSync("gh", ["api", ...(accept ? ["-H", `Accept: ${accept}`] : []), path], { stdio: ["ignore", "pipe", "inherit"] });

@@ -84,12 +84,50 @@ describe("POST /api/checkout/stripe", () => {
     expect(p.line_items).toEqual([{ price: "price_plus_yearly", quantity: 1 }]);
     expect(JSON.stringify(p)).not.toMatch(/unit_amount|price_data/);
     expect(p.payment_method_collection).toBe("always");
-    expect(p.subscription_data).toEqual({ metadata: { user_id: "u1" }, trial_period_days: 7, trial_settings: { end_behavior: { missing_payment_method: "cancel" } } });
+    expect(p.subscription_data).toEqual({ metadata: { user_id: "u1", app: "moodbow" }, trial_period_days: 7, trial_settings: { end_behavior: { missing_payment_method: "cancel" } } });
+    // Tagged as Moodbow's, the subscription and the session: the account is shared with SolvyMed (ours.ts).
+    expect(p.metadata).toMatchObject({ user_id: "u1", app: "moodbow" });
     expect(p.client_reference_id).toBe("u1");
     expect(p.customer_email).toBe("a@example.com");
     expect(p.locale).toBe("es");
     expect(p.success_url).toBe(`${ORIGIN}/es/app/me/plus?started=1`);
     expect(p.cancel_url).toBe(`${ORIGIN}/es/app/me/plus`);
+  });
+
+  // Stripe Tax is off unless STRIPE_AUTOMATIC_TAX=1 (UX, 20 Nov): Stripe doesn't offer it to a Thailand-based business,
+  // and with it on every Checkout Session on this account fails.
+  it("no STRIPE_AUTOMATIC_TAX: no automatic tax, no address asked for it, nothing saved back", async () => {
+    entitlement = { data: row({ store_customer_id: "cus_9" }), error: null };
+    await post();
+    const p = createParams();
+    expect(p).not.toHaveProperty("automatic_tax");
+    expect(p).not.toHaveProperty("billing_address_collection");
+    expect(p).not.toHaveProperty("customer_update");
+  });
+
+  it("STRIPE_AUTOMATIC_TAX set to anything but 1: still off", async () => {
+    vi.stubEnv("STRIPE_AUTOMATIC_TAX", "true");
+    await post();
+    expect(createParams()).not.toHaveProperty("automatic_tax");
+  });
+
+  it("STRIPE_AUTOMATIC_TAX=1: automatic tax on, the address asked only where needed; a new customer gets no customer_update", async () => {
+    vi.stubEnv("STRIPE_AUTOMATIC_TAX", "1");
+    await post();
+    const p = createParams();
+    expect(p.automatic_tax).toEqual({ enabled: true });
+    expect(p.billing_address_collection).toBe("auto");
+    expect(p.customer_update).toBeUndefined();
+  });
+
+  it("STRIPE_AUTOMATIC_TAX=1, a returning customer: the address and name Checkout collects are saved back to them", async () => {
+    vi.stubEnv("STRIPE_AUTOMATIC_TAX", "1");
+    entitlement = { data: row({ store_customer_id: "cus_9" }), error: null };
+    await post();
+    const p = createParams();
+    expect(p.customer).toBe("cus_9");
+    expect(p.automatic_tax).toEqual({ enabled: true });
+    expect(p.customer_update).toEqual({ address: "auto", name: "auto" });
   });
 
   it("the currency the page showed is the one charged: the session carries it (the Reviewer, #315)", async () => {
@@ -108,8 +146,8 @@ describe("POST /api/checkout/stripe", () => {
       const p = createParams();
       expect(dealCalls.at(-1)).toEqual(["FR", true]);
       expect(p.discounts).toEqual([{ coupon: "coupon_xmas" }]);
-      expect(p.subscription_data).toEqual({ metadata: { user_id: "u1" } });
-      expect(p.metadata).toMatchObject({ offer: "christmas" });
+      expect(p.subscription_data).toEqual({ metadata: { user_id: "u1", app: "moodbow" } });
+      expect(p.metadata).toMatchObject({ offer: "christmas", app: "moodbow" });
       expect(String(stripe.checkout.sessions.create.mock.calls[0][1]?.idempotencyKey)).toContain("-offer-");
     } finally {
       vi.useRealTimers();
@@ -155,7 +193,7 @@ describe("POST /api/checkout/stripe", () => {
     entitlement = { data: row({ trial_started_at: "2025-01-01T00:00:00Z", store_customer_id: "cus_9" }), error: null };
     await post();
     const p = createParams();
-    expect(p.subscription_data).toEqual({ metadata: { user_id: "u1" } });
+    expect(p.subscription_data).toEqual({ metadata: { user_id: "u1", app: "moodbow" } });
     expect(p.customer).toBe("cus_9");
     expect(p.customer_email).toBeUndefined();
     // The open-session sweep is this customer's only (Reviewer, #270).
@@ -230,6 +268,14 @@ describe("POST /api/checkout/stripe", () => {
     gate = "hidden";
     expect((await post()).status).toBe(404);
     expect(stripe.checkout.sessions.create).not.toHaveBeenCalled();
+  });
+
+  it("several prices of ours (STRIPE_PLUS_PRICE_ID, comma-separated): the first is the one sold", async () => {
+    vi.stubEnv("STRIPE_PLUS_PRICE_ID", " price_new , price_old");
+    await post();
+    expect(createParams().line_items).toEqual([{ price: "price_new", quantity: 1 }]);
+    vi.stubEnv("STRIPE_PLUS_PRICE_ID", " , ");
+    expect(await (await post()).json()).toEqual({ code: "not_configured" });
   });
 
   it("a locale that isn't one of ours: English URLs", async () => {

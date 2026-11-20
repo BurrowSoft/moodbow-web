@@ -191,13 +191,16 @@ test.describe("language: the offered ones, and Thai as a draft (thai-offered-liv
   });
 
   // Vitor, UX & PM 2026-11-06: on phone widths only, every public page.
-  test("Try the app: in the footer on a phone width, not on a desktop", async ({ page }) => {
+  test("Try the app: in the footer on a phone width, not on a desktop", async ({ page }, testInfo) => {
     await page.setViewportSize({ width: 320, height: 640 });
+    // On Android (the mobile project is a Pixel 7) it's the Play listing once that's public (play-live, group 5;
+    // TryAppButton); anywhere else, and before, Welcome.
+    const href = conditions["play-live"].met && testInfo.project.name === "mobile" ? "https://play.google.com/store/apps/details?id=com.burrowsoft.moodbow" : "/welcome";
     for (const path of ["/", "/help", "/privacy", "/terms"]) {
       await page.goto(path);
       const button = page.getByTestId("try-app");
       await expect(button, path).toBeVisible();
-      await expect(button, path).toHaveAttribute("href", "/welcome");
+      await expect(button, path).toHaveAttribute("href", href);
       expect((await button.boundingBox())?.height ?? 0, path).toBeGreaterThanOrEqual(44);
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
       expect(overflow, path).toBeLessThanOrEqual(0);
@@ -211,8 +214,14 @@ test.describe("language: the offered ones, and Thai as a draft (thai-offered-liv
     await page.goto("/");
     await expect(page.getByTestId("try-app")).toBeHidden();
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.getByTestId("try-app").click();
-    await expect(page).toHaveURL(/\/welcome$/);
+    if (href === "/welcome") {
+      await page.getByTestId("try-app").click();
+      await expect(page).toHaveURL(/\/welcome$/);
+    } else {
+      // The Play listing is another site (its link is checked above), so Welcome is opened directly.
+      await page.goto("/welcome");
+    }
+    // Welcome itself never offers Try the app.
     await expect(page.getByTestId("try-app")).toHaveCount(0);
     // Mid sign-in, it's a link away from what the person is doing.
     await page.goto("/sign-in");
@@ -225,6 +234,16 @@ test.describe("language: the offered ones, and Thai as a draft (thai-offered-liv
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("เริ่มต้นใช้ Moodbow");
   });
 
+  test("/privacy/next on a draft build: the coming text, a line about it, a way to today's, not indexed", async ({ page }) => {
+    const res = await page.goto("/privacy/next");
+    expect(res?.status()).toBe(200);
+    await expect(page.getByTestId("privacy-next-line")).toBeVisible();
+    await expect(page.getByTestId("privacy-next-current")).toHaveAttribute("href", "/privacy");
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
+    // The coming text is the policy with Moodbow Plus in (COMING_POLICY), which /privacy hides today.
+    await expect(page.locator(".legal-prose")).toContainText("Moodbow Plus purchases");
+  });
+
   test("/th/privacy: the English text under the Thai line, as /privacy is (draft or live)", async ({ page }) => {
     const res = await page.goto("/th/privacy");
     expect(res?.status()).toBe(200);
@@ -234,7 +253,9 @@ test.describe("language: the offered ones, and Thai as a draft (thai-offered-liv
     await expect(page.getByTestId("draft-banner")).toHaveCount(LEGAL ? 0 : 1);
   });
 
-  test("/th/account-deletion: treated as legal: the English page under the Thai line (UX, #112)", async ({ page }) => {
+  // A help page now (UX, 20 Nov), in each live language's words; Thai isn't live yet, so it stays the English page under
+  // the Thai line until it goes live (/fr/account-deletion is French: large-text.spec.ts).
+  test("/th/account-deletion: Thai not live yet: the English page under the Thai line", async ({ page }) => {
     const res = await page.goto("/th/account-deletion");
     expect(res?.status()).toBe(200);
     await expect(page.getByTestId("page-notice")).toHaveText("หน้านี้มีให้อ่านเป็นภาษาอังกฤษ");
@@ -278,12 +299,14 @@ test.describe("the live legal pages and account deletion (decision 164)", () => 
     await page.goto("/privacy");
     const article = page.locator('[data-content="article"]');
     await expect(article.getByRole("heading", { level: 2, name: "The short version" })).toBeVisible();
-    await expect(article.getByText("Last updated: 15 November 2026")).toBeVisible();
+    await expect(article.getByText("Last updated: 20 November 2026")).toBeVisible();
     // Every cookie the website sets, as the policy names them (the full-app audit, round 1, item 1).
     await expect(article).toContainText("one that keeps you signed in, one that remembers the language you chose, one that remembers list or calendar view, and, for a minute after you delete your account, one that tells your browser to clear its copies.");
     // The help card's country fallback, as the policy says it (decision 245, #269).
     await expect(article).toContainText("To show helplines near you when we don't know your country, we use the country your connection comes from, at that moment only; it isn't stored.");
-    await expect(article).not.toContainText("Google Play, Apple App Store");
+    // The Plus payments row of the processors table shows with the web's or the app's Plus (app-plus, group 5).
+    if (conditions.plus.met || conditions["app-plus"].met) await expect(article).toContainText("Google Play, Apple App Store");
+    else await expect(article).not.toContainText("Google Play, Apple App Store");
     await expect(article).toContainText("disappear automatically within 8 days");
     // AI is off: no line may point at a Me → AI screen (decision 69).
     await expect(article).not.toContainText("Me → AI");
@@ -311,10 +334,10 @@ test.describe("the live legal pages and account deletion (decision 164)", () => 
     // Sign-up is reached through Consent.
     await page.goto("/consumer-health-data");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Moodbow: Consumer Health Data Privacy Policy");
-    await expect(page.locator('[data-content="article"]')).toContainText("We answer within 45 days");
+    await expect(page.locator('[data-content="article"]')).toContainText("We answer within 10 days");
     await page.goto("/fr/consumer-health-data");
     await expect(page.getByTestId("page-notice")).toHaveText(fr.legal.legalEnglishOnly);
-    await expect(page.locator('[data-content="article"]')).toContainText("We answer within 45 days");
+    await expect(page.locator('[data-content="article"]')).toContainText("We answer within 10 days");
   });
 
   test("the footer links only live pages: account deletion, and the legal pages once live", async ({ page }) => {
@@ -446,10 +469,11 @@ test.describe("404s are server-rendered (no JS)", () => {
     });
   }
 
-  // A Help article that's missing or not out yet (safety-plan and letters are unmet on every
-  // build): the not-found page in the raw HTML, never Next's bare error shell (html
-  // id="__next_error__", no title, no h1; the Web Tester, 15 Nov).
-  for (const path of ["/help/no-such-article", "/help/safety-plan", "/help/letters", "/es/help/no-such-article", "/es/help/safety-plan"]) {
+  // A Help article that's missing or not out yet (ai-reflections and your-week are unmet on every build: AI and the
+  // weekly report aren't in this release. Not bo: its article follows Bo's own gate, readable on a draft build, as
+  // CI's is. safety-plan and letters came out with the app in group 5): the not-found page in the raw HTML, never
+  // Next's bare error shell (html id="__next_error__", no title, no h1; the Web Tester, 15 Nov).
+  for (const path of ["/help/no-such-article", "/help/ai-reflections", "/help/your-week", "/es/help/no-such-article", "/es/help/ai-reflections"]) {
     test(`help 404 ${path}`, async ({ request }) => {
       const res = await request.get(path, { maxRedirects: 0 });
       expect(res.status()).toBe(404);
@@ -458,6 +482,17 @@ test.describe("404s are server-rendered (no JS)", () => {
       expect(html).toMatch(/<title>[^<]+ · Moodbow<\/title>/);
       expect(html).toMatch(/<h1[^>]*>[^<]+<\/h1>/);
       if (!path.startsWith("/es/")) expect(html).toContain("<title>Page not found · Moodbow</title>");
+    });
+  }
+
+  // Out with the app (group 5: app-safety-plan, app-letters): these articles render, server-side, with their heading.
+  for (const [path, title] of [["/help/safety-plan", "My safety plan"], ["/help/letters", "Letters to future me"], ["/es/help/safety-plan", "Mi plan de seguridad"]] as const) {
+    test(`help article out with the app ${path}`, async ({ request }) => {
+      const res = await request.get(path, { maxRedirects: 0 });
+      expect(res.status()).toBe(200);
+      const html = await res.text();
+      expect(html).not.toContain("__next_error__");
+      expect(html).toMatch(new RegExp(`<h1[^>]*>(?:<[^>]+>)*${title}`));
     });
   }
 
@@ -558,10 +593,11 @@ test.describe("auth links", () => {
     if (testInfo.project.name === "mobile") {
       await expect(page.getByTestId("email-confirmed-open-app")).toHaveText("Open Moodbow");
       await expect(page.getByTestId("email-confirmed-open-app")).toHaveAttribute("href", /^intent:\/\/app\/me\/backup#Intent;scheme=moodbow;package=com\.burrowsoft\.moodbow(\.staging)?;/);
-      // No app: back to this page on this host (not Play while it isn't public).
+      // No app: the Play listing once it's public (play-live, group 5; lib/stores openAppFallback), before that
+      // back to this page on this host.
       const href = (await page.getByTestId("email-confirmed-open-app").getAttribute("href")) ?? "";
       const fallback = decodeURIComponent(/S\.browser_fallback_url=([^;]+)/.exec(href)?.[1] ?? "");
-      expect(fallback).toBe(`${new URL(page.url()).origin}/email-confirmed?result=email_changed&app=missing`);
+      expect(fallback).toBe(conditions["play-live"].met ? "https://play.google.com/store/apps/details?id=com.burrowsoft.moodbow" : `${new URL(page.url()).origin}/email-confirmed?result=email_changed&app=missing`);
       await expect(page.getByTestId("email-confirmed-app-line")).toHaveCount(0);
     } else {
       await expect(page.getByTestId("email-confirmed-app-line")).toHaveText("Open the Moodbow app to finish backing up.");
@@ -684,6 +720,29 @@ test.describe("onboarding (signed out)", () => {
     await expect(page.getByTestId("home-security")).toHaveCount(0);
   });
 
+  test("Create account: who keeps what is right above the boxes, in small print that still scales", async ({ page }) => {
+    await page.goto("/sign-up");
+    const notice = page.getByTestId("consent-notice");
+    await expect(notice).toContainText("Moodbow is run by Vitor Carvalho");
+    const n = (await notice.boundingBox())!;
+    const box = (await page.getByTestId("consent-privacy").boundingBox())!;
+    expect(n.y).toBeLessThan(box.y);
+    // Names never hyphenate (UX, 19 Nov), whatever the hyphen rule around them says.
+    expect(await notice.locator(".whole-name").allTextContents()).toEqual(["Moodbow", "Vitor Carvalho", "BurrowSoft"]);
+    expect(await notice.locator(".whole-name").evaluateAll((els) => els.map((el) => getComputedStyle(el).hyphens))).toEqual(["manual", "manual", "manual"]);
+    // Help first, as on Consent (UX, 19 Nov): before the form, the notice and the boxes.
+    const help = (await page.getByTestId("signup-get-help").boundingBox())!;
+    const email = (await page.getByLabel("Email").boundingBox())!;
+    expect(help.y).toBeLessThan(email.y);
+    // Create account's boxes are 24 px (#350). Consent's now match; Consent needs a signed-in account,
+    // so ConsentForm.test checks its size.
+    expect(box.width).toBe(24);
+    // 0.6875rem: 11px at the default root size, and it follows the root (rem, not px).
+    expect(await notice.evaluate((el) => getComputedStyle(el).fontSize)).toBe("11px");
+    await page.evaluate(() => (document.documentElement.style.fontSize = "32px"));
+    expect(await notice.evaluate((el) => getComputedStyle(el).fontSize)).toBe("22px");
+  });
+
   test("Create account: help is there before anything's agreed, and it opens the card", async ({ page }) => {
     await page.goto("/sign-up");
     await page.getByTestId("signup-get-help").click();
@@ -702,7 +761,7 @@ test.describe("onboarding (signed out)", () => {
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("See your patterns");
     await page.getByTestId("welcome-skip").click();
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Private, and yours");
-    await expect(page.getByText("Only you can read your journal, and you can delete everything at any time in Me.")).toBeVisible();
+    await expect(page.getByText("Your journal is private to your account, and you can delete everything in Me.")).toBeVisible();
     await expect(page.getByTestId("welcome-skip")).toHaveCount(0);
     await expect(page).toHaveURL(/\/welcome\?slide=3$/);
     await page.getByTestId("welcome-start").click();
@@ -874,4 +933,18 @@ test("sign-in shows the notice for why the session ended (decisions 68 + 70)", a
   await expect(page.getByTestId("signed-out-notice")).toHaveText("You've been signed out. Please sign in again.");
   await page.goto("/sign-in");
   await expect(page.getByTestId("signed-out-notice")).toHaveCount(0);
+});
+
+// A text link on its own line is at least 24 px tall (WCAG 2.5.8; UX, 20 Nov: the Web Tester measured 23 px at 100 %).
+// Me's links use the same class (lib/ui/linkTargets.test.ts); they need a session.
+test("standalone text links are at least 24 px tall at the normal size", async ({ page }) => {
+  for (const [path, testId] of [
+    ["/support", "support-account-deletion"],
+    ["/sign-up", "signup-to-signin"],
+    ["/help/getting-started", "help-back"],
+  ] as const) {
+    await page.goto(path);
+    const height = await page.getByTestId(testId).evaluate((el) => el.getBoundingClientRect().height);
+    expect(height, path).toBeGreaterThanOrEqual(24);
+  }
 });

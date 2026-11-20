@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { getTranslations, setRequestLocale } from "next-intl/server";
+import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
+import { helpCardMessages } from "@/i18n/clientMessages";
 import type { Locale } from "@/i18n/routing";
 import { getPathname } from "@/i18n/navigation";
 import { Logo } from "@/components/Logo";
@@ -13,7 +14,9 @@ import { getMe } from "@/lib/journal/me";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { offeredLocales } from "@/i18n/routing";
 import { savedLanguageRoute } from "@/lib/savedLanguage";
-import { SavedLanguageRedirect } from "../app/SavedLanguageRedirect";
+import { languageGateCopy } from "@/lib/savedLanguageGate.server";
+import type { SavedLanguageCopy } from "@/lib/savedLanguageCopy";
+import { SavedLanguageGate } from "../app/SavedLanguageGate";
 import { EmailConfirmedMessage } from "./EmailConfirmedMessage";
 
 // Where Supabase's confirm-email links land. Never indexed: the URL can
@@ -37,17 +40,20 @@ export default async function EmailConfirmedPage({ params, searchParams }: PageP
   // in. Before that, no Continue at all (the page stays as it is).
   let continueTo: string | null = null;
   let signedIn = false;
+  let move: { target: string; copy: SavedLanguageCopy } | null = null;
+  let country: string | null | undefined = null;
   if (liveFeatures.webJournal) {
     const supabase = await createSupabaseServerClient();
     const user = supabase ? (await supabase.auth.getUser()).data.user : null;
     continueTo = user ? "/app" : "/sign-in";
     // A link without a language (mail already sent, or a language not offered
-    // when it was): now there's a session, their saved one.
+    // when it was): now there's a session, their saved one, never a bare link (#401).
     if (supabase && user) {
       signedIn = true;
       const me = await getMe(supabase);
       const language = savedLanguageRoute(me?.profile?.locale, locale, offeredLocales());
-      if (language) return <SavedLanguageRedirect locale={language} />;
+      if (language) move = { target: language, copy: await languageGateCopy(language, locale) };
+      country = me?.profile?.country;
     }
   }
   // After an email is confirmed, back to the app (decision 216): an "Open
@@ -61,7 +67,7 @@ export default async function EmailConfirmedPage({ params, searchParams }: PageP
     ? { production: process.env.VERCEL_ENV === "production", playLive: liveStores().play, path: getPathname({ href: "/email-confirmed", locale }) }
     : null;
 
-  return (
+  const page = (
     <main id="main" className="flex flex-1 flex-col items-center justify-center px-6 py-16">
       {signedIn && <SignedInMark />}
       <div className="flex w-full max-w-[560px] flex-col items-center">
@@ -71,5 +77,12 @@ export default async function EmailConfirmedPage({ params, searchParams }: PageP
         <EmailConfirmedMessage fromQuery={classifyAuthLink(query.toString(), "")} continueTo={continueTo} openApp={openApp} appMissing={appMissing(query.toString())} />
       </div>
     </main>
+  );
+  return move ? (
+    <SavedLanguageGate target={move.target} here={locale} copy={move.copy} country={country} standalone helpMessages={helpCardMessages(await getMessages())}>
+      {page}
+    </SavedLanguageGate>
+  ) : (
+    page
   );
 }

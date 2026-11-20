@@ -63,6 +63,15 @@ describe("scrubUrl (decision 79, specs/analytics.md: page addresses only, nothin
     expect(scrubUrl(`${W}/help/safety-plan`)).toBe(`${W}/help/safety-plan`);
   });
 
+  // 1.4 G (UX, the Reviewer): Me → Share speaks of a therapist, and a shared week is a third
+  // party's visit. Neither is ever counted, in any locale or case.
+  it("never Me → Share or a shared week", () => {
+    for (const p of ["/app/me/share", "/fr/app/me/share", "/APP/Me/Share", "/s", "/de/s", "/S"]) {
+      expect(isCountedPage(new URL(`${W}${p}`).pathname), p).toBe(false);
+      expect(scrubUrl(`${W}${p}`), p).toBeNull();
+    }
+  });
+
   it("ordinary pages stay as they are; garbage is dropped", () => {
     expect(scrubUrl(`${W}/privacy`)).toBe(`${W}/privacy`);
     expect(scrubUrl(`${W}/app/me`)).toBe(`${W}/app/me`);

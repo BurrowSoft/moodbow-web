@@ -12,6 +12,11 @@ describe("offerWindowOpen: 1 December to 1 January 00:00 UTC, the server's clock
     expect(offerWindowOpen(at("2026-12-31T23:59:59Z"), {})).toBe(true);
     expect(offerWindowOpen(at("2027-01-01T00:00:00Z"), {})).toBe(false);
   });
+  it("December 2026 only, as the Terms say: another December never reopens it by itself", () => {
+    expect(offerWindowOpen(at("2027-12-15T12:00:00Z"), {})).toBe(false);
+    expect(offerWindowOpen(at("2025-12-15T12:00:00Z"), {})).toBe(false);
+    expect(offerWindowOpen(at("2026-12-15T12:00:00Z"), {})).toBe(true);
+  });
   it("OFFER_PREVIEW opens it on a Preview only; Production and any other build ignore it", () => {
     const nov = at("2026-11-14T12:00:00Z");
     expect(offerWindowOpen(nov, { vercelEnv: "preview", offerPreview: "1" })).toBe(true);
@@ -32,7 +37,7 @@ describe("offerActive: its own switch, with Plus, inside the window", () => {
 });
 
 describe("offerEligible: no previous subscription (the ruling)", () => {
-  const base = { status: "canceled", current_period_end: null, trial_started_at: null, store_subscription_id: null };
+  const base = { source: "stripe" as const, status: "canceled", current_period_end: null, current_period_start: null, trial_started_at: null, store_subscription_id: null };
   it("no row, or a row that never had one: yes", () => {
     expect(offerEligible(null)).toBe(true);
     expect(offerEligible(base)).toBe(true);

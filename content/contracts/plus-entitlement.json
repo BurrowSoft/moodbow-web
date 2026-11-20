@@ -1,0 +1,33 @@
+{
+  "contract": "plus-entitlement",
+  "version": 2,
+  "owner": "moodbow-app (041_plus_past_due_grace.sql, 042_plus_cancel_at.sql); the web vendors this file",
+  "cancel_at": "042: entitlements.cancel_at, a timestamptz. null = the subscription renews. Otherwise it's when Plus stops because the store won't renew (a pending cancel). Display only: the rule below never reads it, and status and current_period_end still decide Plus. While it's set and Plus is on, Me reads \"Plus trial · ends {date} · won't renew\" (trialing) or \"Plus · ends {date} · won't renew\" (active), with {date} = cancel_at in the person's time zone. Writers (service role only): the web's Stripe sync (Stripe's cancel_at, or current_period_end when cancel_at_period_end is true; null when un-cancelled) and plus-store (Play autoRenewing false → expiryTime; Apple auto_renew_status 0 → expires_date; null when renewal is back on).",
+  "rule": "Plus when (status in [trialing, active] and now < current_period_end) or (source = stripe and status = past_due and current_period_start is not null and now < current_period_start + 7 days). 7 days = 604800 s, absolute, end excluded. Stripe opens the new period before it tries the invoice, so a failed renewal's current_period_end is already ahead: the 7 days run from the start, never the end. A null start never grants. paused, canceled and expired never grant. A play or apple past_due row never grants (the store gave its own grace first). grace_until is not read.",
+  "past_due_grace_seconds": 604800,
+  "cases_note": "source: the row's store (null with no row). period_start_offset_s / period_end_offset_s: current_period_start / current_period_end minus now, in seconds (null = not set). plus: the expected has_plus / hasPlus.",
+  "cases": [
+    { "name": "active inside its period", "source": "stripe", "status": "active", "period_start_offset_s": -86400, "period_end_offset_s": 86400, "plus": true },
+    { "name": "trialing inside its period", "source": "stripe", "status": "trialing", "period_start_offset_s": -3600, "period_end_offset_s": 3600, "plus": true },
+    { "name": "active at its period end exactly", "source": "stripe", "status": "active", "period_start_offset_s": -31536000, "period_end_offset_s": 0, "plus": false },
+    { "name": "active past its period end", "source": "stripe", "status": "active", "period_start_offset_s": -31536001, "period_end_offset_s": -1, "plus": false },
+    { "name": "trialing past its period end", "source": "stripe", "status": "trialing", "period_start_offset_s": -604860, "period_end_offset_s": -60, "plus": false },
+    { "name": "active with no period end", "source": "stripe", "status": "active", "period_start_offset_s": -86400, "period_end_offset_s": null, "plus": false },
+    { "name": "past_due, renewal 1 s ago, end a year ahead", "source": "stripe", "status": "past_due", "period_start_offset_s": -1, "period_end_offset_s": 31535999, "plus": true },
+    { "name": "past_due, renewal 6 d 23 h 59 m 59 s ago, end a year ahead", "source": "stripe", "status": "past_due", "period_start_offset_s": -604799, "period_end_offset_s": 30931201, "plus": true },
+    { "name": "past_due, renewal 7 d ago exactly, end a year ahead", "source": "stripe", "status": "past_due", "period_start_offset_s": -604800, "period_end_offset_s": 30931200, "plus": false },
+    { "name": "past_due, renewal 8 d ago, end a year ahead", "source": "stripe", "status": "past_due", "period_start_offset_s": -691200, "period_end_offset_s": 30844800, "plus": false },
+    { "name": "past_due, renewal 8 d ago, end a month ahead (monthly)", "source": "stripe", "status": "past_due", "period_start_offset_s": -691200, "period_end_offset_s": 1900800, "plus": false },
+    { "name": "past_due after the free week's first charge failed 2 d ago", "source": "stripe", "status": "past_due", "period_start_offset_s": -172800, "period_end_offset_s": 31363200, "plus": true },
+    { "name": "past_due with no period start, end a year ahead", "source": "stripe", "status": "past_due", "period_start_offset_s": null, "period_end_offset_s": 31536000, "plus": false },
+    { "name": "past_due with no period start or end", "source": "stripe", "status": "past_due", "period_start_offset_s": null, "period_end_offset_s": null, "plus": false },
+    { "name": "play past_due, renewal 1 s ago", "source": "play", "status": "past_due", "period_start_offset_s": -1, "period_end_offset_s": 31535999, "plus": false },
+    { "name": "apple past_due, renewal 1 d ago", "source": "apple", "status": "past_due", "period_start_offset_s": -86400, "period_end_offset_s": 31449600, "plus": false },
+    { "name": "play active inside its period", "source": "play", "status": "active", "period_start_offset_s": null, "period_end_offset_s": 86400, "plus": true },
+    { "name": "paused inside its period", "source": "stripe", "status": "paused", "period_start_offset_s": -86400, "period_end_offset_s": 86400, "plus": false },
+    { "name": "canceled inside its period", "source": "stripe", "status": "canceled", "period_start_offset_s": -86400, "period_end_offset_s": 86400, "plus": false },
+    { "name": "expired inside its period", "source": "stripe", "status": "expired", "period_start_offset_s": -86400, "period_end_offset_s": 86400, "plus": false },
+    { "name": "canceled, renewal 1 s ago", "source": "stripe", "status": "canceled", "period_start_offset_s": -1, "period_end_offset_s": 31535999, "plus": false },
+    { "name": "no row", "source": null, "status": null, "period_start_offset_s": null, "period_end_offset_s": null, "plus": false }
+  ]
+}

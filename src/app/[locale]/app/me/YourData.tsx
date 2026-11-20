@@ -49,7 +49,7 @@ const hasPictures = (doc: unknown) =>
 // and there are some: text = enforcement, as the Help article's
 // {pending:ai_live} clause (UX, the Web Tester's forced pass). csv: the
 // spreadsheet link (1.1 P, export-csv-live).
-export function YourData({ uid, csv = false, plusSource = null, pdf = null, pictures = false }: { credits?: number; uid: string; csv?: boolean; ai?: boolean; plusSource?: "stripe" | "play" | "apple" | null; pdf?: "plus" | "locked" | null; pictures?: boolean }) {
+export function YourData({ uid, csv = false, plusSource = null, pdf = null, pictures = false, routine = false }: { credits?: number; uid: string; csv?: boolean; ai?: boolean; plusSource?: "stripe" | "play" | "apple" | null; pdf?: "plus" | "locked" | null; pictures?: boolean; routine?: boolean }) {
   const t = useTranslations("me");
   const tp = useTranslations("plus");
   const tt = useTranslations("today");
@@ -115,9 +115,10 @@ export function YourData({ uid, csv = false, plusSource = null, pdf = null, pict
           if (zip) next.push({ kind: "zip", name: zipFileName(result.date), url: URL.createObjectURL(zip) });
           else setZipFailed(true);
         }
-        // The spreadsheet (1.1 P): from the same document, no AI text.
+        // The spreadsheet (1.1 P): from the same document, no AI text. With routine-live, the
+        // routine column (export-csv.json routineCases); the .txt lists routine whenever the JSON has it.
         if (csv && canRenderText(doc)) {
-          next.push({ kind: "csv", name: csvFileName(result.date), url: URL.createObjectURL(new Blob([renderExportCsv(doc, tr as Translate)], { type: "text/csv;charset=utf-8" })) });
+          next.push({ kind: "csv", name: csvFileName(result.date), url: URL.createObjectURL(new Blob([renderExportCsv(doc, tr as Translate, { routine })], { type: "text/csv;charset=utf-8" })) });
         }
         setFiles(next);
         setExportState("ready");

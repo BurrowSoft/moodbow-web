@@ -11,6 +11,7 @@ const row = (over: Partial<EntitlementRow> = {}): EntitlementRow => ({
   status: "active",
   trial_ends_at: null,
   current_period_end: at(NOW + 300 * DAY),
+  current_period_start: null,
   trial_started_at: at(NOW - 400 * DAY),
   store_customer_id: "cus_1",
   store_subscription_id: "sub_1",
@@ -29,6 +30,20 @@ describe("plusView: what a page shows about Plus", () => {
   });
   it("a failed Stripe renewal: the card state, not an offer", () => {
     expect(plusView(row({ status: "past_due" }), NOW)).toEqual({ kind: "past_due" });
+  });
+  it("inside the 7-day grace (041): still Plus, and Me asks for the card; after it, the card state", () => {
+    expect(plusView(row({ status: "past_due", current_period_start: at(NOW - 2 * DAY) }), NOW)).toMatchObject({ kind: "plus", source: "stripe", paymentFailed: true });
+    expect(plusView(row({ status: "past_due", current_period_start: at(NOW - 8 * DAY) }), NOW)).toEqual({ kind: "past_due" });
+    expect(plusView(row({ source: "play", status: "past_due", current_period_start: at(NOW - 2 * DAY) }), NOW)).toMatchObject({ kind: "free" });
+    expect(plusView(row(), NOW)).not.toHaveProperty("paymentFailed");
+  });
+  // 042: a pending cancel. Plus is still on, and Me says when it ends and that it won't renew.
+  it("a pending cancel (cancel_at): still Plus, with endsAt; none once it renews, none without Plus", () => {
+    const ends = at(NOW + 5 * DAY);
+    expect(plusView(row({ status: "trialing", trial_ends_at: ends, current_period_end: ends, cancel_at: ends }), NOW)).toEqual({ kind: "plus", source: "stripe", daysLeft: 5, until: ends, endsAt: ends });
+    expect(plusView(row({ cancel_at: at(NOW + 300 * DAY) }), NOW)).toMatchObject({ kind: "plus", daysLeft: null, endsAt: at(NOW + 300 * DAY) });
+    expect(plusView(row({ cancel_at: null }), NOW)).not.toHaveProperty("endsAt");
+    expect(plusView(row({ status: "canceled", cancel_at: ends }), NOW)).toEqual({ kind: "free", trial: false });
   });
   it("ended, with the free week used: free, without the trial", () => {
     expect(plusView(row({ status: "canceled" }), NOW)).toEqual({ kind: "free", trial: false });

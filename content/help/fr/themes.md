@@ -4,7 +4,7 @@ summary: Changez les couleurs de Moodbow sur cet appareil.
 topic: Settings
 fr-draft: true
 ---
-{pending:plus}L'apparence de Moodbow suit votre appareil, clair ou sombre, sauf si vous en choisissez une dans **Moi → Apparence**.
+{pending:plus|app_plus}L'apparence de Moodbow suit votre appareil, clair ou sombre, sauf si vous en choisissez une dans **Moi → Apparence**.
 
 Avec Moodbow Plus, vous pouvez aussi choisir **Couleurs** : **Crépuscule**, **Aube** ou **Mer**, chacune en clair et en sombre. Votre choix est gardé sur cet appareil seulement.
 

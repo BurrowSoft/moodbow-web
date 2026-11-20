@@ -21,8 +21,10 @@ import { boSpeaks } from "@/lib/journal/bo";
 import { CheckInDraftProvider } from "./CheckInDraft";
 import { KeyboardShortcuts } from "./KeyboardShortcuts";
 import { NavProgress } from "@/components/NavProgress";
-import { SavedLanguageRedirect } from "./SavedLanguageRedirect";
+import { languageGateCopy } from "@/lib/savedLanguageGate.server";
+import { SavedLanguageGate } from "./SavedLanguageGate";
 import { APP_MAIN_GUTTER } from "@/lib/ui/journalLayout";
+import { wholeNames } from "@/lib/wholeNames";
 
 // The signed-in web journal. Behind web-journal-live: the proxy 404s /app on
 // Production until it's met; this check is the backstop. Signed-out visitors
@@ -57,9 +59,10 @@ export default async function AppLayout({ children, params }: LayoutProps<"/[loc
     const { error: setupError } = await supabase.rpc("complete_onboarding", PROTECTIVE_ONBOARDING);
     if (setupError) return <NextIntlClientProvider messages={await getMessages()}><JournalUnavailable standalone /></NextIntlClientProvider>;
   }
-  // Their saved language wins in the journal, if it's offered (row RT4).
+  // Their saved language wins in the journal, if it's offered (row RT4): the gate moves them there. The page is still
+  // rendered here, so if the move can't happen it shows in this language, help and tabs as always (#401).
   const language = savedLanguageRoute(me.profile?.locale, locale, offeredLocales());
-  if (language) return <SavedLanguageRedirect locale={language} />;
+  const languageCopy = language ? await languageGateCopy(language, locale) : null;
 
   // Bo's button, where it could be: the flag, Bo's languages (decision 239) and the person's own
   // switch. Whether it shows is the function's status (decision 240), asked by the button once the
@@ -97,13 +100,21 @@ export default async function AppLayout({ children, params }: LayoutProps<"/[loc
                   {t("meGetHelpNow")}
                 </Link>
               </p>
-              <p data-testid="app-noscript-journal" className="text-muted">{t("meNoScript")}</p>
+              <p data-testid="app-noscript-journal" className="text-muted">{wholeNames(t("meNoScript"))}</p>
             </div>
           </noscript>
           {/* Per user: another account signing in starts empty (#9765 M-01). */}
           <div className="mx-auto max-w-3xl">
             <AnnouncerProvider>
-              <CheckInDraftProvider key={user.id}>{children}</CheckInDraftProvider>
+              <CheckInDraftProvider key={user.id}>
+                {language && languageCopy ? (
+                  <SavedLanguageGate target={language} here={locale} copy={languageCopy} country={me.profile?.country}>
+                    {children}
+                  </SavedLanguageGate>
+                ) : (
+                  children
+                )}
+              </CheckInDraftProvider>
             </AnnouncerProvider>
           </div>
         </main>

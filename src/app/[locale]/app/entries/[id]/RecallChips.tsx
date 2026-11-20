@@ -45,7 +45,7 @@ export function RecallChips({ id, value, onChange }: { id: string; value: Recall
               aria-pressed={on}
               data-testid={`entry-recall-${m}`}
               onClick={() => void tap(m)}
-              className={`inline-flex min-h-11 items-center gap-1.5 rounded-full border-[1.5px] px-4 text-sm text-text ${on ? "border-accent bg-pill" : "border-border bg-surface"}`}
+              className={`inline-flex min-h-11 items-center gap-[6px] rounded-full border-[1.5px] px-[16px] text-sm text-text ${on ? "border-accent bg-pill" : "border-border bg-surface"}`}
             >
               {on && (
                 <svg aria-hidden="true" data-testid={`entry-recall-${m}-check`} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">

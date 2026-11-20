@@ -5,13 +5,14 @@
   on, the store age signal if it sends anything, or Your week if it stores anything.
 -->
 ## Moodbow: Consumer Health Data Privacy Policy
-Last updated: 6 November 2026
+Last updated: 20 November 2026
 
-This policy is for people in Washington State, Nevada and anywhere else where a consumer health data law applies. It adds to our [Privacy Policy](https://www.moodbow.com/privacy). Moodbow is run by Vitor Ribeiro Carvalho, trading as BurrowSoft. Moodbow is a wellbeing journal, not a medical service.
+This policy is for people in Washington State, Nevada and anywhere else where a consumer health data law applies. It adds to our [Privacy Policy](https://www.moodbow.com/privacy). Moodbow is run by Vitor Carvalho, trading as BurrowSoft. Moodbow is a wellbeing journal, not a medical service.
 
 ### What we collect that may be consumer health data
 - Your journal entries and moments, which can reveal how you feel or your health.
 - Your check-ins: mood, sleep, movement and stress, and their dates.
+{pending:routine_live|app_routine}- The routine items you add, such as medication, and the days you tick them.{/pending}
 - What we work out from them to show you, such as your charts and patterns.
 
 ### Where it comes from
@@ -26,6 +27,7 @@ We don't sell your data. We don't share it with advertisers, other third parties
 - **Vercel, USA and global network:** hosts the website and web journal, which show your journal to you.
 - **Resend, USA:** sends account emails. It receives your email address, not your journal, though that address shows you use Moodbow.
 - **Sentry, USA:** receives error reports. Your written text and personal details are removed first.
+{pending:trusted_share_live|app_trusted_share}- **People you choose:** if you make a share link, whoever has it can see the summary of your week described in our Privacy Policy, until you stop the link or it expires.{/pending}
 
 AI features are off today, and no journal text goes to any AI provider. If that changes, we'll update this policy and ask you first.
 
@@ -35,8 +37,8 @@ We may also disclose data if the law requires it.
 - **See and get a copy:** Me → Export my data. You can also ask us to confirm whether we hold or share your data, and for a list of who has received it.
 - **Delete:** delete any item, or everything through Me → Delete account. We delete it from our live database right away, and encrypted backup copies expire within 8 days. Copies in our providers' logs expire on their own schedules, as in our Privacy Policy.
 - **Withdraw consent:** delete your account. We can't keep your journal without this consent.
-- **Other requests:** email support@moodbow.com. It's free. We answer within 45 days. If we need longer, we'll tell you within that time, and we may take up to 45 more days once.
-- **If you use Moodbow without an email:** we have no way to confirm by email that the account is yours. Use Export and Delete account in the app; they work on your phone without an email.
+- **Other requests:** email support@moodbow.com. It's free. We answer within 10 days.
+- **If you use Moodbow without an email:** we have no way to confirm by email that the account is yours. Use Export and Delete account in the app; they work on your phone without an email, as long as you can still open the app.
 
 ### If we say no
 You can appeal by emailing support@moodbow.com with "Appeal" in the subject. We'll answer in writing within 45 days and explain why. If your appeal is denied, you can complain to the Washington State Attorney General at www.atg.wa.gov/file-complaint, or the Nevada Attorney General at ag.nv.gov/Complaints/Consumer_Complaint.

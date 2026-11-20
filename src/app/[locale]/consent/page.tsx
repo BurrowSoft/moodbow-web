@@ -14,9 +14,14 @@ import { pageMetadata } from "@/lib/metadata";
 import { isAuthOutage } from "@/lib/supabase/proxy";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { askAiConsent } from "@/lib/journal/ai";
+import { CONSENT_NOTICE_CLASS } from "@/lib/legalVersions";
+import { wholeNames } from "@/lib/wholeNames";
 import { offeredLocales } from "@/i18n/routing";
 import { savedLanguageRoute } from "@/lib/savedLanguage";
-import { SavedLanguageRedirect } from "../app/SavedLanguageRedirect";
+import { languageGateCopy } from "@/lib/savedLanguageGate.server";
+import type { SavedLanguageCopy } from "@/lib/savedLanguageCopy";
+import { SavedLanguageGate } from "../app/SavedLanguageGate";
+import { legalLocale } from "@/lib/legalContent";
 import { ConsentForm } from "./ConsentForm";
 
 // Consent (M3): before Create account for new people; for signed-in people
@@ -46,19 +51,21 @@ export default async function ConsentPage({ params }: PageProps<"/[locale]/conse
   if (!user && !outage) redirect({ href: "/sign-up", locale });
   let askAge = false;
   let country: string | null | undefined = null;
+  // Their saved language first (row RT4), never a bare link (#401): the gate around the page.
+  let move: { target: string; copy: SavedLanguageCopy } | null = null;
   if (supabase && user) {
     const me = await getMe(supabase);
     // Consents already current (the versions this build ships) → nothing to ask.
     if (me && hasCurrentConsents(me)) redirect({ href: "/app", locale });
     const language = savedLanguageRoute(me?.profile?.locale, locale, offeredLocales());
-    if (language) return <SavedLanguageRedirect locale={language} />;
+    if (language) move = { target: language, copy: await languageGateCopy(language, locale) };
     askAge = !me || !hasCurrentConsent(me, "age_18");
     country = me?.profile?.country;
   }
 
   const t = await getTranslations("onboarding");
   const ta = await getTranslations("auth");
-  return (
+  const page = (
     <PageShell title={t("consentTitle")} capTitle>
       {user && <SignedInMark />}
       {outage && (
@@ -66,14 +73,26 @@ export default async function ConsentPage({ params }: PageProps<"/[locale]/conse
           {ta("errGeneric")}
         </p>
       )}
-      <ConsentForm askAge={askAge} askAi={askAiConsent()} showBack={!user && !outage} />
-      {/* Help is never behind a consent, new or asked again: the card and its words only
-          come to this page, which the root layout doesn't send them to. */}
+      {/* Help first (UX): it's never behind a consent, new or asked again. The card and its
+          words only come to this page, which the root layout doesn't send them to. */}
       <NextIntlClientProvider messages={helpCardMessages(await getMessages())}>
-        <div className="mt-[24px] [font-size:min(1rem,max(10vw,32px))] [&_a]:min-h-[44px] [&_button]:min-h-[44px]">
+        <div className="[font-size:min(1rem,max(10vw,32px))] [&_a]:min-h-[44px] [&_button]:min-h-[44px]">
           <GetHelpNow country={country} testId="consent-get-help" counted neutral />
         </div>
       </NextIntlClientProvider>
+      {/* Who keeps what, above the boxes and never collapsed, so nobody consents with it off screen
+          (decisions 224, 226). Small print: CONSENT_NOTICE_CLASS. */}
+      <p data-testid="consent-notice" data-hyphenate className={CONSENT_NOTICE_CLASS}>
+        {wholeNames(t("consentNotice"))}
+      </p>
+      <ConsentForm askAge={askAge} askAi={askAiConsent()} showBack={!user && !outage} legalInEnglish={legalLocale(locale, "privacy") !== locale || legalLocale(locale, "terms") !== locale} />
     </PageShell>
+  );
+  return move ? (
+    <SavedLanguageGate target={move.target} here={locale} copy={move.copy} country={country} standalone helpMessages={helpCardMessages(await getMessages())}>
+      {page}
+    </SavedLanguageGate>
+  ) : (
+    page
   );
 }

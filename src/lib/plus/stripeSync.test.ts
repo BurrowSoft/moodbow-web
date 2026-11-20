@@ -5,16 +5,17 @@ import type { EntitlementRow } from "./entitlements";
 import { desiredFor, subscriptionIdOf, syncSubscription, type SyncDeps } from "./stripeSync";
 
 const T = 1_800_000_000; // seconds
-const sub = (over: Partial<Stripe.Subscription> & { periodEnd?: number | null } = {}): Stripe.Subscription => {
-  const { periodEnd = T + 365 * 86_400, ...rest } = over;
+const PRICES = ["price_1"];
+const sub =(over: Partial<Stripe.Subscription> & { periodEnd?: number | null; periodStart?: number | null } = {}): Stripe.Subscription => {
+  const { periodEnd = T + 365 * 86_400, periodStart = T, ...rest } = over;
   return {
     id: "sub_1",
     status: "active",
     customer: "cus_1",
-    metadata: { user_id: "u1" },
+    metadata: { user_id: "u1", app: "moodbow" },
     trial_start: null,
     trial_end: null,
-    items: { data: [{ current_period_end: periodEnd, price: { id: "price_1" } }] },
+    items: { data: [{ current_period_end: periodEnd, current_period_start: periodStart, price: { id: "price_1" } }] },
     ...rest,
   } as unknown as Stripe.Subscription;
 };
@@ -24,7 +25,7 @@ const row = (over: Partial<EntitlementRow> = {}): EntitlementRow => ({
   source: "stripe",
   status: "active",
   trial_ends_at: null,
-  current_period_end: iso(T + 365 * 86_400),
+  current_period_end: iso(T + 365 * 86_400), current_period_start: null,
   trial_started_at: null,
   store_customer_id: "cus_1",
   store_subscription_id: "sub_1",
@@ -37,6 +38,7 @@ function fakes(stripeStates: Record<string, Stripe.Subscription[]>, start: Entit
   let stored = start;
   const reads: Record<string, number> = {};
   const deps: SyncDeps = {
+    prices: PRICES,
     retrieve: vi.fn(async (id: string) => {
       const list = stripeStates[id];
       if (!list) return null;
@@ -60,7 +62,7 @@ function fakes(stripeStates: Record<string, Stripe.Subscription[]>, start: Entit
 
 describe("desiredFor: the row a subscription should give", () => {
   it("a trial: trialing until the trial's end, the person from the subscription's metadata", () => {
-    const d = desiredFor(sub({ status: "trialing", trial_start: T, trial_end: T + 7 * 86_400, periodEnd: T + 7 * 86_400 }));
+    const d = desiredFor(sub({ status: "trialing", trial_start: T, trial_end: T + 7 * 86_400, periodEnd: T + 7 * 86_400 }), PRICES);
     expect(d).toEqual({
       kind: "write",
       userId: "u1",
@@ -70,16 +72,63 @@ describe("desiredFor: the row a subscription should give", () => {
         status: "trialing",
         trial_ends_at: iso(T + 7 * 86_400),
         current_period_end: iso(T + 7 * 86_400),
+        current_period_start: iso(T),
         trial_started_at: iso(T),
         store_customer_id: "cus_1",
         store_subscription_id: "sub_1",
         store_product_id: "price_1",
+        cancel_at: null,
       },
     });
   });
+  // 042, display only: Me's "won't renew" line. The portal (2026-05 API) sets cancel_at; older paths set
+  // cancel_at_period_end, so it's the period's end; un-cancelled, nothing.
+  it("cancel_at: Stripe's when set, else the period end when it cancels at the period end, else null", () => {
+    const portal = desiredFor(sub({ status: "trialing", trial_end: T + 7 * 86_400, periodEnd: T + 7 * 86_400, cancel_at: T + 7 * 86_400, cancel_at_period_end: false }), PRICES);
+    expect(portal.kind === "write" && portal.row.cancel_at).toBe(iso(T + 7 * 86_400));
+    const atPeriodEnd = desiredFor(sub({ cancel_at: null, cancel_at_period_end: true }), PRICES);
+    expect(atPeriodEnd.kind === "write" && atPeriodEnd.row.cancel_at).toBe(iso(T + 365 * 86_400));
+    const renews = desiredFor(sub({ cancel_at: null, cancel_at_period_end: false }), PRICES);
+    expect(renews.kind === "write" && renews.row.cancel_at).toBeNull();
+    // Plus itself doesn't change: the status and the period still decide.
+    expect(portal.kind === "write" && portal.live).toBe(true);
+  });
+  it("writes when the current period started (041's grace runs from it), null when Stripe has none", () => {
+    const failed = desiredFor(sub({ status: "past_due", periodStart: T - 2 * 86_400, periodEnd: T + 363 * 86_400 }), PRICES);
+    expect(failed.kind === "write" && failed.row.current_period_start).toBe(iso(T - 2 * 86_400));
+    const none = desiredFor(sub({ periodStart: null }), PRICES);
+    expect(none.kind === "write" && none.row.current_period_start).toBeNull();
+  });
   it("no person, or live with no period end: nothing written", () => {
-    expect(desiredFor(sub({ metadata: {} }))).toEqual({ kind: "skip", reason: "no_user" });
-    expect(desiredFor(sub({ periodEnd: null }))).toEqual({ kind: "skip", reason: "no_period_end" });
+    expect(desiredFor(sub({ metadata: { app: "moodbow" } }), PRICES)).toEqual({ kind: "skip", reason: "no_user" });
+    expect(desiredFor(sub({ periodEnd: null }), PRICES)).toEqual({ kind: "skip", reason: "no_period_end" });
+  });
+  it("ours at any of several prices", () => {
+    expect(desiredFor(sub(), ["price_0", "price_1"]).kind).toBe("write");
+  });
+});
+
+describe("not Moodbow's (the account is shared with SolvyMed): nothing read, nothing written", () => {
+  const otherPrice = { data: [{ current_period_end: T + 365 * 86_400, current_period_start: T, price: { id: "price_solvymed" } }] } as unknown as Stripe.Subscription["items"];
+  const cases: [string, Stripe.Subscription][] = [
+    ["no app tag", sub({ metadata: { user_id: "u1" } })],
+    ["SolvyMed's tag", sub({ metadata: { user_id: "u1", app: "solvymed" } })],
+    ["our tag on a price that isn't ours", sub({ items: otherPrice })],
+    ["no items", sub({ items: { data: [] } as unknown as Stripe.Subscription["items"] })],
+  ];
+  it("each is skipped as foreign before anything else, and the table is never read", async () => {
+    for (const [name, s] of cases) {
+      expect(desiredFor(s, PRICES), name).toEqual({ kind: "skip", reason: "foreign" });
+      const { deps, now } = fakes({ sub_1: [s] }, row());
+      expect(await syncSubscription("sub_1", deps), name).toEqual({ kind: "skipped", reason: "foreign" });
+      expect(deps.read, name).not.toHaveBeenCalled();
+      expect(deps.insert, name).not.toHaveBeenCalled();
+      expect(deps.update, name).not.toHaveBeenCalled();
+      expect(now(), name).toEqual(row());
+    }
+  });
+  it("with no price of ours set, nothing is ours", () => {
+    expect(desiredFor(sub(), [])).toEqual({ kind: "skip", reason: "foreign" });
   });
 });
 
@@ -108,6 +157,16 @@ describe("syncSubscription: the live state, never the payload", () => {
     const { deps, now } = fakes({ sub_2: [sub({ id: "sub_2" })] }, row({ status: "canceled" }));
     expect(await syncSubscription("sub_2", deps)).toEqual({ kind: "written" });
     expect(now()).toMatchObject({ status: "active", store_subscription_id: "sub_2" });
+  });
+
+  it("a cancel in the portal, then an un-cancel: the row's cancel_at follows, Plus unchanged", async () => {
+    const ends = T + 7 * 86_400;
+    const cancelled = fakes({ sub_1: [sub({ status: "trialing", trial_end: ends, periodEnd: ends, cancel_at: ends })] }, row({ status: "trialing" }));
+    expect(await syncSubscription("sub_1", cancelled.deps)).toEqual({ kind: "written" });
+    expect(cancelled.now()).toMatchObject({ status: "trialing", cancel_at: iso(ends) });
+    const resumed = fakes({ sub_1: [sub({ status: "trialing", trial_end: ends, periodEnd: ends, cancel_at: null })] }, cancelled.now());
+    expect(await syncSubscription("sub_1", resumed.deps)).toEqual({ kind: "written" });
+    expect(resumed.now()?.cancel_at).toBeNull();
   });
 
   it("past_due is written, and cuts Plus", async () => {
@@ -140,9 +199,27 @@ describe("syncSubscription: the live state, never the payload", () => {
     expect(await syncSubscription("sub_1", second.deps)).toEqual({ kind: "retry", reason: "db" });
   });
 
+  it("the person deleted their account (the insert's foreign key refuses): user_gone, never retried; live says if Stripe still runs it", async () => {
+    const gone = vi.fn(async () => ({ ok: true as const, value: "user_gone" as const }));
+    const ended = fakes({ sub_1: [sub({ status: "canceled" })] }, null);
+    ended.deps.insert = gone;
+    expect(await syncSubscription("sub_1", ended.deps)).toEqual({ kind: "skipped", reason: "user_gone", live: false });
+    expect(gone).toHaveBeenCalledTimes(1);
+    expect(ended.deps.update).not.toHaveBeenCalled();
+    const running = fakes({ sub_1: [sub()] }, null);
+    running.deps.insert = gone;
+    expect(await syncSubscription("sub_1", running.deps)).toEqual({ kind: "skipped", reason: "user_gone", live: true });
+  });
+
+  it("any other failed insert is still a retry (a 500): only a missing person is final", async () => {
+    const f = fakes({ sub_1: [sub()] }, null);
+    f.deps.insert = vi.fn(async () => ({ ok: false as const }));
+    expect(await syncSubscription("sub_1", f.deps)).toEqual({ kind: "retry", reason: "db" });
+  });
+
   it("unknown to Stripe, or naming nobody: skipped, never retried", async () => {
     expect(await syncSubscription("sub_x", fakes({}, null).deps)).toEqual({ kind: "skipped", reason: "unknown_subscription" });
-    expect(await syncSubscription("sub_1", fakes({ sub_1: [sub({ metadata: {} })] }, null).deps)).toEqual({ kind: "skipped", reason: "no_user" });
+    expect(await syncSubscription("sub_1", fakes({ sub_1: [sub({ metadata: { app: "moodbow" } })] }, null).deps)).toEqual({ kind: "skipped", reason: "no_user" });
   });
 });
 

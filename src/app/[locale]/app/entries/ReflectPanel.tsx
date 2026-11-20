@@ -204,7 +204,7 @@ export function ReflectPanel({ entryId, initial, balance, country, onAnswer }: P
           <p className="mb-2 flex flex-wrap items-center gap-2 text-sm font-medium text-voice" data-testid="reflect-voice">
             <span>{ta("appName")}</span>
             {reflection.tier === "lite" && (
-              <span data-testid="reflect-lite" className="inline-block rounded-full border border-voice px-3 py-0.5 text-xs font-medium text-voice">
+              <span data-testid="reflect-lite" className="inline-block rounded-full border border-voice px-[12px] py-0.5 text-xs font-medium text-voice">
                 {t("reflectLiteBadge")}
               </span>
             )}
@@ -298,7 +298,7 @@ export function ReflectPanel({ entryId, initial, balance, country, onAnswer }: P
             <p role="alert" data-testid="reflect-error" className="text-sm font-medium text-accent">
               {t("errOffline")}
             </p>
-            <button type="button" data-testid="reflect-retry" onClick={retrySameTap} className="mt-2 min-h-11 rounded-full border border-border px-4 text-sm font-medium text-text">
+            <button type="button" data-testid="reflect-retry" onClick={retrySameTap} className="mt-2 min-h-11 rounded-full border border-border px-[16px] text-sm font-medium text-text">
               {ta("tryAgain")}
             </button>
           </div>

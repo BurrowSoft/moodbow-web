@@ -4,12 +4,14 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 
 // The web's only service-role client stays where UX allowed it (#270): the
-// Stripe webhook and the crons. Any other file importing it fails here.
+// Stripe webhook and the crons, and (1.4 G, the Reviewer's blocker 1) the shared-week
+// viewer's route, since share_view is granted to service_role only. Any other file
+// importing it fails here.
 const SRC = path.join(process.cwd(), "src");
 const files = (dir: string): string[] =>
   readdirSync(dir, { withFileTypes: true }).flatMap((d) => (d.isDirectory() ? files(path.join(dir, d.name)) : /\.(ts|tsx|mts)$/.test(d.name) ? [path.join(dir, d.name)] : []));
 const rel = (f: string) => path.relative(process.cwd(), f).split(path.sep).join("/");
-const ALLOWED = [/^src\/app\/api\/webhooks\/stripe\/route\.ts$/, /^src\/app\/api\/cron\/[^/]+\/route\.ts$/];
+const ALLOWED = [/^src\/app\/api\/webhooks\/stripe\/route\.ts$/, /^src\/app\/api\/cron\/[^/]+\/route\.ts$/, /^src\/app\/api\/share\/view\/route\.ts$/];
 const TEST = /\.test\.(ts|tsx)$/;
 
 describe("the service role on the web", () => {
@@ -53,7 +55,9 @@ describe("the service role on the web", () => {
     const buckets = [...text.matchAll(/storage\.from\("([^"]+)"\)\.(\w+)/g)].map((m) => `${m[1]}.${m[2]}`);
     expect(buckets).toEqual(["entry-pictures.remove"]);
     expect(text).not.toMatch(/createSignedUrl|getPublicUrl|\.download\(|\.list\(/);
-    expect(text).not.toMatch(/\.rpc\(/);
+    // One function only (1.4 G): share_view, which the database grants to service_role alone.
+    expect([...text.matchAll(/\.rpc\("([^"]+)"/g)].map((m) => m[1])).toEqual(["share_view"]);
+    expect(text.match(/\.rpc\(/g)?.length).toBe(1);
     expect(text).not.toMatch(/export\s+(const|function)\s+db\b/);
   });
 });
