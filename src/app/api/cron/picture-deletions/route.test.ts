@@ -3,8 +3,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { underOwnFolder } from "@/lib/journal/pictureQueue";
 
 type Row = { id: number; user_id: string; path: string; attempts: number };
-let picturesMet = false;
-vi.mock("@/lib/conditions", () => ({ conditionMet: () => picturesMet }));
+// The conditions met in a test (by id): pictures-live (the web's) and app-pictures (the app release's).
+let met = new Set<string>();
+vi.mock("@/lib/conditions", () => ({ conditionMet: (id: string) => met.has(id) }));
 let queue: Row[] = [];
 let readable = true;
 let configured = true;
@@ -29,7 +30,7 @@ const get = (auth: string | null = "Bearer cron-test") => GET(new Request("https
 
 beforeEach(() => {
   vi.stubEnv("CRON_SECRET", "cron-test");
-  picturesMet = false;
+  met = new Set();
   readable = true;
   configured = true;
   queue = [];
@@ -96,9 +97,26 @@ describe("GET /api/cron/picture-deletions (035)", () => {
     readable = false;
     configured = true;
     expect(await (await get()).json()).toEqual({ skipped: "no_queue" });
-    picturesMet = true;
+    met = new Set(["pictures-live"]);
     expect((await get()).status).toBe(500);
     configured = false;
     expect((await get()).status).toBe(503);
+  });
+
+  it("the app's pictures alone (app-pictures, before the web's pictures-live) make it loud too: no key is a 503, no queue a 500 (UX, 20 Nov)", async () => {
+    met = new Set(["app-pictures"]);
+    configured = false;
+    const noKey = await get();
+    expect(noKey.status).toBe(503);
+    expect(await noKey.json()).toEqual({ error: "not_configured" });
+    configured = true;
+    readable = false;
+    const noQueue = await get();
+    expect(noQueue.status).toBe(500);
+    expect(await noQueue.json()).toEqual({ error: "db" });
+    // With the key and the queue, the same work as ever.
+    readable = true;
+    queue = [row(1)];
+    expect(await (await get()).json()).toEqual({ deleted: 1, failed: 0, refused: 0 });
   });
 });

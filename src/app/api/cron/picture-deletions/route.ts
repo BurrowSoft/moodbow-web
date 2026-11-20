@@ -12,7 +12,8 @@ import { underOwnFolder } from "@/lib/journal/pictureQueue";
 // - in batches of 100 within a time budget; a file already gone counts as done (it may run twice);
 // - a failed batch stays queued with its attempts counted; past 5 it's reported (counts only);
 // - the logs and the answer hold counts only, never a path or an id.
-// The files are only gone once this runs: its schedule must be on before pictures-live is met.
+// The files are only gone once this runs: its schedule must be on before pictures-live or
+// app-pictures is met.
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -21,6 +22,12 @@ const BATCH = 100;
 const BUDGET_MS = 45_000;
 const REPORT_AFTER = 5;
 
+// Pictures are live once the web's switch is on OR the app release that adds them is (app-pictures:
+// the app's pictures queue their files here too). From then, a missing key or an unreadable queue is
+// a failed run (Vercel's cron log, a 5xx), never a quiet skip: the privacy policy's "deleted files
+// removed within a day" holds only while this runs (UX, 20 Nov).
+const picturesOn = (): boolean => conditionMet("pictures-live") || conditionMet("app-pictures");
+
 export async function GET(req: Request): Promise<Response> {
   if (!cronAuthorized(req.headers.get("authorization"), process.env.CRON_SECRET)) return Response.json({ error: "unauthorized" }, { status: 401 });
   // Before pictures are set up here (no key, or no 035 yet): a quiet no-op, not a daily error.
@@ -28,7 +35,7 @@ export async function GET(req: Request): Promise<Response> {
     console.log(`[picture-deletions] skipped: ${why}`);
     return Response.json({ skipped: why });
   };
-  if (!serviceRoleConfigured()) return conditionMet("pictures-live") ? Response.json({ error: "not_configured" }, { status: 503 }) : quiet("not_configured");
+  if (!serviceRoleConfigured()) return picturesOn() ? Response.json({ error: "not_configured" }, { status: 503 }) : quiet("not_configured");
 
   const started = Date.now();
   let deleted = 0;
@@ -40,7 +47,7 @@ export async function GET(req: Request): Promise<Response> {
   while (Date.now() - started < BUDGET_MS) {
     const read = await readPictureQueue(BATCH + skip.size);
     if (!read.ok) {
-      if (deleted + failed + refused === 0) return conditionMet("pictures-live") ? Response.json({ error: "db" }, { status: 500 }) : quiet("no_queue");
+      if (deleted + failed + refused === 0) return picturesOn() ? Response.json({ error: "db" }, { status: 500 }) : quiet("no_queue");
       break;
     }
     const batch = read.value.filter((r) => !skip.has(r.id)).slice(0, BATCH);
