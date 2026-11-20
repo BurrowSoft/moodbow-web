@@ -37,6 +37,14 @@ describe("plusView: what a page shows about Plus", () => {
     expect(plusView(row({ source: "play", status: "past_due", current_period_start: at(NOW - 2 * DAY) }), NOW)).toMatchObject({ kind: "free" });
     expect(plusView(row(), NOW)).not.toHaveProperty("paymentFailed");
   });
+  // 042: a pending cancel. Plus is still on, and Me says when it ends and that it won't renew.
+  it("a pending cancel (cancel_at): still Plus, with endsAt; none once it renews, none without Plus", () => {
+    const ends = at(NOW + 5 * DAY);
+    expect(plusView(row({ status: "trialing", trial_ends_at: ends, current_period_end: ends, cancel_at: ends }), NOW)).toEqual({ kind: "plus", source: "stripe", daysLeft: 5, until: ends, endsAt: ends });
+    expect(plusView(row({ cancel_at: at(NOW + 300 * DAY) }), NOW)).toMatchObject({ kind: "plus", daysLeft: null, endsAt: at(NOW + 300 * DAY) });
+    expect(plusView(row({ cancel_at: null }), NOW)).not.toHaveProperty("endsAt");
+    expect(plusView(row({ status: "canceled", cancel_at: ends }), NOW)).toEqual({ kind: "free", trial: false });
+  });
   it("ended, with the free week used: free, without the trial", () => {
     expect(plusView(row({ status: "canceled" }), NOW)).toEqual({ kind: "free", trial: false });
     expect(plusView(row({ current_period_end: at(NOW - 1) }), NOW)).toEqual({ kind: "free", trial: false });

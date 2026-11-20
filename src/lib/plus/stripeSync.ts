@@ -61,6 +61,10 @@ export function desiredFor(sub: Stripe.Subscription, prices: readonly string[]):
       store_customer_id: id(sub.customer),
       store_subscription_id: sub.id,
       store_product_id: item?.price?.id ?? null,
+      // The pending cancel Me shows as "won't renew" (042, display only). Stripe's portal sets cancel_at (2026-05
+      // API; cancel_at_period_end stays false, sw14), older paths set cancel_at_period_end: then it's the period's
+      // end. Un-cancelled in the portal: null again.
+      cancel_at: iso(sub.cancel_at) ?? (sub.cancel_at_period_end ? periodEnd : null),
     },
   };
 }
