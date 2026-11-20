@@ -29,8 +29,9 @@ describe("Spanish, page by page, behind its approval", () => {
   it("other languages aren't touched by it", () => {
     for (const locale of ["fr", "pt-br", "de", "it", "th"]) expect(legalLocale(locale, "privacy", () => "live")).toBe("en");
   });
-  it("still off on Production: Vitor approves, and his word flips it", () => {
-    expect(conditionMet("legal-es-approved")).toBe(false);
+  it("on in Production since Vitor's word (20 Nov): /es shows the Spanish privacy policy and terms", () => {
+    expect(conditionMet("legal-es-approved")).toBe(true);
+    for (const slug of ["privacy", "terms"] as const) expect(legalLocale("es", slug)).toBe("es");
   });
 });
 
