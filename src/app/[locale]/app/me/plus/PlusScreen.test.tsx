@@ -121,6 +121,8 @@ describe("PlusScreen: the table scrolls, the footer never does", () => {
     expect(within(footer).getByTestId("plus-price")).toHaveTextContent(m.trialFree);
     expect(within(footer).getByTestId("plus-renews")).toHaveTextContent("Then US$59.99 a year · renews automatically");
     expect(within(footer).getByTestId("plus-start")).toBeTruthy();
+    // Pinned (wider than a 13em column): no copy under the title.
+    expect(screen.queryByTestId("plus-offer-top")).toBeNull();
     expect(within(footer).queryByTestId("plus-not-now")).toBeNull();
     expect(within(screen.getByTestId("plus-rest")).getByTestId("plus-not-now")).toBeTruthy();
     // Fixed at the bottom, with room kept under the page's end for it (its measured height).
@@ -163,6 +165,49 @@ describe("PlusScreen: the table scrolls, the footer never does", () => {
     expect(document.documentElement).toHaveAttribute("data-tabs-aside");
     unmount();
     expect(document.documentElement).not.toHaveAttribute("data-tabs-aside");
+    rect.mockRestore();
+    vi.unstubAllGlobals();
+    vi.stubGlobal("fetch", fetchMock);
+  });
+
+  // UX, 20 Nov (#410): "under the 13em breakpoint, no pinned footer. Instead an offer block (price, the renewal line,
+  // Start) sits right after the title/lead, before the feature table, so it's in view on landing at 320/300. The same
+  // block repeats at the end; never Start without the price and renewal next to it." Even where the compact part
+  // alone would have stayed pinned (300 of 640: under 60 %).
+  it("large text on a narrow screen (a 13em column): never pinned; the price, the renewal line and Start under the title and again at the end", () => {
+    vi.stubGlobal("ResizeObserver", class { observe() {} disconnect() {} });
+    const heights: Record<string, number> = { "plus-footer": 300, "plus-scroll": 60 };
+    const rect = vi.spyOn(Element.prototype, "getBoundingClientRect").mockImplementation(function (this: Element) {
+      return { height: heights[this.getAttribute("data-testid") ?? ""] ?? 0 } as DOMRect;
+    });
+    vi.stubGlobal("innerHeight", 640);
+    const queries: string[] = [];
+    vi.stubGlobal("matchMedia", (query: string) => {
+      queries.push(query);
+      return { matches: query === "(max-width: 13em)", media: query } as MediaQueryList;
+    });
+    show({ kind: "free", trial: true });
+    const root = screen.getByTestId("plus-screen");
+    const footer = screen.getByTestId("plus-footer");
+    expect(queries).toContain("(max-width: 13em)");
+    expect(root).toHaveAttribute("data-large");
+    expect(root).toHaveAttribute("data-unpinned");
+    expect(footer.className).not.toContain("fixed");
+    expect(document.body.style.paddingBottom).toBe("");
+    for (const id of ["plus-price", "plus-renews", "plus-start"]) expect(within(footer).getByTestId(id)).toBeTruthy();
+    expect(root.lastElementChild).toBe(footer);
+    // The same three right after the title and lead, before the table, with their own ids (one live region only).
+    const top = screen.getByTestId("plus-offer-top");
+    for (const id of ["plus-top-price", "plus-top-renews", "plus-top-start"]) expect(within(top).getByTestId(id)).toBeTruthy();
+    expect(within(top).getByTestId("plus-top-price")).toHaveTextContent(within(footer).getByTestId("plus-price").textContent!);
+    expect(within(top).getByTestId("plus-top-renews")).toHaveTextContent(within(footer).getByTestId("plus-renews").textContent!);
+    // UX, 20 Nov (the fr re-check): title → offer → lead → table.
+    const lead = screen.getByTestId("plus-lead");
+    expect(lead).toHaveTextContent(m.lead);
+    expect(screen.getByTestId("plus-title").compareDocumentPosition(top) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(top.compareDocumentPosition(lead) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(lead.compareDocumentPosition(screen.getByTestId("plus-table")) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(screen.getAllByText(m.lead)).toHaveLength(1);
     rect.mockRestore();
     vi.unstubAllGlobals();
     vi.stubGlobal("fetch", fetchMock);

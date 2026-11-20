@@ -202,7 +202,7 @@ export function WeeklyReport({ initial, weekStart, weekLabel, dateLocaleTag, bal
           <p className="mb-2 flex flex-wrap items-center gap-2 text-sm font-medium text-voice">
             <span>{ta("appName")}</span>
             {report.tier === "lite" && (
-              <span data-testid="weekly-report-lite" className="inline-block rounded-full border border-voice px-3 py-0.5 text-xs font-medium text-voice">
+              <span data-testid="weekly-report-lite" className="inline-block rounded-full border border-voice px-[12px] py-0.5 text-xs font-medium text-voice">
                 {t("reflectLiteBadge")}
               </span>
             )}
@@ -292,7 +292,7 @@ export function WeeklyReport({ initial, weekStart, weekLabel, dateLocaleTag, bal
             <p role="alert" data-testid="weekly-report-error" className="text-sm font-medium text-accent">
               {t("errOffline")}
             </p>
-            <button type="button" data-testid="weekly-report-retry" onClick={retrySameTap} className="mt-2 min-h-11 rounded-full border border-border px-4 text-sm font-medium text-text">
+            <button type="button" data-testid="weekly-report-retry" onClick={retrySameTap} className="mt-2 min-h-11 rounded-full border border-border px-[16px] text-sm font-medium text-text">
               {ta("tryAgain")}
             </button>
           </div>

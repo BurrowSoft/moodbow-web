@@ -6,6 +6,8 @@ import { PageShell } from "@/components/PageShell";
 import { conditionMet } from "@/lib/conditions";
 import { pageMetadata } from "@/lib/metadata";
 import { SUPPORT_EMAIL } from "@/lib/site";
+import { SupportAddress } from "@/lib/wholeNames";
+import { standaloneLinkClass } from "@/components/AuthField";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/support">): Promise<Metadata> {
   const { locale } = await params;
@@ -24,16 +26,17 @@ export default async function SupportPage({ params }: PageProps<"/[locale]/suppo
       <p>
         {t.rich("emailLine", {
           email: SUPPORT_EMAIL,
-          link: (chunks) => (
+          // The tag holds only {email} in every language: the address, breaking only after its "@" (UX, 20 Nov).
+          link: () => (
             <a href={`mailto:${SUPPORT_EMAIL}`} className="font-medium text-accent underline underline-offset-4">
-              {chunks}
+              <SupportAddress />
             </a>
           ),
         })}
       </p>
       {conditionMet("delete-account-live") && (
         <p>
-          <Link href="/account-deletion" className="font-medium text-accent underline underline-offset-4">
+          <Link href="/account-deletion" data-testid="support-account-deletion" className={standaloneLinkClass}>
             {t("deleteLink")}
           </Link>
         </p>

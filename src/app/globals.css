@@ -167,6 +167,26 @@ body {
 :is(.whole-name, [data-help-entry], a[href^="mailto:"], a[href^="http"], textarea, input) {
   hyphens: manual;
 }
+/* A name where it fits a line at any size (NAMES_FIT in src/lib/ui/largeText.ts: decision 231's cap, or a heading
+   on its own row): no emergency break inside it either (UX, 20 Nov: "Mood / bow" at fr 320 px / 300 %). Elsewhere a
+   name keeps the page's overflow-wrap, the last resort against a page that scrolls sideways. */
+.names-fit .whole-name {
+  overflow-wrap: normal;
+}
+/* Share's week at large text (UX, 20 Nov, the Web Tester at fr 320 px / 300 %: "lun. mar. mer." drawn on top of each
+   other): each day's label is one letter where the page is a 13em column or narrower (the hyphen rule's query), its
+   short form otherwise. Screen readers hear the long day (sr-only). */
+[data-day-form="narrow"] {
+  display: none;
+}
+@media (max-width: 13em) {
+  [data-day-form="short"] {
+    display: none;
+  }
+  [data-day-form="narrow"] {
+    display: inline;
+  }
+}
 
 /* A call link's name may break anywhere rather than push the page sideways: a long name such
    as "TelefonSeelsorge" in a narrow row (the safety plan, the help card, the help page). */

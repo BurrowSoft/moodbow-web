@@ -32,6 +32,7 @@ import { activeShareLine } from "@/lib/share/shareLinks";
 import { MePicture } from "./MePicture";
 import { lettersGate } from "@/lib/plus/letters";
 import { LockedItem, PlusLock } from "../PlusSheet";
+import { standaloneLinkClass } from "@/components/AuthField";
 
 // The export (export_my_data may take 30 s: lib/supabase/deadline) and the
 // import batches run in this page's functions: 60, so their own clean error
@@ -65,7 +66,8 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
   const t = await getTranslations("app");
   const tm = await getTranslations("me");
   const tc = await getTranslations("common");
-  const link = "font-medium text-accent underline underline-offset-4";
+  // Me's links each stand on their own line: at least 24 px tall (standaloneLinkClass).
+  const link = standaloneLinkClass;
   // Me's reads in one round (audit batch D, UX 14 Nov): one after another they could pass
   // maxDuration and take the help row, export and delete with them. Plus is capped as on Today:
   // past it, nothing about Plus (null), never an offer to someone who may pay.

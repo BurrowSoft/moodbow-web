@@ -244,7 +244,9 @@ test.describe("language: the offered ones, and Thai as a draft (thai-offered-liv
     await expect(page.getByTestId("draft-banner")).toHaveCount(LEGAL ? 0 : 1);
   });
 
-  test("/th/account-deletion: treated as legal: the English page under the Thai line (UX, #112)", async ({ page }) => {
+  // A help page now (UX, 20 Nov), in each live language's words; Thai isn't live yet, so it stays the English page under
+  // the Thai line until it goes live (/fr/account-deletion is French: large-text.spec.ts).
+  test("/th/account-deletion: Thai not live yet: the English page under the Thai line", async ({ page }) => {
     const res = await page.goto("/th/account-deletion");
     expect(res?.status()).toBe(200);
     await expect(page.getByTestId("page-notice")).toHaveText("หน้านี้มีให้อ่านเป็นภาษาอังกฤษ");
@@ -907,4 +909,18 @@ test("sign-in shows the notice for why the session ended (decisions 68 + 70)", a
   await expect(page.getByTestId("signed-out-notice")).toHaveText("You've been signed out. Please sign in again.");
   await page.goto("/sign-in");
   await expect(page.getByTestId("signed-out-notice")).toHaveCount(0);
+});
+
+// A text link on its own line is at least 24 px tall (WCAG 2.5.8; UX, 20 Nov: the Web Tester measured 23 px at 100 %).
+// Me's links use the same class (lib/ui/linkTargets.test.ts); they need a session.
+test("standalone text links are at least 24 px tall at the normal size", async ({ page }) => {
+  for (const [path, testId] of [
+    ["/support", "support-account-deletion"],
+    ["/sign-up", "signup-to-signin"],
+    ["/help/getting-started", "help-back"],
+  ] as const) {
+    await page.goto(path);
+    const height = await page.getByTestId(testId).evaluate((el) => el.getBoundingClientRect().height);
+    expect(height, path).toBeGreaterThanOrEqual(24);
+  }
 });

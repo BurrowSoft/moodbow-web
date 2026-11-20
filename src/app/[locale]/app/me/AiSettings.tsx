@@ -62,7 +62,7 @@ export function AiSettings({ initial, credits }: { initial: Values; credits: { b
   };
 
   const chip = (active: boolean) =>
-    `inline-flex min-h-12 items-center rounded-full border px-4 text-sm font-medium aria-disabled:opacity-60 ${active ? "border-accent bg-pill text-accent" : "border-border text-muted hover:bg-pill"}`;
+    `inline-flex min-h-12 items-center rounded-full border px-[16px] text-sm font-medium aria-disabled:opacity-60 ${active ? "border-accent bg-pill text-accent" : "border-border text-muted hover:bg-pill"}`;
 
   return (
     <section {...untilLoaded} aria-labelledby="me-ai" className="rounded-3xl border border-border bg-surface p-[24px]">
@@ -151,7 +151,7 @@ export function AiSettings({ initial, credits }: { initial: Values; credits: { b
           <p role="alert" data-testid="me-ai-error" className="text-sm font-medium text-accent">
             {tt("errGeneric")}
           </p>
-          <button type="button" data-testid="me-ai-retry" onClick={() => save(failed.field, failed.tried, failed.withdrawal)} className="mt-2 min-h-11 rounded-full border border-border px-4 text-sm font-medium text-text">
+          <button type="button" data-testid="me-ai-retry" onClick={() => save(failed.field, failed.tried, failed.withdrawal)} className="mt-2 min-h-11 rounded-full border border-border px-[16px] text-sm font-medium text-text">
             {ta("tryAgain")}
           </button>
         </div>

@@ -8,7 +8,7 @@ de-draft: true
 
 **Kostenlos:** Check-ins und dein Tagebuch ohne Grenze, der Verlauf, der Kalender und die Suche, Hilfe und dein Sicherheitsplan, was dir hilft und Erdungsübungen, die Zusammenfassung für den Termin, Export, Import und Löschen.
 
-**Plus gibt dazu:** Einblicke (Woche, Monat, 3 Monate, dein Jahr und alles bisher), Muster und Was mir guttut, den Jahresrückblick, Briefe an mein zukünftiges Ich, mehr Themes (und App-Symbole in der App), ein gestaltetes PDF deines Tagebuchs und eine Fragensammlung zum Schreiben. Die Fragen für „Schwere Tage“ in der Fragensammlung sind für alle kostenlos.{pending:plus} Im Web gibt Plus außerdem mehr Arten zu atmen in **Was mir hilft** und mehr Erinnerungen dazu.{/pending}
+**Plus gibt dazu:** Einblicke (Woche, Monat, 3 Monate, Jahr und alles bisher), Muster und Was mir guttut, den Jahresrückblick, Briefe an mein zukünftiges Ich, mehr Themes (und App-Symbole in der App), ein gestaltetes PDF deines Tagebuchs und eine Fragensammlung zum Schreiben. Die Fragen für „Schwere Tage“ in der Fragensammlung sind für alle kostenlos.{pending:plus} Im Web gibt Plus außerdem mehr Arten zu atmen in **Was mir hilft** und mehr Erinnerungen dazu.{/pending}
 
 **Mehr Muster** kann auch deine eigenen Tags einbeziehen, sobald du sie nutzt.
 

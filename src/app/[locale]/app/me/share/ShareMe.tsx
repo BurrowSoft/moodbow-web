@@ -183,7 +183,7 @@ export function ShareMe({ initialLinks, routine, dateLocaleTag }: { initialLinks
               <legend className="font-medium text-text">{t("endsLabel")}</legend>
               <div className="flex flex-wrap gap-2">
                 {EXPIRY_DAYS.map((d) => (
-                  <label key={d} className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-border px-[14px] text-text">
+                  <label key={d} className="inline-flex min-h-[44px] items-center gap-[8px] rounded-full border border-border px-[14px] text-text">
                     <input type="radio" name="share-expiry" data-testid={`share-expiry-${d}`} checked={expiry === d} onChange={() => setExpiry(d)} />
                     {t(`ends${d}` as "ends7")}
                   </label>

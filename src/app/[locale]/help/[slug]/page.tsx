@@ -7,6 +7,7 @@ import { Link } from "@/i18n/navigation";
 import { HelpNowLines, HelpNowNumbers } from "@/components/HelpNowLines";
 import { helplinesFor } from "@/lib/safety/helplines";
 import { PageShell } from "@/components/PageShell";
+import { standaloneLinkClass } from "@/components/AuthField";
 import { pageGate } from "@/lib/conditions";
 import { findArticle, helpArticles, helpPageMet, renderArticle } from "@/lib/helpContent";
 import { HELP_GATE } from "@/lib/helpGate";
@@ -58,7 +59,7 @@ export default async function HelpArticlePage({ params, searchParams }: PageProp
         <>
         {slug === "get-help-now" && <HelpNowLines />}
         <p className="mx-auto mt-6 max-w-2xl">
-          <Link href="/help" data-testid="help-back" className="font-medium text-accent underline underline-offset-4">
+          <Link href="/help" data-testid="help-back" className={standaloneLinkClass}>
             {t("helpTitle")}
           </Link>
         </p>

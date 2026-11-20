@@ -87,7 +87,7 @@
     "steps": "Dans l'app ou sur le web : ouvrez Moi → Supprimer le compte, tapez SUPPRIMER, puis confirmez.",
     "what": "Nous supprimons tout ce qui se trouve dans votre compte, dont vos notes, vos bilans et vos réglages, ainsi que vos identifiants de connexion.",
     "backups": "Les copies dans nos sauvegardes chiffrées sont effacées automatiquement sous {days} jours.",
-    "noAccess": "Impossible de vous connecter ? Écrivez à <support>{email}</support> depuis l'adresse utilisée à l'inscription, et nous le supprimerons pour vous."
+    "noAccess": "Impossible de vous connecter ? Écrivez à <support>{email}</support> depuis l'adresse utilisée à l'inscription, et nous le supprimerons pour vous."
   },
   "emailConfirmed": {
     "metaTitle": "E-mail confirmé",
@@ -492,7 +492,13 @@
   },
   "help": {
     "helpTitle": "Aide et FAQ",
-    "helpIntro": "Les réponses aux questions fréquentes sur Moodbow. Vous ne trouvez pas ce qu'il vous faut ? Écrivez à {email}."
+    "helpIntro": "Les réponses aux questions fréquentes sur Moodbow. Vous ne trouvez pas ce qu'il vous faut ? Écrivez à {email}.",
+    "topicBasics": "Les bases",
+    "topicJournal": "Votre journal",
+    "topicSettings": "Réglages",
+    "topicAi": "IA",
+    "topicPrivacy": "Confidentialité et compte",
+    "topicHelp": "Aide"
   },
   "timeline": {
     "onThisDayMonth": "Il y a un mois",
@@ -938,8 +944,8 @@
     "rowAppointment": "Résumé pour un rendez-vous",
     "rowData": "Exporter, importer et supprimer",
     "rowAiFree": "Réflexions IA, 3 par semaine",
-    "rowYear": "Votre année et tout l'historique",
-    "rowInsights": "Statistiques : semaine, mois, 3 mois, votre année",
+    "rowYear": "Année et tout l'historique",
+    "rowInsights": "Statistiques : semaine, mois, 3 mois et année",
     "rowMorePatterns": "Tendances et Ce qui me fait du bien",
     "rowReview": "Bilan de l'année",
     "rowLetters": "Lettres à mon futur moi",
@@ -1030,7 +1036,7 @@
     "close": "Fermer",
     "offerLabel": "Offre spéciale de Noël",
     "offerBannerTitle": "Votre première année pour {offer}",
-    "offerBannerBody": "Des statistiques plus poussées pour l'année à venir : votre année, vos tendances, Ce qui me fait du bien, les lettres à mon futur moi et plus encore.",
+    "offerBannerBody": "Des statistiques plus poussées pour l'année à venir : des graphiques annuels, vos tendances, Ce qui me fait du bien, les lettres à mon futur moi et plus encore.",
     "offerSee": "Voir l'offre",
     "offerSmall": "Spécial Noël, jusqu'au 31 décembre. Ensuite {price} par an. Annulable à tout moment dans Moi → Moodbow Plus.",
     "offerCardSmall": "Jusqu'au 31 décembre. Ensuite {price} par an. Annulable à tout moment dans Moi → Moodbow Plus.",

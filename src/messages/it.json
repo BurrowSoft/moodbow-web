@@ -87,7 +87,7 @@
     "steps": "Nell'app o sul web: apri Profilo → Elimina account, scrivi ELIMINA e conferma.",
     "what": "Eliminiamo tutto ciò che c'è nel tuo account, comprese le tue pagine, i check-in e le impostazioni, e i tuoi dati di accesso.",
     "backups": "Le copie nei nostri backup cifrati vengono rimosse automaticamente entro {days} giorni.",
-    "noAccess": "Non riesci ad accedere? Scrivi a <support>{email}</support> dall'indirizzo usato per la registrazione e lo elimineremo noi."
+    "noAccess": "Non riesci ad accedere? Scrivi a <support>{email}</support> dall'indirizzo usato per la registrazione e lo elimineremo noi."
   },
   "emailConfirmed": {
     "metaTitle": "Email confermata",
@@ -492,7 +492,13 @@
   },
   "help": {
     "helpTitle": "Aiuto e domande frequenti",
-    "helpIntro": "Risposte alle domande più comuni su Moodbow. Non trovi quello che cerchi? Scrivi a {email}."
+    "helpIntro": "Risposte alle domande più comuni su Moodbow. Non trovi quello che cerchi? Scrivi a {email}.",
+    "topicBasics": "Le basi",
+    "topicJournal": "Il tuo diario",
+    "topicSettings": "Impostazioni",
+    "topicAi": "AI",
+    "topicPrivacy": "Privacy e account",
+    "topicHelp": "Aiuto"
   },
   "timeline": {
     "onThisDayMonth": "Un mese fa",
@@ -938,8 +944,8 @@
     "rowAppointment": "Riepilogo per l'appuntamento",
     "rowData": "Esportare, importare ed eliminare",
     "rowAiFree": "Riflessioni IA, 3 a settimana",
-    "rowYear": "Il tuo anno e tutto lo storico",
-    "rowInsights": "Andamento: settimana, mese, 3 mesi, il tuo anno",
+    "rowYear": "Anno e tutto lo storico",
+    "rowInsights": "Andamento: settimana, mese, 3 mesi e anno",
     "rowMorePatterns": "Andamenti e Cosa mi fa stare bene",
     "rowReview": "L'anno in sintesi",
     "rowLetters": "Lettere al me del futuro",
@@ -1030,7 +1036,7 @@
     "close": "Chiudi",
     "offerLabel": "Offerta speciale di Natale",
     "offerBannerTitle": "Il tuo primo anno a {offer}",
-    "offerBannerBody": "Un andamento più approfondito per l'anno che viene: il tuo anno, i tuoi andamenti, Cosa mi fa stare bene, le lettere al me del futuro e altro ancora.",
+    "offerBannerBody": "Un andamento più approfondito per l'anno che viene: grafici annuali, i tuoi andamenti, Cosa mi fa stare bene, le lettere al me del futuro e altro ancora.",
     "offerSee": "Vedi l'offerta",
     "offerSmall": "Speciale Natale, fino al 31 dicembre. Poi {price} all'anno. Annulla quando vuoi in Profilo → Moodbow Plus.",
     "offerCardSmall": "Fino al 31 dicembre. Poi {price} all'anno. Annulla quando vuoi in Profilo → Moodbow Plus.",

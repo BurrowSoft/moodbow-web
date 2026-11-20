@@ -128,7 +128,7 @@ export function Reminder({ on: initialOn, time: initialTime, extra = null }: { o
             setTime(state.time);
             save(state.on, state.time);
           }}
-          className="mt-2 min-h-11 rounded-full border border-border px-4 text-sm font-medium text-text"
+          className="mt-2 min-h-11 rounded-full border border-border px-[16px] text-sm font-medium text-text"
         >
           {ta("tryAgain")}
         </button>

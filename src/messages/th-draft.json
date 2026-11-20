@@ -1616,8 +1616,8 @@
   },
   {
     "key": "plus.rowInsights",
-    "en": "Insights: week, month, 3 months, your year",
-    "reason": "UX draft (native read pending)"
+    "en": "Insights: week, month, 3 months and year",
+    "reason": "UX draft (native read pending; the app's Thai, #274: 3 เดือน และรายปี)"
   },
   {
     "key": "plus.cancelWhere",
@@ -1686,7 +1686,7 @@
   },
   {
     "key": "plus.offerBannerBody",
-    "en": "Deeper insights for the year ahead: your year, patterns, What lifts me, letters to future me and more.",
+    "en": "Deeper insights for the year ahead: yearly charts, patterns, What lifts me, letters to future me and more.",
     "reason": "UX draft (native read pending)"
   },
   {
@@ -2571,7 +2571,7 @@
   },
   {
     "key": "plus.rowYear",
-    "en": "Your year and all time",
+    "en": "Year and all time",
     "reason": "UX draft (native read pending)"
   },
   {
@@ -3748,6 +3748,36 @@
     "key": "common.languageNameInSentence",
     "en": "English",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "help.topicBasics",
+    "en": "Basics",
+    "reason": "UX draft (Web Dev Thai of Help's topic names, 20 Nov; native read pending)"
+  },
+  {
+    "key": "help.topicJournal",
+    "en": "Your journal",
+    "reason": "UX draft (Web Dev Thai of Help's topic names, 20 Nov; native read pending)"
+  },
+  {
+    "key": "help.topicSettings",
+    "en": "Settings",
+    "reason": "UX draft (Web Dev Thai of Help's topic names, 20 Nov; native read pending)"
+  },
+  {
+    "key": "help.topicAi",
+    "en": "AI",
+    "reason": "UX draft (Web Dev Thai of Help's topic names, 20 Nov; native read pending)"
+  },
+  {
+    "key": "help.topicPrivacy",
+    "en": "Privacy & account",
+    "reason": "UX draft (Web Dev Thai of Help's topic names, 20 Nov; native read pending)"
+  },
+  {
+    "key": "help.topicHelp",
+    "en": "Help",
+    "reason": "UX draft (Web Dev Thai of Help's topic names, 20 Nov; native read pending)"
   },
   {
     "key": "plus.trialEndsWontRenew",

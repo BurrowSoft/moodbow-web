@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { LOCKED_ROW_LABEL } from "@/lib/ui/largeText";
 
 // Moodbow Plus's lock (decision 246, mockups 4): a locked item stays visible with the lock, and a
 // tap opens the Plus screen (the sheet is retired since #315). Never on help, the safety plan, the
@@ -22,7 +23,8 @@ export function PlusLock({ size = 16 }: { size?: number }) {
 export function LockedItem({ label, className, testId, children }: { label: string; className: string; testId: string; children?: React.ReactNode }) {
   return (
     <Link href="/app/me/plus" data-testid={testId} data-locked="" className={className}>
-      <span className="min-w-0">
+      {/* Decision 231's cap beside the lock (UX, 20 Nov: "d'icône / s d'app" at fr 320 px / 300 %). */}
+      <span className={LOCKED_ROW_LABEL}>
         {label}
         {children}
       </span>

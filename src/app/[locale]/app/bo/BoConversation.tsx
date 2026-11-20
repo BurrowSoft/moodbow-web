@@ -16,6 +16,7 @@ import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
 import { useKeyboardOpen } from "@/lib/ui/keyboardOpen";
 import { focusUnclaimed, markLeftBo, takeOpenedByButton } from "./boFocus";
 import { PRIMARY_SAVE } from "@/lib/ui/journalLayout";
+import { BO_HEADING } from "@/lib/ui/largeText";
 import { countTap } from "@/lib/analyticsEvents";
 
 const BO_HEADER_MOST = 0.25;
@@ -357,7 +358,11 @@ export function BoConversation({ initial, country, back, healthData = false, con
     <div data-testid="bo-conversation" className="flex flex-col gap-4 [overflow-wrap:anywhere]">
       <header ref={header} data-testid="bo-header" data-pinned={pinned ? "" : undefined} className={`flex flex-wrap items-center gap-x-[8px] gap-y-[4px] bg-bg py-[8px] ${pinned && !keyboard ? "sticky top-0 z-10" : ""}`}>
         {back && <div className="md:hidden">{back}</div>}
-        <h1 ref={heading} tabIndex={-1} className="min-w-0 flex-1 font-medium leading-[1.33] text-text outline-none [font-size:min(1.5rem,max(10vw,24px,1rem))] [overflow-wrap:anywhere]">{t("screenLine")}</h1>
+        {/* Its own row where the page is a 13em column, where "Moodbow" fits, so the name stays whole (UX, 20 Nov:
+            "Mood / bow" at fr 320 px / 300 %); Get help now goes under it. */}
+        <h1 ref={heading} tabIndex={-1} className={BO_HEADING}>
+          {wholeNames(t("screenLine"))}
+        </h1>
         <GetHelpNow country={country} where={helpCountry} testId="bo-get-help" counted neutral />
       </header>
       <p className="text-sm text-muted">

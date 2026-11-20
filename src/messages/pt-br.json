@@ -87,7 +87,7 @@
     "steps": "No app ou na web: abra Perfil → Apagar conta, digite APAGAR e confirme.",
     "what": "Apagamos tudo o que há na sua conta, incluindo suas anotações, check-ins e configurações, e seus dados de acesso.",
     "backups": "As cópias nos nossos backups criptografados são removidas automaticamente em até {days} dias.",
-    "noAccess": "Não consegue entrar? Mande um e-mail para <support>{email}</support> do endereço que você usou no cadastro, e apagamos a conta para você."
+    "noAccess": "Não consegue entrar? Mande um e-mail para <support>{email}</support> do endereço que você usou no cadastro, e apagamos a conta para você."
   },
   "emailConfirmed": {
     "metaTitle": "E-mail confirmado",
@@ -492,7 +492,13 @@
   },
   "help": {
     "helpTitle": "Ajuda e perguntas frequentes",
-    "helpIntro": "Respostas para dúvidas comuns sobre o Moodbow. Não encontrou o que procurava? Mande um e-mail para {email}."
+    "helpIntro": "Respostas para dúvidas comuns sobre o Moodbow. Não encontrou o que procurava? Mande um e-mail para {email}.",
+    "topicBasics": "O básico",
+    "topicJournal": "Seu diário",
+    "topicSettings": "Configurações",
+    "topicAi": "IA",
+    "topicPrivacy": "Privacidade e conta",
+    "topicHelp": "Ajuda"
   },
   "timeline": {
     "onThisDayMonth": "Há um mês",
@@ -938,8 +944,8 @@
     "rowAppointment": "Resumo para a consulta",
     "rowData": "Exportar, importar e apagar",
     "rowAiFree": "Reflexões de IA, 3 por semana",
-    "rowYear": "Seu ano e todo o histórico",
-    "rowInsights": "Insights: semana, mês, 3 meses, seu ano",
+    "rowYear": "Ano e todo o histórico",
+    "rowInsights": "Insights: semana, mês, 3 meses e ano",
     "rowMorePatterns": "Padrões e O que me faz bem",
     "rowReview": "Retrospectiva do ano",
     "rowLetters": "Cartas para o meu eu do futuro",
@@ -1030,7 +1036,7 @@
     "close": "Fechar",
     "offerLabel": "Oferta especial de Natal",
     "offerBannerTitle": "Seu primeiro ano por {offer}",
-    "offerBannerBody": "Insights mais profundos para o ano que vem: seu ano, seus padrões, O que me faz bem, as cartas para o meu eu do futuro e mais.",
+    "offerBannerBody": "Insights mais profundos para o ano que vem: gráficos anuais, seus padrões, O que me faz bem, as cartas para o meu eu do futuro e mais.",
     "offerSee": "Ver a oferta",
     "offerSmall": "Especial de Natal, até 31 de dezembro. Depois, {price} por ano. Cancele quando quiser em Perfil → Moodbow Plus.",
     "offerCardSmall": "Até 31 de dezembro. Depois, {price} por ano. Cancele quando quiser em Perfil → Moodbow Plus.",

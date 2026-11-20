@@ -7,7 +7,7 @@ topic: Privacy & account
 
 **Free:** check-ins and your journal with no limit, the Timeline, the calendar and search, help and your safety plan, Things that help me and its exercises (5-4-3-2-1, Body scan, Name it), the appointment summary, export, import and delete.
 
-**Plus adds:** Insights (week, month, 3 months, your year and all time), patterns and What lifts me, Year in review, letters to future me, more themes (and app icons in the app), a designed PDF of your journal and a prompt library to write from. The prompt library's Hard days prompts are free for everyone.{pending:plus} On the web, Plus also adds more ways to breathe in **Things that help me**, and more reminders.{/pending}
+**Plus adds:** Insights (week, month, 3 months, year and all time), patterns and What lifts me, Year in review, letters to future me, more themes (and app icons in the app), a designed PDF of your journal and a prompt library to write from. The prompt library's Hard days prompts are free for everyone.{pending:plus} On the web, Plus also adds more ways to breathe in **Things that help me**, and more reminders.{/pending}
 
 **More patterns** can include your own tags, once you use them.
 

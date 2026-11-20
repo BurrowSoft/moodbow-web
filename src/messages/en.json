@@ -87,7 +87,7 @@
     "steps": "In the app or on the web: open Me → Delete account, type DELETE, and confirm.",
     "what": "We delete everything in your account, including your entries, check-ins and settings, and your sign-in details.",
     "backups": "Copies in our encrypted backups are removed automatically within {days} days.",
-    "noAccess": "Can't sign in? Email <support>{email}</support> from the address you signed up with and we'll delete it for you."
+    "noAccess": "Can't sign in? Email <support>{email}</support> from the address you signed up with and we'll delete it for you."
   },
   "emailConfirmed": {
     "metaTitle": "Email confirmed",
@@ -492,7 +492,13 @@
   },
   "help": {
     "helpTitle": "Help & FAQ",
-    "helpIntro": "Answers to common questions about using Moodbow. Can't find what you need? Email {email}."
+    "helpIntro": "Answers to common questions about using Moodbow. Can't find what you need? Email {email}.",
+    "topicBasics": "Basics",
+    "topicJournal": "Your journal",
+    "topicSettings": "Settings",
+    "topicAi": "AI",
+    "topicPrivacy": "Privacy & account",
+    "topicHelp": "Help"
   },
   "timeline": {
     "onThisDayMonth": "A month ago",
@@ -938,8 +944,8 @@
     "rowAppointment": "Appointment summary",
     "rowData": "Export, import and delete",
     "rowAiFree": "AI reflections, 3 a week",
-    "rowYear": "Your year and all time",
-    "rowInsights": "Insights: week, month, 3 months, your year",
+    "rowYear": "Year and all time",
+    "rowInsights": "Insights: week, month, 3 months and year",
     "rowMorePatterns": "Patterns and What lifts me",
     "rowReview": "Year in review",
     "rowLetters": "Letters to future me",
@@ -1030,7 +1036,7 @@
     "close": "Close",
     "offerLabel": "Christmas special offer",
     "offerBannerTitle": "Your first year for {offer}",
-    "offerBannerBody": "Deeper insights for the year ahead: your year, patterns, What lifts me, letters to future me and more.",
+    "offerBannerBody": "Deeper insights for the year ahead: yearly charts, patterns, What lifts me, letters to future me and more.",
     "offerSee": "See the offer",
     "offerSmall": "Christmas special, until 31 December. Then {price} a year. Cancel anytime in Me → Moodbow Plus.",
     "offerCardSmall": "Until 31 December. Then {price} a year. Cancel anytime in Me → Moodbow Plus.",

@@ -87,7 +87,7 @@
     "steps": "En la app o en la web: abre Yo → Eliminar cuenta, escribe ELIMINAR y confirma.",
     "what": "Eliminamos todo lo que hay en tu cuenta, incluidas tus entradas, registros y ajustes, y tus datos de inicio de sesión.",
     "backups": "Las copias en nuestras copias de seguridad cifradas se borran automáticamente en un plazo de {days} días.",
-    "noAccess": "¿No puedes iniciar sesión? Escribe a <support>{email}</support> desde el correo con el que te registraste y la eliminaremos por ti."
+    "noAccess": "¿No puedes iniciar sesión? Escribe a <support>{email}</support> desde el correo con el que te registraste y la eliminaremos por ti."
   },
   "emailConfirmed": {
     "metaTitle": "Correo confirmado",
@@ -492,7 +492,13 @@
   },
   "help": {
     "helpTitle": "Ayuda y preguntas frecuentes",
-    "helpIntro": "Respuestas a preguntas frecuentes sobre cómo usar Moodbow. ¿No encuentras lo que buscas? Escribe a {email}."
+    "helpIntro": "Respuestas a preguntas frecuentes sobre cómo usar Moodbow. ¿No encuentras lo que buscas? Escribe a {email}.",
+    "topicBasics": "Lo básico",
+    "topicJournal": "Tu diario",
+    "topicSettings": "Ajustes",
+    "topicAi": "IA",
+    "topicPrivacy": "Privacidad y cuenta",
+    "topicHelp": "Ayuda"
   },
   "timeline": {
     "onThisDayMonth": "Hace un mes",
@@ -938,8 +944,8 @@
     "rowAppointment": "Resumen para tu cita",
     "rowData": "Exportar, importar y eliminar",
     "rowAiFree": "Reflexiones de IA, 3 por semana",
-    "rowYear": "Tu año y todo el historial",
-    "rowInsights": "Resumen: semana, mes, 3 meses, tu año",
+    "rowYear": "Año y todo el historial",
+    "rowInsights": "Resumen: semana, mes, 3 meses y año",
     "rowMorePatterns": "Patrones y Lo que me levanta el ánimo",
     "rowReview": "Resumen del año",
     "rowLetters": "Cartas para mi yo del futuro",
@@ -1030,7 +1036,7 @@
     "close": "Cerrar",
     "offerLabel": "Oferta especial de Navidad",
     "offerBannerTitle": "Tu primer año por {offer}",
-    "offerBannerBody": "Un resumen más profundo para el año que viene: tu año, tus patrones, Lo que me levanta el ánimo, las cartas para mi yo del futuro y más.",
+    "offerBannerBody": "Un resumen más profundo para el año que viene: gráficos anuales, tus patrones, Lo que me levanta el ánimo, las cartas para mi yo del futuro y más.",
     "offerSee": "Ver la oferta",
     "offerSmall": "Especial de Navidad, hasta el 31 de diciembre. Después, {price} al año. Cancela cuando quieras en Yo → Moodbow Plus.",
     "offerCardSmall": "Hasta el 31 de diciembre. Después, {price} al año. Cancela cuando quieras en Yo → Moodbow Plus.",
