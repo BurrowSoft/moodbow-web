@@ -13,6 +13,10 @@ export default defineConfig({
     // takes under a second alone can pass the 5 s default; 15 s keeps those
     // green without hiding a real hang.
     testTimeout: 15_000,
+    // next-intl's middleware (ESM) imports "next/server" with no extension, which Node's own ESM resolution
+    // can't find when the package is loaded as an external: src/proxy.locale.test.ts runs the REAL middleware
+    // (its localeDetection: false behaviour is the point), so next-intl goes through Vite, which resolves it.
+    server: { deps: { inline: ["next-intl"] } },
     // npm run test:coverage (UX, the coverage report): the source under
     // src/, reported per file. No thresholds yet; the report is for finding
     // gaps on the critical paths, not a gate.
