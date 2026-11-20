@@ -30,7 +30,7 @@ export function TagsField({ tags, recent, onChange }: { tags: string[]; recent: 
       {tags.length > 0 && (
         <ul className="mt-2 flex flex-wrap gap-2" data-testid="checkin-tags-list">
           {tags.map((tag) => (
-            <li key={tag} className="inline-flex min-h-11 max-w-full items-center gap-1 rounded-full bg-pill pl-3 text-text">
+            <li key={tag} className="inline-flex min-h-11 max-w-full items-center gap-[4px] rounded-full bg-pill pl-3 text-text">
               <span className="min-w-0 [overflow-wrap:anywhere]">{tag}</span>
               <button
                 type="button"
@@ -84,7 +84,7 @@ export function TagsField({ tags, recent, onChange }: { tags: string[]; recent: 
           <ul className="mt-1 flex flex-wrap gap-2" data-testid="checkin-tags-recent">
             {picks.map((r) => (
               <li key={r}>
-                <button type="button" onClick={() => add(r)} className="inline-flex min-h-11 max-w-full items-center rounded-full border border-border px-3 text-text [overflow-wrap:anywhere]">
+                <button type="button" onClick={() => add(r)} className="inline-flex min-h-11 max-w-full items-center rounded-full border border-border px-[12px] text-text [overflow-wrap:anywhere]">
                   {r}
                 </button>
               </li>

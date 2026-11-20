@@ -5,13 +5,14 @@
   on, the store age signal if it sends anything, or Your week if it stores anything.
 -->
 ## Moodbow: Consumer Health Data Privacy Policy
-Last updated: 19 November 2026
+Last updated: 20 November 2026
 
 This policy is for people in Washington State, Nevada and anywhere else where a consumer health data law applies. It adds to our [Privacy Policy](https://www.moodbow.com/privacy). Moodbow is run by Vitor Carvalho, trading as BurrowSoft. Moodbow is a wellbeing journal, not a medical service.
 
 ### What we collect that may be consumer health data
 - Your journal entries and moments, which can reveal how you feel or your health.
 - Your check-ins: mood, sleep, movement and stress, and their dates.
+{pending:routine_live|app_routine}- The routine items you add, such as medication, and the days you tick them.{/pending}
 - What we work out from them to show you, such as your charts and patterns.
 
 ### Where it comes from
@@ -26,6 +27,7 @@ We don't sell your data. We don't share it with advertisers, other third parties
 - **Vercel, USA and global network:** hosts the website and web journal, which show your journal to you.
 - **Resend, USA:** sends account emails. It receives your email address, not your journal, though that address shows you use Moodbow.
 - **Sentry, USA:** receives error reports. Your written text and personal details are removed first.
+{pending:trusted_share_live|app_trusted_share}- **People you choose:** if you make a share link, whoever has it can see the summary of your week described in our Privacy Policy, until you stop the link or it expires.{/pending}
 
 AI features are off today, and no journal text goes to any AI provider. If that changes, we'll update this policy and ask you first.
 

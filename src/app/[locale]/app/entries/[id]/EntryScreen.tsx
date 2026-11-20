@@ -335,7 +335,7 @@ function Screen({ entry: initial, checkIn, from, backLabel, dateLocaleTag, uid, 
           {chips.length > 0 && (
             <ul className="flex flex-wrap gap-2">
               {chips.map(({ label, hex }) => (
-                <li key={label} className="inline-flex items-center gap-1.5 rounded-full bg-pill px-3 py-0.5 text-xs text-text">
+                <li key={label} className="inline-flex items-center gap-[6px] rounded-full bg-pill px-[12px] py-0.5 text-xs text-text">
                   <ValueDot hex={hex} />
                   {label}
                 </li>

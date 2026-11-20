@@ -26,6 +26,11 @@
       "de": "Deutsch",
       "it": "Italiano"
     },
+    "languageNameInSentence": "English",
+    "savedLanguageSetTo": "Your journal is set to {language}.",
+    "savedLanguageContinue": "Continue in {language}",
+    "savedLanguageSwitch": "Switch to {language}",
+    "savedLanguageStay": "Stay in {language}",
     "burrowsoftProduct": "A BurrowSoft product",
     "burrowsoftAria": "A BurrowSoft product. Visit burrowsoft.com",
     "copyright": "© 2026 BurrowSoft",
@@ -82,7 +87,7 @@
     "steps": "In the app or on the web: open Me → Delete account, type DELETE, and confirm.",
     "what": "We delete everything in your account, including your entries, check-ins and settings, and your sign-in details.",
     "backups": "Copies in our encrypted backups are removed automatically within {days} days.",
-    "noAccess": "Can't sign in? Email <support>{email}</support> from the address you signed up with and we'll delete it for you."
+    "noAccess": "Can't sign in? Email <support>{email}</support> from the address you signed up with and we'll delete it for you."
   },
   "emailConfirmed": {
     "metaTitle": "Email confirmed",
@@ -487,7 +492,13 @@
   },
   "help": {
     "helpTitle": "Help & FAQ",
-    "helpIntro": "Answers to common questions about using Moodbow. Can't find what you need? Email {email}."
+    "helpIntro": "Answers to common questions about using Moodbow. Can't find what you need? Email {email}.",
+    "topicBasics": "Basics",
+    "topicJournal": "Your journal",
+    "topicSettings": "Settings",
+    "topicAi": "AI",
+    "topicPrivacy": "Privacy & account",
+    "topicHelp": "Help"
   },
   "timeline": {
     "onThisDayMonth": "A month ago",
@@ -798,7 +809,7 @@
   },
   "routine": {
     "title": "Routine",
-    "intro": "Up to 3 things you'd like to tick off each day. Only you see them.",
+    "intro": "Up to 3 things you'd like to tick off each day. Only you see them, unless you add them to your appointment summary or to a week you share.",
     "addHint": "For example, Morning meds",
     "add": "Add",
     "full": "That's 3, the most for now.",
@@ -933,8 +944,8 @@
     "rowAppointment": "Appointment summary",
     "rowData": "Export, import and delete",
     "rowAiFree": "AI reflections, 3 a week",
-    "rowYear": "Your year and all time",
-    "rowInsights": "Insights: week, month, 3 months, your year",
+    "rowYear": "Year and all time",
+    "rowInsights": "Insights: week, month, 3 months and year",
     "rowMorePatterns": "Patterns and What lifts me",
     "rowReview": "Year in review",
     "rowLetters": "Letters to future me",
@@ -956,6 +967,9 @@
     "trialLeft": "{n, plural, one {# day left} other {# days left}}",
     "trialDay": "Day {day} of 7",
     "pastDue": "Your last payment didn't go through. Update your card to keep Plus.",
+    "trialEndsWontRenew": "Plus trial · ends {date} · won't renew",
+    "endsWontRenew": "Plus · ends {date} · won't renew",
+    "pastDueLapsed": "Your last payment didn't go through. Update your card to get Plus back.",
     "updateCard": "Update card",
     "starting": "Starting your Plus…",
     "onItsWay": "Your Plus is on its way. It can take a minute.",
@@ -1022,7 +1036,7 @@
     "close": "Close",
     "offerLabel": "Christmas special offer",
     "offerBannerTitle": "Your first year for {offer}",
-    "offerBannerBody": "Deeper insights for the year ahead: your year, patterns, What lifts me, letters to future me and more.",
+    "offerBannerBody": "Deeper insights for the year ahead: yearly charts, patterns, What lifts me, letters to future me and more.",
     "offerSee": "See the offer",
     "offerSmall": "Christmas special, until 31 December. Then {price} a year. Cancel anytime in Me → Moodbow Plus.",
     "offerCardSmall": "Until 31 December. Then {price} a year. Cancel anytime in Me → Moodbow Plus.",
@@ -1076,8 +1090,8 @@
     "titleBefore": "A week shared with you",
     "introBefore": "A read-only summary of someone's check-ins. It never shows anything they wrote.",
     "show": "Show the week",
-    "titleNamed": "{name} shared their week with you",
-    "titleAnon": "Someone shared their week with you",
+    "titleNamed": "Hi {name}, here's a week shared with you",
+    "titleAnon": "A week shared with you",
     "weekOf": "Week of {date}",
     "checkIns": "{count, plural, one {# check-in this week} other {# check-ins this week}}",
     "routinePercent": "{name}: ticked on {percent}% of check-in days",

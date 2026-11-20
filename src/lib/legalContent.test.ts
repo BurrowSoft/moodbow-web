@@ -101,16 +101,17 @@ describe("legal content files", () => {
     const met = (on: boolean) => (id: string) => (id === "anon_start_live" ? on : isPendingMet(id));
     // The names are wrapped so they never hyphenate (wholeNames); the words are the same.
     const words = (html: string) => html.split('<span class="whole-name">').join("").split("</span>").join("");
-    expect(words(renderLegal(source, met(false)).html)).not.toContain(heading);
-    expect(words(renderLegal(source, met(true)).html).split(heading)).toHaveLength(2);
-    expect(words(renderLegal(source).html).includes(heading)).toBe(conditionMet("anon-start-live"));
+    // null: an undated What changed block (it shows with the app's Plus, group 5); the day isn't what's tested here.
+    expect(words(renderLegal(source, met(false), null).html)).not.toContain(heading);
+    expect(words(renderLegal(source, met(true), null).html).split(heading)).toHaveLength(2);
+    expect(words(renderLegal(source, undefined, null).html).includes(heading)).toBe(conditionMet("anon-start-live"));
   });
 
   it("a journal with no email: the policy says it can be lost and can't be returned, only once that start is live", () => {
     const source = readFileSync(path.join(process.cwd(), "content/legal/en/privacy.md"), "utf8");
     const met = (on: boolean) => (id: string) => (id === "anon_start_live" ? on : isPendingMet(id));
-    expect(renderLegal(source, met(true)).html).toContain("sign-in can open your journal");
-    expect(renderLegal(source, met(false)).html).not.toContain("sign-in can open your journal");
+    expect(renderLegal(source, met(true), null).html).toContain("sign-in can open your journal");
+    expect(renderLegal(source, met(false), null).html).not.toContain("sign-in can open your journal");
   });
 
   it("todos() finds every kind of to-confirm mark, but not in editor comments", () => {
@@ -208,7 +209,8 @@ describe("renderLegal (the real privacy text, nothing met)", () => {
     expect(words).not.toContain("Google Play, Apple App Store");
     expect(words).not.toContain("What Moodbow remembers");
     expect(page.html).not.toContain("{pending");
-    expect(page.hidden.map((h) => h.id)).toEqual(expect.arrayContaining(["plus", "ai_memory", "backup_retention", "app_app_lock", "app_share_cards"]));
+    // Plus's lines show with the web's or the app's Plus (legal/app-plus), so their blocks are "plus|app_plus".
+    expect(page.hidden.map((h) => h.id)).toEqual(expect.arrayContaining(["plus|app_plus", "ai_memory", "backup_retention", "app_app_lock", "app_share_cards"]));
   });
 
   it("highlights facts still to confirm (if any come back)", () => {
@@ -245,7 +247,8 @@ describe("renderLegal (the real privacy text, nothing met)", () => {
 describe("the What changed block's date", () => {
   const source = legalSource("privacy", "en");
   const plusMet = (id: string) => id === "plus" || isPendingMet(id);
-  const plusUnmet = (id: string) => id !== "plus" && isPendingMet(id);
+  // Plus off: neither the web's nor, since group 5, the app's (the block shows with either).
+  const plusUnmet = (id: string) => id !== "plus" && id !== "app_plus" && isPendingMet(id);
   const words = (html: string) => html.split('<span class="whole-name">').join("").split("</span>").join("");
   const markers = /\{\/?(?:dated|undated|notice_date)\}/;
 
@@ -261,7 +264,7 @@ describe("the What changed block's date", () => {
   it("is looked up only where the block shows, and can't render without its date", () => {
     expect(needsNoticeDate(source, plusMet)).toBe(true);
     expect(needsNoticeDate(source, plusUnmet)).toBe(false);
-    expect(needsNoticeDate(source)).toBe(conditionMet("plus"));
+    expect(needsNoticeDate(source)).toBe(conditionMet("plus") || conditionMet("app-plus"));
     expect(() => renderLegal(source, plusMet)).toThrow(/notice date/);
     expect(words(renderLegal(source, plusUnmet).html)).not.toContain("What changed");
   });
@@ -284,5 +287,31 @@ describe("the What changed block's date", () => {
     expect(applyNoticeDate(text, null)).toBe("Changed, soon.");
     expect(() => applyNoticeDate("On {notice_date}.", "2 May 2027")).toThrow();
     expect(() => applyNoticeDate("Open {dated} block.", "2 May 2027")).toThrow();
+  });
+});
+
+// The 1.4.0 legal pack (specs/legal-pack-1.4.md, G1c/G3/G4/G5): each line only once its feature is out on the web or in
+// the app ("web|app" gates), and Stripe's billing country with Plus.
+describe("the 1.4.0 privacy lines", () => {
+  const source = legalSource("privacy", "en");
+  const IDS = ["routine_live", "app_routine", "trusted_share_live", "app_trusted_share", "app_voice"];
+  // As text: the name spans out, and the renderer's &#39; back to an apostrophe.
+  const words = (html: string) => html.split('<span class="whole-name">').join("").split("</span>").join("").split("&#39;").join("'");
+  // Without the 1.4.0 lines and without Plus (the web's or, since group 5, the app's).
+  const without = words(renderLegal(source, (id) => !IDS.includes(id) && id !== "plus" && id !== "app_plus" && isPendingMet(id)).html);
+  const appOnly = words(renderLegal(source, (id) => ["app_routine", "app_trusted_share", "app_voice", "plus"].includes(id) || isPendingMet(id), null).html);
+
+  it("show with their feature on either client, and not before", () => {
+    for (const line of ["<strong>Your routine:</strong>", "<strong>Weeks you share:</strong>", "Sharing a summary of your week with someone you choose", "<strong>Speaking instead of typing (app):</strong>"]) {
+      expect(without, line).not.toContain(line);
+      expect(appOnly, line).toContain(line);
+    }
+  });
+
+  it("say what the code does: the link keeps a one-way code, a voice entry no recording, Stripe the billing country", () => {
+    expect(appOnly).toContain("We keep only a one-way code made from the link's key, so we can't rebuild the link.");
+    expect(appOnly).toContain("Moodbow makes no recording, keeps no audio and sends none anywhere.");
+    expect(appOnly).toContain("Stripe receives your card details, your email address to send receipts and, where the card form asks for them, your billing country and postcode, to take the payment");
+    expect(appOnly).not.toContain("to work out the tax");
   });
 });

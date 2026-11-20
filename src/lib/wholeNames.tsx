@@ -1,4 +1,5 @@
 import { Fragment, type ReactNode } from "react";
+import { SUPPORT_EMAIL } from "@/lib/site";
 
 // Names never hyphenate (UX, 19 Nov: "Car-valho", "Bur-rowSoft" at large text read as mistakes; 20 Nov: on
 // every page the large-text hyphen rule reaches, which is all of them). A name is wrapped in a span that
@@ -6,9 +7,11 @@ import { Fragment, type ReactNode } from "react";
 // The text itself never changes.
 // Product and company names (UX, 19 Nov), and every other brand with 8+ letters that pages show (UX, 20 Nov: any
 // trademark, e.g. WhatsApp or Instagram if they ever appear): Supabase (the legal pages' processors), JavaScript (the
-// journal's no-script line), Bluetooth (/privacy). wholeNames.test fails on a known trademark or a camel-case word of
-// HYPHEN_MIN+ letters that isn't here.
-export const WHOLE_NAMES = ["Vitor Carvalho", "BurrowSoft", "Moodbow", "Anthropic", "Stripe", "Google Play", "App Store", "Supabase", "JavaScript", "Bluetooth"] as const;
+// journal's no-script line), Bluetooth (/privacy), and the helplines' own brand names (UX, 20 Nov: TelefonSeelsorge,
+// the countries registry's only one; HelpNumberText keeps it whole in a call line, breaking only at its compound
+// boundary where it can't fit). wholeNames.test fails on a known trademark or a camel-case word of HYPHEN_MIN+
+// letters that isn't here.
+export const WHOLE_NAMES = ["Vitor Carvalho", "BurrowSoft", "Moodbow", "Anthropic", "Stripe", "Google Play", "App Store", "Supabase", "JavaScript", "Bluetooth", "TelefonSeelsorge"] as const;
 // The global large-text rule (globals.css) hyphenates only words of HYPHEN_MIN letters or more. A name whose words are all
 // shorter can never break, wrapped or not ("Moodbow", "Google Play"…). The LONG_NAMES have a word that long, so they're
 // wrapped wherever they render (wholeNames.test checks every message that holds one).
@@ -67,4 +70,57 @@ export function wholeNamesHtml(html: string, names: readonly string[] = WHOLE_NA
     .split(/(<[^>]*>)/)
     .map((part) => (part.startsWith("<") ? part : part.replace(pattern, `<span class="${WHOLE_NAME_CLASS}">$1</span>`)))
     .join("");
+}
+
+// The support address at large text (UX, 20 Nov, the Web Tester's fr/pt-BR sweep: "support@mood / bow.com" on six
+// public pages): a <wbr> after its "@" gives the line a place to end there, so the domain goes whole to the next line
+// (it fits a 320 px line at 300 %; "moodbow" never hyphenates, under 8 letters). No no-wrap on the domain: on a 160 px
+// page (200 % zoom) in a list item it can't fit, and no-wrap pushed the page 3 px sideways (#410's CI); there it may
+// still give way as a last resort. The text is unchanged, so copying it gives the plain address.
+const [SUPPORT_LOCAL, SUPPORT_DOMAIN] = SUPPORT_EMAIL.split("@");
+const SUPPORT_LOCAL_AT = `${SUPPORT_LOCAL}@`;
+export function SupportAddress() {
+  return (
+    <>
+      {SUPPORT_LOCAL_AT}
+      <wbr />
+      {SUPPORT_DOMAIN}
+    </>
+  );
+}
+// Kept whole on a line (UX, 20 Nov: the word to type on /account-deletion): one inline block, so it moves to the next
+// line whole when the rest of this one can't hold it, and its hyphens are off. Never no-wrap: where no line can hold it
+// (a 160 px page at 200 % zoom), it may still give way rather than push the page sideways (UX accepted, #410).
+export const WHOLE_UNIT_CLASS = "inline-block max-w-full [overflow-wrap:anywhere] [hyphens:manual]";
+// A message that names the address as plain text ({email}): the address in its place.
+// (Gluing its full stop to it was tried and reverted, UX 20 Nov: in a legal list item "moodbow.com." can't fit a 320 px
+// line at 300 %, so the "." went to a line of its own; ". We answer…" starting a line is the accepted, minor case.)
+export function withSupportAddress(text: string): ReactNode {
+  const parts = text.split(SUPPORT_EMAIL);
+  if (parts.length === 1) return text;
+  return parts.flatMap((part, i) => (i === 0 ? [part] : [<SupportAddress key={i} />, part]));
+}
+// The same in rendered HTML (the legal pages, Help's articles): only in text between tags, so a mailto: link's
+// address stays as it is.
+export function supportAddressHtml(html: string): string {
+  const shown = `${SUPPORT_LOCAL_AT}<wbr>${SUPPORT_DOMAIN}`;
+  return html
+    .split(/(<[^>]*>)/)
+    .map((part) => (part.startsWith("<") ? part : part.split(SUPPORT_EMAIL).join(shown)))
+    .join("");
+}
+// Words that must stay whole on a line, wherever they are in a text (exact, case-sensitive).
+export function keepWhole(text: string, words: readonly string[]): ReactNode {
+  const found = words.filter((w) => w && text.includes(w));
+  if (!found.length) return text;
+  const pattern = new RegExp(`(${found.map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`, "g");
+  return text.split(pattern).map((part, i) =>
+    i % 2 === 1 ? (
+      <span key={i} className={WHOLE_UNIT_CLASS}>
+        {part}
+      </span>
+    ) : (
+      part
+    ),
+  );
 }

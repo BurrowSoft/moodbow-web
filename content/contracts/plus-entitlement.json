@@ -1,7 +1,8 @@
 {
   "contract": "plus-entitlement",
-  "version": 1,
-  "owner": "moodbow-app (041_plus_past_due_grace.sql); the web vendors this file",
+  "version": 2,
+  "owner": "moodbow-app (041_plus_past_due_grace.sql, 042_plus_cancel_at.sql); the web vendors this file",
+  "cancel_at": "042: entitlements.cancel_at, a timestamptz. null = the subscription renews. Otherwise it's when Plus stops because the store won't renew (a pending cancel). Display only: the rule below never reads it, and status and current_period_end still decide Plus. While it's set and Plus is on, Me reads \"Plus trial · ends {date} · won't renew\" (trialing) or \"Plus · ends {date} · won't renew\" (active), with {date} = cancel_at in the person's time zone. Writers (service role only): the web's Stripe sync (Stripe's cancel_at, or current_period_end when cancel_at_period_end is true; null when un-cancelled) and plus-store (Play autoRenewing false → expiryTime; Apple auto_renew_status 0 → expires_date; null when renewal is back on).",
   "rule": "Plus when (status in [trialing, active] and now < current_period_end) or (source = stripe and status = past_due and current_period_start is not null and now < current_period_start + 7 days). 7 days = 604800 s, absolute, end excluded. Stripe opens the new period before it tries the invoice, so a failed renewal's current_period_end is already ahead: the 7 days run from the start, never the end. A null start never grants. paused, canceled and expired never grant. A play or apple past_due row never grants (the store gave its own grace first). grace_until is not read.",
   "past_due_grace_seconds": 604800,
   "cases_note": "source: the row's store (null with no row). period_start_offset_s / period_end_offset_s: current_period_start / current_period_end minus now, in seconds (null = not set). plus: the expected has_plus / hasPlus.",

@@ -6,6 +6,7 @@ import { FOCUS_AREAS, FOCUS_KEYS, TONE_KEYS, TONES, type FocusArea, type Tone } 
 import { recordAiWithdrawal, saveFocusAreas, saveTone, setAiEnabled, type AiSaveResult, type AiSwitchResult } from "./actions";
 import { useUntilLoaded } from "@/lib/ui/untilLoaded";
 import { wholeNames } from "@/lib/wholeNames";
+import { SWITCH_CONTROL, SWITCH_LABEL, SWITCH_ROW } from "@/lib/ui/switchRow";
 
 type Values = { on: boolean; tone: Tone; focus: FocusArea[] };
 type Field = keyof Values;
@@ -61,15 +62,15 @@ export function AiSettings({ initial, credits }: { initial: Values; credits: { b
   };
 
   const chip = (active: boolean) =>
-    `inline-flex min-h-12 items-center rounded-full border px-4 text-sm font-medium aria-disabled:opacity-60 ${active ? "border-accent bg-pill text-accent" : "border-border text-muted hover:bg-pill"}`;
+    `inline-flex min-h-12 items-center rounded-full border px-[16px] text-sm font-medium aria-disabled:opacity-60 ${active ? "border-accent bg-pill text-accent" : "border-border text-muted hover:bg-pill"}`;
 
   return (
     <section {...untilLoaded} aria-labelledby="me-ai" className="rounded-3xl border border-border bg-surface p-[24px]">
       <h2 id="me-ai" className="text-lg font-medium text-text">
         {t("meAi")}
       </h2>
-      <label className="mt-4 flex min-h-11 items-center justify-between gap-4 text-text">
-        <span className="min-w-0 [overflow-wrap:anywhere]">{t("meAiOn")}</span>
+      <label className={`mt-4 ${SWITCH_ROW} min-h-11 text-text`}>
+        <span className={SWITCH_LABEL}>{t("meAiOn")}</span>
         <input
           type="checkbox"
           role="switch"
@@ -77,7 +78,7 @@ export function AiSettings({ initial, credits }: { initial: Values; credits: { b
           checked={values.on}
           aria-disabled={pending}
           onChange={(e) => save("on", e.target.checked)}
-          className="h-6 w-6 accent-[var(--color-accent)] aria-disabled:opacity-60"
+          className={`${SWITCH_CONTROL} h-6 w-6 accent-[var(--color-accent)] aria-disabled:opacity-60`}
         />
       </label>
       <p className="mt-2 text-sm text-muted" data-testid="me-ai-consent">
@@ -150,7 +151,7 @@ export function AiSettings({ initial, credits }: { initial: Values; credits: { b
           <p role="alert" data-testid="me-ai-error" className="text-sm font-medium text-accent">
             {tt("errGeneric")}
           </p>
-          <button type="button" data-testid="me-ai-retry" onClick={() => save(failed.field, failed.tried, failed.withdrawal)} className="mt-2 min-h-11 rounded-full border border-border px-4 text-sm font-medium text-text">
+          <button type="button" data-testid="me-ai-retry" onClick={() => save(failed.field, failed.tried, failed.withdrawal)} className="mt-2 min-h-11 rounded-full border border-border px-[16px] text-sm font-medium text-text">
             {ta("tryAgain")}
           </button>
         </div>

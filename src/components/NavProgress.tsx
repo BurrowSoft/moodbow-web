@@ -84,7 +84,7 @@ export function NavProgress() {
       <div className="h-1 w-full overflow-hidden bg-pill" aria-hidden="true" data-testid="nav-progress">
         <div className="h-full w-1/3 animate-[nav-progress_1.2s_ease-in-out_infinite] bg-accent motion-reduce:w-full motion-reduce:animate-none" />
       </div>
-      <p role="status" data-testid="nav-slow" className="mt-2 empty:sr-only rounded-full border border-border bg-surface px-3 py-1 text-sm text-muted">
+      <p role="status" data-testid="nav-slow" className="mt-2 empty:sr-only rounded-full border border-border bg-surface px-[12px] py-1 text-sm text-muted">
         {slowLine ? t("slowLoading") : null}
       </p>
     </div>

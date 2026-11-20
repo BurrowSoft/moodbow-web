@@ -4,7 +4,7 @@ summary: Guarda un mes o un año de tu diario como PDF.
 topic: Privacy & account
 es-draft: true
 ---
-{pending:plus}Con Moodbow Plus, **Yo → PDF cuidado de tu diario** compone un mes o un año de tu diario como PDF: una portada y luego el registro y las entradas de cada día, cada mes en una página nueva.
+{pending:plus|app_plus}Con Moodbow Plus, **Yo → PDF cuidado de tu diario** compone un mes o un año de tu diario como PDF: una portada y luego el registro y las entradas de cada día, cada mes en una página nueva.
 
 Elige **Un mes** o **Un año** y luego **Guardar como PDF o imprimir**. Se abre la ventana de impresión de tu navegador, donde puedes elegir «Guardar como PDF» o imprimirlo.
 

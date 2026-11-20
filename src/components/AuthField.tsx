@@ -43,3 +43,7 @@ export const primaryButtonClass =
   "inline-flex min-h-[52px] min-w-[min(200px,100%)] max-w-full items-center justify-center rounded-full bg-accent px-[32px] py-3.5 text-center text-base font-medium text-on-accent [overflow-wrap:anywhere] hover:bg-accent-hover disabled:opacity-60";
 
 export const textLinkClass = "font-medium text-accent underline underline-offset-4";
+// A text link on its own line (not inside a sentence): at least 24 px tall, the target size WCAG 2.5.8 asks of it
+// (UX, 20 Nov, the Web Tester at 100 %: Me's FAQ / Privacy / Terms / Contact, Help's back link, Support's link and
+// Create account's "Already have an account?" were 23 px). One more px at normal size; nothing changes at large text.
+export const standaloneLinkClass = `inline-flex min-h-[24px] max-w-full items-center ${textLinkClass}`;

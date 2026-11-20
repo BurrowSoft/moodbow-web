@@ -146,7 +146,7 @@ export function TimelineSearch({ dateLocaleTag, children }: { dateLocaleTag: str
             autoComplete="off"
             onChange={(e) => setText(e.target.value)}
             onKeyDown={(e) => e.key === "Escape" && close()}
-            className="min-h-11 w-full flex-1 rounded-full border border-border bg-surface px-4 text-text placeholder:text-muted"
+            className="min-h-11 w-full flex-1 rounded-full border border-border bg-surface px-[16px] text-text placeholder:text-muted"
           />
           <button
             type="button"
@@ -174,7 +174,7 @@ export function TimelineSearch({ dateLocaleTag, children }: { dateLocaleTag: str
               type="button"
               data-testid="timeline-search-retry"
               onClick={() => run(state.q)}
-              className="mt-2 inline-flex min-h-11 items-center rounded-full border border-border px-4 text-sm font-medium text-text hover:bg-pill"
+              className="mt-2 inline-flex min-h-11 items-center rounded-full border border-border px-[16px] text-sm font-medium text-text hover:bg-pill"
             >
               {ta("tryAgain")}
             </button>
@@ -199,7 +199,7 @@ export function TimelineSearch({ dateLocaleTag, children }: { dateLocaleTag: str
                     </span>
                     <span className="mt-2 flex flex-wrap gap-2">
                       {d.tags.map((tag) => (
-                        <span key={tag} className="inline-flex max-w-full items-center rounded-full border border-border px-3 py-0.5 text-sm text-text [overflow-wrap:anywhere]">
+                        <span key={tag} className="inline-flex max-w-full items-center rounded-full border border-border px-[12px] py-0.5 text-sm text-text [overflow-wrap:anywhere]">
                           {tag}
                         </span>
                       ))}

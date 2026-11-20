@@ -7,7 +7,7 @@ Tap **Write about your day** to start an entry. Write as much or as little as yo
 
 {pending:app_writing_prompts}When a new entry is empty, Moodbow may offer one gentle question to start from; tap **Another** for a different one, or just start writing.{/pending}
 
-{pending:app_voice}**Speak instead** (in the app, on phones that can do it): tap it in Write and speak; your phone turns your words into text on the phone itself. Your voice never leaves your phone; only the text you keep is saved, like any entry. If your phone can't do this, the button doesn't appear.{/pending}
+{pending:app_voice}**Speak instead of typing** (in the app, on phones that can do it): tap the microphone in the writing space and speak; your phone turns your words into text on the phone itself. Your voice never leaves your phone; only the text you keep is saved, like any entry. If your phone can't do this, the microphone doesn't appear.{/pending}
 
 Open an entry to read it. To change it, tap the text (or ⋯ → **Edit entry**); to add more, tap **Add to this entry…** at the bottom.
 

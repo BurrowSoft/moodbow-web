@@ -67,7 +67,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
         )}
         <MoodbowArc className="mt-8 w-full max-w-[360px]" />
         {!live && (
-          <p className="mt-6 rounded-full bg-pill px-3.5 py-1.5 [font-size:min(0.8125rem,max(8.125vw,26px))] font-medium tracking-wide text-accent" data-testid="home-coming-soon">
+          <p className="mt-6 rounded-full bg-pill px-[14px] py-1.5 [font-size:min(0.8125rem,max(8.125vw,26px))] font-medium tracking-wide text-accent" data-testid="home-coming-soon">
             {t("comingSoon")}
           </p>
         )}
@@ -79,7 +79,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
               href="/sign-up"
               data-testid="home-start"
               data-count="cta_home_start"
-              className="inline-flex min-h-[52px] w-full items-center justify-center rounded-full text-center sm:w-auto sm:min-w-[220px] bg-accent px-5 py-3.5 sm:px-8 [font-size:min(1rem,max(10vw,32px))] font-medium text-on-accent transition-opacity hover:bg-accent-hover"
+              className="inline-flex min-h-[52px] w-full items-center justify-center rounded-full text-center sm:w-auto sm:min-w-[220px] bg-accent px-[20px] py-3.5 sm:px-[32px] [font-size:min(1rem,max(10vw,32px))] font-medium text-on-accent transition-opacity hover:bg-accent-hover"
             >
               {t("start")}
             </Link>
@@ -94,7 +94,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
               aria-label={t("notifyAria")}
               data-testid="home-notify"
               data-count="cta_home_notify"
-              className="mt-9 inline-flex min-h-[52px] w-full items-center justify-center rounded-full text-center sm:w-auto sm:min-w-[200px] bg-accent px-5 py-3.5 sm:px-8 [font-size:min(1rem,max(10vw,32px))] font-medium text-on-accent transition-opacity hover:bg-accent-hover"
+              className="mt-9 inline-flex min-h-[52px] w-full items-center justify-center rounded-full text-center sm:w-auto sm:min-w-[200px] bg-accent px-[20px] py-3.5 sm:px-[32px] [font-size:min(1rem,max(10vw,32px))] font-medium text-on-accent transition-opacity hover:bg-accent-hover"
             >
               {t("notify")}
             </a>

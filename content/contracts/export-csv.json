@@ -1,5 +1,5 @@
 {
-  "$comment": "1.1 P (decision 201): the spreadsheet export. Both clients render `input` (export_my_data's JSON) in `locale` and must produce `csv` byte for byte. mood_word is the locale's mood label (moods 1-5 in order below). Generated from moodbow-web's renderExportCsv (#103).",
+  "$comment": "1.1 P (decision 201): the spreadsheet export. Both clients render `input` (export_my_data's JSON) in `locale` and must produce `csv` byte for byte. mood_word is the locale's mood label (moods 1-5 in order below). Generated from moodbow-web's renderExportCsv (#103). Only day data has rows: `plus` (030, the entitlements row) is JSON only, never a CSV column.",
   "moodWords": {
     "en": [
       "Awful",

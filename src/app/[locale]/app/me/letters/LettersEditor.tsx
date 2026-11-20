@@ -16,7 +16,7 @@ import { deleteLetter, openLetter, saveLetter, type LetterResult } from "./actio
 const MONTHS_KEY: Record<LetterMonths, "in1" | "in3" | "in6" | "in12"> = { 1: "in1", 3: "in3", 6: "in6", 12: "in12" };
 const SECTION = "rounded-3xl border border-border bg-surface p-[24px] max-sm:px-[max(12px,calc(40px-1rem))]";
 
-// Me → Letters to future me (1.2; content/letters.json). Write one and choose when it opens;
+// Me → Letters to future me (1.2; content/contracts/letters.json). Write one and choose when it opens;
 // a locked one shows only its dates (its text isn't even here until it's opened); open early
 // with a confirm (only before opens_on; on or after its day, Open just opens); delete with a
 // confirm; no edit. The matcher runs on the text at saving and opens the help card on a

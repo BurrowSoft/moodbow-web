@@ -3,7 +3,7 @@ title: Themes
 summary: Change Moodbow's colours on this device.
 topic: Settings
 ---
-{pending:plus}Moodbow's look follows your device, light or dark, unless you choose one in **Me → Appearance**.
+{pending:plus|app_plus}Moodbow's look follows your device, light or dark, unless you choose one in **Me → Appearance**.
 
 With Moodbow Plus you can also choose **Colours**: **Dusk**, **Sunrise** or **Sea**, each in light and dark. Your choice is kept on this device only.
 

@@ -67,7 +67,7 @@ export function SafetyCard({ country, onClose, neutral = false, where = null }: 
     ios && isShortCode(line.dial) ? (
       <div>
         {/* iOS can't dial this from a link: the number, and what to do with it. */}
-        <p className={`font-medium text-text ${helpLineSize(line.display)}`}><HelpNumberText text={t("safetyCall", { name: line.name, number: line.display })} number={line.display} /></p>
+        <p className={`font-medium text-text ${helpLineSize(line.display)}`}><HelpNumberText text={t("safetyCall", { name: line.name, number: line.display })} number={line.display} name={line.name} /></p>
         <p data-testid={keypadId} className={small}>
           <HelpNumberText text={t("safetyDialKeypad", { number: line.display })} number={line.display} />
         </p>
@@ -75,7 +75,7 @@ export function SafetyCard({ country, onClose, neutral = false, where = null }: 
     ) : (
       <p>
         <a href={telHref(line.dial)} data-testid={id} className={`${link} ${helpLineSize(line.display)}`}>
-          <HelpNumberText text={t("safetyCall", { name: line.name, number: line.display })} number={line.display} />
+          <HelpNumberText text={t("safetyCall", { name: line.name, number: line.display })} number={line.display} name={line.name} />
         </a>
       </p>
     );

@@ -3,7 +3,8 @@ import { render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { helpArticles, renderArticle } from "./helpContent";
 import { renderLegal } from "./legalContent";
-import { HYPHEN_MIN, KEEP_TOGETHER_CLASS, LONG_NAMES, wholeNames, wholeNamesHtml, WHOLE_NAME_CLASS, WHOLE_NAMES } from "./wholeNames";
+import { HYPHEN_MIN, keepWhole, KEEP_TOGETHER_CLASS, LONG_NAMES, SupportAddress, supportAddressHtml, wholeNames, wholeNamesHtml, withSupportAddress, WHOLE_NAME_CLASS, WHOLE_NAMES, WHOLE_UNIT_CLASS } from "./wholeNames";
+import { SUPPORT_EMAIL } from "./site";
 
 const LOCALES = ["en", "es", "fr", "de", "it", "pt-br", "th"];
 const walk = (o: Record<string, unknown>, p: string[] = []): [string, string][] =>
@@ -30,7 +31,7 @@ describe("names stay whole at large text", () => {
   });
 
   it("short names are safe by length; exactly these need wrapping", () => {
-    expect([...LONG_NAMES]).toEqual(["Vitor Carvalho", "BurrowSoft", "Anthropic", "Supabase", "JavaScript", "Bluetooth"]);
+    expect([...LONG_NAMES]).toEqual(["Vitor Carvalho", "BurrowSoft", "Anthropic", "Supabase", "JavaScript", "Bluetooth", "TelefonSeelsorge"]);
     for (const word of ["Moodbow", "Plus", "AI", "Lite", "Stripe", "Google", "Play", "App", "Store"]) expect(word.length, word).toBeLessThan(HYPHEN_MIN);
   });
 
@@ -150,5 +151,63 @@ describe("a suspended compound stays on one line (German: 'und -Berichte')", () 
   it("works beside a name", () => {
     const { container } = render(<p>{wholeNames("Moodbow-Tipps und -Berichte")}</p>);
     expect([...container.querySelectorAll("span")].map((s) => s.textContent)).toEqual(["Moodbow", "-Berichte"]);
+  });
+});
+
+// UX, 20 Nov (the Web Tester's fr/pt-BR sweep: "support@mood / bow.com" on six public pages at 320 px / 300 %): the
+// address may end a line only after its "@", the domain stays whole, and the text is the plain address.
+describe("the support address", () => {
+  it("breaks only after its @, the domain kept whole, its text unchanged", () => {
+    const { container } = render(
+      <p>
+        <SupportAddress />
+      </p>,
+    );
+    expect(container.textContent).toBe(SUPPORT_EMAIL);
+    // No no-wrap on the domain: it may still give way on a 160 px page rather than push it sideways (#410's CI).
+    expect(container.querySelector("p")!.innerHTML).toBe("support@<wbr>moodbow.com");
+  });
+  it("goes in where a message names it, and nowhere else", () => {
+    const { container } = render(<p>{withSupportAddress(`Écrivez à ${SUPPORT_EMAIL}.`)}</p>);
+    expect(container.textContent).toBe(`Écrivez à ${SUPPORT_EMAIL}.`);
+    expect(container.querySelectorAll("wbr")).toHaveLength(1);
+    expect(withSupportAddress("No address here")).toBe("No address here");
+  });
+  it("in HTML: in the text, never in a mailto: link's address; the text unchanged", () => {
+    const html = `<p>email <a href="mailto:${SUPPORT_EMAIL}">${SUPPORT_EMAIL}</a>. We answer, or ${SUPPORT_EMAIL} too</p>`;
+    const shown = "support@<wbr>moodbow.com";
+    expect(supportAddressHtml(html)).toBe(`<p>email <a href="mailto:${SUPPORT_EMAIL}">${shown}</a>. We answer, or ${shown} too</p>`);
+    // Markup only: the text a reader sees (or copies) is the same.
+    const text = (h: string) => h.replace(/<[^>]*>/g, "");
+    expect(text(supportAddressHtml(html))).toBe(text(html));
+  });
+  // UX, 20 Nov: gluing the full stop to the address was reverted (in this list item "moodbow.com." can't fit a 320 px
+  // line at 300 %, so the "." got a line of its own); a line may start with ". We answer…", the accepted minor case.
+  it("/privacy's own sentence: the address breaks only after its @, its full stop as written", () => {
+    const { html } = renderLegal(readFileSync("content/legal/en/privacy.md", "utf8"), () => true, null);
+    expect(html).toContain(`<a href="mailto:${SUPPORT_EMAIL}">support@<wbr>moodbow.com</a>. We answer within 10 days.`);
+  });
+  it("keepWhole: the word to type stays whole (UX, 20 Nov: \"SUPPRI- / MER\"), exact and case-sensitive", () => {
+    const { container } = render(<p>{keepWhole("ouvrez Moi → Supprimer le compte, tapez SUPPRIMER, puis confirmez.", ["SUPPRIMER", "DELETE"])}</p>);
+    expect([...container.querySelectorAll("span")].map((s) => [s.textContent, s.className])).toEqual([["SUPPRIMER", WHOLE_UNIT_CLASS]]);
+    expect(container.textContent).toBe("ouvrez Moi → Supprimer le compte, tapez SUPPRIMER, puis confirmez.");
+    expect(keepWhole("nothing to keep", ["DELETE"])).toBe("nothing to keep");
+  });
+  it("every legal page and Help article that shows the address shows it that way", () => {
+    for (const locale of LOCALES) {
+      for (const article of helpArticles(locale)) expect(renderArticle(article, () => true), `${locale} ${article.slug}`).not.toMatch(new RegExp(`>[^<]*${SUPPORT_EMAIL}`));
+    }
+    for (const slug of ["privacy", "terms", "consumer-health-data"] as const) {
+      const { html } = renderLegal(readFileSync(`content/legal/en/${slug}.md`, "utf8"), () => true, null);
+      expect(html, slug).not.toMatch(new RegExp(`>[^<]*${SUPPORT_EMAIL}`));
+    }
+  });
+  // A short word before it ("à", "a", "an") never ends a line alone: a no-break space, in every language.
+  it("the two messages that name it have a no-break space before it", () => {
+    for (const locale of LOCALES) {
+      const m = JSON.parse(readFileSync(`src/messages/${locale}.json`, "utf8")) as { help: { helpIntro: string }; accountDeletion: { noAccess: string } };
+      expect(m.help.helpIntro, `${locale} help.helpIntro`).toContain(`${String.fromCharCode(0xa0)}{email}`);
+      expect(m.accountDeletion.noAccess, `${locale} accountDeletion.noAccess`).toContain(`${String.fromCharCode(0xa0)}<support>`);
+    }
   });
 });

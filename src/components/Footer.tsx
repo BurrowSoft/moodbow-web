@@ -43,7 +43,7 @@ export async function Footer() {
         <LanguageSwitcher />
         <p className="flex max-w-full flex-wrap items-center justify-center gap-x-1">
           <a href={BURROWSOFT_URL} aria-label={t("burrowsoftAria")} className={linkClass}>
-            {wholeNames(t("burrowsoftProduct"))}
+            <span className="min-w-0">{wholeNames(t("burrowsoftProduct"))}</span>
           </a>
           <span aria-hidden="true" className="hidden sm:inline">·</span>
           <span className="max-w-full px-[12px]">{wholeNames(t("copyright"))}</span>

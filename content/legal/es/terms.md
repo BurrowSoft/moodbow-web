@@ -1,12 +1,12 @@
 <!--
   Spanish of content/legal/en/terms.md. Wording is Vitor's, as in English. AI translation, checked
   by back-translation, a script and the Code Reviewer; no native lawyer has read it.
-  en-sha256: 35b45f774e041052fce111d5e829da57d40566f174b6e57b48b168e7571532a3
+  en-sha256: 93d44520dc6049c3181ce7ca2a5015959ad445cc43d07daba3e8713fd9f02a6c
   It's the English this translates: legalSpanish.test.ts fails if the English changes, until the
   Spanish follows and this is updated. Shows on Production only once legal-es-approved is met.
 -->
 ## Términos de uso de Moodbow
-Última actualización: 19 de noviembre de 2026
+Última actualización: 20 de noviembre de 2026
 
 Estos términos son un acuerdo entre tú y Vitor Carvalho, que opera como BurrowSoft (297 Moo 1, Baan Sanian, Mueang Nan, Nan 55000, Tailandia), sobre el uso de Moodbow, la app y el sitio web moodbow.com. Al crear una cuenta, los aceptas.
 
@@ -32,7 +32,7 @@ No hagas un mal uso de Moodbow: no intentes acceder a los datos de otras persona
 ### El diario es gratis
 El diario (escribir, registros, la cronología, la ayuda y la exportación) es gratis. Podemos cambiar funciones con el tiempo y te avisaremos con antelación de los cambios importantes.
 
-{pending:plus}
+{pending:plus|app_plus}
 ### Moodbow Plus
 Moodbow Plus es una suscripción anual opcional que añade funciones para profundizar. Lo que incluye se indica en la app y en moodbow.com, y puede cambiar con el tiempo. El diario en sí, la ayuda y el control de tus datos siguen siendo gratis.
 
@@ -45,12 +45,12 @@ Moodbow Plus es una suscripción anual opcional que añade funciones para profun
 **Renovación automática.** Plus se renueva automáticamente cada año hasta que canceles. Antes de cada renovación anual de una suscripción comprada en moodbow.com, te enviamos un recordatorio por correo.
 
 **Cancelar.** Puedes cancelar en cualquier momento y conservas Plus hasta el final del periodo que has pagado. Si cancelas durante la semana gratis, nunca se te cobra.
-- Comprada en moodbow.com: Yo → Moodbow Plus → Gestionar Plus, que abre la página de nuestro proveedor de pagos (Stripe).
+{pending:plus}- Comprada en moodbow.com: Yo → Moodbow Plus → Gestionar Plus, que abre la página de nuestro proveedor de pagos (Stripe).{/pending}
 - Comprada en la app: en Google Play o el App Store, en tus suscripciones. Eliminar la app no la cancela.
 
 **Reembolsos.** Si te suscribiste en moodbow.com, puedes pedir el reembolso completo de cualquier pago en los 14 días siguientes al cobro, por cualquier motivo: escribe a support@moodbow.com. Si vives en la UE o en el Reino Unido, esto también cubre tu derecho legal a desistir del contrato en 14 días. Pasado ese plazo, los pagos no se reembolsan, salvo que la ley diga otra cosa. Para las compras en Google Play o el App Store se aplican las normas de reembolso de la tienda, y se lo pides a la tienda.
 
-**Un pago que falla.** Si falla el pago de una renovación en moodbow.com, conservas Plus hasta 7 días mientras se vuelve a intentar el cobro, y puedes actualizar tu tarjeta en Gestionar Plus. Si sigue fallando, la suscripción termina. Las compras en las tiendas siguen sus propias normas.
+{pending:plus}**Un pago que falla.** Si falla el pago de una renovación en moodbow.com, conservas Plus hasta 7 días mientras se vuelve a intentar el cobro, y puedes actualizar tu tarjeta en Gestionar Plus. Si sigue fallando, la suscripción termina. Las compras en las tiendas siguen sus propias normas.{/pending}
 
 **Si Plus termina.** Cuando Plus termina (cancelada, no renovada, reembolsada o impagada), todo lo que escribiste se queda y el diario gratis sigue funcionando. Las funciones de Plus se vuelven a bloquear. No se elimina nada, y Exportar mis datos sigue incluyéndolo todo.
 

@@ -5,7 +5,7 @@ topic: Your journal
 ---
 {pending:app_letters|letters_live}In **Me → Letters to future me**, write to yourself and choose when to read it. Under **Open it**, choose **In 1 month**, **In 3 months**, **In 6 months** or **In a year**, then tap **Save letter**. Once it's saved, a letter can't be edited.
 
-{pending:plus}Writing a new letter is part of **Moodbow Plus**. The letters you've already written are always yours, Plus or not: they open on their day, and you can open them early, delete them and export them at any time.{/pending}
+{pending:plus|app_plus}Writing a new letter is part of **Moodbow Plus**. The letters you've already written are always yours, Plus or not: they open on their day, and you can open them early, delete them and export them at any time.{/pending}
 
 Until its day, a letter is locked: **Timeline** shows **A letter from you · opens on** its date, never what you wrote. Locked means Moodbow keeps it out of sight until then; it's stored as privately as the rest of your journal.
 

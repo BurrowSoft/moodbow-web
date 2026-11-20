@@ -1,14 +1,14 @@
 <!--
   Spanish of content/legal/en/privacy.md. Wording is Vitor's, as in English. AI translation, checked
   by back-translation, a script and the Code Reviewer; no native lawyer has read it.
-  en-sha256: 8c7d743a0bb38a705ff24733917e5780a5a2ce498b2ea666342257bef4d08424
+  en-sha256: 8eb1f5ceb96b7c03c829c0e6d11f1765ca0f7a15593e64151994f0ea7c4ae9ad
   It's the English this translates: legalSpanish.test.ts fails if the English changes, until the
   Spanish follows and this is updated. Shows on Production only once legal-es-approved is met.
 -->
 ## Política de privacidad de Moodbow
-Última actualización: 19 de noviembre de 2026
+Última actualización: 20 de noviembre de 2026
 
-{pending:plus}**Qué ha cambiado{dated} el {notice_date}{/dated}:** ahora puedes suscribirte a Moodbow Plus. Si lo haces, Google Play, el App Store o Stripe se encargan del pago, y guardamos una referencia de tu suscripción y sus fechas (§1, «Compras de Moodbow Plus»). Stripe es nuevo en nuestra lista de proveedores (§3). No ha cambiado nada más en cómo usamos tu diario.{/pending}
+{pending:plus|app_plus}**Qué ha cambiado{dated} el {notice_date}{/dated}:** ahora puedes suscribirte a Moodbow Plus. Si lo haces, Google Play, el App Store o Stripe se encargan del pago, y guardamos una referencia de tu suscripción y sus fechas (§1, «Compras de Moodbow Plus»). Stripe es nuevo en nuestra lista de proveedores (§3). No ha cambiado nada más en cómo usamos tu diario.{/pending}
 
 Moodbow es un diario privado creado por Vitor Carvalho, que opera como BurrowSoft (297 Moo 1, Baan Sanian, Mueang Nan, Nan 55000, Tailandia), «nosotros» en esta política. La escribimos para que se lea, no para que se pase por alto. Si algo no queda claro, escribe a support@moodbow.com.
 
@@ -26,21 +26,25 @@ Moodbow es un diario privado creado por Vitor Carvalho, que opera como BurrowSof
 **Tu diario:** las entradas que escribes, tus registros diarios (estado de ánimo, sueño, movimiento (minutos activos), estrés), las fechas a las que corresponden y qué entradas marcas como momentos.
 **Datos sensibles:** lo que escribes y registras puede incluir datos sensibles, como tu salud, tu estado de ánimo o tu vida privada. Los tratamos solo con el consentimiento que das al crear tu cuenta.
 {pending:tags_live}**Etiquetas:** las palabras que añades a un registro, hasta 5 al día.{/pending}
+{pending:routine_live|app_routine}**Tu rutina:** los hasta 3 elementos que añades, como tu medicación (sus nombres, su orden, el día en que empezó cada uno y si cada uno va en Para mi cita), y, en cada registro, cuáles marcaste. Aparecen en tus registros, en los patrones, en Para mi cita si lo eliges, en Exportar mis datos y, si los incluyes, en una semana que compartes. Ninguna IA los lee, y sus nombres y marcas nunca se cuentan ni se envían a ningún otro sitio.{/pending}
 {pending:moment_recall_live}**Cuándo vuelve un momento:** qué aniversarios (1 mes, 6 meses, 1 año) elegiste para que vuelva cada momento.{/pending}
 {pending:toolbox_live|app_toolbox}**Lo que te ayuda:** la lista que guardas en Yo → Lo que me ayuda.{/pending}
 {pending:letters_live|app_letters}**Cartas para tu yo del futuro:** las cartas que escribes, el día en que se abre cada una y cuándo pediste que te las recordáramos.{/pending}
+{pending:trusted_share_live|app_trusted_share}**Semanas que compartes:** si compartes tu semana con alguien de confianza, guardamos los ajustes del enlace: un nombre opcional, qué elementos de tu rutina incluye, cuándo se creó, cuándo caduca (a los 7, 30 o 90 días) o se detuvo, cuántas veces se abrió y cuándo aceptaste compartir. Solo guardamos un código de un solo sentido hecho a partir de la clave del enlace, así que no podemos reconstruirlo. Quien abre el enlace ve, sin cuenta, el nombre que diste al enlace (si diste uno), el color del ánimo de cada día de las semanas compartidas (esta semana y hasta 3 anteriores, nunca antes de que se creara el enlace), cuántos días hiciste un registro y, para cada elemento de rutina incluido, su nombre y en qué parte de tus días con registro lo marcaste. Nunca tus entradas, notas, momentos ni etiquetas. Dejar de compartir en Yo → Compartir tu semana funciona al momento, y los enlaces detenidos o caducados se eliminan 30 días después.{/pending}
 {pending:safety_plan_live|app_safety_plan}**Tu plan de seguridad:** el plan que escribes. Puede incluir los nombres y los números de teléfono de las personas y los servicios que elijas anotar. Se guardan con tu diario, protegidos de la misma forma, se incluyen cuando exportas tus datos y se eliminan cuando los eliminas. Moodbow nunca los contacta: una llamada solo ocurre si tocas un número, a través del marcador de tu propio teléfono.{/pending}
 {pending:pictures_live|app_pictures}**Fotos en tus momentos (Moodbow Plus):** si añades fotos a un momento, se guardan con tu diario en el almacenamiento de nuestro proveedor de base de datos en la UE, solo tú puedes verlas y se incluyen cuando exportas tus datos. La ubicación y otros datos ocultos se quitan antes de subirlas. Cuando eliminas una foto, su entrada o tu cuenta, desaparece de Moodbow de inmediato; durante un minuto como máximo, una copia que hubieras abierto puede seguir siendo accesible desde tu propia cuenta, y nadie más puede acceder a ella. Los archivos eliminados se quitan de nuestro almacenamiento activo en el plazo de un día.{/pending}
 {pending:wear}**Reloj:** un estado de ánimo que tocas en el reloj se guarda como cualquier registro de un toque. El reloj no guarda nada y nunca se conecta a nuestros servidores.{/pending}
 **Tus ajustes:** idioma, país, zona horaria, hora{pending:plus}s{/pending} del recordatorio y tus opciones de IA (activada o desactivada, tono, áreas de enfoque).
 **Contenido de IA (solo si la IA está activada):** las reflexiones y los informes que la IA escribe para ti{pending:ai_memory}, y los datos breves que Moodbow recuerda sobre ti, que puedes ver, editar y eliminar en Yo → Lo que Moodbow recuerda{/pending}.
 **Uso de la IA:** por cada solicitud a la IA, la función, el modelo, el número de tokens, el costo y los créditos usados. No el texto de tus entradas ni el de la respuesta de la IA.
-{pending:plus}**Compras de Moodbow Plus:** si te suscribes a Moodbow Plus, Google Play, el App Store o Stripe se encargan del pago. Stripe recibe tu dirección de correo para enviarte los recibos y guarda sus propios registros. Nosotros guardamos una referencia de cliente y de suscripción, su estado, cuándo {pending:plus_grace_live}empieza y {/pending}termina el periodo actual y cuándo empezó una prueba gratuita, nunca los datos de tu tarjeta.{/pending}
+{pending:plus|app_plus}**Compras de Moodbow Plus:** si te suscribes a Moodbow Plus, Google Play, el App Store o Stripe se encargan del pago. Stripe recibe los datos de tu tarjeta, tu dirección de correo para enviarte los recibos y, cuando el formulario de la tarjeta los pide, tu país de facturación y tu código postal, para procesar el pago, y guarda sus propios registros. Nosotros guardamos una referencia de cliente y de suscripción, su estado, cuándo {pending:plus_grace_live}empieza y {/pending}termina el periodo actual y cuándo empezó una prueba gratuita, nunca los datos de tu tarjeta.{/pending}
 **Informes de errores:** si la app o el sitio web fallan o se produce otro error, se envía un informe técnico (tipo de dispositivo, versión de la app o del navegador, el error) a nuestro proveedor de seguimiento de errores. Antes de que se envíe, quitamos los datos que te identifican y cualquier texto que hayas escrito, y el proveedor no guarda tu dirección IP.
 
 **Cookies y almacenamiento en tu dispositivo:** el sitio web usa solo las cookies que necesita para funcionar: una que mantiene tu sesión iniciada, otra que recuerda el idioma que elegiste, otra que recuerda la vista de lista o de calendario y, durante un minuto después de que eliminas tu cuenta, otra que le indica a tu navegador que borre sus copias. También guarda en tu navegador algunas preferencias de visualización, como el aspecto claro u oscuro y las tarjetas que ya cerraste. Ninguna de ellas te rastrea entre sitios ni se usa para publicidad o analítica.
 
 **Lo que se queda solo en tu dispositivo:** los borradores sin enviar{pending:app_app_lock}, el PIN de bloqueo de tu app{/pending}{pending:app_share_cards} y las tarjetas para compartir que creas. Las tarjetas para compartir se crean en tu dispositivo y solo salen de él si tú las compartes{/pending}.
+
+{pending:app_voice}**Hablar en lugar de escribir (app):** si tocas el micrófono mientras escribes, tu teléfono convierte lo que dices en texto en el propio teléfono, y el texto entra en tu entrada como si lo hubieras escrito. Moodbow no hace grabaciones, no guarda audio ni lo envía a ningún sitio. El micrófono solo se usa mientras hablas, después de que lo hayas permitido.{/pending}
 
 {pending:me_picture_live|app_me_picture}**Tu imagen en Yo:** {pending:me_picture_live}Si eliges una imagen para Yo en el sitio web, se guarda solo en este navegador, nunca se nos envía y se quita cuando cierras sesión, eliminas tu cuenta o la quitas. {/pending}{pending:app_me_picture}Si eliges una imagen para Yo en la app, se guarda en tu teléfono (y en la copia de seguridad de tu teléfono, si usas una), nunca se nos envía y se quita cuando cierras sesión, la quitas o borras los datos de la app. {/pending}La ubicación y otros datos ocultos se quitan de la imagen cuando la eliges.{/pending}
 
@@ -61,6 +65,7 @@ Para mostrarte líneas de ayuda cerca de ti cuando no sabemos tu país, usamos e
 |---|---|
 | Hacer funcionar tu cuenta y tu diario | Nuestro contrato contigo (los Términos) |
 | Tratar tu diario, que puede revelar información sobre tu salud y bienestar | Tu consentimiento explícito, dado por separado al crear tu cuenta (puedes retirarlo eliminando tu cuenta) |
+{pending:trusted_share_live|app_trusted_share}| Compartir un resumen de tu semana con alguien que eliges | Tu consentimiento explícito, que das al crear el enlace. Puedes retirarlo deteniendo el enlace |{/pending}
 {pending:ai_live}| Reflexiones e informes con IA | Tu consentimiento explícito y separado para la IA. Puedes retirarlo en cualquier momento en Yo → IA |{/pending}
 | Mantener la seguridad del servicio y solucionar fallos y errores | Nuestro interés legítimo en un servicio seguro y que funcione |
 | Responder a tus correos | Nuestro interés legítimo o nuestro contrato contigo |
@@ -73,13 +78,13 @@ Para mostrarte líneas de ayuda cerca de ti cuando no sabemos tu país, usamos e
 | Vercel | Alojamiento del sitio web y del diario web{pending:web_analytics}; recuento de vistas de página y toques de botones (sin cookies){/pending} | Estados Unidos y red global de servidores |
 | Resend | Envío de correos de la cuenta (confirmación, restablecimiento de contraseña) | Estados Unidos (empresa); los correos se envían desde Japón |
 | Sentry | Informes de errores y fallos, una vez quitados los datos que te identifican | Estados Unidos |
-{pending:plus}| Google Play, Apple App Store | Pagos de Moodbow Plus | Global |{/pending}
-{pending:plus}| Stripe | Pagos y recibos de Moodbow Plus | Estados Unidos |{/pending}
+{pending:plus|app_plus}| Google Play, Apple App Store | Pagos de Moodbow Plus | Global |{/pending}
+{pending:plus|app_plus}| Stripe | Pagos y recibos de Moodbow Plus | Estados Unidos |{/pending}
 {pending:wear}| Google (Wear OS Data Layer, parte de los servicios de Google Play) | Llevar un registro del reloj (solo un valor de estado de ánimo, sin texto) de tu reloj a tu teléfono, solo si usas la app del reloj | Global |{/pending}
 
 {pending:wear}Los registros del reloj normalmente van directamente de tu reloj a tu teléfono por Bluetooth. Si los dos no están conectados directamente, Google puede retransmitir el mensaje a través de sus servidores, cifrado de extremo a extremo para que Google no pueda leerlo. Allí no se guarda nada.{/pending}
 
-{pending:wear|plus|purchases}Los servicios de Google Play se rigen por [la propia política de privacidad de Google](https://policies.google.com/privacy).{/pending}
+{pending:wear|plus|app_plus|purchases}Los servicios de Google Play se rigen por [la propia política de privacidad de Google](https://policies.google.com/privacy).{/pending}
 
 Cada proveedor puede usar tus datos solo para prestarnos su servicio. Anthropic no usa los datos enviados a través de su API para entrenar sus modelos, y los elimina tras un periodo breve (30 días como máximo) durante el que los conserva para vigilar la seguridad y los abusos.
 Cuando los datos salen de tu país (por ejemplo, de la UE a Estados Unidos), nos basamos en el acuerdo de tratamiento de datos de cada proveedor y en sus garantías para la transferencia de datos, como las Cláusulas Contractuales Tipo de la UE o el Marco de Privacidad de Datos UE–EE. UU.
@@ -89,7 +94,7 @@ Nunca vendemos tus datos y nunca los compartimos con anunciantes.
 ### 4. Cuánto tiempo lo conservamos
 - Todo se conserva hasta que lo elimines o elimines tu cuenta, salvo que esta política indique otra cosa.
 - **Eliminar tu cuenta** quita de inmediato tu diario, tus registros, tu contenido de IA, tus ajustes, tu historial de créditos y tus datos de acceso de nuestra base de datos activa.
-{pending:plus}- Los registros de pago que guardan Stripe, Google Play o el App Store siguen sus propias reglas; eliminar tu cuenta de Moodbow cancela una suscripción web y quita nuestra copia. Una suscripción de Google Play o del App Store hay que cancelarla allí; eliminar tu cuenta no la detiene.{/pending}
+{pending:plus|app_plus}- Los registros de pago que guardan Stripe, Google Play o el App Store siguen sus propias reglas; eliminar tu cuenta de Moodbow cancela una suscripción web y quita nuestra copia. Una suscripción de Google Play o del App Store hay que cancelarla allí; eliminar tu cuenta no la detiene.{/pending}
 - Los datos en nuestras copias de seguridad cifradas desaparecen automáticamente en un plazo de {pending:backup_retention}8{/pending} días.
 - Nuestro proveedor de seguimiento de errores conserva los informes de errores y fallos hasta 90 días.
 - Los registros técnicos de nuestros proveedores (alojamiento, base de datos, entrega de correos) se conservan solo durante un periodo limitado que fija cada proveedor, y después se eliminan.

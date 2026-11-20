@@ -18,7 +18,9 @@ import { CONSENT_NOTICE_CLASS } from "@/lib/legalVersions";
 import { wholeNames } from "@/lib/wholeNames";
 import { offeredLocales } from "@/i18n/routing";
 import { savedLanguageRoute } from "@/lib/savedLanguage";
-import { SavedLanguageRedirect } from "../app/SavedLanguageRedirect";
+import { languageGateCopy } from "@/lib/savedLanguageGate.server";
+import type { SavedLanguageCopy } from "@/lib/savedLanguageCopy";
+import { SavedLanguageGate } from "../app/SavedLanguageGate";
 import { legalLocale } from "@/lib/legalContent";
 import { ConsentForm } from "./ConsentForm";
 
@@ -49,19 +51,21 @@ export default async function ConsentPage({ params }: PageProps<"/[locale]/conse
   if (!user && !outage) redirect({ href: "/sign-up", locale });
   let askAge = false;
   let country: string | null | undefined = null;
+  // Their saved language first (row RT4), never a bare link (#401): the gate around the page.
+  let move: { target: string; copy: SavedLanguageCopy } | null = null;
   if (supabase && user) {
     const me = await getMe(supabase);
     // Consents already current (the versions this build ships) → nothing to ask.
     if (me && hasCurrentConsents(me)) redirect({ href: "/app", locale });
     const language = savedLanguageRoute(me?.profile?.locale, locale, offeredLocales());
-    if (language) return <SavedLanguageRedirect locale={language} />;
+    if (language) move = { target: language, copy: await languageGateCopy(language, locale) };
     askAge = !me || !hasCurrentConsent(me, "age_18");
     country = me?.profile?.country;
   }
 
   const t = await getTranslations("onboarding");
   const ta = await getTranslations("auth");
-  return (
+  const page = (
     <PageShell title={t("consentTitle")} capTitle>
       {user && <SignedInMark />}
       {outage && (
@@ -83,5 +87,12 @@ export default async function ConsentPage({ params }: PageProps<"/[locale]/conse
       </p>
       <ConsentForm askAge={askAge} askAi={askAiConsent()} showBack={!user && !outage} legalInEnglish={legalLocale(locale, "privacy") !== locale || legalLocale(locale, "terms") !== locale} />
     </PageShell>
+  );
+  return move ? (
+    <SavedLanguageGate target={move.target} here={locale} copy={move.copy} country={country} standalone helpMessages={helpCardMessages(await getMessages())}>
+      {page}
+    </SavedLanguageGate>
+  ) : (
+    page
   );
 }

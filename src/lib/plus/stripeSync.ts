@@ -2,6 +2,7 @@ import type Stripe from "stripe";
 import { hasPlus, type EntitlementRow } from "./entitlements";
 import { entitlementStatus, isLive } from "./stripe";
 import type { EntitlementWrite } from "./serviceRole";
+import { isOurs } from "./ours";
 
 // The Stripe webhook's write (docs/plus-entitlements.md), SolvyMed's live-state
 // sync. It writes the subscription's CURRENT state as Stripe reports it, never
@@ -13,23 +14,29 @@ import type { EntitlementWrite } from "./serviceRole";
 
 type Result<T> = { ok: true; value: T } | { ok: false };
 export type SyncDeps = {
+  // Our prices (ours.ts): a subscription that isn't Moodbow's (the account is shared with SolvyMed) is never written.
+  prices: readonly string[];
   retrieve: (id: string) => Promise<Stripe.Subscription | null>;
   read: (userId: string) => Promise<Result<EntitlementRow | null>>;
-  insert: (userId: string, row: EntitlementWrite) => Promise<Result<boolean>>;
+  insert: (userId: string, row: EntitlementWrite) => Promise<Result<boolean | "user_gone">>;
   update: (userId: string, seen: Pick<EntitlementRow, "source" | "store_subscription_id">, row: EntitlementWrite) => Promise<Result<boolean>>;
 };
 export type SyncOutcome =
   | { kind: "written" }
-  | { kind: "skipped"; reason: "no_user" | "no_period_end" | "other_store_grants" | "older_subscription" | "unknown_subscription" }
+  | { kind: "skipped"; reason: "foreign" | "no_user" | "no_period_end" | "other_store_grants" | "older_subscription" | "unknown_subscription" }
+  // The person's account is gone (deleted): nothing to write. live: Stripe still has the subscription running.
+  | { kind: "skipped"; reason: "user_gone"; live: boolean }
   | { kind: "retry"; reason: "stripe" | "db" | "still_changing" };
 
 const iso = (s: number | null | undefined) => (s ? new Date(s * 1000).toISOString() : null);
 const id = (ref: string | { id: string } | null | undefined) => (typeof ref === "string" ? ref : (ref?.id ?? null));
 
-export type Desired = { kind: "skip"; reason: "no_user" | "no_period_end" } | { kind: "write"; userId: string; live: boolean; row: EntitlementWrite };
+export type Desired = { kind: "skip"; reason: "foreign" | "no_user" | "no_period_end" } | { kind: "write"; userId: string; live: boolean; row: EntitlementWrite };
 
-// What the row should say for this subscription right now.
-export function desiredFor(sub: Stripe.Subscription): Desired {
+// What the row should say for this subscription right now. Not Moodbow's (no app=moodbow tag, or none of our
+// prices: the account is shared with SolvyMed): nothing, before anything else is read from it.
+export function desiredFor(sub: Stripe.Subscription, prices: readonly string[]): Desired {
+  if (!isOurs(sub, prices)) return { kind: "skip", reason: "foreign" };
   const userId = sub.metadata?.user_id;
   if (!userId) return { kind: "skip", reason: "no_user" };
   const item = sub.items?.data?.[0];
@@ -54,6 +61,10 @@ export function desiredFor(sub: Stripe.Subscription): Desired {
       store_customer_id: id(sub.customer),
       store_subscription_id: sub.id,
       store_product_id: item?.price?.id ?? null,
+      // The pending cancel Me shows as "won't renew" (042, display only). Stripe's portal sets cancel_at (2026-05
+      // API; cancel_at_period_end stays false, sw14), older paths set cancel_at_period_end: then it's the period's
+      // end. Un-cancelled in the portal: null again.
+      cancel_at: iso(sub.cancel_at) ?? (sub.cancel_at_period_end ? periodEnd : null),
     },
   };
 }
@@ -88,7 +99,7 @@ export async function syncSubscription(subId: string, deps: SyncDeps): Promise<S
       return { kind: "retry", reason: "stripe" };
     }
     if (!sub) return { kind: "skipped", reason: "unknown_subscription" };
-    const desired = desiredFor(sub);
+    const desired = desiredFor(sub, deps.prices);
     if (desired.kind === "skip") return { kind: "skipped", reason: desired.reason };
     const fingerprint = JSON.stringify(desired.row);
     if (written === fingerprint) return { kind: "written" };
@@ -102,6 +113,8 @@ export async function syncSubscription(subId: string, deps: SyncDeps): Promise<S
     if (!row) {
       const done = await deps.insert(desired.userId, next);
       if (!done.ok) return { kind: "retry", reason: "db" };
+      // The account was deleted (its row went with it): retrying can't change that.
+      if (done.value === "user_gone") return { kind: "skipped", reason: "user_gone", live: desired.live };
       if (!done.value) continue; // a row appeared meanwhile: read again
     } else {
       // Another store's Plus that still grants is never ended by a Stripe event.

@@ -20,17 +20,14 @@ export const FILES = ["appointment.json", "bo.md", "colour-map.json", "countries
 
 // Files held at another app commit than the one synced, with why. Each is listed in SOURCE.json's
 // "held". Drop an entry once the app's master carries that file's version.
-// export-csv.json, export-text.md, export_fixture.json: app #241's changes (pictures, letter
-// reminders) need the web's export code first (UX, 19 Nov: a feature PR right after the 1.3.2
-// re-sync); before that they waited for the full re-sync after the pilot (UX, round 3: the Reviewer's #3-#5), so the
-// crisis-keywords v4 sync (app #248) moves only the crisis list; these stay at the previous pin.
-const PREVIOUS_PIN = "457f4396add9b06e1b10e67b22d9f5308fbdacfa";
+// The export set (pictures, letter reminders, Plus; app #241, 030, 033, 035) follows app master since the web's
+// export renders it (UX, 19 Nov). Still held:
 export const HELD = {
-  "export-csv.json": PREVIOUS_PIN,
-  "export-text.md": PREVIOUS_PIN,
-  "export_fixture.json": PREVIOUS_PIN,
-  // plus-entitlement.json: 041's past_due grace (moodbow-app #262), not on app master until it merges.
-  "plus-entitlement.json": "a1fdedea7c957b8f4178a9bde4bb0f8433e0c3c0",
+  // plus-entitlement.json v2: 042's cancel_at, the won't-renew line (moodbow-app #275), on top of 041's past_due grace.
+  // On app master since #275's merge (2a2c5812, byte-identical to its 2f173f06). Held there, not synced with the rest,
+  // until the web re-syncs the other contracts app master changed since ad85869d (appointment, export-csv, export-text,
+  // the export fixtures, patterns; late-note added): a change of their own, not #409's.
+  "plus-entitlement.json": "2a2c5812e37564505f633b9d4e3da71e5fc212f9",
 };
 
 const gh = (path, accept) => execFileSync("gh", ["api", ...(accept ? ["-H", `Accept: ${accept}`] : []), path], { stdio: ["ignore", "pipe", "inherit"] });

@@ -4,7 +4,7 @@ summary: Salva un mese o un anno del tuo diario come PDF.
 topic: Privacy & account
 it-draft: true
 ---
-{pending:plus}Con Moodbow Plus, **Profilo → PDF curato del tuo diario** impagina un mese o un anno del tuo diario come PDF: una copertina, poi il check-in e le pagine di ogni giorno, ogni mese su una nuova pagina.
+{pending:plus|app_plus}Con Moodbow Plus, **Profilo → PDF curato del tuo diario** impagina un mese o un anno del tuo diario come PDF: una copertina, poi il check-in e le pagine di ogni giorno, ogni mese su una nuova pagina.
 
 Scegli **Un mese** o **Un anno**, poi **Salva come PDF o stampa**. Si apre la finestra di stampa del browser, dove puoi scegliere "Salva come PDF" o stampare.
 

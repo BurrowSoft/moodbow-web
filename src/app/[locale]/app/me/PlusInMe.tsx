@@ -14,8 +14,61 @@ import { SAVE_WAIT_MS } from "@/lib/ui/withTimeout";
 // - free: the banner; its close hides it for the rest of that day only;
 // - the free week running: "Plus trial · {n} days left", 7 segments (the only
 //   place the counter shows; no reminder, no first-charge date);
-// - a failed renewal: the state line and Update card, only while it fails.
-// Plus without a trial shows nothing here.
+// - a pending cancel (042's cancel_at, UX 20 Nov, so a cancel in the portal visibly worked): "Plus trial · ends
+//   {date} · won't renew" in place of the counter, or "Plus · ends {date} · won't renew" for paid Plus;
+// - a failed renewal: the state line and Update card, only while it fails ("to keep Plus" inside the 7-day grace,
+//   "to get Plus back" after it).
+// Paid Plus that renews shows nothing here.
+
+// The won't-renew date: day and month in the person's own format and time zone (the server and the browser format it
+// the same way), with the year when it isn't this one; UTC for a zone this runtime doesn't know. month: the long name,
+// or the short one that large text shows (DateInLine). Plain spaces: DateInLine keeps it whole on a line (UX 20 Nov)
+// without making it unbreakable.
+export function endsOnLabel(iso: string, dateLocaleTag: string, timeZone: string, now = Date.now(), month: "long" | "short" = "long"): string {
+  let zone = timeZone;
+  try {
+    new Intl.DateTimeFormat("en", { timeZone: zone });
+  } catch {
+    zone = "UTC";
+  }
+  const at = new Date(iso);
+  const year = (d: Date) => new Intl.DateTimeFormat("en", { year: "numeric", timeZone: zone }).format(d);
+  return new Intl.DateTimeFormat(dateLocaleTag, { day: "numeric", month, ...(year(at) === year(new Date(now)) ? {} : { year: "numeric" }), timeZone: zone }).format(at);
+}
+
+// Both forms of the won't-renew date, from the same moment (DateInLine shows one).
+const endsOn = (iso: string, dateLocaleTag: string, timeZone: string, now = Date.now()) => ({
+  long: endsOnLabel(iso, dateLocaleTag, timeZone, now),
+  short: endsOnLabel(iso, dateLocaleTag, timeZone, now, "short"),
+});
+
+// The won't-renew line with its date as one inline-block (UX 20 Nov; the Web Tester at de 360/200 and 320/300): the
+// date moves to the next line whole when it fits there, and only when it can't fit any line does it wrap, at its
+// own spaces, never cut inside a word (no-break spaces made it one unbreakable run, which the browser then cut
+// mid-word): overflow-wrap normal. The date is there twice (UX's ruling, 20 Nov, after the Web Tester at en 320 px /
+// 300 %: Chrome never hyphenates a capitalised English word, so "November" ran past the card): the long month, and
+// the short one ("Nov 19, 2027", "19. Nov. 2027", "19 nov 2027") where large text makes the page a 13em column or
+// narrower, the hyphen rule's own query (globals.css, [data-date-form]). There no word of the date is too long for a
+// line, in any language, so nothing needs a hyphen. The other form is display: none, so a screen reader hears only the
+// one on screen. The message keeps its {date}: a token stands in for it, then the date goes in.
+const DATE_TOKEN = "@@date@@";
+function DateInLine({ text, date }: { text: string; date: { long: string; short: string } }) {
+  const [before, after = ""] = text.split(DATE_TOKEN);
+  return (
+    <>
+      {before}
+      <span data-testid="me-plus-date" className="inline-block [overflow-wrap:normal]">
+        <span data-date-form="long" data-testid="me-plus-date-long">
+          {date.long}
+        </span>
+        <span data-date-form="short" data-testid="me-plus-date-short">
+          {date.short}
+        </span>
+      </span>
+      {after}
+    </>
+  );
+}
 
 const CLOSED_KEY = "moodbow.plusBannerClosed";
 const localDay = () => {
@@ -50,7 +103,19 @@ function Arcs() {
   );
 }
 
-export function PlusInMe({ view, price, offer = null }: { view: PlusView; price: string; offer?: PlusOfferPrices | null }) {
+export function PlusInMe({
+  view,
+  price,
+  offer = null,
+  dateLocaleTag = "en-GB",
+  timeZone = "UTC",
+}: {
+  view: PlusView;
+  price: string;
+  offer?: PlusOfferPrices | null;
+  dateLocaleTag?: string;
+  timeZone?: string;
+}) {
   const t = useTranslations("plus");
   const tt = useTranslations("today");
   const locale = useLocale();
@@ -61,18 +126,39 @@ export function PlusInMe({ view, price, offer = null }: { view: PlusView; price:
   const [failed, setFailed] = useState(false);
 
   if (view.kind === "plus" && !view.paymentFailed) {
-    if (view.daysLeft === null) return null;
+    const ends = view.endsAt ? endsOn(view.endsAt, dateLocaleTag, timeZone) : null;
+    if (view.daysLeft === null) {
+      if (!ends) return null;
+      // Paid Plus that won't renew: when it ends, so the cancel visibly worked.
+      return (
+        <section aria-label={t("label")} data-testid="me-plus-ends" className="flex items-center gap-2 rounded-2xl bg-pill p-[16px]">
+          <Arcs />
+          <p className="min-w-0 flex-1 font-medium">
+            <DateInLine text={t("endsWontRenew", { date: DATE_TOKEN })} date={ends} />
+          </p>
+        </section>
+      );
+    }
     const day = 7 - view.daysLeft + 1;
     return (
       <section aria-labelledby="me-plus-trial" data-testid="me-plus-trial" className="space-y-3 rounded-2xl bg-pill p-[16px]">
         <div className="flex flex-wrap items-center gap-2">
           <Arcs />
-          <h2 id="me-plus-trial" className="flex-1 font-medium">
-            {t("trialTitle")}
-          </h2>
-          <span data-testid="me-plus-days-left" className="font-medium text-accent">
-            {t("trialLeft", { n: view.daysLeft })}
-          </span>
+          {ends ? (
+            // A trial that won't turn into a paid year: when it ends, in place of the counter.
+            <h2 id="me-plus-trial" data-testid="me-plus-trial-ends" className="min-w-0 flex-1 font-medium">
+              <DateInLine text={t("trialEndsWontRenew", { date: DATE_TOKEN })} date={ends} />
+            </h2>
+          ) : (
+            <>
+              <h2 id="me-plus-trial" className="flex-1 font-medium">
+                {t("trialTitle")}
+              </h2>
+              <span data-testid="me-plus-days-left" className="font-medium text-accent">
+                {t("trialLeft", { n: view.daysLeft })}
+              </span>
+            </>
+          )}
         </div>
         <div role="img" aria-label={t("trialDay", { day })} className="grid grid-cols-7 gap-1">
           {Array.from({ length: 7 }, (_, i) => (
@@ -83,8 +169,9 @@ export function PlusInMe({ view, price, offer = null }: { view: PlusView; price:
     );
   }
 
-  // A failed Stripe renewal: the same card inside the 7-day grace (Plus still on, UX 19 Nov) and
-  // after it (Plus paused), "Your last payment didn't go through. Update your card to keep Plus."
+  // A failed Stripe renewal: the same card inside the 7-day grace (Plus still on, UX 19 Nov), "Your last payment didn't
+  // go through. Update your card to keep Plus.", and after it (Plus off) "… Update your card to get Plus back."
+  // (UX, sw14 6b: never "keep" a Plus that's already off).
   if (view.kind === "past_due" || (view.kind === "plus" && view.paymentFailed)) {
     const portal = async () => {
       setBusy(true);
@@ -102,7 +189,7 @@ export function PlusInMe({ view, price, offer = null }: { view: PlusView; price:
     };
     return (
       <section aria-label={t("label")} data-testid="me-plus-past-due" className="space-y-3 rounded-2xl bg-pill p-[16px]">
-        <p>{t("pastDue")}</p>
+        <p data-testid="me-plus-past-due-line">{view.kind === "past_due" ? t("pastDueLapsed") : t("pastDue")}</p>
         <button type="button" data-testid="me-plus-update-card" disabled={busy} onClick={() => void portal()} className={dialogButton(true)}>
           {t("updateCard")}
         </button>
@@ -152,13 +239,13 @@ export function PlusBanner({ trial, price, offer = null, id, tryId, compact = fa
         aria-label={t("bannerClose")}
         data-testid={`${id}-close`}
         onClick={close}
-        className={`absolute top-2 right-2 inline-flex h-11 w-11 items-center justify-center rounded-full ${offer ? "text-white" : "text-muted"}`}
+        className={`absolute top-2 right-2 inline-flex h-[44px] w-[44px] items-center justify-center rounded-full ${offer ? "text-white" : "text-muted"}`}
       >
         <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
           <path d="M6 6l12 12M18 6L6 18" />
         </svg>
       </button>
-      <div className="flex items-center gap-2 pr-12">
+      <div className="flex items-center gap-2 pr-[48px]">
         {offer ? (
           <>
             {compact && <Tree />}
@@ -169,7 +256,7 @@ export function PlusBanner({ trial, price, offer = null, id, tryId, compact = fa
         )}
         <span className={`text-sm font-medium tracking-wide uppercase ${offer ? "text-[#F3D27A]" : "text-accent"}`}>{offer ? t("offerLabel") : t("label")}</span>
       </div>
-      <h2 id={id} className="pr-12 text-lg font-medium leading-snug">
+      <h2 id={id} className="pr-[48px] text-lg font-medium leading-snug">
         {offer ? t("offerBannerTitle", { offer: offer.firstYear }) : t("bannerTitle")}
       </h2>
       {!(offer && compact) && <p>{offer ? t("offerBannerBody") : t("bannerBody")}</p>}
