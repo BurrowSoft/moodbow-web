@@ -100,16 +100,17 @@ describe("legal content files", () => {
     const met = (on: boolean) => (id: string) => (id === "anon_start_live" ? on : isPendingMet(id));
     // The names are wrapped so they never hyphenate (wholeNames); the words are the same.
     const words = (html: string) => html.split('<span class="whole-name">').join("").split("</span>").join("");
-    expect(words(renderLegal(source, met(false)).html)).not.toContain(heading);
-    expect(words(renderLegal(source, met(true)).html).split(heading)).toHaveLength(2);
-    expect(words(renderLegal(source).html).includes(heading)).toBe(conditionMet("anon-start-live"));
+    // null: an undated What changed block (it shows with the app's Plus, group 5); the day isn't what's tested here.
+    expect(words(renderLegal(source, met(false), null).html)).not.toContain(heading);
+    expect(words(renderLegal(source, met(true), null).html).split(heading)).toHaveLength(2);
+    expect(words(renderLegal(source, undefined, null).html).includes(heading)).toBe(conditionMet("anon-start-live"));
   });
 
   it("a journal with no email: the policy says it can be lost and can't be returned, only once that start is live", () => {
     const source = readFileSync(path.join(process.cwd(), "content/legal/en/privacy.md"), "utf8");
     const met = (on: boolean) => (id: string) => (id === "anon_start_live" ? on : isPendingMet(id));
-    expect(renderLegal(source, met(true)).html).toContain("sign-in can open your journal");
-    expect(renderLegal(source, met(false)).html).not.toContain("sign-in can open your journal");
+    expect(renderLegal(source, met(true), null).html).toContain("sign-in can open your journal");
+    expect(renderLegal(source, met(false), null).html).not.toContain("sign-in can open your journal");
   });
 
   it("todos() finds every kind of to-confirm mark, but not in editor comments", () => {
@@ -245,7 +246,8 @@ describe("renderLegal (the real privacy text, nothing met)", () => {
 describe("the What changed block's date", () => {
   const source = legalSource("privacy", "en");
   const plusMet = (id: string) => id === "plus" || isPendingMet(id);
-  const plusUnmet = (id: string) => id !== "plus" && isPendingMet(id);
+  // Plus off: neither the web's nor, since group 5, the app's (the block shows with either).
+  const plusUnmet = (id: string) => id !== "plus" && id !== "app_plus" && isPendingMet(id);
   const words = (html: string) => html.split('<span class="whole-name">').join("").split("</span>").join("");
   const markers = /\{\/?(?:dated|undated|notice_date)\}/;
 
@@ -261,7 +263,7 @@ describe("the What changed block's date", () => {
   it("is looked up only where the block shows, and can't render without its date", () => {
     expect(needsNoticeDate(source, plusMet)).toBe(true);
     expect(needsNoticeDate(source, plusUnmet)).toBe(false);
-    expect(needsNoticeDate(source)).toBe(conditionMet("plus"));
+    expect(needsNoticeDate(source)).toBe(conditionMet("plus") || conditionMet("app-plus"));
     expect(() => renderLegal(source, plusMet)).toThrow(/notice date/);
     expect(words(renderLegal(source, plusUnmet).html)).not.toContain("What changed");
   });
@@ -294,7 +296,8 @@ describe("the 1.4.0 privacy lines", () => {
   const IDS = ["routine_live", "app_routine", "trusted_share_live", "app_trusted_share", "app_voice"];
   // As text: the name spans out, and the renderer's &#39; back to an apostrophe.
   const words = (html: string) => html.split('<span class="whole-name">').join("").split("</span>").join("").split("&#39;").join("'");
-  const without = words(renderLegal(source, (id) => !IDS.includes(id) && id !== "plus" && isPendingMet(id)).html);
+  // Without the 1.4.0 lines and without Plus (the web's or, since group 5, the app's).
+  const without = words(renderLegal(source, (id) => !IDS.includes(id) && id !== "plus" && id !== "app_plus" && isPendingMet(id)).html);
   const appOnly = words(renderLegal(source, (id) => ["app_routine", "app_trusted_share", "app_voice", "plus"].includes(id) || isPendingMet(id), null).html);
 
   it("show with their feature on either client, and not before", () => {

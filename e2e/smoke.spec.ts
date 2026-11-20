@@ -191,13 +191,16 @@ test.describe("language: the offered ones, and Thai as a draft (thai-offered-liv
   });
 
   // Vitor, UX & PM 2026-11-06: on phone widths only, every public page.
-  test("Try the app: in the footer on a phone width, not on a desktop", async ({ page }) => {
+  test("Try the app: in the footer on a phone width, not on a desktop", async ({ page }, testInfo) => {
     await page.setViewportSize({ width: 320, height: 640 });
+    // On Android (the mobile project is a Pixel 7) it's the Play listing once that's public (play-live, group 5;
+    // TryAppButton); anywhere else, and before, Welcome.
+    const href = conditions["play-live"].met && testInfo.project.name === "mobile" ? "https://play.google.com/store/apps/details?id=com.burrowsoft.moodbow" : "/welcome";
     for (const path of ["/", "/help", "/privacy", "/terms"]) {
       await page.goto(path);
       const button = page.getByTestId("try-app");
       await expect(button, path).toBeVisible();
-      await expect(button, path).toHaveAttribute("href", "/welcome");
+      await expect(button, path).toHaveAttribute("href", href);
       expect((await button.boundingBox())?.height ?? 0, path).toBeGreaterThanOrEqual(44);
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
       expect(overflow, path).toBeLessThanOrEqual(0);
@@ -211,8 +214,14 @@ test.describe("language: the offered ones, and Thai as a draft (thai-offered-liv
     await page.goto("/");
     await expect(page.getByTestId("try-app")).toBeHidden();
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.getByTestId("try-app").click();
-    await expect(page).toHaveURL(/\/welcome$/);
+    if (href === "/welcome") {
+      await page.getByTestId("try-app").click();
+      await expect(page).toHaveURL(/\/welcome$/);
+    } else {
+      // The Play listing is another site (its link is checked above), so Welcome is opened directly.
+      await page.goto("/welcome");
+    }
+    // Welcome itself never offers Try the app.
     await expect(page.getByTestId("try-app")).toHaveCount(0);
     // Mid sign-in, it's a link away from what the person is doing.
     await page.goto("/sign-in");
@@ -290,12 +299,14 @@ test.describe("the live legal pages and account deletion (decision 164)", () => 
     await page.goto("/privacy");
     const article = page.locator('[data-content="article"]');
     await expect(article.getByRole("heading", { level: 2, name: "The short version" })).toBeVisible();
-    await expect(article.getByText("Last updated: 19 November 2026")).toBeVisible();
+    await expect(article.getByText("Last updated: 20 November 2026")).toBeVisible();
     // Every cookie the website sets, as the policy names them (the full-app audit, round 1, item 1).
     await expect(article).toContainText("one that keeps you signed in, one that remembers the language you chose, one that remembers list or calendar view, and, for a minute after you delete your account, one that tells your browser to clear its copies.");
     // The help card's country fallback, as the policy says it (decision 245, #269).
     await expect(article).toContainText("To show helplines near you when we don't know your country, we use the country your connection comes from, at that moment only; it isn't stored.");
-    await expect(article).not.toContainText("Google Play, Apple App Store");
+    // The Plus payments row of the processors table shows with the web's or the app's Plus (app-plus, group 5).
+    if (conditions.plus.met || conditions["app-plus"].met) await expect(article).toContainText("Google Play, Apple App Store");
+    else await expect(article).not.toContainText("Google Play, Apple App Store");
     await expect(article).toContainText("disappear automatically within 8 days");
     // AI is off: no line may point at a Me → AI screen (decision 69).
     await expect(article).not.toContainText("Me → AI");
@@ -458,10 +469,11 @@ test.describe("404s are server-rendered (no JS)", () => {
     });
   }
 
-  // A Help article that's missing or not out yet (safety-plan and letters are unmet on every
-  // build): the not-found page in the raw HTML, never Next's bare error shell (html
-  // id="__next_error__", no title, no h1; the Web Tester, 15 Nov).
-  for (const path of ["/help/no-such-article", "/help/safety-plan", "/help/letters", "/es/help/no-such-article", "/es/help/safety-plan"]) {
+  // A Help article that's missing or not out yet (ai-reflections and your-week are unmet on every build: AI and the
+  // weekly report aren't in this release. Not bo: its article follows Bo's own gate, readable on a draft build, as
+  // CI's is. safety-plan and letters came out with the app in group 5): the not-found page in the raw HTML, never
+  // Next's bare error shell (html id="__next_error__", no title, no h1; the Web Tester, 15 Nov).
+  for (const path of ["/help/no-such-article", "/help/ai-reflections", "/help/your-week", "/es/help/no-such-article", "/es/help/ai-reflections"]) {
     test(`help 404 ${path}`, async ({ request }) => {
       const res = await request.get(path, { maxRedirects: 0 });
       expect(res.status()).toBe(404);
@@ -470,6 +482,17 @@ test.describe("404s are server-rendered (no JS)", () => {
       expect(html).toMatch(/<title>[^<]+ · Moodbow<\/title>/);
       expect(html).toMatch(/<h1[^>]*>[^<]+<\/h1>/);
       if (!path.startsWith("/es/")) expect(html).toContain("<title>Page not found · Moodbow</title>");
+    });
+  }
+
+  // Out with the app (group 5: app-safety-plan, app-letters): these articles render, server-side, with their heading.
+  for (const [path, title] of [["/help/safety-plan", "My safety plan"], ["/help/letters", "Letters to future me"], ["/es/help/safety-plan", "Mi plan de seguridad"]] as const) {
+    test(`help article out with the app ${path}`, async ({ request }) => {
+      const res = await request.get(path, { maxRedirects: 0 });
+      expect(res.status()).toBe(200);
+      const html = await res.text();
+      expect(html).not.toContain("__next_error__");
+      expect(html).toMatch(new RegExp(`<h1[^>]*>(?:<[^>]+>)*${title}`));
     });
   }
 
@@ -570,10 +593,11 @@ test.describe("auth links", () => {
     if (testInfo.project.name === "mobile") {
       await expect(page.getByTestId("email-confirmed-open-app")).toHaveText("Open Moodbow");
       await expect(page.getByTestId("email-confirmed-open-app")).toHaveAttribute("href", /^intent:\/\/app\/me\/backup#Intent;scheme=moodbow;package=com\.burrowsoft\.moodbow(\.staging)?;/);
-      // No app: back to this page on this host (not Play while it isn't public).
+      // No app: the Play listing once it's public (play-live, group 5; lib/stores openAppFallback), before that
+      // back to this page on this host.
       const href = (await page.getByTestId("email-confirmed-open-app").getAttribute("href")) ?? "";
       const fallback = decodeURIComponent(/S\.browser_fallback_url=([^;]+)/.exec(href)?.[1] ?? "");
-      expect(fallback).toBe(`${new URL(page.url()).origin}/email-confirmed?result=email_changed&app=missing`);
+      expect(fallback).toBe(conditions["play-live"].met ? "https://play.google.com/store/apps/details?id=com.burrowsoft.moodbow" : `${new URL(page.url()).origin}/email-confirmed?result=email_changed&app=missing`);
       await expect(page.getByTestId("email-confirmed-app-line")).toHaveCount(0);
     } else {
       await expect(page.getByTestId("email-confirmed-app-line")).toHaveText("Open the Moodbow app to finish backing up.");

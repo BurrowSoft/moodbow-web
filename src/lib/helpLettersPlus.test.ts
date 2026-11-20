@@ -9,10 +9,10 @@ import { isPendingMet } from "./legalContent";
 const LOCALES = ALL_LOCALES.filter((l) => findArticle(l, "letters"));
 
 describe("Help: letters and Moodbow Plus", () => {
-  it("names Plus only with plus on", () => {
+  it("names Plus only with Plus on (the web's or, since group 5, the app's)", () => {
     const lettersOn = (id: string) => id === "letters_live" || id === "app_letters" || isPendingMet(id);
     for (const locale of LOCALES) {
-      const off = renderArticle(findArticle(locale, "letters")!, (id) => id !== "plus" && lettersOn(id));
+      const off = renderArticle(findArticle(locale, "letters")!, (id) => id !== "plus" && id !== "app_plus" && lettersOn(id));
       const on = renderArticle(findArticle(locale, "letters")!, (id) => id === "plus" || lettersOn(id));
       expect(off, locale).not.toContain("Moodbow Plus");
       expect(on, locale).toContain("<strong>Moodbow Plus</strong>");

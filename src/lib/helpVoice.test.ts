@@ -37,7 +37,7 @@ describe("Help → Writing entries: speaking instead of typing (app only)", () =
     expect(en).toContain("the microphone doesn't appear");
   });
 
-  it("not met yet: the app's voice ships after 1.2", () => {
-    expect(conditions["app-voice"].met).toBe(false);
+  it("met with the app release that has it: 1.4.0 on Google Play (group 5, 20 Nov)", () => {
+    expect(conditions["app-voice"].met).toBe(true);
   });
 });
