@@ -7,11 +7,13 @@ import { isPendingMet, renderLegal } from "./legalContent";
 // about Plus itself shows with either, so nobody buys in the app without the Plus Terms on moodbow.com. The web's purchase
 // bits (Manage Plus via Stripe, the failed-payment retry) show only with the web's `plus`, the Christmas offer only with
 // offer_live. Three states, each page rendered as Production would render it: today, the app's Plus only, and the web's too.
-// Since group 5 (app 1.4.0 on Google Play, 20 Nov), today IS the app's Plus only: app_plus met, the web's plus not yet.
+// Since group 1 (web Plus, 20 Nov) today is the web's Plus too, with the offer's Terms block: plus and offer_live met
+// (the offer's window opens itself on 1 Dec), after the app's Plus (group 5).
 const WEB = new Set(["plus", "offer_live"]);
 const today = (id: string) => isPendingMet(id);
 const appOnly = (id: string) => id === "app_plus" || (!WEB.has(id) && isPendingMet(id));
-const web = (id: string) => id === "plus" || isPendingMet(id);
+// The web's Plus without the offer, which is its own flip.
+const web = (id: string) => id === "plus" || (id !== "offer_live" && isPendingMet(id));
 const text = (html: string) => html.replace(/<[^>]+>/g, "").split("&#39;").join("'").split("&quot;").join('"').split("&amp;").join("&");
 const legal = (locale: string, slug: string, met: (id: string) => boolean) => text(renderLegal(readFileSync(`content/legal/${locale}/${slug}.md`, "utf8"), met, null).html);
 
@@ -24,9 +26,10 @@ const ALSO_ON_WEB = { en: " On the web, Plus also adds", es: " En la web, Plus t
 const MANAGE_PLUS = { en: "Manage Plus", es: "Gestionar Plus", fr: "Gérer Plus", de: "Plus verwalten", it: "Gestisci Plus", "pt-br": "Gerenciar o Plus", th: "จัดการ Plus" };
 
 describe("Plus in the app before the web's (app_plus alone)", () => {
-  it("today: the app's Plus is met (group 5), the web's isn't yet", () => {
+  it("today: the app's Plus (group 5) and the web's (group 1) are both met, and the offer", () => {
     expect(isPendingMet("app_plus")).toBe(true);
-    expect(isPendingMet("plus")).toBe(false);
+    expect(isPendingMet("plus")).toBe(true);
+    expect(isPendingMet("offer_live")).toBe(true);
   });
 
   it("the Terms: the Plus section and the stores' parts, without Manage Plus via Stripe, the failed-payment retry or the offer", () => {
@@ -36,7 +39,7 @@ describe("Plus in the app before the web's (app_plus alone)", () => {
     };
     for (const [locale, c] of Object.entries(CASES)) {
       const now = legal(locale, "terms", today), app = legal(locale, "terms", appOnly), all = legal(locale, "terms", web);
-      expect(now, `${locale} today = the app's Plus only`).toBe(app);
+      for (const w of [c.section, c.store, ...c.webOnly, c.offer]) expect(now, `${locale} today: ${w}`).toContain(w);
       expect(app, `${locale} app`).toContain(c.section);
       expect(app, `${locale} app`).toContain(c.store);
       for (const w of [...c.webOnly, c.offer]) expect(app, `${locale} app: ${w}`).not.toContain(w);
@@ -52,7 +55,8 @@ describe("Plus in the app before the web's (app_plus alone)", () => {
     };
     for (const [locale, lines] of Object.entries(CASES)) {
       const now = legal(locale, "privacy", today), app = legal(locale, "privacy", appOnly), all = legal(locale, "privacy", web);
-      expect(now, `${locale} today = the app's Plus only`).toBe(app);
+      // The policy has no offer lines: today is the web's Plus.
+      expect(now, `${locale} today = the web's Plus`).toBe(all);
       for (const line of lines) {
         expect(app, `${locale} app: ${line}`).toContain(line);
         expect(all, `${locale} web: ${line}`).toContain(line);
@@ -65,7 +69,7 @@ describe("Plus in the app before the web's (app_plus alone)", () => {
       const article = findArticle(locale, "moodbow-plus");
       expect(article, locale).not.toBeNull();
       const app = text(renderArticle(article!, appOnly)), all = text(renderArticle(article!, web));
-      expect(text(renderArticle(article!, today)), `${locale} today = the app's Plus only`).toBe(app);
+      expect(text(renderArticle(article!, today)), `${locale} today = the web's Plus`).toBe(all);
       expect(app, `${locale} app`).toContain("Google Play");
       expect(app, `${locale} app`).not.toContain(manage);
       expect(all, `${locale} web`).toContain(manage);
