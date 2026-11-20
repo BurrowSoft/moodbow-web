@@ -1,6 +1,6 @@
 {
-  "version": 1,
-  "about": "Patterns in Insights (no AI; UX 2026-11-04). From the person's own check-ins: mood on the SAME check-in, split by one factor. Window: a fixed 90 days, today − 89 … today inclusive (the profile's local dates), on every Insights tab; rows after today are ignored. Gate: fewer than minCheckIns check-ins in the window (any row with a mood, with or without a factor) → every pattern not_enough. Averages are sum / count of the integer moods (no running mean), then rounded. Pairs, in this fixed order (never sorted): sleep (a: sleep_hours ≥ sleepHoursAtLeast; b: below), movement (a: exercise_minutes > 0; b: = 0), stress (a: stressLow; b: stressHigh). A null factor is left out, never a group; stress 3 is left out; sleep_hours may arrive as a string (read it as a number). Each side needs ≥ minPerSide days, else not_enough (a, b, diff null; the UI hides it). a.mood and b.mood: the side's average mood rounded to 1 decimal, halves away from zero, −0 → 0. diff = the same rounding of (a.mood − b.mood), from the ROUNDED averages. |diff| ≥ sameBelow → shown; below → same (both numbers shown, \"about the same\"). The UI shows one none line when no pattern is shown or same. \"copy\" is UX's English text (approved 2026-11-04): the app ARB and the web messages use it word for word; {a} and {b} are the one-decimal moods.",
+  "version": 2,
+  "about": "Patterns in Insights (no AI; UX 2026-11-04). From the person's own check-ins: mood on the SAME check-in, split by one factor. Window: a fixed 90 days, today − 89 … today inclusive (the profile's local dates), on every Insights tab; rows after today are ignored. Gate: fewer than minCheckIns check-ins in the window (any row with a mood, with or without a factor) → every pattern not_enough. Averages are sum / count of the integer moods (no running mean), then rounded. Pairs, in this fixed order (never sorted): sleep (a: sleep_hours ≥ sleepHoursAtLeast; b: below), movement (a: exercise_minutes > 0; b: = 0), stress (a: stressLow; b: stressHigh). A null factor is left out, never a group; stress 3 is left out; sleep_hours may arrive as a string (read it as a number). Each side needs ≥ minPerSide days, else not_enough (a, b, diff null; the UI hides it). a.mood and b.mood: the side's average mood rounded to 1 decimal, halves away from zero, −0 → 0. diff = the same rounding of (a.mood − b.mood), from the ROUNDED averages. |diff| ≥ sameBelow → shown; below → same (both numbers shown, \"about the same\"). The UI shows one none line when no pattern is shown or same. \"copy\" is UX's English text (approved 2026-11-04): the app ARB and the web messages use it word for word; {a} and {b} are the one-decimal moods. Version 2 (1.4 F, PLAN-routine.md §4; UX 18 Nov): routineCases add the person's routine items (routine: [{id, position, started_on, ticks: [dates]}]) as one factor each, in position order, with the same window, gate (minCheckIns over all check-ins in the window), minPerSide and rounding. Only check-in days on or after the item's started_on count: a = ticked, b = the other check-in days; days before started_on are never not ticked, and a tick without a check-in that day counts for nothing. SAFETY (UX): an item may be a medication, so a line shows only when diff >= sameBelow (ticked days higher): state shown with a, b and diff; lower or about the same is state hidden with a, b and diff null, never a line; not_enough as the others. Under any routine line, copy.routineFootnote. The appointment summary never compares moods for routine (appointment.json).",
   "today": "2026-11-04",
   "rules": {
     "windowDays": 90,
@@ -27,7 +27,9 @@
     "stressShown": "On low-stress days, your mood averaged {a} of 5. On high-stress days, {b}.",
     "stressSame": "On low- and high-stress days, your mood was about the same ({a} and {b} of 5).",
     "footnote": "These are your own check-ins side by side. They may show what tends to go together, not what causes what.",
-    "none": "Patterns show up here once you have more check-ins with sleep, movement or stress."
+    "none": "Patterns show up here once you have more check-ins with sleep, movement or stress.",
+    "routineShown": "On days you ticked {name}, your mood averaged {a} of 5. On other days, {b}.",
+    "routineFootnote": "This may show what tends to go together, not what causes what. Never change a medication without talking to your doctor or pharmacist."
   },
   "cases": [
     {
@@ -2406,6 +2408,1997 @@
           "a": null,
           "b": null,
           "diff": null
+        }
+      ]
+    }
+  ],
+  "routineCases": [
+    {
+      "name": "shown: ticked days higher (10 at 4, 10 others at 2)",
+      "rows": [
+        {
+          "local_date": "2026-10-16",
+          "mood": 2,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-17",
+          "mood": 2,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-18",
+          "mood": 2,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-19",
+          "mood": 2,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-20",
+          "mood": 2,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-21",
+          "mood": 2,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-22",
+          "mood": 2,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-23",
+          "mood": 2,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-24",
+          "mood": 2,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-25",
+          "mood": 2,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-26",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-27",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-28",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-29",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-30",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-31",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-11-01",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-11-02",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-11-03",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-11-04",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        }
+      ],
+      "routine": [
+        {
+          "id": "r1",
+          "position": 0,
+          "started_on": "2026-09-01",
+          "ticks": [
+            "2026-10-26",
+            "2026-10-27",
+            "2026-10-28",
+            "2026-10-29",
+            "2026-10-30",
+            "2026-10-31",
+            "2026-11-01",
+            "2026-11-02",
+            "2026-11-03",
+            "2026-11-04"
+          ]
+        }
+      ],
+      "expect": [
+        {
+          "id": "r1",
+          "state": "shown",
+          "a": {
+            "days": 10,
+            "mood": 4
+          },
+          "b": {
+            "days": 10,
+            "mood": 2
+          },
+          "diff": 2
+        }
+      ]
+    },
+    {
+      "name": "started mid-window: the 20 earlier days never count as not ticked",
+      "rows": [
+        {
+          "local_date": "2026-10-06",
+          "mood": 1,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-07",
+          "mood": 1,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-08",
+          "mood": 1,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-09",
+          "mood": 1,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-10",
+          "mood": 1,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-11",
+          "mood": 1,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-12",
+          "mood": 1,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-13",
+          "mood": 1,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-14",
+          "mood": 1,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-15",
+          "mood": 1,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-16",
+          "mood": 1,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-17",
+          "mood": 1,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-18",
+          "mood": 1,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-19",
+          "mood": 1,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-20",
+          "mood": 1,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-21",
+          "mood": 1,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-22",
+          "mood": 1,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-23",
+          "mood": 1,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-24",
+          "mood": 1,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-25",
+          "mood": 1,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-26",
+          "mood": 5,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-27",
+          "mood": 5,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-28",
+          "mood": 5,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-29",
+          "mood": 5,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-30",
+          "mood": 5,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-31",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-11-01",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-11-02",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-11-03",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-11-04",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        }
+      ],
+      "routine": [
+        {
+          "id": "r1",
+          "position": 0,
+          "started_on": "2026-10-26",
+          "ticks": [
+            "2026-10-26",
+            "2026-10-27",
+            "2026-10-28",
+            "2026-10-29",
+            "2026-10-30"
+          ]
+        }
+      ],
+      "expect": [
+        {
+          "id": "r1",
+          "state": "shown",
+          "a": {
+            "days": 5,
+            "mood": 5
+          },
+          "b": {
+            "days": 5,
+            "mood": 3
+          },
+          "diff": 2
+        }
+      ]
+    },
+    {
+      "name": "lower on ticked days: hidden, no numbers (never a lower line)",
+      "rows": [
+        {
+          "local_date": "2026-10-16",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-17",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-18",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-19",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-20",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-21",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-22",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-23",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-24",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-25",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-26",
+          "mood": 2,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-27",
+          "mood": 2,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-28",
+          "mood": 2,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-29",
+          "mood": 2,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-30",
+          "mood": 2,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-31",
+          "mood": 2,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-11-01",
+          "mood": 2,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-11-02",
+          "mood": 2,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-11-03",
+          "mood": 2,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-11-04",
+          "mood": 2,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        }
+      ],
+      "routine": [
+        {
+          "id": "r1",
+          "position": 0,
+          "started_on": "2026-09-01",
+          "ticks": [
+            "2026-10-26",
+            "2026-10-27",
+            "2026-10-28",
+            "2026-10-29",
+            "2026-10-30",
+            "2026-10-31",
+            "2026-11-01",
+            "2026-11-02",
+            "2026-11-03",
+            "2026-11-04"
+          ]
+        }
+      ],
+      "expect": [
+        {
+          "id": "r1",
+          "state": "hidden",
+          "a": null,
+          "b": null,
+          "diff": null
+        }
+      ]
+    },
+    {
+      "name": "about the same: hidden, no numbers",
+      "rows": [
+        {
+          "local_date": "2026-10-16",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-17",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-18",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-19",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-20",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-21",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-22",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-23",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-24",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-25",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-26",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-27",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-28",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-29",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-30",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-31",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-11-01",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-11-02",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-11-03",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-11-04",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        }
+      ],
+      "routine": [
+        {
+          "id": "r1",
+          "position": 0,
+          "started_on": "2026-09-01",
+          "ticks": [
+            "2026-10-26",
+            "2026-10-27",
+            "2026-10-28",
+            "2026-10-29",
+            "2026-10-30",
+            "2026-10-31",
+            "2026-11-01",
+            "2026-11-02",
+            "2026-11-03",
+            "2026-11-04"
+          ]
+        }
+      ],
+      "expect": [
+        {
+          "id": "r1",
+          "state": "hidden",
+          "a": null,
+          "b": null,
+          "diff": null
+        }
+      ]
+    },
+    {
+      "name": "higher by exactly sameBelow (3.5 vs 3.0): shown",
+      "rows": [
+        {
+          "local_date": "2026-10-16",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-17",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-18",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-19",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-20",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-21",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-22",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-23",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-24",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-25",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-26",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-27",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-28",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-29",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-30",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-31",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-11-01",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-11-02",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-11-03",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-11-04",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        }
+      ],
+      "routine": [
+        {
+          "id": "r1",
+          "position": 0,
+          "started_on": "2026-09-01",
+          "ticks": [
+            "2026-10-26",
+            "2026-10-27",
+            "2026-10-28",
+            "2026-10-29",
+            "2026-10-30",
+            "2026-10-31",
+            "2026-11-01",
+            "2026-11-02",
+            "2026-11-03",
+            "2026-11-04"
+          ]
+        }
+      ],
+      "expect": [
+        {
+          "id": "r1",
+          "state": "shown",
+          "a": {
+            "days": 10,
+            "mood": 3.5
+          },
+          "b": {
+            "days": 10,
+            "mood": 3
+          },
+          "diff": 0.5
+        }
+      ]
+    },
+    {
+      "name": "higher but under sameBelow (3.4 vs 3.0): hidden",
+      "rows": [
+        {
+          "local_date": "2026-10-16",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-17",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-18",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-19",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-20",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-21",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-22",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-23",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-24",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-25",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-26",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-27",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-28",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-29",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-30",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-31",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-11-01",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-11-02",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-11-03",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-11-04",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        }
+      ],
+      "routine": [
+        {
+          "id": "r1",
+          "position": 0,
+          "started_on": "2026-09-01",
+          "ticks": [
+            "2026-10-26",
+            "2026-10-27",
+            "2026-10-28",
+            "2026-10-29",
+            "2026-10-30",
+            "2026-10-31",
+            "2026-11-01",
+            "2026-11-02",
+            "2026-11-03",
+            "2026-11-04"
+          ]
+        }
+      ],
+      "expect": [
+        {
+          "id": "r1",
+          "state": "hidden",
+          "a": null,
+          "b": null,
+          "diff": null
+        }
+      ]
+    },
+    {
+      "name": "started 4 days ago: not enough on one side",
+      "rows": [
+        {
+          "local_date": "2026-10-16",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-17",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-18",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-19",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-20",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-21",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-22",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-23",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-24",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-25",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-26",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-27",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-28",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-29",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-30",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-31",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-11-01",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-11-02",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-11-03",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-11-04",
+          "mood": 3,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        }
+      ],
+      "routine": [
+        {
+          "id": "r1",
+          "position": 0,
+          "started_on": "2026-11-01",
+          "ticks": [
+            "2026-11-01",
+            "2026-11-02",
+            "2026-11-03",
+            "2026-11-04"
+          ]
+        }
+      ],
+      "expect": [
+        {
+          "id": "r1",
+          "state": "not_enough",
+          "a": null,
+          "b": null,
+          "diff": null
+        }
+      ]
+    },
+    {
+      "name": "under 14 check-ins in the window: every item not_enough",
+      "rows": [
+        {
+          "local_date": "2026-10-23",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-24",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-25",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-26",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-27",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-28",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-29",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-30",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-31",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-11-01",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-11-02",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-11-03",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-11-04",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        }
+      ],
+      "routine": [
+        {
+          "id": "r1",
+          "position": 0,
+          "started_on": "2026-09-01",
+          "ticks": [
+            "2026-10-23",
+            "2026-10-24",
+            "2026-10-25",
+            "2026-10-26",
+            "2026-10-27",
+            "2026-10-28"
+          ]
+        }
+      ],
+      "expect": [
+        {
+          "id": "r1",
+          "state": "not_enough",
+          "a": null,
+          "b": null,
+          "diff": null
+        }
+      ]
+    },
+    {
+      "name": "two items given out of order: position order; one shown, one hidden",
+      "rows": [
+        {
+          "local_date": "2026-10-16",
+          "mood": 2,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-17",
+          "mood": 2,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-18",
+          "mood": 2,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-19",
+          "mood": 2,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-20",
+          "mood": 2,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-21",
+          "mood": 2,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-22",
+          "mood": 2,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-23",
+          "mood": 2,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-24",
+          "mood": 2,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-25",
+          "mood": 2,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-26",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-27",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-28",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-29",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-30",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-31",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-11-01",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-11-02",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-11-03",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-11-04",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        }
+      ],
+      "routine": [
+        {
+          "id": "walk",
+          "position": 1,
+          "started_on": "2026-09-01",
+          "ticks": [
+            "2026-10-16",
+            "2026-10-17",
+            "2026-10-18",
+            "2026-10-19",
+            "2026-10-20",
+            "2026-10-21",
+            "2026-10-22",
+            "2026-10-23",
+            "2026-10-24",
+            "2026-10-25"
+          ]
+        },
+        {
+          "id": "meds",
+          "position": 0,
+          "started_on": "2026-09-01",
+          "ticks": [
+            "2026-10-26",
+            "2026-10-27",
+            "2026-10-28",
+            "2026-10-29",
+            "2026-10-30",
+            "2026-10-31",
+            "2026-11-01",
+            "2026-11-02",
+            "2026-11-03",
+            "2026-11-04"
+          ]
+        }
+      ],
+      "expect": [
+        {
+          "id": "meds",
+          "state": "shown",
+          "a": {
+            "days": 10,
+            "mood": 4
+          },
+          "b": {
+            "days": 10,
+            "mood": 2
+          },
+          "diff": 2
+        },
+        {
+          "id": "walk",
+          "state": "hidden",
+          "a": null,
+          "b": null,
+          "diff": null
+        }
+      ]
+    },
+    {
+      "name": "ticks with no check-in, after today or before started_on count for nothing",
+      "rows": [
+        {
+          "local_date": "2026-10-16",
+          "mood": 2,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-17",
+          "mood": 2,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-18",
+          "mood": 2,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-19",
+          "mood": 2,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-20",
+          "mood": 2,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-21",
+          "mood": 2,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-22",
+          "mood": 2,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-23",
+          "mood": 2,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-24",
+          "mood": 2,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-25",
+          "mood": 2,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-26",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-27",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-28",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-29",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-30",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-31",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-11-01",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-11-02",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-11-03",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-11-04",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        }
+      ],
+      "routine": [
+        {
+          "id": "r1",
+          "position": 0,
+          "started_on": "2026-10-16",
+          "ticks": [
+            "2026-10-10",
+            "2026-10-15",
+            "2026-10-26",
+            "2026-10-27",
+            "2026-10-28",
+            "2026-10-29",
+            "2026-10-30",
+            "2026-10-31",
+            "2026-11-01",
+            "2026-11-02",
+            "2026-11-03",
+            "2026-11-04",
+            "2026-11-05",
+            "2026-11-20"
+          ]
+        }
+      ],
+      "expect": [
+        {
+          "id": "r1",
+          "state": "shown",
+          "a": {
+            "days": 10,
+            "mood": 4
+          },
+          "b": {
+            "days": 10,
+            "mood": 2
+          },
+          "diff": 2
+        }
+      ]
+    },
+    {
+      "name": "rows outside the window (today - 90, tomorrow) are ignored",
+      "rows": [
+        {
+          "local_date": "2026-08-06",
+          "mood": 1,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-11-05",
+          "mood": 1,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-16",
+          "mood": 2,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-17",
+          "mood": 2,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-18",
+          "mood": 2,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-19",
+          "mood": 2,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-20",
+          "mood": 2,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-21",
+          "mood": 2,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-22",
+          "mood": 2,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-23",
+          "mood": 2,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-24",
+          "mood": 2,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-25",
+          "mood": 2,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-26",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-27",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-28",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-29",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-30",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-10-31",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-11-01",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-11-02",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-11-03",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        },
+        {
+          "local_date": "2026-11-04",
+          "mood": 4,
+          "sleep_hours": null,
+          "exercise_minutes": null,
+          "stress": null
+        }
+      ],
+      "routine": [
+        {
+          "id": "r1",
+          "position": 0,
+          "started_on": "2026-08-01",
+          "ticks": [
+            "2026-08-06",
+            "2026-11-05",
+            "2026-10-26",
+            "2026-10-27",
+            "2026-10-28",
+            "2026-10-29",
+            "2026-10-30",
+            "2026-10-31",
+            "2026-11-01",
+            "2026-11-02",
+            "2026-11-03",
+            "2026-11-04"
+          ]
+        }
+      ],
+      "expect": [
+        {
+          "id": "r1",
+          "state": "shown",
+          "a": {
+            "days": 10,
+            "mood": 4
+          },
+          "b": {
+            "days": 10,
+            "mood": 2
+          },
+          "diff": 2
         }
       ]
     }

@@ -16,19 +16,14 @@ import { join } from "node:path";
 
 const REPO = "BurrowSoft/moodbow-app";
 const DIR = "supabase/contracts";
-export const FILES = ["appointment.json", "bo.md", "colour-map.json", "countries.json", "crisis-keywords.json", "errors.md", "export-csv.json", "export-text.md", "export_fixture.json", "export_fixture.txt", "get-help-label.json", "letters.json", "mood-faces.json", "mood-prompts.json", "on-this-day.json", "patterns.json", "plus-entitlement.json", "prompts-library.json", "prompts.json", "reflect.md", "reminders.json", "report.md", "safety-plan.json", "search-fold.json", "share-cards.json", "showed-up.json", "toolbox.json", "what-lifts-me.json", "year-card.json", "year-review.json", "your-week.json"];
+export const FILES = ["appointment.json", "bo.md", "colour-map.json", "countries.json", "crisis-keywords.json", "errors.md", "export-csv.json", "export-text.md", "export_fixture.json", "export_fixture.txt", "get-help-label.json", "late-note.json", "letters.json", "mood-faces.json", "mood-prompts.json", "on-this-day.json", "patterns.json", "plus-entitlement.json", "prompts-library.json", "prompts.json", "reflect.md", "reminders.json", "report.md", "safety-plan.json", "search-fold.json", "share-cards.json", "showed-up.json", "toolbox.json", "what-lifts-me.json", "year-card.json", "year-review.json", "your-week.json"];
 
 // Files held at another app commit than the one synced, with why. Each is listed in SOURCE.json's
 // "held". Drop an entry once the app's master carries that file's version.
-// The export set (pictures, letter reminders, Plus; app #241, 030, 033, 035) follows app master since the web's
-// export renders it (UX, 19 Nov). Still held:
-export const HELD = {
-  // plus-entitlement.json v2: 042's cancel_at, the won't-renew line (moodbow-app #275), on top of 041's past_due grace.
-  // On app master since #275's merge (2a2c5812, byte-identical to its 2f173f06). Held there, not synced with the rest,
-  // until the web re-syncs the other contracts app master changed since ad85869d (appointment, export-csv, export-text,
-  // the export fixtures, patterns; late-note added): a change of their own, not #409's.
-  "plus-entitlement.json": "2a2c5812e37564505f633b9d4e3da71e5fc212f9",
-};
+// None held since the 20 Nov re-sync at app master 2a2c5812: every file is app master's, plus-entitlement.json v2
+// (042's cancel_at) included, and the 1.4 drafts the web carried (Routine's appointment, export and patterns rules,
+// the late-night note) are the app's own now.
+export const HELD = {};
 
 const gh = (path, accept) => execFileSync("gh", ["api", ...(accept ? ["-H", `Accept: ${accept}`] : []), path], { stdio: ["ignore", "pipe", "inherit"] });
 

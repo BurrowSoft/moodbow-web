@@ -1,8 +1,8 @@
 import { localKey } from "@/lib/localData";
-import contract from "./lateNote.contract.json";
+import contract from "../../../content/contracts/late-note.json";
 
 // The gentle late-night note (1.4 D, specs/1.4-features.md §D; late-note-live; the cases in
-// lateNote.contract.json, for moodbow-app supabase/contracts/late-note.json). A check-in the
+// content/contracts/late-note.json, synced from moodbow-app's supabase/contracts/late-note.json). A check-in the
 // person saves from the card between 00:00 and 04:59 in their PROFILE's time zone (UX, 19 Nov:
 // one clock everywhere), with one of the two lowest moods, shows one soft line under the saved
 // check-in, with the help button. At most once a night (the save's date in that zone), per user.

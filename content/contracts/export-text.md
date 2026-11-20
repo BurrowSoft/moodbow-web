@@ -17,16 +17,17 @@
 Render only `format: "moodbow-export"` with `format_version: 1`. For anything else, a renderer refuses: no partial text. The client then offers the JSON alone.
 
 ## Order and sections
-Render in the JSON's array order (the server already sorts it: check-ins by date, entries by date then created_at, things that help by position, the plan's people by section (people, then professionals) then position, letters by written_on then created_at, reflections and memories by created_at). Never re-sort.
+Render in the JSON's array order (the server already sorts it: check-ins by date, entries by date then created_at, things that help by position, routine items by position (each item's ticks ascending), the plan's people by section (people, then professionals) then position, letters by written_on then created_at, reflections and memories by created_at). Never re-sort.
 
 1. The header (always).
 2. **Check-ins** (`check_ins`).
 3. **Entries** (`entries`).
 4. **Things that help me** (`things_that_help`, 1.2, migration 025).
-5. **My safety plan** (`safety_plan`, 1.2, migration 026).
-6. **Letters to future me** (`letters`, 1.2, migration 027).
-7. **AI reflections** (`ai_reflections`).
-8. **What Moodbow remembers** (`ai_memories`).
+5. **Routine** (`routine`, 1.4, migration 038).
+6. **My safety plan** (`safety_plan`, 1.2, migration 026).
+7. **Letters to future me** (`letters`, 1.2, migration 027).
+8. **AI reflections** (`ai_reflections`).
+9. **What Moodbow remembers** (`ai_memories`).
 
 A section with no items is left out entirely, heading included. There's exactly one blank line between blocks (header → section, section → section), and none at the very end.
 
@@ -62,6 +63,9 @@ The heading `{exportEntries}`, then one block per entry, with a blank line betwe
 
 ## Things that help me
 The heading `{exportThingsThatHelp}`, then one line per item: `- {text}`. The text is as stored, on one line: it can't hold a line break, and a client that finds one renders it as a space. The key is translated in fr, es and pt-BR; de, it and th are drafts behind their gate (UX, 2026-11-09).
+
+## Routine
+The heading `{exportRoutine}`, then for each item two lines. First `- {name} · {exportRoutineStarted}`, followed by ` · {exportRoutineInAppointment}` only when `in_appointment` is true. Then, indented two spaces, `{exportRoutineTicked}` with every tick as ISO dates joined by `, `, or `{exportRoutineNoTicks}` when there are none. The name is as stored, on one line: a line break found is shown as a space. The section only appears when the person has items (UX, 18 Nov), and it never shows a mood or a pattern (UX's medication safety ruling).
 
 ## My safety plan
 The heading `{exportSafetyPlan}`, then, in this order, each part that has something in it (an empty part is left out, heading included):
@@ -105,6 +109,11 @@ The heading `{exportMemories}`, then one line per memory: `- {fact}`.
 | exportReflections | AI reflections |
 | exportMemories | What Moodbow remembers |
 | exportThingsThatHelp | Things that help me |
+| exportRoutine | Routine |
+| exportRoutineStarted | started {date} |
+| exportRoutineInAppointment | in my appointment summary |
+| exportRoutineTicked | Ticked: {dates} |
+| exportRoutineNoTicks | Not ticked yet |
 | exportSafetyPlan | My safety plan |
 | exportPlanWarningSigns | Warning signs |
 | exportPlanDistractions | People and places that take my mind off things |

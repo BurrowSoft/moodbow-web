@@ -277,7 +277,7 @@
   },
   "appointment-live": {
     "met": true,
-    "what": "1.2: For my appointment (specs/1.2-features.md §4, content/appointment.json): a printable summary of check-ins and starred entries, made in the browser, nothing stored or sent. Needs the Reviewer's read, the tester rows and Vitor's look."
+    "what": "1.2: For my appointment (specs/1.2-features.md §4, content/contracts/appointment.json): a printable summary of check-ins and starred entries, made in the browser, nothing stored or sent. Needs the Reviewer's read, the tester rows and Vitor's look."
   },
   "app-appointment": {
     "met": false,
@@ -397,7 +397,7 @@
   },
   "late-note-live": {
     "met": false,
-    "what": "1.4 D Gentle late-night note (specs/1.4-features.md §D, UX 19 Nov; the cases in src/lib/journal/lateNote.contract.json, for moodbow-app supabase/contracts/late-note.json): a check-in the person saves from the card between 00:00 and 04:59 in their profile's zone, with mood 1 or 2, shows one line under the saved check-in with Get help now, at most once a night per user. Never a notification, nothing on the server, never counted. A safety copy: before it's met, the clinician's read (the safety-plan G1 pack), the Reviewer's read and the Web Tester's row."
+    "what": "1.4 D Gentle late-night note (specs/1.4-features.md §D, UX 19 Nov; the cases in content/contracts/late-note.json, for moodbow-app supabase/contracts/late-note.json): a check-in the person saves from the card between 00:00 and 04:59 in their profile's zone, with mood 1 or 2, shows one line under the saved check-in with Get help now, at most once a night per user. Never a notification, nothing on the server, never counted. A safety copy: before it's met, the clinician's read (the safety-plan G1 pack), the Reviewer's read and the Web Tester's row."
   },
   "routine-live": {
     "met": false,
