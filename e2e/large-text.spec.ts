@@ -3,7 +3,7 @@ import countries from "../content/contracts/countries.json";
 import fr from "../src/messages/fr.json";
 import pt from "../src/messages/pt-br.json";
 import { dialogButton } from "../src/lib/ui/dialogButton";
-import { BO_HEADING, DAY_ADD_ENTRY, LOCKED_ROW_LABEL, ME_LOCKED_ROW, WEEK_DAY, WEEK_DAY_LABEL, WEEK_DAYS, WEEK_HEADING, WEEK_SUMMARY } from "../src/lib/ui/largeText";
+import { BO_HEADING, DAY_ADD_ENTRY, LOCKED_ROW_LABEL, ME_LOCKED_ROW, WEEK_DAY, WEEK_DAY_LABEL, WEEK_DAYS, WEEK_HEADING, WEEK_SUMMARY, YEAR_MONTH, YEAR_MONTH_LABEL, YEAR_STRIP } from "../src/lib/ui/largeText";
 
 // The browser's own text setting on a 320 px phone, on the pages someone with large
 // text needs first. Sign in's button scrolled /sign-in sideways by up to 194 px (Web
@@ -662,6 +662,58 @@ test("large text at 320 px / 300 %: no word in the fixed components is cut witho
   await cdp.send("Page.setFontSizes", { fontSizes: { standard: 16, fixed: 13 } });
   await mountIn(page, "/fr", 252, `<span data-day-form="short">lun.</span><span data-day-form="narrow">L</span>`);
   expect(await page.evaluate(() => [...document.querySelectorAll("[data-day-form]")].map((s) => getComputedStyle(s).display))).toEqual(["inline", "none"]);
+});
+
+// Your year's colour strip (the Web Tester's D2, UX 20 Nov): at large text a 4×3 grid, every month's label whole on one
+// line inside its cell, in English (en-GB's "Sept" is its longest) and German ("Sept."); at the normal size a phone's
+// strip is 6 across, as before. The page needs a session, so its markup is put on a public page at the width it has
+// there: the app's gutter (12 px under 360 px, else 16) and the year card's 20 px each side.
+test("Your year's strip at 360 px / 200 % and 320 px / 300 %: 4×3, every month on one line, in en and de", async ({ page, browserName }, testInfo) => {
+  test.skip(browserName !== "chromium" || testInfo.project.name !== "desktop", "Page.setFontSizes is Chromium's; once is enough");
+  const cdp = await page.context().newCDPSession(page);
+  const strip = (tag: string) => {
+    const month = new Intl.DateTimeFormat(tag, { month: "short", timeZone: "UTC" });
+    const items = Array.from(
+      { length: 12 },
+      (_, i) =>
+        `<li class="${YEAR_MONTH}"><span aria-hidden="true" class="block h-[40px] w-full rounded-xl" style="background:#7a9"></span><span aria-hidden="true" data-month-label class="${YEAR_MONTH_LABEL}">${month.format(new Date(Date.UTC(2026, i, 1)))}</span></li>`,
+    ).join("");
+    return `<ol class="${YEAR_STRIP}" data-testid="year-strip">${items}</ol>`;
+  };
+  const read = () =>
+    page.evaluate(() => {
+      const ol = document.querySelector("[data-testid=year-strip]")!;
+      const labels = [...ol.querySelectorAll("[data-month-label]")];
+      return {
+        columns: getComputedStyle(ol).gridTemplateColumns.split(" ").length,
+        lines: labels.map((l) => new Set([...l.getClientRects()].map((r) => Math.round(r.top))).size),
+        outside: labels.filter((l) => l.getBoundingClientRect().width > l.parentElement!.getBoundingClientRect().width + 0.5).map((l) => l.textContent),
+        sideways: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      };
+    });
+  for (const [width, percent, inner] of [
+    [360, 200, 360 - 2 * 16 - 2 * 20],
+    [320, 300, 320 - 2 * 12 - 2 * 20],
+  ] as const) {
+    await page.setViewportSize({ width, height: 640 });
+    await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
+    for (const [language, tag] of [["/", "en-GB"], ["/de", "de"]] as const) {
+      await mountIn(page, language, inner, strip(tag));
+      const where = `${tag} ${width} px / ${percent} %`;
+      const got = await read();
+      expect.soft(got.columns, `${where}: 4 across`).toBe(4);
+      expect.soft(got.lines, `${where}: every month on one line`).toEqual(Array(12).fill(1));
+      expect.soft(got.outside, `${where}: every month inside its cell`).toEqual([]);
+      expect.soft(got.sideways, `${where}: no sideways scroll`).toBe(0);
+    }
+  }
+  // The normal size: 6 across on a phone, as before (12 from sm).
+  await page.setViewportSize({ width: 360, height: 640 });
+  await cdp.send("Page.setFontSizes", { fontSizes: { standard: 16, fixed: 13 } });
+  await mountIn(page, "/", 360 - 2 * 16 - 2 * 20, strip("en-GB"));
+  const normal = await read();
+  expect(normal.columns, "360 px / 100 %: 6 across").toBe(6);
+  expect(normal.lines, "360 px / 100 %: every month on one line").toEqual(Array(12).fill(1));
 });
 
 // UX, 20 Nov: /account-deletion is a help page, not legal text: French in French, no "in English" line.
