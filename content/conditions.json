@@ -56,7 +56,7 @@
     "what": "Help only (decision 212 pattern, UX 2026-11-03): writing prompts (1.1 I) are in the app build people have (first shipped in 0.9.7 (7); no 0.9.6 was uploaded; UX), so their Help line shows. Not writing-prompts (tested on the app and the web)."
   },
   "app-voice": {
-    "met": false,
+    "met": true,
     "what": "Help only (decision 212 pattern, UX 14 Nov; specs/1.3-grounding-and-good-things.md part 2 §4): voice entries, Speak instead in Write, on-device speech only (no cloud fallback, no audio kept), are in the app build people have, so the Writing entries article's line shows. App only: the web has no voice (browser speech sends audio away)."
   },
   "app-share-cards-more": {
@@ -76,7 +76,7 @@
     "what": "Help only (decision 212 pattern, UX 2026-11-04): import from another app (1.1 K) is in the app build people have (0.9.7; met on its publish, UX), so its Help article shows for app users ({pending:app_import|import_live}). Not import-live (the web's own import)."
   },
   "app-quick-checkin": {
-    "met": false,
+    "met": true,
     "what": "Help only (decision 212 pattern, UX 2026-11-12): the one-tap check-in from the daily reminder (1.2 §5, the app's QUICK_CHECKIN) is in the app build people have, so its Help article shows. App only: the web has no reminder of its own."
   },
   "app-app-lock": {
@@ -84,7 +84,7 @@
     "what": "Help only (decision 212): app lock (PIN, fingerprint or face; decision 188) is in the app build people have (0.9 closed test on), so its Help article shows. Not app-lock (the privacy text's clause, Vitor's)."
   },
   "app-today-help": {
-    "met": false,
+    "met": true,
     "what": "Help only (decision 212 pattern, UX & PM 2026-11-13): Today's standing help button (a lifebuoy named with meGetHelpNow, specs/1.2-features.md) is in the app build people have; the web's ships with it (#298, after the pilot). Gates the get-help-now article's line about it."
   },
   "app-share-cards": {
@@ -100,7 +100,7 @@
     "what": "AI credit purchases (Google Play / App Store) are live, with the refund rule enforced (R2)."
   },
   "app-lock": {
-    "met": false,
+    "met": true,
     "what": "The app lock (1.1, decision 174) is in a RELEASED app build. App-only: on the web it only gates the Help article that explains it."
   },
   "share-cards": {
@@ -200,7 +200,7 @@
     "what": "The consents column is on prod, and any client sends the language (decision 224). Flip it with the first of those to go out, so the language is never stored before the privacy policy's §1 says so."
   },
   "play-live": {
-    "met": false,
+    "met": true,
     "what": "The Play listing is public (Vitor). Then the web shows the Google Play link (decision 185) and the manifest names the app (related_applications)."
   },
   "appstore-live": {
@@ -240,7 +240,7 @@
     "what": "1.2: Things that help me (specs/1.2-features.md, content/toolbox.json): Me's list, the Today card after a low check-in, and a minute to breathe. Needs migration 025 on Production (Vitor), the Reviewer's read, the tester rows and Vitor's look."
   },
   "app-toolbox": {
-    "met": false,
+    "met": true,
     "what": "Help only (decision 212 pattern, UX 2026-11-12): Things that help me and the minute to breathe (1.2 §1) are in the app build people have, so its Help article shows. Not toolbox-live (the web's own switch)."
   },
   "grounding-live": {
@@ -248,7 +248,7 @@
     "what": "1.3 (specs/1.3-grounding-and-good-things.md): 5-4-3-2-1, Body scan and Name it in Me → Things that help me (content/toolbox.json, grounding). Ships after 1.2, with toolbox-live; the Reviewer's read, the tester rows and Vitor's look."
   },
   "app-grounding": {
-    "met": false,
+    "met": true,
     "what": "Help only (decision 212 pattern, 1.3 Ruling 8): the grounding exercises are in the app build people have, so their Help lines show ({pending:app_grounding|grounding_live}). Not grounding-live (the web's own switch)."
   },
   "good-things-live": {
@@ -256,7 +256,7 @@
     "what": "1.3 (specs/1.3-grounding-and-good-things.md): Three good things on the web, from Write and Me → Things that help me: the entry editor with three short fields, saving one ordinary entry through the normal save (Ruling 3). No evening prompt on the web (Ruling 9). Ships after 1.2; the Reviewer's read, the tester rows and Vitor's look."
   },
   "app-good-things": {
-    "met": false,
+    "met": true,
     "what": "Help only (decision 212 pattern): Three good things, with its evening reminder, is in the app build people have, so its Help lines show ({pending:app_good_things|good_things_live}); the reminder sentence is the app's alone. Not good-things-live (the web's own switch)."
   },
   "safety-plan-live": {
@@ -264,7 +264,7 @@
     "what": "1.2: My safety plan (specs/1.2-features.md §2, content/contracts/safety-plan.json): Me's plan, its button on the help card below the helplines and on a hard Your week. Needs the clinician's read of every string (Vitor), the privacy policy's text on other people's details (Vitor), migration 026 on Production (Vitor), the Reviewer's read, the tester rows and Vitor's look."
   },
   "app-safety-plan": {
-    "met": false,
+    "met": true,
     "what": "Help only (decision 212 pattern, UX 2026-11-12): My safety plan (1.2 §2) is in the app build people have, with its lock switch and offline view, so its Help article shows. Not safety-plan-live (the web's own switch); like it, waits on the clinician's read."
   },
   "letters-live": {
@@ -272,7 +272,7 @@
     "what": "1.2: Letters to future me (specs/1.2-features.md §3, content/contracts/letters.json): Me's letters, Today's card on the day, and the Timeline's locked line. Part of Moodbow Plus from the day they ship (1.3 §3, UX 14 Nov): on only together with plus (lib/plus/letters.ts lettersGate), and writing a new letter is checked on the server. With reminders (#319): moodbow-app migrations 027, 032 and 033 must all be on Production before this is met. Needs migration 027 on Production (Vitor), the Reviewer's read, the tester rows and Vitor's look."
   },
   "app-letters": {
-    "met": false,
+    "met": true,
     "what": "Help only (decision 212 pattern, UX 2026-11-12): Letters to future me (1.2 §3) are in the app build people have, with the opening-day notification, so its Help article shows. Not letters-live (the web's own switch)."
   },
   "appointment-live": {
@@ -280,7 +280,7 @@
     "what": "1.2: For my appointment (specs/1.2-features.md §4, content/appointment.json): a printable summary of check-ins and starred entries, made in the browser, nothing stored or sent. Needs the Reviewer's read, the tester rows and Vitor's look."
   },
   "app-appointment": {
-    "met": false,
+    "met": true,
     "what": "Help only (decision 212 pattern, UX 2026-11-12): For my appointment (1.2 §4) is in the app build people have, with Share as PDF, so its Help article shows. Not appointment-live (the web's own switch, which brings Print)."
   },
   "test-only-unavailable-page": {
@@ -304,7 +304,7 @@
     "what": "The Christmas special offer (specs/1.3-offer-review-voice-taps.md §1 and its Christmas section): the first year at a lower price, 1 December to 1 January 00:00 UTC on the server's clock, for people with no previous subscription, instead of the free week; lib/plus/offer.ts. Only with plus. Before it's met: Vitor's first-year coupon in Stripe (STRIPE_PLUS_OFFER_COUPON_ID, duration \"once\" so the renewal is the full price, amount_off per currency from store/plus-prices.md's half prices; a currency without an amount shows and charges the usual free week), the same offer in Apple and Play, his terms text for it, the Reviewer's read and the tester rows (OFFER_PREVIEW=1 on a Preview opens the window there; Production ignores it)."
   },
   "app-pictures": {
-    "met": false,
+    "met": true,
     "what": "1.3 Pictures for moments in the app (035; Plus): met when the app release that adds pictures to moments is live (and 035 is on Production with the picture-deletions cron running). The privacy policy's moment pictures line shows from then."
   },
   "app-me-picture": {
@@ -312,15 +312,15 @@
     "what": "1.3 (Vitor, 14 Nov): the app's Me card holds the person's own picture (on the phone only, never uploaded, metadata stripped; spec \"Me: the big card is your own picture\"). Met when that app release is live; the privacy policy's Me picture line (app sentence) shows from then."
   },
   "app-icons": {
-    "met": false,
+    "met": true,
     "what": "Help only (decision 212 pattern, UX 14 Nov): the App icon picker (Plus; specs/1.3-offer-review-voice-taps.md \"App icon pick\") is in the app build people have from the stores. Met with that release; the help article is app-only."
   },
   "app-routine": {
-    "met": false,
+    "met": true,
     "what": "Medication and routine (1.4 F) is in the app build people have (app 1.4.0). Help and privacy only (decision 212 pattern): the Routine Help article and the privacy policy's routine lines show once either this or routine-live (the web's own switch) is met."
   },
   "app-trusted-share": {
-    "met": false,
+    "met": true,
     "what": "Share your week with someone you trust (1.4 G) is in the app build people have (app 1.4.0). Help and privacy only (decision 212 pattern): the Share your week Help article and the privacy policy's share lines show once either this or trusted-share-live (the web's own switch) is met."
   },
   "app-sounds": {
@@ -328,7 +328,7 @@
     "what": "Calming sounds (1.4 B) are in the app build people have (app 1.4.1; SOUNDS is off in app 1.4.0, so this is not in the 1.4.0 app-release flip group). Help only (decision 212 pattern): the article's app paragraph, and the article itself once either this or sounds-live is met."
   },
   "app-showed-up": {
-    "met": false,
+    "met": true,
     "what": "Days you showed up (1.4 C) is in the app build people have (app 1.4.0; 1.3.2 was retired and never uploaded). Help only (decision 212 pattern): its article shows once either this or showed-up-live is met."
   },
   "app-mood-prompts": {
@@ -336,7 +336,7 @@
     "what": "Prompts that follow your mood (1.4 E) are in the app build people have (from 1 December in app 1.4.0). Help only (decision 212 pattern): its article shows once either this or mood-prompts-live is met."
   },
   "app-plus": {
-    "met": false,
+    "met": true,
     "what": "The app sells Moodbow Plus (Google Play in 1.4.0), which can come before the web's own plus (UX, 20 Nov). Every line about Plus itself in the Terms, the privacy policy and Help shows with either (plus|app_plus), so nobody buys in the app without the Plus Terms on moodbow.com. Only the web's purchase bits stay behind plus or offer_live: Manage Plus via Stripe, the failed-payment retry, the Christmas offer's web coupon. Met in group 5, the app release, with the Terms' and privacy's Last updated date and the notice id on that day (Vitor's word)."
   },
   "lifts-live": {
@@ -392,7 +392,7 @@
     "what": "1.4 E Prompts that follow your mood (specs/1.4-features.md §E, UX 18 Nov; the cases in content/contracts/mood-prompts.json, synced from moodbow-app supabase/contracts): on Write, above an empty entry, today's check-in mood picks the library group (1-2 hard-days with its help, 3 noticing, 4-5 gratitude). Free: one prompt a day, Another back to the daily list; Plus: the group from its saved place. Never on a day an entry or tag is crisis-flagged. No new analytics. Before it's met: the contract on the app's master, the Reviewer's read and the Web Tester's row."
   },
   "trusted-share-live": {
-    "met": false,
+    "met": true,
     "what": "1.4 G Share with someone I trust (plans/PLAN-trusted-share.md, passed by the Reviewer 18 Nov; moodbow-app migration 040): /s (the viewer, no account; nothing loads before \"Show the week\") and /api/share/view (the only caller of share_view, with the service role; the token hashed in the route). Hides the UI only: the real off switch is app_config share_enabled in the database (Vitor's on Production). Before it's met: Me → Share and the Today note, the Reviewer's read, the Web Tester's rows, Vitor's privacy line, legal basis and MHMDA wording."
   },
   "late-note-live": {

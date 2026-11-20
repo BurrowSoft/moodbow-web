@@ -1,12 +1,12 @@
 <!--
   Spanish of content/legal/en/privacy.md. Wording is Vitor's, as in English. AI translation, checked
   by back-translation, a script and the Code Reviewer; no native lawyer has read it.
-  en-sha256: 0cf976611de7e7d3834957325ef1bb6c3940b473f7149c1564a2829e602ea5a8
+  en-sha256: 8eb1f5ceb96b7c03c829c0e6d11f1765ca0f7a15593e64151994f0ea7c4ae9ad
   It's the English this translates: legalSpanish.test.ts fails if the English changes, until the
   Spanish follows and this is updated. Shows on Production only once legal-es-approved is met.
 -->
 ## Política de privacidad de Moodbow
-Última actualización: 19 de noviembre de 2026
+Última actualización: 20 de noviembre de 2026
 
 {pending:plus|app_plus}**Qué ha cambiado{dated} el {notice_date}{/dated}:** ahora puedes suscribirte a Moodbow Plus. Si lo haces, Google Play, el App Store o Stripe se encargan del pago, y guardamos una referencia de tu suscripción y sus fechas (§1, «Compras de Moodbow Plus»). Stripe es nuevo en nuestra lista de proveedores (§3). No ha cambiado nada más en cómo usamos tu diario.{/pending}
 
