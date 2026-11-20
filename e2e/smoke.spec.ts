@@ -214,8 +214,14 @@ test.describe("language: the offered ones, and Thai as a draft (thai-offered-liv
     await page.goto("/");
     await expect(page.getByTestId("try-app")).toBeHidden();
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.getByTestId("try-app").click();
-    await expect(page).toHaveURL(/\/welcome$/);
+    if (href === "/welcome") {
+      await page.getByTestId("try-app").click();
+      await expect(page).toHaveURL(/\/welcome$/);
+    } else {
+      // The Play listing is another site (its link is checked above), so Welcome is opened directly.
+      await page.goto("/welcome");
+    }
+    // Welcome itself never offers Try the app.
     await expect(page.getByTestId("try-app")).toHaveCount(0);
     // Mid sign-in, it's a link away from what the person is doing.
     await page.goto("/sign-in");
@@ -463,10 +469,11 @@ test.describe("404s are server-rendered (no JS)", () => {
     });
   }
 
-  // A Help article that's missing or not out yet (ai-reflections and bo are unmet on every build: AI and Bo aren't in
-  // this release; safety-plan and letters came out with the app in group 5): the not-found page in the raw HTML,
-  // never Next's bare error shell (html id="__next_error__", no title, no h1; the Web Tester, 15 Nov).
-  for (const path of ["/help/no-such-article", "/help/ai-reflections", "/help/bo", "/es/help/no-such-article", "/es/help/ai-reflections"]) {
+  // A Help article that's missing or not out yet (ai-reflections and your-week are unmet on every build: AI and the
+  // weekly report aren't in this release. Not bo: its article follows Bo's own gate, readable on a draft build, as
+  // CI's is. safety-plan and letters came out with the app in group 5): the not-found page in the raw HTML, never
+  // Next's bare error shell (html id="__next_error__", no title, no h1; the Web Tester, 15 Nov).
+  for (const path of ["/help/no-such-article", "/help/ai-reflections", "/help/your-week", "/es/help/no-such-article", "/es/help/ai-reflections"]) {
     test(`help 404 ${path}`, async ({ request }) => {
       const res = await request.get(path, { maxRedirects: 0 });
       expect(res.status()).toBe(404);
