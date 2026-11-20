@@ -3,6 +3,7 @@ import path from "node:path";
 import { marked } from "marked";
 import { applyPending, isPendingMet, stripComments } from "./legalContent";
 import { pageGate } from "./conditions";
+import { LONG_NAMES, supportAddressHtml, wholeNamesHtml } from "./wholeNames";
 
 // Help & FAQ articles (item 8): content/help/<locale>/<slug>.md, copied
 // verbatim from UX & PM's specs/help (long-form text in content files,
@@ -18,6 +19,16 @@ import { pageGate } from "./conditions";
 
 export const TOPICS = ["Basics", "Your journal", "Settings", "AI", "Privacy & account", "Help"] as const;
 export type Topic = (typeof TOPICS)[number];
+// A topic is an article's id (its frontmatter's English `topic:`); what Help shows is the language's own name for it
+// (UX, 20 Nov: "Basics" and "Help" were English on /fr/help).
+export const TOPIC_MESSAGE_KEYS = {
+  Basics: "topicBasics",
+  "Your journal": "topicJournal",
+  Settings: "topicSettings",
+  AI: "topicAi",
+  "Privacy & account": "topicPrivacy",
+  Help: "topicHelp",
+} as const satisfies Record<Topic, string>;
 
 export type HelpArticle = { slug: string; title: string; summary: string; topic: Topic; source: string };
 
@@ -54,7 +65,9 @@ export function helpArticles(locale: string): HelpArticle[] {
 // The article as Production shows it: unmet pending blocks removed.
 export function renderArticle(article: HelpArticle, met: (id: string) => boolean = isPendingMet): string {
   const { text } = applyPending(stripComments(article.source), met);
-  return text.trim() ? (marked.parse(text.trim(), { async: false, gfm: true }) as string) : "";
+  // The long names (LONG_NAMES: a word of HYPHEN_MIN+ letters, such as Anthropic) never hyphenate at large text, and
+  // the support address breaks only after its "@" (UX, 20 Nov).
+  return text.trim() ? supportAddressHtml(wholeNamesHtml(marked.parse(text.trim(), { async: false, gfm: true }) as string, LONG_NAMES)) : "";
 }
 
 // What a Help page shows on this build. Bo's article follows Bo's own gate, so it can be

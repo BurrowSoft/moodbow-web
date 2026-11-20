@@ -4,7 +4,7 @@ summary: Mude as cores do Moodbow neste aparelho.
 topic: Settings
 pt-BR-draft: true
 ---
-{pending:plus}A aparência do Moodbow segue o seu aparelho, claro ou escuro, a menos que você escolha uma em **Perfil → Aparência**.
+{pending:plus|app_plus}A aparência do Moodbow segue o seu aparelho, claro ou escuro, a menos que você escolha uma em **Perfil → Aparência**.
 
 Com o Moodbow Plus você também pode escolher **Cores**: **Entardecer**, **Amanhecer** ou **Mar**, cada uma em claro e escuro. Sua escolha fica só neste aparelho.
 

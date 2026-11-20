@@ -49,15 +49,22 @@ export function InsightsExample({ help, yearRow }: { help: React.ReactNode; year
         {help}
       </div>
       {yearRow}
-      {/* The dark strip with the gold See Plus, first (board 3 v58), in every theme. */}
+      {/* The dark strip with the gold See Plus, first (board 3 v58), in every theme. Its words and See Plus share the
+          line while they fit; at large text they stack as a switch row does (switchRow.ts; UX, 20 Nov: at 360 px / 200 %,
+          de, the words had 16 px, one letter a line, beside "Plus ansehen"). The words' basis is in em, so they take the
+          line, and See Plus goes under them, at the end. At the normal size nothing moves. */}
       <div data-testid="insights-example-strip" className="flex flex-wrap items-center gap-3 rounded-2xl bg-[#2B2438] px-[16px] py-[12px] text-white">
-        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F2C66D" strokeWidth="2" strokeLinecap="round" className="shrink-0">
-          <path d="M3 18a9 9 0 0 1 18 0" />
-          <path d="M6.5 18a5.5 5.5 0 0 1 11 0" />
-          <path d="M10 18a2 2 0 0 1 4 0" />
-        </svg>
-        <p className="min-w-0 flex-1 text-sm [overflow-wrap:anywhere]">{tp("exampleStrip")}</p>
-        <Link href="/app/me/plus" data-testid="insights-example-see" className="inline-flex min-h-11 items-center font-medium text-[#F2C66D] underline underline-offset-4">
+        <div className="flex min-w-0 grow basis-[9em] items-center gap-3">
+          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F2C66D" strokeWidth="2" strokeLinecap="round" className="shrink-0">
+            <path d="M3 18a9 9 0 0 1 18 0" />
+            <path d="M6.5 18a5.5 5.5 0 0 1 11 0" />
+            <path d="M10 18a2 2 0 0 1 4 0" />
+          </svg>
+          <p data-testid="insights-example-strip-text" className="min-w-0 flex-1 text-sm [overflow-wrap:anywhere]">
+            {tp("exampleStrip")}
+          </p>
+        </div>
+        <Link href="/app/me/plus" data-testid="insights-example-see" className="ml-auto inline-flex min-h-11 items-center font-medium text-[#F2C66D] underline underline-offset-4">
           {tp("seePlus")}
         </Link>
       </div>
@@ -76,7 +83,7 @@ export function InsightsExample({ help, yearRow }: { help: React.ReactNode; year
             <span key={c.metric} data-testid={`insights-example-${c.metric}`} className={`block min-w-0 [overflow-wrap:anywhere] ${JOURNAL_CARD}`}>
               <span className="flex flex-wrap items-baseline justify-between gap-2">
                 <span className="min-w-0 font-medium text-text">{t(TITLE[c.metric])}</span>
-                <span className="rounded-full border border-border px-2 py-0.5 text-sm text-text">{change(c)}</span>
+                <span className="rounded-full border border-border px-[8px] py-0.5 text-sm text-text">{change(c)}</span>
               </span>
               <span className="mt-1 block text-sm text-muted">{average(c)}</span>
               {/* Gaps in px, never rem: at 300 % the month's 30 bars with rem gaps were 113 px wider

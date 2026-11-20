@@ -6,6 +6,8 @@ import { boCanTurnOn } from "@/lib/journal/bo";
 import { forgetBoStatus, useBoStatus } from "./useBoStatus";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useUntilLoaded } from "@/lib/ui/untilLoaded";
+import { wholeNames } from "@/lib/wholeNames";
+import { SWITCH_CONTROL, SWITCH_LABEL, SWITCH_ROW } from "@/lib/ui/switchRow";
 import { setBoReadsJournal, turnBoOff } from "./actions";
 import { ClearBo } from "./ClearBo";
 
@@ -64,19 +66,19 @@ export function BoMeRow({ hasConversation, readsJournal, consented, canTurnOn, t
         {t("helpLink")}
       </Link>
       {(on || canTurnOn || offByThem) && (
-        <label className="mt-4 flex min-h-11 items-center justify-between gap-4 text-text">
-          <span className="min-w-0 [overflow-wrap:anywhere]">{t("useBo")}</span>
-          <input type="checkbox" role="switch" data-testid="me-bo-use" checked={on} onChange={(e) => void chooseBo(e.target.checked)} className="h-5 w-5 shrink-0 accent-[var(--accent)]" />
+        <label className={`mt-4 ${SWITCH_ROW} min-h-11 text-text`}>
+          <span className={SWITCH_LABEL}>{t("useBo")}</span>
+          <input type="checkbox" role="switch" data-testid="me-bo-use" checked={on} onChange={(e) => void chooseBo(e.target.checked)} className={`${SWITCH_CONTROL} h-5 w-5 accent-[var(--accent)]`} />
         </label>
       )}
       {on && (
         <>
-          <label className="mt-4 flex min-h-11 items-center justify-between gap-4 text-text">
-            <span className="min-w-0 [overflow-wrap:anywhere]">{t("journalSwitch")}</span>
-            <input type="checkbox" role="switch" data-testid="me-bo-journal" aria-describedby="me-bo-journal-note" checked={reads} onChange={(e) => void toggle(e.target.checked)} className="h-5 w-5 shrink-0 accent-[var(--accent)]" />
+          <label className={`mt-4 ${SWITCH_ROW} min-h-11 text-text`}>
+            <span className={SWITCH_LABEL}>{t("journalSwitch")}</span>
+            <input type="checkbox" role="switch" data-testid="me-bo-journal" aria-describedby="me-bo-journal-note" checked={reads} onChange={(e) => void toggle(e.target.checked)} className={`${SWITCH_CONTROL} h-5 w-5 accent-[var(--accent)]`} />
           </label>
           <p id="me-bo-journal-note" data-testid="me-bo-journal-note" className="mt-1 text-sm text-muted">
-            {t("journalSwitchNote")}
+            {wholeNames(t("journalSwitchNote"))}
           </p>
         </>
       )}

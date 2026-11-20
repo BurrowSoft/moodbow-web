@@ -1,5 +1,9 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import countries from "../content/contracts/countries.json";
+import fr from "../src/messages/fr.json";
+import pt from "../src/messages/pt-br.json";
+import { dialogButton } from "../src/lib/ui/dialogButton";
+import { BO_HEADING, DAY_ADD_ENTRY, LOCKED_ROW_LABEL, ME_LOCKED_ROW, WEEK_DAY, WEEK_DAY_LABEL, WEEK_DAYS, WEEK_HEADING, WEEK_SUMMARY } from "../src/lib/ui/largeText";
 
 // The browser's own text setting on a 320 px phone, on the pages someone with large
 // text needs first. Sign in's button scrolled /sign-in sideways by up to 194 px (Web
@@ -93,7 +97,7 @@ test("Create account's consent boxes keep the page's own size on a wide screen: 
 test("large text: Create account's product and company names stay whole at 300 % on a 320 px phone", async ({ page, browserName }, testInfo) => {
   test.skip(browserName !== "chromium" || testInfo.project.name !== "desktop", "Page.setFontSizes is Chromium's; once is enough");
   test.setTimeout(120_000);
-  const NAMES = ["Vitor Carvalho", "BurrowSoft", "Moodbow", "Anthropic", "Stripe", "Google Play", "App Store"];
+  const NAMES = ["Vitor Carvalho", "BurrowSoft", "Moodbow", "Anthropic", "Stripe", "Google Play", "App Store", "Supabase", "JavaScript", "Bluetooth", "TelefonSeelsorge"];
   const cdp = await page.context().newCDPSession(page);
   await page.setViewportSize({ width: 320, height: 640 });
   await cdp.send("Page.setFontSizes", { fontSizes: { standard: 48, fixed: 39 } });
@@ -230,9 +234,10 @@ test("large text: a legal page's words stay whole on a 320 px phone, and normal 
         const size = (css: string) => getComputedStyle(document.querySelector(css)!).fontSize;
         return { split: out, body: size(".legal-prose p"), section: size(".legal-prose h2"), overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth, hyphens: getComputedStyle(document.querySelector(".legal-prose p")!).hyphens };
       });
-      // Decision 231 at normal size and at 200 %: whole words, no hyphens. Only 300 % on a 320 px
-      // phone (under 9em wide) hyphenates.
-      expect.soft(measured.hyphens, `${route} at ${percent} %`).toBe(percent === 300 ? "auto" : "manual");
+      // Decision 231 at normal size: whole words, no hyphens. At 200 % and 300 % a 320 px phone is a
+      // 13em column or narrower, where the legal pages hyphenate long words in every language (UX,
+      // 20 Nov, after /es/terms cut "Responsabilid / ad" at 200 %).
+      expect.soft(measured.hyphens, `${route} at ${percent} %`).toBe(percent === 100 ? "manual" : "auto");
       expect.soft(measured.split, `${route} at ${percent} %`).toEqual([]);
       expect.soft(measured.overflow, `${route} at ${percent} %`).toBe(0);
       if (percent === 100) expect.soft([measured.body, measured.section], route).toEqual(["16px", "20px"]);
@@ -417,13 +422,15 @@ test("<html lang> is the page's language in every locale", async ({ page }) => {
   }
 });
 
-// Headings, labels and buttons hyphenate (only words of 7 letters or more, 3 on each side), so
-// a long word breaks with a hyphen at large text instead of mid-word with none.
-// Only in the journal (whose text isn't capped), and only at really large text: below it, and on
-// the public pages, words stay whole (decision 231), since a browser hyphenates at a line's end
-// even when the word would fit on the next line. The journal needs a session, so its markup is
-// put on a public page here; the Web Tester's pass reads the real pages.
-test("the journal's headings, labels and buttons hyphenate at 300 % on a 320 px phone; not at 100 % or 200 %, nor on public pages", async ({ page, browserName }, testInfo) => {
+// One rule on every page (UX, 20 Nov: the journal, the public and legal pages, Consent and
+// sign-up): only words of 8 letters or more hyphenate (HYPHEN_MIN), 3 on each side, so a long
+// word breaks with a hyphen at large text instead of mid-word with none. Only from a 13em column
+// (UX, 20 Nov: 200 % on phones up to ~416 px; it was 10em, and 360 px at 200 %, 11.25em, cut
+// "Datenschutzerkl / ärung" bare): wider than that words stay whole (decision 231), since a browser
+// hyphenates at a line's end even when the word would fit on the next line. At 100 % no phone is
+// 13em wide. The journal needs a session, so its markup is put on a public page here; the Web
+// Tester's pass reads the real pages.
+test("every page hyphenates long words from a 13em column (200 % and 300 % on a phone up to ~416 px), never at 100 %", async ({ page, browserName }, testInfo) => {
   test.skip(browserName !== "chromium" || testInfo.project.name !== "desktop", "Page.setFontSizes is Chromium's; once is enough");
   const cdp = await page.context().newCDPSession(page);
   await page.setViewportSize({ width: 320, height: 640 });
@@ -442,14 +449,28 @@ test("the journal's headings, labels and buttons hyphenate at 300 % on a 320 px 
     });
   for (const [percent, expected] of [
     [100, "manual"],
-    [200, "manual"],
-    [300, "auto 7 3 3"],
+    [200, "auto 8 3 3"],
+    [300, "auto 8 3 3"],
   ] as const) {
     await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
     await page.goto("/fr/consent");
     const got = await styles();
     expect(got.journal, `${percent} %`).toEqual(["h2", "label", "button"].map((tag) => `${tag} ${expected}`));
-    expect(got.consentHeading, `Consent's heading at ${percent} %`).toBe("manual");
+    // One rule everywhere (UX, 20 Nov): the public pages too.
+    expect(got.consentHeading, `Consent's heading at ${percent} %`).toBe(expected);
+  }
+  // The line itself: 390 px at 200 % (12.2em) hyphenates; 412 px at 100 % (25.75em), the widest phone at normal size,
+  // never does.
+  for (const [width, percent, expected] of [
+    [390, 200, "auto 8 3 3"],
+    [412, 100, "manual"],
+  ] as const) {
+    await page.setViewportSize({ width, height: 640 });
+    await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
+    await page.goto("/fr/consent");
+    const got = await styles();
+    expect(got.journal, `${width} px at ${percent} %`).toEqual(["h2", "label", "button"].map((tag) => `${tag} ${expected}`));
+    expect(got.consentHeading, `Consent's heading, ${width} px at ${percent} %`).toBe(expected);
   }
 });
 
@@ -526,4 +547,129 @@ test("large text at 300 %: a help number wider than the line wraps between its d
   expect(result.right).toBeLessThanOrEqual(320);
   expect(result.groupLines).toEqual([1, 1, 1, 1]);
   expect(result.bracketsWithNumber).toBe(true);
+});
+
+// UX, 20 Nov (option A, the Web Tester's fr/pt-BR sweep at 320 px / 300 %: "Ajo / uter / une / not / e",
+// "donnée / s", "d'icône / s", "novembr / e", "montren / t", "Mood / bow", "support@mood / bow.com"): no word cut
+// without a hyphen. And the bar, verbatim: "UX (20 Nov night): with 8 3 3, Chromium may leave 2 letters after a
+// hyphen (engine behaviour, 4-before/2-after); accepted. The test fails on any break WITHOUT a hyphen, and on any
+// break leaving fewer than 2 letters on either side." (Measured on Chromium 153: at 8 3 3 it breaks "supprim-er",
+// "Novemb-er", never with fewer than 4 before.)
+// A break with a hyphen or without: laid out again with hyphenation off (hyphens: manual), a word that fits a line goes
+// whole to the next one, so its break was a hyphen. A word that can't fit a line stays broken: where its break falls at
+// the same place, the browser only ran out of room there (a cut); a hyphen falls earlier, since the hyphen needs room
+// too. A soft hyphen (U+00AD) right before a break is a hyphen too.
+async function cutWords(page: Page, roots: string): Promise<string[]> {
+  return page.evaluate((selector) => {
+    const letters = (s: string) => s.replace(/[^\p{L}]/gu, "").length;
+    const words: { node: Text; start: number; word: string }[] = [];
+    for (const root of document.querySelectorAll(selector)) {
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+      for (let node = walker.nextNode() as Text | null; node; node = walker.nextNode() as Text | null) {
+        const parent = node.parentElement;
+        if (!parent || parent.closest(".sr-only") || getComputedStyle(parent).display === "none") continue;
+        // A hyphen, a dash or a slash is a place a line may end anyway.
+        for (const m of node.data.matchAll(/[^\s \-–—/]+/g)) words.push({ node, start: m.index, word: m[0] });
+      }
+    }
+    // Where each word's characters change line, as offsets into the word.
+    const breaks = ({ node, start, word }: { node: Text; start: number; word: string }) => {
+      const tops = [...word].map((_, c) => {
+        const range = document.createRange();
+        range.setStart(node, start + c);
+        range.setEnd(node, start + c + 1);
+        return Math.round(range.getBoundingClientRect().top);
+      });
+      return tops.flatMap((top, c) => (c > 0 && top !== tops[c - 1] ? [c] : []));
+    };
+    const asShown = words.map(breaks);
+    const off = document.createElement("style");
+    off.textContent = "* { hyphens: manual !important; }";
+    document.head.append(off);
+    const unhyphenated = words.map(breaks);
+    off.remove();
+    const out: string[] = [];
+    words.forEach(({ word }, i) => {
+      for (const c of asShown[i]) {
+        const before = letters(word.slice(0, c)), after = letters(word) - before;
+        const softHyphen = word[c - 1] === String.fromCharCode(0xad);
+        const hyphen = softHyphen || unhyphenated[i].length === 0 || !unhyphenated[i].includes(c);
+        if (!hyphen) out.push(`${word.slice(0, c)} / ${word.slice(c)} (no hyphen)`);
+        else if (before < 2 || after < 2) out.push(`${word.slice(0, c)} / ${word.slice(c)} (under 2 letters)`);
+      }
+    });
+    return out;
+  }, roots);
+}
+// Pages a session opens: the same classes on a public page in that language (the app's stylesheet, <html lang>).
+async function mountIn(page: Page, language: string, width: number, html: string) {
+  await page.goto(language);
+  await page.evaluate(([w, inner]) => (document.body.innerHTML = `<div id="probe" style="width:${w}px">${inner}</div>`), [String(width), html] as const);
+}
+
+test("large text at 320 px / 300 %: no word in the fixed components is cut without a hyphen, in French and Portuguese", async ({ page, browserName }, testInfo) => {
+  test.skip(browserName !== "chromium" || testInfo.project.name !== "desktop", "Page.setFontSizes is Chromium's; once is enough");
+  test.setTimeout(180_000);
+  const cdp = await page.context().newCDPSession(page);
+  await page.setViewportSize({ width: 320, height: 640 });
+  await cdp.send("Page.setFontSizes", { fontSizes: { standard: 48, fixed: 39 } });
+  // Each component at the width it has on its page (the app's 16 px gutters; a Me card's 16 px padding; Share's 18 px).
+  for (const [language, m] of [["/fr", fr], ["/pt-br", pt]] as const) {
+    const days = Array.from({ length: 7 }, (_, i) => new Date(Date.UTC(2026, 10, 16 + i)));
+    const short = new Intl.DateTimeFormat(language.slice(1), { weekday: "short", timeZone: "UTC" });
+    const narrow = new Intl.DateTimeFormat(language.slice(1), { weekday: "narrow", timeZone: "UTC" });
+    const week = `<div class="${WEEK_SUMMARY}"><h2 class="${WEEK_HEADING}">${m.shareView.weekOf.replace("{date}", new Intl.DateTimeFormat(language.slice(1), { day: "numeric", month: "long", timeZone: "UTC" }).format(days[0]))}</h2><ol class="${WEEK_DAYS}">${days
+      .map((d) => `<li class="${WEEK_DAY}"><span aria-hidden="true" data-day-label class="${WEEK_DAY_LABEL}"><span data-day-form="short">${short.format(d)}</span><span data-day-form="narrow">${narrow.format(d)}</span></span><span class="block h-[32px] w-full rounded-lg border border-dashed"></span></li>`)
+      .join("")}</ol></div>`;
+    const mounted: [string, number, string][] = [
+      ["the day page's Add a note", 288, `<a href="#" class="${DAY_ADD_ENTRY}">${m.timeline.dayAddEntry}</a>`],
+      ["Me's export button", 256, `<button type="button" class="${dialogButton()}">${m.me.meExport}</button>`],
+      ["Me → Appearance's locked row", 256, `<a href="#" class="${ME_LOCKED_ROW}"><span class="${LOCKED_ROW_LABEL}">${m.plus.rowThemes}</span><svg width="16" height="16" aria-hidden="true"></svg></a>`],
+      ["Share's week", 252, week],
+      ["Bo's heading", 288, `<header class="flex flex-wrap items-center gap-x-[8px] gap-y-[4px]"><h1 class="${BO_HEADING}">${m.bo.screenLine.replace("Moodbow", '<span class="whole-name">Moodbow</span>')}</h1><a href="#" class="inline-flex min-h-11 items-center rounded-full border px-[16px]">Help</a></header>`],
+    ];
+    for (const [name, width, html] of mounted) {
+      await mountIn(page, language, width, html);
+      const where = `${language} ${name}`;
+      expect(await page.evaluate(() => getComputedStyle(document.documentElement).fontSize), where).toBe("48px");
+      expect.soft(await cutWords(page, "#probe"), where).toEqual([]);
+      expect.soft(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth), where).toBe(0);
+    }
+    // Share's days: one letter each here (globals.css, [data-day-form]), side by side, none over the next.
+    await mountIn(page, language, 252, week);
+    const labels = await page.evaluate(() => [...document.querySelectorAll("[data-day-label]")].map((s) => [s.getBoundingClientRect().left, s.getBoundingClientRect().right, s.textContent, getComputedStyle(s.querySelector('[data-day-form="short"]')!).display]));
+    expect.soft(labels.map((l) => l[3]), `${language} short forms hidden`).toEqual(Array(7).fill("none"));
+    for (let i = 1; i < labels.length; i++) expect.soft(labels[i][0] as number, `${language} day ${i + 1} after day ${i}`).toBeGreaterThanOrEqual(labels[i - 1][1] as number);
+    // Public pages, as they are.
+    for (const [path, roots] of [["/sign-up", "[data-testid=signup-summary]"], ["/help", "article h1 + div p, article section h2"], ["/support", "article"], ["/account-deletion", "article"]] as const) {
+      await page.goto(`${language}${path}`);
+      // The rule is live under 13em: the 8-letter minimum holds, only Chromium's "after" part bends (the Reviewer).
+      expect(await page.evaluate((sel) => getComputedStyle(document.querySelector(`${sel} p, ${sel} li`) ?? document.querySelector(sel)!).getPropertyValue("hyphenate-limit-chars"), roots.split(",")[0]), `${language}${path}: hyphenate-limit-chars`).toBe("8 3 3");
+      expect.soft(await cutWords(page, roots), `${language}${path}`).toEqual([]);
+      expect.soft(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth), `${language}${path}`).toBe(0);
+      // The word people must type is never broken, not even with a hyphen (UX, 20 Nov: "SUPPRI- / MER").
+      if (path === "/account-deletion") {
+        const word = language === "/fr" ? "SUPPRIMER" : "APAGAR";
+        const lines = await page.evaluate((w) => {
+          const span = [...document.querySelectorAll("[data-testid=account-deletion-steps] span")].find((e) => e.textContent === w);
+          return span ? new Set([...span.getClientRects()].map((r) => Math.round(r.top))).size : 0;
+        }, word);
+        expect.soft(lines, `${language}/account-deletion: ${word} on one line`).toBe(1);
+      }
+    }
+  }
+  // At the normal size the short day names are back.
+  await cdp.send("Page.setFontSizes", { fontSizes: { standard: 16, fixed: 13 } });
+  await mountIn(page, "/fr", 252, `<span data-day-form="short">lun.</span><span data-day-form="narrow">L</span>`);
+  expect(await page.evaluate(() => [...document.querySelectorAll("[data-day-form]")].map((s) => getComputedStyle(s).display))).toEqual(["inline", "none"]);
+});
+
+// UX, 20 Nov: /account-deletion is a help page, not legal text: French in French, no "in English" line.
+test("/fr/account-deletion: the French page, no English notice", async ({ page }) => {
+  await page.goto("/fr/account-deletion");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(fr.accountDeletion.title);
+  await expect(page.getByTestId("page-notice")).toHaveCount(0);
+  await expect(page.locator("article")).not.toHaveAttribute("lang", "en");
+  // The address may end a line only after its "@".
+  await expect(page.locator('article a[href^="mailto:"] wbr')).toHaveCount(1);
 });

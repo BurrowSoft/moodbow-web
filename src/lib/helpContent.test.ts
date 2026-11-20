@@ -281,15 +281,16 @@ describe("Help → Want to talk to someone?: Today's lifebuoy", () => {
       expect(render(locale, false)).not.toContain(`<strong>${app.tabToday}</strong>`);
     });
   }
-  it("waits for the app build (help only, not met yet)", () => {
-    expect(isPendingMet("app_today_help")).toBe(false);
+  it("shows with the app build that has it (help only): met in group 5, app 1.4.0 (20 Nov)", () => {
+    expect(isPendingMet("app_today_help")).toBe(true);
   });
 });
 
 // 1.3.0 ships with Plus off (decision 255): no help text may name Plus while plus is unmet, even with
 // every free feature on. The Plus features' own conditions stay off with it.
 describe("Help with Plus off: no article names Plus", () => {
-  const PLUS_ONLY = new Set(["plus", "offer_live", "letters_live", "app_letters", "pictures_live", "app_pictures", "lifts_live", "app_icons"]);
+  // Plus off = neither the web's nor the app's (app_plus, legal/app-plus): a Plus line shows with either.
+  const PLUS_ONLY = new Set(["plus", "app_plus", "offer_live", "letters_live", "app_letters", "pictures_live", "app_pictures", "lifts_live", "app_icons"]);
   it.each(ALL_LOCALES)("%s", (language) => {
     for (const a of helpArticles(language)) {
       const text = renderArticle(a, (id) => !PLUS_ONLY.has(id));

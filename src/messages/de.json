@@ -26,6 +26,11 @@
       "de": "Deutsch",
       "it": "Italiano"
     },
+    "languageNameInSentence": "Deutsch",
+    "savedLanguageSetTo": "Dein Tagebuch ist auf {language} eingestellt.",
+    "savedLanguageContinue": "Weiter auf {language}",
+    "savedLanguageSwitch": "Zu {language} wechseln",
+    "savedLanguageStay": "Auf {language} bleiben",
     "burrowsoftProduct": "Ein Produkt von BurrowSoft",
     "burrowsoftAria": "Ein Produkt von BurrowSoft. Besuche burrowsoft.com",
     "copyright": "© 2026 BurrowSoft",
@@ -82,7 +87,7 @@
     "steps": "In der App oder im Web: Öffne Ich → Konto löschen, gib LÖSCHEN ein und bestätige.",
     "what": "Wir löschen alles in deinem Konto, auch deine Einträge, Check-ins und Einstellungen, sowie deine Anmeldedaten.",
     "backups": "Kopien in unseren verschlüsselten Backups werden innerhalb von {days} Tagen automatisch entfernt.",
-    "noAccess": "Du kannst dich nicht anmelden? Schreib an <support>{email}</support>, und zwar von der Adresse, mit der du dich registriert hast. Dann löschen wir das Konto für dich."
+    "noAccess": "Du kannst dich nicht anmelden? Schreib an <support>{email}</support>, und zwar von der Adresse, mit der du dich registriert hast. Dann löschen wir das Konto für dich."
   },
   "emailConfirmed": {
     "metaTitle": "E-Mail bestätigt",
@@ -487,7 +492,13 @@
   },
   "help": {
     "helpTitle": "Hilfe & FAQ",
-    "helpIntro": "Antworten auf häufige Fragen zu Moodbow. Nicht gefunden, was du suchst? Schreib an {email}."
+    "helpIntro": "Antworten auf häufige Fragen zu Moodbow. Nicht gefunden, was du suchst? Schreib an {email}.",
+    "topicBasics": "Grundlagen",
+    "topicJournal": "Dein Tagebuch",
+    "topicSettings": "Einstellungen",
+    "topicAi": "KI",
+    "topicPrivacy": "Datenschutz und Konto",
+    "topicHelp": "Hilfe"
   },
   "timeline": {
     "onThisDayMonth": "Vor einem Monat",
@@ -798,7 +809,7 @@
   },
   "routine": {
     "title": "Routine",
-    "intro": "Bis zu 3 Dinge, die du jeden Tag abhaken möchtest. Nur du siehst sie.",
+    "intro": "Bis zu 3 Dinge, die du jeden Tag abhaken möchtest. Nur du siehst sie, außer du fügst sie deiner Zusammenfassung für den Termin oder einer geteilten Woche hinzu.",
     "addHint": "Zum Beispiel Medikamente am Morgen",
     "add": "Hinzufügen",
     "full": "Das sind 3, mehr geht im Moment nicht.",
@@ -933,8 +944,8 @@
     "rowAppointment": "Zusammenfassung für den Termin",
     "rowData": "Exportieren, importieren und löschen",
     "rowAiFree": "KI-Reflexionen, 3 pro Woche",
-    "rowYear": "Dein Jahr und alles bisher",
-    "rowInsights": "Einblicke: Woche, Monat, 3 Monate, dein Jahr",
+    "rowYear": "Jahr und alles bisher",
+    "rowInsights": "Einblicke: Woche, Monat, 3 Monate und Jahr",
     "rowMorePatterns": "Muster und Was mir guttut",
     "rowReview": "Jahresrückblick",
     "rowLetters": "Briefe an mein zukünftiges Ich",
@@ -956,6 +967,9 @@
     "trialLeft": "{n, plural, one {noch # Tag} other {noch # Tage}}",
     "trialDay": "Tag {day} von 7",
     "pastDue": "Deine letzte Zahlung hat nicht geklappt. Aktualisiere deine Karte, um Plus zu behalten.",
+    "trialEndsWontRenew": "Plus-Testzeit · endet am {date} · wird nicht verlängert",
+    "endsWontRenew": "Plus · endet am {date} · wird nicht verlängert",
+    "pastDueLapsed": "Deine letzte Zahlung hat nicht geklappt. Aktualisiere deine Karte, um Plus zurückzubekommen.",
     "updateCard": "Karte aktualisieren",
     "starting": "Dein Plus wird gestartet…",
     "onItsWay": "Dein Plus ist unterwegs. Das kann eine Minute dauern.",
@@ -1022,7 +1036,7 @@
     "close": "Schließen",
     "offerLabel": "Weihnachtsangebot",
     "offerBannerTitle": "Dein erstes Jahr für {offer}",
-    "offerBannerBody": "Tiefere Einblicke für das kommende Jahr: dein Jahr, deine Muster, Was mir guttut, Briefe an mein zukünftiges Ich und mehr.",
+    "offerBannerBody": "Tiefere Einblicke für das kommende Jahr: Jahresdiagramme, deine Muster, Was mir guttut, Briefe an mein zukünftiges Ich und mehr.",
     "offerSee": "Angebot ansehen",
     "offerSmall": "Weihnachtsangebot bis 31. Dezember. Danach {price} pro Jahr. Jederzeit kündbar unter Ich → Moodbow Plus.",
     "offerCardSmall": "Bis 31. Dezember. Danach {price} pro Jahr. Jederzeit kündbar unter Ich → Moodbow Plus.",
@@ -1076,8 +1090,8 @@
     "titleBefore": "Eine Woche, mit Ihnen geteilt",
     "introBefore": "Eine schreibgeschützte Zusammenfassung der Check-ins einer Person. Sie zeigt nie etwas, das sie geschrieben hat.",
     "show": "Woche anzeigen",
-    "titleNamed": "{name} hat die Woche mit Ihnen geteilt",
-    "titleAnon": "Jemand hat die Woche mit Ihnen geteilt",
+    "titleNamed": "Hallo {name}, hier ist eine Woche, die mit Ihnen geteilt wurde",
+    "titleAnon": "Eine Woche, mit Ihnen geteilt",
     "weekOf": "Woche vom {date}",
     "checkIns": "{count, plural, one {# Check-in in dieser Woche} other {# Check-ins in dieser Woche}}",
     "routinePercent": "{name}: an {percent} % der Tage mit Check-in abgehakt",

@@ -12,4 +12,4 @@ Os lembretes chegam no app Moodbow do seu celular, também para as cartas que vo
 
 Os lembretes seguem os próprios botões, não o seu lembrete diário. Abrir uma carta antes da hora cancela os lembretes dela, e apagar a carta remove os lembretes.
 
-{pending:plus}As cartas fazem parte do **Moodbow Plus**. Os lembretes das cartas que você já escreveu continuam chegando, com ou sem Plus.{/pending}{/pending}
+{pending:plus|app_plus}As cartas fazem parte do **Moodbow Plus**. Os lembretes das cartas que você já escreveu continuam chegando, com ou sem Plus.{/pending}{/pending}

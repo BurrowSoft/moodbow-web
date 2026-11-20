@@ -105,7 +105,7 @@ export function LanguageRegion({ initial, countries, zones, languages }: { initi
           <p role="alert" data-testid="me-region-error" className="text-sm font-medium text-accent">
             {tt("errGeneric")}
           </p>
-          <button type="button" data-testid="me-region-retry" onClick={() => save(failed.field, failed.tried)} className="mt-2 min-h-11 rounded-full border border-border px-4 text-sm font-medium text-text">
+          <button type="button" data-testid="me-region-retry" onClick={() => save(failed.field, failed.tried)} className="mt-2 min-h-11 rounded-full border border-border px-[16px] text-sm font-medium text-text">
             {ta("tryAgain")}
           </button>
         </div>

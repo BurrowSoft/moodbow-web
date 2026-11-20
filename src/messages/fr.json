@@ -26,6 +26,11 @@
       "de": "Deutsch",
       "it": "Italiano"
     },
+    "languageNameInSentence": "français",
+    "savedLanguageSetTo": "Votre journal est en {language}.",
+    "savedLanguageContinue": "Continuer en {language}",
+    "savedLanguageSwitch": "Passer en {language}",
+    "savedLanguageStay": "Rester en {language}",
     "burrowsoftProduct": "Un produit BurrowSoft",
     "burrowsoftAria": "Un produit BurrowSoft. Visiter burrowsoft.com",
     "copyright": "© 2026 BurrowSoft",
@@ -82,7 +87,7 @@
     "steps": "Dans l'app ou sur le web : ouvrez Moi → Supprimer le compte, tapez SUPPRIMER, puis confirmez.",
     "what": "Nous supprimons tout ce qui se trouve dans votre compte, dont vos notes, vos bilans et vos réglages, ainsi que vos identifiants de connexion.",
     "backups": "Les copies dans nos sauvegardes chiffrées sont effacées automatiquement sous {days} jours.",
-    "noAccess": "Impossible de vous connecter ? Écrivez à <support>{email}</support> depuis l'adresse utilisée à l'inscription, et nous le supprimerons pour vous."
+    "noAccess": "Impossible de vous connecter ? Écrivez à <support>{email}</support> depuis l'adresse utilisée à l'inscription, et nous le supprimerons pour vous."
   },
   "emailConfirmed": {
     "metaTitle": "E-mail confirmé",
@@ -487,7 +492,13 @@
   },
   "help": {
     "helpTitle": "Aide et FAQ",
-    "helpIntro": "Les réponses aux questions fréquentes sur Moodbow. Vous ne trouvez pas ce qu'il vous faut ? Écrivez à {email}."
+    "helpIntro": "Les réponses aux questions fréquentes sur Moodbow. Vous ne trouvez pas ce qu'il vous faut ? Écrivez à {email}.",
+    "topicBasics": "Les bases",
+    "topicJournal": "Votre journal",
+    "topicSettings": "Réglages",
+    "topicAi": "IA",
+    "topicPrivacy": "Confidentialité et compte",
+    "topicHelp": "Aide"
   },
   "timeline": {
     "onThisDayMonth": "Il y a un mois",
@@ -798,7 +809,7 @@
   },
   "routine": {
     "title": "Routine",
-    "intro": "Jusqu'à 3 choses que vous aimeriez cocher chaque jour. Vous êtes la seule personne à les voir.",
+    "intro": "Jusqu'à 3 choses que vous aimeriez cocher chaque jour. Vous êtes la seule personne à les voir, sauf si vous les ajoutez à votre résumé pour le rendez-vous ou à une semaine que vous partagez.",
     "addHint": "Par exemple, médicaments du matin",
     "add": "Ajouter",
     "full": "C'est 3, le maximum pour l'instant.",
@@ -933,8 +944,8 @@
     "rowAppointment": "Résumé pour un rendez-vous",
     "rowData": "Exporter, importer et supprimer",
     "rowAiFree": "Réflexions IA, 3 par semaine",
-    "rowYear": "Votre année et tout l'historique",
-    "rowInsights": "Statistiques : semaine, mois, 3 mois, votre année",
+    "rowYear": "Année et tout l'historique",
+    "rowInsights": "Statistiques : semaine, mois, 3 mois et année",
     "rowMorePatterns": "Tendances et Ce qui me fait du bien",
     "rowReview": "Bilan de l'année",
     "rowLetters": "Lettres à mon futur moi",
@@ -956,6 +967,9 @@
     "trialLeft": "{n, plural, one {# jour restant} other {# jours restants}}",
     "trialDay": "Jour {day} sur 7",
     "pastDue": "Votre dernier paiement n'est pas passé. Mettez à jour votre carte pour garder Plus.",
+    "trialEndsWontRenew": "Essai Plus · se termine le {date} · ne sera pas renouvelé",
+    "endsWontRenew": "Plus · se termine le {date} · ne sera pas renouvelé",
+    "pastDueLapsed": "Votre dernier paiement n'est pas passé. Mettez à jour votre carte pour retrouver Plus.",
     "updateCard": "Mettre à jour la carte",
     "starting": "Démarrage de votre Plus…",
     "onItsWay": "Votre Plus arrive. Cela peut prendre une minute.",
@@ -1022,7 +1036,7 @@
     "close": "Fermer",
     "offerLabel": "Offre spéciale de Noël",
     "offerBannerTitle": "Votre première année pour {offer}",
-    "offerBannerBody": "Des statistiques plus poussées pour l'année à venir : votre année, vos tendances, Ce qui me fait du bien, les lettres à mon futur moi et plus encore.",
+    "offerBannerBody": "Des statistiques plus poussées pour l'année à venir : des graphiques annuels, vos tendances, Ce qui me fait du bien, les lettres à mon futur moi et plus encore.",
     "offerSee": "Voir l'offre",
     "offerSmall": "Spécial Noël, jusqu'au 31 décembre. Ensuite {price} par an. Annulable à tout moment dans Moi → Moodbow Plus.",
     "offerCardSmall": "Jusqu'au 31 décembre. Ensuite {price} par an. Annulable à tout moment dans Moi → Moodbow Plus.",
@@ -1076,8 +1090,8 @@
     "titleBefore": "Une semaine partagée avec vous",
     "introBefore": "Un résumé en lecture seule des bilans d'une personne. Il ne montre jamais ce qu'elle a écrit.",
     "show": "Afficher la semaine",
-    "titleNamed": "{name} a partagé sa semaine avec vous",
-    "titleAnon": "Quelqu'un a partagé sa semaine avec vous",
+    "titleNamed": "Bonjour {name}, voici une semaine partagée avec vous",
+    "titleAnon": "Une semaine partagée avec vous",
     "weekOf": "Semaine du {date}",
     "checkIns": "{count, plural, one {# bilan cette semaine} other {# bilans cette semaine}}",
     "routinePercent": "{name} : une coche sur {percent} % des jours avec un bilan",

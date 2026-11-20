@@ -8,7 +8,7 @@ import { GetHelpNow } from "@/components/SafetyCard";
 import { JOURNAL_CARD } from "@/lib/ui/journalLayout";
 import { letterNotNow, openLetter } from "./me/letters/actions";
 
-// A letter from you, on its day (1.2; content/letters.json). Only the date it was written
+// A letter from you, on its day (1.2; content/contracts/letters.json). Only the date it was written
 // until Open: the text isn't in the page before then, only fetched by Open. helpFirst: the
 // server matched the text, or last week looked hard, so the help offer comes above it (the
 // Reviewer's read); this card is given a yes or no, never the text. Not now: that letter a week

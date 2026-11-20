@@ -3,7 +3,7 @@ title: Your year in Moodbow
 summary: A gentle look back at your year, made from your own check-ins.
 topic: Your journal
 ---
-{pending:year_review_live}**Your year in Moodbow** looks back at your year in a few short screens. From 1 December to 31 January it's on **Today**, and in January it shows the year that just ended. You can always open it from **Insights**.{pending:plus} It's for everyone, Plus or not.{/pending}
+{pending:year_review_live}**Your year in Moodbow** looks back at your year in a few short screens. From 1 December to 31 January it's on **Today**, and in January it shows the year that just ended. You can always open it from **Insights**.{pending:plus|app_plus} It's for everyone, Plus or not.{/pending}
 
 It appears once you've checked in on at least 30 days that year.
 

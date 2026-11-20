@@ -3,7 +3,7 @@ import path from "node:path";
 import { marked } from "marked";
 import conditions from "../../content/conditions.json";
 import { pageGate, type ConditionId, type PageGate } from "./conditions";
-import { wholeNamesHtml } from "./wholeNames";
+import { supportAddressHtml, wholeNamesHtml } from "./wholeNames";
 
 // The privacy policy and terms (W3) live as Markdown per locale:
 // content/legal/<locale>/<slug>.md, copied from UX & PM's specs. Long-form
@@ -66,6 +66,37 @@ export const COMING_POLICY: readonly string[] = ["plus"];
 export const comingPolicyMet = (id: string) => COMING_POLICY.includes(id) || (pendingKnown(id) && isPendingMet(id));
 const pendingKnown = (id: string) => conditionForPending(id) in (conditions as Record<string, unknown>);
 
+// The What changed block's date (#378): the day the noticed change applies, read from the same
+// notice id as Today's card (app_config.policy_notice_id, "YYYY-MM-DD" or "YYYY-MM-DD-<slug>"),
+// so the policy and the card can never name different days. {dated}…{/dated} shows only with a
+// date, with {notice_date} inside it as that date; {undated}…{/undated} shows only without one.
+// A text that still holds these markers after its pending blocks needs the date to render:
+// renderLegal throws without it. A page that never shows the block never looks the date up.
+const DATED = /\{dated\}([\s\S]*?)\{\/dated\}/g;
+const UNDATED = /\{undated\}([\s\S]*?)\{\/undated\}/g;
+const NOTICE_MARK = /\{(?:\/?dated|\/?undated|notice_date)\}/;
+
+export function needsNoticeDate(source: string, met: (id: string) => boolean = isPendingMet): boolean {
+  return NOTICE_MARK.test(applyPending(stripComments(source), met).text);
+}
+
+export function applyNoticeDate(text: string, date: string | null): string {
+  const out = text
+    .replace(DATED, (_, inner: string) => (date ? inner.replace(/\{notice_date\}/g, () => date) : ""))
+    .replace(UNDATED, (_, inner: string) => (date ? "" : inner));
+  if (NOTICE_MARK.test(out)) throw new Error("Legal text: a {notice_date} outside {dated}…{/dated}, or a block left open");
+  return out;
+}
+
+// A notice day (YYYY-MM-DD) as the legal text writes its dates: "1 December 2026" in English,
+// "1 de diciembre de 2026" in Spanish. The text's language, not the page's: an English policy
+// under /fr keeps English dates.
+export function legalDate(day: string, textLocale: string): string {
+  const [y, m, d] = day.split("-").map(Number);
+  const tag = textLocale === "en" ? "en-GB" : textLocale;
+  return new Intl.DateTimeFormat(tag, { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(Date.UTC(y, m - 1, d)));
+}
+
 // HTML comments (the file header) are notes for editors, never published.
 export function stripComments(source: string): string {
   return source.replace(/<!--[\s\S]*?-->\n?/g, "");
@@ -96,8 +127,16 @@ export function legalSource(slug: LegalSlug, locale: string): string {
 
 export type LegalPage = { title: string; html: string; hidden: HiddenBlock[] };
 
-export function renderLegal(source: string, met: (id: string) => boolean = isPendingMet): LegalPage {
-  const { text, hidden } = applyPending(stripComments(source), met);
+// noticeDate: the What changed block's date (legalDate), null for an undated notice; leave it
+// out only for a text that doesn't show the block (see applyNoticeDate).
+export function renderLegal(source: string, met: (id: string) => boolean = isPendingMet, noticeDate?: string | null): LegalPage {
+  const pending = applyPending(stripComments(source), met);
+  const { hidden } = pending;
+  let { text } = pending;
+  if (NOTICE_MARK.test(text)) {
+    if (noticeDate === undefined) throw new Error("This legal text shows the What changed block: pass its notice date (null for an undated notice)");
+    text = applyNoticeDate(text, noticeDate);
+  }
   // The first "## " line is the page title (the page's h1); sections move
   // up one level so the outline has no gaps (### → h2).
   const lines = text.trim().split("\n");
@@ -110,8 +149,9 @@ export function renderLegal(source: string, met: (id: string) => boolean = isPen
     .replace(/^### /gm, "## ")
     .replace(TODO, (t) => `<mark class="legal-todo">${t}</mark>`);
   const html = marked.parse(body, { async: false, gfm: true }) as string;
-  // Names never hyphenate (UX, 19 Nov), even where the large-text hyphen rule is on.
-  return { title, html: scrollableTables(wholeNamesHtml(html)), hidden };
+  // Names never hyphenate (UX, 19 Nov), even where the large-text hyphen rule is on; the support address breaks only
+  // after its "@" (UX, 20 Nov).
+  return { title, html: scrollableTables(supportAddressHtml(wholeNamesHtml(html))), hidden };
 }
 
 // A wide table scrolls sideways on a phone, so its scroller must be

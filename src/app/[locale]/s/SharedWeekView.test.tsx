@@ -8,8 +8,8 @@ const strings: SharedWeekStrings = {
   titleBefore: "A week shared with you",
   introBefore: "intro",
   show: "Show the week",
-  titleNamed: "{name} shared their week with you",
-  titleAnon: "Someone shared their week with you",
+  titleNamed: "Hi {name}, here's a week shared with you",
+  titleAnon: "A week shared with you",
   weekOf: "Week of {date}",
   checkIns: Array.from({ length: 8 }, (_, n) => `${n} check-ins this week`),
   routinePercent: "{name}: ticked on {percent}% of check-in days",
@@ -66,7 +66,7 @@ describe("SharedWeekView", () => {
     expect(String(fetchMock.mock.calls[0][0])).not.toContain(TOKEN);
     expect(fetchMock.mock.calls[0][1].method).toBe("POST");
     expect(sent(0)).toEqual({ token: TOKEN, week: 0 });
-    await waitFor(() => expect(screen.getByTestId("shared-title").textContent).toBe("Sam shared their week with you"));
+    await waitFor(() => expect(screen.getByTestId("shared-title").textContent).toBe("Hi Sam, here's a week shared with you"));
     expect(screen.getByTestId("shared-count").textContent).toBe("1 check-ins this week");
     expect(screen.getByTestId("shared-routine").textContent).toContain("Morning meds: ticked on 83% of check-in days");
     expect(screen.getByTestId("shared-routine").textContent).toContain("Walk: not enough days yet");
@@ -116,11 +116,11 @@ describe("SharedWeekView", () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  it("no first name: Someone; days have words for screen readers; never any text of theirs", async () => {
+  it("no first name: no greeting; days have words for screen readers; never any text of theirs", async () => {
     reply(week("2026-11-16", null));
     renderIt();
     await act(async () => fireEvent.click(screen.getByTestId("shared-show")));
-    await waitFor(() => expect(screen.getByTestId("shared-title").textContent).toBe("Someone shared their week with you"));
+    await waitFor(() => expect(screen.getByTestId("shared-title").textContent).toBe("A week shared with you"));
     const days = screen.getByTestId("shared-days").textContent ?? "";
     expect(days).toContain("Monday: Good");
     expect(days).toContain("Tuesday: no check-in");

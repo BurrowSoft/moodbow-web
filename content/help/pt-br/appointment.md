@@ -12,7 +12,7 @@ O resumo mostra:
 
 Em **Sobre o que quero falar**, anote o que você gostaria de conversar.
 
-Ele usa só os seus check-ins e Momentos: nunca {pending:safety_plan_live|app_safety_plan}o seu plano de segurança nem {/pending}a sua lista do que ajuda. Nada aqui é salvo ou enviado: quando você sai, as suas escolhas e anotações somem.
+Ele usa só os seus check-ins, os seus Momentos{pending:routine_live|app_routine} e, para os itens da rotina que você escolher, com que frequência você os marcou{/pending}: nunca {pending:safety_plan_live|app_safety_plan}o seu plano de segurança nem {/pending}a sua lista do que ajuda. Nada aqui é salvo ou enviado: quando você sai, as suas escolhas e anotações somem.
 
 {pending:appointment_live}Na web, toque em **Imprimir**. Para guardar uma cópia, escolha salvar como PDF na janela de impressão do navegador.{/pending}{pending:app_appointment}No app, toque em **Compartilhar como PDF** para enviar ou salvar.{/pending}
 

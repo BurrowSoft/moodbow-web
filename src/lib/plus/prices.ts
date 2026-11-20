@@ -1,3 +1,4 @@
+import { sellingPrice } from "./ours";
 import { getStripe, stripeConfigured } from "./stripe";
 import { plusPriceLabel } from "./view";
 import { TimedOut, withTimeout } from "@/lib/ui/withTimeout";
@@ -9,8 +10,9 @@ export const STRIPE_DEADLINE_MS = 8_000;
 
 // Every price on screen comes from Stripe, in the person's currency, the renewal included (the
 // Reviewer's ruling, 1.3): the yearly Price's currency_options (STRIPE_PLUS_PRICE_ID), and for the
-// Christmas offer the first-year coupon's (STRIPE_PLUS_OFFER_COUPON_ID, amount_off per currency,
-// duration "once"; the first year is the price less that). Nothing is typed in here.
+// Christmas offer the first-year coupon (STRIPE_PLUS_OFFER_COUPON_ID, duration "once"): amount_off
+// per currency, or percent_off for every currency (UX, 20 Nov: Vitor's offer is 50 % off). The first
+// year is the price less the coupon's discount (firstYearUnder). Nothing is typed in here.
 // plusDeal is the ONE decision the page and the checkout share (the Reviewer, #315): the currency
 // shown is the currency charged, and the offer shows exactly when the checkout applies it.
 
@@ -41,10 +43,59 @@ export function formatPrice(value: number, currency: string, locale: string): st
 }
 
 // The deal for one person: the currency (theirs where the Price has it, else the Price's own), the
-// yearly amount, and the first year's only when the offer is wanted AND the coupon has an amount
-// for that very currency AND it applies once (a "forever" or "repeating" coupon would make "Then
-// {price} a year" untrue: no offer then). In minor units. null: Stripe isn't there or can't be read.
+// yearly amount, and the first year's only when the offer is wanted AND the coupon gives a first
+// year in that very currency (firstYearUnder). In minor units. null: Stripe isn't there or can't be
+// read.
 export type PlusDeal = { currency: string; year: number; firstYear: number | null; coupon: string | null };
+
+// The coupon fields the offer reads (Stripe's Coupon has them all).
+export type OfferCoupon = {
+  valid: boolean;
+  duration: string;
+  currency?: string | null;
+  amount_off?: number | null;
+  percent_off?: number | null;
+  currency_options?: Record<string, { amount_off?: number | null } | undefined> | null;
+};
+
+// A percent coupon's discount on an amount, in the same minor units. Stripe works the discount out
+// on the invoice line and rounds it to a whole minor unit; a half is taken to go UP, as Stripe's tax
+// and fee rounding does (UX, 20 Nov: to be confirmed by a test-mode invoice preview and the sw14
+// walk; a flip is this one line and its tests). So 50 % of 59.99 is a discount of 30.00 and the
+// charge is 29.99, and the page shows that charge. Whole numbers only: Stripe's percent_off has two
+// decimals, so it's counted in hundredths of a percent, and no float error can decide a half.
+export function percentDiscount(amount: number, percentOff: number): number {
+  const hundredths = Math.round(percentOff * 100);
+  return Math.floor((amount * hundredths + 5_000) / 10_000);
+}
+
+// Stripe's ISK amounts carry two decimals that must be 00 (Stripe's special cases): a first year
+// with a part of a króna can't be charged as it is, and how Stripe would round it isn't known here.
+const WHOLE_UNITS_ONLY = new Set(["isk"]);
+
+// The first year's price under the offer coupon, in minor units, or null when the coupon gives no
+// offer in this currency. It must be valid and once only (a "forever" or "repeating" coupon would
+// make "Then {price} a year" untrue). An amount_off coupon needs an amount for this very currency
+// (its currency_options, or its own currency); a percent_off one applies to every currency. The
+// first year must be more than nothing and less than the year. A coupon claiming both kinds (Stripe
+// doesn't make one) is refused, not guessed.
+export function firstYearUnder(coupon: OfferCoupon, year: number, currency: string): number | null {
+  if (!coupon.valid || coupon.duration !== "once") return null;
+  const optionAmounts = Object.values(coupon.currency_options ?? {}).map((o) => o?.amount_off);
+  const isAmount = [coupon.amount_off, ...optionAmounts].some((a) => typeof a === "number");
+  const percent = coupon.percent_off;
+  const isPercent = typeof percent === "number";
+  if (isAmount === isPercent) return null;
+  const off = isPercent
+    ? percent > 0 && percent < 100
+      ? percentDiscount(year, percent)
+      : null
+    : (coupon.currency_options?.[currency]?.amount_off ?? (coupon.currency === currency ? coupon.amount_off : null));
+  if (typeof off !== "number" || off <= 0 || off >= year) return null;
+  const first = year - off;
+  if (WHOLE_UNITS_ONLY.has(currency) && first % 100 !== 0) return null;
+  return first;
+}
 
 const cache = new Map<string, { at: number; value: PlusDeal | null }>();
 const TTL_MS = 10 * 60 * 1000;
@@ -54,7 +105,8 @@ export async function plusDeal(country: string | null | undefined, withOffer: bo
   const key = `${wanted}:${withOffer}`;
   const hit = cache.get(key);
   if (hit && Date.now() - hit.at < TTL_MS) return hit.value;
-  const priceId = process.env.STRIPE_PLUS_PRICE_ID?.trim();
+  // The price checkout sells: the first of STRIPE_PLUS_PRICE_ID (ours.ts).
+  const priceId = sellingPrice();
   if (!priceId || !stripeConfigured()) return null;
   let value: PlusDeal | null;
   try {
@@ -80,8 +132,7 @@ async function readDeal(priceId: string, wanted: string, withOffer: boolean): Pr
   const couponId = process.env.STRIPE_PLUS_OFFER_COUPON_ID?.trim() || null;
   if (withOffer && couponId) {
     const coupon = await stripe.coupons.retrieve(couponId, { expand: ["currency_options"] });
-    const off = coupon.currency_options?.[currency]?.amount_off ?? (coupon.currency === currency ? coupon.amount_off : null);
-    if (coupon.valid && coupon.duration === "once" && typeof off === "number" && off > 0 && off < year) firstYear = year - off;
+    firstYear = firstYearUnder(coupon, year, currency);
   }
   return { currency, year, firstYear, coupon: firstYear === null ? null : couponId };
 }

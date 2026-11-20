@@ -234,7 +234,7 @@ export function MonthCalendar({
             type="button"
             data-testid="calendar-retry"
             onClick={() => fetchMonth(month)}
-            className="mt-2 inline-flex min-h-11 items-center rounded-full border border-border px-4 text-sm font-medium text-text hover:bg-pill"
+            className="mt-2 inline-flex min-h-11 items-center rounded-full border border-border px-[16px] text-sm font-medium text-text hover:bg-pill"
           >
             {ta("tryAgain")}
           </button>

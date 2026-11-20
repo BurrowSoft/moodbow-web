@@ -689,7 +689,7 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
           aria-describedby={future ? "entry-error" : undefined}
           value={fields.date}
           onChange={(e) => e.target.value && setFields((f) => ({ ...f, date: e.target.value }))}
-          className="min-h-11 w-fit min-w-0 max-w-full rounded-full border border-border bg-bg px-4 text-text"
+          className="min-h-11 w-fit min-w-0 max-w-full rounded-full border border-border bg-bg px-[16px] text-text"
         />
       </div>
       {!initial && !goodThings && goodThingsHref && (

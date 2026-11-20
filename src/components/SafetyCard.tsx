@@ -67,7 +67,7 @@ export function SafetyCard({ country, onClose, neutral = false, where = null }: 
     ios && isShortCode(line.dial) ? (
       <div>
         {/* iOS can't dial this from a link: the number, and what to do with it. */}
-        <p className={`font-medium text-text ${helpLineSize(line.display)}`}><HelpNumberText text={t("safetyCall", { name: line.name, number: line.display })} number={line.display} /></p>
+        <p className={`font-medium text-text ${helpLineSize(line.display)}`}><HelpNumberText text={t("safetyCall", { name: line.name, number: line.display })} number={line.display} name={line.name} /></p>
         <p data-testid={keypadId} className={small}>
           <HelpNumberText text={t("safetyDialKeypad", { number: line.display })} number={line.display} />
         </p>
@@ -75,7 +75,7 @@ export function SafetyCard({ country, onClose, neutral = false, where = null }: 
     ) : (
       <p>
         <a href={telHref(line.dial)} data-testid={id} className={`${link} ${helpLineSize(line.display)}`}>
-          <HelpNumberText text={t("safetyCall", { name: line.name, number: line.display })} number={line.display} />
+          <HelpNumberText text={t("safetyCall", { name: line.name, number: line.display })} number={line.display} name={line.name} />
         </a>
       </p>
     );
@@ -182,6 +182,7 @@ export function GetHelpNow({ country, testId, className, neutral, icon, where, c
           prefetch={false}
           data-testid={testId}
           data-count={count}
+          data-help-entry=""
           onClick={openCard}
           aria-label={name}
           title={name}
@@ -190,7 +191,8 @@ export function GetHelpNow({ country, testId, className, neutral, icon, where, c
           <LifebuoyIcon />
         </Link>
       ) : (
-        <Link href={country ? `/help/get-help-now?country=${encodeURIComponent(country)}` : "/help/get-help-now"} prefetch={false} data-testid={testId} data-count={count} onClick={openCard} className={className ?? `${dialogButton(false, false)} [font-size:min(1em,max(10vw,32px))]`}>
+        // data-help-entry: the way to help keeps whole words at any size (globals.css).
+        <Link href={country ? `/help/get-help-now?country=${encodeURIComponent(country)}` : "/help/get-help-now"} prefetch={false} data-testid={testId} data-count={count} data-help-entry="" onClick={openCard} className={className ?? `${dialogButton(false, false)} [font-size:min(1em,max(10vw,32px))]`}>
           {name}
         </Link>
       )}

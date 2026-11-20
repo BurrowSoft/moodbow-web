@@ -12,7 +12,7 @@ The summary shows:
 
 In **What I want to talk about**, note what you'd like to bring up.
 
-It uses only your check-ins and Moments: never {pending:safety_plan_live|app_safety_plan}your safety plan or {/pending}your list of things that help. Nothing here is saved or sent: when you leave, your choices and notes are gone.
+It uses only your check-ins, your Moments{pending:routine_live|app_routine} and, for the routine items you choose, how often you ticked them{/pending}: never {pending:safety_plan_live|app_safety_plan}your safety plan or {/pending}your list of things that help. Nothing here is saved or sent: when you leave, your choices and notes are gone.
 
 {pending:appointment_live}On the web, tap **Print**. To keep a copy, choose to save as PDF in your browser's print window.{/pending}{pending:app_appointment}In the app, tap **Share as PDF** to send or save it.{/pending}
 
