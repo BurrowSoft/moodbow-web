@@ -10,7 +10,7 @@ import { Chart } from "../../insights/Chart";
 
 const RANGE_KEY: Record<Weeks, "range2" | "range4" | "range12"> = { 2: "range2", 4: "range4", 12: "range12" };
 
-// For my appointment (1.2; content/appointment.json): what will print is what's on screen.
+// For my appointment (1.2; content/contracts/appointment.json): what will print is what's on screen.
 // The count, averages and charts, starred entries as date and first line, full text only
 // where ticked (none at the start), and the box. Nothing is stored or sent: the ticks and
 // the box live in this page's memory only. Never letters, the plan, the toolbox or Bo: the

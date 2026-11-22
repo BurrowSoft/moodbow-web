@@ -33,8 +33,11 @@ describe("Patterns (no AI): the shared contract", () => {
       footnote: "patternsFootnote",
       none: "patternsNone",
     } as const;
-    expect(Object.keys(contract.copy).sort()).toEqual(Object.keys(keys).sort());
+    // v2 (1.4 F) adds Routine's two lines, which the web keeps with Routine's own strings.
+    const routineKeys = { routineShown: "patternShown", routineFootnote: "patternFootnote" } as const;
+    expect(Object.keys(contract.copy).sort()).toEqual([...Object.keys(keys), ...Object.keys(routineKeys)].sort());
     for (const [from, key] of Object.entries(keys)) expect(en.insights[key], key).toBe(contract.copy[from as keyof typeof keys]);
+    for (const [from, key] of Object.entries(routineKeys)) expect(en.routine[key], `routine.${key}`).toBe(contract.copy[from as keyof typeof routineKeys]);
   });
 
   it("the page's read starts on the window's first day (today − 89)", () => {

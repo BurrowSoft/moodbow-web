@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/app/me/a
 
 // Me → For my appointment (1.2, appointment-live): the last 12 weeks' check-ins and starred
 // entries, the most any range shows. Nothing else is read: never letters, the safety plan,
-// the toolbox, Bo or anything AI (content/appointment.json's neverIncluded). Dates are
+// the toolbox, Bo or anything AI (content/contracts/appointment.json's neverIncluded). Dates are
 // written here, on the server, so the page shows the same words before and after it loads.
 export default async function AppointmentPage({ params }: PageProps<"/[locale]/app/me/appointment">) {
   const { locale } = await params;

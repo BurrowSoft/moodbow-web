@@ -1,7 +1,7 @@
-import contract from "../../../content/appointment.json";
+import contract from "../../../content/contracts/appointment.json";
 import { roundFor, series, type InsightRow, type Metric } from "./insights";
 
-// For my appointment (1.2; content/appointment.json, the rules both clients run).
+// For my appointment (1.2; content/contracts/appointment.json, the rules both clients run).
 export const APPOINTMENT_RULES = contract.rules;
 export type Weeks = 2 | 4 | 12;
 
@@ -43,7 +43,7 @@ export function starredIn(rows: unknown, days: string[]): StarredEntry[] {
     .sort((a, b) => (a.entry_date === b.entry_date ? a.id.localeCompare(b.id) : a.entry_date < b.entry_date ? -1 : 1));
 }
 
-// Routine (1.4 F; content/appointment.json routineCases, UX 18 Nov): only the items the person opted
+// Routine (1.4 F; content/contracts/appointment.json routineCases, UX 18 Nov): only the items the person opted
 // in; none, no section (null). Per item, in position order, of the range's check-in days on or
 // after its started_on: the share ticked, a whole number (halves up, by integers); fewer than
 // routineMinDays such days, "not enough days yet". Never a mood comparison (UX's medication
