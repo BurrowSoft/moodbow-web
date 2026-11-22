@@ -12,8 +12,19 @@ import { actionWithoutSession, authCookieNames, authCookieUid, needsSession, ref
 // Locale routing (src/i18n/routing.ts): the default locale is unprefixed,
 // others get /<locale>. With more than one locale, a first visit is matched
 // to the browser language, and the NEXT_LOCALE cookie remembers a choice
-// made in the language switcher. English only for now.
+// made in the language switcher.
 const intl = createMiddleware(routing);
+
+// An auth email's link carries its own language: send-email picks the email's words and the link's prefix from the
+// same saved language, and English has none (moodbow-app emails.ts WEB_ROUTES). So an English email links to the
+// unprefixed /auth/confirm, where detection would follow a NEXT_LOCALE cookie (or the browser's language) instead and
+// redirect to /fr/auth/confirm: an English email opening a French page (the Mobile Dev, 20 Nov: Vitor's email change
+// from app 1.4.0). On that path the link's language wins, with no detection. next-intl's cookie sync then resets a stale
+// NEXT_LOCALE to the page's language, so the confirm's unprefixed next page stays in it too. A prefixed link
+// (/fr/auth/confirm) was never affected: the prefix comes first.
+const intlByLink = createMiddleware({ ...routing, localeDetection: false });
+const LINK_LANGUAGE_PATHS = new Set(["/auth/confirm"]);
+const localeMiddleware = (req: NextRequest) => (LINK_LANGUAGE_PATHS.has(req.nextUrl.pathname) ? intlByLink : intl);
 
 // Where hidden pages are sent: a path under a real locale that no route
 // matches, so Next serves the server-rendered app/not-found.tsx with a 404.
@@ -124,7 +135,7 @@ export default async function proxy(req: NextRequest) {
         ? new NextResponse(null, { status: 200, headers: { "x-action-redirect": `${url.pathname}${url.search};replace`, "content-type": "text/plain" } })
         : NextResponse.redirect(url, 303);
     } else {
-      res = intl(req);
+      res = localeMiddleware(req)(req);
     }
     for (const name of stale) res.cookies.delete(name);
     // A deleted account's health data must not stay in this browser either
@@ -135,7 +146,7 @@ export default async function proxy(req: NextRequest) {
     return withCsp(res);
   }
 
-  const res = intl(req);
+  const res = localeMiddleware(req)(req);
   for (const { name, value, options } of refreshed) res.cookies.set(name, value, options);
   return withCsp(res);
 }

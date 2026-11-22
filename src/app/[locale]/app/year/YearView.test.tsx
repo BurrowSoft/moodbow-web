@@ -107,4 +107,18 @@ describe("YearView", () => {
     expect(strip.textContent).toContain("monthMood");
     expect(strip.textContent).toContain("monthFaint");
   });
+
+  it("at large text the strip is 4×3, and a month's label never splits (the Web Tester's D2, UX 20 Nov)", async () => {
+    await view(reviewOf(0));
+    const strip = screen.getByTestId("year-strip");
+    expect(strip.className).toContain("max-[13em]:grid-cols-4");
+    expect(strip.className).toContain("grid-cols-6");
+    expect(strip.className).toContain("sm:grid-cols-12");
+    const labels = [...strip.querySelectorAll("[data-month-label]")];
+    expect(labels).toHaveLength(12);
+    for (const label of labels) {
+      expect(label.className).toContain("[overflow-wrap:normal]");
+      expect(label.className).not.toContain("anywhere");
+    }
+  });
 });

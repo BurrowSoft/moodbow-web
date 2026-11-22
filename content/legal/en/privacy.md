@@ -7,7 +7,7 @@
   (src/lib/legalContent.test.ts).
 -->
 ## Moodbow Privacy Policy
-Last updated: 19 November 2026
+Last updated: 20 November 2026
 
 {pending:plus|app_plus}**What changed{dated} on {notice_date}{/dated}:** you can now subscribe to Moodbow Plus. If you do, Google Play, the App Store or Stripe handles the payment, and we keep a reference to your subscription and its dates (§1, "Moodbow Plus purchases"). Stripe is new in our list of providers (§3). Nothing else about how we use your journal has changed.{/pending}
 

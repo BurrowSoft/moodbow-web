@@ -5,7 +5,7 @@
   on, the store age signal if it sends anything, or Your week if it stores anything.
 -->
 ## Moodbow: Consumer Health Data Privacy Policy
-Last updated: 19 November 2026
+Last updated: 20 November 2026
 
 This policy is for people in Washington State, Nevada and anywhere else where a consumer health data law applies. It adds to our [Privacy Policy](https://www.moodbow.com/privacy). Moodbow is run by Vitor Carvalho, trading as BurrowSoft. Moodbow is a wellbeing journal, not a medical service.
 
