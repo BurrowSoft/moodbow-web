@@ -745,8 +745,8 @@ test("large text at 320 px / 300 %: the Plus card, the uppercase labels and the 
 // means two lines at most, and nothing sticks out. A longer label one day fails here. At the normal size the tag stays
 // beside the lights as on the board, except Today's on a 320 px phone (9em of room there; UX: under is fine); at 300 %
 // on a 320 px phone the offer's goes under them (the Web Tester's row). Its words stay whole (UX, 23 Nov: no
-// "OFFERTA SPE- / CIALE"): no word is on two lines but de's, at its soft hyphen (Thai's words have no spaces to tell them
-// apart, so its line breaks are its own).
+// "OFFERTA SPE- / CIALE"): the offer's tag doesn't hyphenate, and cutWords finds no word cut at any step (de's breaks
+// only at its soft hyphen; Thai's words have no spaces to tell them apart, so its line breaks are its own).
 test("the Plus card's tag beside its icons only on two lines: every language, 320–430 px, 100–300 %", async ({ page, browserName }, testInfo) => {
   test.skip(browserName !== "chromium" || testInfo.project.name !== "desktop", "Page.setFontSizes is Chromium's; once is enough");
   test.setTimeout(240_000);
@@ -778,16 +778,14 @@ test("the Plus card's tag beside its icons only on two lines: every language, 32
                 const tag = s.querySelector<HTMLElement>("[data-tag]")!, icons = [...s.querySelectorAll("svg")], t = tag.getBoundingClientRect();
                 const icon = icons[icons.length - 1].getBoundingClientRect();
                 const edge = s.getBoundingClientRect().right - parseFloat(getComputedStyle(s).paddingRight);
-                // Its words, line by line, from each word's own boxes: a word with boxes on two lines was split (a word
-                // with a soft hyphen may be: de's, there).
-                const node = tag.firstChild as Text, rows = new Map<number, string[]>(), split: string[] = [];
+                // Its words line by line, each on the line its first letter is on (for Italian's reading below).
+                const node = tag.firstChild as Text, rows = new Map<number, string[]>();
                 for (const w of node.data.matchAll(/\S+/g)) {
                   const range = document.createRange();
                   range.setStart(node, w.index);
-                  range.setEnd(node, w.index + w[0].length);
-                  const tops = [...new Set([...range.getClientRects()].map((r) => Math.round(r.top)))];
-                  if (tops.length > 1 && !w[0].includes(String.fromCharCode(0xad))) split.push(w[0]);
-                  rows.set(tops[0], [...(rows.get(tops[0]) ?? []), w[0]]);
+                  range.setEnd(node, w.index + 1);
+                  const first = Math.round(range.getBoundingClientRect().top);
+                  rows.set(first, [...(rows.get(first) ?? []), w[0]]);
                 }
                 return {
                   name: s.dataset.card!,
@@ -795,7 +793,6 @@ test("the Plus card's tag beside its icons only on two lines: every language, 32
                   lines: Math.round(t.height / parseFloat(getComputedStyle(tag).lineHeight)),
                   outside: t.right > edge + 0.5 || tag.scrollWidth > tag.clientWidth + 0.5,
                   hyphens: getComputedStyle(tag).hyphens,
-                  split,
                   reading: [...rows.values()].map((r) => r.join(" ")).join(" / ").toUpperCase(),
                 };
               }),
@@ -806,10 +803,12 @@ test("the Plus card's tag beside its icons only on two lines: every language, 32
         // The browser is at the size asked for, and the 13em rules are live exactly where they should be.
         expect(got.root, at).toBe(`${root}px`);
         expect(got.large, `${at}: the 13em rules`).toBe(width < 13 * root);
+        // No word cut: the 300 % test's own detector, at every step (a word wider than its line is cut by overflow-wrap;
+        // de's may break only at its soft hyphen, where drawn). Thai has no spaces between its words: its breaks are its own.
+        if (language !== "/th") for (const cut of await cutWords(page, "[data-tag]")) wrong.push(`${at}: ${cut}`);
         for (const c of got.cards) {
           if ((c.beside && c.lines > 2) || c.outside) wrong.push(`${at} ${c.name}: ${c.outside ? "outside its card" : `beside in ${c.lines} lines`}`);
           if (c.name !== "free" && c.hyphens !== "manual") wrong.push(`${at} ${c.name}: hyphens ${c.hyphens}`);
-          if (language !== "/th" && c.split.length) wrong.push(`${at} ${c.name}: ${c.split.join(", ")} split`);
           if (percent === 100 && !c.beside) under100.push(`${at} ${c.name}`);
           if (percent === 300 && width === 320 && c.name !== "free" && c.beside) beside300.push(`${at} ${c.name}`);
           if (language === "/it" && percent === 300 && width === 320 && c.name === "me") italian300 = c.reading;
