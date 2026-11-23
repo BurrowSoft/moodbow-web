@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { exportFileName } from "@/lib/journal/account";
+import { POLICY_VERSIONS } from "@/lib/legalVersions";
 
 // Me's Your data actions with a mocked Supabase client.
 const rpc = vi.fn();
@@ -191,7 +192,7 @@ describe("saveReminder", () => {
 });
 
 describe("Me → AI actions (M9; reflect.md, Me → AI)", () => {
-  const AI = { kind: "ai", version: "2026-10-02", locale: "en" };
+  const AI = { kind: "ai", version: POLICY_VERSIONS.ai, locale: "en" };
 
   it("on: the consent first, then the setting", async () => {
     rpc.mockResolvedValue({ data: null, error: null });
