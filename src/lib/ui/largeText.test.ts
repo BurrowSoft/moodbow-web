@@ -46,10 +46,11 @@ describe("uppercase labels at large text", () => {
     expect(PLUS_CARD_TAG_ROW).toContain("flex-wrap");
     expect(OFFER_STRIP_LIGHTS).toContain("max-[13em]:hidden");
   });
-  it("the offer's tag stays beside the lights only with room for two lines (10em of its size); Moodbow Plus keeps flex-1", () => {
+  it("the offer's tag stays beside the lights only with room for two lines (10em of its size), its words whole; Moodbow Plus keeps flex-1", () => {
     // Where the tag sits is its kind's alone: no flex of its own on the shared tag, so neither overrides the other.
     expect(PLUS_CARD_TAG).not.toMatch(/\b(flex|basis|grow|shrink)-/);
-    expect(PLUS_CARD_OFFER_TAG).toBe("flex-[1_1_10em]");
+    // hyphens-manual: no auto-hyphenation ("OFFERTA SPE- / CIALE"), only de's soft hyphen (UX, 23 Nov).
+    expect(PLUS_CARD_OFFER_TAG).toBe("flex-[1_1_10em] hyphens-manual");
     expect(PLUS_CARD_PLUS_TAG).toBe("flex-1");
     const banner = readFileSync("src/app/[locale]/app/me/PlusInMe.tsx", "utf8");
     expect(banner).toContain("${offer ? `${PLUS_CARD_OFFER_TAG} text-[#F3D27A]` : `${PLUS_CARD_PLUS_TAG} text-accent`}");

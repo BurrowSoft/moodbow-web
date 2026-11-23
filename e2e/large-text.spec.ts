@@ -744,7 +744,9 @@ test("large text at 320 px / 300 %: the Plus card, the uppercase labels and the 
 // at 100–300 %, with the app's stylesheet (its 13em rules live, the app's 12 px gutters under 360 px, else 16): beside
 // means two lines at most, and nothing sticks out. A longer label one day fails here. At the normal size the tag stays
 // beside the lights as on the board, except Today's on a 320 px phone (9em of room there; UX: under is fine); at 300 %
-// on a 320 px phone the offer's goes under them (the Web Tester's row).
+// on a 320 px phone the offer's goes under them (the Web Tester's row). Its words stay whole (UX, 23 Nov: no
+// "OFFERTA SPE- / CIALE"): no word is on two lines but de's, at its soft hyphen (Thai's words have no spaces to tell them
+// apart, so its line breaks are its own).
 test("the Plus card's tag beside its icons only on two lines: every language, 320–430 px, 100–300 %", async ({ page, browserName }, testInfo) => {
   test.skip(browserName !== "chromium" || testInfo.project.name !== "desktop", "Page.setFontSizes is Chromium's; once is enough");
   test.setTimeout(240_000);
@@ -756,6 +758,7 @@ test("the Plus card's tag beside its icons only on two lines: every language, 32
   const wrong: string[] = [];
   const under100: string[] = [];
   const beside300: string[] = [];
+  let italian300 = "";
   for (const [language, m] of [["/", en], ["/fr", fr], ["/es", es], ["/pt-br", pt], ["/de", de], ["/it", it], ["/th", th]] as const) {
     const cards = [card("me", lights, PLUS_CARD_OFFER_TAG, m.plus.offerLabel), card("today", tree + lights, PLUS_CARD_OFFER_TAG, m.plus.offerLabel), card("free", arcs, PLUS_CARD_PLUS_TAG, m.plus.label)].join("");
     await page.goto(language);
@@ -775,11 +778,25 @@ test("the Plus card's tag beside its icons only on two lines: every language, 32
                 const tag = s.querySelector<HTMLElement>("[data-tag]")!, icons = [...s.querySelectorAll("svg")], t = tag.getBoundingClientRect();
                 const icon = icons[icons.length - 1].getBoundingClientRect();
                 const edge = s.getBoundingClientRect().right - parseFloat(getComputedStyle(s).paddingRight);
+                // Its words, line by line, from each word's own boxes: a word with boxes on two lines was split (a word
+                // with a soft hyphen may be: de's, there).
+                const node = tag.firstChild as Text, rows = new Map<number, string[]>(), split: string[] = [];
+                for (const w of node.data.matchAll(/\S+/g)) {
+                  const range = document.createRange();
+                  range.setStart(node, w.index);
+                  range.setEnd(node, w.index + w[0].length);
+                  const tops = [...new Set([...range.getClientRects()].map((r) => Math.round(r.top)))];
+                  if (tops.length > 1 && !w[0].includes(String.fromCharCode(0xad))) split.push(w[0]);
+                  rows.set(tops[0], [...(rows.get(tops[0]) ?? []), w[0]]);
+                }
                 return {
                   name: s.dataset.card!,
                   beside: t.top < icon.bottom && t.left >= icon.right - 0.5,
                   lines: Math.round(t.height / parseFloat(getComputedStyle(tag).lineHeight)),
                   outside: t.right > edge + 0.5 || tag.scrollWidth > tag.clientWidth + 0.5,
+                  hyphens: getComputedStyle(tag).hyphens,
+                  split,
+                  reading: [...rows.values()].map((r) => r.join(" ")).join(" / ").toUpperCase(),
                 };
               }),
             };
@@ -791,8 +808,11 @@ test("the Plus card's tag beside its icons only on two lines: every language, 32
         expect(got.large, `${at}: the 13em rules`).toBe(width < 13 * root);
         for (const c of got.cards) {
           if ((c.beside && c.lines > 2) || c.outside) wrong.push(`${at} ${c.name}: ${c.outside ? "outside its card" : `beside in ${c.lines} lines`}`);
+          if (c.name !== "free" && c.hyphens !== "manual") wrong.push(`${at} ${c.name}: hyphens ${c.hyphens}`);
+          if (language !== "/th" && c.split.length) wrong.push(`${at} ${c.name}: ${c.split.join(", ")} split`);
           if (percent === 100 && !c.beside) under100.push(`${at} ${c.name}`);
           if (percent === 300 && width === 320 && c.name !== "free" && c.beside) beside300.push(`${at} ${c.name}`);
+          if (language === "/it" && percent === 300 && width === 320 && c.name === "me") italian300 = c.reading;
         }
       }
     }
@@ -802,6 +822,8 @@ test("the Plus card's tag beside its icons only on two lines: every language, 32
     ["/en", "/fr", "/es", "/pt-br", "/de", "/it", "/th"].map((l) => `${l} 320 px / 100 % today`),
   );
   expect(beside300, "the offer's tag beside the lights at 300 % on a 320 px phone").toEqual([]);
+  // The widest language, under the lights at 300 % on a 320 px phone: three lines, its words whole (UX, 23 Nov).
+  expect(italian300, "it, Me's card at 320 px / 300 %").toBe("OFFERTA / SPECIALE DI / NATALE");
 });
 
 // Your year's colour strip (the Web Tester's D2, UX 20 Nov): at large text a 4×3 grid, every month's label whole on one

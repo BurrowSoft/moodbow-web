@@ -51,8 +51,11 @@ export const PLUS_CARD_PLUS_TAG = "flex-1";
 // the room its longest language needs for two lines plus a margin: it "OFFERTA SPECIALE / DI NATALE" 9.32em, then es and
 // pt-BR 8.78em (Chromium and WebKit alike). In em, so it holds at every text size and width. e2e/large-text.spec.ts sweeps
 // it in every language, 320–430 px × 100–300 %. At the normal size Me's card keeps it beside (11.1em there on a 320 px
-// phone); Today's on a 320 px phone, with the tree too (9em), puts it under (UX: fine).
-export const PLUS_CARD_OFFER_TAG = "flex-[1_1_10em]";
+// phone); Today's on a 320 px phone, with the tree too (9em), puts it under (UX: fine). Its words stay whole
+// (hyphens-manual; UX, 23 Nov, after Chromium's "OFFERTA SPE- / CIALE DI / NATALE" at 300 %): only de's soft hyphen
+// breaks one. Under the lights its longest piece, de "WEIHNACHTS-" (7.14em), fits the row at every size thanks to the
+// cap (7.43em at 300 % on a 320 px phone).
+export const PLUS_CARD_OFFER_TAG = "flex-[1_1_10em] hyphens-manual";
 export const PLUS_CARD_TITLE = "pr-[48px] text-[1.125em] font-medium leading-snug";
 export const PLUS_CARD_SMALL = "text-center text-[0.875em] leading-[calc(1.25/0.875)]";
 // The Plus screen's Christmas strip: its lights (decoration) step aside at large text, so the offer's name has their
