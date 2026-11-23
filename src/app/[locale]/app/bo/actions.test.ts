@@ -6,19 +6,37 @@ const rpc = vi.fn(async (_name: string, _args?: object) => ({ error: null as { m
 vi.mock("@/lib/supabase/server", () => ({ createSupabaseServerClient: async () => ({ rpc }) }));
 vi.mock("@/lib/conditions", () => ({ pageGate: () => "draft" }));
 vi.mock("@/lib/journal/gateChanged", () => ({ gateChanged: () => {} }));
-const setAiEnabled = vi.fn<(on: boolean, confirm?: object) => Promise<{ ok: boolean }>>(async () => ({ ok: true }));
-vi.mock("../me/actions", () => ({ setAiEnabled: (on: boolean, confirm?: object) => setAiEnabled(on, confirm) }));
+// The AI consent's one writer (lib/journal/aiConsentWrite): what it answers is set per test.
+const write = vi.fn<() => Promise<{ step: "consent" | "setting"; message: string } | null>>(async () => null);
+vi.mock("@/lib/journal/aiConsentWrite", () => ({ recordAiConsentAndTurnOn: () => write() }));
+vi.mock("next-intl/server", () => ({ getLocale: async () => "en" }));
+class Redirect {
+  constructor(public args: { href: string; locale: string }) {}
+}
+vi.mock("@/i18n/navigation", () => ({
+  redirect: (args: Redirect["args"]) => {
+    throw new Redirect(args);
+  },
+}));
 const { giveBoConsent, turnBoOff } = await import("./actions");
 
 beforeEach(() => {
   rpc.mockClear();
-  setAiEnabled.mockClear();
+  write.mockClear();
 });
 
 describe("giveBoConsent", () => {
-  it("Bo's own yes is the confirm, at this build's AI version (the AI go-live: no confirm, no consent)", async () => {
+  // Behind Bo's own gate (bo-live), not the journal's AI switch: the #423 journey "Bo's screen at large text" runs
+  // with staging's AI switch off, and its yes still goes through.
+  it("Bo's yes goes through the AI consent's one writer, once", async () => {
     expect(await giveBoConsent()).toEqual({ ok: true });
-    expect(setAiEnabled).toHaveBeenCalledWith(true, { version: POLICY_VERSIONS.ai });
+    expect(write).toHaveBeenCalledTimes(1);
+  });
+  it("a failed write says so; a lost session goes to sign-in", async () => {
+    write.mockResolvedValueOnce({ step: "setting", message: "boom" });
+    expect(await giveBoConsent()).toEqual({ ok: false });
+    write.mockResolvedValueOnce({ step: "consent", message: "not_authenticated" });
+    await expect(giveBoConsent()).rejects.toBeInstanceOf(Redirect);
   });
 });
 

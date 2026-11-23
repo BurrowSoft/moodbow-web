@@ -38,13 +38,20 @@ describe("aiShown / canReflect", () => {
     expect(canReflect(me())).toBe(false);
   });
 
-  it("the AI consent is granted in one place: Me → AI's action, from its sheet (UX, 23 Nov, the AI go-live)", () => {
+  it("the AI consent is granted in one place, its writer, and only Me → AI's sheet and Bo's yes call it (UX, 23 Nov, the AI go-live; the Reviewer)", () => {
     const files = (dir: string): string[] =>
       readdirSync(dir, { withFileTypes: true }).flatMap((d) => (d.isDirectory() ? files(path.join(dir, d.name)) : /\.(ts|tsx)$/.test(d.name) && !/\.test\.(ts|tsx)$/.test(d.name) ? [path.join(dir, d.name)] : []));
-    const grants = files("src")
-      .filter((f) => /consentItem\(\s*"ai"\s*,\s*true\s*\)/.test(readFileSync(f, "utf8")))
-      .map((f) => path.relative(process.cwd(), f).split(path.sep).join("/"));
-    expect(grants).toEqual(["src/app/[locale]/app/me/actions.ts"]);
+    const rel = (f: string) => path.relative(process.cwd(), f).split(path.sep).join("/");
+    const all = files("src");
+    expect(all.filter((f) => /consentItem\(\s*"ai"\s*,\s*true\s*\)/.test(readFileSync(f, "utf8"))).map(rel)).toEqual(["src/lib/journal/aiConsentWrite.ts"]);
+    // Its callers, by name (a static import, an import() or a require(); never a "use client" file): Me → AI's
+    // action (aiShown read again, the sheet's confirm) and Bo's (bo-live, Bo's own gate).
+    const reaches = (text: string) => /(from\s+|import\s*\(\s*|require\s*\(\s*)["'](@\/lib\/journal|\.{1,2}(\/[^"']*)?)\/aiConsentWrite["']/.test(text);
+    const callers = all.filter((f) => !f.endsWith("aiConsentWrite.ts") && reaches(readFileSync(f, "utf8"))).map(rel).sort();
+    expect(callers).toEqual(["src/app/[locale]/app/bo/actions.ts", "src/app/[locale]/app/me/actions.ts"]);
+    for (const f of callers) expect(readFileSync(f, "utf8").trimStart().startsWith('"use client"'), f).toBe(false);
+    // Not a server action itself (no directive line anywhere in it): a browser can't call it.
+    expect(readFileSync("src/lib/journal/aiConsentWrite.ts", "utf8")).not.toMatch(/^\s*["']use (server|client)["'];?\s*$/m);
   });
 
   it("only the database's tone and focus values", () => {

@@ -30,12 +30,14 @@ test.describe("home", () => {
     await expect(page.getByTestId("home-sign-in")).toHaveAttribute("href", "/sign-in");
     await expect(page.getByTestId("home-coming-soon")).toHaveCount(0);
     await expect(page.getByTestId("home-notify")).toHaveCount(0);
-    for (const title of ["A 10-second check-in", "Write about your day", "See what goes together in your days", "Private by design"]) {
+    // The writing block says Moodbow writes back only once AI is live (ai-live; the AI go-live, UX 23 Nov).
+    const ai = conditions["ai-live"].met;
+    for (const title of ["A 10-second check-in", ai ? "Write it. Moodbow writes back." : "Write about your day", "See what goes together in your days", "Private by design"]) {
       await expect(page.getByRole("heading", { level: 2, name: title })).toBeVisible();
     }
     // No AI claim while AI isn't live; store badges are text only.
-    await expect(page.getByText("Moodbow writes back")).toHaveCount(0);
-    await expect(page.getByText(/\bAI\b/)).toHaveCount(0);
+    await expect(page.getByText("Moodbow writes back")).toHaveCount(ai ? 1 : 0);
+    if (!ai) await expect(page.getByText(/\bAI\b/)).toHaveCount(0);
     // Follows each store's flag, so a launch-day flip passes on its own.
     const play = conditions["play-live"].met;
     const appStore = conditions["appstore-live"].met;
@@ -308,8 +310,10 @@ test.describe("the live legal pages and account deletion (decision 164)", () => 
     if (conditions.plus.met || conditions["app-plus"].met) await expect(article).toContainText("Google Play, Apple App Store");
     else await expect(article).not.toContainText("Google Play, Apple App Store");
     await expect(article).toContainText("disappear automatically within 8 days");
-    // AI is off: no line may point at a Me → AI screen (decision 69).
-    await expect(article).not.toContainText("Me → AI");
+    // AI off: no line may point at a Me → AI screen (decision 69). AI live (ai-live): the AI lines are
+    // in, the withdraw line among them.
+    if (conditions["ai-live"].met) await expect(article).toContainText("withdraw your AI consent");
+    else await expect(article).not.toContainText("Me → AI");
     // What stays on the device, as the 0.9 app has it (Vitor's "ok device
     // sentences"): the app-lock PIN and the share cards.
     await expect(article).toContainText("unsent drafts, your app-lock PIN, and the share cards you create.");
@@ -469,11 +473,20 @@ test.describe("404s are server-rendered (no JS)", () => {
     });
   }
 
-  // A Help article that's missing or not out yet (ai-reflections and your-week are unmet on every build: AI and the
-  // weekly report aren't in this release. Not bo: its article follows Bo's own gate, readable on a draft build, as
-  // CI's is. safety-plan and letters came out with the app in group 5): the not-found page in the raw HTML, never
-  // Next's bare error shell (html id="__next_error__", no title, no h1; the Web Tester, 15 Nov).
-  for (const path of ["/help/no-such-article", "/help/ai-reflections", "/help/your-week", "/es/help/no-such-article", "/es/help/ai-reflections"]) {
+  // A Help article that's missing or not out yet: the not-found page in the raw HTML, never Next's bare error shell
+  // (html id="__next_error__", no title, no h1; the Web Tester, 15 Nov). "Not out yet" is the first of these whose
+  // conditions are all still unmet on this build, so a flip never breaks it (ai-reflections and your-week came out with
+  // the AI go-live). Never bo: its article follows Bo's own gate, readable on a draft build, as CI's is.
+  const notOut = (
+    [
+      ["me-picture", ["me-picture-live", "app-me-picture"]],
+      ["calming-sounds", ["sounds-live", "app-sounds"]],
+      ["your-year", ["year-review-live"]],
+      ["mood-prompts", ["mood-prompts-live", "app-mood-prompts"]],
+    ] as const
+  ).find(([, ids]) => ids.every((id) => !conditions[id].met))?.[0];
+  const missing = ["/help/no-such-article", "/es/help/no-such-article", ...(notOut ? [`/help/${notOut}`, `/es/help/${notOut}`] : [])];
+  for (const path of missing) {
     test(`help 404 ${path}`, async ({ request }) => {
       const res = await request.get(path, { maxRedirects: 0 });
       expect(res.status()).toBe(404);

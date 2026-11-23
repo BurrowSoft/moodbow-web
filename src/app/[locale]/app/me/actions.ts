@@ -6,6 +6,7 @@ import { redirect } from "@/i18n/navigation";
 import { deleteWordTyped, localDay } from "@/lib/journal/account";
 import { aiShown, isFocusArea, isTone } from "@/lib/journal/ai";
 import { EXTRA_REMINDERS, extraReminderError, parseExtraTimes, toHHMM, type ExtraReminderError } from "@/lib/journal/extraReminders";
+import { recordAiConsentAndTurnOn } from "@/lib/journal/aiConsentWrite";
 import { getMe, hasCurrentConsent } from "@/lib/journal/me";
 import { consentItem, POLICY_VERSIONS, withLanguage } from "@/lib/legalVersions";
 import { cancelStripeBeforeDelete } from "@/lib/plus/cancelOnDelete";
@@ -183,8 +184,8 @@ export async function setAiEnabled(on: boolean, confirm?: { version?: unknown } 
     const confirmed = typeof confirm === "object" && confirm !== null && confirm.version === POLICY_VERSIONS.ai;
     if (!confirmed && !hasCurrentConsent(me, "ai")) return { ok: false, aiEnabled: false };
     if (confirmed) {
-      const consent = await supabase.rpc("record_consents", { p_items: withLanguage([consentItem("ai", true)], dataLocale(await getLocale())) });
-      if (consent.error) return failed(consent.error.message, { ok: false, aiEnabled: false });
+      const error = await recordAiConsentAndTurnOn(supabase);
+      return error ? failed(error.message, { ok: false, aiEnabled: false }) : { ok: true };
     }
     const setting = await supabase.rpc("update_settings", { p_ai_enabled: true });
     if (setting.error) return failed(setting.error.message, { ok: false, aiEnabled: false });
