@@ -196,8 +196,14 @@ test.describe("launch journeys", () => {
 
       await page.getByTestId("me-ai-on").click();
       await page.getByTestId("me-ai-sheet-turn-on").click();
+      // The switch shows On at once (the page's optimistic state) while the action records the consent, so the
+      // stored consent is polled, not read once (window 2, 23 Nov: a single read beat the save).
       await expect(page.getByTestId("me-ai-tone-warm")).toBeChecked();
-      expect(await aiConsent(email, password), "Turn on AI: one consent at this build's version").toEqual({ granted: true, version: POLICY_VERSIONS.ai });
+      await expect
+        .poll(() => aiConsent(email, password), { message: "Turn on AI: one consent at this build's version", timeout: 15_000 })
+        .toEqual({ granted: true, version: POLICY_VERSIONS.ai });
+      // The save may still be finishing (the setting after the consent), and input is ignored meanwhile: wait for it.
+      await expect(page.getByTestId("me-ai-tone-direct")).not.toHaveAttribute("aria-disabled", "true");
       await page.getByTestId("me-ai-tone-direct").check();
       await expect(page.getByTestId("me-ai-tone-direct")).toBeChecked();
 
