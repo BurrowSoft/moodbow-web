@@ -3,7 +3,7 @@
 import { useEffect, useState, useSyncExternalStore, type ReactNode } from "react";
 import { HelpNumberText } from "@/components/HelpNumberText";
 import { dialogButton } from "@/lib/ui/dialogButton";
-import { helpLineSize, isIos } from "@/lib/safety/helplines";
+import { isIos } from "@/lib/safety/helplines";
 
 // Helpline numbers with * or # (Chile's *4141; the app's S14, UX 23 Nov, corrected after the Reviewer): iOS won't dial
 // them from a link, Android and computers do. So on iOS there's no link: the name, the number large and selectable,
@@ -52,6 +52,11 @@ export function CopyNumber({ dial, testId, copyLabel, copiedLabel }: { dial: str
   );
 }
 
+// The number to type, visibly large (UX 23 Nov, after the Tester's 16 px note): 1.5 times the help lines' size, so 24 px
+// at the default text size, growing with large text up to 1.5 times their narrow-screen cap (decision 231). A long
+// number (12+ characters) keeps the same step down helpLineSize takes; HelpNumberText wraps it only between digit groups.
+export const typedNumberSize = (display: string) => (display.length >= 12 ? "[font-size:min(1.5rem,max(13.125vw,42px))]" : "[font-size:min(1.5rem,max(15vw,48px))]");
+
 // iOS: no link. The helpline's name on its own line (the registry's names carry their article for "Call {name}",
 // "the Suicide Prevention Line", so it starts with a capital here), the number, how to call it, Copy number.
 export function DialByHand({ name, display, dial, testId, dialByHand, copyLabel, copiedLabel, lineClass = "text-muted" }: { name: string; display: string; dial: string; testId: string; lineClass?: string } & Strings) {
@@ -61,7 +66,7 @@ export function DialByHand({ name, display, dial, testId, dialByHand, copyLabel,
       <p className="font-medium text-text">
         <span data-help-name="">{title}</span>
       </p>
-      <p data-testid={`${testId}-number`} className={`select-all font-medium text-text ${helpLineSize(display)}`}>
+      <p data-testid={`${testId}-number`} className={`select-all font-semibold text-text ${typedNumberSize(display)}`}>
         <HelpNumberText text={display} number={display} />
       </p>
       <p data-testid={`${testId}-how`} className={lineClass}>
