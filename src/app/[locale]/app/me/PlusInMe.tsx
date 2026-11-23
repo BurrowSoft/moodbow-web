@@ -8,7 +8,7 @@ import type { PlusOfferPrices } from "@/lib/plus/page";
 import type { PlusView } from "@/lib/plus/view";
 import { FESTIVE_CARD, Lights, Tree } from "../PlusSheet";
 import { SAVE_WAIT_MS } from "@/lib/ui/withTimeout";
-import { PLUS_CARD, PLUS_CARD_SMALL, PLUS_CARD_TAG, PLUS_CARD_TAG_ROW, PLUS_CARD_TITLE } from "@/lib/ui/largeText";
+import { PLUS_CARD, PLUS_CARD_OFFER_TAG, PLUS_CARD_PLUS_TAG, PLUS_CARD_SMALL, PLUS_CARD_TAG, PLUS_CARD_TAG_ROW, PLUS_CARD_TITLE } from "@/lib/ui/largeText";
 
 // Moodbow Plus in Me (decision 246, mockups 1 and 5), below Get help now
 // (help is always first). One of:
@@ -256,7 +256,7 @@ export function PlusBanner({ trial, price, offer = null, id, tryId, compact = fa
         ) : (
           <Arcs />
         )}
-        <span className={`${PLUS_CARD_TAG} ${offer ? "text-[#F3D27A]" : "text-accent"}`}>{offer ? t("offerLabel") : t("label")}</span>
+        <span className={`${PLUS_CARD_TAG} ${offer ? `${PLUS_CARD_OFFER_TAG} text-[#F3D27A]` : `${PLUS_CARD_PLUS_TAG} text-accent`}`}>{offer ? t("offerLabel") : t("label")}</span>
       </div>
       <h2 id={id} className={PLUS_CARD_TITLE}>
         {offer ? t("offerBannerTitle", { offer: offer.firstYear }) : t("bannerTitle")}

@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import { accountDeletionTextLocale } from "../accountDeletion";
 import { TOPIC_MESSAGE_KEYS, TOPICS } from "../helpContent";
 import { dialogButton } from "./dialogButton";
-import { BO_HEADING, DAY_ADD_ENTRY, LABEL_TRACKING, LARGE_TEXT_CAP, LOCKED_ROW_LABEL, ME_LOCKED_ROW, NAMES_FIT, OFFER_STRIP_LIGHTS, PLUS_CARD, PLUS_CARD_SMALL, PLUS_CARD_TAG, PLUS_CARD_TAG_ROW, PLUS_CARD_TITLE, WEEK_SUMMARY } from "./largeText";
+import { BO_HEADING, DAY_ADD_ENTRY, LABEL_TRACKING, LARGE_TEXT_CAP, LOCKED_ROW_LABEL, ME_LOCKED_ROW, NAMES_FIT, OFFER_STRIP_LIGHTS, PLUS_CARD, PLUS_CARD_OFFER_TAG, PLUS_CARD_PLUS_TAG, PLUS_CARD_SMALL, PLUS_CARD_TAG, PLUS_CARD_TAG_ROW, PLUS_CARD_TITLE, WEEK_SUMMARY } from "./largeText";
 
 // UX, 20 Nov (option A, after the Web Tester's fr/pt-BR sweep at 320 px / 300 %). The layout itself is checked in a
 // real browser (e2e/large-text.spec.ts); these pin the pieces it relies on.
@@ -46,6 +46,14 @@ describe("uppercase labels at large text", () => {
     expect(PLUS_CARD_TAG_ROW).toContain("flex-wrap");
     expect(OFFER_STRIP_LIGHTS).toContain("max-[13em]:hidden");
   });
+  it("the offer's tag stays beside the lights only with room for two lines (10em of its size); Moodbow Plus keeps flex-1", () => {
+    // Where the tag sits is its kind's alone: no flex of its own on the shared tag, so neither overrides the other.
+    expect(PLUS_CARD_TAG).not.toMatch(/\b(flex|basis|grow|shrink)-/);
+    expect(PLUS_CARD_OFFER_TAG).toBe("flex-[1_1_10em]");
+    expect(PLUS_CARD_PLUS_TAG).toBe("flex-1");
+    const banner = readFileSync("src/app/[locale]/app/me/PlusInMe.tsx", "utf8");
+    expect(banner).toContain("${offer ? `${PLUS_CARD_OFFER_TAG} text-[#F3D27A]` : `${PLUS_CARD_PLUS_TAG} text-accent`}");
+  });
   it("no uppercase, wide-tracked class string in src keeps its wide spacing at large text", () => {
     const files: string[] = [];
     const walk = (dir: string) => {
@@ -71,8 +79,9 @@ describe("uppercase labels at large text", () => {
   it("the German compounds wider than a line at 300 % carry soft hyphens (WebKit didn't hyphenate them)", () => {
     const plus = (JSON.parse(readFileSync("src/messages/de.json", "utf8")) as { plus: Record<string, string> }).plus;
     const shy = String.fromCharCode(0xad);
-    expect(plus.offerLabel).toBe(`Weih${shy}nachts${shy}angebot`);
-    expect(plus.offerSmall.startsWith(`Weih${shy}nachts${shy}angebot `)).toBe(true);
+    // One, at the word's seam (UX, 23 Nov: "Weihnachts·angebot" is the better German break).
+    expect(plus.offerLabel).toBe(`Weihnachts${shy}angebot`);
+    expect(plus.offerSmall.startsWith(`Weihnachts${shy}angebot `)).toBe(true);
     expect(plus.offerBannerBody).toContain(`Jahres${shy}diagramme`);
   });
 });

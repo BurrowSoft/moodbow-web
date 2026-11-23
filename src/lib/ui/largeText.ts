@@ -36,15 +36,23 @@ export const LABEL_TRACKING = "tracking-wide max-[13em]:tracking-normal";
 // The Plus card (Me, and Today's during the offer; UX 23 Nov, fixed before 1 Dec, when the Christmas offer shows to
 // everyone: its "CHRISTMAS SPECIAL OFFER" tag ran 75 px off a 320 px phone at 300 %). A card under decision 231: capped,
 // and sized in em inside, so at 300 % on a phone its title is 36 px, its text 32 px, its tag and small print 28 px (the
-// normal size and wide screens as before). The tag's row wraps, so the tag takes its own line under the lights when it
-// doesn't fit beside them. Measured in Chromium and WebKit in en, fr, es, pt-BR, de and it: WebKit (Safari) didn't
-// hyphenate the German compounds wider than a line, so de.json carries soft hyphens in them ("Weih·nachts·angebot",
-// "Jahres·diagramme").
+// normal size and wide screens as before). The tag's row wraps, so the tag can take its own line under its icons.
+// Measured in Chromium and WebKit in en, fr, es, pt-BR, de and it: WebKit (Safari) didn't hyphenate the German compounds
+// wider than a line, so de.json carries a soft hyphen in each ("Weihnachts·angebot", "Jahres·diagramme").
 export const PLUS_CARD = `relative space-y-2 rounded-3xl p-[20px] ${LARGE_TEXT_CAP}`;
 export const PLUS_CARD_TAG_ROW = "flex flex-wrap items-center gap-x-2 gap-y-1 pr-[48px]";
-// flex-1 (a zero basis): whether the tag fits beside the lights is judged by its longest word, not its whole line, so at
-// the normal size it stays beside them and wraps there as before; only a word too wide for that room sends it under.
-export const PLUS_CARD_TAG = `flex-1 text-[0.875em] leading-[calc(1.25/0.875)] font-medium uppercase ${LABEL_TRACKING}`;
+// The tag; with one of the two below, for where it sits.
+export const PLUS_CARD_TAG = `text-[0.875em] leading-[calc(1.25/0.875)] font-medium uppercase ${LABEL_TRACKING}`;
+// "Moodbow Plus" beside the arcs: flex-1 (a zero basis), so whether it fits there is judged by its longest word, not its
+// whole line. Two words: two lines at most.
+export const PLUS_CARD_PLUS_TAG = "flex-1";
+// The offer's tag (UX, 23 Nov, after the Web Tester's de row: under the lights whenever it can't fit on two lines beside
+// them). It stays beside the lights only with 10em of its own size there, else it takes its own line under them. 10em is
+// the room its longest language needs for two lines plus a margin: it "OFFERTA SPECIALE / DI NATALE" 9.32em, then es and
+// pt-BR 8.78em (Chromium and WebKit alike). In em, so it holds at every text size and width. e2e/large-text.spec.ts sweeps
+// it in every language, 320–430 px × 100–300 %. At the normal size Me's card keeps it beside (11.1em there on a 320 px
+// phone); Today's on a 320 px phone, with the tree too (9em), puts it under (UX: fine).
+export const PLUS_CARD_OFFER_TAG = "flex-[1_1_10em]";
 export const PLUS_CARD_TITLE = "pr-[48px] text-[1.125em] font-medium leading-snug";
 export const PLUS_CARD_SMALL = "text-center text-[0.875em] leading-[calc(1.25/0.875)]";
 // The Plus screen's Christmas strip: its lights (decoration) step aside at large text, so the offer's name has their

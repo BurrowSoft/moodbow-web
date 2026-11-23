@@ -6,8 +6,9 @@ import es from "../src/messages/es.json";
 import fr from "../src/messages/fr.json";
 import it from "../src/messages/it.json";
 import pt from "../src/messages/pt-br.json";
+import th from "../src/messages/th.json";
 import { dialogButton } from "../src/lib/ui/dialogButton";
-import { BO_HEADING, DAY_ADD_ENTRY, LABEL_TRACKING, LOCKED_ROW_LABEL, ME_LOCKED_ROW, OFFER_STRIP_LIGHTS, PLUS_CARD, PLUS_CARD_SMALL, PLUS_CARD_TAG, PLUS_CARD_TAG_ROW, PLUS_CARD_TITLE, WEEK_DAY, WEEK_DAY_LABEL, WEEK_DAYS, WEEK_HEADING, WEEK_SUMMARY, YEAR_MONTH, YEAR_MONTH_LABEL, YEAR_STRIP } from "../src/lib/ui/largeText";
+import { BO_HEADING, DAY_ADD_ENTRY, LABEL_TRACKING, LOCKED_ROW_LABEL, ME_LOCKED_ROW, OFFER_STRIP_LIGHTS, PLUS_CARD, PLUS_CARD_OFFER_TAG, PLUS_CARD_PLUS_TAG, PLUS_CARD_SMALL, PLUS_CARD_TAG, PLUS_CARD_TAG_ROW, PLUS_CARD_TITLE, WEEK_DAY, WEEK_DAY_LABEL, WEEK_DAYS, WEEK_HEADING, WEEK_SUMMARY, YEAR_MONTH, YEAR_MONTH_LABEL, YEAR_STRIP } from "../src/lib/ui/largeText";
 
 // The browser's own text setting on a 320 px phone, on the pages someone with large
 // text needs first. Sign in's button scrolled /sign-in sideways by up to 194 px (Web
@@ -690,10 +691,11 @@ test("large text at 320 px / 300 %: the Plus card, the uppercase labels and the 
   await page.setViewportSize({ width: 320, height: 640 });
   await cdp.send("Page.setFontSizes", { fontSizes: { standard: 48, fixed: 39 } });
   const lights = '<svg width="44" height="18" class="shrink-0" aria-hidden="true"></svg>';
+  const arcs = '<svg width="22" height="22" class="shrink-0" aria-hidden="true"></svg>';
   for (const [language, m] of [["/", en], ["/fr", fr], ["/es", es], ["/pt-br", pt], ["/de", de], ["/it", it]] as const) {
     const p = m.plus;
     const card = (offer: boolean) =>
-      `<section class="${PLUS_CARD} ${offer ? "bg-[#1E5B45] text-white" : "bg-pill"}"><div class="${PLUS_CARD_TAG_ROW}">${lights}<span class="${PLUS_CARD_TAG}">${offer ? p.offerLabel : p.label}</span></div>` +
+      `<section class="${PLUS_CARD} ${offer ? "bg-[#1E5B45] text-white" : "bg-pill"}"><div class="${PLUS_CARD_TAG_ROW}">${offer ? lights : arcs}<span class="${PLUS_CARD_TAG} ${offer ? PLUS_CARD_OFFER_TAG : PLUS_CARD_PLUS_TAG}">${offer ? p.offerLabel : p.label}</span></div>` +
       `<h2 class="${PLUS_CARD_TITLE}">${offer ? p.offerBannerTitle.replace("{offer}", "12,99 €") : p.bannerTitle}</h2><p>${offer ? p.offerBannerBody : p.bannerBody}</p>` +
       `<a href="#" class="${dialogButton(true)} w-full">${offer ? p.offerSee : p.tryFree}</a><p class="${PLUS_CARD_SMALL}">${(offer ? p.offerSmall : p.thenPrice).replace("{price}", "29,99 €")}</p></section>`;
     const month = new Intl.DateTimeFormat(language === "/" ? "en" : language.slice(1), { month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(Date.UTC(2026, 8, 1)));
@@ -732,8 +734,74 @@ test("large text at 320 px / 300 %: the Plus card, the uppercase labels and the 
   });
   expect(tag).toEqual({ size: "14px", spacing: "0.35px", beside: true });
   function card100() {
-    return `<section class="${PLUS_CARD} bg-[#1E5B45] text-white"><div class="${PLUS_CARD_TAG_ROW}">${lights}<span class="${PLUS_CARD_TAG}">${en.plus.offerLabel}</span></div></section>`;
+    return `<section class="${PLUS_CARD} bg-[#1E5B45] text-white"><div class="${PLUS_CARD_TAG_ROW}">${lights}<span class="${PLUS_CARD_TAG} ${PLUS_CARD_OFFER_TAG}">${en.plus.offerLabel}</span></div></section>`;
   }
+});
+
+// UX, 23 Nov (#422, after the Web Tester's de row): the offer's tag sits beside the lights only where it fits there on
+// two lines, else on its own line under them, at every size and width. Me's card (the lights), Today's during the offer
+// (the tree and the lights) and the free card's "Moodbow Plus" (the arcs), in every language, on phones 320–430 px wide
+// at 100–300 %, with the app's stylesheet (its 13em rules live, the app's 12 px gutters under 360 px, else 16): beside
+// means two lines at most, and nothing sticks out. A longer label one day fails here. At the normal size the tag stays
+// beside the lights as on the board, except Today's on a 320 px phone (9em of room there; UX: under is fine); at 300 %
+// on a 320 px phone the offer's goes under them (the Web Tester's row).
+test("the Plus card's tag beside its icons only on two lines: every language, 320–430 px, 100–300 %", async ({ page, browserName }, testInfo) => {
+  test.skip(browserName !== "chromium" || testInfo.project.name !== "desktop", "Page.setFontSizes is Chromium's; once is enough");
+  test.setTimeout(240_000);
+  const cdp = await page.context().newCDPSession(page);
+  const tree = '<svg width="22" height="26" class="shrink-0" aria-hidden="true"></svg>';
+  const lights = '<svg width="44" height="18" class="shrink-0" aria-hidden="true"></svg>';
+  const arcs = '<svg width="22" height="22" class="shrink-0" aria-hidden="true"></svg>';
+  const card = (name: string, icons: string, kind: string, label: string) => `<section data-card="${name}" class="${PLUS_CARD}"><div class="${PLUS_CARD_TAG_ROW}">${icons}<span data-tag class="${PLUS_CARD_TAG} ${kind}">${label}</span></div></section>`;
+  const wrong: string[] = [];
+  const under100: string[] = [];
+  const beside300: string[] = [];
+  for (const [language, m] of [["/", en], ["/fr", fr], ["/es", es], ["/pt-br", pt], ["/de", de], ["/it", it], ["/th", th]] as const) {
+    const cards = [card("me", lights, PLUS_CARD_OFFER_TAG, m.plus.offerLabel), card("today", tree + lights, PLUS_CARD_OFFER_TAG, m.plus.offerLabel), card("free", arcs, PLUS_CARD_PLUS_TAG, m.plus.label)].join("");
+    await page.goto(language);
+    for (const width of [320, 360, 375, 390, 412, 430]) {
+      await page.setViewportSize({ width, height: 800 });
+      for (const percent of [100, 112.5, 125, 137.5, 150, 162.5, 175, 200, 250, 300]) {
+        const root = (16 * percent) / 100;
+        await cdp.send("Page.setFontSizes", { fontSizes: { standard: root, fixed: Math.round((13 * percent) / 100) } });
+        const at = `${language === "/" ? "/en" : language} ${width} px / ${percent} %`;
+        const got = await page.evaluate(
+          ([inner, html]) => {
+            document.body.innerHTML = `<div style="width:${inner}px">${html}</div>`;
+            return {
+              root: getComputedStyle(document.documentElement).fontSize,
+              large: matchMedia("(max-width: 13em)").matches,
+              cards: [...document.querySelectorAll<HTMLElement>("[data-card]")].map((s) => {
+                const tag = s.querySelector<HTMLElement>("[data-tag]")!, icons = [...s.querySelectorAll("svg")], t = tag.getBoundingClientRect();
+                const icon = icons[icons.length - 1].getBoundingClientRect();
+                const edge = s.getBoundingClientRect().right - parseFloat(getComputedStyle(s).paddingRight);
+                return {
+                  name: s.dataset.card!,
+                  beside: t.top < icon.bottom && t.left >= icon.right - 0.5,
+                  lines: Math.round(t.height / parseFloat(getComputedStyle(tag).lineHeight)),
+                  outside: t.right > edge + 0.5 || tag.scrollWidth > tag.clientWidth + 0.5,
+                };
+              }),
+            };
+          },
+          [String(width - 2 * (width < 360 ? 12 : 16)), cards] as const,
+        );
+        // The browser is at the size asked for, and the 13em rules are live exactly where they should be.
+        expect(got.root, at).toBe(`${root}px`);
+        expect(got.large, `${at}: the 13em rules`).toBe(width < 13 * root);
+        for (const c of got.cards) {
+          if ((c.beside && c.lines > 2) || c.outside) wrong.push(`${at} ${c.name}: ${c.outside ? "outside its card" : `beside in ${c.lines} lines`}`);
+          if (percent === 100 && !c.beside) under100.push(`${at} ${c.name}`);
+          if (percent === 300 && width === 320 && c.name !== "free" && c.beside) beside300.push(`${at} ${c.name}`);
+        }
+      }
+    }
+  }
+  expect(wrong, "beside its icons in more than two lines, or outside its card").toEqual([]);
+  expect(under100, "under its icons at the normal size: only Today's on a 320 px phone").toEqual(
+    ["/en", "/fr", "/es", "/pt-br", "/de", "/it", "/th"].map((l) => `${l} 320 px / 100 % today`),
+  );
+  expect(beside300, "the offer's tag beside the lights at 300 % on a 320 px phone").toEqual([]);
 });
 
 // Your year's colour strip (the Web Tester's D2, UX 20 Nov): at large text a 4×3 grid, every month's label whole on one
