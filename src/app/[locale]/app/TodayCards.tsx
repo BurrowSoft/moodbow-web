@@ -8,6 +8,7 @@ import { CHECKIN_SAVED_EVENT, isLowMood, type CheckInSavedDetail } from "@/lib/j
 import { markSetupLaterDone, readSetupLaterDone } from "@/lib/journal/setupLater";
 import type { PlusOfferPrices } from "@/lib/plus/page";
 import { PlusBanner, useClosedToday } from "./me/PlusInMe";
+import { LABEL_TRACKING } from "@/lib/ui/largeText";
 
 // Today's Plus card on first landing (1.3 §6): the same card as Me's, closed for the day on either.
 // The server decides whether it may show at all (free, Plus row read, nothing flagged or low saved
@@ -36,7 +37,7 @@ export function TodayPlusCard({ trial, price, offer = null, date }: { trial: boo
           <path d="M6 6l12 12M18 6L6 18" />
         </svg>
       </button>
-      <p className="text-xs font-medium tracking-wide text-accent uppercase">{t("label")}</p>
+      <p className={`text-xs font-medium ${LABEL_TRACKING} text-accent uppercase`}>{t("label")}</p>
       <h2 id="today-plus-card-title" className="font-medium text-text">
         <Link href="/app/me/plus" data-testid="today-plus-try" className="underline-offset-4 hover:underline">
           {t("todayCardTitle")}

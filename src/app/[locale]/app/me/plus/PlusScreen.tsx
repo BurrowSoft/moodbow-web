@@ -10,6 +10,7 @@ import type { PlusView } from "@/lib/plus/view";
 import { FESTIVE_CARD, Lights, Tree } from "../../PlusSheet";
 import { SAVE_WAIT_MS } from "@/lib/ui/withTimeout";
 import { countTap } from "@/lib/analyticsEvents";
+import { LABEL_TRACKING, OFFER_STRIP_LIGHTS } from "@/lib/ui/largeText";
 
 // Free rows, then what Plus adds: "your journal is free, Insights come with Plus" (Vitor, 14 Nov;
 // specs/1.3-offer-review-voice-taps.md §2). No AI rows in any comparison: the AI allowance rules
@@ -235,7 +236,10 @@ export function PlusScreen({ view, price, offer = null, started }: { view: PlusV
             <span className="block font-medium text-[#F3D27A]">{t("offerLabel")}</span>
             <span className="block text-[0.875em]">{t("offerStripBody")}</span>
           </span>
-          <Lights />
+          {/* Decoration: out of the way at large text, so the offer's name has the room (largeText.ts). */}
+          <span className={OFFER_STRIP_LIGHTS}>
+            <Lights />
+          </span>
         </div>
         {/* Dropped on small screens and at large text: the button already says it (Vitor). */}
         {!large && (
@@ -356,7 +360,7 @@ export function PlusScreen({ view, price, offer = null, started }: { view: PlusV
               304, then 220-300 under a pinned top of 276; the price and button say it's Plus).
               During the offer there's none: the footer's Christmas strip carries it (Vitor). */}
           {!offer && (
-            <p data-testid="plus-eyebrow" className={large ? "sr-only" : "text-sm font-medium tracking-wide text-accent uppercase"}>
+            <p data-testid="plus-eyebrow" className={large ? "sr-only" : `text-sm font-medium ${LABEL_TRACKING} text-accent uppercase`}>
               {t("label")}
             </p>
           )}

@@ -8,6 +8,7 @@ import type { PlusOfferPrices } from "@/lib/plus/page";
 import type { PlusView } from "@/lib/plus/view";
 import { FESTIVE_CARD, Lights, Tree } from "../PlusSheet";
 import { SAVE_WAIT_MS } from "@/lib/ui/withTimeout";
+import { PLUS_CARD, PLUS_CARD_SMALL, PLUS_CARD_TAG, PLUS_CARD_TAG_ROW, PLUS_CARD_TITLE } from "@/lib/ui/largeText";
 
 // Moodbow Plus in Me (decision 246, mockups 1 and 5), below Get help now
 // (help is always first). One of:
@@ -233,7 +234,8 @@ export function PlusBanner({ trial, price, offer = null, id, tryId, compact = fa
   const [closed, close] = useClosedToday();
   if (closed) return null;
   return (
-    <section aria-labelledby={id} data-testid={id} data-offer={offer ? "" : undefined} className={`relative space-y-2 rounded-3xl p-[20px] ${offer ? FESTIVE_CARD : "bg-pill"}`}>
+    // A card under decision 231 (PLUS_CARD, largeText.ts): capped at large text, its text sized in em inside.
+    <section aria-labelledby={id} data-testid={id} data-offer={offer ? "" : undefined} className={`${PLUS_CARD} ${offer ? FESTIVE_CARD : "bg-pill"}`}>
       <button
         type="button"
         aria-label={t("bannerClose")}
@@ -245,7 +247,7 @@ export function PlusBanner({ trial, price, offer = null, id, tryId, compact = fa
           <path d="M6 6l12 12M18 6L6 18" />
         </svg>
       </button>
-      <div className="flex items-center gap-2 pr-[48px]">
+      <div className={PLUS_CARD_TAG_ROW}>
         {offer ? (
           <>
             {compact && <Tree />}
@@ -254,16 +256,16 @@ export function PlusBanner({ trial, price, offer = null, id, tryId, compact = fa
         ) : (
           <Arcs />
         )}
-        <span className={`text-sm font-medium tracking-wide uppercase ${offer ? "text-[#F3D27A]" : "text-accent"}`}>{offer ? t("offerLabel") : t("label")}</span>
+        <span className={`${PLUS_CARD_TAG} ${offer ? "text-[#F3D27A]" : "text-accent"}`}>{offer ? t("offerLabel") : t("label")}</span>
       </div>
-      <h2 id={id} className="pr-[48px] text-lg font-medium leading-snug">
+      <h2 id={id} className={PLUS_CARD_TITLE}>
         {offer ? t("offerBannerTitle", { offer: offer.firstYear }) : t("bannerTitle")}
       </h2>
       {!(offer && compact) && <p>{offer ? t("offerBannerBody") : t("bannerBody")}</p>}
       <Link href="/app/me/plus" data-testid={tryId} className={`${dialogButton(true)} w-full`}>
         {offer ? t("offerSee") : trial ? t("tryFree") : t("seePlus")}
       </Link>
-      <p className={`text-center text-sm ${offer ? "text-white" : "text-muted"}`}>
+      <p className={`${PLUS_CARD_SMALL} ${offer ? "text-white" : "text-muted"}`}>
         {offer ? t(compact ? "offerCardSmall" : "offerSmall", { price: offer.price }) : trial ? t("thenPrice", { price }) : t("priceYear", { price })}
       </p>
     </section>

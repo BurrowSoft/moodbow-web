@@ -9,6 +9,7 @@ import { withOrigin } from "@/lib/journal/origin";
 import { dayLabel, groupByMonth, monthLabel, type TimelineDay } from "@/lib/journal/timeline";
 import { MonthShare, type MonthCounts } from "./MonthShare";
 import { PrintMonthLink } from "./PrintMonthLink";
+import { LABEL_TRACKING } from "@/lib/ui/largeText";
 import { loadTimeline } from "./actions";
 
 // The Timeline (M5, decision 161): days newest first under month headers
@@ -130,7 +131,7 @@ export function TimelineList({ initial, initialDone, momentsOnly, dateLocaleTag,
       {groupByMonth(days).map(({ month, days: monthDays }) => (
         <section key={month} aria-labelledby={`month-${month}`}>
           <div className="flex flex-wrap items-center justify-between gap-x-4">
-            <h2 id={`month-${month}`} className="text-sm font-medium uppercase tracking-wide text-muted">
+            <h2 id={`month-${month}`} className={`text-sm font-medium uppercase ${LABEL_TRACKING} text-muted`}>
               {monthLabel(month, dateLocaleTag)}
             </h2>
             <div className="flex flex-wrap items-center gap-x-4">

@@ -1,9 +1,13 @@
 import { expect, test, type Page } from "@playwright/test";
 import countries from "../content/contracts/countries.json";
+import de from "../src/messages/de.json";
+import en from "../src/messages/en.json";
+import es from "../src/messages/es.json";
 import fr from "../src/messages/fr.json";
+import it from "../src/messages/it.json";
 import pt from "../src/messages/pt-br.json";
 import { dialogButton } from "../src/lib/ui/dialogButton";
-import { BO_HEADING, DAY_ADD_ENTRY, LOCKED_ROW_LABEL, ME_LOCKED_ROW, WEEK_DAY, WEEK_DAY_LABEL, WEEK_DAYS, WEEK_HEADING, WEEK_SUMMARY, YEAR_MONTH, YEAR_MONTH_LABEL, YEAR_STRIP } from "../src/lib/ui/largeText";
+import { BO_HEADING, DAY_ADD_ENTRY, LABEL_TRACKING, LOCKED_ROW_LABEL, ME_LOCKED_ROW, OFFER_STRIP_LIGHTS, PLUS_CARD, PLUS_CARD_SMALL, PLUS_CARD_TAG, PLUS_CARD_TAG_ROW, PLUS_CARD_TITLE, WEEK_DAY, WEEK_DAY_LABEL, WEEK_DAYS, WEEK_HEADING, WEEK_SUMMARY, YEAR_MONTH, YEAR_MONTH_LABEL, YEAR_STRIP } from "../src/lib/ui/largeText";
 
 // The browser's own text setting on a 320 px phone, on the pages someone with large
 // text needs first. Sign in's button scrolled /sign-in sideways by up to 194 px (Web
@@ -662,6 +666,63 @@ test("large text at 320 px / 300 %: no word in the fixed components is cut witho
   await cdp.send("Page.setFontSizes", { fontSizes: { standard: 16, fixed: 13 } });
   await mountIn(page, "/fr", 252, `<span data-day-form="short">lun.</span><span data-day-form="narrow">L</span>`);
   expect(await page.evaluate(() => [...document.querySelectorAll("[data-day-form]")].map((s) => getComputedStyle(s).display))).toEqual(["inline", "none"]);
+});
+
+// The Plus card and the uppercase labels at large text (UX, 23 Nov: fixed before 1 Dec, when the Christmas offer shows to
+// everyone; its tag ran 75 px off a 320 px phone at 300 %). Each at the width it has on its page at 320 px: the app's
+// 12 px gutters (296 px; the card's own 20 px padding inside), and the Plus screen's footer (the whole 320 px, 12 px each
+// side, its text capped at 32 px) holding the strip. Every language the app shows.
+test("large text at 320 px / 300 %: the Plus card, the uppercase labels and the Christmas strip stay inside, in every language", async ({ page, browserName }, testInfo) => {
+  test.skip(browserName !== "chromium" || testInfo.project.name !== "desktop", "Page.setFontSizes is Chromium's; once is enough");
+  test.setTimeout(240_000);
+  const cdp = await page.context().newCDPSession(page);
+  await page.setViewportSize({ width: 320, height: 640 });
+  await cdp.send("Page.setFontSizes", { fontSizes: { standard: 48, fixed: 39 } });
+  const lights = '<svg width="44" height="18" class="shrink-0" aria-hidden="true"></svg>';
+  for (const [language, m] of [["/", en], ["/fr", fr], ["/es", es], ["/pt-br", pt], ["/de", de], ["/it", it]] as const) {
+    const p = m.plus;
+    const card = (offer: boolean) =>
+      `<section class="${PLUS_CARD} ${offer ? "bg-[#1E5B45] text-white" : "bg-pill"}"><div class="${PLUS_CARD_TAG_ROW}">${lights}<span class="${PLUS_CARD_TAG}">${offer ? p.offerLabel : p.label}</span></div>` +
+      `<h2 class="${PLUS_CARD_TITLE}">${offer ? p.offerBannerTitle.replace("{offer}", "12,99 €") : p.bannerTitle}</h2><p>${offer ? p.offerBannerBody : p.bannerBody}</p>` +
+      `<a href="#" class="${dialogButton(true)} w-full">${offer ? p.offerSee : p.tryFree}</a><p class="${PLUS_CARD_SMALL}">${(offer ? p.offerSmall : p.thenPrice).replace("{price}", "29,99 €")}</p></section>`;
+    const month = new Intl.DateTimeFormat(language === "/" ? "en" : language.slice(1), { month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(Date.UTC(2026, 8, 1)));
+    const mounted: [string, number, string][] = [
+      ["Me's Christmas card", 296, card(true)],
+      ["Me's Plus card", 296, card(false)],
+      ["Today's Plus tag", 296, `<section class="relative rounded-2xl bg-pill py-[12px] ps-[16px] pe-[52px]"><p class="text-xs font-medium ${LABEL_TRACKING} text-accent uppercase">${p.label}</p></section>`],
+      ["Timeline's month", 296, `<h2 class="text-sm font-medium uppercase ${LABEL_TRACKING} text-muted">${month}</h2>`],
+      [
+        "the Plus screen's Christmas strip",
+        320,
+        `<div class="px-[12px] [font-size:min(1rem,max(10vw,32px))]"><div class="flex items-center gap-[12px] rounded-2xl px-[12px] py-[8px] text-left bg-[#1E5B45] text-white"><svg width="22" height="26" class="shrink-0" aria-hidden="true"></svg><span class="min-w-0 flex-1"><span class="block font-medium text-[#F3D27A]">${p.offerLabel}</span><span class="block text-[0.875em]">${p.offerStripBody}</span></span><span class="${OFFER_STRIP_LIGHTS}">${lights}</span></div></div>`,
+      ],
+    ];
+    for (const [name, width, html] of mounted) {
+      await mountIn(page, language, width, html);
+      const where = `${language === "/" ? "/en" : language} ${name}`;
+      expect(await page.evaluate(() => getComputedStyle(document.documentElement).fontSize), where).toBe("48px");
+      expect.soft(await cutWords(page, "#probe"), where).toEqual([]);
+      expect.soft(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth), where).toBe(0);
+      // Nothing sticks out of its own width (a word past the card's edge shows even where the page can't scroll).
+      const out = await page.evaluate(() => {
+        const probe = document.getElementById("probe")!.getBoundingClientRect();
+        return [...document.querySelectorAll("#probe *")].filter((e) => !e.closest("svg") && e.getBoundingClientRect().right > probe.right + 0.5).map((e) => `${e.tagName.toLowerCase()} +${Math.round(e.getBoundingClientRect().right - probe.right)}px`);
+      });
+      expect.soft(out, `${where}: inside its width`).toEqual([]);
+    }
+  }
+  // At the normal size the tag keeps its size and wide spacing, and stays beside the lights (as before; at 300 % it went
+  // under them above).
+  await cdp.send("Page.setFontSizes", { fontSizes: { standard: 16, fixed: 13 } });
+  await mountIn(page, "/", 296, card100());
+  const tag = await page.evaluate(() => {
+    const s = document.querySelector("#probe span")!, svg = document.querySelector("#probe svg")!, cs = getComputedStyle(s);
+    return { size: cs.fontSize, spacing: cs.letterSpacing, beside: s.getBoundingClientRect().left > svg.getBoundingClientRect().right && s.getBoundingClientRect().top < svg.getBoundingClientRect().bottom };
+  });
+  expect(tag).toEqual({ size: "14px", spacing: "0.35px", beside: true });
+  function card100() {
+    return `<section class="${PLUS_CARD} bg-[#1E5B45] text-white"><div class="${PLUS_CARD_TAG_ROW}">${lights}<span class="${PLUS_CARD_TAG}">${en.plus.offerLabel}</span></div></section>`;
+  }
 });
 
 // Your year's colour strip (the Web Tester's D2, UX 20 Nov): at large text a 4×3 grid, every month's label whole on one

@@ -30,5 +30,25 @@ export const WEEK_DAY_LABEL = "text-[0.75em] text-muted";
 export const YEAR_STRIP = "mt-4 grid grid-cols-6 gap-[8px] sm:grid-cols-12 max-[13em]:grid-cols-4";
 export const YEAR_MONTH = "flex flex-col items-center gap-[4px]";
 export const YEAR_MONTH_LABEL = "max-w-full text-center leading-tight text-muted [font-size:min(0.75rem,max(6vw,12px))] [overflow-wrap:normal]";
+// An uppercase label's letter-spacing: wide at the normal size, normal at large text (a 13em column), where wide
+// capitals cost a line its room (UX, 23 Nov: modest). The Plus card's tag, Today's tag, Timeline's months.
+export const LABEL_TRACKING = "tracking-wide max-[13em]:tracking-normal";
+// The Plus card (Me, and Today's during the offer; UX 23 Nov, fixed before 1 Dec, when the Christmas offer shows to
+// everyone: its "CHRISTMAS SPECIAL OFFER" tag ran 75 px off a 320 px phone at 300 %). A card under decision 231: capped,
+// and sized in em inside, so at 300 % on a phone its title is 36 px, its text 32 px, its tag and small print 28 px (the
+// normal size and wide screens as before). The tag's row wraps, so the tag takes its own line under the lights when it
+// doesn't fit beside them. Measured in Chromium and WebKit in en, fr, es, pt-BR, de and it: WebKit (Safari) didn't
+// hyphenate the German compounds wider than a line, so de.json carries soft hyphens in them ("Weih·nachts·angebot",
+// "Jahres·diagramme").
+export const PLUS_CARD = `relative space-y-2 rounded-3xl p-[20px] ${LARGE_TEXT_CAP}`;
+export const PLUS_CARD_TAG_ROW = "flex flex-wrap items-center gap-x-2 gap-y-1 pr-[48px]";
+// flex-1 (a zero basis): whether the tag fits beside the lights is judged by its longest word, not its whole line, so at
+// the normal size it stays beside them and wraps there as before; only a word too wide for that room sends it under.
+export const PLUS_CARD_TAG = `flex-1 text-[0.875em] leading-[calc(1.25/0.875)] font-medium uppercase ${LABEL_TRACKING}`;
+export const PLUS_CARD_TITLE = "pr-[48px] text-[1.125em] font-medium leading-snug";
+export const PLUS_CARD_SMALL = "text-center text-[0.875em] leading-[calc(1.25/0.875)]";
+// The Plus screen's Christmas strip: its lights (decoration) step aside at large text, so the offer's name has their
+// room (de "Weihnachtsangebot" at the footer's 32 px).
+export const OFFER_STRIP_LIGHTS = "flex shrink-0 max-[13em]:hidden";
 // Bo's heading: its own row where the page is a 13em column, where "Moodbow" fits, so the name stays whole.
 export const BO_HEADING = `min-w-0 flex-1 font-medium leading-[1.33] text-text outline-none [font-size:min(1.5rem,max(10vw,24px,1rem))] [overflow-wrap:anywhere] max-[13em]:basis-full ${NAMES_FIT}`;

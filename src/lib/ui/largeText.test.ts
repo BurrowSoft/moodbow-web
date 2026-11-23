@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import { accountDeletionTextLocale } from "../accountDeletion";
 import { TOPIC_MESSAGE_KEYS, TOPICS } from "../helpContent";
 import { dialogButton } from "./dialogButton";
-import { BO_HEADING, DAY_ADD_ENTRY, LARGE_TEXT_CAP, LOCKED_ROW_LABEL, ME_LOCKED_ROW, NAMES_FIT, WEEK_SUMMARY } from "./largeText";
+import { BO_HEADING, DAY_ADD_ENTRY, LABEL_TRACKING, LARGE_TEXT_CAP, LOCKED_ROW_LABEL, ME_LOCKED_ROW, NAMES_FIT, OFFER_STRIP_LIGHTS, PLUS_CARD, PLUS_CARD_SMALL, PLUS_CARD_TAG, PLUS_CARD_TAG_ROW, PLUS_CARD_TITLE, WEEK_SUMMARY } from "./largeText";
 
 // UX, 20 Nov (option A, after the Web Tester's fr/pt-BR sweep at 320 px / 300 %). The layout itself is checked in a
 // real browser (e2e/large-text.spec.ts); these pin the pieces it relies on.
@@ -15,7 +15,7 @@ const css = readFileSync("src/app/globals.css", "utf8").replace(/\s+/g, " ");
 describe("decision 231's cap where words were cut", () => {
   it("stops at 10vw, never under 32 px, in em (the normal size is unchanged), and lets names stay whole", () => {
     expect(LARGE_TEXT_CAP).toBe(`${NAMES_FIT} [font-size:min(1em,max(10vw,32px))]`);
-    for (const [name, classes] of Object.entries({ DAY_ADD_ENTRY, LOCKED_ROW_LABEL, WEEK_SUMMARY, dialogButton: dialogButton(), primary: dialogButton(true) })) {
+    for (const [name, classes] of Object.entries({ DAY_ADD_ENTRY, LOCKED_ROW_LABEL, WEEK_SUMMARY, PLUS_CARD, dialogButton: dialogButton(), primary: dialogButton(true) })) {
       expect(classes, name).toContain(LARGE_TEXT_CAP);
     }
     expect(BO_HEADING).toContain(NAMES_FIT);
@@ -30,6 +30,50 @@ describe("decision 231's cap where words were cut", () => {
     expect(css).toContain(".names-fit .whole-name { overflow-wrap: normal; }");
     expect(css).toContain("@media (max-width: 13em) { body { hyphens: auto; hyphenate-limit-chars: 8 3 3;");
     expect(css).toContain('[data-day-form="narrow"] { display: none; } @media (max-width: 13em) { [data-day-form="short"] { display: none; } [data-day-form="narrow"] { display: inline; } }');
+  });
+});
+
+// The uppercase labels at large text (UX, 23 Nov, before 1 Dec: the Christmas tag ran 75 px off a 320 px phone at
+// 300 %). The layout in every language is checked in a real browser (e2e/large-text.spec.ts); these pin its pieces.
+describe("uppercase labels at large text", () => {
+  it("the Plus card sizes its text in em inside the cap; its tag's row wraps; the tag's spacing is normal at large text", () => {
+    expect(LABEL_TRACKING).toBe("tracking-wide max-[13em]:tracking-normal");
+    expect(PLUS_CARD_TAG).toContain(LABEL_TRACKING);
+    expect(PLUS_CARD_TAG).toContain("text-[0.875em]");
+    expect(PLUS_CARD_TITLE).toContain("text-[1.125em]");
+    expect(PLUS_CARD_SMALL).toContain("text-[0.875em]");
+    for (const classes of [PLUS_CARD_TAG, PLUS_CARD_TITLE, PLUS_CARD_SMALL]) expect(classes).not.toMatch(/\btext-(xs|sm|base|lg|xl)\b/);
+    expect(PLUS_CARD_TAG_ROW).toContain("flex-wrap");
+    expect(OFFER_STRIP_LIGHTS).toContain("max-[13em]:hidden");
+  });
+  it("no uppercase, wide-tracked class string in src keeps its wide spacing at large text", () => {
+    const files: string[] = [];
+    const walk = (dir: string) => {
+      for (const e of readdirSync(dir, { withFileTypes: true })) {
+        const p = join(dir, e.name);
+        if (e.isDirectory()) walk(p);
+        else if (p.endsWith(".tsx") && !p.endsWith(".test.tsx")) files.push(p);
+      }
+    };
+    walk("src");
+    const wide: string[] = [];
+    for (const file of files) {
+      readFileSync(file, "utf8")
+        .split("\n")
+        .forEach((line, i) => {
+          for (const segment of line.split(/["'`]/)) {
+            if (/\buppercase\b/.test(segment) && /\btracking-(wide|wider|widest)\b/.test(segment) && !segment.includes("max-[13em]:tracking-normal")) wide.push(`${file}:${i + 1}`);
+          }
+        });
+    }
+    expect(wide).toEqual([]);
+  });
+  it("the German compounds wider than a line at 300 % carry soft hyphens (WebKit didn't hyphenate them)", () => {
+    const plus = (JSON.parse(readFileSync("src/messages/de.json", "utf8")) as { plus: Record<string, string> }).plus;
+    const shy = String.fromCharCode(0xad);
+    expect(plus.offerLabel).toBe(`Weih${shy}nachts${shy}angebot`);
+    expect(plus.offerSmall.startsWith(`Weih${shy}nachts${shy}angebot `)).toBe(true);
+    expect(plus.offerBannerBody).toContain(`Jahres${shy}diagramme`);
   });
 });
 
