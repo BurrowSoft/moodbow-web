@@ -1,4 +1,5 @@
 import { getLocale, getTranslations } from "next-intl/server";
+import { ShortCodeLine } from "@/components/DialByHand";
 import { HelpNumberText } from "@/components/HelpNumberText";
 import { helpLineSize, helplinesFor, isShortCode, telHref } from "@/lib/safety/helplines";
 
@@ -7,26 +8,27 @@ const SIZE = "[font-size:min(1rem,max(10vw,32px))]";
 
 // The card's help, on the page the help button leads to with no script running (#248): that
 // country's numbers from the same list, in the card's words, directly under the heading, as getting
-// someone their number is the point (UX). A code that isn't on the list has none. No script here, so
-// a short code iOS can't dial from a link has both the link and what to do with it.
+// someone their number is the point (UX). A code that isn't on the list has none. A number with * or #
+// (S14, UX 23 Nov): with no script, the link (Android and computers dial it) and how to type it (an iPhone
+// can't); once a script runs, iOS gets the number to type and Copy number, everyone else Copy number under the link.
 export async function HelpNowNumbers({ country }: { country: string | undefined }) {
   const locale = await getLocale();
   const t = await getTranslations("safety");
   const { helpline, emergency } = helplinesFor(country, locale);
   if (!helpline && !emergency) return null;
+  const call = helpline && (
+    <p>
+      <a href={telHref(helpline.dial)} data-testid="help-now-call-helpline" className={`${link} ${helpLineSize(helpline.display)}`}>
+        <HelpNumberText text={t("safetyCall", { name: helpline.name, number: helpline.display })} number={helpline.display} name={helpline.name} />
+      </a>
+    </p>
+  );
   return (
     <div data-testid="help-now-numbers" className={`mt-6 space-y-[12px] ${SIZE}`}>
-      {helpline && (
-        <p>
-          <a href={telHref(helpline.dial)} data-testid="help-now-call-helpline" className={`${link} ${helpLineSize(helpline.display)}`}>
-            <HelpNumberText text={t("safetyCall", { name: helpline.name, number: helpline.display })} number={helpline.display} name={helpline.name} />
-          </a>
-        </p>
-      )}
-      {helpline && isShortCode(helpline.dial) && (
-        <p data-testid="help-now-keypad">
-          <HelpNumberText text={t("safetyDialKeypad", { number: helpline.display })} number={helpline.display} />
-        </p>
+      {helpline && isShortCode(helpline.dial) ? (
+        <ShortCodeLine link={call} how name={helpline.name} display={helpline.display} dial={helpline.dial} testId="help-now-helpline-byhand" dialByHand={t("planDialByHand")} copyLabel={t("planCopyNumber")} copiedLabel={t("planNumberCopied")} lineClass="" />
+      ) : (
+        call
       )}
       {helpline?.hours && <p data-testid="help-now-hours">{helpline.hours}</p>}
       {emergency && (
