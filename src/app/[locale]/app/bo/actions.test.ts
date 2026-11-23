@@ -6,10 +6,21 @@ const rpc = vi.fn(async (_name: string, _args?: object) => ({ error: null as { m
 vi.mock("@/lib/supabase/server", () => ({ createSupabaseServerClient: async () => ({ rpc }) }));
 vi.mock("@/lib/conditions", () => ({ pageGate: () => "draft" }));
 vi.mock("@/lib/journal/gateChanged", () => ({ gateChanged: () => {} }));
-vi.mock("../me/actions", () => ({ setAiEnabled: async () => ({ ok: true }) }));
-const { turnBoOff } = await import("./actions");
+const setAiEnabled = vi.fn<(on: boolean, confirm?: object) => Promise<{ ok: boolean }>>(async () => ({ ok: true }));
+vi.mock("../me/actions", () => ({ setAiEnabled: (on: boolean, confirm?: object) => setAiEnabled(on, confirm) }));
+const { giveBoConsent, turnBoOff } = await import("./actions");
 
-beforeEach(() => rpc.mockClear());
+beforeEach(() => {
+  rpc.mockClear();
+  setAiEnabled.mockClear();
+});
+
+describe("giveBoConsent", () => {
+  it("Bo's own yes is the confirm, at this build's AI version (the AI go-live: no confirm, no consent)", async () => {
+    expect(await giveBoConsent()).toEqual({ ok: true });
+    expect(setAiEnabled).toHaveBeenCalledWith(true, { version: POLICY_VERSIONS.ai });
+  });
+});
 
 describe("turnBoOff", () => {
   it("one call, with the current AI version, and no consent recorded on the side", async () => {

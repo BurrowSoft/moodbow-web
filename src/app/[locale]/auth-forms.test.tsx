@@ -143,14 +143,13 @@ describe("SignUpForm", () => {
     expect(screen.getByTestId("signup-to-signin")).toHaveAttribute("href", "/sign-in");
   });
 
-  it("Create account waits for all three required boxes; the AI box never counts (1.3 §6)", () => {
-    wrap(<SignUpForm askAi healthLink />);
+  it("Create account waits for all three required boxes (1.3 §6); no AI box (AI consent is only in Me → AI)", () => {
+    wrap(<SignUpForm healthLink />);
+    expect(screen.queryByTestId("consent-ai")).toBeNull();
     const submit = screen.getByTestId("signup-submit");
     expect(submit).toBeDisabled();
     fireEvent.click(screen.getByTestId("consent-privacy"));
     fireEvent.click(screen.getByTestId("consent-health"));
-    expect(submit).toBeDisabled();
-    fireEvent.click(screen.getByTestId("consent-ai"));
     expect(submit).toBeDisabled();
     fireEvent.click(screen.getByTestId("consent-age"));
     expect(submit).toBeEnabled();

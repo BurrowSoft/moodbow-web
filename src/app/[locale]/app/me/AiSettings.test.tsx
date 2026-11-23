@@ -14,14 +14,17 @@ vi.mock("./actions", () => ({
   saveFocusAreas: (...a: unknown[]) => saveFocusAreas(...a),
 }));
 const { AiSettings } = await import("./AiSettings");
+const { POLICY_VERSIONS } = await import("@/lib/legalVersions");
 const m = messages.ai;
 
-const renderIt = (on = false, balance = 700) =>
+// consented: the account's AI consent is current (by default, exactly when AI is on).
+const renderIt = (on = false, balance = 700, consented = on) =>
   render(
     <NextIntlClientProvider locale="en" messages={messages}>
-      <AiSettings initial={{ on, tone: "warm", focus: ["sleep"] }} credits={{ balance }} />
+      <AiSettings initial={{ on, tone: "warm", focus: ["sleep"] }} consented={consented} credits={{ balance }} />
     </NextIntlClientProvider>,
   );
+const sheet = () => screen.queryByRole("dialog", { name: m.aiConfirmTitle });
 
 beforeEach(() => {
   for (const fn of [setAiEnabled, recordAiWithdrawal, saveTone, saveFocusAreas]) fn.mockReset().mockResolvedValue({ ok: true });
@@ -40,10 +43,60 @@ describe("Me → AI", () => {
     expect(screen.getByTestId("me-ai-on").closest("section")?.textContent ?? "").not.toMatch(/credit/i);
   });
 
-  it("turning it on saves at once and shows tone and focus", async () => {
+  it("turning it on without a current consent opens the sheet first (UX, 23 Nov, the AI go-live): its title names it, the consent text word for word describes it, focus starts on Not now; nothing is saved yet", () => {
     renderIt(false);
     fireEvent.click(screen.getByTestId("me-ai-on"));
+    const dialog = sheet()!;
+    expect(dialog).toBeInTheDocument();
+    expect(dialog).toHaveAttribute("aria-modal", "true");
+    expect(dialog).toHaveAccessibleDescription(m.consentAiBody);
+    expect(screen.getByTestId("me-ai-sheet-not-now")).toHaveFocus();
+    expect(screen.getByTestId("me-ai-sheet-not-now")).toHaveTextContent(m.aiConfirmNotNow);
+    expect(screen.getByTestId("me-ai-sheet-turn-on")).toHaveTextContent(m.aiConfirmTurnOn);
+    expect(setAiEnabled).not.toHaveBeenCalled();
+    expect(screen.getByTestId("me-ai-on")).not.toBeChecked();
+  });
+
+  it("Not now, Escape or a tap outside: nothing saved, AI stays off, the sheet closes", () => {
+    for (const close of [
+      () => fireEvent.click(screen.getByTestId("me-ai-sheet-not-now")),
+      () => fireEvent.keyDown(document, { key: "Escape" }),
+      () => fireEvent.click(screen.getByTestId("me-ai-sheet-backdrop")),
+    ]) {
+      renderIt(false);
+      fireEvent.click(screen.getByTestId("me-ai-on"));
+      expect(sheet()).toBeInTheDocument();
+      close();
+      expect(sheet()).toBeNull();
+      expect(screen.getByTestId("me-ai-on")).not.toBeChecked();
+      cleanup();
+    }
+    expect(setAiEnabled).not.toHaveBeenCalled();
+    expect(recordAiWithdrawal).not.toHaveBeenCalled();
+  });
+
+  it("a tap inside the sheet doesn't close it", () => {
+    renderIt(false);
+    fireEvent.click(screen.getByTestId("me-ai-on"));
+    fireEvent.click(sheet()!);
+    expect(sheet()).toBeInTheDocument();
+  });
+
+  it("with a consent already current (an Off whose withdrawal didn't go through): no sheet, On saves at once, with no confirm", async () => {
+    renderIt(false, 700, true);
+    fireEvent.click(screen.getByTestId("me-ai-on"));
+    expect(sheet()).toBeNull();
     expect(setAiEnabled).toHaveBeenCalledWith(true);
+    expect(setAiEnabled.mock.calls[0]).toHaveLength(1);
+    expect(await screen.findByTestId("me-ai-tone-warm")).toBeChecked();
+  });
+
+  it("Turn on AI is the one control that saves, with the confirm at this build's version, and shows tone and focus", async () => {
+    renderIt(false);
+    fireEvent.click(screen.getByTestId("me-ai-on"));
+    fireEvent.click(screen.getByTestId("me-ai-sheet-turn-on"));
+    expect(sheet()).toBeNull();
+    expect(setAiEnabled).toHaveBeenCalledWith(true, { version: POLICY_VERSIONS.ai });
     expect(await screen.findByTestId("me-ai-tone-warm")).toBeChecked();
     // Named by the tone, described by its hint (not one run-together name).
     expect(screen.getByTestId("me-ai-tone-warm")).toHaveAccessibleName(messages.ai.toneWarm);
@@ -51,16 +104,30 @@ describe("Me → AI", () => {
     expect(screen.getByTestId("me-ai-focus-sleep")).toHaveAttribute("aria-pressed", "true");
   });
 
-  it("a failed switch goes back to what the account has; Try again resends it (decision 111)", async () => {
+  it("a failed switch goes back to what the account has; Try again resends it, with the sheet's confirm (decision 111)", async () => {
     setAiEnabled.mockResolvedValueOnce({ ok: false });
     renderIt(false);
     fireEvent.click(screen.getByTestId("me-ai-on"));
+    fireEvent.click(screen.getByTestId("me-ai-sheet-turn-on"));
     expect(await screen.findByTestId("me-ai-error")).toHaveTextContent(messages.today.errGeneric);
     expect(screen.getByTestId("me-ai-on")).not.toBeChecked();
     fireEvent.click(screen.getByTestId("me-ai-retry"));
     await waitFor(() => expect(screen.getByTestId("me-ai-on")).toBeChecked());
-    expect(setAiEnabled).toHaveBeenCalledTimes(2);
+    expect(setAiEnabled.mock.calls).toEqual([
+      [true, { version: POLICY_VERSIONS.ai }],
+      [true, { version: POLICY_VERSIONS.ai }],
+    ]);
     expect(screen.queryByTestId("me-ai-error")).toBeNull();
+  });
+
+  it("Off records the withdrawal; the next On asks again (the consent is no longer current)", async () => {
+    renderIt(true);
+    fireEvent.click(screen.getByTestId("me-ai-on"));
+    await waitFor(() => expect(setAiEnabled).toHaveBeenCalledWith(false));
+    await waitFor(() => expect(screen.getByTestId("me-ai-on")).not.toHaveAttribute("aria-disabled", "true"));
+    fireEvent.click(screen.getByTestId("me-ai-on"));
+    expect(sheet()).toBeInTheDocument();
+    expect(setAiEnabled).toHaveBeenCalledTimes(1);
   });
 
   it("off, and only the withdrawal failed: the switch stays off (the account is off); Try again records just the withdrawal (reviewer #33)", async () => {

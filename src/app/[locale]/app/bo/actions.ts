@@ -9,12 +9,14 @@ import { setAiEnabled } from "../me/actions";
 
 // The first open's yes: the AI consent, which also turns AI on (the database's rule,
 // migration 001). The 18+ row is /consent's, and this never ticks or implies it. The
-// function checks both again on every send.
+// function checks both again on every send. Bo's own explicit yes is its confirm (setAiEnabled
+// records a consent only with one, at this build's version: the AI go-live, 23 Nov). Bo stays off
+// (bo-live), so this is a draft-build path only; its new consent is decided before Bo goes live.
 export async function giveBoConsent(): Promise<{ ok: boolean }> {
   if (pageGate("bo-live") === "hidden") return { ok: false };
   const supabase = await createSupabaseServerClient();
   if (!supabase) return { ok: false };
-  const { ok } = await setAiEnabled(true);
+  const { ok } = await setAiEnabled(true, { version: POLICY_VERSIONS.ai });
   if (ok) gateChanged();
   return { ok };
 }

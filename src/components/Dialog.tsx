@@ -22,9 +22,10 @@ export function Dialog({
   initialFocus = "first",
   capText = false,
   defaultColours = false,
+  cancelOnBackdrop = false,
 }: {
   title: string;
-  body?: string;
+  body?: React.ReactNode;
   // Shown between the body and the buttons (the check-in conflict's two versions).
   details?: React.ReactNode;
   onCancel: () => void;
@@ -38,6 +39,9 @@ export function Dialog({
   capText?: boolean;
   // The default theme's colours whatever Plus palette is on (the help card: UX, 11 Nov).
   defaultColours?: boolean;
+  // A tap or click on the dimmed page around it is the cancel action too (Me → AI's consent sheet:
+  // the Reviewer, 23 Nov). Off by default: elsewhere only a button or Escape closes.
+  cancelOnBackdrop?: boolean;
 }) {
   const titleId = useId();
   const bodyId = useId();
@@ -109,7 +113,12 @@ export function Dialog({
   // the first help fits the first screen at large text (UX, #247). No smaller text, no new order. Its
   // corner is in px there: in rem it's 72 px at 300 %, and cut off the title's first letter (Web Tester).
   return createPortal(
-    <div data-default-colours={defaultColours ? "" : undefined} className={`fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center ${capText ? "p-[max(4px,calc(32px-1rem))]" : "p-[16px]"}`}>
+    <div
+      data-default-colours={defaultColours ? "" : undefined}
+      data-testid={testId ? `${testId}-backdrop` : undefined}
+      onClick={cancelOnBackdrop ? (e) => e.target === e.currentTarget && onCancel() : undefined}
+      className={`fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center ${capText ? "p-[max(4px,calc(32px-1rem))]" : "p-[16px]"}`}
+    >
       <div
         ref={ref}
         role="dialog"

@@ -203,13 +203,28 @@ export async function seedTags(email: string, password: string, monday: string, 
 }
 
 // Whether the account holds a granted AI consent, as get_me says.
-export async function aiConsentGranted(email: string, password: string): Promise<boolean> {
-  const user = createClient(URL_, PUBLISHABLE, { auth: { persistSession: false, autoRefreshToken: false } });
-  const { error: signInError } = await user.auth.signInWithPassword({ email, password });
-  if (signInError) throw new Error(`sign-in failed: ${signInError.message}`);
-  const { data, error } = await user.rpc("get_me");
+// The account's AI consent as get_me has it: granted or not, and at which version (the AI go-live asks
+// again at a new one, 043; the Reviewer: turn-on → one row with the new id).
+export async function aiConsent(email: string, password: string): Promise<{ granted: boolean; version: string | null }> {
+  const { data, error } = await (await signedInAs(email, password)).rpc("get_me");
   if (error) throw new Error(`get_me failed: ${error.message}`);
-  return (data as { consents?: { ai?: { granted?: boolean } } }).consents?.ai?.granted === true;
+  const ai = (data as { consents?: { ai?: { granted?: boolean; version?: string } } }).consents?.ai;
+  return { granted: ai?.granted === true, version: ai?.version ?? null };
+}
+
+// The reflect function as the person calls it, for its server-side consent gate (the Reviewer, 23 Nov): its
+// HTTP status and its error code ({ "code": … }, contracts/errors.md). Without a current AI consent it
+// refuses in ai_begin_request, before any model call, so nothing is billed.
+export async function reflectCode(email: string, password: string, entryId: string): Promise<{ status: number; code: string | null }> {
+  const user = await signedInAs(email, password);
+  const { data } = await user.auth.getSession();
+  const res = await fetch(`${URL_}/functions/v1/reflect`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${data.session?.access_token ?? ""}`, apikey: PUBLISHABLE, "Content-Type": "application/json" },
+    body: JSON.stringify({ entry_id: entryId, client_key: crypto.randomUUID() }),
+  });
+  const body = (await res.json().catch(() => null)) as { code?: string } | null;
+  return { status: res.status, code: body?.code ?? null };
 }
 
 // The token a password reset email would carry.
@@ -244,13 +259,23 @@ export async function picturesOnStaging(): Promise<boolean> {
 // A moment written through the app's own RPC, signed in as them (the service role has no write on
 // entries). Returns its id.
 export async function seedMoment(email: string, password: string, date: string, body: string): Promise<string> {
-  if (!ours(email)) throw new Error("seedMoment only touches this helper's own users");
+  return seedJournalItem(email, password, date, body, true);
+}
+
+// A plain entry, the same way (reflect works on an entry). Returns its id.
+export async function seedEntry(email: string, password: string, date: string, body: string): Promise<string> {
+  return seedJournalItem(email, password, date, body, false);
+}
+
+async function seedJournalItem(email: string, password: string, date: string, body: string, isMoment: boolean): Promise<string> {
+  const what = isMoment ? "a moment" : "an entry";
+  if (!ours(email)) throw new Error(`seeding ${what} only touches this helper's own users`);
   const user = createClient(URL_, PUBLISHABLE, { auth: { persistSession: false, autoRefreshToken: false } });
   const { error: signInError } = await user.auth.signInWithPassword({ email, password });
-  if (signInError) throw new Error(`sign-in to seed a moment failed: ${signInError.message}`);
-  const { data, error } = await user.rpc("save_entry", { p_id: null, p_date: date, p_body: body, p_is_moment: true, p_expected_updated_at: null });
+  if (signInError) throw new Error(`sign-in to seed ${what} failed: ${signInError.message}`);
+  const { data, error } = await user.rpc("save_entry", { p_id: null, p_date: date, p_body: body, p_is_moment: isMoment, p_expected_updated_at: null });
   await user.auth.signOut({ scope: "local" });
-  if (error) throw new Error(`seeding a moment failed: ${error.message}`);
+  if (error) throw new Error(`seeding ${what} failed: ${error.message}`);
   return (data as { id: string }).id;
 }
 

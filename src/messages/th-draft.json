@@ -3808,5 +3808,20 @@
     "key": "safety.planNumberCopied",
     "en": "Copied",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "ai.aiConfirmTitle",
+    "en": "Turn on AI?",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "ai.aiConfirmTurnOn",
+    "en": "Turn on AI",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "ai.aiConfirmNotNow",
+    "en": "Not now",
+    "reason": "UX draft (native read pending)"
   }
 ]

@@ -108,11 +108,11 @@
     "what": "Share cards (made on the device, leaving it only when the user shares) are in a RELEASED app build and on the web (M10)."
   },
   "ai-live": {
-    "met": false,
+    "met": true,
     "what": "AI reflections and reports are switched on for users (the AI flag on, decision D2), with the free Lite allowance enforced server-side."
   },
   "starter-credits": {
-    "met": false,
+    "met": true,
     "what": "New accounts get starter credits after confirming their email (app_config.starter_credits > 0, enforced server-side). Flips with ai-live (the same AI go-live day: starter credits only mean something with AI; UX)."
   },
   "export-live": {
@@ -172,7 +172,7 @@
     "what": "The Content-Security-Policy (lib/csp.ts) is enforced instead of Report-Only. Flip only after a clean Preview run of every page (journal, share-card canvas, the OG route) with no violations reported to Sentry (reviewer's audit A1)."
   },
   "weekly-report-live": {
-    "met": false,
+    "met": true,
     "what": "1.1 D \"Your week\" (specs/m9-weekly-report.md, decision 180) is tested on the app and the web against staging; then the Insights card shows on Production, which also needs AI live there (the combined AI go-live)."
   },
   "widget-live": {

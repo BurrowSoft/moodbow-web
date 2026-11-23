@@ -793,7 +793,7 @@ test.describe("onboarding (signed out)", () => {
   // least 24 × 24 px.
   test("Create account: every consent control is at least 24 × 24 px", async ({ page }) => {
     await page.goto("/sign-up");
-    const ids = ["consent-privacy", "consent-health", "consent-age", "consent-read-terms", "consent-read-privacy", "consent-read-health", "consent-ai"];
+    const ids = ["consent-privacy", "consent-health", "consent-age", "consent-read-terms", "consent-read-privacy", "consent-read-health"];
     let measured = 0;
     for (const id of ids) {
       const control = page.getByTestId(id);
@@ -806,7 +806,7 @@ test.describe("onboarding (signed out)", () => {
     expect(measured).toBeGreaterThanOrEqual(5);
   });
 
-  test("Create account: the summary above three separate unticked boxes, each with its link; the AI box optional", async ({ page }) => {
+  test("Create account: the summary above three separate unticked boxes, each with its link; no AI box", async ({ page }) => {
     await page.goto("/sign-up");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Create your account");
     const summary = page.getByTestId("signup-summary");
@@ -825,13 +825,10 @@ test.describe("onboarding (signed out)", () => {
     await page.getByTestId("consent-health").check();
     await expect(cont).toBeDisabled();
     await page.getByTestId("consent-age").check();
-    // This build shows drafts, so ai-live is a draft and the optional AI box
-    // is there (#60; hidden on Production until ai-live is met): unticked,
-    // never required, and Continue doesn't wait for it.
-    const ai = page.getByTestId("consent-ai");
-    await expect(ai).toBeVisible();
-    await expect(ai).not.toBeChecked();
-    await expect(page.getByText("AI reflections and reports (optional)")).toBeVisible();
+    // No AI box, even with ai-live met (UX, 23 Nov, the AI go-live, as the app): the AI consent is
+    // asked only in Me → AI, on its own sheet, where AI is actually available.
+    await expect(page.getByTestId("consent-ai")).toHaveCount(0);
+    await expect(page.getByText("AI reflections and reports (optional)")).toHaveCount(0);
     await expect(cont).toBeEnabled();
     await expect(page.getByRole("contentinfo").locator('a[href$="/consumer-health-data"]'), "sign-up has the health data link").toBeVisible();
   });

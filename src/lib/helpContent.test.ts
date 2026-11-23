@@ -91,9 +91,11 @@ describe("Help is public, scoped to what's live (decision 212)", () => {
   const published = (slug: string) => renderArticle(findArticle("en", slug)!);
 
   it("articles about features that are off have nothing left: a 404", () => {
-    for (const slug of ["ai-reflections", "your-week"]) {
-      expect(published(slug), slug).toBe("");
-    }
+    // The AI go-live (UX, 23 Nov) publishes these: each is out exactly when its condition is met.
+    expect(published("ai-reflections") === "", "ai-reflections").toBe(!isPendingMet("ai_live"));
+    expect(published("your-week") === "", "your-week").toBe(!isPendingMet("weekly_report_live"));
+    // Bo stays off: nothing left of its article.
+    expect(published("bo"), "bo").toBe("");
     // The shortcuts go live with the web launch step (UX 2026-11-04): a
     // 404 before it, published after.
     expect(published("keyboard-shortcuts") === "").toBe(!isPendingMet("shortcuts_live"));
