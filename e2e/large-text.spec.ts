@@ -593,10 +593,21 @@ async function cutWords(page: Page, roots: string): Promise<string[]> {
     const unhyphenated = words.map(breaks);
     off.remove();
     const out: string[] = [];
-    words.forEach(({ word }, i) => {
+    words.forEach(({ node, start, word }, i) => {
       for (const c of asShown[i]) {
         const before = letters(word.slice(0, c)), after = letters(word) - before;
-        const softHyphen = word[c - 1] === String.fromCharCode(0xad);
+        // A soft hyphen the line broke at is drawn (a hyphen, non-zero width; an unused one is zero wide). Chromium puts
+        // the rect of the letter after it on the earlier line, so its break reads one letter later (#422: the browser
+        // drew "WEIHNACHTS- / ANGEBOT", the rects said "…NACHTS·A / NGEBOT"); WebKit's rects are exact. So a break
+        // right after a drawn soft hyphen, or one letter after it, is that soft hyphen's.
+        const drawnShy = (k: number) => {
+          if (k < 0 || word[k] !== String.fromCharCode(0xad)) return false;
+          const range = document.createRange();
+          range.setStart(node, start + k);
+          range.setEnd(node, start + k + 1);
+          return range.getBoundingClientRect().width > 0;
+        };
+        const softHyphen = drawnShy(c - 1) || drawnShy(c - 2);
         const hyphen = softHyphen || unhyphenated[i].length === 0 || !unhyphenated[i].includes(c);
         if (!hyphen) out.push(`${word.slice(0, c)} / ${word.slice(c)} (no hyphen)`);
         else if (before < 2 || after < 2) out.push(`${word.slice(0, c)} / ${word.slice(c)} (under 2 letters)`);
