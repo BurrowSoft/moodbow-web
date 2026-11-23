@@ -6,8 +6,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 let gate: "live" | "draft" | "hidden" = "draft";
 vi.mock("@/lib/conditions", () => ({ pageGate: () => gate }));
 const { aiShown, canReflect, isFocusArea, isTone } = await import("./ai");
+const { POLICY_VERSIONS } = await import("@/lib/legalVersions");
 
-const consented = { ai: { version: "2026-10-02", granted: true } };
+const consented = { ai: { version: POLICY_VERSIONS.ai, granted: true } };
 const me = (over: object = {}) => ({ ai_available: true, consents: consented, settings: { reminder_on: true, reminder_time: null, ai_enabled: true }, ...over });
 
 beforeEach(() => {
@@ -25,8 +26,11 @@ describe("aiShown / canReflect", () => {
 
   it("Reflect also needs the current AI consent and AI on in settings", () => {
     expect(canReflect(me())).toBe(true);
-    expect(canReflect(me({ consents: { ai: { version: "2026-10-02", granted: false } } }))).toBe(false);
+    expect(canReflect(me({ consents: { ai: { version: POLICY_VERSIONS.ai, granted: false } } }))).toBe(false);
     expect(canReflect(me({ consents: { ai: { version: "2025-01-01", granted: true } } }))).toBe(false);
+    // The AI go-live (UX, 23 Nov; migration 043): asked again, so a tick at the old version doesn't count.
+    expect(POLICY_VERSIONS.ai).toBe("2026-12-01");
+    expect(canReflect(me({ consents: { ai: { version: "2026-10-02", granted: true } } }))).toBe(false);
     expect(canReflect(me({ settings: { reminder_on: true, reminder_time: null, ai_enabled: false } }))).toBe(false);
     gate = "hidden";
     expect(canReflect(me())).toBe(false);

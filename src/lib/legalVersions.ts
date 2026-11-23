@@ -7,7 +7,10 @@ export const POLICY_VERSIONS = {
   terms: "2026-10-02",
   health_data: "2026-10-02",
   age_18: "1",
-  ai: "2026-10-02",
+  // The AI go-live (UX, 23 Nov; moodbow-app migration 043): asked again, only in Me → AI's sheet.
+  // The server counts only a granted consent at the latest published "ai" version, so a 2026-10-02
+  // tick no longer lets AI run.
+  ai: "2026-12-01",
 } as const;
 
 export type ConsentKind = keyof typeof POLICY_VERSIONS;
