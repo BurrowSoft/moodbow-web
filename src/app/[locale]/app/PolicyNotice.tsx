@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import type { NoticeSlug } from "@/lib/journal/policyNotice";
 import { JOURNAL_CARD } from "@/lib/ui/journalLayout";
+import { wholeNames } from "@/lib/wholeNames";
 import { dismissPolicyNotice } from "./actions";
 
 // Each notice's words, by its id's slug (the app's card reads the same; an unknown slug never gets
@@ -31,7 +32,7 @@ export function PolicyNotice({ id, slug, date }: { id: string; slug: NoticeSlug;
       {/* UX's copy (the AI notice, 23 Nov): when the change applies, then what it means. Without a
           date in the notice id, "Soon" stands in for "From {date}" (the app's card reads the same). */}
       <p className="mt-1 text-text">
-        {date ? t(copy.applies, { date }) : t(copy.soon)} {t(copy.body)}
+        {date ? t(copy.applies, { date }) : t(copy.soon)} {wholeNames(t(copy.body))}
       </p>
       <div className="mt-[12px] flex flex-wrap items-center gap-[12px]">
         <Link href="/privacy/next" data-testid="policy-notice-read" className="inline-flex min-h-11 max-w-full items-center font-medium text-accent underline underline-offset-4 [overflow-wrap:anywhere]">
