@@ -137,6 +137,16 @@ describe("SafetyPlanEditor", () => {
     expect(within(screen.getByTestId("plan-professionals")).getByTestId("plan-helpline")).toBe(line);
   });
 
+  it("Chile's *4141 (S14): no call link; the name, the number, how to call it, Copy number", () => {
+    open(EMPTY_PLAN, "CL");
+    const line = screen.getByTestId("plan-helpline");
+    expect(within(line).queryByTestId("plan-helpline-call")).toBeNull();
+    expect(line.querySelector('a[href^="tel:"]')).toBeNull();
+    expect(within(line).getByTestId("plan-helpline-byhand-number")).toHaveTextContent("*4141");
+    expect(within(line).getByTestId("plan-helpline-byhand-how")).toHaveTextContent(messages.safety.planDialByHand);
+    expect(within(line).getByTestId("plan-helpline-byhand-copy")).toHaveTextContent(messages.safety.planCopyNumber);
+  });
+
   it("no listed country: no helpline line, and the rest still there", () => {
     open(EMPTY_PLAN, "ZZ");
     expect(screen.queryByTestId("plan-helpline")).toBeNull();

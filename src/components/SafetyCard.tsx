@@ -1,22 +1,21 @@
 "use client";
 
-import { useCallback, useEffect, useState, useSyncExternalStore, type MouseEvent } from "react";
+import { useCallback, useEffect, useState, type MouseEvent } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Dialog, dialogButton } from "@/components/Dialog";
+import { DialByHand } from "@/components/DialByHand";
 import { HelpNumberText } from "@/components/HelpNumberText";
 import { Link } from "@/i18n/navigation";
-import { helpLineSize, helplinesFor, isIos, isShortCode, telHref } from "@/lib/safety/helplines";
+import { helpLineSize, helplinesFor, isShortCode, telHref } from "@/lib/safety/helplines";
 import { safetyPlanHasContent } from "@/app/[locale]/app/me/safety-plan/actions";
 import { useRequestCountry } from "@/components/RequestCountry";
 import { countryName } from "@/lib/region/countries";
-
-const noSubscribe = () => () => {};
 
 // The safety card (M8, r1 §M8, decision 124): the same card after a flagged
 // save, behind Me → the help button (meGetHelpNow, "Want to talk to someone?")
 // and under a reflection that names it. A
 // dismissible dialog; focus moves to its title; Esc or Close closes it.
-// Numbers from the country registry as tel: links; without a known
+// Numbers from the country registry as tel: links (one with * or # has none: DialByHand); without a known
 // country, the generic emergency line; the helpline directory always
 // (decision 135). neutral: opened by the person from Me (safetyBodyNeutral,
 // #9765 S-03); after a flagged entry or a crisis signal, safetyBody. Each
@@ -44,7 +43,6 @@ export function SafetyCard({ country, onClose, neutral = false, where = null }: 
   // Numbers from where the request came from, not the person's own country: say whose they
   // are, so someone travelling or on a VPN can tell (UX). The browser's own country name.
   const fromRequest = !both && !country && requested && (lines.helpline || lines.emergency) ? countryName(requested, locale) : null;
-  const ios = useSyncExternalStore(noSubscribe, () => isIos(navigator.userAgent, navigator.maxTouchPoints), () => false);
   // My safety plan (1.2), below the helplines, only where it has content (the Reviewer's read):
   // asked once the card is open, so help never waits on it; a yes or no, never the plan.
   const [plan, setPlan] = useState(false);
@@ -63,15 +61,10 @@ export function SafetyCard({ country, onClose, neutral = false, where = null }: 
   const help = "[font-size:min(1rem,max(10vw,32px))]";
   const link = "font-medium text-accent underline underline-offset-4";
   const small = "text-muted [font-size:min(0.875rem,max(8.75vw,28px))]";
-  const helplineRow = (line: NonNullable<typeof lines.helpline>, id: string, keypadId: string) =>
-    ios && isShortCode(line.dial) ? (
-      <div>
-        {/* iOS can't dial this from a link: the number, and what to do with it. */}
-        <p className={`font-medium text-text ${helpLineSize(line.display)}`}><HelpNumberText text={t("safetyCall", { name: line.name, number: line.display })} number={line.display} name={line.name} /></p>
-        <p data-testid={keypadId} className={small}>
-          <HelpNumberText text={t("safetyDialKeypad", { number: line.display })} number={line.display} />
-        </p>
-      </div>
+  const helplineRow = (line: NonNullable<typeof lines.helpline>, id: string, byHandId: string) =>
+    isShortCode(line.dial) ? (
+      // * or # (Chile's *4141): no call link on any device (S14, UX 23 Nov); the number to type, and Copy number.
+      <DialByHand name={line.name} display={line.display} dial={line.dial} testId={byHandId} dialByHand={t("planDialByHand")} copyLabel={t("planCopyNumber")} copiedLabel={t("planNumberCopied")} lineClass={small} />
     ) : (
       <p>
         <a href={telHref(line.dial)} data-testid={id} className={`${link} ${helpLineSize(line.display)}`}>
@@ -100,7 +93,7 @@ export function SafetyCard({ country, onClose, neutral = false, where = null }: 
             {countryName(first, locale)}
           </h3>
         )}
-        {lines.helpline && helplineRow(lines.helpline, "safety-call-helpline", "safety-helpline-keypad")}
+        {lines.helpline && helplineRow(lines.helpline, "safety-call-helpline", "safety-helpline-byhand")}
         {lines.helpline?.hours && (
           <p data-testid="safety-helpline-hours" className={small}>
             {lines.helpline.hours}
@@ -114,7 +107,7 @@ export function SafetyCard({ country, onClose, neutral = false, where = null }: 
             <h3 data-testid="safety-also-country" className="font-medium text-text">
               {countryName(mine, locale)}
             </h3>
-            {also.helpline && helplineRow(also.helpline, "safety-also-call-helpline", "safety-also-helpline-keypad")}
+            {also.helpline && helplineRow(also.helpline, "safety-also-call-helpline", "safety-also-helpline-byhand")}
             {also.emergency && emergencyRow(also.emergency, "safety-also-call-emergency")}
           </div>
         )}

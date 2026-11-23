@@ -3793,5 +3793,20 @@
     "key": "plus.pastDueLapsed",
     "en": "Your last payment didn't go through. Update your card to get Plus back.",
     "reason": "UX draft (Web Dev Thai of the won't-renew and past-grace lines, 20 Nov; native read pending)"
+  },
+  {
+    "key": "safety.planDialByHand",
+    "en": "To call, open your Phone app and type this number.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "safety.planCopyNumber",
+    "en": "Copy number",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "safety.planNumberCopied",
+    "en": "Copied",
+    "reason": "UX draft (native read pending)"
   }
 ]
