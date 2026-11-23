@@ -24,9 +24,9 @@ type Country = { code: string; helpline?: { names: PerLanguage; hours?: PerLangu
 // (Chile's *4141). A # is sent as %23, or Android drops what follows (app #143).
 export const telHref = (dial: string) => `tel:${dial.replace(/[^\d+*#]/g, "").replaceAll("#", "%23")}`;
 
-// iOS won't open a tel: link with * or #, and the web can't reliably tell iOS Safari apart, so such a number
-// gets no call link on any device (DialByHand; the app's S14, UX 23 Nov). isIos is for the app-store button
-// (TryAppButton): iPadOS says it's a Mac, but has a touch screen.
+// iOS won't open a tel: link with * or #: there such a number is to be typed (ShortCodeLine → DialByHand; the
+// app's S14, UX 23 Nov); Android and computers keep the link. iPadOS says it's a Mac, but has a touch screen.
+// TryAppButton uses isIos too.
 export const isShortCode = (dial: string) => /[*#]/.test(dial);
 export const isIos = (userAgent: string, touchPoints: number) => /iPad|iPhone|iPod/.test(userAgent) || (userAgent.includes("Macintosh") && touchPoints > 1);
 

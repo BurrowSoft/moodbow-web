@@ -126,18 +126,24 @@ describe("SafetyCard", () => {
     expect(screen.queryByTestId("safety-helpline-hours")).toBeNull();
   });
 
-  // S14 (UX 23 Nov, as the app): a number with * or # gets no call link on any device (iOS can't dial it from a
-  // link, and the web can't reliably tell iOS Safari apart). The name, the number, how to call it, Copy number.
+  // S14 (the app's #291; UX 23 Nov, corrected after the Reviewer): iOS can't dial a number with * or # from a link,
+  // Android and computers can. iOS: no link; the name, the number, how to call it, Copy number. Elsewhere: the link,
+  // one tap as before, with Copy number under it.
   describe("a number with * or # (Chile's *4141)", () => {
-    afterEach(() => vi.restoreAllMocks());
+    afterEach(() => {
+      vi.restoreAllMocks();
+      Reflect.deleteProperty(navigator, "maxTouchPoints");
+    });
     const IPHONE = "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)";
+    const IPAD_AS_MAC = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)";
     const ANDROID = "Mozilla/5.0 (Linux; Android 14)";
 
-    it.each([["Android", ANDROID], ["iOS", IPHONE], ["a desktop", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"]])("%s: no link; the name, the number large and selectable, the line, Copy number", (_, agent) => {
+    it.each([["iPhone", IPHONE, 5], ["an iPad that says it's a Mac", IPAD_AS_MAC, 5]])("%s: no link; the name, the number large and selectable, the line, Copy number", (_, agent, touch) => {
       vi.spyOn(navigator, "userAgent", "get").mockReturnValue(agent);
+      Object.defineProperty(navigator, "maxTouchPoints", { value: touch, configurable: true });
       wrap(<SafetyCard country="CL" onClose={() => {}} />);
       expect(screen.queryByTestId("safety-call-helpline")).toBeNull();
-      expect(screen.getByTestId("safety-card").querySelector('a[href^="tel:*"], a[href*="%23"]')).toBeNull();
+      expect(screen.getByTestId("safety-card").querySelector('a[href^="tel:*"]')).toBeNull();
       const block = screen.getByTestId("safety-helpline-byhand");
       const parts = [...block.children].map((el) => el.textContent);
       expect(parts.slice(0, 4)).toEqual(["The Suicide Prevention Line", "*4141", s.planDialByHand, s.planCopyNumber]);
@@ -147,7 +153,32 @@ describe("SafetyCard", () => {
       expect(block).not.toHaveTextContent(/keypad/i);
     });
 
+    it.each([["Android", ANDROID, 5], ["a desktop", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)", 0], ["a real Mac", IPAD_AS_MAC, 0]])("%s: the link, one tap as before, with Copy number under it", (_, agent, touch) => {
+      vi.spyOn(navigator, "userAgent", "get").mockReturnValue(agent);
+      Object.defineProperty(navigator, "maxTouchPoints", { value: touch, configurable: true });
+      wrap(<SafetyCard country="CL" onClose={() => {}} />);
+      expect(screen.getByTestId("safety-call-helpline")).toHaveAttribute("href", "tel:*4141");
+      expect(screen.queryByTestId("safety-helpline-byhand")).toBeNull();
+      const linked = screen.getByTestId("safety-helpline-byhand-linked");
+      expect(linked).toContainElement(screen.getByTestId("safety-call-helpline"));
+      expect(screen.getByTestId("safety-helpline-byhand-copy")).toHaveTextContent(s.planCopyNumber);
+      // The typed line is for iOS only here (the link works).
+      expect(screen.queryByTestId("safety-helpline-byhand-how")).toBeNull();
+    });
+
+    it("under the link, Copy number copies it exactly as dialled and says Copied", async () => {
+      vi.spyOn(navigator, "userAgent", "get").mockReturnValue(ANDROID);
+      const writeText = vi.fn().mockResolvedValue(undefined);
+      Object.assign(navigator, { clipboard: { writeText } });
+      wrap(<SafetyCard country="CL" onClose={() => {}} />);
+      fireEvent.click(screen.getByTestId("safety-helpline-byhand-copy"));
+      expect(writeText).toHaveBeenCalledWith("*4141");
+      expect(await screen.findByText(s.planNumberCopied, { selector: "button" })).toBeInTheDocument();
+      expect(screen.getByTestId("safety-helpline-byhand-copied")).toHaveTextContent(s.planNumberCopied);
+    });
+
     it("Copy number copies it exactly as dialled and says Copied, to a screen reader too", async () => {
+      vi.spyOn(navigator, "userAgent", "get").mockReturnValue(IPHONE);
       const writeText = vi.fn().mockResolvedValue(undefined);
       Object.assign(navigator, { clipboard: { writeText } });
       wrap(<SafetyCard country="CL" onClose={() => {}} />);
@@ -160,6 +191,7 @@ describe("SafetyCard", () => {
     });
 
     it("no clipboard: no Copied, the number stays there to select", async () => {
+      vi.spyOn(navigator, "userAgent", "get").mockReturnValue(IPHONE);
       const writeText = vi.fn().mockRejectedValue(new Error("denied"));
       Object.assign(navigator, { clipboard: { writeText } });
       wrap(<SafetyCard country="CL" onClose={() => {}} />);

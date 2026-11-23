@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState, type MouseEvent } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Dialog, dialogButton } from "@/components/Dialog";
-import { DialByHand } from "@/components/DialByHand";
+import { ShortCodeLine } from "@/components/DialByHand";
 import { HelpNumberText } from "@/components/HelpNumberText";
 import { Link } from "@/i18n/navigation";
 import { helpLineSize, helplinesFor, isShortCode, telHref } from "@/lib/safety/helplines";
@@ -15,7 +15,7 @@ import { countryName } from "@/lib/region/countries";
 // save, behind Me → the help button (meGetHelpNow, "Want to talk to someone?")
 // and under a reflection that names it. A
 // dismissible dialog; focus moves to its title; Esc or Close closes it.
-// Numbers from the country registry as tel: links (one with * or # has none: DialByHand); without a known
+// Numbers from the country registry as tel: links (one with * or # has none on iOS: ShortCodeLine); without a known
 // country, the generic emergency line; the helpline directory always
 // (decision 135). neutral: opened by the person from Me (safetyBodyNeutral,
 // #9765 S-03); after a flagged entry or a crisis signal, safetyBody. Each
@@ -61,17 +61,18 @@ export function SafetyCard({ country, onClose, neutral = false, where = null }: 
   const help = "[font-size:min(1rem,max(10vw,32px))]";
   const link = "font-medium text-accent underline underline-offset-4";
   const small = "text-muted [font-size:min(0.875rem,max(8.75vw,28px))]";
-  const helplineRow = (line: NonNullable<typeof lines.helpline>, id: string, byHandId: string) =>
-    isShortCode(line.dial) ? (
-      // * or # (Chile's *4141): no call link on any device (S14, UX 23 Nov); the number to type, and Copy number.
-      <DialByHand name={line.name} display={line.display} dial={line.dial} testId={byHandId} dialByHand={t("planDialByHand")} copyLabel={t("planCopyNumber")} copiedLabel={t("planNumberCopied")} lineClass={small} />
-    ) : (
+  const helplineRow = (line: NonNullable<typeof lines.helpline>, id: string, byHandId: string) => {
+    const call = (
       <p>
         <a href={telHref(line.dial)} data-testid={id} className={`${link} ${helpLineSize(line.display)}`}>
           <HelpNumberText text={t("safetyCall", { name: line.name, number: line.display })} number={line.display} name={line.name} />
         </a>
       </p>
     );
+    // * or # (Chile's *4141; S14, UX 23 Nov): on iOS no link, the number to type and Copy number; elsewhere the link
+    // with Copy number under it.
+    return isShortCode(line.dial) ? <ShortCodeLine link={call} name={line.name} display={line.display} dial={line.dial} testId={byHandId} dialByHand={t("planDialByHand")} copyLabel={t("planCopyNumber")} copiedLabel={t("planNumberCopied")} lineClass={small} /> : call;
+  };
   // Its own line; the visible text is the spoken name (WCAG 2.5.3).
   const emergencyRow = (line: NonNullable<typeof lines.emergency>, id: string) => (
     <p>
