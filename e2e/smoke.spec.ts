@@ -400,11 +400,12 @@ test.describe("static files", () => {
     expect(await res.json()).toEqual([]);
   });
 
-  test("apple-app-site-association is JSON with no app claims yet, and not redirected", async ({ request }) => {
+  test("apple-app-site-association is JSON claiming /open/* only, and not redirected", async ({ request }) => {
     const res = await request.get("/.well-known/apple-app-site-association", { maxRedirects: 0 });
     expect(res.status()).toBe(200);
     expect(res.headers()["content-type"]).toContain("application/json");
-    expect(await res.json()).toEqual({ applinks: { details: [] } });
+    const body = (await res.json()) as { applinks: { details: { components: { "/": string; exclude?: boolean }[] }[] } };
+    expect(body.applinks.details[0].components.filter((c) => !c.exclude).map((c) => c["/"])).toEqual(["/open/*"]);
   });
 
   test("the email logo is a 320×65 PNG, cached, not redirected", async ({ request }) => {

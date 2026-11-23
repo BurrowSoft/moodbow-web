@@ -64,7 +64,7 @@ export default async function EmailConfirmedPage({ params, searchParams }: PageP
   // button is a client navigation, and the address bar can still show
   // /auth/confirm while this renders (Reviewer, #139 F1).
   const openApp = conditionMet("app-open-link")
-    ? { production: process.env.VERCEL_ENV === "production", playLive: liveStores().play, path: getPathname({ href: "/email-confirmed", locale }) }
+    ? { production: process.env.VERCEL_ENV === "production", playLive: liveStores().play, iosLive: liveStores().appStore, path: getPathname({ href: "/email-confirmed", locale }) }
     : null;
 
   const page = (

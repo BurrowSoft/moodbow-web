@@ -182,6 +182,24 @@ describe("EmailConfirmedMessage: back to the app after an email is confirmed (de
     }
   });
 
+  it("iPhone, once the iPhone app is in the App Store (iosLive): the custom scheme, with the line kept under it (UX & PM, 17 Nov)", () => {
+    setUserAgent(IPHONE);
+    const view = wrap(<EmailConfirmedMessage fromQuery="email_changed" continueTo={null} openApp={{ ...INTENT, iosLive: true }} />);
+    expect(screen.getByTestId("email-confirmed-open-app")).toHaveAttribute("href", "moodbow://app/me/backup");
+    expect(screen.getByTestId("email-confirmed-open-app")).toHaveTextContent(m.emailConfirmedOpenApp);
+    expect(screen.getByTestId("email-confirmed-ios-line")).toHaveTextContent(m.emailConfirmedDesktopLine);
+    view.unmount();
+    // Android keeps its intent link with iosLive met; a desktop keeps the line.
+    setUserAgent(ANDROID);
+    const android = wrap(<EmailConfirmedMessage fromQuery="email_changed" continueTo={null} openApp={{ ...INTENT, iosLive: true }} />);
+    expect(screen.getByTestId("email-confirmed-open-app").getAttribute("href")).toMatch(/^intent:\/\//);
+    android.unmount();
+    setUserAgent(DESKTOP);
+    wrap(<EmailConfirmedMessage fromQuery="email_changed" continueTo={null} openApp={{ ...INTENT, iosLive: true }} />);
+    expect(screen.queryByTestId("email-confirmed-open-app")).toBeNull();
+    expect(screen.getByTestId("email-confirmed-app-line")).toBeInTheDocument();
+  });
+
   it("only after an email is confirmed: not on a confirmed sign-up or an error", () => {
     setUserAgent(ANDROID);
     for (const fromQuery of ["ok", "error", "email_change_pending"] as const) {
