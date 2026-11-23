@@ -7,7 +7,7 @@ import { PageShell } from "@/components/PageShell";
 import { draftsAllowed, pageGate } from "@/lib/conditions";
 import { legalDate, legalLocale, legalSource, renderLegal, comingPolicyMet } from "@/lib/legalContent";
 import { pageMetadata } from "@/lib/metadata";
-import { POLICY_NOTICE_CONDITION, policyNoticeDate } from "@/lib/journal/policyNotice";
+import { knownNotice, POLICY_NOTICE_CONDITION, policyNoticeDate } from "@/lib/journal/policyNotice";
 import { dateInSentence, dateLocale } from "@/lib/journal/today";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { headers } from "next/headers";
@@ -29,8 +29,9 @@ export default async function ComingPrivacyPage({ params }: PageProps<"/[locale]
   const { locale } = await params;
   setRequestLocale(locale as Locale);
   const supabase = await createSupabaseServerClient();
-  const answer = supabase ? await supabase.rpc("policy_notice_current") : { data: null };
-  const id = typeof answer.data === "string" && answer.data !== "" ? answer.data : null;
+  // The v2 notice (migration 043; the web's only one), and only one this build has words for.
+  const answer = supabase ? await supabase.rpc("policy_notice_v2_current") : { data: null };
+  const id = knownNotice(answer.data);
   const draft = draftsAllowed();
   if (pageGate(POLICY_NOTICE_CONDITION) === "hidden" || (!id && !draft)) notFound();
 

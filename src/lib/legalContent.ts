@@ -60,14 +60,15 @@ export function applyPending(source: string, met: (id: string) => boolean = isPe
 }
 
 // The legal text as it will read once the noticed change applies (the policy's §8): the pending
-// ids in COMING are in, everything else as it is today. Now: Moodbow Plus (its purchases, Stripe,
-// the stores' rows, the payment-records bullet). Change it with the next noticed change.
-export const COMING_POLICY: readonly string[] = ["plus"];
+// ids in COMING are in, everything else as it is today. Now: the AI features (the AI go-live, UX 23
+// Nov: the legal-basis row, the withdraw line, the short version's bullet and What changed), noticed
+// about two days before they apply. Change it with the next noticed change.
+export const COMING_POLICY: readonly string[] = ["ai_live"];
 export const comingPolicyMet = (id: string) => COMING_POLICY.includes(id) || (pendingKnown(id) && isPendingMet(id));
 const pendingKnown = (id: string) => conditionForPending(id) in (conditions as Record<string, unknown>);
 
 // The What changed block's date (#378): the day the noticed change applies, read from the same
-// notice id as Today's card (app_config.policy_notice_id, "YYYY-MM-DD" or "YYYY-MM-DD-<slug>"),
+// notice id as Today's card (app_config.policy_notice_v2_id, "YYYY-MM-DD-<slug>"),
 // so the policy and the card can never name different days. {dated}…{/dated} shows only with a
 // date, with {notice_date} inside it as that date; {undated}…{/undated} shows only without one.
 // A text that still holds these markers after its pending blocks needs the date to render:

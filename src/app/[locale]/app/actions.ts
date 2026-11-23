@@ -109,12 +109,12 @@ async function saveCheckInValues(_prev: CheckInState, form: FormData): Promise<C
 
 // The privacy notice was seen, once, across devices. A failure blocks nothing: it just comes
 // back next time. invalid_value means the current notice changed under this one, so the
-// page reads it again (the app's #194).
+// page reads it again (the app's #194). The v2 notice (migration 043; the web's only card).
 export async function dismissPolicyNotice(id: string): Promise<{ ok: boolean; changed?: boolean }> {
   if (typeof id !== "string" || id === "") return { ok: false };
   const supabase = await createSupabaseServerClient();
   if (!supabase) return { ok: false };
-  const { error } = await supabase.rpc("policy_notice_seen", { p_id: id });
+  const { error } = await supabase.rpc("policy_notice_v2_seen", { p_id: id });
   if (!error) return { ok: true };
   return { ok: false, changed: error.message.includes("invalid_value") };
 }

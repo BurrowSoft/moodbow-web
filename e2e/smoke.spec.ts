@@ -240,8 +240,10 @@ test.describe("language: the offered ones, and Thai as a draft (thai-offered-liv
     await expect(page.getByTestId("privacy-next-line")).toBeVisible();
     await expect(page.getByTestId("privacy-next-current")).toHaveAttribute("href", "/privacy");
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
-    // The coming text is the policy with Moodbow Plus in (COMING_POLICY), which /privacy hides today.
-    await expect(page.locator(".legal-prose")).toContainText("Moodbow Plus purchases");
+    // The coming text is the policy with the AI features in (COMING_POLICY, the AI notice), which
+    // /privacy hides until ai-live: What changed and the withdraw line.
+    await expect(page.locator(".legal-prose")).toContainText("Moodbow now offers optional AI features");
+    await expect(page.locator(".legal-prose")).toContainText("withdraw your AI consent");
   });
 
   test("/th/privacy: the English text under the Thai line, as /privacy is (draft or live)", async ({ page }) => {

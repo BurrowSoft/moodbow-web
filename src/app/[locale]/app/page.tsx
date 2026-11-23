@@ -184,15 +184,15 @@ export default async function TodayPage({ params, searchParams }: PageProps<"/[l
 
   // The notice of a privacy change, here and not everywhere: Today comes after consent and
   // setup, so it never meets someone on their first screen (UX, Reviewer).
-  const noticeId = pageGate(POLICY_NOTICE_CONDITION) !== "hidden" ? policyNoticeToShow(me) : null;
-  const noticeDate = noticeId && policyNoticeDate(noticeId);
+  const notice = pageGate(POLICY_NOTICE_CONDITION) !== "hidden" ? policyNoticeToShow(me) : null;
+  const noticeDate = notice && policyNoticeDate(notice.id);
 
   return (
     <section className="space-y-8">
       <Suspense fallback={null}>
         <SecurityNoticeRead supabase={supabase} uid={user.id} />
       </Suspense>
-      {noticeId && <PolicyNotice key={noticeId} id={noticeId} date={noticeDate ? dateInSentence(noticeDate, dateLocaleTag) : null} />}
+      {notice && <PolicyNotice key={notice.id} id={notice.id} slug={notice.slug} date={noticeDate ? dateInSentence(noticeDate, dateLocaleTag) : null} />}
       {/* Today's standing help (UX & PM, 13 Nov): a quiet lifebuoy at the header's end, always
           there whatever the cards show, opening Me's help card. A fixed 48 px, so at large text
           it takes no more room and Write under the date stays in the first view. */}
