@@ -148,7 +148,10 @@ describe("SafetyCard", () => {
       const parts = [...block.children].map((el) => el.textContent);
       expect(parts.slice(0, 4)).toEqual(["The Suicide Prevention Line", "*4141", s.planDialByHand, s.planCopyNumber]);
       expect(screen.getByTestId("safety-helpline-byhand-number").className).toMatch(/select-all/);
-      expect(screen.getByTestId("safety-helpline-byhand-number").className).toContain(helpLineSize("*4141"));
+      // Visibly large (UX 23 Nov): 1.5 times the help lines (24 px at the default size), semibold, still scaling.
+      expect(screen.getByTestId("safety-helpline-byhand-number").className).toContain("[font-size:min(1.5rem,max(15vw,48px))]");
+      expect(screen.getByTestId("safety-helpline-byhand-number").className).toContain("font-semibold");
+      expect(screen.getByTestId("safety-helpline-byhand-number").className).not.toContain(helpLineSize("*4141"));
       // The retired line is gone.
       expect(block).not.toHaveTextContent(/keypad/i);
     });
