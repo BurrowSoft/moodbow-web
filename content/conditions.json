@@ -224,8 +224,8 @@
     "what": "Portuguese (Brazil) is offered on the web (Vitor 2026-11-05: no native review; instead the AI back-translation safety check, specs/i18n/safety-check-fr-es-pt.md, its fixes applied, and the Web Tester's rows, plans/PLAN-web-i18n-rows.md). Until then /pt-br is a draft on test builds only."
   },
   "de-offered-live": {
-    "met": false,
-    "what": "German is offered on the web: a native reader has read the UI, Help, dates and crisis list (de_reviewed, localization plan), with UX's go. Until then /de is a draft on test builds only."
+    "met": true,
+    "what": "German is offered on the web, with app 1.4.0: Vitor, 20 Nov via UX, \"German used as it is\" (in place of the native read the localization plan named). /de is served on Production and in the switcher, Me → Language, hreflang and the sitemap; the legal pages stay English under their line."
   },
   "it-offered-live": {
     "met": false,

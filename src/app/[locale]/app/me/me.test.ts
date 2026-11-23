@@ -260,7 +260,8 @@ describe("saveRegion (Me → Language & region)", () => {
     // send-email reads this, as in the app.
     expect(updateUser).toHaveBeenLastCalledWith({ data: { locale: "en" } });
     rpc.mockClear();
-    for (const [field, value] of [["country", "XX"], ["country", "th"], ["time_zone", "../x"], ["locale", "de"], ["nope", "x"]] as const) {
+    // A language that isn't offered: Italian (German is offered from 1.4.0, Vitor 20 Nov).
+    for (const [field, value] of [["country", "XX"], ["country", "th"], ["time_zone", "../x"], ["locale", "it"], ["nope", "x"]] as const) {
       expect(await saveRegion(field as "country", value), `${field}=${value}`).toEqual({ ok: false });
     }
     expect(rpc).not.toHaveBeenCalled();

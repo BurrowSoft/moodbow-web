@@ -39,8 +39,8 @@ describe("offeredLocales: what the switcher, Me, hreflang and the sitemap offer"
     expect(offeredLocales(met)).toEqual(ALL);
   });
 
-  it("in content/conditions.json: French, Spanish and Portuguese; German, Italian and Thai wait for their native review", () => {
-    expect(offeredLocales()).toEqual(["en", "fr", "es", "pt-br"]);
+  it("in content/conditions.json: French, Spanish, Portuguese and German (Vitor, 20 Nov); Italian and Thai wait for their native review", () => {
+    expect(offeredLocales()).toEqual(["en", "fr", "es", "pt-br", "de"]);
   });
 });
 
