@@ -61,7 +61,7 @@ export default async function ReflectionsPage({ params, searchParams }: PageProp
         </p>
       ) : (
         <div className={JOURNAL_CARD}>
-          <ReflectionList rows={read.rows} dateLocaleTag={tag} origin={ALL_REFLECTIONS} />
+          <ReflectionList rows={read.rows} dateLocaleTag={tag} origin={ALL_REFLECTIONS} crisisWord={t("reflectionsRowCrisis")} />
         </div>
       )}
       {read?.more && shown < REFLECTIONS_MAX && (

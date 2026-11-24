@@ -48,7 +48,7 @@ export async function AiPane(
             {t("reflectionsEmpty")}
           </p>
         ) : (
-          <ReflectionList rows={reflections.rows} dateLocaleTag={dateLocaleTag} origin={INSIGHTS_AI} />
+          <ReflectionList rows={reflections.rows} dateLocaleTag={dateLocaleTag} origin={INSIGHTS_AI} crisisWord={t("reflectionsRowCrisis")} />
         )}
         {reflections?.more && (
           <Link href="/app/insights/reflections" data-testid="insights-reflections-see-all" className={`mt-2 ${TEXT_LINK}`}>
@@ -79,10 +79,10 @@ export async function AiPane(
 
 // The reflection rows (the AI segment's 3, and See all's): each one link to its entry, the entry's
 // date read first, then the reflection's first line, at most two lines. A crisis reply's row has only
-// the date and the neutral word: its line was never read into the row (lib/journal/reflections).
+// the date and the neutral word (crisisWord, ai.reflectionsRowCrisis): its line was never read into the
+// row (lib/journal/reflections).
 // first: the index of the first row here, for See all's anchors (#reflection-20 after Show more).
-export async function ReflectionList({ rows, dateLocaleTag, origin, first = 0 }: { rows: ReflectionRow[]; dateLocaleTag: string; origin: Origin; first?: number }) {
-  const t = await getTranslations("ai");
+export function ReflectionList({ rows, dateLocaleTag, origin, crisisWord, first = 0 }: { rows: ReflectionRow[]; dateLocaleTag: string; origin: Origin; crisisWord: string; first?: number }) {
   return (
     <ul data-testid="insights-reflections-list" className="mt-2">
       {rows.map((row, i) => (
@@ -97,7 +97,7 @@ export async function ReflectionList({ rows, dateLocaleTag, origin, first = 0 }:
               {dateLine(row.entryDate, dateLocaleTag)}
             </span>
             <span data-testid="insights-reflection-line" className={`line-clamp-2 [overflow-wrap:anywhere] ${row.line === null ? "text-muted" : ""}`}>
-              {row.line ?? t("reflectionsRowCrisis")}
+              {row.line ?? crisisWord}
             </span>
           </Link>
         </li>

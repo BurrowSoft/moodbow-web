@@ -109,7 +109,7 @@ describe("Insights → AI (decision 258)", () => {
   });
 
   it("See all's rows carry their place, for Show more's landing, and go Back to See all", async () => {
-    render(await ReflectionList({ rows: [row(1), row(2)], dateLocaleTag: "en-GB", origin: "/app/insights/reflections", first: 20 }));
+    render(<ReflectionList rows={[row(1), row(2)]} dateLocaleTag="en-GB" origin="/app/insights/reflections" crisisWord={m.reflectionsRowCrisis} first={20} />);
     const links = screen.getAllByRole("link");
     expect(links.map((l) => l.id)).toEqual(["reflection-20", "reflection-21"]);
     expect(links[0]).toHaveAttribute("href", "/app/entries/e1?from=%2Fapp%2Finsights%2Freflections");

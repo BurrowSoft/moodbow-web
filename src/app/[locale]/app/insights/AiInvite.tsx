@@ -40,10 +40,11 @@ export function AiInvite() {
   };
   return (
     <section aria-labelledby="ai-invite-title" data-testid="insights-ai-invite" className={`mt-6 flex flex-col items-center gap-[14px] text-center ${JOURNAL_CARD}`}>
-      <svg aria-hidden="true" width="72" height="40" viewBox="0 0 72 40" fill="none" strokeWidth="6" strokeLinecap="round" className="shrink-0">
-        <path d="M6 36a30 30 0 0 1 60 0" stroke="#7F8CB8" />
-        <path d="M15 36a21 21 0 0 1 42 0" stroke="#E6C7D3" />
-        <path d="M24 36a12 12 0 0 1 24 0" stroke="#F3C24F" />
+      {/* The arcs in the accent, as on the Plus card: the Sunrise colours are only ever the person's own values (decision 150). */}
+      <svg aria-hidden="true" width="72" height="40" viewBox="0 0 72 40" fill="none" stroke="currentColor" strokeWidth="6" strokeLinecap="round" className="shrink-0 text-accent">
+        <path d="M6 36a30 30 0 0 1 60 0" />
+        <path d="M15 36a21 21 0 0 1 42 0" opacity="0.7" />
+        <path d="M24 36a12 12 0 0 1 24 0" opacity="0.45" />
       </svg>
       <h2 id="ai-invite-title" className="text-lg font-medium text-text [overflow-wrap:anywhere]">
         {wholeNames(t("aiInviteTitle"))}

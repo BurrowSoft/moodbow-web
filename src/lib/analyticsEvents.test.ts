@@ -161,6 +161,8 @@ describe("which help buttons count (cta_help_open)", () => {
   const ALWAYS = [
     "bo-get-help", "editor-help", "entry-help", "insights-example-help", "insights-help", "review-get-help",
     "appointment-get-help", "pdf-get-help", "letters-get-help", "me-get-help", "past-reports-get-help", "toolbox-get-help", "routine-get-help", "grounding-get-help", "sounds-get-help",
+    // Insights → AI's See all (decision 258): beside Back, on every visit (a crisis reflection there is only its date).
+    "reflections-get-help",
     "today-help", "print-get-help", "timeline-help", "day-help", "consent-get-help", "signup-get-help", "welcome-help",
     "journal-unavailable-help", "session-ended-help", "year-help", "share-get-help",
     // The saved-language gate (#401): there every time someone's saved language differs from the page's, like
