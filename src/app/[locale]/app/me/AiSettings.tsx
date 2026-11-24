@@ -82,8 +82,14 @@ export function AiSettings({ initial, consented, credits }: { initial: Values; c
     if (on && !current.current) return setAsking(true);
     save("on", on);
   };
-  // Stable, so the open sheet's focus handling isn't set up again on a re-render.
-  const notNow = useCallback(() => setAsking(false), []);
+  // Stable, so the open sheet's focus handling isn't set up again on a re-render. Not now (Escape, a tap outside) also
+  // drops a failed Turn on AI's retry: Try again never sends the sheet's confirm once the person has said no to the sheet
+  // (UX, 25 Nov, from the app's review). Any other save drops it too (save starts by clearing the failure), and so does
+  // leaving the page (it's only this component's state).
+  const notNow = useCallback(() => {
+    setAsking(false);
+    setFailed((f) => (f?.confirmed ? null : f));
+  }, []);
   const turnOn = () => {
     setAsking(false);
     save("on", true, false, true);

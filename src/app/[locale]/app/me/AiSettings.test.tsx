@@ -120,6 +120,47 @@ describe("Me → AI", () => {
     expect(screen.queryByTestId("me-ai-error")).toBeNull();
   });
 
+  it("a failed Turn on AI, then the sheet again and Not now (or Escape, or a tap outside): Try again is gone, nothing more is sent (UX, 25 Nov)", async () => {
+    for (const close of [
+      () => fireEvent.click(screen.getByTestId("me-ai-sheet-not-now")),
+      () => fireEvent.keyDown(document, { key: "Escape" }),
+      () => fireEvent.click(screen.getByTestId("me-ai-sheet-backdrop")),
+    ]) {
+      setAiEnabled.mockReset().mockResolvedValueOnce({ ok: false, aiEnabled: false }).mockResolvedValue({ ok: true });
+      renderIt(false);
+      fireEvent.click(screen.getByTestId("me-ai-on"));
+      fireEvent.click(screen.getByTestId("me-ai-sheet-turn-on"));
+      expect(await screen.findByTestId("me-ai-retry")).toBeInTheDocument();
+      // The switch again: no consent yet, so the sheet, and this time no.
+      fireEvent.click(screen.getByTestId("me-ai-on"));
+      expect(sheet()).toBeInTheDocument();
+      close();
+      expect(sheet()).toBeNull();
+      expect(screen.queryByTestId("me-ai-retry")).toBeNull();
+      expect(screen.queryByTestId("me-ai-error")).toBeNull();
+      expect(screen.getByTestId("me-ai-on")).not.toBeChecked();
+      await act(async () => {});
+      expect(setAiEnabled.mock.calls).toEqual([[true, { version: POLICY_VERSIONS.ai }]]);
+      cleanup();
+    }
+  });
+
+  it("a failed Turn on AI, then the sheet's Turn on AI again: one more call with the confirm, and the error is gone", async () => {
+    setAiEnabled.mockResolvedValueOnce({ ok: false, aiEnabled: false });
+    renderIt(false);
+    fireEvent.click(screen.getByTestId("me-ai-on"));
+    fireEvent.click(screen.getByTestId("me-ai-sheet-turn-on"));
+    expect(await screen.findByTestId("me-ai-retry")).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId("me-ai-on"));
+    fireEvent.click(screen.getByTestId("me-ai-sheet-turn-on"));
+    await waitFor(() => expect(screen.getByTestId("me-ai-on")).toBeChecked());
+    expect(setAiEnabled.mock.calls).toEqual([
+      [true, { version: POLICY_VERSIONS.ai }],
+      [true, { version: POLICY_VERSIONS.ai }],
+    ]);
+    expect(screen.queryByTestId("me-ai-retry")).toBeNull();
+  });
+
   it("Off records the withdrawal; the next On asks again (the consent is no longer current)", async () => {
     renderIt(true);
     fireEvent.click(screen.getByTestId("me-ai-on"));
