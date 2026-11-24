@@ -2,7 +2,7 @@
 
 import { useCallback, useRef, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
-import { Dialog, dialogButton } from "@/components/Dialog";
+import { AiConsentSheet } from "@/components/AiConsentSheet";
 import { FOCUS_AREAS, FOCUS_KEYS, TONE_KEYS, TONES, type FocusArea, type Tone } from "@/lib/journal/ai";
 import { POLICY_VERSIONS } from "@/lib/legalVersions";
 import { recordAiWithdrawal, saveFocusAreas, saveTone, setAiEnabled, type AiSaveResult, type AiSwitchResult } from "./actions";
@@ -112,17 +112,8 @@ export function AiSettings({ initial, consented, credits }: { initial: Values; c
       <p className="mt-2 text-sm text-muted" data-testid="me-ai-consent">
         {wholeNames(t("consentAiBody"))}
       </p>
-      {asking && (
-        // Focus starts on Not now, the choice that records nothing.
-        <Dialog title={t("aiConfirmTitle")} body={wholeNames(t("consentAiBody"))} onCancel={notNow} cancelOnBackdrop testId="me-ai-sheet">
-          <button type="button" data-testid="me-ai-sheet-not-now" onClick={notNow} className={dialogButton()}>
-            {t("aiConfirmNotNow")}
-          </button>
-          <button type="button" data-testid="me-ai-sheet-turn-on" onClick={turnOn} className={dialogButton(true)}>
-            {t("aiConfirmTurnOn")}
-          </button>
-        </Dialog>
-      )}
+      {/* The same sheet as Insights → AI's invitation (decision 258). */}
+      {asking && <AiConsentSheet testId="me-ai-sheet" onNotNow={notNow} onTurnOn={turnOn} />}
 
       {!values.on ? (
         <p className="mt-4 text-sm text-muted" data-testid="me-ai-off">

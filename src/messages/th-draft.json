@@ -3823,5 +3823,65 @@
     "key": "ai.aiConfirmNotNow",
     "en": "Not now",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.insightsSegPatterns",
+    "en": "Patterns",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.insightsSegAi",
+    "en": "AI",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "insights.insightsMoodThisWeek",
+    "en": "Mood this week",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "ai.aiInviteTitle",
+    "en": "Let Moodbow write back",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "ai.aiInviteBody",
+    "en": "Turn on AI to get a short reflection on your entries, and a weekly report with Plus. It's optional, and you can turn it off any time.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "ai.reflectionsTitle",
+    "en": "Your reflections",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "ai.reflectionsEmpty",
+    "en": "When you reflect on an entry, the reflection will appear here.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "ai.reflectionsRowCrisis",
+    "en": "Reflection",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "ai.reflectionsSeeAll",
+    "en": "See all",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "ai.reflectionsShowMore",
+    "en": "Show more",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "ai.aiSettingsLink",
+    "en": "AI settings",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "ai.reportPlusLine",
+    "en": "Each week, Moodbow's AI writes you a short report about your week. Reports come with Plus.",
+    "reason": "UX draft (native read pending)"
   }
 ]

@@ -42,15 +42,14 @@ const SECTIONS = [
 // client_key, resent unchanged on every retry of that tap. The report is
 // plain text in Moodbow's voice card (decision 150), four headed sections,
 // or, for a crisis week, only its text and the Get help button (decisions
-// 124, 157). Shown only where canReflect(me) (the page decides).
-// aiOff: AI is available but this person hasn't turned it on: the card
-// explains (meAiOffHint, as Me → AI does) and offers nothing to press.
+// 124, 157). Shown only where canReflect(me) (the page decides), in Insights → AI (decision 258);
+// with AI off there, the AI segment's invitation stands in for it (no "AI is off" card any more).
 // weekLabel: weekStart's range, formatted on the server. Formatted here too, the browser's ICU
 // could space it differently ("2 – 8" with thin spaces or plain ones), and the page failed to
 // hydrate (#418, AI on only; Web Tester). Another week, after a new report: formatted here,
 // long after hydration.
-type Props = { initial: Report | null; weekStart: string; weekLabel: string; dateLocaleTag: string; balance: number; country?: string | null; aiOff?: boolean };
-export function WeeklyReport({ initial, weekStart, weekLabel, dateLocaleTag, balance, country, aiOff = false }: Props) {
+type Props = { initial: Report | null; weekStart: string; weekLabel: string; dateLocaleTag: string; balance: number; country?: string | null };
+export function WeeklyReport({ initial, weekStart, weekLabel, dateLocaleTag, balance, country }: Props) {
   const rangeOf = (start: string) => (start === weekStart ? weekLabel : weekRange(start, dateLocaleTag));
   const t = useTranslations("ai");
   const ta = useTranslations("app");
@@ -171,20 +170,6 @@ export function WeeklyReport({ initial, weekStart, weekLabel, dateLocaleTag, bal
   }, [report]);
 
   if (hidden) return null;
-  if (aiOff)
-    return (
-      <section aria-labelledby="week-title" data-testid="weekly-report" className="mt-8 rounded-3xl border border-border bg-surface p-[20px]">
-        <h2 id="week-title" className="text-lg font-medium text-text">
-          {t("reportWeekly")}
-        </h2>
-        <p data-testid="weekly-report-range" className="text-sm text-muted">
-          {weekLabel}
-        </p>
-        <p data-testid="weekly-report-ai-off" className="mt-4 text-muted">
-          {t("meAiOffHint")}
-        </p>
-      </section>
-    );
   // Too few check-ins that week (422 not_enough): the note replaces the button.
   const notEnough = phase.kind === "error" && phase.message === "reportNotEnough";
 

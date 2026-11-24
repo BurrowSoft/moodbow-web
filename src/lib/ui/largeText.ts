@@ -61,5 +61,12 @@ export const PLUS_CARD_SMALL = "text-center text-[0.875em] leading-[calc(1.25/0.
 // The Plus screen's Christmas strip: its lights (decoration) step aside at large text, so the offer's name has their
 // room (de "Weihnachtsangebot" at the footer's 32 px).
 export const OFFER_STRIP_LIGHTS = "flex shrink-0 max-[13em]:hidden";
+// Insights' Patterns | AI control (decision 258; board 30): two tabs that share the row, half each, while both words fit
+// whole, else each takes its own line (flex-wrap: a tab is never narrower than its word, min-w-fit, and never hyphenates,
+// so "Andamenti" or "Tendances" can't split). Its type is the Insights ranges' (decision 231's cap). e2e/large-text.spec.ts
+// sweeps it in every language, 320–430 px × 100–300 %.
+export const INSIGHTS_TABLIST = "mt-4 flex flex-wrap gap-[4px] rounded-[14px] bg-pill p-[4px]";
+export const insightsTab = (selected: boolean) =>
+  `flex min-h-[44px] min-w-fit flex-[1_1_0%] items-center justify-center rounded-[11px] px-[12px] text-center leading-tight text-text hyphens-manual [overflow-wrap:normal] [font-size:min(0.875rem,max(8.75vw,28px))] ${selected ? "bg-surface font-semibold shadow-sm" : "font-medium hover:bg-surface/60"}`;
 // Bo's heading: its own row where the page is a 13em column, where "Moodbow" fits, so the name stays whole.
 export const BO_HEADING = `min-w-0 flex-1 font-medium leading-[1.33] text-text outline-none [font-size:min(1.5rem,max(10vw,24px,1rem))] [overflow-wrap:anywhere] max-[13em]:basis-full ${NAMES_FIT}`;

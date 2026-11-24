@@ -52,6 +52,12 @@ describe("aiShown / canReflect", () => {
     for (const f of callers) expect(readFileSync(f, "utf8").trimStart().startsWith('"use client"'), f).toBe(false);
     // Not a server action itself (no directive line anywhere in it): a browser can't call it.
     expect(readFileSync("src/lib/journal/aiConsentWrite.ts", "utf8")).not.toMatch(/^\s*["']use (server|client)["'];?\s*$/m);
+    // The sheet's confirm (setAiEnabled with this build's version, the one way to that writer from a page) is sent from
+    // two places, both from the same one-time sheet: Me → AI's switch and Insights → AI's invitation (decision 258; the
+    // Reviewer: the invitation only opens the sheet).
+    const confirming = all.filter((f) => /setAiEnabled\([^)]*version:\s*POLICY_VERSIONS\.ai/.test(readFileSync(f, "utf8"))).map(rel).sort();
+    expect(confirming).toEqual(["src/app/[locale]/app/insights/AiInvite.tsx", "src/app/[locale]/app/me/AiSettings.tsx"]);
+    for (const f of confirming) expect(readFileSync(f, "utf8"), f).toMatch(/<AiConsentSheet\b[^>]*onTurnOn=\{turnOn\}/);
   });
 
   it("only the database's tone and focus values", () => {

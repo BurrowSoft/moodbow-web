@@ -218,6 +218,89 @@ test.describe("launch journeys", () => {
       await cleanup(email);
     }
   });
+
+  // Insights' Patterns | AI (decision 258), the Reviewer's musts: where AI isn't available there's no control and no
+  // word of AI anywhere on /app/insights (text, labels, titles), and a kept "ai" or ?view=ai is Patterns. Runs whenever
+  // staging's switch is off, i.e. on every run outside an AI window.
+  test("AI not available: Insights has no Patterns | AI control and no word of AI, whatever's kept or asked", { tag: "@real-email" }, async ({ page }) => {
+    const email = newEmail();
+    try {
+      const password = await signUp(page, email);
+      test.skip(await aiAvailable(email, password), "staging's AI switch is on (an AI window): this checks it off");
+      for (const [route, saved, words] of [
+        ["", "en", /\b(AI|Anthropic)\b|reflection/i],
+        ["/de", "de", /\b(KI|Anthropic)\b|reflexion/i],
+        ["/fr", "fr", /\b(IA|Anthropic)\b|réflexion/i],
+      ] as const) {
+        await setProfileLocale(email, password, saved);
+        await page.goto(`${route}/app/insights`);
+        await expect(page.getByTestId("insights-example")).toBeVisible({ timeout: 15_000 });
+        // A choice kept from a day with AI, and an address asking for AI.
+        await page.evaluate(() => window.localStorage.setItem("mb:insights-view", "ai"));
+        for (const path of [`${route}/app/insights`, `${route}/app/insights?view=ai`]) {
+          await page.goto(path);
+          await expect(page.getByTestId("insights-example")).toBeVisible({ timeout: 15_000 });
+          await expect(page.getByRole("tablist")).toHaveCount(0);
+          await expect(page.getByTestId("insights-ai-invite")).toHaveCount(0);
+          await expect(page.getByTestId("insights-reflections")).toHaveCount(0);
+          const shown = await page.evaluate(() =>
+            [document.body.innerText, ...[...document.querySelectorAll("[aria-label], [title], [alt], [placeholder]")].flatMap((e) => ["aria-label", "title", "alt", "placeholder"].map((a) => e.getAttribute(a) ?? ""))].join("\n"),
+          );
+          expect(shown, `${path}: no word of AI`).not.toMatch(words);
+        }
+        // See all isn't there either: back to Insights.
+        await page.goto(`${route}/app/insights/reflections`);
+        await expect(page).toHaveURL(new RegExp(`${route}/app/insights$`));
+      }
+    } finally {
+      await cleanup(email);
+    }
+  });
+
+  // Insights → AI's invitation (decision 258, board 30b), in an AI window: its button only opens the one-time sheet;
+  // Not now records nothing; Turn on AI records one consent at this build's version, and the AI segment is then Your
+  // reflections (none yet) first, Your week (a free account: its Plus line), and AI settings. The choice is kept.
+  test("Insights → AI: the invitation opens the sheet, Not now records nothing, Turn on AI shows the AI segment", { tag: "@real-email" }, async ({ page }) => {
+    const email = newEmail();
+    try {
+      const password = await signUp(page, email);
+      test.skip(!(await aiAvailable(email, password)), "staging's AI switch is off (get_me().ai_available false): AI-on journey skipped");
+      await page.goto("/app/insights");
+      await expect(page.getByTestId("insights-tab-patterns")).toHaveAttribute("aria-selected", "true", { timeout: 15_000 });
+      await expect(page.getByTestId("insights-example")).toBeVisible();
+      await page.getByTestId("insights-tab-ai").click();
+      await expect(page.getByTestId("insights-tab-ai")).toHaveAttribute("aria-selected", "true");
+      await expect(page).toHaveURL(/[?&]view=ai\b/);
+      const invite = page.getByTestId("insights-ai-invite");
+      await expect(invite).toBeVisible();
+      await expect(page.getByTestId("insights-example")).toBeHidden();
+      const sheet = page.getByRole("dialog", { name: messages.ai.aiConfirmTitle });
+      await invite.getByTestId("insights-ai-invite-turn-on").click();
+      await expect(sheet).toBeVisible();
+      await expect(sheet).toContainText(messages.ai.consentAiBody);
+      expect(await aiConsent(email, password), "the invitation's button records nothing").toEqual({ granted: false, version: null });
+      await page.getByTestId("insights-ai-sheet-not-now").click();
+      await expect(sheet).toHaveCount(0);
+      expect(await aiConsent(email, password), "Not now records nothing").toEqual({ granted: false, version: null });
+
+      await invite.getByTestId("insights-ai-invite-turn-on").click();
+      await page.getByTestId("insights-ai-sheet-turn-on").click();
+      await expect
+        .poll(() => aiConsent(email, password), { message: "Turn on AI: one consent at this build's version", timeout: 15_000 })
+        .toEqual({ granted: true, version: POLICY_VERSIONS.ai });
+      const reflections = page.getByTestId("insights-reflections");
+      await expect(reflections.getByTestId("insights-reflections-empty")).toHaveText(messages.ai.reflectionsEmpty, { timeout: 15_000 });
+      await expect(page.getByTestId("weekly-report-plus")).toContainText(messages.ai.reportPlusLine);
+      await expect(page.getByTestId("insights-ai-settings")).toHaveAttribute("href", /\/app\/me#me-ai$/);
+      await expect(page.getByTestId("insights-ai-invite")).toHaveCount(0);
+      // Kept on this device: Insights opens on AI again.
+      await page.goto("/app/insights");
+      await expect(page.getByTestId("insights-tab-ai")).toHaveAttribute("aria-selected", "true", { timeout: 15_000 });
+      await expect(reflections).toBeVisible();
+    } finally {
+      await cleanup(email);
+    }
+  });
 });
 
 // Tonight's flows (UX & PM 2026-11-03), so they stay protected after merge.

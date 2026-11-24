@@ -5,9 +5,7 @@ import { useTranslations } from "next-intl";
 import { Dialog, dialogButton } from "@/components/Dialog";
 import { GetHelpNow } from "@/components/SafetyCard";
 import { lastQuestion } from "@/lib/journal/answer";
-import getHelpLabel from "../../../../../content/contracts/get-help-label.json";
-import { IN_PROGRESS_LIMIT_MS, IN_PROGRESS_RETRY_MS, REFLECT_CLIENT_DEADLINE_MS, type Reflection, type ReflectErrorKey, type ReflectResult } from "@/lib/journal/reflect";
-import { normalizeForCrisis } from "@/lib/safety/crisis";
+import { IN_PROGRESS_LIMIT_MS, IN_PROGRESS_RETRY_MS, namesGetHelp, REFLECT_CLIENT_DEADLINE_MS, type Reflection, type ReflectErrorKey, type ReflectResult } from "@/lib/journal/reflect";
 import { deleteReflection, reflectOnEntry } from "./reflectActions";
 import { countTap } from "@/lib/analyticsEvents";
 
@@ -19,16 +17,7 @@ type Phase =
   // No answer reached the browser: Try again resends the same tap.
   | { kind: "offline" };
 
-// The reply names the button in the entry's language, which may not be the
-// UI's: any label in the shared contract counts (reviewer #35). Both sides go
-// through the crisis normalizer, as on the app (namesHelpLabel): a no-break
-// space, a curly apostrophe, a missing ? or ¿, or the case can't hide the button.
-const forMatch = (s: string) => normalizeForCrisis(s, false);
-const GET_HELP_LABELS = Object.values(getHelpLabel.labels).map(forMatch).filter(Boolean);
-const namesGetHelp = (body: string) => {
-  const reply = forMatch(body);
-  return GET_HELP_LABELS.some((label) => reply.includes(label));
-};
+// A crisis reply names the help button: namesGetHelp (lib/journal/reflect), the same rule as Insights → AI's list.
 
 // One call, or no answer after ms (a hung request): the late answer, if
 // any, is ignored; the same key is resent on Try again.
