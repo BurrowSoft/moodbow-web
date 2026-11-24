@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState, useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { INSIGHTS_TABLIST, insightsTab } from "@/lib/ui/largeText";
@@ -19,12 +19,20 @@ const recall = (): InsightsSegment | null => {
     return null;
   }
 };
+const listeners = new Set<() => void>();
+const subscribe = (cb: () => void) => {
+  listeners.add(cb);
+  return () => {
+    listeners.delete(cb);
+  };
+};
 const remember = (segment: InsightsSegment) => {
   try {
     window.localStorage.setItem(INSIGHTS_VIEW_KEY, segment);
   } catch {
     // Storage blocked: the choice holds for this visit only.
   }
+  listeners.forEach((cb) => cb());
 };
 
 // Insights' two segments, Patterns | AI (decision 258; specs/insights-ai-split.md, board 30). The page
@@ -50,12 +58,17 @@ export function InsightsTabs({
   ai: React.ReactNode;
 }) {
   const t = useTranslations("insights");
-  const [selected, setSelected] = useState<InsightsSegment>(initial);
+  // The choice kept on this device: none on the server and while the page hydrates, so the first page is the
+  // default or the address's choice; then this browser's.
+  const kept = useSyncExternalStore(subscribe, recall, () => null);
+  // A tab chosen on this page.
+  const [chosen, setChosen] = useState<InsightsSegment | null>(null);
+  const selected = chosen ?? (named ? initial : (kept ?? initial));
   const id = useId();
   const tabs = useRef<Partial<Record<InsightsSegment, HTMLAnchorElement | null>>>({});
 
   const select = (segment: InsightsSegment, focus = false) => {
-    setSelected(segment);
+    setChosen(segment);
     remember(segment);
     const url = new URL(window.location.href);
     if (segment === "ai") url.searchParams.set("view", "ai");
@@ -64,13 +77,10 @@ export function InsightsTabs({
     if (focus) tabs.current[segment]?.focus();
   };
 
+  // The address's choice is kept too, as a click would be.
   useEffect(() => {
-    if (named) return remember(initial);
-    const kept = recall();
-    if (kept && kept !== initial) select(kept);
-    // Once, after load: the server's page is always the default or the address's choice.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (named) remember(initial);
+  }, [named, initial]);
 
   const onKeyDown = (e: React.KeyboardEvent) => {
     const next = e.key === "ArrowRight" || e.key === "ArrowLeft" ? SEGMENTS[(SEGMENTS.indexOf(selected) + 1) % SEGMENTS.length] : e.key === "Home" ? SEGMENTS[0] : e.key === "End" ? SEGMENTS[SEGMENTS.length - 1] : null;

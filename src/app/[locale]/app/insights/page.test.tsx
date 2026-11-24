@@ -195,7 +195,8 @@ describe("Insights → Patterns | AI (decision 258)", () => {
         expect(paneProps, at).toBeNull();
         expect(screen.queryByTestId("weekly-report"), at).toBeNull();
         expect(screen.queryByTestId("insights-heading"), `${at}: the view's own heading`).toBeNull();
-        expect(view.kind === "plus" ? viewProps?.heading : exampleProps?.heading, at).not.toBe(false);
+        const handed = (view.kind === "plus" ? viewProps : exampleProps) as { heading?: boolean } | null;
+        expect(handed?.heading, at).not.toBe(false);
         expect(readReflections, at).not.toHaveBeenCalled();
         expect(asked, `${at}: no AI read`).not.toContain("ai_reports");
         expect(container.textContent ?? "", at).not.toMatch(/\b(AI|IA|KI)\b/);

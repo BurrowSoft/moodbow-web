@@ -14,10 +14,12 @@ const { InsightsTabs, INSIGHTS_VIEW_KEY } = await import("./InsightsTabs");
 const t = messages.insights;
 
 const HREFS = { patterns: "/app/insights?range=month", ai: "/app/insights?view=ai&range=month" };
+const CHARTS = "THE CHARTS";
+const AI_SIDE = "THE AI SIDE";
 const show = (initial: "patterns" | "ai" = "patterns", named = false) =>
   render(
     <NextIntlClientProvider locale="en" messages={messages}>
-      <InsightsTabs initial={initial} named={named} hrefs={HREFS} patterns={<p>THE CHARTS</p>} ai={<p>THE AI SIDE</p>} />
+      <InsightsTabs initial={initial} named={named} hrefs={HREFS} patterns={<p>{CHARTS}</p>} ai={<p>{AI_SIDE}</p>} />
     </NextIntlClientProvider>,
   );
 const tab = (name: string) => screen.getByRole("tab", { name });
@@ -41,7 +43,7 @@ describe("InsightsTabs: Patterns | AI (decision 258)", () => {
     expect(tab(t.insightsSegPatterns)).toHaveAttribute("tabindex", "0");
     expect(tab(t.insightsSegAi)).toHaveAttribute("tabindex", "-1");
     const panel = screen.getByRole("tabpanel");
-    expect(panel).toHaveTextContent("THE CHARTS");
+    expect(panel).toHaveTextContent(CHARTS);
     expect(tab(t.insightsSegPatterns)).toHaveAttribute("aria-controls", panel.id);
     expect(panel).toHaveAttribute("aria-labelledby", tab(t.insightsSegPatterns).id);
     expect(screen.getByTestId("insights-panel-ai")).not.toBeVisible();
@@ -54,7 +56,7 @@ describe("InsightsTabs: Patterns | AI (decision 258)", () => {
     show();
     fireEvent.click(tab(t.insightsSegAi));
     expect(tab(t.insightsSegAi)).toHaveAttribute("aria-selected", "true");
-    expect(screen.getByRole("tabpanel")).toHaveTextContent("THE AI SIDE");
+    expect(screen.getByRole("tabpanel")).toHaveTextContent(AI_SIDE);
     expect(screen.getByTestId("insights-panel-patterns")).not.toBeVisible();
     expect(new URLSearchParams(window.location.search).get("view")).toBe("ai");
     expect(new URLSearchParams(window.location.search).get("range")).toBe("month");
@@ -93,7 +95,7 @@ describe("InsightsTabs: Patterns | AI (decision 258)", () => {
     show();
     await act(async () => {});
     expect(tab(t.insightsSegAi)).toHaveAttribute("aria-selected", "true");
-    expect(new URLSearchParams(window.location.search).get("view")).toBe("ai");
+    expect(screen.getByRole("tabpanel")).toHaveTextContent(AI_SIDE);
     cleanup();
     // ?view=ai (named): AI, kept.
     window.localStorage.setItem(INSIGHTS_VIEW_KEY, "patterns");

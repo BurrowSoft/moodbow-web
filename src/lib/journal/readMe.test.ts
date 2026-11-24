@@ -7,7 +7,7 @@ import { GET_ME_ARGS, readMe } from "./me";
 const ME = { today: "2026-11-25", ai_available: true };
 const NO_FUNCTION = { code: "PGRST202", message: "Could not find the function public.get_me(p_client_ai) in the schema cache" };
 const withAnswers = (...answers: { data: unknown; error: unknown }[]) => {
-  const rpc = vi.fn(async (..._args: unknown[]) => answers.shift() ?? { data: null, error: { message: "nothing more" } });
+  const rpc = vi.fn<(name: string, args?: object) => Promise<{ data: unknown; error: unknown }>>(async () => answers.shift() ?? { data: null, error: { message: "nothing more" } });
   return { rpc, supabase: { rpc } as never };
 };
 
