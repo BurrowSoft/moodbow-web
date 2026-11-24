@@ -3,7 +3,7 @@ import { Link } from "@/i18n/navigation";
 import { GetHelpNow } from "@/components/SafetyCard";
 import { dateLine } from "@/lib/journal/today";
 import { JOURNAL_CARD, JOURNAL_HEADING } from "@/lib/ui/journalLayout";
-import { YEAR_MONTH, YEAR_MONTH_LABEL, YEAR_STRIP } from "@/lib/ui/largeText";
+import { YEAR_MONTH, YEAR_MONTH_LABEL, YEAR_STRIP, YEAR_STRIP_BOX } from "@/lib/ui/largeText";
 import { MOOD_HEX } from "@/lib/share/moodbow";
 import { YEAR_MIN_MONTHS } from "@/lib/share/year";
 import type { YearReview, YearScreen } from "@/lib/journal/yearReview";
@@ -53,19 +53,22 @@ export async function YearView({ review, country, dateLocaleTag, share, morePlus
           <>
             <h2 tabIndex={-1} className={H2}>{t("coloursTitle")}</h2>
             <p className="mt-1 text-muted">{t("coloursLine")}</p>
-            <ol className={YEAR_STRIP} data-testid="year-strip">
-              {s.months.map((m, i) => (
-                <li key={i} className={YEAR_MONTH}>
-                  <span
-                    aria-hidden="true"
-                    className={`block h-[40px] w-full rounded-xl ${m === null ? "border border-dashed border-border" : ""}`}
-                    style={m === null ? undefined : { backgroundColor: MOOD_HEX[m - 1] }}
-                  />
-                  <span aria-hidden="true" data-month-label className={YEAR_MONTH_LABEL}>{monthName(i)}</span>
-                  <span className="sr-only">{m === null ? t("monthFaint", { month: monthName(i) }) : t("monthMood", { month: monthName(i), mood: moodName(m) })}</span>
-                </li>
-              ))}
-            </ol>
+            {/* The strip's columns follow its own width (a container), so every month fits its cell whole. */}
+            <div className={YEAR_STRIP_BOX}>
+              <ol className={YEAR_STRIP} data-testid="year-strip">
+                {s.months.map((m, i) => (
+                  <li key={i} className={YEAR_MONTH}>
+                    <span
+                      aria-hidden="true"
+                      className={`block h-[40px] w-full rounded-xl ${m === null ? "border border-dashed border-border" : ""}`}
+                      style={m === null ? undefined : { backgroundColor: MOOD_HEX[m - 1] }}
+                    />
+                    <span aria-hidden="true" data-month-label className={YEAR_MONTH_LABEL}>{monthName(i)}</span>
+                    <span className="sr-only">{m === null ? t("monthFaint", { month: monthName(i) }) : t("monthMood", { month: monthName(i), mood: moodName(m) })}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
           </>
         );
       case "days":
