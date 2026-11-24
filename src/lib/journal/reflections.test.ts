@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
+import crisisKeywords from "../../../content/contracts/crisis-keywords.json";
 import getHelpLabel from "../../../content/contracts/get-help-label.json";
 import { readReflections, reflectionLine, REFLECTIONS_MAX, REFLECTIONS_PAGE, shownOf } from "./reflections";
 
@@ -21,6 +22,17 @@ describe("reflectionLine: the first line, or null for a crisis reply (decision 2
     expect(reflectionLine("   \n ")).toBeNull();
     // Only the label: the word "talk" alone isn't a crisis reply.
     expect(reflectionLine("You wanted to talk about work.")).toBe("You wanted to talk about work.");
+  });
+  it("a reply with a crisis keyword and no help label is null too, wherever the keyword is (the Reviewer's second check)", () => {
+    // The shared list, as the after-save check reads it: the first phrase of each language's list.
+    for (const [lang, list] of Object.entries(crisisKeywords.languages)) {
+      const phrase = list.phrases[0];
+      expect(reflectionLine(`${phrase}.`), `${lang}: ${phrase}`).toBeNull();
+      expect(reflectionLine(`It sounds like a long week.\nYou wrote that you want to ${phrase}.`), `${lang}, on a later line`).toBeNull();
+    }
+    expect(reflectionLine("You wrote that you want to end my life, and that matters.")).toBeNull();
+    // A reply with neither stays a line.
+    expect(reflectionLine("A slow, kind evening with Mai.")).toBe("A slow, kind evening with Mai.");
   });
 });
 

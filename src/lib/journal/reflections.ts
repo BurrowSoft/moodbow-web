@@ -1,4 +1,6 @@
 import type { createSupabaseServerClient } from "@/lib/supabase/server";
+import { flagsCrisis } from "@/lib/safety/crisis";
+import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
 import { namesGetHelp } from "./reflect";
 
 type Client = NonNullable<Awaited<ReturnType<typeof createSupabaseServerClient>>>;
@@ -7,10 +9,12 @@ type Client = NonNullable<Awaited<ReturnType<typeof createSupabaseServerClient>>
 // reflections, newest first by the reflection's own time (UX, 25 Nov), each with its entry's date and
 // the reflection's first line. Each reflection also stays on its entry exactly as before: this only
 // collects them.
-// A crisis reply (namesGetHelp, the entry panel's own rule) is listed as its date and a neutral word
-// only: its line is null here, so its text never leaves the server for the list, not as text, a
-// label or anything else (the Reviewer). A reflection whose entry is gone isn't listed (it would open
-// nothing).
+// A crisis reply is listed as its date and a neutral word only: its line is null here, so its text
+// never leaves the server for the list, not as text, a label or anything else (the Reviewer). Two
+// checks, either is enough: it names the help button (namesGetHelp, the entry panel's own rule), or it
+// holds a crisis keyword (the shared list, as the after-save check uses), in case a reply ever leaves
+// the button out and echoes the person's words (the Reviewer, #423). A reflection whose entry is gone
+// isn't listed (it would open nothing).
 export const REFLECTIONS_PREVIEW = 3;
 export const REFLECTIONS_PAGE = 20;
 // See all's most at once (?shown=), so an address can't ask for every row there is.
@@ -21,9 +25,9 @@ const ENTRY_IDS_PER_READ = 100;
 export type ReflectionRow = { id: string; entryId: string; entryDate: string; line: string | null };
 
 // The first line with text, trimmed; null for a crisis reply (or no text at all), which the list
-// names with the neutral word.
+// names with the neutral word. The whole body is checked, not only its first line.
 export function reflectionLine(body: string): string | null {
-  if (namesGetHelp(body)) return null;
+  if (namesGetHelp(body) || flagsCrisis(body, CRISIS_KEYWORDS)) return null;
   return (
     body
       .split(/\r?\n/)
