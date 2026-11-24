@@ -220,8 +220,10 @@ export async function aiConsent(email: string, password: string): Promise<{ gran
 }
 
 // The reflect function as the person calls it, for its server-side consent gate (the Reviewer, 23 Nov): its
-// HTTP status and its error code ({ "code": … }, contracts/errors.md). Without a current AI consent it
-// refuses in ai_begin_request, before any model call, so nothing is billed.
+// HTTP status and its error code. The body is { "error": "<code>" } (contracts/reflect.md, Errors), which is what
+// the web's own Reflect action reads (entries/reflectActions.ts). errors.md's "{ "code": … }" line disagrees; the
+// helper first read that and saw null in window B1a, 25 Nov. Without a current AI consent it refuses in
+// ai_begin_request, before any model call, so nothing is billed.
 export async function reflectCode(email: string, password: string, entryId: string): Promise<{ status: number; code: string | null }> {
   const user = await signedInAs(email, password);
   const { data } = await user.auth.getSession();
@@ -230,8 +232,8 @@ export async function reflectCode(email: string, password: string, entryId: stri
     headers: { Authorization: `Bearer ${data.session?.access_token ?? ""}`, apikey: PUBLISHABLE, "Content-Type": "application/json" },
     body: JSON.stringify({ entry_id: entryId, client_key: crypto.randomUUID() }),
   });
-  const body = (await res.json().catch(() => null)) as { code?: string } | null;
-  return { status: res.status, code: body?.code ?? null };
+  const body = (await res.json().catch(() => null)) as { error?: unknown } | null;
+  return { status: res.status, code: typeof body?.error === "string" ? body.error : null };
 }
 
 // The token a password reset email would carry.
