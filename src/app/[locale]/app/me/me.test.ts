@@ -194,7 +194,8 @@ describe("saveReminder", () => {
 describe("Me → AI actions (M9; reflect.md, Me → AI)", () => {
   const AI = { kind: "ai", version: POLICY_VERSIONS.ai, locale: "en" };
   const SHEET = { version: POLICY_VERSIONS.ai };
-  // get_me as the server reads it again on On: AI shown or not, and the consent the account has.
+  // get_me as the server reads it again on On: AI shown or not, and the consent the account has. Always with
+  // this build's AI flag (moodbow-app 044: p_client_ai 1; readMe.test has its fallback).
   const account = (me: { ai_available: boolean; consents?: object }) =>
     rpc.mockImplementation(async (name: string) => (name === "get_me" ? { data: { consents: {}, ...me }, error: null } : { data: null, error: null }));
 
@@ -203,7 +204,7 @@ describe("Me → AI actions (M9; reflect.md, Me → AI)", () => {
     account({ ai_available: true });
     expect(await setAiEnabled(true, SHEET)).toEqual({ ok: true });
     expect(rpc.mock.calls).toEqual([
-      ["get_me"],
+      ["get_me", { p_client_ai: 1 }],
       ["record_consents", { p_items: [{ ...AI, granted: true }] }],
       ["update_settings", { p_ai_enabled: true }],
     ]);
@@ -214,24 +215,24 @@ describe("Me → AI actions (M9; reflect.md, Me → AI)", () => {
       rpc.mockReset();
       account({ ai_available: true, consents: { ai: { version: "2026-10-02", granted: true } } });
       expect(await setAiEnabled(true, confirm as never), JSON.stringify(confirm)).toEqual({ ok: false, aiEnabled: false });
-      expect(rpc.mock.calls).toEqual([["get_me"]]);
+      expect(rpc.mock.calls).toEqual([["get_me", { p_client_ai: 1 }]]);
     }
   });
 
   it("on where AI isn't shown for this account (the global switch off): refused even with the sheet's confirm", async () => {
     account({ ai_available: false });
     expect(await setAiEnabled(true, SHEET)).toEqual({ ok: false, aiEnabled: false });
-    expect(rpc.mock.calls).toEqual([["get_me"]]);
+    expect(rpc.mock.calls).toEqual([["get_me", { p_client_ai: 1 }]]);
     rpc.mockReset();
     rpc.mockResolvedValue({ data: null, error: { message: "boom" } });
     expect(await setAiEnabled(true, SHEET)).toEqual({ ok: false, aiEnabled: false });
-    expect(rpc.mock.calls).toEqual([["get_me"]]);
+    expect(rpc.mock.calls).toEqual([["get_me", { p_client_ai: 1 }]]);
   });
 
   it("on with a consent already current (an Off whose withdrawal didn't go through): the setting only, no new consent row", async () => {
     account({ ai_available: true, consents: { ai: { version: POLICY_VERSIONS.ai, granted: true } } });
     expect(await setAiEnabled(true)).toEqual({ ok: true });
-    expect(rpc.mock.calls).toEqual([["get_me"], ["update_settings", { p_ai_enabled: true }]]);
+    expect(rpc.mock.calls).toEqual([["get_me", { p_client_ai: 1 }], ["update_settings", { p_ai_enabled: true }]]);
   });
 
   it("off: the setting first, then the recorded withdrawal", async () => {

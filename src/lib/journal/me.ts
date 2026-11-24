@@ -41,10 +41,19 @@ export type Me = {
 // cached: the check-in save asks it fresh.
 export const getMe = cache(async (supabase: Client): Promise<Me | null> => (await readMe(supabase)).me);
 
+// get_me says AI is available only to a build that says it can show AI (moodbow-app 044, run sheet C1b):
+// ai_available is the global switch AND p_client_ai >= 1, so a call without it (every released app build)
+// gets false. This build passes it on every read. Before 044 is on a server, or after a rollback, there's no
+// get_me(p_client_ai) and PostgREST answers PGRST202: then once without it, as the app does, so nobody is
+// locked out whatever the release order.
+export const GET_ME_ARGS = { p_client_ai: 1 } as const;
+const NO_SUCH_FUNCTION = "PGRST202";
+
 // getMe, also saying whether get_me never answered (a data deadline), for a
 // caller that handles a dropped connection itself (the check-in save).
 export async function readMe(supabase: Client): Promise<{ me: Me | null; unreachable: boolean }> {
-  const { data, error } = await supabase.rpc("get_me");
+  let { data, error } = await supabase.rpc("get_me", GET_ME_ARGS);
+  if ((error as { code?: string } | null)?.code === NO_SUCH_FUNCTION) ({ data, error } = await supabase.rpc("get_me"));
   if (error || !data) return { me: null, unreachable: isDeadlineError(error) };
   return { me: data as Me, unreachable: false };
 }

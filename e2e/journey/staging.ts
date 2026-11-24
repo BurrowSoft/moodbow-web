@@ -118,13 +118,20 @@ async function signedInAs(email: string, password: string): Promise<SupabaseClie
   return user;
 }
 
+// get_me as this build calls it (moodbow-app 044, src/lib/journal/me.ts): with p_client_ai 1, so
+// ai_available is the switch; where 044 isn't applied (PGRST202, no such function), once without it.
+async function getMeAs(user: SupabaseClient) {
+  const asked = await user.rpc("get_me", { p_client_ai: 1 });
+  return asked.error?.code === "PGRST202" ? user.rpc("get_me") : asked;
+}
+
 export async function grantAiConsent(email: string, password: string): Promise<void> {
   const { error } = await (await signedInAs(email, password)).rpc("record_consents", { p_items: [consentItem("ai", true)] });
   if (error) throw new Error(`granting the AI consent failed: ${error.message}`);
 }
 
 export async function boOff(email: string, password: string): Promise<boolean> {
-  const { data, error } = await (await signedInAs(email, password)).rpc("get_me");
+  const { data, error } = await getMeAs(await signedInAs(email, password));
   if (error) throw new Error(`get_me failed: ${error.message}`);
   return (data as { settings?: { bo_off?: boolean } }).settings?.bo_off === true;
 }
@@ -145,7 +152,7 @@ export async function journalToday(email: string, password: string): Promise<str
   const user = createClient(URL_, PUBLISHABLE, { auth: { persistSession: false, autoRefreshToken: false } });
   const { error: signInError } = await user.auth.signInWithPassword({ email, password });
   if (signInError) throw new Error(`sign-in failed: ${signInError.message}`);
-  const { data, error } = await user.rpc("get_me");
+  const { data, error } = await getMeAs(user);
   if (error) throw new Error(`get_me failed: ${error.message}`);
   return (data as { today: string }).today;
 }
@@ -206,7 +213,7 @@ export async function seedTags(email: string, password: string, monday: string, 
 // The account's AI consent as get_me has it: granted or not, and at which version (the AI go-live asks
 // again at a new one, 043; the Reviewer: turn-on → one row with the new id).
 export async function aiConsent(email: string, password: string): Promise<{ granted: boolean; version: string | null }> {
-  const { data, error } = await (await signedInAs(email, password)).rpc("get_me");
+  const { data, error } = await getMeAs(await signedInAs(email, password));
   if (error) throw new Error(`get_me failed: ${error.message}`);
   const ai = (data as { consents?: { ai?: { granted?: boolean; version?: string } } }).consents?.ai;
   return { granted: ai?.granted === true, version: ai?.version ?? null };
@@ -342,7 +349,7 @@ export async function aiAvailable(email: string, password: string): Promise<bool
   const user = createClient(URL_, PUBLISHABLE, { auth: { persistSession: false, autoRefreshToken: false } });
   const { error: signInError } = await user.auth.signInWithPassword({ email, password });
   if (signInError) throw new Error(`sign-in for get_me failed: ${signInError.message}`);
-  const { data, error } = await user.rpc("get_me");
+  const { data, error } = await getMeAs(user);
   await user.auth.signOut({ scope: "local" });
   if (error) throw new Error(`get_me failed: ${error.message}`);
   return (data as { ai_available?: boolean } | null)?.ai_available === true;
