@@ -877,6 +877,76 @@ test("Your year's strip at 360 px / 200 % and 320 px / 300 %: 4×3, every month 
   expect(normal.lines, "360 px / 100 %: every month on one line").toEqual(Array(12).fill(1));
 });
 
+// Your year's strip in every language at every phone size (UX, 25 Nov, after the Web Tester's f360 "Ja/n", which was #360's
+// old head, without #416's 4×3): all twelve labels one size, each month whole on one line inside its cell, from 320 to 430 px
+// at 100–300 %; 4 across where the page is a 13em column, else 6. The months are the browser's own (Intl), in each
+// language's date formats (en-GB's "Sept", de "Sept.", fr "févr.", th "ม.ค."). Lines are counted from the label's text (a
+// range's line boxes): the label is a flex item, a block, whose own rects are one box however many lines it holds.
+test("Your year's strip: every month whole on one line, one size, every language, 320–430 px, 100–300 %", async ({ page, browserName }, testInfo) => {
+  test.skip(browserName !== "chromium" || testInfo.project.name !== "desktop", "Page.setFontSizes is Chromium's; once is enough");
+  test.setTimeout(300_000);
+  const cdp = await page.context().newCDPSession(page);
+  const strip = (tag: string) => {
+    const month = new Intl.DateTimeFormat(tag, { month: "short", timeZone: "UTC" });
+    const items = Array.from(
+      { length: 12 },
+      (_, i) =>
+        `<li class="${YEAR_MONTH}"><span aria-hidden="true" class="block h-[40px] w-full rounded-xl" style="background:#7a9"></span><span aria-hidden="true" data-month-label class="${YEAR_MONTH_LABEL}">${month.format(new Date(Date.UTC(2026, i, 1)))}</span></li>`,
+    ).join("");
+    return `<ol class="${YEAR_STRIP}" data-testid="year-strip">${items}</ol>`;
+  };
+  const wrong: string[] = [];
+  for (const [language, tags] of [
+    ["/", ["en-US", "en-GB"]],
+    ["/fr", ["fr-FR"]],
+    ["/es", ["es-ES", "es-MX"]],
+    ["/pt-br", ["pt-BR"]],
+    ["/de", ["de-DE"]],
+    ["/it", ["it-IT"]],
+    ["/th", ["th-TH"]],
+  ] as const) {
+    await page.goto(language);
+    for (const width of [320, 360, 375, 390, 412, 430]) {
+      await page.setViewportSize({ width, height: 800 });
+      for (const percent of [100, 112.5, 125, 137.5, 150, 175, 200, 250, 300]) {
+        const root = (16 * percent) / 100;
+        await cdp.send("Page.setFontSizes", { fontSizes: { standard: root, fixed: Math.round((13 * percent) / 100) } });
+        for (const tag of tags) {
+          const at = `${tag} ${width} px / ${percent} %`;
+          // The year card's width on that phone: the app's gutter (12 px under 360 px, else 16) and the card's 20 px each side.
+          const got = await page.evaluate(
+            ([inner, html]) => {
+              document.body.innerHTML = `<div style="width:${inner}px">${html}</div>`;
+              const ol = document.querySelector("[data-testid=year-strip]")!;
+              const labels = [...ol.querySelectorAll<HTMLElement>("[data-month-label]")];
+              const lines = (l: HTMLElement) => {
+                const range = document.createRange();
+                range.selectNodeContents(l);
+                return new Set([...range.getClientRects()].map((r) => Math.round(r.top))).size;
+              };
+              return {
+                root: getComputedStyle(document.documentElement).fontSize,
+                large: matchMedia("(max-width: 13em)").matches,
+                columns: getComputedStyle(ol).gridTemplateColumns.split(" ").length,
+                sizes: [...new Set(labels.map((l) => getComputedStyle(l).fontSize))],
+                split: labels.filter((l) => lines(l) !== 1).map((l) => l.textContent),
+                outside: labels.filter((l) => l.scrollWidth > l.clientWidth + 0.5 || l.getBoundingClientRect().width > l.parentElement!.getBoundingClientRect().width + 0.5).map((l) => l.textContent),
+              };
+            },
+            [String(width - 2 * (width < 360 ? 12 : 16) - 2 * 20), strip(tag)] as const,
+          );
+          expect(got.root, at).toBe(`${root}px`);
+          if (got.split.length) wrong.push(`${at}: on more than one line: ${got.split.join(", ")}`);
+          if (got.outside.length) wrong.push(`${at}: past its cell: ${got.outside.join(", ")}`);
+          if (got.sizes.length !== 1) wrong.push(`${at}: ${got.sizes.length} sizes (${got.sizes.join(", ")})`);
+          if (got.columns !== (got.large ? 4 : 6)) wrong.push(`${at}: ${got.columns} across`);
+        }
+      }
+    }
+  }
+  expect(wrong, "a month split, past its cell, in another size, or the wrong number across").toEqual([]);
+});
+
 // UX, 20 Nov: /account-deletion is a help page, not legal text: French in French, no "in English" line.
 test("/fr/account-deletion: the French page, no English notice", async ({ page }) => {
   await page.goto("/fr/account-deletion");
