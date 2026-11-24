@@ -8,7 +8,7 @@ import it from "../src/messages/it.json";
 import pt from "../src/messages/pt-br.json";
 import th from "../src/messages/th.json";
 import { dialogButton } from "../src/lib/ui/dialogButton";
-import { BO_HEADING, DAY_ADD_ENTRY, LABEL_TRACKING, LOCKED_ROW_LABEL, ME_LOCKED_ROW, OFFER_STRIP_LIGHTS, PLUS_CARD, PLUS_CARD_OFFER_TAG, PLUS_CARD_PLUS_TAG, PLUS_CARD_SMALL, PLUS_CARD_TAG, PLUS_CARD_TAG_ROW, PLUS_CARD_TITLE, WEEK_DAY, WEEK_DAY_LABEL, WEEK_DAYS, WEEK_HEADING, WEEK_SUMMARY, YEAR_MONTH, YEAR_MONTH_LABEL, YEAR_STRIP } from "../src/lib/ui/largeText";
+import { BO_HEADING, DAY_ADD_ENTRY, LABEL_TRACKING, LOCKED_ROW_LABEL, ME_LOCKED_ROW, OFFER_STRIP_LIGHTS, PLUS_CARD, PLUS_CARD_OFFER_TAG, PLUS_CARD_PLUS_TAG, PLUS_CARD_SMALL, PLUS_CARD_TAG, PLUS_CARD_TAG_ROW, PLUS_CARD_TITLE, WEEK_DAY, WEEK_DAY_LABEL, WEEK_DAYS, WEEK_HEADING, WEEK_SUMMARY, YEAR_MONTH, YEAR_MONTH_LABEL, YEAR_STRIP, YEAR_STRIP_BOX } from "../src/lib/ui/largeText";
 
 // The browser's own text setting on a 320 px phone, on the pages someone with large
 // text needs first. Sign in's button scrolled /sign-in sideways by up to 194 px (Web
@@ -839,7 +839,8 @@ test("Your year's strip at 360 px / 200 % and 320 px / 300 %: 4×3, every month 
       (_, i) =>
         `<li class="${YEAR_MONTH}"><span aria-hidden="true" class="block h-[40px] w-full rounded-xl" style="background:#7a9"></span><span aria-hidden="true" data-month-label class="${YEAR_MONTH_LABEL}">${month.format(new Date(Date.UTC(2026, i, 1)))}</span></li>`,
     ).join("");
-    return `<ol class="${YEAR_STRIP}" data-testid="year-strip">${items}</ol>`;
+    // In its box, as on the page: the columns follow the strip's own width (a container query).
+    return `<div class="${YEAR_STRIP_BOX}"><ol class="${YEAR_STRIP}" data-testid="year-strip">${items}</ol></div>`;
   };
   const read = () =>
     page.evaluate(() => {
@@ -878,10 +879,13 @@ test("Your year's strip at 360 px / 200 % and 320 px / 300 %: 4×3, every month 
 });
 
 // Your year's strip in every language at every phone size (UX, 25 Nov, after the Web Tester's f360 "Ja/n", which was #360's
-// old head, without #416's 4×3): all twelve labels one size, each month whole on one line inside its cell, from 320 to 430 px
-// at 100–300 %; 4 across where the page is a 13em column, else 6. The months are the browser's own (Intl), in each
-// language's date formats (en-GB's "Sept", de "Sept.", fr "févr.", th "ม.ค."). Lines are counted from the label's text (a
-// range's line boxes): the label is a flex item, a block, whose own rects are one box however many lines it holds.
+// old head, without #416's 4×3; this sweep's first run then found labels wider than their cells, 6 across at 125–200 %):
+// all twelve labels at their own size, one size, each month whole on one line inside its cell, from 320 to 430 px at
+// 100–300 %; 4, 6 or 12 across by the strip's own width in em (under 15.5em 4, from 31em 12), 6 across at the normal size.
+// The months are the browser's own (Intl), in each language's date formats (en-GB's "Sept", de "Sept.", fr "mars").
+// Lines are counted from the label's text (a range's line boxes): the label is a flex item, a block, whose own rects are
+// one box however many lines it holds. The widest label (its width over its size) is what the 15.5em and 31em rest on
+// (largeText.ts): at most 2.8, checked here too.
 test("Your year's strip: every month whole on one line, one size, every language, 320–430 px, 100–300 %", async ({ page, browserName }, testInfo) => {
   test.skip(browserName !== "chromium" || testInfo.project.name !== "desktop", "Page.setFontSizes is Chromium's; once is enough");
   test.setTimeout(300_000);
@@ -893,9 +897,11 @@ test("Your year's strip: every month whole on one line, one size, every language
       (_, i) =>
         `<li class="${YEAR_MONTH}"><span aria-hidden="true" class="block h-[40px] w-full rounded-xl" style="background:#7a9"></span><span aria-hidden="true" data-month-label class="${YEAR_MONTH_LABEL}">${month.format(new Date(Date.UTC(2026, i, 1)))}</span></li>`,
     ).join("");
-    return `<ol class="${YEAR_STRIP}" data-testid="year-strip">${items}</ol>`;
+    return `<div data-strip-box class="${YEAR_STRIP_BOX}"><ol class="${YEAR_STRIP}" data-testid="year-strip">${items}</ol></div>`;
   };
   const wrong: string[] = [];
+  const widest: Record<string, number> = {};
+  const normal: string[] = [];
   for (const [language, tags] of [
     ["/", ["en-US", "en-GB"]],
     ["/fr", ["fr-FR"]],
@@ -924,11 +930,13 @@ test("Your year's strip: every month whole on one line, one size, every language
                 range.selectNodeContents(l);
                 return new Set([...range.getClientRects()].map((r) => Math.round(r.top))).size;
               };
+              const box = document.querySelector<HTMLElement>("[data-strip-box]")!;
               return {
                 root: getComputedStyle(document.documentElement).fontSize,
-                large: matchMedia("(max-width: 13em)").matches,
+                boxEm: box.clientWidth / parseFloat(getComputedStyle(box).fontSize),
                 columns: getComputedStyle(ol).gridTemplateColumns.split(" ").length,
                 sizes: [...new Set(labels.map((l) => getComputedStyle(l).fontSize))],
+                ratio: Math.max(...labels.map((l) => l.scrollWidth / parseFloat(getComputedStyle(l).fontSize))),
                 split: labels.filter((l) => lines(l) !== 1).map((l) => l.textContent),
                 outside: labels.filter((l) => l.scrollWidth > l.clientWidth + 0.5 || l.getBoundingClientRect().width > l.parentElement!.getBoundingClientRect().width + 0.5).map((l) => l.textContent),
               };
@@ -939,12 +947,18 @@ test("Your year's strip: every month whole on one line, one size, every language
           if (got.split.length) wrong.push(`${at}: on more than one line: ${got.split.join(", ")}`);
           if (got.outside.length) wrong.push(`${at}: past its cell: ${got.outside.join(", ")}`);
           if (got.sizes.length !== 1) wrong.push(`${at}: ${got.sizes.length} sizes (${got.sizes.join(", ")})`);
-          if (got.columns !== (got.large ? 4 : 6)) wrong.push(`${at}: ${got.columns} across`);
+          const across = got.boxEm >= 31 ? 12 : got.boxEm >= 15.5 ? 6 : 4;
+          if (got.columns !== across) wrong.push(`${at}: ${got.columns} across in ${got.boxEm.toFixed(2)}em (expected ${across})`);
+          if (percent === 100 && got.columns !== 6) normal.push(at);
+          widest[tag] = Math.max(widest[tag] ?? 0, got.ratio);
         }
       }
     }
   }
+  console.log(`Your year's widest month label, width over size: ${JSON.stringify(Object.fromEntries(Object.entries(widest).map(([k, v]) => [k, Number(v.toFixed(3))])))}`);
   expect(wrong, "a month split, past its cell, in another size, or the wrong number across").toEqual([]);
+  expect(normal, "6 across on every phone at the normal size").toEqual([]);
+  expect(Object.entries(widest).filter(([, v]) => v > 2.8), "a label wider than 2.8 of its size, which the 15.5em and 31em rest on").toEqual([]);
 });
 
 // UX, 20 Nov: /account-deletion is a help page, not legal text: French in French, no "in English" line.
