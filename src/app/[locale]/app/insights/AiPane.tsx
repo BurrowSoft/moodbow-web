@@ -82,9 +82,11 @@ export async function AiPane(
 // the date and the neutral word (crisisWord, ai.reflectionsRowCrisis): its line was never read into the
 // row (lib/journal/reflections).
 // first: the index of the first row here, for See all's anchors (#reflection-20 after Show more).
-export function ReflectionList({ rows, dateLocaleTag, origin, crisisWord, first = 0 }: { rows: ReflectionRow[]; dateLocaleTag: string; origin: Origin; crisisWord: string; first?: number }) {
+// topRule: a rule above the first row too, under a heading in the same card (the AI segment); See all's card has none
+// inside, so there the first row has no rule above it (the Web Tester, B1a).
+export function ReflectionList({ rows, dateLocaleTag, origin, crisisWord, first = 0, topRule = true }: { rows: ReflectionRow[]; dateLocaleTag: string; origin: Origin; crisisWord: string; first?: number; topRule?: boolean }) {
   return (
-    <ul data-testid="insights-reflections-list" className="mt-2">
+    <ul data-testid="insights-reflections-list" className={topRule ? "mt-2" : "[&>li:first-child>a]:border-t-0"}>
       {rows.map((row, i) => (
         <li key={row.id}>
           <Link
