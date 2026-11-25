@@ -9,13 +9,16 @@ const GROUP_LABELS = { noticing: "libraryNoticing", gratitude: "libraryGratitude
 const CAPPED = "max-sm:[font-size:min(1rem,max(10vw,32px))]";
 const LINK = "min-h-11 font-medium text-accent underline underline-offset-4";
 
-// "Need a prompt?" beside the day's prompt, above an empty entry (the editor shows this only
-// where the day's prompt shows: never on a crisis-flagged day). Its groups in list order; Hard
-// days is free and has Get help now under its line. Plus never appears while writing (UX, 12
-// Nov): no lock or sheet here, so without Plus (or with Plus unreadable) only the free group is
-// listed, and with Plus all five. The rest are found on the Plus screen and in Help. "Use this"
-// puts the prompt above the box, as the day's prompt is; nothing is written into the entry.
-export function PromptLibrary({ uid, country, hasPlus, onUse }: { uid: string; country: string | null | undefined; hasPlus: boolean; onUse: (text: string) => void }) {
+// "Need a prompt?" beside the day's prompt, above the entry (the editor shows this only where
+// the day's prompt shows: never on a crisis-flagged day; it folds away while someone writes,
+// board 31b). Its groups in list order; Hard days is free and has Get help now under its line.
+// Plus never appears while writing (UX, 12 Nov): no lock or sheet here, so without Plus (or with
+// Plus unreadable) only the free group is listed, and with Plus all five. The rest are found on
+// the Plus screen and in Help. "Use this" puts the prompt above the box, as the day's prompt is;
+// nothing is written into the entry. A Hard days prompt goes with its help: the editor shows Get
+// help now under it, before and while writing (UX, 25 Nov), as this library did under its line.
+export type ChosenPrompt = { text: string; help: boolean };
+export function PromptLibrary({ uid, country, hasPlus, onUse }: { uid: string; country: string | null | undefined; hasPlus: boolean; onUse: (prompt: ChosenPrompt) => void }) {
   const t = useTranslations("entry");
   const language = useLocale();
   const [open, setOpen] = useState(false);
@@ -64,7 +67,7 @@ export function PromptLibrary({ uid, country, hasPlus, onUse }: { uid: string; c
   };
   const use = () => {
     if (!group) return;
-    onUse(libraryText(libraryPrompt(group, place), language));
+    onUse({ text: libraryText(libraryPrompt(group, place), language), help: group.help });
     // The next one is where they'll start next time.
     savePlace(uid, group.id, (place + 1) % group.prompts.length);
     // Where they'll write.

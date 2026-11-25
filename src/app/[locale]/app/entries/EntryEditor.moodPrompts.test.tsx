@@ -28,12 +28,13 @@ const group = (id: string) => LIBRARY.find((g) => g.id === id)!;
 const daily = (id: string) => PROMPTS.find((p) => p.id === id)!.en;
 const lib = (g: string, n: number) => group(g).prompts[n].en;
 
-const renderIt = (moodPrompt: { mood: number | null; plus: boolean } | undefined) =>
-  render(
-    <NextIntlClientProvider locale="en" messages={messages}>
-      <EntryEditor initial={null} newId="11111111-1111-4111-8111-111111111111" uid="u1" today={DAY} promptDate={DAY} moodPrompt={moodPrompt} />
-    </NextIntlClientProvider>,
-  );
+const tree = (moodPrompt: { mood: number | null; plus: boolean } | undefined) => (
+  <NextIntlClientProvider locale="en" messages={messages}>
+    <EntryEditor initial={null} newId="11111111-1111-4111-8111-111111111111" uid="u1" today={DAY} promptDate={DAY} moodPrompt={moodPrompt} />
+  </NextIntlClientProvider>
+);
+const renderIt = (moodPrompt: { mood: number | null; plus: boolean } | undefined) => render(tree(moodPrompt));
+const type = (text: string) => fireEvent.change(screen.getByTestId("entry-text"), { target: { value: text } });
 beforeEach(() => window.localStorage.clear());
 afterEach(cleanup);
 
@@ -88,5 +89,23 @@ describe("the editor's mood prompt", () => {
     renderIt(undefined);
     expect(screen.getByTestId("entry-prompt-text")).toHaveTextContent(daily("prompt16"));
     expect(screen.queryByTestId("entry-prompt-help")).toBeNull();
+  });
+
+  // The storybook's board 31c (25 Nov): Get help now stays with its prompt while writing.
+  it("writing on the hard-days prompt: it stays, with its Get help now in reach; a mood changed meanwhile changes neither", () => {
+    const { rerender } = renderIt({ mood: 2, plus: false });
+    type("Everything felt too much today.");
+    expect(screen.getByTestId("entry-prompt-text")).toHaveTextContent(lib("hard-days", 3));
+    expect(screen.getByTestId("entry-prompt-help").closest("[inert]")).toBeNull();
+    expect(screen.getByTestId("entry-prompt-another-fold")).toHaveAttribute("inert");
+    // Frozen: the question being answered doesn't change under the words.
+    rerender(tree({ mood: 5, plus: false }));
+    expect(screen.getByTestId("entry-prompt-text")).toHaveTextContent(lib("hard-days", 3));
+    expect(screen.getByTestId("entry-prompt-help")).toBeInTheDocument();
+    // Emptied: the live prompt again, the new mood's, with Another.
+    type("");
+    expect(screen.getByTestId("entry-prompt-text")).toHaveTextContent(lib("gratitude", 3));
+    expect(screen.queryByTestId("entry-prompt-help")).toBeNull();
+    expect(screen.getByTestId("entry-prompt-another-fold")).not.toHaveAttribute("inert");
   });
 });
