@@ -958,6 +958,7 @@
     "rowJournal": "Votre journal : bilans et notes, sans limite",
     "rowTimeline": "Chronologie : liste, calendrier, moments forts, souvenirs et recherche",
     "rowHelp": "Aide, plan de sécurité, Ce qui m'aide et ses exercices",
+    "rowHelpNoPlan": "Aide, Ce qui m'aide et ses exercices",
     "rowOwn": "Lettres, résumé pour un rendez-vous",
     "rowRanges": "Votre semaine, mois et 3 mois",
     "rowPatterns": "Tendances sur les 3 derniers mois",

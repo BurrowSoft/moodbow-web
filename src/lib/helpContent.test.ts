@@ -302,3 +302,19 @@ describe("Help with Plus off: no article names Plus", () => {
     }
   });
 });
+
+// UX, 26 Nov: Moodbow Plus's Free list names the safety plan only once the web has it (safety-plan-live), in every
+// language; the rest of the list stays as it is.
+describe("Moodbow Plus's Free list and the safety plan", () => {
+  const PLAN: Record<string, string> = { en: "safety plan", fr: "plan de sécurité", es: "plan de seguridad", "pt-br": "plano de segurança", de: "Sicherheitsplan", it: "piano di sicurezza", th: "แผนความปลอดภัย" };
+  it.each(ALL_LOCALES)("%s", (language) => {
+    const article = findArticle(language, "moodbow-plus");
+    expect(article, language).not.toBeNull();
+    const off = renderArticle(article!, (id) => id !== "safety_plan_live");
+    const on = renderArticle(article!, () => true);
+    expect(off, language).not.toContain(PLAN[language]);
+    expect(on, language).toContain(PLAN[language]);
+    // Only the plan goes: the same list, one item shorter.
+    expect(off.replace(/\s+/g, " ").length, language).toBeLessThan(on.replace(/\s+/g, " ").length);
+  });
+});

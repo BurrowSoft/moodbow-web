@@ -1195,6 +1195,11 @@
     "reason": "UX draft (native read pending)"
   },
   {
+    "key": "plus.rowHelpNoPlan",
+    "en": "Help, Things that help me and its exercises",
+    "reason": "UX draft (native read pending)"
+  },
+  {
     "key": "plus.rowData",
     "en": "Export, import and delete",
     "reason": "UX draft (native read pending)"
