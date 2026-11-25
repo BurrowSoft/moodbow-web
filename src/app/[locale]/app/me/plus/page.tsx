@@ -4,7 +4,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 import { JournalUnavailable } from "@/components/JournalUnavailable";
 import { SessionEnded } from "@/components/SessionEnded";
-import { pageGate } from "@/lib/conditions";
+import { conditionMet, pageGate } from "@/lib/conditions";
 import { currentUser } from "@/lib/journal/currentUser";
 import { getMe } from "@/lib/journal/me";
 import { readPlusPage } from "@/lib/plus/page";
@@ -33,9 +33,11 @@ export default async function PlusPage({ params, searchParams }: PageProps<"/[lo
   // A row that can't be read: never an offer to someone who may already pay.
   if (!me || !plus) return <JournalUnavailable />;
   const started = (await searchParams).started === "1";
+  // The free help row names the safety plan only once the web has it (UX, 26 Nov): a claim, so the condition
+  // itself (as the Help article reads it), never a Preview's draft.
   return (
     <section className="space-y-2">
-      <PlusScreen view={plus.view} price={plus.price} offer={plus.offer} started={started} />
+      <PlusScreen view={plus.view} price={plus.price} offer={plus.offer} started={started} safetyPlan={conditionMet("safety-plan-live")} />
     </section>
   );
 }

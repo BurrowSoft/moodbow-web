@@ -958,6 +958,7 @@
     "rowJournal": "Dein Tagebuch: Check-ins und Einträge, unbegrenzt",
     "rowTimeline": "Verlauf: Liste, Kalender, Momente, Erinnerungen und Suche",
     "rowHelp": "Hilfe, Sicherheitsplan, Was mir hilft und seine Übungen",
+    "rowHelpNoPlan": "Hilfe, Was mir hilft und seine Übungen",
     "rowOwn": "Briefe, Zusammenfassung für den Termin",
     "rowRanges": "Deine Woche, dein Monat und 3 Monate",
     "rowPatterns": "Muster der letzten 3 Monate",

@@ -44,7 +44,10 @@ function Lock({ label }: { label: string }) {
 // in view on landing at any size. No first-charge date, no countdown, no
 // pre-ticked box: Stripe's own page confirms the terms.
 // offer: the Christmas special (1.3), only while it runs and for someone eligible (the server decides).
-export function PlusScreen({ view, price, offer = null, started }: { view: PlusView; price: string; offer?: PlusOfferPrices | null; started: boolean }) {
+// safetyPlan: whether the free help row names the safety plan, only once the web has it (safety-plan-live met;
+// UX, 26 Nov: a claim never goes live before the feature). Without it, the same row without the plan (its test id
+// unchanged).
+export function PlusScreen({ view, price, offer = null, started, safetyPlan = false }: { view: PlusView; price: string; offer?: PlusOfferPrices | null; started: boolean; safetyPlan?: boolean }) {
   const t = useTranslations("plus");
   const tt = useTranslations("today");
   const locale = useLocale();
@@ -415,7 +418,7 @@ export function PlusScreen({ view, price, offer = null, started }: { view: PlusV
             {[...rows, ...plusRows].map(({ k, free }) => (
               <tr key={k} role="row" data-testid={`plus-row-${k}`} className="border-t border-border">
                 <th scope="row" role="rowheader" className="px-[12px] py-2 text-left font-normal [overflow-wrap:anywhere]">
-                  {t(k)}
+                  {t(k === "rowHelp" && !safetyPlan ? "rowHelpNoPlan" : k)}
                 </th>
                 <td role="cell" data-label={t("colFree")} className="px-1 py-2">
                   {free ? <Tick label={t("included")} /> : <Lock label={t("plusOnly")} />}

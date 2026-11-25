@@ -6,7 +6,7 @@ pt-BR-draft: true
 ---
 {pending:plus|app_plus}Seu diário é grátis. Os Insights vêm com o Plus. A ajuda e seus dados são grátis para todos, sempre.
 
-**Grátis:** check-ins e seu diário sem limite, a Linha do tempo, o calendário e a busca, a ajuda e seu plano de segurança, O que me ajuda e seus exercícios (5-4-3-2-1, Escaneamento corporal, Dê um nome), o resumo para a consulta, exportar, importar e apagar.
+**Grátis:** check-ins e seu diário sem limite, a Linha do tempo, o calendário e a busca, a ajuda{pending:safety_plan_live} e seu plano de segurança{/pending}, O que me ajuda e seus exercícios (5-4-3-2-1, Escaneamento corporal, Dê um nome), o resumo para a consulta, exportar, importar e apagar.
 
 **O Plus acrescenta:** os Insights (semana, mês, 3 meses, ano e todo o histórico), os padrões e O que me faz bem, a retrospectiva do ano, as cartas para o meu eu do futuro, mais temas (e ícones no app), um PDF caprichado do seu diário e uma biblioteca de perguntas para escrever. As perguntas de "Dias difíceis" da biblioteca de perguntas são grátis para todos.{pending:plus} Na web, o Plus também acrescenta mais formas de respirar em **O que me ajuda** e mais lembretes.{/pending}
 

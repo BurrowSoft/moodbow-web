@@ -6,7 +6,7 @@ it-draft: true
 ---
 {pending:plus|app_plus}Il tuo diario è gratis. L'Andamento è incluso in Plus. L'aiuto e i tuoi dati sono gratis per tutti, sempre.
 
-**Gratis:** check-in e il tuo diario senza limiti, la Cronologia, il calendario e la ricerca, l'aiuto e il tuo piano di sicurezza, ciò che ti aiuta e gli esercizi di radicamento, il riepilogo per l'appuntamento, esportare, importare ed eliminare.
+**Gratis:** check-in e il tuo diario senza limiti, la Cronologia, il calendario e la ricerca, l'aiuto{pending:safety_plan_live} e il tuo piano di sicurezza{/pending}, ciò che ti aiuta e gli esercizi di radicamento, il riepilogo per l'appuntamento, esportare, importare ed eliminare.
 
 **Plus aggiunge:** l'Andamento (settimana, mese, 3 mesi, anno e tutto lo storico), gli andamenti e Cosa mi fa stare bene, l'anno in sintesi, le lettere al me del futuro, più temi (e icone nell'app), un PDF curato del tuo diario e una raccolta di domande per scrivere. Le domande di «Giornate difficili» della raccolta di domande sono gratis per tutti.{pending:plus} Sul web, Plus aggiunge anche più modi di respirare in **Cose che mi aiutano** e più promemoria.{/pending}
 
