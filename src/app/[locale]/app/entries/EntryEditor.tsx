@@ -23,7 +23,8 @@ import { SAVE_WAIT_MS, TimedOut, withTimeout } from "@/lib/ui/withTimeout";
 import { CRISIS_KEYWORDS } from "@/lib/safety/keywords";
 import { PRIMARY_SAVE } from "@/lib/ui/journalLayout";
 import { deleteEntry, getEntry, saveEntry, type DeleteState, type EntryState } from "./actions";
-import { PromptLibrary } from "./PromptLibrary";
+import { PromptLibrary, type ChosenPrompt } from "./PromptLibrary";
+import { Fold } from "./Fold";
 import { moodGroup, moodPrompt as moodPromptFor } from "@/lib/journal/moodPrompts";
 import { readPlace, savePlace, LIBRARY } from "@/lib/journal/promptLibrary";
 import { countTap } from "@/lib/analyticsEvents";
@@ -43,6 +44,10 @@ type Draft = Fields & { id: string; base: string | null };
 const AUTOSAVE_MS = 2000;
 const fromEntry = (e: Entry): Fields => ({ body: e.body, date: e.entry_date, isMoment: e.is_moment });
 const same = (a: Fields, b: Fields) => a.body === b.body && a.date === b.date && a.isMoment === b.isMoment;
+// Only text is worth keeping. A changed date or moment alone isn't (Web Tester #83), and an
+// emptied box keeps nothing, for an edit as for a new entry (UX, 25 Nov): reopening an entry
+// must never show an empty box over its saved text.
+const hasText = (f: Fields) => f.body.trim() !== "";
 
 function readDraft(key: string): Draft | null {
   try {
@@ -74,6 +79,12 @@ function removeSentDraft(key: string, sent: Draft) {
   if (d && (d.id !== sent.id || !same(d, sent))) return;
   removeDraft(key);
 }
+// A save's late answer keeps what's been typed since, but only with text in it: an emptied
+// box keeps no draft, not even an empty one (UX, 25 Nov).
+function keepOrDrop(key: string, draft: Draft) {
+  if (hasText(draft)) writeDraft(key, draft);
+  else removeDraft(key);
+}
 
 const isRedirect = (e: unknown) => typeof (e as { digest?: unknown })?.digest === "string" && (e as { digest: string }).digest.startsWith("NEXT_REDIRECT");
 
@@ -88,7 +99,11 @@ export function deletedRedirect(e: unknown): boolean {
 
 // Whether this browser holds an unsaved draft of the entry: the entry view
 // opens the editor straight away, so the draft isn't hidden (decision 151).
-export const hasDraft = (uid: string, entryId: string) => readDraft(localKey("draft-entry", uid, entryId))?.id === entryId;
+// A blank one (kept before 25 Nov) isn't a draft: the entry opens as saved.
+export const hasDraft = (uid: string, entryId: string) => {
+  const d = readDraft(localKey("draft-entry", uid, entryId));
+  return d?.id === entryId && hasText(d);
+};
 
 // startDate: the day a new entry starts on (a Timeline day's "Add an entry").
 // country: the profile's, for the safety card's numbers (M8).
@@ -100,7 +115,8 @@ export const hasDraft = (uid: string, entryId: string) => readDraft(localKey("dr
 // return to the view, with the saved entry when there's a new version.
 // promptDate: the writing prompt's day (1.1 I), where prompts are on and
 // nothing earlier that day was crisis-flagged (the page decides); shown only
-// while the text is empty and the entry is still on that day (reviewer #83).
+// while the entry is still on that day (reviewer #83): with Another while the
+// text is empty, then as the question being answered (board 31b, 25 Nov).
 export type EditorStart = { at: number | "end"; question?: string };
 // Stops growing at about 200 % on a narrow screen (decision 231), like PRIMARY_SAVE.
 const CAPPED = "max-sm:[font-size:min(1rem,max(10vw,32px))]";
@@ -153,8 +169,9 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
   const language = useLocale();
   // "Another" steps through the list from the day's prompt.
   const [promptStep, setPromptStep] = useState(0);
-  // A prompt chosen from the library: shown where the day's prompt is, until "Another".
-  const [chosenPrompt, setChosenPrompt] = useState<string | null>(null);
+  // A prompt chosen from the library: shown where the day's prompt is, until "Another", with
+  // Get help now under it when it's from Hard days (UX, 25 Nov).
+  const [chosenPrompt, setChosenPrompt] = useState<ChosenPrompt | null>(null);
   // With Plus, the mood's group from its saved place on this device (the library's), read once in
   // the browser (restore); Free uses the day's own prompt and promptStep.
   const moodGroupId = moodPrompt ? moodGroup(moodPrompt.mood) : null;
@@ -168,12 +185,13 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
 
   // What "unchanged" means: the server version, or a blank new entry.
   const [saved, setSaved] = useState<Fields>(initial ? fromEntry(initial) : { body: "", date: startDate ?? today, isMoment: false });
-  // A new entry's draft is kept only with text in it: a changed date or
-  // moment alone isn't worth keeping, and must not win over the day the
-  // next "Add an entry" asks for (Web Tester #83).
+  // A draft is kept only with text in it (hasText): a new entry's changed date
+  // or moment alone must not win over the day the next "Add an entry" asks for
+  // (Web Tester #83), and an old blank draft of an edit must not empty the box
+  // over the saved text (UX, 25 Nov).
   const [draft] = useState(() => {
     const d = restore ? readDraft(draftKey) : null;
-    return d && (!initial || d.id === initial.id) && (initial || d.body.trim() !== "") ? d : null;
+    return d && (!initial || d.id === initial.id) && hasText(d) ? d : null;
   });
   const [id, setId] = useState(draft?.id ?? initial?.id ?? newId);
   const [base, setBase] = useState<string | null>(draft ? draft.base : (initial?.updated_at ?? null));
@@ -215,8 +233,10 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
   // (decision 125).
   const [safety, setSafety] = useState<"closed" | "open">("closed");
   const dirty = !same(fields, saved);
-  // Whether there's anything to keep in this browser (see draft above).
-  const keep = dirty && (initial !== null || fields.body.trim() !== "");
+  // Whether there's anything to keep in this browser (see draft above): an
+  // emptied box, new or an edit, has nothing, so its draft goes at once, leaving
+  // doesn't ask, and an edit stays as saved (UX, 25 Nov).
+  const keep = dirty && hasText(fields);
 
   // The latest values for the unload handler and the autosave timer.
   const current = useRef<Draft>({ ...fields, id, base });
@@ -469,7 +489,8 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
         setLandedLate(true);
         announce?.(tt("checkinSaved"));
         if (same(current.current, sent)) removeDraft(draftKey);
-        else if (!signedOut.current && !finished.current) writeDraft(draftKey, { ...current.current, base: late.entry.updated_at });
+        // Typed since: kept on top of the version that landed, but only with text in it.
+        else if (!signedOut.current && !finished.current) keepOrDrop(draftKey, { ...current.current, base: late.entry.updated_at });
       })
       .catch(() => {
         // no answer after all: the error stands, and the draft is still here
@@ -509,8 +530,9 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
       if (!same(current.current, sent)) {
         const newer = { ...current.current, base: next.entry.updated_at };
         // Not once signed out in another tab: a save answered after that
-        // mustn't write the text back (Reviewer #147, merge note).
-        if (!signedOut.current) writeDraft(draftKey, newer);
+        // mustn't write the text back (Reviewer #147, merge note). Emptied
+        // meanwhile: no draft at all (UX, 25 Nov).
+        if (!signedOut.current) keepOrDrop(draftKey, newer);
         lastSaved.current = next.entry;
         setBase(next.entry.updated_at);
         setSaved(fromEntry(next.entry));
@@ -624,15 +646,32 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
   }, []);
   const conflict = dialog && typeof dialog === "object" ? dialog.conflict : undefined;
 
-  const showPrompt = !!promptDate && fields.date === promptDate && fields.body.trim() === "";
+  // The prompt's rows on a new entry on the prompt's day (the storybook's boards 31–31c, 25 Nov).
+  // Empty: all of them, the prompt with Another. From the first text, the prompt then showing is
+  // the question being answered: it stays as it was, without Another, with its Get help now when
+  // it's a hard-days one, while Three good things and Need a prompt? fold away (Fold); emptied,
+  // everything comes back the same way. Typed before the page's code ran: the prompt it showed.
+  // A draft that comes back with its text answered no prompt that's known: none until it's empty.
+  const promptOn = !!promptDate && fields.date === promptDate;
+  const writing = hasText(fields);
   // What the prompt line shows (lib/journal/moodPrompts): the mood's group where it applies, else
   // the day's list. The page has already left out a flagged day (no promptDate at all).
-  const shownPrompt = showPrompt
+  const shownPrompt = promptOn
     ? moodPrompt
       ? moodPromptFor({ today: promptDate!, mood: moodPrompt.mood, flagged: false, plus: moodPrompt.plus, place: moodPlace, another: moodPrompt.plus && moodGroupId ? 0 : promptStep })
       : ({ source: "daily", prompt: promptFor(promptDate!, promptStep), help: false } as const)
     : null;
-  const promptHelp = !chosenPrompt && shownPrompt?.source === "group" && shownPrompt.help;
+  const livePrompt: ChosenPrompt | null = !promptOn
+    ? null
+    : (chosenPrompt ?? (shownPrompt && shownPrompt.source !== "none" ? { text: promptText(shownPrompt.prompt, language), help: shownPrompt.source === "group" && shownPrompt.help } : null));
+  // Kept as it was at the first text (React's "storing information from previous renders").
+  const [answered, setAnswered] = useState<ChosenPrompt | null>(() => (writing && !draft ? livePrompt : null));
+  const [wasWriting, setWasWriting] = useState(writing);
+  if (writing !== wasWriting) {
+    setWasWriting(writing);
+    setAnswered(writing ? livePrompt : null);
+  }
+  const promptLine = !promptOn ? null : writing ? answered : livePrompt;
   return (
     <form
       className="flex min-h-[70dvh] flex-col gap-4"
@@ -693,38 +732,50 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
         />
       </div>
       {!initial && !goodThings && goodThingsHref && (
-        <Link href={goodThingsHref} data-testid="write-good-things" className={`w-fit min-h-[44px] inline-flex items-center font-medium text-accent underline underline-offset-4 ${CAPPED}`}>
-          {goodHeading}
-        </Link>
+        <Fold folded={writing} testId="write-good-things-fold">
+          <Link href={goodThingsHref} data-testid="write-good-things" className={`w-fit min-h-[44px] inline-flex items-center font-medium text-accent underline underline-offset-4 ${CAPPED}`}>
+            {goodHeading}
+          </Link>
+        </Fold>
       )}
-      {/* A quiet invitation, never inserted: only while the entry is empty. */}
-      {showPrompt && (
+      {/* A quiet invitation, never inserted: with Another while the entry is empty,
+          then the question being answered (board 31b). */}
+      {promptLine && (
         <p className={`flex flex-wrap items-baseline gap-x-3 gap-y-1 text-muted ${CAPPED}`} data-testid="entry-prompt">
           <span id="entry-prompt-text" data-testid="entry-prompt-text" className="min-w-0 [overflow-wrap:anywhere]">
-            {chosenPrompt ?? (shownPrompt && shownPrompt.source !== "none" ? promptText(shownPrompt.prompt, language) : null)}
+            {promptLine.text}
           </span>
-          <button
-            type="button"
-            data-testid="entry-prompt-another"
-            onClick={() => {
-              // Back to the day's list: the chosen one goes, and the next of the day's comes.
-              if (chosenPrompt) setChosenPrompt(null);
-              // Plus with a mood: the next in the mood's group, its place saved (as the library does).
-              if (moodPrompt?.plus && moodGroupId) {
-                const length = LIBRARY.find((g) => g.id === moodGroupId)!.prompts.length;
-                const next = (moodPlace + 1) % length;
-                savePlace(uid, moodGroupId, next);
-                setMoodPlace(next);
-              } else setPromptStep((n) => n + 1);
-            }}
-            className="min-h-11 font-medium text-accent underline underline-offset-4"
-          >
-            {t("promptAnother")}
-          </button>
+          {/* Folds in place, its width kept, so the prompt's words don't rewrap. */}
+          <Fold inline folded={writing} testId="entry-prompt-another-fold">
+            <button
+              type="button"
+              data-testid="entry-prompt-another"
+              onClick={() => {
+                // Back to the day's list: the chosen one goes, and the next of the day's comes.
+                if (chosenPrompt) setChosenPrompt(null);
+                // Plus with a mood: the next in the mood's group, its place saved (as the library does).
+                if (moodPrompt?.plus && moodGroupId) {
+                  const length = LIBRARY.find((g) => g.id === moodGroupId)!.prompts.length;
+                  const next = (moodPlace + 1) % length;
+                  savePlace(uid, moodGroupId, next);
+                  setMoodPlace(next);
+                } else setPromptStep((n) => n + 1);
+              }}
+              className="min-h-11 font-medium text-accent underline underline-offset-4"
+            >
+              {t("promptAnother")}
+            </button>
+          </Fold>
         </p>
       )}
-      {showPrompt && promptHelp && <GetHelpNow country={country} testId="entry-prompt-help" neutral />}
-      {showPrompt && library !== undefined && <PromptLibrary uid={uid} country={country} hasPlus={library} onUse={setChosenPrompt} />}
+      {/* A hard-days prompt's Get help now, from the mood or from the library: it stays while
+          writing and never folds (board 31c). */}
+      {promptLine?.help && <GetHelpNow country={country} testId="entry-prompt-help" neutral />}
+      {promptOn && library !== undefined && (
+        <Fold folded={writing} testId="entry-library-fold">
+          <PromptLibrary uid={uid} country={country} hasPlus={library} onUse={setChosenPrompt} />
+        </Fold>
+      )}
       {goodThings ? (
         <div {...untilLoaded} className="flex flex-col gap-4" data-testid="good-things-fields">
           {([1, 2, 3] as const).map((n) => (
@@ -764,7 +815,7 @@ function Editor({ initial, newId, uid, today, startDate, country, backTo = "/app
         placeholder={t("entryPlaceholder")}
         // Too long: the message is tied to the text (a11y pass).
         aria-invalid={tooLong || undefined}
-        aria-describedby={[tooLong && "entry-error", showPrompt && "entry-prompt-text"].filter(Boolean).join(" ") || undefined}
+        aria-describedby={[tooLong && "entry-error", promptLine && "entry-prompt-text"].filter(Boolean).join(" ") || undefined}
         className="min-h-[50dvh] w-full flex-1 resize-none rounded-3xl border border-border bg-surface p-[24px] text-lg leading-relaxed text-text placeholder:text-muted"
       />
       </>

@@ -3,6 +3,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import messages from "@/messages/en.json";
 import { PROMPTS } from "@/lib/journal/prompts";
+import { LIBRARY } from "@/lib/journal/promptLibrary";
 import type { Entry } from "@/lib/journal/entry";
 
 // The entry editor against mocked actions (CI has no Supabase to sign in to).
@@ -1214,14 +1215,17 @@ describe("EntryEditor: writing prompts (1.1 I, decision 183)", () => {
     expect(screen.getByTestId("entry-prompt-another")).toHaveTextContent(messages.entry.promptAnother);
   });
 
-  it("it's only an invitation: nothing is inserted, and it goes once there's text", () => {
+  it("it's only an invitation: nothing is inserted; once there's text it stays as the question being answered, without Another (board 31b)", () => {
     renderWithPrompt("2026-10-20");
     expect(screen.getByTestId("entry-text")).toHaveValue("");
     type("Today I");
-    expect(screen.queryByTestId("entry-prompt")).toBeNull();
-    expect(screen.getByTestId("entry-text")).not.toHaveAttribute("aria-describedby");
+    expect(screen.getByTestId("entry-text")).toHaveValue("Today I");
+    expect(screen.getByTestId("entry-prompt-text")).toHaveTextContent(text("prompt17"));
+    expect(screen.getByTestId("entry-text")).toHaveAccessibleDescription(text("prompt17"));
+    expect(screen.getByTestId("entry-prompt-another-fold")).toHaveAttribute("inert");
+    // Spaces are still empty: Another is back.
     type("   ");
-    expect(screen.getByTestId("entry-prompt")).toBeInTheDocument();
+    expect(screen.getByTestId("entry-prompt-another-fold")).not.toHaveAttribute("inert");
   });
 
   it("the entry moved to another day: the prompt (and its description) go; back on its day, it returns (reviewer #83)", () => {
@@ -1236,6 +1240,157 @@ describe("EntryEditor: writing prompts (1.1 I, decision 183)", () => {
   it("no promptDate (off, or a crisis-flagged day): no prompt", () => {
     renderWithPrompt(null);
     expect(screen.queryByTestId("entry-prompt")).toBeNull();
+  });
+});
+
+describe("EntryEditor: the prompt's rows while writing (the storybook's boards 31–31c, 25 Nov)", () => {
+  // 2026-10-20 is prompt17, then prompt18 (the contract's fixture). library false: the free group only.
+  const renderRows = (library = false) =>
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <EntryEditor initial={null} newId={NEW_ID} uid="u1" today="2026-10-20" promptDate="2026-10-20" goodThingsHref="/app/write/good-things" library={library} />
+      </NextIntlClientProvider>,
+    );
+  const daily = (id: string) => PROMPTS.find((p) => p.id === id)!.en;
+  const hardDays = LIBRARY.find((g) => g.id === "hard-days")!.prompts[0].en;
+  const ROWS = ["write-good-things-fold", "entry-prompt-another-fold", "entry-library-fold"];
+  const folded = (testId: string) => screen.getByTestId(testId).getAttribute("data-folded") === "true" && screen.getByTestId(testId).hasAttribute("inert");
+  const open = (testId: string) => screen.getByTestId(testId).getAttribute("data-folded") === "false" && !screen.getByTestId(testId).hasAttribute("inert");
+  const before = (a: string, b: string) => (screen.getByTestId(a).compareDocumentPosition(screen.getByTestId(b)) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0;
+
+  it("empty (31): every row, in the board's order: Three good things, the prompt with Another, Need a prompt?, then the box", () => {
+    renderRows();
+    for (const row of ROWS) expect(open(row), row).toBe(true);
+    expect(screen.getByTestId("entry-prompt-text")).toHaveTextContent(daily("prompt17"));
+    expect(before("write-good-things", "entry-prompt")).toBe(true);
+    expect(before("entry-prompt", "entry-library-open")).toBe(true);
+    expect(before("entry-library-open", "entry-text")).toBe(true);
+  });
+
+  it("the first text (31b): the prompt stays, still read with the box, without Another; Three good things and Need a prompt? fold away, out of reach", () => {
+    renderRows();
+    type("Coffee with Mai");
+    expect(screen.getByTestId("entry-prompt-text")).toHaveTextContent(daily("prompt17"));
+    expect(screen.getByTestId("entry-text")).toHaveAccessibleDescription(daily("prompt17"));
+    for (const row of ROWS) expect(folded(row), row).toBe(true);
+    expect(screen.getByTestId("entry-library-fold")).toHaveClass("invisible");
+  });
+
+  it("emptied (spaces count as empty): every row comes back, and Another steps on again", () => {
+    renderRows();
+    type("Coffee");
+    type("   ");
+    for (const row of ROWS) expect(open(row), row).toBe(true);
+    fireEvent.click(screen.getByTestId("entry-prompt-another"));
+    expect(screen.getByTestId("entry-prompt-text")).toHaveTextContent(daily("prompt18"));
+  });
+
+  it("the question being answered is the one showing at the first text: after Another, that one", () => {
+    renderRows();
+    fireEvent.click(screen.getByTestId("entry-prompt-another"));
+    type("Answering the next one");
+    expect(screen.getByTestId("entry-prompt-text")).toHaveTextContent(daily("prompt18"));
+  });
+
+  it("a Hard days pick from the library (31c): Get help now under it before any text, and it stays while writing", () => {
+    renderRows();
+    fireEvent.click(screen.getByTestId("entry-library-open"));
+    fireEvent.click(screen.getByTestId("entry-library-group-hard-days"));
+    fireEvent.click(screen.getByTestId("entry-library-use"));
+    expect(screen.getByTestId("entry-prompt-text")).toHaveTextContent(hardDays);
+    expect(screen.getByTestId("entry-prompt-help")).toBeInTheDocument();
+    type("Everything felt too much today.");
+    expect(screen.getByTestId("entry-prompt-text")).toHaveTextContent(hardDays);
+    expect(screen.getByTestId("entry-prompt-help")).toBeInTheDocument();
+    expect(screen.getByTestId("entry-prompt-help").closest("[inert]")).toBeNull();
+  });
+
+  it("another group's pick has no help, before or while writing", () => {
+    renderRows(true);
+    fireEvent.click(screen.getByTestId("entry-library-open"));
+    fireEvent.click(screen.getByTestId("entry-library-group-noticing"));
+    fireEvent.click(screen.getByTestId("entry-library-use"));
+    expect(screen.queryByTestId("entry-prompt-help")).toBeNull();
+    type("Noticed the light.");
+    expect(screen.queryByTestId("entry-prompt-help")).toBeNull();
+  });
+
+  it("a draft that comes back with its text answered no known prompt: no prompt line, the other rows folded; emptied, all of them back", async () => {
+    window.localStorage.setItem(NEW_KEY, JSON.stringify({ id: DRAFT_ID, body: "Kept from before", date: "2026-10-20", isMoment: false, base: null }));
+    renderRows();
+    expect(screen.getByTestId("entry-text")).toHaveValue("Kept from before");
+    expect(screen.queryByTestId("entry-prompt")).toBeNull();
+    expect(folded("write-good-things-fold")).toBe(true);
+    expect(folded("entry-library-fold")).toBe(true);
+    type("");
+    expect(screen.getByTestId("entry-prompt-text")).toHaveTextContent(daily("prompt17"));
+    for (const row of ROWS) expect(open(row), row).toBe(true);
+    await waitFor(() => expect(getEntry).toHaveBeenCalled());
+  });
+});
+
+describe("EntryEditor: an emptied box keeps no draft (UX, 25 Nov)", () => {
+  const flush = () => window.dispatchEvent(new Event("beforeunload", { cancelable: true }));
+
+  it("a new entry: typed and kept, then emptied: the draft goes at once, leaving doesn't ask, and the next new entry is empty", () => {
+    const first = renderEditor();
+    type("Qu");
+    flush();
+    expect(stored(NEW_KEY)).toMatchObject({ body: "Qu" });
+    type("");
+    expect(window.localStorage.getItem(NEW_KEY)).toBeNull();
+    fireEvent.click(screen.getByTestId("entry-cancel"));
+    expect(screen.queryByTestId("entry-leave-dialog")).toBeNull();
+    first.unmount();
+    expect(window.localStorage.getItem(NEW_KEY)).toBeNull();
+    renderEditor();
+    expect(screen.getByTestId("entry-text")).toHaveValue("");
+  });
+
+  it("an edit: emptied, its draft goes at once; Cancel doesn't ask, and reopened it shows the saved text, not an empty box", () => {
+    const first = renderEditor(ENTRY);
+    type("Changed");
+    flush();
+    expect(stored(EDIT_KEY)).toMatchObject({ body: "Changed" });
+    type("");
+    expect(window.localStorage.getItem(EDIT_KEY)).toBeNull();
+    fireEvent.click(screen.getByTestId("entry-cancel"));
+    expect(screen.queryByTestId("entry-leave-dialog")).toBeNull();
+    expect(push).toHaveBeenCalledWith("/app");
+    first.unmount();
+    expect(window.localStorage.getItem(EDIT_KEY)).toBeNull();
+    renderEditor(ENTRY);
+    expect(screen.getByTestId("entry-text")).toHaveValue(ENTRY.body);
+  });
+
+  it("an emptied edit is still not saved: Save waits, as for any empty entry", () => {
+    renderEditor(ENTRY);
+    type("");
+    expect(screen.getByTestId("entry-save")).toBeDisabled();
+  });
+
+  it("an old blank draft of an edit (kept before this) doesn't empty the box over the saved text, and it goes", () => {
+    window.localStorage.setItem(EDIT_KEY, JSON.stringify({ id: ENTRY.id, body: "", date: ENTRY.entry_date, isMoment: false, base: ENTRY.updated_at }));
+    renderEditor(ENTRY);
+    expect(screen.getByTestId("entry-text")).toHaveValue(ENTRY.body);
+    expect(window.localStorage.getItem(EDIT_KEY)).toBeNull();
+  });
+
+  it("emptied while a save was out: the late answer leaves no draft, not an empty one, for an edit or a new entry", async () => {
+    for (const initial of [ENTRY, null]) {
+      let answer: (value: unknown) => void = () => {};
+      saveEntry.mockReturnValueOnce(new Promise((resolve) => (answer = resolve)));
+      const view = renderEditor(initial);
+      type("Calm, then busy.");
+      fireEvent.click(screen.getByTestId("entry-save"));
+      type("");
+      const id = initial ? ENTRY.id : NEW_ID;
+      await act(async () => answer({ status: "saved", entry: { ...ENTRY, id, entry_date: initial ? ENTRY.entry_date : "2026-10-02", body: "Calm, then busy.", updated_at: "2026-10-02T09:00:00Z" } }));
+      expect(screen.getByTestId("entry-text")).toHaveValue("");
+      expect(window.localStorage.getItem(initial ? EDIT_KEY : NEW_KEY)).toBeNull();
+      expect(push).not.toHaveBeenCalled();
+      view.unmount();
+    }
   });
 });
 
