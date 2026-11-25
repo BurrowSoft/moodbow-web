@@ -7,7 +7,7 @@
   (src/lib/legalContent.test.ts).
 -->
 ## Moodbow Terms of Use
-Last updated: 20 November 2026
+Last updated: 25 November 2026
 
 These terms are an agreement between you and Vitor Carvalho, trading as BurrowSoft (297 Moo 1, Baan Sanian, Mueang Nan, Nan 55000, Thailand) about using Moodbow, the app and the website moodbow.com. By creating an account you agree to them.
 
@@ -41,7 +41,7 @@ Moodbow Plus is an optional yearly subscription that adds features for going dee
 
 **The free week.** Plus starts with 7 days free, once per person on moodbow.com; in Google Play or the App Store, the store decides who gets a free trial. You start it yourself, after seeing the yearly price. Unless you cancel before the 7 days end, your first year is charged when the free week ends.
 
-{pending:offer_live}**The Christmas offer.** From 1 December 2026 until 1 January 2027 at 00:00 UTC, if you've never had Plus or its free week and the offer is shown to you, you can have your first year at the lower price shown, instead of the free week. It's charged when you subscribe. After that first year, Plus renews at the normal yearly price shown to you at the time, unless you cancel.{/pending}
+{pending:offer_live}**The Christmas offer.** From 1 December 2026 until 1 January 2027 at 00:00 UTC, if the offer is shown to you, you can have your first year at the lower price shown, instead of the free week. It's charged when you subscribe. After that first year, Plus renews at the normal yearly price shown to you at the time, unless you cancel. On moodbow.com: for people who have never had Plus or its free week. In Google Play or the App Store, the store decides who can get the offer, by its own rules.{/pending}
 
 **Automatic renewal.** Plus renews automatically every year until you cancel. Before each yearly renewal of a subscription bought on moodbow.com, we email you a reminder.
 
