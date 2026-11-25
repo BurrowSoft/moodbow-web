@@ -308,8 +308,9 @@ describe("the 1.4.0 privacy lines", () => {
   const IDS = ["routine_live", "app_routine", "trusted_share_live", "app_trusted_share", "app_voice"];
   // As text: the name spans out, and the renderer's &#39; back to an apostrophe.
   const words = (html: string) => html.split('<span class="whole-name">').join("").split("</span>").join("").split("&#39;").join("'");
-  // Without the 1.4.0 lines and without Plus (the web's or, since group 5, the app's).
-  const without = words(renderLegal(source, (id) => !IDS.includes(id) && id !== "plus" && id !== "app_plus" && isPendingMet(id)).html);
+  // Without the 1.4.0 lines and without Plus (the web's or, since group 5, the app's). Undated (null):
+  // with ai-live met, the AI What changed block shows here too, and only these lines are checked.
+  const without = words(renderLegal(source, (id) => !IDS.includes(id) && id !== "plus" && id !== "app_plus" && isPendingMet(id), null).html);
   const appOnly = words(renderLegal(source, (id) => ["app_routine", "app_trusted_share", "app_voice", "plus"].includes(id) || isPendingMet(id), null).html);
 
   it("show with their feature on either client, and not before", () => {
