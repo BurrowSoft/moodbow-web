@@ -6,7 +6,7 @@ import { ALL_LOCALES, routing } from "@/i18n/routing";
 import messages from "@/messages/en.json";
 import thMessages from "@/messages/th.json";
 import { conditionMet, type ConditionId } from "./conditions";
-import { applyNoticeDate, applyPending, isPendingMet, legalDate, legalLocale, legalSource, needsNoticeDate, pendingIds, renderLegal, scrollableTables, todos, type LegalSlug } from "./legalContent";
+import { applyNoticeDate, applyPending, COMING_POLICY, comingPolicyMet, isPendingMet, legalDate, legalLocale, legalSource, needsNoticeDate, pendingIds, renderLegal, scrollableTables, todos, type LegalSlug } from "./legalContent";
 import { BACKUP_RETENTION_DAYS } from "./site";
 
 const PAGES: { slug: LegalSlug; gate: ConditionId }[] = [
@@ -101,7 +101,7 @@ describe("legal content files", () => {
     const met = (on: boolean) => (id: string) => (id === "anon_start_live" ? on : isPendingMet(id));
     // The names are wrapped so they never hyphenate (wholeNames); the words are the same.
     const words = (html: string) => html.split('<span class="whole-name">').join("").split("</span>").join("");
-    // null: an undated What changed block (it shows with the app's Plus, group 5); the day isn't what's tested here.
+    // null: an undated What changed block (it shows with ai-live); the day isn't what's tested here.
     expect(words(renderLegal(source, met(false), null).html)).not.toContain(heading);
     expect(words(renderLegal(source, met(true), null).html).split(heading)).toHaveLength(2);
     expect(words(renderLegal(source, undefined, null).html).includes(heading)).toBe(conditionMet("anon-start-live"));
@@ -246,27 +246,30 @@ describe("renderLegal (the real privacy text, nothing met)", () => {
 // /privacy/next give, or no day at all for an undated notice. Never a typed date that could drift.
 describe("the What changed block's date", () => {
   const source = legalSource("privacy", "en");
-  const plusMet = (id: string) => id === "plus" || isPendingMet(id);
-  // Plus off: neither the web's nor, since group 5, the app's (the block shows with either).
-  const plusUnmet = (id: string) => id !== "plus" && id !== "app_plus" && isPendingMet(id);
+  // The AI notice (UX, 23 Nov): What changed is the AI one now, and shows with ai-live (Plus's went with it).
+  const aiMet = (id: string) => id === "ai_live" || isPendingMet(id);
+  const aiUnmet = (id: string) => id !== "ai_live" && isPendingMet(id);
   const words = (html: string) => html.split('<span class="whole-name">').join("").split("</span>").join("");
   const markers = /\{\/?(?:dated|undated|notice_date)\}/;
 
   it("names the notice's day, or reads without one, and leaves no marker", () => {
-    const dated = words(renderLegal(source, plusMet, legalDate("2026-12-01", "en")).html);
-    const undated = words(renderLegal(source, plusMet, null).html);
-    expect(dated).toContain("<strong>What changed on 1 December 2026:</strong> you can now subscribe to Moodbow Plus.");
-    expect(undated).toContain("<strong>What changed:</strong> you can now subscribe to Moodbow Plus.");
+    const dated = words(renderLegal(source, aiMet, legalDate("2026-12-01", "en")).html);
+    const undated = words(renderLegal(source, aiMet, null).html);
+    expect(dated).toContain("<strong>What changed on 1 December 2026:</strong> Moodbow now offers optional AI features: reflections on your entries and a weekly report.");
+    expect(undated).toContain("<strong>What changed:</strong> Moodbow now offers optional AI features: reflections on your entries and a weekly report.");
     expect(dated).not.toMatch(markers);
     expect(undated).not.toMatch(markers);
+    // Plus's What changed is gone: the AI one is the only one.
+    expect(dated).not.toContain("you can now subscribe to Moodbow Plus");
+    expect(dated.split("What changed")).toHaveLength(2);
   });
 
   it("is looked up only where the block shows, and can't render without its date", () => {
-    expect(needsNoticeDate(source, plusMet)).toBe(true);
-    expect(needsNoticeDate(source, plusUnmet)).toBe(false);
-    expect(needsNoticeDate(source)).toBe(conditionMet("plus") || conditionMet("app-plus"));
-    expect(() => renderLegal(source, plusMet)).toThrow(/notice date/);
-    expect(words(renderLegal(source, plusUnmet).html)).not.toContain("What changed");
+    expect(needsNoticeDate(source, aiMet)).toBe(true);
+    expect(needsNoticeDate(source, aiUnmet)).toBe(false);
+    expect(needsNoticeDate(source)).toBe(conditionMet("ai-live"));
+    expect(() => renderLegal(source, aiMet)).toThrow(/notice date/);
+    expect(words(renderLegal(source, aiUnmet).html)).not.toContain("What changed");
   });
 
   it("writes the day as the legal text writes dates, in the text's own language", () => {
@@ -276,9 +279,17 @@ describe("the What changed block's date", () => {
 
   it("the Spanish block names the same day, in Spanish, or none", () => {
     const es = legalSource("privacy", "es");
-    expect(words(renderLegal(es, plusMet, legalDate("2026-12-01", "es")).html)).toContain("<strong>Qué ha cambiado el 1 de diciembre de 2026:</strong> ahora puedes suscribirte a Moodbow Plus.");
-    expect(words(renderLegal(es, plusMet, null).html)).toContain("<strong>Qué ha cambiado:</strong> ahora puedes suscribirte a Moodbow Plus.");
-    expect(needsNoticeDate(es, plusUnmet)).toBe(false);
+    expect(words(renderLegal(es, aiMet, legalDate("2026-12-01", "es")).html)).toContain("<strong>Qué ha cambiado el 1 de diciembre de 2026:</strong> Moodbow ahora ofrece funciones de IA opcionales: reflexiones sobre tus entradas y un informe semanal.");
+    expect(words(renderLegal(es, aiMet, null).html)).toContain("<strong>Qué ha cambiado:</strong> Moodbow ahora ofrece funciones de IA opcionales: reflexiones sobre tus entradas y un informe semanal.");
+    expect(needsNoticeDate(es, aiUnmet)).toBe(false);
+  });
+
+  it("the coming policy (what the notice's /privacy/next shows) is the AI one: COMING_POLICY", () => {
+    expect(COMING_POLICY).toEqual(["ai_live"]);
+    const coming = words(renderLegal(source, comingPolicyMet, legalDate("2026-12-01", "en")).html);
+    expect(coming).toContain("<strong>What changed on 1 December 2026:</strong> Moodbow now offers optional AI features");
+    expect(coming).toContain("withdraw your AI consent");
+    expect(coming).toContain("Our Terms also gain a short section on these features.");
   });
 
   it("dated and undated blocks; a stray marker is an error, not text", () => {

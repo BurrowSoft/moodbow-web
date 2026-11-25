@@ -9,7 +9,7 @@
 ## Moodbow Privacy Policy
 Last updated: 20 November 2026
 
-{pending:plus|app_plus}**What changed{dated} on {notice_date}{/dated}:** you can now subscribe to Moodbow Plus. If you do, Google Play, the App Store or Stripe handles the payment, and we keep a reference to your subscription and its dates (§1, "Moodbow Plus purchases"). Stripe is new in our list of providers (§3). Nothing else about how we use your journal has changed.{/pending}
+{pending:ai_live}**What changed{dated} on {notice_date}{/dated}:** Moodbow now offers optional AI features: reflections on your entries and a weekly report. They stay off unless you turn them on, with your separate, explicit AI consent (§2). If you do, the parts of your journal needed for a reflection or report are sent to our AI provider, Anthropic, in the USA (§3). You can withdraw your AI consent at any time in Me → AI (§5). Our Terms also gain a short section on these features. Nothing else about how we use your journal has changed.{/pending}
 
 Moodbow is a private journal made by Vitor Carvalho, trading as BurrowSoft (297 Moo 1, Baan Sanian, Mueang Nan, Nan 55000, Thailand), "we" in this policy. We wrote this to be read, not skimmed past. If anything is unclear, email support@moodbow.com.
 

@@ -23,13 +23,19 @@ export const WEEK_DAYS = "grid grid-cols-7 gap-[6px]";
 export const WEEK_DAY = "flex flex-col items-center gap-[4px]";
 export const WEEK_DAY_LABEL = "text-[0.75em] text-muted";
 
-// Your year's colour strip (the Web Tester's D2, UX 20 Nov): 6 months across on a phone, 12 on a wide screen, and at
-// large text (a 13em column or narrower) a 4×3 grid, Jan–Apr, May–Aug, Sep–Dec, so each 3-letter month (de "Sept."
-// the longest) fits on one line. Never one-letter months (J, J, J). The gaps are in px, so large text doesn't shrink
-// the cells; the label never splits (overflow-wrap normal against body's break-word).
-export const YEAR_STRIP = "mt-4 grid grid-cols-6 gap-[8px] sm:grid-cols-12 max-[13em]:grid-cols-4";
+// Your year's colour strip (the Web Tester's D2, UX 20 Nov; UX 25 Nov after #426's sweep): Jan–Apr, May–Aug, Sep–Dec
+// (4 across), 6 across, or 12, by the strip's OWN width in em (a container query: YEAR_STRIP_BOX around it), so that
+// every language's longest month fits its cell whole at the label's own size; never one-letter months (J, J, J), and
+// never a smaller label for someone who chose large text (UX: that would undo their setting). The sweep measured the
+// widest label at ~2.8 of its own size (fr "mars"; 0.75rem labels: 2.1rem): 6 across needs 6 × 2.1rem + 5 gaps of 8 px,
+// at most 15.1em at 100 % text and less in em at larger text, so from 15.5em; 12 across needs 12 × 2.1rem + 11 gaps,
+// so from 31em. 4 across always fits on a phone (320 px at 300 %: 58 px cells for at most 54 px). The label never
+// breaks (nowrap, overflow-wrap normal against body's break-word). e2e/large-text.spec.ts sweeps every language,
+// 320–430 px × 100–300 %.
+export const YEAR_STRIP_BOX = "@container";
+export const YEAR_STRIP = "mt-4 grid grid-cols-4 gap-[8px] @min-[15.5em]:grid-cols-6 @min-[31em]:grid-cols-12";
 export const YEAR_MONTH = "flex flex-col items-center gap-[4px]";
-export const YEAR_MONTH_LABEL = "max-w-full text-center leading-tight text-muted [font-size:min(0.75rem,max(6vw,12px))] [overflow-wrap:normal]";
+export const YEAR_MONTH_LABEL = "max-w-full whitespace-nowrap text-center leading-tight text-muted [font-size:min(0.75rem,max(6vw,12px))] [overflow-wrap:normal]";
 // An uppercase label's letter-spacing: wide at the normal size, normal at large text (a 13em column), where wide
 // capitals cost a line its room (UX, 23 Nov: modest). The Plus card's tag, Today's tag, Timeline's months.
 export const LABEL_TRACKING = "tracking-wide max-[13em]:tracking-normal";

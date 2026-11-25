@@ -108,16 +108,19 @@ describe("YearView", () => {
     expect(strip.textContent).toContain("monthFaint");
   });
 
-  it("at large text the strip is 4×3, and a month's label never splits (the Web Tester's D2, UX 20 Nov)", async () => {
+  it("4, 6 or 12 across by the strip's own width, and a month's label never splits (the Web Tester's D2, UX 20 Nov; UX 25 Nov, #426)", async () => {
     await view(reviewOf(0));
     const strip = screen.getByTestId("year-strip");
-    expect(strip.className).toContain("max-[13em]:grid-cols-4");
-    expect(strip.className).toContain("grid-cols-6");
-    expect(strip.className).toContain("sm:grid-cols-12");
+    // Its box is the container its columns follow (e2e/large-text.spec.ts checks the widths in a browser).
+    expect(strip.parentElement!.className).toContain("@container");
+    expect(strip.className).toContain("grid-cols-4");
+    expect(strip.className).toContain("@min-[15.5em]:grid-cols-6");
+    expect(strip.className).toContain("@min-[31em]:grid-cols-12");
     const labels = [...strip.querySelectorAll("[data-month-label]")];
     expect(labels).toHaveLength(12);
     for (const label of labels) {
       expect(label.className).toContain("[overflow-wrap:normal]");
+      expect(label.className).toContain("whitespace-nowrap");
       expect(label.className).not.toContain("anywhere");
     }
   });

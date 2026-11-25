@@ -41,6 +41,7 @@ describe("names stay whole at large text", () => {
       "common.copyright": "Footer",
       "onboarding.consentNotice": "consent/page, sign-up/page",
       "ai.consentAiBody": "AiSettings, ConsentForm, SignUpForm",
+      "app.policyNoticeAiBody": "PolicyNotice (the AI notice's body names Anthropic)",
       "bo.consentBody": "BoConsent",
       "bo.journalSwitchNote": "BoMeRow",
       "bo.pictureConsentBody": "BoConversation",

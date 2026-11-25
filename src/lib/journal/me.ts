@@ -13,11 +13,14 @@ export type Me = {
   has_required_consents: boolean;
   today: string;
   // user_settings (migration 001); reminder_time is "HH:MM:SS".
-  // The current privacy notice, from the server's config; null when there isn't one.
+  // The current privacy notice, from the server's config; null when there isn't one. Plus's
+  // (policy_notice_id) is the installed apps'; the web reads the v2 one (migration 043).
   policy_notice_id?: string | null;
+  policy_notice_v2_id?: string | null;
   settings?: {
     bo_off?: boolean;
     policy_notice_seen?: string | null;
+    policy_notice_v2_seen?: string | null;
     reminder_on: boolean;
     reminder_time: string | null;
     // Plus: more daily reminders, "HH:MM:SS" each (migration 031); absent before it.

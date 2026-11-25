@@ -48,10 +48,11 @@ describe("Plus in the app before the web's (app_plus alone)", () => {
     }
   });
 
-  it("the privacy policy: What changed, the purchases, Stripe's row, the Google Play services line and the payment records", () => {
+  // Plus's What changed went with the AI notice (UX, 23 Nov): the AI one replaces it (legalContent.test).
+  it("the privacy policy: the purchases, Stripe's row, the Google Play services line and the payment records", () => {
     const CASES = {
-      en: ["What changed:", "Moodbow Plus purchases:", "Payments and receipts for Moodbow Plus", "Google Play services runs under", "Payment records kept by Stripe"],
-      es: ["Qué ha cambiado:", "Compras de Moodbow Plus:", "Pagos y recibos de Moodbow Plus", "Los servicios de Google Play se rigen", "Los registros de pago que guardan Stripe"],
+      en: ["Moodbow Plus purchases:", "Payments and receipts for Moodbow Plus", "Google Play services runs under", "Payment records kept by Stripe"],
+      es: ["Compras de Moodbow Plus:", "Pagos y recibos de Moodbow Plus", "Los servicios de Google Play se rigen", "Los registros de pago que guardan Stripe"],
     };
     for (const [locale, lines] of Object.entries(CASES)) {
       const now = legal(locale, "privacy", today), app = legal(locale, "privacy", appOnly), all = legal(locale, "privacy", web);

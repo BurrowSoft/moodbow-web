@@ -3700,6 +3700,21 @@
     "reason": "UX draft (Web Dev Thai of the privacy-change notice, 19 Nov; native read pending)"
   },
   {
+    "key": "app.policyNoticeAiApplies",
+    "en": "From {date}, Moodbow offers optional AI features.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "app.policyNoticeAiSoon",
+    "en": "Soon, Moodbow will offer optional AI features.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "app.policyNoticeAiBody",
+    "en": "They stay off unless you turn them on. If you do, Anthropic (USA) processes what's needed to write a reflection or report.",
+    "reason": "UX draft (native read pending)"
+  },
+  {
     "key": "app.policyNoticeRead",
     "en": "See what changes",
     "reason": "UX draft (Web Dev Thai of the privacy-change notice, 19 Nov; native read pending)"

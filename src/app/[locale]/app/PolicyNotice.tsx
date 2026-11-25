@@ -4,14 +4,23 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import type { NoticeSlug } from "@/lib/journal/policyNotice";
 import { JOURNAL_CARD } from "@/lib/ui/journalLayout";
+import { wholeNames } from "@/lib/wholeNames";
 import { dismissPolicyNotice } from "./actions";
+
+// Each notice's words, by its id's slug (the app's card reads the same; an unknown slug never gets
+// here: policyNoticeToShow). The title, link and button are every notice's.
+const COPY = {
+  ai: { applies: "policyNoticeAiApplies", soon: "policyNoticeAiSoon", body: "policyNoticeAiBody" },
+} as const satisfies Record<NoticeSlug, { applies: string; soon: string; body: string }>;
 
 // Once, for a privacy change that's coming. It blocks nothing, and it goes as soon as it's
 // dismissed: if saving that fails, it comes back next time, which is the honest result.
 // Under the safety card's cap (UX): nobody gets 3 to 4 screens of a notice at 300 %.
-export function PolicyNotice({ id, date }: { id: string; date: string | null }) {
+export function PolicyNotice({ id, slug, date }: { id: string; slug: NoticeSlug; date: string | null }) {
   const t = useTranslations("app");
+  const copy = COPY[slug];
   const router = useRouter();
   const [shown, setShown] = useState(true);
   if (!shown) return null;
@@ -20,10 +29,10 @@ export function PolicyNotice({ id, date }: { id: string; date: string | null }) 
       <h2 id="policy-notice-title" className="font-medium leading-[1.556] text-text [font-size:min(1.125rem,max(9vw,18px))]">
         {t("policyNoticeTitle")}
       </h2>
-      {/* UX's copy (19 Nov): when Plus becomes available, then who handles the payment. Without a
+      {/* UX's copy (the AI notice, 23 Nov): when the change applies, then what it means. Without a
           date in the notice id, "Soon" stands in for "From {date}" (the app's card reads the same). */}
       <p className="mt-1 text-text">
-        {date ? t("policyNoticeApplies", { date }) : t("policyNoticeSoon")} {t("policyNoticeBody")}
+        {date ? t(copy.applies, { date }) : t(copy.soon)} {wholeNames(t(copy.body))}
       </p>
       <div className="mt-[12px] flex flex-wrap items-center gap-[12px]">
         <Link href="/privacy/next" data-testid="policy-notice-read" className="inline-flex min-h-11 max-w-full items-center font-medium text-accent underline underline-offset-4 [overflow-wrap:anywhere]">
