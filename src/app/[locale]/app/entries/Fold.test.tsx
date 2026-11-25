@@ -12,7 +12,7 @@ afterEach(() => {
 
 const row = (folded: boolean, inline = false) => (
   <Fold folded={folded} inline={inline} testId="fold">
-    <button type="button">Inside</button>
+    <button type="button" data-testid="inside" />
   </Fold>
 );
 const inner = () => screen.getByTestId("fold").firstElementChild!;
