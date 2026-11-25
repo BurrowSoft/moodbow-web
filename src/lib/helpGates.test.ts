@@ -6,6 +6,7 @@ import { helpArticles, renderArticle } from "./helpContent";
 import { gatePublished, helpArticlePublished, type HelpGate } from "./helpGates";
 import gates from "./helpGates.json";
 import { pendingIds } from "./legalContent";
+import { conditionMet } from "./conditions";
 
 const LOCALES = Object.keys(gates);
 
@@ -41,9 +42,11 @@ describe("helpGates.json (the proxy's list of published Help articles)", () => {
     expect(helpArticlePublished("en", "check-ins")).toBe(true);
     expect(helpArticlePublished("es", "get-help-now")).toBe(true);
     expect(helpArticlePublished("en", "no-such-article")).toBe(false);
-    // Unmet through the 1.4.0 release: ai-live (AI stays off). safety-plan, letters and one-tap-check-in
-    // publish with the launch flips, so they're no examples of "not out yet" any more.
-    expect(helpArticlePublished("en", "ai-reflections")).toBe(false);
-    expect(helpArticlePublished("fr", "ai-reflections")).toBe(false);
+    // Not out yet: each AI article is published exactly when its condition is met (the AI go-live flips
+    // them, UX 23 Nov), in every language.
+    for (const locale of ["en", "fr"]) {
+      expect(helpArticlePublished(locale, "ai-reflections"), `${locale} ai-reflections`).toBe(conditionMet("ai-live"));
+      expect(helpArticlePublished(locale, "your-week"), `${locale} your-week`).toBe(conditionMet("weekly-report-live"));
+    }
   });
 });

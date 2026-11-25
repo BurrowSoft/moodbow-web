@@ -6,7 +6,6 @@ import { redirect } from "@/i18n/navigation";
 import { dataLocale } from "@/i18n/routing";
 import { isRateLimit, logAuthFailure } from "@/lib/authErrors";
 import { isValidEmail, normalizeEmail } from "@/lib/email";
-import { askAiConsent } from "@/lib/journal/ai";
 import { consentItem, withLanguage } from "@/lib/legalVersions";
 import { CONSENT_COOKIE, grantedAtConsent } from "@/lib/onboardingConsent";
 import { PASSWORD_MIN_LENGTH } from "@/lib/password";
@@ -49,7 +48,9 @@ async function signUp(form: FormData): Promise<SignUpState> {
   // whatever the browser sent. Per item with POLICY_VERSIONS, as Consent records them.
   if (form.get("privacy") !== "on" || form.get("health") !== "on") return fail("consentRequired");
   if (form.get("age") !== "on") return fail("ageRequired");
-  const consents = grantedAtConsent(askAiConsent() && form.get("ai") === "on");
+  // Never the AI consent, whatever the form sent: it's asked only in Me → AI, on its own sheet,
+  // where AI is actually available (UX, 23 Nov, the AI go-live, as the app).
+  const consents = grantedAtConsent();
   const store = await cookies();
 
   const supabase = await createSupabaseServerClient();

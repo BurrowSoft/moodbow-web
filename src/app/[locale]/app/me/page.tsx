@@ -131,6 +131,7 @@ export default async function MePage({ params }: PageProps<"/[locale]/app/me">) 
             tone: isTone(me.settings?.tone) ? me.settings.tone : "warm",
             focus: FOCUS_AREAS.filter((a) => me.settings?.focus_areas?.includes(a)),
           }}
+          consented={hasCurrentConsent(me, "ai")}
           credits={{ balance: me.credits?.balance ?? 0 }}
         />
       )}

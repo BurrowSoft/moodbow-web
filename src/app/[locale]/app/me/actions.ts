@@ -4,9 +4,11 @@ import { cookies } from "next/headers";
 import { getLocale } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
 import { deleteWordTyped, localDay } from "@/lib/journal/account";
-import { isFocusArea, isTone } from "@/lib/journal/ai";
+import { aiShown, isFocusArea, isTone } from "@/lib/journal/ai";
 import { EXTRA_REMINDERS, extraReminderError, parseExtraTimes, toHHMM, type ExtraReminderError } from "@/lib/journal/extraReminders";
-import { consentItem, withLanguage } from "@/lib/legalVersions";
+import { recordAiConsentAndTurnOn } from "@/lib/journal/aiConsentWrite";
+import { getMe, hasCurrentConsent } from "@/lib/journal/me";
+import { consentItem, POLICY_VERSIONS, withLanguage } from "@/lib/legalVersions";
 import { cancelStripeBeforeDelete } from "@/lib/plus/cancelOnDelete";
 import { isCountry, isTimeZoneName } from "@/lib/region/countries";
 import { dataLocale, offeredLocales } from "@/i18n/routing";
@@ -166,14 +168,25 @@ export type AiSwitchResult = { ok: true } | { ok: false; aiEnabled: boolean; pen
 // AI off. Off: switch AI off, then record the withdrawal (a consent row
 // with granted false). If only the withdrawal failed, AI IS off: say so,
 // and the retry records just the withdrawal (reviewer #33).
-export async function setAiEnabled(on: boolean): Promise<AiSwitchResult> {
+// The consent is recorded only from Me → AI's sheet (UX, 23 Nov, the AI go-live; the Reviewer's
+// conditions), checked again here whatever the call carries: only where AI is shown for this account
+// (aiShown, read again), and only with the sheet's confirm at the version this build asks for. Without
+// it, On only switches AI back on for an account whose consent is already current, and records
+// nothing; otherwise it changes nothing.
+export async function setAiEnabled(on: boolean, confirm?: { version?: unknown } | null): Promise<AiSwitchResult> {
   if (typeof on !== "boolean") return { ok: false, aiEnabled: !on };
   const supabase = await createSupabaseServerClient();
   if (!supabase) return { ok: false, aiEnabled: !on };
   const failed = async (message: string, result: AiSwitchResult) => ((await settingsFailed(message)), result);
   if (on) {
-    const consent = await supabase.rpc("record_consents", { p_items: withLanguage([consentItem("ai", true)], dataLocale(await getLocale())) });
-    if (consent.error) return failed(consent.error.message, { ok: false, aiEnabled: false });
+    const me = await getMe(supabase);
+    if (!me || !aiShown(me)) return { ok: false, aiEnabled: false };
+    const confirmed = typeof confirm === "object" && confirm !== null && confirm.version === POLICY_VERSIONS.ai;
+    if (!confirmed && !hasCurrentConsent(me, "ai")) return { ok: false, aiEnabled: false };
+    if (confirmed) {
+      const error = await recordAiConsentAndTurnOn(supabase);
+      return error ? failed(error.message, { ok: false, aiEnabled: false }) : { ok: true };
+    }
     const setting = await supabase.rpc("update_settings", { p_ai_enabled: true });
     if (setting.error) return failed(setting.error.message, { ok: false, aiEnabled: false });
     return { ok: true };

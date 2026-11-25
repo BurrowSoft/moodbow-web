@@ -40,9 +40,12 @@ describe("InsightsExample (Insights become Plus, rulings 3 and 4)", () => {
   it("the range chips switch the example (the only taps besides the tab bar, Back and help that don't open Plus)", () => {
     show();
     expect(screen.getByTestId("insights-example-range-week")).toHaveAttribute("aria-pressed", "true");
-    // Week (board 3): Your week's 7 bars and its sentence, then What lifts me's pairs, then Patterns.
+    // Week (board 3): Mood this week's 7 bars and its sentence, then What lifts me's pairs, then Patterns. Not named
+    // "Your week" any more: that's the AI report's name in Insights → AI (UX, 25 Nov, decision 258).
     const week = screen.getByTestId("insights-example-week");
     expect(week.querySelectorAll("span.flex-1")).toHaveLength(7);
+    expect(week).toHaveTextContent(messages.insights.insightsMoodThisWeek);
+    expect(week).not.toHaveTextContent(messages.insights.yourWeekTitle);
     expect(week).toHaveTextContent(m.exampleWeekLine);
     expect(screen.getByTestId("insights-example-lifts")).toHaveTextContent(`“${m.exampleTagWalk}”`);
     expect(screen.getByTestId("insights-example-lifts")).toHaveTextContent(messages.insights.pairOther);

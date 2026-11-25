@@ -8,7 +8,7 @@ import it from "../src/messages/it.json";
 import pt from "../src/messages/pt-br.json";
 import th from "../src/messages/th.json";
 import { dialogButton } from "../src/lib/ui/dialogButton";
-import { BO_HEADING, DAY_ADD_ENTRY, LABEL_TRACKING, LOCKED_ROW_LABEL, ME_LOCKED_ROW, OFFER_STRIP_LIGHTS, PLUS_CARD, PLUS_CARD_OFFER_TAG, PLUS_CARD_PLUS_TAG, PLUS_CARD_SMALL, PLUS_CARD_TAG, PLUS_CARD_TAG_ROW, PLUS_CARD_TITLE, WEEK_DAY, WEEK_DAY_LABEL, WEEK_DAYS, WEEK_HEADING, WEEK_SUMMARY, YEAR_MONTH, YEAR_MONTH_LABEL, YEAR_STRIP, YEAR_STRIP_BOX } from "../src/lib/ui/largeText";
+import { BO_HEADING, DAY_ADD_ENTRY, INSIGHTS_TABLIST, insightsTab, LABEL_TRACKING, LOCKED_ROW_LABEL, ME_LOCKED_ROW, OFFER_STRIP_LIGHTS, PLUS_CARD, PLUS_CARD_OFFER_TAG, PLUS_CARD_PLUS_TAG, PLUS_CARD_SMALL, PLUS_CARD_TAG, PLUS_CARD_TAG_ROW, PLUS_CARD_TITLE, WEEK_DAY, WEEK_DAY_LABEL, WEEK_DAYS, WEEK_HEADING, WEEK_SUMMARY, YEAR_MONTH, YEAR_MONTH_LABEL, YEAR_STRIP, YEAR_STRIP_BOX } from "../src/lib/ui/largeText";
 
 // The browser's own text setting on a 320 px phone, on the pages someone with large
 // text needs first. Sign in's button scrolled /sign-in sideways by up to 194 px (Web
@@ -823,6 +823,61 @@ test("the Plus card's tag beside its icons only on two lines: every language, 32
   expect(beside300, "the offer's tag beside the lights at 300 % on a 320 px phone").toEqual([]);
   // The widest language, under the lights at 300 % on a 320 px phone: three lines, its words whole (UX, 23 Nov).
   expect(italian300, "it, Me's card at 320 px / 300 %").toBe("OFFERTA / SPECIALE DI / NATALE");
+});
+
+// Insights' Patterns | AI tabs (decision 258; specs/insights-ai-split.md: "the segments stack or wrap, never truncate
+// mid-word"): every language, on phones 320–430 px wide at 100–300 %, with the app's stylesheet (its 13em rules live, the
+// app's gutters). Each tab's word whole on one line inside its tab, at least 44 px tall; the two side by side while both
+// fit, else one under the other, never overlapping or past the row; side by side at the normal size everywhere.
+test("Insights' Patterns | AI tabs: whole words, side by side or stacked, every language, 320–430 px, 100–300 %", async ({ page, browserName }, testInfo) => {
+  test.skip(browserName !== "chromium" || testInfo.project.name !== "desktop", "Page.setFontSizes is Chromium's; once is enough");
+  test.setTimeout(240_000);
+  const cdp = await page.context().newCDPSession(page);
+  const wrong: string[] = [];
+  const stacked: string[] = [];
+  for (const [language, m] of [["/", en], ["/fr", fr], ["/es", es], ["/pt-br", pt], ["/de", de], ["/it", it], ["/th", th]] as const) {
+    const tabs = `<div role="tablist" class="${INSIGHTS_TABLIST}"><a role="tab" href="#" data-tab class="${insightsTab(true)}">${m.insights.insightsSegPatterns}</a><a role="tab" href="#" data-tab class="${insightsTab(false)}">${m.insights.insightsSegAi}</a></div>`;
+    await page.goto(language);
+    for (const width of [320, 360, 375, 390, 412, 430]) {
+      await page.setViewportSize({ width, height: 800 });
+      for (const percent of [100, 125, 150, 175, 200, 250, 300]) {
+        const root = (16 * percent) / 100;
+        await cdp.send("Page.setFontSizes", { fontSizes: { standard: root, fixed: Math.round((13 * percent) / 100) } });
+        const at = `${language === "/" ? "/en" : language} ${width} px / ${percent} %`;
+        const got = await page.evaluate(
+          ([inner, html]) => {
+            document.body.innerHTML = `<div style="width:${inner}px">${html}</div>`;
+            const row = document.querySelector("[role=tablist]")!.getBoundingClientRect();
+            return {
+              root: getComputedStyle(document.documentElement).fontSize,
+              row: { left: row.left, right: row.right },
+              tabs: [...document.querySelectorAll<HTMLElement>("[data-tab]")].map((tab) => {
+                const r = tab.getBoundingClientRect();
+                const words = document.createRange();
+                words.selectNodeContents(tab);
+                return { left: r.left, right: r.right, top: r.top, bottom: r.bottom, height: r.height, lines: new Set([...words.getClientRects()].map((x) => Math.round(x.top))).size, clipped: tab.scrollWidth > tab.clientWidth + 0.5 };
+              }),
+            };
+          },
+          [String(width - 2 * (width < 360 ? 12 : 16)), tabs] as const,
+        );
+        expect(got.root, at).toBe(`${root}px`);
+        // Thai has no spaces to tell its words apart: its line count says it all.
+        if (language !== "/th") for (const cut of await cutWords(page, "[data-tab]")) wrong.push(`${at}: ${cut}`);
+        got.tabs.forEach((t, i) => {
+          if (t.lines !== 1) wrong.push(`${at}: tab ${i + 1} in ${t.lines} lines`);
+          if (t.clipped || t.left < got.row.left - 0.5 || t.right > got.row.right + 0.5) wrong.push(`${at}: tab ${i + 1} past its row`);
+          if (t.height < 43.5) wrong.push(`${at}: tab ${i + 1} only ${Math.round(t.height)} px tall`);
+        });
+        const [a, b] = got.tabs;
+        const beside = Math.abs(a.top - b.top) < 1;
+        if (beside ? a.right > b.left + 0.5 : a.bottom > b.top + 0.5) wrong.push(`${at}: the tabs overlap`);
+        if (!beside) stacked.push(at);
+      }
+    }
+  }
+  expect(wrong, "a tab's word cut, wrapped, past its row or overlapping").toEqual([]);
+  expect(stacked.filter((s) => s.endsWith(" 100 %")), "side by side at the normal size, in every language and width").toEqual([]);
 });
 
 // Your year's colour strip (the Web Tester's D2, UX 20 Nov): at large text a 4×3 grid, every month's label whole on one

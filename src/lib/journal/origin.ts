@@ -6,15 +6,21 @@
 // Only these paths, so ?from= can't send anyone elsewhere.
 const DAY = /^\/app\/timeline\/\d{4}-\d{2}-\d{2}$/;
 
-export type Origin = "/app" | "/app/timeline" | `/app/timeline/${string}`;
+// Insights → AI's reflections (decision 258): an entry opened from the AI segment, or from See all,
+// goes Back there (the AI segment by its address, so it opens on AI even without scripts).
+export const INSIGHTS_AI = "/app/insights?view=ai";
+export const ALL_REFLECTIONS = "/app/insights/reflections";
+
+export type Origin = "/app" | "/app/timeline" | `/app/timeline/${string}` | typeof INSIGHTS_AI | typeof ALL_REFLECTIONS;
 
 export function originOf(from: unknown): Origin {
-  if (from === "/app" || from === "/app/timeline") return from;
+  if (from === "/app" || from === "/app/timeline" || from === INSIGHTS_AI || from === ALL_REFLECTIONS) return from;
   if (typeof from === "string" && DAY.test(from)) return from as Origin;
   return "/app";
 }
 
-export const originTab = (origin: Origin): "/app" | "/app/timeline" => (origin === "/app" ? "/app" : "/app/timeline");
+export const originTab = (origin: Origin): "/app" | "/app/timeline" | "/app/insights" =>
+  origin === "/app" ? "/app" : origin === INSIGHTS_AI || origin === ALL_REFLECTIONS ? "/app/insights" : "/app/timeline";
 
 // The day of a day-view origin, else null.
 export const originDay = (origin: Origin): string | null => (DAY.test(origin) ? origin.slice("/app/timeline/".length) : null);

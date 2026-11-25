@@ -48,20 +48,6 @@ describe("weekRange", () => {
   });
 });
 
-describe("WeeklyReport: AI available but not turned on by this person (UX)", () => {
-  it("the card explains with meAiOffHint and offers nothing to press", () => {
-    render(
-      <NextIntlClientProvider locale="en" messages={messages}>
-        <WeeklyReport initial={null} weekStart="2026-10-12" weekLabel={weekRange("2026-10-12", "en-GB")} dateLocaleTag="en-GB" balance={0} aiOff />
-      </NextIntlClientProvider>,
-    );
-    expect(screen.getByRole("heading", { name: m.reportWeekly })).toBeInTheDocument();
-    expect(screen.getByTestId("weekly-report-ai-off")).toHaveTextContent(m.meAiOffHint);
-    expect(screen.queryByTestId("weekly-report-button")).toBeNull();
-    expect(screen.queryByRole("button")).toBeNull();
-  });
-});
-
 describe("WeeklyReport (1.1 D)", () => {
   it("no report yet: the title, last week's range and See my week", () => {
     renderIt();
@@ -181,15 +167,12 @@ describe("WeeklyReport (1.1 D)", () => {
 });
 
 describe("WeeklyReport: the week's range comes from the server, as is (#418)", () => {
-  it("shows the label it's given, with and without AI on, never formatting its own week again", () => {
-    for (const aiOff of [false, true]) {
-      render(
-        <NextIntlClientProvider locale="en" messages={messages}>
-          <WeeklyReport initial={null} weekStart="2026-10-12" weekLabel="SERVER LABEL" dateLocaleTag="en-GB" balance={1} aiOff={aiOff} />
-        </NextIntlClientProvider>,
-      );
-      expect(screen.getByTestId("weekly-report-range"), String(aiOff)).toHaveTextContent("SERVER LABEL");
-      cleanup();
-    }
+  it("shows the label it's given, never formatting its own week again", () => {
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <WeeklyReport initial={null} weekStart="2026-10-12" weekLabel="SERVER LABEL" dateLocaleTag="en-GB" balance={1} />
+      </NextIntlClientProvider>,
+    );
+    expect(screen.getByTestId("weekly-report-range")).toHaveTextContent("SERVER LABEL");
   });
 });

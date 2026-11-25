@@ -6,8 +6,9 @@ import { POLICY_VERSIONS, type ConsentItem } from "./legalVersions";
 export const CONSENT_COOKIE = "mb_consent";
 
 // What the Consent screen grants (the 18+ box is on Create account): the
-// required three, and AI when its optional box was ticked (r1 §M3).
-export function grantedAtConsent(ai = false): ConsentItem[] {
-  return [...(["privacy", "terms", "health_data"] as const), ...(ai ? (["ai"] as const) : [])].map((kind) => ({ kind, version: POLICY_VERSIONS[kind], granted: true }));
+// required three. Never AI: it's asked only in Me → AI, on its own sheet,
+// where AI is actually available (UX, 23 Nov, the AI go-live, as the app).
+export function grantedAtConsent(): ConsentItem[] {
+  return (["privacy", "terms", "health_data"] as const).map((kind) => ({ kind, version: POLICY_VERSIONS[kind], granted: true }));
 }
 

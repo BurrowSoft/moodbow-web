@@ -1,5 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it, vi } from "vitest";
+import { conditionMet } from "@/lib/conditions";
 
 // A Help article page: the article body is [data-content=article]; the link
 // back to Help is chrome, after it (Web Tester, #23).
@@ -47,9 +48,8 @@ describe("Help article page", () => {
     expect(en).toContain("get-help-now");
     // The 1.3.0 web flips (#343).
     for (const slug of ["things-that-help", "appointment", "your-week-today", "tags", "bring-this-back"]) expect(en, slug).toContain(slug);
-    // Unmet through the 1.4.0 release: ai-live (AI stays off). The launch flips publish safety-plan,
-    // letters and one-tap-check-in.
-    for (const slug of ["ai-reflections"]) expect(en, slug).not.toContain(slug);
+    // The AI go-live (UX, 23 Nov) publishes ai-reflections: prerendered exactly when ai-live is met.
+    expect(en.includes("ai-reflections"), "ai-reflections").toBe(conditionMet("ai-live"));
   });
 
   // Previews keep what they had: pending blocks follow conditions only (isPendingMet), and the one

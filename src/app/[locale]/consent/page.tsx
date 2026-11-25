@@ -13,7 +13,6 @@ import { getMe, hasCurrentConsent, hasCurrentConsents } from "@/lib/journal/me";
 import { pageMetadata } from "@/lib/metadata";
 import { isAuthOutage } from "@/lib/supabase/proxy";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { askAiConsent } from "@/lib/journal/ai";
 import { CONSENT_NOTICE_CLASS } from "@/lib/legalVersions";
 import { wholeNames } from "@/lib/wholeNames";
 import { offeredLocales } from "@/i18n/routing";
@@ -85,7 +84,7 @@ export default async function ConsentPage({ params }: PageProps<"/[locale]/conse
       <p data-testid="consent-notice" data-hyphenate className={CONSENT_NOTICE_CLASS}>
         {wholeNames(t("consentNotice"))}
       </p>
-      <ConsentForm askAge={askAge} askAi={askAiConsent()} showBack={!user && !outage} legalInEnglish={legalLocale(locale, "privacy") !== locale || legalLocale(locale, "terms") !== locale} />
+      <ConsentForm askAge={askAge} showBack={!user && !outage} legalInEnglish={legalLocale(locale, "privacy") !== locale || legalLocale(locale, "terms") !== locale} />
     </PageShell>
   );
   return move ? (

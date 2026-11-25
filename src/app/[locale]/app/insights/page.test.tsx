@@ -15,7 +15,16 @@ const chain = (table: string, result: () => unknown) => {
   c.then = (done: (value: unknown) => unknown) => (asked.push(table), Promise.resolve(result()).then(done));
   return c;
 };
-const client = { from: (table: string) => chain(table, () => (table === "check_ins" ? checkInsResult : { data: [], error: null })) };
+const client = { from: (table: string) => chain(table, () => (table === "check_ins" ? checkInsResult : { data: [], error: null, count: table === "ai_reports" ? reportCount : null })) };
+let reportCount = 0;
+// get_me's answer: AI not available unless a test says so.
+const ME = { today: "2026-11-07", profile: { country: null, time_zone: "UTC" }, credits: { balance: 0 } };
+let me: Record<string, unknown> = ME;
+const AI_ON = { ai_available: true, consents: { ai: { granted: true, version: "2026-12-01" } }, settings: { ai_enabled: true } };
+// The gates on: Plus and Patterns; a test adds ai-live (the build shows AI) or weekly-report-live.
+let live = new Set(["plus", "patterns-live"]);
+const readReflections = vi.fn(async () => ({ rows: [], more: false }));
+vi.mock("@/lib/journal/reflections", async (orig) => ({ ...(await orig<typeof import("@/lib/journal/reflections")>()), readReflections: (...a: unknown[]) => readReflections(...(a as [])) }));
 let plusView: unknown = null;
 let plusAnswer: (() => void) | null = null;
 let holdPlus = false;
@@ -26,20 +35,49 @@ const readPlusView = vi.fn(() => {
 const readCheckInsSince = vi.fn(async () => PLUS_ROWS);
 vi.mock("@/lib/supabase/server", () => ({ createSupabaseServerClient: async () => client }));
 vi.mock("@/lib/journal/currentUser", () => ({ currentUser: async () => ({ user: { id: "u1" }, ended: false }) }));
-vi.mock("@/lib/journal/me", () => ({ getMe: async () => ({ today: "2026-11-07", profile: { country: null, time_zone: "UTC" }, credits: { balance: 0 } }) }));
+vi.mock("@/lib/journal/me", async (orig) => ({ ...(await orig<typeof import("@/lib/journal/me")>()), getMe: async () => me }));
 vi.mock("next/headers", () => ({ headers: async () => new Headers() }));
 vi.mock("next-intl/server", () => ({ setRequestLocale: () => {}, getTranslations: async () => (k: string) => k }));
 // Plus and Patterns on; the rest off, so the reads are the check-ins and the Plus view.
-vi.mock("@/lib/conditions", async (orig) => ({ ...(await orig<typeof import("@/lib/conditions")>()), pageGate: (id: string) => (id === "plus" || id === "patterns-live" ? "live" : "hidden") }));
+vi.mock("@/lib/conditions", async (orig) => ({ ...(await orig<typeof import("@/lib/conditions")>()), pageGate: (id: string) => (live.has(id) ? "live" : "hidden") }));
 vi.mock("@/lib/plus/view", async (orig) => ({ ...(await orig<typeof import("@/lib/plus/view")>()), readPlusView: (...a: unknown[]) => readPlusView(...(a as [])) }));
 vi.mock("@/lib/plus/insightsData", async (orig) => ({ ...(await orig<typeof import("@/lib/plus/insightsData")>()), readCheckInsSince: (...a: unknown[]) => readCheckInsSince(...(a as [])), readWrittenDays: async () => new Set<string>() }));
-let viewProps: { rows: InsightRow[] } | null = null;
-vi.mock("./InsightsView", () => ({ InsightsView: (p: { rows: InsightRow[] }) => ((viewProps = p), <div data-testid="insights-view" />) }));
+let viewProps: { rows: InsightRow[]; heading?: boolean } | null = null;
+vi.mock("./InsightsView", () => ({
+  InsightsView: (p: { rows: InsightRow[] }) => ((viewProps = p), <div data-testid="insights-view" />),
+  InsightsHeading: () => <h1 data-testid="insights-heading" />,
+}));
 vi.mock("./PlusInsights", () => ({ MorePatternsCard: () => null, PlusTabs: () => null }));
 vi.mock("./YourWeekCard", () => ({ YourWeekCard: () => null }));
-vi.mock("./InsightsExample", () => ({ InsightsExample: () => <div data-testid="insights-example" /> }));
+let exampleProps: { heading?: boolean } | null = null;
+vi.mock("./InsightsExample", () => ({ InsightsExample: (p: { heading?: boolean }) => ((exampleProps = p), <div data-testid="insights-example" />) }));
 vi.mock("./ShareMonth", () => ({ ShareMonth: () => null }));
-vi.mock("./WeeklyReport", () => ({ WeeklyReport: () => null }));
+vi.mock("./WeeklyReport", () => ({ WeeklyReport: () => <div data-testid="weekly-report" /> }));
+// The segments and the AI pane (their own tests render them): here, what the page hands them.
+let tabsProps: { initial: string; named: boolean; hrefs: Record<string, string> } | null = null;
+vi.mock("./InsightsTabs", () => ({
+  InsightsTabs: (p: { initial: string; named: boolean; hrefs: Record<string, string>; patterns: React.ReactNode; ai: React.ReactNode }) => (
+    (tabsProps = p),
+    (
+      <div data-testid="tabs">
+        {p.patterns}
+        {p.ai}
+      </div>
+    )
+  ),
+}));
+let paneProps: { state: string; reflections?: unknown; week?: React.ReactNode; pastReports?: boolean } | null = null;
+vi.mock("./AiPane", () => ({
+  AiPane: (p: { state: string; week?: React.ReactNode }) => (
+    (paneProps = p),
+    (
+      <div data-testid={`ai-pane-${p.state}`}>
+        {p.week}
+      </div>
+    )
+  ),
+  WeekPlusPrompt: () => <div data-testid="week-plus" />,
+}));
 vi.mock("@/components/JournalUnavailable", () => ({ JournalUnavailable: () => <div data-testid="journal-unavailable" /> }));
 vi.mock("@/components/SessionEnded", () => ({ SessionEnded: () => null }));
 vi.mock("@/i18n/navigation", () => ({
@@ -51,7 +89,7 @@ vi.mock("@/i18n/navigation", () => ({
 }));
 const { default: InsightsPage } = await import("./page");
 
-const page = (range?: string) => InsightsPage({ params: Promise.resolve({ locale: "en" }), searchParams: Promise.resolve(range ? { range } : {}) } as never);
+const page = (range?: string, more: Record<string, string> = {}) => InsightsPage({ params: Promise.resolve({ locale: "en" }), searchParams: Promise.resolve({ ...(range ? { range } : {}), ...more }) } as never);
 
 beforeEach(() => {
   asked.length = 0;
@@ -60,8 +98,16 @@ beforeEach(() => {
   plusAnswer = null;
   holdPlus = false;
   viewProps = null;
+  exampleProps = null;
+  tabsProps = null;
+  paneProps = null;
+  me = ME;
+  live = new Set(["plus", "patterns-live"]);
+  reportCount = 0;
   readPlusView.mockClear();
   readCheckInsSince.mockClear();
+  readReflections.mockClear();
+  window.localStorage.clear();
 });
 afterEach(cleanup);
 
@@ -121,6 +167,109 @@ describe("Insights' reads with Plus (#272 × #293)", () => {
     checkInsResult = { data: null, error: { message: "boom" } };
     render(await page());
     expect(screen.getByTestId("journal-unavailable")).toBeInTheDocument();
+  });
+});
+
+// Insights' Patterns | AI (decision 258; specs/insights-ai-split.md), and the Reviewer's musts for it.
+describe("Insights → Patterns | AI (decision 258)", () => {
+  const PLUS = { kind: "plus", source: "stripe", daysLeft: null };
+  const FREE = { kind: "free", trial: true };
+
+  it("AI not available (the switch off, or this build doesn't show AI): no segments and nothing of AI, whatever's kept or asked", async () => {
+    // A kept "ai" from an earlier day with AI, and an address asking for AI: both fall back to Patterns (the Reviewer).
+    window.localStorage.setItem("mb:insights-view", "ai");
+    for (const [why, who, gates] of [
+      ["switch off", { ...ME, ...AI_ON, ai_available: false }, ["plus", "patterns-live", "ai-live", "weekly-report-live"]],
+      ["build without AI", { ...ME, ...AI_ON }, ["plus", "patterns-live", "weekly-report-live"]],
+    ] as const) {
+      for (const view of [PLUS, FREE]) {
+        me = who;
+        live = new Set(gates);
+        plusView = view;
+        viewProps = exampleProps = tabsProps = paneProps = null;
+        asked.length = 0;
+        const { container } = render(await page(undefined, { view: "ai" }));
+        const at = `${why}, ${view.kind}`;
+        expect(screen.queryByTestId("tabs"), at).toBeNull();
+        expect(tabsProps, at).toBeNull();
+        expect(paneProps, at).toBeNull();
+        expect(screen.queryByTestId("weekly-report"), at).toBeNull();
+        expect(screen.queryByTestId("insights-heading"), `${at}: the view's own heading`).toBeNull();
+        const handed = (view.kind === "plus" ? viewProps : exampleProps) as { heading?: boolean } | null;
+        expect(handed?.heading, at).not.toBe(false);
+        expect(readReflections, at).not.toHaveBeenCalled();
+        expect(asked, `${at}: no AI read`).not.toContain("ai_reports");
+        expect(container.textContent ?? "", at).not.toMatch(/\b(AI|IA|KI)\b/);
+        cleanup();
+      }
+    }
+  });
+
+  it("AI available, off for this person: the heading above the segments, Patterns first, the AI segment only the invitation", async () => {
+    me = { ...ME, ai_available: true, consents: {}, settings: { ai_enabled: false } };
+    live = new Set(["plus", "patterns-live", "ai-live", "weekly-report-live"]);
+    plusView = PLUS;
+    render(await page());
+    expect(screen.getByTestId("insights-heading")).toBeInTheDocument();
+    expect(tabsProps).toMatchObject({ initial: "patterns", named: false, hrefs: { patterns: "/app/insights", ai: "/app/insights?view=ai" } });
+    expect(viewProps?.heading).toBe(false);
+    expect(paneProps?.state).toBe("off");
+    expect(readReflections).not.toHaveBeenCalled();
+    expect(asked).not.toContain("ai_reports");
+  });
+
+  it("?view=ai opens on AI (also without scripts), and the tabs' addresses keep the range", async () => {
+    me = { ...ME, ...AI_ON };
+    live = new Set(["plus", "patterns-live", "ai-live"]);
+    plusView = PLUS;
+    render(await page("month", { view: "ai" }));
+    expect(tabsProps).toMatchObject({ initial: "ai", named: true, hrefs: { patterns: "/app/insights?range=month", ai: "/app/insights?view=ai&range=month" } });
+    cleanup();
+    render(await page("bogus", { view: "nonsense" }));
+    expect(tabsProps).toMatchObject({ initial: "patterns", named: false, hrefs: { patterns: "/app/insights", ai: "/app/insights?view=ai" } });
+  });
+
+  it("AI on, with Plus: the 3 newest reflections read with the page's batch, the weekly report in the AI segment, past reports once there's one", async () => {
+    me = { ...ME, ...AI_ON };
+    live = new Set(["plus", "patterns-live", "ai-live", "weekly-report-live"]);
+    plusView = PLUS;
+    reportCount = 2;
+    render(await page());
+    expect(readReflections).toHaveBeenCalledTimes(1);
+    expect((readReflections.mock.calls[0] as unknown[])[1]).toBe(3);
+    expect(paneProps).toMatchObject({ state: "on", pastReports: true });
+    expect(screen.getByTestId("ai-pane-on")).toContainElement(screen.getByTestId("weekly-report"));
+    expect(screen.queryByTestId("week-plus")).toBeNull();
+    // Patterns keeps everything else, minus the report.
+    expect(viewProps?.heading).toBe(false);
+    cleanup();
+    reportCount = 0;
+    render(await page());
+    expect(paneProps?.pastReports).toBe(false);
+  });
+
+  it("AI on, without Plus: Patterns is the example under the shared heading, and the AI segment's Your week is its Plus line", async () => {
+    me = { ...ME, ...AI_ON };
+    live = new Set(["plus", "patterns-live", "ai-live", "weekly-report-live"]);
+    plusView = FREE;
+    reportCount = 3;
+    render(await page());
+    expect(exampleProps?.heading).toBe(false);
+    expect(screen.getByTestId("insights-heading")).toBeInTheDocument();
+    expect(paneProps).toMatchObject({ state: "on", pastReports: false });
+    expect(screen.getByTestId("week-plus")).toBeInTheDocument();
+    expect(screen.queryByTestId("weekly-report")).toBeNull();
+    expect(readCheckInsSince).not.toHaveBeenCalled();
+  });
+
+  it("AI on, the weekly report not live: the AI segment without Your week", async () => {
+    me = { ...ME, ...AI_ON };
+    live = new Set(["plus", "patterns-live", "ai-live"]);
+    plusView = PLUS;
+    render(await page());
+    expect(paneProps?.state).toBe("on");
+    expect(paneProps?.week).toBeNull();
+    expect(asked).not.toContain("ai_reports");
   });
 });
 

@@ -1,12 +1,12 @@
 <!--
   Spanish of content/legal/en/privacy.md. Wording is Vitor's, as in English. AI translation, checked
   by back-translation, a script and the Code Reviewer; no native lawyer has read it.
-  en-sha256: fa40909f5ad205a032ecbb3ef6be1fafb3210d2efb5aeedddb4e4fd6ec90fdb0
+  en-sha256: f1bfb917349de90fafbea5f9cc859a9ca49ad796940567530f4532f5e60e9a5f
   It's the English this translates: legalSpanish.test.ts fails if the English changes, until the
   Spanish follows and this is updated. Shows on Production only once legal-es-approved is met.
 -->
 ## Política de privacidad de Moodbow
-Última actualización: 20 de noviembre de 2026
+Última actualización: 25 de noviembre de 2026
 
 {pending:ai_live}**Qué ha cambiado{dated} el {notice_date}{/dated}:** Moodbow ahora ofrece funciones de IA opcionales: reflexiones sobre tus entradas y un informe semanal. Están desactivadas a menos que las actives, con tu consentimiento explícito y separado para la IA (§2). Si las activas, las partes de tu diario necesarias para una reflexión o un informe se envían a nuestro proveedor de IA, Anthropic, en Estados Unidos (§3). Puedes retirar tu consentimiento para la IA en cualquier momento en Yo → IA (§5). Nuestros Términos también incluyen una breve sección sobre estas funciones. No ha cambiado nada más en cómo usamos tu diario.{/pending}
 

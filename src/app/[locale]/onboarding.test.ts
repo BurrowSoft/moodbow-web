@@ -32,7 +32,7 @@ vi.mock("@/i18n/navigation", () => ({
   },
 }));
 
-// The optional AI box shows where this build shows AI ("ai-live").
+// Whatever "ai-live" says, Consent and Create account never grant AI (it's asked only in Me → AI).
 let aiGate: "live" | "draft" | "hidden" = "hidden";
 vi.mock("@/lib/conditions", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/lib/conditions")>()),
@@ -73,9 +73,9 @@ beforeEach(() => {
 });
 
 describe("grantedAtConsent", () => {
-  it("the required three, plus the current AI grant when its box was ticked", () => {
+  it("the required three, never AI (asked only in Me → AI; UX, 23 Nov, the AI go-live)", () => {
     expect(grantedAtConsent().map((i) => i.kind)).toEqual(["privacy", "terms", "health_data"]);
-    expect(grantedAtConsent(true)).toContainEqual({ kind: "ai", version: POLICY_VERSIONS.ai, granted: true });
+    expect(grantedAtConsent().every((i) => i.version === POLICY_VERSIONS[i.kind] && i.granted)).toBe(true);
   });
 });
 
@@ -100,14 +100,15 @@ describe("onboardingStep", () => {
   });
 });
 
-describe("giveConsent: the optional AI box (r1 §M3)", () => {
-
-  it("signed in: record_consents with the AI grant (the database then turns AI on)", async () => {
+describe("giveConsent: no AI consent here (UX, 23 Nov, the AI go-live: only in Me → AI, as the app)", () => {
+  it("signed in, AI shown, an AI field posted: the required consents only, never an AI grant", async () => {
     signedIn();
     aiGate = "live";
     me({ age_18: { version: "1", granted: true } });
     await redirected(giveConsent(idle, form({ privacy: "on", health: "on", ai: "on" })));
-    expect(rpc).toHaveBeenCalledWith("record_consents", { p_items: withLanguage(grantedAtConsent(true), "en") });
+    expect(rpc).toHaveBeenCalledWith("record_consents", { p_items: withLanguage(grantedAtConsent(), "en") });
+    const items = rpc.mock.calls.find((c) => c[0] === "record_consents")![1].p_items;
+    expect(items.map((i: { kind: string }) => i.kind)).not.toContain("ai");
   });
 });
 
@@ -175,14 +176,14 @@ describe("signUpFlow", () => {
     expect(auth.signUp).not.toHaveBeenCalled();
   });
 
-  it("the optional AI box: its grant only where it's shown and ticked", async () => {
+  it("no AI box any more: an AI field in the POST grants nothing, whatever this build shows (UX, 23 Nov, the AI go-live)", async () => {
     auth.signUp.mockResolvedValue({ data: { user: { identities: [{}] }, session: null }, error: null });
-    aiGate = "draft";
-    await signUpFlow(idle, form({ ...valid, ai: "on" }));
-    expect(auth.signUp.mock.calls[0][0].options.data.consents.map((c: { kind: string }) => c.kind)).toEqual(["privacy", "terms", "health_data", "ai", "age_18"]);
-    aiGate = "hidden";
-    await signUpFlow(idle, form({ ...valid, ai: "on" }));
-    expect(auth.signUp.mock.calls[1][0].options.data.consents.map((c: { kind: string }) => c.kind)).toEqual(["privacy", "terms", "health_data", "age_18"]);
+    for (const gate of ["live", "draft", "hidden"] as const) {
+      aiGate = gate;
+      await signUpFlow(idle, form({ ...valid, ai: "on" }));
+    }
+    for (const call of auth.signUp.mock.calls) expect(call[0].options.data.consents.map((c: { kind: string }) => c.kind)).toEqual(["privacy", "terms", "health_data", "age_18"]);
+    expect(auth.signUp).toHaveBeenCalledTimes(3);
   });
 
   it("signs up with the consents (+ 18+), locale and time zone in metadata, then Check email", async () => {

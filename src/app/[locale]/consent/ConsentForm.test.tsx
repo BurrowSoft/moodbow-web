@@ -16,16 +16,16 @@ vi.mock("@/i18n/navigation", () => ({
 const { ConsentForm } = await import("./ConsentForm");
 afterEach(cleanup);
 
-const renderIt = (askAi: boolean) =>
+const renderIt = () =>
   render(
     <NextIntlClientProvider locale="en" messages={messages}>
-      <ConsentForm askAge={false} askAi={askAi} showBack={false} />
+      <ConsentForm askAge={false} showBack={false} />
     </NextIntlClientProvider>,
   );
 
 describe("ConsentForm: the legal pages are in English", () => {
   it("said where they are, not where they aren't", () => {
-    const view = renderIt(false);
+    const view = renderIt();
     expect(screen.queryByTestId("consent-legal-english")).toBeNull();
     view.unmount();
     render(
@@ -37,20 +37,11 @@ describe("ConsentForm: the legal pages are in English", () => {
   });
 });
 
-describe("ConsentForm: the optional AI box (r1 §M3)", () => {
-  it("hidden while this build doesn't show AI", () => {
-    renderIt(false);
+describe("ConsentForm: no AI box (UX, 23 Nov, the AI go-live: AI consent only in Me → AI, as the app)", () => {
+  it("never shown; the two required boxes are enough for Continue", () => {
+    renderIt();
     expect(screen.queryByTestId("consent-ai")).toBeNull();
-  });
-
-  it("shown: never pre-ticked, never required, named by its title and described by what it means", () => {
-    renderIt(true);
-    const box = screen.getByTestId("consent-ai");
-    expect(box).not.toBeChecked();
-    expect(box).not.toBeRequired();
-    expect(box).toHaveAccessibleName(messages.ai.consentAiTitle);
-    expect(box).toHaveAccessibleDescription(messages.ai.consentAiBody);
-    // Continue doesn't wait for it: the two required boxes are enough.
+    expect(screen.queryByText(messages.ai.consentAiBody)).toBeNull();
     fireEvent.click(screen.getByTestId("consent-privacy"));
     fireEvent.click(screen.getByTestId("consent-health"));
     expect(screen.getByTestId("consent-continue")).toBeEnabled();
@@ -60,7 +51,7 @@ describe("ConsentForm: the optional AI box (r1 §M3)", () => {
 // Web Tester batch E: the two links were 20 px tall. min-h-11 is 44 px; the measured height is checked in Chromium.
 describe("ConsentForm: the legal links are 44 px tap areas", () => {
   it("Read the Terms and Read the Privacy Policy", () => {
-    renderIt(false);
+    renderIt();
     for (const id of ["consent-read-terms", "consent-read-privacy"]) {
       expect(screen.getByTestId(id).className.split(" ")).toEqual(expect.arrayContaining(["inline-flex", "min-h-11", "items-center"]));
     }
@@ -69,8 +60,8 @@ describe("ConsentForm: the legal links are 44 px tap areas", () => {
 
 describe("ConsentForm: the boxes", () => {
   it("are 24 px, as Create account's (#350; UX, 19 Nov)", () => {
-    renderIt(true);
-    for (const id of ["consent-privacy", "consent-health", "consent-ai"]) {
+    renderIt();
+    for (const id of ["consent-privacy", "consent-health"]) {
       const box = screen.getByTestId(id);
       expect(box.className, id).toContain("h-[24px]");
       expect(box.className, id).toContain("w-[24px]");

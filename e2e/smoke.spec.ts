@@ -30,12 +30,14 @@ test.describe("home", () => {
     await expect(page.getByTestId("home-sign-in")).toHaveAttribute("href", "/sign-in");
     await expect(page.getByTestId("home-coming-soon")).toHaveCount(0);
     await expect(page.getByTestId("home-notify")).toHaveCount(0);
-    for (const title of ["A 10-second check-in", "Write about your day", "See what goes together in your days", "Private by design"]) {
+    // The writing block says Moodbow writes back only once AI is live (ai-live; the AI go-live, UX 23 Nov).
+    const ai = conditions["ai-live"].met;
+    for (const title of ["A 10-second check-in", ai ? "Write it. Moodbow writes back." : "Write about your day", "See what goes together in your days", "Private by design"]) {
       await expect(page.getByRole("heading", { level: 2, name: title })).toBeVisible();
     }
     // No AI claim while AI isn't live; store badges are text only.
-    await expect(page.getByText("Moodbow writes back")).toHaveCount(0);
-    await expect(page.getByText(/\bAI\b/)).toHaveCount(0);
+    await expect(page.getByText("Moodbow writes back")).toHaveCount(ai ? 1 : 0);
+    if (!ai) await expect(page.getByText(/\bAI\b/)).toHaveCount(0);
     // Follows each store's flag, so a launch-day flip passes on its own.
     const play = conditions["play-live"].met;
     const appStore = conditions["appstore-live"].met;
@@ -301,7 +303,7 @@ test.describe("the live legal pages and account deletion (decision 164)", () => 
     await page.goto("/privacy");
     const article = page.locator('[data-content="article"]');
     await expect(article.getByRole("heading", { level: 2, name: "The short version" })).toBeVisible();
-    await expect(article.getByText("Last updated: 20 November 2026")).toBeVisible();
+    await expect(article.getByText("Last updated: 25 November 2026")).toBeVisible();
     // Every cookie the website sets, as the policy names them (the full-app audit, round 1, item 1).
     await expect(article).toContainText("one that keeps you signed in, one that remembers the language you chose, one that remembers list or calendar view, and, for a minute after you delete your account, one that tells your browser to clear its copies.");
     // The help card's country fallback, as the policy says it (decision 245, #269).
@@ -310,8 +312,10 @@ test.describe("the live legal pages and account deletion (decision 164)", () => 
     if (conditions.plus.met || conditions["app-plus"].met) await expect(article).toContainText("Google Play, Apple App Store");
     else await expect(article).not.toContainText("Google Play, Apple App Store");
     await expect(article).toContainText("disappear automatically within 8 days");
-    // AI is off: no line may point at a Me → AI screen (decision 69).
-    await expect(article).not.toContainText("Me → AI");
+    // AI off: no line may point at a Me → AI screen (decision 69). AI live (ai-live): the AI lines are
+    // in, the withdraw line among them.
+    if (conditions["ai-live"].met) await expect(article).toContainText("withdraw your AI consent");
+    else await expect(article).not.toContainText("Me → AI");
     // What stays on the device, as the 0.9 app has it (Vitor's "ok device
     // sentences"): the app-lock PIN and the share cards.
     await expect(article).toContainText("unsent drafts, your app-lock PIN, and the share cards you create.");
@@ -471,11 +475,20 @@ test.describe("404s are server-rendered (no JS)", () => {
     });
   }
 
-  // A Help article that's missing or not out yet (ai-reflections and your-week are unmet on every build: AI and the
-  // weekly report aren't in this release. Not bo: its article follows Bo's own gate, readable on a draft build, as
-  // CI's is. safety-plan and letters came out with the app in group 5): the not-found page in the raw HTML, never
-  // Next's bare error shell (html id="__next_error__", no title, no h1; the Web Tester, 15 Nov).
-  for (const path of ["/help/no-such-article", "/help/ai-reflections", "/help/your-week", "/es/help/no-such-article", "/es/help/ai-reflections"]) {
+  // A Help article that's missing or not out yet: the not-found page in the raw HTML, never Next's bare error shell
+  // (html id="__next_error__", no title, no h1; the Web Tester, 15 Nov). "Not out yet" is the first of these whose
+  // conditions are all still unmet on this build, so a flip never breaks it (ai-reflections and your-week came out with
+  // the AI go-live). Never bo: its article follows Bo's own gate, readable on a draft build, as CI's is.
+  const notOut = (
+    [
+      ["me-picture", ["me-picture-live", "app-me-picture"]],
+      ["calming-sounds", ["sounds-live", "app-sounds"]],
+      ["your-year", ["year-review-live"]],
+      ["mood-prompts", ["mood-prompts-live", "app-mood-prompts"]],
+    ] as const
+  ).find(([, ids]) => ids.every((id) => !conditions[id].met))?.[0];
+  const missing = ["/help/no-such-article", "/es/help/no-such-article", ...(notOut ? [`/help/${notOut}`, `/es/help/${notOut}`] : [])];
+  for (const path of missing) {
     test(`help 404 ${path}`, async ({ request }) => {
       const res = await request.get(path, { maxRedirects: 0 });
       expect(res.status()).toBe(404);
@@ -795,7 +808,7 @@ test.describe("onboarding (signed out)", () => {
   // least 24 × 24 px.
   test("Create account: every consent control is at least 24 × 24 px", async ({ page }) => {
     await page.goto("/sign-up");
-    const ids = ["consent-privacy", "consent-health", "consent-age", "consent-read-terms", "consent-read-privacy", "consent-read-health", "consent-ai"];
+    const ids = ["consent-privacy", "consent-health", "consent-age", "consent-read-terms", "consent-read-privacy", "consent-read-health"];
     let measured = 0;
     for (const id of ids) {
       const control = page.getByTestId(id);
@@ -808,7 +821,7 @@ test.describe("onboarding (signed out)", () => {
     expect(measured).toBeGreaterThanOrEqual(5);
   });
 
-  test("Create account: the summary above three separate unticked boxes, each with its link; the AI box optional", async ({ page }) => {
+  test("Create account: the summary above three separate unticked boxes, each with its link; no AI box", async ({ page }) => {
     await page.goto("/sign-up");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Create your account");
     const summary = page.getByTestId("signup-summary");
@@ -827,13 +840,10 @@ test.describe("onboarding (signed out)", () => {
     await page.getByTestId("consent-health").check();
     await expect(cont).toBeDisabled();
     await page.getByTestId("consent-age").check();
-    // This build shows drafts, so ai-live is a draft and the optional AI box
-    // is there (#60; hidden on Production until ai-live is met): unticked,
-    // never required, and Continue doesn't wait for it.
-    const ai = page.getByTestId("consent-ai");
-    await expect(ai).toBeVisible();
-    await expect(ai).not.toBeChecked();
-    await expect(page.getByText("AI reflections and reports (optional)")).toBeVisible();
+    // No AI box, even with ai-live met (UX, 23 Nov, the AI go-live, as the app): the AI consent is
+    // asked only in Me → AI, on its own sheet, where AI is actually available.
+    await expect(page.getByTestId("consent-ai")).toHaveCount(0);
+    await expect(page.getByText("AI reflections and reports (optional)")).toHaveCount(0);
     await expect(cont).toBeEnabled();
     await expect(page.getByRole("contentinfo").locator('a[href$="/consumer-health-data"]'), "sign-up has the health data link").toBeVisible();
   });

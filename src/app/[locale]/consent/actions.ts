@@ -2,7 +2,6 @@
 
 import { getLocale } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
-import { askAiConsent } from "@/lib/journal/ai";
 import { gateChanged } from "@/lib/journal/gateChanged";
 import { getMe, hasCurrentConsent } from "@/lib/journal/me";
 import { dataLocale } from "@/i18n/routing";
@@ -22,9 +21,6 @@ export type ConsentState = { status: "idle" } | { status: "error"; error: "requi
 //   asked here too only when that account has no 18+ consent yet.
 export async function giveConsent(_prev: ConsentState, form: FormData): Promise<ConsentState> {
   if (form.get("privacy") !== "on" || form.get("health") !== "on") return { status: "error", error: "required" };
-  // The optional AI box, only where it was shown. Its grant also turns AI
-  // on (the database's consent rule, migration 001), for setup and Me → AI.
-  const ai = askAiConsent() && form.get("ai") === "on";
   const locale = await getLocale();
   const supabase = await createSupabaseServerClient();
   const { data, error: userError } = supabase ? await supabase.auth.getUser() : { data: { user: null }, error: null };
@@ -39,7 +35,9 @@ export async function giveConsent(_prev: ConsentState, form: FormData): Promise<
   const me = await getMe(supabase);
   const needsAge = !me || !hasCurrentConsent(me, "age_18");
   if (needsAge && form.get("age") !== "on") return { status: "error", error: "age" };
-  const items: ConsentItem[] = [...grantedAtConsent(ai), ...(needsAge ? [consentItem("age_18")] : [])];
+  // Never the AI consent, whatever the form sent: it's asked only in Me → AI, on its own sheet,
+  // where AI is actually available (UX, 23 Nov, the AI go-live, as the app).
+  const items: ConsentItem[] = [...grantedAtConsent(), ...(needsAge ? [consentItem("age_18")] : [])];
   const { error } = await supabase.rpc("record_consents", { p_items: withLanguage(items, dataLocale(locale)) });
   if (error) return { status: "error", error: "generic" };
   gateChanged();
