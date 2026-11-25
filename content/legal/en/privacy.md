@@ -7,7 +7,7 @@
   (src/lib/legalContent.test.ts).
 -->
 ## Moodbow Privacy Policy
-Last updated: 20 November 2026
+Last updated: 25 November 2026
 
 {pending:ai_live}**What changed{dated} on {notice_date}{/dated}:** Moodbow now offers optional AI features: reflections on your entries and a weekly report. They stay off unless you turn them on, with your separate, explicit AI consent (§2). If you do, the parts of your journal needed for a reflection or report are sent to our AI provider, Anthropic, in the USA (§3). You can withdraw your AI consent at any time in Me → AI (§5). Our Terms also gain a short section on these features. Nothing else about how we use your journal has changed.{/pending}
 
