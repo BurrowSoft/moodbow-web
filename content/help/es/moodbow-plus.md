@@ -18,8 +18,8 @@ es-draft: true
 
 **Cancelar:** puedes cancelar cuando quieras, y conservas Plus hasta el final del periodo pagado. Si cancelas durante la semana gratis, no se te cobrará.
 {pending:plus}- Comprado en la web: **Yo → Moodbow Plus → Gestionar Plus**.{/pending}
-- Si tienes Plus a través de Google Play o la App Store, cancélalo allí, en tus suscripciones. Borrar la app no lo cancela.
+- Si tienes Plus a través de Google Play o el App Store, cancélalo allí, en tus suscripciones. Borrar la app no lo cancela.
 
 **Si Plus termina:** todo lo que escribiste se queda, y todas las funciones gratis siguen funcionando. Las vistas de Plus se bloquean de nuevo y tu tema vuelve al predeterminado. No se borra nada.
 
-**Eliminar tu cuenta** cancela al instante Plus comprado en la web. Si tienes Plus a través de Google Play o la App Store, cancélalo también allí: eliminar tu cuenta no detiene la suscripción de la tienda.{/pending}
+**Eliminar tu cuenta** cancela al instante Plus comprado en la web. Si tienes Plus a través de Google Play o el App Store, cancélalo también allí: eliminar tu cuenta no detiene la suscripción de la tienda.{/pending}

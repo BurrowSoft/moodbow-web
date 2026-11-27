@@ -196,7 +196,7 @@ describe("ShareMonth: the default theme follows Me → Appearance (decision 133)
 });
 
 describe("ShareMonth for screen readers (decision 143)", () => {
-  it("while loading: Getting your month…", async () => {
+  it("while loading: Preparing your card…", async () => {
     loadMonthCheckIns.mockReturnValueOnce(new Promise(() => {}));
     renderIt();
     fireEvent.click(screen.getByTestId("share-open"));
