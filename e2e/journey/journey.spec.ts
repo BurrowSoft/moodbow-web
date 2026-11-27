@@ -1196,7 +1196,7 @@ test.describe("the tab bar in every language", () => {
       // column of letters, and it closes.
       await textAt(300);
       await page.setViewportSize({ width: 320, height: 640 });
-      for (const [route, saved] of [["", "en"], ["/fr", "fr"], ["/es", "es"], ["/pt-br", "pt"]]) {
+      for (const [route, saved] of [["", "en"], ["/fr", "fr"], ["/es", "es"], ["/pt-br", "pt"], ["/de", "de"]]) {
         await setProfileLocale(email, password, saved);
         await page.goto(`${route}/app/me`);
         await page.getByTestId("me-get-help").click();
@@ -1532,7 +1532,7 @@ test("large text, set in the browser: the check-in conflict dialog shows the who
     await seedCheckIns(email, password, today, [{ offset: 0, mood: 4 }]);
     await page.setViewportSize({ width: 320, height: 640 });
 
-    for (const [route, saved] of [["", "en"], ["/fr", "fr"], ["/es", "es"], ["/pt-br", "pt"]]) {
+    for (const [route, saved] of [["", "en"], ["/fr", "fr"], ["/es", "es"], ["/pt-br", "pt"], ["/de", "de"]]) {
       await setProfileLocale(email, password, saved);
       for (const percent of [100, 200, 300]) {
         await textAt(percent);
@@ -1601,7 +1601,7 @@ test("large text, set in the browser: the check-in conflict dialog shows the who
         return new Set([...range.getClientRects()].map((rect) => rect.top)).size > 1;
       }).map((word) => word[0]);
     };
-    for (const [route, saved] of [["", "en"], ["/fr", "fr"], ["/es", "es"], ["/pt-br", "pt"]]) {
+    for (const [route, saved] of [["", "en"], ["/fr", "fr"], ["/es", "es"], ["/pt-br", "pt"], ["/de", "de"]]) {
       await setProfileLocale(email, password, saved);
       for (const percent of [100, 300]) {
         const where = `${route || "/"} ${percent} %`;
@@ -1680,7 +1680,7 @@ test("large text: every help number on the list stays whole on a phone", { tag: 
     // The help button on Me: its words whole, at the capped size, and on the first screen.
     for (const width of [320, 390]) {
       await page.setViewportSize({ width, height: 640 });
-      for (const [route, saved] of [["/en", "en"], ["/fr", "fr"], ["/es", "es"], ["/pt-br", "pt"]]) {
+      for (const [route, saved] of [["/en", "en"], ["/fr", "fr"], ["/es", "es"], ["/pt-br", "pt"], ["/de", "de"]]) {
         await saveProfile({ p_locale: saved });
         await page.goto(`${route}/app/me`);
         const button = await page.getByTestId("me-get-help").evaluate((el) => {
@@ -1700,7 +1700,7 @@ test("large text: every help number on the list stays whole on a phone", { tag: 
       await saveProfile({ p_country: code });
       // /en, not /: from /pt-br the cookie sends / back there, and the saved-language page won't
       // move to the same language twice in a row, so it stays on its link (#179).
-      for (const [route, saved] of [["/en", "en"], ["/fr", "fr"], ["/es", "es"], ["/pt-br", "pt"]]) {
+      for (const [route, saved] of [["/en", "en"], ["/fr", "fr"], ["/es", "es"], ["/pt-br", "pt"], ["/de", "de"]]) {
         await saveProfile({ p_locale: saved });
         await page.goto(`${route}/app/me`);
         await page.getByTestId("me-get-help").click({ timeout: 15_000 });
@@ -1806,7 +1806,7 @@ test("large text, set in the browser: Print this month stays inside a 320 px pho
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     const month = (await journalToday(email, password)).slice(0, 7);
     await page.setViewportSize({ width: 320, height: 640 });
-    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"], ["/de", "de"]] as const) {
       await setProfileLocale(email, password, saved);
       for (const percent of [100, 300]) {
         const where = `${saved} at ${percent} %`;
@@ -1824,7 +1824,7 @@ test("large text, set in the browser: Print this month stays inside a 320 px pho
     }
     // No serious or critical axe violation, at 320 and 1280 px, at the normal size (UX, 2026-11-12).
     await cdp.send("Page.setFontSizes", { fontSizes: { standard: 16, fixed: 13 } });
-    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"], ["/de", "de"]] as const) {
       await setProfileLocale(email, password, saved);
       await axeAtWidths(page, `Print this month (${saved})`, async () => {
         await page.goto(`${route}/app/print/${month}`);
@@ -2040,7 +2040,7 @@ test("axe: Moodbow Plus, its screen and sheet, at 320 and 1280 px", async ({ pag
     await page.locator("main form button[type=submit]").first().click();
     await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
-    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"], ["/de", "de"]] as const) {
       await setProfileLocale(email, password, saved);
       await axeAtWidths(page, `Plus screen, free (${saved})`, async () => {
         await page.goto(`${route}/app/me/plus`);
@@ -2060,7 +2060,7 @@ test("axe: Moodbow Plus, its screen and sheet, at 320 and 1280 px", async ({ pag
       });
     }
     await grantPlusTrial(email);
-    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"], ["/de", "de"]] as const) {
       await setProfileLocale(email, password, saved);
       await axeAtWidths(page, `Plus screen, in the free week (${saved})`, async () => {
         await page.goto(`${route}/app/me/plus`);
@@ -2089,7 +2089,7 @@ test("axe: Plus's Year, All time and More patterns, at 320 and 1280 px", async (
     await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     await grantPlusTrial(email);
-    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"], ["/de", "de"]] as const) {
       await setProfileLocale(email, password, saved);
       await axeAtWidths(page, `Insights, Year (${saved})`, async () => {
         await page.goto(`${route}/app/insights?range=year`);
@@ -2195,7 +2195,7 @@ test("axe: the PDF journal page, at 320 and 1280 px", async ({ page }) => {
     await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     await grantPlusTrial(email);
-    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"], ["/de", "de"]] as const) {
       await setProfileLocale(email, password, saved);
       await axeAtWidths(page, `PDF journal (${saved})`, async () => {
         await page.goto(`${route}/app/me/journal-pdf`);
@@ -2224,7 +2224,7 @@ test("axe: Year in review, at 320 and 1280 px", async ({ page }) => {
     await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     await grantPlusTrial(email);
-    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"], ["/de", "de"]] as const) {
       await setProfileLocale(email, password, saved);
       await axeAtWidths(page, `Year in review (${saved})`, async () => {
         await page.goto(`${route}/app/insights/review`);
@@ -2252,7 +2252,7 @@ test("axe: Appearance with themes, at 320 and 1280 px", async ({ page }) => {
     await page.locator("main form button[type=submit]").first().click();
     await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
-    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"], ["/de", "de"]] as const) {
       await setProfileLocale(email, password, saved);
       await axeAtWidths(page, `Appearance, free (the lock) (${saved})`, async () => {
         await page.goto(`${route}/app/me`);
@@ -2260,7 +2260,7 @@ test("axe: Appearance with themes, at 320 and 1280 px", async ({ page }) => {
       });
     }
     await grantPlusTrial(email);
-    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"], ["/de", "de"]] as const) {
       await setProfileLocale(email, password, saved);
       await axeAtWidths(page, `Appearance, the themes (${saved})`, async () => {
         await page.goto(`${route}/app/me`);
@@ -2728,7 +2728,7 @@ test("axe: Today's check-in with tags, at 320 and 1280 px", async ({ page }) => 
     // Signing in lands on Today now (Setup is later, #314).
     await expect(page).toHaveURL(RegExp("/app$"), { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
-    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"], ["/de", "de"]] as const) {
       await setProfileLocale(email, password, saved);
       await axeAtWidths(page, `Today with tags (${saved})`, async () => {
         await page.goto(`${route}/app`);
@@ -2792,7 +2792,7 @@ test("What lifts me: shown with Plus, an excluded tag never, at large text, and 
       expect(await page.evaluate(() => document.documentElement.scrollWidth), `${where}: no sideways scroll`).toBeLessThanOrEqual(320);
     }
     await cdp.send("Page.setFontSizes", { fontSizes: { standard: 16, fixed: 13 } });
-    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"], ["/de", "de"]] as const) {
       await setProfileLocale(email, password, saved);
       await axeAtWidths(page, `What lifts me (${saved})`, async () => {
         await page.goto(`${route}/app/insights?range=year`);
@@ -2860,7 +2860,7 @@ test("axe: the toolbox and breathing, at 320 and 1280 px", async ({ page }) => {
     // Since #314 (fewer taps) sign-in lands on Today (audit trial).
     await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
-    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"], ["/de", "de"]] as const) {
       await setProfileLocale(email, password, saved);
       await axeAtWidths(page, `toolbox (${saved})`, async () => {
         await page.goto(`${route}/app/me/toolbox`);
@@ -2897,7 +2897,7 @@ test("large text, set in the browser: the safety plan's help is in the first vie
     await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     await page.setViewportSize({ width: 320, height: 640 });
-    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"], ["/de", "de"]] as const) {
       await setProfileLocale(email, password, saved);
       for (const percent of [100, 300]) {
         await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
@@ -2934,7 +2934,7 @@ test("axe: the safety plan, at 320 and 1280 px", async ({ page }) => {
     // Since #314 (fewer taps) sign-in lands on Today (audit trial).
     await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
-    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"], ["/de", "de"]] as const) {
       await setProfileLocale(email, password, saved);
       await axeAtWidths(page, `safety plan (${saved})`, async () => {
         await page.goto(`${route}/app/me/safety-plan`);
@@ -2980,7 +2980,7 @@ test("large text, set in the browser: the appointment summary's title keeps its 
     await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     await page.setViewportSize({ width: 320, height: 640 });
-    for (const [route, saved] of [["", "en"], ["/fr", "fr"], ["/es", "es"], ["/pt-br", "pt"]] as const) {
+    for (const [route, saved] of [["", "en"], ["/fr", "fr"], ["/es", "es"], ["/pt-br", "pt"], ["/de", "de"]] as const) {
       await setProfileLocale(email, password, saved);
       for (const percent of [100, 300]) {
         const where = `${saved} at ${percent} %`;
@@ -3026,7 +3026,7 @@ test("large text, set in the browser: the 1.2 pages' help is in the first view o
       ["toolbox", "toolbox-get-help", "toolbox-title"],
       ["appointment", "appointment-get-help", "appointment-title"],
     ] as const;
-    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"], ["/de", "de"]] as const) {
       await setProfileLocale(email, password, saved);
       for (const percent of [100, 300]) {
         await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
@@ -3065,7 +3065,7 @@ test("axe: the appointment summary, at 320 and 1280 px", async ({ page }) => {
     // Since #314 (fewer taps) sign-in lands on Today (audit trial).
     await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
-    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"], ["/de", "de"]] as const) {
       await setProfileLocale(email, password, saved);
       await axeAtWidths(page, `appointment summary (${saved})`, async () => {
         await page.goto(`${route}/app/me/appointment`);
@@ -3154,7 +3154,7 @@ test("grounding: the three at large text on a 320 px phone, help on every screen
     await expect(page.getByTestId("safety-card")).toHaveCount(0);
 
     // No serious or critical axe violation (UX, 2026-11-12), en and pt-BR (the longest).
-    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"], ["/de", "de"]] as const) {
       await setProfileLocale(email, password, saved);
       for (const exercise of ["5-4-3-2-1", "body-scan", "name-it"]) {
         await axeAtWidths(page, `grounding ${exercise} (${saved})`, async () => {
@@ -3220,7 +3220,7 @@ test("Three good things: large text on a 320 px phone, one ordinary entry on Tod
     await expect(page.locator('[data-testid^="today-entry-"]').first()).toContainText(messages.entry.goodThingsTitle);
 
     await cdp.send("Page.setFontSizes", { fontSizes: { standard: 16, fixed: 13 } });
-    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"], ["/de", "de"]] as const) {
       await setProfileLocale(email, password, saved);
       await axeAtWidths(page, `Three good things (${saved})`, async () => {
         await page.goto(`${route}/app/write/good-things`);
@@ -3248,7 +3248,7 @@ test("axe: letters to future me, at 320 and 1280 px", async ({ page }) => {
     // Since #314 (fewer taps) sign-in lands on Today (audit trial).
     await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
-    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"], ["/de", "de"]] as const) {
       await setProfileLocale(email, password, saved);
       await axeAtWidths(page, `letters (${saved})`, async () => {
         await page.goto(`${route}/app/me/letters`);
