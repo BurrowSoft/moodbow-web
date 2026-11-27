@@ -100,8 +100,10 @@ describe("version 4: de, th, it", () => {
     for (const t of texts) expect(flags(t), t).toBe(false);
   };
 
-  it("is version 4, with an Italian list", () => {
-    expect(CRISIS_KEYWORDS?.version).toBe(4);
+  // Version 5 (app #316, 27 Nov): German only, the de safety report's should-fix phrases
+  // ("ein Ende", "lieber tot", "mich toeten" spelled out) with their contract fixtures.
+  it("is version 5, with an Italian list", () => {
+    expect(CRISIS_KEYWORDS?.version).toBe(5);
     expect(CRISIS_KEYWORDS?.languages.it.match).toBe("word");
   });
 
@@ -129,10 +131,13 @@ describe("version 4: de, th, it", () => {
     yes(["Penso al suicidio.", "ho pensieri suicidi", "un gesto autolesionistico", "Autolesione, di nuovo."]);
   });
 
-  // UX's clear should-fix rows (15 Nov); "ein Ende" left out as too broad.
+  // UX's clear should-fix rows (15 Nov); "ein Ende" left out as too broad. v5 (the de safety
+  // report's should-fix, kept by UX's ruling on 27 Nov: the card is gentle and dismissible):
+  // de phrase "allem ein ende" flags "Das ist allem ein Ende." now; the bare "ein Ende" stays out.
+  // As the app's test/crisis_matcher_test.dart at f27301b8.
   it("the should-fix rows: de, th, it", () => {
-    yes(["Ich will tot sein.", "ich will einfach nicht mehr aufwachen", "Ich denke über Freitod nach.", "Freitodgedanken, schon wieder", "บางทีก็ทำร้ายร่างกายตัวเองตอนเครียด", "ฉันไม่อยากอยู่บนโลกนี้อีกแล้ว", "Ogni sera penso di ammazzarmi."]);
-    no(["Die Batterie ist tot, ich will sie tauschen.", "Das ist allem ein Ende.", "Se non passo l’esame mi ammazzo."]);
+    yes(["Ich will tot sein.", "ich will einfach nicht mehr aufwachen", "Ich denke über Freitod nach.", "Freitodgedanken, schon wieder", "บางทีก็ทำร้ายร่างกายตัวเองตอนเครียด", "ฉันไม่อยากอยู่บนโลกนี้อีกแล้ว", "Ogni sera penso di ammazzarmi.", "Das ist allem ein Ende."]);
+    no(["Die Batterie ist tot, ich will sie tauschen.", "Der Film hatte ein Ende, das mir gefiel.", "Se non passo l’esame mi ammazzo."]);
   });
 
   it("it: everyday hyperbole stays quiet", () => {
