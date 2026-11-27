@@ -5,6 +5,7 @@ import { JournalUnavailable } from "@/components/JournalUnavailable";
 import { SessionEnded } from "@/components/SessionEnded";
 import { currentUser } from "@/lib/journal/currentUser";
 import { getMe } from "@/lib/journal/me";
+import { aiShown } from "@/lib/journal/ai";
 import { isIsoDate } from "@/lib/journal/timeline";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { headers } from "next/headers";
@@ -90,7 +91,7 @@ export default async function WritePage({ params, searchParams }: PageProps<"/[l
       promptDate={promptDate}
       library={promptDate ? library : undefined}
       moodPrompt={promptDate ? moodPrompt : undefined}
-      back={<BackLink href={from} label={await backLabel(from, tag)} testId="nav-back" />}
+      back={<BackLink href={from} label={await backLabel(from, tag, aiShown(me))} testId="nav-back" />}
       // Three good things (1.3, Ruling 9): offered from Write, a plain new entry only.
       goodThingsHref={pageGate("good-things-live") !== "hidden" ? "/app/write/good-things" : null}
     />
