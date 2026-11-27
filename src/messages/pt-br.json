@@ -632,7 +632,7 @@
     "milestoneReachedTitle": "{n} dias da sua história",
     "milestoneShare": "Compartilhar",
     "milestoneNotNow": "Agora não",
-    "shareLoading": "Preparando o seu mês…",
+    "shareLoading": "Preparando o seu card…",
     "shareFormat": "Formato",
     "shareTheme": "Tema",
     "shareLineCount": "{count, plural, one {Resta # caractere} other {Restam # caracteres}}",

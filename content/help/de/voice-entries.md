@@ -3,7 +3,7 @@ title: Einträge per Sprache
 summary: Sprich deinen Eintrag, und dein Handy macht direkt auf dem Handy Text daraus.
 topic: Your journal
 ---
-{pending:app_voice}In der App kannst du deinen Eintrag sprechen, statt ihn zu tippen. Tippe auf das Mikrofon in der Ecke des Schreibfelds, unter **Heute** oder während du einen Eintrag schreibst, und sprich. Deine Worte erscheinen als Text, während du sprichst. Tippe noch einmal auf das Mikrofon, um aufzuhören: Solange es zuhört, steht dort **Hört zu… zum Beenden tippen**. Ändere dann den Text, wenn du magst, und speichere ihn wie immer.
+{pending:app_voice}In der App kannst du deinen Eintrag sprechen, statt ihn zu tippen. Tippe auf das Mikrofon in der Ecke des Schreibfelds, unter **Heute** oder während du einen Eintrag schreibst, und sprich. Deine Worte erscheinen als Text, während du sprichst. Tippe noch einmal auf das Mikrofon, um aufzuhören: Solange es zuhört, steht dort **Hört zu … zum Beenden tippen**. Ändere dann den Text, wenn du magst, und speichere ihn wie immer.
 
 Beim ersten Mal erklärt Moodbow, was passiert, dann fragt dein Handy, ob Moodbow das Mikrofon nutzen darf. Wenn du Nein gesagt hast, kannst du es später in den Einstellungen deines Handys erlauben.
 
