@@ -10,6 +10,6 @@ es-draft: true
 
 **Después del primer año,** Plus se renueva automáticamente a su precio anual habitual, que se muestra antes de comprar.
 
-**Cancelar:** puedes cancelar cuando quieras. Si lo compraste en la web: **Yo → Moodbow Plus → Gestionar Plus**. Si lo compraste en la app: en Google Play o en la App Store, en tus suscripciones.
+**Cancelar:** puedes cancelar cuando quieras. Si lo compraste en la web: **Yo → Moodbow Plus → Gestionar Plus**. Si lo compraste en la app: en Google Play o en el App Store, en tus suscripciones.
 
 La oferta termina al empezar el 1 de enero (UTC). Nunca aparece junto a la ayuda, tu plan de seguridad ni mientras escribes.{/pending}

@@ -138,6 +138,20 @@ body {
   overflow-wrap: break-word;
 }
 
+/* Headings wrap balanced (UX, 27 Nov, #430): a page title, a card heading or a dialog title never
+   ends on one lone word at a narrow width, in any language («Lettres à mon futur / moi» and
+   «Cartas para mi yo del / futuro» at 360 px, the Web Tester). One rule for every heading, today's
+   and future ones, instead of no-break spaces in the strings. A browser without text-wrap: balance
+   wraps as before. In the base layer, so a heading's own utility (text-pretty, whitespace-nowrap)
+   still wins. Headings only: balance is for a few short lines, not running text. */
+@layer base {
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+}
+
 /* Large text, everywhere (UX, 20 Nov): in every language, every page (the journal, the public and
    legal pages, Consent and sign-up), a long word breaks with a hyphen in the page's language
    (<html lang>) instead of being cut mid-word, but only once the page is a 13em column or narrower
