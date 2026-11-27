@@ -2,6 +2,7 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import de from "./de.json";
 import fr from "./fr.json";
 
 // French typography (1.4.3, UX 27 Nov): before ? ! : ; a no-break space (U+00A0, the one every fr string already
@@ -70,5 +71,20 @@ describe("fr typography: a no-break space before ? ! : ;", () => {
       return ordinarySpacesBeforeMarks(text, helpSkips(text)).map((s) => `${f}: ${s}`);
     });
     expect(bad).toEqual([]);
+  });
+});
+
+// German (1.4.3, UX 27 Nov, as the app's ARB): the space before «…» is U+00A0, so «…» never starts a line at 200 %
+// text («Deine Karte wird vorbereitet …»). The help pages quote those labels, so they follow too.
+describe("de typography: a no-break space before «…»", () => {
+  it("every de message", () => {
+    expect(leaves(de).filter(([, value]) => value.includes(" …")).map(([key]) => key)).toEqual([]);
+  });
+
+  it("every de help page", () => {
+    const dir = join(process.cwd(), "content", "help", "de");
+    const pages = readdirSync(dir).filter((f) => f.endsWith(".md"));
+    expect(pages.length).toBeGreaterThanOrEqual(40);
+    expect(pages.filter((f) => readFileSync(join(dir, f), "utf8").includes(" …"))).toEqual([]);
   });
 });
