@@ -74,17 +74,27 @@ describe("fr typography: a no-break space before ? ! : ;", () => {
   });
 });
 
-// German (1.4.3, UX 27 Nov, as the app's ARB): the space before «…» is U+00A0, so «…» never starts a line at 200 %
-// text («Deine Karte wird vorbereitet …»). The help pages quote those labels, so they follow too.
-describe("de typography: a no-break space before «…»", () => {
+// German (1.4.3, UX 27 Nov, as the app's ARB, per Duden): every «…» has U+00A0 right before it, so it never starts
+// a line at 200 % text and never sticks to the word («Deine Karte wird vorbereitet …»). The help pages quote those
+// labels, so they follow too.
+const deEllipsisWithoutNbsp = (text: string) => /(^|[^ ])…/.test(text);
+
+describe("de typography: U+00A0 right before every «…»", () => {
+  it("the check itself", () => {
+    expect(deEllipsisWithoutNbsp("Wird geladen …")).toBe(true);
+    expect(deEllipsisWithoutNbsp("Wird geladen…")).toBe(true);
+    expect(deEllipsisWithoutNbsp("Wird geladen …")).toBe(false);
+    expect(deEllipsisWithoutNbsp("Import läuft … {done} von {total}")).toBe(false);
+  });
+
   it("every de message", () => {
-    expect(leaves(de).filter(([, value]) => value.includes(" …")).map(([key]) => key)).toEqual([]);
+    expect(leaves(de).filter(([, value]) => deEllipsisWithoutNbsp(value)).map(([key]) => key)).toEqual([]);
   });
 
   it("every de help page", () => {
     const dir = join(process.cwd(), "content", "help", "de");
     const pages = readdirSync(dir).filter((f) => f.endsWith(".md"));
     expect(pages.length).toBeGreaterThanOrEqual(40);
-    expect(pages.filter((f) => readFileSync(join(dir, f), "utf8").includes(" …"))).toEqual([]);
+    expect(pages.filter((f) => deEllipsisWithoutNbsp(readFileSync(join(dir, f), "utf8")))).toEqual([]);
   });
 });
