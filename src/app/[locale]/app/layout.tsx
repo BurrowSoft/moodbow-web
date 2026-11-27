@@ -9,6 +9,7 @@ import { offeredLocales } from "@/i18n/routing";
 import { savedLanguageRoute } from "@/lib/savedLanguage";
 import { pageGate } from "@/lib/conditions";
 import { getMe, onboardingStep } from "@/lib/journal/me";
+import { aiShown } from "@/lib/journal/ai";
 import { PROTECTIVE_ONBOARDING } from "@/lib/journal/setupLater";
 import { authUser } from "@/lib/journal/currentUser";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -69,6 +70,10 @@ export default async function AppLayout({ children, params }: LayoutProps<"/[loc
   // page is on screen, so no page waits on Bo. The function refuses whatever a client shows.
   const boMayShow = pageGate("bo-live") !== "hidden" && boSpeaks(locale) && me.settings?.bo_off !== true;
 
+  // Insights' name (insightsName): "AI & Insights" only where AI is shown to this person, worked out
+  // here once from this request's `me`, so the tab and the "i" shortcut never wait or flip.
+  const ai = aiShown(me);
+
   const t = await getTranslations("me");
   // The journal's client components get every message (the root layout sends
   // only the public namespaces, perf fix 3).
@@ -81,9 +86,9 @@ export default async function AppLayout({ children, params }: LayoutProps<"/[loc
         <Suspense fallback={null}>
           <NavProgress />
         </Suspense>
-        <AppNav />
+        <AppNav ai={ai} />
         {/* "/" opens Timeline search wherever search itself is shown. */}
-        {pageGate("shortcuts-live") !== "hidden" && <KeyboardShortcuts search={pageGate("search-live") !== "hidden"} />}
+        {pageGate("shortcuts-live") !== "hidden" && <KeyboardShortcuts search={pageGate("search-live") !== "hidden"} ai={ai} />}
         {/* At least a screen tall: the page streams in after a first paint
             (the loading fallback) that's shorter than the screen, and the
             footer under it would be pushed down in view. Kept below the fold,

@@ -36,7 +36,8 @@ afterEach(() => {
 describe("InsightsTabs: Patterns | AI (decision 258)", () => {
   it("a tab list: two tabs, the selected one in the tab order and controlling its panel; the other panel hidden", () => {
     show();
-    expect(screen.getByRole("tablist", { name: t.insightsTitle })).toBeInTheDocument();
+    // Only where AI is shown: Insights' name with AI, said with "and" (UX, 27 Nov).
+    expect(screen.getByRole("tablist", { name: messages.app.tabInsightsSpoken })).toBeInTheDocument();
     expect(screen.getAllByRole("tab").map((e) => e.textContent)).toEqual([t.insightsSegPatterns, t.insightsSegAi]);
     expect(tab(t.insightsSegPatterns)).toHaveAttribute("aria-selected", "true");
     expect(tab(t.insightsSegAi)).toHaveAttribute("aria-selected", "false");

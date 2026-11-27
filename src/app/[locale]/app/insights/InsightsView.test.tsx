@@ -12,7 +12,7 @@ vi.mock("@/i18n/navigation", () => ({
     </a>
   ),
 }));
-const { InsightsView } = await import("./InsightsView");
+const { InsightsView, InsightsHeading } = await import("./InsightsView");
 
 const row = (local_date: string, mood: number, extra: Partial<InsightRow> = {}): InsightRow => ({ local_date, mood, sleep_hours: null, stress: null, exercise_minutes: null, ...extra });
 const renderView = (rows: InsightRow[], range: Range = "week") =>
@@ -29,6 +29,31 @@ const thisWeek = [
   row("2026-10-02", 5, { sleep_hours: 7.5, stress: 1 }),
 ];
 const lastWeek = [row("2026-09-20", 3, { stress: 2 }), row("2026-09-22", 4, { stress: 2 }), row("2026-09-24", 4, { stress: 2 })];
+
+describe("Insights' name in the heading and the range nav (UX, 27 Nov; the app's build 3)", () => {
+  const withMessages = (node: React.ReactNode) => render(<NextIntlClientProvider locale="en" messages={messages}>{node}</NextIntlClientProvider>);
+
+  it("AI not shown, and the default (not known): Insights, with no word of AI", () => {
+    for (const ai of [false, undefined]) {
+      withMessages(<InsightsView rows={[]} today="2026-10-02" range="week" ai={ai} />);
+      expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(messages.insights.insightsTitleNoAi);
+      expect(messages.insights.insightsTitleNoAi).toBe("Insights");
+      expect(screen.getByRole("navigation", { name: messages.app.tabInsightsNoAi })).toBeInTheDocument();
+      expect(screen.getByRole("heading", { level: 1 }).textContent).not.toMatch(/\bAI\b/);
+      cleanup();
+    }
+  });
+
+  it("AI shown: the heading above the Patterns | AI tabs is AI & Insights; the range nav is named with and", () => {
+    withMessages(<InsightsHeading ai />);
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(messages.insights.insightsTitle);
+    expect(messages.insights.insightsTitle).toBe("AI & Insights");
+    cleanup();
+    withMessages(<InsightsView rows={[]} today="2026-10-02" range="week" heading={false} ai />);
+    expect(screen.getByRole("navigation", { name: messages.app.tabInsightsSpoken })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { level: 1 })).toBeNull();
+  });
+});
 
 describe("InsightsView", () => {
   it("help everywhere (audit batch H): the help slot sits on the title row, after the title", () => {

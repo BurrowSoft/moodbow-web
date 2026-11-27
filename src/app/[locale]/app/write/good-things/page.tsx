@@ -10,6 +10,7 @@ import { pageGate } from "@/lib/conditions";
 import { backLabel } from "@/lib/journal/backLabel";
 import { currentUser } from "@/lib/journal/currentUser";
 import { getMe } from "@/lib/journal/me";
+import { aiShown } from "@/lib/journal/ai";
 import { originOf } from "@/lib/journal/origin";
 import { dateLocale } from "@/lib/journal/today";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -54,7 +55,7 @@ export default async function GoodThingsPage({ params, searchParams }: PageProps
       today={me.today}
       country={me.profile?.country}
       backTo={toolbox ? TOOLBOX : from}
-      back={<BackLink href={toolbox ? TOOLBOX : from} label={toolbox ? (await getTranslations("app"))("navBackTo", { screen: (await getTranslations("toolbox"))("meRow") }) : await backLabel(from, tag)} testId="nav-back" />}
+      back={<BackLink href={toolbox ? TOOLBOX : from} label={toolbox ? (await getTranslations("app"))("navBackTo", { screen: (await getTranslations("toolbox"))("meRow") }) : await backLabel(from, tag, aiShown(me))} testId="nav-back" />}
     />
   );
 }

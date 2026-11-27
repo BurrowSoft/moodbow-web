@@ -4,13 +4,15 @@ import { useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { Link, usePathname } from "@/i18n/navigation";
+import { insightsName } from "@/lib/journal/insightsName";
 import { entryOriginOf, originOf, originTab } from "@/lib/journal/origin";
 import { Logo } from "@/components/Logo";
 import { TAB_COLUMNS, TAB_ITEM, TAB_LABEL, TAB_LINK_NARROW, tabLabelSize } from "@/lib/ui/journalLayout";
 import { useKeyboardOpen } from "@/lib/ui/keyboardOpen";
 
 // The web journal's tabs, the same four as the app (Today · Timeline ·
-// Insights · Me) with the same test ids. A sidebar from md up, a bottom bar
+// Insights · Me) with the same test ids. Insights is "AI & Insights" where AI
+// is shown to this person (insightsName; the app's build 3 name, UX 27 Nov). A sidebar from md up, a bottom bar
 // on phones.
 const TABS = [
   { href: "/app", key: "tabToday", id: "tab-today", icon: <SunIcon /> },
@@ -97,9 +99,18 @@ function useTabBarHeight() {
   return nav;
 }
 
-export function AppNav() {
+// ai: aiShown(me), from the layout (the server's one answer for this request); without it, no AI word.
+export function AppNav({ ai = false }: { ai?: boolean }) {
   const bar = useTabBarHeight();
   const t = useTranslations("app");
+  const insights = insightsName(ai);
+  // A tab's visible name, and its accessible name where that differs ("AI and Insights" for "AI & Insights").
+  const names = (tab: (typeof TABS)[number]) => {
+    if (tab.id !== "tab-insights") return { shown: t(tab.key), spoken: undefined };
+    const shown = t(insights.tab);
+    const spoken = t(insights.spoken);
+    return { shown, spoken: spoken !== shown ? spoken : undefined };
+  };
   const tc = useTranslations("common");
   const pathname = usePathname();
   // The phone bar steps aside while the on-screen keyboard is up (UX); the
@@ -142,13 +153,15 @@ export function AppNav() {
       <ul ref={row} className={`group/tabs grid ${TAB_COLUMNS} md:flex md:flex-col md:gap-1`}>
         {TABS.map((tab) => {
           const active = isActive(tab.href);
+          const { shown, spoken } = names(tab);
           return (
             <li key={tab.href} className={TAB_ITEM}>
               <Link
                 href={tab.href}
                 data-testid={tab.id}
                 aria-current={active ? "page" : undefined}
-                title={t(tab.key)}
+                aria-label={spoken}
+                title={shown}
                 data-stays={pathname === tab.href || undefined}
                 onClick={(e) => toTop(e, tab.href)}
                 className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-2xl ${TAB_LINK_NARROW} text-xs font-medium md:min-h-12 md:px-3 md:text-left md:flex-row md:justify-start md:gap-3 md:text-base ${
@@ -159,7 +172,7 @@ export function AppNav() {
                   {tab.icon}
                 </span>
                 <span data-tab-label className={TAB_LABEL}>
-                  {t(tab.key)}
+                  {shown}
                 </span>
               </Link>
             </li>
