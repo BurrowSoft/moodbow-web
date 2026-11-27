@@ -674,7 +674,7 @@ test.describe("help with no script at all", () => {
   // Create account carries the consents now (1.3 §6): help before anything is agreed is there.
   // Welcome too (round 3, batch E): its lifebuoy is a real link to the help page.
   for (const [path, id] of [["/sign-in", "sign-in-get-help"], ["/forgot-password", "forgot-get-help"], ["/sign-up", "signup-get-help"], ["/welcome", "welcome-help"]]) {
-    for (const language of ["", "/fr", "/es", "/pt-br"]) {
+    for (const language of ["", "/fr", "/es", "/pt-br", "/de"]) {
       test(`${language}${path}: the help button leads to a page with the way to a helpline`, async ({ page }) => {
         await page.goto(`${language}${path}`);
         await page.getByTestId(id).click();

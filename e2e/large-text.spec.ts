@@ -295,7 +295,7 @@ test("home and the plain pages' headings follow the browser's setting", async ({
   for (const { width, percent, heading, sub, feature } of home) {
     await page.setViewportSize({ width, height: 800 });
     await setting(percent);
-    for (const language of ["/", "/fr", "/es", "/pt-br"]) {
+    for (const language of ["/", "/fr", "/es", "/pt-br", "/de"]) {
       await page.goto(language);
       const at = `${language} at ${width} px, ${percent} %`;
       expect.soft(await size("h1"), at).toBe(heading);
@@ -328,7 +328,7 @@ test("large text: the help card keeps up, and its number and Close stay whole", 
   await page.setViewportSize({ width: 320, height: 640 });
   for (const percent of [100, 200, 300]) {
     await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
-    for (const language of ["", "/fr", "/es", "/pt-br"]) {
+    for (const language of ["", "/fr", "/es", "/pt-br", "/de"]) {
       const at = `${language || "/en"} at ${percent} %`;
       await page.goto(`${language}/sign-in`);
       await page.getByTestId("sign-in-get-help").click();
@@ -367,7 +367,7 @@ test("large text: the help button's words stay whole on a phone", async ({ page,
   await cdp.send("Page.setFontSizes", { fontSizes: { standard: 48, fixed: 39 } });
   for (const width of [320, 390]) {
     await page.setViewportSize({ width, height: 640 });
-    for (const language of ["", "/fr", "/es", "/pt-br"]) {
+    for (const language of ["", "/fr", "/es", "/pt-br", "/de"]) {
       await page.goto(`${language}/sign-in`);
       const split = await page.getByTestId("sign-in-get-help").evaluate((el) => {
         const text = el.firstChild as Text;
@@ -391,7 +391,7 @@ test("large text: every number on the help page stays whole on a phone", async (
   await cdp.send("Page.setFontSizes", { fontSizes: { standard: 48, fixed: 39 } });
   await page.setViewportSize({ width: 320, height: 640 });
   for (const { code, helpline, emergency } of countries.countries) {
-    for (const language of ["", "/fr", "/es", "/pt-br"]) {
+    for (const language of ["", "/fr", "/es", "/pt-br", "/de"]) {
       await page.goto(`${language}/help/get-help-now?country=${code}`);
       for (const [id, display] of [["help-now-call-helpline", helpline?.display], ["help-now-call-emergency", emergency?.display]]) {
         if (!display) continue;
