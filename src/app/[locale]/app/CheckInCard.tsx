@@ -224,7 +224,9 @@ function ConflictVersion({ label, values, testId }: { label: string; values: Pic
   return (
     <div className="min-w-0 rounded-2xl bg-pill p-[12px] [overflow-wrap:anywhere] [font-size:min(1rem,max(10vw,32px))]" data-testid={testId}>
       <p className="leading-[1.429] text-muted [font-size:min(0.875rem,max(8.75vw,28px))]">{label}</p>
-      <p className="mt-[8px] flex items-center gap-[8px] font-medium text-text">
+      {/* flex-wrap: a mood word too long to sit beside the face goes under it whole, with the card's
+          full width, instead of breaking inside the word ("Schlecht" at 320 px, de; #431's journey). */}
+      <p className="mt-[8px] flex flex-wrap items-center gap-[8px] font-medium text-text">
         <MoodFace mood={values.mood} className="h-[28px] w-[28px] shrink-0" />
         <span className="min-w-0" data-testid={`${testId}-mood`}>
           {t(`mood${values.mood}` as "mood1")}
