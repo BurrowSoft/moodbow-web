@@ -3918,5 +3918,10 @@
     "key": "insights.insightsTitle",
     "en": "AI & Insights",
     "reason": "UX draft (native read pending; the tab renamed with the app's build 3, UX 27 Nov)"
+  },
+  {
+    "key": "app.tabInsightsSpoken",
+    "en": "AI and Insights",
+    "reason": "UX draft (native read pending; the tab's accessible name, with และ for the ampersand, UX 27 Nov)"
   }
 ]

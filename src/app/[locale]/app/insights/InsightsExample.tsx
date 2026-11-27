@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { insightsName } from "@/lib/journal/insightsName";
 import { valueHex } from "@/lib/journal/valueColours";
 import { EXAMPLE_RANGES, INSIGHTS_EXAMPLE, WEEK_EXAMPLE, type ExampleCard, type ExampleRange } from "@/lib/plus/insightsExample";
 import { MoodPair } from "@/components/MoodPair";
@@ -26,7 +27,8 @@ const TITLE: Record<ExampleCard["metric"], string> = { mood: "chartMood", sleep_
 // yearRow: Your year in Moodbow's row (1.4 A): the person's own, for everyone, so it's above the
 // example's strip and outside the example's cards.
 // heading: false inside the Patterns | AI tabs (decision 258), which have Insights' heading above them.
-export function InsightsExample({ help, yearRow, heading = true }: { help?: React.ReactNode; yearRow?: React.ReactNode; heading?: boolean }) {
+// ai: aiShown(me), from the page: Insights' name in the heading (insightsName).
+export function InsightsExample({ help, yearRow, heading = true, ai = false }: { help?: React.ReactNode; yearRow?: React.ReactNode; heading?: boolean; ai?: boolean }) {
   const t = useTranslations("insights");
   const tp = useTranslations("plus");
   const locale = useLocale();
@@ -47,7 +49,7 @@ export function InsightsExample({ help, yearRow, heading = true }: { help?: Reac
       </svg>
       {heading && (
         <div className="flex flex-wrap items-center justify-between gap-x-[12px] gap-y-[8px]">
-          <h1 className={JOURNAL_HEADING}>{t("insightsTitle")}</h1>
+          <h1 className={JOURNAL_HEADING}>{t(insightsName(ai).title)}</h1>
           {help}
         </div>
       )}

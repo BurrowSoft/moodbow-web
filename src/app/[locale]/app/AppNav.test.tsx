@@ -10,8 +10,8 @@ let pathname = "/app";
 let search = "";
 vi.mock("@/i18n/navigation", () => ({
   usePathname: () => pathname,
-  Link: (p: { href: string; children: React.ReactNode; "aria-current"?: string; "data-testid"?: string; className?: string; title?: string; onClick?: React.MouseEventHandler }) => (
-    <a href={p.href} aria-current={p["aria-current"] as "page" | undefined} data-testid={p["data-testid"]} title={p.title} onClick={p.onClick}>
+  Link: (p: { href: string; children: React.ReactNode; "aria-current"?: string; "aria-label"?: string; "data-testid"?: string; className?: string; title?: string; onClick?: React.MouseEventHandler }) => (
+    <a href={p.href} aria-current={p["aria-current"] as "page" | undefined} aria-label={p["aria-label"]} data-testid={p["data-testid"]} title={p.title} onClick={p.onClick}>
       {p.children}
     </a>
   ),
@@ -23,12 +23,12 @@ vi.mock("@/lib/ui/keyboardOpen", () => ({ useKeyboardOpen: () => keyboard }));
 const { AppNav } = await import("./AppNav");
 afterEach(cleanup);
 
-const current = (path: string, query = "") => {
+const current = (path: string, query = "", ai?: boolean) => {
   pathname = path;
   search = query;
   render(
     <NextIntlClientProvider locale="en" messages={messages}>
-      <AppNav />
+      <AppNav ai={ai} />
     </NextIntlClientProvider>,
   );
   return ["tab-today", "tab-timeline", "tab-insights", "tab-me"].filter((id) => screen.getByTestId(id).getAttribute("aria-current") === "page");
@@ -124,9 +124,37 @@ describe("AppNav: the current tab again (r1)", () => {
   });
 
   it("each tab carries its label as a title (the icons-only bar under 240 px)", () => {
-    current("/app");
+    current("/app", "", true);
+    expect(screen.getByTestId("tab-today")).toHaveAttribute("title", messages.app.tabToday);
     expect(screen.getByTestId("tab-insights")).toHaveAttribute("title", messages.app.tabInsights);
-    expect(screen.getByTestId("tab-insights")).toHaveTextContent(messages.app.tabInsights);
+  });
+
+  // Insights' name (UX, 27 Nov; the app's build 3): "AI & Insights" only where AI is shown to this
+  // person, said "AI and Insights"; else "Insights" as before, with no word of AI.
+  it("AI shown: the Insights tab is AI & Insights, its accessible name with and", () => {
+    current("/app", "", true);
+    const tab = screen.getByTestId("tab-insights");
+    expect(messages.app.tabInsights).toBe("AI & Insights");
+    expect(tab).toHaveTextContent(messages.app.tabInsights);
+    expect(tab).toHaveAttribute("title", messages.app.tabInsights);
+    expect(tab).toHaveAccessibleName(messages.app.tabInsightsSpoken);
+    expect(messages.app.tabInsightsSpoken).toBe("AI and Insights");
+    // The other tabs keep their own names, no aria-label of their own.
+    expect(screen.getByTestId("tab-today")).not.toHaveAttribute("aria-label");
+  });
+
+  it("AI not shown (and the default, ai unknown): Insights as before, no AI anywhere in the bar", () => {
+    for (const ai of [false, undefined]) {
+      current("/app", "", ai);
+      const tab = screen.getByTestId("tab-insights");
+      expect(messages.app.tabInsightsNoAi).toBe("Insights");
+      expect(tab).toHaveTextContent(messages.app.tabInsightsNoAi);
+      expect(tab).toHaveAttribute("title", messages.app.tabInsightsNoAi);
+      expect(tab).not.toHaveAttribute("aria-label");
+      expect(tab).toHaveAccessibleName(messages.app.tabInsightsNoAi);
+      expect(screen.getByRole("navigation")).not.toHaveTextContent(/\bAI\b/);
+      cleanup();
+    }
   });
 });
 

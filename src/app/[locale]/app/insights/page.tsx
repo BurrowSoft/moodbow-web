@@ -16,7 +16,7 @@ import { readReflections, REFLECTIONS_PREVIEW } from "@/lib/journal/reflections"
 import { getMe } from "@/lib/journal/me";
 import { patterns, patternsWindowStart, routineLines } from "@/lib/journal/patterns";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { tabMetadata } from "../pageMeta";
+import { insightsMetadata } from "../pageMeta";
 import { InsightsHeading, InsightsView } from "./InsightsView";
 import { InsightsTabs, type InsightsSegment } from "./InsightsTabs";
 import { AiPane, WeekPlusPrompt } from "./AiPane";
@@ -43,7 +43,7 @@ import { YearInsightsRow } from "../year/YearLink";
 export const maxDuration = 60;
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/app/insights">): Promise<Metadata> {
-  return tabMetadata("tabInsights", (await params).locale);
+  return insightsMetadata((await params).locale);
 }
 
 // Insights (M6): mood, sleep, stress and exercise over a rolling Week /
@@ -159,7 +159,7 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
   const yearRow = rowYear !== null ? <YearInsightsRow year={rowYear} query={previewTodayQuery(yearToday, me.today)} /> : undefined;
   if (plus && plus.kind !== "plus") {
     const help = <GetHelpNow country={me.profile?.country} testId="insights-example-help" counted neutral icon />;
-    return withSegments(<InsightsExample yearRow={yearRow} help={help} heading={!available} />, <InsightsHeading help={help} />, false);
+    return withSegments(<InsightsExample yearRow={yearRow} help={help} heading={!available} ai={available} />, <InsightsHeading help={help} ai={available} />, false);
   }
   const longRange = hasPlus && isLongRange(asked) ? asked : null;
   const moreWindow = longRange === "all" ? "all" : "year";
@@ -236,6 +236,7 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
       share={share}
       help={help}
       heading={!available}
+      ai={available}
       summary={null}
       patterns={withPatterns ? patterns(rows, me.today) : undefined}
       routinePatterns={withPatterns && routineItems ? routineLines(rows, me.today, routineItems) : undefined}
@@ -245,7 +246,7 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
       showedUp={showedUpLine}
       yearRow={yearRow}
     />,
-    <InsightsHeading share={share} help={help} />,
+    <InsightsHeading share={share} help={help} ai={available} />,
     true,
   );
 }

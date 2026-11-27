@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { usePathname, useRouter } from "@/i18n/navigation";
+import { insightsName } from "@/lib/journal/insightsName";
 import { readShortcutsOn, shortcutFor, SHORTCUTS } from "@/lib/shortcuts";
 import { requestArrival } from "@/lib/ui/arrival";
 import { leaveThen } from "@/lib/ui/leaveGuard";
@@ -12,8 +13,10 @@ import { leaveThen } from "@/lib/ui/leaveGuard";
 // (when search is live), ? this list. lib/shortcuts decides when a key
 // counts (never while typing, in a dialog or with Ctrl/Cmd/Alt); Me →
 // Appearance turns them all off on this device.
-export function KeyboardShortcuts({ search }: { search: boolean }) {
+// ai: aiShown(me), from the layout: the "i" key's label names Insights as the tab does (insightsName).
+export function KeyboardShortcuts({ search, ai = false }: { search: boolean; ai?: boolean }) {
   const t = useTranslations("me");
+  const insightsLabel = insightsName(ai).shortcut;
   const ts = useTranslations("safety");
   const router = useRouter();
   const pathname = usePathname();
@@ -86,7 +89,7 @@ export function KeyboardShortcuts({ search }: { search: boolean }) {
             <dt>
               <kbd className="inline-flex h-8 min-w-8 items-center justify-center rounded-lg border border-border bg-bg px-2 font-mono text-sm">{s.key}</kbd>
             </dt>
-            <dd>{t(s.label)}</dd>
+            <dd>{t(s.label === "shortcutInsights" ? insightsLabel : s.label)}</dd>
           </div>
         ))}
       </dl>

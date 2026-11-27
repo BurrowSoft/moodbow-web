@@ -3,6 +3,7 @@
 import { useEffect, useId, useRef, useState, useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { insightsName } from "@/lib/journal/insightsName";
 import { INSIGHTS_TABLIST, insightsTab } from "@/lib/ui/largeText";
 
 export type InsightsSegment = "patterns" | "ai";
@@ -58,6 +59,9 @@ export function InsightsTabs({
   ai: React.ReactNode;
 }) {
   const t = useTranslations("insights");
+  // The tab list's name: Insights' name with AI (insightsName(true)), since the page renders the tabs
+  // only where aiShown(me) is true.
+  const ta = useTranslations("app");
   // The choice kept on this device: none on the server and while the page hydrates, so the first page is the
   // default or the address's choice; then this browser's.
   const kept = useSyncExternalStore(subscribe, recall, () => null);
@@ -91,7 +95,7 @@ export function InsightsTabs({
 
   return (
     <>
-      <div role="tablist" aria-label={t("insightsTitle")} data-testid="insights-tabs" className={INSIGHTS_TABLIST} onKeyDown={onKeyDown}>
+      <div role="tablist" aria-label={ta(insightsName(true).spoken)} data-testid="insights-tabs" className={INSIGHTS_TABLIST} onKeyDown={onKeyDown}>
         {SEGMENTS.map((segment) => (
           <Link
             key={segment}

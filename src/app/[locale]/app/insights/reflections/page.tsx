@@ -15,12 +15,13 @@ import { readReflections, REFLECTIONS_MAX, REFLECTIONS_PAGE, shownOf } from "@/l
 import { dateLocale } from "@/lib/journal/today";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { JOURNAL_CARD, JOURNAL_HEADING } from "@/lib/ui/journalLayout";
-import { tabMetadata } from "../../pageMeta";
+import { insightsMetadata } from "../../pageMeta";
+import { insightsName } from "@/lib/journal/insightsName";
 import { ReflectionList } from "../AiPane";
 import { FocusFirstNew } from "./FocusFirstNew";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/app/insights/reflections">): Promise<Metadata> {
-  return tabMetadata("tabInsights", (await params).locale);
+  return insightsMetadata((await params).locale);
 }
 
 // See all (Insights → AI, decision 258): every reflection, newest first, 20 at a time. Show more is a
@@ -47,7 +48,7 @@ export default async function ReflectionsPage({ params, searchParams }: PageProp
     <section className="space-y-6">
       {/* Help first, beside Back (every page with journal content). */}
       <div className="flex flex-wrap items-center gap-x-[12px] gap-y-[8px]">
-        <BackLink href={INSIGHTS_AI} label={ta("navBackTo", { screen: ta("tabInsights") })} testId="nav-back" />
+        <BackLink href={INSIGHTS_AI} label={ta("navBackTo", { screen: ta(insightsName(aiShown(me)).spoken) })} testId="nav-back" />
         <GetHelpNow country={me.profile?.country} testId="reflections-get-help" counted neutral />
       </div>
       <h1 className={JOURNAL_HEADING} data-testid="reflections-title">

@@ -11,10 +11,10 @@ vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push }), usePathname: 
 const { KeyboardShortcuts } = await import("./KeyboardShortcuts");
 
 const m = messages.me;
-const renderIt = (search = true) =>
+const renderIt = (search = true, ai?: boolean) =>
   render(
     <NextIntlClientProvider locale="en" messages={messages}>
-      <KeyboardShortcuts search={search} />
+      <KeyboardShortcuts search={search} ai={ai} />
       <input data-testid="field" />
     </NextIntlClientProvider>,
   );
@@ -93,12 +93,30 @@ describe("KeyboardShortcuts (1.1 O)", () => {
     expect(push).not.toHaveBeenCalled();
   });
 
+  // "i" names Insights as the tab does (UX, 27 Nov): "AI & Insights" only where AI is shown to this
+  // person; else, and when that isn't known, "Insights" with no word of AI.
+  it("the i key's label: AI & Insights with AI shown, Insights without it", () => {
+    const iLabel = () => [...screen.getByTestId("shortcuts-dialog").querySelectorAll("div")].find((row) => row.querySelector("kbd")?.textContent === "i")?.querySelector("dd")?.textContent;
+    renderIt(false, true);
+    key("?", document, { shiftKey: true });
+    expect(iLabel()).toBe(m.shortcutInsights);
+    expect(m.shortcutInsights).toBe("AI & Insights");
+    cleanup();
+    for (const ai of [false, undefined]) {
+      renderIt(false, ai);
+      key("?", document, { shiftKey: true });
+      expect(iLabel()).toBe(m.shortcutInsightsNoAi);
+      expect(screen.getByTestId("shortcuts-dialog")).not.toHaveTextContent(/\bAI\b/);
+      cleanup();
+    }
+  });
+
   it("? lists the shortcuts and how to turn them off; Close returns", () => {
     renderIt(false);
     key("?", document, { shiftKey: true });
     const dialog = screen.getByTestId("shortcuts-dialog");
     expect(dialog).toHaveAccessibleName(m.shortcutsTitle);
-    for (const label of [m.shortcutNew, m.shortcutCheckIn, m.shortcutTimeline, m.shortcutInsights]) expect(dialog).toHaveTextContent(label);
+    for (const label of [m.shortcutNew, m.shortcutCheckIn, m.shortcutTimeline, m.shortcutInsightsNoAi]) expect(dialog).toHaveTextContent(label);
     // "?" itself is listed too (UX).
     expect([...dialog.querySelectorAll("kbd")].map((k) => k.textContent)).toEqual(["n", "c", "t", "i", "?"]);
     expect(dialog).not.toHaveTextContent(m.shortcutSearch);

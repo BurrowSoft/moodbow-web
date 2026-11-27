@@ -22,6 +22,20 @@ const show = () =>
   );
 
 describe("InsightsExample (Insights become Plus, rulings 3 and 4)", () => {
+  // Its own heading shows only where AI isn't (heading = !available), so "Insights" there; given
+  // ai, it names Insights as the tab does (UX, 27 Nov).
+  it("its heading: Insights by default and without AI; AI & Insights with AI", () => {
+    show();
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(messages.insights.insightsTitleNoAi);
+    cleanup();
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <InsightsExample ai />
+      </NextIntlClientProvider>,
+    );
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(messages.insights.insightsTitle);
+  });
+
   it("the strip says it's an example, with See Plus; help is there; no lock anywhere", () => {
     show();
     expect(screen.getByTestId("insights-example-strip")).toHaveTextContent(m.exampleStrip);

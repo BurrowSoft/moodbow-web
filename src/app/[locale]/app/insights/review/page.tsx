@@ -10,6 +10,8 @@ import { pageGate } from "@/lib/conditions";
 import { currentUser } from "@/lib/journal/currentUser";
 import type { InsightRow } from "@/lib/journal/insights";
 import { getMe } from "@/lib/journal/me";
+import { aiShown } from "@/lib/journal/ai";
+import { insightsName } from "@/lib/journal/insightsName";
 import { dateLocale } from "@/lib/journal/today";
 import { readJournalDates } from "@/lib/plus/insightsData";
 import { periodsWithData } from "@/lib/plus/journalPdf";
@@ -63,7 +65,7 @@ export default async function YearReviewPage({ params, searchParams }: PageProps
       soFar={year === me.today.slice(0, 4)}
       review={yearReview(year, (checkIns.data ?? []) as InsightRow[], entries.count ?? 0, (moments.data ?? []) as { id: string; entry_date: string; body: string }[])}
       country={me.profile?.country}
-      backLabel={ta("navBackTo", { screen: ta("tabInsights") })}
+      backLabel={ta("navBackTo", { screen: ta(insightsName(aiShown(me)).spoken) })}
       dateLocaleTag={tag}
     />
   );
