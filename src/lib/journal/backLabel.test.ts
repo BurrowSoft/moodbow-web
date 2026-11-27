@@ -16,7 +16,7 @@ describe("backLabel (navBackTo, decision 152)", () => {
     expect(await backLabel("/app/timeline", "en-US")).toBe("Back to Timeline");
     expect(await backLabel("/app/timeline/2026-10-02", "en-US")).toMatch(/^Back to .*Oct.*2/);
     // From Insights → AI and from See all (decision 258).
-    expect(await backLabel("/app/insights?view=ai", "en-US")).toBe("Back to Insights");
+    expect(await backLabel("/app/insights?view=ai", "en-US")).toBe("Back to AI & Insights");
     expect(await backLabel("/app/insights/reflections", "en-US")).toBe("Back to Your reflections");
   });
 });

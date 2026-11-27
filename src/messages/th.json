@@ -223,7 +223,7 @@
     "appName": "Moodbow",
     "tabToday": "วันนี้",
     "tabTimeline": "ไทม์ไลน์",
-    "tabInsights": "ข้อมูลเชิงลึก",
+    "tabInsights": "AI & ข้อมูลเชิงลึก",
     "tabMe": "ฉัน",
     "meSignOut": "ออกจากระบบ",
     "retry": "ลองอีกครั้ง",
@@ -419,7 +419,7 @@
     "shortcutNew": "บันทึกใหม่",
     "shortcutCheckIn": "บันทึกอารมณ์",
     "shortcutTimeline": "ไทม์ไลน์",
-    "shortcutInsights": "ข้อมูลเชิงลึก",
+    "shortcutInsights": "AI & ข้อมูลเชิงลึก",
     "shortcutSearch": "ค้นหา",
     "meLanguageRegion": "ภาษาและภูมิภาค",
     "meLanguage": "ภาษา",
@@ -540,7 +540,7 @@
     "printEmpty": "เดือนนี้ยังไม่มีบันทึก"
   },
   "insights": {
-    "insightsTitle": "ข้อมูลเชิงลึก",
+    "insightsTitle": "AI & ข้อมูลเชิงลึก",
     "insightsSegPatterns": "รูปแบบ",
     "insightsSegAi": "AI",
     "insightsMoodThisWeek": "อารมณ์สัปดาห์นี้",

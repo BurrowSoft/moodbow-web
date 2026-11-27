@@ -10,7 +10,7 @@ import { TAB_COLUMNS, TAB_ITEM, TAB_LABEL, TAB_LINK_NARROW, tabLabelSize } from 
 import { useKeyboardOpen } from "@/lib/ui/keyboardOpen";
 
 // The web journal's tabs, the same four as the app (Today · Timeline ·
-// Insights · Me) with the same test ids. A sidebar from md up, a bottom bar
+// AI & Insights · Me; the app's build 3 name, UX 27 Nov) with the same test ids. A sidebar from md up, a bottom bar
 // on phones.
 const TABS = [
   { href: "/app", key: "tabToday", id: "tab-today", icon: <SunIcon /> },

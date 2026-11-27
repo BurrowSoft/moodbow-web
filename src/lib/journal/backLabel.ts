@@ -3,7 +3,7 @@ import { ALL_REFLECTIONS, INSIGHTS_AI, originDay, type Origin } from "./origin";
 import { dateLine } from "./today";
 
 // "Back to Today" / "Back to Timeline" / "Back to Fri, Oct 2": the name of
-// the screen Back returns to (navBackTo, decision 152). From Insights → AI: "Back to Insights", and
+// the screen Back returns to (navBackTo, decision 152). From Insights → AI: "Back to AI & Insights" (the tab's name), and
 // from See all, "Back to Your reflections" (decision 258).
 export async function backLabel(origin: Origin, dateLocaleTag: string): Promise<string> {
   const t = await getTranslations("app");

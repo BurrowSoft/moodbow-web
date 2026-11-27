@@ -223,7 +223,7 @@
     "appName": "Moodbow",
     "tabToday": "Heute",
     "tabTimeline": "Verlauf",
-    "tabInsights": "Einblicke",
+    "tabInsights": "KI & Einblicke",
     "tabMe": "Ich",
     "meSignOut": "Abmelden",
     "retry": "Wiederholen",
@@ -419,7 +419,7 @@
     "shortcutNew": "Neuer Eintrag",
     "shortcutCheckIn": "Check-in",
     "shortcutTimeline": "Verlauf",
-    "shortcutInsights": "Einblicke",
+    "shortcutInsights": "KI & Einblicke",
     "shortcutSearch": "Suchen",
     "meLanguageRegion": "Sprache & Region",
     "meLanguage": "Sprache",
@@ -540,7 +540,7 @@
     "printEmpty": "In diesem Monat ist noch nichts geschrieben."
   },
   "insights": {
-    "insightsTitle": "Einblicke",
+    "insightsTitle": "KI & Einblicke",
     "insightsSegPatterns": "Muster",
     "insightsSegAi": "KI",
     "insightsMoodThisWeek": "Stimmung diese Woche",

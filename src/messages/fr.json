@@ -223,7 +223,7 @@
     "appName": "Moodbow",
     "tabToday": "Aujourd'hui",
     "tabTimeline": "Chronologie",
-    "tabInsights": "Statistiques",
+    "tabInsights": "IA & Stats",
     "tabMe": "Moi",
     "meSignOut": "Se déconnecter",
     "retry": "Réessayer",
@@ -419,7 +419,7 @@
     "shortcutNew": "Nouvelle note",
     "shortcutCheckIn": "Faire le point",
     "shortcutTimeline": "Chronologie",
-    "shortcutInsights": "Statistiques",
+    "shortcutInsights": "IA & Stats",
     "shortcutSearch": "Rechercher",
     "meLanguageRegion": "Langue et région",
     "meLanguage": "Langue",
@@ -540,7 +540,7 @@
     "printEmpty": "Rien d'écrit ce mois-ci pour l'instant."
   },
   "insights": {
-    "insightsTitle": "Statistiques",
+    "insightsTitle": "IA & Stats",
     "insightsSegPatterns": "Tendances",
     "insightsSegAi": "IA",
     "insightsMoodThisWeek": "Humeur de la semaine",

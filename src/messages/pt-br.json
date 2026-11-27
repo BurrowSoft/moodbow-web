@@ -223,7 +223,7 @@
     "appName": "Moodbow",
     "tabToday": "Hoje",
     "tabTimeline": "Linha do tempo",
-    "tabInsights": "Insights",
+    "tabInsights": "IA e Insights",
     "tabMe": "Perfil",
     "meSignOut": "Sair",
     "retry": "Tentar de novo",
@@ -419,7 +419,7 @@
     "shortcutNew": "Nova anotação",
     "shortcutCheckIn": "Fazer check-in",
     "shortcutTimeline": "Linha do tempo",
-    "shortcutInsights": "Insights",
+    "shortcutInsights": "IA e Insights",
     "shortcutSearch": "Pesquisar",
     "meLanguageRegion": "Idioma e região",
     "meLanguage": "Idioma",
@@ -540,7 +540,7 @@
     "printEmpty": "Nada escrito neste mês ainda."
   },
   "insights": {
-    "insightsTitle": "Insights",
+    "insightsTitle": "IA e Insights",
     "insightsSegPatterns": "Padrões",
     "insightsSegAi": "IA",
     "insightsMoodThisWeek": "Humor desta semana",

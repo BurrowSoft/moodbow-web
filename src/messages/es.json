@@ -223,7 +223,7 @@
     "appName": "Moodbow",
     "tabToday": "Hoy",
     "tabTimeline": "Cronología",
-    "tabInsights": "Resumen",
+    "tabInsights": "IA y resumen",
     "tabMe": "Yo",
     "meSignOut": "Cerrar sesión",
     "retry": "Reintentar",
@@ -419,7 +419,7 @@
     "shortcutNew": "Nueva entrada",
     "shortcutCheckIn": "Hacer registro",
     "shortcutTimeline": "Cronología",
-    "shortcutInsights": "Resumen",
+    "shortcutInsights": "IA y resumen",
     "shortcutSearch": "Buscar",
     "meLanguageRegion": "Idioma y región",
     "meLanguage": "Idioma",
@@ -540,7 +540,7 @@
     "printEmpty": "Aún no has escrito nada este mes."
   },
   "insights": {
-    "insightsTitle": "Resumen",
+    "insightsTitle": "IA y resumen",
     "insightsSegPatterns": "Patrones",
     "insightsSegAi": "IA",
     "insightsMoodThisWeek": "Ánimo de esta semana",

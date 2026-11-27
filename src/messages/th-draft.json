@@ -3903,5 +3903,20 @@
     "key": "ai.reportPlusLine",
     "en": "Each week, Moodbow's AI writes you a short report about your week. Reports come with Plus.",
     "reason": "UX draft (native read pending)"
+  },
+  {
+    "key": "app.tabInsights",
+    "en": "AI & Insights",
+    "reason": "UX draft (native read pending; the tab renamed with the app's build 3, UX 27 Nov)"
+  },
+  {
+    "key": "me.shortcutInsights",
+    "en": "AI & Insights",
+    "reason": "UX draft (native read pending; the tab renamed with the app's build 3, UX 27 Nov)"
+  },
+  {
+    "key": "insights.insightsTitle",
+    "en": "AI & Insights",
+    "reason": "UX draft (native read pending; the tab renamed with the app's build 3, UX 27 Nov)"
   }
 ]
