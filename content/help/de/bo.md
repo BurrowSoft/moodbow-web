@@ -9,7 +9,7 @@ topic: AI
 Bo ist eine KI, kein Mensch und kein Therapeut. Bo ist nicht dafür da, Diagnosen zu stellen oder medizinische Ratschläge zu geben, und kann niemanden für dich anrufen. Bo kann sich irren. Niemand bei Moodbow liest deine Unterhaltung. Wenn du eine Antwort meldest, lesen wir diese Antwort und deine Notiz, falls du eine hinzufügst. Moodbow ist für Menschen ab 18 Jahren, und Bo auch.
 
 **Wenn du jetzt jemanden brauchst**
-Tippe auf "Möchtest du mit jemandem reden?". Der Button ist auf Bos Bildschirm immer da und zeigt Hilfetelefone und Notrufnummern, wo wir welche haben. Wenn du gerade in Gefahr bist, ruf deine örtliche Notrufnummer an.
+Tippe auf "Möchtest du mit jemandem reden?". Der Button ist auf Bos Bildschirm immer da und zeigt Krisentelefone und Notrufnummern, wo wir welche haben. Wenn du gerade in Gefahr bist, ruf deine örtliche Notrufnummer an.
 
 **Wie deine Unterhaltung behandelt wird**
 - Deine Nachrichten gehen an Anthropic, das Unternehmen, dessen KI Bos Antworten schreibt, mit einer ID, die wir für dich erstellen, nicht mit deinem Namen oder deiner E-Mail. Anthropic löscht sie normalerweise innerhalb von 30 Tagen und kann sie länger behalten, wenn die Sicherheitssysteme sie markieren. Diese Systeme können illegale Inhalte den Behörden melden.
