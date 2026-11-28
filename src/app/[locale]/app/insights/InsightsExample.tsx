@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { insightsName } from "@/lib/journal/insightsName";
 import { valueHex } from "@/lib/journal/valueColours";
 import { EXAMPLE_RANGES, INSIGHTS_EXAMPLE, WEEK_EXAMPLE, type ExampleCard, type ExampleRange } from "@/lib/plus/insightsExample";
 import { MoodPair } from "@/components/MoodPair";
@@ -25,7 +26,9 @@ const TITLE: Record<ExampleCard["metric"], string> = { mood: "chartMood", sleep_
 
 // yearRow: Your year in Moodbow's row (1.4 A): the person's own, for everyone, so it's above the
 // example's strip and outside the example's cards.
-export function InsightsExample({ help, yearRow }: { help: React.ReactNode; yearRow?: React.ReactNode }) {
+// heading: false inside the Patterns | AI tabs (decision 258), which have Insights' heading above them.
+// ai: aiShown(me), from the page: Insights' name in the heading (insightsName).
+export function InsightsExample({ help, yearRow, heading = true, ai = false }: { help?: React.ReactNode; yearRow?: React.ReactNode; heading?: boolean; ai?: boolean }) {
   const t = useTranslations("insights");
   const tp = useTranslations("plus");
   const locale = useLocale();
@@ -44,10 +47,12 @@ export function InsightsExample({ help, yearRow }: { help: React.ReactNode; year
           {tp("exampleWatermark")}
         </text>
       </svg>
-      <div className="flex flex-wrap items-center justify-between gap-x-[12px] gap-y-[8px]">
-        <h1 className={JOURNAL_HEADING}>{t("insightsTitle")}</h1>
-        {help}
-      </div>
+      {heading && (
+        <div className="flex flex-wrap items-center justify-between gap-x-[12px] gap-y-[8px]">
+          <h1 className={JOURNAL_HEADING}>{t(insightsName(ai).title)}</h1>
+          {help}
+        </div>
+      )}
       {yearRow}
       {/* The dark strip with the gold See Plus, first (board 3 v58), in every theme. Its words and See Plus share the
           line while they fit; at large text they stack as a switch row does (switchRow.ts; UX, 20 Nov: at 360 px / 200 %,
@@ -108,8 +113,9 @@ export function InsightsExample({ help, yearRow }: { help: React.ReactNode; year
   );
 }
 
-// Week (board 3): Your week (7 bars in the mood palette, one sentence), then What lifts me and
-// Patterns as #301's colour-bar pairs. Inside the sample's aria-hidden area, like the cards.
+// Week (board 3): Mood this week (7 bars in the mood palette, one sentence; named so since "Your week"
+// is the AI report's name, decision 258, UX 25 Nov), then What lifts me and Patterns as #301's
+// colour-bar pairs. Inside the sample's aria-hidden area, like the cards.
 function WeekExample() {
   const t = useTranslations("insights");
   const tp = useTranslations("plus");
@@ -124,7 +130,7 @@ function WeekExample() {
       <div data-testid="insights-example-week" className={`min-w-0 [overflow-wrap:anywhere] ${JOURNAL_CARD}`}>
         {/* Wraps at large text (300 % on a 320 px phone: the label went 9 px past the edge). */}
         <div className="flex flex-wrap items-baseline justify-between gap-x-2">
-          <span className="min-w-0 font-medium text-text">{t("yourWeekTitle")}</span>
+          <span className="min-w-0 font-medium text-text">{t("insightsMoodThisWeek")}</span>
           <span className="text-xs text-muted">{tp("exampleLabel")}</span>
         </div>
         <div className="mt-3 flex h-24 items-end gap-2">

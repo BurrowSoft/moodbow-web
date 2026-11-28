@@ -9,7 +9,6 @@ import { getMessages } from "next-intl/server";
 import { helpCardMessages } from "@/i18n/clientMessages";
 import { GetHelpNow } from "@/components/SafetyCard";
 import { conditionMet, pageGate } from "@/lib/conditions";
-import { askAiConsent } from "@/lib/journal/ai";
 import { pageMetadata } from "@/lib/metadata";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { legalLocale } from "@/lib/legalContent";
@@ -54,7 +53,7 @@ export default async function SignUpPage({ params }: PageProps<"/[locale]/sign-u
           <GetHelpNow country={null} testId="signup-get-help" counted neutral />
         </div>
       </NextIntlClientProvider>
-      <SignUpForm askAi={askAiConsent()} healthLink={conditionMet("consumer-health-data-approved")} legalInEnglish={legalLocale(locale, "privacy") !== locale || legalLocale(locale, "terms") !== locale} />
+      <SignUpForm healthLink={conditionMet("consumer-health-data-approved")} legalInEnglish={legalLocale(locale, "privacy") !== locale || legalLocale(locale, "terms") !== locale} />
     </PageShell>
   );
 }

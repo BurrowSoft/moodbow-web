@@ -6,7 +6,7 @@ de-draft: true
 ---
 {pending:plus|app_plus}Dein Tagebuch ist kostenlos. Einblicke gibt es mit Plus. Hilfe und deine Daten sind für alle kostenlos, immer.
 
-**Kostenlos:** Check-ins und dein Tagebuch ohne Grenze, der Verlauf, der Kalender und die Suche, Hilfe und dein Sicherheitsplan, was dir hilft und Erdungsübungen, die Zusammenfassung für den Termin, Export, Import und Löschen.
+**Kostenlos:** Check-ins und dein Tagebuch ohne Grenze, der Verlauf, der Kalender und die Suche, Hilfe{pending:safety_plan_live} und dein Sicherheitsplan{/pending}, Was mir hilft und seine Übungen (5-4-3-2-1, Body-Scan, Benennen), die Zusammenfassung für den Termin, Export, Import und Löschen.
 
 **Plus gibt dazu:** Einblicke (Woche, Monat, 3 Monate, Jahr und alles bisher), Muster und Was mir guttut, den Jahresrückblick, Briefe an mein zukünftiges Ich, mehr Themes (und App-Symbole in der App), ein gestaltetes PDF deines Tagebuchs und eine Fragensammlung zum Schreiben. Die Fragen für „Schwere Tage“ in der Fragensammlung sind für alle kostenlos.{pending:plus} Im Web gibt Plus außerdem mehr Arten zu atmen in **Was mir hilft** und mehr Erinnerungen dazu.{/pending}
 

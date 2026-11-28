@@ -1,12 +1,12 @@
 <!--
   Spanish of content/legal/en/terms.md. Wording is Vitor's, as in English. AI translation, checked
   by back-translation, a script and the Code Reviewer; no native lawyer has read it.
-  en-sha256: 93d44520dc6049c3181ce7ca2a5015959ad445cc43d07daba3e8713fd9f02a6c
+  en-sha256: 5fb423a00e5fbc9652c5eaad04b1825b818fcc480f70e14db5c7decc29a3421a
   It's the English this translates: legalSpanish.test.ts fails if the English changes, until the
   Spanish follows and this is updated. Shows on Production only once legal-es-approved is met.
 -->
 ## Términos de uso de Moodbow
-Última actualización: 20 de noviembre de 2026
+Última actualización: 25 de noviembre de 2026
 
 Estos términos son un acuerdo entre tú y Vitor Carvalho, que opera como BurrowSoft (297 Moo 1, Baan Sanian, Mueang Nan, Nan 55000, Tailandia), sobre el uso de Moodbow, la app y el sitio web moodbow.com. Al crear una cuenta, los aceptas.
 
@@ -40,7 +40,7 @@ Moodbow Plus es una suscripción anual opcional que añade funciones para profun
 
 **La semana gratis.** Plus empieza con 7 días gratis, una vez por persona en moodbow.com; en Google Play o el App Store, la tienda decide quién recibe una prueba gratis. La empiezas tú, después de ver el precio anual. Si no cancelas antes de que terminen los 7 días, tu primer año se cobra cuando termina la semana gratis.
 
-{pending:offer_live}**La oferta de Navidad.** Del 1 de diciembre de 2026 al 1 de enero de 2027 a las 00:00 UTC, si nunca has tenido Plus ni su semana gratis y se te muestra la oferta, puedes tener tu primer año al precio reducido que ves, en lugar de la semana gratis. Se cobra al suscribirte. Después de ese primer año, Plus se renueva al precio anual normal que se te muestre en ese momento, salvo que canceles.{/pending}
+{pending:offer_live}**La oferta de Navidad.** Del 1 de diciembre de 2026 al 1 de enero de 2027 a las 00:00 UTC, si se te muestra la oferta, puedes tener tu primer año al precio reducido que ves, en lugar de la semana gratis. Se cobra al suscribirte. Después de ese primer año, Plus se renueva al precio anual normal que se te muestre en ese momento, salvo que canceles. En moodbow.com: para quienes nunca han tenido Plus ni su semana gratis. En Google Play o el App Store, la tienda decide quién puede recibir la oferta, según sus propias normas.{/pending}
 
 **Renovación automática.** Plus se renueva automáticamente cada año hasta que canceles. Antes de cada renovación anual de una suscripción comprada en moodbow.com, te enviamos un recordatorio por correo.
 

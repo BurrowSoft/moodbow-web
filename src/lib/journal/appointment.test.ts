@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import contract from "../../../content/appointment.json";
+import contract from "../../../content/contracts/appointment.json";
 import yourWeek from "../../../content/contracts/your-week.json";
 import { APPOINTMENT_RULES, checkInCount, firstLine, rangeAverage, starredIn, weeksDays } from "./appointment";
 import type { InsightRow } from "./insights";
@@ -9,7 +9,7 @@ const LANGUAGES = ["en", "fr", "es", "pt-br", "de", "it", "th"] as const;
 const messages = (l: string) => JSON.parse(readFileSync(`src/messages/${l}.json`, "utf8")) as Record<string, Record<string, string>>;
 const row = (local_date: string, mood: number, more: Partial<InsightRow> = {}): InsightRow => ({ local_date, mood, sleep_hours: null, stress: null, exercise_minutes: null, ...more });
 
-describe("appointment rules (content/appointment.json)", () => {
+describe("appointment rules (content/contracts/appointment.json)", () => {
   it("are the contract's: 2, 4 or 12 weeks, 4 by default, first lines of 120, routine from 5 days", () => {
     expect(APPOINTMENT_RULES).toEqual({ rangeWeeks: [2, 4, 12], defaultWeeks: 4, firstLineChars: 120, routineMinDays: 5 });
   });

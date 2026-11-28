@@ -12,11 +12,14 @@ import { loadMilestone } from "@/lib/share/milestoneData";
 import { yearOnOffer } from "@/lib/share/year";
 import { aiShown, canReflect } from "@/lib/journal/ai";
 import { lastWeekStart, parseReportBody, weekRange, type WeeklyReport as Report } from "@/lib/journal/report";
+import { readReflections, REFLECTIONS_PREVIEW } from "@/lib/journal/reflections";
 import { getMe } from "@/lib/journal/me";
 import { patterns, patternsWindowStart, routineLines } from "@/lib/journal/patterns";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { tabMetadata } from "../pageMeta";
-import { InsightsView } from "./InsightsView";
+import { insightsMetadata } from "../pageMeta";
+import { InsightsHeading, InsightsView } from "./InsightsView";
+import { InsightsTabs, type InsightsSegment } from "./InsightsTabs";
+import { AiPane, WeekPlusPrompt } from "./AiPane";
 import { MorePatternsCard, PlusTabs } from "./PlusInsights";
 import { InsightsExample } from "./InsightsExample";
 import { GetHelpNow } from "@/components/SafetyCard";
@@ -40,13 +43,17 @@ import { YearInsightsRow } from "../year/YearLink";
 export const maxDuration = 60;
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/app/insights">): Promise<Metadata> {
-  return tabMetadata("tabInsights", (await params).locale);
+  return insightsMetadata((await params).locale);
 }
 
 // Insights (M6): mood, sleep, stress and exercise over a rolling Week /
 // Month / 3 months ending on the user's today (?range=). From the check-ins
 // only: an RLS select of this range and the one before (at most 180 rows,
 // no entry text). The rules are the app's (agreed with Mobile Dev).
+// Where AI is available (aiShown), two segments, Patterns | AI (decision 258, specs/insights-ai-split.md):
+// Patterns is all of the above; AI is the person's reflections and the weekly report (or, with AI off
+// for them, one invitation). Where AI isn't available there's no control and no AI word at all: the page
+// is Patterns alone, as before, minus the weekly report.
 export default async function InsightsPage({ params, searchParams }: PageProps<"/[locale]/app/insights">) {
   const { locale } = await params;
   setRequestLocale(locale as Locale);
@@ -57,7 +64,8 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
   const me = await getMe(supabase);
   if (!me) return <JournalUnavailable />;
 
-  const asked = (await searchParams).range;
+  const search = await searchParams;
+  const asked = search.range;
   const range: Range = isRange(asked) ? asked : "week";
   // Patterns (no AI) use a fixed 90 days on every tab: where they're on,
   // the one read starts early enough for them too (still one request).
@@ -67,31 +75,80 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
   const more = pageGate("share-cards-more") !== "hidden";
   const shareOn = pageGate("share-cards") !== "hidden";
   const weekly = pageGate("weekly-report-live") !== "hidden";
+  const plusOn = pageGate("plus") !== "hidden";
   const weekStart = lastWeekStart(me.today);
   const freeStart = [chartsStart, ...(withPatterns ? [patternsStart] : [])].sort()[0];
+  // Insights → AI: anything AI only where it's available; the person's own reflections only where AI is on for them.
+  const available = aiShown(me);
+  const aiOn = canReflect(me);
   // The page's reads all need only `me`, so they start together (the Web Dev's LCP read, 12 Nov:
   // each one in turn cost a round trip to the database). Same reads, same results. Moodbow Plus's
   // view is one of them (decision 246): null when its row can't be read (then nothing about Plus).
   // Your year in Moodbow's row (1.4 A): read with the rest. A Preview's ?today= stands in (never on
-  // Production).
-  const yearToday = previewToday((await searchParams).today, me.today);
+  // Production). The AI segment's reads too, only where AI is on: the 3 newest reflections, and whether
+  // there's a past report (for its link, with Plus).
+  const yearToday = previewToday(search.today, me.today);
   const yearOn = pageGate("year-review-live") !== "hidden";
-  const [checkIns, plus, milestone, stored, requestHeaders, rowYear, routineItems] = await Promise.all([
+  const [checkIns, plus, milestone, stored, requestHeaders, rowYear, routineItems, reflections, reports] = await Promise.all([
     supabase
       .from("check_ins")
       .select("local_date, mood, sleep_hours, stress, exercise_minutes")
       .gte("local_date", freeStart)
       .lte("local_date", me.today),
-    pageGate("plus") !== "hidden" ? readPlusView(supabase, user.id) : null,
+    plusOn ? readPlusView(supabase, user.id) : null,
     shareOn && more ? loadMilestone(supabase) : undefined,
-    weekly && canReflect(me)
+    weekly && aiOn
       ? supabase.from("ai_reports").select("id, period_start, body, tier, created_at").eq("kind", "weekly").eq("period_start", weekStart).maybeSingle()
       : null,
     headers(),
     yearOn ? loadInsightsRowYear(supabase, yearToday).catch(() => null) : null,
     // 1.4 F (routine-live): the items and their ticks over the patterns window.
     withPatterns ? readRoutineWithTicks(supabase, patternsStart, me.today).catch(() => null) : null,
+    aiOn ? readReflections(supabase, REFLECTIONS_PREVIEW).catch(() => null) : null,
+    aiOn && weekly && plusOn ? supabase.from("ai_reports").select("id", { count: "exact", head: true }).eq("kind", "weekly") : null,
   ]);
+  const dateLocaleTag = dateLocale(locale, requestHeaders.get("accept-language"), me.profile?.country ?? null);
+  const hasPlus = plus?.kind === "plus";
+
+  // Your week (1.1 D), in Insights → AI where AI is on for this person and the weekly report is
+  // (weekly-report-live): the last complete week's report. A stored one shows as is; a failed read
+  // just means the button. Someone without Plus: its example line and See Plus (UX, 25 Nov).
+  const week = (withPlus: boolean): React.ReactNode => {
+    if (!weekly || !aiOn) return null;
+    if (!withPlus) return <WeekPlusPrompt />;
+    const row = (stored?.data ?? null) as { id: string; period_start: string; body: unknown; tier: string; created_at: string } | null;
+    const body = row ? parseReportBody(row.body) : null;
+    const initial: Report | null = row && body ? { id: row.id, week_start: row.period_start, body, tier: row.tier === "lite" ? "lite" : "full", created_at: row.created_at } : null;
+    return <WeeklyReport initial={initial} weekStart={weekStart} weekLabel={weekRange(weekStart, dateLocaleTag)} dateLocaleTag={dateLocaleTag} balance={me.credits?.balance ?? 0} country={me.profile?.country ?? null} />;
+  };
+  // The segments, only where AI is available (else the page is Patterns alone, with its own heading).
+  // ?view=ai opens on AI (without scripts too); else Patterns, then the last choice on this device.
+  const named = available && search.view === "ai";
+  const initial: InsightsSegment = named ? "ai" : "patterns";
+  const rangeQuery = typeof asked === "string" && asked !== "week" && (isRange(asked) || (hasPlus && isLongRange(asked))) ? `range=${asked}` : "";
+  const hrefs = { patterns: `/app/insights${rangeQuery ? `?${rangeQuery}` : ""}`, ai: `/app/insights?view=ai${rangeQuery ? `&${rangeQuery}` : ""}` };
+  const withSegments = (patternsPane: React.ReactNode, heading: React.ReactNode, withPlus: boolean) =>
+    available ? (
+      <section>
+        {heading}
+        <InsightsTabs
+          initial={initial}
+          named={named}
+          hrefs={hrefs}
+          patterns={patternsPane}
+          ai={
+            aiOn ? (
+              <AiPane state="on" reflections={reflections} dateLocaleTag={dateLocaleTag} week={week(withPlus)} pastReports={hasPlus && (reports?.count ?? 0) > 0} />
+            ) : (
+              <AiPane state="off" />
+            )
+          }
+        />
+      </section>
+    ) : (
+      patternsPane
+    );
+
   // With Plus: Year and All time, and More patterns over the last 12 months (or all time on All time).
   // Insights are Plus (spec "Insights become Plus", 14 Nov): without Plus (or with a payment that
   // failed), the labelled example and nothing of theirs. A row that can't be read, or Plus off,
@@ -100,8 +157,10 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
   // Your year in Moodbow's row (1.4 A), for everyone: December and January always; otherwise only
   // when a complete year has 30 days, naming the year the page will show (UX, 18 Nov).
   const yearRow = rowYear !== null ? <YearInsightsRow year={rowYear} query={previewTodayQuery(yearToday, me.today)} /> : undefined;
-  if (plus && plus.kind !== "plus") return <InsightsExample yearRow={yearRow} help={<GetHelpNow country={me.profile?.country} testId="insights-example-help" counted neutral icon />} />;
-  const hasPlus = plus?.kind === "plus";
+  if (plus && plus.kind !== "plus") {
+    const help = <GetHelpNow country={me.profile?.country} testId="insights-example-help" counted neutral icon />;
+    return withSegments(<InsightsExample yearRow={yearRow} help={help} heading={!available} ai={available} />, <InsightsHeading help={help} ai={available} />, false);
+  }
   const longRange = hasPlus && isLongRange(asked) ? asked : null;
   const moreWindow = longRange === "all" ? "all" : "year";
   let rows: InsightRow[];
@@ -121,7 +180,6 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
   // Share: the current month's moodbow (M10), where share cards are on; and,
   // where the 1.1 cards are on too (decision 169), this range's mood line
   // (the chart card) and the milestone reached, if any.
-  const dateLocaleTag = dateLocale(locale, requestHeaders.get("accept-language"), me.profile?.country ?? null);
   const share = shareOn ? (
     <ShareMonth
       month={me.today.slice(0, 7)}
@@ -131,20 +189,6 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
       year={pageGate("year-card") !== "hidden" ? yearOnOffer(me.today) : null}
     />
   ) : null;
-  // Your week (1.1 D): the last complete week's report, where AI is on for
-  // this user and the weekly report is (weekly-report-live). A stored one
-  // shows as is; a failed read just means the button. AI available but not
-  // turned on by this person: the card explains, with no button (UX); AI
-  // off for everyone: no card at all (text = enforcement).
-  let week: React.ReactNode = null;
-  if (weekly && aiShown(me) && !canReflect(me)) {
-    week = <WeeklyReport initial={null} weekStart={weekStart} weekLabel={weekRange(weekStart, dateLocaleTag)} dateLocaleTag={dateLocaleTag} balance={0} aiOff />;
-  } else if (weekly && canReflect(me)) {
-    const row = (stored?.data ?? null) as { id: string; period_start: string; body: unknown; tier: string; created_at: string } | null;
-    const body = row ? parseReportBody(row.body) : null;
-    const initial: Report | null = row && body ? { id: row.id, week_start: row.period_start, body, tier: row.tier === "lite" ? "lite" : "full", created_at: row.created_at } : null;
-    week = <WeeklyReport initial={initial} weekStart={weekStart} weekLabel={weekRange(weekStart, dateLocaleTag)} dateLocaleTag={dateLocaleTag} balance={me.credits?.balance ?? 0} country={me.profile?.country ?? null} />;
-  }
   // Your week moved to Today, for everyone (ruling 1): its hard-week help never waits behind Plus.
   let long: React.ComponentProps<typeof InsightsView>["long"];
   if (longRange) {
@@ -183,15 +227,17 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
     }
     plusMore = <MorePatternsCard window={moreWindow} patterns={morePatterns(rows, me.today, moreWindow, written ?? new Set()).filter((p) => written || p.id !== "writing")} tags={tagLines} lifts={lifts} country={me.profile?.country ?? null} />;
   }
-  return (
+  const help = <GetHelpNow country={me.profile?.country} testId="insights-help" counted neutral icon />;
+  return withSegments(
     <InsightsView
       rows={rows}
       today={me.today}
       range={range}
       share={share}
-      help={<GetHelpNow country={me.profile?.country} testId="insights-help" counted neutral icon />}
+      help={help}
+      heading={!available}
+      ai={available}
       summary={null}
-      week={week}
       patterns={withPatterns ? patterns(rows, me.today) : undefined}
       routinePatterns={withPatterns && routineItems ? routineLines(rows, me.today, routineItems) : undefined}
       plusTab={hasPlus ? <PlusTabs current={longRange} /> : undefined}
@@ -199,6 +245,8 @@ export default async function InsightsPage({ params, searchParams }: PageProps<"
       long={long}
       showedUp={showedUpLine}
       yearRow={yearRow}
-    />
+    />,
+    <InsightsHeading share={share} help={help} ai={available} />,
+    true,
   );
 }

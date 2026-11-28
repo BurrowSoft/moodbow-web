@@ -1,22 +1,30 @@
 "use server";
 
+import { getLocale } from "next-intl/server";
+import { redirect } from "@/i18n/navigation";
 import { pageGate } from "@/lib/conditions";
+import { recordAiConsentAndTurnOn } from "@/lib/journal/aiConsentWrite";
 import { isUuid } from "@/lib/journal/reflect";
 import { gateChanged } from "@/lib/journal/gateChanged";
 import { POLICY_VERSIONS } from "@/lib/legalVersions";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { setAiEnabled } from "../me/actions";
 
 // The first open's yes: the AI consent, which also turns AI on (the database's rule,
 // migration 001). The 18+ row is /consent's, and this never ticks or implies it. The
-// function checks both again on every send.
+// function checks both again on every send. Bo's own explicit yes, behind Bo's own gate (bo-live;
+// Bo's server switches decide whether Bo runs, not the journal's AI switch), through the AI
+// consent's one writer (lib/journal/aiConsentWrite, the AI go-live, 23 Nov). Bo stays off on
+// Production, so this is a draft-build path only; its consent screen meets the sheet's bar before
+// Bo goes live (the Reviewer).
 export async function giveBoConsent(): Promise<{ ok: boolean }> {
   if (pageGate("bo-live") === "hidden") return { ok: false };
   const supabase = await createSupabaseServerClient();
   if (!supabase) return { ok: false };
-  const { ok } = await setAiEnabled(true);
-  if (ok) gateChanged();
-  return { ok };
+  const error = await recordAiConsentAndTurnOn(supabase);
+  if (error?.message.includes("not_authenticated")) return redirect({ href: "/sign-in", locale: await getLocale() });
+  if (error) return { ok: false };
+  gateChanged();
+  return { ok: true };
 }
 
 // Me → Use Bo, off: one transaction on the server sets bo_off (which the button goes

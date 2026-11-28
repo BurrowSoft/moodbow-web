@@ -6,12 +6,13 @@ import messages from "../../src/messages/en.json";
 import fr from "../../src/messages/fr.json";
 import { monthsBefore } from "../../src/lib/journal/onThisDay";
 import { axeAtWidths } from "../axe";
-import { aiConsentGranted, journalToday, aiAvailable, cleanup, configured, confirmEmail, createConfirmedUser, exists, lastWeekMonday, seedCheckIns, newEmail, newPassword, notConfigured, profileLocale, profileSaver, revokeSessions, setProfileLocale, signedUpUnconfirmed, sweep, grantPlusTrial, plusOnStaging, picturesOnStaging, seedMoment, pictureFiles, seedTags, boOff, grantAiConsent } from "./staging";
+import { POLICY_VERSIONS } from "../../src/lib/legalVersions";
+import { aiConsent, reflectCode, seedEntry, journalToday, aiAvailable, cleanup, configured, confirmEmail, createConfirmedUser, exists, lastWeekMonday, seedCheckIns, newEmail, newPassword, notConfigured, profileLocale, profileSaver, revokeSessions, setProfileLocale, signedUpUnconfirmed, sweep, grantPlusTrial, plusOnStaging, picturesOnStaging, seedMoment, pictureFiles, seedTags, boOff, grantAiConsent } from "./staging";
 
 // The launch-critical journeys (1.0), end to end against staging with a
 // throwaway account each: sign-up → confirm → consent → setup → check-in →
 // entry → Timeline → Insights → export → delete account; and the AI-on
-// path through setup's focus and tone. Run by the CI "journeys" job (its own
+// path through Me → AI's consent sheet. Run by the CI "journeys" job (its own
 // build, pointed at staging); skipped where the staging secrets aren't set.
 test.skip(!configured, notConfigured);
 test.describe.configure({ timeout: 90_000 });
@@ -22,11 +23,12 @@ test.beforeAll(async () => {
 
 const ENTRY = "A calm walk by the river after work, then tea with a friend.";
 
-// Home's Start → Create account, with its consent boxes (AI as asked) → confirmed → Today (1.3 §6).
+// Home's Start → Create account, with its consent boxes (no AI box: AI is asked only in Me → AI) →
+// confirmed → Today (1.3 §6).
 // The real form sends a real email, and staging limits those: heavy days failed CI on "Please wait a
 // minute". So the journeys that test the form are tagged @real-email and run on PRs that touch
 // sign-up, and in the daily run of everything on master (ci.yml); the rest start from accountAtSetup, which sends none.
-async function signUp(page: Page, email: string, { ai }: { ai: boolean }): Promise<string> {
+async function signUp(page: Page, email: string): Promise<string> {
   const password = newPassword();
   await page.goto("/");
   await page.getByTestId("home-start").click();
@@ -41,8 +43,7 @@ async function signUp(page: Page, email: string, { ai }: { ai: boolean }): Promi
   await page.getByTestId("consent-health").check();
   await expect(page.getByTestId("signup-submit")).toBeDisabled();
   await page.getByTestId("consent-age").check();
-  if (ai) await page.getByTestId("consent-ai").check();
-  else if (await page.getByTestId("consent-ai").count()) await expect(page.getByTestId("consent-ai")).not.toBeChecked();
+  await expect(page.getByTestId("consent-ai")).toHaveCount(0);
   await page.getByTestId("signup-submit").click();
 
   // Staging asks for confirmation: confirm through the admin API, then the
@@ -61,7 +62,7 @@ test.describe("launch journeys", () => {
   test("AI off: sign-up to delete account, through every tab and the export", { tag: "@real-email" }, async ({ page }) => {
     const email = newEmail();
     try {
-      await signUp(page, email, { ai: false });
+      await signUp(page, email);
 
       // Setup after first use (1.3 §6): the journal opened at once; Setup is still there to open.
       await page.goto("/setup");
@@ -171,29 +172,131 @@ test.describe("launch journeys", () => {
     }
   });
 
-  test("AI on: consent → setup's focus and tone → Today", { tag: "@real-email" }, async ({ page }) => {
+  // The AI consent is asked only in Me → AI (UX, 23 Nov, the AI go-live, as the app; the Reviewer's
+  // conditions): nothing at sign-up; Not now records nothing; Turn on AI records one consent at this
+  // build's version; Off records the withdrawal, and reflect itself then refuses (ai_consent_required).
+  test("AI on: Me → AI's sheet, the consent at this build's version, Off withdraws it", { tag: "@real-email" }, async ({ page }) => {
     const email = newEmail();
     try {
-      const password = await signUp(page, email, { ai: true });
-      // What the form's box is for, whether or not staging's AI switch is on.
-      expect(await aiConsentGranted(email, password)).toBe(true);
+      const password = await signUp(page, email);
+      expect(await aiConsent(email, password), "nothing asked at sign-up").toEqual({ granted: false, version: null });
 
-      // Focus and tone also need staging's global AI switch, which is off
-      // outside AI windows (decision 123): read it as the app does, and skip
-      // rather than fail while it's off.
+      // The sheet needs staging's global AI switch, which is off outside AI windows (decision 123):
+      // read it as the app does, and skip rather than fail while it's off.
       test.skip(!(await aiAvailable(email, password)), "staging's AI switch is off (get_me().ai_available false): AI-on journey skipped");
-      await page.goto("/setup");
-      const sleep = page.getByTestId("setup-focus-sleep");
-      await expect(sleep).toHaveAttribute("aria-pressed", "false");
-      await sleep.click();
-      await expect(sleep).toHaveAttribute("aria-pressed", "true");
-      await page.getByTestId("setup-focus-work").click();
-      await expect(page.getByTestId("setup-tone-warm")).toBeChecked();
-      await page.getByTestId("setup-tone-direct").check();
-      await expect(page.getByTestId("setup-tone-direct")).toBeChecked();
-      await page.getByTestId("setup-done").click();
-      await expect(page).toHaveURL(/\/app$/);
-      await expect(page.getByTestId("checkin-card")).toBeVisible();
+      await page.goto("/app/me");
+      const sheet = page.getByRole("dialog", { name: messages.ai.aiConfirmTitle });
+      await page.getByTestId("me-ai-on").click();
+      await expect(sheet).toBeVisible();
+      await expect(sheet).toContainText(messages.ai.consentAiBody);
+      await page.getByTestId("me-ai-sheet-not-now").click();
+      await expect(sheet).toHaveCount(0);
+      await expect(page.getByTestId("me-ai-on")).not.toBeChecked();
+      expect(await aiConsent(email, password), "Not now records nothing").toEqual({ granted: false, version: null });
+
+      await page.getByTestId("me-ai-on").click();
+      await page.getByTestId("me-ai-sheet-turn-on").click();
+      // The switch shows On at once (the page's optimistic state) while the action records the consent, so the
+      // stored consent is polled, not read once (window 2, 23 Nov: a single read beat the save).
+      await expect(page.getByTestId("me-ai-tone-warm")).toBeChecked();
+      await expect
+        .poll(() => aiConsent(email, password), { message: "Turn on AI: one consent at this build's version", timeout: 15_000 })
+        .toEqual({ granted: true, version: POLICY_VERSIONS.ai });
+      // The save may still be finishing (the setting after the consent), and input is ignored meanwhile: wait for it.
+      await expect(page.getByTestId("me-ai-tone-direct")).not.toHaveAttribute("aria-disabled", "true");
+      await page.getByTestId("me-ai-tone-direct").check();
+      await expect(page.getByTestId("me-ai-tone-direct")).toBeChecked();
+
+      // Off: the withdrawal, and the server's own gate refuses a reflection (before any model call).
+      const entry = await seedEntry(email, password, await journalToday(email, password), ENTRY);
+      await expect(page.getByTestId("me-ai-tone-direct")).not.toHaveAttribute("aria-disabled", "true");
+      await page.getByTestId("me-ai-on").click();
+      await expect(page.getByTestId("me-ai-off")).toBeVisible();
+      await expect.poll(async () => (await aiConsent(email, password)).granted, { message: "Off records the withdrawal" }).toBe(false);
+      expect(await reflectCode(email, password, entry)).toEqual({ status: 403, code: "ai_consent_required" });
+    } finally {
+      await cleanup(email);
+    }
+  });
+
+  // Insights' Patterns | AI (decision 258), the Reviewer's musts: where AI isn't available there's no control and no
+  // word of AI anywhere on /app/insights (text, labels, titles), and a kept "ai" or ?view=ai is Patterns. Runs whenever
+  // staging's switch is off, i.e. on every run outside an AI window.
+  test("AI not available: Insights has no Patterns | AI control and no word of AI, whatever's kept or asked", { tag: "@real-email" }, async ({ page }) => {
+    const email = newEmail();
+    try {
+      const password = await signUp(page, email);
+      test.skip(await aiAvailable(email, password), "staging's AI switch is on (an AI window): this checks it off");
+      for (const [route, saved, words] of [
+        ["", "en", /\b(AI|Anthropic)\b|reflection/i],
+        ["/de", "de", /\b(KI|Anthropic)\b|reflexion/i],
+        ["/fr", "fr", /\b(IA|Anthropic)\b|réflexion/i],
+      ] as const) {
+        await setProfileLocale(email, password, saved);
+        await page.goto(`${route}/app/insights`);
+        await expect(page.getByTestId("insights-example")).toBeVisible({ timeout: 15_000 });
+        // A choice kept from a day with AI, and an address asking for AI.
+        await page.evaluate(() => window.localStorage.setItem("mb:insights-view", "ai"));
+        for (const path of [`${route}/app/insights`, `${route}/app/insights?view=ai`]) {
+          await page.goto(path);
+          await expect(page.getByTestId("insights-example")).toBeVisible({ timeout: 15_000 });
+          await expect(page.getByRole("tablist")).toHaveCount(0);
+          await expect(page.getByTestId("insights-ai-invite")).toHaveCount(0);
+          await expect(page.getByTestId("insights-reflections")).toHaveCount(0);
+          const shown = await page.evaluate(() =>
+            [document.body.innerText, ...[...document.querySelectorAll("[aria-label], [title], [alt], [placeholder]")].flatMap((e) => ["aria-label", "title", "alt", "placeholder"].map((a) => e.getAttribute(a) ?? ""))].join("\n"),
+          );
+          expect(shown, `${path}: no word of AI`).not.toMatch(words);
+        }
+        // See all isn't there either: back to Insights.
+        await page.goto(`${route}/app/insights/reflections`);
+        await expect(page).toHaveURL(new RegExp(`${route}/app/insights$`));
+      }
+    } finally {
+      await cleanup(email);
+    }
+  });
+
+  // Insights → AI's invitation (decision 258, board 30b), in an AI window: its button only opens the one-time sheet;
+  // Not now records nothing; Turn on AI records one consent at this build's version, and the AI segment is then Your
+  // reflections (none yet) first, Your week (a free account: its Plus line), and AI settings. The choice is kept.
+  test("Insights → AI: the invitation opens the sheet, Not now records nothing, Turn on AI shows the AI segment", { tag: "@real-email" }, async ({ page }) => {
+    const email = newEmail();
+    try {
+      const password = await signUp(page, email);
+      test.skip(!(await aiAvailable(email, password)), "staging's AI switch is off (get_me().ai_available false): AI-on journey skipped");
+      await page.goto("/app/insights");
+      await expect(page.getByTestId("insights-tab-patterns")).toHaveAttribute("aria-selected", "true", { timeout: 15_000 });
+      await expect(page.getByTestId("insights-example")).toBeVisible();
+      await page.getByTestId("insights-tab-ai").click();
+      await expect(page.getByTestId("insights-tab-ai")).toHaveAttribute("aria-selected", "true");
+      await expect(page).toHaveURL(/[?&]view=ai\b/);
+      const invite = page.getByTestId("insights-ai-invite");
+      await expect(invite).toBeVisible();
+      await expect(page.getByTestId("insights-example")).toBeHidden();
+      const sheet = page.getByRole("dialog", { name: messages.ai.aiConfirmTitle });
+      await invite.getByTestId("insights-ai-invite-turn-on").click();
+      await expect(sheet).toBeVisible();
+      await expect(sheet).toContainText(messages.ai.consentAiBody);
+      expect(await aiConsent(email, password), "the invitation's button records nothing").toEqual({ granted: false, version: null });
+      await page.getByTestId("insights-ai-sheet-not-now").click();
+      await expect(sheet).toHaveCount(0);
+      expect(await aiConsent(email, password), "Not now records nothing").toEqual({ granted: false, version: null });
+
+      await invite.getByTestId("insights-ai-invite-turn-on").click();
+      await page.getByTestId("insights-ai-sheet-turn-on").click();
+      await expect
+        .poll(() => aiConsent(email, password), { message: "Turn on AI: one consent at this build's version", timeout: 15_000 })
+        .toEqual({ granted: true, version: POLICY_VERSIONS.ai });
+      const reflections = page.getByTestId("insights-reflections");
+      await expect(reflections.getByTestId("insights-reflections-empty")).toHaveText(messages.ai.reflectionsEmpty, { timeout: 15_000 });
+      await expect(page.getByTestId("weekly-report-plus")).toContainText(messages.ai.reportPlusLine);
+      await expect(page.getByTestId("insights-ai-settings")).toHaveAttribute("href", /\/app\/me#me-ai$/);
+      await expect(page.getByTestId("insights-ai-invite")).toHaveCount(0);
+      // Kept on this device: Insights opens on AI again.
+      await page.goto("/app/insights");
+      await expect(page.getByTestId("insights-tab-ai")).toHaveAttribute("aria-selected", "true", { timeout: 15_000 });
+      await expect(reflections).toBeVisible();
     } finally {
       await cleanup(email);
     }
@@ -1093,7 +1196,7 @@ test.describe("the tab bar in every language", () => {
       // column of letters, and it closes.
       await textAt(300);
       await page.setViewportSize({ width: 320, height: 640 });
-      for (const [route, saved] of [["", "en"], ["/fr", "fr"], ["/es", "es"], ["/pt-br", "pt"]]) {
+      for (const [route, saved] of [["", "en"], ["/fr", "fr"], ["/es", "es"], ["/pt-br", "pt"], ["/de", "de"]]) {
         await setProfileLocale(email, password, saved);
         await page.goto(`${route}/app/me`);
         await page.getByTestId("me-get-help").click();
@@ -1429,7 +1532,7 @@ test("large text, set in the browser: the check-in conflict dialog shows the who
     await seedCheckIns(email, password, today, [{ offset: 0, mood: 4 }]);
     await page.setViewportSize({ width: 320, height: 640 });
 
-    for (const [route, saved] of [["", "en"], ["/fr", "fr"], ["/es", "es"], ["/pt-br", "pt"]]) {
+    for (const [route, saved] of [["", "en"], ["/fr", "fr"], ["/es", "es"], ["/pt-br", "pt"], ["/de", "de"]]) {
       await setProfileLocale(email, password, saved);
       for (const percent of [100, 200, 300]) {
         await textAt(percent);
@@ -1498,7 +1601,7 @@ test("large text, set in the browser: the check-in conflict dialog shows the who
         return new Set([...range.getClientRects()].map((rect) => rect.top)).size > 1;
       }).map((word) => word[0]);
     };
-    for (const [route, saved] of [["", "en"], ["/fr", "fr"], ["/es", "es"], ["/pt-br", "pt"]]) {
+    for (const [route, saved] of [["", "en"], ["/fr", "fr"], ["/es", "es"], ["/pt-br", "pt"], ["/de", "de"]]) {
       await setProfileLocale(email, password, saved);
       for (const percent of [100, 300]) {
         const where = `${route || "/"} ${percent} %`;
@@ -1577,7 +1680,7 @@ test("large text: every help number on the list stays whole on a phone", { tag: 
     // The help button on Me: its words whole, at the capped size, and on the first screen.
     for (const width of [320, 390]) {
       await page.setViewportSize({ width, height: 640 });
-      for (const [route, saved] of [["/en", "en"], ["/fr", "fr"], ["/es", "es"], ["/pt-br", "pt"]]) {
+      for (const [route, saved] of [["/en", "en"], ["/fr", "fr"], ["/es", "es"], ["/pt-br", "pt"], ["/de", "de"]]) {
         await saveProfile({ p_locale: saved });
         await page.goto(`${route}/app/me`);
         const button = await page.getByTestId("me-get-help").evaluate((el) => {
@@ -1597,7 +1700,7 @@ test("large text: every help number on the list stays whole on a phone", { tag: 
       await saveProfile({ p_country: code });
       // /en, not /: from /pt-br the cookie sends / back there, and the saved-language page won't
       // move to the same language twice in a row, so it stays on its link (#179).
-      for (const [route, saved] of [["/en", "en"], ["/fr", "fr"], ["/es", "es"], ["/pt-br", "pt"]]) {
+      for (const [route, saved] of [["/en", "en"], ["/fr", "fr"], ["/es", "es"], ["/pt-br", "pt"], ["/de", "de"]]) {
         await saveProfile({ p_locale: saved });
         await page.goto(`${route}/app/me`);
         await page.getByTestId("me-get-help").click({ timeout: 15_000 });
@@ -1703,7 +1806,7 @@ test("large text, set in the browser: Print this month stays inside a 320 px pho
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     const month = (await journalToday(email, password)).slice(0, 7);
     await page.setViewportSize({ width: 320, height: 640 });
-    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"], ["/de", "de"]] as const) {
       await setProfileLocale(email, password, saved);
       for (const percent of [100, 300]) {
         const where = `${saved} at ${percent} %`;
@@ -1721,7 +1824,7 @@ test("large text, set in the browser: Print this month stays inside a 320 px pho
     }
     // No serious or critical axe violation, at 320 and 1280 px, at the normal size (UX, 2026-11-12).
     await cdp.send("Page.setFontSizes", { fontSizes: { standard: 16, fixed: 13 } });
-    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"], ["/de", "de"]] as const) {
       await setProfileLocale(email, password, saved);
       await axeAtWidths(page, `Print this month (${saved})`, async () => {
         await page.goto(`${route}/app/print/${month}`);
@@ -1937,7 +2040,7 @@ test("axe: Moodbow Plus, its screen and sheet, at 320 and 1280 px", async ({ pag
     await page.locator("main form button[type=submit]").first().click();
     await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
-    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"], ["/de", "de"]] as const) {
       await setProfileLocale(email, password, saved);
       await axeAtWidths(page, `Plus screen, free (${saved})`, async () => {
         await page.goto(`${route}/app/me/plus`);
@@ -1957,7 +2060,7 @@ test("axe: Moodbow Plus, its screen and sheet, at 320 and 1280 px", async ({ pag
       });
     }
     await grantPlusTrial(email);
-    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"], ["/de", "de"]] as const) {
       await setProfileLocale(email, password, saved);
       await axeAtWidths(page, `Plus screen, in the free week (${saved})`, async () => {
         await page.goto(`${route}/app/me/plus`);
@@ -1986,7 +2089,7 @@ test("axe: Plus's Year, All time and More patterns, at 320 and 1280 px", async (
     await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     await grantPlusTrial(email);
-    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"], ["/de", "de"]] as const) {
       await setProfileLocale(email, password, saved);
       await axeAtWidths(page, `Insights, Year (${saved})`, async () => {
         await page.goto(`${route}/app/insights?range=year`);
@@ -2092,7 +2195,7 @@ test("axe: the PDF journal page, at 320 and 1280 px", async ({ page }) => {
     await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     await grantPlusTrial(email);
-    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"], ["/de", "de"]] as const) {
       await setProfileLocale(email, password, saved);
       await axeAtWidths(page, `PDF journal (${saved})`, async () => {
         await page.goto(`${route}/app/me/journal-pdf`);
@@ -2121,7 +2224,7 @@ test("axe: Year in review, at 320 and 1280 px", async ({ page }) => {
     await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     await grantPlusTrial(email);
-    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"], ["/de", "de"]] as const) {
       await setProfileLocale(email, password, saved);
       await axeAtWidths(page, `Year in review (${saved})`, async () => {
         await page.goto(`${route}/app/insights/review`);
@@ -2149,7 +2252,7 @@ test("axe: Appearance with themes, at 320 and 1280 px", async ({ page }) => {
     await page.locator("main form button[type=submit]").first().click();
     await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
-    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"], ["/de", "de"]] as const) {
       await setProfileLocale(email, password, saved);
       await axeAtWidths(page, `Appearance, free (the lock) (${saved})`, async () => {
         await page.goto(`${route}/app/me`);
@@ -2157,7 +2260,7 @@ test("axe: Appearance with themes, at 320 and 1280 px", async ({ page }) => {
       });
     }
     await grantPlusTrial(email);
-    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"], ["/de", "de"]] as const) {
       await setProfileLocale(email, password, saved);
       await axeAtWidths(page, `Appearance, the themes (${saved})`, async () => {
         await page.goto(`${route}/app/me`);
@@ -2245,8 +2348,8 @@ test("large text, set in the browser: Write is in Today's first view at 320 px, 
       await cdp.send("Page.setFontSizes", { fontSizes: { standard: Math.round((16 * percent) / 100), fixed: Math.round((13 * percent) / 100) } });
       await page.goto("/app");
       await expect(page.getByTestId("checkin-card"), where).toBeVisible();
-      // A privacy-change notice out (app_config.policy_notice_id, e.g. on staging during a Tester row,
-      // or on the day Plus is announced) sits above the header until it's dismissed: Got it first, then
+      // A privacy-change notice out (app_config.policy_notice_v2_id, e.g. on staging during a Tester row,
+      // or before the AI features apply) sits above the header until it's dismissed: Got it first, then
       // measure Today as everyone sees it afterwards (UX, 19 Nov). Once per account, so only the first
       // size meets it.
       const notice = page.getByTestId("policy-notice");
@@ -2625,7 +2728,7 @@ test("axe: Today's check-in with tags, at 320 and 1280 px", async ({ page }) => 
     // Signing in lands on Today now (Setup is later, #314).
     await expect(page).toHaveURL(RegExp("/app$"), { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
-    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"], ["/de", "de"]] as const) {
       await setProfileLocale(email, password, saved);
       await axeAtWidths(page, `Today with tags (${saved})`, async () => {
         await page.goto(`${route}/app`);
@@ -2689,7 +2792,7 @@ test("What lifts me: shown with Plus, an excluded tag never, at large text, and 
       expect(await page.evaluate(() => document.documentElement.scrollWidth), `${where}: no sideways scroll`).toBeLessThanOrEqual(320);
     }
     await cdp.send("Page.setFontSizes", { fontSizes: { standard: 16, fixed: 13 } });
-    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"], ["/de", "de"]] as const) {
       await setProfileLocale(email, password, saved);
       await axeAtWidths(page, `What lifts me (${saved})`, async () => {
         await page.goto(`${route}/app/insights?range=year`);
@@ -2757,7 +2860,7 @@ test("axe: the toolbox and breathing, at 320 and 1280 px", async ({ page }) => {
     // Since #314 (fewer taps) sign-in lands on Today (audit trial).
     await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
-    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"], ["/de", "de"]] as const) {
       await setProfileLocale(email, password, saved);
       await axeAtWidths(page, `toolbox (${saved})`, async () => {
         await page.goto(`${route}/app/me/toolbox`);
@@ -2794,7 +2897,7 @@ test("large text, set in the browser: the safety plan's help is in the first vie
     await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     await page.setViewportSize({ width: 320, height: 640 });
-    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"], ["/de", "de"]] as const) {
       await setProfileLocale(email, password, saved);
       for (const percent of [100, 300]) {
         await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
@@ -2831,7 +2934,7 @@ test("axe: the safety plan, at 320 and 1280 px", async ({ page }) => {
     // Since #314 (fewer taps) sign-in lands on Today (audit trial).
     await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
-    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"], ["/de", "de"]] as const) {
       await setProfileLocale(email, password, saved);
       await axeAtWidths(page, `safety plan (${saved})`, async () => {
         await page.goto(`${route}/app/me/safety-plan`);
@@ -2877,7 +2980,7 @@ test("large text, set in the browser: the appointment summary's title keeps its 
     await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
     await page.setViewportSize({ width: 320, height: 640 });
-    for (const [route, saved] of [["", "en"], ["/fr", "fr"], ["/es", "es"], ["/pt-br", "pt"]] as const) {
+    for (const [route, saved] of [["", "en"], ["/fr", "fr"], ["/es", "es"], ["/pt-br", "pt"], ["/de", "de"]] as const) {
       await setProfileLocale(email, password, saved);
       for (const percent of [100, 300]) {
         const where = `${saved} at ${percent} %`;
@@ -2923,7 +3026,7 @@ test("large text, set in the browser: the 1.2 pages' help is in the first view o
       ["toolbox", "toolbox-get-help", "toolbox-title"],
       ["appointment", "appointment-get-help", "appointment-title"],
     ] as const;
-    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"], ["/de", "de"]] as const) {
       await setProfileLocale(email, password, saved);
       for (const percent of [100, 300]) {
         await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
@@ -2962,7 +3065,7 @@ test("axe: the appointment summary, at 320 and 1280 px", async ({ page }) => {
     // Since #314 (fewer taps) sign-in lands on Today (audit trial).
     await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
-    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"], ["/de", "de"]] as const) {
       await setProfileLocale(email, password, saved);
       await axeAtWidths(page, `appointment summary (${saved})`, async () => {
         await page.goto(`${route}/app/me/appointment`);
@@ -3051,7 +3154,7 @@ test("grounding: the three at large text on a 320 px phone, help on every screen
     await expect(page.getByTestId("safety-card")).toHaveCount(0);
 
     // No serious or critical axe violation (UX, 2026-11-12), en and pt-BR (the longest).
-    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"], ["/de", "de"]] as const) {
       await setProfileLocale(email, password, saved);
       for (const exercise of ["5-4-3-2-1", "body-scan", "name-it"]) {
         await axeAtWidths(page, `grounding ${exercise} (${saved})`, async () => {
@@ -3117,7 +3220,7 @@ test("Three good things: large text on a 320 px phone, one ordinary entry on Tod
     await expect(page.locator('[data-testid^="today-entry-"]').first()).toContainText(messages.entry.goodThingsTitle);
 
     await cdp.send("Page.setFontSizes", { fontSizes: { standard: 16, fixed: 13 } });
-    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"], ["/de", "de"]] as const) {
       await setProfileLocale(email, password, saved);
       await axeAtWidths(page, `Three good things (${saved})`, async () => {
         await page.goto(`${route}/app/write/good-things`);
@@ -3145,7 +3248,7 @@ test("axe: letters to future me, at 320 and 1280 px", async ({ page }) => {
     // Since #314 (fewer taps) sign-in lands on Today (audit trial).
     await expect(page).toHaveURL(/\/app$/, { timeout: 20_000 });
     await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 15_000 });
-    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"]] as const) {
+    for (const [route, saved] of [["", "en"], ["/pt-br", "pt"], ["/de", "de"]] as const) {
       await setProfileLocale(email, password, saved);
       await axeAtWidths(page, `letters (${saved})`, async () => {
         await page.goto(`${route}/app/me/letters`);

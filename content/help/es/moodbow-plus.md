@@ -6,7 +6,7 @@ es-draft: true
 ---
 {pending:plus|app_plus}Tu diario es gratis. El Resumen viene con Plus. La ayuda y tus datos son gratis para todos, siempre.
 
-**Gratis:** registros y tu diario sin límite, la Cronología, el calendario y la búsqueda, la ayuda y tu plan de seguridad, Lo que me ayuda y sus ejercicios (5-4-3-2-1, Escaneo corporal, Ponle nombre), el resumen para tu cita, exportar, importar y eliminar.
+**Gratis:** registros y tu diario sin límite, la Cronología, el calendario y la búsqueda, la ayuda{pending:safety_plan_live} y tu plan de seguridad{/pending}, Lo que me ayuda y sus ejercicios (5-4-3-2-1, Escaneo corporal, Ponle nombre), el resumen para tu cita, exportar, importar y eliminar.
 
 **Plus añade:** el Resumen (semana, mes, 3 meses, año y todo el historial), los patrones y Lo que me levanta el ánimo, el resumen del año, las cartas para mi yo del futuro, más temas (e iconos en la app), un PDF cuidado de tu diario y una biblioteca de preguntas para escribir. Las preguntas de «Días difíciles» de la biblioteca de preguntas son gratis para todos.{pending:plus} En la web, Plus también añade más formas de respirar en **Lo que me ayuda** y más recordatorios.{/pending}
 
@@ -18,8 +18,8 @@ es-draft: true
 
 **Cancelar:** puedes cancelar cuando quieras, y conservas Plus hasta el final del periodo pagado. Si cancelas durante la semana gratis, no se te cobrará.
 {pending:plus}- Comprado en la web: **Yo → Moodbow Plus → Gestionar Plus**.{/pending}
-- Si tienes Plus a través de Google Play o la App Store, cancélalo allí, en tus suscripciones. Borrar la app no lo cancela.
+- Si tienes Plus a través de Google Play o el App Store, cancélalo allí, en tus suscripciones. Borrar la app no lo cancela.
 
 **Si Plus termina:** todo lo que escribiste se queda, y todas las funciones gratis siguen funcionando. Las vistas de Plus se bloquean de nuevo y tu tema vuelve al predeterminado. No se borra nada.
 
-**Eliminar tu cuenta** cancela al instante Plus comprado en la web. Si tienes Plus a través de Google Play o la App Store, cancélalo también allí: eliminar tu cuenta no detiene la suscripción de la tienda.{/pending}
+**Eliminar tu cuenta** cancela al instante Plus comprado en la web. Si tienes Plus a través de Google Play o el App Store, cancélalo también allí: eliminar tu cuenta no detiene la suscripción de la tienda.{/pending}

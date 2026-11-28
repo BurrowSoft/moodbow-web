@@ -1,5 +1,5 @@
 {
-  "$comment": "1.1 P (decision 201): the spreadsheet export. Both clients render `input` (export_my_data's JSON) in `locale` and must produce `csv` byte for byte. mood_word is the locale's mood label (moods 1-5 in order below). Generated from moodbow-web's renderExportCsv (#103). Only day data has rows: `plus` (030, the entitlements row) is JSON only, never a CSV column.",
+  "$comment": "1.1 P (decision 201): the spreadsheet export. Both clients render `input` (export_my_data's JSON) in `locale` and must produce `csv` byte for byte. mood_word is the locale's mood label (moods 1-5 in order below). Generated from moodbow-web's renderExportCsv (#103). routineCases (1.4 F, UX 18 Nov): the file while the Routine flag is on (app ROUTINE, web routine-live): the header's last column is routine, that day's ticked item names in position order, \" | \" joined, a \"|\" in a name written as \"/\" (as tags); the cases above stay the flag-off file byte for byte. Their CSV is written by hand in moodbow-web's scripts/gen-export-csv-routine.mjs.",
   "moodWords": {
     "en": [
       "Awful",
@@ -522,6 +522,170 @@
         ]
       },
       "csv": "﻿date,mood,mood_word,sleep_hours,sleep_quality,movement_minutes,stress,moment,tags,note\r\n2026-10-01,4,Good,,,,,,Walk | A/B,Morning.\r\n2026-10-01,4,Good,,,,,yes,Walk | A/B,Evening.\r\n2026-10-02,2,Bad,,,,,,Rain,\r\n"
+    }
+  ],
+  "routineCases": [
+    {
+      "name": "routine on: the day's ticked items in position order, ' | ' joined, a '|' written as '/', on each of the day's rows",
+      "locale": "en",
+      "input": {
+        "format": "moodbow-export",
+        "format_version": 1,
+        "exported_at": "2026-10-21T09:00:00Z",
+        "account": {
+          "email": "a@example.com"
+        },
+        "check_ins": [
+          {
+            "local_date": "2026-10-01",
+            "mood": 4,
+            "sleep_hours": null,
+            "sleep_quality": null,
+            "exercise_minutes": null,
+            "stress": null
+          },
+          {
+            "local_date": "2026-10-02",
+            "mood": 2,
+            "sleep_hours": null,
+            "sleep_quality": null,
+            "exercise_minutes": null,
+            "stress": null
+          },
+          {
+            "local_date": "2026-10-03",
+            "mood": 3,
+            "sleep_hours": null,
+            "sleep_quality": null,
+            "exercise_minutes": null,
+            "stress": null
+          }
+        ],
+        "check_in_tags": [
+          {
+            "local_date": "2026-10-01",
+            "tag": "Walk"
+          }
+        ],
+        "entries": [
+          {
+            "id": "t1",
+            "entry_date": "2026-10-01",
+            "body": "Morning.",
+            "is_moment": false
+          },
+          {
+            "id": "t2",
+            "entry_date": "2026-10-01",
+            "body": "Evening.",
+            "is_moment": true
+          }
+        ],
+        "routine": [
+          {
+            "name": "Walk outside",
+            "position": 1,
+            "in_appointment": false,
+            "started_on": "2026-09-20",
+            "created_at": "2026-09-20T08:00:00Z",
+            "ticks": [
+              "2026-10-01",
+              "2026-10-02"
+            ]
+          },
+          {
+            "name": "Meds|AM",
+            "position": 0,
+            "in_appointment": true,
+            "started_on": "2026-09-20",
+            "created_at": "2026-09-20T08:01:00Z",
+            "ticks": [
+              "2026-10-01",
+              "2026-10-03"
+            ]
+          }
+        ]
+      },
+      "csv": "﻿date,mood,mood_word,sleep_hours,sleep_quality,movement_minutes,stress,moment,tags,note,routine\r\n2026-10-01,4,Good,,,,,,Walk,Morning.,Meds/AM | Walk outside\r\n2026-10-01,4,Good,,,,,yes,Walk,Evening.,Meds/AM | Walk outside\r\n2026-10-02,2,Bad,,,,,,,,Walk outside\r\n2026-10-03,3,Okay,,,,,,,,Meds/AM\r\n"
+    },
+    {
+      "name": "routine on, a name with a comma: the cell is quoted",
+      "locale": "en",
+      "input": {
+        "format": "moodbow-export",
+        "format_version": 1,
+        "exported_at": "2026-10-21T09:00:00Z",
+        "account": {
+          "email": "a@example.com"
+        },
+        "check_ins": [
+          {
+            "local_date": "2026-10-01",
+            "mood": 5,
+            "sleep_hours": null,
+            "sleep_quality": null,
+            "exercise_minutes": null,
+            "stress": null
+          }
+        ],
+        "routine": [
+          {
+            "name": "Tea, no sugar",
+            "position": 0,
+            "in_appointment": false,
+            "started_on": "2026-10-01",
+            "created_at": "2026-10-01T08:00:00Z",
+            "ticks": [
+              "2026-10-01"
+            ]
+          }
+        ]
+      },
+      "csv": "﻿date,mood,mood_word,sleep_hours,sleep_quality,movement_minutes,stress,moment,tags,note,routine\r\n2026-10-01,5,Great,,,,,,,,\"Tea, no sugar\"\r\n"
+    },
+    {
+      "name": "routine on, no routine items: the column is there and empty",
+      "locale": "en",
+      "input": {
+        "format": "moodbow-export",
+        "format_version": 1,
+        "exported_at": "2026-10-21T09:00:00Z",
+        "account": {
+          "email": "a@example.com"
+        },
+        "check_ins": [
+          {
+            "local_date": "2026-10-01",
+            "mood": 4,
+            "sleep_hours": null,
+            "sleep_quality": null,
+            "exercise_minutes": null,
+            "stress": null
+          }
+        ],
+        "entries": [
+          {
+            "id": "t1",
+            "entry_date": "2026-10-01",
+            "body": "Fine.",
+            "is_moment": false
+          }
+        ]
+      },
+      "csv": "﻿date,mood,mood_word,sleep_hours,sleep_quality,movement_minutes,stress,moment,tags,note,routine\r\n2026-10-01,4,Good,,,,,,,Fine.,\r\n"
+    },
+    {
+      "name": "routine on, an empty journal: the header only",
+      "locale": "en",
+      "input": {
+        "format": "moodbow-export",
+        "format_version": 1,
+        "exported_at": "2026-10-21T09:00:00Z",
+        "account": {
+          "email": "a@example.com"
+        }
+      },
+      "csv": "﻿date,mood,mood_word,sleep_hours,sleep_quality,movement_minutes,stress,moment,tags,note,routine\r\n"
     }
   ]
 }

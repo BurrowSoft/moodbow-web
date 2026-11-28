@@ -1,9 +1,14 @@
 import { expect, test, type Page } from "@playwright/test";
 import countries from "../content/contracts/countries.json";
+import de from "../src/messages/de.json";
+import en from "../src/messages/en.json";
+import es from "../src/messages/es.json";
 import fr from "../src/messages/fr.json";
+import it from "../src/messages/it.json";
 import pt from "../src/messages/pt-br.json";
+import th from "../src/messages/th.json";
 import { dialogButton } from "../src/lib/ui/dialogButton";
-import { BO_HEADING, DAY_ADD_ENTRY, LOCKED_ROW_LABEL, ME_LOCKED_ROW, WEEK_DAY, WEEK_DAY_LABEL, WEEK_DAYS, WEEK_HEADING, WEEK_SUMMARY } from "../src/lib/ui/largeText";
+import { BO_HEADING, DAY_ADD_ENTRY, INSIGHTS_TABLIST, insightsTab, LABEL_TRACKING, LOCKED_ROW_LABEL, ME_LOCKED_ROW, OFFER_STRIP_LIGHTS, PLUS_CARD, PLUS_CARD_OFFER_TAG, PLUS_CARD_PLUS_TAG, PLUS_CARD_SMALL, PLUS_CARD_TAG, PLUS_CARD_TAG_ROW, PLUS_CARD_TITLE, WEEK_DAY, WEEK_DAY_LABEL, WEEK_DAYS, WEEK_HEADING, WEEK_SUMMARY, YEAR_MONTH, YEAR_MONTH_LABEL, YEAR_STRIP, YEAR_STRIP_BOX } from "../src/lib/ui/largeText";
 
 // The browser's own text setting on a 320 px phone, on the pages someone with large
 // text needs first. Sign in's button scrolled /sign-in sideways by up to 194 px (Web
@@ -290,7 +295,7 @@ test("home and the plain pages' headings follow the browser's setting", async ({
   for (const { width, percent, heading, sub, feature } of home) {
     await page.setViewportSize({ width, height: 800 });
     await setting(percent);
-    for (const language of ["/", "/fr", "/es", "/pt-br"]) {
+    for (const language of ["/", "/fr", "/es", "/pt-br", "/de"]) {
       await page.goto(language);
       const at = `${language} at ${width} px, ${percent} %`;
       expect.soft(await size("h1"), at).toBe(heading);
@@ -323,7 +328,7 @@ test("large text: the help card keeps up, and its number and Close stay whole", 
   await page.setViewportSize({ width: 320, height: 640 });
   for (const percent of [100, 200, 300]) {
     await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
-    for (const language of ["", "/fr", "/es", "/pt-br"]) {
+    for (const language of ["", "/fr", "/es", "/pt-br", "/de"]) {
       const at = `${language || "/en"} at ${percent} %`;
       await page.goto(`${language}/sign-in`);
       await page.getByTestId("sign-in-get-help").click();
@@ -362,7 +367,7 @@ test("large text: the help button's words stay whole on a phone", async ({ page,
   await cdp.send("Page.setFontSizes", { fontSizes: { standard: 48, fixed: 39 } });
   for (const width of [320, 390]) {
     await page.setViewportSize({ width, height: 640 });
-    for (const language of ["", "/fr", "/es", "/pt-br"]) {
+    for (const language of ["", "/fr", "/es", "/pt-br", "/de"]) {
       await page.goto(`${language}/sign-in`);
       const split = await page.getByTestId("sign-in-get-help").evaluate((el) => {
         const text = el.firstChild as Text;
@@ -386,7 +391,7 @@ test("large text: every number on the help page stays whole on a phone", async (
   await cdp.send("Page.setFontSizes", { fontSizes: { standard: 48, fixed: 39 } });
   await page.setViewportSize({ width: 320, height: 640 });
   for (const { code, helpline, emergency } of countries.countries) {
-    for (const language of ["", "/fr", "/es", "/pt-br"]) {
+    for (const language of ["", "/fr", "/es", "/pt-br", "/de"]) {
       await page.goto(`${language}/help/get-help-now?country=${code}`);
       for (const [id, display] of [["help-now-call-helpline", helpline?.display], ["help-now-call-emergency", emergency?.display]]) {
         if (!display) continue;
@@ -589,10 +594,21 @@ async function cutWords(page: Page, roots: string): Promise<string[]> {
     const unhyphenated = words.map(breaks);
     off.remove();
     const out: string[] = [];
-    words.forEach(({ word }, i) => {
+    words.forEach(({ node, start, word }, i) => {
       for (const c of asShown[i]) {
         const before = letters(word.slice(0, c)), after = letters(word) - before;
-        const softHyphen = word[c - 1] === String.fromCharCode(0xad);
+        // A soft hyphen the line broke at is drawn (a hyphen, non-zero width; an unused one is zero wide). Chromium puts
+        // the rect of the letter after it on the earlier line, so its break reads one letter later (#422: the browser
+        // drew "WEIHNACHTS- / ANGEBOT", the rects said "…NACHTS·A / NGEBOT"); WebKit's rects are exact. So a break
+        // right after a drawn soft hyphen, or one letter after it, is that soft hyphen's.
+        const drawnShy = (k: number) => {
+          if (k < 0 || word[k] !== String.fromCharCode(0xad)) return false;
+          const range = document.createRange();
+          range.setStart(node, start + k);
+          range.setEnd(node, start + k + 1);
+          return range.getBoundingClientRect().width > 0;
+        };
+        const softHyphen = drawnShy(c - 1) || drawnShy(c - 2);
         const hyphen = softHyphen || unhyphenated[i].length === 0 || !unhyphenated[i].includes(c);
         if (!hyphen) out.push(`${word.slice(0, c)} / ${word.slice(c)} (no hyphen)`);
         else if (before < 2 || after < 2) out.push(`${word.slice(0, c)} / ${word.slice(c)} (under 2 letters)`);
@@ -662,6 +678,342 @@ test("large text at 320 px / 300 %: no word in the fixed components is cut witho
   await cdp.send("Page.setFontSizes", { fontSizes: { standard: 16, fixed: 13 } });
   await mountIn(page, "/fr", 252, `<span data-day-form="short">lun.</span><span data-day-form="narrow">L</span>`);
   expect(await page.evaluate(() => [...document.querySelectorAll("[data-day-form]")].map((s) => getComputedStyle(s).display))).toEqual(["inline", "none"]);
+});
+
+// The Plus card and the uppercase labels at large text (UX, 23 Nov: fixed before 1 Dec, when the Christmas offer shows to
+// everyone; its tag ran 75 px off a 320 px phone at 300 %). Each at the width it has on its page at 320 px: the app's
+// 12 px gutters (296 px; the card's own 20 px padding inside), and the Plus screen's footer (the whole 320 px, 12 px each
+// side, its text capped at 32 px) holding the strip. Every language the app shows.
+test("large text at 320 px / 300 %: the Plus card, the uppercase labels and the Christmas strip stay inside, in every language", async ({ page, browserName }, testInfo) => {
+  test.skip(browserName !== "chromium" || testInfo.project.name !== "desktop", "Page.setFontSizes is Chromium's; once is enough");
+  test.setTimeout(240_000);
+  const cdp = await page.context().newCDPSession(page);
+  await page.setViewportSize({ width: 320, height: 640 });
+  await cdp.send("Page.setFontSizes", { fontSizes: { standard: 48, fixed: 39 } });
+  const lights = '<svg width="44" height="18" class="shrink-0" aria-hidden="true"></svg>';
+  const arcs = '<svg width="22" height="22" class="shrink-0" aria-hidden="true"></svg>';
+  for (const [language, m] of [["/", en], ["/fr", fr], ["/es", es], ["/pt-br", pt], ["/de", de], ["/it", it]] as const) {
+    const p = m.plus;
+    const card = (offer: boolean) =>
+      `<section class="${PLUS_CARD} ${offer ? "bg-[#1E5B45] text-white" : "bg-pill"}"><div class="${PLUS_CARD_TAG_ROW}">${offer ? lights : arcs}<span class="${PLUS_CARD_TAG} ${offer ? PLUS_CARD_OFFER_TAG : PLUS_CARD_PLUS_TAG}">${offer ? p.offerLabel : p.label}</span></div>` +
+      `<h2 class="${PLUS_CARD_TITLE}">${offer ? p.offerBannerTitle.replace("{offer}", "12,99 €") : p.bannerTitle}</h2><p>${offer ? p.offerBannerBody : p.bannerBody}</p>` +
+      `<a href="#" class="${dialogButton(true)} w-full">${offer ? p.offerSee : p.tryFree}</a><p class="${PLUS_CARD_SMALL}">${(offer ? p.offerSmall : p.thenPrice).replace("{price}", "29,99 €")}</p></section>`;
+    const month = new Intl.DateTimeFormat(language === "/" ? "en" : language.slice(1), { month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(Date.UTC(2026, 8, 1)));
+    const mounted: [string, number, string][] = [
+      ["Me's Christmas card", 296, card(true)],
+      ["Me's Plus card", 296, card(false)],
+      ["Today's Plus tag", 296, `<section class="relative rounded-2xl bg-pill py-[12px] ps-[16px] pe-[52px]"><p class="text-xs font-medium ${LABEL_TRACKING} text-accent uppercase">${p.label}</p></section>`],
+      ["Timeline's month", 296, `<h2 class="text-sm font-medium uppercase ${LABEL_TRACKING} text-muted">${month}</h2>`],
+      [
+        "the Plus screen's Christmas strip",
+        320,
+        `<div class="px-[12px] [font-size:min(1rem,max(10vw,32px))]"><div class="flex items-center gap-[12px] rounded-2xl px-[12px] py-[8px] text-left bg-[#1E5B45] text-white"><svg width="22" height="26" class="shrink-0" aria-hidden="true"></svg><span class="min-w-0 flex-1"><span class="block font-medium text-[#F3D27A]">${p.offerLabel}</span><span class="block text-[0.875em]">${p.offerStripBody}</span></span><span class="${OFFER_STRIP_LIGHTS}">${lights}</span></div></div>`,
+      ],
+    ];
+    for (const [name, width, html] of mounted) {
+      await mountIn(page, language, width, html);
+      const where = `${language === "/" ? "/en" : language} ${name}`;
+      expect(await page.evaluate(() => getComputedStyle(document.documentElement).fontSize), where).toBe("48px");
+      expect.soft(await cutWords(page, "#probe"), where).toEqual([]);
+      expect.soft(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth), where).toBe(0);
+      // Nothing sticks out of its own width (a word past the card's edge shows even where the page can't scroll).
+      const out = await page.evaluate(() => {
+        const probe = document.getElementById("probe")!.getBoundingClientRect();
+        return [...document.querySelectorAll("#probe *")].filter((e) => !e.closest("svg") && e.getBoundingClientRect().right > probe.right + 0.5).map((e) => `${e.tagName.toLowerCase()} +${Math.round(e.getBoundingClientRect().right - probe.right)}px`);
+      });
+      expect.soft(out, `${where}: inside its width`).toEqual([]);
+    }
+  }
+  // At the normal size the tag keeps its size and wide spacing, and stays beside the lights (as before; at 300 % it went
+  // under them above).
+  await cdp.send("Page.setFontSizes", { fontSizes: { standard: 16, fixed: 13 } });
+  await mountIn(page, "/", 296, card100());
+  const tag = await page.evaluate(() => {
+    const s = document.querySelector("#probe span")!, svg = document.querySelector("#probe svg")!, cs = getComputedStyle(s);
+    return { size: cs.fontSize, spacing: cs.letterSpacing, beside: s.getBoundingClientRect().left > svg.getBoundingClientRect().right && s.getBoundingClientRect().top < svg.getBoundingClientRect().bottom };
+  });
+  expect(tag).toEqual({ size: "14px", spacing: "0.35px", beside: true });
+  function card100() {
+    return `<section class="${PLUS_CARD} bg-[#1E5B45] text-white"><div class="${PLUS_CARD_TAG_ROW}">${lights}<span class="${PLUS_CARD_TAG} ${PLUS_CARD_OFFER_TAG}">${en.plus.offerLabel}</span></div></section>`;
+  }
+});
+
+// UX, 23 Nov (#422, after the Web Tester's de row): the offer's tag sits beside the lights only where it fits there on
+// two lines, else on its own line under them, at every size and width. Me's card (the lights), Today's during the offer
+// (the tree and the lights) and the free card's "Moodbow Plus" (the arcs), in every language, on phones 320–430 px wide
+// at 100–300 %, with the app's stylesheet (its 13em rules live, the app's 12 px gutters under 360 px, else 16): beside
+// means two lines at most, and nothing sticks out. A longer label one day fails here. At the normal size the tag stays
+// beside the lights as on the board, except Today's on a 320 px phone (9em of room there; UX: under is fine); at 300 %
+// on a 320 px phone the offer's goes under them (the Web Tester's row). Its words stay whole (UX, 23 Nov: no
+// "OFFERTA SPE- / CIALE"): the offer's tag doesn't hyphenate, and cutWords finds no word cut at any step (de's breaks
+// only at its soft hyphen; Thai's words have no spaces to tell them apart, so its line breaks are its own).
+test("the Plus card's tag beside its icons only on two lines: every language, 320–430 px, 100–300 %", async ({ page, browserName }, testInfo) => {
+  test.skip(browserName !== "chromium" || testInfo.project.name !== "desktop", "Page.setFontSizes is Chromium's; once is enough");
+  test.setTimeout(240_000);
+  const cdp = await page.context().newCDPSession(page);
+  const tree = '<svg width="22" height="26" class="shrink-0" aria-hidden="true"></svg>';
+  const lights = '<svg width="44" height="18" class="shrink-0" aria-hidden="true"></svg>';
+  const arcs = '<svg width="22" height="22" class="shrink-0" aria-hidden="true"></svg>';
+  const card = (name: string, icons: string, kind: string, label: string) => `<section data-card="${name}" class="${PLUS_CARD}"><div class="${PLUS_CARD_TAG_ROW}">${icons}<span data-tag class="${PLUS_CARD_TAG} ${kind}">${label}</span></div></section>`;
+  const wrong: string[] = [];
+  const under100: string[] = [];
+  const beside300: string[] = [];
+  let italian300 = "";
+  for (const [language, m] of [["/", en], ["/fr", fr], ["/es", es], ["/pt-br", pt], ["/de", de], ["/it", it], ["/th", th]] as const) {
+    const cards = [card("me", lights, PLUS_CARD_OFFER_TAG, m.plus.offerLabel), card("today", tree + lights, PLUS_CARD_OFFER_TAG, m.plus.offerLabel), card("free", arcs, PLUS_CARD_PLUS_TAG, m.plus.label)].join("");
+    await page.goto(language);
+    for (const width of [320, 360, 375, 390, 412, 430]) {
+      await page.setViewportSize({ width, height: 800 });
+      for (const percent of [100, 112.5, 125, 137.5, 150, 162.5, 175, 200, 250, 300]) {
+        const root = (16 * percent) / 100;
+        await cdp.send("Page.setFontSizes", { fontSizes: { standard: root, fixed: Math.round((13 * percent) / 100) } });
+        const at = `${language === "/" ? "/en" : language} ${width} px / ${percent} %`;
+        const got = await page.evaluate(
+          ([inner, html]) => {
+            document.body.innerHTML = `<div style="width:${inner}px">${html}</div>`;
+            return {
+              root: getComputedStyle(document.documentElement).fontSize,
+              large: matchMedia("(max-width: 13em)").matches,
+              cards: [...document.querySelectorAll<HTMLElement>("[data-card]")].map((s) => {
+                const tag = s.querySelector<HTMLElement>("[data-tag]")!, icons = [...s.querySelectorAll("svg")], t = tag.getBoundingClientRect();
+                const icon = icons[icons.length - 1].getBoundingClientRect();
+                const edge = s.getBoundingClientRect().right - parseFloat(getComputedStyle(s).paddingRight);
+                // Its words line by line, each on the line its first letter is on (for Italian's reading below).
+                const node = tag.firstChild as Text, rows = new Map<number, string[]>();
+                for (const w of node.data.matchAll(/\S+/g)) {
+                  const range = document.createRange();
+                  range.setStart(node, w.index);
+                  range.setEnd(node, w.index + 1);
+                  const first = Math.round(range.getBoundingClientRect().top);
+                  rows.set(first, [...(rows.get(first) ?? []), w[0]]);
+                }
+                return {
+                  name: s.dataset.card!,
+                  beside: t.top < icon.bottom && t.left >= icon.right - 0.5,
+                  lines: Math.round(t.height / parseFloat(getComputedStyle(tag).lineHeight)),
+                  outside: t.right > edge + 0.5 || tag.scrollWidth > tag.clientWidth + 0.5,
+                  hyphens: getComputedStyle(tag).hyphens,
+                  reading: [...rows.values()].map((r) => r.join(" ")).join(" / ").toUpperCase(),
+                };
+              }),
+            };
+          },
+          [String(width - 2 * (width < 360 ? 12 : 16)), cards] as const,
+        );
+        // The browser is at the size asked for, and the 13em rules are live exactly where they should be.
+        expect(got.root, at).toBe(`${root}px`);
+        expect(got.large, `${at}: the 13em rules`).toBe(width < 13 * root);
+        // No word cut: the 300 % test's own detector, at every step (a word wider than its line is cut by overflow-wrap;
+        // de's may break only at its soft hyphen, where drawn). Thai has no spaces between its words: its breaks are its own.
+        if (language !== "/th") for (const cut of await cutWords(page, "[data-tag]")) wrong.push(`${at}: ${cut}`);
+        for (const c of got.cards) {
+          if ((c.beside && c.lines > 2) || c.outside) wrong.push(`${at} ${c.name}: ${c.outside ? "outside its card" : `beside in ${c.lines} lines`}`);
+          if (c.name !== "free" && c.hyphens !== "manual") wrong.push(`${at} ${c.name}: hyphens ${c.hyphens}`);
+          if (percent === 100 && !c.beside) under100.push(`${at} ${c.name}`);
+          if (percent === 300 && width === 320 && c.name !== "free" && c.beside) beside300.push(`${at} ${c.name}`);
+          if (language === "/it" && percent === 300 && width === 320 && c.name === "me") italian300 = c.reading;
+        }
+      }
+    }
+  }
+  expect(wrong, "beside its icons in more than two lines, or outside its card").toEqual([]);
+  expect(under100, "under its icons at the normal size: only Today's on a 320 px phone").toEqual(
+    ["/en", "/fr", "/es", "/pt-br", "/de", "/it", "/th"].map((l) => `${l} 320 px / 100 % today`),
+  );
+  expect(beside300, "the offer's tag beside the lights at 300 % on a 320 px phone").toEqual([]);
+  // The widest language, under the lights at 300 % on a 320 px phone: three lines, its words whole (UX, 23 Nov).
+  expect(italian300, "it, Me's card at 320 px / 300 %").toBe("OFFERTA / SPECIALE DI / NATALE");
+});
+
+// Insights' Patterns | AI tabs (decision 258; specs/insights-ai-split.md: "the segments stack or wrap, never truncate
+// mid-word"): every language, on phones 320–430 px wide at 100–300 %, with the app's stylesheet (its 13em rules live, the
+// app's gutters). Each tab's word whole on one line inside its tab, at least 44 px tall; the two side by side while both
+// fit, else one under the other, never overlapping or past the row; side by side at the normal size everywhere.
+test("Insights' Patterns | AI tabs: whole words, side by side or stacked, every language, 320–430 px, 100–300 %", async ({ page, browserName }, testInfo) => {
+  test.skip(browserName !== "chromium" || testInfo.project.name !== "desktop", "Page.setFontSizes is Chromium's; once is enough");
+  test.setTimeout(240_000);
+  const cdp = await page.context().newCDPSession(page);
+  const wrong: string[] = [];
+  const stacked: string[] = [];
+  for (const [language, m] of [["/", en], ["/fr", fr], ["/es", es], ["/pt-br", pt], ["/de", de], ["/it", it], ["/th", th]] as const) {
+    const tabs = `<div role="tablist" class="${INSIGHTS_TABLIST}"><a role="tab" href="#" data-tab class="${insightsTab(true)}">${m.insights.insightsSegPatterns}</a><a role="tab" href="#" data-tab class="${insightsTab(false)}">${m.insights.insightsSegAi}</a></div>`;
+    await page.goto(language);
+    for (const width of [320, 360, 375, 390, 412, 430]) {
+      await page.setViewportSize({ width, height: 800 });
+      for (const percent of [100, 125, 150, 175, 200, 250, 300]) {
+        const root = (16 * percent) / 100;
+        await cdp.send("Page.setFontSizes", { fontSizes: { standard: root, fixed: Math.round((13 * percent) / 100) } });
+        const at = `${language === "/" ? "/en" : language} ${width} px / ${percent} %`;
+        const got = await page.evaluate(
+          ([inner, html]) => {
+            document.body.innerHTML = `<div style="width:${inner}px">${html}</div>`;
+            const row = document.querySelector("[role=tablist]")!.getBoundingClientRect();
+            return {
+              root: getComputedStyle(document.documentElement).fontSize,
+              row: { left: row.left, right: row.right },
+              tabs: [...document.querySelectorAll<HTMLElement>("[data-tab]")].map((tab) => {
+                const r = tab.getBoundingClientRect();
+                const words = document.createRange();
+                words.selectNodeContents(tab);
+                return { left: r.left, right: r.right, top: r.top, bottom: r.bottom, height: r.height, lines: new Set([...words.getClientRects()].map((x) => Math.round(x.top))).size, clipped: tab.scrollWidth > tab.clientWidth + 0.5 };
+              }),
+            };
+          },
+          [String(width - 2 * (width < 360 ? 12 : 16)), tabs] as const,
+        );
+        expect(got.root, at).toBe(`${root}px`);
+        // Thai has no spaces to tell its words apart: its line count says it all.
+        if (language !== "/th") for (const cut of await cutWords(page, "[data-tab]")) wrong.push(`${at}: ${cut}`);
+        got.tabs.forEach((t, i) => {
+          if (t.lines !== 1) wrong.push(`${at}: tab ${i + 1} in ${t.lines} lines`);
+          if (t.clipped || t.left < got.row.left - 0.5 || t.right > got.row.right + 0.5) wrong.push(`${at}: tab ${i + 1} past its row`);
+          if (t.height < 43.5) wrong.push(`${at}: tab ${i + 1} only ${Math.round(t.height)} px tall`);
+        });
+        const [a, b] = got.tabs;
+        const beside = Math.abs(a.top - b.top) < 1;
+        if (beside ? a.right > b.left + 0.5 : a.bottom > b.top + 0.5) wrong.push(`${at}: the tabs overlap`);
+        if (!beside) stacked.push(at);
+      }
+    }
+  }
+  expect(wrong, "a tab's word cut, wrapped, past its row or overlapping").toEqual([]);
+  expect(stacked.filter((s) => s.endsWith(" 100 %")), "side by side at the normal size, in every language and width").toEqual([]);
+});
+
+// Your year's colour strip (the Web Tester's D2, UX 20 Nov): at large text a 4×3 grid, every month's label whole on one
+// line inside its cell, in English (en-GB's "Sept" is its longest) and German ("Sept."); at the normal size a phone's
+// strip is 6 across, as before. The page needs a session, so its markup is put on a public page at the width it has
+// there: the app's gutter (12 px under 360 px, else 16) and the year card's 20 px each side.
+test("Your year's strip at 360 px / 200 % and 320 px / 300 %: 4×3, every month on one line, in en and de", async ({ page, browserName }, testInfo) => {
+  test.skip(browserName !== "chromium" || testInfo.project.name !== "desktop", "Page.setFontSizes is Chromium's; once is enough");
+  const cdp = await page.context().newCDPSession(page);
+  const strip = (tag: string) => {
+    const month = new Intl.DateTimeFormat(tag, { month: "short", timeZone: "UTC" });
+    const items = Array.from(
+      { length: 12 },
+      (_, i) =>
+        `<li class="${YEAR_MONTH}"><span aria-hidden="true" class="block h-[40px] w-full rounded-xl" style="background:#7a9"></span><span aria-hidden="true" data-month-label class="${YEAR_MONTH_LABEL}">${month.format(new Date(Date.UTC(2026, i, 1)))}</span></li>`,
+    ).join("");
+    // In its box, as on the page: the columns follow the strip's own width (a container query).
+    return `<div class="${YEAR_STRIP_BOX}"><ol class="${YEAR_STRIP}" data-testid="year-strip">${items}</ol></div>`;
+  };
+  const read = () =>
+    page.evaluate(() => {
+      const ol = document.querySelector("[data-testid=year-strip]")!;
+      const labels = [...ol.querySelectorAll("[data-month-label]")];
+      return {
+        columns: getComputedStyle(ol).gridTemplateColumns.split(" ").length,
+        lines: labels.map((l) => new Set([...l.getClientRects()].map((r) => Math.round(r.top))).size),
+        outside: labels.filter((l) => l.getBoundingClientRect().width > l.parentElement!.getBoundingClientRect().width + 0.5).map((l) => l.textContent),
+        sideways: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      };
+    });
+  for (const [width, percent, inner] of [
+    [360, 200, 360 - 2 * 16 - 2 * 20],
+    [320, 300, 320 - 2 * 12 - 2 * 20],
+  ] as const) {
+    await page.setViewportSize({ width, height: 640 });
+    await cdp.send("Page.setFontSizes", { fontSizes: { standard: (16 * percent) / 100, fixed: (13 * percent) / 100 } });
+    for (const [language, tag] of [["/", "en-GB"], ["/de", "de"]] as const) {
+      await mountIn(page, language, inner, strip(tag));
+      const where = `${tag} ${width} px / ${percent} %`;
+      const got = await read();
+      expect.soft(got.columns, `${where}: 4 across`).toBe(4);
+      expect.soft(got.lines, `${where}: every month on one line`).toEqual(Array(12).fill(1));
+      expect.soft(got.outside, `${where}: every month inside its cell`).toEqual([]);
+      expect.soft(got.sideways, `${where}: no sideways scroll`).toBe(0);
+    }
+  }
+  // The normal size: 6 across on a phone, as before (12 from sm).
+  await page.setViewportSize({ width: 360, height: 640 });
+  await cdp.send("Page.setFontSizes", { fontSizes: { standard: 16, fixed: 13 } });
+  await mountIn(page, "/", 360 - 2 * 16 - 2 * 20, strip("en-GB"));
+  const normal = await read();
+  expect(normal.columns, "360 px / 100 %: 6 across").toBe(6);
+  expect(normal.lines, "360 px / 100 %: every month on one line").toEqual(Array(12).fill(1));
+});
+
+// Your year's strip in every language at every phone size (UX, 25 Nov, after the Web Tester's f360 "Ja/n", which was #360's
+// old head, without #416's 4×3; this sweep's first run then found labels wider than their cells, 6 across at 125–200 %):
+// all twelve labels at their own size, one size, each month whole on one line inside its cell, from 320 to 430 px at
+// 100–300 %; 4, 6 or 12 across by the strip's own width in em (under 15.5em 4, from 31em 12), 6 across at the normal size.
+// The months are the browser's own (Intl), in each language's date formats (en-GB's "Sept", de "Sept.", fr "mars").
+// Lines are counted from the label's text (a range's line boxes): the label is a flex item, a block, whose own rects are
+// one box however many lines it holds. The widest label (its width over its size) is what the 15.5em and 31em rest on
+// (largeText.ts): at most 2.8, checked here too.
+test("Your year's strip: every month whole on one line, one size, every language, 320–430 px, 100–300 %", async ({ page, browserName }, testInfo) => {
+  test.skip(browserName !== "chromium" || testInfo.project.name !== "desktop", "Page.setFontSizes is Chromium's; once is enough");
+  test.setTimeout(300_000);
+  const cdp = await page.context().newCDPSession(page);
+  const strip = (tag: string) => {
+    const month = new Intl.DateTimeFormat(tag, { month: "short", timeZone: "UTC" });
+    const items = Array.from(
+      { length: 12 },
+      (_, i) =>
+        `<li class="${YEAR_MONTH}"><span aria-hidden="true" class="block h-[40px] w-full rounded-xl" style="background:#7a9"></span><span aria-hidden="true" data-month-label class="${YEAR_MONTH_LABEL}">${month.format(new Date(Date.UTC(2026, i, 1)))}</span></li>`,
+    ).join("");
+    return `<div data-strip-box class="${YEAR_STRIP_BOX}"><ol class="${YEAR_STRIP}" data-testid="year-strip">${items}</ol></div>`;
+  };
+  const wrong: string[] = [];
+  const widest: Record<string, number> = {};
+  const normal: string[] = [];
+  for (const [language, tags] of [
+    ["/", ["en-US", "en-GB"]],
+    ["/fr", ["fr-FR"]],
+    ["/es", ["es-ES", "es-MX"]],
+    ["/pt-br", ["pt-BR"]],
+    ["/de", ["de-DE"]],
+    ["/it", ["it-IT"]],
+    ["/th", ["th-TH"]],
+  ] as const) {
+    await page.goto(language);
+    for (const width of [320, 360, 375, 390, 412, 430]) {
+      await page.setViewportSize({ width, height: 800 });
+      for (const percent of [100, 112.5, 125, 137.5, 150, 175, 200, 250, 300]) {
+        const root = (16 * percent) / 100;
+        await cdp.send("Page.setFontSizes", { fontSizes: { standard: root, fixed: Math.round((13 * percent) / 100) } });
+        for (const tag of tags) {
+          const at = `${tag} ${width} px / ${percent} %`;
+          // The year card's width on that phone: the app's gutter (12 px under 360 px, else 16) and the card's 20 px each side.
+          const got = await page.evaluate(
+            ([inner, html]) => {
+              document.body.innerHTML = `<div style="width:${inner}px">${html}</div>`;
+              const ol = document.querySelector("[data-testid=year-strip]")!;
+              const labels = [...ol.querySelectorAll<HTMLElement>("[data-month-label]")];
+              const lines = (l: HTMLElement) => {
+                const range = document.createRange();
+                range.selectNodeContents(l);
+                return new Set([...range.getClientRects()].map((r) => Math.round(r.top))).size;
+              };
+              const box = document.querySelector<HTMLElement>("[data-strip-box]")!;
+              return {
+                root: getComputedStyle(document.documentElement).fontSize,
+                boxEm: box.clientWidth / parseFloat(getComputedStyle(box).fontSize),
+                columns: getComputedStyle(ol).gridTemplateColumns.split(" ").length,
+                sizes: [...new Set(labels.map((l) => getComputedStyle(l).fontSize))],
+                ratio: Math.max(...labels.map((l) => l.scrollWidth / parseFloat(getComputedStyle(l).fontSize))),
+                split: labels.filter((l) => lines(l) !== 1).map((l) => l.textContent),
+                outside: labels.filter((l) => l.scrollWidth > l.clientWidth + 0.5 || l.getBoundingClientRect().width > l.parentElement!.getBoundingClientRect().width + 0.5).map((l) => l.textContent),
+              };
+            },
+            [String(width - 2 * (width < 360 ? 12 : 16) - 2 * 20), strip(tag)] as const,
+          );
+          expect(got.root, at).toBe(`${root}px`);
+          if (got.split.length) wrong.push(`${at}: on more than one line: ${got.split.join(", ")}`);
+          if (got.outside.length) wrong.push(`${at}: past its cell: ${got.outside.join(", ")}`);
+          if (got.sizes.length !== 1) wrong.push(`${at}: ${got.sizes.length} sizes (${got.sizes.join(", ")})`);
+          const across = got.boxEm >= 31 ? 12 : got.boxEm >= 15.5 ? 6 : 4;
+          if (got.columns !== across) wrong.push(`${at}: ${got.columns} across in ${got.boxEm.toFixed(2)}em (expected ${across})`);
+          if (percent === 100 && got.columns !== 6) normal.push(at);
+          widest[tag] = Math.max(widest[tag] ?? 0, got.ratio);
+        }
+      }
+    }
+  }
+  console.log(`Your year's widest month label, width over size: ${JSON.stringify(Object.fromEntries(Object.entries(widest).map(([k, v]) => [k, Number(v.toFixed(3))])))}`);
+  expect(wrong, "a month split, past its cell, in another size, or the wrong number across").toEqual([]);
+  expect(normal, "6 across on every phone at the normal size").toEqual([]);
+  expect(Object.entries(widest).filter(([, v]) => v > 2.8), "a label wider than 2.8 of its size, which the 15.5em and 31em rest on").toEqual([]);
 });
 
 // UX, 20 Nov: /account-deletion is a help page, not legal text: French in French, no "in English" line.

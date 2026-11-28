@@ -270,6 +270,16 @@ describe("EntryScreen: the view", () => {
     renderIt();
     expect(text().value).toBe("Unsaved words");
   });
+
+  // An emptied box keeps nothing (UX, 25 Nov); a blank draft kept before that isn't one, so the
+  // entry never opens on an empty box over its saved text.
+  it("a blank draft of this entry (kept before 25 Nov): the entry opens as saved, and Edit shows its text", () => {
+    window.localStorage.setItem(`mb:draft-entry:u1:${ENTRY.id}`, JSON.stringify({ id: ENTRY.id, body: "  ", date: ENTRY.entry_date, isMoment: false, base: ENTRY.updated_at }));
+    renderIt();
+    expect(screen.queryByTestId("entry-text")).toBeNull();
+    fireEvent.click(screen.getByTestId("entry-add-more"));
+    expect(text().value).toBe(ENTRY.body);
+  });
 });
 
 describe("EntryScreen: an entry deleted on another device", () => {

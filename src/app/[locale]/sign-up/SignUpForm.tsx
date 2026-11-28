@@ -59,12 +59,12 @@ function Box({ name, label, checked, onChange, testId, describedBy, invalid }: {
 // without asking again (decision: web-only button). Nothing is stored.
 // The consents are here too (1.3 §6; the Reviewer's rulings): what Moodbow is, in the welcome's
 // three lines, above the boxes; Terms and Privacy, health data, and 18+, each its own unticked box
-// with its link (opened in a new tab, so what's typed stays); AI only where it's asked, optional.
+// with its link (opened in a new tab, so what's typed stays). No AI box: AI consent is asked only in
+// Me → AI, where AI is actually available (UX, 23 Nov, the AI go-live, as the app).
 // Create account stays off until the required boxes are ticked, once the page runs.
-export function SignUpForm({ askAi = false, healthLink = false, legalInEnglish = false }: { askAi?: boolean; healthLink?: boolean; legalInEnglish?: boolean }) {
+export function SignUpForm({ healthLink = false, legalInEnglish = false }: { healthLink?: boolean; legalInEnglish?: boolean }) {
   const t = useTranslations("onboarding");
   const ta = useTranslations("auth");
-  const tai = useTranslations("ai");
   const tc = useTranslations("common");
   const [privacy, setPrivacy] = useState(false);
   const [health, setHealth] = useState(false);
@@ -207,17 +207,6 @@ export function SignUpForm({ askAi = false, healthLink = false, legalInEnglish =
           </p>
         )}
         <Box name="age" testId="consent-age" label={t("ageConfirm")} checked={age} onChange={setAge} describedBy={errorOn === "age" ? "signup-error" : undefined} invalid={errorOn === "age"} />
-        {askAi && (
-          <label className="flex items-start gap-[12px] rounded-2xl border border-border bg-surface p-[16px] text-text">
-            <input type="checkbox" name="ai" data-testid="consent-ai" aria-describedby="consent-ai-body" className="mt-[2px] h-[24px] w-[24px] shrink-0 accent-[var(--accent)]" />
-            <span className="flex min-w-0 flex-col gap-[4px]">
-              <span className="font-medium">{wholeNames(tai("consentAiTitle"))}</span>
-              <span id="consent-ai-body" aria-hidden="true" className={`text-muted ${smallText}`}>
-                {wholeNames(tai("consentAiBody"))}
-              </span>
-            </span>
-          </label>
-        )}
         {message && (
           <p id="signup-error" role="alert" data-testid="signup-error" className="font-medium text-accent">
             {message}

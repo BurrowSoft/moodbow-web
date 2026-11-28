@@ -2,6 +2,7 @@ import { useLocale, useTranslations } from "next-intl";
 import type { ShowedUpRange } from "@/lib/journal/showedUp";
 import { Link } from "@/i18n/navigation";
 import { CHARTS, METRICS, summarize, type InsightRow, type Metric, type Range } from "@/lib/journal/insights";
+import { insightsName } from "@/lib/journal/insightsName";
 import type { Pattern, PatternId, RoutineLine } from "@/lib/journal/patterns";
 import { MoodPair } from "@/components/MoodPair";
 import { PATTERN_PAIR } from "@/lib/journal/patternPair";
@@ -34,18 +35,20 @@ const PATTERN_TEXT: Record<PatternId, Record<"shown" | "same", `patterns${"Sleep
 // failure, so it gets the same muted ink either way.
 // share: the "My month's moodbow" button, where share cards are on (M10).
 // summary: Your week's card (no AI), above the range tabs.
-// week: "Your week" (1.1 D), between the range tabs and the charts, where AI
-// and the weekly report are on.
 // patterns: Patterns (no AI), after the charts, where patterns-live is on;
 // the same on every tab (a fixed 90 days).
+// The weekly report ("Your week", 1.1 D) isn't here any more: it's in Insights → AI (decision 258).
+// heading: false inside the Patterns | AI tabs, which have the heading above them (InsightsHeading).
+// ai: aiShown(me), from the page: Insights' name in the heading and the range nav (insightsName).
 export function InsightsView({
   rows,
   today,
   range,
   share,
   help,
+  heading = true,
+  ai = false,
   summary,
-  week,
   patterns,
   routinePatterns,
   plusTab,
@@ -60,8 +63,9 @@ export function InsightsView({
   share?: React.ReactNode;
   // help: the lifebuoy by the title (audit batch H).
   help?: React.ReactNode;
+  heading?: boolean;
+  ai?: boolean;
   summary?: React.ReactNode;
-  week?: React.ReactNode;
   patterns?: Pattern[];
   // 1.4 F: the routine lines to show (higher on ticked days only), where routine-live is on.
   routinePatterns?: RoutineLine[];
@@ -81,6 +85,7 @@ export function InsightsView({
   const tp = useTranslations("plus");
   const t = useTranslations("insights");
   const tt = useTranslations("today");
+  const ta = useTranslations("app");
   // Always one decimal for mood, stress and sleep ("4.0", "↑ 1.0": the
   // precision stays visible), whole minutes for exercise; same as the app.
   const oneDecimal = new Intl.NumberFormat(useLocale(), { minimumFractionDigits: 1, maximumFractionDigits: 1 });
@@ -97,18 +102,10 @@ export function InsightsView({
 
   return (
     <section>
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className={`min-w-0 ${JOURNAL_HEADING}`}>{t("insightsTitle")}</h1>
-        {/* Help everywhere (audit batch H): the lifebuoy by the title, on every range, as on the
-            example; the screen's one help control. */}
-        <div className="flex flex-wrap items-center gap-2">
-          {share}
-          {help}
-        </div>
-      </div>
+      {heading && <InsightsHeading share={share} help={help} ai={ai} />}
       {yearRow && <div className="mt-4">{yearRow}</div>}
       {summary}
-      <nav aria-label={t("insightsTitle")} className="mt-4 flex flex-wrap gap-2">
+      <nav aria-label={ta(insightsName(ai).spoken)} className="mt-4 flex flex-wrap gap-2">
         {RANGE_TABS.map(({ range: r, key }) => (
           <Link
             key={r}
@@ -129,8 +126,6 @@ export function InsightsView({
           {t("showedUp", { count: showedUp.count, range: showedUp.range })}
         </p>
       )}
-
-      {week}
 
       {long && (
         <div className="mt-6 space-y-1" data-testid="insights-long-heading">
@@ -193,6 +188,23 @@ export function InsightsView({
       {patterns && <Patterns patterns={patterns} routine={routinePatterns} format={(v) => number.format(v)} signed={(v) => signedDecimal.format(v)} />}
       {plusPatterns}
     </section>
+  );
+}
+
+// Insights' heading: the title, then the share button and the lifebuoy (audit batch H: help
+// everywhere, on every range, as on the example; the screen's one help control). Above the Patterns
+// | AI tabs where AI is available, so it's the same on both. ai: aiShown(me), from the page: "AI &
+// Insights" there, "Insights" where AI isn't shown (insightsName).
+export function InsightsHeading({ share, help, ai = false }: { share?: React.ReactNode; help?: React.ReactNode; ai?: boolean }) {
+  const t = useTranslations("insights");
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-4">
+      <h1 className={`min-w-0 ${JOURNAL_HEADING}`}>{t(insightsName(ai).title)}</h1>
+      <div className="flex flex-wrap items-center gap-2">
+        {share}
+        {help}
+      </div>
+    </div>
   );
 }
 

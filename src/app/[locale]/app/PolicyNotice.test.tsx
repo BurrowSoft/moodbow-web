@@ -2,7 +2,7 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import messages from "@/messages/en.json";
-import { policyNoticeDate, policyNoticeToShow } from "@/lib/journal/policyNotice";
+import { knownNotice, policyNoticeDate, policyNoticeSlug, policyNoticeToShow } from "@/lib/journal/policyNotice";
 import { dateInSentence } from "@/lib/journal/today";
 import { PolicyNotice } from "./PolicyNotice";
 
@@ -26,20 +26,37 @@ const a = messages.app;
 const open = (date: string | null = "1 December 2026") =>
   render(
     <NextIntlClientProvider locale="en" messages={messages}>
-      <PolicyNotice id="2026-12-01-plus" date={date} />
+      <PolicyNotice id="2026-12-01-ai" slug="ai" date={date} />
     </NextIntlClientProvider>,
   );
 
+// The web reads the v2 notice only (migration 043; UX, 23 Nov): Plus's policy_notice_id is the
+// installed apps', and a slug this build has no words for shows nothing.
 describe("policyNoticeToShow", () => {
-  it("only when there's a current notice this account hasn't seen", () => {
-    expect(policyNoticeToShow({ policy_notice_id: "n1", settings: { policy_notice_seen: null } })).toBe("n1");
-    expect(policyNoticeToShow({ policy_notice_id: "n2", settings: { policy_notice_seen: "n1" } })).toBe("n2");
-    expect(policyNoticeToShow({ policy_notice_id: "n1", settings: { policy_notice_seen: "n1" } })).toBeNull();
-    expect(policyNoticeToShow({ policy_notice_id: null, settings: {} })).toBeNull();
+  it("only when there's a current v2 notice this account hasn't seen, with its slug", () => {
+    expect(policyNoticeToShow({ policy_notice_v2_id: "2026-12-01-ai", settings: { policy_notice_v2_seen: null } })).toEqual({ id: "2026-12-01-ai", slug: "ai" });
+    expect(policyNoticeToShow({ policy_notice_v2_id: "2026-12-01-ai", settings: { policy_notice_v2_seen: "2026-01-01-ai" } })).toEqual({ id: "2026-12-01-ai", slug: "ai" });
+    expect(policyNoticeToShow({ policy_notice_v2_id: "2026-12-01-ai", settings: { policy_notice_v2_seen: "2026-12-01-ai" } })).toBeNull();
+    expect(policyNoticeToShow({ policy_notice_v2_id: null, settings: {} })).toBeNull();
   });
-  it("a server without the field shows nothing", () => {
+  it("a slug this build has no words for, or no date in front of it: nothing", () => {
+    expect(policyNoticeToShow({ policy_notice_v2_id: "2027-03-01-ads" })).toBeNull();
+    expect(policyNoticeToShow({ policy_notice_v2_id: "ai" })).toBeNull();
+    expect(policyNoticeToShow({ policy_notice_v2_id: "2026-12-01" })).toBeNull();
+    expect(policyNoticeSlug("2026-12-01-ai")).toBe("ai");
+    expect(policyNoticeSlug("2026-12-01-ai-2")).toBeNull();
+  });
+  it("Plus's notice (policy_notice_id, the installed apps') never shows on the web; a server without the field shows nothing", () => {
+    expect(policyNoticeToShow({ policy_notice_id: "2026-11-20-plus", settings: { policy_notice_seen: null } } as never)).toBeNull();
     expect(policyNoticeToShow({})).toBeNull();
-    expect(policyNoticeToShow({ policy_notice_id: "" })).toBeNull();
+    expect(policyNoticeToShow({ policy_notice_v2_id: "" })).toBeNull();
+  });
+});
+
+describe("knownNotice (policy_notice_v2_current: /privacy/next and the What changed date)", () => {
+  it("the id only when it's a notice this build has words for", () => {
+    expect(knownNotice("2026-12-01-ai")).toBe("2026-12-01-ai");
+    for (const value of [null, undefined, "", 42, "2026-11-20-plus", "2027-03-01-ads"]) expect(knownNotice(value), String(value)).toBeNull();
   });
 });
 
@@ -66,25 +83,28 @@ describe("the date in the sentence", () => {
 });
 
 describe("PolicyNotice", () => {
-  it("says what's changing and when, links to the policy, and blocks nothing", () => {
+  it("the AI notice (UX, 23 Nov): what's changing and when, links to the policy, and blocks nothing", () => {
     open();
     expect(screen.getByTestId("policy-notice")).toHaveTextContent(a.policyNoticeTitle);
-    expect(screen.getByTestId("policy-notice")).toHaveTextContent("From 1 December 2026, you can subscribe to Moodbow Plus. If you do, Stripe, Google Play or the App Store handles the payment.");
+    expect(screen.getByTestId("policy-notice")).toHaveTextContent(
+      "From 1 December 2026, Moodbow offers optional AI features. They stay off unless you turn them on. If you do, Anthropic (USA) processes what's needed to write a reflection or report.",
+    );
+    expect(screen.getByTestId("policy-notice")).not.toHaveTextContent("Moodbow Plus");
     expect(screen.getByTestId("policy-notice-read")).toHaveTextContent("See what changes");
     expect(screen.getByTestId("policy-notice-read")).toHaveAttribute("href", "/privacy/next");
     expect(screen.queryByRole("dialog")).toBeNull();
   });
-  it("without a date, says Soon instead, and still who handles the payment", () => {
+  it("without a date, says Soon instead, and still what it means", () => {
     open(null);
     expect(screen.getByTestId("policy-notice")).not.toHaveTextContent("{date}");
-    expect(screen.getByTestId("policy-notice")).toHaveTextContent(`${a.policyNoticeSoon} ${a.policyNoticeBody}`);
+    expect(screen.getByTestId("policy-notice")).toHaveTextContent(`${a.policyNoticeAiSoon} ${a.policyNoticeAiBody}`);
   });
   it("Got it: gone, and said once, with this notice's id", () => {
     open();
     fireEvent.click(screen.getByTestId("policy-notice-dismiss"));
     expect(screen.queryByTestId("policy-notice")).toBeNull();
     expect(dismiss).toHaveBeenCalledTimes(1);
-    expect(dismiss).toHaveBeenCalledWith("2026-12-01-plus");
+    expect(dismiss).toHaveBeenCalledWith("2026-12-01-ai");
   });
   it("Got it: focus goes to Today's heading, never to the page (as the Year card's Not now)", () => {
     const title = document.createElement("h1");

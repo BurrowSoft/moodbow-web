@@ -4,9 +4,10 @@ import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { Dialog, dialogButton } from "@/components/Dialog";
+import { ShortCodeLine } from "@/components/DialByHand";
 import { HelpNumberText } from "@/components/HelpNumberText";
 import { canCall, personProblem, SAFETY_PLAN_RULES, type PlanPeopleSection, type PlanPerson, type PlanText, type SafetyPlan } from "@/lib/journal/safetyPlan";
-import { helplinesFor, telHref } from "@/lib/safety/helplines";
+import { helplinesFor, isShortCode, telHref } from "@/lib/safety/helplines";
 import type { ToolboxItem } from "@/lib/journal/toolbox";
 import { ToolboxEditor } from "../toolbox/ToolboxEditor";
 import { addSafetyPlanPerson, deleteSafetyPlanPerson, saveSafetyPlanText, updateSafetyPlanPerson, type PlanResult } from "./actions";
@@ -342,13 +343,20 @@ function Helpline({ country }: { country: string | null | undefined }) {
   const lines = helplinesFor(country, useLocale());
   const link = "font-medium text-accent underline underline-offset-4";
   if (!lines.helpline && !lines.emergency) return null;
+  const call = lines.helpline && (
+    <a href={telHref(lines.helpline.dial)} data-testid="plan-helpline-call" className={link}>
+      <HelpNumberText text={ts("safetyCall", { name: lines.helpline.name, number: lines.helpline.display })} number={lines.helpline.display} name={lines.helpline.name} />
+    </a>
+  );
   return (
     <div data-testid="plan-helpline" className="mt-3 rounded-2xl bg-pill p-[12px]">
       <p className="text-sm font-medium text-text">{t("helpline")}</p>
-      {lines.helpline ? (
-        <a href={telHref(lines.helpline.dial)} data-testid="plan-helpline-call" className={link}>
-          <HelpNumberText text={ts("safetyCall", { name: lines.helpline.name, number: lines.helpline.display })} number={lines.helpline.display} name={lines.helpline.name} />
-        </a>
+      {lines.helpline && isShortCode(lines.helpline.dial) ? (
+        // * or # (Chile's *4141; S14, UX 23 Nov): on iOS no link, the number to type and Copy number; elsewhere the
+        // link with Copy number under it.
+        <ShortCodeLine link={call} name={lines.helpline.name} display={lines.helpline.display} dial={lines.helpline.dial} testId="plan-helpline-byhand" dialByHand={ts("planDialByHand")} copyLabel={ts("planCopyNumber")} copiedLabel={ts("planNumberCopied")} lineClass="text-sm text-muted" />
+      ) : lines.helpline ? (
+        call
       ) : (
         <a href={telHref(lines.emergency!.dial)} data-testid="plan-emergency-call" className={link}>
           <HelpNumberText text={ts("safetyCallEmergency", { number: lines.emergency!.display })} number={lines.emergency!.display} />

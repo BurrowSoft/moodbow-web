@@ -82,7 +82,7 @@ describe("the prompt library on Write (UX, 12 Nov)", () => {
     const onUse = show(true);
     fireEvent.click(screen.getByTestId("entry-library-group-noticing"));
     fireEvent.click(screen.getByTestId("entry-library-use"));
-    expect(onUse).toHaveBeenCalledWith(noticing.prompts[0].en);
+    expect(onUse).toHaveBeenCalledWith({ text: noticing.prompts[0].en, help: false });
     expect(screen.queryByTestId("entry-library")).toBeNull();
     expect(readPlace("u1", "noticing")).toBe(1);
   });
@@ -128,6 +128,7 @@ describe("the prompt library on Write (UX, 12 Nov)", () => {
     fireEvent.click(screen.getByTestId("entry-library-group-hard-days"));
     expect(screen.getByTestId("entry-library-prompt")).toHaveTextContent(hard.prompts[0].pt!);
     fireEvent.click(screen.getByTestId("entry-library-use"));
-    expect(onUse).toHaveBeenCalledWith(hard.prompts[0].pt);
+    // Hard days goes with its help: the editor shows Get help now under it (UX, 25 Nov).
+    expect(onUse).toHaveBeenCalledWith({ text: hard.prompts[0].pt, help: true });
   });
 });

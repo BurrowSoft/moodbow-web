@@ -12,6 +12,7 @@ import { dateLocale } from "@/lib/journal/today";
 import { BO_HISTORY_SHOWN, historyFromRows } from "@/lib/journal/bo";
 import { currentUser } from "@/lib/journal/currentUser";
 import { getMe, hasCurrentConsent } from "@/lib/journal/me";
+import { aiShown } from "@/lib/journal/ai";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { titledMetadata } from "../pageMeta";
 import { BoConversation } from "./BoConversation";
@@ -48,7 +49,7 @@ export default async function BoPage({ params }: PageProps<"/[locale]/app/bo">) 
       healthData={conditionMet("consumer-health-data-approved")}
       consented={hasCurrentConsent(me, "ai") && hasCurrentConsent(me, "age_18")}
       picturesAllowed={pageGate("bo-pictures-live") !== "hidden"}
-      back={<BackLink href="/app" label={await backLabel("/app", tag)} testId="nav-back" />}
+      back={<BackLink href="/app" label={await backLabel("/app", tag, aiShown(me))} testId="nav-back" />}
     />
   );
 }

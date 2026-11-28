@@ -1,7 +1,21 @@
 // "Reflect with Moodbow" on the web (M9): the reflect edge function's
 // answers (content/contracts/reflect.md) mapped to what the page shows.
+import getHelpLabel from "../../../content/contracts/get-help-label.json";
+import { normalizeForCrisis } from "@/lib/safety/crisis";
 
 export type Reflection = { id: string; body: string; tier: "full" | "lite"; created_at: string };
+
+// A crisis reply (decision 124): it names the help button. The reply is in the entry's language, which
+// may not be the UI's, so any label in the shared contract counts (reviewer #35). Both sides go through
+// the crisis normalizer, as on the app (namesHelpLabel): a no-break space, a curly apostrophe, a missing
+// ? or ¿, or the case can't hide the button. One rule for both places: the entry's panel shows the
+// button itself, and Insights → AI's list shows only the date and a neutral word (decision 258).
+const forMatch = (s: string) => normalizeForCrisis(s, false);
+const GET_HELP_LABELS = Object.values(getHelpLabel.labels).map(forMatch).filter(Boolean);
+export function namesGetHelp(body: string): boolean {
+  const reply = forMatch(body);
+  return GET_HELP_LABELS.some((label) => reply.includes(label));
+}
 
 // What one call of the reflect server action came back with.
 export type ReflectResult =

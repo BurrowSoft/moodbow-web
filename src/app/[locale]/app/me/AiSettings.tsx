@@ -1,8 +1,10 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useCallback, useRef, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
+import { AiConsentSheet } from "@/components/AiConsentSheet";
 import { FOCUS_AREAS, FOCUS_KEYS, TONE_KEYS, TONES, type FocusArea, type Tone } from "@/lib/journal/ai";
+import { POLICY_VERSIONS } from "@/lib/legalVersions";
 import { recordAiWithdrawal, saveFocusAreas, saveTone, setAiEnabled, type AiSaveResult, type AiSwitchResult } from "./actions";
 import { useUntilLoaded } from "@/lib/ui/untilLoaded";
 import { wholeNames } from "@/lib/wholeNames";
@@ -16,7 +18,12 @@ type Field = keyof Values;
 // as soon as it changes; a failed save puts it back to what the account has,
 // with the error and Try again (decision 111). Tone and focus only while AI
 // is on, as in Set up.
-export function AiSettings({ initial, credits }: { initial: Values; credits: { balance: number } }) {
+// The AI consent is asked here only (UX, 23 Nov, the AI go-live, as the app): turning AI on without a
+// current consent (the version this build asks for) opens the consent sheet first, with the consent text
+// word for word. Only its "Turn on AI" records the consent; "Not now", Escape or a tap outside records
+// nothing and leaves AI off. With a current consent (an Off whose withdrawal didn't go through) there's
+// no sheet. Without scripts the switch does nothing (no form), so nothing is recorded that way either.
+export function AiSettings({ initial, consented, credits }: { initial: Values; consented: boolean; credits: { balance: number } }) {
   const untilLoaded = useUntilLoaded();
   const t = useTranslations("ai");
   const ta = useTranslations("app");
@@ -24,41 +31,68 @@ export function AiSettings({ initial, credits }: { initial: Values; credits: { b
   const [values, setValues] = useState(initial);
   // What the account has (the last successful save of each field).
   const saved = useRef(initial);
+  // Whether the account's AI consent is current: set by a successful On (from the sheet), cleared by a
+  // recorded withdrawal.
+  const current = useRef(consented);
+  const [asking, setAsking] = useState(false);
   // The failed save, for Try again: the field and value tried, or (AI
   // switched off but its withdrawal not yet recorded) just the withdrawal.
-  const [failed, setFailed] = useState<{ field: Field; tried: Values[Field]; withdrawal?: boolean } | null>(null);
+  // confirmed: the failed save came from the sheet's Turn on AI, so Try again carries its confirm too.
+  const [failed, setFailed] = useState<{ field: Field; tried: Values[Field]; withdrawal?: boolean; confirmed?: boolean } | null>(null);
   const [pending, startTransition] = useTransition();
 
-  const send = (field: Field, next: Values[Field], withdrawalOnly = false): Promise<AiSaveResult | AiSwitchResult> => {
+  // confirmed: the sheet's "Turn on AI", the only call that records the consent (at this build's version;
+  // the action checks it again).
+  const send = (field: Field, next: Values[Field], withdrawalOnly = false, confirmed = false): Promise<AiSaveResult | AiSwitchResult> => {
     if (withdrawalOnly) return recordAiWithdrawal();
-    if (field === "on") return setAiEnabled(next as boolean);
+    if (field === "on") return confirmed ? setAiEnabled(next as boolean, { version: POLICY_VERSIONS.ai }) : setAiEnabled(next as boolean);
     return field === "tone" ? saveTone(next as Tone) : saveFocusAreas(next as FocusArea[]);
   };
 
   // While a save is in flight, input is ignored (not disabled: disabling
   // the focused radio or switch would drop keyboard focus; a11y pass).
-  const save = <F extends Field>(field: F, next: Values[F], withdrawalOnly = false) => {
+  const save = <F extends Field>(field: F, next: Values[F], withdrawalOnly = false, confirmed = false) => {
     if (pending) return;
     setFailed(null);
     setValues((v) => ({ ...v, [field]: next }));
     startTransition(async () => {
       let result: AiSaveResult | AiSwitchResult;
       try {
-        result = await send(field, next, withdrawalOnly);
+        result = await send(field, next, withdrawalOnly, confirmed);
       } catch (e) {
         if (typeof (e as { digest?: unknown })?.digest === "string" && (e as { digest: string }).digest.startsWith("NEXT_REDIRECT")) throw e;
         result = { ok: false };
       }
       if (result.ok) {
         saved.current = { ...saved.current, [field]: next };
+        if (field === "on") current.current = next === true;
         return;
       }
       // The switch takes what the server says it has (two steps: one may
       // have gone through); everything else goes back to the last save.
       if (field === "on" && "aiEnabled" in result) saved.current = { ...saved.current, on: result.aiEnabled };
       setValues((v) => ({ ...v, [field]: saved.current[field] }));
-      setFailed({ field, tried: next, withdrawal: withdrawalOnly || ("pending" in result && result.pending === "withdrawal") });
+      setFailed({ field, tried: next, withdrawal: withdrawalOnly || ("pending" in result && result.pending === "withdrawal"), confirmed });
     });
+  };
+
+  // The switch: On without a current consent asks first; everything else saves at once.
+  const toggle = (on: boolean) => {
+    if (pending) return;
+    if (on && !current.current) return setAsking(true);
+    save("on", on);
+  };
+  // Stable, so the open sheet's focus handling isn't set up again on a re-render. Not now (Escape, a tap outside) also
+  // drops a failed Turn on AI's retry: Try again never sends the sheet's confirm once the person has said no to the sheet
+  // (UX, 25 Nov, from the app's review). Any other save drops it too (save starts by clearing the failure), and so does
+  // leaving the page (it's only this component's state).
+  const notNow = useCallback(() => {
+    setAsking(false);
+    setFailed((f) => (f?.confirmed ? null : f));
+  }, []);
+  const turnOn = () => {
+    setAsking(false);
+    save("on", true, false, true);
   };
 
   const chip = (active: boolean) =>
@@ -77,13 +111,15 @@ export function AiSettings({ initial, credits }: { initial: Values; credits: { b
           data-testid="me-ai-on"
           checked={values.on}
           aria-disabled={pending}
-          onChange={(e) => save("on", e.target.checked)}
+          onChange={(e) => toggle(e.target.checked)}
           className={`${SWITCH_CONTROL} h-6 w-6 accent-[var(--color-accent)] aria-disabled:opacity-60`}
         />
       </label>
       <p className="mt-2 text-sm text-muted" data-testid="me-ai-consent">
         {wholeNames(t("consentAiBody"))}
       </p>
+      {/* The same sheet as Insights → AI's invitation (decision 258). */}
+      {asking && <AiConsentSheet testId="me-ai-sheet" onNotNow={notNow} onTurnOn={turnOn} />}
 
       {!values.on ? (
         <p className="mt-4 text-sm text-muted" data-testid="me-ai-off">
@@ -151,7 +187,7 @@ export function AiSettings({ initial, credits }: { initial: Values; credits: { b
           <p role="alert" data-testid="me-ai-error" className="text-sm font-medium text-accent">
             {tt("errGeneric")}
           </p>
-          <button type="button" data-testid="me-ai-retry" onClick={() => save(failed.field, failed.tried, failed.withdrawal)} className="mt-2 min-h-11 rounded-full border border-border px-[16px] text-sm font-medium text-text">
+          <button type="button" data-testid="me-ai-retry" onClick={() => save(failed.field, failed.tried, failed.withdrawal, failed.confirmed)} className="mt-2 min-h-11 rounded-full border border-border px-[16px] text-sm font-medium text-text">
             {ta("tryAgain")}
           </button>
         </div>

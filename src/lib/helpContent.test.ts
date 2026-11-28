@@ -91,9 +91,11 @@ describe("Help is public, scoped to what's live (decision 212)", () => {
   const published = (slug: string) => renderArticle(findArticle("en", slug)!);
 
   it("articles about features that are off have nothing left: a 404", () => {
-    for (const slug of ["ai-reflections", "your-week"]) {
-      expect(published(slug), slug).toBe("");
-    }
+    // The AI go-live (UX, 23 Nov) publishes these: each is out exactly when its condition is met.
+    expect(published("ai-reflections") === "", "ai-reflections").toBe(!isPendingMet("ai_live"));
+    expect(published("your-week") === "", "your-week").toBe(!isPendingMet("weekly_report_live"));
+    // Bo stays off: nothing left of its article.
+    expect(published("bo"), "bo").toBe("");
     // The shortcuts go live with the web launch step (UX 2026-11-04): a
     // 404 before it, published after.
     expect(published("keyboard-shortcuts") === "").toBe(!isPendingMet("shortcuts_live"));
@@ -298,5 +300,21 @@ describe("Help with Plus off: no article names Plus", () => {
       // French "Plus de…" / "Plus d'…" means "more", not the product.
       expect(text, `${language}/${a.slug}`).not.toMatch(/\bPlus\b(?! de\b| d['’])/);
     }
+  });
+});
+
+// UX, 26 Nov: Moodbow Plus's Free list names the safety plan only once the web has it (safety-plan-live), in every
+// language; the rest of the list stays as it is.
+describe("Moodbow Plus's Free list and the safety plan", () => {
+  const PLAN: Record<string, string> = { en: "safety plan", fr: "plan de sécurité", es: "plan de seguridad", "pt-br": "plano de segurança", de: "Sicherheitsplan", it: "piano di sicurezza", th: "แผนความปลอดภัย" };
+  it.each(ALL_LOCALES)("%s", (language) => {
+    const article = findArticle(language, "moodbow-plus");
+    expect(article, language).not.toBeNull();
+    const off = renderArticle(article!, (id) => id !== "safety_plan_live");
+    const on = renderArticle(article!, () => true);
+    expect(off, language).not.toContain(PLAN[language]);
+    expect(on, language).toContain(PLAN[language]);
+    // Only the plan goes: the same list, one item shorter.
+    expect(off.replace(/\s+/g, " ").length, language).toBeLessThan(on.replace(/\s+/g, " ").length);
   });
 });

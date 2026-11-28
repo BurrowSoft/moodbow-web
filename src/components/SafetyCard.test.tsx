@@ -126,27 +126,95 @@ describe("SafetyCard", () => {
     expect(screen.queryByTestId("safety-helpline-hours")).toBeNull();
   });
 
-  describe("a short code (Chile's *4141)", () => {
-    afterEach(() => vi.restoreAllMocks());
-
-    it("a link everywhere but iOS", () => {
-      wrap(<SafetyCard country="CL" onClose={() => {}} />);
-      expect(screen.getByTestId("safety-call-helpline")).toHaveAttribute("href", "tel:*4141");
-      expect(screen.queryByTestId("safety-helpline-keypad")).toBeNull();
+  // S14 (the app's #291; UX 23 Nov, corrected after the Reviewer): iOS can't dial a number with * or # from a link,
+  // Android and computers can. iOS: no link; the name, the number, how to call it, Copy number. Elsewhere: the link,
+  // one tap as before, with Copy number under it.
+  describe("a number with * or # (Chile's *4141)", () => {
+    afterEach(() => {
+      vi.restoreAllMocks();
+      Reflect.deleteProperty(navigator, "maxTouchPoints");
     });
+    const IPHONE = "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)";
+    const IPAD_AS_MAC = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)";
+    const ANDROID = "Mozilla/5.0 (Linux; Android 14)";
 
-    it("on iOS: no link, the number, and to dial it by hand", () => {
-      vi.spyOn(navigator, "userAgent", "get").mockReturnValue("Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)");
+    it.each([["iPhone", IPHONE, 5], ["an iPad that says it's a Mac", IPAD_AS_MAC, 5]])("%s: no link; the name, the number large and selectable, the line, Copy number", (_, agent, touch) => {
+      vi.spyOn(navigator, "userAgent", "get").mockReturnValue(agent);
+      Object.defineProperty(navigator, "maxTouchPoints", { value: touch, configurable: true });
       wrap(<SafetyCard country="CL" onClose={() => {}} />);
       expect(screen.queryByTestId("safety-call-helpline")).toBeNull();
-      expect(screen.getByTestId("safety-card")).toHaveTextContent("*4141");
-      expect(screen.getByTestId("safety-helpline-keypad")).toHaveTextContent(s.safetyDialKeypad.replace("{number}", "*4141"));
+      expect(screen.getByTestId("safety-card").querySelector('a[href^="tel:*"]')).toBeNull();
+      const block = screen.getByTestId("safety-helpline-byhand");
+      const parts = [...block.children].map((el) => el.textContent);
+      expect(parts.slice(0, 4)).toEqual(["The Suicide Prevention Line", "*4141", s.planDialByHand, s.planCopyNumber]);
+      expect(screen.getByTestId("safety-helpline-byhand-number").className).toMatch(/select-all/);
+      // Visibly large (UX 23 Nov): 1.5 times the help lines (24 px at the default size), semibold, still scaling.
+      expect(screen.getByTestId("safety-helpline-byhand-number").className).toContain("[font-size:min(1.5rem,max(15vw,48px))]");
+      expect(screen.getByTestId("safety-helpline-byhand-number").className).toContain("font-semibold");
+      expect(screen.getByTestId("safety-helpline-byhand-number").className).not.toContain(helpLineSize("*4141"));
+      // The retired line is gone.
+      expect(block).not.toHaveTextContent(/keypad/i);
     });
 
-    it("on iOS an ordinary number is still a link", () => {
-      vi.spyOn(navigator, "userAgent", "get").mockReturnValue("Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)");
+    it.each([["Android", ANDROID, 5], ["a desktop", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)", 0], ["a real Mac", IPAD_AS_MAC, 0]])("%s: the link, one tap as before, with Copy number under it", (_, agent, touch) => {
+      vi.spyOn(navigator, "userAgent", "get").mockReturnValue(agent);
+      Object.defineProperty(navigator, "maxTouchPoints", { value: touch, configurable: true });
+      wrap(<SafetyCard country="CL" onClose={() => {}} />);
+      expect(screen.getByTestId("safety-call-helpline")).toHaveAttribute("href", "tel:*4141");
+      expect(screen.queryByTestId("safety-helpline-byhand")).toBeNull();
+      const linked = screen.getByTestId("safety-helpline-byhand-linked");
+      expect(linked).toContainElement(screen.getByTestId("safety-call-helpline"));
+      expect(screen.getByTestId("safety-helpline-byhand-copy")).toHaveTextContent(s.planCopyNumber);
+      // The typed line is for iOS only here (the link works).
+      expect(screen.queryByTestId("safety-helpline-byhand-how")).toBeNull();
+    });
+
+    it("under the link, Copy number copies it exactly as dialled and says Copied", async () => {
+      vi.spyOn(navigator, "userAgent", "get").mockReturnValue(ANDROID);
+      const writeText = vi.fn().mockResolvedValue(undefined);
+      Object.assign(navigator, { clipboard: { writeText } });
+      wrap(<SafetyCard country="CL" onClose={() => {}} />);
+      fireEvent.click(screen.getByTestId("safety-helpline-byhand-copy"));
+      expect(writeText).toHaveBeenCalledWith("*4141");
+      expect(await screen.findByText(s.planNumberCopied, { selector: "button" })).toBeInTheDocument();
+      expect(screen.getByTestId("safety-helpline-byhand-copied")).toHaveTextContent(s.planNumberCopied);
+    });
+
+    it("Copy number copies it exactly as dialled and says Copied, to a screen reader too", async () => {
+      vi.spyOn(navigator, "userAgent", "get").mockReturnValue(IPHONE);
+      const writeText = vi.fn().mockResolvedValue(undefined);
+      Object.assign(navigator, { clipboard: { writeText } });
+      wrap(<SafetyCard country="CL" onClose={() => {}} />);
+      expect(screen.getByTestId("safety-helpline-byhand-copied")).toHaveAttribute("role", "status");
+      expect(screen.getByTestId("safety-helpline-byhand-copied")).toHaveTextContent("");
+      fireEvent.click(screen.getByTestId("safety-helpline-byhand-copy"));
+      expect(writeText).toHaveBeenCalledWith("*4141");
+      expect(await screen.findByText(s.planNumberCopied, { selector: "button" })).toBeInTheDocument();
+      expect(screen.getByTestId("safety-helpline-byhand-copied")).toHaveTextContent(s.planNumberCopied);
+    });
+
+    it("no clipboard: no Copied, the number stays there to select", async () => {
+      vi.spyOn(navigator, "userAgent", "get").mockReturnValue(IPHONE);
+      const writeText = vi.fn().mockRejectedValue(new Error("denied"));
+      Object.assign(navigator, { clipboard: { writeText } });
+      wrap(<SafetyCard country="CL" onClose={() => {}} />);
+      fireEvent.click(screen.getByTestId("safety-helpline-byhand-copy"));
+      await vi.waitFor(() => expect(writeText).toHaveBeenCalled());
+      expect(screen.getByTestId("safety-helpline-byhand-copied")).toHaveTextContent("");
+      expect(screen.getByTestId("safety-helpline-byhand-number")).toHaveTextContent("*4141");
+    });
+
+    it("on iOS an all-digit number is still a link, unchanged", () => {
+      vi.spyOn(navigator, "userAgent", "get").mockReturnValue(IPHONE);
       wrap(<SafetyCard country="FR" onClose={() => {}} />);
       expect(screen.getByTestId("safety-call-helpline")).toHaveAttribute("href", "tel:3114");
+      expect(screen.queryByTestId("safety-helpline-byhand")).toBeNull();
+    });
+
+    it("every * or # number in the registry is a helpline (an emergency number with one would need this too)", () => {
+      const starred = registry.countries.flatMap((c) => [["helpline", c.helpline], ["emergency", c.emergency]] as const).filter(([, n]) => n && /[*#]/.test(n.dial));
+      expect(starred.length).toBeGreaterThan(0);
+      expect(starred.every(([kind]) => kind === "helpline")).toBe(true);
     });
   });
 

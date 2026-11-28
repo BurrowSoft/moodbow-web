@@ -7,7 +7,7 @@ import { SessionEnded } from "@/components/SessionEnded";
 import { currentUser } from "@/lib/journal/currentUser";
 import type { CheckIn } from "@/lib/journal/checkIn";
 import { ENTRY_COLUMNS, isEntryId, type Entry } from "@/lib/journal/entry";
-import { canReflect } from "@/lib/journal/ai";
+import { aiShown, canReflect } from "@/lib/journal/ai";
 import { getMe } from "@/lib/journal/me";
 import { pageGate } from "@/lib/conditions";
 import { parseRecall } from "@/lib/journal/momentRecall";
@@ -93,7 +93,7 @@ export default async function EntryPage({ params, searchParams }: PageProps<"/[l
       entry={entry}
       checkIn={(checkIn as CheckIn | null) ?? null}
       from={from}
-      backLabel={await backLabel(from, tag)}
+      backLabel={await backLabel(from, tag, aiShown(me))}
       dateLocaleTag={tag}
       uid={user.id}
       today={me.today}

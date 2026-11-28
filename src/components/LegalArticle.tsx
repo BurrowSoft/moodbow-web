@@ -3,18 +3,19 @@ import { notFound } from "next/navigation";
 import { PageShell } from "./PageShell";
 import { pageGate, type ConditionId } from "@/lib/conditions";
 import { isPendingMet, legalDate, legalLocale, legalSource, needsNoticeDate, renderLegal, type LegalSlug } from "@/lib/legalContent";
-import { policyNoticeDate } from "@/lib/journal/policyNotice";
+import { knownNotice, policyNoticeDate } from "@/lib/journal/policyNotice";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 type Props = { slug: LegalSlug; locale: string; gate: ConditionId };
 
 // The What changed block's day, from the notice that's out (the same server value as Today's
-// card and /privacy/next), in the text's language; null when the notice has no date or can't be
-// read, and the block then reads without one.
+// card and /privacy/next: the v2 notice, migration 043), in the text's language; null when the
+// notice has no date, isn't one this build has words for, or can't be read, and the block then
+// reads without one.
 async function noticeDateFor(textLocale: string): Promise<string | null> {
   const supabase = await createSupabaseServerClient();
-  const answer = supabase ? await supabase.rpc("policy_notice_current") : { data: null };
-  const id = typeof answer.data === "string" && answer.data !== "" ? answer.data : null;
+  const answer = supabase ? await supabase.rpc("policy_notice_v2_current") : { data: null };
+  const id = knownNotice(answer.data);
   const day = id && policyNoticeDate(id);
   return day ? legalDate(day, textLocale) : null;
 }

@@ -1,5 +1,5 @@
 {
-  "version": 4,
+  "version": 5,
   "rules": "specs/crisis-keywords-1.0.md",
   "languages": {
     "en": {
@@ -73,8 +73,11 @@
         "ich will mich umbringen", "mich selbst umbringen", "mich umbringen", "mir das leben nehmen",
         "ich will sterben", "will nicht mehr leben", "möchte nicht mehr leben", "moechte nicht mehr leben",
         "mich selbst verletzen", "mich ritzen", "ritze mich",
-        "bringe mich um", "bring mich um", "mich töten", "mich selbst töten",
-        "will tot sein", "nicht mehr aufwachen"
+        "bringe mich um", "bring mich um", "mich töten", "mich toeten", "mich selbst töten", "mich selbst toeten",
+        "will tot sein", "nicht mehr aufwachen",
+        "meinem leben ein ende", "allem ein ende", "wäre lieber tot", "waere lieber tot", "wäre am liebsten tot", "waere am liebsten tot",
+        "ich sterben will", "nicht mehr leben will", "tot sein will", "lieber tot wäre", "lieber tot waere",
+        "wär lieber tot", "waer lieber tot", "am liebsten tot wäre", "am liebsten tot waere"
       ]
     },
     "fr": {
@@ -182,7 +185,11 @@
       "Ich bringe mich um, wenn das so weitergeht.", "manchmal denke ich nur noch: ich bring mich um", "Ich will mich töten.", "ich will mich selbst toten",
       "ช่วงนี้ฉันคิดสั้นบ่อยมาก", "อยากฆ่าตัวเองให้จบ ๆ ไป", "Non voglio più vivere così.", "Stasera vorrei solo morire",
       "Ultimamente ho pensato di farla finita", "Mi faccio del male quando è troppo", "non ho piu voglia di vivere", "Ho pensato al suicidio tutta la settimana.",
-      "Ich will tot sein.", "Am liebsten würde ich nie mehr... ich will einfach nicht mehr aufwachen", "Ich denke über Freitod nach.", "บางทีก็ทำร้ายร่างกายตัวเองตอนเครียด", "ฉันไม่อยากอยู่บนโลกนี้อีกแล้ว", "Ogni sera penso di ammazzarmi."
+      "Ich will tot sein.", "Am liebsten würde ich nie mehr... ich will einfach nicht mehr aufwachen", "Ich denke über Freitod nach.", "บางทีก็ทำร้ายร่างกายตัวเองตอนเครียด", "ฉันไม่อยากอยู่บนโลกนี้อีกแล้ว", "Ogni sera penso di ammazzarmi.",
+      "Ich will mich toeten.", "ich will mich selbst toeten", "Ich waere lieber tot.", "Ich wäre lieber tot.", "Ich will meinem Leben ein Ende setzen.", "Am liebsten würde ich allem ein Ende machen.", "Ich wäre am liebsten tot.", "ich waere am liebsten tot",
+      "Ich schreibe das, weil ich sterben will.", "Ich weiß nicht, warum ich nicht mehr leben will.", "Manchmal denke ich, dass ich tot sein will.",
+      "Ich glaube, dass ich lieber tot wäre.", "ich glaube dass ich lieber tot waere", "Ich wär lieber tot.", "ich waer lieber tot",
+      "Es gibt Tage, an denen ich am liebsten tot wäre.", "es gibt tage an denen ich am liebsten tot waere"
     ],
     "should_not_flag": [
       "This deadline is killing me.",
@@ -220,7 +227,9 @@
       "Das bringt mich um, diese Hitze.", "Ich bringe meine Mutter um acht zum Bahnhof.", "วันนี้ฉันคิดถึงแม่มาก", "Questo lavoro mi sta uccidendo.",
       "Mia madre mi ammazza se vede la macchina.", "Muoio dalla voglia di vedere il film.", "Domani vado a tagliarmi i capelli.", "Sono morta dalle risate allo spettacolo.",
       "Finalmente l'ho fatta finita con quel progetto.",
-      "Se non passo l’esame mi ammazzo.", "Die Batterie ist tot, ich will sie tauschen."
+      "Se non passo l’esame mi ammazzo.", "Die Batterie ist tot, ich will sie tauschen.",
+      "Ich will die Muecken toeten, sie stechen so.", "Der Film hatte ein Ende, das mir gefiel.", "Ich waere lieber am Meer als im Buero.", "Ich wäre am liebsten im Urlaub.",
+      "Ich merke, dass ich nicht mehr so leben will wie früher.", "Ich weiß, dass ich lieber im Garten wäre.", "Weil ich am liebsten im Bett wäre, bleibe ich zu Hause."
     ]
   }
 }

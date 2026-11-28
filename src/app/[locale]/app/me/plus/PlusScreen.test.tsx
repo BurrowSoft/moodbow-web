@@ -17,10 +17,10 @@ vi.mock("@/i18n/navigation", () => ({
 const { PlusScreen } = await import("./PlusScreen");
 const m = messages.plus;
 
-const show = (view: PlusView, { started = false } = {}) =>
+const show = (view: PlusView, { started = false, safetyPlan }: { started?: boolean; safetyPlan?: boolean } = {}) =>
   render(
     <NextIntlClientProvider locale="en" messages={messages}>
-      <PlusScreen view={view} price="US$59.99" started={started} />
+      <PlusScreen view={view} price="US$59.99" started={started} safetyPlan={safetyPlan} />
     </NextIntlClientProvider>,
   );
 const fetchMock = vi.fn();
@@ -61,6 +61,20 @@ describe("PlusScreen: the table scrolls, the footer never does", () => {
     for (const row of ["rowJournal", "rowTimeline", "rowHelp", "rowAppointment", "rowData"]) expect(free(row).getByRole("img", { name: m.included })).toBeInTheDocument();
     for (const row of ["rowInsights", "rowMorePatterns", "rowReview", "rowLetters", "rowExtras", "rowPdf", "rowThemes"]) expect(free(row).getByRole("img", { name: m.plusOnly })).toBeInTheDocument();
     expect(screen.getByTestId("plus-table").textContent).not.toMatch(/\bAI\b/);
+  });
+
+  it("the free help row names the safety plan only once the web has it (UX, 26 Nov)", () => {
+    const help = () => within(screen.getByTestId("plus-row-rowHelp")).getByRole("rowheader").textContent;
+    // The page passes safety-plan-live's condition; left out, the row makes no claim.
+    show({ kind: "free", trial: true });
+    expect(help()).toBe(m.rowHelpNoPlan);
+    expect(screen.getByTestId("plus-table").textContent).not.toMatch(/safety plan/i);
+    cleanup();
+    show({ kind: "free", trial: true }, { safetyPlan: false });
+    expect(help()).toBe(m.rowHelpNoPlan);
+    cleanup();
+    show({ kind: "free", trial: true }, { safetyPlan: true });
+    expect(help()).toBe(m.rowHelp);
   });
 
   it("the free week used: the yearly price and Start Plus", () => {

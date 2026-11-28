@@ -1,9 +1,9 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
-import contract from "./lateNote.contract.json";
+import contract from "../../../content/contracts/late-note.json";
 import { LATE_NOTE_RULES, lateNote, zonedDateHour } from "./lateNote";
 
-// The late-night note (1.4 D): lateNote.contract.json, generated from the rules alone by
+// The late-night note (1.4 D): content/contracts/late-note.json (the app's, synced), first generated from the rules alone by
 // scripts/gen-late-note-contract.mjs (fixed UTC offsets, no Intl), for moodbow-app's late-note.json.
 describe("late-night note: the contract", () => {
   it("rules: 00:00-04:59, moods 1 and 2", () => {
