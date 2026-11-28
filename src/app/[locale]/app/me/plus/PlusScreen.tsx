@@ -13,14 +13,16 @@ import { countTap } from "@/lib/analyticsEvents";
 import { LABEL_TRACKING, OFFER_STRIP_LIGHTS } from "@/lib/ui/largeText";
 
 // Free rows, then what Plus adds: "your journal is free, Insights come with Plus" (Vitor, 14 Nov;
-// specs/1.3-offer-review-voice-taps.md §2). No AI rows in any comparison: the AI allowance rules
-// stay in the code, unadvertised. Nothing free today gets a lock (wording only). rowExtras: one row
-// for the prompt library, the other ways to breathe and more reminders (UX, 14 Nov), never one each.
+// specs/1.3-offer-review-voice-taps.md §2). Decision 265 (as the app's #319): "No ads" leads, ticked
+// in both columns; Your week (the weekly AI report) is the one AI row, shown only while AI is
+// available (decision 257: weekly-report-live met and aiShown(me), the page's yourWeek), else the
+// table names no AI. Nothing free today gets a lock (wording only). rowExtras: one row for the
+// prompt library, the other ways to breathe and more reminders (UX, 14 Nov), never one each.
 // Large text on a narrow screen: the page is a 13em column or narrower (the hyphen rule's query, globals.css).
 const narrowLargeText = () => typeof window !== "undefined" && window.matchMedia?.("(max-width: 13em)").matches === true;
 
-const FREE_ROWS = ["rowJournal", "rowTimeline", "rowHelp", "rowAppointment", "rowData"] as const;
-const PLUS_ROWS = ["rowInsights", "rowMorePatterns", "rowReview", "rowLetters", "rowExtras", "rowPdf", "rowThemes"] as const;
+const FREE_ROWS = ["rowNoAds", "rowJournal", "rowTimeline", "rowHelp", "rowAppointment", "rowData"] as const;
+const PLUS_ROWS = ["rowInsights", "rowYourWeek", "rowMorePatterns", "rowReview", "rowLetters", "rowExtras", "rowPdf", "rowThemes"] as const;
 
 function Tick({ label, plus }: { label: string; plus?: boolean }) {
   return (
@@ -47,7 +49,9 @@ function Lock({ label }: { label: string }) {
 // safetyPlan: whether the free help row names the safety plan, only once the web has it (safety-plan-live met;
 // UX, 26 Nov: a claim never goes live before the feature). Without it, the same row without the plan (its test id
 // unchanged).
-export function PlusScreen({ view, price, offer = null, started, safetyPlan = false }: { view: PlusView; price: string; offer?: PlusOfferPrices | null; started: boolean; safetyPlan?: boolean }) {
+// yourWeek: whether the Your week row shows (decision 265): weekly-report-live met and aiShown(me), from the page.
+// Left out, no AI row.
+export function PlusScreen({ view, price, offer = null, started, safetyPlan = false, yourWeek = false }: { view: PlusView; price: string; offer?: PlusOfferPrices | null; started: boolean; safetyPlan?: boolean; yourWeek?: boolean }) {
   const t = useTranslations("plus");
   const tt = useTranslations("today");
   const locale = useLocale();
@@ -100,7 +104,7 @@ export function PlusScreen({ view, price, offer = null, started, safetyPlan = fa
   };
 
   const rows = FREE_ROWS.map((k) => ({ k, free: true }));
-  const plusRows = PLUS_ROWS.map((k) => ({ k, free: false }));
+  const plusRows = PLUS_ROWS.filter((k) => k !== "rowYourWeek" || yourWeek).map((k) => ({ k, free: false }));
 
   // Large text (UX, 12 Nov, the Web Tester's long-language pass): when the whole footer would take
   // more than 40 % of the screen's height, the table was left a slit. Then the page scrolls as a
