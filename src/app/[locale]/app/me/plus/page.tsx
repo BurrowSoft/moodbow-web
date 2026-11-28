@@ -5,6 +5,7 @@ import type { Locale } from "@/i18n/routing";
 import { JournalUnavailable } from "@/components/JournalUnavailable";
 import { SessionEnded } from "@/components/SessionEnded";
 import { conditionMet, pageGate } from "@/lib/conditions";
+import { aiShown } from "@/lib/journal/ai";
 import { currentUser } from "@/lib/journal/currentUser";
 import { getMe } from "@/lib/journal/me";
 import { readPlusPage } from "@/lib/plus/page";
@@ -35,9 +36,12 @@ export default async function PlusPage({ params, searchParams }: PageProps<"/[lo
   const started = (await searchParams).started === "1";
   // The free help row names the safety plan only once the web has it (UX, 26 Nov): a claim, so the condition
   // itself (as the Help article reads it), never a Preview's draft.
+  // Your week's row (decision 265), only while AI is available here, as the app's: the weekly report's
+  // condition met (a claim, so never a Preview's draft, as safetyPlan) and the server's AI answer for this
+  // account (aiShown, decision 257), the two that put the report under Insights' AI tab.
   return (
     <section className="space-y-2">
-      <PlusScreen view={plus.view} price={plus.price} offer={plus.offer} started={started} safetyPlan={conditionMet("safety-plan-live")} />
+      <PlusScreen view={plus.view} price={plus.price} offer={plus.offer} started={started} safetyPlan={conditionMet("safety-plan-live")} yourWeek={conditionMet("weekly-report-live") && aiShown(me)} />
     </section>
   );
 }

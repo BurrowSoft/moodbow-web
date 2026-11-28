@@ -17,10 +17,10 @@ vi.mock("@/i18n/navigation", () => ({
 const { PlusScreen } = await import("./PlusScreen");
 const m = messages.plus;
 
-const show = (view: PlusView, { started = false, safetyPlan }: { started?: boolean; safetyPlan?: boolean } = {}) =>
+const show = (view: PlusView, { started = false, safetyPlan, yourWeek }: { started?: boolean; safetyPlan?: boolean; yourWeek?: boolean } = {}) =>
   render(
     <NextIntlClientProvider locale="en" messages={messages}>
-      <PlusScreen view={view} price="US$59.99" started={started} safetyPlan={safetyPlan} />
+      <PlusScreen view={view} price="US$59.99" started={started} safetyPlan={safetyPlan} yourWeek={yourWeek} />
     </NextIntlClientProvider>,
   );
 const fetchMock = vi.fn();
@@ -49,18 +49,38 @@ describe("PlusScreen: the table scrolls, the footer never does", () => {
     expect(scroll).not.toContainElement(footer);
   });
 
-  it("your journal is free, insights are Plus (Vitor, 14 Nov): the rows in order, and no AI rows", () => {
+  it("your journal is free, insights are Plus (Vitor, 14 Nov): No ads first (decision 265), the rows in order, and no AI row without AI", () => {
     show({ kind: "free", trial: true });
     expect(screen.getByText(m.lead)).toBeInTheDocument();
     const order = screen.getAllByTestId(/^plus-row-/).map((r) => r.getAttribute("data-testid"));
     expect(order).toEqual(
-      ["rowJournal", "rowTimeline", "rowHelp", "rowAppointment", "rowData", "rowInsights", "rowMorePatterns", "rowReview", "rowLetters", "rowExtras", "rowPdf", "rowThemes"].map((k) => `plus-row-${k}`),
+      ["rowNoAds", "rowJournal", "rowTimeline", "rowHelp", "rowAppointment", "rowData", "rowInsights", "rowMorePatterns", "rowReview", "rowLetters", "rowExtras", "rowPdf", "rowThemes"].map((k) => `plus-row-${k}`),
     );
     // The Free column's cell: free rows are Included, Plus rows are Plus only.
     const free = (row: string) => within(within(screen.getByTestId(`plus-row-${row}`)).getAllByRole("cell")[0]);
-    for (const row of ["rowJournal", "rowTimeline", "rowHelp", "rowAppointment", "rowData"]) expect(free(row).getByRole("img", { name: m.included })).toBeInTheDocument();
+    for (const row of ["rowNoAds", "rowJournal", "rowTimeline", "rowHelp", "rowAppointment", "rowData"]) expect(free(row).getByRole("img", { name: m.included })).toBeInTheDocument();
     for (const row of ["rowInsights", "rowMorePatterns", "rowReview", "rowLetters", "rowExtras", "rowPdf", "rowThemes"]) expect(free(row).getByRole("img", { name: m.plusOnly })).toBeInTheDocument();
+    // "No ads" is ticked in both columns, the words as the app's (#319).
+    const noAds = screen.getByTestId("plus-row-rowNoAds");
+    expect(within(noAds).getByRole("rowheader")).toHaveTextContent(m.rowNoAds);
+    expect(within(noAds).getAllByRole("img", { name: m.included })).toHaveLength(2);
+    // Without AI available (yourWeek left out), the table names no AI.
+    expect(screen.queryByTestId("plus-row-rowYourWeek")).toBeNull();
     expect(screen.getByTestId("plus-table").textContent).not.toMatch(/\bAI\b/);
+  });
+
+  it("Your week, the weekly AI report: one Plus row right after Insights, only while AI is available (decisions 257, 265)", () => {
+    show({ kind: "free", trial: true }, { yourWeek: true });
+    const order = screen.getAllByTestId(/^plus-row-/).map((r) => r.getAttribute("data-testid"));
+    expect(order.indexOf("plus-row-rowYourWeek")).toBe(order.indexOf("plus-row-rowInsights") + 1);
+    const row = screen.getByTestId("plus-row-rowYourWeek");
+    expect(within(row).getByRole("rowheader")).toHaveTextContent(m.rowYourWeek);
+    const [freeCell, plusCell] = within(row).getAllByRole("cell");
+    expect(within(freeCell).getByRole("img", { name: m.plusOnly })).toBeInTheDocument();
+    expect(within(plusCell).getByRole("img", { name: m.included })).toBeInTheDocument();
+    cleanup();
+    show({ kind: "free", trial: true }, { yourWeek: false });
+    expect(screen.queryByTestId("plus-row-rowYourWeek")).toBeNull();
   });
 
   it("the free help row names the safety plan only once the web has it (UX, 26 Nov)", () => {
